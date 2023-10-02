@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -166,12 +162,6 @@ contains
 !!   (3) Hartree energy, (4) local pseudopotential energy,
 !!   (5) pseudoion core correction energy, (6) nonlocal pseudopotential energy,
 !!   (7) Ewald energy.
-!!
-!! PARENTS
-!!      m_forstr
-!!
-!! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 
@@ -752,12 +742,6 @@ end subroutine stress
 !!   (Cartesian coordinates, symmetric tensor) in hartree/bohr^3
 !!   Definition of symmetric tensor storage: store 6 unique components
 !!   in the order 11, 22, 33, 32, 31, 21 (suggested by Xavier Gonze).
-!!
-!! PARENTS
-!!      m_stress
-!!
-!! CHILDREN
-!!      metric,ptabs_fourdp,timab,xmpi_sum
 !!
 !! SOURCE
 

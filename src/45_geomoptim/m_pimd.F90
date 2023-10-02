@@ -12,10 +12,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -134,11 +130,6 @@ CONTAINS !===========================================================
 !!  pimd_param=datastructure of type pimd_type.
 !!             several parameters for Path-Integral MD.
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_init(dtset,pimd_param,is_master)
@@ -223,11 +214,6 @@ end subroutine pimd_init
 !!  pimd_param=datastructure of type pimd_type.
 !!             several parameters for Path-Integral MD.
 !!
-!! PARENTS
-!!      m_pimd
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_nullify(pimd_param)
@@ -283,11 +269,6 @@ end subroutine pimd_nullify
 !! SIDE EFFECTS
 !!  pimd_param=datastructure of type pimd_type.
 !!            several parameters for PIMD.
-!!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -345,11 +326,6 @@ end subroutine pimd_destroy
 !!
 !! OUTPUT
 !!  qtb_file_unit=if a PIQTB_force file exists, return its file unit.
-!!
-!! PARENTS
-!!      m_pimd
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -417,11 +393,6 @@ end subroutine pimd_init_qtb
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstateimg
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_skip_qtb(pimd_param)
@@ -469,10 +440,6 @@ end subroutine pimd_skip_qtb
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pimd_is_restart(mass,vel,vel_cell)
@@ -516,10 +483,6 @@ end function pimd_is_restart
 !!  pimd_temperature=temperature (from all images of the cell)
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -603,11 +566,6 @@ end function pimd_temperature
 !!  -- only printing --
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -875,11 +833,6 @@ end subroutine pimd_print
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator
 !!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
@@ -998,11 +951,6 @@ end subroutine pimd_initvel
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      m_pimd_langevin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zeroforce)
@@ -1106,11 +1054,6 @@ end subroutine pimd_langevin_random
 !! OUTPUT
 !!  alea(3,natom,trotter)=set of random forces
 !!
-!! PARENTS
-!!      m_pimd_langevin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter,zeroforce)
@@ -1200,11 +1143,6 @@ end subroutine pimd_langevin_random_qtb
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      m_pimd_langevin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
@@ -1272,11 +1210,6 @@ end subroutine pimd_langevin_random_bar
 !! SIDE EFFECTS
 !!  iseed=seed for random number generator (used only if irandom=1)
 !!
-!! PARENTS
-!!      m_pimd_langevin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_random_init(irandom,iseed)
@@ -1321,11 +1254,6 @@ end subroutine pimd_langevin_random_init
 !!  epot        =potential energy
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1416,11 +1344,6 @@ end subroutine pimd_energies
 !!    at input:  forces from electronic calculation
 !!    at output: forces from electronic calculation + quantum spring contribution
 !!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
@@ -1503,11 +1426,6 @@ end subroutine pimd_forces
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_pimd_langevin
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
@@ -1573,11 +1491,6 @@ end subroutine pimd_langevin_forces
 !!  forces_nosehoover(3,natom,trotter)=forces including thermostat contribution
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1646,11 +1559,6 @@ end subroutine pimd_nosehoover_forces
 !!                     First dimension (3) corresponds to 3 different pressure estimators
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1783,10 +1691,6 @@ end subroutine pimd_stresses
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function pimd_diff_stress(stress_pimd,stress_target)
@@ -1847,11 +1751,6 @@ end function pimd_diff_stress
 !!  xcart_next(3,natom,trotter)=cartesian coordinates of atoms in each cell at t+dt
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1915,11 +1814,6 @@ end subroutine pimd_predict_taylor
 !!  xcart_next(3,natom,trotter)=cartesian coordinates of atoms in each cell at t+dt
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1996,11 +1890,6 @@ end subroutine pimd_predict_verlet
 !!  zeta_next(3,natom,trotter,nnos)=next value of zeta (t+dt)
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2169,11 +2058,6 @@ end subroutine pimd_nosehoover_propagate
 !!
 !! SIDE EFFECTS
 !!  array(3,natom,trotter)=array to be transformed
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2358,11 +2242,6 @@ end subroutine pimd_coord_transform
 !! NOTES
 !!  Back transformation (ioption=-1) not implemented !
 !!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
@@ -2482,11 +2361,6 @@ end subroutine pimd_force_transform
 !!
 !! SIDE EFFECTS
 !!  forces(3,natom,trotter)=array containing forces
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2613,11 +2487,6 @@ end subroutine pimd_apply_constraint
 !!
 !! NOTES
 !!  Back transformation (ioption=-1) not implemented !
-!!
-!! PARENTS
-!!      m_pimd_langevin,m_pimd_nosehoover
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

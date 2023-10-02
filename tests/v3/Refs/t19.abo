@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t19/t19.in
-- output file    -> t19.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t19/t19.abi
+- output file    -> t19.abo
 - root for input  files -> t19i
 - root for output files -> t19o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           7        mffmem =           1         mkmem =           1
        mpw =         619          nfft =       27000          nkpt =           1
 ================================================================================
-P This job should need less than                      12.374 Mbytes of memory.
+P This job should need less than                      13.169 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.134 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -70,6 +68,8 @@ _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.414 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      5.58470000E+01
+              asr           0
+           chneut           0
            diemac      2.00000000E+00
            diemix      4.00000000E-01
              ecut      1.80000000E+01 Hartree
@@ -104,8 +104,8 @@ P          mk1mem           1
            occopt           2
         optdriver1          0
         optdriver2          1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
           spgroup         221
@@ -181,8 +181,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -368,7 +368,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t19o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -395,7 +394,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t19o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -417,9 +415,9 @@ tolerances: {tolvrs: 1.00E-10, }
  ETOT  7 -1.51454214142177E-03 -1.680E-04 2.195E-07 2.295E-02
  ETOT  8 -1.51798962656358E-03 -3.447E-06 4.574E-08 2.707E-03
  ETOT  9 -1.51950566873893E-03 -1.516E-06 1.470E-09 1.729E-04
- ETOT 10 -1.51955300611917E-03 -4.734E-08 1.812E-10 2.292E-06
- ETOT 11 -1.51955355545397E-03 -5.493E-10 5.133E-13 8.121E-07
- ETOT 12 -1.51955364458445E-03 -8.913E-11 9.113E-13 2.029E-08
+ ETOT 10 -1.51955300430018E-03 -4.734E-08 1.812E-10 2.292E-06
+ ETOT 11 -1.51955355363498E-03 -5.493E-10 5.133E-13 8.121E-07
+ ETOT 12 -1.51955364458445E-03 -9.095E-11 9.113E-13 2.029E-08
  ETOT 13 -1.51955365913636E-03 -1.455E-11 6.733E-15 2.671E-09
  ETOT 14 -1.51955365367940E-03  5.457E-12 1.100E-15 4.750E-10
  ETOT 15 -1.51955367005030E-03 -1.637E-11 3.045E-16 3.464E-11
@@ -525,6 +523,8 @@ tolerances: {tolvrs: 1.00E-10, }
  -outvars: echo values of variables after computation  --------
             acell      7.0000000000E+00  7.0000000000E+00  7.0000000000E+00 Bohr
               amu      5.58470000E+01
+              asr           0
+           chneut           0
            diemac      2.00000000E+00
            diemix      4.00000000E-01
              ecut      1.80000000E+01 Hartree
@@ -563,8 +563,8 @@ P          mk1mem           1
            occopt           2
         optdriver1          0
         optdriver2          1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
+           prtpot1          0
+           prtpot2          1
            rfphon1          0
            rfphon2          1
           spgroup         221
@@ -687,10 +687,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.7
+.Delivered   0 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.2  wall=          3.3

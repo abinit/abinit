@@ -13,10 +13,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -63,10 +59,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine compute_kinetic_energy(ab_mover,vel,ekin)
@@ -111,11 +103,6 @@ end subroutine compute_kinetic_energy
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pred_hmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -189,11 +176,6 @@ end subroutine generate_random_velocities
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_pred_hmc
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

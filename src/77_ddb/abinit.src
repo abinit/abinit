@@ -34,6 +34,7 @@ sources = [
  "m_band2eps_dataset.F90",
  "m_gruneisen.F90",
  "m_ifc.F90",
+ "m_lwf.F90",
  "m_phonons.F90",
  "m_primcell_ddb_info.F90",
  "m_sortph.F90",

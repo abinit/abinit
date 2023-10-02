@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -40,6 +36,7 @@ module m_dfpt_nstwf
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists
+ use m_fourier_interpol, only : transgrid
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
  use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band, proc_distrb_nband
@@ -80,6 +77,7 @@ module m_dfpt_nstwf
 
  public :: dfpt_nstpaw
  public :: dfpt_nstwf
+ public :: gaugetransfo
 !!***
 
 contains
@@ -188,11 +186,13 @@ contains
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  usexcnhat= -PAW only- flag controling use of compensation density in Vxc
 !!  useylmgr1= 1 if ylmgr1 array is allocated
+!!  vectornd(with_vectornd*nfftf,3)=nuclear dipole moment vector potential
 !!  vhartr1(cplex*nfft)=1-order Hartree potential
 !!  vpsp1(cplex*nfftf)=first-order derivative of the ionic potential
 !!  vtrial(nfftf,nspden)=GS potential (Hartree).
 !!  vtrial1(cplex*nfftf,nspden)= RF 1st-order potential (Hartree).
 !!  vxc(nfftf,nspden)=XC GS potential
+!!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point in the reduced BZ
 !!  xccc3d1(cplex*n3xccc)=3D change in core charge density, see n3xccc
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -213,12 +213,6 @@ contains
 !!     delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !!     see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
@@ -228,15 +222,15 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
 &                  paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,&
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
-&                  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
+&                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vectornd,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
+&                  with_vectornd,wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpw,mpw1
  integer,intent(in) :: ncpgr,nfftf,nkpt_rbz,nkxc,nspden,nspinor,nsppol,nsym1
  integer,intent(in) :: n3xccc,usecprj,usepaw,usexcnhat,useylmgr1
- integer,intent(in) :: mband_mem_rbz
+ integer,intent(in) :: mband_mem_rbz,with_vectornd
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: eovl1
  type(datafiles_type),intent(in) :: dtfil
@@ -276,6 +270,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),target,intent(in) :: vpsp1(cplex*nfftf),vtrial(nfftf,nspden),xccc3d1(cplex*n3xccc)
  real(dp),intent(inout) :: d2nl(2,3,mpert,3,mpert)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert),d2ovl(2,3,mpert,3,mpert*usepaw)
+ real(dp),intent(inout) :: vectornd(with_vectornd*nfftf,3)
  type(pawcprj_type),intent(in) :: cprj(dtset%natom,nspinor*mband_mem_rbz*mkmem*nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(dtset%natom,nspinor*mband_mem_rbz*mkqmem*nsppol*usecprj)
  type(paw_an_type),intent(in) :: paw_an(:)
@@ -297,14 +292,14 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
- integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
+ integer :: nddir,nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
  integer :: do_scprod, do_bcast
  integer :: startband, endband
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
- logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
+ logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file,has_vectornd
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
  logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist
  character(len=500) :: msg
@@ -317,9 +312,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,allocatable :: bands_treated_now(:),band_procs(:)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
+ real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3),rhodum(1)
  real(dp) :: sumelfd(2),symfact(3),tsec(2),ylmgr_dum(1,3,1)
- real(dp),allocatable :: buffer(:),ch1c(:,:,:,:),cs1c(:,:,:,:)
+ real(dp),allocatable :: buffer(:),cgrvtrial(:,:),ch1c(:,:,:,:),cs1c(:,:,:,:)
  real(dp),allocatable :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dcwavef(:,:)
@@ -334,6 +329,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),allocatable :: gh1(:,:),gs1(:,:),gvnlx1(:,:),kinpw1(:),kpg_k(:,:),kpg1_k(:,:)
  real(dp),allocatable :: gvnlx1_tmp(:,:)
  real(dp),allocatable :: occ_k(:),occ_kq(:),ph3d(:,:,:),ph3d1(:,:,:),rhotmp(:,:),rocceig(:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:),ylm1_k(:,:),ylmgr1_k(:,:,:),vtmp1(:,:),vxc10(:,:)
  real(dp),allocatable,target :: work(:,:,:),e1kb_work(:,:,:,:)
  real(dp),pointer :: e1kbfr(:,:,:,:,:),e1kb_ptr(:,:,:,:)
@@ -524,6 +520,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
 & usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+ 
+has_vectornd = (with_vectornd .EQ. 1)
+ if(has_vectornd) then
+    ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
+    ABI_MALLOC(vectornd_pac_idir,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc))
+ end if
 
 !Variables common to all perturbations
  arg=maxval(occ_rbz)-minval(occ_rbz)
@@ -827,6 +829,24 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
      if (need_pawij10) then
        ii=min(isppol,size(e1kbfr_spin,6))
        if (ii>0) e1kbfr => e1kbfr_spin(:,:,:,:,:,ii)
+     end if
+
+     ! if vectornd is present, set it up for addition to gs_hamkq and rf_hamkq.
+     ! Note that it must be done for the three Cartesian directions. Also, the following
+     ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
+     if(has_vectornd) then
+       do nddir = 1, 3
+         ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
+         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+           & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
+         call fftpac(isppol,mpi_enreg,dtset%nspden,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),&
+           & dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%ngfft,&
+           & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
+         ABI_FREE(cgrvtrial)
+       end do
+       call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
+       vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
+       call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
      end if
 
 !    Initialize accumulation of density
@@ -1577,6 +1597,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !  Free memory used for this type of perturbation
    call rf_hamkq%free()
+   if (has_vectornd) then
+     ABI_FREE(vectornd_pac_idir)
+   end if
    if (has_drho)  then
      ABI_FREE(drhoaug1)
    end if
@@ -1712,6 +1735,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
    ABI_FREE(cs1c_tmp)
  end if
  call gs_hamkq%free()
+ if (has_vectornd) then
+   ABI_FREE(vectornd_pac)
+ end if
 
 !In case of parallelism, sum over processors
  if (xmpi_paral==1)then
@@ -1921,12 +1947,6 @@ end subroutine dfpt_nstpaw
 !! TODO
 !!  XG 20141103 The localization tensor cannot be defined in the metallic case. It should not be computed.
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
@@ -1994,7 +2014,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
 !Keep track of total time spent in dfpt_nstwf
- call timab(102,1,tsec)
+ call timab(112,1,tsec)
  tim_getgh1c=2
 
 !Miscelaneous inits
@@ -2390,11 +2410,11 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_FREE(eig2_ddk)
  end if
 
- call timab(102,2,tsec)
+ call timab(112,2,tsec)
 
  DBG_EXIT("COLL")
 
-  contains
+end subroutine dfpt_nstwf
 !!***
 
 !!****f* ABINIT/gaugetransfo
@@ -2428,12 +2448,6 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !!  cwavef_d(2,npw1_k*nspinor)=first order wavefunction for a particular k point
 !!                             in the diagonal gauge
 !!
-!! PARENTS
-!!      m_dfpt_nstwf
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iband,nband_k, &
@@ -2453,7 +2467,7 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
 !Local variables-------------------------------
 !tolerance for non degenerated levels
 !scalars
- integer :: jband,jband_me
+ integer :: ierr, jband,jband_me
  real(dp),parameter :: etol=1.0d-3
 !arrays
  real(dp) :: cwave0(2,npw1_k*nspinor),eig1(2)
@@ -2489,8 +2503,6 @@ subroutine gaugetransfo(cg_k,cwavef,cwavef_d,comm,distrb_cycle,eig_k,eig1_k,iban
   end subroutine gaugetransfo
 !!***
 
-end subroutine dfpt_nstwf
-!!***
 
 end module m_dfpt_nstwf
 !!***

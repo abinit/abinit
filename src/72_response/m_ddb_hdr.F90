@@ -7,12 +7,10 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, GA)
+!! Copyright (C) 2011-2022 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -29,32 +27,119 @@ MODULE m_ddb_hdr
  use m_abicore
  use m_xmpi
  use m_dtset
+ use m_crystal
+ use m_nctk
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
 
  use defs_datatypes, only : pseudopotential_type
  use m_copy,      only : alloc_copy
- use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free !, pawtab_copy
- use m_psps,      only : psps_copy, psps_free
- use m_io_tools,  only : open_file
+ use m_pawtab,    only : pawtab_type, pawtab_nullify, pawtab_free, pawtab_bcast !, pawtab_copy
+ use m_psps,      only : psps_copy, psps_free, psps_ncwrite, psps_ncread
+ use m_io_tools,  only : open_file, get_unit, file_exists
  use m_copy,      only : alloc_copy
- use m_fstrings,  only : sjoin
+ use m_fstrings,  only : sjoin, endswith
+ use m_geometry,  only : mkrdim
+
 
  implicit none
 
  private
 
+ public :: is_type_d0E      ! Is this block type of a d0E kind?
+ public :: is_type_d1E      ! Is this block type of a d1E kind?
+ public :: is_type_d2E      ! Is this block type of a d2E kind?
+ public :: is_type_d3E      ! Is this block type of a d3E kind?
+ public :: is_type_d2eig    ! Is this block type of a d2eig kind?
+
+ ! GA: These 3 functions should no longer be public
  public :: ddb_getdims      ! Open a DDB file and read basic dimensions and variables.
  public :: ioddb8_in        ! Temporary
  public :: psddb8           ! Temporary
 
+
+ ! Description of perturbations and block types
+ ! --------------------------------------------
+ ! 
+ ! GA: Variable names should not end with _d0E, _d1E, d2E, ...
+ !     Such names may affect the variable type, with certain compilers.
+ !     This is why I appended _xx, lack of a better suffix.
+ !
+ !
+ ! These parameters should be consistent with input variable rfmeth 
+ ! and input parameter rftyp (e.g. ddb_get_block, ddb_read_block_txt).
+ ! Changing these values requires to change the documentation as well.
+ !
+ integer,public,parameter :: BLKTYP_d0E_xx=0       ! Total energy
+ integer,public,parameter :: BLKTYP_d1E_xx=4       ! First-order derivatives of total energy
+ integer,public,parameter :: BLKTYP_d2E_ns=1       ! Second-order derivatives of total energy, non-stationary
+ integer,public,parameter :: BLKTYP_d2E_st=2  ! Second-order derivatives of total energy, stationary
+ integer,public,parameter :: BLKTYP_d3E_xx=3       ! Third-order derivatives of total energy
+ integer,public,parameter :: BLKTYP_d3E_lw=33   ! Long-wave third-order derivatives of total energy
+ integer,public,parameter :: BLKTYP_d2eig_re=5     ! Second-order derivatives of eigenvalues
+ integer,public,parameter :: BLKTYP_d2eig_im=6 ! Static broadening of eigenvalues
+
+ integer,public,parameter :: descrlen=500
+ integer,public,parameter :: ntypes=8  ! The number of different block types
+ character(len=descrlen),public,parameter :: DESCR_d0E_xx = ' Total energy                 - '
+ character(len=descrlen),public,parameter :: DESCR_d1E_xx = ' 1st derivatives              - '
+ character(len=descrlen),public,parameter :: DESCR_d2E_ns = ' 2nd derivatives (non-stat.)  - '
+ character(len=descrlen),public,parameter :: DESCR_d2E_st = ' 2nd derivatives (stationary) - '
+ character(len=descrlen),public,parameter :: DESCR_d3E_xx = ' 3rd derivatives              - '
+ character(len=descrlen),public,parameter :: DESCR_d3E_lw = ' 3rd derivatives (long wave)  - '
+ character(len=descrlen),public,parameter :: DESCR_d2eig_re = ' 2nd eigenvalue derivatives   - '
+ character(len=descrlen),public,parameter :: DESCR_d2eig_im = ' 2nd eigenvalue derivatives (imaginary part)  - '
+
+ ! These describe the perturbation indices above natom
+ ! GA: It would be nice if different ddb instance could order perturbations
+ !     differently.  This could potentially reduce the ddb size.
+ character(len=descrlen),public,parameter :: DESCR_ipert_0 = 'displacement of atom '
+ character(len=descrlen),public,parameter :: DESCR_ipert_1 = 'derivative wrt k'
+ character(len=descrlen),public,parameter :: DESCR_ipert_2 = 'electric field'
+ character(len=descrlen),public,parameter :: DESCR_ipert_3 = 'strain'  ! GA: Dont know the difference
+ character(len=descrlen),public,parameter :: DESCR_ipert_4 = 'strain'  !     between these two
+ character(len=descrlen),public,parameter :: DESCR_ipert_5 = 'magnetic field'
+ character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
+ character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
+
+ integer,public,parameter :: DDB_VERSION=20230401
+ ! DDB Version number for text format.
+
+ integer,public,parameter :: DDB_VERSION_NC=20230219
+ ! DDB NetCDF version number.
+
  type,public :: ddb_hdr_type
+
+   logical :: has_open_file_txt=.false.  ! Has an open file in text format
+   logical :: has_open_file_nc=.false.   ! Has an open file in netcdf format
+
+   integer :: iomode=IO_MODE_FORTRAN
+
+   integer :: unddb         ! Unit for open file in text format
+   integer :: ncid          ! Unit for open file in netcdf format
+
+   ! The variables with_psps / with_dfpt_vars
+   ! Must be identical in text format, but may differ in netcdf.
+   integer :: with_psps=0   ! Whether info on pseudopotentials is present.
+   integer :: with_dfpt_vars=0 ! Whether this ddb comes from a dfpt calculation
+                               ! 0 -> comes from a ground state calculation.
+                               ! 1 -> comes from a dfpt calculation
+                               !      and k-point may or may not be reduced
+                               !      by time reversal symmetry.
 
    integer :: ddb_version   ! Version of the DDB file
 
    integer :: matom
    integer :: mband
    integer :: mkpt
-   integer :: msym
+   integer :: msym          ! GA: Do we need both msym and nsym ?
+                            ! ddb_hdr reading is first called with msym=192
+                            ! for dimensions only, then it is called with
+                            ! actual number of sym.
    integer :: mtypat
+   integer :: mpert
+   integer :: msize
 
    integer :: intxc
    integer :: iscf
@@ -70,6 +155,9 @@ MODULE m_ddb_hdr
    integer :: usepaw
 
    integer :: nblok         ! Number of blocks in the ddb
+
+   ! GA: FIXME mblktyp doesnt make sense.
+   ! Instead, we should have logical variables has_d2eig, has_d3E, etc.
    integer :: mblktyp       ! Max block type
                             ! 0 = Total energy
                             ! 1 = 2nd derivatives (non-stat.)
@@ -78,9 +166,6 @@ MODULE m_ddb_hdr
                             ! 4 = 1st derivatives
                             ! 5 = 2nd eigenvalue derivatives
                             !
-   integer :: fullinit      ! Whether the full info on the pseudo is present
-                            ! TODO rename this variable
-
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
@@ -108,6 +193,9 @@ MODULE m_ddb_hdr
 
    integer,allocatable :: typat(:)
    ! typat(matom)
+
+   integer,allocatable :: typ(:)
+   ! typ(nblok)
 
    real(dp),allocatable :: amu(:)
    ! amu(mtypat)
@@ -141,7 +229,12 @@ MODULE m_ddb_hdr
 
    type(pseudopotential_type) :: psps
 
+   type(crystal_t) :: crystal
+
  contains
+
+   procedure :: init => ddb_hdr_init
+    ! Initialize object
 
    procedure :: malloc => ddb_hdr_malloc
     ! Allocate dynamic memory.
@@ -149,16 +242,55 @@ MODULE m_ddb_hdr
    procedure :: free => ddb_hdr_free
     ! Free dynamic memory.
 
-   procedure :: open_write => ddb_hdr_open_write
-    ! Open the DDB file and write the header.
+   procedure :: bcast_dim => ddb_hdr_bcast_dim
+    ! Master broadcasts header dimensions.
+
+   procedure :: bcast => ddb_hdr_bcast
+    ! Master broadcasts header data.
+
+   procedure :: print => ddb_hdr_print
+    ! Print out the content of the header.
 
    procedure :: compare => ddb_hdr_compare
     ! Compare two DDB headers.
 
- end type ddb_hdr_type
+   procedure :: copy_missing_variables => ddb_hdr_copy_missing_variables
+    ! Copy some missing variables from one header to another
 
- public :: ddb_hdr_init            ! Construct object
- public :: ddb_hdr_open_read       ! Open the DDB file and read the header.
+   procedure :: copy_psps_from => ddb_hdr_copy_psps_from
+    ! Copy the information on pseudopotentials from one header to another
+
+   procedure :: set_typ => ddb_hdr_set_typ
+    ! Set the type of each blok in the ddb
+
+   procedure :: get_block_dims => ddb_hdr_get_block_dims
+    ! Compute mpert and msize
+
+   procedure :: open_write => ddb_hdr_open_write
+    ! Open the DDB file and write the header.
+
+   procedure :: open_write_txt => ddb_hdr_open_write_txt
+    ! Open the DDB text file and write the header.
+
+   procedure :: open_write_nc => ddb_hdr_open_write_nc
+    ! Open the DDB NetCDF file and write the header.
+
+   procedure :: open_read => ddb_hdr_open_read
+    ! Open the DDB file and read the header.
+
+   procedure :: open_read_txt => ddb_hdr_open_read_txt
+    ! Open the DDB text file and read the header.
+
+   procedure :: open_read_nc => ddb_hdr_open_read_nc
+    ! Open the DDB NetCDF file and read the header.
+
+   procedure :: close => ddb_hdr_close
+    ! Close any open file
+
+   procedure :: get_iomode => ddb_hdr_get_iomode
+    ! Decide on iomode based on file name and current iomode parameter
+
+ end type ddb_hdr_type
 
 CONTAINS  !===========================================================
 !!***
@@ -173,45 +305,48 @@ CONTAINS  !===========================================================
 !!   Initialize a ddb_hdr object from a dataset.
 !!
 !! INPUTS
+!!   ddb_hdr=the new ddb_hdr object
+!!   dtset=dtset object of the current calculation
+!!   psps=the pseudopotential objects
+!!   pawtab=pawtab object
+!!   dscrpt=string description of the ddb
+!!   nblok=number of blocks
+!!   xred=reduced coordinate positions of the atoms
+!!   occ=occupation number of the bands
+!!   ngfft=fft grid
+!!   mband=maximum number of bands
+!!   mkpt=maximum number of kpoints
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dfpt_looppert,m_eig2d,m_gstate,m_longwave,m_nonlinear,m_respfn_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
-                        nblok, xred, occ, ngfft)
+subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, dscrpt, &
+                        nblok, msize, mpert, xred, occ, ngfft,&
+                        mband,nkpt,kpt)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(out) :: ddb_hdr
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
  type(dataset_type),intent(in) :: dtset
- type(pseudopotential_type),intent(in) :: psps
+ type(pseudopotential_type),intent(inout) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
- character(len=*),intent(in) :: dscrpt
- integer,intent(in) :: ddb_version
+ character(len=*),intent(in) :: dscrpt  ! TODO: Make this one optional.
  integer,intent(in) :: nblok
+ !integer,intent(in),optional :: mpert  ! GA: TODO
+ integer,intent(in),optional :: mband,nkpt,msize,mpert
  integer,intent(in),optional :: ngfft(18)
  real(dp),intent(in),optional :: xred(3,dtset%natom)
  real(dp),intent(in),optional :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp),intent(in),optional :: kpt(:,:)
 
 !Local variables -------------------------
- integer :: ii, nn
+ integer :: ii, nn, ikpt
 
 ! ************************************************************************
 
  ddb_hdr%nblok = nblok
- ddb_hdr%ddb_version = ddb_version
+ ddb_hdr%ddb_version = DDB_VERSION
  ddb_hdr%dscrpt = trim(dscrpt)
- if (present(ngfft)) then
-   ddb_hdr%ngfft = ngfft
- else
-   ddb_hdr%ngfft = dtset%ngfft
- end if
 
  call psps_copy(psps, ddb_hdr%psps)
 
@@ -219,18 +354,36 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  ddb_hdr%matom = dtset%natom
  ddb_hdr%natom = dtset%natom
  ddb_hdr%mband = dtset%mband
- !ddb_hdr%mkpt = dtset%maxnkpt
  ddb_hdr%mkpt = dtset%nkpt
  ddb_hdr%nkpt = dtset%nkpt
- !ddb_hdr%msym = dtset%maxnsym
  ddb_hdr%msym = dtset%nsym
  ddb_hdr%nsym = dtset%nsym
  ddb_hdr%mtypat = dtset%ntypat
  ddb_hdr%ntypat = dtset%ntypat
-
  ddb_hdr%nspden = dtset%nspden
  ddb_hdr%nspinor = dtset%nspinor
  ddb_hdr%nsppol = dtset%nsppol
+
+ if (present(mband)) then
+   ddb_hdr%mband = mband
+ end if
+
+ if (present(nkpt)) then
+   ddb_hdr%mkpt = nkpt
+   ddb_hdr%nkpt = nkpt
+ end if
+
+ if (present(mpert)) then
+   ddb_hdr%mpert = mpert
+ end if
+
+ if (present(msize)) then
+   ddb_hdr%msize = msize
+ else
+   if (present(mpert)) then
+     call ddb_hdr%get_block_dims()
+   end if
+ end if
 
  ddb_hdr%occopt = dtset%occopt
  ddb_hdr%usepaw = dtset%usepaw
@@ -245,13 +398,24 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  ddb_hdr%pawecutdg = dtset%pawecutdg
  ddb_hdr%kptnrm = dtset%kptnrm
  ddb_hdr%dfpt_sciss = dtset%dfpt_sciss
- ddb_hdr%tolwfr = 1.0_dp  ! dummy
+ ddb_hdr%tolwfr = one
  ddb_hdr%tphysel = dtset%tphysel
  ddb_hdr%tsmear = dtset%tsmear
 
- ddb_hdr%fullinit = 1
+ ddb_hdr%with_psps = 1
+ ddb_hdr%with_dfpt_vars = 1
+
+ ddb_hdr%iomode = dtset%iomode
+ ddb_hdr%has_open_file_txt = .false.
+ ddb_hdr%has_open_file_nc = .false.
 
  call ddb_hdr%malloc()
+
+ if (present(ngfft)) then
+   ddb_hdr%ngfft = ngfft
+ else
+   ddb_hdr%ngfft = dtset%ngfft
+ end if
 
  ! Copy arrays from dtset
  ddb_hdr%acell(:) = dtset%acell_orig(1:3,1)
@@ -261,12 +425,28 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
  ddb_hdr%symafm(:) = dtset%symafm(1:ddb_hdr%msym)
  ddb_hdr%symrel(:,:,:) = dtset%symrel(1:3,1:3,1:ddb_hdr%msym)
  ddb_hdr%typat(:) = dtset%typat(1:ddb_hdr%matom)
- ddb_hdr%kpt(:,:) = dtset%kpt(1:3,1:ddb_hdr%mkpt)
  ddb_hdr%wtk(:) = dtset%wtk(1:ddb_hdr%mkpt)
  ddb_hdr%spinat(:,:) = dtset%spinat(1:3,1:ddb_hdr%matom)
  ddb_hdr%tnons(:,:) = dtset%tnons(1:3,1:ddb_hdr%msym)
  ddb_hdr%zion(:) = dtset%ziontypat(1:ddb_hdr%mtypat)
  ddb_hdr%znucl(:) = dtset%znucl(1:ddb_hdr%mtypat)
+
+
+ if (present(kpt)) then
+   do ikpt=1,ddb_hdr%nkpt
+     do ii = 1,3
+       ddb_hdr%kpt(ii,ikpt) = kpt(ii,ikpt)
+     end do
+   end do
+ else
+   ddb_hdr%kpt(:,:) = dtset%kpt(1:3,1:ddb_hdr%mkpt)
+ end if
+
+ if (present(mband)) then
+  do ii=1,ddb_hdr%nkpt
+    ddb_hdr%nband(ii) = mband
+  end do
+ end if
 
  if (present(xred)) then
    ddb_hdr%xred(:,:) = xred(1:3,1:ddb_hdr%matom)
@@ -279,12 +459,16 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
    ddb_hdr%occ(:) = dtset%occ_orig(1:ddb_hdr%mband*ddb_hdr%mkpt*ddb_hdr%nsppol,1)
  end if
 
- ! GA: I had way too much problems implementing pawtab_copy.
+ ! GA: I had way too many problems implementing pawtab_copy.
  !     The script check-libpaw would report all sorts of errors.
  !     Therefore, I do a cheap copy here, copying only the relevant info.
  !call pawtab_copy(pawtab, ddb_hdr%pawtab)
  nn=size(pawtab)
+ ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
  if (nn.gt.0) then
+
+   call pawtab_nullify(ddb_hdr%pawtab)
+
    do ii=1,nn
     ddb_hdr%pawtab(ii)%basis_size = pawtab(ii)%basis_size
     ddb_hdr%pawtab(ii)%lmn_size = pawtab(ii)%lmn_size
@@ -298,8 +482,17 @@ subroutine ddb_hdr_init(ddb_hdr, dtset, psps, pawtab, ddb_version, dscrpt, &
    end do
  end if
 
+ call crystal_init(dtset%amu_orig(:,1), ddb_hdr%crystal, &
+& dtset%spgroup, dtset%natom, dtset%npsp, psps%ntypat, &
+& dtset%nsym, dtset%rprimd_orig(:,:,1), dtset%typat, &
+& ddb_hdr%xred, dtset%ziontypat, dtset%znucl, 1, &
+& dtset%nspden==2.and.dtset%nsppol==1, .false., '', &
+& dtset%symrel, dtset%tnons, dtset%symafm)
+
 end subroutine ddb_hdr_init
 !!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_ddb_hdr/ddb_hdr_malloc
 !! NAME
@@ -307,11 +500,6 @@ end subroutine ddb_hdr_init
 !!
 !! FUNCTION
 !!  Allocate dynamic memory.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -340,10 +528,92 @@ subroutine ddb_hdr_malloc(ddb_hdr)
  ABI_MALLOC(ddb_hdr%znucl,(ddb_hdr%mtypat))
 
  ! types
- ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
- call pawtab_nullify(ddb_hdr%pawtab)
+ !ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+ !call pawtab_nullify(ddb_hdr%pawtab)
+
+ ! Do not allocate the pseudo
+
+ ddb_hdr%ngfft = zero
+ ddb_hdr%nband = zero
+ ddb_hdr%symafm = one
+ ddb_hdr%symrel = zero
+ ddb_hdr%typat = zero
+ ddb_hdr%amu = zero
+ ddb_hdr%kpt = zero
+ ddb_hdr%occ = zero
+ ddb_hdr%spinat = zero
+ ddb_hdr%tnons = zero
+ ddb_hdr%wtk = zero
+ ddb_hdr%xred = zero
+ ddb_hdr%zion = zero
+ ddb_hdr%znucl = zero
 
 end subroutine ddb_hdr_malloc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_set_typ
+!! NAME
+!! ddb_hdr_set_typ
+!!
+!! FUNCTION
+!!  Set the type of each block.
+!!
+!! INPUTS
+!!  nblok=number of blocks
+!!  typ=type of each block
+!!
+!! SOURCE
+
+subroutine ddb_hdr_set_typ(ddb_hdr, nblok, typ)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer,intent(in) :: nblok
+ integer,intent(in) :: typ(nblok)
+
+! ************************************************************************
+
+ ddb_hdr%nblok = nblok
+ ABI_SFREE(ddb_hdr%typ)
+ ABI_MALLOC(ddb_hdr%typ,(nblok))
+ ddb_hdr%typ(:) = typ(:)
+
+end subroutine ddb_hdr_set_typ
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_get_block_dims
+!! NAME
+!! ddb_hdr_get_block_dims
+!!
+!! FUNCTION
+!!  Get the maximum number of perturbations from natom,
+!!  and get the maximum matrix size of one block, knowing the block types.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_get_block_dims(ddb_hdr)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+
+! ************************************************************************
+
+ ! Compute mpert
+ !ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+ ! GA: mpert is stored in netcdf format but not in text format.
+ 
+ ! Compute msize
+ if (is_type_d3E(ddb_hdr%mblktyp)) then
+   ddb_hdr%msize=3*ddb_hdr%mpert*3*ddb_hdr%mpert*3*ddb_hdr%mpert
+ else
+   ddb_hdr%msize=3*ddb_hdr%mpert*3*ddb_hdr%mpert
+ end if
+
+end subroutine ddb_hdr_get_block_dims
 !!***
 
 !----------------------------------------------------------------------
@@ -353,12 +623,7 @@ end subroutine ddb_hdr_malloc
 !! ddb_hdr_free
 !!
 !! FUNCTION
-!!  Free memory
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
+!!  Free memory.
 !!
 !! SOURCE
 
@@ -385,8 +650,10 @@ subroutine ddb_hdr_free(ddb_hdr)
  ABI_SFREE(ddb_hdr%xred)
  ABI_SFREE(ddb_hdr%zion)
  ABI_SFREE(ddb_hdr%znucl)
+ ABI_SFREE(ddb_hdr%typ)
 
  ! types
+ call ddb_hdr%crystal%free()
  call psps_free(ddb_hdr%psps)
 
  if (allocated(ddb_hdr%pawtab)) then
@@ -399,6 +666,767 @@ end subroutine ddb_hdr_free
 
 !----------------------------------------------------------------------
 
+!!****f* m_ddb_hdr/ddb_hdr_open_write_txt
+!! NAME
+!! ddb_hdr_open_write_txt
+!!
+!! FUNCTION
+!!  Open the DDB text file and write the header.
+!!
+!! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  with_psps
+!!      1-> include information on pseudopoentials
+!!      0-> do not include information on pseudopoentials
+!!
+!! OUTPUT
+!!  unddb=unit of the open ddb file in text format.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_write_txt(ddb_hdr, filename, with_psps)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in),optional :: with_psps
+
+!Local variables -------------------------
+ character(len=500) :: message
+ integer :: unddb
+ integer :: ierr
+
+! ************************************************************************
+
+ if (present(with_psps)) then
+    ddb_hdr%with_psps = with_psps
+    ddb_hdr%with_dfpt_vars = with_psps
+ end if
+
+ unddb = get_unit()
+ ddb_hdr%unddb = unddb
+ ddb_hdr%has_open_file_txt = .true.
+
+ ! Open the output derivative database.
+ ierr = open_file(filename,message,unit=unddb,status='unknown',form='formatted')
+ if (ierr /= 0) then
+   ABI_ERROR(message)
+ end if
+
+ call ddb_hdr%print(unddb)
+
+end subroutine ddb_hdr_open_write_txt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_open_write_nc
+!! NAME
+!! ddb_hdr_open_write_nc
+!!
+!! FUNCTION
+!!  Open the DDB NetCDF file and write the header.
+!!  Create the groups and define all variables.
+!!
+!! INPUTS
+!!  filename=name of the file being written
+!!  with_psps
+!!      1-> include information on pseudopoentials
+!!      0-> do not include information on pseudopoentials
+!!
+!! OUTPUT
+!!  ncid=netcdf identifier.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in),optional :: with_psps
+ integer,intent(in),optional :: with_dfpt_vars
+
+!Local variables -------------------------
+!scalars
+ integer :: ncid
+ integer :: ncid_crystal, ncid_psps, ncid_pawtab, ncid_d0E, ncid_d1E, ncid_d2E, ncid_d3E, ncid_d2eig
+ integer :: ncerr,nkpt,bandtot,occopt,blktyp
+ integer :: ii,iat,itypat,isppol,ikpt,iband,iblok,giblok
+ integer :: nblok_d0E,nblok_d1E,nblok_d2E,nblok_d3E,nblok_d2eig
+ integer :: iblok_d0E,iblok_d1E,iblok_d2E,iblok_d3E,iblok_d2eig
+ integer :: basis_size, max_basis_size, lmn_size, lmn2_size, max_lmn2_size, shape_type
+ integer :: natom, mpert
+!arrays
+ integer,allocatable :: available_block_types(:)
+ integer,allocatable :: blktyp_d0E(:),blktyp_d1E(:),blktyp_d2E(:),blktyp_d3E(:),blktyp_d2eig(:)
+ integer,allocatable :: nband(:,:)
+ character(len=descrlen) :: descr
+ real(dp),allocatable :: occ(:,:,:)
+ integer,allocatable :: pawtab_basis_size(:)
+ integer,allocatable :: pawtab_lmn_size(:)
+ integer,allocatable :: pawtab_lmn2_size(:)
+ integer,allocatable :: pawtab_shape_type(:)
+ real(dp),allocatable :: pawtab_rshp(:)
+ real(dp),allocatable :: pawtab_rpaw(:)
+
+! ************************************************************************
+
+ if (present(with_psps)) then
+    ddb_hdr%with_psps = with_psps
+ end if
+
+ if (present(with_dfpt_vars)) then
+    ddb_hdr%with_dfpt_vars = with_dfpt_vars
+ else
+    ddb_hdr%with_dfpt_vars = ddb_hdr%with_psps
+ end if
+
+ ! Initialize NetCDF file.
+ NCF_CHECK(nctk_open_create(ncid, filename, xmpi_comm_self))
+ ddb_hdr%ncid = ncid
+ ddb_hdr%has_open_file_nc = .True.
+
+ ! Write version number
+ NCF_CHECK(nctk_defnwrite_ivars(ncid, ['ddb_version'], [DDB_VERSION_NC]))
+
+ ! ----------
+ ! Dimensions
+ ! ----------
+
+ ! Dimensions specified by ETSF
+ ncerr = nctk_def_dims(ncid, [&
+  nctkdim_t('number_of_cartesian_directions', 3), &
+  nctkdim_t('number_of_atoms', ddb_hdr%natom), &
+  nctkdim_t('number_of_kpoints', ddb_hdr%nkpt), &
+  nctkdim_t('number_of_spins', ddb_hdr%nsppol), &
+  nctkdim_t('number_of_spinor_components', ddb_hdr%nspinor), &
+  nctkdim_t('number_of_spin_densities', ddb_hdr%nspden), &
+  nctkdim_t('one_dim', 1), &
+  nctkdim_t('two_dim', 2), &
+  nctkdim_t('three_dim', 3), &
+  nctkdim_t('cplex',2)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Dimensions relevant to the DDB
+ ncerr = nctk_def_dims(ncid, [&
+  nctkdim_t('number_of_symmetries', ddb_hdr%nsym), &
+  nctkdim_t('number_of_atom_types', ddb_hdr%ntypat), &
+  nctkdim_t('maximum_number_of_bands', ddb_hdr%mband) &
+  ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Compute total number of bands
+ occopt = ddb_hdr%occopt
+ nkpt = ddb_hdr%nkpt
+ if(ddb_hdr%occopt==2)then
+   bandtot=0
+     do ikpt=1,nkpt
+       bandtot=bandtot+ddb_hdr%nband(ikpt)*ddb_hdr%nsppol
+     end do
+ else
+   bandtot=nkpt*ddb_hdr%nband(1)*ddb_hdr%nsppol
+ end if
+ ncerr = nctk_def_dims(ncid, [&
+   nctkdim_t('total_number_of_states', bandtot) &
+   ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Construct local array of occupations and nband
+ ABI_MALLOC(occ, (ddb_hdr%mband,ddb_hdr%nkpt,ddb_hdr%nsppol))
+ occ = zero
+ ii = 0
+ do isppol=1,ddb_hdr%nsppol
+   do ikpt=1,ddb_hdr%nkpt
+     do iband=1,ddb_hdr%mband
+       ii = ii + 1
+       occ(iband,ikpt,isppol) = ddb_hdr%occ(ii)
+     end do
+   end do
+ end do
+ ABI_MALLOC(nband, (ddb_hdr%nkpt,ddb_hdr%nsppol))
+ nband = zero
+ ii = 0
+ do isppol=1,ddb_hdr%nsppol
+   do ikpt=1,ddb_hdr%nkpt
+     ii = ii + 1
+     nband(ikpt,isppol) = ddb_hdr%nband(ii)
+   end do
+ end do
+
+
+ ncerr = nctk_defnwrite_ivars(ncid, ["with_psps"], [ddb_hdr%with_psps])
+ NCF_CHECK(ncerr)
+ ncerr = nctk_defnwrite_ivars(ncid, ["with_dfpt_vars"], [ddb_hdr%with_dfpt_vars])
+ !ncerr = nctk_defnwrite_ivars(ncid, &
+ !&           [ character(len=nctk_slen) :: &
+ !&            "with_psps", "with_dfpt_vars"], &
+ !&           [ddb_hdr%with_psps, ddb_hdr%with_dfpt_vars])
+ NCF_CHECK(ncerr)
+
+ ! --------------------------
+ ! Write objects in subgroups
+ ! --------------------------
+
+ ! Crystal info
+ NCF_CHECK(nf90_def_grp(ncid, 'Crystal', ncid_crystal))
+ NCF_CHECK(ddb_hdr%crystal%ncwrite(ncid_crystal))
+
+ ! Pseudopotentials info
+ NCF_CHECK(nf90_def_grp(ncid, 'Pseudopotentials', ncid_psps))
+ call psps_ncwrite(ddb_hdr%psps, ncid_psps)  ! We still need to write usepaw, for example.
+
+ ! PAW info
+ ! Note that PAW shares the namespace with Pseudopotentials.
+ if (ddb_hdr%psps%usepaw > 0) then
+
+   ! -------------------------------------
+   ! GA: TODO This should be a function pawtab_ncwrite
+   NCF_CHECK(nf90_def_grp(ncid_psps, 'PAW', ncid_pawtab))
+
+   ! get dimensions
+   ABI_MALLOC(pawtab_basis_size, (ddb_hdr%ntypat))
+   ABI_MALLOC(pawtab_lmn_size, (ddb_hdr%ntypat))
+   ABI_MALLOC(pawtab_lmn2_size, (ddb_hdr%ntypat))
+   ABI_MALLOC(pawtab_shape_type, (ddb_hdr%ntypat))
+
+   pawtab_basis_size = zero
+   pawtab_lmn_size = zero
+   pawtab_lmn2_size = zero
+   pawtab_shape_type = zero
+
+   max_basis_size = 0 ; max_lmn2_size = 0
+   do itypat=1,ddb_hdr%ntypat
+
+     basis_size = ddb_hdr%pawtab(itypat)%basis_size
+     lmn_size = ddb_hdr%pawtab(itypat)%lmn_size
+     lmn2_size = ddb_hdr%pawtab(itypat)%lmn2_size
+     shape_type = ddb_hdr%pawtab(itypat)%shape_type
+
+     pawtab_basis_size(itypat) = basis_size
+     pawtab_lmn_size(itypat) = lmn_size
+     pawtab_lmn2_size(itypat) = lmn2_size
+     pawtab_shape_type(itypat) = shape_type
+     
+     if (lmn2_size > max_lmn2_size) then
+       max_lmn2_size = lmn2_size
+     end if 
+     if (basis_size > max_basis_size) then
+       max_basis_size = basis_size
+     end if 
+   end do
+
+   ncerr = nctk_def_dims(ncid_pawtab, [&
+      nctkdim_t('maximum_basis_size', max_basis_size), &
+      nctkdim_t('maximum_lmn2_size', max_lmn2_size)], &
+      defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid_pawtab, [&
+     nctkarr_t('basis_size', "i", 'number_of_atom_types'), &
+     nctkarr_t('lmn_size', "i", 'number_of_atom_types'), &
+     nctkarr_t('lmn2_size', "i", 'number_of_atom_types'), &
+     nctkarr_t('shape_type', "i", 'number_of_atom_types') &
+     &])
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid_pawtab, [&
+     nctkarr_t('Dij0', "dp", 'number_of_atom_types, maximum_lmn2_size'), &
+     nctkarr_t('r_PAW', "dp", 'number_of_atom_types'), &
+     nctkarr_t('r_shape', "dp", 'number_of_atom_types') &
+     &])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'basis_size'), pawtab_basis_size))
+   NCF_CHECK(nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'lmn_size'), pawtab_lmn_size))
+   NCF_CHECK(nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'lmn2_size'), pawtab_lmn2_size))
+   NCF_CHECK(nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'shape_type'), pawtab_shape_type))
+
+   ABI_FREE(pawtab_basis_size)
+   ABI_FREE(pawtab_lmn_size)
+   ABI_FREE(pawtab_lmn2_size)
+   ABI_FREE(pawtab_shape_type)
+
+   ABI_MALLOC(pawtab_rpaw, (ddb_hdr%ntypat))
+   ABI_MALLOC(pawtab_rshp, (ddb_hdr%ntypat))
+
+   do itypat=1,ddb_hdr%ntypat
+
+     pawtab_rpaw(itypat) = ddb_hdr%pawtab(itypat)%rpaw
+     pawtab_rshp(itypat) = ddb_hdr%pawtab(itypat)%rshp
+
+     ncerr = nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'Dij0'), &
+                          ddb_hdr%pawtab(itypat)%dij0, start=[itypat,1], &
+                          count=[1,ddb_hdr%pawtab(itypat)%lmn2_size])
+     NCF_CHECK(ncerr)
+
+   end do
+
+   ncerr = nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'r_PAW'), pawtab_rpaw)
+   NCF_CHECK(ncerr)
+
+   ncerr = nf90_put_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'r_shape'), pawtab_rshp)
+   NCF_CHECK(ncerr)
+
+   ABI_FREE(pawtab_rpaw)
+   ABI_FREE(pawtab_rshp)
+
+   ! -------------------------------------
+
+ end if
+ 
+
+ ! ----------------
+ ! Scalar variables
+ ! ----------------
+
+ ! Scalar integer variables
+ ncerr = nctk_defnwrite_ivars(ncid, &
+  [character(len=nctk_slen) :: 'intxc', 'iscf', 'ixc', 'occopt'], &
+  [ddb_hdr%intxc, ddb_hdr%iscf, ddb_hdr%ixc, ddb_hdr%occopt])
+ NCF_CHECK(ncerr)
+
+ ! Scalar float variables
+ ncerr = nctk_defnwrite_dpvars(ncid, &
+  [character(len=nctk_slen) :: 'dilatmx', 'ecut', 'pawecutdg', 'ecutsm', 'kptnrm'], &
+  [ddb_hdr%dilatmx, ddb_hdr%ecut, ddb_hdr%pawecutdg, ddb_hdr%ecutsm, ddb_hdr%kptnrm])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_defnwrite_dpvars(ncid, &
+  [character(len=nctk_slen) :: 'dfpt_sciss', 'tolwfr', 'tphysel', 'tsmear'], &
+  [ddb_hdr%dfpt_sciss, ddb_hdr%tolwfr, ddb_hdr%tphysel, ddb_hdr%tsmear])
+ NCF_CHECK(ncerr)
+
+ ! ------
+ ! Arrays
+ ! ------
+
+ ! FFT grid
+ ncerr = nctk_def_arrays(ncid, [nctkarr_t('ngfft', "i", 'number_of_cartesian_directions')])
+ NCF_CHECK(ncerr)
+
+ ! Geometry
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('acell', "dp", 'number_of_cartesian_directions') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ! Basis
+ ! note: In case occopt!=2, only the first entry of number_of_bands matters
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('reduced_coordinates_of_kpoints', "dp", 'number_of_cartesian_directions, number_of_kpoints'), &
+   nctkarr_t('number_of_bands', "i", 'number_of_kpoints, number_of_spins'), &
+   nctkarr_t('spinat', "dp", 'number_of_cartesian_directions, number_of_atoms'), &
+   nctkarr_t('occupations', "dp", 'maximum_number_of_bands, number_of_kpoints, number_of_spins'), &
+   nctkarr_t('kpoints_weights', "dp", 'number_of_kpoints') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ! ----------------
+ ! Set array values
+ ! ----------------
+
+ ! FFT grid
+ NCF_CHECK(nf90_put_var(ncid, vid('ngfft'), ddb_hdr%ngfft(1:3)))
+
+ ! Geometry
+ NCF_CHECK(nf90_put_var(ncid, vid('acell'), ddb_hdr%acell(:)))
+
+ ! Basis
+ NCF_CHECK(nf90_put_var(ncid, vid('spinat'), ddb_hdr%spinat(:,:)))
+ NCF_CHECK(nf90_put_var(ncid, vid('occupations'), occ))
+ NCF_CHECK(nf90_put_var(ncid, vid('reduced_coordinates_of_kpoints'), ddb_hdr%kpt(:,:)))
+ NCF_CHECK(nf90_put_var(ncid, vid('kpoints_weights'), ddb_hdr%wtk(:)))
+ NCF_CHECK(nf90_put_var(ncid, vid('number_of_bands'), nband))
+
+ ABI_FREE(occ)
+ ABI_FREE(nband)
+
+ ! =============================================================
+ ! Write info on blocks, create groups, and define all variables
+ ! =============================================================
+
+ ! --------------------------------------------
+ ! Description of perturbations and block types
+ ! --------------------------------------------
+ mpert = ddb_hdr%mpert
+ natom = ddb_hdr%natom
+
+ ncerr = nctk_def_dims(ncid, [&
+   nctkdim_t('number_of_perturbations', ddb_hdr%mpert), &
+   nctkdim_t("number_of_available_block_types", ntypes), &
+   nctkdim_t("description_length", descrlen) &
+   &], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('available_block_types', "i", 'number_of_available_block_types'), &
+   nctkarr_t('description_of_block_types', "char", 'description_length, number_of_available_block_types'), &
+   nctkarr_t('description_of_perturbations', "char", 'description_length, number_of_perturbations') &
+   &])
+ NCF_CHECK(ncerr)
+
+
+ do iat=1,natom
+
+   write(descr, '(2a,i7)') trim(DESCR_ipert_0), ' ', iat
+
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(descr) , start=[1, iat])
+   NCF_CHECK(ncerr)
+ end do
+
+
+ if (mpert >= natom+1) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_1), start=[1, natom+1])
+   NCF_CHECK(ncerr)
+ end if
+ 
+ if (mpert >= natom+2) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_2), start=[1, natom+2])
+   NCF_CHECK(ncerr)
+ end if
+ 
+ if (mpert >= natom+3) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_3), start=[1, natom+3])
+   NCF_CHECK(ncerr)
+ end if
+
+ if (mpert >= natom+4) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_4), start=[1, natom+4])
+   NCF_CHECK(ncerr)
+ end if
+
+ if (mpert >= natom+5) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_5), start=[1, natom+5])
+   NCF_CHECK(ncerr)
+ end if
+
+ ! GA: The numbering natom+5, natom+10 , natom+11 comes from dfpt_looppert
+ !     However, we dont want to increase mpert needlessly.
+ !     Hence, we use natom+5, natom+6, natom+7.
+ if (mpert >= natom+6) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_10), start=[1, natom+6])
+   NCF_CHECK(ncerr)
+ end if
+
+ if (mpert >= natom+7) then
+   ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
+                        trim(DESCR_ipert_11), start=[1, natom+7])
+   NCF_CHECK(ncerr)
+ end if
+
+
+ ABI_MALLOC(available_block_types, (ntypes))
+ ! The order is unimportant, as long as it matches the description order
+
+ available_block_types(1) = BLKTYP_d0E_xx
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d0E_xx), start=[1, 1])
+ NCF_CHECK(ncerr)
+
+ available_block_types(2) = BLKTYP_d1E_xx
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d1E_xx), start=[1, 2])
+ NCF_CHECK(ncerr)
+
+ available_block_types(3) = BLKTYP_d2E_ns
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2E_ns), start=[1, 3])
+ NCF_CHECK(ncerr)
+
+ available_block_types(4) = BLKTYP_d2E_st
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2E_st), start=[1, 4])
+ NCF_CHECK(ncerr)
+
+ available_block_types(5) = BLKTYP_d3E_xx
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d3E_xx), start=[1, 5])
+ NCF_CHECK(ncerr)
+
+ available_block_types(6) = BLKTYP_d3E_lw
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d3E_lw), start=[1, 6])
+ NCF_CHECK(ncerr)
+
+ available_block_types(7) = BLKTYP_d2eig_re
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2eig_re), start=[1, 7])
+ NCF_CHECK(ncerr)
+
+ available_block_types(8) = BLKTYP_d2eig_im
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2eig_im), start=[1, 8])
+ NCF_CHECK(ncerr)
+
+ ncerr = nf90_put_var(ncid, vid("available_block_types"), available_block_types)
+ NCF_CHECK(ncerr)
+ ABI_FREE(available_block_types)
+
+ ncerr = nctk_def_dims(ncid, [nctkdim_t('number_of_blocks', ddb_hdr%nblok)])
+
+ ! Info on blocks
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t('block_types', "i", 'number_of_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'block_types'), ddb_hdr%typ))
+
+! TODO Write a chart of block types
+
+ ! Count each types of blocks
+ nblok_d0E = 0
+ nblok_d1E = 0
+ nblok_d2E = 0
+ nblok_d3E = 0
+ nblok_d2eig = 0
+
+ do iblok=1,ddb_hdr%nblok
+   blktyp = ddb_hdr%typ(iblok)
+   if (is_type_d0E(blktyp)) nblok_d0E = nblok_d0E + 1
+   if (is_type_d1E(blktyp)) nblok_d1E = nblok_d1E + 1
+   if (is_type_d2E(blktyp)) nblok_d2E = nblok_d2E + 1
+   if (is_type_d3E(blktyp)) nblok_d3E = nblok_d3E + 1
+   if (is_type_d2eig(blktyp)) nblok_d2eig = nblok_d2eig + 1
+ end do
+
+ ! ------------------------------------------
+ ! Build local arrays of global block indices
+ ! to keep track of the initial order.
+ ! ------------------------------------------
+
+ ABI_MALLOC(blktyp_d0E, (nblok_d0E))
+ ABI_MALLOC(blktyp_d1E, (nblok_d1E))
+ ABI_MALLOC(blktyp_d2E, (nblok_d2E))
+ ABI_MALLOC(blktyp_d3E, (nblok_d3E))
+ ABI_MALLOC(blktyp_d2eig, (nblok_d2eig))
+
+ iblok_d0E = 0
+ iblok_d1E = 0
+ iblok_d2E = 0
+ iblok_d3E = 0
+ iblok_d2eig = 0
+
+ do giblok=1,ddb_hdr%nblok
+
+   blktyp = ddb_hdr%typ(giblok)
+
+   if (is_type_d0E(blktyp)) then
+     iblok_d0E = iblok_d0E + 1
+     blktyp_d0E(iblok_d0E) = blktyp
+
+   else if (is_type_d1E(blktyp)) then
+     iblok_d1E = iblok_d1E + 1
+     blktyp_d1E(iblok_d1E) = blktyp
+
+   else if (is_type_d2E(blktyp)) then
+     iblok_d2E = iblok_d2E + 1
+     blktyp_d2E(iblok_d2E) = blktyp
+
+   else if (is_type_d3E(blktyp)) then
+     iblok_d3E = iblok_d3E + 1
+     blktyp_d3E(iblok_d3E) = blktyp
+
+   else if (is_type_d2eig(blktyp)) then
+     iblok_d2eig = iblok_d2eig + 1
+     blktyp_d2eig(iblok_d2eig) = blktyp
+   end if
+
+ end do
+ 
+ ! ------------------------
+ ! Zeroth-order derivatives
+ ! ------------------------
+
+ NCF_CHECK(nf90_def_grp(ncid, 'd0E', ncid_d0E))
+
+ ncerr = nctk_def_dims(ncid_d0E, [nctkdim_t('number_of_d0E_blocks', nblok_d0E)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Info on blocks and matrix values
+ ncerr = nctk_def_arrays(ncid_d0E, [&
+   nctkarr_t('d0E_block_types', "i", 'number_of_d0E_blocks'), &
+   nctkarr_t('matrix_values', "dp", 'number_of_d0E_blocks'), &
+   nctkarr_t('matrix_mask', "i", 'number_of_d0E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid_d0E, nctk_idname(ncid_d0E, 'd0E_block_types'), blktyp_d0E))
+
+ ABI_FREE(blktyp_d0E)
+
+ ! -----------------------
+ ! First-order derivatives
+ ! -----------------------
+
+ NCF_CHECK(nf90_def_grp(ncid, 'd1E', ncid_d1E))
+
+ ncerr = nctk_def_dims(ncid_d1E, [nctkdim_t('number_of_d1E_blocks', nblok_d1E)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Info on blocks and matrix values
+ ncerr = nctk_def_arrays(ncid_d1E, [&
+   nctkarr_t('d1E_block_types', "i", 'number_of_d1E_blocks'),&
+   nctkarr_t('matrix_values', "dp",&
+        sjoin('cplex,',&
+              'number_of_cartesian_directions, number_of_perturbations, ',&
+              'number_of_d1E_blocks')),&
+   nctkarr_t('matrix_mask', "i",&
+       sjoin('number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d1E_blocks'))&
+   &])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid_d1E, nctk_idname(ncid_d1E, 'd1E_block_types'), blktyp_d1E))
+
+ ABI_FREE(blktyp_d1E)
+
+ ! ------------------------
+ ! Second-order derivatives
+ ! ------------------------
+
+ NCF_CHECK(nf90_def_grp(ncid, 'd2E', ncid_d2E))
+
+ ! Qpoints
+ ncerr = nctk_def_dims(ncid_d2E, [&
+   nctkdim_t('number_of_d2E_blocks', nblok_d2E) &
+   ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d2E, [&
+   nctkarr_t('reduced_coordinates_of_qpoints', "dp",&
+             'number_of_cartesian_directions, number_of_d2E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d2E, [&
+   nctkarr_t('qpoints_normalization', "dp", 'number_of_d2E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ! Info on blocks and matrix values
+ ncerr = nctk_def_arrays(ncid_d2E, [&
+   nctkarr_t('matrix_values', "dp",&
+       sjoin('cplex, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d2E_blocks')), &
+   nctkarr_t('matrix_mask', "i",&
+       sjoin('number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d2E_blocks')), &
+   nctkarr_t('d2E_block_types', "i", 'number_of_d2E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ABI_FREE(blktyp_d2E)
+
+ ! -----------------------
+ ! Third-order derivatives
+ ! -----------------------
+
+ NCF_CHECK(nf90_def_grp(ncid, 'd3E', ncid_d3E))
+
+ ! Qpoints
+ ncerr = nctk_def_dims(ncid_d3E, [&
+  nctkdim_t('number_of_d3E_blocks', nblok_d3E) &
+  ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d3E, [&
+   nctkarr_t('reduced_coordinates_of_qpoints', "dp",&
+             'three_dim, number_of_cartesian_directions, number_of_d3E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d3E, [&
+   nctkarr_t('qpoints_normalization', "dp",&
+             'three_dim, number_of_d3E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ! Info on blocks and matrix values
+ ncerr = nctk_def_arrays(ncid_d3E, [&
+   nctkarr_t('matrix_values', "dp",&
+       sjoin('cplex, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d3E_blocks')), &
+   nctkarr_t('matrix_mask', "i",&
+       sjoin('number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d3E_blocks')), &
+   nctkarr_t('d3E_block_types', "i", 'number_of_d3E_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid_d3E, nctk_idname(ncid_d3E, 'd3E_block_types'), blktyp_d3E))
+
+ ABI_FREE(blktyp_d3E)
+
+ ! ---------------------------------------
+ ! Second-order derivatives of eigenvalues
+ ! ---------------------------------------
+
+ NCF_CHECK(nf90_def_grp(ncid, 'd2eig', ncid_d2eig))
+
+ ! Qpoints
+ ncerr = nctk_def_dims(ncid_d2eig, [nctkdim_t('number_of_d2eig_blocks', nblok_d2eig)], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d2eig, [&
+   nctkarr_t('reduced_coordinates_of_qpoints', "dp",&
+             'number_of_cartesian_directions, number_of_d2eig_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(ncid_d2eig, [&
+   nctkarr_t('qpoints_normalization', "dp", 'number_of_d2eig_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ ! Info on blocks and matrix values
+ ncerr = nctk_def_arrays(ncid_d2eig, [&
+   nctkarr_t('matrix_values', "dp",&
+       sjoin('cplex, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'maximum_number_of_bands, number_of_kpoints, number_of_spins, ',&
+             'number_of_d2eig_blocks')), &
+   nctkarr_t('matrix_mask', "i",&
+       sjoin('number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_cartesian_directions, number_of_perturbations, ',&
+             'number_of_d2eig_blocks')), &
+   nctkarr_t('d2eig_block_types', "i", 'number_of_d2eig_blocks') &
+   &])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_put_var(ncid_d2eig, nctk_idname(ncid_d2eig, 'd2eig_block_types'), blktyp_d2eig))
+
+ ABI_FREE(blktyp_d2eig)
+
+
+ contains
+   integer function vid(vname)
+   character(len=*),intent(in) :: vname
+   vid = nctk_idname(ncid, vname)
+ end function vid
+
+end subroutine ddb_hdr_open_write_nc
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_ddb_hdr/ddb_hdr_open_write
 !! NAME
 !! ddb_hdr_open_write
@@ -407,49 +1435,52 @@ end subroutine ddb_hdr_free
 !!  Open the DDB file and write the header.
 !!
 !! INPUTS
+!!  filename=name of the file being written
+!!  with_psps
+!!      1-> include information on pseudopoentials
+!!      0-> do not include information on pseudopoentials
+!!  comm=MPI communicator.
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine ddb_hdr_open_write(ddb_hdr, filnam, unddb, fullinit)
+subroutine ddb_hdr_open_write(ddb_hdr, filename, with_psps, comm)
 
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
- character(len=*),intent(in) :: filnam
- integer,intent(in) :: unddb
- integer,intent(in),optional :: fullinit
+ character(len=*),intent(in) :: filename
+ integer,intent(in),optional :: with_psps
+ integer,intent(in),optional :: comm
 
-!Local variables -------------------------
- integer :: choice
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: comm_
+ integer :: iomode
+ character(len=fnlen) :: filename_
 
 ! ************************************************************************
 
- if (present(fullinit)) ddb_hdr%fullinit = fullinit
+  if (present(comm)) then
+    comm_ = comm
+  else
+    comm_ = xmpi_comm_self
+  end if
 
- call ddb_io_out(ddb_hdr%dscrpt,filnam,ddb_hdr%matom,ddb_hdr%mband,&
-&  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_hdr%ddb_version,&
-&  ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
-&  ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
-&  ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
-&  ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,ddb_hdr%occ,&
-&  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
-&  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
-&  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
-&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
+ if (xmpi_comm_rank(comm_) /= master) return
 
+ call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
 
- choice=2  ! Write
- call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
-&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
-&  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,&
-&  ddb_hdr%ddb_version)
+ if (iomode==IO_MODE_ETSF) then
 
+    call ddb_hdr%open_write_nc(nctk_ncify(filename), with_psps=with_psps)
+
+ else if (iomode==IO_MODE_FORTRAN) then
+
+    call ddb_hdr%open_write_txt(filename, with_psps)
+
+ end if
 
 end subroutine ddb_hdr_open_write
 !!***
@@ -464,37 +1495,104 @@ end subroutine ddb_hdr_open_write
 !!  Open the DDB file and read the header.
 !!
 !! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!      anaddb,m_ddb,m_effective_potential_file,m_gruneisen,m_ifc,m_thmeig
-!!      mrgddb
-!!
-!! CHILDREN
-!!      wrtout
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  comm=MPI communicator
+!!  matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw=dimensions to be set.
+!!  dimonly
+!!   1-> only read dimensions and close the file
+!!   0-> leave the file open
 !!
 !! SOURCE
 
-subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
+subroutine ddb_hdr_open_read(ddb_hdr, filename, comm, &
 &        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
 
 !Arguments ------------------------------------
- type(ddb_hdr_type),intent(inout) :: ddb_hdr
- character(len=*),intent(in) :: filnam
- integer,intent(in) :: unddb
- integer,intent(in) :: ddb_version
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: comm
+ integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
+ integer,intent(in),optional :: dimekb,lmnmax,usepaw
+ integer,intent(in),optional :: dimonly
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: iomode
+ character(len=fnlen) :: filename_
+
+
+ call ddb_hdr%get_iomode(filename, 1, iomode, filename_)
+
+ if (xmpi_comm_rank(comm) == master) then
+
+   ! GA: FIXME
+   ! Here we keep the old output behavior just to make test pass.
+   ! However, test should allow differences in filenames.
+   !call wrtout(std_out, sjoin(" Opening DDB file:", filename_), 'COLL')
+   call wrtout(std_out, sjoin(" Opening DDB file:", filename), 'COLL')
+ end if
+
+ if (iomode==IO_MODE_ETSF) then
+
+   call ddb_hdr%open_read_nc(filename_, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+ else if (iomode==IO_MODE_FORTRAN) then
+
+   call ddb_hdr%open_read_txt(filename, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+ end if
+
+
+end subroutine ddb_hdr_open_read
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_open_read_txt
+!! NAME
+!! ddb_hdr_open_read_txt
+!!
+!! FUNCTION
+!!  Open the DDB text file and read the header.
+!!  If dimonly, only read dimensions and close the file,
+!!  otherwise leave the file open.
+!!
+!! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB)
+!!  comm=MPI communicator
+!!  matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw=dimensions to be set.
+!!  dimonly
+!!   1-> only read dimensions and close the file
+!!   0-> leave the file open
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
  integer,intent(in),optional :: comm
  integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
  integer,intent(in),optional :: dimekb,lmnmax,usepaw
  integer,intent(in),optional :: dimonly
 
 !Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: unddb
+ integer :: spgroup, timrev, npsp
  integer :: choice
- integer :: mblktyp,nblok
- integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l
+ integer :: ii, mblktyp,nblok
+ integer :: matom_l,mtypat_l,mband_l,mkpt_l,msym_l,nsppol_l
  integer :: dimekb_l,lmnmax_l,usepaw_l
  integer :: comm_l
+!arrays
+ real(dp):: rprimd(3,3)
 
 ! ************************************************************************
 
@@ -504,13 +1602,17 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
    comm_l = xmpi_comm_self
  end if
 
- ! Read the dimensions from the DDB
- call ddb_getdims(dimekb_l,filnam,lmnmax_l,mband_l,mblktyp, &
-&       msym_l,matom_l,nblok,mkpt_l,mtypat_l,unddb,usepaw_l, &
-&       ddb_version,comm_l)
+ ! =====================================================
+ ! Open the DDB once and read the dimensions from header
+ ! =====================================================
 
- close(unddb)
+ call ddb_getdims(filename,comm_l,dimekb_l,lmnmax_l,mband_l,mblktyp, &
+&       msym_l,matom_l,nblok,mkpt_l,nsppol_l,mtypat_l,usepaw_l)
 
+
+ ! When merging ddbs, we want to open a header with fixed dimensions.
+ ! GA: Might not be necessary if we handle the merging better. 
+ !    
  if (present(matom)) matom_l = matom
  if (present(mtypat)) mtypat_l = mtypat
  if (present(mband)) mband_l = mband
@@ -520,14 +1622,14 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  if (present(lmnmax)) lmnmax_l = lmnmax
  if (present(usepaw)) usepaw_l = usepaw
 
- ddb_hdr%ddb_version = ddb_version
+ ddb_hdr%ddb_version = DDB_VERSION
  ddb_hdr%usepaw = usepaw_l
  ddb_hdr%mband = mband_l
  ddb_hdr%matom = matom_l
  ddb_hdr%msym = msym_l
  ddb_hdr%mtypat = mtypat_l
  ddb_hdr%mkpt = mkpt_l
- ddb_hdr%nsppol = 1     ! GA: Is nsppol not read?? Have to fix this...
+ ddb_hdr%nsppol = nsppol_l
 
  ddb_hdr%nblok = nblok
  ddb_hdr%mblktyp = mblktyp
@@ -536,60 +1638,548 @@ subroutine ddb_hdr_open_read(ddb_hdr, filnam, unddb, ddb_version, comm, &
  ddb_hdr%psps%ntypat = mtypat_l
  ddb_hdr%psps%lmnmax = lmnmax_l
  ddb_hdr%psps%usepaw = usepaw_l
- ddb_hdr%psps%useylm = usepaw_l  ! yep...
+ ddb_hdr%psps%useylm = usepaw_l  ! yep.
+
+ ! GA: Eventually, we might want to initialize other entries of psps here.
+ !     such as alchemical psps info.
 
  ddb_hdr%natom = ddb_hdr%matom
  ddb_hdr%nkpt = ddb_hdr%mkpt
  ddb_hdr%nsym = ddb_hdr%msym
  ddb_hdr%ntypat = ddb_hdr%mtypat
 
+ npsp = ddb_hdr%mtypat
+
+ ! Set maximal value for mpert
+ ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
+
+ ! Compute the block dimensions
+ call ddb_hdr%get_block_dims()
+
+ unddb = get_unit()
+ ddb_hdr%unddb = unddb
+
  if (present(dimonly)) then
    if (dimonly==1) return
  end if
 
- ! Allocate the memory
- call ddb_hdr%malloc()
 
- ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
- ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
- ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+ ! =========================================
+ ! Open the DDB a second time to read header
+ ! =========================================
 
- ! This is needed to read the DDBs in the old format
- ! GA : Not sure why this is required
- ddb_hdr%symafm(:)=1
- if(ddb_hdr%mtypat>=1)then
-   ddb_hdr%psps%pspso(:)=0
-   ddb_hdr%znucl(:)=zero
-   ddb_hdr%psps%ekb(:,:)=zero
- end if
- if(ddb_hdr%matom>=1)then
-   ddb_hdr%spinat(:,:)=zero
- end if
+ ddb_hdr%has_open_file_txt = .true.
+
+ if (xmpi_comm_rank(comm) == master) then
+
+   ! Allocate the memory
+   call ddb_hdr%malloc()
+
+   ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+   ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+   ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat))
+
+   ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+   call pawtab_nullify(ddb_hdr%pawtab)
+
+   ! This is needed to read the DDBs in the old format
+   ! GA : Not sure if we really need this.
+   ddb_hdr%symafm(:)=1
+   if(ddb_hdr%mtypat>=1)then
+     ddb_hdr%psps%pspso(:)=0
+     ddb_hdr%psps%ekb(:,:)=zero
+     ddb_hdr%znucl(:)=zero
+   end if
+   if(ddb_hdr%matom>=1)then
+     ddb_hdr%spinat(:,:)=zero
+   end if
+
+   ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
+   !       wile the actual parameters (natom, nkpt, etc.) are outputs
+   call ioddb8_in(filename,ddb_hdr%matom,ddb_hdr%mband,&
+  &       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,&
+  &       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%ddb_version,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+  &       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
+  &       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
+  &       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
+  &       ddb_hdr%occ,ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,&
+  &       ddb_hdr%dfpt_sciss,ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,&
+  &       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
+  &       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
+  &       ddb_hdr%znucl)
 
 
- ! Note: the maximum parameters (matom, mkpt, etc.) are inputs to ioddb8_in
- !       wile the actual parameters (natom, nkpt, etc.) are outputs
- call ioddb8_in(filnam,ddb_hdr%matom,ddb_hdr%mband,&
-&       ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,unddb,ddb_version,&
-&       ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
-&       ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
-&       ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
-&       ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,&
-&       ddb_hdr%occ,ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,&
-&       ddb_hdr%dfpt_sciss,ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,&
-&       ddb_hdr%tnons,ddb_hdr%tolwfr,ddb_hdr%tphysel,ddb_hdr%tsmear,&
-&       ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,ddb_hdr%xred,ddb_hdr%zion,&
-&       ddb_hdr%znucl)
-
-
-!  Read the psp information of the input DDB
+  !  Read the psp information of the input DDB
    choice=1  ! Read
-   call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%fullinit,&
-&       ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,&
-&       ddb_hdr%nblok,ddb_hdr%ntypat,unddb,ddb_hdr%pawtab,ddb_hdr%psps%pspso,&
-&       ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm,ddb_version)
+   call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%with_psps,&
+  &       ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,&
+  &       ddb_hdr%nblok,ddb_hdr%ntypat,unddb,ddb_hdr%pawtab,ddb_hdr%psps%pspso,&
+  &       ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm)
 
-end subroutine ddb_hdr_open_read
+
+  ! This is a limitation of the text file format.
+  ! We might be able to get rid of it.
+  ddb_hdr%with_dfpt_vars = ddb_hdr%with_psps
+
+  ddb_hdr%dscrpt = ''
+
+   ! Complete the initialization of the psps object
+   ! so that we may copy it.
+   ddb_hdr%psps%npsp = npsp
+   ddb_hdr%psps%ntypat = ddb_hdr%ntypat
+   ddb_hdr%psps%ntypalch = 0  ! Alchemical potential not supported
+   ddb_hdr%psps%mtypalch = 0  ! Alchemical potential not supported
+   ddb_hdr%psps%n1xccc = 0
+   ddb_hdr%psps%usewvl = 0
+   ddb_hdr%psps%mqgrid_vl = 0
+   ddb_hdr%psps%mqgrid_ff = 0
+   ddb_hdr%psps%mpspso = 1  ! FIXME
+   do ii=1,npsp
+     ddb_hdr%psps%mpspso = max(ddb_hdr%psps%mpspso, ddb_hdr%psps%pspso(ii))
+   end do
+   ddb_hdr%psps%mpssoang = 1
+   ddb_hdr%psps%mpsang = 1
+   ddb_hdr%psps%mproj = 0
+   ddb_hdr%psps%lnmax = 0
+   ddb_hdr%psps%ntyppure = 0
+   ddb_hdr%psps%npspalch = 0
+   ddb_hdr%psps%nc_xccc_gspace = 0
+   ddb_hdr%psps%optnlxccc = 0
+   ddb_hdr%psps%positron = 0
+   ddb_hdr%psps%vlspl_recipSpace = .false.
+
+   ABI_MALLOC(ddb_hdr%psps%ziontypat,(ddb_hdr%psps%ntypat))
+   ABI_MALLOC(ddb_hdr%psps%znucltypat,(ddb_hdr%psps%ntypat))
+   ABI_MALLOC(ddb_hdr%psps%filpsp,(ddb_hdr%psps%npsp))
+   ABI_MALLOC(ddb_hdr%psps%md5_pseudos,(ddb_hdr%psps%npsp))
+   ABI_MALLOC(ddb_hdr%psps%title,(ddb_hdr%psps%npsp))
+   ABI_MALLOC(ddb_hdr%psps%pspxc,(ddb_hdr%psps%ntypat))
+
+   ABI_MALLOC(ddb_hdr%psps%pspcod,(ddb_hdr%psps%npsp))
+   ABI_MALLOC(ddb_hdr%psps%algalch,(ddb_hdr%psps%ntypalch))
+   ABI_MALLOC(ddb_hdr%psps%pspdat,(ddb_hdr%psps%ntypat))
+   ABI_MALLOC(ddb_hdr%psps%zionpsp,(ddb_hdr%psps%npsp))
+   ABI_MALLOC(ddb_hdr%psps%znuclpsp,(ddb_hdr%psps%npsp))
+
+   ABI_MALLOC(ddb_hdr%psps%nctab,(ddb_hdr%psps%ntypat))
+
+   ddb_hdr%psps%ziontypat(:) = ddb_hdr%zion(:)
+   ddb_hdr%psps%znucltypat(:) = ddb_hdr%znucl(:)
+   do ii=1,npsp
+     ddb_hdr%psps%filpsp(ii) = ''
+     ddb_hdr%psps%md5_pseudos(ii) = ''
+     ddb_hdr%psps%title(ii) = ''
+     !ddb_hdr%psps%pspxc(ii) = ddb_hdr%ixc
+   end do
+
+   ddb_hdr%psps%pspxc = zero  ! Unknown
+
+   ! -------------------------------
+   ! Initialize the crystal
+   ! -------------------------------
+  
+   call mkrdim(ddb_hdr%acell,ddb_hdr%rprim,rprimd)
+  
+   ! GA: space group and time reversal are not written in the text file
+   !     but they are written in the netcdf version.
+   !     It doesnt seem to make any difference to anaddb.
+   spgroup = 1
+   timrev = 2
+  
+   call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
+&   spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
+&   ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
+&   ddb_hdr%xred, ddb_hdr%zion, ddb_hdr%znucl, timrev, &
+&   ddb_hdr%nspden==2.and.ddb_hdr%nsppol==1, .false., '', &
+&   ddb_hdr%symrel, ddb_hdr%tnons, ddb_hdr%symafm)
+
+
+ end if
+
+ ! Master broadcasts data
+ call ddb_hdr%bcast(comm_l)
+
+end subroutine ddb_hdr_open_read_txt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_open_read_nc
+!! NAME
+!! ddb_hdr_open_read
+!!
+!! FUNCTION
+!!  Open the DDB.nc file and read the header.
+!!
+!! INPUTS
+!!  filename=name of the file being written (abo_DS*_DDB.nc)
+!!  comm=MPI communicator
+!!  matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw=dimensions to be set.
+!!  dimonly
+!!   1-> only read dimensions and close the file
+!!   0-> leave the file open
+!!
+!! SOURCE
+
+subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
+&        matom,mtypat,mband,mkpt,msym,dimekb,lmnmax,usepaw,dimonly)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=*),intent(in) :: filename
+ integer,intent(in),optional :: comm
+ integer,intent(in),optional :: matom,mtypat,mband,mkpt,msym
+ integer,intent(in),optional :: dimekb,lmnmax,usepaw
+ integer,intent(in),optional :: dimonly
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: ncid
+ integer :: ncid_crystal, ncid_psps, ncid_pawtab
+ integer :: ii,isppol,isym,ikpt,iband,itypat,iblok
+ integer :: comm_
+ integer :: natom_file, ntypat_file, mband_file, nkpt_file, nsym_file
+ integer :: mband_, nkpt_
+ integer :: ncerr
+!arrays
+ integer :: ngfft(3)
+ integer,allocatable :: nband(:,:)
+ integer,allocatable :: pawtab_basis_size(:)
+ integer,allocatable :: pawtab_lmn_size(:)
+ integer,allocatable :: pawtab_lmn2_size(:)
+ integer,allocatable :: pawtab_shape_type(:)
+ real(dp),allocatable :: pawtab_rpaw(:)
+ real(dp),allocatable :: pawtab_rshp(:)
+ real(dp),allocatable :: occ(:,:,:)
+
+! ************************************************************************
+
+ if (present(comm)) then
+   comm_ = comm
+ else
+   comm_ = xmpi_comm_self
+ end if
+
+ if (xmpi_comm_rank(comm_) == master) then
+   NCF_CHECK(nctk_open_read(ncid, filename, xmpi_comm_self))
+   ddb_hdr%ncid = ncid
+ end if
+
+ if (xmpi_comm_size(comm_) > 1) then
+   call xmpi_bcast(ddb_hdr%ncid, master, comm_, ncerr)
+ end if
+
+ ddb_hdr%has_open_file_nc = .True.
+
+ ! Flush allocated arrays
+ call ddb_hdr%free()
+
+ ! ===============
+ ! Read dimensions
+ ! ===============
+ if (xmpi_comm_rank(comm_) == master) then
+
+   ! No check is performed on the ddb version number, yet.
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ddb_version'), ddb_hdr%ddb_version))
+
+   ! Scalar integers
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", natom_file))
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkpt_file))
+   ddb_hdr%natom = natom_file
+   ddb_hdr%nkpt = nkpt_file
+
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_spins", ddb_hdr%nsppol))
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_spinor_components", ddb_hdr%nspinor))
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_spin_densities", ddb_hdr%nspden))
+
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_symmetries", nsym_file))
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_types", ntypat_file))
+   ddb_hdr%nsym = nsym_file
+   ddb_hdr%ntypat = ntypat_file
+
+   NCF_CHECK(nctk_get_dim(ncid, "maximum_number_of_bands", mband_file))
+   ddb_hdr%mband = mband_file
+
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_blocks", ddb_hdr%nblok))
+   NCF_CHECK(nctk_get_dim(ncid, "number_of_perturbations", ddb_hdr%mpert))
+
+   ddb_hdr%msym = ddb_hdr%nsym
+   ddb_hdr%mkpt = ddb_hdr%nkpt
+   ddb_hdr%matom = ddb_hdr%natom
+   ddb_hdr%mtypat = ddb_hdr%ntypat
+
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_psps"), ddb_hdr%with_psps))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_dfpt_vars"), ddb_hdr%with_dfpt_vars))
+
+   ! Read pseudopotentials info
+   ncid_psps = nctk_idgroup(ncid, 'Pseudopotentials')
+
+   call psps_ncread(ddb_hdr%psps, ncid_psps)
+   ddb_hdr%usepaw = ddb_hdr%psps%usepaw
+
+   ABI_MALLOC(ddb_hdr%pawtab, (ddb_hdr%ntypat*ddb_hdr%usepaw))
+   if (ddb_hdr%usepaw > 0) then
+
+     ! Read PAW info
+     ! -------------------------------------
+     ! GA: TODO There should be a function pawtab_ncread
+     !     Here, we only read the info needed to print the ddb in text format.
+
+     ncid_pawtab = nctk_idgroup(ncid_psps, 'PAW')
+     call pawtab_nullify(ddb_hdr%pawtab)
+
+     ABI_MALLOC(pawtab_basis_size, (ddb_hdr%ntypat))
+     ABI_MALLOC(pawtab_lmn_size, (ddb_hdr%ntypat))
+     ABI_MALLOC(pawtab_lmn2_size, (ddb_hdr%ntypat))
+     ABI_MALLOC(pawtab_shape_type, (ddb_hdr%ntypat))
+
+     NCF_CHECK(nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'basis_size'), pawtab_basis_size))
+     NCF_CHECK(nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'lmn_size'), pawtab_lmn_size))
+     NCF_CHECK(nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'lmn2_size'), pawtab_lmn2_size))
+     NCF_CHECK(nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'shape_type'), pawtab_shape_type))
+
+     ABI_MALLOC(pawtab_rpaw, (ddb_hdr%ntypat))
+     ncerr = nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'r_PAW'), pawtab_rpaw)
+     NCF_CHECK(ncerr)
+     ABI_MALLOC(pawtab_rshp, (ddb_hdr%ntypat))
+     ncerr = nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'r_shape'), pawtab_rshp)
+     NCF_CHECK(ncerr)
+
+     do itypat=1,ddb_hdr%ntypat
+
+       ddb_hdr%pawtab(itypat)%basis_size = pawtab_basis_size(itypat)
+       ddb_hdr%pawtab(itypat)%lmn_size = pawtab_lmn_size(itypat)
+       ddb_hdr%pawtab(itypat)%lmn2_size = pawtab_lmn2_size(itypat)
+       ddb_hdr%pawtab(itypat)%shape_type = pawtab_shape_type(itypat)
+
+       ddb_hdr%pawtab(itypat)%rpaw = pawtab_rpaw(itypat)
+       ddb_hdr%pawtab(itypat)%rshp = pawtab_rshp(itypat)
+       
+       ABI_MALLOC(ddb_hdr%pawtab(itypat)%dij0, (ddb_hdr%pawtab(itypat)%lmn2_size))
+       ncerr = nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'Dij0'), &
+                            ddb_hdr%pawtab(itypat)%dij0, &
+                            start=[itypat,1], &
+                            count=[1,ddb_hdr%pawtab(itypat)%lmn2_size])
+       NCF_CHECK(ncerr)
+
+     end do
+
+     ABI_FREE(pawtab_rpaw)
+     ABI_FREE(pawtab_rshp)
+     ABI_FREE(pawtab_basis_size)
+     ABI_FREE(pawtab_lmn_size)
+     ABI_FREE(pawtab_lmn2_size)
+     ABI_FREE(pawtab_shape_type)
+
+     ! -------------------------------------
+
+   end if
+
+   ! Read block types and compute maximum block type
+   ABI_SFREE(ddb_hdr%typ)
+   ABI_MALLOC(ddb_hdr%typ,(ddb_hdr%nblok))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'block_types'), ddb_hdr%typ))
+
+   ! TODO: mblktyp should be removed
+   ddb_hdr%mblktyp=0
+   do iblok=1,ddb_hdr%nblok
+     ddb_hdr%mblktyp = max(ddb_hdr%mblktyp, ddb_hdr%typ(iblok))
+   end do
+
+   ! Overwrite dimensions if requested
+   ! GA: TODO Try to remove these optional arguments
+   !     Should at least give a warning when inconsistencies are found
+   if (present(matom))  ddb_hdr%matom = matom
+   if (present(mtypat)) ddb_hdr%mtypat = mtypat
+   if (present(mband))  ddb_hdr%mband = mband
+   if (present(mkpt))   ddb_hdr%mkpt = mkpt
+   if (present(msym))   ddb_hdr%msym = msym
+   if (present(dimekb)) ddb_hdr%psps%dimekb = dimekb
+   if (present(lmnmax)) ddb_hdr%psps%lmnmax = lmnmax
+   if (present(usepaw)) ddb_hdr%usepaw = usepaw
+
+   ! Compute the block dimensions (mpert and msize)
+   call ddb_hdr%get_block_dims()
+
+ end if
+
+ ddb_hdr%dscrpt = ''
+
+ if (present(dimonly)) then
+   if (dimonly==1) then
+     call ddb_hdr%bcast_dim(comm_)
+     call ddb_hdr%close()
+     return
+   end if
+ end if
+
+ ! ===============
+ ! Allocate arrays
+ ! ===============
+ if (xmpi_comm_rank(comm_) == master) then
+
+   call ddb_hdr%malloc()
+
+   !! GA : Not sure we still need this.
+   !ddb_hdr%symafm(:)=1
+   !if(ddb_hdr%mtypat>=1)then
+   !  ddb_hdr%znucl(:)=zero
+   !end if
+   !if(ddb_hdr%matom>=1)then
+   !  ddb_hdr%spinat(:,:)=zero
+   !end if
+
+ end if
+
+ ! ==============
+ ! Read variables
+ ! ==============
+ if (xmpi_comm_rank(comm_) == master) then
+
+   ! -------
+   ! Scalars
+   ! -------
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'intxc'), ddb_hdr%intxc))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'iscf'), ddb_hdr%iscf))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ixc'), ddb_hdr%ixc))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'occopt'), ddb_hdr%occopt))
+
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'dilatmx'), ddb_hdr%dilatmx))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ecut'), ddb_hdr%ecut))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'pawecutdg'), ddb_hdr%pawecutdg))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ecutsm'), ddb_hdr%ecutsm))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'kptnrm'), ddb_hdr%kptnrm))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'dfpt_sciss'), ddb_hdr%dfpt_sciss))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'tolwfr'), ddb_hdr%tolwfr))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'tphysel'), ddb_hdr%tphysel))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'tsmear'), ddb_hdr%tsmear))
+
+   ! ------
+   ! Arrays
+   ! ------
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'acell'), ddb_hdr%acell))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ngfft'), ngfft))
+   ddb_hdr%ngfft = zero
+   do ii=1,3
+     ddb_hdr%ngfft(ii) = ngfft(ii) 
+   end do
+
+   ! Basis
+   ! Note that internal value of mband might differ from file when merging ddbs.
+   ABI_MALLOC(occ, (mband_file,nkpt_file,ddb_hdr%nsppol))
+   ABI_MALLOC(nband, (nkpt_file,ddb_hdr%nsppol))
+
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'spinat'), ddb_hdr%spinat))
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'occupations'), occ))
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'reduced_coordinates_of_kpoints'), ddb_hdr%kpt, count=[3,nkpt_file])
+   NCF_CHECK(ncerr)
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'kpoints_weights'), ddb_hdr%wtk, count=[nkpt_file])
+   NCF_CHECK(ncerr)
+   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'number_of_bands'), nband))
+
+
+   ! Flatten some arrays for internal storage
+   ddb_hdr%occ = zero
+   mband_ = min(mband_file, ddb_hdr%mband)
+   nkpt_ = min(nkpt_file, ddb_hdr%nkpt)
+   ii = 0
+   do isppol=1,ddb_hdr%nsppol
+     do ikpt=1,nkpt_
+       do iband=1,mband_
+         ii = ii + 1
+         ddb_hdr%occ(ii) = occ(iband,ikpt,isppol)
+       end do
+     end do
+   end do
+   ddb_hdr%nband = zero
+   ii = 0
+   do isppol=1,ddb_hdr%nsppol
+     do ikpt=1,nkpt_
+       ii = ii + 1
+       ddb_hdr%nband(ii) = nband(ikpt,isppol)
+     end do
+   end do
+   ABI_FREE(occ)
+   ABI_FREE(nband)
+
+   ! ----------------------
+   ! Initialize the crystal
+   ! ----------------------
+   ncid_crystal = nctk_idgroup(ncid, 'Crystal')
+   call ddb_hdr%crystal%ncread(ncid_crystal)
+
+   ! Copy symmetries
+   do isym=1,ddb_hdr%nsym
+     ddb_hdr%symafm(isym) = ddb_hdr%crystal%symafm(isym)
+     ddb_hdr%tnons(:,isym) = ddb_hdr%crystal%tnons(:,isym)
+     ddb_hdr%symrel(:,:,isym) = ddb_hdr%crystal%symrel(:,:,isym)
+   end do
+
+   ! Copy geometry
+   do ii=1,3
+     ddb_hdr%rprim(:,ii) = ddb_hdr%crystal%rprimd(:,ii) / ddb_hdr%acell(ii)
+   end do
+
+   ddb_hdr%xred = ddb_hdr%crystal%xred
+   ddb_hdr%typat = ddb_hdr%crystal%typat
+   ddb_hdr%znucl = ddb_hdr%crystal%znucl
+   ddb_hdr%zion = ddb_hdr%crystal%zion
+   ddb_hdr%amu = ddb_hdr%crystal%amu
+
+ end if
+
+ ! ======================
+ ! Master broadcasts data
+ ! ======================
+ call ddb_hdr%bcast(comm_)
+
+end subroutine ddb_hdr_open_read_nc
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_close
+!! NAME
+!! ddb_hdr_close
+!!
+!! FUNCTION
+!!  Close the open DDB file in either txt or nc format
+!!  using the unit or ncid stored in the ddb_hdr object.
+!!
+!! INPUTS
+!!  comm=MPI communicator.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_close(ddb_hdr, comm)
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer,intent(in),optional :: comm
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: ncerr, ierr
+
+! ************************************************************************
+
+  if (present(comm)) then
+    if (xmpi_comm_rank(comm) /= master) return
+  end if
+
+  if (ddb_hdr%has_open_file_txt) then
+    close(ddb_hdr%unddb, iostat=ierr)
+    ddb_hdr%has_open_file_txt = .false.
+  end if
+  if (ddb_hdr%has_open_file_nc) then
+#ifdef HAVE_NETCDF
+    ncerr = nf90_close(ddb_hdr%ncid)
+    ddb_hdr%has_open_file_nc = .false.
+#endif
+  end if
+
+end subroutine ddb_hdr_close
 !!***
 
 !----------------------------------------------------------------------
@@ -603,67 +2193,686 @@ end subroutine ddb_hdr_open_read
 !!  Also, complete psps information if one has more info than the other.
 !!
 !! INPUTS
+!!   ddb_hdr2: ddb header to compare with.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
 subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 
 !Arguments ------------------------------------
- class(ddb_hdr_type),intent(inout) :: ddb_hdr1, ddb_hdr2
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr1
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr2
 
 !Local variables -------------------------
+ integer :: bantot,ii,ij,isym
+ integer :: fullinit,fullinit2
+ !integer :: itypat
+ !real(dp) :: ekbcm8,ekbcmp
+ real(dp),parameter :: tol=1.0d-6  ! Limited by the precision of text DDB
+ character(len=500) :: msg
 
 ! ************************************************************************
 
+ fullinit = ddb_hdr1%with_psps * ddb_hdr1%with_dfpt_vars
+ fullinit2 = ddb_hdr2%with_psps * ddb_hdr2%with_dfpt_vars
+
+ ! natom
+ call chki8(ddb_hdr1%natom,ddb_hdr2%natom,' natom')
+
+ ! nkpt
+ if(fullinit/=0)then
+   if(ddb_hdr1%nkpt/=2*ddb_hdr2%nkpt .and. 2*ddb_hdr1%nkpt/=ddb_hdr2%nkpt)then
+     ! GA: I've disabled this check, but I might want to put it back...
+     !call chki8(nkpt,nkpt8,'  nkpt')
+   else
+     write(std_out,*)' compar8 : assume that one of the DDB to be',' merged use Time-Reversal to'
+     write(std_out,*)' decrease the number of k-points'
+   end if
+ end if
+
+ ! nband
+ ! There can be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
+ if(fullinit==0 .or. ddb_hdr2%nkpt==2*ddb_hdr1%nkpt)then
+   bantot=0
+   do ii=1,ddb_hdr2%nkpt
+     bantot=bantot+ddb_hdr1%nband(ii)
+   end do
+ else
+   bantot=0
+   do ii=1,ddb_hdr1%nkpt
+     !if(ddb_hdr1%nkpt==ddb_hdr2%nkpt)then
+     !  call chki8(ddb_hdr1%nband(ii),ddb_hdr2%nband(ii),' nband')
+     !end if
+     bantot=bantot+ddb_hdr1%nband(ii)
+   end do
+ end if
+
+ ! nsppol
+ call chki8(ddb_hdr1%nsppol,ddb_hdr2%nsppol,'nsppol')
+
+ ! nsym
+ !if(ddb_hdr1%nsym/=1 .and. ddb_hdr2%nsym/=1)then
+ !  call chki8(ddb_hdr1%nsym,ddb_hdr2%nsym,'  nsym')
+ !end if
+
+ ! ntypat
+ call chki8(ddb_hdr1%ntypat,ddb_hdr2%ntypat,'ntypat')
+
+ ! acell
+ do ii=1,3
+   call chkr8(ddb_hdr1%acell(ii),ddb_hdr2%acell(ii),' acell',tol)
+ end do
+
+ ! amu
+ do ii=1,ddb_hdr1%ntypat
+   call chkr8(ddb_hdr1%amu(ii),ddb_hdr2%amu(ii),'   amu',tol)
+ end do
+
+ ! ecut
+ call chkr8(ddb_hdr1%ecut,ddb_hdr2%ecut,'  ecut',tol)
+
+ ! pawecutdg (PAW only)
+ if (ddb_hdr1%usepaw==1) then
+   call chkr8(ddb_hdr1%pawecutdg,ddb_hdr2%pawecutdg,'  ecut',tol)
+ end if
+
+ ! iscf
+ if(fullinit/=0)then
+   call chki8(ddb_hdr1%iscf,ddb_hdr2%iscf,'  iscf')
+ end if
+
+ ! ixc
+ call chki8(ddb_hdr1%ixc,ddb_hdr2%ixc,'   ixc')
+
+ ! kpt and 14. kptnrm
+ if(ddb_hdr2%nkpt == ddb_hdr1%nkpt .and. fullinit/=0)then
+   do ij=1,ddb_hdr1%nkpt
+     do ii=1,3
+       call chkr8(ddb_hdr1%kpt(ii,ij)/ddb_hdr1%kptnrm,ddb_hdr2%kpt(ii,ij)/ddb_hdr2%kptnrm,'   kpt',tol)
+     end do
+   end do
+ end if
+
+ ! ngfft
+ ! Allow for different ngfft
+ ! E.g. DFPT calculation might use a different ngfft from GS WFK.
+ do ii=1,3
+   if (ddb_hdr1%ngfft(ii) == ddb_hdr2%ngfft(ii)) cycle
+   write(msg,'(3a,i10,3a,i10,a)') &
+    'Comparing integers for variable ngfft.',ch10,&
+    'Value from input DDB is',ddb_hdr1%ngfft(ii),' and',ch10,&
+    'from transfer DDB is',ddb_hdr2%ngfft(ii),'.'
+   ABI_WARNING(msg)
+ end do
+
+! occ
+ if(fullinit/=0 .and. ddb_hdr1%nkpt==ddb_hdr2%nkpt)then
+   do ii=1,bantot
+       call chkr8(ddb_hdr1%occ(ii),ddb_hdr2%occ(ii),'   occ',tol)
+   end do
+ end if
+
+! rprim
+ do ii=1,3
+   do ij=1,3
+     call chkr8(ddb_hdr1%rprim(ii,ij),ddb_hdr2%rprim(ii,ij),' rprim',tol)
+   end do
+ end do
+
+! dfpt_sciss
+ if(fullinit/=0)then
+   call chkr8(ddb_hdr1%dfpt_sciss,ddb_hdr2%dfpt_sciss,' dfpt_sciss',tol)
+ end if
+
+! symrel and tnons
+ if(ddb_hdr1%nsym==ddb_hdr2%nsym)then
+   do isym=1,ddb_hdr1%nsym
+     do ii=1,3
+       call chkr8(ddb_hdr1%tnons(ii,isym),ddb_hdr2%tnons(ii,isym),' tnons',tol)
+       do ij=1,3
+         call chki8(ddb_hdr1%symrel(ii,ij,isym),ddb_hdr2%symrel(ii,ij,isym),'symrel')
+       end do
+     end do
+   end do
+ end if
+
+! typat
+ do ii=1,ddb_hdr1%ntypat
+   call chki8(ddb_hdr1%typat(ii),ddb_hdr2%typat(ii),' typat')
+ end do
+
+! wtk
+ if(ddb_hdr1%nkpt==ddb_hdr2%nkpt .and. fullinit/=0)then
+   do ii=1,ddb_hdr1%nkpt
+     call chkr8(ddb_hdr1%wtk(ii),ddb_hdr2%wtk(ii),'   wtk',tol)
+   end do
+ end if
+
+! xred
+ do ij=1,ddb_hdr1%natom
+   do ii=1,3
+     call chkr8(ddb_hdr1%xred(ii,ij),ddb_hdr2%xred(ii,ij),'  xred',tol)
+   end do
+ end do
+! zion
+ do ii=1,ddb_hdr1%ntypat
+   call chkr8(ddb_hdr1%zion(ii),ddb_hdr2%zion(ii),'  zion',tol)
+ end do
+
+! Now compare the NC pseudopotential information
+ ! GA: I disabled this comparison because the ekb
+ !     are not properly written to the DDB in text format.
+ !     See comment in psddb8
+ !if (ddb_hdr1%usepaw==0) then
+ !  if(ddb_hdr1%psps%dimekb/=0 .and. fullinit/=0 .and. fullinit2/=0 )then
+ !    do ii=1,dimekb
+ !      do itypat=1,ntypat
+ !        ekbcmp=ekb(ii,itypat)
+ !        ekbcm8=ekb8(ii,itypat)
+ !        !call chkr8(ekbcmp,ekbcm8,'   ekb',tol)
+ !      end do
+ !    end do
+ !end if
+
+!Now compare several PAW dataset information
+! if (ddb_hdr1%usepaw==1) then
+!   if (fullinit/=0 .and. fullinit2/=0) then
+!     do itypat=1,ddb_hdr1%ntypat
+!       call chki8(ddb_hdr1%pawtab(itypat)%basis_size,ddb_hdr2%pawtab(itypat)%basis_size,'bas_sz')
+!       call chki8(ddb_hdr1%pawtab(itypat)%lmn_size,ddb_hdr2%pawtab(itypat)%lmn_size,'lmn_sz')
+!       call chki8(ddb_hdr1%pawtab(itypat)%lmn2_size,ddb_hdr2%pawtab(itypat)%lmn2_size,'lmn2sz')
+!       call chkr8(ddb_hdr1%pawtab(itypat)%rpaw,ddb_hdr2%pawtab(itypat)%rpaw,'  rpaw',tol3)
+!       call chkr8(ddb_hdr1%pawtab(itypat)%rshp,ddb_hdr2%pawtab(itypat)%rshp,'rshape',tol3)
+!       call chki8(ddb_hdr1%pawtab(itypat)%shape_type,ddb_hdr2%pawtab(itypat)%shape_type,'shp_tp')
+!       if (ddb_hdr1%pawtab(itypat)%lmn2_size>0) then
+!         do ii=1,ddb_hdr1%pawtab(itypat)%lmn2_size
+!           call chkr8(ddb_hdr1%pawtab(itypat)%dij0(ii),ddb_hdr2%pawtab(itypat)%dij0(ii),'  dij0',tol)
+!         end do
+!       end if
+!     end do
+!   end if
+! end if
+ 
+
+
  ! Should also compare indlmn and pspso ... but suppose that
  ! the checking of ekb is enough for the psps.
- ! Should also compare many other variables ... this is still to be done ...
- call compare_ddb_variables(&
-     ddb_hdr1%matom, ddb_hdr2%matom,&
-     ddb_hdr1%mtypat, ddb_hdr2%mtypat,&
-     ddb_hdr1%mkpt, ddb_hdr2%mkpt,&
-     ddb_hdr1%mband, ddb_hdr2%mband,&
-     ddb_hdr1%msym, ddb_hdr2%msym,&
-     ddb_hdr1%acell, ddb_hdr2%acell,&
-     ddb_hdr1%amu, ddb_hdr2%amu,&
-     ddb_hdr1%psps%dimekb,&
-     ddb_hdr1%ecut, ddb_hdr2%ecut,&
-     ddb_hdr1%psps%ekb, ddb_hdr2%psps%ekb,&
-     ddb_hdr1%fullinit, ddb_hdr2%fullinit,&
-     ddb_hdr1%iscf, ddb_hdr2%iscf,&
-     ddb_hdr1%ixc, ddb_hdr2%ixc,&
-     ddb_hdr1%kpt, ddb_hdr2%kpt,&
-     ddb_hdr1%kptnrm, ddb_hdr2%kptnrm,&
-     ddb_hdr1%natom, ddb_hdr2%natom,&
-     ddb_hdr1%nband, ddb_hdr2%nband,&
-     ddb_hdr1%ngfft, ddb_hdr2%ngfft,&
-     ddb_hdr1%nkpt, ddb_hdr2%nkpt,&
-     ddb_hdr1%nsppol, ddb_hdr2%nsppol,&
-     ddb_hdr1%nsym, ddb_hdr2%nsym,&
-     ddb_hdr1%ntypat, ddb_hdr2%ntypat,&
-     ddb_hdr1%occ, ddb_hdr2%occ,&
-     ddb_hdr1%occopt, ddb_hdr2%occopt,&
-     ddb_hdr1%pawecutdg, ddb_hdr2%pawecutdg,&
-     ddb_hdr1%pawtab, ddb_hdr2%pawtab,&
-     ddb_hdr1%rprim, ddb_hdr2%rprim,&
-     ddb_hdr1%dfpt_sciss, ddb_hdr2%dfpt_sciss,&
-     ddb_hdr1%symrel, ddb_hdr2%symrel,&
-     ddb_hdr1%tnons, ddb_hdr2%tnons,&
-     ddb_hdr1%tolwfr, ddb_hdr2%tolwfr,&
-     ddb_hdr1%typat, ddb_hdr2%typat,&
-     ddb_hdr1%usepaw,&
-     ddb_hdr1%wtk, ddb_hdr2%wtk,&
-     ddb_hdr1%xred, ddb_hdr2%xred,&
-     ddb_hdr1%zion, ddb_hdr2%zion)
+ ! Should also compare many other variables ...
+
 
 end subroutine ddb_hdr_compare
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_copy_missing_variables
+!! NAME
+!! ddb_hdr_copy_missing_variables
+!!
+!! FUNCTION
+!!  Copy missing variables from ddb_hdr2 to ddb_hdr1
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_hdr_copy_missing_variables(ddb_hdr1, ddb_hdr2)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr1
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr2
+
+!Local variables -------------------------
+ integer :: fullinit, fullinit2
+ integer :: bantot,ii,ij,itypat
+
+! ************************************************************************
+
+ fullinit = ddb_hdr1%with_psps * ddb_hdr1%with_dfpt_vars
+ fullinit2 = ddb_hdr2%with_psps * ddb_hdr2%with_dfpt_vars
+
+ ! nkpt
+ if(fullinit==0)then
+   ddb_hdr1%nkpt = ddb_hdr2%nkpt
+ end if
+
+ ! occopt
+ ! Take here the most favorable case.
+ if(ddb_hdr2%occopt==0) ddb_hdr1%occopt=0
+
+ ! nband
+ ! There can be the case of perturbation at Gamma, that
+ ! only need half of the number of k points.
+ if(fullinit==0 .or. ddb_hdr2%nkpt==2*ddb_hdr1%nkpt)then
+   bantot=0
+   do ii=1,ddb_hdr2%nkpt
+     ddb_hdr1%nband(ii) = ddb_hdr2%nband(ii)
+     bantot=bantot+ddb_hdr1%nband(ii)
+   end do
+ else
+   bantot=0
+   do ii=1,ddb_hdr1%nkpt
+     bantot=bantot+ddb_hdr1%nband(ii)
+   end do
+ end if
+
+ ! iscf
+ if(fullinit==0)then
+   ddb_hdr1%iscf = ddb_hdr2%iscf
+ end if
+
+ ! kpt and kptnrm
+ if(ddb_hdr2%nkpt == 2*ddb_hdr1%nkpt .or. fullinit==0) then
+
+   ! Copy the largest number of k points in the right place
+   do ij=1,ddb_hdr2%nkpt
+     do ii=1,3
+       ddb_hdr1%kpt(ii,ij)=ddb_hdr2%kpt(ii,ij)
+     end do
+   end do
+
+   ddb_hdr1%kptnrm=ddb_hdr2%kptnrm
+
+ end if
+
+! occ
+ if (fullinit==0 .or. ddb_hdr2%nkpt==2*ddb_hdr1%nkpt) then
+   do ii=1,bantot
+     ddb_hdr1%occ(ii)=ddb_hdr2%occ(ii)
+   end do
+ end if
+
+! dfpt_sciss
+ if(fullinit==0)then
+   ddb_hdr1%dfpt_sciss = ddb_hdr2%dfpt_sciss
+ end if
+
+! symrel
+ if(ddb_hdr1%nsym/=ddb_hdr2%nsym .and. ddb_hdr2%nsym/=1)then
+   ! GA: It is suspicious to assume the array are allocated with the same size
+   !     but this is only used in merge_ddb
+   ddb_hdr1%nsym = ddb_hdr2%nsym
+   ddb_hdr1%symrel(:,:,1:ddb_hdr2%nsym)=ddb_hdr2%symrel(:,:,1:ddb_hdr2%nsym)
+   ddb_hdr1%tnons(:,1:ddb_hdr2%nsym)=ddb_hdr2%tnons(:,1:ddb_hdr2%nsym)
+ end if
+
+! tolwfr
+!Take the less converged value...
+ !ddb_hdr1%tolwfr=max(ddb_hdr1%tolwfr,ddb_hdr2%tolwfr)
+
+! wtk
+ if(ddb_hdr2%nkpt==2*ddb_hdr1%nkpt .or. fullinit==0)then
+   do ii=1,ddb_hdr2%nkpt
+     ddb_hdr1%wtk(ii)=ddb_hdr2%wtk(ii)
+   end do
+ end if
+
+! Copy nkpt in the case of the use of the time-reversal symmetry
+ if(2*ddb_hdr1%nkpt==ddb_hdr2%nkpt)then
+   ddb_hdr1%nkpt=ddb_hdr2%nkpt
+ end if
+
+! PAW dataset information
+ if (ddb_hdr1%usepaw==1) then
+   if (fullinit==0 .and. fullinit2/=0) then
+     do itypat=1,ddb_hdr1%ntypat
+       ddb_hdr1%pawtab(itypat)%basis_size = ddb_hdr2%pawtab(itypat)%basis_size
+       ddb_hdr1%pawtab(itypat)%lmn_size   = ddb_hdr2%pawtab(itypat)%lmn_size
+       ddb_hdr1%pawtab(itypat)%rpaw       = ddb_hdr2%pawtab(itypat)%rpaw
+       ddb_hdr1%pawtab(itypat)%rshp       = ddb_hdr2%pawtab(itypat)%rshp
+       ddb_hdr1%pawtab(itypat)%shape_type = ddb_hdr2%pawtab(itypat)%shape_type
+       if (ddb_hdr2%pawtab(itypat)%lmn2_size>0) then
+         if (ddb_hdr1%pawtab(itypat)%lmn2_size==0)  then
+           ABI_MALLOC(ddb_hdr1%pawtab(itypat)%dij0,(ddb_hdr2%pawtab(itypat)%lmn2_size))
+         end if
+         do ii=1,ddb_hdr2%pawtab(itypat)%lmn2_size
+           ddb_hdr1%pawtab(itypat)%dij0(ii) = ddb_hdr2%pawtab(itypat)%dij0(ii)
+         end do
+       end if
+       ddb_hdr1%pawtab(itypat)%lmn2_size  = ddb_hdr2%pawtab(itypat)%lmn2_size
+     end do
+   end if
+ end if
+end subroutine ddb_hdr_copy_missing_variables
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_copy_psps_info
+!! NAME
+!! ddb_hdr_compare
+!!
+!! FUNCTION
+!!   Copy the information on pseudopotentials from one header to another.
+!!
+!! INPUTS
+!!   ddb_hdr1: the ddb header into which info is copied
+!!   ddb_hdr2: the ddb header from which info is copied
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_hdr_copy_psps_from(ddb_hdr1, ddb_hdr2)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr1
+ type(ddb_hdr_type),intent(inout) :: ddb_hdr2
+
+!Local variables -------------------------
+ integer :: itypat
+
+! ************************************************************************
+
+ if (ddb_hdr2%with_psps > 0) then
+   ddb_hdr1%with_psps = ddb_hdr2%with_psps
+
+   call psps_free(ddb_hdr1%psps)
+   call psps_copy(ddb_hdr2%psps, ddb_hdr1%psps)
+
+ end if
+
+ ! TODO: Need a function pawtab_copy
+ if (ddb_hdr1%psps%usepaw > 0) then
+   do itypat=1,ddb_hdr1%mtypat
+     ddb_hdr1%pawtab(itypat)%basis_size = ddb_hdr2%pawtab(itypat)%basis_size
+     ddb_hdr1%pawtab(itypat)%lmn_size = ddb_hdr2%pawtab(itypat)%lmn_size
+     ddb_hdr1%pawtab(itypat)%lmn2_size = ddb_hdr2%pawtab(itypat)%lmn2_size
+     ddb_hdr1%pawtab(itypat)%shape_type = ddb_hdr2%pawtab(itypat)%shape_type
+     ddb_hdr1%pawtab(itypat)%rpaw = ddb_hdr2%pawtab(itypat)%rpaw
+     ddb_hdr1%pawtab(itypat)%rshp = ddb_hdr2%pawtab(itypat)%rshp
+     if (allocated(ddb_hdr2%pawtab(itypat)%dij0)) then
+       ABI_SFREE(ddb_hdr1%pawtab(itypat)%dij0)
+       ABI_MALLOC(ddb_hdr1%pawtab(itypat)%dij0, (ddb_hdr1%pawtab(itypat)%lmn2_size))
+       ddb_hdr1%pawtab(itypat)%dij0(:) = ddb_hdr2%pawtab(itypat)%dij0(:)
+     end if
+   end do
+ end if
+
+
+end subroutine ddb_hdr_copy_psps_from
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_bcast_dim
+!! NAME
+!! ddb_hdr_bcast_dim
+!!
+!! FUNCTION
+!!  Master broadcasts the header dimensions.
+!!
+!! INPUTS
+!!  comm=MPI communicator.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_bcast_dim(ddb_hdr, comm)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer, intent(in) :: comm
+
+!Local variables -------------------------
+ integer, parameter :: master=0
+ integer :: ierr
+
+! ************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+ ! Integers
+ call xmpi_bcast(ddb_hdr%ddb_version, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%matom, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mband, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mkpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%msym, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mtypat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%natom, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nkpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nsym, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%ntypat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nsppol, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nspinor, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%nspden, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nblok, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%mblktyp, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%mpert, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%msize, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%with_psps, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%with_dfpt_vars, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%usepaw, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%dimekb, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%ntypat, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%lmnmax, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%usepaw, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%useylm, master, comm, ierr)
+
+ DBG_EXIT("COLL")
+ 
+end subroutine ddb_hdr_bcast_dim
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_bcast
+!! NAME
+!! ddb_hdr_bcast
+!!
+!! FUNCTION
+!!  Master broadcasts the data and others allocate their arrays
+!!
+!! INPUTS
+!!  comm=MPI communicator.
+!!
+!! SOURCE
+
+subroutine ddb_hdr_bcast(ddb_hdr, comm)
+
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer, intent(in) :: comm
+
+!Local variables -------------------------
+ integer, parameter :: master=0
+ integer :: ierr
+ integer :: ii,nn
+
+! ************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+
+ DBG_ENTER("COLL")
+
+ call ddb_hdr%bcast_dim(comm)
+
+ ! Allocate arrays on the other nodes.
+ if (xmpi_comm_rank(comm) /= master) then
+
+    call ddb_hdr%free()
+    call ddb_hdr%malloc()
+
+    ABI_MALLOC(ddb_hdr%psps%indlmn,(6,ddb_hdr%psps%lmnmax,ddb_hdr%mtypat))
+    ABI_MALLOC(ddb_hdr%psps%pspso,(ddb_hdr%mtypat))
+    ABI_MALLOC(ddb_hdr%psps%ekb,(ddb_hdr%psps%dimekb,ddb_hdr%mtypat * (1 - ddb_hdr%psps%usepaw)))
+
+    ABI_MALLOC(ddb_hdr%pawtab,(ddb_hdr%psps%ntypat*ddb_hdr%psps%usepaw))
+    call pawtab_nullify(ddb_hdr%pawtab)
+
+    ddb_hdr%dscrpt = ''
+
+ end if
+
+ ! Floats
+ call xmpi_bcast(ddb_hdr%dilatmx, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%ecut, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%kptnrm, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%pawecutdg, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%dfpt_sciss, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tolwfr, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tphysel, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tsmear, master, comm, ierr)
+
+ ! Arrays
+ call xmpi_bcast(ddb_hdr%ngfft, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%acell, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%rprim, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%nband, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%symafm, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%symrel, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%typat, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%amu, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%kpt, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%occ, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%spinat, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%tnons, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%wtk, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%xred, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%zion, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%znucl, master, comm, ierr)
+
+ call xmpi_bcast(ddb_hdr%psps%indlmn, master, comm, ierr)
+ call xmpi_bcast(ddb_hdr%psps%pspso, master, comm, ierr)
+
+ if (ddb_hdr%psps%dimekb > 0 .and. ddb_hdr%psps%usepaw==0) then
+   call xmpi_bcast(ddb_hdr%psps%ekb, master, comm, ierr)
+ end if
+
+ nn = ddb_hdr%psps%ntypat * ddb_hdr%psps%usepaw
+ if (nn.gt.0) then
+   do ii=1,nn
+    call pawtab_bcast(ddb_hdr%pawtab(ii), comm)
+   end do
+ end if
+
+ ! Strings
+ !call xmpi_bcast(ddb_hdr%dscrpt, master, comm, ierr)
+
+ call ddb_hdr%crystal%bcast(comm)
+
+end subroutine ddb_hdr_bcast
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/ddb_hdr_get_iomode
+!! NAME
+!! ddb_hdr_get_iomode
+!!
+!! FUNCTION
+!!  Decide whether to use text or netcdf IO
+!!
+!! INPUTS
+!!  filename=name of the file to examine.
+!!  io=specify whether we want to read (io=1) or write (io=2)
+!!
+!! OUTPUT
+!!  iomode=The io mode.
+!!  filenameout=The filename, possibly appended by '.nc'
+!!
+!! SOURCE
+
+subroutine ddb_hdr_get_iomode(ddb_hdr, filenamein, io, iomode, filenameout)
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ character(len=fnlen),intent(in) :: filenamein
+ integer,intent(in) :: io
+ integer,intent(out) :: iomode
+ character(len=fnlen),intent(out) :: filenameout
+
+!Local variables ------------------------------
+ character(len=fnlen) :: filenamenc
+
+! ************************************************************************
+
+ ! Simple case: file name was given with netcdf extension
+#ifdef HAVE_NETCDF
+ if (endswith(filenamein, ".nc")) then
+   filenameout = filenamein
+   iomode = IO_MODE_ETSF
+   return
+ else
+   ! In most case, this function is called without filename extension.
+   filenamenc = nctk_ncify(filenamein)
+ end if
+#else
+ if (endswith(filenamein, ".nc")) then
+   ABI_ERROR("NETCDF support required to read or write DDB.nc file.")
+ else
+   filenameout = filenamein
+   iomode = IO_MODE_FORTRAN
+   return
+ end if
+#endif
+
+ ! Reading
+ if (io==1) then
+
+    ! First check for the existence of netcdf file
+    if (file_exists(filenamenc)) then
+      filenameout = filenamenc
+      iomode = IO_MODE_ETSF
+      return
+
+    ! Then check for the existence of text file
+    else if (file_exists(filenamein)) then
+      filenameout = filenamein
+      iomode = IO_MODE_FORTRAN
+      return
+
+    ! File is not available for reading.
+    else
+
+      ! This doesnt always have to be an error
+      !ABI_ERROR(sjoin("Cannot find DDB file:", filenamein))
+      ABI_WARNING(sjoin("Cannot find DDB file:", filenamein))
+
+      ! Rely on default value of iomode.
+      iomode = ddb_hdr%iomode
+      if (iomode==IO_MODE_ETSF) then
+        filenameout = filenamenc
+      else
+        filenameout = filenamein
+      end if
+      return
+    end if
+
+ ! Writing
+ else if (io==2) then
+
+   ! Rely on ddb_hdr%iomode, which should have been initialized from dtset
+   if (ddb_hdr%iomode==IO_MODE_ETSF) then
+     filenameout = filenamenc
+     iomode = IO_MODE_ETSF
+     return
+   else if ((ddb_hdr%iomode==IO_MODE_FORTRAN).or.(ddb_hdr%iomode==IO_MODE_FORTRAN_MASTER).or.(ddb_hdr%iomode==IO_MODE_MPI)) then
+     filenameout = filenamein
+     iomode = IO_MODE_FORTRAN
+     return
+   else
+     ABI_ERROR("Unexpected value for iomode.")
+   end if
+ else
+   ABI_ERROR("Unexpected value for io.")
+ end if
+
+end subroutine ddb_hdr_get_iomode
 !!***
 
 !----------------------------------------------------------------------
@@ -690,7 +2899,6 @@ end subroutine ddb_hdr_compare
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  vrsddb=Derivative Database version, for check of compatibility.
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -700,7 +2908,7 @@ end subroutine ddb_hdr_compare
 !!                                                 or i=lmn  (if useylm=1)
 !!  ekb(dimekb,ntypat)= (norm-conserving psps only) (Real) Kleinman-Bylander energies (hartree)
 !!                      Presently the only characteristics of the psp
-!!  fullinit=0 if the ekb are not available, at input as well as at output
+!!  with_psps=0 if the ekb are not available, at input as well as at output
 !!  pawtab(ntypat*usepaw)= (PAW only) PAW datasets characteristics
 !!                  Presently only pawtab%basis_size,pawtab%lmn_size,pawtab%shape_type
 !!                  pawtab%rpaw,pawtab%rshp,pawtab%dij0  are used
@@ -709,22 +2917,15 @@ end subroutine ddb_hdr_compare
 !! NOTES
 !! Only executed by one processor
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
-&          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm,vrsddb)
+subroutine psddb8 (choice,dimekb,ekb,with_psps,indlmn,lmnmax,&
+&          nblok,ntypat,nunit,pawtab,pspso,usepaw,useylm)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: choice,dimekb,lmnmax,ntypat,nunit,usepaw,useylm
- integer,intent(in) :: vrsddb
- integer,intent(inout) :: fullinit,nblok
+ integer,intent(inout) :: with_psps,nblok
 !arrays
  integer,intent(in) :: pspso(ntypat)
  integer,intent(inout) :: indlmn(6,lmnmax,ntypat)
@@ -747,14 +2948,6 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 
 ! *********************************************************************
 
-!Check psddb8 version number (vrsio8) against DDB version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-    'the psddb8 DDB version number=',vrsio8,ch10,&
-    'is not equal to the calling code DDB version number=',vrsddb,'.'
-   ABI_WARNING(message)
- end if
-
 !Check the value of choice
  if (choice<=0.or.choice>=3) then
    write(message, '(a,a,a,i10,a)' )&
@@ -770,7 +2963,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 
    read(nunit,*)
    read(nunit, '(a12)' )string
-   fullinit=1 ; if (lmnmax>0) indlmn(:,:,:)=0
+   with_psps=1 ; if (lmnmax>0) indlmn(:,:,:)=0
 
 !  --------------------------------------------
 !  -----  NEW FORMAT (NCPP+PAW) ---------------
@@ -968,7 +3161,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !    -----  OTHER CASES -------------------------
 !    --------------------------------------------
    else if(string==' No informat')then
-     fullinit=0
+     with_psps=0
    else
      ABI_BUG('Error when reading the psp information')
    end if
@@ -979,12 +3172,12 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
    read(nunit, '(24x,i4)' )nblok
 
 !  ==================================================================================
-!  Second option: read psp characteristic from file ================================
+!  Second option: write psp characteristic to file ==================================
 !  ==================================================================================
  else if(choice==2)then
 
    write(nunit, '(a)' )' '
-   if (fullinit==0)then
+   if (with_psps==0)then
 !    This possibility is used when the DDB is initialized,
 !    and the ekb s are not available from the GS input file...
      write(nunit, '(a)' )' No information on the potentials yet '
@@ -993,6 +3186,10 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
 !    ==============================
 !    === Norm-conserving psps =====
 !    ==============================
+     ! GA: Something is wrong here.
+     !     I noticed this with test tutorespfn[tnlo_2]
+     !     where the ekb are reported both in the main output
+     !     and in the ddb, but some components written to ddb are wrong.
      if (usepaw==0) then
        write(nunit, '(a)' )'  Description of the potentials (KB energies)'
        write(nunit, '(a,i6)' )'  vrsio8 (for pseudopotentials)=',vrsio8
@@ -1057,7 +3254,8 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
          write(nunit, '(a,50i2)' ) &
           '    Basis functions=',orbitals(1:pawtab(itypat)%basis_size)
          write(nunit, '(a,f6.3,a,i2,a,f6.3)' ) &
-          '    r_PAW= ',pawtab(itypat)%rpaw,' shape_type= ',pawtab(itypat)%shape_type,&
+          '    r_PAW= ',pawtab(itypat)%rpaw, &
+          ' shape_type= ',pawtab(itypat)%shape_type,&
           '  r_shape= ',pawtab(itypat)%rshp
          nekb=0
          ABI_MALLOC(dij0,(pawtab(itypat)%lmn2_size))
@@ -1085,7 +3283,7 @@ subroutine psddb8 (choice,dimekb,ekb,fullinit,indlmn,lmnmax,&
        end do
 
      end if ! NCPP or PAW
-   end if ! fullinit==0
+   end if ! with_psps==0
 
 !  Now, write the number of blocks
    write(nunit, '(a)' )' '
@@ -1115,13 +3313,11 @@ end subroutine psddb8
 !! msym=maximum number of symetries
 !! mtypat=maximum number of atom types
 !! unddb=unit number for input
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !!
 !! OUTPUT
 !! acell(3)=length scales of primitive translations (bohr)
 !! amu(mtypat)=mass of the atoms (atomic mass unit)
+!! ddb_version=version of the ddb file
 !! dilatmx=the maximal dilatation factor
 !! ecut=kinetic energy planewave cutoff (hartree)
 !! ecutsm=smearing energy for plane wave kinetic energy (Ha)
@@ -1158,26 +3354,20 @@ end subroutine psddb8
 !! zion(mtypat)=valence charge of each type of atom
 !! znucl(mtypat)=atomic number of atom type
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
-&  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
+subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
+&  acell,amu,ddb_version,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
 &  typat,usepaw,wtk,xred,zion,znucl)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb,usepaw
- integer,intent(out) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occopt
+ integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,usepaw
+ integer,intent(out) :: ddb_version,intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occopt
  real(dp),intent(out) :: dilatmx,ecut,ecutsm,pawecutdg,kptnrm,dfpt_sciss,tolwfr,tphysel,tsmear
- character(len=*),intent(in) :: filnam
+ character(len=*),intent(in) :: filename
 !arrays
  integer,intent(out) :: nband(mkpt),ngfft(18),symafm(msym),symrel(3,3,msym),typat(matom)
  real(dp),intent(out) :: acell(3),amu(mtypat),kpt(3,mkpt),occ(mband*mkpt)
@@ -1188,27 +3378,22 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,usepaw0
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
- character(len=6) :: name_old
+ character(len=6) :: name_old, ddbvrs6
+ character(len=8) :: ddbvrs8
+ character(len=3) :: prefix
 !arrays
  character(len=12) :: name(9)
 
 ! *********************************************************************
 
-!Check ioddb8 version number (vrsio8) against mkddb version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i10,a,a,i10,a)' )&
-    'The input/output DDB version number=',vrsio8,ch10,&
-    'is not equal to the DDB version number=',vrsddb,'.'
-   ABI_WARNING(message)
- end if
-
 !Open the input derivative database.
- write(message,'(a,a)')' About to open file ',TRIM(filnam)
- call wrtout(std_out,message,'COLL')
- if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
+ !write(message,'(a,a)')' About to open file ',TRIM(filename)
+ !call wrtout(std_out,message,'COLL')
+ if (open_file(filename,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
  end if
 
@@ -1218,12 +3403,34 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
-   write(message, '(a,i10,2a,3(a,i10),a)' )&
+ if(ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
+   write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-    'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
+    'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
    ABI_BUG(message)
  end if
+
+!Convert older version to 8 digit format
+ if (ddbvrs /= cvrsio9) then
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
+   else if (ddbvrs==vrsio8_old_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
+   end if
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
+   read(ddbvrs8,'(i8)') ddbvrs
+ end if
+ ddb_version=ddbvrs
 
 !Read the 4 n-integers, also testing the names of data, and checking that their value is acceptable.
 !This is important to insure that any array has a sufficient dimension.
@@ -1231,10 +3438,11 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  read (unddb,*)
  read (unddb,*)
  testn=.true.; testv=.true.
- ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+! ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+ ddbvrs_is_current_or_old=(ddbvrs>=cvrsio8_old)
 
 !1. usepaw
- if(ddbvrs==vrsio8)then
+ if(ddbvrs>=cvrsio8)then
    read (unddb, '(1x,a9,i10)' )name(1),usepaw0
  else
    usepaw0=0;name(1)='   usepaw'
@@ -1416,7 +3624,7 @@ subroutine ioddb8_in(filnam,matom,mband,mkpt,msym,mtypat,unddb,vrsddb,&
  end if
  call ddb_chkname(name(1),'     ecut')
 !12b. pawecutdg (PAW only)
- if(ddbvrs==vrsio8.and.usepaw==1) then
+ if(ddbvrs>=cvrsio8.and.usepaw==1) then
    read (unddb, '(1x,a9,d22.14)' )name(1),pawecutdg
  else
    pawecutdg=ecut;name(1)='pawecutdg'
@@ -1726,14 +3934,11 @@ end subroutine ioddb8_in
 !!
 !! FUNCTION
 !! Open Derivative DataBase, then reads the variables that
-!! must be known in order to dimension the arrays before complete reading
+!! must be known in order to dimension the arrays, and close the file.
 !!
 !! INPUTS
-!! character(len=*) filnam: name of input or output file
+!! character(len=*) filename: name of input or output file
 !! unddb=unit number for input or output
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !!
 !! OUTPUT
 !! dimekb=dimension of ekb (only used for norm-conserving psps)
@@ -1749,35 +3954,30 @@ end subroutine ioddb8_in
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb,comm)
+subroutine ddb_getdims(filename,comm,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: unddb,vrsddb,comm
- integer,intent(out) :: msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw
- character(len=*),intent(in) :: filnam
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: comm
+ integer,intent(out) :: msym,dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ierr
- !integer :: mpert,msize
+ integer :: ierr,unddb
 
 ! *********************************************************************
 
  ! Master node reads dims from file and then broadcast.
  if (xmpi_comm_rank(comm) == master) then
-   call inprep8(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,ntypat,unddb,usepaw,vrsddb)
+   unddb = get_unit()
+   call inprep8(filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,nsppol,ntypat,usepaw)
  end if
 
+ ! couldnt we use ddb_hdr_bcast_dim here?
  if (xmpi_comm_size(comm) > 1) then
    call xmpi_bcast(dimekb, master, comm, ierr)
    call xmpi_bcast(lmnmax, master, comm, ierr)
@@ -1788,6 +3988,7 @@ subroutine ddb_getdims(dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,
    call xmpi_bcast(nblok, master, comm, ierr)
    call xmpi_bcast(nkpt, master, comm, ierr)
    call xmpi_bcast(ntypat, master, comm, ierr)
+   call xmpi_bcast(nsppol, master, comm, ierr)
    call xmpi_bcast(usepaw, master, comm, ierr)
  end if
 
@@ -1810,10 +4011,8 @@ end subroutine ddb_getdims
 !! Note: only one processor read or write the DDB.
 !!
 !! INPUTS
-!! character(len=*) filnam: name of input or output file
+!! character(len=*) filename: name of input or output file
 !! unddb=unit number for input or output
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089), of current DDB version.
 !!
 !! OUTPUT
 !! dimekb=dimension of ekb (only used for norm-conserving psps)
@@ -1828,55 +4027,43 @@ end subroutine ddb_getdims
 !! ntypat=number of atom types
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 
-subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
-& ntypat,unddb,usepaw,vrsddb)
+subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
+& nsppol,ntypat,usepaw)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: unddb,vrsddb
+ integer,intent(in) :: unddb
  integer, intent(out) :: msym
- integer,intent(out) :: dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,usepaw
- character(len=*),intent(in) :: filnam
+ integer,intent(out) :: dimekb,lmnmax,mband,mblktyp,natom,nblok,nkpt,ntypat,nsppol,usepaw
+ character(len=*),intent(in) :: filename
 
 !Local variables -------------------------
 !scalars
 !Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
- integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,nelmts,nsppol
+ integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,ndig,nelmts
  integer :: occopt,pspso0,nsym
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=12) :: string
  character(len=32) :: blkname
  character(len=500) :: message
- character(len=6) :: name_old
+ character(len=6) :: name_old, ddbvrs6
  character(len=80) :: rdstring
+ character(len=8) :: ddbvrs8
+ character(len=3) :: prefix
 !arrays
  integer,allocatable :: nband(:)
  character(len=12) :: name(9)
 
 ! *********************************************************************
 
-!Check inprep8 version number (vrsio8) against mkddb version number (vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,i0,2a,i0)' )&
-&   'The input/output DDB version number= ',vrsio8,ch10,&
-&   'is not equal to the DDB version number= ',vrsddb
-   ABI_BUG(message)
- end if
-
 !Open the input derivative database.
- call wrtout(std_out, sjoin(" Opening DDB file:", filnam), 'COLL')
- if (open_file(filnam,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
+ if (open_file(filename,message,unit=unddb,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
  end if
 
@@ -1885,11 +4072,32 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  read (unddb,*)
  read (unddb, '(20x,i10)' )ddbvrs
 
- if (all(ddbvrs/= [vrsio8, vrsio8_old, vrsio8_old_old]) )then
-   write(message, '(a,i10,2a,3(a,i10))' )&
+ if (all(ddbvrs/= [cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
+   write(message, '(a,i10,2a,4(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
-&   'with the allowed code DDB version numbers,',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
+&   'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
    ABI_ERROR(message)
+ end if
+
+!Convert older version to 8 digit format
+ if (ddbvrs /= cvrsio9) then
+   ndig= int(log10(real(ddbvrs))) + 1
+   write(ddbvrs6,'(i0)') ddbvrs
+   if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 20 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 200 
+     end if
+   else if (ddbvrs==vrsio8_old_old) then
+     if (ndig==6) then
+       write(prefix,'(i2)') 19 
+     else if (ndig==5) then
+       write(prefix,'(i3)') 199 
+     end if
+   end if
+   ddbvrs8= trim(prefix) // trim(ddbvrs6)
+   read(ddbvrs8,'(i8)') ddbvrs
  end if
 
 !Read the 4 n-integers, also testing the names of data,
@@ -1900,10 +4108,11 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  read (unddb,*)
  testn=.true.
  testv=.true.
- ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+! ddbvrs_is_current_or_old=(ddbvrs==vrsio8.or.ddbvrs==vrsio8_old)
+ ddbvrs_is_current_or_old=(ddbvrs>=cvrsio8_old)
 
 !1. usepaw
- if(ddbvrs==vrsio8)then
+ if(ddbvrs>=cvrsio8)then
    read (unddb, '(1x,a9,i10)' )name(1),usepaw
  else
    usepaw=0;name(1)='   usepaw'
@@ -2048,7 +4257,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
 !12. ecut
  read (unddb,*)
 !12b. pawecutdg (PAW only)
- if(ddbvrs==vrsio8.and.usepaw==1) read (unddb,*)
+ if(ddbvrs>=cvrsio8.and.usepaw==1) read (unddb,*)
 !13. ecutsm
  if(ddbvrs_is_current_or_old) read (unddb,*)
 !14. intxc
@@ -2075,12 +4284,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read (unddb,*)
    end do
  else
-   write(message,*)' inprep8 : nband(1)=',nband(1)
-   call wrtout(std_out,message,'COLL')
+   !write(message,*)' inprep8 : nband(1)=',nband(1)
+   !call wrtout(std_out,message,'COLL')
    do iline=1,(nband(1)+2)/3
      read (unddb,'(a80)')rdstring
-     write(message,*)trim(rdstring)
-     call wrtout(std_out,message,'COLL')  ! GA: why are we printing this?
+     !write(message,*)trim(rdstring)
+     !call wrtout(std_out,message,'COLL')  ! GA: why are we printing this?
    end do
  end if
 !23. rprim
@@ -2156,14 +4365,14 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  if(string=='  Descriptio')then
 
    read (unddb,*)
-   if (ddbvrs==vrsio8_old.or.ddbvrs==vrsio8_old_old) then
+   if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
      read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      if(ios/=0)then
        backspace(unddb)
        read (unddb, '(10x,i3,14x,i3)')dimekb,lmnmax
        usepaw=0
      end if
-   else if (ddbvrs==vrsio8) then
+   else if (ddbvrs>=cvrsio8) then
      read (unddb, '(10x,i3)') usepaw
      if (usepaw==0) then
        read (unddb, '(10x,i3,14x,i3)' ) dimekb,lmnmax
@@ -2217,7 +4426,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
    lmnmax=0
    !usepaw=0   ! GA: usepaw is also declared earlier in the header
                !     and it is that earlier value that usepaw will
-               !     be compared in ioddb8_in, so there is no reason
+               !     be compared to in ioddb8_in, so there is no reason
                !     to override the value here.
 
  else
@@ -2233,6 +4442,7 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
  read(unddb, '(24x,i4)' )nblok
 
 !Now, the type of each blok, in turn
+! GA: Certain types of block are not expected to mix (3 and 5)
  mblktyp=1
  if(nblok>=1)then
    do iblok=1,nblok
@@ -2240,19 +4450,19 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      read(unddb,*)
      read(unddb, '(a32,12x,i8)' )blkname,nelmts
      if(blkname==' 2nd derivatives (non-stat.)  - ' .or.  blkname==' 2rd derivatives (non-stat.)  - ')then
-       blktyp=1
+       blktyp=BLKTYP_d2E_ns
      else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then
-       blktyp=2
+       blktyp=BLKTYP_d2E_st
      else if(blkname==' 3rd derivatives              - ')then
-       blktyp=3
+       blktyp=BLKTYP_d3E_xx
      else if(blkname==' Total energy                 - ')then
-       blktyp=0
+       blktyp=BLKTYP_d0E_xx
      else if(blkname==' 1st derivatives              - ')then
-       blktyp=4
+       blktyp=BLKTYP_d1E_xx
      else if(blkname==' 2nd eigenvalue derivatives   - ' .or. blkname==' 2rd eigenvalue derivatives   - ')then
-       blktyp=5
+       blktyp=BLKTYP_d2eig_re
      else if(blkname==' 3rd derivatives (long wave)  - ')then
-       blktyp=33
+       blktyp=BLKTYP_d3E_lw
      else
        write(message, '(a,a,a,a,a,a,a,a,a)' )&
 &       'The following string appears in the DDB in place of',' the block type description :',ch10,blkname,ch10,&
@@ -2262,22 +4472,22 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
        ABI_ERROR(message)
      end if
 
-     if(blktyp==1.or.blktyp==2)then
+     if (is_type_d2E(blktyp)) then
 !      Read the phonon wavevector
        read(unddb,*)
-     else if(blktyp==3.or.blktyp==33)then
+     else if (is_type_d3E(blktyp)) then
 !      Read the perturbation wavevectors
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
        mblktyp=blktyp
-     else if(blktyp==5)then
+     else if (is_type_d2eig(blktyp)) then
        read(unddb,*)
-       mblktyp=5
+       mblktyp=BLKTYP_d2eig_re
      end if
 
 !    Read every element
-     if(blktyp==5)then
+     if (is_type_d2eig(blktyp)) then
        do ikpt=1,nkpt
          read(unddb,*)
          do iband=1,nband(ikpt)
@@ -2325,12 +4535,6 @@ end subroutine inprep8
 !! TODO
 !! Describe the inputs
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine ddb_chkname(nmfond,nmxpct,nmxpct2)
@@ -2372,385 +4576,47 @@ end subroutine ddb_chkname
 
 !----------------------------------------------------------------------
 
-!!****f* m_ddb_hdr/compare_ddb_variables
-!!
+!!****f* m_ddb_hdr/ddb_hdr_print
 !! NAME
-!! compare_ddb_variables
+!! ddb_hdr_print
 !!
 !! FUNCTION
-!! Compare the temporary DDB and input DDB preliminary information,
-!! as well as psp information.
-!!
-!! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (XG,MT,GA)
-!! This file is distributed under the terms of the
-!! GNU General Public Licence, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! NOTES
-!! 1. All the variables have their usual meaning.
-!! 2. Note that fullinit==0  means that the input DDB has been
-!! initialized by a ground state input file. Some comparison are
-!! then not required.
-!! 3. All variables with 8 appended are from the new input DDB
+!!  Print out the content of the header.
 !!
 !! INPUTS
-!!  acell, acell8 = lattice parameters
-!!  amu, amu8 = atomic masses
-!!  dimekb = dimension of KB projector set (only used for NCPP)
-!!  ecut, ecut8 = cutoff energy
-!!  ekb, ekb8 = KB energies for pseudopotentials
-!!  fullinit, fullmrgddb_init = flags (see notes)
-!!  iscf, iscf8 = SCF algorithm
-!!  ixc, ixc8 = XC functional
-!!  kpt, kpt8 = kpoint array
-!!  kptnrm, kptnrm8 = normalization factor for kpt
-!!  natom, natom8 = number of atoms
-!!  nband, nband8 = number of bands at each kpt
-!!  ngfft, ngfft8 = FFT grid sizes
-!!  nkpt, nkpt8 = number of kpoints
-!!  nsppol, nsppol8 = number of spin polarization (1 or 2)
-!!  nsym, nsym8 = number of symmetry operations
-!!  ntypat, ntypat8 = number of types of atoms
-!!  occ, occ8 = occupation numbers
-!!  occopt, occop8 = occupation style (metal, insulator, smearing...)
-!!  pawecutdg,pawecutdg8= cutoff energy used for the fine "double grid" (PAW only)
-!!  pawtab,pawtab8= PAW tabulated data (PAW dataset)
-!!  rprim, rprim8 = primitive vectors of unit cell (cartesian coordinates)
-!!  dfpt_sciss, dfpt_sciss8 = scissor correction (Ha)
-!!  symrel, symrel8 = symmetry operations in reciprocal space
-!!  tnons, tnons8 = translations associated to symrel
-!!  tolwfr, tolwfr8 = tolerance on convergence of wavefunctions
-!!  typat, typat8 = array of atom types
-!!  usepaw = flag for utilization of PAW
-!!  wtk, wtk8 = weights of kpoints
-!!  xred, xred8 = reduced coordinates of atoms
-!!  zion, zion8 = ionic charges of nuclei
+!!  unddb=unit to print out the content.
 !!
-!! OUTPUT (corresponding values, checked and/or set)
-!!  acell, amu, dimekb, ecut, ekb, fullinit, iscf, ixc, kpt, kptnrm,
-!!  natom, nband, ngfft, nkpt, nsppol, nsym, ntypat, occ, occopt,
-!!  rprim, dfpt_sciss, symrel, tnons, tolwfr, typat, usepaw, wtk, xred, zion
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
+!! OUTPUT
 !!
 !! SOURCE
 
+subroutine ddb_hdr_print(ddb_hdr, unddb)
 
-subroutine compare_ddb_variables(&
-& matom, matom8, mtypat, mtypat8, mkpt, mkpt8,&
-& mband, mband8, msym, msym8,&
-& acell,acell8,amu,amu8,dimekb,ecut,ecut8,ekb,ekb8,&
-& fullinit,fullmrgddb_init,iscf,iscf8,ixc,ixc8,kpt,kpt8,&
-& kptnrm,kptnrm8,&
-& natom,natom8,nband,nband8,ngfft,ngfft8,nkpt,nkpt8,&
-& nsppol,nsppol8,nsym,nsym8,ntypat,ntypat8,occ,occ8,&
-& occopt,occop8,pawecutdg,pawecutdg8,pawtab,pawtab8,&
-& rprim,rprim8,dfpt_sciss,dfpt_sciss8,symrel,symrel8,&
-& tnons,tnons8,tolwfr,tolwfr8,typat,typat8,usepaw,wtk,wtk8,&
-& xred,xred8,zion,zion8)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: matom, matom8, mtypat, mtypat8, mkpt, mkpt8
- integer,intent(in) :: mband, mband8, msym, msym8
- integer,intent(in) :: dimekb,fullmrgddb_init,iscf8,ixc8,natom8,nkpt8,nsppol8
- integer,intent(in) :: nsym8,ntypat8,occop8,usepaw
- integer,intent(inout) :: fullinit,iscf,ixc,natom,nkpt,nsppol,nsym,ntypat
- integer,intent(inout) :: occopt
- real(dp),intent(in) :: ecut8,kptnrm8,pawecutdg8,dfpt_sciss8,tolwfr8
- real(dp),intent(inout) :: ecut,kptnrm,pawecutdg,dfpt_sciss,tolwfr
-!arrays
- integer,intent(in) :: nband8(mkpt8*nsppol8),ngfft8(18)
- integer,intent(inout) :: nband(mkpt*nsppol),ngfft(18)
- integer,intent(in) :: symrel8(3,3,msym8),typat8(matom8)
- integer,intent(inout) :: symrel(3,3,msym),typat(matom)
- real(dp),intent(in) :: acell8(3),amu8(mtypat8),ekb8(dimekb,mtypat8)
- real(dp),intent(inout) :: acell(3),amu(mtypat),ekb(dimekb,mtypat)
- real(dp),intent(in) :: kpt8(3,mkpt8),occ8(mband8*mkpt8*nsppol8)
- real(dp),intent(inout) :: kpt(3,mkpt),occ(mband*mkpt*nsppol)
- real(dp),intent(in) :: rprim8(3,3),tnons8(3,msym8)
- real(dp),intent(inout) :: rprim(3,3),tnons(3,msym)
- real(dp),intent(in) :: wtk8(mkpt8),xred8(3,matom8),zion8(mtypat8)
- real(dp),intent(inout) :: wtk(mkpt),xred(3,matom),zion(mtypat)
- type(pawtab_type),intent(in) :: pawtab8(ntypat8*usepaw)
- type(pawtab_type),intent(inout) :: pawtab(ntypat*usepaw)
+!Arguments ------------------------------------
+ class(ddb_hdr_type),intent(inout) :: ddb_hdr
+ integer,intent(in) :: unddb
 
 !Local variables -------------------------
-!scalars
- integer :: bantot,ii,ij,isym,itypat
- real(dp) :: ekbcm8,ekbcmp
- real(dp),parameter :: tol=2.0d-14
- character(len=500) :: msg
+ integer,parameter :: choice=2
 
-! *********************************************************************
+! ************************************************************************
 
- !Compare all the preliminary information
- !1. natom
- call chki8(natom,natom8,' natom')
+ call ddb_io_out(unddb,ddb_hdr%dscrpt,ddb_hdr%matom,ddb_hdr%mband,&
+&  ddb_hdr%mkpt,ddb_hdr%msym,ddb_hdr%mtypat,&
+&  ddb_hdr%acell,ddb_hdr%amu,ddb_hdr%dilatmx,ddb_hdr%ecut,ddb_hdr%ecutsm,&
+&  ddb_hdr%intxc,ddb_hdr%iscf,ddb_hdr%ixc,ddb_hdr%kpt,ddb_hdr%kptnrm,&
+&  ddb_hdr%natom,ddb_hdr%nband,ddb_hdr%ngfft,ddb_hdr%nkpt,ddb_hdr%nspden,&
+&  ddb_hdr%nspinor,ddb_hdr%nsppol,ddb_hdr%nsym,ddb_hdr%ntypat,ddb_hdr%occ,&
+&  ddb_hdr%occopt,ddb_hdr%pawecutdg,ddb_hdr%rprim,ddb_hdr%dfpt_sciss,&
+&  ddb_hdr%spinat,ddb_hdr%symafm,ddb_hdr%symrel,ddb_hdr%tnons,ddb_hdr%tolwfr,&
+&  ddb_hdr%tphysel,ddb_hdr%tsmear,ddb_hdr%typat,ddb_hdr%usepaw,ddb_hdr%wtk,&
+&  ddb_hdr%xred,ddb_hdr%zion,ddb_hdr%znucl)
 
- ! 2. nkpt
- ! Compares the input and transfer values only if the input has not
- ! been initialized by a ground state input file
- ! There can also be the case of perturbation at Gamma, that
- ! only need half of the number of k points.
- if(fullinit/=0)then
-   if(nkpt/=2*nkpt8 .and. 2*nkpt/=nkpt8)then
+ call psddb8(choice,ddb_hdr%psps%dimekb,ddb_hdr%psps%ekb,ddb_hdr%with_psps,&
+&  ddb_hdr%psps%indlmn,ddb_hdr%psps%lmnmax,ddb_hdr%nblok,ddb_hdr%ntypat,unddb,&
+&  ddb_hdr%pawtab,ddb_hdr%psps%pspso,ddb_hdr%psps%usepaw,ddb_hdr%psps%useylm)
 
-     ! GKA: We don't always need this variable to be consistent
-     !      For example, we might have reduced the number of k-points
-     !      with TRS only for certain q-points.
-     !call chki8(nkpt,nkpt8,'  nkpt')
-   else
-     write(std_out,*)' compar8 : assume that one of the DDB to be',' merged use Time-Reversal to'
-     write(std_out,*)' decrease the number of k-points'
-   end if
- else
-   !Otherwise, takes the meaningful value
-   nkpt=nkpt8
- end if
-
- ! 3a. occopt
- ! Because the program will stop if the bloks
- ! do not compare well, take here the most favorable case.
- if(occop8==0)occopt=0
-
- ! 3b. nband
- ! Compares the input and transfer values only if the input has not
- ! been initialized by a ground state input file
- ! There can also be the case of perturbation at Gamma, that
- ! only need half of the number of k points.
- if(fullinit==0 .or. nkpt8==2*nkpt)then
-   bantot=0
-   do ii=1,nkpt8
-     nband(ii)=nband8(ii)
-     bantot=bantot+nband(ii)
-   end do
- else
-   bantot=0
-   do ii=1,nkpt
-     if(nkpt==nkpt8)then
-       call chki8(nband(ii),nband8(ii),' nband')
-     end if
-     bantot=bantot+nband(ii)
-   end do
- end if
- !9. nsppol
- call chki8(nsppol,nsppol8,'nsppol')
- !4. nsym
- if(nsym/=1 .and. nsym8/=1)then
-   call chki8(nsym,nsym8,'  nsym')
- end if
- !5. ntypat
- call chki8(ntypat,ntypat8,'ntypat')
- !6. acell
- do ii=1,3
-   call chkr8(acell(ii),acell8(ii),' acell',tol)
- end do
- !7. amu
- do ii=1,ntypat
-   call chkr8(amu(ii),amu8(ii),'   amu',tol)
- end do
- !9. date
- !10. ecut
- call chkr8(ecut,ecut8,'  ecut',tol)
- !10b. pawecutdg (PAW only)
- if (usepaw==1) then
-   call chkr8(pawecutdg,pawecutdg8,'  ecut',tol)
- end if
- !11. iscf
- !Compares the input and transfer values only if the input has not
- !been initialized by a ground state input file
- if(fullinit/=0)then
-   call chki8(iscf,iscf8,'  iscf')
- else
-   ! Otherwise, takes the meaningful value
-   iscf=iscf8
- end if
- !12. ixc
- call chki8(ixc,ixc8,'   ixc')
- ! 13. kpt and 14. kptnrm
- ! Compares the input and transfer values only if the input
- ! has not been initialized by a ground state input file
- ! and if the number of k points is identical
- if(nkpt8 == 2*nkpt .or. fullinit==0)then
-   ! Copy the largest number of k points in the right place
-   do ij=1,nkpt8
-     do ii=1,3
-       kpt(ii,ij)=kpt8(ii,ij)
-     end do
-   end do
-   kptnrm=kptnrm8
- else if (nkpt==nkpt8)then
-   do ij=1,nkpt
-     do ii=1,3
-       ! Compares the input and transfer values only if the input
-       ! has not been initialized by a ground state input file
-       call chkr8(kpt(ii,ij)/kptnrm,kpt8(ii,ij)/kptnrm8,'   kpt',tol)
-     end do
-   end do
- end if
- !16. ngfft
- !MT dec 2013: deactivate the stop on ngfft to allow for
- ! (nfft-converged) DFPT calculations with GS WFK obtained with a different ngfft
- do ii=1,3
-   if (ngfft(ii) == ngfft8(ii)) cycle
-   write(msg,'(3a,i10,3a,i10,a)') &
-    'Comparing integers for variable ngfft.',ch10,&
-    'Value from input DDB is',ngfft(ii),' and',ch10,&
-    'from transfer DDB is',ngfft8(ii),'.'
-   ABI_WARNING(msg)
- end do
-!17. occ
-!Compares the input and transfer values only if the input has not
-!been inititialized by a ground state input file
- do ii=1,bantot
-   if (fullinit==0 .or. nkpt8==2*nkpt) then
-     occ(ii)=occ8(ii)
-   else if(nkpt==nkpt8)then
-     call chkr8(occ(ii),occ8(ii),'   occ',tol)
-   end if
- end do
-!18. rprim
- do ii=1,3
-   do ij=1,3
-     call chkr8(rprim(ii,ij),rprim8(ii,ij),' rprim',tol)
-   end do
- end do
-!19. dfpt_sciss
-!Compares the input and transfer values only if the input has not
-!been inititialized by a ground state input file
- if(fullinit/=0)then
-   call chkr8(dfpt_sciss,dfpt_sciss8,' dfpt_sciss',tol)
- else
-!  Otherwise, takes the meaningful value
-   dfpt_sciss=dfpt_sciss8
- end if
-!20. symrel
-!If nsym == nsym8, compares the symmetry operations,
-!otherwise, one of nsym or nsym8 is 1, and thus take the
-!symrel corresponding to the largest set.
-!nsym will be changed later
- if(nsym==nsym8)then
-   do isym=1,nsym
-     do ii=1,3
-       do ij=1,3
-         call chki8(symrel(ii,ij,isym),symrel8(ii,ij,isym),'symrel')
-       end do
-     end do
-   end do
- else if(nsym8/=1)then
-   symrel(:,:,1:nsym8)=symrel8(:,:,1:nsym8)
- end if
-!21. tnons (see symrel)
- if(nsym==nsym8)then
-   do isym=1,nsym
-     do ii=1,3
-       call chkr8(tnons(ii,isym),tnons8(ii,isym),' tnons',tol)
-     end do
-   end do
- else if(nsym8/=1)then
-   tnons(:,1:nsym8)=tnons8(:,1:nsym8)
-   nsym=nsym8
- end if
-!22. tolwfr
-!Take the less converged value...
- tolwfr=max(tolwfr,tolwfr8)
-!23. typat
- do ii=1,ntypat
-   call chki8(typat(ii),typat8(ii),' typat')
- end do
-!24. wtk
-!Compares the input and transfer values only if the input has not
-!been initialized by a ground state input file and the
-!number of k-points is identical.
- if(nkpt8==2*nkpt .or. fullinit==0)then
-   do ii=1,nkpt8
-     wtk(ii)=wtk8(ii)
-   end do
- else if(nkpt==nkpt8)then
-   do ii=1,nkpt
-     call chkr8(wtk(ii),wtk8(ii),'   wtk',tol)
-   end do
- end if
-!25.xred
- do ij=1,natom
-   do ii=1,3
-     call chkr8(xred(ii,ij),xred8(ii,ij),'  xred',tol)
-   end do
- end do
-!26. zion
- do ii=1,ntypat
-   call chkr8(zion(ii),zion8(ii),'  zion',tol)
- end do
-
-!Finally, put the correct value of nkpt in the case
-!of the use of the time-reversal symmetry
- if(2*nkpt==nkpt8)then
-   nkpt=nkpt8
- end if
-
-!Now compare the NC pseudopotential information
- if (usepaw==0) then
-   if(dimekb/=0 .and. fullinit/=0 .and. fullmrgddb_init/=0 )then
-     do ii=1,dimekb
-       do itypat=1,ntypat
-         ekbcmp=ekb(ii,itypat)
-         ekbcm8=ekb8(ii,itypat)
-         call chkr8(ekbcmp,ekbcm8,'   ekb',tol)
-       end do
-     end do
-   else if(dimekb/=0 .and. fullmrgddb_init/=0)then
-     do ii=1,dimekb
-       do itypat=1,ntypat
-         ekb(ii,itypat)=ekb8(ii,itypat)
-       end do
-     end do
-   end if
- end if
-
-!Now compare several PAW dataset information
- if (usepaw==1) then
-   if (fullinit/=0 .and. fullmrgddb_init/=0) then
-     do itypat=1,ntypat
-       call chki8(pawtab(itypat)%basis_size,pawtab8(itypat)%basis_size,'bas_sz')
-       call chki8(pawtab(itypat)%lmn_size,pawtab8(itypat)%lmn_size,'lmn_sz')
-       call chki8(pawtab(itypat)%lmn2_size,pawtab8(itypat)%lmn2_size,'lmn2sz')
-       call chkr8(pawtab(itypat)%rpaw,pawtab8(itypat)%rpaw,'  rpaw',tol3)
-       call chkr8(pawtab(itypat)%rshp,pawtab8(itypat)%rshp,'rshape',tol3)
-       call chki8(pawtab(itypat)%shape_type,pawtab8(itypat)%shape_type,'shp_tp')
-       if (pawtab(itypat)%lmn2_size>0) then
-         do ii=1,pawtab(itypat)%lmn2_size
-           call chkr8(pawtab(itypat)%dij0(ii),pawtab8(itypat)%dij0(ii),'  dij0',tol)
-         end do
-       end if
-     end do
-   else if (fullmrgddb_init/=0) then
-     do itypat=1,ntypat
-       pawtab(itypat)%basis_size =pawtab8(itypat)%basis_size
-       pawtab(itypat)%lmn_size   =pawtab8(itypat)%lmn_size
-       pawtab(itypat)%rpaw       =pawtab8(itypat)%rpaw
-       pawtab(itypat)%rshp       =pawtab8(itypat)%rshp
-       pawtab(itypat)%shape_type =pawtab8(itypat)%shape_type
-       if (pawtab8(itypat)%lmn2_size>0) then
-         if (pawtab(itypat)%lmn2_size==0)  then
-           ABI_MALLOC(pawtab(itypat)%dij0,(pawtab8(itypat)%lmn2_size))
-         end if
-         do ii=1,pawtab8(itypat)%lmn2_size
-           pawtab(itypat)%dij0(ii)=pawtab8(itypat)%dij0(ii)
-         end do
-       end if
-       pawtab(itypat)%lmn2_size  =pawtab8(itypat)%lmn2_size
-     end do
-   end if
- end if
-
-end subroutine compare_ddb_variables
+end subroutine ddb_hdr_print
 !!***
 
 !----------------------------------------------------------------------
@@ -2774,12 +4640,6 @@ end subroutine compare_ddb_variables
 !!
 !! OUTPUT
 !!  (only checking)
-!!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2829,12 +4689,6 @@ subroutine chkr8(reali,realt,name,tol)
 !! OUTPUT
 !!  (only checking)
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine chki8(inti,intt,name)
@@ -2875,13 +4729,14 @@ subroutine chki8(inti,intt,name)
 !! Note: only one processor writes the DDB.
 !!
 !! INPUTS
+!! unddb=unit number for output
 !! acell(3)=length scales of primitive translations (bohr)
 !! amu(mtypat)=mass of the atoms (atomic mass unit)
 !! dilatmx=the maximal dilatation factor
 !! character(len=fnlen) dscrpt:string that describe the output database
 !! ecut=kinetic energy planewave cutoff (hartree)
 !! ecutsm=smearing energy for plane wave kinetic energy (Ha)
-!! character(len=fnlen) filnam: name of output file
+!! character(len=fnlen) filename: name of output file
 !! intxc=control xc quadrature
 !! iscf=parameter controlling scf or non-scf choice
 !! ixc=exchange-correlation choice parameter
@@ -2915,11 +4770,7 @@ subroutine chki8(inti,intt,name)
 !! tphysel="physical" electronic temperature with FD occupations
 !! tsmear=smearing width (or temperature) in Hartree
 !! typat(matom)=type of each atom
-!! unddb=unit number for output
 !! usepaw=flag for PAW
-!! vrsddb=6 digit integer giving date, in form yymmdd for month=mm(1-12),
-!!  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
-!!  of current DDB version.
 !! wtk(mkpt)=weight assigned to each k point
 !! xred(3,matom)=reduced atomic coordinates
 !! zion(mtypat)=valence charge of each type of atom
@@ -2928,16 +4779,10 @@ subroutine chki8(inti,intt,name)
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_ddb_hdr
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
-&  mkpt,msym,mtypat,unddb,vrsddb,&
+subroutine ddb_io_out (unddb,dscrpt,matom,mband,&
+&  mkpt,msym,mtypat,&
 &  acell,amu,dilatmx,ecut,ecutsm,intxc,iscf,ixc,kpt,kptnrm,&
 &  natom,nband,ngfft,nkpt,nspden,nspinor,nsppol,nsym,ntypat,occ,occopt,&
 &  pawecutdg,rprim,dfpt_sciss,spinat,symafm,symrel,tnons,tolwfr,tphysel,tsmear,&
@@ -2945,12 +4790,12 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: matom,mband,mkpt,msym,mtypat,unddb,vrsddb
+ integer,intent(in) :: unddb,matom,mband,mkpt,msym,mtypat
  integer,intent(in) :: intxc,iscf,ixc,natom,nkpt,nspden,nspinor,nsppol,nsym
  integer,intent(in) :: ntypat,occopt,usepaw
  real(dp),intent(in) :: dilatmx,ecut,ecutsm,kptnrm,pawecutdg,dfpt_sciss,tolwfr,tphysel
  real(dp),intent(in) :: tsmear
- character(len=fnlen),intent(in) :: dscrpt,filnam
+ character(len=fnlen),intent(in) :: dscrpt
 !arrays
  integer,intent(in) :: nband(mkpt*nsppol),ngfft(18),symafm(msym),symrel(3,3,msym)
  integer,intent(in) :: typat(matom)
@@ -2962,8 +4807,7 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer :: bantot,ii,ij,ikpt,iline,im,ierr
- character(len=500) :: message
+ integer :: bantot,ii,ij,ikpt,iline,im
 !arrays
  character(len=9) :: name(9)
 
@@ -2972,29 +4816,10 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
  DBG_ENTER("COLL")
 
 
-!Check ioddb8 version number (vrsio8) against mkddb version number
-!(vrsddb)
- if (vrsio8/=vrsddb) then
-   write(message, '(a,a,a,i10,a,a,i10,a)' )&
-   ' ddb_io_out: WARNING -',ch10,&
-   '  The input/output DDB version number=',vrsio8,ch10,&
-   '  is not equal to the DDB version number=',vrsddb,'.'
-   call wrtout(std_out,message,'COLL')
- end if
-
-!Open the output derivative database.
-!(version 2.1. : changed because of a bug in a Perl script
-!should set up a name checking procedure, with change of name
-!like for the output file)
- ierr = open_file(filnam,message,unit=unddb,status='unknown',form='formatted')
- if (ierr /= 0) then
-   ABI_ERROR(message)
- end if
-
 !Write the heading
  write(unddb, '(/,a,/,a,i10,/,/,a,a,/)' ) &
  ' **** DERIVATIVE DATABASE ****    ',&
- '+DDB, Version number',vrsddb,' ',trim(dscrpt)
+ '+DDB, Version number',DDB_VERSION,' ',trim(dscrpt)
 
 !Write the descriptive data
 !1. usepaw
@@ -3170,6 +4995,132 @@ subroutine ddb_io_out (dscrpt,filnam,matom,mband,&
 
 end subroutine ddb_io_out
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/is_type_d0E
+!! NAME
+!! is_type_d0E
+!!
+!! FUNCTION
+!!  Is this block type of a d0E kind?
+!!
+!! SOURCE
+
+logical function is_type_d0E(blktyp) result(answer)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: blktyp
+
+   if (blktyp==BLKTYP_d0E_xx) then
+     answer = .True.
+   else
+     answer = .False.
+   end if
+
+end function is_type_d0E
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/is_type_d1E
+!! NAME
+!! is_type_d1E
+!!
+!! FUNCTION
+!!  Is this block type of a d1E kind?
+!!
+!! SOURCE
+
+logical function is_type_d1E(blktyp) result(answer)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: blktyp
+
+   if (blktyp==BLKTYP_d1E_xx) then
+     answer = .True.
+   else
+     answer = .False.
+   end if
+
+end function is_type_d1E
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/is_type_d2E
+!! NAME
+!! is_type_d2E
+!!
+!! FUNCTION
+!!  Is this block type of a d2E kind?
+!!
+!! SOURCE
+
+logical function is_type_d2E(blktyp) result(answer)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: blktyp
+
+   if ((blktyp==BLKTYP_d2E_ns).or.(blktyp==BLKTYP_d2E_st)) then
+     answer = .True.
+   else
+     answer = .False.
+   end if
+
+end function is_type_d2E
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/is_type_d3E
+!! NAME
+!! is_type_d3E
+!!
+!! FUNCTION
+!!  Is this block type of a d3E kind?
+!!
+!! SOURCE
+
+logical function is_type_d3E(blktyp) result(answer)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: blktyp
+
+   if ((blktyp==BLKTYP_d3E_xx).or.(blktyp==BLKTYP_d3E_lw)) then
+     answer = .True.
+   else
+     answer = .False.
+   end if
+
+end function is_type_d3E
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb_hdr/is_type_d2eig
+!! NAME
+!! is_type_d2eig
+!!
+!! FUNCTION
+!!  Is this block type of a d2eig kind?
+!!
+!! SOURCE
+
+logical function is_type_d2eig(blktyp) result(answer)
+
+!Arguments ------------------------------------
+ integer, intent(in) :: blktyp
+
+   if (blktyp==BLKTYP_d2eig_re.or.blktyp==BLKTYP_d2eig_im) then
+     answer = .True.
+   else
+     answer = .False.
+   end if
+
+end function is_type_d2eig
+!!***
+
 
 END MODULE m_ddb_hdr
 !!***

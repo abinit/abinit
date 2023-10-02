@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v8_t60/t60.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v8_t60/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
-
 
  DATASET    1 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       3.717 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                       3.771 Mbytes of memory.
 _ WF disk file :      0.273 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -75,7 +72,6 @@ P This job should need less than                       3.829 Mbytes of memory.
 _ WF disk file :      0.273 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -91,7 +87,6 @@ P This job should need less than                       2.741 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.070 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
@@ -109,7 +104,6 @@ P This job should need less than                       4.424 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.138 Mbytes ; DEN or POT disk file :      0.061 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
 ================================================================================
@@ -317,18 +311,18 @@ P          mk1mem6          2
          prtphdos4          1
          prtphdos5          1
          prtphdos6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+          rfatpol1          1       3
+          rfatpol2          1       3
           rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+          rfatpol4          1       3
+          rfatpol5          1       3
+          rfatpol6          1       3
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -436,8 +430,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.08035
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
 - Zr    ONCVPSP-3.2.3.1  r_core=   1.56507   1.56507   1.51006
 - 40.00000  12.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -451,8 +445,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    1.531478    0.503023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
 - S     ONCVPSP-3.2.3.1  r_core=   1.45376   1.45376   1.61851
 - 16.00000   6.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1288,6 +1282,34 @@ tolerances: {tolvrs: 1.00E-10, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -2.816314        0.000000
+       1               2        0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1       -0.000000        0.000000
+       2               2       -2.816314        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3        1.028436        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1    1.584111E+01    0.000000E+00    3.434085E-21
+         1         2   -1.888310E-17    1.584111E+01   -5.948009E-21
+         1         3    0.000000E+00    0.000000E+00    2.409480E+00
+         2         1   -7.920553E+00    0.000000E+00   -1.717042E-21
+         2         2   -1.766915E-15   -7.920553E+00    2.974004E-21
+         2         3    0.000000E+00    0.000000E+00   -1.204740E+00
+         3         1   -7.920553E+00    0.000000E+00   -1.717042E-21
+         3         2    1.785798E-15   -7.920553E+00    2.974004E-21
+         3         3    0.000000E+00    0.000000E+00   -1.204740E+00
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1456,73 +1478,73 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.0301564631         0.0000000000
+   1    1   1    1        -0.0348763453         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
-   1    1   1    2         0.0174381726        -0.0000000000
-   1    1   2    2        -0.0000000000        -0.0000000000
+   1    1   1    2         0.0174381726         0.0000000000
+   1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
    1    1   1    3         0.0174381726         0.0000000000
-   1    1   2    3        -0.0000000000        -0.0000000000
-   1    1   3    3        -0.0000000000        -0.0000000000
+   1    1   2    3        -0.0000000000         0.0000000000
+   1    1   3    3        -0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1        -0.0301564631         0.0000000000
+   2    1   2    1        -0.0348763453         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000000        -0.0000000000
-   2    1   2    2         0.0174381726        -0.0000000000
+   2    1   1    2        -0.0000000000         0.0000000000
+   2    1   2    2         0.0174381726         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
-   2    1   1    3        -0.0000000000        -0.0000000000
-   2    1   2    3         0.0174381726        -0.0000000000
-   2    1   3    3        -0.0000000000        -0.0000000000
+   2    1   1    3        -0.0000000000         0.0000000000
+   2    1   2    3         0.0174381726         0.0000000000
+   2    1   3    3        -0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.1872260073         0.0000000000
+   3    1   3    1         0.1995911555         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2        -0.0997955777         0.0000000000
-   3    1   1    3        -0.0000000000        -0.0000000000
-   3    1   2    3        -0.0000000000        -0.0000000000
+   3    1   1    3        -0.0000000000         0.0000000000
+   3    1   2    3        -0.0000000000         0.0000000000
    3    1   3    3        -0.0997955777         0.0000000000
   
    1    2   1    1         0.0174346695         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
-   1    2   3    1         0.0000000000        -0.0000000000
-   1    2   1    2         0.0355580140         0.0000000000
+   1    2   3    1         0.0000000000         0.0000000000
+   1    2   1    2         0.0355097892         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
    1    2   1    3        -0.0529444587         0.0000000000
-   1    2   2    3         0.0000000000        -0.0000000000
+   1    2   2    3         0.0000000000         0.0000000000
    1    2   3    3         0.0000000000         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1         0.0174346695         0.0000000000
-   2    2   3    1         0.0000000000        -0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.0355580140         0.0000000000
+   2    2   2    2         0.0355097892         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
-   2    2   1    3         0.0000000000        -0.0000000000
-   2    2   2    3        -0.0529444587        -0.0000000000
+   2    2   1    3         0.0000000000         0.0000000000
+   2    2   2    3        -0.0529444587         0.0000000000
    2    2   3    3        -0.0000000000         0.0000000000
   
-   3    2   1    1         0.0000000000        -0.0000000000
-   3    2   2    1         0.0000000000        -0.0000000000
-   3    2   3    1        -0.0997992766        -0.0000000000
+   3    2   1    1         0.0000000000         0.0000000000
+   3    2   2    1         0.0000000000         0.0000000000
+   3    2   3    1        -0.0997992766         0.0000000000
    3    2   1    2        -0.0000000000         0.0000000000
    3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.1195615155         0.0000000000
+   3    2   3    2         0.1150103880         0.0000000000
    3    2   1    3         0.0000000000         0.0000000000
    3    2   2    3        -0.0000000000         0.0000000000
    3    2   3    3        -0.0152111114         0.0000000000
   
-   1    3   1    1         0.0174346695        -0.0000000000
+   1    3   1    1         0.0174346695         0.0000000000
    1    3   2    1        -0.0000000000         0.0000000000
    1    3   3    1        -0.0000000000         0.0000000000
-   1    3   1    2        -0.0529444587        -0.0000000000
+   1    3   1    2        -0.0529444587         0.0000000000
    1    3   2    2         0.0000000000         0.0000000000
-   1    3   3    2         0.0000000000        -0.0000000000
-   1    3   1    3         0.0355580140         0.0000000000
+   1    3   3    2         0.0000000000         0.0000000000
+   1    3   1    3         0.0355097892         0.0000000000
    1    3   2    3         0.0000000000         0.0000000000
    1    3   3    3         0.0000000000         0.0000000000
   
@@ -1531,20 +1553,20 @@ tolerances: {tolvrs: 1.00E-10, }
    2    3   3    1        -0.0000000000         0.0000000000
    2    3   1    2         0.0000000000         0.0000000000
    2    3   2    2        -0.0529444587         0.0000000000
-   2    3   3    2        -0.0000000000        -0.0000000000
+   2    3   3    2        -0.0000000000         0.0000000000
    2    3   1    3         0.0000000000         0.0000000000
-   2    3   2    3         0.0355580140         0.0000000000
+   2    3   2    3         0.0355097892         0.0000000000
    2    3   3    3         0.0000000000         0.0000000000
   
    3    3   1    1        -0.0000000000         0.0000000000
    3    3   2    1        -0.0000000000         0.0000000000
-   3    3   3    1        -0.0997992766        -0.0000000000
-   3    3   1    2         0.0000000000        -0.0000000000
-   3    3   2    2        -0.0000000000        -0.0000000000
-   3    3   3    2        -0.0152111114        -0.0000000000
+   3    3   3    1        -0.0997992766         0.0000000000
+   3    3   1    2         0.0000000000         0.0000000000
+   3    3   2    2        -0.0000000000         0.0000000000
+   3    3   3    2        -0.0152111114         0.0000000000
    3    3   1    3         0.0000000000         0.0000000000
    3    3   2    3         0.0000000000         0.0000000000
-   3    3   3    3         0.1195615155         0.0000000000
+   3    3   3    3         0.1150103880         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1564,119 +1586,119 @@ tolerances: {tolvrs: 1.00E-10, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    5        14.9023350117         0.0000000000
+   1    1   1    5        15.8411063632         0.0000000000
    2    1   1    5        -0.0000000000         0.0000000000
    3    1   1    5         0.0000000000         0.0000000000
-   1    2   1    5        -8.8593244910         0.0000000000
+   1    2   1    5        -7.9205531396         0.0000000000
    2    2   1    5        -0.0000000000         0.0000000000
    3    2   1    5         0.0000000000         0.0000000000
-   1    3   1    5        -8.8593244910         0.0000000000
+   1    3   1    5        -7.9205531396         0.0000000000
    2    3   1    5         0.0000000000         0.0000000000
    3    3   1    5         0.0000000000         0.0000000000
   
    1    1   2    5         0.0000000000         0.0000000000
-   2    1   2    5        14.9023350117         0.0000000000
+   2    1   2    5        15.8411063632         0.0000000000
    3    1   2    5         0.0000000000         0.0000000000
    1    2   2    5         0.0000000000         0.0000000000
-   2    2   2    5        -8.8593244910         0.0000000000
+   2    2   2    5        -7.9205531396         0.0000000000
    3    2   2    5         0.0000000000         0.0000000000
    1    3   2    5         0.0000000000         0.0000000000
-   2    3   2    5        -8.8593244910         0.0000000000
+   2    3   2    5        -7.9205531396         0.0000000000
    3    3   2    5         0.0000000000         0.0000000000
   
    1    1   3    5         0.0000000000         0.0000000000
-   2    1   3    5         0.0000000000         0.0000000000
-   3    1   3    5         2.7522921680         0.0000000000
+   2    1   3    5        -0.0000000000         0.0000000000
+   3    1   3    5         2.4094802263         0.0000000000
    1    2   3    5        -0.0000000000         0.0000000000
    2    2   3    5         0.0000000000         0.0000000000
-   3    2   3    5        -0.8619281867         0.0000000000
+   3    2   3    5        -1.2047401285         0.0000000000
    1    3   3    5        -0.0000000000         0.0000000000
    2    3   3    5         0.0000000000         0.0000000000
-   3    3   3    5        -0.8619281867         0.0000000000
+   3    3   3    5        -1.2047401285         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    5   1    1        14.9029767726         0.0000000000
+   1    5   1    1        15.8415332626         0.0000000000
    2    5   1    1         0.0000000000         0.0000000000
-   3    5   1    1         0.0000000000         0.0000000000
+   3    5   1    1        -0.0000000000         0.0000000000
   
    1    5   2    1         0.0000000000         0.0000000000
-   2    5   2    1        14.9029767726         0.0000000000
+   2    5   2    1        15.8415332626         0.0000000000
    3    5   2    1         0.0000000000         0.0000000000
   
    1    5   3    1         0.0000000000         0.0000000000
    2    5   3    1         0.0000000000         0.0000000000
-   3    5   3    1         2.7521005371         0.0000000000
+   3    5   3    1         2.4093431199         0.0000000000
   
-   1    5   1    2        -8.8593230793         0.0000000000
+   1    5   1    2        -7.9207665893         0.0000000000
    2    5   1    2         0.0000000000         0.0000000000
    3    5   1    2         0.0000000000         0.0000000000
   
    1    5   2    2        -0.0000000000         0.0000000000
-   2    5   2    2        -8.8593230793         0.0000000000
+   2    5   2    2        -7.9207665893         0.0000000000
    3    5   2    2        -0.0000000000         0.0000000000
   
    1    5   3    2         0.0000000000         0.0000000000
    2    5   3    2         0.0000000000         0.0000000000
-   3    5   3    2        -0.8619141581         0.0000000000
+   3    5   3    2        -1.2046715753         0.0000000000
   
-   1    5   1    3        -8.8593230793         0.0000000000
+   1    5   1    3        -7.9207665893         0.0000000000
    2    5   1    3         0.0000000000         0.0000000000
    3    5   1    3         0.0000000000         0.0000000000
   
    1    5   2    3        -0.0000000000         0.0000000000
-   2    5   2    3        -8.8593230793         0.0000000000
+   2    5   2    3        -7.9207665893         0.0000000000
    3    5   2    3        -0.0000000000         0.0000000000
   
    1    5   3    3         0.0000000000         0.0000000000
    2    5   3    3         0.0000000000         0.0000000000
-   3    5   3    3        -0.8619141581         0.0000000000
+   3    5   3    3        -1.2046715753         0.0000000000
   
   
   
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -7.043836E-04 -7.043836E-04 -1.159134E-04  1.317742E-04  1.317742E-04
-   1.230482E-03  1.230482E-03  1.518443E-03  1.710128E-03
+  -7.127412E-04 -7.127412E-04 -1.538034E-08  3.536791E-08  3.548406E-08
+   1.230147E-03  1.230147E-03  1.492584E-03  1.705169E-03
  Phonon frequencies in cm-1    :
-- -1.545943E+02 -1.545943E+02 -2.544006E+01  2.892109E+01  2.892109E+01
--  2.700596E+02  2.700596E+02  3.332596E+02  3.753297E+02
+- -1.564286E+02 -1.564286E+02 -3.375595E-03  7.762360E-03  7.787851E-03
+-  2.699860E+02  2.699860E+02  3.275844E+02  3.742413E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -7.043836E-04 -1.159134E-04  1.245110E-04  1.317742E-04  1.230482E-03
-   1.230482E-03  1.518443E-03  1.710128E-03  2.158470E-03
+  -7.127412E-04 -1.538035E-08 -1.159859E-08  3.536791E-08  1.230147E-03
+   1.230147E-03  1.492584E-03  1.705169E-03  2.043761E-03
  Phonon frequencies in cm-1    :
-- -1.545943E+02 -2.544006E+01  2.732701E+01  2.892109E+01  2.700596E+02
--  2.700596E+02  3.332596E+02  3.753297E+02  4.737293E+02
+- -1.564286E+02 -3.375597E-03 -2.545596E-03  7.762360E-03  2.699860E+02
+-  2.699860E+02  3.275844E+02  3.742413E+02  4.485538E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-  -7.043836E-04 -1.159134E-04  1.245110E-04  1.317742E-04  1.230482E-03
-   1.230482E-03  1.518443E-03  1.710128E-03  2.158470E-03
+  -7.127412E-04 -1.538031E-08 -1.194806E-08  3.548406E-08  1.230147E-03
+   1.230147E-03  1.492584E-03  1.705169E-03  2.043761E-03
  Phonon frequencies in cm-1    :
-- -1.545943E+02 -2.544006E+01  2.732701E+01  2.892109E+01  2.700596E+02
--  2.700596E+02  3.332596E+02  3.753297E+02  4.737293E+02
+- -1.564286E+02 -3.375588E-03 -2.622295E-03  7.787851E-03  2.699860E+02
+-  2.699860E+02  3.275844E+02  3.742413E+02  4.485538E+02
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-  -7.043836E-04 -7.043836E-04  1.126629E-04  1.317742E-04  1.317742E-04
-   1.230482E-03  1.230482E-03  1.518443E-03  1.833924E-03
+  -7.127412E-04 -7.127412E-04 -1.406682E-08  3.536791E-08  3.548405E-08
+   1.230147E-03  1.230147E-03  1.492584E-03  1.860523E-03
  Phonon frequencies in cm-1    :
-- -1.545943E+02 -1.545943E+02  2.472666E+01  2.892109E+01  2.892109E+01
--  2.700596E+02  2.700596E+02  3.332596E+02  4.024997E+02
+- -1.564286E+02 -1.564286E+02 -3.087310E-03  7.762360E-03  7.787849E-03
+-  2.699860E+02  2.699860E+02  3.275844E+02  4.083376E+02
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1815,8 +1837,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.08035
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
 - Zr    ONCVPSP-3.2.3.1  r_core=   1.56507   1.56507   1.51006
 - 40.00000  12.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1830,8 +1852,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2    1.531478    0.503023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
 - S     ONCVPSP-3.2.3.1  r_core=   1.45376   1.45376   1.61851
 - 16.00000   6.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2245,13 +2267,21 @@ meta: {optdriver: 7, eph_task: 6, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  6.9749786  0.0000000  0.0000000  G(1)=  0.1433696  0.0827745  0.0000000
  R(2)= -3.4874893  6.0405087  0.0000000  G(2)=  0.0000000  0.1655490  0.0000000
  R(3)=  0.0000000  0.0000000 12.4929785  G(3)=  0.0000000  0.0000000  0.0800450
  Unit cell volume ucvol=  5.2635940E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Zr
+    2)    0.6666667  0.3333333  0.7796080   S
+    3)    0.3333333  0.6666667  0.2203920   S
+
+ DDB file with 1 blocks has been read.
 
 ================================================================================
 
@@ -2262,7 +2292,7 @@ meta: {optdriver: 7, eph_task: 6, }
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.490234E+01    0.000000E+00    0.000000E+00
@@ -2285,8 +2315,8 @@ meta: {optdriver: 7, eph_task: 6, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Zr.psp8
 - Zr    ONCVPSP-3.2.3.1  r_core=   1.56507   1.56507   1.51006
 - 40.00000  12.00000    170510                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2300,8 +2330,8 @@ meta: {optdriver: 7, eph_task: 6, }
              2    1.531478    0.503023
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/S.psp8
 - S     ONCVPSP-3.2.3.1  r_core=   1.45376   1.45376   1.61851
 - 16.00000   6.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2317,6 +2347,17 @@ meta: {optdriver: 7, eph_task: 6, }
 
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+ Dielectric average (EQ. 25 Melo2022)
+--------------------------------------------------------------------------------
+ Mode    <1/epsilon*SQRT(w_LO/2)>              Cumulative sum
+    4              0.000000000000              0.000000000000
+    5              0.000424637614              0.000424637614
+    6              0.000000000000              0.000424637614
+    7              0.000182344428              0.000606982043
+    8              0.000217934240              0.000824916282
+    9              0.002221733529              0.003046649811
+--------------------------------------------------------------------------------
 
  Rough correction to the ZPR, to take into account the missing q=0 piece using Frohlich model:
  (+ for occupied states, - for unoccupied states) * zpr_q0_fact / (Nqpt_full_bz)**(1/3) 
@@ -2532,18 +2573,18 @@ P          mk1mem6          2
          prtphdos4          1
          prtphdos5          1
          prtphdos6          0
-          rfatpol1          1       1
-          rfatpol2          1       1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+          rfatpol1          1       3
+          rfatpol2          1       3
           rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       1
-          rfatpol6          1       1
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          0       0       0
+          rfatpol4          1       3
+          rfatpol5          1       3
+          rfatpol6          1       3
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -2708,10 +2749,10 @@ P          mk1mem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.5
+- Proc.   0 individual time (sec): cpu=         14.9  wall=         15.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.5
+.Delivered  26 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.9  wall=         15.1

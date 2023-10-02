@@ -49,8 +49,6 @@
  smdelta4 1
  kptopt4 3 # Need full k-point set for finite q response
  rfphon4 1 # Do phonon response
- rfatpol4 1 2 # Treat displacements of all atoms
- rfdir4 1 1 1 # Do all directions (symmetry will be used)
  tolwfr4 1.0d-8
 
 # Cell dependant parameters

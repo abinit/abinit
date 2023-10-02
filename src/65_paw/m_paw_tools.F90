@@ -29,7 +29,7 @@ MODULE m_paw_tools
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON
- use m_pawang,           only : pawang_type, mat_slm2ylm, mat_mlms2jmj
+ use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_free, paw_ij_nullify, paw_ij_gather
  use m_pawdij,           only : pawdij_print_dij
@@ -74,16 +74,6 @@ CONTAINS  !=====================================================================
 !!  (only checking)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_nonlinear,m_respfn_driver,m_scfcv_core
-!!      m_screening_driver,m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
-!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 
@@ -339,15 +329,6 @@ end subroutine chkpawovlp
 !!
 !! OUTPUT
 !!  (only printing)
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_outscfcv,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      free_my_atmtab,get_my_atmtab,mat_mlms2jmj,mat_slm2ylm,paw_ij_free
-!!      paw_ij_gather,paw_ij_nullify,pawdij_print_dij,pawrhoij_free
-!!      pawrhoij_gather,pawrhoij_nullify,pawrhoij_print_rhoij,setnoccmmp,wrtout
-!!      xmpi_comm_group,xmpi_group_free,xmpi_group_translate_ranks
 !!
 !! SOURCE
 

@@ -18,8 +18,6 @@
 !!   Moreover the multiple calls to redef render the IO very inefficient
 !!   That part should be rationalized!
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -34,7 +32,7 @@ MODULE m_nctk
  use m_abicore
  use m_build_info
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_xmpi
 #ifdef HAVE_NETCDF
  use netcdf
@@ -188,6 +186,7 @@ MODULE m_nctk
  public :: nctk_use_classic_for_seq ! Use netcdf-classic for files that are used in sequential.
                                     ! instead of the default that is netcdf4/hdf5.
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
+ public :: nctk_idgroup             ! Return the nc identifier from the name of a group.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
  public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
  public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and
@@ -236,6 +235,9 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
+
+ ! FIXME These routines are specific to anaddb
+ !       and should be moved at the level of 77_ddb
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
  public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
@@ -274,8 +276,6 @@ CONTAINS
 !! FUNCTION
 !!  Use netcdf classic mode for new files when only sequential-IO needs to be performed
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 subroutine nctk_use_classic_for_seq()
@@ -291,14 +291,14 @@ subroutine nctk_use_classic_for_seq()
 end subroutine nctk_use_classic_for_seq
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_nctk/nctk_idname
 !! NAME
 !!  nctk_idname
 !!
 !! FUNCTION
 !!  Return the nc identifier from the name of the variable
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -319,8 +319,8 @@ integer function nctk_idname(ncid, varname) result(varid)
  ncerr = nf90_inq_varid(ncid, varname, varid)
 
  if (ncerr /= nf90_noerr) then
-   write(msg,'(5a)')&
-     "NetCDF library returned: ",trim(nf90_strerror(ncerr)),ch10,&
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
      "while trying to get the ncid of variable: ",trim(varname)
    ABI_ERROR(msg)
  end if
@@ -334,6 +334,46 @@ end function nctk_idname
 
 !----------------------------------------------------------------------
 
+!!****f* m_nctk/nctk_idgroup
+!! NAME
+!!  nctk_idgroup
+!!
+!! FUNCTION
+!!  Return the nc identifier from the name of a group
+!!
+!! SOURCE
+
+integer function nctk_idgroup(ncid, grpname) result(grpid)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ character(len=*),intent(in) :: grpname
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr
+ character(len=1000) :: msg
+
+! *********************************************************************
+
+#ifdef HAVE_NETCDF
+ ncerr = nf90_inq_ncid(ncid, grpname, grpid)
+
+ if (ncerr /= nf90_noerr) then
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
+     "while trying to get the ncid of group: ",trim(grpname)
+   ABI_ERROR(msg)
+ end if
+#else
+ ABI_ERROR("Netcdf support is not activated")
+ write(std_out,*)ncid,grpname
+#endif
+
+end function nctk_idgroup
+!!***
+
+!----------------------------------------------------------------------
 !!****f* m_nctk/nctk_ncify
 !! NAME
 !!  nctk_ncify
@@ -420,12 +460,6 @@ end function nctk_string_from_occopt
 !!  errmsg=String with error message. Use `if (len_trim(errmsg) /= 0) ABI_ERROR(errmsg)`
 !!    to handle possible errors in the caller.
 !!
-!! PARENTS
-!!      m_conducti,optic
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_fort_or_ncfile(filename, iomode, errmsg)
@@ -477,10 +511,6 @@ end subroutine nctk_fort_or_ncfile
 !! OUTPUT
 !!  errmsg=String with error message if return value /= 0
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
@@ -526,18 +556,19 @@ end function nctk_try_fort_or_ncfile
 !!  This is a COLLECTIVE routine that should be called by all processors
 !!  in MPI_COMM_WORLD at the beginning of the calculation
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      ab_define_var
+!! INPUTS
+!!  [print_warning]=TRUE if a warning about paral_kgb use has to be printed
+!!                  Optional, default=yes
 !!
 !! SOURCE
 
-subroutine nctk_test_mpiio()
+subroutine nctk_test_mpiio(print_warning)
+
+ logical,intent(in),optional :: print_warning
 
 !Local variables-------------------------------
 !scalars
+ logical :: my_print_warning
 #ifdef HAVE_NETCDF_MPI
  integer,parameter :: master=0
  integer :: ierr,ncid,ncerr
@@ -548,6 +579,7 @@ subroutine nctk_test_mpiio()
 ! *********************************************************************
 
  nctk_has_mpiio = .False.
+ my_print_warning=.true. ; if (present(print_warning)) my_print_warning=print_warning
 
 #ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
@@ -576,7 +608,7 @@ subroutine nctk_test_mpiio()
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
- if (.not. nctk_has_mpiio) then
+ if ((.not.nctk_has_mpiio).and.my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
@@ -688,8 +720,6 @@ end function bail_if_ncerr
 !!  ncid=Netcdf identifier.
 !!  comm=MPI communicator.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_open_read(ncid, path, comm) result(ncerr)
@@ -746,8 +776,6 @@ end function nctk_open_read
 !!
 !! OUTPUT
 !!  ncid=Netcdf identifier.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -836,8 +864,6 @@ end function nctk_open_create
 !! OUTPUT
 !!  ncid=Netcdf identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_open_modify(ncid, path, comm) result(ncerr)
@@ -850,7 +876,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
-   ABI_ERROR("netcdf without MPI-IO support with nprocs > 1!")
+   ABI_ERROR("netcdf without MPI-IO support and nprocs > 1!")
  end if
 
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
@@ -892,8 +918,6 @@ end function nctk_open_modify
 !!                       as defined in the ETSF specifications (default is .true.).
 !!                       When value is .false., arguments title, history and version
 !!                       are ignored.
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -961,8 +985,6 @@ end function nctk_add_etsf_header
 !! INPUTS
 !!  ncid=Netcdf identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_set_defmode(ncid) result(ncerr)
@@ -998,8 +1020,6 @@ end function nctk_set_defmode
 !!
 !! OUTPUT
 !!  ncerr=Exit status
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -1053,8 +1073,6 @@ end function nctk_set_datamode
 !!  ncid=Netcdf file identifier.
 !!  varid=Netcdf variable identifier.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 integer function nctk_set_collective(ncid, varid) result(ncerr)
@@ -1089,10 +1107,6 @@ end function nctk_set_collective
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1136,9 +1150,9 @@ integer function nctk_def_one_dim(ncid, nctkdim, defmode, prefix) result(ncerr)
  if (ncerr == nf90_noerr) then
    NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
    if (dimlen /= nctkdim%value) then
-     write(msg, "(2a,2(a,i0))")&
-        "dimension already exists with a different value",ch10,&
-        "file = ", dimlen, "; write = ", nctkdim%value
+     write(msg, "(4a,2(a,i0))")&
+        "dimension ", trim(dname)," already exists but with a different value",ch10,&
+        "from file: ", dimlen, "; about to write: ", nctkdim%value
      ABI_ERROR(msg)
    end if
  else
@@ -1165,10 +1179,6 @@ end function nctk_def_one_dim
 !!  values(:)=List of integer scalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1220,10 +1230,6 @@ end function nctk_def_dim_list
 !!  ncid=Netcdf identifier.
 !!  varname=Name of the variable
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_set_atomic_units(ncid, varname) result(ncerr)
@@ -1260,11 +1266,6 @@ end function nctk_set_atomic_units
 !!  ncid=Netcdf identifier.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!
-!! PARENTS
-!!      m_dfpt_io,m_dfptdb,m_header,m_phonons
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_basedims(ncid, defmode) result(ncerr)
@@ -1287,14 +1288,17 @@ integer function nctk_def_basedims(ncid, defmode) result(ncerr)
  ncerr = nctk_def_dims(ncid, [&
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2), nctkdim_t("character_string_length", etsfio_charlen),&
    nctkdim_t("number_of_cartesian_directions", 3), nctkdim_t("number_of_reduced_dimensions", 3),&
-   nctkdim_t("number_of_vectors", 3)])
+   nctkdim_t("number_of_vectors", 3) &
+ ])
  NCF_CHECK(ncerr)
 
  ! Useful integers.
- ncerr = nctk_def_dims(ncid, [&
+ ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("one", 1), nctkdim_t("two", 2), nctkdim_t("three", 3), &
    nctkdim_t("four", 4), nctkdim_t("five", 5), nctkdim_t("six", 6), &
-   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10)])
+   nctkdim_t("seven", 7), nctkdim_t("eight", 8), nctkdim_t("nine", 9), nctkdim_t("ten", 10), &
+   nctkdim_t("fnlen", fnlen + 1) &
+ ])
  NCF_CHECK(ncerr)
 
 end function nctk_def_basedims
@@ -1319,12 +1323,6 @@ end function nctk_def_basedims
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_abihist,m_bse_io,m_effective_potential,m_nctk,m_spin_ncfile
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -1372,10 +1370,6 @@ end subroutine ab_define_var
 !!  xtype=Type of the variables
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1442,10 +1436,6 @@ end function nctk_def_scalars_type
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_iscalars(ncid, varnames, defmode, prefix) result(ncerr)
@@ -1486,10 +1476,6 @@ end function nctk_def_iscalars
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_def_dpscalars(ncid, varnames, defmode, prefix) result(ncerr)
@@ -1529,10 +1515,6 @@ end function nctk_def_dpscalars
 !!  nctk_array=Array descriptor.
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1657,10 +1639,6 @@ end function nctk_def_one_array
 !!  [defmode]=If True, the nc file is set in define mode (default=False)
 !!  [prefix]=Prefix added to varnames and dimensions. Empty string if not specified.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 
@@ -1714,10 +1692,6 @@ end function nctk_def_array_list
 !! OUTPUT
 !!  ncerr=Exit status
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_write_iscalars(ncid, varnames, values, datamode) result(ncerr)
@@ -1765,10 +1739,6 @@ end function nctk_write_iscalars
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of real(dp) scalars
 !!  [datamode]=If True, the nc file is set in data mode (default=False)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1819,10 +1789,6 @@ end function nctk_write_dpscalars
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of integer scalars
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_defnwrite_ivars(ncid, varnames, values) result(ncerr)
@@ -1866,10 +1832,6 @@ end function nctk_defnwrite_ivars
 !!  ncid=Netcdf identifier.
 !!  varnames(:)=List of strings with the name of the variables
 !!  values(:)=List of integer scalars
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1920,10 +1882,6 @@ end function nctk_defnwrite_dpvars
 !!
 !! OUTPUT
 !!  ncerr=Exit status
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1982,10 +1940,6 @@ end function nctk_write_ibz
 !! OUTPUT
 !!  dimlen=Value of the dimension.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
@@ -2011,8 +1965,10 @@ integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
    end if
  end if
 
- NCF_CHECK(nf90_inq_dimid(ncid, dimname, dimid))
- NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
+ ncerr = nf90_inq_dimid(ncid, dimname, dimid)
+ if (ncerr == nf90_noerr) then
+   ncerr = nf90_inquire_dimension(ncid, dimid, len=dimlen)
+ end if
 
 end function nctk_get_dim
 !!***
@@ -2041,10 +1997,6 @@ end function nctk_get_dim
 !!
 !! OUTPUT
 !!  Only writing
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2248,10 +2200,6 @@ end function nctk_write_datar
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 integer function nctk_read_datar(path,varname,ngfft,cplex,nfft,nspden,&
@@ -2375,12 +2323,6 @@ end function nctk_read_datar
 !! OUTPUT
 !!   rhor_glob(cplex*nfft_tot,nspden)=Global array
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine collect_datar(ngfft,cplex,nfft,nspden,rhor,comm_fft,fftn3_distrib,ffti3_local,rhor_glob,master)
@@ -2457,12 +2399,6 @@ end subroutine collect_datar
 !! OUTPUT
 !!  rhor(cplex*nfft,nspden)=Array in real space (MPI-FFT distributed)
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine distrib_datar(ngfft,cplex,nfft,nspden,rhor_glob,master,comm_fft,fftn3_distrib,ffti3_local,rhor)
@@ -2526,12 +2462,6 @@ end subroutine distrib_datar
 !! OUTPUT
 !!  var<nctkvar_t>=Info on the variable.
 !!
-!! PARENTS
-!!      m_nctk
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine var_from_id(ncid, varid, var)
@@ -2587,11 +2517,6 @@ end subroutine var_from_id
 !! OUTPUT
 !!  var<nctkvar_t>=Info on the variable.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine var_from_name(ncid, name, var)
@@ -2634,12 +2559,6 @@ end subroutine var_from_name
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      anaddb,m_ifc
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, cart_displ, mode)
@@ -2666,10 +2585,10 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [&
-   nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
-   nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
-   nctkarr_t('non_analytical_phdispl_cart', "dp", &
-   "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
+     nctkarr_t('non_analytical_directions', "dp", "number_of_cartesian_directions, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phonon_modes', "dp", "number_of_phonon_modes, number_of_non_analytical_directions"),&
+     nctkarr_t('non_analytical_phdispl_cart', "dp", &
+               "two, number_of_phonon_modes, number_of_phonon_modes, number_of_non_analytical_directions")])
    NCF_CHECK(ncerr)
 
    NCF_CHECK(nctk_set_datamode(ncid))
@@ -2708,12 +2627,6 @@ end subroutine nctk_defwrite_nonana_terms
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
 subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
@@ -2746,7 +2659,6 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
    NCF_CHECK(nctk_set_datamode(ncid))
 
  case ("write")
-
    NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
    ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
      start=[iphl2,1,1,1], count=[1,3*natom,3,3])
@@ -2773,12 +2685,6 @@ end subroutine nctk_defwrite_nonana_raman_terms
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2828,12 +2734,6 @@ end subroutine nctk_defwrite_raman_terms
 !!
 !! TODO:
 !!  Remove
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2888,12 +2788,6 @@ integer :: ncerr, cmode
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_parser
-!!
-!! CHILDREN
-!!      ab_define_var
 !!
 !! SOURCE
 
@@ -2973,20 +2867,17 @@ end subroutine write_var_netcdf
 !! OUTPUT
 !!  (only writing)
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      ab_define_var
-!!
 !! SOURCE
 
-subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
+subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
+& shiftfactor_extfpmd) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
+ real(dp),intent(in) :: fermie
+ real(dp),optional,intent(in) :: shiftfactor_extfpmd
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -2996,13 +2887,15 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
 !scalars
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
- integer :: eig_id,kpt_id,nbk_id,nbk
+ integer :: eig_id,fermie_id,kpt_id,nbk_id,nbk
+ integer :: shiftfactor_extfpmd_id
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
  integer :: dimEIG(3),dimKPT(2),dimNBK(2)
  integer :: count2(2),start2(2)
  integer :: count3(3),start3(3)
+ integer :: dim0(0)
  real(dp):: band(mband)
 
 ! *********************************************************************
@@ -3039,7 +2932,8 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
  dimNBK = (/ nkpt_id, nsppol_id /)
 
 !3. Define variables
-
+ call ab_define_var(ncid,dim0,fermie_id,NF90_DOUBLE,&
+& "fermie","Chemical potential","Hartree")
  call ab_define_var(ncid, dimEIG, eig_id, NF90_DOUBLE,&
 & "Eigenvalues",&
 & "Values of eigenvalues",&
@@ -3050,6 +2944,10 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
  call ab_define_var(ncid, dimNBK, nbk_id, NF90_INT,"NBandK",&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
+ if(present(shiftfactor_extfpmd)) then
+    call ab_define_var(ncid,dim0,shiftfactor_extfpmd_id,NF90_DOUBLE,&
+&    "shiftfactor_extfpmd","Extended FPMD shiftfactor","Hartree")
+ end if
 
 !4. End define mode
  ncerr = nf90_enddef(ncid)
@@ -3066,8 +2964,17 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
    NCF_CHECK_MSG(ncerr," write variable kptns")
  end do
 
+!6.1 Write chemical potential
+ ncerr = nf90_put_var(ncid, fermie_id, fermie)
+ NCF_CHECK_MSG(ncerr," write variable fermie")
 
-!6 Write eigenvalues
+!6.2 Write extfpmd shiftfactor
+ if(present(shiftfactor_extfpmd)) then
+   ncerr = nf90_put_var(ncid, shiftfactor_extfpmd_id, shiftfactor_extfpmd)
+   NCF_CHECK_MSG(ncerr," write variable shiftfactor_extfpmd")
+ end if
+
+!6.3 Write eigenvalues
  band_index=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
@@ -3088,7 +2995,7 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
    end do
  end do
 
-!6 Write Number of bands per kpoint and Spin
+!6.4 Write Number of bands per kpoint and Spin
 
  do isppol=1,nsppol
    do ikpt=1,nkpt

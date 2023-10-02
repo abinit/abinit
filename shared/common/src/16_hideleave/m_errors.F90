@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -287,11 +283,6 @@ end function assert_eqn
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additiona information
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine assert1(l1,message,file,line)
@@ -329,11 +320,6 @@ end subroutine assert1
 !! INPUTS
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -373,11 +359,6 @@ end subroutine assert2
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine assert3(l1,l2,l3,message,file,line)
@@ -416,11 +397,6 @@ end subroutine assert3
 !!  l1,l2,.. logical values to be checked (array version is also provided)
 !!  message(len=*)=tag with additional information
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine assert4(l1,l2,l3,l4,message,file,line)
@@ -454,11 +430,6 @@ end subroutine assert4
 !! FUNCTION
 !!  Routines for argument checking and error handling. Report and die if
 !!  any logical is false (used for arg range checking).
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -502,15 +473,9 @@ end subroutine assert_v
 !! NOTES
 !!  This routine is usually interfaced with the macros defined in abi_common.h
 !!
-!! PARENTS
-!!      m_slc_primitive_potential
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
-subroutine netcdf_check(ncerr,msg,file,line)
+subroutine netcdf_check(ncerr, msg, file, line)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ncerr
@@ -528,23 +493,15 @@ subroutine netcdf_check(ncerr,msg,file,line)
 
 #ifdef HAVE_NETCDF
  if (ncerr /= NF90_NOERR) then
-   if (PRESENT(line)) then
-     f90line=line
-   else
-     f90line=0
-   end if
-   if (PRESENT(file)) then
-     f90name = basename(file)
-   else
-     f90name='Subroutine Unknown'
-   end if
-   !
-   ! Append Netcdf string to user-defined message.
-   write(nc_msg,'(a,2x,a)')' - NetCDF library returned:',TRIM(nf90_strerror(ncerr))
-   !write(std_out,*)TRIM(nf90_strerror(ncerr))
-   my_msg = TRIM(msg) // TRIM(nc_msg)
 
-   call msg_hndl(my_msg,"ERROR","PERS",f90name,f90line)
+   f90line = 0; if (present(line)) f90line = line
+   f90name = 'Subroutine Unknown'; if (present(file)) f90name = basename(file)
+
+   ! Append netcdf string to user-defined message.
+   write(nc_msg,'(3a)')' - NetCDF library returned: `', trim(nf90_strerror(ncerr)),"`"
+   my_msg = trim(msg) // trim(nc_msg)
+
+   call msg_hndl(my_msg, "ERROR", "PERS", f90name, f90line)
  end if
 #endif
 
@@ -572,11 +529,6 @@ end subroutine netcdf_check
 !!
 !! NOTES
 !!  This routine is usually interfaced with the macros defined in abi_common.h
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -656,12 +608,6 @@ end subroutine sentinel
 !!  line=Line number of the file where problem occurred
 !!  f90name=Name of the f90 file containing the caller
 !!
-!! PARENTS
-!!      m_errors,m_xc_vdw
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine die(message,file,line)
@@ -725,12 +671,6 @@ end subroutine die
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit)
@@ -744,6 +684,7 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
 
 !Local variables-------------------------------
  integer :: f90line,ierr,unit_
+ logical :: is_open_unit
  character(len=10) :: lnum
  character(len=500) :: f90name
  character(len=LEN(message)) :: my_msg
@@ -806,6 +747,10 @@ subroutine msg_hndl(message, level, mode_paral, file, line, NODUMP, NOSTOP, unit
      "...",ch10
    call wrtout(unit_, sbuf, mode_paral)
 
+   ! Write error message to ab_out is unit is connected.
+   inquire(unit=ab_out, opened=is_open_unit)
+   if (is_open_unit) call wrtout(ab_out, sbuf) !, mode_paral="PERS")
+
    if (.not.present(NOSTOP)) then
      ! The first MPI proc that gets here, writes the ABI_MPIABORTFILE with the message!
      ! The file is written only if nprocs > 1. Do not change this behaviour!
@@ -829,11 +774,6 @@ end subroutine msg_hndl
 !!
 !! FUNCTION
 !!  1 to activate show_backtrace call in msg_hndl. 0 to disable it
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -859,12 +799,6 @@ end subroutine set_backtrace_onerr
 !!  Program execution continues normally afterwards.
 !!  The backtrace information is printed to the unit corresponding to ERROR_UNIT in ISO_FORTRAN_ENV.
 !!  This is a (Gfortran extension| Ifort Extension)
-!!
-!! PARENTS
-!!      m_errors
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -896,11 +830,6 @@ end subroutine show_backtrace
 !!
 !! OUTPUT
 !!  Write error message thep stop execution.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -957,8 +886,6 @@ end subroutine check_mpi_ierr
 !! OUTPUT
 !!  None
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 elemental subroutine unused_int(var)
@@ -990,11 +917,6 @@ end subroutine unused_int
 !!
 !! OUTPUT
 !!  None
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      signal
 !!
 !! SOURCE
 
@@ -1086,11 +1008,6 @@ end subroutine unused_cplx_spc
 !! OUTPUT
 !!  None
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      signal
-!!
 !! SOURCE
 
 elemental subroutine unused_cplx_dpc(var)
@@ -1123,11 +1040,6 @@ end subroutine unused_cplx_dpc
 !! OUTPUT
 !!  None
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      signal
-!!
 !! SOURCE
 
 elemental subroutine unused_logical(var)
@@ -1157,11 +1069,6 @@ end subroutine unused_logical
 !!
 !! OUTPUT
 !!  None
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      signal
 !!
 !! SOURCE
 
@@ -1195,11 +1102,6 @@ end subroutine unused_logical1B
 !! OUTPUT
 !!  None
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      signal
-!!
 !! SOURCE
 
 elemental subroutine unused_ch(var)
@@ -1229,11 +1131,6 @@ end subroutine unused_ch
 !! INPUTS
 !!  line=line number of the file where problem occurred
 !!  file=name of the f90 file containing the caller
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -1288,11 +1185,6 @@ end subroutine bigdft_lib_error
 !!   Provides a traceback that starts from the point at which it is called.
 !!   You call it as a subroutine from your code, rather than specifying it with the -qsigtrap option. It requires no parameters. It does not stop the program.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_abort
-!!
 !! SOURCE
 
 subroutine xlf_set_sighandler()
@@ -1320,14 +1212,6 @@ end subroutine xlf_set_sighandler
 !!  prefix=Prefix for output file  (usually "__nameofprogram" e.g. __cut3d)
 !!  [print_mem_report]=0 to disable the test on memory leaks (used in Abinit if bigdft is activated).
 !!    Default: 1, i.e. memory check is always activated.
-!!
-!! PARENTS
-!!      abinit,abitk,anaddb,atdep,conducti,cut3d,fftprof,fold2Bloch,ioprof
-!!      lapackprof,macroave,mrgddb,mrgdv,mrggkk,mrgscr,multibinit,optic
-!!      testtransposer,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 
@@ -1394,7 +1278,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
-       '   or use the command line option `abinit --abimem-level 2`', ch10, &
+       '   or use the command line option `abinit run.abi --abimem-level 2`', ch10, &
        '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created,',ch10, &
        '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc',ch10, &
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
@@ -1479,12 +1363,6 @@ end subroutine abinit_doctor
 !!
 !! NOTES
 !!  By default, it uses "call exit(1)", that is not completely portable.
-!!
-!! PARENTS
-!!      m_errors,m_kpts
-!!
-!! CHILDREN
-!!      abi_abort
 !!
 !! SOURCE
 

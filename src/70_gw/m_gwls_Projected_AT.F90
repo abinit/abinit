@@ -11,10 +11,6 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -71,14 +67,6 @@ contains
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gwls_ComputeCorrelationEnergy
-!!
-!! CHILDREN
-!!      cleanup_lanczosresolvents,compute_resolvent_column_shift_lanczos
-!!      get_projection_band_indices,pc_k_valence_kernel,setup_lanczosresolvents
-!!      wf_block_distribute,xmpi_sum
 !!
 !! SOURCE
 

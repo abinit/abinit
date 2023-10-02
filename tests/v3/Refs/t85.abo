@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h17 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v3_t85/t85.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t85/t85.abi
 - output file    -> t85.abo
 - root for input  files -> t85i
 - root for output files -> t85o
-
 
  DATASET    1 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -56,7 +55,6 @@ P newvtr chain                          2.093 Mbytes.
 _ WF disk file :      0.154 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -89,7 +87,6 @@ P newvtr chain                          1.838 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -132,6 +129,8 @@ _ WF disk file :      0.162 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      5.7180000000E+00  5.7180000000E+00  5.7180000000E+00 Bohr
               amu      4.78800000E+01  5.86900000E+01
+              asr           0
+           chneut           0
            diemix      3.00000000E-01
              ecut      4.00000000E+00 Hartree
 -          fftalg         312
@@ -204,16 +203,13 @@ P          mk1mem           8
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            prtvol          10
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  4.16666667E-02
               qpt3     0.00000000E+00  0.00000000E+00  4.16666667E-02
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -305,8 +301,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/22ti.pspnc
 -  Troullier-Martins psp for element  Ti        Thu Oct 27 17:33:40 EDT 1994
 - 22.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -323,8 +319,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -8.015692
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/28ni.pspnc
 -  Troullier-Martins psp for element  Ni        Thu Oct 27 17:35:45 EDT 1994
 - 28.00000  10.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2881,6 +2877,8 @@ tolerances: {tolvrs: 1.00E-08, }
  -outvars: echo values of variables after computation  --------
             acell      5.7180000000E+00  5.7180000000E+00  5.7180000000E+00 Bohr
               amu      4.78800000E+01  5.86900000E+01
+              asr           0
+           chneut           0
            diemix      3.00000000E-01
              ecut      4.00000000E+00 Hartree
            etotal1    -3.5853383511E+01
@@ -2959,16 +2957,13 @@ P          mk1mem           8
         optdriver1          0
         optdriver2          0
         optdriver3          1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            prtvol          10
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  4.16666667E-02
               qpt3     0.00000000E+00  0.00000000E+00  4.16666667E-02
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -3105,10 +3100,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  23 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.1
++Overall time at end (sec) : cpu=          4.4  wall=          4.6

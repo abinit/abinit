@@ -16,11 +16,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!      vtowfk
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -52,7 +47,7 @@ module m_lobpcgwf
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
 
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  private
 

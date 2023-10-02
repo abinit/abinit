@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -88,12 +84,6 @@ contains
 !!
 !! OUTPUT
 !!  (only writing)
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      matr3inv,wrtout
 !!
 !! SOURCE
 

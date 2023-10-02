@@ -10,11 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!      m_nonlop
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -169,16 +164,6 @@ contains
 !!    In particular, the OMP parallelisation is still missing,
 !!    but it matters here only when nspinor==2.
 !!  - Warning 2: the order of atoms is governed by atindx
-!!
-!! PARENTS
-!!      nonlop
-!!
-!! CHILDREN
-!!      cont13,cont22,cont22cso,cont22so,cont24,cont3,cont33cso,cont33so,cont35
-!!      contistr01,contistr03,contistr12,contstr21,contstr23,contstr25
-!!      contstr25a,contstr26,ddkten,metcon,metcon_so,metric_so,metstr,opernl2
-!!      opernl3,opernl4a,opernl4b,ph1d3d,scalewf_nonlop,strconv,strsocv,trace2
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -1303,11 +1288,6 @@ contains
 !! The components are given in the order 11 22 33 32 31 21.
 !! The initial 2 handles the Re and Im parts.
 !!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine trace2(gxa,gmet,trace)
@@ -1367,11 +1347,6 @@ end subroutine trace2
 !! cart(3,1) & = &  0.5 ( & red(i,j,3) G(3,i) G(2,j) + red(i,j,1) G(2,i) G(1,j)) \nonumber
 !! cart(2,1) & = &  0.5 ( & red(i,j,2) G(3,i) G(2,j) + red(i,j,1) G(1,i) G(3,j))
 !! \end{eqnarray} }}
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1450,11 +1425,6 @@ end subroutine strsocv
 !! NOTES
 !!  XG030513 : MPIWF One should pay attention to the
 !!  G=0 component, that will be only one one proc...
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1560,11 +1530,6 @@ end subroutine scalewf_nonlop
 !!
 !! NOTES
 !! For l=0, there is no contribution.
-!!
-!! PARENTS
-!!      m_nonlop_pl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

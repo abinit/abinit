@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t80/t80.in
-- output file    -> t80.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t80/t80.abi
+- output file    -> t80.abo
 - root for input  files -> t80i
 - root for output files -> t80o
-
 
  DATASET    1 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        5440          nfft =       91125          nkpt =           1
 ================================================================================
-P This job should need less than                      25.796 Mbytes of memory.
+P This job should need less than                      28.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.085 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.085 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        5440          nfft =       91125          nkpt =           1
 ================================================================================
-P This job should need less than                      25.796 Mbytes of memory.
+P This job should need less than                      28.328 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.085 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -87,6 +84,8 @@ _ WF disk file :      0.334 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.4000000000E+01  1.4000000000E+01  1.4000000000E+01 Bohr
               amu      1.00794000E+00
+              asr           0
+           chneut           0
            diemac      2.00000000E+00
              ecut      1.20000000E+01 Hartree
            ecutsm      1.00000000E+00 Hartree
@@ -148,12 +147,9 @@ P          mk1mem3          4
         optforces1          1
         optforces2          2
         optforces3          2
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -228,8 +224,8 @@ meta: {optdriver: 0, ionmov: 3, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.01544
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -830,7 +826,6 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.01544
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -869,7 +864,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -930,7 +924,6 @@ tolerances: {tolvrs: 1.00E-09, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t80o_DS2_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1129,6 +1122,8 @@ tolerances: {tolvrs: 1.00E-09, }
  -outvars: echo values of variables after computation  --------
             acell      1.4000000000E+01  1.4000000000E+01  1.4000000000E+01 Bohr
               amu      1.00794000E+00
+              asr           0
+           chneut           0
            diemac      2.00000000E+00
              ecut      1.20000000E+01 Hartree
            ecutsm      1.00000000E+00 Hartree
@@ -1199,12 +1194,9 @@ P          mk1mem3          4
         optforces1          1
         optforces2          2
         optforces3          2
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          1       1       1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          1
            rfphon1          0
            rfphon2          0
            rfphon3          1
@@ -1333,10 +1325,10 @@ P          mk1mem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.3
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.2  wall=          3.3
+.Delivered  28 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.0  wall=          3.1

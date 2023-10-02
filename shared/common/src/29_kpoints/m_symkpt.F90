@@ -8,10 +8,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! TODO
 !!  Move it to m_kpts
 !!
@@ -91,13 +87,6 @@ contains
 !!
 !! TODO
 !!  Bad scaling wrt nkbz. Should try to MPI parallelize or implement more efficient algorithm
-!!
-!! PARENTS
-!!      m_bz_mesh,m_dfpt_looppert,m_dfpt_lw,m_dtset,m_elphon,m_harmonic_thermo
-!!      m_ifc,m_kpts,m_tdep_psij,m_unittests
-!!
-!! CHILDREN
-!!      krank%free
 !!
 !! SOURCE
 
@@ -257,9 +246,9 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
                end if
              end do
 
-             if (quit==0) then
-               write(msg,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
-               'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
+             if (quit == 0) then
+               write(msg,'(3a,i0,2a,9(i0,1x),2a,i0,1a,3es16.6,6a)' )&
+               'Chksymbreak = 1. It has been observed that the k point grid is not symmetric:',ch10,&
                'for the symmetry number: ',isym,ch10,&
                'with symrec= ',symrec(1:3,1:3,isym),ch10,&
                'the symmetric of the k point number: ',ind_ikpt2,' with components: ', kbz(1:3,ind_ikpt2),ch10,&
@@ -429,12 +418,6 @@ end subroutine symkpt
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_kpts,m_lgroup,m_unittests
-!!
-!! CHILDREN
-!!      krank%free
 !!
 !! SOURCE
 
@@ -681,12 +664,6 @@ end subroutine symkpt_new
 !! nkirred = number of irreducible k needed from list 1 (in)
 !! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1,
 !!   symop and timrev needed to transform them
-!!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      krank%free
 !!
 !! SOURCE
 

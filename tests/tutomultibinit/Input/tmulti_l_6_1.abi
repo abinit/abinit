@@ -1,0 +1,50 @@
+#---------------------------------------------------------------
+#Print the model into XML file:
+#---------------------------------------------------------------
+prt_model = 4  #Print the model into a XML file 
+
+#---------------------------------------------------------------
+#Information about the DDB and the training set
+#---------------------------------------------------------------
+ngqpt =  4 4 4    # Mesh of Q-points in the DDB (default 1 1 1)
+dipdip = 1        # Recompute the dipole-dipole interaction (default 1)
+ncell = 2 2 2     # Number of cells in the DDB regarding to the RS (default 1 1 )
+
+#---------------------------------------------------------------
+#Inputs for the fit process:
+#---------------------------------------------------------------
+
+fit_coeff = 1         # Activate the fit process
+fit_ncoeff = 12       # Number of coefficients to consider for the fit (default 0)
+fit_generatecoeff = 1 # Default 1. Flag to activate the generation of the possible coefficienta
+fit_rangePower = 3 4  # Range for the powers of the polynomial coefficient (default 3 to 4 )
+fit_cutoff = 5.6      # Cut-off for the interaction  (in Bohr) (default 1 unit cell)
+fit_dispterms = 1     # Activate the fit of terms related to displacement
+fit_SPCoupling = 1    # Activate the strain phonon coupling. This option will add terms like (Ba-Hf)^3eta^1
+fit_SPC_maxS = 1      # Range for the powers of the polynomial coefficient related to strain in strain-phonon coupling
+fit_iatom = 2
+fit_EFS = 0 1 1       # Fit on the (E)nergy (F)orces and (S)tresses
+sel_EFS = 0 1 1       # Select coefficient on the (E)nergy (F)orces and (S)tresses
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% input_ddb = tmulti_l_6_DDB
+#%% md_hist = tmulti_l_6_HIST.nc
+#%% exclude_builders = .*_nag_7.[01]_.* 
+#%% [files]
+#%% files_to_test =
+#%%   tmulti_l_6_1.abo, tolnlines = 10, tolabs = 0.1, tolrel = 0.5, fld_options = -easy;
+#%% [paral_info]
+#%% max_nprocs = 10
+#%% [extra_info]
+#%% authors = L. BASTOGNE
+#%% keywords = Effective potential, multibinit
+#%% description = 
+#%%   read ddb and generate effective potential by fitting a training set
+#%% topics = LatticeModel
+#%%<END TEST_INFO>
+

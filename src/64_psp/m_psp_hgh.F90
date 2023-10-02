@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -105,12 +101,6 @@ contains
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!   | vlspl_recipSpace(IN)=.true. if pseudo are expressed in reciprocal space.
 !!   | gth_params(OUT)=store GTH coefficients and parameters.
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -287,12 +277,6 @@ end subroutine psp2in
 !!   second derivative from spline fit for each angular momentum
 !!   and each projector
 !!
-!! PARENTS
-!!      m_psp_hgh
-!!
-!! CHILDREN
-!!      spline,zhpev
-!!
 !! SOURCE
 
 subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
@@ -430,12 +414,6 @@ end subroutine psp2nl
 !! for GTH vloc with $K=(2\pi q)$.
 !!  yp1,ypn=derivative of q^2 v(q) wrt q at q=0 and q=qmax
 !!   (needed for spline fitter).
-!!
-!! PARENTS
-!!      m_psp_hgh
-!!
-!! CHILDREN
-!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -591,12 +569,6 @@ end subroutine psp2lo
 !!   | qgrid_ff(mqgrid_ff)(IN)=values of q on grid from 0 to qmax (bohr^-1) for nl form factors
 !!   | useylm(IN)=governs the way the nonlocal operator is to be applied:
 !!   |            1=using Ylm, 0=using Legendre polynomials
-!!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      spline,zhpev
 !!
 !! SOURCE
 
@@ -1028,12 +1000,6 @@ end subroutine psp3in
 !!   second derivative from spline fit for each angular momentum and
 !!   each projectors
 !!
-!! PARENTS
-!!      m_psp_hgh
-!!
-!! CHILDREN
-!!      spline,zhpev
-!!
 !! SOURCE
 
 subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
@@ -1395,12 +1361,6 @@ end subroutine psp3nl
 !!   | useylm(IN)=governs the way the nonlocal operator is to be applied:
 !!   |            1=using Ylm, 0=using Legendre polynomials
 !!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      spline,zhpev
-!!
 !! SOURCE
 
 subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
@@ -1641,12 +1601,6 @@ end subroutine psp10in
 !!  ffspl(mqgrid,2,mpssang,mproj)=Kleinman-Bylander form factor f_l(q) and
 !!   second derivative from spline fit for each angular momentum and
 !!   each projectors
-!!
-!! PARENTS
-!!      m_psp_hgh
-!!
-!! CHILDREN
-!!      spline,zhpev
 !!
 !! SOURCE
 

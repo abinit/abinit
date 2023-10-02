@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -100,12 +96,6 @@ contains
 !!
 !! NOTES
 !! Based on mkcore.F90. Adapted to WVL case.
-!!
-!! PARENTS
-!!      m_forces,m_setvtr
-!!
-!! CHILDREN
-!!      paw_splint,paw_splint_der,sort_dp
 !!
 !! SOURCE
 
@@ -538,11 +528,6 @@ end subroutine mkcore_wvl
 !! NOTES
 !! Based on mkcore.F90
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      paw_splint,paw_splint_der,sort_dp
-!!
 !! SOURCE
 
 
@@ -909,12 +894,6 @@ end subroutine mkcore_wvl_old
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      mkcore_wvl
-!!
-!! CHILDREN
-!!      paw_splint,paw_splint_der,sort_dp
-!!
 !! SOURCE
 
 
@@ -1076,12 +1055,6 @@ end module m_mkcore_wvl
 !%% !! SIDE EFFECTS
 !%% !!
 !%% !! NOTES
-!%% !!
-!%% !! PARENTS
-!%% !!
-!%% !! CHILDREN
-!%% !!      ind_positions_,mkcore_inner,mkgrid_fft,pawrad_free,pawrad_init
-!%% !!      ptabs_fourdp,strconv,timab,wrtout,xcart2xred,xmpi_sum,xred2xcart
 !%% !!
 !%% !! SOURCE
 !%%

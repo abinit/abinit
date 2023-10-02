@@ -16,14 +16,20 @@
 
     xred6  -0.047 0 0   0.047    0 0
 
+  rfatpol 2 2
+  rfdir   1 0 0
+
 #Specific for RF
   rfphon6  1
- rfatpol6  2 2
-   rfdir6  1 0 0
     nqpt6  1
      qpt6  0.0 0.0 0.0
   getwfk6  3
    nstep6  20
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #Common data
  acell 12 10 10

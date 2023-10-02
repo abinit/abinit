@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -94,11 +90,6 @@ contains
 !!  pseudo_paths(npsp): List of paths to pseudopotential files as read from input file.
 !!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, mxntypat, ndtset, ndtset_alloc, &
@@ -130,7 +121,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !******************************************************************
 
- !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
+!DEBUG
+!write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
+!ENDDEBUG
 
  marr=max(9,ndtset_alloc,2)
  ABI_MALLOC(dprarr,(marr))
@@ -384,6 +377,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
 
+   ! Read extfpmd calculations
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useextfpmd',tread,'INT')
+   if(tread==1) dtsets(idtset)%useextfpmd=intarr(1)
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -558,6 +554,14 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  end do
 
+ dtsets(:)%diago_apply_block_sliced=1
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
+    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
+ end do
+
+
 !GPU information
  use_gpu_cuda=0
  dtsets(:)%use_gpu_cuda=0
@@ -574,7 +578,17 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
    if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+end do
+
+ dtsets(:)%use_nvtx=0
+#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
  end do
+#endif
+
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
@@ -615,6 +629,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ABI_MALLOC(dtsets(idtset)%f6of2_sla,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%jpawu,(mxntypat,mxnimage))
    ABI_MALLOC(dtsets(idtset)%kberry,(3,20))
+   ABI_MALLOC(dtsets(idtset)%lambsig,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lexexch,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%ldaminushalf,(mxntypat))
    ABI_MALLOC(dtsets(idtset)%lpawu,(mxntypat))
@@ -686,11 +701,6 @@ end subroutine invars0
 !!  dtsets(0:ndtset_alloc)=<type datafiles_type>contains all input variables,
 !!   some of which are initialized here (see invars1.f for more details on the initialized records)
 !!  mx<ab_dimensions>=datatype storing the maximal dimensions. Partly initialized in input.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -905,11 +915,6 @@ end subroutine invars1m
 !!  dtset=<type datafiles_type>contains all input variables for one dataset,
 !!   some of which are given a default value here.
 !!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine indefo1(dtset)
@@ -955,6 +960,7 @@ subroutine indefo1(dtset)
  dtset%efmas_calc_dirs=0
  dtset%efmas_n_dirs=0
 !F
+ dtset%field_red(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
@@ -1117,11 +1123,6 @@ end subroutine indefo1
 !!
 !! They should be kept consistent with defaults of the same variables provided to the invars routines.
 !!
-!! PARENTS
-!!      m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
@@ -1156,7 +1157,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
-!real(dp) :: field(3)
  real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1507,7 +1507,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
+!call flush(std_out)
+!ENDDEBUG
+
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
@@ -1515,6 +1520,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
+!call flush(std_out)
+!ENDDEBUG
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -1569,6 +1579,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
 & dtset%xred_orig(1:3,1:natom,intimage))
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
+!call flush(std_out)
+!ENDDEBUG
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
@@ -1661,6 +1676,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! test that the value of nkpt is OK, if kptopt/=0
  ! Set up dummy arrays istwfk, kpt, wtk
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
+!call flush(std_out)
+!ENDDEBUG
+
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_MALLOC(istwfk,(nkpt))
    ABI_MALLOC(kpt,(3,nkpt))
@@ -1688,6 +1708,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
+!call flush(std_out)
+!ENDDEBUG
+
    ! Find the q-point, if any.
    if(nqpt/=0)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
@@ -1695,12 +1720,23 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
+!call flush(std_out)
+!ENDDEBUG
+
+
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
      kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
+!call flush(std_out)
+!ENDDEBUG
 
    ABI_FREE(istwfk)
    ABI_FREE(kpt)
@@ -1711,6 +1747,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
+!call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
  if(tread==1) dtset%nqptdm=intarr(1)
@@ -1776,6 +1817,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !---------------------------------------------------------------------------
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before nnos '
+!call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) dtset%nnos=intarr(1)
@@ -1974,12 +2020,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  dtset%usedmatpu=0
  dtset%lpawu(1:dtset%ntypat)=-1
+ dtset%optdcmagpawu=3
  if (dtset%usepawu/=0.or.dtset%usedmft>0) then
    call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'lpawu',tread,'INT')
    if(tread==1) dtset%lpawu(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usedmatpu',tread,'INT')
    if(tread==1) dtset%usedmatpu=intarr(1)
+   if (dtset%nspden==4) then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'optdcmagpawu',tread,'INT')
+     if(tread==1) dtset%optdcmagpawu=intarr(1)
+   end if
  end if
 
 !Some PAW+Exact exchange keywords
@@ -2045,7 +2096,7 @@ end subroutine invars1
 !!
 !! FUNCTION
 !! Initialisation phase: default values for most input variables
-!! (some are initialized earlier, see indefo1 routine, or even 
+!! (some are initialized earlier, see indefo1 routine, or even
 !!  at the definition of the input variables (m_dtset.F90))
 !!
 !! INPUTS
@@ -2063,11 +2114,6 @@ end subroutine invars1
 !!
 !! NOTE that Scalars and static arrays can be initialized directly at the level of the datatype declaration
 !! provided the value does not depend on runtime conditions.
-!!
-!! PARENTS
-!!      m_common
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -2137,7 +2183,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      else
        dtsets(idtset)%use_gpu_cuda=1
      end if
-   end if
+  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2158,6 +2204,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
+   dtsets(idtset)%asr=1
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
@@ -2187,6 +2234,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
+   dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_update_lvl=0
@@ -2249,19 +2297,20 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dmftqmc_seed=jdtset
    dtsets(idtset)%dmftqmc_therm=1000
    dtsets(idtset)%dmftctqmc_gmove = dtsets(idtset)%dmftqmc_therm / 10
-   dtsets(idtset)%dosdeltae=zero
+   dtsets(idtset)%dosdeltae=0.0
    dtsets(idtset)%dtion=100.0_dp
-   dtsets(idtset)%d3e_pert1_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert1_dir(1:3)=0
+   dtsets(idtset)%dtele=0.1_dp
+   dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
    dtsets(idtset)%d3e_pert1_phon=0
-   dtsets(idtset)%d3e_pert2_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert2_dir(1:3)=0
+   dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
-   dtsets(idtset)%d3e_pert3_atpol(1:2)=1
-   dtsets(idtset)%d3e_pert3_dir(1:3)=0
+   dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
+   dtsets(idtset)%d3e_pert3_dir(1:3)=1
    dtsets(idtset)%d3e_pert3_elfd=0
    dtsets(idtset)%d3e_pert3_phon=0
 !  E
@@ -2318,8 +2367,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%gw_icutcoul=6
    dtsets(idtset)%gw_qprange=0
    dtsets(idtset)%gw_sigxcore=0
-   dtsets(idtset)%gw_sctype = GWSC_one_shot
-   dtsets(idtset)%gw_toldfeig=0.1/Ha_eV
    dtsets(idtset)%gwls_stern_kmax=1
    dtsets(idtset)%gwls_model_parameter=1.0_dp
    dtsets(idtset)%gwls_npt_gauss_quad=10
@@ -2401,8 +2448,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%lotf_nneigx=40
    dtsets(idtset)%lotf_version=2
 #endif
+   dtsets(idtset)%lambsig(:) = zero
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
+   dtsets(idtset)%lw_natopt=0
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
@@ -2431,6 +2480,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
      dtsets(idtset)%nc_xccc_gspace = 1
    end if
    dtsets(idtset)%nctime=0
+   dtsets(idtset)%ncout = 1
    dtsets(idtset)%ndtset = -1
    dtsets(idtset)%neb_algo=1
    dtsets(idtset)%neb_spring(1:2)=(/0.05_dp,0.05_dp/)
@@ -2556,6 +2606,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1
    do ii=1,dtsets(idtset)%natom,1
@@ -2583,10 +2634,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rectolden=zero
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
-   dtsets(idtset)%rfasr=0
-   dtsets(idtset)%rfatpol(1:2)=1
+!  dtsets(idtset)%rfasr=0
+   dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
-   dtsets(idtset)%rfdir(1:3)=0
+   dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
@@ -2596,8 +2647,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfuser=0
    dtsets(idtset)%rf2_dkdk=0
    dtsets(idtset)%rf2_dkde=0
-   dtsets(idtset)%rf2_pert1_dir(1:3)=0
-   dtsets(idtset)%rf2_pert2_dir(1:3)=0
+   dtsets(idtset)%rf2_pert1_dir(1:3)=1
+   dtsets(idtset)%rf2_pert2_dir(1:3)=1
    dtsets(idtset)%rhoqpmix=one
 !  S
    dtsets(idtset)%shiftk_orig(:,:)=one
@@ -2616,8 +2667,14 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
 !  T
+   dtsets(idtset)%td_exp_order=4
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
+   dtsets(idtset)%td_scnmax=3
+   dtsets(idtset)%td_prtstr=10
+   dtsets(idtset)%td_restart=0
+   dtsets(idtset)%td_propagator=1
+   dtsets(idtset)%td_scthr=1e-7_dp
    dtsets(idtset)%tfw_toldfe=0.000001_dp
    dtsets(idtset)%tim1rev = 1
    dtsets(idtset)%tl_nprccg = 30
@@ -2693,10 +2750,11 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%wvl_nprccg  = 10
    dtsets(idtset)%w90iniprj   = 1
    dtsets(idtset)%w90prtunk   = 0
-
+   dtsets(idtset)%write_files = "default"
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14
+   dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp
    dtsets(idtset)%xredsph_extra(:,:)=zero
 !  Y

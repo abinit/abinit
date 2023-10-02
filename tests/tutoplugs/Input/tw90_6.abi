@@ -1,0 +1,117 @@
+#############################################################################
+# La2CuO4 : Wannier90
+#############################################################################
+# Structural parameters
+#############################################################################
+acell            3*1
+
+rprim            3.6077606084241   3.6077606084241  -12.478046911766                
+                -3.6077606084241   3.6077606084241   12.478046911766                
+                 3.6077606084241  -3.6077606084241   12.478046911766
+
+natom            7  
+ntypat           3  
+typat            1 1 2 3 3 3 3  
+znucl            57 29 8  
+xcart            0.0000000000  0.0000000000  9.0145301354                           
+                 3.6077606086  3.6077606086  3.4635167757                           
+                 0.0000000000  0.0000000000  0.0000000000                           
+                 0.0000000000  3.6077606086  0.0000000000                           
+                 3.6077606086  0.0000000000  0.0000000000                           
+                 0.0000000000  0.0000000000  4.6340316725                           
+                 3.6077606086  3.6077606086  7.8440152387      
+
+# Four datasets: Ground state on coarse grid, non-self-consistent calculations on
+# finer grid, wannier90 projection, band structure
+ndtset           4
+
+# Shared parameters
+nband            38    # Number of bands
+nbdbuf           4     # Extra bands easing convergence
+ecut             10    # Low but sufficient
+pawecutdg        18    # Low but sufficient
+
+nshiftk          1     # For most datasets, need no shift
+shiftk           0 0 0
+
+#############################################################################
+# First dataset: Ground state on a coarse grid
+#############################################################################
+ngkpt1           6 6 6
+shiftk1          0.5 0.5 0.5
+nstep1           100
+tolvrs1          1.0d-8
+prtden1          1     # Print density for other datasets
+prtwf1           1
+diemac1          12.0
+istwfk1         *1
+
+#############################################################################
+# Second dataset: Non-self-consistent ground state on a finer grid
+#############################################################################
+iscf2           -2
+prtvol2          1
+nstep2           100
+tolwfr2          1e-9   # Good resolution on the wave function necessary
+getwfk2          1      # Get wave function and density from previous dataset
+getden2          1
+prtden2          1      # Print for next one
+prtwf2           1
+ngkpt2           8 8 8
+
+#############################################################################
+# Third dataset: Call to the Wannier90 library
+#############################################################################
+prtvol3          1
+iscf3           -2
+nstep3           0
+tolwfr3          1e-9
+getwfk3          2
+getden3          2
+prtwant3         2     # ABINIT - Wannier90 interface
+istwfk3         *1
+kptopt3          3     # Do not use symmetries
+ngkpt3           8 8 8
+w90prtunk3       0     # Do not prints the unk matrices
+w90iniprj3       2     # Use projection defined in the .win file
+
+#############################################################################
+# Fourth dataset: Band structure on the same path as Wannier90
+#############################################################################
+iscf4           -2
+getden4         -2
+getwfk4         -2
+kptopt4         -4    # Four segments of paths
+ndivsm4          13    # Smallest path has 16 points, other scaled
+kptbounds4       0.00000000  0.00000000  0.00000000  # Gamma
+                 0.25000000  0.25000000 -0.25000000  # Sigma
+                 0.50000000  0.00000000  0.00000000  # X
+                 0.00000000  0.00000000  0.00000000  # Gamma
+                -0.25000000  0.25000000  0.25000000  # Z
+tolwfr4          1.0d-9
+enunit4          1
+
+pp_dirpath       "$ABI_PSPDIR"
+pseudos          "Pseudodojo_paw_pw_standard/La.xml, Pseudodojo_paw_pw_standard/Cu.xml, Pseudodojo_paw_pw_standard/O.xml"
+
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [shell]
+#%% pre_commands = iw_cp tw90_6o_DS3_w90.win tw90_6_MPI4o_DS3_w90.win
+#%% [paral_info]                                                                
+#%% max_nprocs = 4                                                              
+#%% nprocs_to_test = 4                                                          
+#%% [NCPU_4]                                                                    
+#%% files_to_test =
+#%%    tw90_6_MPI4.abo, tolnlines=5, tolabs=7.00e-05, tolrel=1.10e+00, fld_options=-medium
+#%% [extra_info]
+#%% authors = O. Gingras
+#%% keywords = wannier90, la2cuo4, paw
+#%% description = Test interface with Wannier90 (PAW pseudopotentials)
+#%%<END TEST_INFO>
+#

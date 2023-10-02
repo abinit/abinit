@@ -56,6 +56,7 @@ MODULE m_iowf
 
  public :: outwf
  public :: outresid
+ public :: prtkbff            !  Write KB form factors to WFK in netcdf format.
 
 !!***
 
@@ -82,19 +83,9 @@ CONTAINS  !=====================================================================
 !! OUTPUT
 !!  (only writing)
 !!
-!! NOTES
-!!
-!! PARENTS
-!!      m_berryphase_new,m_dfpt_looppert,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
-subroutine outresid(dtset,kptns,mband,&
-&                nband,nkpt,&
-&                nsppol,resid)
+subroutine outresid(dtset,kptns,mband,nband,nkpt,nsppol,resid)
 
 !Arguments ------------------------------------
 !scalars
@@ -150,17 +141,17 @@ subroutine outresid(dtset,kptns,mband,&
 !      Find largest residual over all bands for given k point
        residk=maxval(resid(1+band_index:nband_k+band_index))
        write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+       call wrtout(std_out, msg)
        do ii=0,(nband_k-1)/8
          write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-         call wrtout(std_out,msg,'COLL')
+         if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+         call wrtout(std_out, msg)
        end do
      else if(ikpt==nkpt_eff+1)then
        write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
+       if(dtset%prtvol>=2) call wrtout(ab_out, msg)
+       call wrtout(std_out, msg)
      end if
      band_index=band_index+nband_k
    end do
@@ -212,18 +203,12 @@ end subroutine outresid
 !! NOTES
 !! * The name of the file wff2 might be the same as that of the file wff1.
 !!
-!! PARENTS
-!!      m_berryphase_new,m_gstate
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
-&                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
-&                nsppol,occ,response,unwff2,&
-&                wfs,wvl)
+                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
+                nsppol,occ,response,unwff2,&
+                wfs,wvl,force_write) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -236,6 +221,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  type(hdr_type), intent(inout) :: hdr
  type(wvl_wf_type),intent(in) :: wfs
  type(wvl_internal_type), intent(in) :: wvl
+ logical, intent(in), optional :: force_write
 !arrays
  integer, intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp), intent(inout) :: cg(2,mcg)
@@ -243,32 +229,29 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  real(dp), intent(in) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
- integer :: iomode,action,band_index,fform,formeig,iband,icg,iat,iproj
- integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
+ integer :: iomode,action,band_index,fform,formeig,iband,icg !,iat,iproj
+ integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,mtag,my_nspinor
  integer :: nband_k,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
  integer :: ipwnbd
 #endif
  real(dp) :: cpu,wall,gflops
- logical :: ihave_data,iwrite,iam_master,done
+ logical :: ihave_data,iwrite,iam_master,done,prtwf
  character(len=500) :: msg
  type(wffile_type) :: wff2
- character(len=fnlen) :: path
+ !character(len=fnlen) :: path
 !arrays
  integer,allocatable :: kg_disk(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cg_disk(:,:),eig_k(:),occ_k(:)
-#ifdef HAVE_NETCDF
- integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk
- real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
- type(crystal_t) :: crystal
-#endif
 
 ! *************************************************************************
 !For readability of the source file, define a "me" variable also in the sequential case
 
  DBG_ENTER("COLL")
+
+ ABI_UNUSED(kptns(1,1))
 
  xfdim2 = natom+4
 !Init mpi_comm
@@ -330,7 +313,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0
 !if (nstep>0 .and. dtset%prtwf/=0) then
- if (dtset%prtwf/=0) then
+!FB 03/2022: Added an option to force writing (used in RT-TDDFT)
+ prtwf = dtset%prtwf/=0
+ if (present(force_write)) then
+    if (force_write) prtwf = .true.
+ end if
+ if (prtwf) then
 
    ! Only the master write the file, except if MPI I/O, but the
    ! full wff dataset should be provided to WffOpen in this case
@@ -350,92 +338,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
      ! having to deal with paral_kgb distribution.
      if (me == master .and. dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
        ABI_CHECK(done, "cg_ncwrite was not able to generate WFK.nc in parallel. Perhaps hdf5 is not working")
-       path = nctk_ncify(filnam)
-       call wrtout(std_out, sjoin("Writing KB form factors to:", path))
-       NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
-       NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
-       mpw_disk = maxval(hdr%npwarr)
-
-       ! Dimensions needed by client code to allocate memory when reading.
-       ncerr = nctk_def_dims(ncid, [ &
-         nctkdim_t("mproj", psps%mproj), &
-         nctkdim_t("mpsang", psps%mpsang), &
-         nctkdim_t("mpssoang", psps%mpssoang), &
-         nctkdim_t("lnmax", psps%lnmax), &
-         nctkdim_t("lmnmax", psps%lmnmax) &
-       ])
-       NCF_CHECK(ncerr)
-
-       ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
-       NCF_CHECK(ncerr)
-
-       ! Write indlmn table (needed to access vkb arrays)
-       ncerr = nctk_def_arrays(ncid, [ &
-         nctkarr_t("indlmn", "int", "six, lmnmax, number_of_atom_species"), &
-         nctkarr_t("vkbsign", "dp", "lnmax, number_of_atom_species"), &
-         nctkarr_t("vkb", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints"), &
-         nctkarr_t("vkbd", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints") &
-       ], defmode=.True.)
-       NCF_CHECK(ncerr)
-
-       ! Switch to write mode.
-       NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
-
-       ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-         "mpspso"], &
-         [psps%mpspso])
-       NCF_CHECK(ncerr)
-
-       ! Calculate KB form factors and derivatives.
-       ! The arrays are allocated with lnmax to support pseudos with more than projector.
-       ! Note that lnmax takes into account lloc hence arrays are in packed form and one should be
-       ! accessed with the indices provided by psps%indlmn.
-       ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
-       ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
-       ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
-       ABI_MALLOC(kg_disk, (3, mpw_disk))
-
-       crystal = hdr%get_crystal()
-
-       ! For each k-point: read full G-vector list from file, compute KB data and write to file.
-       do ikpt=1,nkpt
-         npwk_disk = hdr%npwarr(ikpt)
-         NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
-         vkb = zero; vkbd = zero
-         call calc_vkb(crystal, psps, kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
-
-         if (ikpt == 1) then
-           ! This for the automatic tests.
-           NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
-           if(dtset%prtvol>=2)then
-             write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
-             call wrtout(ab_out,msg,'COLL')
-             do iat=1,psps%ntypat
-               write(msg,'(a10,i5)') 'atype ',iat
-               call wrtout(ab_out,msg,'COLL')
-               do iproj=1,psps%lnmax
-                 write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
-                        'projector ', iproj,ch10, &
-                        'vkbsign   ', vkbsign(iproj,iat), ch10, &
-                        'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
-                        'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
-                 call wrtout(ab_out,msg,'COLL')
-               end do
-             end do
-           end if
-         end if
-
-         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
-         NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
-       end do
-       NCF_CHECK(nf90_close(ncid))
-
-       ABI_FREE(kg_disk)
-       ABI_FREE(vkbsign)
-       ABI_FREE(vkb)
-       ABI_FREE(vkbd)
-       call crystal%free()
+       call prtkbff(filnam, hdr, psps, dtset%prtvol)
      end if
 
      if (done) return
@@ -504,6 +407,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 #ifdef HAVE_MPI
        if (dtset%usewvl == 0) then
+         mtag=ikpt+(spin-1)*nkpt
          call xmpi_barrier(spaceWorld)
 
 !        Must transfer the wavefunctions to the master processor
@@ -551,12 +455,12 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
              !write(std_out,*)npw_k,nband_k
              call timab(48,1,tsec)
              if(action==2)then
-               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
                call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor, &
-&               source,cg_disk,nmaster,spaceWorld,ierr)
+&               source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              else
-               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,ierr)
-               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,ierr)
+               call xmpi_exch(kg_disk,3*npw_k,source,kg_disk,nmaster,spaceWorld,2*mtag+1,ierr)
+               call xmpi_exch(cg_disk,2*nband_k*npw_k*my_nspinor,source,cg_disk,nmaster,spaceWorld,2*mtag+2,ierr)
              end if
              call timab(48,2,tsec)
            end if
@@ -607,21 +511,21 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
                if ( iband == 1 ) then
                  if (action==2) then
                    call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin), &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  else
                    call xmpi_exch(kg_disk,3*npw_k,mpi_enreg%proc_distrb(ikpt,iband,spin),  &
-&                   kg_disk,nmaster,spaceWorld,ierr)
+&                   kg_disk,nmaster,spaceWorld,iband*(mtag-1)+1,ierr)
                  end if
                end if       ! iband =1
                ipwnbd=(iband-1)*npw_k*my_nspinor
                if (action==2) then
                  call xmpi_exch( cg(:,ipwnbd+icg+1:ipwnbd+icg+npw_k*my_nspinor),2*npw_k*my_nspinor &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                else
                  call xmpi_exch( cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),2*npw_k*my_nspinor    &
 &                 ,mpi_enreg%proc_distrb(ikpt,iband,spin)                    &
-&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,ierr)
+&                 ,cg_disk(:,ipwnbd+1:ipwnbd+npw_k*my_nspinor),nmaster,spaceWorld,iband*(mtag-1)+2,ierr)
                end if
 
                call timab(48,2,tsec)
@@ -749,12 +653,6 @@ end subroutine outwf
 !! OUTPUT
 !!  done=.True if cg_ncwrite can handle the output of the WFK file in parallel.
 !!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 #ifdef HAVE_NETCDF
@@ -779,7 +677,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 !scalars
  integer,parameter :: master=0,fform2=2
  integer :: ii,iomode,icg,iband,ikg,ikpt,spin,me_cell,me_kpt,me_band,me_spinor,my_nspinor,nband_k,npw_k
- integer :: comm_cell,comm_fft,comm_bandfft,formeig
+ integer :: comm_cell,comm_fft,comm_bandfft,mtag,formeig
  integer :: cnt,min_cnt,max_cnt,ierr,action,source,ncid,ncerr,cg_varid,kg_varid !,eig_varid,
  integer :: paral_kgb,npwtot_k !,start_pwblock !,start_cgblock !count_pwblock,
  integer :: ipw,ispinor_index,npwso,npwsotot,npwtot,nspinortot,ikpt_this_proc,ispinor
@@ -804,7 +702,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
  done = .False.
 
  path = nctk_ncify(fname)
- call wrtout(std_out, sjoin("in cg_ncwrite with path:", path), "COLL")
+ call wrtout(std_out, sjoin("in cg_ncwrite with path:", path))
 
  ! communicators and ranks
  comm_cell = mpi_enreg%comm_cell; me_cell = mpi_enreg%me_cell; nproc_cell = mpi_enreg%nproc_cell
@@ -1017,7 +915,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
      use_collective = (response == 0) ! or (response == 1 .and. nproc_cell == 1)
 
      if (use_collective) then
-       call wrtout(std_out,"Using collective IO for the CGs","COLL")
+       call wrtout(std_out,"Using collective IO for the CGs")
        ! Use collective IO for the CGs
        ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
@@ -1052,7 +950,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        end do
 
      else
-       call wrtout(std_out,"Using individual IO for the CGs","COLL")
+       call wrtout(std_out, "Using individual IO for the CGs")
        ! Individual IO of the CGs (for debugging purposes)
        icg = 0
        do spin=1,nsppol
@@ -1106,6 +1004,7 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
        do ikpt=1,nkpt
          nband_k = nband(ikpt + (spin-1)*nkpt)
          npw_k   = npwarr(ikpt)
+         mtag = ikpt+(spin-1)*nkpt
 
          call xmpi_barrier(comm_cell)
 
@@ -1127,12 +1026,12 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
          if (action==2.or.action==3) then
            call timab(48,1,tsec)
            if (action==2) then
-             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg(:,1+ikg:npw_k+ikg),3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
              call xmpi_exch(cg(:,icg+1:icg+nband_k*npw_k*my_nspinor),2*nband_k*npw_k*my_nspinor,&
-&             source,cg_k,master,comm_cell,ierr)
+&             source,cg_k,master,comm_cell,2*mtag+2,ierr)
            else
-             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,ierr)
-             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,ierr)
+             call xmpi_exch(kg_k,3*npw_k,source,kg_k,master,comm_cell,2*mtag+1,ierr)
+             call xmpi_exch(cg_k,2*nband_k*npw_k*my_nspinor,source,cg_k,master,comm_cell,2*mtag+2,ierr)
            end if
            call timab(48,2,tsec)
          end if
@@ -1349,6 +1248,130 @@ subroutine cg_ncwrite(fname,hdr,dtset,response,mpw,mband,nband,nkpt,nsppol,nspin
 end subroutine cg_ncwrite
 !!***
 
+!!****f* m_iowf/prtkbff
+!! NAME
+!!  prtkbff
+!!
+!! FUNCTION
+!!  Write KB form factors to WFK in netcdf format.
+!!  Only master works. G-vectors are read from file to avoid
+!!  having to deal with paral_kgb distribution.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine prtkbff(filnam, hdr, psps, prtvol)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: filnam
+ type(hdr_type),intent(in) :: hdr
+ type(pseudopotential_type),intent(in) :: psps
+ integer,intent(in) :: prtvol
+
+!Local variables-------------------------------
+!scalars
+ character(len=fnlen) :: path
+ character(len=500) :: msg
+ integer :: ncid, ncerr, kg_varid, mpw_disk, npwk_disk, ikpt, iat, iproj
+ integer,allocatable :: kg_disk(:,:)
+ real(dp),allocatable :: vkb(:,:,:),vkbd(:,:,:),vkbsign(:,:)
+ type(crystal_t) :: crystal
+
+! *************************************************************************
+
+ path = nctk_ncify(filnam)
+ call wrtout(std_out, sjoin("Writing KB form factors to:", path))
+ NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
+ NCF_CHECK(nf90_inq_varid(ncid, "reduced_coordinates_of_plane_waves", kg_varid))
+ mpw_disk = maxval(hdr%npwarr)
+
+ ! Dimensions needed by client code to allocate memory when reading.
+ ncerr = nctk_def_dims(ncid, [ &
+   nctkdim_t("mproj", psps%mproj), &
+   nctkdim_t("mpsang", psps%mpsang), &
+   nctkdim_t("mpssoang", psps%mpssoang), &
+   nctkdim_t("lnmax", psps%lnmax), &
+   nctkdim_t("lmnmax", psps%lmnmax) &
+ ])
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "mpspso"])
+ NCF_CHECK(ncerr)
+
+ ! Write indlmn table (needed to access vkb arrays)
+ ncerr = nctk_def_arrays(ncid, [ &
+   nctkarr_t("indlmn", "int", "six, lmnmax, number_of_atom_species"), &
+   nctkarr_t("vkbsign", "dp", "lnmax, number_of_atom_species"), &
+   nctkarr_t("vkb", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints"), &
+   nctkarr_t("vkbd", "dp", "max_number_of_coefficients, lnmax, number_of_atom_species, number_of_kpoints") &
+ ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ! Switch to write mode.
+ NCF_CHECK(nctk_set_datamode(ncid))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "indlmn"), psps%indlmn))
+
+ ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
+   "mpspso"], &
+   [psps%mpspso])
+ NCF_CHECK(ncerr)
+
+ ! Calculate KB form factors and derivatives.
+ ! The arrays are allocated with lnmax to support pseudos with more than projector.
+ ! Note that lnmax takes into account lloc hence arrays are in packed form and should be
+ ! accessed with the indices provided by psps%indlmn.
+ ABI_MALLOC(vkbsign, (psps%lnmax, psps%ntypat))
+ ABI_MALLOC(vkb, (mpw_disk, psps%lnmax, psps%ntypat))
+ ABI_MALLOC(vkbd, (mpw_disk, psps%lnmax, psps%ntypat))
+ ABI_MALLOC(kg_disk, (3, mpw_disk))
+
+ crystal = hdr%get_crystal()
+
+ ! For each k-point: read full G-vector list from file, compute KB data and write to file.
+ do ikpt=1,hdr%nkpt
+   npwk_disk = hdr%npwarr(ikpt)
+   NCF_CHECK(nf90_get_var(ncid, kg_varid, kg_disk, start=[1, 1, ikpt], count=[3, npwk_disk, 1]))
+   vkb = zero; vkbd = zero
+   call calc_vkb(crystal, psps, hdr%kptns(:, ikpt), npwk_disk, mpw_disk, kg_disk, vkbsign, vkb, vkbd)
+
+   if (ikpt == 1) then
+     ! This for the automatic tests.
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbsign"), vkbsign))
+     if(prtvol >= 2) then
+       write(msg,'(a)') 'prtkbff: writing first and last G-components of the KB form factors'
+       call wrtout(ab_out, msg)
+       do iat=1,psps%ntypat
+         write(msg,'(a10,i5)') 'atype ',iat
+         call wrtout(ab_out, msg)
+         do iproj=1,psps%lnmax
+           write(msg,'(a10,i5,a,a10,e12.4,a,2(a10,2e12.4,a))') &
+                  'projector ', iproj,ch10, &
+                  'vkbsign   ', vkbsign(iproj,iat), ch10, &
+                  'vkb       ', vkb(1,iproj,iat),  vkb(npwk_disk,iproj,iat), ch10, &
+                  'vkbd      ', vkbd(1,iproj,iat), vkbd(npwk_disk,iproj,iat), ''
+           call wrtout(ab_out, msg)
+         end do
+       end do
+     end if
+   end if
+
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkb"), vkb, start=[1, 1, 1, ikpt]))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vkbd"), vkbd, start=[1, 1, 1, ikpt]))
+ end do
+ NCF_CHECK(nf90_close(ncid))
+
+ ABI_FREE(kg_disk)
+ ABI_FREE(vkbsign)
+ ABI_FREE(vkb)
+ ABI_FREE(vkbd)
+ call crystal%free()
+
+end subroutine prtkbff
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_iowf/ncwrite_eigen1_occ
@@ -1371,12 +1394,6 @@ end subroutine cg_ncwrite
 !!    packs the occupations in a 1d vector with a k-dependent separation (nband_k).
 !!    occ and occ3d differ only if nband is k-dependent but you should never assume this, hence
 !!    remember to *convert* occ into occ3d before calling this routine.
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 
@@ -1465,11 +1482,6 @@ end subroutine ncwrite_eigen1_occ
 !!  count_pwblock
 !!  gblock(:,:)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_sum_master
-!!
 !! SOURCE
 
 subroutine kg2seqblocks(npwtot_k,npw_k,kg_k,gmpi2seq,comm_fft,start_pwblock,count_pwblock,gblock)
@@ -1556,12 +1568,6 @@ end subroutine kg2seqblocks
 !! OUTPUT
 !!  bstart
 !!  bcount
-!!
-!! PARENTS
-!!      m_iowf
-!!
-!! CHILDREN
-!!      xmpi_sum_master
 !!
 !! SOURCE
 

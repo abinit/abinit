@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -83,11 +79,6 @@ contains
 !! NOTES
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
-!!
-!! PARENTS
-!!      m_opernl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -649,11 +640,6 @@ end subroutine dfpt_mkffkg
 !! NOTES
 !!  This routine must be thread-safe as it is called inside loops that are OpenMP parallelized.
 !!  Please, do not add variables with the save attribute or SIDE EFFECTS.
-!!
-!! PARENTS
-!!      m_opernl
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

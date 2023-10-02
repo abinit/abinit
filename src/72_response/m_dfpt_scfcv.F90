@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_dfpt_scfcv
 !! NAME
 !!  m_dfpt_scfcv
@@ -10,10 +9,6 @@
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -269,13 +264,6 @@ contains
 !!  === if psps%usepaw==1
 !!    pawrhoij1(natom) <type(pawrhoij_type)>= 1st-order paw rhoij occupancies and related data
 !!
-!! PARENTS
-!!      m_dfpt_looppert
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
@@ -433,7 +421,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),allocatable :: dielinv(:,:,:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
- real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:),vhartr1(:),vxc1(:,:)
+ real(dp),allocatable :: susmat(:,:,:,:,:),vectornd(:,:,:),vhartr1(:),vxc1(:,:)
  real(dp),allocatable :: vhartr1_tmp(:,:)
  real(dp),allocatable,target :: vtrial1(:,:),vtrial2(:,:)
  real(dp),allocatable :: vtrial1_pq(:,:),vtrial1_mq(:,:),rhorfermi_mq(:,:)
@@ -472,8 +460,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  paral_atom=(my_natom/=dtset%natom)
  my_atmtab=>mpi_enreg%my_atmtab
 
- _IBM6("XLF in dfpt_scfcv")
-
 !Save some variables from dataset definition
  ecut=dtset%ecut
  ecutf=ecut;if (psps%usepaw==1) ecutf=dtset%pawecutdg
@@ -509,14 +495,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  usexcnhat=0
 !This might be taken away later
  edocc=zero ; eeig0=zero ; ehart01=zero ; ehart1=zero ; ek0=zero ; ek1=zero
- eloc0=zero ; elpsp1=zero ; end0=zero; end1=zero; 
+ eloc0=zero ; elpsp1=zero ; end0=zero; end1=zero;
  enl0=zero ; enl1=zero ; eovl1=zero; exc1=zero
  deltae=zero ; fermie1=zero ; epaw1=zero ; eberry=zero ; elmag1=zero
  elast_mq=zero
  dbl_nnsclo_mq=0
 !This might be taken away later
  edocc_mq=zero ; eeig0_mq=zero ; ehart01_mq=zero ; ehart1_mq=zero ; ek0_mq=zero ; ek1_mq=zero
- eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ; 
+ eloc0_mq=zero ; elpsp1_mq=zero ; enl0_mq=zero ; enl1_mq=zero ;
  end0_mq=zero; end1_mq=zero; eovl1_mq=zero; exc1_mq=zero
  deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
  res2_mq=zero
@@ -698,17 +684,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_MALLOC(qmat,(0,0,0,0,0,0))
  end if
 
-! if any nuclear dipoles are nonzero, compute the vector potential in real space 
+! if any nuclear dipoles are nonzero, compute the vector potential in real space
  with_vectornd = 0
  ! nuclear dipoles only work with the DDK response function
  if ( (ANY(ABS(dtset%nucdipmom(:,:))>tol8)) .AND. (ipert.EQ.dtset%natom+1) )  with_vectornd = 1
  if(allocated(vectornd)) then
    ABI_FREE(vectornd)
  end if
- ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
+ ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
  if(with_vectornd .EQ. 1) then
    call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,&
-   & ngfftf,dtset%nucdipmom,rprimd,vectornd,xred)
+   & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
  call timab(154,2,tsec)
@@ -889,7 +875,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdenpot(dum,epaw1,epawdc1_dum,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,&
 &     dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !    First-order Dij computation
@@ -1103,7 +1089,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        call pawdenpot(dum,epaw1,epawdc1_dum,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,dtset%pawprtvol,&
 &       pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&       dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
 
@@ -1386,8 +1372,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
-&     symrl1,tnons1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
-&     xccc3d1,xred,ylm,ylm1,ylmgr1)
+&     symrl1,tnons1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vectornd,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
+&     with_vectornd,wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
    else
      if (dtset%nspden==4) then
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
@@ -1489,16 +1475,44 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ngfftf,cplex,nfftf,dtset%nspden,rhor1,mpi_enreg)
    end if
 
-   ! first order potentials are always written because the eph code requires them
-   ! the files are small (much much smaller that 1WFK, actually we should avoid writing 1WFK)
-   rdwrpaw=0
-   call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
-   ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
-   call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
-   ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
+   ! Write first order potentials (needed by EPH)
+   ! In DFPT, prtpot is automatically set to 1 unless the user set it to 0 explictly in the input
+   ! See invars2
+   ! (actually we should avoid writing 1WFK)
+   if (dtset%prtpot > 0) then
+     rdwrpaw=0
+     call appdig(pertcase,dtfil%fnameabo_pot,fi1o)
+     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+     call fftdatar_write_from_hdr("first_order_potential",fi1o,dtset%iomode,hdr,&
+     ngfftf,cplex,nfftf,dtset%nspden,vtrial1,mpi_enreg)
 
-! output files for perturbed potential components: vhartr1,vpsp1,vxc
-! NB: only 1 spin for these
+     ! Add rhog1(G=0) to file
+     ! This part is obsolete. I keep it just to maintain compatibility with the fileformat.
+     if (mpi_enreg%me_g0 == 1) then
+       if (dtset%iomode == IO_MODE_ETSF) then
+#ifdef HAVE_NETCDF
+         NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
+         ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
+         NCF_CHECK(ncerr)
+         NCF_CHECK(nctk_set_datamode(ncid))
+         NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
+         NCF_CHECK(nf90_close(ncid))
+#endif
+       else
+         ! Handle Fortran files.
+         if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
+           ABI_ERROR(msg)
+         end if
+         if (fort_denpot_skip(ncid, msg) /= 0) ABI_ERROR(msg)
+         write(ncid) rhog1(:,1)
+         close(ncid)
+       end if
+     end if
+
+   end if
+
+   ! output files for perturbed potential components: vhartr1,vpsp1,vxc
+   ! NB: only 1 spin for these
    if (dtset%prtvha > 0) then
      rdwrpaw=0
      ABI_MALLOC(vhartr1_tmp, (cplex*nfftf, dtset%nspden))
@@ -1511,15 +1525,14 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ABI_FREE(vhartr1_tmp)
    end if
 
-
-! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
-!   if (dtset%prtvpsp > 0) then
-!     rdwrpaw=0
-!     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
-!     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
-!     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
-!       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
-!   end if
+   ! vpsp1 needs to be copied to a temp array - intent(inout) in fftdatar_write_from_hdr though I do not know why
+   !   if (dtset%prtvpsp > 0) then
+   !     rdwrpaw=0
+   !     call appdig(pertcase,dtfil%fnameabo_vpsp,fi1o)
+   !     ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
+   !     call fftdatar_write_from_hdr("first_order_vpsp",fi1o,dtset%iomode,hdr,&
+   !       ngfftf,cplex,nfftf,1,vpsp1,mpi_enreg)
+   !   end if
 
    if (dtset%prtvxc > 0) then
      rdwrpaw=0
@@ -1527,29 +1540,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      ! TODO: should we write pawrhoij1 or pawrhoij. Note that ioarr writes hdr%pawrhoij
      call fftdatar_write_from_hdr("first_order_vxc",fi1o,dtset%iomode,hdr,&
      ngfftf,cplex,nfftf,dtset%nspden,vxc1,mpi_enreg)
-   end if
-
-
-   ! Add rhog1(G=0) to file
-   if (mpi_enreg%me_g0 == 1) then
-     if (dtset%iomode == IO_MODE_ETSF) then
-#ifdef HAVE_NETCDF
-       NCF_CHECK(nctk_open_modify(ncid, nctk_ncify(fi1o), xmpi_comm_self))
-       ncerr = nctk_def_one_array(ncid, nctkarr_t('rhog1_g0', "dp", "two"), varid=varid)
-       NCF_CHECK(ncerr)
-       NCF_CHECK(nctk_set_datamode(ncid))
-       NCF_CHECK(nf90_put_var(ncid, varid, rhog1(:,1)))
-       NCF_CHECK(nf90_close(ncid))
-#endif
-     else
-       ! Handle Fortran files.
-       if (open_file(fi1o, msg, newunit=ncid, form='unformatted', status='old', action="readwrite") /= 0) then
-         ABI_ERROR(msg)
-       end if
-       if (fort_denpot_skip(ncid, msg) /= 0) ABI_ERROR(msg)
-       write(ncid) rhog1(:,1)
-       close(ncid)
-     end if
    end if
 
  end if ! iwrite_fftdatar(mpi_enreg)
@@ -1652,13 +1642,6 @@ end subroutine dfpt_scfcv
 !! elast=previous value of the 2nd-order total energy, needed to compute deltae,
 !!      then updated (cannot simply be saved, because set to zero
 !!      at each new call of dfpt_scfcv).
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1795,13 +1778,6 @@ end subroutine dfpt_etot
 !!  fermie1=derivative of fermi energy wrt perturbation
 !!   at input  : old value
 !!   at output : updated value
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -1992,13 +1968,6 @@ end subroutine newfermie1
 !!    On-site occupancies (rhoij) are stored in (n,mx,my,mz)
 !!    This is compatible provided that the mixing factors for n and m are identical
 !!    and that the residual is not a combination of V_res and rhoij_res (pawoptmix=0).
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2401,13 +2370,6 @@ end subroutine dfpt_newvtr
 !!       second order derivatives
 !!  d2lo(2,3,mpert,3,mpert)=local contributions to the 2DTEs
 !!  d2nl(2,3,mpert,3,mpert)=non-local contributions to the 2DTEs
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -2817,13 +2779,6 @@ end subroutine dfpt_nselt
 !!  d2nl_k(2,3,mpert)=non-local contributions to
 !!   non-stationary 2DTE, for the present k point, and perturbation idir, ipert
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1,ikpt,isppol,&
@@ -3077,13 +3032,6 @@ end subroutine dfpt_nsteltwf
 !! NOTES
 !! Note that the ddk perturbation should not be treated here.
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
-!!
 !! SOURCE
 
 subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,&
@@ -3162,7 +3110,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 
 !Keep track of total time spent in dfpt_nstdy
- call timab(101,1,tsec)
+ call timab(111,1,tsec)
 
 !Init parallelism
  spaceworld=mpi_enreg%comm_cell
@@ -3541,7 +3489,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  ABI_FREE(eig_k)
  ABI_FREE(eig1_k)
 
- call timab(101,2,tsec)
+ call timab(111,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -3651,13 +3599,6 @@ end subroutine dfpt_nstdy
 !! NOTES
 !!  This routine will NOT work with nspden==4:
 !!    at least the use of fftpac should be modified.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 
@@ -4327,13 +4268,6 @@ end subroutine dfpt_rhofermi
 !!  ==== if (gs_hamkq%usepaw==1) ====
 !!    pawrhoijfermi(natom) <type(pawrhoij_type)>= paw rhoij occupancies
 !!       at Fermi level (cumulative, so input as well as output)
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_accrho,dotprod_g,getgh1c,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,pawcprj_get,timab,wrtout
 !!
 !! SOURCE
 

@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -140,12 +136,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -614,12 +604,6 @@ end subroutine pead_nl_loop
 !! OUTPUT
 !!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
-!! PARENTS
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
@@ -930,12 +914,6 @@ end subroutine pead_nl_resp
 !! For a given set of values of i1pert,i3pert,i1dir and
 !! i3dir, the routine computes the k-point derivatives for
 !! 12dir = 1,2,3
-!!
-!! PARENTS
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 

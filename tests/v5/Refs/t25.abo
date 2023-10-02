@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h27 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t25/t25.in
-- output file    -> t25.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t25/t25.abi
+- output file    -> t25.abo
 - root for input  files -> t25i
 - root for output files -> t25o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           5        mffmem =           1         mkmem =           1
        mpw =           5          nfft =         216          nkpt =           1
 ================================================================================
-P This job should need less than                       1.045 Mbytes of memory.
+P This job should need less than                       1.051 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -56,7 +54,6 @@ P This job should need less than                       1.021 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -88,6 +85,8 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.004 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      6.0000000000E+00  6.0000000000E+00  6.0000000000E+00 Bohr
               amu      2.07200000E+02  1.27600000E+02
+              asr           0
+           chneut           0
              ecut      2.00000000E+00 Hartree
 -          fftalg         312
            getddk1          0
@@ -126,9 +125,9 @@ P          mk1mem           1
         optdriver1          0
         optdriver2          1
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
             rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
@@ -220,8 +219,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/82pb.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Pb,  from PRB58, 3641 (1998)
 - 82.00000   4.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -246,8 +245,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2    4.356433
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/52te.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for Te,  from PRB58, 3641 (1998)
 - 52.00000   6.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -431,7 +430,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -451,7 +449,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -513,7 +510,7 @@ tolerances: {tolwfr: 1.00E-16, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -558,7 +555,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -612,7 +608,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -669,7 +664,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -725,7 +719,6 @@ tolerances: {tolwfr: 1.00E-16, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t25o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -929,7 +922,7 @@ tolerances: {tolwfr: 1.00E-16, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -956,7 +949,7 @@ tolerances: {tolwfr: 1.00E-16, }
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -1028,6 +1021,8 @@ tolerances: {tolwfr: 1.00E-16, }
  -outvars: echo values of variables after computation  --------
             acell      6.0000000000E+00  6.0000000000E+00  6.0000000000E+00 Bohr
               amu      2.07200000E+02  1.27600000E+02
+              asr           0
+           chneut           0
              ecut      2.00000000E+00 Hartree
            etotal1    -8.1449474190E-01
            etotal2    -5.4361408656E+00
@@ -1073,9 +1068,9 @@ P          mk1mem           1
         optdriver1          0
         optdriver2          1
         optdriver3          1
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
             rfdir1          1       1       1
             rfdir2          1       0       0
             rfdir3          1       1       1
@@ -1217,5 +1212,5 @@ P          mk1mem           1
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and  39 COMMENTs to log file.
+.Delivered  10 WARNINGs and  22 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.4  wall=          0.4

@@ -12,7 +12,71 @@
  *
  */
 
-#include <cublas.h>
+#include <gpu_linalg.h>
+
+cublasHandle_t cublas_handle;
+
+// utility function for compatiblity between cublas v1/v2 API
+cublasOperation_t select_cublas_op(char *c)
+{
+  cublasOperation_t op;
+
+  if (*c == 'n' or *c == 'N')
+    op = CUBLAS_OP_N;
+  else if (*c == 't' or *c == 'T')
+    op = CUBLAS_OP_T;
+  else if (*c == 'c' or *c == 'C')
+    op = CUBLAS_OP_C;
+  else
+    printf("CUBLAS API error, character can't be converted to a valid cublas operation !\n");
+
+  return op;
+}
+
+// utility function for compatiblity between cublas v1/v2 API
+cublasSideMode_t select_cublas_side(char *c)
+{
+  cublasSideMode_t mode;
+
+  if (*c == 'l' or *c == 'L')
+    mode = CUBLAS_SIDE_LEFT;
+  else if (*c == 'r' or *c == 'R')
+    mode = CUBLAS_SIDE_RIGHT;
+  else
+    printf("CUBLAS API error, character can't be converted to a valid cublas side mode !\n");
+
+  return mode;
+}
+
+// utility function for compatiblity between cublas v1/v2 API
+cublasFillMode_t select_cublas_fill_mode(char *c)
+{
+  cublasFillMode_t mode;
+
+  if (*c == 'u' or *c == 'U')
+    mode = CUBLAS_FILL_MODE_UPPER;
+  else if (*c == 'l' or *c == 'L')
+    mode = CUBLAS_FILL_MODE_LOWER;
+  else
+    printf("CUBLAS API error, character can't be converted to a valid cublas fill mode !\n");
+
+  return mode;
+}
+
+// utility function for compatiblity between cublas v1/v2 API
+cublasDiagType_t select_cublas_diag_type(char *c)
+{
+  cublasDiagType_t diag;
+
+  if (*c == 'n' or *c == 'N')
+    diag = CUBLAS_DIAG_NON_UNIT;
+  else if (*c == 'u' or *c == 'U')
+    diag = CUBLAS_DIAG_UNIT;
+  else
+    printf("CUBLAS API error, character can't be converted to a valid cublas diag type !\n");
+
+  return diag;
+}
 
 
 /*=========================================================================*/
@@ -27,7 +91,7 @@
 /*=========================================================================*/
 
 extern "C" void gpu_linalg_init_(){
-  cublasInit();
+  CUDA_API_CHECK( cublasCreate(&cublas_handle) );
 }
 
 /*=========================================================================*/
@@ -42,7 +106,7 @@ extern "C" void gpu_linalg_init_(){
 /*=========================================================================*/
 
 extern "C" void gpu_linalg_shutdown_(){
-  cublasShutdown();
+  CUDA_API_CHECK( cublasDestroy(cublas_handle) );
 }
 
 /*=========================================================================*/
@@ -76,12 +140,26 @@ extern "C" void gpu_linalg_shutdown_(){
 //            the correct one is in xx_gpu_toolbox/gpu_linalg.cu
 /*=========================================================================*/
 
-extern "C" void gpu_xgemm_(int* cplx,char *transA,char *transB,int *N,int *M,int *K,cuDoubleComplex *alpha,
-			   void **A_ptr,int *lda,void** B_ptr,int *ldb,cuDoubleComplex *beta,void** C_ptr,int *ldc){
+extern "C" void gpu_xgemm_(int* cplx, char *transA, char *transB, int *N, int *M, int *K,
+                           cuDoubleComplex *alpha,
+                           void **A_ptr, int *lda, void** B_ptr, int *ldb,
+                           cuDoubleComplex *beta, void** C_ptr, int *ldc)
+{
+
+  cublasOperation_t opA = select_cublas_op(transA);
+  cublasOperation_t opB = select_cublas_op(transB);
+
   (*cplx==1)?
-    cublasDgemm(*transA,*transB,*N,*M,*K,(*alpha).x,(double *)(*A_ptr),*lda,(double *)(*B_ptr),*ldb,(*beta).x,(double *)(*C_ptr),*ldc):
-    cublasZgemm(*transA,*transB,*N,*M,*K,*alpha,(cuDoubleComplex *)(*A_ptr),*lda,
-		(cuDoubleComplex *)(*B_ptr),*ldb,*beta,(cuDoubleComplex *)(*C_ptr),*ldc);
+    cublasDgemm(cublas_handle, opA, opB, *N, *M, *K, &((*alpha).x),
+                (double *)(*A_ptr), *lda,
+                (double *)(*B_ptr), *ldb,
+                &((*beta).x),
+                (double *)(*C_ptr), *ldc) :
+    cublasZgemm(cublas_handle, opA, opB, *N, *M, *K, alpha,
+                (cuDoubleComplex *)(*A_ptr), *lda,
+                (cuDoubleComplex *)(*B_ptr), *ldb,
+                beta,
+                (cuDoubleComplex *)(*C_ptr), *ldc);
 }
 
 /*=========================================================================*/
@@ -131,9 +209,24 @@ extern "C" void gpu_xgemm_(int* cplx,char *transA,char *transB,int *N,int *M,int
 //  b_gpu
 /*=========================================================================*/
 
-extern "C" void gpu_xtrsm_(int* cplx,char *side,char *uplo,char *transA,char *diag,int *N,int *M,cuDoubleComplex *alpha,
-			   void **A_ptr,int *ldA,void** B_ptr,int *ldB){
-  (*cplx==1)?
-    cublasDtrsm(*side,*uplo,*transA,*diag,*N,*M,(*alpha).x,(double *)(*A_ptr),*ldA,(double *)(*B_ptr),*ldB):
-    cublasZtrsm(*side,*uplo,*transA,*diag,*N,*M,*alpha,(cuDoubleComplex *)(*A_ptr),*ldA,(cuDoubleComplex *)(*B_ptr),*ldB);
+extern "C" void gpu_xtrsm_(int* cplx, char *side, char *uplo, char *transA, char *diag,
+                           int *N, int *M, cuDoubleComplex *alpha,
+                           void **A_ptr, int *ldA,
+                           void** B_ptr, int *ldB)
+{
+
+  cublasSideMode_t sideMode = select_cublas_side(side);
+  cublasFillMode_t fillMode = select_cublas_fill_mode(uplo);
+  cublasDiagType_t diagType = select_cublas_diag_type(diag);
+  cublasOperation_t opA     = select_cublas_op(transA);
+
+  (*cplx==1) ?
+    cublasDtrsm(cublas_handle, sideMode, fillMode, opA, diagType,
+                *N, *M, &((*alpha).x),
+                (double *)(*A_ptr), *ldA,
+                (double *)(*B_ptr), *ldB):
+    cublasZtrsm(cublas_handle, sideMode, fillMode, opA, diagType,
+                *N, *M, alpha,
+                (cuDoubleComplex *)(*A_ptr), *ldA,
+                (cuDoubleComplex *)(*B_ptr), *ldB);
 }

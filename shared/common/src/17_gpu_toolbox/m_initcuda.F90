@@ -15,10 +15,6 @@
 !! NOTES
 !!  Is an experimental development
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -87,11 +83,6 @@ CONTAINS !===========================================================
 !! FUNCTION
 !! Print information about GPU device
 !!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine prt_device_info(device)
@@ -130,7 +121,7 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i2,a,i4,4a,2(a,i7,2a),a,i7,a)')&
+ write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i4,a,i4,4a,2(a,i7,2a),a,i7,a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
@@ -157,11 +148,6 @@ CONTAINS !===========================================================
 !!
 !! FUNCTION
 !! Print information about GPU device
-!!
-!! PARENTS
-!!      m_hidecudarec,m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -200,11 +186,6 @@ CONTAINS !===========================================================
 !! FUNCTION
 !! Give the number of device with capability>=1.2
 !!
-!! PARENTS
-!!      m_gpu_detect,m_invars1
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine Get_ndevice(ndevice)
@@ -236,10 +217,6 @@ CONTAINS !===========================================================
 !! OUTPUT
 !! max_mem_dev
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine Get_Mem_Dev(device,max_mem_dev)
@@ -265,11 +242,6 @@ end subroutine Get_Mem_Dev
 !!
 !! FUNCTION
 !! Print information about GPU device
-!!
-!! PARENTS
-!!      m_hidecudarec,m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -304,11 +276,6 @@ end subroutine Get_Mem_Dev
 !!
 !! SIDE EFFECTS
 !!  use_gpu_cuda= 1 if CUDA is on; will be set to 0 if no GPU device is free.
-!!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -396,11 +363,6 @@ end subroutine Get_Mem_Dev
 !! FUNCTION
 !! Deactivate a GPU device from current CPU core
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine unsetdevice_cuda(use_gpu_cuda)
@@ -431,11 +393,6 @@ end subroutine Get_Mem_Dev
 !! FUNCTION
 !! In case of multiple devices, sort them by performances
 !! and output the resulting list of devices.
-!!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -487,7 +444,7 @@ end subroutine Get_Mem_Dev
 &                    sharemem,regist,nprocs,ncores)
    flops(ii+1)=dble(gflops) ; mem(ii+1)=dble(globalmem)
    call unset_dev()
-   write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i2,a,i4,a)') &
+   write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i4,a,i4,a)') &
 &   '  Device ',ii,': ',trim(name(1:lenname)),', v',vers(0),'.',vers(1),', Mem=',nint(globalmem),&
 &   ' Mbytes, Clock=',clockrate,' GHz, ',gflops,' GFLOPS, ',nprocs,' processors, ',ncores,' cores'
    call wrtout(std_out,msg,'PERS')
@@ -519,11 +476,6 @@ contains
 !! FUNCTION
 !!  Small sorting routine: change iperm array
 !!  according to list1 values then list2 values
-!!
-!! PARENTS
-!!      m_initcuda
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

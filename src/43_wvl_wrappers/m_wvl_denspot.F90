@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -62,13 +58,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      deallocate_denspot_distribution,deallocate_rho_descriptors
-!!      denspot_free_history,f_free_ptr
 !!
 !! SOURCE
 
@@ -175,13 +164,6 @@ end subroutine wvl_denspot_set
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gstate,m_wvl_wfsinp
-!!
-!! CHILDREN
-!!      deallocate_denspot_distribution,deallocate_rho_descriptors
-!!      denspot_free_history,f_free_ptr
 !!
 !! SOURCE
 

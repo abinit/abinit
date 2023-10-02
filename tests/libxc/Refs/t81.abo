@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,11 +14,11 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h18 )
+.Starting date : Tue 11 Jul 2023.
+- ( at 21h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/libxc_t81/t81.in
-- output file    -> t81.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/libxc_t81/t81.abi
+- output file    -> t81.abo
 - root for input  files -> t81i
 - root for output files -> t81o
 
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           2
        mpw =          69          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.149 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.013 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -931,13 +931,35 @@ P          mk1mem37        16
         optdriver35         1
         optdriver36         1
         optdriver37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         0
+           prtpot14         0
+           prtpot15         0
+           prtpot16         0
+           prtpot17         0
+           prtpot21         1
+           prtpot22         1
+           prtpot23         1
+           prtpot24         1
+           prtpot25         1
+           prtpot26         1
+           prtpot27         1
+           prtpot31         1
+           prtpot32         1
+           prtpot33         1
+           prtpot34         1
+           prtpot35         1
+           prtpot36         1
+           prtpot37         1
+          rfatpol           1       1
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
+            rfdir14         1       1       1
+            rfdir15         1       1       1
+            rfdir16         1       1       1
+            rfdir17         1       1       1
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0
@@ -1220,8 +1242,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1387,8 +1409,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1512,10 +1534,10 @@ xc                  : -5.61196983300395E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
 local_psp           : -2.46259440288329E+00
-non_local_psp       :  1.65856251203445E+00
+non_local_psp       :  1.65856251203444E+00
 total_energy        : -1.08254693657561E+01
 total_energy_eV     : -2.94576002376261E+02
-band_energy         : -1.53070948962153E-01
+band_energy         : -1.53070948962151E-01
 ...
 
 
@@ -1558,8 +1580,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1724,8 +1746,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1789,9 +1811,9 @@ xred      :
 - [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
 - [  8.7500E-01,   8.7500E-01,   8.7500E-01, Si]
 cartesian_forces: # hartree/bohr
-- [ -9.90138970E-20,  -1.41448424E-20,   1.27303582E-19, ]
-- [  9.90138970E-20,   1.41448424E-20,  -1.27303582E-19, ]
-force_length_stats: {min:   1.61895121E-19, max:   1.61895121E-19, mean:   1.61895121E-19, }
+- [ -1.83882952E-19,   7.07242122E-20,   4.24345273E-20, ]
+- [  1.83882952E-19,  -7.07242122E-20,  -4.24345273E-20, ]
+force_length_stats: {min:   2.01532983E-19, max:   2.01532983E-19, mean:   2.01532983E-19, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1807,23 +1829,23 @@ force_length_stats: {min:   1.61895121E-19, max:   1.61895121E-19, mean:   1.618
  reduced coordinates (array xred) for    2 atoms
        0.125000000000      0.125000000000      0.125000000000
        0.875000000000      0.875000000000      0.875000000000
- rms dE/dt=  4.7945E-19; max dE/dt=  5.7824E-19; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  6.5718E-19; max dE/dt=  8.6736E-19; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.67602388397372     0.67602388397372     0.67602388397372
     2      4.73216718781608     4.73216718781608     4.73216718781608
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 9.3470192E-20 1.2730358E-19   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.1635512E-19 1.8388295E-19   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 4.8064301E-18 6.5462128E-18   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 5.9832204E-18 9.4556408E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.220000000000 10.220000000000 10.220000000000 bohr
               =  5.408191071790  5.408191071790  5.408191071790 angstroms
  prteigrs : about to open file t81o_DS14_EIG
@@ -1843,16 +1865,16 @@ force_length_stats: {min:   1.61895121E-19, max:   1.61895121E-19, mean:   1.618
 --- !EnergyTerms
 iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
-kinetic             :  2.95539445431454E+00
+kinetic             :  2.95539445431455E+00
 hartree             :  5.36576068556620E-01
-xc                  : -5.72471689302634E+00
+xc                  : -5.72471689302633E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
 local_psp           : -2.46783885993589E+00
 non_local_psp       :  1.65227246971915E+00
 total_energy        : -1.09356810836781E+01
 total_energy_eV     : -2.97575015738507E+02
-band_energy         : -8.81413268406932E-02
+band_energy         : -8.81413268406924E-02
 ...
 
 
@@ -1895,8 +1917,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2061,8 +2083,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2185,8 +2207,8 @@ hartree             :  5.29649129877228E-01
 xc                  : -5.61182218401014E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
-local_psp           : -2.46383113592156E+00
-non_local_psp       :  1.65933320576201E+00
+local_psp           : -2.46383113592155E+00
+non_local_psp       :  1.65933320576200E+00
 total_energy        : -1.08250774217355E+01
 total_energy_eV     : -2.94565337037065E+02
 band_energy         : -1.51398155762842E-01
@@ -2227,8 +2249,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2347,15 +2369,15 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.94896179711168E+00
-hartree             :  5.29649046737724E-01
+hartree             :  5.29649046737727E-01
 xc                  : -5.61182025028937E+00
 Ewald energy        : -8.43334331763888E+00
 psp_core            :  5.45974994332637E-01
-local_psp           : -2.46383089143433E+00
+local_psp           : -2.46383089143434E+00
 non_local_psp       :  1.65933308454254E+00
 total_energy        : -1.08250755366380E+01
 total_energy_eV     : -2.94565285740952E+02
-band_energy         : -1.51397065560970E-01
+band_energy         : -1.51397065560969E-01
 ...
 
 
@@ -2401,8 +2423,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2417,7 +2439,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2434,7 +2455,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2508,7 +2528,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2539,8 +2559,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2555,7 +2575,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2572,7 +2591,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2646,7 +2664,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2682,8 +2700,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2698,7 +2716,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2715,7 +2732,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2789,7 +2805,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2820,8 +2836,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2836,7 +2852,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2853,7 +2868,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2927,7 +2941,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2963,8 +2977,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2979,7 +2993,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2996,7 +3009,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3070,7 +3082,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3101,8 +3113,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3117,7 +3129,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3134,7 +3145,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3208,7 +3218,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3239,8 +3249,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3255,7 +3265,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3272,7 +3281,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3346,7 +3354,7 @@ tolerances: {tolwfr: 1.00E-22, }
 
  WARNING : Localization tensor calculation (this does not apply to other properties).
   Not all d/dk perturbations were computed. So the localization tensor in reciprocal space is incomplete,
-  and transformation to cartesian coordinates may be wrong.
+  and transformation to cartesian coordinates may be wrong. Check input variable rfdir.
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -3384,8 +3392,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3400,7 +3408,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3418,7 +3425,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3564,23 +3570,23 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3120742017         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   1    1         0.1235345406        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1235345406         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.3120742017         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1235345406        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1235345406         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3120742017         0.0000000000
+   3    1   3    1         0.1235345406        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1235345406         0.0000000000
@@ -3588,27 +3594,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1235345406        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3120742017         0.0000000000
+   1    2   1    2         0.1235345406         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1235345406        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3120742017         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1235345406         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1235345406        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3120742017         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1235345406         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -3641,20 +3647,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.919023E-03  1.919023E-03  1.919023E-03  2.916938E-03  2.916938E-03
-   2.916938E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.196788E-03  2.196788E-03
+   2.196788E-03
  Phonon energies in meV     :
--  5.221928E+01  5.221928E+01  5.221928E+01  7.937391E+01  7.937391E+01
--  7.937391E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.977763E+01  5.977763E+01
+-  5.977763E+01
  Phonon frequencies in cm-1    :
--  4.211769E+02  4.211769E+02  4.211769E+02  6.401938E+02  6.401938E+02
--  6.401938E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.821391E+02  4.821391E+02
+-  4.821391E+02
  Phonon frequencies in Thz     :
--  1.262657E+01  1.262657E+01  1.262657E+01  1.919253E+01  1.919253E+01
--  1.919253E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.445417E+01  1.445417E+01
+-  1.445417E+01
  Phonon energies in Kelvin  :
--  6.059789E+02  6.059789E+02  6.059789E+02  9.210950E+02  9.210950E+02
--  9.210950E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.936898E+02  6.936898E+02
+-  6.936898E+02
 
 ================================================================================
 == DATASET 32 ==================================================================
@@ -3685,8 +3691,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3701,7 +3707,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3719,7 +3724,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS11_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -3734,7 +3738,7 @@ tolerances: {tolvrs: 1.00E-10, }
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   24.722988461497     -3.273E+01 3.215E-02 9.955E+02
  ETOT  2   16.457065419113     -8.266E+00 1.406E-02 4.191E+00
- ETOT  3   16.434737926987     -2.233E-02 3.170E-04 3.038E-01
+ ETOT  3   16.434737926986     -2.233E-02 3.170E-04 3.038E-01
 -open ddk wf file :t81o_DS21_1WF7
 
  scprqt:  WARNING -
@@ -3865,23 +3869,23 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3120742017         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   1    1         0.1235345406        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1235345406         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.3120742017         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1235345406        -0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1235345406         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3120742017         0.0000000000
+   3    1   3    1         0.1235345406        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1235345406         0.0000000000
@@ -3889,27 +3893,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1235345406        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3120742017         0.0000000000
+   1    2   1    2         0.1235345406         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1235345406        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3120742017         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.1235345406         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1235345406        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.3120742017         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1235345406         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -3942,20 +3946,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.919023E-03  1.919023E-03  1.919023E-03  2.916938E-03  2.916938E-03
-   2.916938E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.196788E-03  2.196788E-03
+   2.196788E-03
  Phonon energies in meV     :
--  5.221928E+01  5.221928E+01  5.221928E+01  7.937391E+01  7.937391E+01
--  7.937391E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.977763E+01  5.977763E+01
+-  5.977763E+01
  Phonon frequencies in cm-1    :
--  4.211769E+02  4.211769E+02  4.211769E+02  6.401938E+02  6.401938E+02
--  6.401938E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.821391E+02  4.821391E+02
+-  4.821391E+02
  Phonon frequencies in Thz     :
--  1.262657E+01  1.262657E+01  1.262657E+01  1.919253E+01  1.919253E+01
--  1.919253E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.445417E+01  1.445417E+01
+-  1.445417E+01
  Phonon energies in Kelvin  :
--  6.059789E+02  6.059789E+02  6.059789E+02  9.210950E+02  9.210950E+02
--  9.210950E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.936898E+02  6.936898E+02
+-  6.936898E+02
 
 ================================================================================
 == DATASET 33 ==================================================================
@@ -3991,8 +3995,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4007,7 +4011,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4025,7 +4028,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4171,15 +4173,15 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.1505734885         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   1    1         0.1344282483        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1344282483         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1        -0.1505734885         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1344282483        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1344282483         0.0000000000
@@ -4187,7 +4189,7 @@ tolerances: {tolvrs: 1.00E-10, }
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1        -0.1505734885         0.0000000000
+   3    1   3    1         0.1344282483        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1344282483         0.0000000000
@@ -4195,27 +4197,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1344282483        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2        -0.1505734885         0.0000000000
+   1    2   1    2         0.1344282483         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1344282483        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2        -0.1505734885         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   2    2         0.1344282483         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1344282483        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2        -0.1505734885         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1344282483         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -4248,20 +4250,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -2.359406E-03 -2.359406E-03 -2.359406E-03 -5.615664E-04 -5.615664E-04
-  -5.615664E-04
+   0.000000E+00  0.000000E+00  0.000000E+00  2.291602E-03  2.291602E-03
+   2.291602E-03
  Phonon energies in meV     :
-- -6.420269E+01 -6.420269E+01 -6.420269E+01 -1.528100E+01 -1.528100E+01
-- -1.528100E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.235765E+01  6.235765E+01
+-  6.235765E+01
  Phonon frequencies in cm-1    :
-- -5.178297E+02 -5.178297E+02 -5.178297E+02 -1.232496E+02 -1.232496E+02
-- -1.232496E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.029484E+02  5.029484E+02
+-  5.029484E+02
  Phonon frequencies in Thz     :
-- -1.552414E+01 -1.552414E+01 -1.552414E+01 -3.694930E+00 -3.694930E+00
-- -3.694930E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.507801E+01  1.507801E+01
+-  1.507801E+01
  Phonon energies in Kelvin  :
-- -7.450405E+02 -7.450405E+02 -7.450405E+02 -1.773284E+02 -1.773284E+02
-- -1.773284E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.236297E+02  7.236297E+02
+-  7.236297E+02
 
 ================================================================================
 == DATASET 34 ==================================================================
@@ -4292,8 +4294,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4308,7 +4310,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4326,7 +4327,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS13_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4472,23 +4472,23 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1        -0.1505736200         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   1    1         0.1344282796        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1344282796         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1        -0.1505736200         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1344282796        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1344282796         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1        -0.1505736200         0.0000000000
+   3    1   3    1         0.1344282796        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1344282796         0.0000000000
@@ -4496,27 +4496,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1344282796        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2        -0.1505736200         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   1    2         0.1344282796         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1344282796        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2        -0.1505736200         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1344282796         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1344282796        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2        -0.1505736200         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1344282796         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -4549,20 +4549,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -2.359406E-03 -2.359406E-03 -2.359406E-03 -5.615682E-04 -5.615682E-04
-  -5.615682E-04
+   0.000000E+00  0.000000E+00  0.000000E+00  2.291602E-03  2.291602E-03
+   2.291602E-03
  Phonon energies in meV     :
-- -6.420271E+01 -6.420271E+01 -6.420271E+01 -1.528105E+01 -1.528105E+01
-- -1.528105E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.235766E+01  6.235766E+01
+-  6.235766E+01
  Phonon frequencies in cm-1    :
-- -5.178298E+02 -5.178298E+02 -5.178298E+02 -1.232500E+02 -1.232500E+02
-- -1.232500E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.029485E+02  5.029485E+02
+-  5.029485E+02
  Phonon frequencies in Thz     :
-- -1.552415E+01 -1.552415E+01 -1.552415E+01 -3.694941E+00 -3.694941E+00
-- -3.694941E+00
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.507802E+01  1.507802E+01
+-  1.507802E+01
  Phonon energies in Kelvin  :
-- -7.450407E+02 -7.450407E+02 -7.450407E+02 -1.773290E+02 -1.773290E+02
-- -1.773290E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  7.236298E+02  7.236298E+02
+-  7.236298E+02
 
 ================================================================================
 == DATASET 35 ==================================================================
@@ -4598,8 +4598,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4614,7 +4614,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4632,7 +4631,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -4778,23 +4776,23 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136281542         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   1    1         0.1234702718        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1234702718         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000         0.0000000000
-   2    1   2    1         0.3136281542         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1234702718        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1234702718         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3136281542         0.0000000000
+   3    1   3    1         0.1234702718        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1234702718         0.0000000000
@@ -4802,27 +4800,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1234702718        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136281542         0.0000000000
+   1    2   1    2         0.1234702718         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
-   1    2   3    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1234702718        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3136281542         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1234702718         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1234702718        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3136281542         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1234702718         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -4855,20 +4853,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
-   2.921921E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.196216E-03  2.196216E-03
+   2.196216E-03
  Phonon energies in meV     :
--  5.244290E+01  5.244290E+01  5.244290E+01  7.950952E+01  7.950952E+01
--  7.950952E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.976208E+01  5.976208E+01
+-  5.976208E+01
  Phonon frequencies in cm-1    :
--  4.229805E+02  4.229805E+02  4.229805E+02  6.412876E+02  6.412876E+02
--  6.412876E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.820137E+02  4.820137E+02
+-  4.820137E+02
  Phonon frequencies in Thz     :
--  1.268064E+01  1.268064E+01  1.268064E+01  1.922532E+01  1.922532E+01
--  1.922532E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.445041E+01  1.445041E+01
+-  1.445041E+01
  Phonon energies in Kelvin  :
--  6.085738E+02  6.085738E+02  6.085738E+02  9.226686E+02  9.226686E+02
--  9.226686E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.935093E+02  6.935093E+02
+-  6.935093E+02
 
 ================================================================================
 == DATASET 36 ==================================================================
@@ -4899,8 +4897,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4915,7 +4913,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -4933,7 +4930,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -5079,15 +5075,15 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136281542         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.1234702718        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1234702718         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.3136281542         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1234702718        -0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1234702718         0.0000000000
@@ -5095,7 +5091,7 @@ tolerances: {tolvrs: 1.00E-10, }
   
    3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
-   3    1   3    1         0.3136281542         0.0000000000
+   3    1   3    1         0.1234702718        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1234702718         0.0000000000
@@ -5103,27 +5099,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1234702718        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136281542         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    2         0.1234702718         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1234702718        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
-   2    2   2    2         0.3136281542         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1234702718         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1234702718        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
-   3    2   3    2         0.3136281542         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1234702718         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -5156,20 +5152,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
-   2.921921E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.196216E-03  2.196216E-03
+   2.196216E-03
  Phonon energies in meV     :
--  5.244290E+01  5.244290E+01  5.244290E+01  7.950952E+01  7.950952E+01
--  7.950952E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.976208E+01  5.976208E+01
+-  5.976208E+01
  Phonon frequencies in cm-1    :
--  4.229805E+02  4.229805E+02  4.229805E+02  6.412876E+02  6.412876E+02
--  6.412876E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.820137E+02  4.820137E+02
+-  4.820137E+02
  Phonon frequencies in Thz     :
--  1.268064E+01  1.268064E+01  1.268064E+01  1.922532E+01  1.922532E+01
--  1.922532E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.445041E+01  1.445041E+01
+-  1.445041E+01
  Phonon energies in Kelvin  :
--  6.085738E+02  6.085738E+02  6.085738E+02  9.226686E+02  9.226686E+02
--  9.226686E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.935093E+02  6.935093E+02
+-  6.935093E+02
 
 ================================================================================
 == DATASET 37 ==================================================================
@@ -5200,8 +5196,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.12971
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/14-Si.nlcc.fhi
 -   Si  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 14.00000   4.00000  20091105                znucl, zion, pspdat
     6    7    3    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5216,7 +5212,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -5234,7 +5229,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t81o_DS15_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -5380,23 +5374,23 @@ tolerances: {tolvrs: 1.00E-10, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.3136282276         0.0000000000
-   1    1   2    1        -0.0000000000         0.0000000000
+   1    1   1    1         0.1234703002        -0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1234703002         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.0000000000         0.0000000000
-   2    1   2    1         0.3136282276         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   2    1         0.1234703002        -0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.1234703002         0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
-   3    1   3    1         0.3136282276         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
+   3    1   3    1         0.1234703002        -0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1234703002         0.0000000000
@@ -5404,27 +5398,27 @@ tolerances: {tolvrs: 1.00E-10, }
    1    2   1    1        -0.1234703002        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2         0.3136282276         0.0000000000
-   1    2   2    2        -0.0000000000         0.0000000000
-   1    2   3    2        -0.0000000000         0.0000000000
+   1    2   1    2         0.1234703002         0.0000000000
+   1    2   2    2         0.0000000000         0.0000000000
+   1    2   3    2        -0.0000000000        -0.0000000000
   
    2    2   1    1        -0.0000000000        -0.0000000000
    2    2   2    1        -0.1234703002        -0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        -0.0000000000         0.0000000000
-   2    2   2    2         0.3136282276         0.0000000000
-   2    2   3    2        -0.0000000000         0.0000000000
+   2    2   1    2         0.0000000000         0.0000000000
+   2    2   2    2         0.1234703002         0.0000000000
+   2    2   3    2         0.0000000000        -0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.1234703002        -0.0000000000
-   3    2   1    2        -0.0000000000         0.0000000000
-   3    2   2    2        -0.0000000000         0.0000000000
-   3    2   3    2         0.3136282276         0.0000000000
+   3    2   1    2        -0.0000000000        -0.0000000000
+   3    2   2    2         0.0000000000        -0.0000000000
+   3    2   3    2         0.1234703002         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
@@ -5457,20 +5451,20 @@ tolerances: {tolvrs: 1.00E-10, }
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.927241E-03  1.927241E-03  1.927241E-03  2.921921E-03  2.921921E-03
-   2.921921E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  2.196216E-03  2.196216E-03
+   2.196216E-03
  Phonon energies in meV     :
--  5.244290E+01  5.244290E+01  5.244290E+01  7.950953E+01  7.950953E+01
--  7.950953E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.976209E+01  5.976209E+01
+-  5.976209E+01
  Phonon frequencies in cm-1    :
--  4.229806E+02  4.229806E+02  4.229806E+02  6.412876E+02  6.412876E+02
--  6.412876E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  4.820138E+02  4.820138E+02
+-  4.820138E+02
  Phonon frequencies in Thz     :
--  1.268064E+01  1.268064E+01  1.268064E+01  1.922532E+01  1.922532E+01
--  1.922532E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.445041E+01  1.445041E+01
+-  1.445041E+01
  Phonon energies in Kelvin  :
--  6.085739E+02  6.085739E+02  6.085739E+02  9.226687E+02  9.226687E+02
--  9.226687E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  6.935094E+02  6.935094E+02
+-  6.935094E+02
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -5507,8 +5501,8 @@ tolerances: {tolvrs: 1.00E-10, }
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart13   -8.4869054598E-20  0.0000000000E+00 -3.2683803790E-37
                        8.4869054598E-20  0.0000000000E+00  3.2683803790E-37
-            fcart14   -9.9013897031E-20 -1.4144842433E-20  1.2730358190E-19
-                       9.9013897031E-20  1.4144842433E-20 -1.2730358190E-19
+            fcart14   -1.8388295163E-19  7.0724212165E-20  4.2434527299E-20
+                       1.8388295163E-19 -7.0724212165E-20 -4.2434527299E-20
             fcart15   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart16   -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -6052,13 +6046,35 @@ P          mk1mem37        16
         optdriver35         1
         optdriver36         1
         optdriver37         1
-            rfdir11         0       0       0
-            rfdir12         0       0       0
-            rfdir13         0       0       0
-            rfdir14         0       0       0
-            rfdir15         0       0       0
-            rfdir16         0       0       0
-            rfdir17         0       0       0
+           prtpot11         0
+           prtpot12         0
+           prtpot13         0
+           prtpot14         0
+           prtpot15         0
+           prtpot16         0
+           prtpot17         0
+           prtpot21         1
+           prtpot22         1
+           prtpot23         1
+           prtpot24         1
+           prtpot25         1
+           prtpot26         1
+           prtpot27         1
+           prtpot31         1
+           prtpot32         1
+           prtpot33         1
+           prtpot34         1
+           prtpot35         1
+           prtpot36         1
+           prtpot37         1
+          rfatpol           1       1
+            rfdir11         1       1       1
+            rfdir12         1       1       1
+            rfdir13         1       1       1
+            rfdir14         1       1       1
+            rfdir15         1       1       1
+            rfdir16         1       1       1
+            rfdir17         1       1       1
             rfdir21         1       0       0
             rfdir22         1       0       0
             rfdir23         1       0       0
@@ -6354,7 +6370,7 @@ P          mk1mem37        16
 -
 - [5] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -6393,10 +6409,10 @@ P          mk1mem37        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          9.0
+- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  90 WARNINGs and 109 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          9.0
+.Delivered  53 WARNINGs and  26 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.2  wall=          8.6

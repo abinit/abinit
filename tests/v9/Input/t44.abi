@@ -1,76 +1,66 @@
-# test DDK response and orbmag with nuclear dipole moment
+# test DDK and orbital magnetism response with nuclear dipole moment
+# Neon atom in a box
 
 ndtset 2
 
-# dataset 1 ground state
+#nuclear magnetic dipole moment, 
+#size 1 in a.u. along x axis
+nucdipmom 1.0 0.0 0.0
 
-tolvrs1 1.0D-16
-prtwf1 1
+# ground state convergence
+tolvrs1 1.0D-18
 
-# dataset 2 ddk
-
+# ddk convergence
 tolwfr2 1.0D-20
-getwfk2 -1
 rfddk2 1
 rfdir2 1 1 1
 iscf2 -3
-prtwf2 0
-orbmag2 3
+getwfk2 -1
+orbmag2 2
+lambsig2 341.86D-6
 
-nucdipmom
-3*0.0
-1.0 0.0 0.0
-
-# this ecut is severly underconverged
-ecut 5
-pawecutdg 6
-
-istwfk *1
-
-kptopt 3
+kptopt 0
+nkpt 1
+kpt 3*0.0
 nsym 1
 symrel 1 0 0 0 1 0 0 0 1
 symmorphi 0
+istwfk *1
+enunit 2
 
-# this kpt grid is severly undercoverged
-ngkpt 3*2
-nshiftk 4
-shiftk 3*1/2
-1/2 0 0
-0 1/2 0
-0 0 1/2
+nstep 500
+ecut  5 # much too small for real studies
+pawecutdg 6 # much too small for real studies
+# ecut 30 # these values give converged orbital magnetism value
+# pawecutdg 60
 
-nstep 30
+nband 4
 
-prtwf 0
-prteig 0
-prtden 0
-
+# nuclear dipole requires the following settings
 optforces 0
 optstress 0
 pawcpxocc 2
 usexcnhat 0
+pawxcdev 0
 
 paral_atom 0
 paral_kgb 0
 
-nband 4
 
-acell    3*10.3008969711  
-
-rprim    0.000000000000000   0.500000000000000   0.500000000000000 
-         0.500000000000000   0.000000000000000   0.500000000000000 
-         0.500000000000000   0.500000000000000   0.000000000000000 
+# Structural parameters
+acell    3*20.0
        
-natom    2  
-ntypat   2  
-typat    1 2  
-znucl    15 13  
-xred     0.250000000000000   0.250000000000000   0.250000000000000 
-         0.000000000000000   0.000000000000000   0.000000000000000 
+natom    1
+ntypat   1
+typat    1
+znucl    10
+
+# Ne atom at center of box
+xred
+3*1/2 
 
 pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
-pseudos="P.xml, Al.xml"
+pseudos="Ne.xml"
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -80,12 +70,12 @@ pseudos="P.xml, Al.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t44.abo, tolnlines=  0, tolabs=  0.0e+00, tolrel= 0.0e+00
+#%%   t44.abo, tolnlines=  19, tolabs=  1.0e-7, tolrel= 1.8E-3
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = 
-#%% topics = DFPT
+#%% description = Calculate chemical shielding for isolated neon atom	
+#%% topics = MagField
 #%%<END TEST_INFO>

@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -61,11 +57,6 @@ CONTAINS  !===========================================================
  !!
  !! OUTPUT
  !!  exp_mat_cx = its exponential is returned in the same matrix
- !! PARENTS
-!!
- !! CHILDREN
-!!      zgeev,zgetrf,zgetri
-!!
  !! SOURCE
 
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)

@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,12 +94,6 @@ contains
 !! In consequence, no use of message and wrtout routine.
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
-!!
-!! PARENTS
-!!      m_outvars
-!!
-!! CHILDREN
-!!      prttagm,prttagm_images
 !!
 !! SOURCE
 
@@ -407,6 +397,11 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdhaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdhaydock','INT',0)
 
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%irdkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdkden','INT',0)
+ end if
+
  intarr(1,:)=dtsets(:)%irdpawden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdpawden','INT',0)
 
@@ -671,6 +666,14 @@ subroutine outvar_i_n (dtsets,iout,&
 !### 03. Print all the input variables (L)
 !##
 
+!lambsig
+ do idtset=0, ndtset_alloc
+   do ii = 1, ntypat
+     dprarr(ii,idtset) = dtsets(idtset)%lambsig(ii)
+   end do ! end loop over ntypat
+ end do ! end loop over datasets
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'lambsig','DPR',0)
+
 !lexexch
  narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
@@ -720,6 +723,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%lw_qdrpl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_qdrpl','INT',0)
+
+ intarr(1,:)=dtsets(:)%lw_natopt
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'lw_natopt','INT',0)
 
 !write(ab_out,*)' outvar_i_n : M '
 !call flush(ab_out)
@@ -1127,6 +1133,12 @@ subroutine outvar_i_n (dtsets,iout,&
    if(sum(abs( dtsets(idtset)%nucdipmom(1:3,1:dtsets(idtset)%natom))) < tol12 ) narrm(idtset)=0
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'nucdipmom','DPR',multivals%natom)
+ 
+ intarr(1,:)=dtsets(:)%nucefg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucefg','INT',0)
+
+ intarr(1,:)=dtsets(:)%nucfc
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nucfc','INT',0)
 
  intarr(1,:)=dtsets(:)%nwfshist
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nwfshist','INT',0)

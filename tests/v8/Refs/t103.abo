@@ -1,6 +1,10 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
 
-.Version 9.5.3 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu7.5 computer) 
+.Version 9.11.2 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -8,21 +12,35 @@
  under certain conditions (GNU General Public License,
  see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
 
- ABINIT is a project of the Universite Catholique de Louvain,
- Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
- Please read https://docs.abinit.org/theory/acknowledgments for suggested
- acknowledgments of the ABINIT effort.
- For more information, see https://www.abinit.org .
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
 
-.Starting date : Tue 20 Jul 2021.
-- ( at 11h36 )
+-----------------------------------------------------------------------------------------
+
+                          MULTIBINIT - LATTICE MODELS                   
+
+ Project initiated and coordinated by Philippe GHOSEZ and his group at ULiege
+   (Philippe.Ghosez@uliege.be).
+
+ Main contributors: Alexandre MARTIN, Jordan BIEDER, Michael Marcus SCHMITT,
+   Louis BASTOGNE, Xu HE, Alireza SASANI, Huazhang ZHANG, Subhadeep BANDYOPADHYAY,
+   Philippe GHOSEZ.
+
+ Technical support: Xu HE (X.He@uliege.be)
+
+*****************************************************************************************
+
+
+
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h09 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t103_ddb.in
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t103_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -36,6 +54,7 @@
  Fit the coefficients :
          fit_coeff  1
  fit_generateCoeff  1
+ fit_initializeDat  0
         fit_cutoff  5.40000000E+00
         fit_option  0
          fit_iatom  0
@@ -71,13 +90,23 @@
 
  Read the DDB information of the reference system and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.4265196  0.0000000  0.0000000  G(1)=  0.1346526  0.0000000  0.0000000
  R(2)=  0.0000000  7.4265196  0.0000000  G(2)=  0.0000000  0.1346526  0.0000000
  R(3)=  0.0000000  0.0000000  7.4265196  G(3)=  0.0000000  0.0000000  0.1346526
  Unit cell volume ucvol=  4.0959627E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Sr
+    2)    0.5000000  0.5000000  0.5000000  Ru
+    3)    0.0000000  0.5000000  0.5000000   O
+    4)    0.5000000  0.0000000  0.5000000   O
+    5)    0.5000000  0.5000000  0.0000000   O
+
+ DDB file with 5 blocks has been read.
 
 ================================================================================
 
@@ -177,7 +206,7 @@
 ================================================================================
 
 -Reading the training-set file :
--/home/marcus/CODES/DEVELOP-MULTIBINIT/abinit/tests/v8/Input/t103_HIST
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t103_HIST
 
 
 ================================================================================
@@ -207,25 +236,25 @@
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.4805075157626357E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.1267080983980854E-04
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1     101         3.6517069801E-05  7.1737450037E-03  7.0615922572E-03  1.1215274647E-04
- 2     175         3.5756076605E-05  7.0936467919E-03  6.9812575543E-03  1.1238923756E-04
+ 1     101         3.6517071448E-05  7.1737453273E-03  7.0615925758E-03  1.1215275153E-04
+ 2     175         3.5756078218E-05  7.0936471119E-03  6.9812578693E-03  1.1238924264E-04
 
  Fitted coefficients at the end of the fit process:
  101 =>  -4.4596107148E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
  175 =>  -1.5273104573E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   3.5756076604803089E-05
-   Forces+Stresses :   7.0936467918695243E-03
-   Forces          :   6.9812575543045262E-03
-   Stresses        :   1.1238923756499858E-04
+   Energy          :   3.5756078217962436E-05
+   Forces+Stresses :   7.0936471119041862E-03
+   Forces          :   6.9812578692686712E-03
+   Stresses        :   1.1238924263551441E-04
 
 
 --------------------------------------------------------------------------------
@@ -242,27 +271,27 @@
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.4805075157626357E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.1267080983980854E-04
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     10          2.6072550852E-05  6.2292396792E-03  6.1165628023E-03  1.1267687687E-04
- 4     9           2.4617002113E-05  6.0194044643E-03  5.9065575180E-03  1.1284694631E-04
+ 3     10          2.6072552028E-05  6.2292399603E-03  6.1165630783E-03  1.1267688196E-04
+ 4     9           2.4617003223E-05  6.0194047358E-03  5.9065577844E-03  1.1284695140E-04
 
  Fitted coefficients at the end of the fit process:
  1 =>  -4.4837177321E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
  2 =>  -1.1764466976E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
- 10 =>  -1.2676828081E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
- 9 =>   8.1093269326E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 10 =>  -1.2676828081E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1
+ 9 =>   8.1093269326E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.4617002112603598E-05
-   Forces+Stresses :   6.0194044642715300E-03
-   Forces          :   5.9065575179596723E-03
-   Stresses        :   1.1284694631185753E-04
+   Energy          :   2.4617003223215940E-05
+   Forces+Stresses :   6.0194047358410087E-03
+   Forces          :   5.9065577844379857E-03
+   Stresses        :   1.1284695140302312E-04
 
 
 --------------------------------------------------------------------------------
@@ -275,33 +304,33 @@
 
  The coefficients for the fit around atom  3: O1, will be generated
 
- 471 coefficients generated 
+ 693 coefficients generated 
 
 
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Energy          :   4.0372993081225752E-05
-   Forces+Stresses :   7.4805075157626357E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.1267080983980854E-04
+   Energy          :   4.0372994902680415E-05
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 5     140         2.3411968624E-05  5.6378752407E-03  5.5249458785E-03  1.1292936226E-04
- 6     337         2.0153290479E-05  5.2224853797E-03  5.1095437870E-03  1.1294159274E-04
+ 5     29          1.9814405772E-05  5.3923531742E-03  5.2797567390E-03  1.1259643519E-04
+ 6     150         1.3516963809E-05  4.8795476377E-03  4.7673945680E-03  1.1215306973E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>  -4.0545626075E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
- 2 =>  -7.6817206083E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
- 3 =>  -1.2706158618E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
- 4 =>   9.8937626457E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
- 140 =>  -7.1445348692E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
- 337 =>   7.8012384201E-02 (Ru_y-O1_y)^2(O3_z-O1_z)^1
+ 1 =>  -4.6361104683E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
+ 2 =>  -8.0861808863E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
+ 3 =>  -1.5391214133E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1
+ 4 =>   9.1223326358E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
+ 29 =>   1.4332907656E-01 (O1_x-Ru_x)^1(O1_y-Ru_y[-1 0 0])^1(O1_x-O2_x[-1 1 0])^1
+ 150 =>   8.0030683957E-02 (O1_y-Ru_y)^1(O1_x-Sr_x)^1(O1_z-Sr_z[0 1 1])^1
 
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.0153290478842716E-05
-   Forces+Stresses :   5.2224853797160544E-03
-   Forces          :   5.1095437869772223E-03
-   Stresses        :   1.1294159273883286E-04
+   Energy          :   1.3516963808594163E-05
+   Forces+Stresses :   4.8795476376903221E-03
+   Forces          :   4.7673945679620744E-03
+   Stresses        :   1.1215306972824776E-04
 
 
 ================================================================================
@@ -313,10 +342,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         41.3  wall=         42.0
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
 
 ================================================================================
 
-+Total cpu time     41.279  and wall time     42.013 sec
++Total cpu time      3.933  and wall time      3.941 sec
 
  multibinit : the run completed succesfully.

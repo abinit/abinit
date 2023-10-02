@@ -19,7 +19,7 @@
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!! For the initials of contributorsi see ~abinit/doc/developers/contributors.txt .
 !!
 !! SOURCE
 
@@ -35,13 +35,15 @@ module m_lattice_mover
   use defs_basis
   use m_abicore
   use m_errors
-
+  use m_xmpi
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
   use m_hashtable_strval, only: hash_table_t
+  use m_lattice_ncfile, only: lattice_ncfile_t
+  use m_mpi_scheduler, only: init_mpi_info
 !!***
 
   implicit none
@@ -51,7 +53,7 @@ module m_lattice_mover
      !> This is the abstract lattice mover
 
      type(multibinit_dtset_type), pointer :: params=>null() ! input parameters
-     integer :: natom     ! number of atoms
+     integer :: natom=0     ! number of atoms
      real(dp) :: stress(3,3), strain(3,3)  ! stress and strain
      real(dp), allocatable :: masses(:)  ! masses
      integer :: latt_dynamics=0 ! type of lattice dynamics
@@ -69,14 +71,19 @@ module m_lattice_mover
      !type(lattice_hist_t) :: hist
 
      real(dp) :: mass_total 
+     type(lattice_ncfile_t) :: ncfile
    contains
      procedure:: initialize       ! perhaps each effpot type should have own 
      procedure :: finalize
      procedure :: set_params
+     procedure :: prepare_ncfile
+     procedure :: set_ncfile_name
      procedure :: set_initial_state ! initial state
+     procedure :: set_temperature
      procedure :: force_stationary
      procedure :: run_one_step
      procedure :: run_time
+     procedure :: run_varT
      procedure :: reset            ! reset the mover
      procedure :: get_T_and_Ek     ! calculate temperature and kinetic energy.
      procedure :: calc_observables ! call functions to calculate observables
@@ -152,23 +159,29 @@ contains
   end subroutine set_params
 
   !-------------------------------------------------------------------!
+  ! Set the mover temperature
+  !-------------------------------------------------------------------!
+  subroutine set_temperature(self, temperature)
+    class(lattice_mover_t), intent(inout) :: self
+    real(dp),intent(in) :: temperature
+    self%temperature = temperature !TODO: to Hartree ??
+  end subroutine set_temperature
+
+
+  !-------------------------------------------------------------------!
   ! set initial state:
   !  Inputs:
   !   mode: integer
   !    if mode=1, use a Boltzman distribution to init the velocities.
   !    if mode=2, ...
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode, restart_hist_fname)
+  subroutine set_initial_state(self, mode)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
-    character(len=*), optional, intent(in) :: restart_hist_fname
-
-
     real(dp) :: xi(3, self%natom)
     integer :: i
 
-    ABI_UNUSED(restart_hist_fname)
 
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover
@@ -185,8 +198,8 @@ contains
           self%current_vcart(:,i) = xi(:, i) *sqrt(self%temperature/self%masses(i))
        end do
        call self%force_stationary()
-       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
        call self%get_T_and_Ek()
+       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
        if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
@@ -196,11 +209,44 @@ contains
           self%current_vcart(:,i) = 0.0
        end do
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
+       call self%get_T_and_Ek()
     end if
 
-    ABI_UNUSED(restart_hist_fname)
 
   end subroutine set_initial_state
+
+  subroutine prepare_ncfile(self, params, fname)
+    class(lattice_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    character(len=*), intent(in) :: fname
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+    ABI_UNUSED_A(params)
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+    if(iam_master) then
+       call self%ncfile%initialize( trim(fname), 1)
+       call self%ncfile%write_cell(self%supercell)
+       call self%ncfile%def_lattice_var()
+    end if
+  end subroutine prepare_ncfile
+
+
+  !-------------------------------------------------------------------!
+  !set_ncfile_name :
+  !-------------------------------------------------------------------!
+  subroutine set_ncfile_name(self, params, fname)
+    class(lattice_mover_t), intent(inout) :: self
+    type(multibinit_dtset_type) :: params
+    character(len=fnlen), intent(in) :: fname
+    integer :: master, my_rank, comm, nproc
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+    if (iam_master) then
+       call self%prepare_ncfile(params, trim(fname)//'_latthist.nc')
+       call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek )
+    endif
+  end subroutine set_ncfile_name
+
 
 
   !-------------------------------------------------------------------!
@@ -296,7 +342,6 @@ contains
   ! run from begining to end.
   !-------------------------------------------------------------------!
   subroutine run_time(self, effpot, displacement, strain, spin, lwf, energy_table)
-    ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
@@ -329,7 +374,7 @@ contains
             & "Epot(Ha/uc)", "ETOT(Ha/uc)"
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-
+    
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
@@ -337,15 +382,16 @@ contains
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
-       !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
        call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
-       
-       write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
-            & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
-            & (self%Ek+self%energy)/self%supercell%ncell
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-
+       if(modulo(i, self%params%nctime)==0) then
+          write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
+               & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
+               & (self%Ek+self%energy)/self%supercell%ncell
+          call wrtout(std_out,msg,'COLL')
+          call wrtout(ab_out, msg, 'COLL')
+          self%current_xcart = self%supercell%lattice%xcart+self%displacement
+          call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek)
+       end if
        !TODO: output, observables
     end do
 
@@ -385,6 +431,7 @@ contains
     ! write to hist file
     class(lattice_mover_t), intent(inout) :: self
     ABI_UNUSED_A(self)
+
   end subroutine write_hist
 
   !-------------------------------------------------------------------!
@@ -402,6 +449,109 @@ contains
     ABI_UNUSED_A(lwf)
     ABI_UNUSED_A(ihist)
   end subroutine get_state
+
+
+  !!****f* m_lwf_mover/run_varT
+  !!
+  !! NAME
+  !! run_varT
+  !!
+  !! FUNCTION
+  !! run M vs Temperature
+  !!
+  !! INPUTS
+  !! pot: potential
+  !! T_start, Tend, T_nstep
+  !u
+  !! OUTPUT
+  !!
+  !! SOURCE
+  subroutine  run_varT(self, pot, ncfile_prefix, displacement, strain, spin, lwf, energy_table)
+    class(lattice_mover_t), intent(inout) :: self
+    class(abstract_potential_t), intent(inout) :: pot
+    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), lwf(:), spin(:,:)
+    character(fnlen), intent(inout) :: ncfile_prefix
+    type(hash_table_t), optional, intent(inout) :: energy_table
+    real(dp) :: T_start, T_end
+    integer :: T_nstep
+    !type(lwf_ncfile_t) :: lwf_ncfile
+    character(len=4) :: post_fname
+    real(dp) :: T, T_step
+    integer :: i
+    !integer :: Tfile, iostat
+    character(len=90) :: msg
+    !character(len=4200) :: Tmsg ! to write to var T file
+    !character(len=150) :: iomsg
+    !character(fnlen) :: Tfname ! file name for output various T calculation
+    !real(dp), allocatable :: Tlist(:), chi_list(:), Cv_list(:), binderU4_list(:)
+    !real(dp), allocatable :: Mst_sub_norm_list(:, :)
+    !real(dp), allocatable ::  Mst_norm_total_list(:)
+
+    integer :: master, my_rank, comm, nproc, ierr
+    logical :: iam_master
+    call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
+
+    ABI_UNUSED_A(displacement)
+    ABI_UNUSED_A(strain)
+
+    if (iam_master) then
+       T_start=self%params%latt_temperature_start
+       T_end=self%params%latt_temperature_end
+       T_nstep=self%params%latt_temperature_nstep
+       !Tfile=get_unit()
+       !Tfname = trim(ncfile_prefix)//'.varT'
+       !iostat=open_file(file=Tfname, unit=Tfile, iomsg=iomsg )
+       if (T_nstep<=1) then
+          T_step=0.0
+       else
+          T_step=(T_end-T_start)/(T_nstep-1)
+       endif
+       write(msg, "(A52, ES13.5, A11, ES13.5, A1)") & 
+            & "Starting temperature dependent calculations. T from ", &
+            & T_start*Ha_K, "K to ", T_end*Ha_K, " K."
+       call wrtout(std_out, msg, "COLL")
+       call wrtout(ab_out, msg, "COLL")
+    end if
+
+    call xmpi_bcast(T_nstep, 0, comm, ierr)
+    do i=1, T_nstep
+       if(iam_master) then
+          T=T_start+(i-1)*T_step
+          msg=repeat("=", 79)
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out, msg, "COLL")
+
+          write(msg, "(A13, 5X, ES13.5, A3)") "Temperature: ", T*Ha_K, " K."
+          call wrtout(std_out, msg, "COLL")
+          call wrtout(ab_out,  msg, "COLL")
+
+          ! set temperature
+          ! TODO make this into a subroutine set_params
+       endif
+       call self%set_temperature(temperature=T)
+       if(iam_master) then
+          if(i==1) then
+             call self%set_initial_state(mode=1)
+          endif
+
+          write(post_fname, "(I4.4)") i
+          call self%prepare_ncfile( self%params, &
+               & trim(ncfile_prefix)//'_T'//post_fname//'_latthist.nc')
+          call self%ncfile%write_one_step(self%current_xcart, self%current_vcart, self%energy, self%Ek )
+       endif
+
+       call self%run_time(pot, spin=spin, &
+            & lwf=lwf, energy_table=energy_table)
+
+       if(iam_master) then
+          call self%ncfile%finalize()
+       endif
+    end do
+
+  end subroutine run_varT
+  !!***
+
+
 
 end module m_lattice_mover
 

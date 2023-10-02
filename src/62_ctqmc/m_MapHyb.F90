@@ -17,12 +17,6 @@
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 #include "defs.h"
@@ -101,12 +95,6 @@ CONTAINS
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_init(this, size)
@@ -151,12 +139,6 @@ END SUBROUTINE MapHyb_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_setSize(this,new_tail)
@@ -200,12 +182,6 @@ END SUBROUTINE MapHyb_setSize
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -271,12 +247,6 @@ END SUBROUTINE MapHyb_enlarge
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_assign(this, map)
@@ -317,12 +287,6 @@ END SUBROUTINE MapHyb_assign
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_sort(this)
@@ -359,12 +323,6 @@ END SUBROUTINE MapHyb_sort
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 
@@ -436,12 +394,6 @@ END SUBROUTINE MapHyb_quickSort
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_print(this,ostream)
@@ -484,12 +436,6 @@ END SUBROUTINE MapHyb_print
 !!
 !! NOTES
 !!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
-!!
 !! SOURCE
 
 SUBROUTINE MapHyb_clear(this)
@@ -521,12 +467,6 @@ END SUBROUTINE MapHyb_clear
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!  Will be filled automatically by the parent script
-!!
-!! CHILDREN
-!!  Will be filled automatically by the parent script
 !!
 !! SOURCE
 

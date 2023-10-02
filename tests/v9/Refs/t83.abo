@@ -1,5 +1,9 @@
+******************************************************************************************
+                                Welcome to MULTIBINIT,                         
+ a software platform designed for the construction and use of second-principles models
+                   for lattice, spin and electron degrees of freedom.
 
-.Version 9.3.1 of MULTIBINIT 
+.Version 9.11.2 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,16 +18,19 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+ MULTIBINIT is a software project of the University of Liege
+ (PHYTHEMA & NANOMAT groups), in collaboration with other partners.
+
+*****************************************************************************************
+
+
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
 -  nproc =    1
 
 ================================================================================
 
- Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/v9/Input/t83.nc
- to initialize the multibinit input
 
 ================================================================================
 
@@ -64,25 +71,25 @@ dipdip_range         4         4         4
 Lattice dynamic steps:
 ==========================================================================================
     Iteration     temperature(K)        Ekin(Ha/uc)        Epot(Ha/uc)        ETOT(Ha/uc)
-            1           51.33118        1.21917E-03        2.06402E-07        1.21938E-03
-            2           53.75668        1.27678E-03        6.57052E-07        1.27744E-03
-            3           48.73219        1.15744E-03        1.18408E-06        1.15863E-03
-            4           48.62118        1.15481E-03        1.69237E-06        1.15650E-03
-            5           51.28654        1.21811E-03        2.22227E-06        1.22033E-03
-            6           50.92951        1.20963E-03        2.81633E-06        1.21245E-03
-            7           49.76107        1.18188E-03        3.41825E-06        1.18530E-03
-            8           50.53452        1.20025E-03        3.98628E-06        1.20424E-03
-            9           51.24175        1.21705E-03        4.57105E-06        1.22162E-03
-           10           50.46634        1.19863E-03        5.16671E-06        1.20380E-03
+            1           51.33118        1.21917E-03        2.06295E-07        1.21938E-03
+            2           53.75667        1.27678E-03        6.57388E-07        1.27744E-03
+            3           48.73220        1.15744E-03        1.18561E-06        1.15863E-03
+            4           48.62115        1.15481E-03        1.69505E-06        1.15650E-03
+            5           51.28659        1.21811E-03        2.22486E-06        1.22034E-03
+            6           50.92959        1.20963E-03        2.81673E-06        1.21245E-03
+            7           49.76114        1.18188E-03        3.41721E-06        1.18530E-03
+            8           50.53454        1.20025E-03        3.98565E-06        1.20424E-03
+            9           51.24191        1.21705E-03        4.56808E-06        1.22162E-03
+           10           50.46648        1.19864E-03        5.16087E-06        1.20380E-03
 ==========================================================================================
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.037  and wall time      0.037 sec
++Total cpu time      0.055  and wall time      0.055 sec
 
  multibinit : the run completed succesfully.

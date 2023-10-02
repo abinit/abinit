@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -98,12 +94,6 @@ contains
 !!
 !! NOTES
 !! Note that this routine is tightly connected to the dfpt_mkcore.f routine
-!!
-!! PARENTS
-!!      m_forces,m_longwave,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
-!!      m_stress,m_xchybrid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -536,10 +526,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
@@ -609,11 +595,6 @@ end subroutine mkcore
 !!
 !! NOTES
 !!  Based on mkcore.F90
-!!
-!! PARENTS
-!!      m_forces,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1075,10 +1056,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
@@ -1099,11 +1076,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Find the grid index of a given position in the cell according to the BC
 !!  Determine also whether the index is inside or outside the box for free BC
-!!
-!! PARENTS
-!!      m_mkcore
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1163,12 +1135,6 @@ end subroutine mkcore_alt
 !!
 !! NOTES
 !! Note that this routine is tightly connected to the mkcore.f routine
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_pead_nl_loop,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

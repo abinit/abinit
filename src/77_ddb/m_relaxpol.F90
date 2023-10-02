@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -95,12 +91,6 @@ contains
 !!   are symmetrized before computing the new atomic positions and cell parameters.
 !! - In case relaxat = 0 and relaxstr = 0, the routine only
 !!   computes the polarization in cartesian coordinates.
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,matr3inv,polcart,symdyma,xcart2xred
 !!
 !! SOURCE
 

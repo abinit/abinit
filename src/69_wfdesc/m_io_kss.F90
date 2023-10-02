@@ -12,10 +12,6 @@
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -109,12 +105,6 @@ CONTAINS  !===========================================================
 !!
 !! SIDE EFFECTS
 !!  The KSS Header is written on file.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -357,12 +347,6 @@ end subroutine write_kss_header
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine write_vkb(kss_unt,ikpt,kpoint,kss_npw,gbig,rprimd,Psps,iomode)
@@ -482,12 +466,6 @@ end subroutine write_vkb
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -611,12 +589,6 @@ end subroutine write_kss_wfgk
 !! NOTES
 !!  1) icg is used only if cg is present.
 !!  2) cg and eig_vec are mutually exclusive. One and only one can be passed to the routine.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -803,12 +775,6 @@ end subroutine k2gamma_centered
 !!  gvec_kss(:,:) = Input: null pointer. Output: gvec_kss(3,npwkss), list of G-vectors (closed shells)
 !!  ierr=Status error
 !!
-!! PARENTS
-!!      m_gwls_hamiltonian,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine make_gvec_kss(nkpt,kptns,ecut_eff,symmorphi,nsym,symrel,tnons,gprimd,prtvol,npwkss,gvec_kss,ierr)
@@ -962,12 +928,6 @@ end subroutine make_gvec_kss
 !!
 !! TODO
 !!  *) Spinorial case is not implemented.
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1198,12 +1158,6 @@ end subroutine kss_calc_vkb
 !! TESTS
 !! * ETSF_IO output is tested in tests/etsf_io/t02.
 !!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
@@ -1245,7 +1199,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
  integer :: ibsp,ibsp1,ibsp2,ibg,ig,ii,ikpt
  integer :: master,receiver,sender,spinor_shift1,shift
  integer :: ishm,ispinor,isppol,istwf_k,my_rank,j
- integer :: k_index,maxpw,mproj,n1,n2,n2dim,n3,n4,n5,n6,nband_k
+ integer :: k_index,maxpw,mproj,mtag,n1,n2,n2dim,n3,n4,n5,n6,nband_k
  integer :: nbandkss_k,nbandksseff,nbase,nprocs,npw_k,onpw_k,npwkss
  integer :: nrst1,nrst2,nsym2,ntemp,pinv,sizepw,spaceComm,comm_self
  integer :: pad1,pad2
@@ -1676,6 +1630,8 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      istwf_k   =Dtset%istwfk(ikpt)
      kpoint    =Dtset%kptns(:,ikpt)
      nbandkss_k=nbandkssk(ikpt)
+     mtag      =5*(ikpt+(isppol-1)*nkpt)
+
 
      ! Get G-vectors, for this k-point.
      call get_kg(kpoint,istwf_k,ecut_eff,gmet,onpw_k,kg_k)
@@ -1687,7 +1643,7 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
      if (MPI_enreg%proc_distrb(ikpt,1,isppol)==my_rank) then
 
        write(msg,'(2a,i3,3x,a)')ch10,' k-point ',ikpt,stag(isppol)
-       call wrtout(std_out,msg,'PERS')
+       call wrtout(std_out, msg)
 
        if (do_diago) then
          ! Direct diagonalization of the KS Hamiltonian.
@@ -1773,24 +1729,24 @@ subroutine outkss(crystal,Dtfil,Dtset,ecut,gmet,gprimd,Hdr,&
                end if
              end if
              if (sender/=receiver) then
-               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,ierr)
+               call pawcprj_mpi_exch(natom,n2dim,dimlmn,0,Cprjnk_k,Cprjnk_k,sender,receiver,spaceComm,mtag+4,ierr)
              end if
            end if ! usepaw
 
          else ! do_diago
-           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,ierr)
+           call xmpi_exch(eig_ene,nbandksseff,sender,eig_ene,receiver,spaceComm,mtag+1,ierr)
          end if
 
 !        Exchange eigenvectors.
          if (bufsz>0) then
            do i=0,bufnb-1
              call xmpi_exch(eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),2*npw_k*dtset%nspinor*bufsz,&
-&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,ierr)
+&             sender,eig_vec(:,:,i*bufsz+1:(i+1)*bufsz),receiver,spaceComm,mtag+2,ierr)
            end do
          end if
          if (bufrt>0) then
            call xmpi_exch(eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),2*npw_k*dtset%nspinor*bufrt,&
-&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,ierr)
+&           sender,eig_vec(:,:,bufnb*bufsz+1:bufnb*bufsz+bufrt),receiver,spaceComm,mtag+3,ierr)
          end if
 
        end if
@@ -2034,12 +1990,6 @@ contains
 !! NOTES
 !! This routine is not available for paw calculations
 !!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine memkss(mband,mgfft,mproj,mpsang,mpw,natom,ngfft,nkpt,nspinor,nsym,ntypat)
@@ -2162,12 +2112,6 @@ end subroutine memkss
 !!
 !! OUTPUT
 !!  Writes on standard output
-!!
-!! PARENTS
-!!      m_io_kss
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

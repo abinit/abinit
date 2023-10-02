@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -143,18 +139,6 @@ contains
 !!                          pawfgrtab(:)%gylmgr2 are deallocated here
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!    (gradients of rhoij for each atom with respect to atomic positions are computed here)
-!!
-!! PARENTS
-!!      m_respfn_driver
-!!
-!! CHILDREN
-!!      appdig,check_degeneracies,ddkfiles,dotprod_g,gs_ham%free,gs_ham%load_k
-!!      gs_ham%load_spin,init_hamiltonian,metric,mkffnl,mkkin,mkkpg,nonlop
-!!      paw_ij_free,paw_ij_init,paw_ij_nullify,paw_ij_reset_flags,pawaccrhoij
-!!      pawcprj_alloc,pawcprj_free,pawdij2e1kb,pawdijfr,pawfgrtab_free
-!!      pawfgrtab_init,pawgrnl,pawrhoij_free,pawrhoij_gather,pawrhoij_nullify
-!!      pawrhoij_symrhoij,pawtab_get_lsize,proc_distrb_band,strconv,timab
-!!      wfk_open_read,wrtout,xmpi_bcast,xmpi_sum
 !!
 !! SOURCE
 

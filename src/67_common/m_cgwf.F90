@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -138,13 +134,6 @@ contains
 !!  1) cg should not be filtered and normalized: it should already be OK at input !
 !!  2) Not sure that that the generalized eigenproblem (when gs_hamk%usepaw=1)
 !!     is compatible with wfoptalg=2 or 3 (use of shifted square Hamiltonian) - to be verified
-!!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1366,7 +1355,6 @@ end subroutine cgwf
 !! sinth = sin(thetam)
 !! thetam = optimal angle theta in line_minimization
 !!
-!!
 !! SIDE EFFECTS
 !! Input/Output
 !! dphase_aux1 = change in Zak phase accumulated during the loop over iline
@@ -1378,13 +1366,6 @@ end subroutine cgwf
 !! Hamiltonian does not change with theta (we are neglecting the dependence
 !! of the Hartree and exchange-correlation terms on theta; the original
 !! abinit routine does the same)
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -1694,13 +1675,6 @@ end subroutine linemin
 !! e0 = energy for the given value of theta
 !! e1 = derivative of the energy with respect to theta
 !!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
-!!
 !! SOURCE
 
 subroutine etheta(bcut,chc,detovc,detovd,dhc,dhd,efield_dot,e0,e1,&
@@ -1822,13 +1796,6 @@ end subroutine etheta
 !!  subovl(nband_k*(nband_k+1)*use_subovl)=overlap matrix expressed in the WFs subspace
 !!  subvnlx(nband_k*(nband_k+1)*use_subvnlx)=non-local Hamiltonian (if NCPP)  plus Fock ACE operator (if usefock_ACE)
 !!   expressed in the WFs subspace
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 
@@ -2050,13 +2017,6 @@ end subroutine mksubham
 !!  dtefield <type(efield_type)> = variables related to Berry phase calculations (see initberry.f)
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_cgwf
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_copy,pawcprj_free,pawcprj_get
-!!      pawcprj_symkn,smatrix,smatrix_k_paw
 !!
 !! SOURCE
 

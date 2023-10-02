@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -79,12 +75,6 @@ contains
 !! This routine can be used either to simulate NVE molecular dynamics (ionmov = 24) or
 !! is called from pred_hmc routine (ionmov = 25) to perform updates of ionic positions
 !! in Hybrid Monte Carlo iterations.
-!!
-!! PARENTS
-!!      m_precpred_1geo,m_pred_hmc
-!!
-!! CHILDREN
-!!      hist2var,var2hist,xcart2xred,xred2xcart
 !!
 !! SOURCE
 

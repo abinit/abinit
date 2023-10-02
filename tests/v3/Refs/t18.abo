@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t18/t18.in
-- output file    -> t18.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t18/t18.abi
+- output file    -> t18.abo
 - root for input  files -> t18i
 - root for output files -> t18o
-
 
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           3        mffmem =           1         mkmem =           1
        mpw =          52          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.734 Mbytes of memory.
+P This job should need less than                       1.738 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           8
        mpw =          52          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       1.531 Mbytes of memory.
+P This job should need less than                       1.550 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           8
        mpw =          52          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       1.755 Mbytes of memory.
+P This job should need less than                       1.761 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           8
        mpw =          52          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       1.531 Mbytes of memory.
+P This job should need less than                       1.550 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -108,7 +103,6 @@ P This job should need less than                       1.730 Mbytes of memory.
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -125,7 +119,6 @@ P This job should need less than                       2.276 Mbytes of memory.
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    7 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -141,7 +134,6 @@ P This job should need less than                       2.276 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    8 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -160,7 +152,6 @@ P This job should need less than                       0.993 Mbytes of memory.
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    9 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -177,7 +168,6 @@ P This job should need less than                       1.543 Mbytes of memory.
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   10 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -193,7 +183,6 @@ P This job should need less than                       1.543 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -235,6 +224,8 @@ _ WF disk file :      0.012 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
             acell10    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
             acell11    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
               amu      2.69600000E+01
+              asr           0
+           chneut           0
              ecut      4.00000000E+00 Hartree
            enunit           2
 -          fftalg         312
@@ -509,6 +500,17 @@ P          mk1mem11         1
         optdriver9          0
         optdriver10         0
         optdriver11         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          0
+           prtpot8          1
+           prtpot9          0
+           prtpot10         0
+           prtpot11         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -520,16 +522,27 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       1
+          rfatpol5          1       1
+          rfatpol6          1       2
+          rfatpol7          1       2
+          rfatpol8          1       1
+          rfatpol9          1       2
+          rfatpol10         1       2
+          rfatpol11         1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0
@@ -719,8 +732,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1256,7 +1269,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1274,10 +1286,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS3_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS4_WFQ
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -1293,15 +1303,15 @@ tolerances: {toldfe: 1.00E-08, }
 -ETOT  1   402.80187179503      3.699E+02 7.946E-02 1.935E+05
  ETOT  2   97.678970532932     -3.051E+02 9.043E-02 4.500E+04
  ETOT  3  -3.8014619033245     -1.015E+02 9.962E-03 1.367E+02
- ETOT  4  -4.0521284300767     -2.507E-01 2.934E-05 5.863E-01
- ETOT  5  -4.0531132111970     -9.848E-04 1.365E-07 9.345E-04
+ ETOT  4  -4.0521284300766     -2.507E-01 2.934E-05 5.863E-01
+ ETOT  5  -4.0531132111971     -9.848E-04 1.365E-07 9.345E-04
  ETOT  6  -4.0531152322821     -2.021E-06 7.766E-10 9.135E-06
- ETOT  7  -4.0531152449772     -1.270E-08 2.400E-12 6.764E-08
+ ETOT  7  -4.0531152449773     -1.270E-08 2.400E-12 6.764E-08
  ETOT  8  -4.0531152450780     -1.007E-10 3.368E-14 2.091E-09
- ETOT  9  -4.0531152450820     -4.071E-12 1.084E-15 1.423E-11
+ ETOT  9  -4.0531152450821     -4.150E-12 1.084E-15 1.423E-11
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  4.071E-12 < toldfe=  1.000E-08
+  for the second time, diff in etot=  4.150E-12 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1340,10 +1350,10 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part     imaginary part
   
    1    1   1    1        -4.0531157912         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
@@ -1356,10 +1366,10 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1        -0.1498933355         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
    1    1   3    1         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
@@ -1377,7 +1387,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 - -5.514783E+02  0.000000E+00  0.000000E+00
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  6 ==================================================================
@@ -1763,7 +1773,6 @@ meta: {optdriver: 1, rfphon: 1, }
    4.08917216E+00                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS3_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1781,10 +1790,8 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS3_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS4_WFQ
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
@@ -1799,14 +1806,14 @@ tolerances: {toldfe: 1.00E-08, }
  ETOT  2   6.9117021718090     -6.290E+01 1.633E-02 9.820E+02
  ETOT  3   5.4098625901284     -1.502E+00 3.531E-04 1.030E+01
  ETOT  4   5.3945931894096     -1.527E-02 5.198E-06 1.701E-01
- ETOT  5   5.3943660703084     -2.271E-04 7.868E-08 1.908E-04
+ ETOT  5   5.3943660703083     -2.271E-04 7.868E-08 1.908E-04
  ETOT  6   5.3943657615132     -3.088E-07 1.681E-10 6.975E-06
  ETOT  7   5.3943657503955     -1.112E-08 5.289E-12 4.603E-09
- ETOT  8   5.3943657503860     -9.450E-12 4.301E-15 3.585E-11
- ETOT  9   5.3943657503862      1.954E-13 3.284E-17 6.616E-14
+ ETOT  8   5.3943657503861     -9.443E-12 4.301E-15 3.585E-11
+ ETOT  9   5.3943657503862      1.705E-13 3.284E-17 6.616E-14
 
  At SCF step    9, etot is converged : 
-  for the second time, diff in etot=  1.954E-13 < toldfe=  1.000E-08
+  for the second time, diff in etot=  1.705E-13 < toldfe=  1.000E-08
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1845,13 +1852,13 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part     imaginary part
   
    1    1   1    1         5.3943657294         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000        -0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
   
   
@@ -1861,13 +1868,13 @@ tolerances: {toldfe: 1.00E-08, }
   dir pert dir pert     real part    imaginary part
   
    1    1   1    1         0.1994957740         0.0000000000
-   1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   2    1         0.0000000000        -0.0000000000
+   1    1   3    1         0.0000000000        -0.0000000000
   
-   2    1   1    1         0.0000000000        -0.0000000000
+   2    1   1    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000        -0.0000000000
+   3    1   1    1         0.0000000000         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
@@ -1882,7 +1889,7 @@ tolerances: {toldfe: 1.00E-08, }
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  6.362153E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 ================================================================================
 == DATASET  9 ==================================================================
@@ -2260,7 +2267,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS9_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2277,7 +2283,6 @@ meta: {optdriver: 1, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t18o_DS9_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -2297,8 +2302,8 @@ tolerances: {toldfe: 2.00E-12, }
  ETOT  5   10.799778314899     -4.527E-04 8.693E-08 4.653E-04
  ETOT  6   10.799777596676     -7.182E-07 1.912E-10 1.181E-05
  ETOT  7   10.799777578245     -1.843E-08 3.924E-12 1.597E-08
- ETOT  8   10.799777578208     -3.730E-11 1.617E-14 3.628E-10
- ETOT  9   10.799777578207     -4.690E-13 3.905E-16 3.776E-12
+ ETOT  8   10.799777578208     -3.723E-11 1.617E-14 3.628E-10
+ ETOT  9   10.799777578207     -5.116E-13 3.905E-16 3.776E-12
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2338,9 +2343,9 @@ tolerances: {toldfe: 2.00E-12, }
   
    1    1   1    1        10.7997777185         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2       -10.7776853325         0.0000000000
-   1    1   2    2         0.0000000000         0.0000000000
+   1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
    1    1   2    4         0.0000000000         0.0000000000
    1    1   3    4         0.0000000000         0.0000000000
@@ -2352,7 +2357,7 @@ tolerances: {toldfe: 2.00E-12, }
    2    1   1    4         0.0000000000         0.0000000000
    2    1   3    4         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
@@ -2367,7 +2372,7 @@ tolerances: {toldfe: 2.00E-12, }
    1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000000         0.0000000000
+   2    2   1    1        -0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
@@ -2410,9 +2415,9 @@ tolerances: {toldfe: 2.00E-12, }
   
    1    1   1    1         0.0998500159         0.0000000000
    1    1   2    1        -0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.0996457594         0.0000000000
-   1    1   2    2         0.0000000000         0.0000000000
+   1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
    2    1   1    1        -0.0000000000         0.0000000000
@@ -2420,7 +2425,7 @@ tolerances: {toldfe: 2.00E-12, }
    2    1   1    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
-   3    1   1    1         0.0000000000         0.0000000000
+   3    1   1    1        -0.0000000000         0.0000000000
    3    1   2    1        -0.0000000000         0.0000000000
    3    1   1    2         0.0000000000         0.0000000000
    3    1   2    2         0.0000000000         0.0000000000
@@ -2431,7 +2436,7 @@ tolerances: {toldfe: 2.00E-12, }
    1    2   2    2        -0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000000         0.0000000000
+   2    2   1    1        -0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2        -0.0000000000         0.0000000000
    2    2   3    2        -0.0000000000         0.0000000000
@@ -2458,7 +2463,7 @@ tolerances: {toldfe: 2.00E-12, }
 -  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
 -  4.501024E+02
  chkph3 : WARNING -
-  The dynamical matrix was incomplete : phonon frequencies may be wrong ...
+  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2476,6 +2481,8 @@ tolerances: {toldfe: 2.00E-12, }
             acell10    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
             acell11    1.0400000000E+01  5.0500000000E+00  5.0500000000E+00 Bohr
               amu      2.69600000E+01
+              asr           0
+           chneut           0
              ecut      4.00000000E+00 Hartree
            enunit           2
            etotal1    -2.0191030142E+00
@@ -2773,6 +2780,17 @@ P          mk1mem11         1
         optdriver9          0
         optdriver10         0
         optdriver11         1
+           prtpot1          0
+           prtpot2          0
+           prtpot3          0
+           prtpot4          0
+           prtpot5          1
+           prtpot6          0
+           prtpot7          0
+           prtpot8          1
+           prtpot9          0
+           prtpot10         0
+           prtpot11         1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -2784,16 +2802,27 @@ P          mk1mem11         1
               qpt9     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt10    0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt11    0.00000000E+00  0.00000000E+00  0.00000000E+00
-            rfdir1          0       0       0
-            rfdir2          0       0       0
-            rfdir3          0       0       0
-            rfdir4          0       0       0
+          rfatpol1          1       1
+          rfatpol2          1       1
+          rfatpol3          1       1
+          rfatpol4          1       1
+          rfatpol5          1       1
+          rfatpol6          1       2
+          rfatpol7          1       2
+          rfatpol8          1       1
+          rfatpol9          1       2
+          rfatpol10         1       2
+          rfatpol11         1       1
+            rfdir1          1       1       1
+            rfdir2          1       1       1
+            rfdir3          1       1       1
+            rfdir4          1       1       1
             rfdir5          1       0       0
-            rfdir6          0       0       0
-            rfdir7          0       0       0
+            rfdir6          1       1       1
+            rfdir7          1       1       1
             rfdir8          1       0       0
-            rfdir9          0       0       0
-            rfdir10         0       0       0
+            rfdir9          1       1       1
+            rfdir10         1       1       1
             rfdir11         1       0       0
            rfphon1          0
            rfphon2          0
@@ -2943,6 +2972,11 @@ P          mk1mem11         1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -2993,7 +3027,7 @@ P          mk1mem11         1
 -
 - [4] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- M. Fuchs and, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
@@ -3032,10 +3066,10 @@ P          mk1mem11         1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  40 WARNINGs and  56 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.3
+.Delivered  84 WARNINGs and  55 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.3

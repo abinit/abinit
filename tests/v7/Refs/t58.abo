@@ -1,5 +1,5 @@
 
-.Version 9.7.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Feb 2022.
-- ( at 14h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h06 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/TestBot_MPI1/v7_t58-t59/t58.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t58-t59/t58.abi
 - output file    -> t58.abo
 - root for input  files -> t58i
 - root for output files -> t58o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -38,7 +37,6 @@ P This job should need less than                       1.660 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -57,7 +55,6 @@ P This job should need less than                       1.698 Mbytes of memory.
 _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -75,7 +72,6 @@ P This job should need less than                       1.723 Mbytes of memory.
 _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -91,7 +87,6 @@ P This job should need less than                       1.248 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -109,7 +104,6 @@ P This job should need less than                       1.904 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.172 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -237,24 +231,18 @@ P          mk1mem           8
         optdriver4          0
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt4     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt5     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt6     6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       2
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -332,8 +320,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09552
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__beuken/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1418,6 +1406,31 @@ tolerances: {tolwfr: 1.00E-16, }
 
 
  ==> Compute Derivative Database <==
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1       -5.723321        0.000000
+       1               2       -0.000000        0.000000
+       1               3       -0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2       -5.723321        0.000000
+       2               3        0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2        0.000000        0.000000
+       3               3       -5.723321        0.000000
+
+ Effective charge tensors after 
+ imposition of the charge neutrality (if requested by user),
+ and eventual restriction to some part :
+   atom    displacement
+         1         1   -1.142214E-05   -8.263473E-10    8.779361E-10
+         1         2   -4.748738E-10   -1.142239E-05   -3.193664E-10
+         1         3    6.300427E-10    1.358640E-10   -1.142239E-05
+         2         1    1.142214E-05    8.263473E-10   -8.779361E-10
+         2         2    4.748738E-10    1.142239E-05    3.193664E-10
+         2         3   -6.300427E-10   -1.358640E-10    1.142239E-05
+ Now, the imaginary part of the dynamical matrix is zeroed
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
    asr not included )
@@ -1520,47 +1533,47 @@ tolerances: {tolwfr: 1.00E-16, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.7931580266         0.0000000000
-   1    1   2    1         0.0000000003         0.0000000000
-   1    1   3    1         0.0000000022         0.0000000000
+   1    1   1    1         0.7931635269         0.0000000000
+   1    1   2    1        -0.0000000002         0.0000000000
+   1    1   3    1         0.0000000018         0.0000000000
    1    1   1    2        -0.7931635269         0.0000000000
-   1    1   2    2         0.0000000002        -0.0000000000
-   1    1   3    2        -0.0000000018        -0.0000000000
+   1    1   2    2         0.0000000002         0.0000000000
+   1    1   3    2        -0.0000000018         0.0000000000
   
-   2    1   1    1         0.0000000004         0.0000000000
-   2    1   2    1         0.7931580271         0.0000000000
-   2    1   3    1        -0.0000000004         0.0000000000
-   2    1   1    2         0.0000000003        -0.0000000000
+   2    1   1    1        -0.0000000003         0.0000000000
+   2    1   2    1         0.7931635266         0.0000000000
+   2    1   3    1        -0.0000000002         0.0000000000
+   2    1   1    2         0.0000000003         0.0000000000
    2    1   2    2        -0.7931635266         0.0000000000
-   2    1   3    2         0.0000000002        -0.0000000000
+   2    1   3    2         0.0000000002         0.0000000000
   
-   3    1   1    1         0.0000000022         0.0000000000
-   3    1   2    1        -0.0000000003         0.0000000000
-   3    1   3    1         0.7931580277         0.0000000000
-   3    1   1    2        -0.0000000020        -0.0000000000
-   3    1   2    2         0.0000000004        -0.0000000000
+   3    1   1    1         0.0000000020         0.0000000000
+   3    1   2    1        -0.0000000004         0.0000000000
+   3    1   3    1         0.7931635262         0.0000000000
+   3    1   1    2        -0.0000000020         0.0000000000
+   3    1   2    2         0.0000000004         0.0000000000
    3    1   3    2        -0.7931635262         0.0000000000
   
-   1    2   1    1        -0.7931635269        -0.0000000000
+   1    2   1    1        -0.7931635269         0.0000000000
    1    2   2    1         0.0000000003         0.0000000000
    1    2   3    1        -0.0000000019         0.0000000000
-   1    2   1    2         0.7931848076         0.0000000000
-   1    2   2    2        -0.0000000007         0.0000000000
-   1    2   3    2         0.0000000037         0.0000000000
+   1    2   1    2         0.7931635269         0.0000000000
+   1    2   2    2        -0.0000000003         0.0000000000
+   1    2   3    2         0.0000000019         0.0000000000
   
    2    2   1    1         0.0000000002         0.0000000000
-   2    2   2    1        -0.7931635266        -0.0000000000
+   2    2   2    1        -0.7931635266         0.0000000000
    2    2   3    1         0.0000000003         0.0000000000
-   2    2   1    2        -0.0000000006         0.0000000000
-   2    2   2    2         0.7931848079         0.0000000000
-   2    2   3    2        -0.0000000006         0.0000000000
+   2    2   1    2        -0.0000000002         0.0000000000
+   2    2   2    2         0.7931635266         0.0000000000
+   2    2   3    2        -0.0000000003         0.0000000000
   
    3    2   1    1        -0.0000000019         0.0000000000
    3    2   2    1         0.0000000002         0.0000000000
-   3    2   3    1        -0.7931635263        -0.0000000000
-   3    2   1    2         0.0000000038         0.0000000000
-   3    2   2    2        -0.0000000006         0.0000000000
-   3    2   3    2         0.7931848082         0.0000000000
+   3    2   3    1        -0.7931635263         0.0000000000
+   3    2   1    2         0.0000000019         0.0000000000
+   3    2   2    2        -0.0000000002         0.0000000000
+   3    2   3    2         0.7931635263         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
@@ -1580,134 +1593,134 @@ tolerances: {tolwfr: 1.00E-16, }
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    4        -2.8616717760         0.0000000000
-   2    1   1    4         0.0000000018         0.0000000000
-   3    1   1    4        -0.0000000134         0.0000000000
-   1    2   1    4        -2.8616489317         0.0000000000
-   2    2   1    4         0.0000000027         0.0000000000
-   3    2   1    4        -0.0000000146         0.0000000000
+   1    1   1    4        -0.0000114221         0.0000000000
+   2    1   1    4        -0.0000000005         0.0000000000
+   3    1   1    4         0.0000000006         0.0000000000
+   1    2   1    4         0.0000114221         0.0000000000
+   2    2   1    4         0.0000000005         0.0000000000
+   3    2   1    4        -0.0000000006         0.0000000000
   
-   1    1   2    4        -0.0000000014         0.0000000000
-   2    1   2    4        -2.8616717738         0.0000000000
-   3    1   2    4         0.0000000005         0.0000000000
-   1    2   2    4         0.0000000002         0.0000000000
-   2    2   2    4        -2.8616489290         0.0000000000
-   3    2   2    4         0.0000000003         0.0000000000
+   1    1   2    4        -0.0000000008         0.0000000000
+   2    1   2    4        -0.0000114224         0.0000000000
+   3    1   2    4         0.0000000001         0.0000000000
+   1    2   2    4         0.0000000008         0.0000000000
+   2    2   2    4         0.0000114224         0.0000000000
+   3    2   2    4        -0.0000000001         0.0000000000
   
-   1    1   3    4        -0.0000000117         0.0000000000
-   2    1   3    4         0.0000000016         0.0000000000
-   3    1   3    4        -2.8616717746         0.0000000000
-   1    2   3    4        -0.0000000135         0.0000000000
-   2    2   3    4         0.0000000023         0.0000000000
-   3    2   3    4        -2.8616489299         0.0000000000
+   1    1   3    4         0.0000000009         0.0000000000
+   2    1   3    4        -0.0000000003         0.0000000000
+   3    1   3    4        -0.0000114224         0.0000000000
+   1    2   3    4        -0.0000000009         0.0000000000
+   2    2   3    4         0.0000000003         0.0000000000
+   3    2   3    4         0.0000114224         0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from phonon response) 
-   if specified in the inputs, asr has been imposed
+   if specified in the inputs, charge neutrality has been imposed
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    1        -2.8616717719         0.0000000000
-   2    4   1    1         0.0000000007         0.0000000000
-   3    4   1    1        -0.0000000116         0.0000000000
+   1    4   1    1        -0.0000114221         0.0000000000
+   2    4   1    1        -0.0000000008         0.0000000000
+   3    4   1    1         0.0000000009         0.0000000000
   
-   1    4   2    1         0.0000000009         0.0000000000
-   2    4   2    1        -2.8616717721         0.0000000000
-   3    4   2    1         0.0000000015         0.0000000000
+   1    4   2    1        -0.0000000004         0.0000000000
+   2    4   2    1        -0.0000114223         0.0000000000
+   3    4   2    1        -0.0000000003         0.0000000000
   
-   1    4   3    1        -0.0000000120         0.0000000000
-   2    4   3    1         0.0000000020         0.0000000000
-   3    4   3    1        -2.8616717721         0.0000000000
+   1    4   3    1         0.0000000006         0.0000000000
+   2    4   3    1         0.0000000001         0.0000000000
+   3    4   3    1        -0.0000114224         0.0000000000
   
-   1    4   1    2        -2.8616489276         0.0000000000
-   2    4   1    2         0.0000000022         0.0000000000
-   3    4   1    2        -0.0000000134         0.0000000000
+   1    4   1    2         0.0000114221         0.0000000000
+   2    4   1    2         0.0000000008         0.0000000000
+   3    4   1    2        -0.0000000009         0.0000000000
   
-   1    4   2    2         0.0000000018         0.0000000000
-   2    4   2    2        -2.8616489275         0.0000000000
-   3    4   2    2         0.0000000021         0.0000000000
+   1    4   2    2         0.0000000004         0.0000000000
+   2    4   2    2         0.0000114223         0.0000000000
+   3    4   2    2         0.0000000003         0.0000000000
   
-   1    4   3    2        -0.0000000132         0.0000000000
-   2    4   3    2         0.0000000017         0.0000000000
-   3    4   3    2        -2.8616489273         0.0000000000
+   1    4   3    2        -0.0000000006         0.0000000000
+   2    4   3    2        -0.0000000001         0.0000000000
+   3    4   3    2         0.0000114224         0.0000000000
   
   
   
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.898256E-05  1.898415E-05  1.898573E-05  8.511925E-03  8.511925E-03
-   8.511925E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  8.511904E-03  8.511904E-03
+   8.511904E-03
  Phonon energies in meV     :
--  5.165418E-01  5.165850E-01  5.166281E-01  2.316213E+02  2.316213E+02
--  2.316213E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.316207E+02  2.316207E+02
+-  2.316207E+02
  Phonon frequencies in cm-1    :
--  4.166191E+00  4.166539E+00  4.166887E+00  1.868152E+03  1.868152E+03
--  1.868152E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.868147E+03  1.868147E+03
+-  1.868147E+03
  Phonon frequencies in Thz     :
--  1.248993E-01  1.249097E-01  1.249201E-01  5.600578E+01  5.600578E+01
--  5.600578E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.600564E+01  5.600564E+01
+-  5.600564E+01
  Phonon energies in Kelvin  :
--  5.994212E+00  5.994713E+00  5.995213E+00  2.687850E+03  2.687850E+03
--  2.687850E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.687844E+03  2.687844E+03
+-  2.687844E+03
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
-   1.898409E-05  1.898509E-05  2.842558E-03  8.511925E-03  8.511925E-03
-   8.511925E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  8.511904E-03  8.511904E-03
+   8.511904E-03
  Phonon energies in meV     :
--  5.165832E-01  5.166106E-01  7.734992E+01  2.316213E+02  2.316213E+02
--  2.316213E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.316207E+02  2.316207E+02
+-  2.316207E+02
  Phonon frequencies in cm-1    :
--  4.166525E+00  4.166746E+00  6.238693E+02  1.868152E+03  1.868152E+03
--  1.868152E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.868147E+03  1.868147E+03
+-  1.868147E+03
  Phonon frequencies in Thz     :
--  1.249093E-01  1.249159E-01  1.870313E+01  5.600578E+01  5.600578E+01
--  5.600578E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.600564E+01  5.600564E+01
+-  5.600564E+01
  Phonon energies in Kelvin  :
--  5.994693E+00  5.995010E+00  8.976076E+02  2.687850E+03  2.687850E+03
--  2.687850E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.687844E+03  2.687844E+03
+-  2.687844E+03
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
-   1.898259E-05  1.898572E-05  2.842558E-03  8.511925E-03  8.511925E-03
-   8.511925E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  8.511904E-03  8.511904E-03
+   8.511904E-03
  Phonon energies in meV     :
--  5.165425E-01  5.166278E-01  7.734992E+01  2.316213E+02  2.316213E+02
--  2.316213E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.316207E+02  2.316207E+02
+-  2.316207E+02
  Phonon frequencies in cm-1    :
--  4.166197E+00  4.166884E+00  6.238693E+02  1.868152E+03  1.868152E+03
--  1.868152E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.868147E+03  1.868147E+03
+-  1.868147E+03
  Phonon frequencies in Thz     :
--  1.248994E-01  1.249201E-01  1.870313E+01  5.600578E+01  5.600578E+01
--  5.600578E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.600564E+01  5.600564E+01
+-  5.600564E+01
  Phonon energies in Kelvin  :
--  5.994220E+00  5.995210E+00  8.976076E+02  2.687850E+03  2.687850E+03
--  2.687850E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.687844E+03  2.687844E+03
+-  2.687844E+03
 
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
-   1.898325E-05  1.898415E-05  2.842558E-03  8.511925E-03  8.511925E-03
-   8.511925E-03
+   0.000000E+00  0.000000E+00  0.000000E+00  8.511904E-03  8.511904E-03
+   8.511904E-03
  Phonon energies in meV     :
--  5.165606E-01  5.165850E-01  7.734992E+01  2.316213E+02  2.316213E+02
--  2.316213E+02
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.316207E+02  2.316207E+02
+-  2.316207E+02
  Phonon frequencies in cm-1    :
--  4.166342E+00  4.166539E+00  6.238693E+02  1.868152E+03  1.868152E+03
--  1.868152E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  1.868147E+03  1.868147E+03
+-  1.868147E+03
  Phonon frequencies in Thz     :
--  1.249038E-01  1.249097E-01  1.870313E+01  5.600578E+01  5.600578E+01
--  5.600578E+01
+-  0.000000E+00  0.000000E+00  0.000000E+00  5.600564E+01  5.600564E+01
+-  5.600564E+01
  Phonon energies in Kelvin  :
--  5.994430E+00  5.994713E+00  8.976076E+02  2.687850E+03  2.687850E+03
--  2.687850E+03
+-  0.000000E+00  0.000000E+00  0.000000E+00  2.687844E+03  2.687844E+03
+-  2.687844E+03
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -2532,13 +2545,20 @@ meta: {optdriver: 1, rfphon: 1, }
     6)    idir= 3    ipert=   2
 
 ================================================================================
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3354992  3.3354992  G(1)= -0.1499026  0.1499026  0.1499026
  R(2)=  3.3354992  0.0000000  3.3354992  G(2)=  0.1499026 -0.1499026  0.1499026
  R(3)=  3.3354992  3.3354992  0.0000000  G(3)=  0.1499026  0.1499026 -0.1499026
  Unit cell volume ucvol=  7.4218556E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 1 blocks has been read.
 
 ================================================================================
 
@@ -2549,7 +2569,7 @@ meta: {optdriver: 1, rfphon: 1, }
    and impose the ASR on the effective charges 
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1   -2.861672E+00   -1.428774E-09   -1.171177E-08
@@ -3353,24 +3373,18 @@ P          mk1mem           8
         optdriver4          0
         optdriver5          1
         optdriver6          1
+           prtpot1          0
+           prtpot2          1
+           prtpot3          1
+           prtpot4          0
+           prtpot5          1
+           prtpot6          1
               qpt1     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt2     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt3     0.00000000E+00  0.00000000E+00  0.00000000E+00
               qpt4     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt5     6.66666667E-03  0.00000000E+00  0.00000000E+00
               qpt6     6.66666667E-03  0.00000000E+00  0.00000000E+00
-          rfatpol1          1       1
-          rfatpol2          1       1
-          rfatpol3          1       2
-          rfatpol4          1       1
-          rfatpol5          1       2
-          rfatpol6          1       2
-            rfdir1          0       0       0
-            rfdir2          1       1       1
-            rfdir3          1       1       1
-            rfdir4          0       0       0
-            rfdir5          1       1       1
-            rfdir6          1       1       1
            rfelfd1          0
            rfelfd2          2
            rfelfd3          3
@@ -3414,6 +3428,11 @@ P          mk1mem           8
             znucl        6.00000
 
 ================================================================================
+
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
 
 - Timing analysis has been suppressed with timopt=0
@@ -3511,10 +3530,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.2  wall=         26.6
+- Proc.   0 individual time (sec): cpu=         22.2  wall=         22.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  63 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.2  wall=         26.6
+.Delivered  67 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=         22.2  wall=         22.5

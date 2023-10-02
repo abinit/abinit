@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -177,12 +173,6 @@ contains
 !!       needed if the electronic dielectric matrix is computed
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
-!!
-!! PARENTS
-!!      m_newrho
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -818,12 +808,6 @@ end subroutine prcref
 !!  ===== if densfor_pred==3 .and. moved_atm_inside==1 =====
 !!    ph1d(2,3*(2*mgfft+1)*natom)=1-dim structure factor phases
 !!
-!! PARENTS
-!!      m_newvtr
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
-!!
 !! SOURCE
 
   subroutine prcref_PMA(atindx,dielar,dielinv,&
@@ -1341,12 +1325,6 @@ end subroutine prcref_PMA
 !! NOTES
 !! optreal==2 is not compatible with cplex==1
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
-!!
 !! SOURCE
 
 subroutine moddiel(cplex,dielar,mpi_enreg,nfft,ngfft,nspden,optreal,optres,qphon,rprimd,vresid,vrespc)
@@ -1576,12 +1554,6 @@ end subroutine moddiel
 !!
 !! TODO
 !! Write equation below (hermitian matrix)
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -1937,12 +1909,6 @@ end subroutine dielmt
 !! Output (not cleaned)
 !! !!! Spin behaviour is not obvious !!!
 !! Will not work in the spin-polarized, metallic case.
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2409,12 +2375,6 @@ end subroutine dieltcel
 !! NOTES
 !!  needs severe cleaning and this is abuse of modules as common blocks...
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
-!!
 !! SOURCE
 
 subroutine prcrskerker1(dtset,mpi_enreg,nfft,nspden,ngfft,dielar,etotal,gprimd,vresid,vrespc,base)
@@ -2626,12 +2586,6 @@ end subroutine prcrskerker1
 !! This is experimental code : input, ouptput, results and any other feature may vary greatly.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -2934,12 +2888,6 @@ end subroutine prcrskerker2
 !! v: vector on which minimization is to be performed, starting point
 !! and resulting min
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
-!!
 !! SOURCE
 
 subroutine cgpr(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,dtol,itmax,v,fmin,delta)
@@ -3024,12 +2972,6 @@ end subroutine cgpr
 !! grad: the gradient line along which the minimization is performed (not changed)
 !! v: the starting and then ending point of the minimization
 !!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
-!!
 !! SOURCE
 
 subroutine linmin(nv1,nv2,dp_dum_v2dp,v2dp_dum_v2dp,sub_dum_dp_v2dp_v2dp,v,grad,fmin)
@@ -3081,12 +3023,6 @@ end subroutine linmin
 !! v: the initial vector for the function (return unchanged)
 !! grad: the direction on which the bracketting is to be performed (return unchanged)
 !! a,x: two members of the bracketing triplet (see b)
-!!
-!! PARENTS
-!!      m_prcref
-!!
-!! CHILDREN
-!!      sub_dum_dp_v2dp_v2dp
 !!
 !! SOURCE
 
@@ -3190,12 +3126,6 @@ end subroutine bracketing
 !! SIDE EFFECTS
 !! grad(:): direction along which the minimization is performed
 !! v(:): starting and ending point of the minimization
-!!
-!! PARENTS
-!! linmin
-!!
-!! CHILDREN
-!! dotproduct
 !!
 !! SOURCE
 

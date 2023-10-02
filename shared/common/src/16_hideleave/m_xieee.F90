@@ -14,10 +14,6 @@
 !! NOTES
 !!   See F2003 standard and http://www.nag.com/nagware/np/r51_doc/ieee_exceptions.html
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -54,12 +50,6 @@ contains
 !!
 !! INPUTS
 !!  halt= If the value is true, the exceptions will cause halting; otherwise, execution will continue after this exception.
-!!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      ieee_set_flag
 !!
 !! SOURCE
 
@@ -105,12 +95,6 @@ end subroutine xieee_halt_ifexc
 
 !! INPUTS
 !!  flag= If the value is true, the exceptions will be signalled
-!!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      ieee_set_flag
 !!
 !! SOURCE
 

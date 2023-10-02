@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -212,12 +208,6 @@ contains
 !!
 !!  There is a large amount of overhead in the way this routine do the computation of the energy !
 !!  For example, the density has already been precomputed, so why to compute it again here ??
-!!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 
@@ -679,7 +669,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
        call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
 &       gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&       gs_hamk%ph3d_k)
+&       gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
      end if
 
 #if defined HAVE_GPU_CUDA
@@ -943,12 +933,6 @@ end subroutine energy
 !!  eig_k(nband)$= \langle C_n \mid H \mid C_n \rangle $ for each band.
 !!  resid_k(nband)=residual for each band
 !!   $= \langle C_n \mid H H \mid C_n \rangle- \langle C_n \mid H \mid C_n \rangle^2 $.
-!!
-!! PARENTS
-!!      m_dft_energy
-!!
-!! CHILDREN
-!!      dotprod_g,getghc,prep_getghc,sqnorm_g,timab
 !!
 !! SOURCE
 

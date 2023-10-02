@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -140,11 +136,6 @@ contains
 !! * LIMITATIONS: The method does not work if k is at zone border and the little group of k
 !!                contains a non-symmorphic fractional translation.
 !!
-!! PARENTS
-!!      m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngfftf,&
@@ -160,7 +151,7 @@ subroutine classify_bands(Wfd,use_paw_aeur,first_band,last_band,ik_ibz,spin,ngff
  type(crystal_t),intent(in) :: Cryst
  type(pawang_type),intent(in) :: Pawang
  type(pseudopotential_type),intent(in) :: Psps
- type(wfd_t),intent(inout) :: Wfd
+ class(wfd_t),intent(inout) :: Wfd
  type(ebands_t),target,intent(in) :: BSt
  type(esymm_t),intent(out) :: BSym
 !arrays
@@ -566,11 +557,6 @@ end subroutine classify_bands
 !!  L_{at} is the position of the initial atom inside the first unit cell
 !!  Note that atom a might be in a cell different from the initial one. No wrapping is done.
 !!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in,Cprj_out)
@@ -650,8 +636,6 @@ end subroutine rotate_cprj
 !!
 !! OUTPUT
 !!  omat(2)=The onsite matrix element.
-!!
-!! PARENTS
 !!
 !! SOURCE
 

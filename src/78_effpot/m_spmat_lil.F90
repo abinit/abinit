@@ -79,7 +79,7 @@ module m_spmat_lil
     endif
     self%ncol=0
     self%nrow=0
-    if(allocated(self%mshape)) ABI_FREE(self%mshape)
+    ABI_SFREE(self%mshape)
   end subroutine LIL_mat_t_finalize
 
   subroutine LIL_mat_t_insert(self, irow, icol, val, mode)
@@ -103,7 +103,7 @@ module m_spmat_lil
 
 !  subroutine LIL_mat_t_print(self, mat)
 !
-!    class(LIL_mat_t) , intent(inout)::self 
+!    class(LIL_mat_t) , intent(inout)::self
 !    real(dp), intent(out):: mat(self%nrow,self%ncol)
 !    integer:: irow, icol
 !    real(dp):: val
@@ -118,7 +118,7 @@ module m_spmat_lil
 !    enddo
 !  end subroutine LIL_mat_t_print
 !
- 
+
   function LIL_mat_t_get_nnz(ll) result(nnz)
 
     class(LIL_mat_t), intent(in)::ll

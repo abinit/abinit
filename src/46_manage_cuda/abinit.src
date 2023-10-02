@@ -1,0 +1,52 @@
+# -*- Python -*-
+#
+# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+#
+# Source files making up the 52_manage_cuda library
+#
+
+# Source file attributes
+ABI_SRC_NIL = 0     # No attribute
+ABI_SRC_BLT = 1     # The file is built by a script
+ABI_SRC_DEP = 2     # The file depends on other files
+
+# Source files
+sources = [
+ "m_manage_cuda.F90",
+ "m_alloc_hamilt_gpu.F90",
+ "m_nvtx_data.F90",
+ "abi_gpu_header.h",
+ "cuda_rec.cu",
+ "cuda_rec_cut.cu",
+ "density.cu",
+ "gpu_apply_invovl_inner.cu",
+ "gpu_apply_local_potential.cu",
+ "gpu_compute_nl_hamiltonian.cu",
+ "gpu_compute_nl_projections.cu",
+ "gpu_density_accumulation.cu",
+ "gpu_fourwf.cu",
+ "gpu_mkkpg.cu",
+ "gpu_nonlop.cu",
+ "gpu_sphere.cu",
+ "gpu_fftbox.cu",
+ "prt_utils_rec.cu",
+ "rec_dens_calc.cu",
+ "rec_kernels.cu",
+ "recursion_bth.cu",
+ "recursion_cut_bth.cu",
+ "recursion_cut_no_bth.cu",
+ "recursion_no_bth.cu",
+]
+
+#optional_sources = {
+#    "NVTX": ["m_nvtx_data.F90"],
+#}
+
+# IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
+# This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

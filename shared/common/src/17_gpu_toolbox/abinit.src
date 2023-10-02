@@ -18,11 +18,13 @@ ABI_SRC_DEP = 2     # The file depends on other files
 
 # Source files
 sources = [
+ "abi_gpu_header_common.h",
  "dev_spec.cu",
  "gpu_linalg.cu",
  "m_gpu_detect.F90",
  "m_gpu_toolbox.F90",
  "m_initcuda.F90",
+ "m_nvtx.F90",
  "timing_cuda.cu"
 ]
 

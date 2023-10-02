@@ -31,8 +31,8 @@
 #Specific for RF
  xred4  0.0 0.0  0.1155     0.0 0.0 -0.1155
   rfphon4  1
- rfatpol4  1 1
-   rfdir4  0 0 1
+ rfatpol   1 1
+   rfdir   0 0 1
     nqpt4  1
      qpt4  0.0 0.0 0.0
   getwfk4  2
@@ -46,6 +46,11 @@
  xred6  0.0 0.0  0.11555    0.0 0.0 -0.1155
  nsym6  1
  getwfk6 3
+
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 
 #Common data

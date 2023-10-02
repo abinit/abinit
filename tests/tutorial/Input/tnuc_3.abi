@@ -1,7 +1,7 @@
 # Computation of the Fermi contact term at the atomic sites in \alpha-Sn
 # Nonmetallic form of tin
 
-prtfc 1 # requests Fermi contact at each nuclear site
+nucfc 1 # requests Fermi contact at each nuclear site
 
 #Definition of the unit cell
 

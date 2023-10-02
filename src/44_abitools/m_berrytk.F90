@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -129,12 +125,6 @@ contains
 !!    icg1 = 0. cgq must contain the WF of ALL occupied bands.
 !!  - cg1_k can either be computed for all valence bands or
 !!    for a group of valence bands defined by minbd and maxbd.
-!!
-!! PARENTS
-!!      m_berryphase_new,m_cgwf,m_dfpt_looppert,m_orbmag
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -665,12 +655,6 @@ end subroutine smatrix
 !!   pel_cart and pion_cart
 !! - unit_out = 0 is allowed, in this case, there will be no
 !!   output of the results
-!!
-!! PARENTS
-!!      m_berryphase_new,m_relaxpol
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

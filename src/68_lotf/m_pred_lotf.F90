@@ -74,14 +74,6 @@ CONTAINS !===========================================================
  !!
  !! NOTES
  !!
- !! PARENTS
-!!      m_precpred_1geo
-!!
- !! CHILDREN
-!!      extrapolation_loop,fitclus,hist2var,init_lotf,intparms
-!!      lotf_interpolation,var2hist,vel_rescale,vel_to_gauss,wrtout,xcart2xred
-!!      xred2xcart
-!!
  !! SOURCE
  subroutine pred_lotf(ab_mover,hist,itime,icycle,zDEBUG,iexit)
 

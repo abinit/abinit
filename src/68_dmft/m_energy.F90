@@ -14,10 +14,6 @@
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -120,12 +116,6 @@ CONTAINS  !=====================================================================
 !! OUTPUTS
 !! energies_dmft  = structure of data for dmft of type energy_type
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_energy(cryst_struc,energies_dmft)
@@ -172,12 +162,6 @@ end subroutine init_energy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine destroy_energy(energies_dmft,paw_dmft)
@@ -220,12 +204,6 @@ end subroutine destroy_energy
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -304,12 +282,6 @@ end subroutine print_energy
 !!
 !! SIDE EFFECTS
 !! energies_dmft <type(energy_type)> = DMFT energy structure data
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -478,12 +450,6 @@ end subroutine compute_energy
 !! SIDE EFFECTS
 !!  energies_dmft <type(energy_type)> = DMFT energy structure data
 !!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_band_energy(energies_dmft,green,paw_dmft,occ_type,ecalc_dft,fcalc_dft,ecalc_dmft)
@@ -619,12 +585,6 @@ end subroutine compute_band_energy
 !! OUTPUT
 !!  e_hu_mig(natom)= Migdal energy for each atom.
 !!  e_hu_mig_tot= Total Migdal energy.
-!!
-!! PARENTS
-!!      m_energy
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -765,12 +725,6 @@ end subroutine compute_migdal_energy
 !!           renorm = J/U for the real values (does not depend on "lambda" entropy)
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft,m_energy
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -950,11 +904,6 @@ end subroutine compute_dftu_energy
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine compute_noninterentropy(cryst_struc,green,paw_dmft)
@@ -1052,11 +1001,6 @@ end subroutine compute_noninterentropy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

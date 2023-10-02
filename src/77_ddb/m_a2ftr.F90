@@ -12,10 +12,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -91,14 +87,6 @@ contains
 !!
 !! OUTPUT
 !!  elph_ds
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -1047,14 +1035,6 @@ end subroutine mka2f_tr
 !! OUTPUT
 !!  elph_ds
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
-!!
 !! NOTES
 !!   copied from ftiaf9.f
 !!
@@ -1668,14 +1648,6 @@ end subroutine mka2f_tr_lova
 !! OUTPUT
 !!  tau_k(nsppol,nkptirr,nband)=mode relaxation time due to electron phonono coupling
 !!  rate_e(nene)= scattering rate due to electron phonono coupling vs. energy
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! SOURCE
 

@@ -10,10 +10,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -47,6 +43,11 @@ module m_rhotov
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_psolver,          only : psolver_rhohxc
  use m_wvl_psi,          only : wvl_psitohpsi
+ use m_pawang,            only : pawang_type
+ use m_pawrad,            only : pawrad_type
+ use m_pawrhoij,          only : pawrhoij_type
+ use m_pawtab,            only : pawtab_type
+ use m_xc_tb09,           only : xc_tb09_update_c
 
  implicit none
 
@@ -91,6 +92,10 @@ contains
 !!  optres=0: the trial potential residual is computed ; the input potential value is kept
 !!         1: the new value of the trial potential is computed in place of the input value
 !!  optxc=option to be used for the call to rhotoxc
+!!  pawang <type(pawang_type)> =paw angular mesh and related data
+!!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies and related data (for the current atom)
+!!  pawtab(ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3.
 !!   | definition for spin components:
@@ -154,19 +159,11 @@ contains
 !!      they have to be stored on the fine FFT grid.
 !!  In case of norm-conserving calculations the FFT grid is the usual FFT grid.
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      constrained_residual,dotprod_vn,hartre,mag_penalty,mean_fftr
-!!      psolver_rhohxc,rhohxcpositron,rhotoxc,sqnorm_v,timab,wvl_psitohpsi
-!!      wvl_vtrial_abi2big,xcdata_init,xchybrid_ncpp_cc,xred2xcart
-!!
 !! SOURCE
 
 subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,istep,kxc,mpi_enreg,nfft,ngfft,&
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
-&  rhog,rhor,rprimd,strscondft,strsxc,ucvol,usepaw,usexcnhat,&
+&  pawang,pawrad,pawrhoij,pawtab,rhog,rhor,rprimd,strscondft,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
 &  electronpositron,taur,vxc_hybcomp,vxctau,vtauresid,add_tfw,xcctau3d) ! optional arguments
 
@@ -182,6 +179,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  type(dataset_type),intent(in) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(pawang_type),intent(in) :: pawang
  type(wvl_data), intent(inout) :: wvl
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -201,6 +199,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
  real(dp),intent(out),optional,target :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(out),optional :: xcctau3d(n3xccc)
+ type(pawrhoij_type),intent(in) :: pawrhoij(:)
+ type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*dtset%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -263,18 +264,30 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,grcondft,gsqcut,intgres,
    if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+
+!    >>>> Hartree potential
      call hartre(1,gsqcut,dtset%icutcoul,usepaw,mpi_enreg,nfft,ngfft,&
                  &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
 
+!    >>>> Exchange-correlation potential
      !Use the proper exchange_correlation energy : either the origin one, or the auxiliary one
      ixc_current=dtset%ixc
      if(mod(dtset%fockoptmix,100)==11)ixc_current=dtset%auxc_ixc
      call xcdata_init(xcdata,dtset=dtset,ixc=ixc_current)
      non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
+     nk3xc=1
+
+!    If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+     if (dtset%xc_tb09_c>99._dp) then
+       call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&        nfft,ngfft,nhat,usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&        pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,usepaw, &
+&        xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&        computation_type='all')
+     end if
 
 !    Use the periodic solver to compute Hxc.
      call timab(941,1,tsec)
-     nk3xc=1
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&

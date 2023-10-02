@@ -177,13 +177,6 @@ CONTAINS
 !!                          Integral[f] = Sum_i [simfact(i)*f(i)]
 !!    %rmax = Max. value of r = rad(mesh_size)
 !!
-!! PARENTS
-!!      m_dfpt_elt,m_mkcore,m_paw_atomorb,m_paw_gaussfit,m_pawpsp,m_pawpwij
-!!      m_pawxmlps,m_psp8,m_psp9,m_psps,m_wvl_rho,mkcore_wvl
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! NOTES
 !!  Possible mesh types (mesh%mesh_type)
 !!   mesh_type=1 (regular grid): rad(i)=(i-1)*AA
@@ -314,12 +307,6 @@ end subroutine pawrad_init
 !! FUNCTION
 !!  Frees all memory allocated in the object
 !!
-!! PARENTS
-!!      m_pawrad
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! SOURCE
 
 subroutine pawrad_free_0D(Rmesh)
@@ -358,11 +345,6 @@ end subroutine pawrad_free_0D
 !!
 !! FUNCTION
 !!  Destroy all objects in an array of pawrad data structures
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      poisson,simp_gen
 !!
 !! SOURCE
 
@@ -406,12 +388,6 @@ end subroutine pawrad_free_1D
 !!
 !! OUTPUT
 !!  Only writing.
-!!
-!! PARENTS
-!!      m_paw_atomorb
-!!
-!! CHILDREN
-!!      poisson,simp_gen
 !!
 !! SOURCE
 
@@ -502,12 +478,6 @@ end subroutine pawrad_print
 !!    * 1 if Rmesh1 is denser than Rmesh2
 !!    * 2 if Rmesh2 is denser than Rmesh1
 !!
-!! PARENTS
-!!      m_paw_atomorb,m_paw_slater
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! SOURCE
 
 subroutine pawrad_isame(Rmesh1,Rmesh2,hasameq,whichdenser)
@@ -576,12 +546,6 @@ end subroutine pawrad_isame
 !! OUTPUT
 !!  mesh2 <type(pawrad_type)>=data containing radial grid information of output mesh
 !!
-!! PARENTS
-!!      m_pawpsp,m_pawpwij
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! NOTES
 !!  Possible mesh types (mesh%mesh_type)
 !!   mesh_type=1 (regular grid): rad(i)=(i-1)*AA
@@ -642,14 +606,6 @@ end subroutine pawrad_copy
 !! SIDE EFFECTS
 !!  func(funcsz)=array containing values of function to extrapolate
 !!
-!! PARENTS
-!!      m_orbmag,m_paw_atom,m_paw_denpot,m_paw_gaussfit,m_paw_init,m_paw_mkrho
-!!      m_paw_nmr,m_paw_onsite,m_paw_pwaves_lmn,m_paw_slater,m_pawdij,m_pawpsp
-!!      m_pawrad,m_pawxc
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! SOURCE
 
 subroutine pawrad_deducer0(func,funcsz,radmesh)
@@ -686,12 +642,6 @@ end subroutine pawrad_deducer0
 !!
 !! SIDE EFFECTS
 !!  pawrad=<type pawrad_type>= a radial mesh datastructure for PAW
-!!
-!! PARENTS
-!!      m_pawpsp
-!!
-!! CHILDREN
-!!      poisson,simp_gen
 !!
 !! SOURCE
 
@@ -852,15 +802,6 @@ end subroutine pawrad_bcast
 !! OUTPUT
 !!  intg=resulting integral by Simpson rule
 !!
-!! PARENTS
-!!      m_epjdos,m_mlwfovlp,m_orbmag,m_paw_atom,m_paw_atomorb
-!!      m_paw_correlations,m_paw_denpot,m_paw_dfptnl,m_paw_hr,m_paw_init
-!!      m_paw_nmr,m_paw_onsite,m_paw_overlap,m_paw_slater,m_pawdij,m_pawpsp
-!!      m_pawpwij,m_pawrad,m_pawxc,m_plowannier,m_positron,m_psps
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! NOTES
 !!  Possible mesh types (radmesh%mesh_type)
 !!   mesh_type=1 (regular grid): rad(i)=(i-1)*AA
@@ -978,13 +919,6 @@ end subroutine simp_gen
 !!  der(:)= 1st derivative of input function
 !!  [der2(:)]= -- optional -- 2nd derivative of input function
 !!
-!! PARENTS
-!!      m_paw_init,m_paw_onsite,m_paw_pwaves_lmn,m_pawdij,m_pawpsp,m_pawxc
-!!      m_positron
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! NOTES
 !!  Possible mesh types (radmesh%mesh_type)
 !!   mesh_type=1 (regular grid): rad(i)=(i-1)*AA
@@ -1088,12 +1022,6 @@ end subroutine nderiv_gen
 !! OUTPUT
 !!  zz(ndim)= first or second derivative of y
 !!
-!! PARENTS
-!!      m_pawrad
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! SOURCE
 
 subroutine nderiv_lin(hh,yy,zz,ndim,norder)
@@ -1181,12 +1109,6 @@ end subroutine nderiv_lin
 !! OUTPUT
 !!  yp1,ypn= derivatives of func at r(1) and r(n)
 !!
-!! PARENTS
-!!      m_outscfcv,m_paw_atom,m_pawpsp,m_pawxmlps
-!!
-!! CHILDREN
-!!      poisson,simp_gen
-!!
 !! SOURCE
 
  subroutine bound_deriv(func,mesh,nn,yp1,ypn)
@@ -1236,12 +1158,6 @@ end subroutine bound_deriv
 !!  rv(:)= electrostatic potential * r in (Hartree*Bohr) units
 !!          where v(r)=\frac{1}{2l+1}(\frac{int[(r''^(l+2))g(r'')dr'']} {r^(l+1)}
 !!                                   +(r^l) int[r''^(1-l)g(r'')dr''])
-!!
-!! PARENTS
-!!      m_paw_atom,m_paw_correlations,m_paw_denpot,m_paw_init,m_pawpsp,m_pawrad
-!!
-!! CHILDREN
-!!      poisson,simp_gen
 !!
 !! SOURCE
 
@@ -1477,10 +1393,6 @@ end subroutine poisson
 !! OUTPUT
 !!  pawrad_ifromr=index of rr in radial grid
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!  Possible mesh types (radmesh%mesh_type)
 !!   mesh_type=1 (regular grid): rad(i)=(i-1)*AA
@@ -1545,10 +1457,6 @@ end function pawrad_ifromr
 !!
 !! OUTPUT
 !!  screened_coul_kernel=output radial function
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1788,12 +1696,6 @@ end function screened_coul_kernel
 !!  integral =
 !!   $ \dfrac{4\pi}{2L+1} \int ff1(r1) \dfrac{r_<^L}{r_>^{L+1}} ff2(r2) dr1 dr2 $
 !!  where $r_< = min(r1,r2)$ and $r_> = Max(r1,r2)$.
-!!
-!! PARENTS
-!!      m_paw_slater
-!!
-!! CHILDREN
-!!      poisson,simp_gen
 !!
 !! SOURCE
 

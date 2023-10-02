@@ -11,10 +11,6 @@
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -93,12 +89,6 @@ contains
 !!                       or part of <G|K^(2)+Vnl^(2)-lambda.S^(2)|C> not depending on VHxc^(2) (sij_opt==-1)
 !! if (sij_opt=1)
 !!  gs2c(2,npw1*nspinor)=<G|S^(2)|C> (S=overlap).
-!!
-!! PARENTS
-!!      m_rf2
-!!
-!! CHILDREN
-!!      nonlop,pawcprj_alloc,pawcprj_free
 !!
 !! SOURCE
 
