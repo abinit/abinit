@@ -56,7 +56,8 @@ of uniaxial crystals, the z-axis should be chosen along the optical axis.
         commentdefault="was 0 before v5.3",
         added_in_version="before_v9",
         text=r"""
-Governs the imposition of the Acoustic Sum Rule (ASR).
+Governs the imposition of the Acoustic Sum Rule (ASR) in the ANADDB application.
+Note that there is a similar input variable [[asr]] for ABINIT. 
 
   * 0 --> no ASR for interatomic force constants is imposed.
   * 1 or 2 --> the ASR for interatomic force constants is imposed by modifying
@@ -84,9 +85,10 @@ So, if **asr** is non-zero, the correction to the self-force will be
 determined, and the self-force will be imposed to be consistent with the ASR.
 This correction will work if IFCs are computed ([[anaddb:ifcflag]]/=0), as
 well as if the IFCs are not computed ([[anaddb:ifcflag]]==0). In both cases,
-the phonon frequencies will not be the same as the ones determined by the
-output of abinit, RF case. If you want to check that the DDB is correct, by
-comparing phonon frequencies from abinit and anaddb, you should turn off both
+the phonon frequencies might not be the same as the ones determined by the
+output of abinit, RF case, unless the same values of asr and chneut are used,
+if the IFCs are not computed. If you want to check that the DDB is correct, by
+comparing phonon frequencies from abinit and anaddb, it is best to turn off both
 **asr** and [[anaddb:chneut]].
 
 Until now, we have not explained the difference between **asr** =1 and **asr**
@@ -107,8 +109,7 @@ exactly the same likely due to an extra symmetrisation in the
 diagonalisation routine. Of course, when the matrix at Gamma has been
 generated from IFCs coming from dynamical matrices none of which are Gamma,
 the breaking of the ASR is rather severe. In order to clear the situation, one
-should use a diagonalisation routine for non-hermitian matrices. So, at the
-present status of understanding, one should always use the **asr** =2 option
+should use a diagonalisation routine for non-hermitian matrices. 
 ).
 """,
     ),
@@ -193,22 +194,25 @@ based on Wigner-Seitz cells (new as v8.7). The default algorithm has a correct t
         topics=['Phonons_useful'],
         dimensions="scalar",
         defaultval=0,
-        mnemonics="Integer for CHarge NEUTrality treatment",
+        mnemonics="CHarge NEUTrality treatment",
         added_in_version="before_v9",
         text=r"""
-Set the treatment of the Charge Neutrality requirement for the effective charges.
+Set the treatment of the Charge Neutrality requirement for the effective charges in the ANADDB application.
+Note that there is a similar input variable [[abinit:chneut]] for ABINIT, however its default value is different..
 
-  * chneut=0 --> no ASR for effective charges is imposed
-  * chneut=1 --> the ASR for effective charges is imposed by giving to each atom
+  * **chneut**=0 --> no charge neutrality for effective charges is imposed
+  * **chneut**=1 --> the charge neutrality for effective charges is imposed by giving to each atom
     an equal portion of the missing charge. See Eq.(48) in [[cite:Gonze1997a]].
-  * chneut=2 --> the ASR for effective charges is imposed by giving to each atom a portion
+  * **chneut**=2 --> the charge neutrality for effective charges is imposed by giving to each atom a portion
     of the missing charge proportional to the screening charge already present.
     See Eq.(49) in [[cite:Gonze1997a]].
 
 More detailed explanation: the sum of the effective charges in the unit cell
 should be equal to zero. It is not the case in the DDB, and this sum rule is
 sometimes strongly violated. In particular, this will make the lowest
-frequencies at Gamma non-zero. There is no "best" way of imposing the ASR on effective charges.
+frequencies at Gamma non-zero. There is no "best" way of imposing the cherge neutrality on effective charges.
+
+See also [[asr@anaddb]] and [[asr]].
 """,
     ),
 
@@ -350,12 +354,14 @@ Frequency-dependent dielectric tensor flag.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-06 Hartree = 1 cm$^{-1}$",
+        defaultval="0.2 cm$^{-1}$ (about 0.9E-06 Hartree)",
         mnemonics="DOS DELTA in Energy",
         added_in_version="before_v9",
         text=r"""
 The input variable **dosdeltae** is used to define the step of the frequency
 grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 1 cm$^{-1}$.
 """,
     ),
 
@@ -365,13 +371,15 @@ grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
         vartype="real",
         topics=['PhononBands_useful'],
         dimensions="scalar",
-        defaultval="4.5E-05 Hartree = 10 cm$^{-1}$",
+        defaultval="1 cm$^{-1}$ (about 4.5E-06 Hartree)",
         mnemonics="DOS SMEARing value",
         characteristics=['[[ENERGY]]'],
         added_in_version="before_v9",
         text=r"""
 **dossmear** defines the gaussian broadening used to calculate the phonon
 density of states when [[anaddb:prtdos]] = 1.
+
+Prior to v9.10, the default was 5 cm$^{-1}$.
 """,
     ),
 
@@ -1757,9 +1765,9 @@ must be set to 1 since the interatomic force constants are supposed to be known.
 
 The available options are:
 
-  * 0 --> no output of PHDOS (default);
-  * 1 --> calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]].
-  * 2 --> calculate PHDOS using the tetrahedron method.
+  * 0 --> No output of PHDOS (default);
+  * 1 --> Calculate PHDOS using the gaussian method and the broadening defined by [[anaddb:dossmear]]. This is the recommended technique, as usually the interpolation q-point grid is very fine.
+  * 2 --> Calculate PHDOS using the tetrahedron method. The tetrahedron DOS has Van Hove singularities, and this might yield problems with further post-treatment of the DOS.
 
 The step of the frequency grid employed to calculate the DOS can be defined
 through the input variable [[anaddb:dosdeltae]].

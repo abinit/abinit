@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.10.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h29 )
+.Starting date : Thu 20 Jul 2023.
+- ( at 09h44 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t32/t32.in
-- output file    -> t32.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/TestBot_MPI1/v6_t32/t32.abi
+- output file    -> t32.abo
 - root for input  files -> t32i
 - root for output files -> t32o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                      14.942 Mbytes of memory.
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -56,7 +54,6 @@ P This job should need less than                      14.942 Mbytes of memory.
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,7 +69,6 @@ P This job should need less than                      24.750 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -143,6 +139,7 @@ P           mkmem           2
                        1.000000  1.000000  1.000000  1.000000
               occ4     1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000
+        optstress           0
            prtden           0
           prtkden           1
             prtwf           0
@@ -268,8 +265,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -319,12 +316,6 @@ Result for kinetic energy density :
    Integrated=    3.0746E+00
 --------------------------------------------------------------------------------
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.08844889E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.08844889E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.08844889E-05  sigma(2 1)=  0.00000000E+00
-
-
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
   maximum residual=  2.785E-16 exceeds tolwfr=  1.000E-28
@@ -344,11 +335,8 @@ convergence: {deltae: -4.370E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: 
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
-cartesian_stress_tensor: # hartree/bohr^3
-- [  6.08844889E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   6.08844889E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   6.08844889E-05, ]
-pressure_GPa:  -1.7913E+00
+cartesian_stress_tensor: null
+pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
@@ -414,16 +402,6 @@ band_energy         : -1.37817912200610E+00
 ...
 
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.08844889E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.08844889E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.08844889E-05  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -1.7913E+00 GPa]
-- sigma(1 1)=  1.79128320E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.79128320E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.79128320E+00  sigma(2 1)=  0.00000000E+00
-
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
@@ -458,8 +436,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -508,12 +486,6 @@ Result for kinetic energy density :
    Integrated=    3.0746E+00
 --------------------------------------------------------------------------------
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  7.58281028E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  7.58281028E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  7.58281028E-05  sigma(2 1)=  0.00000000E+00
-
-
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
   maximum residual=  2.785E-16 exceeds tolwfr=  1.000E-28
@@ -533,11 +505,8 @@ convergence: {deltae: -2.380E-13, res2:  1.657E-13, residm:  2.785E-16, diffor: 
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
-cartesian_stress_tensor: # hartree/bohr^3
-- [  7.58281028E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   7.58281028E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   7.58281028E-05, ]
-pressure_GPa:  -2.2309E+00
+cartesian_stress_tensor: null
+pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
@@ -603,16 +572,6 @@ band_energy         : -1.37817912200614E+00
 ...
 
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  7.58281028E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  7.58281028E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  7.58281028E-05  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -2.2309E+00 GPa]
-- sigma(1 1)=  2.23093943E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.23093943E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.23093943E+00  sigma(2 1)=  0.00000000E+00
-
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
@@ -647,8 +606,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -712,12 +671,6 @@ Result for kinetic energy density :
 )     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.08844889E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.08844889E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.08844889E-05  sigma(2 1)=  0.00000000E+00
-
-
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
   maximum residual=  2.785E-16 exceeds tolwfr=  1.000E-28
@@ -737,11 +690,8 @@ convergence: {deltae: -3.979E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: 
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
-cartesian_stress_tensor: # hartree/bohr^3
-- [  6.08844889E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   6.08844889E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   6.08844889E-05, ]
-pressure_GPa:  -1.7913E+00
+cartesian_stress_tensor: null
+pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
@@ -817,16 +767,6 @@ band_energy         : -1.37817912200611E+00
 ...
 
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  6.08844889E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  6.08844889E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  6.08844889E-05  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -1.7913E+00 GPa]
-- sigma(1 1)=  1.79128320E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.79128320E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  1.79128320E+00  sigma(2 1)=  0.00000000E+00
-
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
@@ -861,8 +801,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/torrent_quickfix-release/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -926,12 +866,6 @@ Result for kinetic energy density :
 )     Minimum=    0.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
 --------------------------------------------------------------------------------
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  7.58281028E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  7.58281028E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  7.58281028E-05  sigma(2 1)=  0.00000000E+00
-
-
  scprqt:  WARNING -
   nstep=    8 was not enough SCF cycles to converge;
   maximum residual=  2.785E-16 exceeds tolwfr=  1.000E-28
@@ -951,11 +885,8 @@ convergence: {deltae: -2.514E-13, res2:  3.314E-13, residm:  2.785E-16, diffor: 
 etotal    :  -7.93574684E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45485544E-02
-cartesian_stress_tensor: # hartree/bohr^3
-- [  7.58281028E-05,   0.00000000E+00,   0.00000000E+00, ]
-- [  0.00000000E+00,   7.58281028E-05,   0.00000000E+00, ]
-- [  0.00000000E+00,   0.00000000E+00,   7.58281028E-05, ]
-pressure_GPa:  -2.2309E+00
+cartesian_stress_tensor: null
+pressure_GPa: null
 xred      :
 - [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
 - [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
@@ -1031,16 +962,6 @@ band_energy         : -1.37817912200613E+00
 ...
 
 
- Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  7.58281028E-05  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  7.58281028E-05  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  7.58281028E-05  sigma(2 1)=  0.00000000E+00
-
--Cartesian components of stress tensor (GPa)         [Pressure= -2.2309E+00 GPa]
-- sigma(1 1)=  2.23093943E+00  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  2.23093943E+00  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  2.23093943E+00  sigma(2 1)=  0.00000000E+00
-
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1099,6 +1020,7 @@ P           mkmem           2
                        1.000000  1.000000  1.000000  1.000000
               occ4     1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000
+        optstress           0
            prtden           0
           prtkden           1
             prtwf           0
@@ -1110,14 +1032,14 @@ P           mkmem           2
    spinmagntarget2    -9.99900000E+01
    spinmagntarget3     0.00000000E+00
    spinmagntarget4     0.00000000E+00
-           strten1     6.0884488852E-05  6.0884488852E-05  6.0884488852E-05
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten2     7.5828102845E-05  7.5828102845E-05  7.5828102845E-05
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     6.0884488852E-05  6.0884488852E-05  6.0884488852E-05
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     7.5828102845E-05  7.5828102845E-05  7.5828102845E-05
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+           strten1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           strten2     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           strten3     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+           strten4     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
+                       9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
                       -1  0  0  -1  0  1  -1  1  0       1  0  0   1  0 -1   1 -1  0
@@ -1267,10 +1189,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         16.5
+- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  17 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.4  wall=         16.5
+.Delivered  56 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.2  wall=         17.3

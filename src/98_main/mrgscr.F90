@@ -42,9 +42,7 @@ program mrgscr
  use m_build_info
  use m_errors
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_crystal
  use m_pawrhoij
@@ -62,12 +60,11 @@ program mrgscr
  use m_numeric_tools,       only : iseven, cspint
  use m_mpinfo,              only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,            only : normv, metric
- use m_gsphere,             only : gsph_init, gsph_free, gsphere_t
- use m_bz_mesh,             only : kmesh_t, find_qmesh, kmesh_init, kmesh_print, kmesh_free
- use m_vcoul,               only : vcoul_t, vcoul_init, vcoul_free
+ use m_gsphere,             only : gsphere_t
+ use m_bz_mesh,             only : kmesh_t, find_qmesh
+ use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
- use m_io_screening,        only : hscr_print, read_screening, hscr_free, hscr_t, hscr_from_file,&
-                                   ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
+ use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
  use m_ppmodel,             only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm_one_ggp, &
                                    get_PPm_eigenvalues, ppmodel_t, cqratio
  use m_model_screening,     only : remove_phase
@@ -105,10 +102,10 @@ program mrgscr
  type(MPI_type) :: MPI_enreg
  type(kmesh_t) :: Kmesh,Qmesh
  type(crystal_t) :: Cryst
- type(gsphere_t)  :: Gsphere
+ type(gsphere_t) :: Gsphere
  type(ppmodel_t) :: PPm
  type(Epsilonm1_results) :: Er
- type(vcoul_t),target :: Vcp
+ type(vcoul_t), target :: Vcp
  type(Dataset_type) :: Dtset
 !arrays
  integer :: ngfft(18)
@@ -162,7 +159,7 @@ program mrgscr
     ' Running single-file mode:',ch10,&
     ' Checking the integrity of file: ',TRIM(filenames(1)),ch10,&
     ' reporting the list of q-points that are missing. '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
 
    if (nctk_try_fort_or_ncfile(filenames(1), msg) /= 0) then
      ABI_ERROR(msg)
@@ -187,7 +184,7 @@ program mrgscr
  do ifile=1,nfiles
    iomode = IO_MODE_FORTRAN; if (endswith(filenames(ifile), ".nc")) iomode = IO_MODE_ETSF
 
-   call hscr_from_file(Hscr_file(ifile), filenames(ifile), fform1, comm)
+   call Hscr_file(ifile)%from_file(filenames(ifile), fform1, comm)
    ABI_CHECK(fform1 /= 0, sjoin("fform == 0 in", filenames(ifile)))
 
    abifile = abifile_from_fform(fform1)
@@ -200,7 +197,7 @@ program mrgscr
    is_scr = abifile%class == "epsm1"
    is_sus = abifile%class == "polariz"
 
-   call hscr_print(Hscr_file(ifile),unit=std_out,prtvol=1)
+   call Hscr_file(ifile)%print(unit=std_out,prtvol=1)
 
    if (ifile == 1) call metric(gmet,gprimd,-1,rmet,Hscr_file(ifile)%Hdr%rprimd,ucvol)
  end do !ifile
@@ -249,7 +246,7 @@ program mrgscr
  ! Now check if the list of q-points is complete
  ! Here we assume that the k-mesh reported in the header is the same as that used during the sigma calculation.
  write(msg,'(3a)') ch10,' Checking if the list of q-points is complete. ',ch10
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out, msg)
 
  !call hscr_check_qpoints(hscr0)
 
@@ -263,11 +260,11 @@ program mrgscr
  cryst = HScr0%Hdr%get_crystal(remove_inv=.FALSE.)
 
  kptopt=1
- call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",prtvol=prtvol)
+ call Kmesh%init(Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
+ call Kmesh%print("K-mesh for the wavefunctions",prtvol=prtvol)
 
  call find_qmesh(Qmesh,Cryst,Kmesh)
- call kmesh_print(Qmesh,"Q-mesh for the screening function",prtvol=prtvol)
+ call qmesh%print("Q-mesh for the screening function",prtvol=prtvol)
 
  ABI_MALLOC(foundq,(Qmesh%nibz))
  foundq(:)=0
@@ -282,13 +279,13 @@ program mrgscr
    write(msg,'(6a)')ch10,&
     ' File ',TRIM(fname),' is not complete ',ch10,&
     ' The following q-points are missing:'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
      if (foundq(iqibz)==0) then
        ii=ii+1
        write(msg,'(i3,a,3f12.6)')ii,') ',Qmesh%ibz(:,iqibz)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
      end if
    end do
  end if
@@ -297,13 +294,13 @@ program mrgscr
    write(msg,'(6a)')ch10,&
     ' File ',TRIM(fname),' is overcomplete ',ch10,&
     ' The following q-points are present more than once:'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    ii=0
    do iqibz=1,Qmesh%nibz
      if (foundq(iqibz)>1) then
        ii=ii+1
        write(msg,'(i3,a,3f12.6)')ii,') ',Qmesh%ibz(:,iqibz)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out, msg)
      end if
    end do
  end if
@@ -311,7 +308,7 @@ program mrgscr
  if (ALL(foundq==1)) then
    write(msg,'(5a)')ch10,&
     '.File ',TRIM(fname),' contains a complete list of q-points ',ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
  end if
 
  !=====================
@@ -351,7 +348,7 @@ program mrgscr
      write(std_out,'(a)') ' 2 => Extraction of file contents'
 
      ! Initialize the G-sphere.
-     call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
+     call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
      ABI_MALLOC_OR_DIE(epsm1,(Hscr0%npwe,Hscr0%npwe,Hscr0%nomega,1), ierr)
 
@@ -390,8 +387,8 @@ program mrgscr
          end if
          dtset%ecutsigx = -one
 
-         call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
-           Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,ngfft,comm)
+         call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,&
+                        Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,qlwl,comm)
          ABI_FREE(qlwl)
 
          calc_epsilon = .TRUE.
@@ -581,7 +578,7 @@ program mrgscr
      end do !iqibz
 
      ABI_FREE(epsm1)
-     call gsph_free(Gsphere)
+     call Gsphere%free()
 
    case(3)
        ! Extract dielectric function and plasmon-pole stuff --------------------------
@@ -592,7 +589,7 @@ program mrgscr
      call init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
 
      ! Initialize the G-sphere ===
-     call gsph_init(Gsphere,Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
+     call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
 
      boxcutmin=two; igmax=Gsphere%shlim(Gsphere%nsh)
      ecut=Er%Hscr%Hdr%ecutdg
@@ -620,8 +617,8 @@ program mrgscr
        qlwl(:,:)=Er%Hscr%qlwl(:,1:nqlwl)
      end if
 
-     call vcoul_init(Vcp,Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Hscr0%npwe,nqlwl,&
-       qlwl,ngfft,comm)
+     call Vcp%init(Gsphere,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,&
+                  Hscr0%npwe,nqlwl,qlwl,comm)
      ABI_FREE(qlwl)
 
      ! Get the density from an external file ===
@@ -1090,9 +1087,9 @@ program mrgscr
      ABI_FREE(rhog)
      ABI_FREE(nhat)
 
-     call vcoul_free(Vcp)
+     call Vcp%free()
      call em1results_free(Er)
-     call gsph_free(Gsphere)
+     call Gsphere%free()
 
    case(4)
      ! Remove real frequencies ----------------------------------------------------------
@@ -1272,15 +1269,15 @@ program mrgscr
  ABI_SFREE(foundq)
 
  call cryst%free()
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Kmesh%free()
+ call Qmesh%free()
  call destroy_mpi_enreg(MPI_enreg)
 
  nullify(Hscr0)
- call hscr_free(Hscr_merge)
+ call Hscr_merge%free()
 
  do ifile=1,nfiles
-   call hscr_free(Hscr_file(ifile))
+   call Hscr_file(ifile)%free()
  end do
  ABI_FREE(Hscr_file)
 

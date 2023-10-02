@@ -29,7 +29,7 @@ module m_ptgroups
  use m_io_tools,       only : open_file
  use m_fstrings,       only : sjoin
  use m_numeric_tools,  only : get_trace, cmplx_sphcart
- use m_symtk,          only : mati3inv
+ use m_symtk,          only : mati3inv, sg_multable
 
 ! Import group tables
  use m_ptg_C1
@@ -256,11 +256,12 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 
 !Local variables-------------------------------
 !scalars
- integer :: isym,jsym,ksym,identity_idx !,ierr
+ integer :: isym,jsym,ksym,identity_idx,ierr
  character(len=500) :: msg
 !arrays
  integer :: cjg(3,3),ss(3,3),xx(3,3),xxm1(3,3),test(3,3)
  integer :: identity(3,3)
+ integer :: dummy_symafm(nsym)
  logical :: found(nsym),found_identity
 
 !************************************************************************
@@ -279,11 +280,10 @@ subroutine get_classes(nsym,sym,nclass,nelements,elements_idx)
 &  'check set of symmetry operations '
   ABI_ERROR(msg)
  end if
- !
- ! Is it a group? Note that I assume that AFM sym.op (if any) have been pruned in the caller.
- !dummy_symafm=1
- !call chkgrp(nsym,dummy_symafm,sym,ierr)
- !ABI_CHECK(ierr==0,"Error in group closure")
+  
+ dummy_symafm=1
+ call sg_multable(nsym,dummy_symafm,sym,ierr)
+ ABI_CHECK(ierr==0,"Error in group closure")
 
  nclass=0; nelements(:)=0; elements_idx(:,:)=0; found(:)=.FALSE.
  do isym=1,nsym

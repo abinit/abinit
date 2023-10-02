@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v3_t02/t02.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t02/t02.abi
 - output file    -> t02.abo
 - root for input  files -> t02i
 - root for output files -> t02o
-
 
  DATASET    1 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -55,7 +54,6 @@ P newvtr chain                          1.019 Mbytes.
 _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -87,7 +85,6 @@ P newvtr chain                          1.019 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -121,7 +118,6 @@ P newvtr chain                          1.019 Mbytes.
 _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -148,7 +144,6 @@ P Main chain + nonlop.f + opernl.f      1.043 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -182,7 +177,6 @@ P newvtr chain                          1.064 Mbytes.
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6 (RF).
@@ -209,7 +203,6 @@ P Main chain + nonlop.f + opernl.f      1.196 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -243,7 +236,6 @@ P newvtr chain                          1.201 Mbytes.
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    8 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -276,7 +268,6 @@ P newvtr chain                          1.201 Mbytes.
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-
  DATASET    9 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -308,7 +299,6 @@ P newvtr chain                          1.201 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET   10 : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -444,7 +434,7 @@ P          mk1mem           3
            prtpot9          0
            prtpot10         1
            prtvol          10
-          rfatpol           1       1        
+          rfatpol           1       1
             rfdir           1       0       0
            rfphon1          0
            rfphon2          0
@@ -606,8 +596,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2240,8 +2230,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3655,7 +3645,7 @@ P          mk1mem           3
            prtpot9          0
            prtpot10         1
            prtvol          10
-          rfatpol           1       1        
+          rfatpol           1       1
             rfdir           1       0       0
            rfphon1          0
            rfphon2          0
@@ -3788,6 +3778,11 @@ P          mk1mem           3
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -3871,10 +3866,10 @@ P          mk1mem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.6
+.Delivered  73 WARNINGs and  36 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.6  wall=          3.8

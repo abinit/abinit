@@ -1656,7 +1656,7 @@ pp_dirpath $ABI_PSPDIR
 
     def get_pseudo_paths(self, dir_and_names=False):
         """
-        Return list of absolut paths for pseudos.
+        Return list of absolute paths for pseudos.
         If `dir_and_names` is True, the function returns (dirname, basenames)
         where dirname is the common directory and basenames is a list of basenames in dirname.
         If a common directory cannot be found, dirname is set to None and basename is a list of absolute paths.
@@ -2037,10 +2037,11 @@ pp_dirpath $ABI_PSPDIR
                 stdin_fname = ""
                 self.prepare_new_cli_invokation()
 
-                path = os.path.join(
-                    self.workdir, os.path.basename(self.inp_fname))
+                path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
                 bin_argstr = path + " " + self.exec_args
                 #print("Using .abi mode with bin_argstr", bin_argstr)
+
+            #print("Invoking binary:", self.bin_path, "with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,
                                         stdin_fname, self.stdout_fname, self.stderr_fname,
@@ -2720,7 +2721,8 @@ class AnaddbTest(BaseTest):
         if self.input_ddb:
             # Use output DDB of a previous run.
             iddb_fname = os.path.join(self.workdir, self.input_ddb)
-            if not os.path.isfile(iddb_fname):
+            if (not os.path.isfile(iddb_fname) 
+                and not os.path.isfile(iddb_fname + '.nc')):
                 self.exceptions.append(self.Error(
                     "%s no such DDB file: " % iddb_fname))
         return iddb_fname
@@ -2730,11 +2732,13 @@ class AnaddbTest(BaseTest):
         input_gkk = self.id + ".gkk"
         if self.input_gkk:
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
-            if not os.path.isfile(input_gkk):
+            if (not os.path.isfile(input_gkk)
+                and not os.path.isfile(input_gkk + '.nc')):
                 self.exceptions.append(self.Error(
                     "%s no such GKK file: " % input_gkk))
 
-        if not os.path.isfile(input_gkk):
+        if (not os.path.isfile(input_gkk)
+            and not os.path.isfile(input_gkk + '.nc')):
             input_gkk = ""
         return input_gkk
 
@@ -3110,6 +3114,26 @@ class AtompawTest(BaseTest):
         return self.build_env.path_of_bin("atompaw")
 
 
+class LrujTest(BaseTest):
+    """
+    Class for LRUJ tests redefining the make_stdin method of BaseTest..
+    Note that lruj is a command line tool that receives arguments from the command line instead of stdin.
+    To interface lruj with the runtests.py framework, we return an empty string as stdin and
+    set the value of self.exec_args using the command line options reported in the .abi file.
+    The .abi file is still needed as we need to read metadata from the <TEST_INFO> section.
+    """
+
+    def make_stdin(self):
+        # Parse .abi file: Ignore comments and empty lines.
+        # Interpret the remaining lines as command line options that will be stored in exec_args
+        with open(self.inp_fname, "rt") as fh:
+            lines = [l.strip() for l in fh]
+            lines = [l for l in lines if l and not l.startswith("#")]
+
+        self.exec_args = " ".join(lines)
+        return ""
+
+
 def exec2class(exec_name):
     """
     Return the test class associated to the executable. Default is BaseTest.
@@ -3120,6 +3144,7 @@ def exec2class(exec_name):
         "aim": AimTest,
         "conducti": ConductiTest,
         "atompaw": AtompawTest,
+        "lruj": LrujTest,
         "band2eps": Band2epsTest,
         "optic": OpticTest,
         "multibinit": MultibinitTest,
@@ -3587,7 +3612,7 @@ class AbinitTestSuite(object):
 
         # Rules for the test id:
         # Simple case: t01, tgw1_1
-        # test chain (no MPI): t81-t82-t83-t84, tudet_1-tudet_2-tudet_3
+        # test chain (no MPI): t81-t82-t83-t84, tlruj_1-tlruj_2-tlruj_3
         # multi-parallel tests:  t74_MPI2, t51_MPI1-t52_MPI1-t53_MPI1, tdfpt_01_MPI2 ...
 
         test_list = []

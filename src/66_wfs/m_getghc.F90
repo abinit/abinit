@@ -170,7 +170,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
  DBG_ENTER("COLL")
 
 !Keep track of total time spent in getghc:
- call timab(200+tim_getghc,1,tsec)
+ call timab(350+tim_getghc,1,tsec)
 
 !Structured debugging if prtvol==-level
  if(prtvol==-level)then
@@ -733,16 +733,20 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if (has_fock) then
        if (fock_get_getghc_call(fock)==1) then
          if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
-         do idat=1,ndat
-           if (fock%use_ACE==0) then
+         if (fock%use_ACE==0) then
+           call timab(360,1,tsec)
+           do idat=1,ndat
              if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
              call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
 &             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-           else
+           end do ! idat
+           call timab(360,2,tsec)
+         else
+           do idat=1,ndat
              call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
 &             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-           end if
-         end do ! idat
+           end do ! idat
+         end if
        end if
      end if
 
@@ -872,7 +876,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
  end if ! type_calc
 
- call timab(200+tim_getghc,2,tsec)
+ call timab(350+tim_getghc,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -1661,6 +1665,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: spacedim, spacedim_prj
 #ifdef HAVE_OPENMP
  logical :: is_nested
+#ifdef HAVE_FFTW3_THREADS
+ logical ::  fftw3_use_lib_threads_sav
+#endif
 #endif
 
  integer :: select_k_default
@@ -1682,8 +1689,16 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 ! is_nested = omp_get_nested()
  is_nested = .false.
 ! call omp_set_nested(.false.)
+!Ensure that libs are used without threads (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(1)
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(1)
+#endif
+#ifdef HAVE_FFTW3_THREADS
+ fftw3_use_lib_threads_sav=(.not.fftw3_spawn_threads_here(nthreads,nthreads))
+ call fftw3_use_lib_threads(.false.)
 #endif
 #else
  ithread = 0
@@ -1739,8 +1754,15 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  end if
 #ifdef HAVE_OPENMP
 ! call omp_set_nested(is_nested)
+!Restire libs behavior (mkl, openblas, fftw3, ...)
 #ifdef HAVE_LINALG_MKL_THREADS
  call mkl_set_num_threads(nthreads)
+#endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+ call openblas_set_num_threads(nthreads)
+#endif
+#ifdef HAVE_FFTW3_THREADS
+ call fftw3_use_lib_threads(fftw3_use_lib_threads_sav)
 #endif
 #endif
     !$omp end parallel

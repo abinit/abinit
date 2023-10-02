@@ -45,8 +45,9 @@ nav:
     - topics/Abipy.md
     - topics/APPA.md
     - topics/Artificial.md
-    - topics/AtomManipulator.md
     - topics/aTDEP.md
+    - topics/AtomCentered.md
+    - topics/AtomManipulator.md
     - topics/AtomTypes.md
     - topics/Bader.md
     - topics/Band2eps.md
@@ -59,7 +60,7 @@ nav:
     - topics/Control.md
     - topics/Coulomb.md
     - topics/CrossingBarriers.md
-    - topics/CRPA.md
+    - topics/CalcUJ.md
     - topics/crystal.md
     - topics/DFT+U.md
     - topics/DeltaSCF.md
@@ -85,6 +86,7 @@ nav:
     - topics/Git.md
     - topics/GSintroduction.md
     - topics/GW.md
+    - topics/GWR.md
     - topics/GWls.md
     - topics/Hybrids.md
     - topics/k-points.md
@@ -190,8 +192,8 @@ nav:
     - DFT beyond basics:
         - properties at the nucleus: tutorial/nuc.md
         - DFT+U : tutorial/dftu.md
-        - U_calc_RPA: tutorial/ucalc_crpa.md 
-        - U_calc_LR: tutorial/ucalc_lr.md
+        - cRPA U(J): tutorial/ucalc_crpa.md 
+        - Linear Response U(J): tutorial/lruj.md
         - PAW2: tutorial/paw2.md
         - PAW3: tutorial/paw3.md
         - positron : tutorial/positron.md
@@ -199,6 +201,7 @@ nav:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
         - Bethe-Salpeter: tutorial/bse.md
+        #- GWR1: tutorial/gwr1.md
         - DMFT: tutorial/dmft.md
         - TDDFT (Casida): tutorial/tddft.md
     - DFPT & electron-phonon:
@@ -210,7 +213,7 @@ nav:
         - eph for zero-point renormalization : tutorial/eph4zpr.md
         #- tutorial/eph4isotc.md
         - eph_legacy : tutorial/eph_legacy.md
-        - tdepes_legacy : tutorial/eph_tdep_legacy.md
+        - eph_tdep_legacy : tutorial/eph_tdep_legacy.md
     - Multibinit:
         - introduction to multibinit: tutorial/multibinit.md
         - lattice_model: tutorial/lattice_model.md
@@ -346,7 +349,7 @@ copyright: Copyright &copy; 2020-2021 The Abinit Group
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
 extra:
-    version: 9.8.2
+    version: 9.11.4
     previous_published_versions: [] #8.2.0
     social:
         - icon: fontawesome/brands/github

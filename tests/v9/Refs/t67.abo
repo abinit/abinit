@@ -1,6 +1,6 @@
 
-.Version 9.6.2 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin20.3.0_gnu8.2 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 15 Oct 2021.
-- ( at 18h03 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
 
 ================================================================================
@@ -47,13 +47,20 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0838809  5.0838809  G(1)= -0.0983501  0.0983501  0.0983501
  R(2)=  5.0838809  0.0000000  5.0838809  G(2)=  0.0983501 -0.0983501  0.0983501
  R(3)=  5.0838809  5.0838809  0.0000000  G(3)=  0.0983501  0.0983501 -0.0983501
  Unit cell volume ucvol=  2.6279439E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Si
+    2)    0.2500000  0.2500000  0.2500000  Si
+
+ DDB file with 4 blocks has been read.
 
 ================================================================================
 
@@ -81,16 +88,16 @@
  displacement     direction
        1               1       -0.188514        0.000000
        1               2        0.000000        0.000000
-       1               3       -0.000000        0.000000
+       1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2       -0.188514        0.000000
        2               3       -0.000000        0.000000
-       3               1        0.000000        0.000000
-       3               2        0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
        3               3       -0.188514        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    0.000000E+00    0.000000E+00    0.000000E+00
@@ -105,7 +112,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.037  and twall      0.045 sec
+-begin at tcpu      0.026  and twall      0.032 sec
 
  Warning : due to the use of quadrupolar fields, the width of the reciprocal space gaussians
  in ewald9 has been set to eta=    1.2618 1/bohr and the real-space sums have been neglected.
@@ -145,18 +152,18 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0  3.0 -1.0 -1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0
- -0.0 -0.0 -0.0 -0.0  0.0  0.0  0.0  0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
- -0.0 -0.0  0.0  0.0  0.0  0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
+  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0  1.0  1.0
+  0.0  0.0  0.0  0.0 -0.0 -0.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -1.0 -1.0 -1.0 -1.0
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.055  and wall time      0.068 sec
++Total cpu time      0.043  and wall time      0.059 sec
 
  anaddb : the run completed succesfully.

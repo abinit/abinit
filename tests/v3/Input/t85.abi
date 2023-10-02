@@ -29,6 +29,11 @@
   tolvrs3   1.0d-8
   diemix    0.3
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #######################################################################
 #Common input variables
 

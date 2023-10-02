@@ -30,9 +30,7 @@ MODULE m_haydock
  use m_linalg_interfaces
  use m_ebands
  use m_hdr
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
@@ -44,7 +42,7 @@ MODULE m_haydock
  use m_numeric_tools,     only : print_arr, symmetrize, hermitianize, continued_fract, wrap2_pmhalf, iseven
  use m_kpts,              only : listkk
  use m_crystal,           only : crystal_t
- use m_bz_mesh,           only : kmesh_t, findqg0, get_bz_item
+ use m_bz_mesh,           only : kmesh_t, findqg0
  use m_double_grid,       only : double_grid_t, get_kpt_from_indices_coarse, compute_corresp
  use m_paw_hr,            only : pawhur_t
  use m_wfd,               only : wfdgw_t
@@ -534,16 +532,12 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
 
      ! Write MDF file with the final results.
      ! FIXME: It won't work if prtdos == True
-#ifdef HAVE_NETCDF
      path = strcat(BS_files%out_basename,strcat(prefix,"_MDF.nc"))
      NCF_CHECK(nctk_open_create(ncid, path, xmpi_comm_self))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(QP_bst, ncid))
      call mdfs_ncwrite(ncid, Bsp, green, eps_rpanlf, eps_gwnlf)
      NCF_CHECK(nf90_close(ncid))
-#else
-     ABI_UNUSED(ncid)
-#endif
    end if
 
    ABI_FREE(green)

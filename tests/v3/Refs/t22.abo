@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t22/t22.in
-- output file    -> t22.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t22/t22.abi
+- output file    -> t22.abo
 - root for input  files -> t22i
 - root for output files -> t22o
-
 
  DATASET    1 : magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
@@ -38,11 +37,10 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        16    nfftf =      1024
 ================================================================================
-P This job should need less than                       3.119 Mbytes of memory.
+P This job should need less than                       3.128 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
@@ -59,11 +57,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       3.955 Mbytes of memory.
+P This job should need less than                       3.979 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    3 : magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
@@ -80,11 +77,10 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       3.955 Mbytes of memory.
+P This job should need less than                       3.979 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET    4 : magnetic group, Shubnikov type IV
  Fedorov space group R-3 m (#166)
@@ -101,7 +97,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        15    nfftf =      3375
 ================================================================================
-P This job should need less than                       3.955 Mbytes of memory.
+P This job should need less than                       3.979 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -376,5 +372,5 @@ P           mkmem           1
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   0 COMMENTs to log file.
+.Delivered   0 WARNINGs and   1 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          0.4  wall=          0.4

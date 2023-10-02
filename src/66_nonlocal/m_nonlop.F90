@@ -395,7 +395,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ABI_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
    if (hamk%use_gpu_cuda/=0) then
-     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm 1.')
+     ABI_BUG('When use_gpu_cuda/=0 you must use ylm version of nonlop! Set useylm to 1.')
    end if
  end if
  if (hamk%use_gpu_cuda/=0.and.hamk%dimekbq/=1) then
@@ -665,15 +665,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
 
-! use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-!& signs == 2 .and. paw_opt /= 2 .and. hamk%nspinor == 1 .and. &
-!& cpopt < 3 .and. hamk%useylm /= 0 .and. &
-!& (choice < 2 .or. choice == 7) )
-
- use_gemm_nonlop= ( gemm_nonlop_use_gemm .and. &
-& signs == 2 .and. paw_opt /= 2 .and. &
-& cpopt < 3 .and. hamk%useylm /= 0 .and. &
-& (choice < 2 .or. choice == 7) )
+ use_gemm_nonlop=.false.
+ if (gemm_nonlop_use_gemm) then
+   use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
+   use_gemm_nonlop= ( use_gemm_nonlop .or. &
+&      ( signs == 2 .and. paw_opt /= 2 .and. &
+&        cpopt < 3 .and. hamk%useylm /= 0 .and. &
+&        (choice < 2 .or. choice == 7) ) )
+   use_gemm_nonlop= ( use_gemm_nonlop .or. &
+&      ( choice==2.and.signs==1 .and. hamk%useylm/=0 .and. &
+&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0) )
+ end if
 
  if(use_gemm_nonlop) then
    !call wrtout(std_out, "Calling gemm_nonlop")

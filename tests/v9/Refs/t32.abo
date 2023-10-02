@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h37 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h10 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v9_t32/t32.in
-- output file    -> t32.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t32/t32.abi
+- output file    -> t32.abo
 - root for input  files -> t32i
 - root for output files -> t32o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          55        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       7.489 Mbytes of memory.
+P This job should need less than                       7.886 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.741 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      2.741 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          25        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       5.907 Mbytes of memory.
+P This job should need less than                       6.304 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          25        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       5.907 Mbytes of memory.
+P This job should need less than                       6.304 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,7 +81,7 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 -    mband =          25        mffmem =           1         mkmem =           6
        mpw =         544          nfft =       13824          nkpt =           6
 ================================================================================
-P This job should need less than                       5.907 Mbytes of memory.
+P This job should need less than                       6.304 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -110,6 +106,14 @@ _ WF disk file :      1.247 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
          ecutsigx      3.00000000E+00 Hartree
           ecutwfn      1.20000000E+01 Hartree
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     0.00000000E+00 Hartree
+        freqspmax4     1.83746627E-01 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -0.00000000E+00 Hartree
+        freqspmin4    -1.83746627E-01 Hartree
            getscr1          0
            getscr2          0
            getscr3          2
@@ -154,6 +158,10 @@ P           mkmem           6
           nfreqim2         20
           nfreqim3         -1
           nfreqim4         -1
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3          0
+          nfreqsp4         50
             ngfft          24      24      24
              nkpt           6
            nkptgw           2
@@ -314,8 +322,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13033
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/14si.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.psp
 -   Si  Fri Oct 08 11:18:59 1993
 - 14.00000   4.00000    930920                znucl, zion, pspdat
     1    1    2    2      2001   0.00050      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1817,8 +1825,8 @@ meta: {optdriver: 4, gwcalctyp: 1, }
  number of q-points in BZ                           32
  number of frequencies for dSigma/dE                 9
  frequency step for dSigma/dE [eV]                0.25
- number of omega for Sigma on real axis              0
- max omega for Sigma on real axis  [eV]           0.00
+ number of omega for Sigma on real axis             50
+ max omega for Sigma on real axis  [eV]           5.00
  zcut for avoiding poles [eV]                     0.10
  number of imaginary frequencies for Sigma          10
  max omega for Sigma on imag axis  [eV]          40.00
@@ -1916,6 +1924,14 @@ data: !SigmaeeData |
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
+        freqspmax1     0.00000000E+00 Hartree
+        freqspmax2     0.00000000E+00 Hartree
+        freqspmax3     0.00000000E+00 Hartree
+        freqspmax4     1.83746627E-01 Hartree
+        freqspmin1    -0.00000000E+00 Hartree
+        freqspmin2    -0.00000000E+00 Hartree
+        freqspmin3    -0.00000000E+00 Hartree
+        freqspmin4    -1.83746627E-01 Hartree
            getscr1          0
            getscr2          0
            getscr3          2
@@ -1960,6 +1976,10 @@ P           mkmem           6
           nfreqim2         20
           nfreqim3         -1
           nfreqim4         -1
+          nfreqsp1          0
+          nfreqsp2          0
+          nfreqsp3          0
+          nfreqsp4         50
             ngfft          24      24      24
              nkpt           6
            nkptgw           2
@@ -2178,10 +2198,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.3  wall=         16.4
+- Proc.   0 individual time (sec): cpu=         14.2  wall=         14.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.3  wall=         16.4
+.Delivered   1 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=         14.2  wall=         14.3
