@@ -2721,8 +2721,8 @@ subroutine get_weight_from_hist(hist, temperature, ntime, natom, weights, comm)
       weights = 0.0_dp
       do itime=1,ntime
         weights(itime) = exp(-average_forces(itime)/(kb*temperature))
-        if (weights(itime)< 0.2) then
-          weight(itime) = 0.2
+        if (weights(itime)< 0.001) then
+          weights(itime) = 0.001
         endif 
       end do
       ! normalize the weight
