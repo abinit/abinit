@@ -277,7 +277,10 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
+   !LTEST
+   !if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
+   if(ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
+   !LTEST
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
 &     'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
@@ -554,7 +557,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 #endif
      ! Here treat the tolwfr criterion: if maximum residual is less than
      ! input tolwfr, stop steps (exit loop here)
-     if (ttolwfr == 1 .and. .not. noquit) then
+     if (ttolwfr == 1 .and. (ttolvrs+ttoldfe+ttoldff+ttolrff==0) .and. .not. noquit) then
        if (residm < tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a)' )ch10, &
@@ -590,12 +593,20 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          use_dpfft = diffor < tol6
        end if
 
-       if(toldff_ok==2 .and. .not.noquit)then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-&         ' At SCF step',istep,', forces are converged : ',ch10,&
-&         '  for the second time, max diff in force=',diffor,' < toldff=',toldff
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(toldff_ok>=2 .and..not.noquit)then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr )then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+&           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are converged : ',ch10,&
+&           '  for the second time, max diff in force=',diffor,' < toldff=',toldff
+           call wrtout([std_out, ab_out], message)
+           quit=1
+        end if
        end if
      end if
 
@@ -614,13 +625,22 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          tolrff_ok=0
          use_dpfft = diffor < tolrff * maxfor * five
        end if
-       if(tolrff_ok==2 .and. (.not.noquit))then
-         write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
-         ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
-         '  for the second time, max diff in force=',diffor,&
-         ' is less than < tolrff=',tolrff, ' times max force'
-         call wrtout([std_out, ab_out], message)
-         quit=1
+       if(tolrff_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3,a)' ) ch10, &
+           ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND forces are sufficiently converged : ',ch10,&
+           '  for the second time, max diff in force=',diffor,&
+           ' is less than < tolrff=',tolrff, ' times max force'
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
      end if
 
@@ -635,18 +655,26 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok==2 .and. (.not.noquit))then
-         if(usefock==0 .or. nnsclohf<2)then
-           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-            ' At SCF step',istep,', etot is converged : ',ch10,&
+       if(toldfe_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0.or.usefock/=0) then
+           if(usefock==0 .or. nnsclohf<2)then
+             write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+              ' At SCF step',istep,', etot is converged : ',ch10,&
+              '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           else
+             write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+              ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+              '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           endif
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else if (ttolwfr==1 .and. residm < tolwfr) then
+           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', max residual=',residm,' < tolwfr=',tolwfr,' AND etot is converged : ',ch10,&
             '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         else
-           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
-            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-         endif
-         call wrtout([std_out, ab_out], message)
-         quit=1
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
        end if
        if(usefock==1 .and. nnsclohf>1)then
          if(istep_mix==1 .and. (.not.noquit))then
@@ -692,18 +720,36 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! Here treat the tolvrs criterion: if density/potential residual (squared)
      ! is less than input tolvrs, stop steps (exit loop here)
      if (ttolvrs==1 .and. .not. noquit) then
-       if (res2 < tolvrs) then
-         if (optres==0) then
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+       if (ttolwfr==0) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       vres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
          else
-           write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a)' ) ch10,&
-            ' At SCF step',istep,'       nres2   =',res2,' < tolvrs=',tolvrs,' =>converged.'
+           use_dpfft = res2 < tol5
          end if
-         call wrtout([std_out, ab_out], message)
-         quit=1
-       else
-         use_dpfft = res2 < tol5
+       else if (ttolwfr==1 .and. residm < tolwfr) then
+         if (res2 < tolvrs) then
+           if (optres==0) then
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND vres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           else
+             write(message, '(a,a,i5,a,a,1p,e10.2,a,e10.2,1p,e10.2,a,e10.2,a)' ) ch10,&
+              ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND nres2   =',res2,&
+              & ' < tolvrs=',tolvrs,' =>converged.'
+           end if
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         else
+           use_dpfft = res2 < tol5
+         end if
        end if
      end if
 
@@ -752,7 +798,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
        call wrtout([std_out, ab_out], message)
 
-       if (ttolwfr==1) then
+       if (ttolwfr==1 .and. residm > tolwfr) then
          if (dtset%usewvl == 0) then
            write(message, '(a,es11.3,a,es11.3,a)' ) &
            '  maximum residual=',residm,' exceeds tolwfr=',tolwfr,ch10
@@ -809,13 +855,29 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 
      if (prtxml == 1) then
        if (ttoldfe == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldfe+tolwfr" />'
+         end if
        else if (ttoldff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="toldff+tolwfr" />'
+         end if
        else if (ttolrff == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         if (ttolwfr==0) then
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff" />'
+         else
+             write(ab_xml_out, "(A)") ' stop-criterion="tolrff+tolwfr" />'
+         end if
        else if (ttolvrs == 1) then
-         write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         if (ttolwfr==0) then
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs" />'
+         else
+           write(ab_xml_out, "(A)") ' stop-criterion="tolvrs+tolwfr" />'
+         end if
        else if (ttolwfr == 1) then
          write(ab_xml_out, "(A)") ' stop-criterion="tolwfr" />'
        else

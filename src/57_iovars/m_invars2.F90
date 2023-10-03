@@ -243,7 +243,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  logical :: xc_is_mgga,xc_is_tb09,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
- real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
+ real(dp) :: toldfe_, tolrff_, toldff_, tolvrs_ !,tolwfr_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
@@ -3277,7 +3277,9 @@ if (dtset%usekden==1) then
  if(tread==1) dtset%tolrde=dprarr(1)
 
  ! find which tolXXX are defined generically and for this jdtset
- tolwfr_=zero
+ !LTEST
+ !tolwfr_=zero
+ !LTEST
  toldfe_=zero
  toldff_=zero
  tolrff_=zero
@@ -3286,13 +3288,16 @@ if (dtset%usekden==1) then
  itol_gen=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolwfr',tread,'DPR',ds_input)
  if(tread==1) then
-   if (ds_input == 0) then
-     tolwfr_=dprarr(1)
-     if(abs(dprarr(1))>tiny(0._dp))itol_gen=itol_gen+1
-   else
-     dtset%tolwfr=dprarr(1)
-     if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
-   end if
+   !LTEST
+   dtset%tolwfr=dprarr(1)
+   !LTEST
+   !if (ds_input == 0) then
+   !  tolwfr_=dprarr(1)
+   !  !if(abs(dprarr(1))>tiny(0._dp))itol_gen=itol_gen+1
+   !else
+   !  dtset%tolwfr=dprarr(1)
+   !  !if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
+   !end if
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'toldff',tread,'DPR',ds_input)
@@ -3353,7 +3358,9 @@ if (dtset%usekden==1) then
 
  ! if no value is given for jdtset, use defaults
  if (itol == 0 .and. itol_gen == 1) then
-   dtset%tolwfr=tolwfr_
+   !LTEST
+   !dtset%tolwfr=tolwfr_
+   !LTEST
    dtset%toldfe=toldfe_
    dtset%toldff=toldff_
    dtset%tolrff=tolrff_
