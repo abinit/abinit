@@ -32,6 +32,7 @@ module m_dfpt_rhotov
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_dens,        only : calcdenmagsph
+ use m_numeric_tools, only : wrap2_zero_one
 
  implicit none
 
@@ -222,8 +223,8 @@ contains
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
-   call dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspden,&
-&  v1zeeman)
+   call dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
+&  qphon,rprimd,v1zeeman,xred)
  end if
 
  ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
@@ -746,12 +747,16 @@ end subroutine dfpt_v1magpen
 !! INPUTS
 !!  nspden = number of density matrix components
 !!  nfft   = numbder of fft grid points
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  cplex  = complex or real density matrix
 !!  idir   = direction of the perturbing field in Cartesian frame
 !!           1: along x
 !!           2: along y
 !!           3: along z
 !!           4: identity matrix at each fft point is returned (for density-density response)
+!!  qphon(3)=reduced coordinates for the phonon wavelength
+!!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!  v1zeeman(nfft*cplex,nspden)= 1st order Zeeman potential, or Identity matrix (electrostatic potential) for idir=4
@@ -766,25 +771,39 @@ end subroutine dfpt_v1magpen
 !!
 !! SOURCE
 
-subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspden,&
-& v1zeeman)
+subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
+& qphon,rprimd,v1zeeman,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)    :: idir,ipert,nfft,cplex,natom,nspden
  type(MPI_type), intent(in) :: mpi_enreg
 !arrays
+ integer, intent(in)    :: ngfft(18)
  real(dp), intent(in)   :: fatsph(nfft,natom)
- real(dp), intent(inout) :: v1zeeman(cplex*nfft,nspden)
+ real(dp), intent(in)   :: qphon(3)
+ real(dp), intent(in)   :: rprimd(3,3)
+ real(dp), intent(inout):: v1zeeman(cplex*nfft,nspden)
+ real(dp), intent(in)   :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft,iatom
+ integer :: ifft,iatom,i1,i2,i3,im,n1,n2,n3,re
+ real(dp) :: a1,a2,a3,arg,d1,d2,d3,r1,r2,r3
+ real(dp) :: phr1d_re,phr1d_im
  character(len=500) :: msg
 !arrays
  real(dp) :: Bloc(cplex*nfft)
+ real(dp) :: my_xred(3,natom),xshift(3, natom)
+ real(dp) :: taumr(3)
+ real(dp) :: v1_tmp(cplex*nfft,nspden)
+
 
 ! *************************************************************************
+
+ if (cplex==1.and.any(qphon(:)>tol8)) then
+   ABI_ERROR('Local Zeeman fields are cplex==2 at finite q vector')
+ end if
 
  iatom=ipert-natom-11
 
@@ -798,6 +817,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspd
      Bloc(2*ifft-1)=-0.5*fatsph(ifft,iatom)
    end do
  end if
+
 
  !Build the first-order potential
  select case(cplex)
@@ -871,9 +891,51 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,nspd
      ABI_BUG(msg)
    end if
  end select !cplex
+
+ !Apply the phase factor if qphon/=0
+ if (any(qphon(:)>tol8)) then 
+   v1_tmp=v1zeeman
+   n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+  
+   a1=sqrt(dot_product(rprimd(:,1),rprimd(:,1)))
+   a2=sqrt(dot_product(rprimd(:,2),rprimd(:,2)))
+   a3=sqrt(dot_product(rprimd(:,3),rprimd(:,3)))
+  
+   d1=a1/(n1-1)
+   d2=a2/(n2-1)
+   d3=a3/(n3-1)
+  
+   ! This routine is not able to handle xred positions that are "far" from the
+   ! first unit cell so wrap xred into [0, 1[ interval here.
+   call wrap2_zero_one(xred, my_xred, xshift)
+  
+   ifft=0
+   do i3=1,n3
+     r3=(i3-1)*d3
+     do i2=1,n3
+       r2=(i2-1)*d2
+       do i1=1,n3
+         r1=(i1-1)*d1
+         ifft=ifft+1
+         re=2*ifft-1
+         im=2*ifft
+  
+         taumr(:)=my_xred(:,iatom)-(/r1,r2,r3/)
+         arg=two_pi*dot_product(qphon,taumr)
+  
+         phr1d_re=dcos(arg)
+         phr1d_im=dsin(arg)
+
+         v1zeeman(re,:)=phr1d_re*v1_tmp(re,:)-phr1d_im*v1_tmp(im,:)
+         v1zeeman(im,:)=phr1d_im*v1_tmp(re,:)+phr1d_re*v1_tmp(im,:)
+  
+       end do
+     end do
+   end do
+ end if 
+
 end subroutine dfpt_v1zeeman_atsph
 !!***
-
 
 end module m_dfpt_rhotov
 !!***
