@@ -4063,7 +4063,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !end if
 
      ! If SCF calculations, one and only one of these can differ from zero
-     if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
+     !LTEST
+     !if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
+     if(ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
+     !LTEST
        write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
         'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
