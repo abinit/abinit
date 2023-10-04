@@ -609,7 +609,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  end if
 
  call timab(tim_getAX_BX,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
  call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
+ ABI_NVTX_END_RANGE()
  call timab(tim_getAX_BX,2,tsec)
 
  if (chebfi%paral_kgb == 1) then
