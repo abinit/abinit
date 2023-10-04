@@ -1224,6 +1224,13 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
  ratio=one;if (nspden_rhoij==2) ratio=half
  spinat_zero=all(abs(spinat(:,:))<tol10)
 
+ if (nspden_rhoij==4.and.nspden==1.and.(.not.spinat_zero)) then
+   write(message,'(5a)') 'You are performing a unpolarized calculation (nspden==1)',ch10,&
+&            'but you start with a magnetization on atom (spinat/=0).',ch10,&
+&            'This is not expected and my produce unphysical results!'
+   ABI_WARNING(message)
+ end if
+
  if (my_natom>0) then
    ngrhoij0=0;if (present(ngrhoij)) ngrhoij0=ngrhoij
    nlmnmix0=0;if (present(nlmnmix)) nlmnmix0=nlmnmix
