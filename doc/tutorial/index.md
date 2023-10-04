@@ -19,6 +19,7 @@ To start with, four tutorials cover the basics of using ABINIT, and one tutorial
 (as a complement to the easier user guide type documentation).
 Six tutorials are intermediate level ones, that might be prerequisite for some more advanced tutorials.
 The following schema should help to understand these dependencies.
+To access the tutorials, see the menu on the left...
 
 <center>
 <img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v11.png" usemap="#map1"/>
