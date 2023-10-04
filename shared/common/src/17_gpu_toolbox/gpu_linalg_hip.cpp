@@ -19,6 +19,11 @@ hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
 static hipStream_t stream_compute;
 
+// Parameters to HIP SYEVJ and SYGVJ (Jacobi-based eigensolver)
+hipsolverSyevjInfo_t syevj_params = nullptr;
+const int    MAX_SWEEPS  = 1;
+const double TOLERANCE   = 1.e-5;
+
 //! utility function for compatiblity between hipblas v1/v2 API
 hipblasOperation_t select_hipblas_op(char *c)
 {
@@ -146,6 +151,10 @@ extern "C" void gpu_linalg_init_()
   HIP_API_CHECK( hipStreamCreate(&stream_compute) );
   HIP_API_CHECK( hipsolverDnSetStream(hipsolverDn_handle,stream_compute) );
   HIP_API_CHECK( hipblasSetStream(hipblas_handle,stream_compute) );
+
+  HIP_API_CHECK(hipsolverCreateSyevjInfo(&syevj_params));
+  HIP_API_CHECK(hipsolverXsyevjSetTolerance(syevj_params, TOLERANCE));
+  HIP_API_CHECK(hipsolverXsyevjSetMaxSweeps(syevj_params, MAX_SWEEPS));
   fprintf(stdout, "Initializing hipBLAS, this may take 10 seconds...\n");
   fflush(stdout);
   rocblas_initialize();
@@ -165,6 +174,7 @@ extern "C" void gpu_linalg_shutdown_()
   //FIXME
   //HIP_API_CHECK( hipblasDestroy(hipblas_handle) );
   hipblasDestroy(hipblas_handle);
+  HIP_API_CHECK( hipsolverDestroySyevjInfo(syevj_params) );
   HIP_API_CHECK( hipsolverDnDestroy(hipsolverDn_handle) );
   HIP_API_CHECK( hipStreamDestroy(stream_compute) );
 }
@@ -723,13 +733,13 @@ extern "C" void gpu_xsygvd_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvd(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvj(hipsolverDn_handle, itype_cu,
                                        jobz_cu, fillMode, *A_nrows,
                                        (hipDoubleComplex*)(*A_ptr), *lda,
                                        (hipDoubleComplex*)(*B_ptr), *ldb,
                                        (double*)(*W_ptr),
                                        (hipDoubleComplex*)(*work_ptr),
-                                       *lwork, devInfo) );
+                                       *lwork, devInfo, syevj_params) );
     }
 
   HIP_API_CHECK( hipMemcpy(info, devInfo, 1*sizeof(int), hipMemcpyDefault) );
@@ -766,11 +776,11 @@ extern "C" void gpu_xsygvd_buffersize_(const int* cplx,
     }
   else
     {
-      HIP_API_CHECK( hipsolverDnZhegvd_bufferSize(hipsolverDn_handle, itype_cu,
+      HIP_API_CHECK( hipsolverDnZhegvj_bufferSize(hipsolverDn_handle, itype_cu,
                                                   jobz_cu, fillMode, *A_nrows,
                                                   (hipDoubleComplex*)(*A_ptr), *lda,
                                                   (hipDoubleComplex*)(*B_ptr), *ldb,
-                                                  (double*)(*W_ptr), lwork) );
+                                                  (double*)(*W_ptr), lwork, syevj_params) );
     }
 
 } // gpu_xsygvd_bufferSize_
