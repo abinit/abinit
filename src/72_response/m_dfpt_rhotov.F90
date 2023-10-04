@@ -892,7 +892,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
    end if
  end select !cplex
 
- !Apply the phase factor if qphon/=0
+ !Apply the phase factor if qphon/=0 
  if (any(qphon(:)>tol8)) then 
    v1_tmp=v1zeeman
    n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
@@ -912,9 +912,9 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
    ifft=0
    do i3=1,n3
      r3=(i3-1)*d3
-     do i2=1,n3
+     do i2=1,n2
        r2=(i2-1)*d2
-       do i1=1,n3
+       do i1=1,n1
          r1=(i1-1)*d1
          ifft=ifft+1
          re=2*ifft-1
