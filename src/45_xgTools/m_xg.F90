@@ -3976,12 +3976,14 @@ contains
 #ifdef HAVE_GPU_HIP
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
+          xgBlock__vecR => xgBlock%vecR
           do i=1,xgBlock%cols
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
             call abi_gpu_xscal(1, xgBlock%rows/inc, valc, c_loc(xgBlock__vecR(1,i)), inc)
             !$OMP END TARGET DATA
           end do
         case (SPACE_C)
+          xgBlock__vecC => xgBlock%vecC
           do i=1,xgBlock%cols
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
             call abi_gpu_xscal(2, xgBlock%rows/inc, valc, c_loc(xgBlock__vecC(1,i)), inc)
