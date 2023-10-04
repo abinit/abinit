@@ -269,7 +269,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    !if ( size(l_gvnlxc) /= 0 ) then
    !  ABI_FREE(l_gvnlxc)
      !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
+#ifdef FC_CRAY
+   ABI_MALLOC(l_gvnlxc,(1,1))
+#else
    ABI_MALLOC(l_gvnlxc,(0,0))
+#endif
 
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
