@@ -56,7 +56,7 @@ integer :: npw=-1
 
 ! GPU ffts buffers
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
-#ifdef HAVE_GPU_HIP
+#if defined HAVE_GPU_HIP && defined FC_LLVM
 type(c_ptr),target,save :: fofr_amdref
 #endif
 
@@ -182,7 +182,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
      !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT DEPEND(OUT:weight_r,weight_i)
    endif
 
-#ifdef HAVE_GPU_HIP
+#if defined HAVE_GPU_HIP && defined FC_LLVM
    !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
    ! For some reason, fofr won't be processed normally when passed as argument
    ! of FFT routine within TARGET DATA directives
@@ -274,14 +274,13 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    end if
 
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
-#ifdef HAVE_GPU_CUDA
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
-   !$OMP END TARGET DATA
-#endif
-#ifdef HAVE_GPU_HIP
+#if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
    call gpu_fft_exec_z2z(c_loc(work_gpu), fofr_amdref, FFT_INVERSE)
+   !$OMP END TARGET DATA
+#else
+   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
 #endif
    call gpu_fft_stream_synchronize()
@@ -340,14 +339,13 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2 .or. option==3) then
 
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
-#if defined HAVE_GPU_CUDA
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
-   call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
-   !$OMP END TARGET DATA
-#endif
-#if defined HAVE_GPU_HIP
+#if defined HAVE_GPU_HIP && defined FC_LLVM
    !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
    call gpu_fft_exec_z2z(fofr_amdref, c_loc(work_gpu), FFT_FORWARD)
+   !$OMP END TARGET DATA
+#else
+   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
+   call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #endif
    call gpu_fft_stream_synchronize()
