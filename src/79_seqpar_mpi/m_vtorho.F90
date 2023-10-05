@@ -392,7 +392,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(pawrhoij_type),pointer :: pawrhoij_unsym(:)
  type(crystal_t) :: cryst_struc
  integer :: idum1(0),idum3(0,0,0)
- real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+ real(dp) :: rdum4(0,0,0,0)
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
@@ -1812,7 +1812,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    if(paw_dmft%use_dmft==1) then
 !    == check noccmmp
      call setnoccmmp(1,0,rdum4,0,0,idum3,my_natom,natom,0,1,dtset%nsppol,0,ntypat,&
-&     paw_ij,pawang,dtset%pawprtvol,pawrhoij,pawtab,rdum2,idum1,dtset%typat,0,dtset%usepawu,&
+&     paw_ij,pawang,dtset%pawprtvol,pawrhoij,pawtab,idum1,dtset%typat,0,dtset%usepawu,&
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    end if
 

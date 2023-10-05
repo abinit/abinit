@@ -365,7 +365,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
  integer :: idum1(0),idum3(0,0,0)
  integer,allocatable :: jatom(:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: rdum2(0,0),rdum4(0,0,0,0)
+ real(dp) :: rdum4(0,0,0,0)
  complex(dpc),allocatable :: noccmmp_ylm(:,:,:),noccmmp_jmj(:,:),noccmmp_slm(:,:,:)
  type(paw_ij_type), ABI_CONTIGUOUS pointer :: paw_ij_all(:)
  type(pawrhoij_type),ABI_CONTIGUOUS pointer :: pawrhoij_all(:)
@@ -694,7 +694,7 @@ subroutine pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
      end if
    end do
    call setnoccmmp(1,0,rdum4,0,0,idum3,dtset%natom,dtset%natom,0,1,nsppol,0,dtset%ntypat,&
-&   paw_ij_all,pawang_dum,dtset%pawprtvol,pawrhoij_all,pawtab,rdum2,idum1,dtset%typat,1,0)
+&   paw_ij_all,pawang_dum,dtset%pawprtvol,pawrhoij_all,pawtab,idum1,dtset%typat,1,0)
    do i_unitfi=1,2
      unitfi=ab_out;if (i_unitfi==2) unitfi=std_out
      write(msg, '(3a)' ) &

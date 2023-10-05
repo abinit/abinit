@@ -1469,7 +1469,6 @@ CONTAINS  !=====================================================================
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  spinat(3,matom)=initial spin of each atom, in unit of hbar/2
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  typat(natom)=type for each atom
 !!  useexexch=1 if local-exact-exchange is activated
@@ -1501,7 +1500,7 @@ CONTAINS  !=====================================================================
 
 subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
-&                     spinat,symafm,typat,useexexch,usepawu, &
+&                     symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom,atom_orbmom,my_l_occmat) ! optional arguments (parallelism) and printing lorb mag
 
 !Arguments ---------------------------------------------
@@ -1517,7 +1516,6 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  integer,optional,intent(in) :: l_orbmom,atom_orbmom
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
  !real(dp),intent(in) :: dmatpawu(:,:,:,:)
- real(dp),intent(in) :: spinat(3,natom)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
@@ -1531,7 +1529,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,my_atmtab_allocated,noccsym_error,paral_atom,use_afm
 ! real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szp,szm
+ real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn
  character(len=4) :: wrt_mode
  character(len=500) :: message
 !arrays
@@ -2935,7 +2933,6 @@ end subroutine setrhoijpbe0
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
-!!  spinat(3,matom)=initial spin of each atom, in unit of hbar/2
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  typat(natom)=type for each atom
 !!  useexexch=1 if local-exact-exchange is activated
@@ -2955,8 +2952,8 @@ end subroutine setrhoijpbe0
 !! SOURCE
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
-       &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
-&                     spinat,symafm,typat,useexexch,usepawu, &
+&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
+&                     symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
@@ -2971,7 +2968,6 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
  !real(dp),intent(in) :: dmatpawu(:,:,:,:)
- real(dp),intent(in) :: spinat(3,natom)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
@@ -3176,8 +3172,8 @@ end if
  ABI_MALLOC(cmfoccmat,(2*my_lcur+1,2*my_lcur+1,ndij))
 
 call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
-                  &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,& 
-&                     spinat,symafm,typat,useexexch,usepawu, &
+&                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,& 
+&                     symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
 
   cmfoccmat(:,:,:)=cmplx(my_l_occmat(1,:,:,:),my_l_occmat(2,:,:,:))

@@ -1200,6 +1200,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 !arrays
  integer,pointer :: my_atmtab(:),lnspinat(:)
  real(dp),allocatable :: occ(:)
+
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1222,14 +1223,14 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 &                          nspden=nspden,spnorb=pawspnorb,cpxocc=cpxocc,cplex=qphase)
 
  ratio=one;if (nspden_rhoij==2) ratio=half
- spinat_zero=all(abs(spinat(:,:))<tol10)
+ spinat_zero=(all(abs(spinat(:,:))<tol10).or.(nspden_rhoij==4.and.nspden==1))
 
- if (nspden_rhoij==4.and.nspden==1.and.(.not.spinat_zero)) then
-   write(message,'(5a)') 'You are performing a unpolarized calculation (nspden==1)',ch10,&
-&            'but you start with a magnetization on atom (spinat/=0).',ch10,&
-&            'This is not expected and my produce unphysical results!'
-   ABI_WARNING(message)
- end if
+! if (nspden_rhoij==4.and.nspden==1.and.(.not.spinat_zero)) then
+!   write(message,'(5a)') 'You are performing a unpolarized calculation (nspden==1)',ch10,&
+!&            'but you start with a magnetization on atom (spinat/=0).',ch10,&
+!&            'This is not expected and my produce unphysical results!'
+!   ABI_WARNING(message)
+! end if
 
  if (my_natom>0) then
    ngrhoij0=0;if (present(ngrhoij)) ngrhoij0=ngrhoij
@@ -1296,8 +1297,8 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
      ratio=one
      if (nspden_rhoij==2) then
        ratio=half
-       if ((spinat(3,iatom)>zero.and.ispden==1).or.&
-&       (spinat(3,iatom)<zero.and.ispden==2)) then
+       if ((spinat(3,iatom)>tol12.and.ispden==1).or.&
+&          (spinat(3,iatom)<tol12.and.ispden==2)) then
          if(abs(zz)>tol12)then
            zratio=two*abs(spinat(3,iatom))/zz
          else
@@ -1306,7 +1307,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
        end if
      else if (nspden_rhoij==4.and.ispden>=2) then
        roshift=zero
-       if(abs(zz)>tol12)then
+       if(abs(zz)>tol12.and.(.not.spinat_zero)) then
          zratio=spinat(ispden-1,iatom)/zz
        else
          zratio=zero
