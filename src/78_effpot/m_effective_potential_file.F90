@@ -311,7 +311,7 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
-      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
+      call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm,1)
 
 !     If needed, print the effective potential
       call effective_potential_print(eff_pot,inp%prt_model)
@@ -1935,7 +1935,7 @@ end subroutine system_getDimFromXML
 ! Case 1: only local in the xml
    if (irpt1>0 .and. irpt2==0) then
      ifcs%cell(:,:) = int(cell_local(:,:))
-     ifcs%atmfrc(:,:,:,:,:)  = local_atmfrc(:,:,:,:,:)
+     ifcs%atmfrc(:,:,:,:,:)  = zero !local_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = local_atmfrc(:,:,:,:,:)
      ifcs%ewald_atmfrc(:,:,:,:,:) = zero
 
@@ -1944,7 +1944,7 @@ end subroutine system_getDimFromXML
      ifcs%cell(:,:) = int(cell_total(:,:))
      ifcs%atmfrc(:,:,:,:,:)  = total_atmfrc(:,:,:,:,:)
      ifcs%short_atmfrc(:,:,:,:,:) = zero
-     ifcs%ewald_atmfrc(:,:,:,:,:) = total_atmfrc(:,:,:,:,:)
+     ifcs%ewald_atmfrc(:,:,:,:,:) = zero !total_atmfrc(:,:,:,:,:)
 
 ! Case 3: local + total in the xml
    else if (irpt1>0 .and. irpt2>0)then
