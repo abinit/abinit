@@ -894,9 +894,9 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  if (any(qphon(:)>tol8)) then 
    v1_tmp=v1zeeman
    n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
-   d1=real(one/(n1-1))
-   d2=real(one/(n2-1))
-   d3=real(one/(n3-1))
+   d1=one/(real(n1)-one)
+   d2=one/(real(n2)-one)
+   d3=one/(real(n3)-one)
   
    ! This routine is not able to handle xred positions that are "far" from the
    ! first unit cell so wrap xred into [0, 1[ interval here.
@@ -925,7 +925,6 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
        end do
      end do
    end do
-   stop
  end if 
 
 end subroutine dfpt_v1zeeman_atsph
