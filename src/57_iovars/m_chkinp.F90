@@ -3291,7 +3291,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  Not allowed with nspden=1 (PAW)
    if(any(abs(dt%spinat)>tol8).and.nspden==1.and.usepaw==1) then
      write(msg, '(3a)' )&
-      'A spintat/=0 is not allowed when magnetization is forced to zero (nspden=1)!',ch10,&
+      'A spinat/=0 is not allowed when magnetization is forced to zero (nspden=1)!',ch10,&
       'Action: re-run with spinat zero '
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
