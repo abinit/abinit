@@ -16,7 +16,7 @@ temperature 300.0
 #DEFINE_COMPUTATIONAL_DETAILS
 nstep_max 21
 nstep_min 1
-rcut 23.123975857447526
+rcut 10.0
 #OPTIONAL_INPUT_VARIABLES
 enunit 3
 use_ideal_positions 0
