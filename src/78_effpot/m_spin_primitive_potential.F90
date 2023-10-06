@@ -679,6 +679,9 @@ contains
          p_uni_ilist, p_uni_amplitude_list, p_uni_direction_list, &
          p_bi_ilist, p_bi_jlist, p_bi_Rlist, p_bi_vallist
 
+    real(dp), target :: dummy_real(1)
+    integer(c_int),target :: dummy_int(1)
+
     integer(c_int),pointer :: index_spin(:)=>null() ,&
          exc_ilist(:)=>null(), exc_jlist(:)=>null(),  exc_Rlist(:)=>null(), &
          dmi_ilist(:)=>null(), dmi_jlist(:)=>null(),  dmi_Rlist(:)=>null(), &
@@ -692,11 +695,38 @@ contains
          uni_amplitude_list(:)=>null(), uni_direction_list(:)=>null(), &
          bi_vallist(:)=>null()
 
+
     real(dp) :: uc(3,3)
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc)
+
+    ! associate the fortran pointers with the dummy variables
+    if(.not. iam_master) then
+      index_spin=>dummy_int
+      exc_ilist=>dummy_int
+      exc_jlist=>dummy_int
+      exc_Rlist=>dummy_int
+      exc_vallist=>dummy_real
+      dmi_ilist=>dummy_int
+      dmi_jlist=>dummy_int
+      dmi_Rlist=>dummy_int
+      dmi_vallist=>dummy_real
+      uni_ilist=>dummy_int
+      uni_amplitude_list=>dummy_real
+      uni_direction_list=>dummy_real
+      bi_ilist=>dummy_int
+      bi_jlist=>dummy_int
+      bi_Rlist=>dummy_int
+      bi_vallist=>dummy_real
+      unitcell=>dummy_real
+      masses=>dummy_real
+      gyroratios=>dummy_real
+      damping_factors=>dummy_real
+      positions=>dummy_real
+      spinat=>dummy_real
+   endif
 
     if (iam_master) then
        write(std_out,'(A58)') "Reading parameters from xml file and setting up spin model"
@@ -859,7 +889,7 @@ contains
       call scpot%set_supercell(supercell)
       if (iam_master) then
         call self%coeff%sum_duplicates()
-        do inz=1, self%coeff%nnz
+         do inz=1, self%coeff%nnz
           ind_Rij=self%coeff%get_ind_inz(inz)
           iR=ind_Rij(1)
           ii=ind_Rij(2)

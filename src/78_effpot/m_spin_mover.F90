@@ -955,17 +955,22 @@ contains
           self%params%spin_temperature=T
        endif
        call self%set_temperature(temperature=T)
+
        if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
+       endif
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==1) then
-             call self%set_initial_state(mode=self%params%spin_init_state)
-          else
-             call self%hist%inc1()
-          endif
+       if(i==1) then
+          call self%set_initial_state(mode=self%params%spin_init_state)
+       else   
+          if(iam_master) then
+            call self%hist%inc1()
+           endif
+       endif
 
+       if(iam_master) then
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')
