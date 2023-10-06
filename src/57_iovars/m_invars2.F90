@@ -3277,9 +3277,6 @@ if (dtset%usekden==1) then
  if(tread==1) dtset%tolrde=dprarr(1)
 
  ! find which tolXXX are defined generically and for this jdtset
- !LTEST
- !tolwfr_=zero
- !LTEST
  toldfe_=zero
  toldff_=zero
  tolrff_=zero
@@ -3288,16 +3285,7 @@ if (dtset%usekden==1) then
  itol_gen=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolwfr',tread,'DPR',ds_input)
  if(tread==1) then
-   !LTEST
    dtset%tolwfr=dprarr(1)
-   !LTEST
-   !if (ds_input == 0) then
-   !  tolwfr_=dprarr(1)
-   !  !if(abs(dprarr(1))>tiny(0._dp))itol_gen=itol_gen+1
-   !else
-   !  dtset%tolwfr=dprarr(1)
-   !  !if(abs(dprarr(1))>tiny(0._dp))itol=itol+1
-   !end if
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'toldff',tread,'DPR',ds_input)
@@ -3358,9 +3346,6 @@ if (dtset%usekden==1) then
 
  ! if no value is given for jdtset, use defaults
  if (itol == 0 .and. itol_gen == 1) then
-   !LTEST
-   !dtset%tolwfr=tolwfr_
-   !LTEST
    dtset%toldfe=toldfe_
    dtset%toldff=toldff_
    dtset%tolrff=tolrff_

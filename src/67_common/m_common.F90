@@ -277,10 +277,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ABI_ERROR('toldff only allowed when prtfor=1!')
    end if
    ! If SCF calculations, one and only one of these can differ from zero
-   !LTEST
-   !if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
    if(ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (iscf>0 .or. iscf==-3))then
-   !LTEST
      write(message,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,a,a)' )&
 &     'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
 &     'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
@@ -737,11 +734,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        else if (ttolwfr==1 .and. residm < tolwfr) then
          if (res2 < tolvrs) then
            if (optres==0) then
-             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,1p,e10.2,a,e10.2,a)' ) ch10,&
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
               ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND vres2   =',res2,&
               & ' < tolvrs=',tolvrs,' =>converged.'
            else
-             write(message, '(a,a,i5,a,a,1p,e10.2,a,e10.2,1p,e10.2,a,e10.2,a)' ) ch10,&
+             write(message, '(a,a,i5,a,1p,e10.2,a,e10.2,a,e10.2,a,e10.2,a)' ) ch10,&
               ' At SCF step',istep,'  max residual=',residm,' < tolwfr=',tolwfr,' AND nres2   =',res2,&
               & ' < tolvrs=',tolvrs,' =>converged.'
            end if
