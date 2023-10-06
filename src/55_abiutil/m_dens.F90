@@ -49,7 +49,7 @@ MODULE m_dens
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdenmagsph           ! Compute integral of total density  and magnetization inside spheres around atoms.
  public :: prtdenmagsph            ! Print integral of total density and magnetization inside spheres around atoms.
- public :: magmom_to_ddb           ! Integrates the magnetic moments (total & local ones) into the ddb array. 
+ public :: magmom_to_d2           ! Integrates the magnetic moments (total & local ones) into the ddb array. 
  public :: fatsph_recip            ! Compute atom centered spheres in reciprocal space
 
 !!***
@@ -2927,47 +2927,80 @@ subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
 end subroutine fatsph_recip
 !!***
 
-!!****f* m_dens/magmom_to_ddb
+!!****f* m_dens/magmom_to_d2
 !! NAME
-!! magmom_to_ddb
+!! magmom_to_d2
 !!
 !! FUNCTION
 !! Incorporates the magnetic moments in the ddb files as second
 !! order energy derivatives with respect to (ipert,idir) and a 
 !! Zeeman field. Both total, i.e., response to a uniform Zeeman 
 !! field (ipert=natom+5) and local (ipert=natom+11+1:2*natom+11)
-!! magnetic moments are considered.
+!! magnetic moments are considered. The Zeeman field directions
+!! are passed in Cartesian format.
 !!
 !! INPUTS
+!!  blkflg(3,mpert,3,mpert)=flags for each element of the 2DTE (=1 if computed)
+!!  idir=direction of the perturbation
 !!  intgden(cplex,nspden, natom)=integrated rhor or potential residual, for each atom in a sphere of radius ratsph.
 !!    Representation differs according to nspden :
 !!      if nspden=1, total density
 !!      if nspden=2, spin up, then spin down
 !!      if nspden=4, total density, then mag_x, mag_y, mag_z
+!!  ipert=type of perturbation
+!!  mpert=maximum number of perturbations
 !!  natom=number of atoms in cell.
 !!  nspden=number of spin-density components
 !!  rhomag(2,nspden)=integral of charge or magnetization over the whole cell (also taking into account a possible imaginary part for DFPT).
 !!
 !! OUTPUT
-!!  Printing
+!!  d2lo(2,3,mpert,3,mpert)= Local contributions to the second-order energy functional.
 !!
 !! SOURCE
 
-subroutine magmom_to_ddb(cplex,intgden,natom,nspden,rhomag)
+subroutine magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,natom,nspden,rhomag)
 
 !Arguments ---------------------------------------------
 !scalars
-integer,intent(in)        :: natom,nspden
-integer, intent(in)       :: cplex
+integer,intent(in)        :: cplex,idir,ipert,mpert,natom,nspden
 !arrays
+integer,intent(inout) :: blkflg(3,mpert,3,mpert)
 real(dp),intent(in) :: intgden(cplex,nspden,natom)
 real(dp),intent(in) :: rhomag(2,nspden)
+real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert)
 !Local variables ------------------------------
 !scalars
+integer :: iatom
 
 ! *************************************************************************
 
-end subroutine magmom_to_ddb
+ ! Incorporate total magnetic moments
+ if (nspden==2) then
+   blkflg(idir,ipert,3,natom+5)=1
+   d2lo(1,idir,ipert,3,natom+5)= rhomag(1,2)
+   if (cplex==2) d2lo(2,idir,ipert,3,natom+5)= -rhomag(2,2)
+ else if (nspden==4) then
+   blkflg(idir,ipert,1:3,natom+5)=1
+   d2lo(1,idir,ipert,1:3,natom+5)= rhomag(1,2:4)
+   if (cplex==2) d2lo(2,idir,ipert,1:3,natom+5)= -rhomag(2,2:4)
+ end if
+
+ ! Incorporate local magnetic moments
+ if (nspden==2) then
+   do iatom= 1, natom
+     blkflg(idir,ipert,3,natom+11+iatom)=1
+     d2lo(1,idir,ipert,3,natom+11+iatom)= intgden(1,2,iatom)
+     if (cplex==2) d2lo(2,idir,ipert,3,natom+11+iatom)= -intgden(2,2,iatom)
+   end do
+ else if (nspden==4) then
+   do iatom= 1, natom
+     blkflg(idir,ipert,3:3,natom+11+iatom)=1
+     d2lo(1,idir,ipert,1:3,natom+11+iatom)= intgden(1,2:4,iatom)
+     if (cplex==2) d2lo(2,idir,ipert,1:3,natom+11+iatom)= -intgden(2,2:4,iatom)
+   end do
+ end if
+
+end subroutine magmom_to_d2
 !!***
 
 end module m_dens

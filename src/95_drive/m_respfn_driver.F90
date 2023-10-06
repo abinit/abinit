@@ -1493,7 +1493,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   has_full_piezo,has_allddk,ab_out,dtset%mband,mpert,natom,ntypat,&
 &   outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,dtset%prtvol,qzero,&
-&   dtset%typat,rfdir,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
+&   dtset%typat,rfdir,rfmagn,rfpert,rfphon,rfstrs,psps%usepaw,usevdw,psps%ziontypat)
 
 
 !  Initialize ddb header object
@@ -2070,6 +2070,7 @@ end subroutine wrtloctens
 !!  prtvol=print volume
 !!  qzero=1 if zero phonon wavevector
 !!  rfdir(3)=defines the directions for the perturbations
+!!  rfmagn= if 1 (2), there are response to uniform (local) Zeeman fields
 !!  rfpert(mpert)=defines the perturbations
 !!  rfphon=if 1, there are phonon perturbations
 !!  rfstrs=if 1,2,3 there are strain perturbations
@@ -2093,13 +2094,13 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & has_full_piezo,has_allddk,iout,mband,mpert,natom,ntypat,&
 & outd2,pawbec,pawpiezo,piezofrnl,prtbbb,prtvol,qzero,typat,rfdir,&
-& rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
+& rfmagn,rfpert,rfphon,rfstrs,usepaw,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,iout,mband,mpert
  integer,intent(in) :: natom,ntypat,outd2,pawbec,pawpiezo,prtbbb,prtvol,qzero
- integer, intent(in) :: rfphon,rfstrs,usepaw,usevdw
+ integer, intent(in) :: rfmagn,rfphon,rfstrs,usepaw,usevdw
 !arrays
  integer,intent(in) :: blkflg(3,mpert,3,mpert),carflg(3,mpert,3,mpert)
  integer,intent(in) :: ddkfil(3),rfdir(3),rfpert(mpert),typat(natom)
@@ -3294,6 +3295,55 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        end do
      end do
    end if
+ end if
+
+!Now the Zeeman field quantities
+ if (rfmagn==1) then
+   write(iout,*)' '
+   write(iout,*)' Magnetic susceptibility, in cartesian coordinates'
+   write(iout,*)' (from uniform Zeeman field response)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   ipert1=natom+5
+   ipert2=natom+5
+   nline=1
+   do idir1=1,3
+     if (nline/=0) write(iout,*)' '
+     nline=0
+     do idir2=1,3
+       if (carflg(idir1,ipert1,idir2,ipert2)==1) then
+         nline=nline+1
+         write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+ &       d2cart(1,idir1,ipert1,idir2,ipert2),&
+ &       d2cart(2,idir1,ipert1,idir2,ipert2)
+       end if
+     end do
+   end do
+ end if
+
+ if (rfmagn==2) then
+   write(iout,*)' '
+   write(iout,*)' Local spin susceptibility, in cartesian coordinates'
+   write(iout,*)' (from local Zeeman field response)'
+   write(iout,*)'    j1       j2             matrix element'
+   write(iout,*)' dir pert dir pert     real part    imaginary part'
+   nline=1
+   do ipert1= natom+12,2*natom+11
+     do idir1=1,3
+       if(nline/=0)write(iout,*)' '
+       nline=0
+       do ipert2= natom+12,2*natom+11
+         do idir2=1,3
+           if(carflg(idir1,ipert1,idir2,ipert2)==1)then
+             nline=nline+1
+             write(iout,'(2(i4,i5),2(1x,f20.10))')idir1,ipert1,idir2,ipert2,&
+&             d2cart(1,idir1,ipert1,idir2,ipert2),&
+&             d2cart(2,idir1,ipert1,idir2,ipert2)
+           end if
+         end do
+       end do
+     end do
+   end do
  end if
 
 end subroutine dfpt_dyout

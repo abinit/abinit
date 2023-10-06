@@ -74,7 +74,7 @@ module m_dfpt_scfcv
  use m_paw_dfpt,    only : pawdfptenergy
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_rf2,         only : rf2_getidirs
- use m_dens,        only : calcdenmagsph, prtdenmagsph
+ use m_dens,        only : calcdenmagsph, prtdenmagsph, magmom_to_d2
  use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
@@ -1545,7 +1545,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
  & qphon=qphon)
-   call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
+ & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+
+   call  magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
+dtset%natom,nspden,rhomag)
    
  end if
 
