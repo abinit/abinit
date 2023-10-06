@@ -2994,7 +2994,7 @@ integer :: iatom
    end do
  else if (nspden==4) then
    do iatom= 1, natom
-     blkflg(idir,ipert,3:3,natom+11+iatom)=1
+     blkflg(idir,ipert,1:3,natom+11+iatom)=1
      d2lo(1,idir,ipert,1:3,natom+11+iatom)= intgden(1,2:4,iatom)
      if (cplex==2) d2lo(2,idir,ipert,1:3,natom+11+iatom)= -intgden(2,2:4,iatom)
    end do
