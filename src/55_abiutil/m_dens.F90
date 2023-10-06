@@ -1504,6 +1504,7 @@ end subroutine mag_penalty_e
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  typat(natom)=type of each atom
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  [qphon(3)]= perturbation wave vector.
 !!
 !! OUTPUT
 !!  dentot(nspden)=integrated density (magnetization...) over full u.c. vol. Optional argument
@@ -1521,7 +1522,7 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph)
+&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1535,6 +1536,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
+ real(dp),intent(in),optional   :: qphon(3)
  real(dp),intent(out),optional  :: dentot(nspden)
  real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)   
  real(dp),intent(out),optional  :: intgden(cplex,nspden,natom)
@@ -1550,6 +1552,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer :: n1c, n2c, n3c
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
+ real(dp) :: arg,d1,d2,d3,s1,s2,s3,phr1d_im,phr1d_re
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
  logical   :: grid_found
@@ -1557,8 +1560,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
- real(dp) :: intg(cplex,4),rhomag_(2,nspden)
- real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
+ real(dp) :: intg(cplex,4),intg_im(4),intg_re(4),qphon_(3),rhomag_(2,nspden)
+ real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),taumr(3),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:)
@@ -1580,6 +1583,14 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  if(present(strs_intgden))then
    strs_intgden=zero
  endif
+ qphon_=zero
+ if(present(qphon))then
+   qphon_=qphon
+ endif
+
+ d1=one/(real(n1)-one)
+ d2=one/(real(n2)-one)
+ d3=one/(real(n3)-one)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -1669,6 +1680,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
    do i3=n3a,n3b
      iz=mod(i3+ishift*n3,n3)
+     s3=(iz-1)*d3
 
      if(fftn3_distrib(iz+1)==mpi_enreg%me_fft) then
 
@@ -1676,9 +1688,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        difz=dble(i3)/dble(n3)-my_xred(3,iatom)
        do i2=n2a,n2b
          iy=mod(i2+ishift*n2,n2)
+         s2=(iy-1)*d2
          dify=dble(i2)/dble(n2)-my_xred(2,iatom)
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
+           s1=(ix-1)*d1
 
            difx=dble(i1)/dble(n1)-my_xred(1,iatom)
 !DEBUG
@@ -1698,6 +1712,12 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            ry=difx*rprimd(2,1)+dify*rprimd(2,2)+difz*rprimd(2,3)
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
            r2=rx**2+ry**2+rz**2
+
+!          Compute the finite-q real-space phase
+           taumr(:)=my_xred(:,iatom)-(/s1,s2,s3/)
+           arg=two_pi*dot_product(qphon_,taumr)
+           phr1d_re=dcos(arg)
+           phr1d_im=dsin(arg)
 
 
 !          Identify the fft indexes of the rectangular grid around the atom
@@ -1724,8 +1744,15 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            if (cplex==1) then
              intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(ifft_local,1:nspden)
            else if (cplex==2) then
-             intg(1,1:nspden)=intg(1,1:nspden)+fsm*rhor(2*ifft_local-1,1:nspden)
-             intg(2,1:nspden)=intg(2,1:nspden)+fsm*rhor(2*ifft_local  ,1:nspden)
+             intg_re(1:nspden)=fsm*rhor(2*ifft_local-1,1:nspden)
+             intg_im(1:nspden)=fsm*rhor(2*ifft_local  ,1:nspden)
+             if (any(abs(qphon_(:))<tol8)) then 
+               intg(1,1:nspden)=intg(1,1:nspden)+intg_re(1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+intg_im(1:nspden)
+             else 
+               intg(1,1:nspden)=intg(1,1:nspden)+phr1d_re*intg_re(1:nspden)-phr1d_im*intg_im(1:nspden)
+               intg(2,1:nspden)=intg(2,1:nspden)+phr1d_re*intg_im(1:nspden)+phr1d_im*intg_re(1:nspden)
+             end if
            end if
            if((present(gr_intgden).or.present(strs_intgden)).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
