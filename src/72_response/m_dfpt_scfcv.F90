@@ -1545,11 +1545,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
  & qphon=qphon)
-   call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
+   call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
  & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
    call  magmom_to_d2(blkflg,cplex,d2lo,idir,intgden,ipert,mpert,&
-dtset%natom,nspden,rhomag)
+ & dtset%natom,nspden,rhomag)
    
  end if
 
