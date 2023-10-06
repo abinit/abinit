@@ -1539,30 +1539,31 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
-! if (nspden==4.and.abs(omega)>tol10.and.dtset%prtvol>0) then
- if (ipert/=dtset%natom+1.and.nspden==4.and.dtset%prtvol>0) then
+ if (ipert/=dtset%natom+1.and.dtset%prt1mag==1) then
    prtopt=1
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
    call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   
  end if
 
- if(ipert==dtset%natom+5.or.ipert<=dtset%natom)then
-   prtopt=1
-   if(ipert==dtset%natom+5) then
-     prtopt=idir+1;
-     call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-&     dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
-     call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-     !debug: write out the vtk first-order density components
-!    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
-!    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_PQ"))
-!    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_MQ"))
-     !SPr: add calculation of the contributions to susceptibility from all atomic spheres
-   end if
- end if
+!MR: Next call to calcdenmagsph is commented since it provides redundant information
+!  if(ipert==dtset%natom+5.or.ipert<=dtset%natom)then
+!    prtopt=1
+!    if(ipert==dtset%natom+5) then
+!      prtopt=idir+1;
+!      call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+! &     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+! &     dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+!      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+!      !debug: write out the vtk first-order density components
+! !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
+! !    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_PQ"))
+! !    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_MQ"))
+!      !SPr: add calculation of the contributions to susceptibility from all atomic spheres
+!    end if
+!  end if
 
  if (iwrite_fftdatar(mpi_enreg)) then
    if (dtset%prtden>0) then

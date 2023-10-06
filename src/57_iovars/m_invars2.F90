@@ -930,6 +930,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magpen',tread,'ENE')
  if(tread==1) dtset%magpen=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt1mag',tread,'INT')
+ if(tread==1) dtset%prt1mag=intarr(1)
+
 !LONG WAVE integer input variables
 !FIXME
 ! if(dtset%optdriver==RUNL_LONGWAVE) then
@@ -2137,9 +2140,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'magcon_lambda',tread,'DPR')
  if(tread==1) dtset%magcon_lambda=dprarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'mag1mom',tread,'INT')
- if(tread==1) dtset%mag1mom=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ratopt',tread,'INT')
  if(tread==1) dtset%ratopt=intarr(1)

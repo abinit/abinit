@@ -2405,7 +2405,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
-   dtsets(idtset)%mag1mom = 0
    dtsets(idtset)%magpen = zero
    dtsets(idtset)%mband = -1
    dtsets(idtset)%mdtemp(:)=300.0_dp
@@ -2559,6 +2558,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%prteig=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtgsr=1    ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtgsr=0
    dtsets(idtset)%prtkpt = -1
+   dtsets(idtset)%prt1mag = 0
    dtsets(idtset)%prtocc=0
    dtsets(idtset)%prtwf=1     ; if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtwf=0
    !if (dtsets%(idtset)%optdriver == RUNL_RESPFN and all(dtsets(:)%optdriver /= RUNL_NONLINEAR) dtsets(idtset)%prtwf = -1

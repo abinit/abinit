@@ -49,6 +49,7 @@ MODULE m_dens
  public :: mag_penalty_e           ! Compute the energy corresponding to constrained magnetic moments.
  public :: calcdenmagsph           ! Compute integral of total density  and magnetization inside spheres around atoms.
  public :: prtdenmagsph            ! Print integral of total density and magnetization inside spheres around atoms.
+ public :: magmom_to_ddb           ! Integrates the magnetic moments (total & local ones) into the ddb array. 
  public :: fatsph_recip            ! Compute atom centered spheres in reciprocal space
 
 !!***
@@ -2897,6 +2898,49 @@ subroutine fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,&
  end function gsq_vl3
 
 end subroutine fatsph_recip
+!!***
+
+!!****f* m_dens/magmom_to_ddb
+!! NAME
+!! magmom_to_ddb
+!!
+!! FUNCTION
+!! Incorporates the magnetic moments in the ddb files as second
+!! order energy derivatives with respect to (ipert,idir) and a 
+!! Zeeman field. Both total, i.e., response to a uniform Zeeman 
+!! field (ipert=natom+5) and local (ipert=natom+11+1:2*natom+11)
+!! magnetic moments are considered.
+!!
+!! INPUTS
+!!  intgden(cplex,nspden, natom)=integrated rhor or potential residual, for each atom in a sphere of radius ratsph.
+!!    Representation differs according to nspden :
+!!      if nspden=1, total density
+!!      if nspden=2, spin up, then spin down
+!!      if nspden=4, total density, then mag_x, mag_y, mag_z
+!!  natom=number of atoms in cell.
+!!  nspden=number of spin-density components
+!!  rhomag(2,nspden)=integral of charge or magnetization over the whole cell (also taking into account a possible imaginary part for DFPT).
+!!
+!! OUTPUT
+!!  Printing
+!!
+!! SOURCE
+
+subroutine magmom_to_ddb(cplex,intgden,natom,nspden,rhomag)
+
+!Arguments ---------------------------------------------
+!scalars
+integer,intent(in)        :: natom,nspden
+integer, intent(in)       :: cplex
+!arrays
+real(dp),intent(in) :: intgden(cplex,nspden,natom)
+real(dp),intent(in) :: rhomag(2,nspden)
+!Local variables ------------------------------
+!scalars
+
+! *************************************************************************
+
+end subroutine magmom_to_ddb
 !!***
 
 end module m_dens
