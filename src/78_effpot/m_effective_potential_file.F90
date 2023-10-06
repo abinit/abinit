@@ -3162,7 +3162,7 @@ subroutine coeffs_xml2effpot(eff_pot,filename,comm)
 !          Initialisation of the polynomial_coefficent structure with the values from the
 !          previous step
            icoeff = icoeff + 1
-           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:))
+           call polynomial_coeff_init(coefficient(1),nterm,coeffs(icoeff),terms(1,:),isbound=0)
            call polynomial_coeff_getName(name,coeffs(icoeff),symbols,recompute=.true.)
            call polynomial_coeff_setName(name,coeffs(icoeff))
 !          Deallocation of the terms array for this coefficient
