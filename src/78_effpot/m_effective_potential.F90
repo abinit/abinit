@@ -616,7 +616,7 @@ end subroutine effective_potential_freempi
 !!
 !! SOURCE
 
-subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
+subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm,file_option)
 
 !Arguments ------------------------------------
 !scalars
@@ -625,6 +625,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !array
  integer,intent(in) :: ncell(3)
  type(effective_potential_type),intent(inout) :: eff_pot
+ integer,optional,intent(in) :: file_option
 !Local variables-------------------------------
 !scalar
  integer,parameter :: master=0
@@ -637,7 +638,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: my_nrpt,nrpt_alone
  real(dp) :: ucvol
  character(len=500) :: msg
- logical :: iam_master
+ logical :: iam_master , has_totFC
 !array
  integer,allocatable :: my_index_rpt(:,:)
  integer,allocatable :: bufsize(:),bufdisp(:)
@@ -652,6 +653,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  integer :: full_nrpt
  real(dp), allocatable :: full_cell_atmfrc(:,:,:,:,:), full_cell_short_atmfrc(:,:,:,:,:), full_cell_ewald_atmfrc(:,:,:,:,:)
 
+ integer :: in_file_option 
 ! *************************************************************************
 
 !0 MPI variables
@@ -660,6 +662,10 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
  iam_master = (my_rank == master)
  ierr=0
 
+in_file_option = 0
+if (present(file_option)) then
+    in_file_option = file_option
+end if
 !0 Check the size of the cell
  do ia=1,3
    if(ncell(ia)<0.or.ncell(ia)>150)then
@@ -999,28 +1005,67 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
      end do
    end do
 
-   ! Copy LR into total_atmfrc
-   do irpt=1,ifc_tmp%nrpt ! LR IRPT
-     do irpt2=1, full_nrpt
-       if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
-&           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
-&           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
-         full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-         full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
-       end if
-     end do
-   end do
-   ! Copy SR into total_atmfrc
-   do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
-     do irpt2=1, full_nrpt
-     if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
-&         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
-&         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
-         full_cell_atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt2) + eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
-         full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
-       end if
-     end do
-   end do
+    has_totFC = .False.
+
+    do irpt = 1,eff_pot%harmonics_terms%ifcs%nrpt
+     if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)) > tol8))then
+         has_totFC = .True.
+         cycle 
+      end if
+    end do
+
+  if (has_totFC .and. in_file_option==1) then   ! 
+    !   print *, '   >>>>>                HAS TOTAL FC'
+    !     ! Copy LR into total_atmfrc
+      do irpt=1,ifc_tmp%nrpt ! LR IRPT
+        do irpt2=1, full_nrpt
+          if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
+    &           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
+    &           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
+            ! full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+            full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+          end if
+        end do
+      end do
+
+      ! Copy total FC into total_atmfrc
+      do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
+        do irpt2=1, full_nrpt
+        if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
+    &         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
+    &         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
+            full_cell_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt)
+            if(any(abs(eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)) > tol8))then
+                   full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt) - full_cell_ewald_atmfrc(:,:,:,:,irpt2)
+            end if
+          end if
+        end do
+      end do   
+  else
+      ! Copy LR into total_atmfrc
+      do irpt=1,ifc_tmp%nrpt ! LR IRPT
+        do irpt2=1, full_nrpt
+          if(  ifc_tmp%cell(1,irpt)==full_cell(1,irpt2).and.&
+    &           ifc_tmp%cell(2,irpt)==full_cell(2,irpt2).and.&
+    &           ifc_tmp%cell(3,irpt)==full_cell(3,irpt2) ) then
+            full_cell_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+            full_cell_ewald_atmfrc(:,:,:,:,irpt2) = ifc_tmp%ewald_atmfrc(:,:,:,:,irpt)
+          end if
+        end do
+      end do
+        
+      ! Copy SR into total_atmfrc
+      do irpt=1,eff_pot%harmonics_terms%ifcs%nrpt ! SR IRPT
+        do irpt2=1, full_nrpt
+        if(  eff_pot%harmonics_terms%ifcs%cell(1,irpt)==full_cell(1,irpt2).and.&
+    &         eff_pot%harmonics_terms%ifcs%cell(2,irpt)==full_cell(2,irpt2).and.&
+    &         eff_pot%harmonics_terms%ifcs%cell(3,irpt)==full_cell(3,irpt2) ) then
+            full_cell_atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt2) + eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+            full_cell_short_atmfrc(:,:,:,:,irpt2) = eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt)
+          end if
+        end do
+      end do
+   end if
 
 !  Count the rpt inferior to the tolerance
    irpt2 = 0
