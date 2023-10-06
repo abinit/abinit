@@ -70,13 +70,14 @@ module m_lobpcgwf
 
  contains
 
-subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid)
 
  implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
+ integer,intent(in) :: isppol,ikpt,inonsc,istep
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(inout) :: mpi_enreg
@@ -85,12 +86,14 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
  real(dp)                 ,target,intent(  out) :: eig(nband)
+ real(dp)                 ,target,intent(in   ) :: occ(nband)
 
 !Local variables-------------------------------
 
  type(xgBlock_t) :: xgx0
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
+ type(xgBlock_t) :: xgocc
  type(lobpcg_t) :: lobpcg
 
  integer :: space, blockdim,  nline
@@ -108,6 +111,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(c_ptr) :: cptr
  real(dp), pointer :: eig_ptr(:,:) => NULL()
  real(dp), pointer :: resid_ptr(:,:) => NULL()
+ real(dp), pointer :: occ_ptr(:,:) => NULL()
 
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
@@ -157,19 +161,19 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
  ! Memory info
- if ( prtvol >= 3 ) then
-   lobpcgMem = lobpcg_memInfo(nband,l_icplx*l_npw*l_nspinor,blockdim,space)
-   localMem = (l_npw+2*l_npw*l_nspinor*blockdim+2*nband)*kind(1.d0)
-   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling lobpcg should need around ", &
-   (localMem+sum(lobpcgMem))/1e9, &
-   "GB of peak memory as follows :"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in lobpcgwf : ", &
-   (localMem)/1e9, "GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_lobpcg : ", &
-   (lobpcgMem(1))/1e9, "GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_lobpcg : ", &
-   (lobpcgMem(2))/1e9, "GB"
- end if
+ !if ( prtvol >= 3 ) then
+ !  lobpcgMem = lobpcg_memInfo(nband,l_icplx*l_npw*l_nspinor,blockdim,space)
+ !  localMem = (l_npw+2*l_npw*l_nspinor*blockdim+2*nband)*kind(1.d0)
+ !  write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling lobpcg should need around ", &
+ !  (localMem+sum(lobpcgMem))/1e9, &
+ !  "GB of peak memory as follows :"
+ !  write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in lobpcgwf : ", &
+ !  (localMem)/1e9, "GB"
+ !  write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_lobpcg : ", &
+ !  (lobpcgMem(1))/1e9, "GB"
+ !  write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_lobpcg : ", &
+ !  (lobpcgMem(2))/1e9, "GB"
+ !end if
 
  !For preconditionning
  ABI_MALLOC(l_pcon,(1:l_icplx*npw))
@@ -206,16 +210,22 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
  call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
 
+ !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ ! Trick the with C to change rank of arrays (:) to (:,:)
+ cptr = c_loc(occ)
+ call c_f_pointer(cptr,occ_ptr,(/ nband,1 /))
+ call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1)
+
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space, l_mpi_enreg%comm_bandspinorfft)
+ call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space,l_mpi_enreg%comm_bandspinorfft)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
 
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgresidu,prtvol)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgocc,xgresidu,prtvol,isppol,ikpt,inonsc,istep,dtset%nbdbuf)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)
@@ -275,18 +285,17 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 
  call timab(tim_lobpcgwf2,2,tsec)
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
- nthreads = xomp_get_num_threads(open_parallel = .true.)
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
-
+! cputime = abi_cpu_time() - cputime
+! walltime = abi_wtime() - walltime
+! nthreads = xomp_get_num_threads(open_parallel = .true.)
+! if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
+!   if ( prtvol >= 3 ) then
+!     write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
+!     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+!     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+!   end if
+!   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+! end if
 
  DBG_EXIT("COLL")
 

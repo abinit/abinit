@@ -333,7 +333,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  ! Carry out UP TO dtset%nline steps, or until resid for every band is < dtset%tolwfr
- if (prtvol>2 .or. ikpt <= nkpt_max) then
+ if (prtvol/=5 .and. (prtvol>2 .or. ikpt <= nkpt_max)) then
    write(msg,'(a,i5,2x,a,3f9.5,2x,a)')' non-scf iterations; kpt # ',ikpt,', k= (',gs_hamk%kpt_k,'), band residuals:'
    call wrtout(std_out,msg,'PERS')
  end if
@@ -448,7 +448,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
           else
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
-             call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,mpi_enreg,&
+             call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &             nband_k,npw_k,my_nspinor,prtvol,resid_k)
              ABI_NVTX_END_RANGE()
 
@@ -510,7 +510,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    residk=maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
 
 !  Print residuals
-   if(prtvol>2 .or. ikpt<=nkpt_max)then
+   if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then
      do ii=0,(nband_k-1)/8
        write(msg,'(a,8es10.2)')' res:',(resid_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
        call wrtout(std_out,msg,'PERS')
@@ -544,7 +544,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_NVTX_END_RANGE()
 
    !  Print energies
-   if(prtvol>2 .or. ikpt<=nkpt_max)then
+   if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then
      do ii=0,(nband_k-1)/8
        write(msg, '(a,8es10.2)' )' ene:',(eig_k(iband),iband=1+ii*8,min(nband_k,8+ii*8))
        call wrtout(std_out,msg,'PERS')
@@ -1009,7 +1009,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
 !Print out eigenvalues (hartree)
- if (prtvol>2 .or. ikpt<=nkpt_max) then
+ if (prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max)) then
    write(msg, '(5x,a,i5,2x,a,a,a,i4,a,i4,a)' ) &
     'eigenvalues (hartree) for',nband_k,'bands',ch10,&
     '              after ',inonsc,' non-SCF iterations with ',dtset%nline,' CG line minimizations'
