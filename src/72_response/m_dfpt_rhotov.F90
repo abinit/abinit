@@ -218,7 +218,7 @@ contains
    ABI_MALLOC(fatsph,(nfft,natom))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
   &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-  &  ratopt,prtopt,cplex,intgden=intgden,rhomag=rhomag,fatsph=fatsph)
+  &  ratopt,prtopt,cplex,intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon)
  end if
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
@@ -799,7 +799,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
 
 ! *************************************************************************
 
- if (cplex==1.and.any(qphon(:)>tol8)) then
+ if (cplex==1.and.any(abs(qphon(:))>tol8)) then
    ABI_ERROR('Local Zeeman fields are cplex==2 at finite q vector')
  end if
 
@@ -891,7 +891,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  end select !cplex
 
  !Apply the phase factor if qphon/=0 
- if (any(qphon(:)>tol8)) then 
+ if (any(abs(qphon(:))>tol8)) then 
    v1_tmp=v1zeeman
    n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
    d1=one/(real(n1)-one)
