@@ -1633,9 +1633,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !     end if
 !   end if
 
-!  mag1mom
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'mag1mom',dt%mag1mom,3,(/0,1,2/),iout)
-
 !  magpen
    if(dt%magpen/=zero)then
      cond_string(1)='magpen' ; cond_values(1)=dt%magpen
@@ -3086,6 +3083,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
    !  call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
    !end if
+
+!  prt1mag
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prt1mag',dt%prt1mag,2,(/0,1/),iout)
 
 !  prtstm
    call chkint_le(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,iout)

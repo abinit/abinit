@@ -562,6 +562,9 @@ contains
  intarr(1,:)=dtsets(:)%prtlden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtlden','INT',0)
 
+ intarr(1,:)=dtsets(:)%prt1mag
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prt1mag','INT',0)
+
  intarr(1,:)=dtsets(:)%prtnabla
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtnabla','INT',0)
 
