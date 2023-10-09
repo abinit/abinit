@@ -180,6 +180,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'acell','LEN',&
    mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
+ intarr(1,:)=dtsets(:)%adiabatic
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'adiabatic','INT',0)
+
+
 !adpimd and adpimd_gamma
  intarr(1,:)=dtsets(:)%adpimd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'adpimd','INT',0)
@@ -713,7 +717,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_atpol','INT',0)
  endif
 
-
  intarr(1,:)=dtsets(:)%d3e_pert1_dir(1)
  intarr(2,:)=dtsets(:)%d3e_pert1_dir(2)
  intarr(3,:)=dtsets(:)%d3e_pert1_dir(3)
@@ -721,6 +724,24 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%d3e_pert1_elfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_elfd','INT',0)
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert1_magat(1)/=1 .or. dtsets(idtset)%d3e_pert1_magat(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert1_magat(1)
+   intarr(2,:)=dtsets(:)%d3e_pert1_magat(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert1_magat','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%d3e_pert1_magdir(1)
+ intarr(2,:)=dtsets(:)%d3e_pert1_magdir(2)
+ intarr(3,:)=dtsets(:)%d3e_pert1_magdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'d3e_pert1_magdir','INT',0)
+
+ intarr(1,:)=dtsets(:)%d3e_pert1_magn
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_magn','INT',0)
 
  intarr(1,:)=dtsets(:)%d3e_pert1_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert1_phon','INT',0)
@@ -742,6 +763,24 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%d3e_pert2_elfd
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_elfd','INT',0)
+
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%d3e_pert2_magat(1)/=1 .or. dtsets(idtset)%d3e_pert2_magat(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%d3e_pert2_magat(1)
+   intarr(2,:)=dtsets(:)%d3e_pert2_magat(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert2_magat','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%d3e_pert2_magdir(1)
+ intarr(2,:)=dtsets(:)%d3e_pert2_magdir(2)
+ intarr(3,:)=dtsets(:)%d3e_pert2_magdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'d3e_pert2_magdir','INT',0)
+
+ intarr(1,:)=dtsets(:)%d3e_pert2_magn
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_magn','INT',0)
 
  intarr(1,:)=dtsets(:)%d3e_pert2_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_phon','INT',0)
