@@ -164,12 +164,12 @@ contains
 subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
-& mpw,natom,nband_k,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
+& mpw,natom,nband_k,nbdbuf,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
 & pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift, rmm_diis_status)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ibg,icg,ikpt,iscf,isppol,mband_cprj,mcg,mcgq,mcprj,mkgq,mpw
- integer, intent(in) :: natom,nband_k,nkpt,nnsclo_now,npw_k,optforces
+ integer, intent(in) :: natom,nband_k,nbdbuf,nkpt,nnsclo_now,npw_k,optforces
  integer, intent(in) :: prtvol,pwind_alloc,istep
  logical,intent(in) :: fixed_occ
  real(dp), intent(in) :: cpus,wtk
@@ -449,7 +449,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
-&             nband_k,npw_k,my_nspinor,prtvol,resid_k)
+&             nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
              ABI_NVTX_END_RANGE()
 
           end if
@@ -507,7 +507,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  Find largest resid over bands at this k point
 !  Note that this operation is done BEFORE rotation of bands:
 !  it would be time-consuming to recompute the residuals after.
-   residk=maxval(resid_k(1:max(1,nband_k-dtset%nbdbuf)))
+   if (nbdbuf>=0) then
+     residk=maxval(resid_k(1:max(1,nband_k-nbdbuf)))
+   else if (nbdbuf==-101) then
+     residk=maxval(occ_k(1:nband_k)*resid_k(1:nband_k))
+   else
+     ABI_ERROR('Bad value of nbdbuf')
+   end if
 
 !  Print residuals
    if(prtvol/=5.and.(prtvol>2 .or. ikpt<=nkpt_max))then

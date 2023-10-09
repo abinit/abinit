@@ -1419,7 +1419,11 @@ subroutine prteigrs(eigen,enunit,fermie,fermih,fname_eig,iout,iscf,kptns,kptopt,
        end if
 
        ! Don't include the buffer in the output.
-       residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       if (nbdbuf>0) then
+         residk=maxval(resid(band_index+1:band_index+nband_k-nbdbuf))
+       else
+         residk=maxval(resid(band_index+1:band_index+nband_k))
+       end if
        if (residk>tolwfr) then
          write(msg, '(1x,a,2i5,a,1p,e13.5)' ) &
           ' prteigrs : nnsclo,ikpt=',nnsclo_now,ikpt,' max resid (excl. the buffer)=',residk
