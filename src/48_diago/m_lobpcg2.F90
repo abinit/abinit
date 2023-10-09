@@ -337,9 +337,8 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
-    double precision :: maxResidu, minResidu, average, deviation
+    double precision :: maxResidu, minResidu
     double precision :: dlamch
-    integer :: eigResiduMax, eigResiduMin
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
