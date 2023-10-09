@@ -1998,8 +1998,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nbdbuf=intarr(1)
    ! A negative value is interpreted as percentage of nband
    if (dtset%nbdbuf < 0) then
-     ABI_CHECK(abs(dtset%nbdbuf) < 100, "abs(nbdbuf) should be < 100")
-     dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
+     if (dtset%nbdbuf/=-101) then
+       ABI_CHECK(abs(dtset%nbdbuf) < 100, "abs(nbdbuf) should be < 100")
+       dtset%nbdbuf = max(nint(abs(dtset%nbdbuf) / 100.0_dp * maxval(dtset%nband)), 1)
+     else
+       ABI_CHECK(response==0,'nbdbuf=-101 is not implemented for DFPT')
+     end if
    end if
  else
    if(response/=1 .and. dtset%iscf<0) then

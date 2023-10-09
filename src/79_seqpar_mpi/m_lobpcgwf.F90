@@ -71,13 +71,13 @@ module m_lobpcgwf
  contains
 
 subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
-&                   nband,npw,nspinor,prtvol,resid)
+&                   nband,npw,nspinor,prtvol,resid,nbdbuf)
 
  implicit none
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
- integer,intent(in) :: isppol,ikpt,inonsc,istep
+ integer,intent(in) :: isppol,ikpt,inonsc,istep,nbdbuf
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(inout) :: mpi_enreg
@@ -99,10 +99,10 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  integer :: space, blockdim,  nline
  integer :: ipw
 
- integer :: nthreads
-
- double precision :: lobpcgMem(2)
- double precision :: localmem
+! integer :: nthreads
+!
+! double precision :: lobpcgMem(2)
+! double precision :: localmem
 
  integer, parameter :: tim_lobpcgwf2 = 1650
  double precision :: cputime, walltime
@@ -225,7 +225,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 !###########################################################################
 
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgocc,xgresidu,prtvol,isppol,ikpt,inonsc,istep,dtset%nbdbuf)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgocc,xgresidu,prtvol,isppol,ikpt,inonsc,istep,nbdbuf)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)

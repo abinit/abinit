@@ -176,4 +176,5 @@ inp_files = [
     "t199.abi",  # test treatment of inaccurate POSCAR file
 
     "t200.abi",  # tolwfr with other tolerances
+    "t201.abi",  # tolwfr with tolvrs + nbdbuf with lobpcg
 ]
