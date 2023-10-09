@@ -183,6 +183,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  accuracy
    call chkint_eq(0,0,cond_string,cond_values,ierr,'accuracy',dt%accuracy,7,(/0,1,2,3,4,5,6/),iout)
 
+!  adiabatic
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'adiabatic',dt%adiabatic,2,(/0,1/),iout)
+   if(dt%adiabatic/=0)then
+     cond_string(1)='adiabatic' ; cond_values(1)=dt%adiabatic
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
+
 !  adpimd
    call chkint_eq(0,0,cond_string,cond_values,ierr,'accuracy',dt%adpimd,2,(/0,1/),iout)
 
@@ -510,6 +517,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert3_atpol(1)',dt%d3e_pert3_atpol(1),1,iout)
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert3_atpol(2)',dt%d3e_pert3_atpol(2),natom,iout)
+
+!  d3e_pert1_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_magat(1)',dt%d3e_pert1_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert1_magat(2)',dt%d3e_pert1_magat(2),natom,iout)
+
+!  d3e_pert2_magat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert2_magat(1)',dt%d3e_pert2_magat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'d3e_pert2_magat(2)',dt%d3e_pert2_magat(2),natom,iout)
 
 !  densfor_pred
    if(dt%iscf>0)then
@@ -3228,6 +3245,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_ge(0,0,cond_string,cond_values,ierr,'rfatpol(1)',dt%rfatpol(1),1,iout)
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'rfatpol(2)',dt%rfatpol(2),natom,iout)
+
+!  rfmagat
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'rfmagat(1)',dt%rfmagat(1),1,iout)
+   cond_string(1)='natom' ; cond_values(1)=natom
+   call chkint_le(1,1,cond_string,cond_values,ierr,'rfmagat(2)',dt%rfmagat(2),natom,iout)
 
 !  rfmeth
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)

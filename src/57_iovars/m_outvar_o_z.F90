@@ -818,6 +818,21 @@ contains
  dprarr(1,:)=dtsets(:)%rfeta
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'rfeta','ENE',0)
 
+ test_write=0
+ do idtset=1,ndtset_alloc
+   if(dtsets(idtset)%rfmagat(1)/=1 .or. dtsets(idtset)%rfmagat(2)/=dtsets(idtset)%natom)test_write=1
+ enddo
+ if(test_write==1)then
+   intarr(1,:)=dtsets(:)%rfmagat(1)
+   intarr(2,:)=dtsets(:)%rfmagat(2)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'rfmagat','INT',0)
+ endif
+
+ intarr(1,:)=dtsets(:)%rfmagdir(1)
+ intarr(2,:)=dtsets(:)%rfmagdir(2)
+ intarr(3,:)=dtsets(:)%rfmagdir(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'rfmagdir','INT',0)
+
  intarr(1,:)=dtsets(:)%rfmagn
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfmagn','INT',0)
 

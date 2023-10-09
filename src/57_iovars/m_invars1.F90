@@ -2153,6 +2153,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%iomode=IO_MODE_MPI
 #endif
 
+   dtsets(idtset)%adiabatic=0
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
@@ -2253,10 +2254,16 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%d3e_pert1_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert1_dir(1:3)=1
    dtsets(idtset)%d3e_pert1_elfd=0
+   dtsets(idtset)%d3e_pert1_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert1_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert1_magn=0
    dtsets(idtset)%d3e_pert1_phon=0
    dtsets(idtset)%d3e_pert2_atpol(1:2)=-1
    dtsets(idtset)%d3e_pert2_dir(1:3)=1
    dtsets(idtset)%d3e_pert2_elfd=0
+   dtsets(idtset)%d3e_pert2_magat(1:2)=-1
+   dtsets(idtset)%d3e_pert2_magdir(1:3)=1
+   dtsets(idtset)%d3e_pert2_magn=0
    dtsets(idtset)%d3e_pert2_phon=0
    dtsets(idtset)%d3e_pert2_strs=0
    dtsets(idtset)%d3e_pert3_atpol(1:2)=-1
@@ -2594,6 +2601,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rfdir(1:3)=1
    dtsets(idtset)%rfelfd=0
    dtsets(idtset)%rfeta=zero
+   dtsets(idtset)%rfmagat(1:2)=-1
+   dtsets(idtset)%rfmagdir(1:3)=1
    dtsets(idtset)%rfmagn=0
    dtsets(idtset)%rfmeth=1
    dtsets(idtset)%rfomega=zero

@@ -77,6 +77,7 @@ type, public :: dataset_type
 
 !A
  integer :: accuracy
+ integer :: adiabatic
  integer :: adpimd
  integer :: asr = 1
  integer :: autoparal
@@ -161,8 +162,10 @@ type, public :: dataset_type
  integer :: dvdb_add_lr = 1
  integer :: dvdb_rspace_cell = 0
  integer :: d3e_pert1_elfd
+ integer :: d3e_pert1_magn
  integer :: d3e_pert1_phon
  integer :: d3e_pert2_elfd
+ integer :: d3e_pert2_magn
  integer :: d3e_pert2_phon
  integer :: d3e_pert2_strs
  integer :: d3e_pert3_elfd
@@ -667,8 +670,12 @@ type, public :: dataset_type
  integer :: ddb_ngqpt(3) = 0
  integer :: d3e_pert1_atpol(2)
  integer :: d3e_pert1_dir(3)
+ integer :: d3e_pert1_magat(2)
+ integer :: d3e_pert1_magdir(3)
  integer :: d3e_pert2_atpol(2)
  integer :: d3e_pert2_dir(3)
+ integer :: d3e_pert2_magat(2)
+ integer :: d3e_pert2_magdir(3)
  integer :: d3e_pert3_atpol(2)
  integer :: d3e_pert3_dir(3)
  integer :: eph_ngqpt_fine(3) = 0
@@ -694,6 +701,8 @@ type, public :: dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
+ integer :: rfmagat(2)
+ integer :: rfmagdir(3)
  integer :: sigma_bsum_range(2) = 0
  integer :: sigma_ngkpt(3) = 0         ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
  integer :: supercell_latt(3)
@@ -1408,6 +1417,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !Copy integers from dtin to dtout
  dtout%iomode             = dtin%iomode
  dtout%accuracy           = dtin%accuracy
+ dtout%adiabatic          = dtin%adiabatic
  dtout%adpimd             = dtin%adpimd
  dtout%autoparal          = dtin%autoparal
  dtout%auxc_ixc           = dtin%auxc_ixc
@@ -1476,8 +1486,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmftqmc_seed       = dtin%dmftqmc_seed
  dtout%dmftqmc_therm      = dtin%dmftqmc_therm
  dtout%d3e_pert1_elfd     = dtin%d3e_pert1_elfd
+ dtout%d3e_pert1_magn     = dtin%d3e_pert1_magn
  dtout%d3e_pert1_phon     = dtin%d3e_pert1_phon
  dtout%d3e_pert2_elfd     = dtin%d3e_pert2_elfd
+ dtout%d3e_pert2_magn     = dtin%d3e_pert2_magn
  dtout%d3e_pert2_phon     = dtin%d3e_pert2_phon
  dtout%d3e_pert2_strs     = dtin%d3e_pert2_strs
  dtout%d3e_pert3_elfd     = dtin%d3e_pert3_elfd
@@ -2040,8 +2052,12 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cd_subset_freq(:)  = dtin%cd_subset_freq(:)
  dtout%d3e_pert1_atpol(:) = dtin%d3e_pert1_atpol(:)
  dtout%d3e_pert1_dir(:)   = dtin%d3e_pert1_dir(:)
+ dtout%d3e_pert1_magat(:) = dtin%d3e_pert1_magat(:)
+ dtout%d3e_pert1_magdir(:) = dtin%d3e_pert1_magdir(:)
  dtout%d3e_pert2_atpol(:) = dtin%d3e_pert2_atpol(:)
  dtout%d3e_pert2_dir(:)   = dtin%d3e_pert2_dir(:)
+ dtout%d3e_pert2_magat(:) = dtin%d3e_pert2_magat(:)
+ dtout%d3e_pert2_magdir(:) = dtin%d3e_pert2_magdir(:)
  dtout%d3e_pert3_atpol(:) = dtin%d3e_pert3_atpol(:)
  dtout%d3e_pert3_dir(:)   = dtin%d3e_pert3_dir(:)
  dtout%ga_rules(:)        = dtin%ga_rules(:)
@@ -2061,6 +2077,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfdir(:)           = dtin%rfdir(:)
  dtout%rf2_pert1_dir(:)   = dtin%rf2_pert1_dir(:)
  dtout%rf2_pert2_dir(:)   = dtin%rf2_pert2_dir(:)
+ dtout%rfmagat(:)         = dtin%rfmagat(:)
+ dtout%rfmagdir(:)        = dtin%rfmagdir(:)
  dtout%supercell_latt(:)= dtin%supercell_latt(:)
  dtout%ucrpa_bands(:)     = dtin%ucrpa_bands(:)
  dtout%vdw_supercell(:)   = dtin%vdw_supercell(:)
@@ -2595,7 +2613,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
- if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfatpol(1):dtset%natom+11+dtset%rfatpol(2))=1
+ if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfmagat(1):dtset%natom+11+dtset%rfmagat(2))=1
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
@@ -3269,7 +3287,7 @@ subroutine chkvars(string)
 !Here, list all admitted variable names (max 10 per line, to fix the ideas)
 !<ABINIT_VARS>
 !A
- list_vars=                 ' accuracy acell adpimd adpimd_gamma'
+ list_vars=                 ' accuracy acell adiabatic adpimd adpimd_gamma'
  list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
@@ -3308,8 +3326,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dosdeltae dtion dtele dynamics dynimage' !FB: dynamics?
  list_vars=trim(list_vars)//' dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dvdb_qdamp dvdb_rspace_cell'
  list_vars=trim(list_vars)//' dyn_chksym dyn_tolsym'
- list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
- list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
+ list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_magat' 
+ list_vars=trim(list_vars)//' d3e_pert1_magdir d3e_pert1_magn d3e_pert1_phon'
+ list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_magat' 
+ list_vars=trim(list_vars)//' d3e_pert2_magdir d3e_pert2_magn d3e_pert2_phon'
  list_vars=trim(list_vars)//' d3e_pert2_strs'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
@@ -3462,7 +3482,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' random_atpos randomseed ratopt ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
- list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagn rfmeth rfomega rfphon'
+ list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagat rfmagdir rfmagn rfmeth rfomega rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
