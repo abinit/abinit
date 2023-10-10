@@ -621,15 +621,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%rfatpol(2)=dtset%natom
  endif
 
- call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rfmagat',tread,'INT')
- if(tread==1) dtset%rfmagat(1:2)=intarr(1:2)
- if(dtset%rfmagat(1)==-1)then
-   dtset%rfmagat(1)=1
- endif
- if(dtset%rfmagat(2)==-1)then
-   dtset%rfmagat(2)=dtset%natom
- endif
-
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mpatpol',tread,'INT')
  if(tread==1) dtset%mpatpol(1:2)=intarr(1:2)
  if(dtset%mpatpol(1)==-1)then
@@ -650,9 +641,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfelfd',tread,'INT')
  if(tread==1) dtset%rfelfd=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rfmagdir',tread,'INT')
- if(tread==1) dtset%rfmagdir(1:3)=intarr(1:3)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rfmagn',tread,'INT')
  if(tread==1) dtset%rfmagn=intarr(1)

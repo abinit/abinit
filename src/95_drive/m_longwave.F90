@@ -650,12 +650,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 ! if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
 ! if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
 
-!TODO:Add perturbation symmetries. See m_respfn_driver.F90.
-!........
-
 ! All perturbations and directions are temporarily activated
- ABI_MALLOC(pertsy,(3,natom+6))
- pertsy(:,:)=1
+! ABI_MALLOC(pertsy,(3,natom+6))
+! pertsy(:,:)=1
 
 
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
@@ -775,7 +772,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(vxc)
  ABI_FREE(d3etot)
  ABI_FREE(d3etot_nv)
- ABI_FREE(pertsy)
+! ABI_FREE(pertsy)
  ABI_FREE(rfpert)
  ABI_FREE(d3e_pert1)
  ABI_FREE(d3e_pert2)
