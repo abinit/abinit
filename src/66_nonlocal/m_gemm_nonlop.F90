@@ -104,6 +104,10 @@ module m_gemm_nonlop
  ! Public variable indicating whether we should call gemm_nonlop or fall back to the usual nonlop. Set to false
  ! in order not to interfere with non-GS calls to nonlop.
 
+ logical, save, public :: gemm_nonlop_is_distributed = .true.
+ ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
+ ! but might be enabled by memory constraints or forced by user through parameters.
+
 contains
 
 !----------------------------------------------------------------------
