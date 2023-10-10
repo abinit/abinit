@@ -3246,11 +3246,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    cond_string(1)='natom' ; cond_values(1)=natom
    call chkint_le(1,1,cond_string,cond_values,ierr,'rfatpol(2)',dt%rfatpol(2),natom,iout)
 
-!  rfmagat
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'rfmagat(1)',dt%rfmagat(1),1,iout)
-   cond_string(1)='natom' ; cond_values(1)=natom
-   call chkint_le(1,1,cond_string,cond_values,ierr,'rfmagat(2)',dt%rfmagat(2),natom,iout)
-
 !  rfmeth
    call chkint_eq(0,0,cond_string,cond_values,ierr,'rfmeth',dt%rfmeth,6,(/-3,-2,-1,1,2,3/),iout)
 

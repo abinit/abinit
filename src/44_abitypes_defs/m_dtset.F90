@@ -701,8 +701,6 @@ type, public :: dataset_type
  integer :: rfdir(3)
  integer :: rf2_pert1_dir(3)
  integer :: rf2_pert2_dir(3)
- integer :: rfmagat(2)
- integer :: rfmagdir(3)
  integer :: sigma_bsum_range(2) = 0
  integer :: sigma_ngkpt(3) = 0         ! K-mesh for Sigma_{nk} (only IBZ points). Alternative to kptgw.
  integer :: supercell_latt(3)
@@ -2077,8 +2075,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%rfdir(:)           = dtin%rfdir(:)
  dtout%rf2_pert1_dir(:)   = dtin%rf2_pert1_dir(:)
  dtout%rf2_pert2_dir(:)   = dtin%rf2_pert2_dir(:)
- dtout%rfmagat(:)         = dtin%rfmagat(:)
- dtout%rfmagdir(:)        = dtin%rfmagdir(:)
  dtout%supercell_latt(:)= dtin%supercell_latt(:)
  dtout%ucrpa_bands(:)     = dtin%ucrpa_bands(:)
  dtout%vdw_supercell(:)   = dtin%vdw_supercell(:)
@@ -2613,7 +2609,7 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
  if(dtset%rfuser==2.or.dtset%rfuser==3)rfpert(dtset%natom+7)=1
 
  if(dtset%rfmagn==1) rfpert(dtset%natom+5)=1
- if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfmagat(1):dtset%natom+11+dtset%rfmagat(2))=1
+ if(dtset%rfmagn==2) rfpert(dtset%natom+11+dtset%rfatpol(1):dtset%natom+11+dtset%rfatpol(2))=1
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
@@ -3482,7 +3478,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' random_atpos randomseed ratopt ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
- list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagat rfmagdir rfmagn rfmeth rfomega rfphon'
+ list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfeta rfmagn rfmeth rfomega rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
