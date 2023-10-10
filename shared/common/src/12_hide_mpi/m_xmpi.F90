@@ -578,6 +578,7 @@ interface xmpi_irecv
   module procedure xmpi_irecv_int1d
   module procedure xmpi_irecv_dp1d
   module procedure xmpi_irecv_dp2d
+  module procedure xmpi_irecv_dp3d
 end interface xmpi_irecv
 
 !----------------------------------------------------------------------
@@ -597,6 +598,7 @@ interface xmpi_isend
   module procedure xmpi_isend_int1d
   module procedure xmpi_isend_dp1d
   module procedure xmpi_isend_dp2d
+  module procedure xmpi_isend_dp3d
 end interface xmpi_isend
 
 !----------------------------------------------------------------------
