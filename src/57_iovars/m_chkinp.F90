@@ -2401,7 +2401,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !Non-linear response not compatible with spinors
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
    !Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
@@ -2508,8 +2508,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   !Longwave not compatible with spinors
+   if(nspinor/=1.and.dt%timdisp==0)then
+     cond_string(1)='nspinor' ; cond_values(1)=nspinor
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+   end if
    !Longwave calculation not compatible with nonlinear core corrections
-   if(dt%optdriver==RUNL_LONGWAVE)then
+   if(dt%optdriver==RUNL_LONGWAVE.and.dt%timdisp==0)then
      do ipsp=1,npsp
   !    Check that xccc is zero
        if (pspheads(ipsp)%xccc/=0) then
@@ -2537,7 +2542,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'usepaw',dt%usepaw,1,(/0/),iout)
    endif
    !Longwave calculation not compatible with spin-dependent calculations
-   if(dt%nsppol/=1.or.dt%nspden/=1)then
+   if((dt%nsppol/=1.or.dt%nspden/=1).and.dt%timdisp==0)then
      cond_string(1)='nsppol' ; cond_values(1)=dt%nsppol
      cond_string(2)='nspden' ; cond_values(2)=dt%nspden
      call chkint_ne(1,2,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
