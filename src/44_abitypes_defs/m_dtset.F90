@@ -77,7 +77,6 @@ type, public :: dataset_type
 
 !A
  integer :: accuracy
- integer :: adiabatic
  integer :: adpimd
  integer :: asr = 1
  integer :: autoparal
@@ -609,8 +608,9 @@ type, public :: dataset_type
  integer :: td_propagator
  integer :: td_restart
  integer :: tfkinfunc
- integer :: tim1rev
  integer :: timopt
+ integer :: tim1rev
+ integer :: timdisp
  integer :: tl_nprccg
 !U
  integer :: ucrpa
@@ -1415,7 +1415,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 !Copy integers from dtin to dtout
  dtout%iomode             = dtin%iomode
  dtout%accuracy           = dtin%accuracy
- dtout%adiabatic          = dtin%adiabatic
  dtout%adpimd             = dtin%adpimd
  dtout%autoparal          = dtin%autoparal
  dtout%auxc_ixc           = dtin%auxc_ixc
@@ -1982,8 +1981,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%td_propagator      = dtin%td_propagator
  dtout%td_scthr           = dtin%td_scthr
  dtout%tfkinfunc          = dtin%tfkinfunc
- dtout%tim1rev            = dtin%tim1rev
+ dtout%timdisp            = dtin%timdisp
  dtout%timopt             = dtin%timopt
+ dtout%tim1rev            = dtin%tim1rev
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
  dtout%useextfpmd         = dtin%useextfpmd
@@ -3283,7 +3283,7 @@ subroutine chkvars(string)
 !Here, list all admitted variable names (max 10 per line, to fix the ideas)
 !<ABINIT_VARS>
 !A
- list_vars=                 ' accuracy acell adiabatic adpimd adpimd_gamma'
+ list_vars=                 ' accuracy acell adpimd adpimd_gamma'
  list_vars=trim(list_vars)//' algalch amu analyze_anh_pot angdeg asr atvshift autoparal'
  list_vars=trim(list_vars)//' auxc_ixc auxc_scal awtr'
 !B
@@ -3521,7 +3521,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' structure '
 !T
  list_vars=trim(list_vars)//' td_exp_order td_maxene td_mexcit td_scnmax td_prtstr td_restart td_propagator td_scthr'
- list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
+ list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe timdisp timopt tim1rev'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
