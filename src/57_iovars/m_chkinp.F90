@@ -183,13 +183,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  accuracy
    call chkint_eq(0,0,cond_string,cond_values,ierr,'accuracy',dt%accuracy,7,(/0,1,2,3,4,5,6/),iout)
 
-!  adiabatic
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'adiabatic',dt%adiabatic,2,(/0,1/),iout)
-   if(dt%adiabatic/=0)then
-     cond_string(1)='adiabatic' ; cond_values(1)=dt%adiabatic
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
-   end if
-
 !  adpimd
    call chkint_eq(0,0,cond_string,cond_values,ierr,'accuracy',dt%adpimd,2,(/0,1/),iout)
 
@@ -3456,6 +3449,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'useylm',dt%useylm,1,(/1/),iout)
      cond_string(1)='prtwf' ; cond_values(1)=dt%prtwf
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtwf',dt%prtwf,1,(/0/),iout)
+   end if
+
+!  timdisp
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'timdisp',dt%timdisp,2,(/0,1/),iout)
+   if(dt%timdisp/=0)then
+     cond_string(1)='timdisp' ; cond_values(1)=dt%timdisp
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
 
 !  tolmxde

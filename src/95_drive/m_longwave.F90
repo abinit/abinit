@@ -151,7 +151,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: usexcnhat,useylmgr
  real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
  real(dp) :: ucvol,vxcavg
- logical :: non_magnetic_xc
+ logical :: non_magnetic_xc,just_timdisp
 ! logical :: has_strain,non_magnetic_xc
  character(len=fnlen) :: dscrpt
  character(len=500) :: msg

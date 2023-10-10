@@ -180,9 +180,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'acell','LEN',&
    mxvals%nimage,nimagem,ndtset,prtimg,strimg)
 
- intarr(1,:)=dtsets(:)%adiabatic
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'adiabatic','INT',0)
-
 
 !adpimd and adpimd_gamma
  intarr(1,:)=dtsets(:)%adpimd

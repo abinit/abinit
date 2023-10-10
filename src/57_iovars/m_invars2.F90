@@ -960,8 +960,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(dtset%optdriver==RUNL_LONGWAVE) then
    tread_key=0
 
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'adiabatic',tread,'INT')
-   if(tread==1) dtset%adiabatic=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'timdisp',tread,'INT')
+   if(tread==1) dtset%timdisp=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
    if(tread==1.or.tread_alt==1) dtset%d3e_pert1_dir(1:3)=intarr(1:3)
