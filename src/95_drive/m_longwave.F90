@@ -3,7 +3,7 @@
 !!  m_longwave
 !!
 !! FUNCTION
-!!  DFPT long-wave calculation of spatial dispersion properties
+!!  DFPT calculation of spatial and time dispersion properties
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2019-2022 ABINIT group (MR, MS)
@@ -80,7 +80,7 @@ contains
 !!  longwave
 !!
 !! FUNCTION
-!! Primary routine for conducting DFPT calculations of spatial dispersion properties
+!! Primary routine for conducting DFPT calculations of dispersion properties
 !!
 !! INPUTS
 !!  codvsn = code version
@@ -165,6 +165,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wvl_data) :: wvl
  type(wffile_type) :: wffgs,wfftgs
  !arrays
+ integer :: d3e_dir1(3),d3e_dir2(3),d3e_dir3(3)
  integer :: ngfft(18),ngfftf(18),perm(6)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
@@ -189,6 +190,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  DBG_ENTER("COLL")
 
+!Just time dispersion calculation
+ just_timdisp=.false.
+ if (dtset%lw_flexo==0.and.dtset%lw_qdrpl==0.and.&
+&  dtset%lw_natopt==0.and.dtset%timdisp==1) just_timdisp=.true.
+
 !Not valid for PAW
  if (psps%usepaw==1) then
    msg='This routine cannot be used for PAW!'
@@ -196,29 +202,28 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Not valid for finite wave-vector perturbations
- if (sqrt(sum(dtset%qptn**2))/=0_dp) then
-   msg='This routine cannot be used for q /= 0 '
+ if (.not.just_timdisp.and.sqrt(sum(dtset%qptn**2))/=0_dp) then
+   msg='This routine can only be used at q /= 0 for time dispersion calculation '
    ABI_BUG(msg)
  end if
 
 !Only usable with spherical harmonics
- if (dtset%useylm/=1.and.(dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
-   msg='This routine can only be used with useylm/=1 for lw_natopt=1'
+ if (dtset%useylm/=1.and.(.not.just_timdisp.and.dtset%lw_qdrpl/=0.or.dtset%lw_flexo/=0)) then
+   msg='This routine can only be used with useylm/=1 for the spatial dispersion given by lw_natopt=1'
    ABI_BUG(msg)
  end if
 
 !Not valid for spin-dependent calculations
- if (dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1) then
-   msg='This routine cannot be used for spin-dependent calculations'
+ if (.not.just_timdisp.and.(dtset%nspinor/=1.or.dtset%nsppol/=1.or.dtset%nspden/=1)) then
+   msg='This routine cannot be used for spin-dependent calculations of spatial dispersion'
    ABI_BUG(msg)
  end if
 
 !Not usable with core electron density corrections
- if (psps%n1xccc/=0) then
-   msg='This routine cannot be used for n1xccc/=0'
+ if (.not.just_timdisp.and.psps%n1xccc/=0) then
+   msg='This routine cannot be used for n1xccc/=0 in case of spatial dispersion'
    ABI_BUG(msg)
  end if
-
 
 !Define some data
  ntypat=psps%ntypat
@@ -243,8 +248,14 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Define the set of admitted perturbations taking into account
 !the possible permutations
-!  -> natom+8 refers to ddq perturbation
- mpert=natom+8
+!  -> natom+8 refers to ddq perturbation (spatial dispersion)
+!  -> natom+9 refers to ddw perturbation (time dispersion)
+ if (dtset%timdisp==0) then
+   mpert=natom+8
+ else
+   mpert=natom+9
+   if (dtset%d3e_pert1_magn==2.or.dtset%d3e_pert2_magn==2) mpert=2*dtset%natom+11
+ end if
  ABI_MALLOC(blkflg,(3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot,(2,3,mpert,3,mpert,3,mpert))
  ABI_MALLOC(d3etot_nv,(2,3,mpert,3,mpert,3,mpert))
@@ -258,7 +269,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  rfpert(:,:,:,:,:,:) = 0
  d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
 
- d3e_pert3(natom+8)=1
+!Spatial-dispersion perturbations
+ if (.not.just_timdisp) d3e_pert3(natom+8)=1
+ 
  if (dtset%lw_qdrpl==1) then
    d3e_pert1(natom+2)=1
    d3e_pert2(1:natom)=1
@@ -299,6 +312,44 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    end do
  end do 
 
+!Time-dispersion perturbations
+ d3e_pert1(:) = 0 ; d3e_pert2(:) = 0 ; d3e_pert3(:) = 0
+ d3e_dir1(:) = 0 ; d3e_dir2(:) = 0 ; d3e_dir3(:) = 0
+ if (dtset%timdisp==1) then
+   d3e_pert3(natom+9)=1
+   d3e_dir3(1)=1
+   d3e_dir3(2)=0
+   d3e_dir3(3)=0
+ end if
+
+ !Local spin susceptibility
+ if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
+ if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
+
+ perm(:)=0
+ do i1pert = 1, mpert
+   d3e_dir1(:)=dtset%d3e_pert1_dir(:)
+   if (i1pert>natom+11.and.i1pert<=2*natom+11) &
+ & d3e_dir1(:)=dtset%d3e_pert1_magdir(:)
+   do i1dir = 1, 3
+     do i2pert = 1, mpert
+       d3e_dir2(:)=dtset%d3e_pert2_dir(:)
+       if (i1pert>natom+11.and.i1pert<=2*natom+11) &
+     & d3e_dir2(:)=dtset%d3e_pert2_magdir(:)
+       do i2dir = 1, 3
+         do i3pert = 1, mpert
+           do i3dir = 1, 3
+             perm(1)=d3e_pert1(i1pert)*d3e_dir1(i1dir)* &
+           &         d3e_pert2(i2pert)*d3e_dir2(i2dir)* &
+           &         d3e_pert3(i3pert)*d3e_dir3(i3dir)
+             if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
+           end do
+         end do
+       end do
+     end do
+   end do
+ end do 
+
 !Do symmetry stuff
  ABI_MALLOC(irrzon,(nfftot**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
  ABI_MALLOC(phnons,(2,nfftot**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)))
@@ -328,8 +379,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
 
  write(msg,'(a,a,a,a,a)') ch10, &
-& ' The list of irreducible elements of the spatial-dispersion third-order energy derivatives is: ', ch10,& 
-& ' (in reduced coordinates except for strain pert.) ', ch10
+& ' The list of irreducible elements of the dispersion third-order energy derivatives is: ', ch10,& 
+& ' (in reduced coordinates except for strain and Zeeman perturbations) ', ch10
  call wrtout(ab_out,msg,'COLL')
  call wrtout(std_out,msg,'COLL')
 
