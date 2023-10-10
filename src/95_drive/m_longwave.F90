@@ -334,7 +334,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    do i1dir = 1, 3
      do i2pert = 1, mpert
        d3e_dir2(:)=dtset%d3e_pert2_dir(:)
-       if (i1pert>natom+11.and.i1pert<=2*natom+11) &
+       if (i2pert>natom+11.and.i2pert<=2*natom+11) &
      & d3e_dir2(:)=dtset%d3e_pert2_magdir(:)
        do i2dir = 1, 3
          do i3pert = 1, mpert
@@ -342,7 +342,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
              perm(1)=d3e_pert1(i1pert)*d3e_dir1(i1dir)* &
            &         d3e_pert2(i2pert)*d3e_dir2(i2dir)* &
            &         d3e_pert3(i3pert)*d3e_dir3(i3dir)
-             if ( sum(perm(:)) > 0 ) rfpert(:,i1pert,:,i2pert,:,i3pert)=1
+             if ( sum(perm(:)) > 0 ) rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=1
            end do
          end do
        end do

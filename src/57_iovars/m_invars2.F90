@@ -992,11 +992,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_magdir',tread,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magdir(1:3)=intarr(1:3)
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magdir(1:3)=intarr(1:3)
    if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_magn',tread,'INT')
-   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_magn=intarr(1)
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_magn=intarr(1)
    if (tread_alt==1) tread_key=1
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
