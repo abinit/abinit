@@ -475,8 +475,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call ebands_free(bstruct)
 
 !Initialize wavefunction files and wavefunctions.
- ireadwf0=1
-
  mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
  ABI_STAT_MALLOC(cg,(2,mcg), ierr)
  ABI_CHECK(ierr==0, "out-of-memory in cg")
@@ -485,6 +483,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+ ireadwf0=1
  hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
  call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
 & formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
@@ -498,7 +497,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  if (ireadwf0==1) then
    call WffClose(wffgs,ierr)
  end if
-
 
 !Generate an index table of atoms, in order for them to be used
 !type after type.
@@ -605,9 +603,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    useylmgr=1; option=2 ; nylmgr=9
    ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))               
    ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
-   call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
-&  psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
-&  rprimd,ylm,ylmgr)                                   
+   if (.not.just_timdisp) then
+     call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
+   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,option,&
+   & rprimd,ylm,ylmgr)                                   
+   end if
  end if
 
 !Compute nonlocal form factors ffnl1, for all atoms and all k-points.
@@ -618,16 +618,18 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
      ABI_MALLOC(ffnl_i,(dtset%mkmem,dtset%mpw,dimffnl_i,psps%lmnmax,psps%ntypat))
      do idir=1, 3
        idir0=idir
-       call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
-     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
-     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       if (.not.just_timdisp) then
+         call preca_ffnl(dimffnl_i,ffnl_i,gmet,gprimd,ider,idir0,kg, &
+       & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+       & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+       end if
        ffnl(:,:,1,:,:)=ffnl_i(:,:,1,:,:)
        ffnl(:,:,1+idir,:,:)=ffnl_i(:,:,2,:,:)
      end do
      ABI_FREE(ffnl_i)
      if (psps%useylm==1) then
        useylmgr=0
-       ABI_FREE(ylmgr)
+       ABI_SFREE(ylmgr)
        ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
      end if
    else        
@@ -636,11 +638,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
        ider=2; idir0=4; dimffnl=10
      end if
      ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
-     call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
-   & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
-   & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     if (.not.just_timdisp) then
+       call preca_ffnl(dimffnl,ffnl,gmet,gprimd,ider,idir0,kg, &
+     & dtset%kptns,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw, &
+     & dtset%nkpt,npwarr,nylmgr,psps,rmet,useylmgr,ylm,ylmgr)
+     end if
      useylmgr=0
-     ABI_FREE(ylmgr)
+     ABI_SFREE(ylmgr)
      ABI_MALLOC(ylmgr,(dtset%mpw*dtset%mkmem,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    end if
  else if (dtset%ffnl_lw == 1) then 
@@ -648,69 +652,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_MALLOC(ffnl,(dtset%mkmem,dtset%mpw,dimffnl,psps%lmnmax,psps%ntypat))
  end if
 
-!TODO: This part of the implementation does not work properly to select specific directions
-!      for each perturbation. This development is temporarily frozen.
-!Initialize the list of perturbations rfpert
-! mpert=natom+11
-! ABI_MALLOC(rfpert,(mpert))
-! rfpert(:)=0
-! rfpert(natom+1)=1
-! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==3.or.dtset%lw_flexo==4 &
-!&.or.dtset%d3e_pert1_phon==1.or.dtset%d3e_pert2_phon==1) then
-!   if (dtset%d3e_pert1_phon==1) rfpert(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
-!   if (dtset%d3e_pert2_phon==1) rfpert(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
-! end if
-! if (dtset%lw_qdrpl==1.or.dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==3.or.&
-!& dtset%d3e_pert1_elfd==1) then
-!   rfpert(natom+2)=1
-!   rfpert(natom+10)=1
-!   rfpert(natom+11)=1
-! end if
-! if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4.or.dtset%d3e_pert2_strs/=0) then
-!   if (dtset%d3e_pert2_strs==1.or.dtset%d3e_pert2_strs==3) rfpert(natom+3)=1
-!   if (dtset%d3e_pert2_strs==2.or.dtset%d3e_pert2_strs==3) rfpert(natom+4)=1
-! endif
-!
-!!Determine which directions treat for each type of perturbation
-! ABI_MALLOC(pertsy,(3,natom+6))
-! pertsy(:,:)=0
-! !atomic displacement
-! do ipert=1,natom
-!   if (rfpert(ipert)==1.and.dtset%d3e_pert1_phon==1) then
-!     do idir=1,3
-!       if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do
-!   endif
-!   if (rfpert(ipert)==1.and.dtset%d3e_pert2_phon==1) then
-!     do idir=1,3
-!       if (dtset%d3e_pert2_dir(idir)==1) pertsy(idir,ipert)=1
-!     end do
-!   end if
-! end do
-! !ddk
-! do idir=1,3
-!   if (dtset%d3e_pert3_dir(idir)==1) pertsy(idir,natom+1)=1
-! end do
-! !electric field
-! if (rfpert(natom+2)==1) then
-!   do idir=1,3
-!     if (dtset%d3e_pert1_dir(idir)==1) pertsy(idir,natom+2)=1
-!   end do
-! end if
-! !strain
-! if (rfpert(natom+3)==1) pertsy(:,natom+3)=1
-! if (rfpert(natom+4)==1) pertsy(:,natom+4)=1
-
-! All perturbations and directions are temporarily activated
-! ABI_MALLOC(pertsy,(3,natom+6))
-! pertsy(:,:)=1
-
-
 !#############  SPATIAL-DISPERSION PROPERTIES CALCULATION  ###########################
 
 !Anounce start of spatial-dispersion calculation
  write(msg, '(a,80a,a,a,a)' ) ch10,('=',ii=1,80),ch10,&
-&   ' ==> Compute spatial-dispersion 3rd-order energy derivatives <== ',ch10
+&   ' ==> Compute dispersion 3rd-order energy derivatives <== ',ch10
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
@@ -731,7 +677,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Main loop over the perturbations to calculate the stationary part
  call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
 & ffnl,gmet,gprimd,&
-& hdr,kg,kxc,dtset%mband,dtset%mgfft,&
+& hdr,just_timdisp,kg,kxc,dtset%mband,dtset%mgfft,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
 & pawfgr,pawtab,&
