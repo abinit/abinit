@@ -53,7 +53,7 @@ module m_gemm_nonlop_ompgpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
- use m_gemm_nonlop, only : gemm_nonlop_type,gemm_nonlop_ikpt_this_proc_being_treated,gemm_nonlop_kpt,make_gemm_nonlop
+ use m_gemm_nonlop
 
  implicit none
 
@@ -138,11 +138,11 @@ contains
 
 !----------------------------------------------------------------------
 
- function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat,&
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat, nblocks,&
      compute_grad_strain,compute_grad_atom) result(req_mem)
    implicit none
 
-   integer, intent(in) :: npw, ntypat
+   integer, intent(in) :: npw, ntypat, nblocks
    integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
    logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
 
@@ -159,6 +159,7 @@ contains
    do itypat=1,ntypat
      nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
    end do
+   nprojs = nprojs / nblocks
 
    ngrads = 0
    if (my_compute_grad_strain) ngrads = ngrads + 6
@@ -166,11 +167,17 @@ contains
 
    req_mem = 0
 
+   if(nblocks>1) then
+     req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(nprojs, c_size_t)          !projs_recv
+   end if
    ! projs or projs_r + projs_i
    req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs, c_size_t)
    if(ngrads>0) then
      ! dprojs or dprojs_r + dprojs_i
      req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs, c_size_t)
+     if(nblocks>1) then
+       req_mem = req_mem + dp * 2 * int(npw, c_size_t) * int(ngrads, c_size_t)*int(nprojs, c_size_t)   !dprojs_recv
+     end if
    end if
 
  end function gemm_nonlop_ompgpu_static_mem
@@ -519,6 +526,171 @@ contains
 
 !----------------------------------------------------------------------
 
+!!****f* m_gemm_nonlop_ompgpu/gemm_nonlop_ompgpu_distributed_gemm_opernla
+!! NAME
+!! gemm_nonlop_ompgpu_distributed_gemm_opernla
+!!
+!! FUNCTION
+!! Distributed version of "opernla" GEMM called in gemm_nonlop.
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
+ &                                               nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,beta,&
+ &                                               projs_local,projs_recv,vectin,cprojs)
+   integer,  intent(in)     :: rank,nprocs,npwin,ndat,nspinor
+   integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
+   real(dp), intent(in)     :: vectin(*)
+   complex(dpc), intent(in) :: beta
+   real(dp), intent(inout), target  :: projs_local(cplex,npwin,nprojs_last_blk),projs_recv(cplex,npwin,nprojs_last_blk)
+   real(dp), intent(out)  :: cprojs(:,:,:)
+
+   !Local variables
+   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next,idat
+   real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
+
+! *************************************************************************
+
+   rank_next=modulo(rank + 1,nprocs)
+   rank_prev=rank - 1
+   if(rank_prev == -1) rank_prev = nprocs - 1
+   do iblock=1,nprocs
+
+     if(rank+iblock == nprocs) then
+       nprojs_cur_blk = nprojs_last_blk
+     else
+       nprojs_cur_blk = nprojs_blk
+     end if
+
+     if(modulo(iblock,2)==1) then
+       work_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
+       recv_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
+     else
+       work_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
+       recv_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
+     end if
+
+     call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+     call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+
+     !$OMP TARGET UPDATE TO(work_buf)
+
+
+     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
+     iend = ibeg+nprojs_cur_blk-1
+     if(cplex == 2) then
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectin,cprojs)
+       call abi_gpu_xgemm(cplex, 'C','N', &
+               nprojs_cur_blk, ndat*nspinor, npwin, cone, &
+               c_loc(work_buf), npwin, &
+               c_loc(vectin), npwin, &
+               beta, &
+               c_loc(cprojs(1,ibeg,1)), nprojs)
+       !$OMP END TARGET DATA
+     else
+       call DGEMM('T', 'N', nprojs_cur_blk, ndat*nspinor, npwin, one, &
+       &          work_buf, npwin, &
+       &          vectin, npwin, real(beta), cprojs(:,ibeg:iend,:), nprojs_cur_blk)
+     end if
+
+     call xmpi_waitall(req,ierr)
+
+   end do
+
+   if(modulo(iblock,2)==1) then
+     call DCOPY(cplex*npwin*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+   end if
+ end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gemm_nonlop_ompgpu/gemm_nonlop_ompgpu_distributed_gemm_opernlb
+!! NAME
+!! gemm_nonlop_ompgpu_distributed_gemm_opernlb
+!!
+!! FUNCTION
+!! Distributed version of "opernlb" GEMM called in gemm_nonlop.
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
+ &                                               nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,&
+ &                                               projs_local,projs_recv,cprojs_s_vnl,vectout)
+   integer,  intent(in)     :: rank,nprocs,npwout,ndat,nspinor
+   integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
+   real(dp), intent(in)     :: cprojs_s_vnl(:,:,:)
+   real(dp), intent(inout), target  :: projs_local(cplex,npwout,nprojs_last_blk),projs_recv(cplex,npwout,nprojs_last_blk)
+   real(dp), intent(out)    :: vectout(*)
+
+   !Local variables
+   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
+   complex(dpc) :: beta
+   real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
+
+! *************************************************************************
+
+   rank_next=modulo(rank + 1,nprocs)
+   rank_prev=rank - 1
+   if(rank_prev == -1) rank_prev = nprocs - 1
+
+   beta = czero
+
+   do iblock=1,nprocs
+
+     if(rank+iblock == nprocs) then
+       nprojs_cur_blk = nprojs_last_blk
+     else
+       nprojs_cur_blk = nprojs_blk
+     end if
+
+     if(modulo(iblock,2)==1) then
+       work_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
+       recv_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
+     else
+       work_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
+       recv_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
+     end if
+
+     call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+     call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+
+     !$OMP TARGET UPDATE TO(work_buf)
+
+     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
+     iend = ibeg+nprojs_cur_blk-1
+     if(cplex==2) then
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,cprojs_s_vnl)
+       call abi_gpu_xgemm(cplex, 'N','N', &
+               npwout, ndat*nspinor, nprojs_cur_blk, cone, &
+               c_loc(work_buf), npwout, &
+               c_loc(cprojs_s_vnl(1,ibeg,1)), nprojs, &
+               beta, &
+               c_loc(vectout), npwout)
+       !$OMP END TARGET DATA
+     else
+       call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs_cur_blk, one, &
+       &          work_buf, npwout, &
+       &          cprojs_s_vnl(:,ibeg:iend,:), nprojs_cur_blk, real(beta), vectout, npwout)
+     end if
+
+     beta = cone
+
+     call xmpi_waitall(req,ierr)
+
+   end do
+
+   if(modulo(iblock,2)==1) then
+     call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+   end if
+
+ end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_gemm_nonlop_ompgpu/gemm_nonlop_ompgpu
 !! NAME
 !! gemm_nonlop_ompgpu
@@ -567,7 +739,7 @@ contains
 
 
   ! locals
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, i1, i2, i
+  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, i1, i2, i, ikpt
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift, nattyp_i
   integer :: enlout_shift, force_shift, nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
@@ -578,6 +750,10 @@ contains
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: enlk(:)
   real(dp),pointer :: projections_ptr(:,:,:)
+  integer :: nprojs_my_blk, ipw, iproj, iblock, nprojs_blk
+  integer :: rank, nprocs, req(2)
+  logical :: is_last
+  real(dp), allocatable :: projs_recv(:,:,:), dprojs_recv(:,:,:)
   logical :: local_vectproj
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
   character(len=500) :: msg
@@ -610,13 +786,22 @@ contains
     end if
   end if
 
+  ikpt=gemm_nonlop_ikpt_this_proc_being_treated
   cplex=2;if (istwf_k>1) cplex=1
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
-  nprojs = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
-  ngrads = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads
+  nprojs = gemm_nonlop_kpt(ikpt)%nprojs
+  ngrads = gemm_nonlop_kpt(ikpt)%ngrads
+  nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
+
+  if(gemm_nonlop_is_distributed) then
+    rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
+    is_last = (rank==nprocs-1)
+    if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_last_blk
+  end if
+
   if(choice==1) ngrads=0
   ABI_CHECK(ngrads>=3.or.choice/=2 ,"Bad allocation in gemm_nonlop (2)!")
   ABI_CHECK(ngrads>=6.or.choice/=3 ,"Bad allocation in gemm_nonlop (3)!")
@@ -671,6 +856,15 @@ contains
   !$OMP TARGET ENTER DATA MAP(alloc:s_projections,vnl_projections)
   if(.not. local_vectproj) then
     !$OMP TARGET ENTER DATA MAP(alloc:projections_ptr)
+  end if
+
+  if(gemm_nonlop_is_distributed) then
+    ABI_MALLOC(projs_recv,   (cplex, npwin, gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
+    !$OMP TARGET ENTER DATA MAP(alloc:projs_recv)
+    if (signs==1.and.ngrads>0) then
+      ABI_MALLOC(dprojs_recv,   (cplex, npwin, ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
+      !$OMP TARGET ENTER DATA MAP(alloc:dprojs_recv)
+    end if
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
@@ -751,18 +945,37 @@ contains
   else
     ! opernla
     if(cplex == 2) then
+      if(.not. gemm_nonlop_is_distributed) then
 
 #ifdef HAVE_GPU_CUDA
-      call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
+        call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                current_ikpt_projs, npwin,&
 &                vectin, npwin, czero, projections_ptr, nprojs)
-      if(signs==1.and.ngrads>0) then
-        call   abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                 current_ikpt_dprojs, npwin,&
-                 vectin, npwin, czero, dprojections, ngrads*nprojs)
-      end if
+        if(signs==1.and.ngrads>0) then
+          call   abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
+                   current_ikpt_dprojs, npwin,&
+                   vectin, npwin, czero, dprojections, ngrads*nprojs)
+        end if
 #endif
 
+      else
+        call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
+        &                                         nprojs,&
+        &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
+        &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+        &                                         nprojs_my_blk,cplex,czero,&
+        &                                         current_ikpt_projs,projs_recv,&
+        &                                         vectin,projections_ptr)
+        if(signs==1.and.ngrads>0) then
+          call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
+          &                                         ngrads*nprojs,&
+          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_blk,&
+          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+          &                                         ngrads*nprojs_my_blk,cplex,czero,&
+          &                                         current_ikpt_dprojs,dprojs_recv,&
+          &                                         vectin,dprojections)
+        end if
+      end if
     else
       ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
@@ -915,9 +1128,19 @@ contains
       if(paw_opt == 3 .or. paw_opt == 4) then
         ! Get svectout from s_projections
         if(cplex == 2) then
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                  current_ikpt_projs, npwout,&
-                  s_projections, nprojs, czero, svectout, npwout)
+          if(.not. gemm_nonlop_is_distributed) then
+            call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                    current_ikpt_projs, npwout,&
+                    s_projections, nprojs, czero, svectout, npwout)
+          else
+            call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
+            &                                         nprojs,&
+            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
+            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+            &                                         nprojs_my_blk,cplex,&
+            &                                         current_ikpt_projs,projs_recv,&
+            &                                         s_projections,svectout)
+          end if
         else
           call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                     current_ikpt_projs_r, npwout, &
@@ -947,9 +1170,19 @@ contains
       if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
         ! Get vectout from vnl_projections
         if(cplex_fac == 2) then
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                  current_ikpt_projs, npwout, &
-                  vnl_projections, nprojs, czero, vectout, npwout)
+          if(.not. gemm_nonlop_is_distributed) then
+            call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
+                    current_ikpt_projs, npwout, &
+                    vnl_projections, nprojs, czero, vectout, npwout)
+          else
+            call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
+            &                                         nprojs,&
+            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
+            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+            &                                         nprojs_my_blk,cplex,&
+            &                                         current_ikpt_projs,projs_recv,&
+            &                                         vnl_projections,vectout)
+          end if
         else
           call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                   current_ikpt_projs_r, npwout, &
@@ -1127,6 +1360,14 @@ contains
 ! Release memory
   if(signs == 1) then
     !$OMP TARGET EXIT DATA MAP(release:enlout)
+  end if
+  if(gemm_nonlop_is_distributed) then
+    !$OMP TARGET EXIT DATA MAP(release:projs_recv)
+    ABI_FREE(projs_recv)
+    if (signs==1.and.ngrads>0) then
+      !$OMP TARGET EXIT DATA MAP(release:dprojs_recv)
+      ABI_FREE(dprojs_recv)
+    end if
   end if
   !$OMP TARGET EXIT DATA MAP(release:atindx1,indlmn,enl)
   if (allocated(dprojections)) then
