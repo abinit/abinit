@@ -66,6 +66,7 @@ module m_dfptlw_loop
  use m_mkcore,      only : dfpt_mkcore
  use m_mklocl,      only : dfpt_vlocal, vlocalstr,dfpt_vlocaldq,dfpt_vlocaldqdq,dfpt_vmetdqdq 
  use m_dfptlw_pert, only : dfptlw_pert
+ use m_dfpttd_berrycurv, only : dfpttd_berrycurv
  use m_dynmat,      only : cart39
  use m_xmpi
 
@@ -726,13 +727,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      end if
                    end if ! .not.just_timdisp
 
-                   if (dtset%timdisp==1) then
+                   if (i3pert==natom+9) then
 
-!                     !Perform the Berry curvature part of the time-disperion 3dte calculation
-!                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
-!                     & i2dir,i3dir,i1pert,i2pert,i3pert,mband,mk1mem,mpert,mpi_enreg,&
-!                     & mpw,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
-!                     & samepert,ucvol)
+                     !Perform the Berry curvature part of the time-disperion 3dte calculation
+                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
+                     & i2dir,i1pert,i2pert,mband,mk1mem,mpert,mpi_enreg,&
+                     & mpw,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
+                     & samepert,ucvol)
 
                    end if 
   
