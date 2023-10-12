@@ -1289,7 +1289,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
      !MR: this is to not interfere with the second-order derivatives
-     pertcase_mq=pertcase+(dtset%natom+12)*3
+     !neither with the local Zeeman perturbation
+     pertcase_mq=pertcase+(2*dtset%natom+11)*3
      call hdr_init(ebands_kmq,codvsn,dtset,hdr_mq,pawtab,pertcase_mq,psps,wvl%descr, &
        comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
