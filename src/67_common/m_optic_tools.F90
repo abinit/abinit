@@ -698,7 +698,8 @@ complex(dpc), allocatable :: intra1wS_2bands(:,:), intra1wS_2bands_ik(:,:)
 !calculate the constant
  zi=(0._dp,1._dp)
  idel=zi*brod
- const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) !VT 1 instead of 2 
+ !const_au=-1._dp/(cryst%ucvol*dble(cryst%nsym)) !VT 1 instead of 2 
+ const_au=-2._dp/(cryst%ucvol*dble(cryst%nsym)) 
  au2esu=5.8300348177d-8
  const_esu=const_au*au2esu
  ha2ev=13.60569172*2._dp
