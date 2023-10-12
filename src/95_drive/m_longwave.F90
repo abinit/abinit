@@ -485,17 +485,19 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
  ireadwf0=1
  hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
- call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
-& formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
-& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
-& dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
-& dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
- hdr%rprimd=rprimd
-
-!Close wffgs, if it was ever opened (in inwffil)
- if (ireadwf0==1) then
-   call WffClose(wffgs,ierr)
+ if (.not.just_timdisp) then
+   call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+  & formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
+  & dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
+  & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
+  & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+  & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
+   hdr%rprimd=rprimd
+  
+  !Close wffgs, if it was ever opened (in inwffil)
+   if (ireadwf0==1) then
+     call WffClose(wffgs,ierr)
+   end if
  end if
 
 !Generate an index table of atoms, in order for them to be used
@@ -526,54 +528,58 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(rhor,(nfftf,dtset%nspden))
 
- if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
-   ! Read rho1(r) from a disk file and broadcast data.
-   ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
-
-   rdwrpaw=psps%usepaw
-   ABI_MALLOC(pawrhoij_read,(0))
-
-!  MT july 2013: Should we read rhoij from the density file ?
-   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
-   hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_den%free()
-
-   ABI_FREE(pawrhoij_read)
-
-!  Compute up+down rho(G) by fft
-   ABI_MALLOC(work,(nfftf))
-   work(:)=rhor(:,1)
-   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_FREE(work)
- else
-!  Obtain the charge density from read wfs
-!  Be careful: in PAW, compensation density has to be added !
-   tim_mkrho=4
-   paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
-   paw_dmft%use_dmft=0 ! respfn with dmft not implemented
-
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
- end if ! getden
-! ABI_FREE(cg)
-
+ if (.not.just_timdisp) then
+   if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
+     ! Read rho1(r) from a disk file and broadcast data.
+     ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
+  
+     rdwrpaw=psps%usepaw
+     ABI_MALLOC(pawrhoij_read,(0))
+  
+  !  MT july 2013: Should we read rhoij from the density file ?
+     call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
+     hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
+     etotal = hdr_den%etot; call hdr_den%free()
+  
+     ABI_FREE(pawrhoij_read)
+  
+  !  Compute up+down rho(G) by fft
+     ABI_MALLOC(work,(nfftf))
+     work(:)=rhor(:,1)
+     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+     ABI_FREE(work)
+   else
+  !  Obtain the charge density from read wfs
+  !  Be careful: in PAW, compensation density has to be added !
+     tim_mkrho=4
+     paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
+     paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+  
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+  &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+   end if ! getden
+  ! ABI_FREE(cg)
+ end if
+  
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
 !driver.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
  coredens_method=2
- if (coredens_method==2.and.psps%n1xccc/=0) then
-   option=1
-   ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
-   ABI_MALLOC(vxc,(0,0)) ! dummy
-   ABI_MALLOC(grxc,(3,natom))
-   call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
-   ABI_FREE(dummy_dyfrx2) ! dummy
-   ABI_FREE(vxc) ! dummy
-   ABI_FREE(grxc) ! dummy
+ if (.not.just_timdisp) then
+   if (coredens_method==2.and.psps%n1xccc/=0) then
+     option=1
+     ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
+     ABI_MALLOC(vxc,(0,0)) ! dummy
+     ABI_MALLOC(grxc,(3,natom))
+     call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+  &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+  &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+     ABI_FREE(dummy_dyfrx2) ! dummy
+     ABI_FREE(vxc) ! dummy
+     ABI_FREE(grxc) ! dummy
+   end if
  end if
 
 !Set up xc potential. Compute kxc here.
@@ -592,11 +598,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  non_magnetic_xc=.false.
 
  enxc=zero; usexcnhat=0
-
- call xcdata_init(xcdata,dtset=dtset)
- call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
-& nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+ 
+ if (.not.just_timdisp) then 
+   call xcdata_init(xcdata,dtset=dtset)
+   call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+  & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
+  & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+ end if
 
 !Set up the spherical harmonics (Ylm) and gradients at each k point 
  if (psps%useylm==1) then

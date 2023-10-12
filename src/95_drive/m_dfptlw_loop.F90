@@ -201,10 +201,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
+ integer :: pert1case_mq,pert2case_mq
  real(dp) :: boxcut,delad,delag,delbd,delbg,ecut,ecut_eff,gsqcut   
- logical :: samepert
+ logical :: kramers_deg,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
+ character(len=fnlen) :: fiwf1i_mq,fiwf2i_mq
  type(gs_hamiltonian_type) :: gs_hamkq
  type(wffile_type) :: wff1,wff2,wfft1,wfft2
  type(wfk_t) :: ddk_f,d2_dkdk_f,d2_dkdk_f2
@@ -213,7 +215,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
- real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:),eigen1(:),eigen2(:)
+ real(dp),allocatable :: cg1_mq(:,:),cg2_mq(:,:)
+ real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:)
+ real(dp),allocatable :: eigen1(:),eigen2(:)
+ real(dp),allocatable :: eigen1_mq(:),eigen2_mq(:)
  real(dp),allocatable :: nhat1(:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
@@ -235,8 +240,16 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  comm_cell=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt
 
+!Deactivate kramer's degeneracy for calculations that break TRS
+!(finite q in magnetic materials or finite omega)
+ kramers_deg=.true.
+ timrev = 1 
+ if (dtset%tim1rev==0) then
+   kramers_deg=.false.
+   timrev = 0
+ end if
+
 !Various initializations
- timrev = 1 ! as q=0
  cplex = 2 - timrev
  nspden = dtset%nspden
  ecut=dtset%ecut
@@ -248,6 +261,12 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
  ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
  ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+! if (.not.kramers_deg) then
+!   ABI_MALLOC(cg1_mq,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+!   ABI_MALLOC(cg2_mq,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
+!   ABI_MALLOC(eigen1_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+!   ABI_MALLOC(eigen2_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+! end if
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
@@ -313,6 +332,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  mcg=mpw*nspinor*mband*mkmem*nsppol
 
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
+ pert1case_mq = 0 ; pert2case_mq = 0 
 
  do i1pert = 1, mpert
    do i1dir = 1, 3
@@ -338,6 +358,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
        end if
+
+!       if (.not.kramers_deg) then
+!         pert1case_mq=pert1case_mq+(2*dtset%natom+11)*3
+!         call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
+!       end if 
 
        if (.not.just_timdisp) then 
          call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
@@ -393,6 +418,11 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              if (ireadwf==1) then
                call WffClose (wff2,ierr)
              end if
+
+!             if (.not.kramers_deg) then
+!               pert2case_mq=pert2case_mq+(2*dtset%natom+11)*3
+!               call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
+!             end if 
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -695,6 +725,16 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                        tgeom_typeII(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=d3etot_tgeom(:,1)
                      end if
                    end if ! .not.just_timdisp
+
+                   if (dtset%timdisp==1) then
+
+!                     !Perform the Berry curvature part of the time-disperion 3dte calculation
+!                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
+!                     & i2dir,i3dir,i1pert,i2pert,i3pert,mband,mk1mem,mpert,mpi_enreg,&
+!                     & mpw,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
+!                     & samepert,ucvol)
+
+                   end if 
   
                  end if   ! rfpert
                end do    ! ir3dir
@@ -722,6 +762,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
  ABI_FREE(cg1)
  ABI_FREE(cg2)
+! if (.not.kramers_deg) then
+!   ABI_FREE(cg1_mq)
+!   ABI_FREE(cg2_mq)
+! end if
  ABI_FREE(eigen1)
  ABI_FREE(eigen2)
  ABI_FREE(rho1r1)
@@ -766,7 +810,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Anounce end of spatial-dispersion calculation
  write(message, '(a,a,a,a)' ) ch10,ch10,&
-&   ' -- Spatial-dispersion 3rd-order derivatives completed -- ',ch10
+&   ' -- Dispersion 3rd-order derivatives completed -- ',ch10
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
  
