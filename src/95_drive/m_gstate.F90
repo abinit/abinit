@@ -459,6 +459,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    end if
  end if
 
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%distribute_gemm_nonlop == 1) gemm_nonlop_is_distributed = .true.
+
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
    ABI_MALLOC(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))

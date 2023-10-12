@@ -125,6 +125,7 @@ type, public :: dataset_type
  integer :: diismemory
  integer :: dipdip = 1
  integer :: dipquad = 1
+ integer :: distribute_gemm_nonlop = 0
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -1439,6 +1440,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%diago_apply_block_sliced = dtin%diago_apply_block_sliced
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
+ dtout%distribute_gemm_nonlop = dtin%distribute_gemm_nonlop
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
  dtout%dmft_dc            = dtin%dmft_dc
@@ -3303,7 +3305,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diago_apply_block_sliced diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
- list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range distribute_gemm_nonlop'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'

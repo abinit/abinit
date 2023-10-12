@@ -2456,6 +2456,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%userec=1
  end if
 
+ ! Read distribute_gemm_nonlop
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'distribute_gemm_nonlop',tread,'INT')
+ if(tread==1) dtset%distribute_gemm_nonlop=intarr(1)
+
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt
 
