@@ -731,7 +731,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                      !Perform the Berry curvature part of the time-disperion 3dte calculation
                      call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
-                     & i2dir,i1pert,i2pert,mband,mk1mem,mpert,mpi_enreg,&
+                     & i2dir,i3dir,i1pert,i2pert,i3pert,mband,mk1mem,mpert,mpi_enreg,&
                      & mpw,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
                      & samepert,ucvol)
 

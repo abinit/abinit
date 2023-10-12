@@ -697,6 +697,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Real (imaginary) part of d3etot is zero for first (second) momentum derivatives
  if (dtset%kptopt /= 3) then
    do i3pert = 1, mpert
+     if (i3pert == natom+9 ) cycle
      do i3dir = 1, 3
        do i2pert = 1, mpert
          do i2dir = 1,3
@@ -752,7 +753,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
    ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
    call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
-   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
+   call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,dtset%timdisp,ucvol)
  end if
 
 !Deallocate arrays
@@ -819,6 +820,7 @@ end subroutine longwave
 !!  lw_flexo= flag that activates flexoelectric tensor calculation
 !!  mpert =maximum number of ipert
 !!  natom = number of atoms in unit cell
+!!  timdisp = if 1 write derivatives with respect to omega
 !!
 !! OUTPUT
 !!
@@ -839,7 +841,7 @@ end subroutine longwave
 #include "abi_common.h"
 
 
-subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,ucvol)
+subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,timdisp,ucvol)
 
  use defs_basis
  use m_errors
@@ -849,7 +851,7 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom
+ integer,intent(in) :: lw_flexo,lw_qdrpl,lw_natopt,mpert,natom,timdisp
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: blkflg_car(3,mpert,3,mpert,3,mpert) 
@@ -1099,6 +1101,27 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
        end do
      end do
      write(ab_out,*)' '
+   end do
+ end if
+
+ if (timdisp==1) then
+   i3pert=natom+9
+   i3dir=1
+   write(ab_out,'(a)')' Frequency derivative of second-order energies, in cartesian coordinates'
+   write(ab_out,*)'    j1       j2             matrix element'
+   write(ab_out,*)' dir pert dir pert     real part   imaginary part'
+   do i1pert=1,mpert
+     do i1dir=1,3
+       do i2pert=1,mpert
+         do i2dir=1,3
+           if (blkflg_car(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+             write(ab_out,'(2(i4,i5),2(1x,f20.10))')i1dir,i1pert,i2dir,i2pert,&
+           & d3etot_car(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert), &
+           & d3etot_car(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+           end if
+         end do
+       end do
+     end do
    end do
  end if
 
