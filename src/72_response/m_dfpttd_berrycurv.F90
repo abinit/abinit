@@ -84,7 +84,6 @@ contains
 !!  nsppol = number of channels for spin-polarization (1 or 2)
 !!  npwarr(nkpt) = array holding npw for each k point
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
-!!  samepert= .true. if i1pert=i2pert and i1dir=i2dir
 !!  ucvol=volume of the unit cell
 !!
 !! OUTPUT
@@ -102,7 +101,7 @@ contains
 
 subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,i1pert,i2pert,i3pert, &
  & mband,mk1mem,mpert,mpi_enreg,mpw,natom,nfft,ngfft,nkpt,nspden,nspinor,nsppol, & 
- & npwarr,occ,samepert,ucvol)
+ & npwarr,occ,ucvol)
     
  use defs_basis
 
@@ -112,7 +111,6 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 !scalars
  integer, intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mk1mem,mpert,mpw
  integer, intent(in) :: natom,nfft,nkpt,nspden,nspinor,nsppol
- logical,intent(in) :: samepert
  real(dp),intent(in) :: gsqcut,ucvol
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -149,8 +147,8 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
  me=mpi_enreg%me_kpt 
 
 !Loop over spins
+ e3tot=zero
  bandtot = 0
- bd2tot = 0
  icg=0
  do isppol = 1, nsppol
 
@@ -163,7 +161,6 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 
      if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,mband,isppol,mpi_enreg%me)) then
        bandtot = bandtot + nband_k
-       bd2tot = bd2tot + 2*nband_k**2
        cycle ! Skip the rest of the k-point loop
      end if
 
@@ -172,7 +169,6 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
      wtk_k    = dtset%wtk(ikpt)
 
      d3etot_k=zero
-     e3tot=zero
      size_wf= dtset%nspinor*npw_k
      ABI_MALLOC(cwavef1,(2,size_wf))
      ABI_MALLOC(cwavef2,(2,size_wf))
@@ -205,7 +201,6 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
-     bd2tot = bd2tot + 2*nband_k**2
 
 !    Shift arrays memory
      icg=icg+npw_k*dtset%nspinor*nband_k
@@ -228,12 +223,9 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
  e3tot(:)=two*e3tot
 
 !Add the result to the big array
- d3etot(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=e3tot(:)
+ d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=zero
+ d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-two*e3tot(2)
  
-! if (me==0) then
-!   write(100,'(4i3,2f18.6)') i1dir,i1pert,i2dir,i2pert,e3tot(:)
-! end if
-
  DBG_EXIT("COLL")
 
 end subroutine dfpttd_berrycurv

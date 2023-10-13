@@ -326,6 +326,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
  if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
 
+ !Dielectric susceptibility
+ if (dtset%d3e_pert1_elfd/=0) d3e_pert1(natom+2)=1
+ if (dtset%d3e_pert2_elfd/=0) d3e_pert2(natom+2)=1
+
  perm(:)=0
  do i1pert = 1, mpert
    d3e_dir1(:)=dtset%d3e_pert1_dir(:)
