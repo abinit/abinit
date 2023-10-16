@@ -1112,8 +1112,8 @@ subroutine dfptlw_out(blkflg_car,d3etot_car,lw_flexo,lw_qdrpl,lw_natopt,mpert,na
    i3pert=natom+9
    i3dir=1
    write(ab_out,'(a)')' Frequency derivative of second-order energies, in cartesian coordinates'
-   write(ab_out,*)'    j1       j2             matrix element'
-   write(ab_out,*)' dir pert dir pert     real part   imaginary part'
+   write(ab_out,'(a)')'     j1       j2                    matrix elementi'
+   write(ab_out,'(a)')'  dir pert dir pert           real part       imaginary part'
    do i1pert=1,mpert
      do i1dir=1,3
        do i2pert=1,mpert
