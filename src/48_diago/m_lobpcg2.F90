@@ -160,7 +160,7 @@ module m_lobpcg2
     lobpcg%neigenpairs = neigenpairs
     lobpcg%spacedim    = spacedim
     lobpcg%blockdim    = blockdim
-    if (tolerance > 0) then
+    if (tolerance > 0.0) then
       lobpcg%tolerance = tolerance
     else
       lobpcg%tolerance = 1.0e-20
