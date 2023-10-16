@@ -240,10 +240,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  integer :: occopt,occopt_tmp,response,sumnbl,tfband,tnband,tread,tread_alt,tread_dft,tread_fock,tread_key,tread_extrael
  integer :: tread_brange, tread_erange, tread_kfilter
  integer :: itol, itol_gen, ds_input, ifreq, ncerr, ierr, image, tread_dipdip, my_rank
+ integer :: itol_wfr, itol_gen_wfr
  logical :: xc_is_mgga,xc_is_tb09,xc_need_kden,xc_has_kxc
  real(dp) :: areaxy,cellcharge_min,fband,kptrlen,nelectjell,sum_spinat
  real(dp) :: rhoavg,zelect,zval
- real(dp) :: toldfe_, tolrff_, toldff_, tolvrs_ !,tolwfr_
+ real(dp) :: toldfe_, tolrff_, toldff_, tolwfr_, tolvrs_
  real(dp) :: tolmxde_, tolmxf_
  character(len=500) :: msg
  character(len=fnlen) :: key_value
@@ -3281,15 +3282,24 @@ if (dtset%usekden==1) then
  if(tread==1) dtset%tolrde=dprarr(1)
 
  ! find which tolXXX are defined generically and for this jdtset
+ tolwfr_=zero
  toldfe_=zero
  toldff_=zero
  tolrff_=zero
  tolvrs_=zero
  itol=0
  itol_gen=0
+ itol_wfr=0
+ itol_gen_wfr=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolwfr',tread,'DPR',ds_input)
  if(tread==1) then
-   dtset%tolwfr=dprarr(1)
+   if (ds_input == 0) then
+     tolwfr_=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol_gen_wfr=itol_gen_wfr+1
+   else
+     dtset%tolwfr=dprarr(1)
+     if(abs(dprarr(1))>tiny(0._dp))itol_wfr=itol_wfr+1
+   end if
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'toldff',tread,'DPR',ds_input)
@@ -3344,16 +3354,37 @@ if (dtset%usekden==1) then
  if (itol > 1 .or. itol_gen > 1) then
    write(msg, '(3a)' )&
    'Only one of the tolXXX variables may be defined at once.',ch10,&
-   'Action: check values of tolvrs, toldfe, tolrff, tolwfr, and toldff.'
+   'Action: check values of tolvrs, toldfe, tolrff and toldff.'
    ABI_ERROR(msg)
  end if
 
- ! if no value is given for jdtset, use defaults
- if (itol == 0 .and. itol_gen == 1) then
-   dtset%toldfe=toldfe_
-   dtset%toldff=toldff_
-   dtset%tolrff=tolrff_
-   dtset%tolvrs=tolvrs_
+! up to here:
+! -- dtset%tolXXX is set if given for this dataset (itol or itol_wfr>0)
+! -- tolXXX_ is non-zero if a generic value is defined (itol_gen or itol_wfr_gen>0)
+! Now we take into account that tolwfr can be coupled with an other tolerance,
+! ONLY if both tolerances are given for this dataset, or both generic values are defined for both
+!if tol/=tolwfr is set without tolwfr, tolwfr should be 0
+ if (itol == 1 .and. itol_wfr == 0) then
+   dtset%tolwfr=zero
+ end if
+!if tolwfr is set without tol/=tolwfr, tol/=tolwfr should be 0
+ if (itol == 0 .and. itol_wfr == 1) then
+   dtset%toldfe=zero
+   dtset%toldff=zero
+   dtset%tolrff=zero
+   dtset%tolvrs=zero
+ end if
+!if no value is given for jdtset, use defaults:
+ if (itol == 0 .and. itol_wfr == 0) then
+   if (itol_gen == 1) then
+     dtset%toldfe=toldfe_
+     dtset%toldff=toldff_
+     dtset%tolrff=tolrff_
+     dtset%tolvrs=tolvrs_
+   end if
+   if (itol_gen_wfr == 1) then
+     dtset%tolwfr=tolwfr_
+   end if
  end if
 
  ! Tolerance variable for TFW initialization step
