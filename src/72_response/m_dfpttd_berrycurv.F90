@@ -219,9 +219,6 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
    call xmpi_sum(e3tot,spaceworld,ierr)
  end if
 
-!Apply here the two factor to the stationary wf1 contributions 
- e3tot(:)=two*e3tot
-
 !Add the result to the big array
  d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=zero
  d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-two*e3tot(2)
