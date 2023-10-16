@@ -3358,11 +3358,8 @@ if (dtset%usekden==1) then
    ABI_ERROR(msg)
  end if
 
-! up to here:
-! -- dtset%tolXXX is set if given for this dataset (itol or itol_wfr>0)
-! -- tolXXX_ is non-zero if a generic value is defined (itol_gen or itol_wfr_gen>0)
 ! Now we take into account that tolwfr can be coupled with an other tolerance,
-! ONLY if both tolerances are given for this dataset, or both generic values are defined for both
+! ONLY if both tolerances are given for this dataset, or both generic values are defined
 !if tol/=tolwfr is set without tolwfr, tolwfr should be 0
  if (itol == 1 .and. itol_wfr == 0) then
    dtset%tolwfr=zero
@@ -3374,6 +3371,10 @@ if (dtset%usekden==1) then
    dtset%tolrff=zero
    dtset%tolvrs=zero
  end if
+
+! up to here:
+! -- dtset%tolXXX is set if given for this dataset (itol or itol_wfr>0)
+! -- tolXXX_ is non-zero if a generic value is defined (itol_gen or itol_wfr_gen>0)
 !if no value is given for jdtset, use defaults:
  if (itol == 0 .and. itol_wfr == 0) then
    if (itol_gen == 1) then

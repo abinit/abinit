@@ -218,7 +218,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr,nline,space,l_mpi_enreg%comm_bandspinorfft)
+ call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr_diago,nline,space,l_mpi_enreg%comm_bandspinorfft)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
