@@ -89,7 +89,11 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
     new_s = prep_char(s, firstchar)
     write(unit, "(a)")trim(new_s)
   else
-    write(unit, "(a)")trim(s)
+#ifdef FC_NVHPC
+    write(unit, "(a)") s
+#else
+    write(unit, "(a)") trim(s)
+#endif
   end if
 
   if (present(newline)) then
