@@ -38,6 +38,14 @@ module m_getghc_ompgpu
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
 
+ !FIXME Keep those in these modules or moves them together ?
+ use m_ompgpu_fourwf,      only : ompgpu_fourwf_work_mem
+ use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_work_mem
+
+#ifdef HAVE_FC_ISO_C_BINDING
+ use iso_c_binding
+#endif
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
@@ -53,6 +61,8 @@ module m_getghc_ompgpu
  public :: alloc_getghc_ompgpu_buffers
  public :: free_getghc_ompgpu_buffers
 
+ ! This routine is here to assess memory requirements
+ public :: getghc_ompgpu_work_mem
 !!***
 #ifdef HAVE_OPENMP_OFFLOAD
  integer, save :: mod__n4=0, mod__n5=0, mod__n6=0, mod__nspinor=0, mod__ndat=0, mod__npw=0
@@ -116,6 +126,47 @@ subroutine free_getghc_ompgpu_buffers
 
 #endif
 end subroutine free_getghc_ompgpu_buffers
+!!***
+
+
+!!****f* ABINIT/getghc_ompgpu_work_mem
+!! NAME
+!! getghc_ompgpu_work_mem
+!!
+!! FUNCTION
+!! Returns work memory requirement for getghc_ompgpu
+!!
+!! INPUTS
+!!
+!! gs_ham <type(gs_hamiltonian_type)>=contains dimensions of FFT domain
+!! ndat=size of batch for fourwf and nonlop processing
+!!
+!! OUTPUT
+!!
+!! req_mem=amount in bytes of required memory for getghc_ompgpu
+function getghc_ompgpu_work_mem(gs_ham, ndat) result(req_mem)
+
+ implicit none
+
+ type(gs_hamiltonian_type),intent(in),target :: gs_ham
+ integer, intent(in) :: ndat
+ integer(kind=c_size_t) :: req_mem, ghc_mem, nonlop_mem
+
+ ! getghc use a GPU work buffer only when using fourwf
+ ! Therefore, max GPU memory required by getghc is either:
+ !   - the sum of getghc and fourwf work buffers memory requirements
+ !   - the amount of memory required by gemm_nonlop_ompgpu work buffers
+ ghc_mem = 0
+ ghc_mem = 2 * dp * int(gs_ham%n4, c_size_t) * int(gs_ham%n5, c_size_t) &
+ &        * int(gs_ham%n6, c_size_t) * int(ndat, c_size_t)
+ ghc_mem = ghc_mem + ompgpu_fourwf_work_mem(gs_ham%ngfft, ndat)
+
+ nonlop_mem = gemm_nonlop_ompgpu_work_mem(gs_ham%istwf_k, ndat, gs_ham%npw_fft_k,&
+ &               gs_ham%indlmn, gs_ham%nattyp, gs_ham%ntypat, gs_ham%lmnmax)
+
+ req_mem = MAX(ghc_mem, nonlop_mem)
+
+end function getghc_ompgpu_work_mem
 !!***
 
 !!****f* ABINIT/getghc_ompgpu

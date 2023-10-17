@@ -89,6 +89,7 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
+ use m_chebfiwf,           only : chebfiwf2_blocksize
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -964,6 +965,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            ffnl_k   =my_bandfft_kpt%ffnl_gather, &
            ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
+
+       call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb)
+       flush(6)
+       call xmpi_barrier(xmpi_world)
+       ABI_BUG("Nooooooo")
 
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
