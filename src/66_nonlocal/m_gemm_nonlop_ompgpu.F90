@@ -65,6 +65,10 @@ module m_gemm_nonlop_ompgpu
  public :: destroy_gemm_nonlop_ompgpu
  public :: make_gemm_nonlop_ompgpu
  public :: gemm_nonlop_ompgpu
+
+ ! Those routines are here to assess memory requirements
+ public :: gemm_nonlop_ompgpu_work_mem
+ public :: gemm_nonlop_ompgpu_static_mem
 !!***
 
 !----------------------------------------------------------------------
@@ -99,6 +103,79 @@ module m_gemm_nonlop_ompgpu
 #endif
 
 contains
+
+ function gemm_nonlop_ompgpu_work_mem(istwfk, ndat, npw, indlmn, nattyp, ntypat, lmnmax) result(req_mem)
+   implicit none
+
+   integer, intent(in) :: istwfk, ndat, npw, ntypat, lmnmax
+   integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
+
+   integer :: nprojs, cplex, itypat
+   real(dp) :: req_mem
+
+! *************************************************************************
+
+   cplex=2;if (istwfk>1) cplex=1
+   nprojs=0
+   do itypat=1,ntypat
+     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+   end do
+
+   req_mem = 0
+
+   if(cplex == 1) then
+     req_mem = req_mem + dp * npw * ndat ! temp_realvec_r
+     req_mem = req_mem + dp * npw * ndat ! temp_realvec_i
+   end if
+
+   req_mem = req_mem + dp * lmnmax * (lmnmax+1)/2 * ntypat  ! sij_typ
+
+   req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! projections
+   req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_projections
+   req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_projections
+
+ end function gemm_nonlop_ompgpu_work_mem
+
+!----------------------------------------------------------------------
+
+ function gemm_nonlop_ompgpu_static_mem(npw, indlmn, nattyp, ntypat,&
+     compute_grad_strain,compute_grad_atom) result(req_mem)
+   implicit none
+
+   integer, intent(in) :: npw, ntypat
+   integer, intent(in) :: indlmn(:,:,:), nattyp(ntypat)
+   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
+
+   integer :: nprojs, ngrads, itypat
+   logical :: my_compute_grad_strain,my_compute_grad_atom
+   integer(kind=c_size_t) :: req_mem
+
+! *************************************************************************
+
+   my_compute_grad_strain=.false. ; if (present(compute_grad_strain)) my_compute_grad_strain=compute_grad_strain
+   my_compute_grad_atom=.false. ; if (present(compute_grad_atom)) my_compute_grad_atom=compute_grad_atom
+
+   nprojs = 0
+   do itypat=1,ntypat
+     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+   end do
+
+   ngrads = 0
+   if (my_compute_grad_strain) ngrads = ngrads + 6
+   if (my_compute_grad_atom)   ngrads = ngrads + 3
+
+   req_mem = 0
+
+   ! projs or projs_r + projs_i
+   req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(nprojs, c_size_t)
+   if(ngrads>0) then
+     ! dprojs or dprojs_r + dprojs_i
+     req_mem = req_mem + 2 * dp * int(npw, c_size_t) * int(ngrads, c_size_t) * int(nprojs, c_size_t)
+   end if
+
+ end function gemm_nonlop_ompgpu_static_mem
+
+!----------------------------------------------------------------------
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA
