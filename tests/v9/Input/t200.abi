@@ -1,6 +1,4 @@
 # Hydrogen diatomic molecule for built-in tests--broyden minimization
- builtintest 1
-
  acell 12 10 10
  diemac 1.0d0   diemix 0.5d0
  ecut 4.5

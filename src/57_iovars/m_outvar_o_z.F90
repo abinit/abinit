@@ -1122,6 +1122,9 @@ contains
  dprarr(1,:)=dtsets(:)%tolwfr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr','DPR',0)
 
+ dprarr(1,:)=dtsets(:)%tolwfr_diago
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr_diago','DPR',0)
+
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
 

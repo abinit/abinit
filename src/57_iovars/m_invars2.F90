@@ -3388,6 +3388,9 @@ if (dtset%usekden==1) then
    end if
  end if
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolwfr_diago',tread,'DPR')
+ if(tread==1) dtset%tolwfr_diago = dprarr(1)
+
  ! Tolerance variable for TFW initialization step
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tfw_toldfe',tread,'ENE',ds_input)
  if(tread==1) then
