@@ -177,4 +177,5 @@ inp_files = [
 
     "t200.abi",  # tolwfr with other tolerances
     "t201.abi",  # tolwfr with tolvrs + nbdbuf with lobpcg
+    "t202.abi",  # tolwfr_diago with tolvrs and tolvrs+tolwfr with lobpcg
 ]
