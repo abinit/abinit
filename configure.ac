@@ -39,7 +39,7 @@ https://github.com/abinit/abiconfig.
 # Initialize Autoconf
 AC_PREREQ(2.59)
 AC_INIT([ABINIT],
-    [m4_esyscmd([config/gnu/git-version-gen .tarball-version])],
+    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
     [https://bugs.launchpad.net/abinit/],
     [abinit])
 AC_REVISION([Autotools support for ABINIT 9])

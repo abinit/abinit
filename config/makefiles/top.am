@@ -171,7 +171,7 @@ binary_package_lite:
 
 dist-hook:
 	echo $(VERSION) > $(distdir)/.tarball-version
-	(GITGEN_VERSION=`(cd @top_srcdir@ && ./config/gnu/git-version-gen\
+	(GITGEN_VERSION=`(cd @top_srcdir@ && ./config/scripts/git-version-gen\
                 .tarball-version)` ; \
 	 test "x$(VERSION)" = "x$${GITGEN_VERSION}" || \
          ((echo "Stale version;"; echo $(VERSION); echo "$${GITGEN_VERSION}"; \

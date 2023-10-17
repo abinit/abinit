@@ -26,7 +26,7 @@
 # Initialize Autoconf
 AC_PREREQ(2.62)
 AC_INIT([ABINIT-Documentation],
-    [m4_esyscmd([config/gnu/git-version-gen .tarball-version])],
+    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
     [https://bugs.launchpad.net/abinit/],
     [abinit-doc])
 AC_REVISION([Autotools support for the ABINIT Documentation])
