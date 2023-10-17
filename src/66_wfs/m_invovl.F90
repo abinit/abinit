@@ -69,6 +69,9 @@ MODULE m_invovl
  public :: apply_invovl
  public :: destroy_invovl
 
+ ! Those routines are here to assess memory requirements
+ public :: invovl_ompgpu_work_mem
+ public :: invovl_ompgpu_static_mem
 !!***
 
 !!****t* m_invovl/invovl_kpt_type
@@ -1190,6 +1193,51 @@ subroutine apply_block(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 end subroutine apply_block
 !!***
+
+ function invovl_ompgpu_work_mem(ham, ndat) result(req_mem)
+   implicit none
+
+   type(gs_hamiltonian_type), intent(in) :: ham
+   integer, intent(in) :: ndat
+   integer :: nprojs, cplx, itypat
+   integer(kind=c_size_t) :: req_mem
+
+   nprojs = 0
+   do itypat=1,ham%ntypat
+     nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
+   end do
+   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+
+   req_mem = 0
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! proj
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! sm1proj
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! PtPsm1proj
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! resid (solve_inner)
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! precondresid (solve_inner)
+
+ end function invovl_ompgpu_work_mem
+
+ function invovl_ompgpu_static_mem(ham) result(req_mem)
+   implicit none
+
+   type(gs_hamiltonian_type), intent(in) :: ham
+   integer :: nprojs, cplx, itypat
+   integer(kind=c_size_t) :: req_mem
+
+   nprojs = 0
+   do itypat=1,ham%ntypat
+     nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
+   end do
+   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+
+   req_mem = 0
+   req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(nprojs, c_size_t)                       ! gram_projs
+   req_mem = req_mem + dp * cplx * int(ham%lmnmax, c_size_t) * &
+   &         int(ham%lmnmax, c_size_t) * int(ham%ntypat, c_size_t)  ! inv_sij
+   req_mem = req_mem + dp * cplx * int(ham%lmnmax, c_size_t) * &
+   &         int(ham%lmnmax, c_size_t) * int(ham%ntypat, c_size_t)  ! inv_s_approx
+
+ end function invovl_ompgpu_static_mem
 
 #ifdef HAVE_OPENMP_OFFLOAD
 !*******************************************************************************************************************************!

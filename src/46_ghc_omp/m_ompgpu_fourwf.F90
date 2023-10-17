@@ -62,7 +62,22 @@ real(dp),allocatable,target :: work_gpu(:,:,:,:)
  public :: ompgpu_fourwf
  public :: alloc_ompgpu_fourwf
  public :: free_ompgpu_fourwf
+
+ ! This routine is here to assess memory requirements
+ public :: ompgpu_fourwf_work_mem
 contains
+
+function ompgpu_fourwf_work_mem(ngfft, ndat) result(req_mem)
+
+ implicit none
+
+ integer, intent(in) :: ngfft(:), ndat
+ integer(kind=c_size_t) :: req_mem
+
+ req_mem = 2 * dp * int(ngfft(1), c_size_t) * int(ngfft(2), c_size_t) * &
+ &         int(ngfft(3), c_size_t) * int(ndat, c_size_t)
+
+end function ompgpu_fourwf_work_mem
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA

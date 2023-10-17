@@ -54,6 +54,11 @@ module m_chebfiwf
  use m_xg
  use m_xgTransposer
 
+ !FIXME Keep those in these modules or moves them together ?
+ use m_invovl,             only : invovl_ompgpu_static_mem,invovl_ompgpu_work_mem
+ use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_static_mem
+ use m_getghc_ompgpu,      only : getghc_ompgpu_work_mem
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
@@ -104,11 +109,47 @@ module m_chebfiwf
  integer, parameter :: DEBUG_ROWS = 5
  integer, parameter :: DEBUG_COLUMNS = 5
 
+ public :: chebfiwf2_blocksize
  public :: chebfiwf2
 
  CONTAINS  !========================================================================================
 !!***
 
+subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb)
+   implicit none
+
+   integer,intent(in) :: ndat,npw,nband,nspinor,paral_kgb
+   type(gs_hamiltonian_type),intent(in) :: gs_hamk
+
+   integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem
+   integer  :: icplx,space
+   real(dp) :: localMem,chebfiMem(2)
+
+! *********************************************************************
+
+   if ( gs_hamk%istwf_k == 2 ) then ! Real only
+     space = SPACE_CR
+     icplx = 2
+   else ! complex
+     space = SPACE_C
+     icplx = 1
+   end if
+
+   chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,ndat)
+   localMem = (npw+2*npw*nspinor+2*nband)*kind(1.d0) !blockdim
+   print*,"Memory requirements of chebfiwf per MPI task (OpenMP GPU)"
+   print*,"---------------------------------------------------------"
+   print*,"Static buffers, computed once and permanently on card :"
+   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (make_gemm_nonlop) : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
+   print'(A)',"Work buffers, temporary, bandpp sized  :"
+   write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",          chebfiMem(2)/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", (nonlop_smem+invovl_smem+getghc_wmem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem)/(1024*1024), "MiB"
+ end subroutine chebfiwf2_blocksize
 !!****f* m_chebfiwf/chebfiwf2
 !! NAME
 !! chebfiwf2
