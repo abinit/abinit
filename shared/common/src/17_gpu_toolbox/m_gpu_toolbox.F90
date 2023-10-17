@@ -113,6 +113,12 @@ module m_gpu_toolbox
       integer(kind=C_INT32_T), intent(inout) :: deviceId
     end subroutine gpu_get_device
 
+    subroutine gpu_get_free_mem(free_mem) bind(c, name='gpu_get_free_mem_cpp')
+      use, intrinsic :: iso_c_binding
+      implicit none
+      integer(kind=C_SIZE_T), intent(inout) :: free_mem
+    end subroutine gpu_get_free_mem
+
     subroutine gpu_data_prefetch_async_f(dev_ptr, count, deviceId) bind(c, name='gpu_data_prefetch_async_cpp')
       use, intrinsic :: iso_c_binding
       implicit none
