@@ -5170,6 +5170,26 @@ it is inverted.
 ),
 
 Variable(
+    abivarname="gemm_nonlop_split_size",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="GEMM variant of the application of NON-Local OPerator split size.",
+    characteristics=['[[DEVELOP]]'],
+    commentdefault="because it is not usually worth using it unless bandpp is large, in which case code should fallback to it.",
+    added_in_version="9.11.4",
+    text=r"""
+This variables forces the distribution of GEMM of the application of NON-Local OPerator.
+It exists mostly for testing purposes.
+In normal circumstances, distribution is only needed on large use cases to address the high memory needs of GEMM variant.
+Therefore ABINIT should use the "distributed mode" automatically when needed.
+Irrelevant when use_gemm_nonlop=0.
+""",
+),
+
+Variable(
     abivarname="genafm",
     varset="geo",
     vartype="real",
