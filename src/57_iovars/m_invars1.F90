@@ -651,6 +651,13 @@ end do
  end do
 
 
+ dtsets(:)%gemm_nonlop_split_size=1
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gemm_nonlop_split_size',tread,'INT')
+    if(tread==1)dtsets(idtset)%gemm_nonlop_split_size=intarr(1)
+ end do
+
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
 
