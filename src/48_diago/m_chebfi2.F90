@@ -599,8 +599,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
    call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
-   call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
-   call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
+   chebfi%xgTransposerAX%state = STATE_COLSROWS
+   chebfi%xgTransposerBX%state = STATE_COLSROWS
    ABI_NVTX_END_RANGE()
  else
    call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, 1, spacedim, neigenpairs)   !use xXColsRows instead of X notion
