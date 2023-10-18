@@ -462,7 +462,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  real(dp) :: atom_projs(2, ham%npw_k, ham%lmnmax)
  real(dp) :: temp(ham%npw_k)
  complex(dpc), allocatable :: work(:)
- real(dp), allocatable :: projs(:,:,:)
+ real(dp), allocatable,target :: projs(:,:,:)
  real(dp), allocatable :: gram_proj(:,:,:)
  integer, allocatable :: ipiv(:)
 
@@ -665,21 +665,39 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
  ABI_MALLOC(invovl%gram_projs, (cplx,invovl%nprojs,array_nprojs_pp(mpi_enreg%me_fft+1)))
  shift = 0
- do iproc = 1, mpi_enreg%nproc_fft
-   ! compute local contribution to slice iproc of gram_projs
-   slice_size = array_nprojs_pp(iproc)
-   ABI_MALLOC(gramwork, (cplx,invovl%nprojs,slice_size))
-   call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, projs(:,:,1), (3-cplx)*ham%npw_k, &
-&                      projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
-   shift = shift + slice_size
-   ! reduce on proc i
-   call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
-   if(iproc == mpi_enreg%me_fft+1) then
-     invovl%gram_projs = gramwork
-   end if
-   ABI_FREE(gramwork)
- end do
- call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
+ if (ham%use_gpu_impl==ABI_GPU_OPENMP .and. mpi_enreg%nproc_fft==1) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
+   slice_size = array_nprojs_pp(1)
+   !$OMP TARGET ENTER DATA MAP(alloc:invovl%gram_projs)
+   !$OMP TARGET ENTER DATA MAP(to:projs)
+
+   !$OMP TARGET DATA USE_DEVICE_PTR(invovl%gram_projs,projs)
+   call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, &
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl%gram_projs), invovl%nprojs)
+   !$OMP END TARGET DATA
+   !$OMP TARGET EXIT DATA MAP(from:invovl%gram_projs)
+   !$OMP TARGET EXIT DATA MAP(release:projs)
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
+#endif
+ else
+   do iproc = 1, mpi_enreg%nproc_fft
+     ! compute local contribution to slice iproc of gram_projs
+     slice_size = array_nprojs_pp(iproc)
+     ABI_MALLOC(gramwork, (cplx,invovl%nprojs,slice_size))
+     call abi_xgemm(blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, projs(:,:,1), (3-cplx)*ham%npw_k, &
+     &                   projs(:, :, shift+1), (3-cplx)*ham%npw_k, czero, gramwork(:,:,1), invovl%nprojs,x_cplx=cplx)
+     shift = shift + slice_size
+     ! reduce on proc i
+     call xmpi_sum_master(gramwork, iproc-1, mpi_enreg%comm_fft, ierr)
+     if(iproc == mpi_enreg%me_fft+1) then
+       invovl%gram_projs = gramwork
+     end if
+     ABI_FREE(gramwork)
+   end do
+   call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
+ end if
 
  call timab(timer_mkinvovl_build_ptp, 2, tsec)
  call timab(timer_mkinvovl,2,tsec)
