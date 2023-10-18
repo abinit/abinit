@@ -203,6 +203,7 @@ type, public :: dataset_type
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
+ integer :: gemm_nonlop_split_size = 1
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
@@ -1573,6 +1574,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
  dtout%ga_n_rules         = dtin%ga_n_rules
+ dtout%gemm_nonlop_split_size = dtin%gemm_nonlop_split_size
  dtout%getbseig           = dtin%getbseig
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
@@ -3353,7 +3355,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' gemm_nonlop_split_size genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
