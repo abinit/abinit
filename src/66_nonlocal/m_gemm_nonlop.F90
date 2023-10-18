@@ -111,6 +111,13 @@ module m_gemm_nonlop
  ! Public variable indicating whether we should gemm_nonlop operated in a distributed manner. Set to false by default
  ! but might be enabled by memory constraints or forced by user through parameters.
 
+ integer, save, public :: gemm_nonlop_nblocks = 1
+ ! Public variable indicating in how many blocks of MPI tasks should the projs arrays be ditributed.
+ ! Default size 1 indicates no distribution at all.
+
+ integer, save, public :: gemm_nonlop_block_comm = xmpi_comm_null
+ ! MPI communicator for MPI tasks processing the same gemm_nonlop block for projs array distribution
+
 contains
 
 !----------------------------------------------------------------------
@@ -256,8 +263,8 @@ contains
   logical :: parity,my_compute_grad_strain,my_compute_grad_atom
   real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
   real(dp),pointer :: kpg(:,:)
-  integer :: rank, nprocs
-  integer :: nprojs_blk, iproj, nprojs_last_blk, nprojs_my_blk
+  integer :: rank, nprocs, ierr
+  integer :: nprojs_blk, nprojs_last_blk, nprojs_my_blk
   integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
   logical :: is_last_rank
   real(dp),allocatable :: dprojs_tmp(:,:,:),dprojs_r_tmp(:,:,:),dprojs_i_tmp(:,:,:)
@@ -294,7 +301,16 @@ contains
   if (nprojs>0) gemm_nonlop_kpt(ikpt)%nprojs = nprojs
   if (ngrads>0) gemm_nonlop_kpt(ikpt)%ngrads = ngrads
 
-  rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
+  if(gemm_nonlop_is_distributed) then
+    rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
+    is_last_rank = (rank==nprocs-1)
+    if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
+    if(gemm_nonlop_nblocks==1) gemm_nonlop_nblocks=nprocs
+    write(std_out,*) "Splitting on ", gemm_nonlop_nblocks
+    call xmpi_comm_split(xmpi_world, rank/(nprocs/gemm_nonlop_nblocks), rank, gemm_nonlop_block_comm, ierr)
+    if(ierr/=0) ABI_BUG("Bug split!")
+  end if
+  rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
   is_last_rank = (rank==nprocs-1)
 
   if(gemm_nonlop_is_distributed) then
@@ -678,8 +694,8 @@ contains
      end if
 
      if(iblock < nprocs) then
-       call xmpi_isend(projs_local,rank_prev,iblock,xmpi_world,req(1),ierr)
-       call xmpi_irecv(projs_recv,rank_next,iblock,xmpi_world,req(2),ierr)
+       call xmpi_isend(projs_local,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call xmpi_irecv(projs_recv,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
      end if
 
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
@@ -750,8 +766,8 @@ contains
      end if
 
      if(iblock < nprocs) then
-       call xmpi_isend(projs_local,rank_prev,iblock,xmpi_world,req(1),ierr)
-       call xmpi_irecv(projs_recv,rank_next,iblock,xmpi_world,req(2),ierr)
+       call xmpi_isend(projs_local,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call xmpi_irecv(projs_recv,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
      end if
 
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
@@ -888,7 +904,7 @@ contains
   nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
 
   if(gemm_nonlop_is_distributed) then
-    rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
+    rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
     is_last = (rank==nprocs-1)
     if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_last_blk
   end if
