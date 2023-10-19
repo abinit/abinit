@@ -1085,7 +1085,7 @@ end subroutine mpi_setup
  logical :: dtset_found,file_found,first_bpp,iam_master
  logical :: with_image,with_pert,with_kpt,with_spinor,with_fft,with_band,with_bandpp,with_thread
  real(dp):: acc_c,acc_k,acc_kgb,acc_kgb_0,acc_s,ecut_eff,eff,ucvol,weight0
- character(len=9) :: suffix
+ character(len=10) :: suffix
  character(len=20) :: strg
  character(len=500) :: msg,msgttl
  character(len=fnlen) :: filden
@@ -1290,39 +1290,47 @@ end subroutine mpi_setup
    ! In case of a restart from a density file, it has to be
    ! compatible with the FFT grid used for the density
    n2=dtset%ngfft(2) ; n3=dtset%ngfft(3)
-   if (n2==0.and.n3==0.and.(dtset%getden/=0.or.dtset%irdden/=0.or.dtset%iscf<0)) then
-     dtset_found=.false.;file_found=.false.
-     !1-Try to find ngfft from previous dataset
-     if (dtset%getden/=0) then
-       do ii=1,ndtset_alloc
-         jj=dtset%getden;if (jj<0) jj=dtset%jdtset+jj
-         if (dtsets(ii)%jdtset==jj) then
-           dtset_found=.true.
-           n2=dtsets(ii)%ngfftdg(2);n3=dtsets(ii)%ngfftdg(3)
-         end if
-       end do
-     end if
-     !2-If not found, try to extract ngfft from density file
-     if (.not.dtset_found) then
-       !Retrieve file name
-       suffix='_DEN';if (dtset%nimage>1) suffix='_IMG1_DEN'
-       ABI_MALLOC(jdtset_,(0:ndtset_alloc))
-       jdtset_=0;if(ndtset_alloc/=0) jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
-       call mkfilename(filnam,filden,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset_alloc,suffix,'den',ii)
-       ABI_FREE(jdtset_)
-       !Retrieve ngfft from file header
-       idum3=0
-       if (mpi_enreg%me==0) then
-         inquire(file=trim(filden),exist=file_found)
-         if (file_found) then
-           call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
-           idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
-           call hdr0%free()
-           ABI_WARNING("Cannot find filden"//filden)
-         end if
+   if (n2==0.and.n3==0) then
+     if (dtset%getden/=0.or.dtset%irdden/=0.or.&
+&        dtset%getkden/=0.or.dtset%irdkden/=0.or.dtset%iscf<0) then
+       dtset_found=.false.;file_found=.false.
+       !1-Try to find ngfft from previous dataset
+       if (dtset%getden/=0.or.dtset%getkden/=0) then
+         do ii=1,ndtset_alloc
+           jj=dtset%getden;if (jj==0) jj=dtset%getkden
+           if (jj<0) jj=dtset%jdtset+jj
+           if (dtsets(ii)%jdtset==jj) then
+             dtset_found=.true.
+             n2=dtsets(ii)%ngfftdg(2);n3=dtsets(ii)%ngfftdg(3)
+           end if
+         end do
        end if
-       call xmpi_bcast(idum3,0,mpi_enreg%comm_world,ii)
-       n2=idum3(1);n3=idum3(2);file_found=(idum3(3)/=0)
+       !2-If not found, try to extract ngfft from density file
+       if (.not.dtset_found) then
+         !Retrieve file name
+         if (dtset%getden/=0.or.dtset%irdden/=0) then
+           suffix='_DEN';if (dtset%nimage>1) suffix='_IMG1_DEN'
+         else if (dtset%getkden/=0.or.dtset%irdkden/=0) then
+           suffix='_KDEN';if (dtset%nimage>1) suffix='_IMG1_KDEN'
+         end if
+         ABI_MALLOC(jdtset_,(0:ndtset_alloc))
+         jdtset_=0;if(ndtset_alloc/=0) jdtset_(0:ndtset_alloc)=dtsets(0:ndtset_alloc)%jdtset
+         call mkfilename(filnam,filden,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset_alloc,suffix,'den',ii)
+         ABI_FREE(jdtset_)
+         !Retrieve ngfft from file header
+         idum3=0
+         if (mpi_enreg%me==0) then
+           inquire(file=trim(filden),exist=file_found)
+           if (file_found) then
+             call hdr_read_from_fname(hdr0,filden,ii,xmpi_comm_self)
+             idum3(1:2)=hdr0%ngfft(2:3);if (file_found) idum3(3)=1
+             call hdr0%free()
+             ABI_WARNING("Cannot find filden "//filden)
+           end if
+         end if
+         call xmpi_bcast(idum3,0,mpi_enreg%comm_world,ii)
+         n2=idum3(1);n3=idum3(2);file_found=(idum3(3)/=0)
+       end if
      end if
    end if
 

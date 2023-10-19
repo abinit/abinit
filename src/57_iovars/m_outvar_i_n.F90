@@ -397,6 +397,11 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%irdhaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdhaydock','INT',0)
 
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%irdkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdkden','INT',0)
+ end if
+
  intarr(1,:)=dtsets(:)%irdpawden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'irdpawden','INT',0)
 
