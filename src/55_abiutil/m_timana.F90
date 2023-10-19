@@ -1988,14 +1988,31 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if
      end do
 
+     nlist=6
+     list(:nlist)=(/1661,1764,1765,1766,1767,1768/)
+     flag_write=1
+     do ilist=1,nlist
+       isort = list(ilist)
+       if(ncount(isort)/=0)then
+         if(flag_write==1)then
+           write(ount, '(/,a)' ) ' Additional information about segments I want to see'
+           flag_write=0
+         end if
+         times(2,isort)=times(2,isort)+tol14
+         write(ount,format01040)names(isort),&
+           times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+       end if
+     end do
+
 !    The detailed analysis cannot be done in the multidataset mode
      if(ndtset<2)then
        write(ount, '(/,/,a,/,a,/,a)' ) &
         ' Detailed analysis of some time consuming routines ',&
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
-       nlist=14
-       list(:nlist)=(/802,803,9,75,76,77,210,11,1661,1764,1765,1766,1767,1768/)
+       nlist=8
+       list(:nlist)=(/802,803,9,75,76,77,210,11/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then
