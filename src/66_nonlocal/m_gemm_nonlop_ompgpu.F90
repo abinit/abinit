@@ -55,6 +55,10 @@ module m_gemm_nonlop_ompgpu
  use m_kg, only : mkkpg
  use m_gemm_nonlop
 
+#if defined HAVE_MPI2
+ use mpi
+#endif
+
  implicit none
 
  private
@@ -549,6 +553,8 @@ contains
    !Local variables
    integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next,idat
    real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
+   real(dp), ABI_CONTIGUOUS pointer :: recv_buf_f(:), work_buf_f(:)
+
 
 ! *************************************************************************
 
@@ -557,6 +563,7 @@ contains
    if(rank_prev == -1) rank_prev = nprocs - 1
    do iblock=1,nprocs
 
+     call xmpi_barrier(gemm_nonlop_block_comm)
      if(rank+iblock == nprocs) then
        nprojs_cur_blk = nprojs_last_blk
      else
@@ -571,10 +578,21 @@ contains
        recv_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
      end if
 
-     call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-     call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+     if(.false.) then
+       call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
 
-     !$OMP TARGET UPDATE TO(work_buf)
+       !$OMP TARGET UPDATE TO(work_buf)
+     else
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+       call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwin*nprojs_last_blk])
+       call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwin*nprojs_last_blk])
+       call MPI_ISEND(work_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
+       &    rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call MPI_IRECV(recv_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
+       &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+       !$OMP END TARGET DATA
+     end if
 
 
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
@@ -596,10 +614,17 @@ contains
 
      call xmpi_waitall(req,ierr)
 
+     call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
-     call DCOPY(cplex*npwin*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+     if(.false.) then
+       call DCOPY(cplex*npwin*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+     else
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+       call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwin*nprojs_last_blk*dp)
+       !$OMP END TARGET DATA
+     end if
    end if
  end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla
 !!***
@@ -629,6 +654,7 @@ contains
    integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
    complex(dpc) :: beta
    real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
+   real(dp), ABI_CONTIGUOUS pointer :: recv_buf_f(:), work_buf_f(:)
 
 ! *************************************************************************
 
@@ -640,6 +666,7 @@ contains
 
    do iblock=1,nprocs
 
+     call xmpi_barrier(gemm_nonlop_block_comm)
      if(rank+iblock == nprocs) then
        nprojs_cur_blk = nprojs_last_blk
      else
@@ -654,10 +681,21 @@ contains
        recv_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
      end if
 
-     call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-     call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+     if(.false.) then
+       call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
 
-     !$OMP TARGET UPDATE TO(work_buf)
+       !$OMP TARGET UPDATE TO(work_buf)
+     else
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+       call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwout*nprojs_last_blk])
+       call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwout*nprojs_last_blk])
+       call MPI_ISEND(work_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
+       &    rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
+       call MPI_IRECV(recv_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
+       &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+       !$OMP END TARGET DATA
+     end if
 
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
      iend = ibeg+nprojs_cur_blk-1
@@ -680,10 +718,17 @@ contains
 
      call xmpi_waitall(req,ierr)
 
+     call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
-     call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+     if(.false.) then
+       call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+     else
+       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
+       call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwout*nprojs_last_blk*dp)
+       !$OMP END TARGET DATA
+     end if
    end if
 
  end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb
