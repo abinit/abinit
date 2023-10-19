@@ -39,6 +39,7 @@ module m_gemm_nonlop_ompgpu
  use m_xmpi
  use m_xomp
  use m_abi_linalg
+ use m_nvtx
 
 #ifdef HAVE_FC_ISO_C_BINDING
  use iso_c_binding
@@ -566,6 +567,7 @@ contains
 
 ! *************************************************************************
 
+   call nvtxStartRange("opernla", 9)
    rank_next=modulo(rank + 1,nprocs)
    rank_prev=rank - 1
    if(rank_prev == -1) rank_prev = nprocs - 1
@@ -588,14 +590,19 @@ contains
 
 #ifndef HAVE_GPU_MPI
 
+       call nvtxstartrange("mpi_isend/recv", 2)
        ! GPU-aware MPI not available : perform MPI comms on CPU
        call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
        call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+       call nvtxEndRange()
+       call nvtxStartRange("gpu_copy", 3)
        !$OMP TARGET UPDATE TO(work_buf)
+       call nvtxEndRange()
 
 #else
 
        ! GPU-aware MPI available : pass GPU buffers to MPI
+       call nvtxstartrange("mpi_isend/recv", 2)
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
        call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwin*nprojs_last_blk])
        call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwin*nprojs_last_blk])
@@ -605,8 +612,10 @@ contains
        &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
        !$OMP END TARGET DATA
 
+       call nvtxEndRange()
 #endif
 
+     call nvtxStartRange("gemm", 4)
 
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
      iend = ibeg+nprojs_cur_blk-1
@@ -624,21 +633,29 @@ contains
        &          work_buf, npwin, &
        &          vectin, npwin, real(beta), cprojs(:,ibeg:iend,:), nprojs_cur_blk)
      end if
+     call nvtxEndRange()
 
+     call nvtxStartRange("mpi_wait_all", 5)
      call xmpi_waitall(req,ierr)
+     call nvtxEndRange()
 
      call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
 #ifndef HAVE_GPU_MPI
+       call nvtxStartRange("cpu_copy", 1)
        call DCOPY(cplex*npwin*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+       call nvtxEndRange()
 #else
+       call nvtxStartRange("gpu_copy", 1)
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
        call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwin*nprojs_last_blk*dp)
        !$OMP END TARGET DATA
+       call nvtxEndRange()
 #endif
    end if
+   call nvtxEndRange()
  end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla
 !!***
 
@@ -671,6 +688,7 @@ contains
 
 ! *************************************************************************
 
+   call nvtxStartRange("opernlb", 8)
    rank_next=modulo(rank + 1,nprocs)
    rank_prev=rank - 1
    if(rank_prev == -1) rank_prev = nprocs - 1
@@ -696,13 +714,18 @@ contains
 
 #ifndef HAVE_GPU_MPI
 
+       call nvtxStartRange("mpi_isend/recv", 2)
        ! GPU-aware MPI not available : perform MPI comms on CPU
        call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
        call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
+       call nvtxEndRange()
+       call nvtxStartRange("gpu_copy", 3)
        !$OMP TARGET UPDATE TO(work_buf)
+       call nvtxEndRange()
 
 #else
 
+       call nvtxStartRange("mpi_isend/recv", 2)
        ! GPU-aware MPI available : pass GPU buffers to MPI
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
        call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwout*nprojs_last_blk])
@@ -712,9 +735,11 @@ contains
        call MPI_IRECV(recv_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
        &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
        !$OMP END TARGET DATA
+       call nvtxEndRange()
 
 #endif
 
+     call nvtxStartRange("gemm", 4)
      ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
      iend = ibeg+nprojs_cur_blk-1
      if(cplex==2) then
@@ -733,22 +758,30 @@ contains
      end if
 
      beta = cone
+     call nvtxEndRange()
 
+     call nvtxStartRange("mpi_wait_all", 5)
      call xmpi_waitall(req,ierr)
+     call nvtxEndRange()
 
      call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
 #ifndef HAVE_GPU_MPI
+       call nvtxStartRange("cpu_copy", 1)
        call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
+       call nvtxEndRange()
 #else
+       call nvtxStartRange("gpu_copy", 1)
        !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
        call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwout*nprojs_last_blk*dp)
        !$OMP END TARGET DATA
+       call nvtxEndRange()
 #endif
    end if
 
+   call nvtxEndRange()
  end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb
 !!***
 
