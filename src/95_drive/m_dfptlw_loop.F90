@@ -198,7 +198,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !scalars
  integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,mcg1_mq,me,mpsang
+ integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,me,mpsang
  integer :: mpw1, mpw1_mq
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
@@ -254,7 +254,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Special treatment for timdisp calculations at finite q
  finite_q=.false.
- if (sum(dtset%qptn(:)**2)>tol6) finite_q=.true.
+ if (sum(dtset%qptn(:)**2)>tol8) finite_q=.true.
 
 !Various initializations
  cplex = 2 - timrev
@@ -266,37 +266,42 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  opthartdqdq=1
 
  !Initialize k+q (and k-q) array
- ABI_MALLOC(kpq,(3,dtset%nkpt))
- do ikpt=1,dtset%nkpt
-   kpq(:,ikpt)=dtset%qptn(:)+dtset%kptns(:,ikpt)
- end do
- if (.not.kramers_deg) then
-   ABI_MALLOC(kmq,(3,dtset%nkpt))
-   do ikpt=1,nkpt
-     kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt) 
+ if (finite_q) then
+   ABI_MALLOC(kpq,(3,dtset%nkpt))
+   do ikpt=1,dtset%nkpt
+     kpq(:,ikpt)=dtset%qptn(:)+dtset%kptns(:,ikpt)
    end do
- end if
+   if (.not.kramers_deg) then
+     ABI_MALLOC(kmq,(3,dtset%nkpt))
+     do ikpt=1,nkpt
+       kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt) 
+     end do
+   end if
 
- !Compute maximum number of planewaves at k+q (and k-q)
- call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kpq,mpi_enreg,mpw1,dtset%nkpt)
- mcg1=mpw1*nspinor*mband*mk1mem*nsppol
- if (.not.kramers_deg) then
-   call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kmq,mpi_enreg,mpw1_mq,dtset%nkpt)
-   !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
-   mpw1=max(mpw1,mpw1_mq)
-   mpw1_mq=mpw1
-   mcg1_mq=mpw1_mq*nspinor*mband*mk1mem*nsppol
+   !Compute maximum number of planewaves at k+q (and k-q)
+   call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kpq,mpi_enreg,mpw1,dtset%nkpt)
+   ABI_FREE(kpq)
+   if (.not.kramers_deg) then
+     call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kmq,mpi_enreg,mpw1_mq,dtset%nkpt)
+     !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
+     mpw1=max(mpw1,mpw1_mq)
+     mpw1_mq=mpw1
+     ABI_FREE(kmq)
+   else
+     mpw1_mq=0
+   end if
  else
-   mpw1_mq=0
+   mpw1=mpw
  end if
+ mcg1=mpw1*nspinor*mband*mk1mem*nsppol
   
  ABI_MALLOC(cg1,(2,mcg1))
  ABI_MALLOC(cg2,(2,mcg1))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  if (.not.kramers_deg) then
-   ABI_MALLOC(cg1_mq,(2,mcg1_mq))
-   ABI_MALLOC(cg2_mq,(2,mcg1_mq))
+   ABI_MALLOC(cg1_mq,(2,mcg1))
+   ABI_MALLOC(cg2_mq,(2,mcg1))
    ABI_MALLOC(eigen1_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
    ABI_MALLOC(eigen2_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
@@ -391,6 +396,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        if (.not.kramers_deg) then
          pert1case_mq=pert1case_mq+(2*dtset%natom+11)*3
          call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
+
+         call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
+         & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+         & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+         & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+         & dtset%nsppol,dtset%nsym,&
+         & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+         & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i_mq,wvl)
+  
+         if (ireadwf==1) then
+           call WffClose (wff1,ierr)
+         end if
        end if 
 
        if (.not.just_timdisp) then 
@@ -451,6 +468,18 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              if (.not.kramers_deg) then
                pert2case_mq=pert2case_mq+(2*dtset%natom+11)*3
                call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
+
+               call inwffil(ask_accurate,cg2_mq,dtset,dtset%ecut,ecut_eff,eigen2_mq,dtset%exchn2n3d,&
+               & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+               & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
+               & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+               & dtset%nsppol,dtset%nsym,&
+               & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+               & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i_mq,wvl)
+ 
+               if (ireadwf==1) then
+                 call WffClose (wff2,ierr)
+               end if
              end if 
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
@@ -789,7 +818,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !More memory cleaning
  call gs_hamkq%free()
 
- ABI_FREE(kpq)
  ABI_FREE(cg1)
  ABI_FREE(cg2)
  ABI_FREE(eigen1)
@@ -813,7 +841,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    ABI_FREE(cg2_mq)
    ABI_FREE(eigen1_mq)
    ABI_FREE(eigen2_mq)
-   ABI_FREE(kmq)
  end if
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
