@@ -41,7 +41,7 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
- use m_kg,          only : getcut,getph
+ use m_kg,          only : getcut,getph,getmpw
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -198,13 +198,14 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !scalars
  integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
- integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
+ integer :: idq,ierr,ii,ikpt,ireadwf,istr,itypat,mcg1,mcg1_mq,me,mpsang
+ integer :: mpw1, mpw1_mq
  integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  integer :: pert1case_mq,pert2case_mq
  real(dp) :: boxcut,delad,delag,delbd,delbg,ecut,ecut_eff,gsqcut   
- logical :: kramers_deg,samepert
+ logical :: finite_q,kramers_deg,samepert
  character(len=500) :: message
  character(len=fnlen) :: fiden1i,fiwf1i,fiwf2i,fiwfddk,fiwfdkdk
  character(len=fnlen) :: fiwf1i_mq,fiwf2i_mq
@@ -220,6 +221,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:)
  real(dp),allocatable :: eigen1(:),eigen2(:)
  real(dp),allocatable :: eigen1_mq(:),eigen2_mq(:)
+ real(dp),allocatable :: kpq(:,:),kmq(:,:)
  real(dp),allocatable :: nhat1(:,:),ph1d(:,:)
  real(dp),allocatable :: rho1g1(:,:),rho1r1(:,:)
  real(dp),allocatable :: rho2g1(:,:),rho2r1(:,:)
@@ -250,6 +252,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    timrev = 0
  end if
 
+!Special treatment for timdisp calculations at finite q
+ finite_q=.false.
+ if (sum(dtset%qptn(:)**2)>tol6) finite_q=.true.
+
 !Various initializations
  cplex = 2 - timrev
  nspden = dtset%nspden
@@ -259,17 +265,41 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  optorth=1;if (psps%usepaw==1) optorth=0
  opthartdqdq=1
 
+ !Initialize k+q (and k-q) array
+ ABI_MALLOC(kpq,(3,dtset%nkpt))
+ do ikpt=1,dtset%nkpt
+   kpq(:,ikpt)=dtset%qptn(:)+dtset%kptns(:,ikpt)
+ end do
+ if (.not.kramers_deg) then
+   ABI_MALLOC(kmq,(3,dtset%nkpt))
+   do ikpt=1,nkpt
+     kmq(:,ikpt)=-dtset%qptn(:)+dtset%kptns(:,ikpt) 
+   end do
+ end if
 
- ABI_MALLOC(cg1,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
- ABI_MALLOC(cg2,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
-! if (.not.kramers_deg) then
-!   ABI_MALLOC(cg1_mq,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
-!   ABI_MALLOC(cg2_mq,(2,dtset%mpw*dtset%nspinor*mband*dtset%mk1mem*dtset%nsppol))
-!   ABI_MALLOC(eigen1_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
-!   ABI_MALLOC(eigen2_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
-! end if
+ !Compute maximum number of planewaves at k+q (and k-q)
+ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kpq,mpi_enreg,mpw1,dtset%nkpt)
+ mcg1=mpw1*nspinor*mband*mk1mem*nsppol
+ if (.not.kramers_deg) then
+   call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kmq,mpi_enreg,mpw1_mq,dtset%nkpt)
+   !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
+   mpw1=max(mpw1,mpw1_mq)
+   mpw1_mq=mpw1
+   mcg1_mq=mpw1_mq*nspinor*mband*mk1mem*nsppol
+ else
+   mpw1_mq=0
+ end if
+  
+ ABI_MALLOC(cg1,(2,mcg1))
+ ABI_MALLOC(cg2,(2,mcg1))
  ABI_MALLOC(eigen1,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(eigen2,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ if (.not.kramers_deg) then
+   ABI_MALLOC(cg1_mq,(2,mcg1_mq))
+   ABI_MALLOC(cg2_mq,(2,mcg1_mq))
+   ABI_MALLOC(eigen1_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+   ABI_MALLOC(eigen2_mq,(2*dtset%mband*dtset%mband*dtset%nkpt*dtset%nsppol))
+ end if
  ABI_MALLOC(rho1r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho2r1,(cplex*nfftf,dtset%nspden))
  ABI_MALLOC(rho1g1,(2,nfftf))
@@ -330,7 +360,6 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
  nhat1=zero
 
- mcg=mpw*nspinor*mband*mkmem*nsppol
 
  pert1case = 0 ; pert2case = 0 ; pert3case = 0
  pert1case_mq = 0 ; pert2case_mq = 0 
@@ -349,21 +378,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
        & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-       & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+       & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
        & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
        & dtset%nsppol,dtset%nsym,&
        & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
        & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
 
-
        if (ireadwf==1) then
          call WffClose (wff1,ierr)
        end if
 
-!       if (.not.kramers_deg) then
-!         pert1case_mq=pert1case_mq+(2*dtset%natom+11)*3
-!         call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
-!       end if 
+       if (.not.kramers_deg) then
+         pert1case_mq=pert1case_mq+(2*dtset%natom+11)*3
+         call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
+       end if 
 
        if (.not.just_timdisp) then 
          call read_1eig(eigen1,formeig,mband,nkpt,nsppol,fiwf1i)
@@ -410,7 +438,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
              call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
              & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
-             & dtset%mband,mcg,dtset%mk1mem,mpi_enreg,mpw,&
+             & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
              & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
              & dtset%nsppol,dtset%nsym,&
              & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
@@ -420,10 +448,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                call WffClose (wff2,ierr)
              end if
 
-!             if (.not.kramers_deg) then
-!               pert2case_mq=pert2case_mq+(2*dtset%natom+11)*3
-!               call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
-!             end if 
+             if (.not.kramers_deg) then
+               pert2case_mq=pert2case_mq+(2*dtset%natom+11)*3
+               call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
+             end if 
 
              if (i1pert==i2pert.and.i1dir==i2dir) then
                samepert=.true.
@@ -648,7 +676,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      call dfptlw_pert(cg,cg1,cg2,cplex,d3etot,d3etot_t4,d3etot_t5,d3etot_tgeom,dimffnl,dtset, &
                      & eigen1,eigen2,ffnl,gmet,gs_hamkq,gsqcut,i1dir,&
                      & i2dir,i3dir,i1pert,i2pert,i3pert,kg,kxc,mband,mkmem,mk1mem,mpert,mpi_enreg,&
-                     & mpsang,mpw,natom,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
+                     & mpsang,mpw1,natom,n1dq,n2dq,nfftf,ngfftf,nkpt,nkxc,nspden,nspinor,nsppol,npwarr,nylmgr,occ,&
                      & pawfgr,psps,rho1g1,rho1r1,rho2r1,rmet,rprimd,samepert,ucvol,useylmgr,&
                      & vpsp1_i1pertdq,vpsp1_i1pertdqdq,vpsp1_i1pertdq_geom,vpsp1_i2pertdq,&
                      & ddk_f,d2_dkdk_f,d2_dkdk_f2,ylm,ylmgr)
@@ -732,7 +760,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      !Perform the Berry curvature part of the time-disperion 3dte calculation
                      call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
                      & i2dir,i3dir,i1pert,i2pert,i3pert,mband,mk1mem,mpert,mpi_enreg,&
-                     & mpw,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
+                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
                      & ucvol)
 
                    end if 
@@ -761,12 +789,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !More memory cleaning
  call gs_hamkq%free()
 
+ ABI_FREE(kpq)
  ABI_FREE(cg1)
  ABI_FREE(cg2)
-! if (.not.kramers_deg) then
-!   ABI_FREE(cg1_mq)
-!   ABI_FREE(cg2_mq)
-! end if
  ABI_FREE(eigen1)
  ABI_FREE(eigen2)
  ABI_FREE(rho1r1)
@@ -783,6 +808,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
   ABI_FREE(vxc1dqdq)
  end if
 
+ if (.not.kramers_deg) then
+   ABI_FREE(cg1_mq)
+   ABI_FREE(cg2_mq)
+   ABI_FREE(eigen1_mq)
+   ABI_FREE(eigen2_mq)
+   ABI_FREE(kmq)
+ end if
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
  if (d3e_pert2(natom+3)==1.or.d3e_pert2(natom+4)==1) then
