@@ -43,6 +43,10 @@ module m_xg
   use m_xomp
   use m_abi_linalg
 
+#if defined HAVE_MPI2
+ use mpi
+#endif
+
 #if defined(HAVE_GPU_CUDA)
   use m_gpu_toolbox
 #endif
@@ -1287,24 +1291,36 @@ contains
         if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
-        else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-          !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-          call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
         end if
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
         call nvtxStartRange("MPI_Sum",8) !FIXME Debug only, to be removed
 #endif
 
-        call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+        if (l_use_gpu_cuda/=ABI_GPU_OPENMP) then
+          call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+        else
+#ifdef HAVE_GPU_MPI
+          ! If GPU-aware MPI is available, perform reduction on GPU buffers
+#ifdef HAVE_GPU_CUDA
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          !$OMP END TARGET DATA
+#endif
+
+#else
+
+          ! With "regular" MPI, perform reduction by passing CPU buffers
+          call xgBlock_copy_from_gpu(xgBlockW)
+          call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+          call xgBlock_copy_to_gpu(xgBlockW)
+#endif
+        end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
         call nvtxEndRange() !FIXME Debug only, to be removed
 #endif
-        if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-          !Putting data back on GPU
-          !FIXME Again, this could be avoided using GPU-direct
-          call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
-        end if
       end if
 
     case(SPACE_C)
@@ -1329,15 +1345,29 @@ contains
         if (l_use_gpu_cuda==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
-        else if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-          !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-          call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
         end if
-        call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
-        if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
-          !Putting data back on GPU
-          !FIXME Again, this could be avoided using GPU-direct
-          call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+
+        if (l_use_gpu_cuda/=ABI_GPU_OPENMP) then
+          call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+        else
+#ifdef HAVE_GPU_MPI
+          ! If GPU-aware MPI is available, perform reduction on GPU buffers
+#ifdef HAVE_GPU_CUDA
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          !$OMP END TARGET DATA
+#endif
+
+#else
+
+          ! With "regular" MPI, perform reduction by passing CPU buffers
+          call xgBlock_copy_from_gpu(xgBlockW)
+          call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+          call xgBlock_copy_to_gpu(xgBlockW)
+
+#endif
         end if
       end if
 
