@@ -329,13 +329,17 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    d3e_dir3(3)=0
  end if
 
- !Local spin susceptibility
- if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
- if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
+ !Atomic displacements
+ if (dtset%d3e_pert1_phon==1) d3e_pert1(dtset%d3e_pert1_atpol(1):dtset%d3e_pert1_atpol(2))=1
+ if (dtset%d3e_pert2_phon==1) d3e_pert2(dtset%d3e_pert2_atpol(1):dtset%d3e_pert2_atpol(2))=1
 
- !Dielectric susceptibility
+ !Electric fields
  if (dtset%d3e_pert1_elfd/=0) d3e_pert1(natom+2)=1
  if (dtset%d3e_pert2_elfd/=0) d3e_pert2(natom+2)=1
+
+ !Local Zeemans
+ if (dtset%d3e_pert1_magn==2) d3e_pert1(natom+11+dtset%d3e_pert1_magat(1):natom+11+dtset%d3e_pert1_magat(2))=1
+ if (dtset%d3e_pert2_magn==2) d3e_pert2(natom+11+dtset%d3e_pert2_magat(1):natom+11+dtset%d3e_pert2_magat(2))=1
 
  perm(:)=0
  do i1pert = 1, mpert

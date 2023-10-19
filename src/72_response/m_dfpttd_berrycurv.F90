@@ -67,8 +67,6 @@ contains
 !!          if 2, COMPLEX
 !!  dtset <type(dataset_type)>=all input variables for this dataset
 !!  gsqcut=large sphere cut-off
-!!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
-!!  i1pert,i2pert,i3pert= type of perturbation that has to be computed
 !!  mband = maximum number of bands
 !!  mk1mem = maximum number of k points for first-order WF
 !!           which can fit in core memory
@@ -99,7 +97,7 @@ contains
 !!
 !! SOURCE
 
-subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,i1pert,i2pert,i3pert, &
+subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
  & mband,mk1mem,mpert,mpi_enreg,mpw,natom,nfft,ngfft,nkpt,nspden,nspinor,nsppol, & 
  & npwarr,occ,ucvol)
     
@@ -109,7 +107,7 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mk1mem,mpert,mpw
+ integer, intent(in) :: cplex,mband,mk1mem,mpert,mpw
  integer, intent(in) :: natom,nfft,nkpt,nspden,nspinor,nsppol
  real(dp),intent(in) :: gsqcut,ucvol
  type(dataset_type),intent(in) :: dtset
@@ -119,7 +117,7 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
  integer,intent(in) :: ngfft(18), npwarr(nkpt)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
- real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
+ real(dp),intent(out) :: d3etot_td(2)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
@@ -129,7 +127,7 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
  real(dp) :: doti,dotr,wtk_k                                    
  character(len=500) :: msg                   
 !arrays
- real(dp) :: d3etot_k(2),e3tot(2)
+ real(dp) :: d3etot_k(2)
  real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: occ_k(:)
  
@@ -137,17 +135,12 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 
  DBG_ENTER("COLL")
  
- write(msg,'(2a,3(a,i2,a,i1))') ch10,'TIMDISP : ',&
- ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
- call wrtout(std_out,msg,'COLL')
- call wrtout(ab_out,msg,'COLL')
-
 !Init parallelism
  spaceworld=mpi_enreg%comm_cell
  me=mpi_enreg%me_kpt 
 
 !Loop over spins
- e3tot=zero
+ d3etot_td=zero
  bandtot = 0
  icg=0
  do isppol = 1, nsppol
@@ -197,7 +190,7 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
      d3etot_k(:)=d3etot_k(:)*wtk_k
 
 !    Add the contribution from each k-point. 
-     e3tot= e3tot+ d3etot_k
+     d3etot_td= d3etot_td + d3etot_k
 
 !    Keep track of total number of bands
      bandtot = bandtot + nband_k
@@ -216,12 +209,8 @@ subroutine dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,i2dir,i3dir,
 
 !=== MPI communications ==================
  if (xmpi_paral==1) then
-   call xmpi_sum(e3tot,spaceworld,ierr)
+   call xmpi_sum(d3etot_td,spaceworld,ierr)
  end if
-
-!Add the result to the big array
- d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=zero
- d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-two*e3tot(2)
  
  DBG_EXIT("COLL")
 

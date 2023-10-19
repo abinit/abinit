@@ -216,6 +216,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  type(hdr_type) :: hdr_den
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ real(dp) :: d3etot_td(2),d3etot_td_mq(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
  real(dp),allocatable :: cg1_mq(:,:),cg2_mq(:,:)
  real(dp),allocatable :: d3etot_t4(:,:),d3etot_t5(:,:),d3etot_tgeom(:,:)
@@ -394,7 +395,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        end if
 
        if (.not.kramers_deg) then
-         pert1case_mq=pert1case_mq+(2*dtset%natom+11)*3
+         pert1case_mq=pert1case+(2*dtset%natom+11)*3
          call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
 
          call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
@@ -466,7 +467,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              end if
 
              if (.not.kramers_deg) then
-               pert2case_mq=pert2case_mq+(2*dtset%natom+11)*3
+               pert2case_mq=pert2case+(2*dtset%natom+11)*3
                call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
 
                call inwffil(ask_accurate,cg2_mq,dtset,dtset%ecut,ecut_eff,eigen2_mq,dtset%exchn2n3d,&
@@ -786,11 +787,30 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
                    if (i3pert==natom+9) then
 
+                      write(message,'(2a,3(a,i2,a,i1))') ch10,'TIMDISP : ',&
+                      ' perts : ',i1pert,'.',i1dir,' / ',i2pert,'.',i2dir,' / ',i3pert,'.',i3dir
+                      call wrtout(std_out,message,'COLL')
+                      call wrtout(ab_out,message,'COLL')
                      !Perform the Berry curvature part of the time-disperion 3dte calculation
-                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot,dtset,gsqcut,i1dir,&
-                     & i2dir,i3dir,i1pert,i2pert,i3pert,mband,mk1mem,mpert,mpi_enreg,&
+                     call dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
+                     & mband,mk1mem,mpert,mpi_enreg,&
                      & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
                      & ucvol)
+                     if (.not.kramers_deg) then
+                     call dfpttd_berrycurv(cg1_mq,cg2_mq,cplex,d3etot_td_mq,dtset,gsqcut,&
+                     & mband,mk1mem,mpert,mpi_enreg,&
+                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
+                     & ucvol)
+                     end if
+
+                     !Add the result to the big array
+                     if (kramers_deg) then
+                       d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=zero
+                       d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-two*d3etot_td(2)
+                     else
+                       d3etot(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(1)+d3etot_td_mq(1)
+                       d3etot(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)=-d3etot_td(2)-d3etot_td_mq(2)
+                     end if   
 
                    end if 
   
