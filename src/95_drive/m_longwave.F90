@@ -225,6 +225,13 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_BUG(msg)
  end if
 
+!Only usable for insulators
+ if(0>dtset%occopt .and. dtset%occopt>2)then
+   msg='This routine cannot be used with metallic occupations'
+   ABI_BUG(msg)
+ end if
+
+
 !Define some data
  ntypat=psps%ntypat
  natom=dtset%natom
