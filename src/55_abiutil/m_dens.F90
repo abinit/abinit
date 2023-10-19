@@ -1655,7 +1655,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  do iatom=1,natom
 
 !  Compute the finite-q real-space phase factor
-   if (any(abs(qphon_(:))<tol8)) then 
+   if (sum(qphon_(:)**2)>tol8) then 
      arg=two_pi*dot_product(qphon_,my_xred(:,iatom))
      phr1d_re=dcos(arg)
      phr1d_im=dsin(arg)
@@ -1739,7 +1739,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            else if (cplex==2) then
              intg_re(1:nspden)=fsm*rhor(2*ifft_local-1,1:nspden)
              intg_im(1:nspden)=fsm*rhor(2*ifft_local  ,1:nspden)
-             if (any(abs(qphon_(:))<tol8)) then 
+             if (sum(qphon_(:)**2)<tol8) then 
                intg(1,1:nspden)=intg(1,1:nspden)+intg_re(1:nspden)
                intg(2,1:nspden)=intg(2,1:nspden)+intg_im(1:nspden)
              else 
