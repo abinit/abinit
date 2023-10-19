@@ -429,7 +429,7 @@ end subroutine Get_Mem_Dev
  end if
 
  ! kokkos_finalize already reset GPU context
- if (use_gpu_cuda/=ABI_GPU_KOKKOS) call unset_dev()
+ !if (use_gpu_cuda/=ABI_GPU_KOKKOS) call unset_dev()
 
 #endif
  end subroutine unsetdevice_cuda
