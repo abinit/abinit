@@ -983,7 +983,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (psps%usepaw==1.and.dtset%usepawu/=0.and.(dtset%iscf>0.or.dtset%iscf==-3)) then
    call setnoccmmp(1,0,dmatdum,0,0,indsym,my_natom,dtset%natom,dtset%natpawu,&
 &   dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
-&   pawrhoij,pawtab,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+&   pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
