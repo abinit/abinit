@@ -1475,7 +1475,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &         dmatpawu(1:dimdmat,1:dimdmat,1:dtset%nsppol*dtset%nspinor,1:dtset%natpawu*impose_dmat),&
 &         dtset%dmatudiag,impose_dmat,indsym,my_natom,dtset%natom,dtset%natpawu,&
 &         dtset%nspinor,dtset%nsppol,dtset%nsym,dtset%ntypat,paw_ij,pawang,dtset%pawprtvol,&
-&         pawrhoij,pawtab,dtset%symafm,dtset%typat,0,dtset%usepawu,&
+&         pawrhoij,pawtab,dtset%spinat,dtset%symafm,dtset%typat,0,dtset%usepawu,&
 &         comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 !        Reinitalize mixing if PAW+U and occupation matrix now allowed to change
 !        For experimental purpose...

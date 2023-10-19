@@ -192,7 +192,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  real(dp),allocatable :: dij_ep(:),dijfock_vv(:,:),dijfock_cv(:,:)
  real(dp),allocatable :: one_over_rad2(:),kxc_tmp(:,:,:),k3xc_tmp(:,:,:)
  real(dp),allocatable :: nhat1(:,:,:),nhat1_ep(:,:,:)
- real(dp) :: rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
+ real(dp) :: rdum2(0,0),rdum3(0,0,0),rdum3a(0,0,0),rdum4(0,0,0,0)
  real(dp),allocatable :: rho(:),rho1(:,:,:),rho1_ep(:,:,:),rho1xx(:,:,:)
  real(dp),allocatable :: tau1(:,:,:),ttau1(:,:,:), trho1(:,:,:),trho1_ep(:,:,:)
  real(dp),allocatable :: vh(:),vxc_tmp(:,:,:),vxctau_tmp(:,:,:)
@@ -319,11 +319,11 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
  if (usepawu/=0.and.ipert<=0.and.ipositron/=1) then
    if (paral_atom) then
      call setnoccmmp(1,0,rdum4,0,0,idum3,my_natom,natom,0,1,nsppol,0,ntypat,&
-&     paw_ij,pawang,pawprtvol,pawrhoij,pawtab,idum1,idum1,0,usepawu,&
+&     paw_ij,pawang,pawprtvol,pawrhoij,pawtab,rdum2,idum1,idum1,0,usepawu,&
 &     comm_atom=my_comm_atom,mpi_atmtab=mpi_atmtab)
    else
      call setnoccmmp(1,0,rdum4,0,0,idum3,my_natom,natom,0,1,nsppol,0,ntypat,&
-&     paw_ij,pawang,pawprtvol,pawrhoij,pawtab,idum1,idum1,0,usepawu)
+&     paw_ij,pawang,pawprtvol,pawrhoij,pawtab,rdum2,idum1,idum1,0,usepawu)
    end if
  end if
 

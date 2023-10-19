@@ -1469,6 +1469,7 @@ CONTAINS  !=====================================================================
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  spinat(3,matom)=initial spin of each atom, in unit of hbar/2
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  typat(natom)=type for each atom
 !!  useexexch=1 if local-exact-exchange is activated
@@ -1500,7 +1501,7 @@ CONTAINS  !=====================================================================
 
 subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawprtvol,pawrhoij,pawtab,&
-&                     symafm,typat,useexexch,usepawu, &
+&                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom,atom_orbmom,my_l_occmat) ! optional arguments (parallelism) and printing lorb mag
 
 !Arguments ---------------------------------------------
@@ -1515,7 +1516,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  integer,optional,intent(in) :: l_orbmom,atom_orbmom
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
- !real(dp),intent(in) :: dmatpawu(:,:,:,:)
+ real(dp),intent(in) :: spinat(3,natom)
  type(paw_ij_type),intent(inout) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
@@ -1529,7 +1530,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
  logical :: antiferro,my_atmtab_allocated,noccsym_error,paral_atom,use_afm
 ! real(dp),parameter :: invsqrt2=one/sqrt2
- real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn
+ real(dp) :: factafm,mnorm,mx,my,mz,ntot,nup,ndn,snorm,sx,sy,szm,szp
  character(len=4) :: wrt_mode
  character(len=500) :: message
 !arrays
@@ -1550,6 +1551,7 @@ subroutine setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym
  real(dpc),optional,allocatable :: my_l_occmat(:,:,:,:)
  logical :: cal_lmom
  integer :: atom_min,atom_max
+
 !*********************************************************************
 
  DBG_ENTER("COLL")
@@ -1632,34 +1634,29 @@ end if
        else
          ABI_MALLOC(tmp_noccmmp(iatom_tot)%value,(cplex_dij,2*lpawu+1,2*lpawu+1,ndij))
          tmp_noccmmp(iatom_tot)%value=zero
-         if(limp==0) then ! default reading
-!            snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
-!            if (snorm>tol12) then
-!              sx=half*spinat(1,iatom_tot)/snorm
-!              sy=half*spinat(2,iatom_tot)/snorm
-!              szp=half*(one+spinat(3,iatom_tot)/snorm)
-!              szm=half*(one-spinat(3,iatom_tot)/snorm)
-!            else
-!              sx=zero;sy=zero
-!              szp=half;szm=half
-!            end if                    
+         if (limp==0) then ! default reading
+           snorm=sqrt(spinat(1,iatom_tot)**2+spinat(1,iatom_tot)**2+spinat(3,iatom_tot)**2)
+           if (snorm>tol12.and.nspden/=1) then
+             sx=half*spinat(1,iatom_tot)/snorm
+             sy=half*spinat(2,iatom_tot)/snorm
+             szp=half*(one+spinat(3,iatom_tot)/snorm)
+             szm=half*(one-spinat(3,iatom_tot)/snorm)
+           else
+             sx=zero;sy=zero
+             szp=half;szm=half
+           end if                    
            do im2=1,2*lpawu+1
              do im1=1,2*lpawu+1
                nup=dmatpawu(im1,im2,1,iatpawu);ndn=dmatpawu(im1,im2,2,iatpawu)
-               if (nspden==1) then
-                 tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=half*(nup+ndn)
-                 tmp_noccmmp(iatom_tot)%value(2,im1,im2,1)=half*(nup+ndn)
-               else
-                 tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup
-                 tmp_noccmmp(iatom_tot)%value(2,im1,im2,1)=ndn
-               end if
-!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup*szp+ndn*szm
-!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,2)=nup*szm+ndn*szp
-!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,3)=(nup-ndn)*sx
-!               tmp_noccmmp(iatom_tot)%value(1,im1,im2,4)=(ndn-nup)*sy
+!              if (nspden==1) tmp_noccmmp(iatom_tot)%value(1,im1,im2,1:2)=half*(nup+ndn)
+               tmp_noccmmp(iatom_tot)%value(1,im1,im2,1)=nup*szp+ndn*szm
+               tmp_noccmmp(iatom_tot)%value(1,im1,im2,2)=nup*szm+ndn*szp
+               tmp_noccmmp(iatom_tot)%value(1,im1,im2,3)=(nup-ndn)*sx
+               tmp_noccmmp(iatom_tot)%value(1,im1,im2,4)=(ndn-nup)*sy
              end do
            end do
-         else if(limp>=1) then
+
+         else if (limp>=1) then
            ABI_MALLOC(noccmmp_ylm,(2*lpawu+1,2*lpawu+1,ndij))
            noccmmp_ylm=czero
            ABI_MALLOC(noccmmp_slm,(2*lpawu+1,2*lpawu+1,ndij))
@@ -1678,7 +1675,7 @@ end if
              call mat_mlms2jmj(lpawu,noccmmp_ylm,noccmmp_jmj,ndij,&
 &             2,2,pawprtvol,std_out,wrt_mode) !  optspin=1: up spin are first
            end if
-           if(limp==2) then ! read input matrix in Ylm basis
+           if (limp==2) then ! read input matrix in Ylm basis
              noccmmp_ylm=czero
              do im1=1,2*lpawu+1
                noccmmp_ylm(im1,im1,1)=cmplx(dmatpawu(im1,im1,1,iatpawu),zero,kind=dp)
@@ -1691,7 +1688,7 @@ end if
            call mat_slm2ylm(lpawu,noccmmp_ylm,noccmmp_slm,ndij,&
 &           2,2,pawprtvol,std_out,wrt_mode) ! optspin=1 because up spin are first
 !          interchange upup and dndn
-           if(limp>=1) then
+           if (limp>=1) then
              tmp_noccmmp(iatom_tot)%value(1,:,:,1)=real(noccmmp_slm(:,:,2))
              tmp_noccmmp(iatom_tot)%value(2,:,:,1)=aimag(noccmmp_slm(:,:,2))
              tmp_noccmmp(iatom_tot)%value(1,:,:,2)=real(noccmmp_slm(:,:,1))
@@ -2933,6 +2930,7 @@ end subroutine setrhoijpbe0
 !!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrhoij(my_natom) <type(pawrhoij_type)>= paw rhoij occupancies and related data
 !!  pawtab(ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!  spinat(3,matom)=initial spin of each atom, in unit of hbar/2
 !!  symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !!  typat(natom)=type for each atom
 !!  useexexch=1 if local-exact-exchange is activated
@@ -2953,7 +2951,7 @@ end subroutine setrhoijpbe0
 
 subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,my_natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij,pawang,pawrad,pawprtvol,pawrhoij,pawtab,&
-&                     symafm,typat,useexexch,usepawu, &
+&                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
@@ -2967,7 +2965,7 @@ subroutine loc_orbmom_cal(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,in
  integer,intent(in) :: indsym(4,nsym,natom),symafm(nsym),typat(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),intent(in) :: dmatpawu(dimdmat,dimdmat,nspinor*nsppol,natpawu*impose_dmat)
- !real(dp),intent(in) :: dmatpawu(:,:,:,:)
+ real(dp),intent(in) :: spinat(3,natom)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom)
  type(pawrhoij_type),intent(in) :: pawrhoij(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
@@ -3173,7 +3171,7 @@ end if
 
 call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,natom,natom,&
 &                     natpawu,nspinor,nsppol,nsym,ntypat,paw_ij_all,pawang,pawprtvol,pawrhoij_all,pawtab_tmp,& 
-&                     symafm,typat,useexexch,usepawu, &
+&                     spinat,symafm,typat,useexexch,usepawu, &
 &                     mpi_atmtab,comm_atom,l_orbmom=my_lcur,atom_orbmom=my_iatom,my_l_occmat=my_l_occmat)
 
   cmfoccmat(:,:,:)=cmplx(my_l_occmat(1,:,:,:),my_l_occmat(2,:,:,:))
