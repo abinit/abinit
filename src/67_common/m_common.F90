@@ -653,17 +653,21 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          toldfe_ok=0
          use_dpfft = abs(deltae) < tol8
        end if
-       if(toldfe_ok>=2 .and. (.not.noquit))then
-         if (ttolwfr==0.or.usefock/=0) then
-           if(usefock==0 .or. nnsclohf<2)then
-             write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
-              ' At SCF step',istep,', etot is converged : ',ch10,&
-              '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-           else
-             write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
-              ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
-              '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
-           endif
+       ! Fock : tolwfr not taken into account
+       if(usefock/=0.and.nnsclohf>=2) then
+         if (toldfe_ok==2 .and. (.not.noquit))then
+           write(message, '(a,i3,a,i3,a,a,a,es11.3,a,es11.3)' ) &
+            ' Outer loop step',istep_fock_outer,' - inner step',istep_mix,' - frozen Fock etot converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
+           call wrtout([std_out, ab_out], message)
+           quit=1
+         end if
+       ! No Fock : take into account tolwfr if ttolwfr/=0
+       else if(toldfe_ok>=2 .and. (.not.noquit))then
+         if (ttolwfr==0) then
+           write(message, '(a,a,i5,a,a,a,es11.3,a,es11.3)' ) ch10, &
+            ' At SCF step',istep,', etot is converged : ',ch10,&
+            '  for the second time, diff in etot=',abs(deltae),' < toldfe=',toldfe
            call wrtout([std_out, ab_out], message)
            quit=1
          else if (ttolwfr==1 .and. residm < tolwfr) then
