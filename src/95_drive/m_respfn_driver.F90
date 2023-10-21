@@ -211,10 +211,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,cplex,cplex_rhoij
+ integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,coretau_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
+ integer :: gscase,has_dijnd,has_diju,has_kxc,has_vxctau,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -251,6 +251,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
+ real(dp) :: dummy_in(0)
+ real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
@@ -272,7 +274,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
  real(dp),allocatable :: symrel_cart(:,:,:),taug(:,:),taur(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: vxc(:,:),vxctau(:,:,:),xccc3d(:),xcctau3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -677,6 +679,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
+   has_vxctau=dtset%usekden
    has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_diju=merge(0,1,dtset%usepawu==0)
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
@@ -684,8 +687,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=has_vxctau,&
+        &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
 &   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
@@ -820,13 +823,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(irrzon)
  ABI_FREE(phnons)
 
-!jmb 2012 write(std_out,'(a)')' ' ! needed to make ibm6_xlf12 pass tests. No idea why this works. JWZ 5 Sept 2011
 !Will compute now the total potential
 
-!Compute local ionic pseudopotential vpsp and core electron density xccc3d:
+!Compute local ionic pseudopotential vpsp and core electron density xccc3d
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vpsp,(nfftf))
+ if(psps%usepaw==1) then
+    ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
+ else
+    ABI_MALLOC(xcctau3d,(0))
+ end if
+ 
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -839,6 +847,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
 
+ ! Core kinetic energy density method
+ coretau_method = 0
+ if (dtset%usekden==1.and.psps%usepaw==1) then
+    coretau_method=1
+    if (psps%nc_xccc_gspace==0) then
+       coretau_method=2
+    end if
+ end if
+ 
+
 !Local ionic potential and/or pseudo core charge by method 1
  if (vloc_method==1.or.coredens_method==1) then
    call timab(562,1,tsec)
@@ -850,6 +868,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
+ end if
+
+! code for xcctau3d computation copied over from setvtr
+ if (coretau_method==1) then
+   optv=0;optn=1
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=4
+   call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
+&   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,dtset%mgfft,psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,ngfft,ntypat,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
+&   dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
  end if
 
 !Local ionic potential by method 2
@@ -888,6 +918,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
+ ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
 
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
@@ -901,7 +932,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+& taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
@@ -1108,7 +1140,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_FREE(vpsp)
  ABI_FREE(xccc3d)
-
+ if(allocated(xcctau3d)) then
+    ABI_FREE(xcctau3d)
+ end if
+ 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
@@ -1433,6 +1468,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout([std_out, ab_out], message)
 
  ABI_FREE(vxc)
+ ABI_FREE(vxctau)
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_FREE(rfpert_nl)
