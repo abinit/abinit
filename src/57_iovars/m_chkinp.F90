@@ -3098,11 +3098,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  prtkden
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'prtkden',dt%prtkden,0,iout)
-   if(optdriver/=RUNL_GSTATE)then
-     cond_string(1)='optdriver' ; cond_values(1)=optdriver
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-   end if
+   ! call chkint_ge(0,0,cond_string,cond_values,ierr,'prtkden',dt%prtkden,0,iout)
+   ! if(optdriver/=RUNL_GSTATE)then
+   !   cond_string(1)='optdriver' ; cond_values(1)=optdriver
+   !   call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
+   !end if
    !if(usepaw/=0)then
    !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
    !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
