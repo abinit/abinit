@@ -41,7 +41,7 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
- use m_kg,          only : getcut,getph,getmpw
+ use m_kg,          only : getcut,getph,getmpw,kpgio
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -216,6 +216,8 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  type(hdr_type) :: hdr_den
 !arrays
  integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer,allocatable :: kg1(:,:),kg1_mq(:,:)
+ integer,allocatable :: npwar1(:),npwar1_mq(:),npwtot1(:),npwtot1_mq(:)
  real(dp) :: d3etot_td(2),d3etot_td_mq(2)
  real(dp),allocatable :: cg1(:,:),cg2(:,:)
  real(dp),allocatable :: cg1_mq(:,:),cg2_mq(:,:)
@@ -266,8 +268,19 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  optorth=1;if (psps%usepaw==1) optorth=0
  opthartdqdq=1
 
- !Initialize k+q (and k-q) array
+!Set up some quantities required to calculate the Berry 
+!curvature at finite q
+ ABI_MALLOC(kg1,(3,mpw1*mk1mem))
+ ABI_MALLOC(npwar1,(dtset%nkpt))
+ ABI_MALLOC(npwtot1,(dtset%nkpt))
+ if (.not.kramers_deg) then
+   ABI_MALLOC(kg1_mq,(3,mpw1_mq*mk1mem))
+   ABI_MALLOC(npwar1_mq,(dtset%nkpt))
+   ABI_MALLOC(npwtot1_mq,(dtset%nkpt))
+ end if
  if (finite_q) then
+
+   !Initialize k+q (and k-q) array
    ABI_MALLOC(kpq,(3,dtset%nkpt))
    do ikpt=1,dtset%nkpt
      kpq(:,ikpt)=dtset%qptn(:)+dtset%kptns(:,ikpt)
@@ -281,18 +294,32 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
    !Compute maximum number of planewaves at k+q (and k-q)
    call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kpq,mpi_enreg,mpw1,dtset%nkpt)
-   ABI_FREE(kpq)
    if (.not.kramers_deg) then
      call getmpw(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kmq,mpi_enreg,mpw1_mq,dtset%nkpt)
      !number of plane waves at k+q and k-q should be in principle the same to reconstruct rhor1_pq (?)
      mpw1=max(mpw1,mpw1_mq)
      mpw1_mq=mpw1
-     ABI_FREE(kmq)
    else
      mpw1_mq=0
    end if
+
+   !Set up the basis sphere of planewaves at k+q (and k-q)
+   call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1,&
+   &   kpq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1,&
+   &   npwar1,npwtot1,dtset%nsppol)
+   ABI_FREE(kpq)
+   WRITE(*,*) "npwar1:", npwar1
+   if (.not.kramers_deg) then
+     call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1_mq,&
+   & kmq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1_mq,&
+   & npwar1_mq,npwtot1_mq,dtset%nsppol)
+     ABI_FREE(kmq)
+   end if
+
  else
    mpw1=mpw
+   kg1=kg
+   npwar1=npwarr
  end if
  mcg1=mpw1*nspinor*mband*mk1mem*nsppol
   
@@ -383,9 +410,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
        call appdig(pert1case,dtfil%fnamewff1,fiwf1i)
 
        call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-       & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+       & formeig,hdr,ireadwf,dtset%istwfk,kg1,dtset%kptns,dtset%localrdwf,&
        & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
-       & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+       & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
        & dtset%nsppol,dtset%nsym,&
        & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
        & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i,wvl)
@@ -399,9 +426,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
          call appdig(pert1case_mq,dtfil%fnamewff1,fiwf1i_mq)
 
          call inwffil(ask_accurate,cg1_mq,dtset,dtset%ecut,ecut_eff,eigen1_mq,dtset%exchn2n3d,&
-         & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+         & formeig,hdr,ireadwf,dtset%istwfk,kg1_mq,dtset%kptns,dtset%localrdwf,&
          & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
-         & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+         & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1_mq,&
          & dtset%nsppol,dtset%nsym,&
          & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
          & dtfil%unkg1,wff1,wfft1,dtfil%unwff1,fiwf1i_mq,wvl)
@@ -455,9 +482,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
              call appdig(pert2case,dtfil%fnamewff1,fiwf2i)
 
              call inwffil(ask_accurate,cg2,dtset,dtset%ecut,ecut_eff,eigen2,dtset%exchn2n3d,&
-             & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+             & formeig,hdr,ireadwf,dtset%istwfk,kg1,dtset%kptns,dtset%localrdwf,&
              & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
-             & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+             & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1,&
              & dtset%nsppol,dtset%nsym,&
              & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
              & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i,wvl)
@@ -471,9 +498,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                call appdig(pert2case_mq,dtfil%fnamewff1,fiwf2i_mq)
 
                call inwffil(ask_accurate,cg2_mq,dtset,dtset%ecut,ecut_eff,eigen2_mq,dtset%exchn2n3d,&
-               & formeig,hdr,ireadwf,dtset%istwfk,kg,dtset%kptns,dtset%localrdwf,&
+               & formeig,hdr,ireadwf,dtset%istwfk,kg1_mq,dtset%kptns,dtset%localrdwf,&
                & dtset%mband,mcg1,dtset%mk1mem,mpi_enreg,mpw1,&
-               & dtset%nband,dtset%ngfft,dtset%nkpt,npwarr,&
+               & dtset%nband,dtset%ngfft,dtset%nkpt,npwar1_mq,&
                & dtset%nsppol,dtset%nsym,&
                & occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
                & dtfil%unkg1,wff2,wfft2,dtfil%unwff2,fiwf2i_mq,wvl)
@@ -794,13 +821,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
                      !Perform the Berry curvature part of the time-disperion 3dte calculation
                      call dfpttd_berrycurv(cg1,cg2,cplex,d3etot_td,dtset,gsqcut,&
                      & mband,mk1mem,mpert,mpi_enreg,&
-                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
+                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwar1,occ,&
                      & ucvol)
                      if (.not.kramers_deg) then
-                     call dfpttd_berrycurv(cg1_mq,cg2_mq,cplex,d3etot_td_mq,dtset,gsqcut,&
-                     & mband,mk1mem,mpert,mpi_enreg,&
-                     & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwarr,occ,&
-                     & ucvol)
+                       call dfpttd_berrycurv(cg1_mq,cg2_mq,cplex,d3etot_td_mq,dtset,gsqcut,&
+                       & mband,mk1mem,mpert,mpi_enreg,&
+                       & mpw1,natom,nfftf,ngfftf,nkpt,nspden,nspinor,nsppol,npwar1_mq,occ,&
+                       & ucvol)
                      end if
 
                      !Add the result to the big array
@@ -838,6 +865,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 !More memory cleaning
  call gs_hamkq%free()
 
+ ABI_FREE(kg1)
+ ABI_FREE(npwar1)
+ ABI_FREE(npwtot1)
  ABI_FREE(cg1)
  ABI_FREE(cg2)
  ABI_FREE(eigen1)
@@ -849,6 +879,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_FREE(nhat1)
  ABI_FREE(pawrhoij_read)
  ABI_FREE(ph1d)
+ ABI_SFREE(kpq)
 
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
   ABI_FREE(vhart1dqdq)
@@ -861,6 +892,10 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    ABI_FREE(cg2_mq)
    ABI_FREE(eigen1_mq)
    ABI_FREE(eigen2_mq)
+   ABI_FREE(kg1_mq)
+   ABI_FREE(npwar1_mq)
+   ABI_FREE(npwtot1_mq)
+   ABI_SFREE(kmq)
  end if
 !Treatment of T4 and T5 terms that have a q-gradient of a rf Hamiltonian
 !they need to be converted to type-II for strain perturbation
