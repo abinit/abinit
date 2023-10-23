@@ -296,7 +296,14 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
      do line=1,nline_for(state)
        ! Compute etrial=<phi|H|phi> and the residual [H-etrial]|phi>.
        hphi = czero
+#ifdef FC_NVHPC
+!Buggy NVHPC compiler
+       do jj=1,my_t2-my_t1+1;do ii=1,hexc_size
+         hphi(ii)=hphi(ii)+hexc(ii,jj)*my_phi(jj)
+       enddo ; enddo
+#else
        hphi = MATMUL(hexc, my_phi)
+#endif
        call xmpi_sum(hphi,comm,ierr)
 
        etrial = DOT_PRODUCT(my_phi, hphi(my_t1:my_t2))
@@ -408,7 +415,14 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
        ! Line minimization of the Raileigh functional.
        ABI_MALLOC(vec_tmp,(hexc_size))
        vec_tmp=czero
+#ifdef FC_NVHPC
+!Buggy NVHPC compiler
+       do jj=my_t1,my_t2;do ii=1,hexc_size
+         vec_tmp(ii)=vec_tmp(ii)+hexc(ii,jj-my_t1+1)*cg_dir(jj)
+       enddo ; enddo
+#else
        vec_tmp = MATMUL(hexc, cg_dir(my_t1:my_t2))
+#endif
        call xmpi_sum(vec_tmp,comm,ierr)
 
        !if (my_rank==master) then
