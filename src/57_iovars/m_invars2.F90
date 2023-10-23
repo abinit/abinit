@@ -3376,7 +3376,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  dtset%kptrlen=kptrlen
 
  dtset%kptns(:,1:nkpt)=dtset%kpt(:,1:nkpt)/dtset%kptnrm
- if(nqpt>=1 .and. dtset%optdriver/=RUNL_RESPFN)then
+ if(nqpt>=1 .and. dtset%optdriver/=RUNL_RESPFN.and.dtset%optdriver/=RUNL_LONGWAVE)then
    dtset%kptns(1,1:nkpt)=dtset%kptns(1,1:nkpt)+dtset%qptn(1)
    dtset%kptns(2,1:nkpt)=dtset%kptns(2,1:nkpt)+dtset%qptn(2)
    dtset%kptns(3,1:nkpt)=dtset%kptns(3,1:nkpt)+dtset%qptn(3)
