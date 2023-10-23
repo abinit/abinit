@@ -59,13 +59,16 @@ module m_chebfiwf
  use m_gemm_nonlop_ompgpu, only : gemm_nonlop_ompgpu_static_mem
  use m_getghc_ompgpu,      only : getghc_ompgpu_work_mem
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
  use m_nvtx_data
 #endif
 
 #if defined(HAVE_YAKL)
  use gator_mod
- use m_gpu_toolbox
 #endif
 
  use, intrinsic :: iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer,c_double,c_size_t
@@ -115,18 +118,30 @@ module m_chebfiwf
  CONTAINS  !========================================================================================
 !!***
 
-subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb)
+subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,use_gpu,nblk_gemm_nonlop)
    implicit none
 
-   integer,intent(in) :: ndat,npw,nband,nspinor,paral_kgb
+   integer,intent(in) :: ndat,npw,nband,nspinor,paral_kgb,use_gpu
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
+   integer, intent(out)  :: nblk_gemm_nonlop
 
    integer(kind=c_size_t) :: nonlop_smem,invovl_smem,getghc_wmem,invovl_wmem
-   integer  :: icplx,space
+   integer(kind=c_size_t) :: sum_mem,sum_bandpp_mem,sum_other_mem,free_mem
+   integer  :: icplx,space,i,ndat_try,rank,nprocs
    real(dp) :: localMem,chebfiMem(2)
 
 ! *********************************************************************
 
+   free_mem=256*1e9 ! Dummy value
+#ifdef HAVE_GPU
+   if(use_gpu /= ABI_GPU_DISABLED) then
+     call gpu_get_free_mem(free_mem)
+     free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
+   end if
+#else
+   ABI_UNUSED(use_gpu)
+#endif
+   rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
    if ( gs_hamk%istwf_k == 2 ) then ! Real only
      space = SPACE_CR
      icplx = 2
@@ -135,20 +150,65 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb)
      icplx = 1
    end if
 
+   call xmpi_barrier(xmpi_world)
+   ndat_try=ndat
+   nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%ntypat, 1)
+   invovl_smem = invovl_ompgpu_static_mem(gs_hamk)
+   getghc_wmem = getghc_ompgpu_work_mem(gs_hamk, ndat_try)
+   invovl_wmem = invovl_ompgpu_work_mem(gs_hamk, ndat_try)
+
    chebfiMem = chebfi_memInfo(nband,icplx*npw*nspinor,space,paral_kgb,icplx*npw*nspinor,ndat)
-   localMem = (npw+2*npw*nspinor+2*nband)*kind(1.d0) !blockdim
-   print*,"Memory requirements of chebfiwf per MPI task (OpenMP GPU)"
-   print*,"---------------------------------------------------------"
-   print*,"Static buffers, computed once and permanently on card :"
-   write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (make_gemm_nonlop) : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
-   print'(A)',"Work buffers, temporary, bandpp sized  :"
-   write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",          chebfiMem(2)/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
-   write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", (nonlop_smem+invovl_smem+getghc_wmem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem)/(1024*1024), "MiB"
+   localMem  = (npw+2*npw*nspinor+2*nband)*kind(1.d0) !blockdim
+
+   sum_mem          = nonlop_smem+invovl_smem+getghc_wmem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
+   sum_bandpp_mem   = getghc_wmem+invovl_wmem
+   sum_other_mem    = nonlop_smem+invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+
+   nblk_gemm_nonlop=1
+
+   ! No blocking needed, all good !
+   if(sum_mem < free_mem) return
+
+   write(std_out,*) "Setting block size..."
+   ! How the number of blocks is decided:
+   ! We try to divide bandpp with dividers from 1 to 20
+   ! If we fail, that means test case is too fat for given hardware, and that's it
+   ! This looks stupid but we don't actually expect to process CHEBFI with 20 blocks.
+   do i=1,20
+
+     ! Gemm nonlop static memory requirement is higher, split here
+     nblk_gemm_nonlop = nblk_gemm_nonlop + 1
+     if(modulo(nprocs,nblk_gemm_nonlop)/=0) cycle
+
+     nonlop_smem = gemm_nonlop_ompgpu_static_mem(gs_hamk%npw_fft_k,gs_hamk%indlmn,gs_hamk%nattyp,gs_hamk%ntypat,nblk_gemm_nonlop)
+
+     ! Bandpp~ndat sized buffer memory requirements are higher, split there
+     sum_mem          = nonlop_smem+invovl_smem+getghc_wmem+invovl_wmem+chebfiMem(1)+chebfiMem(2)+localMem
+     sum_bandpp_mem   = getghc_wmem+invovl_wmem
+     sum_other_mem    = nonlop_smem+invovl_smem+chebfiMem(1)+chebfiMem(2)+localMem
+
+     write(std_out,'(A,F10.3,1x,A)') "Free mem                                   : ", real(free_mem)/(1024*1024), "MiB"
+     write(std_out,*) "Memory requirements of chebfiwf per MPI task (OpenMP GPU)"
+     write(std_out,*) "---------------------------------------------------------"
+     write(std_out,*) "Static buffers, computed once and permanently on card :"
+     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (make_gemm_nonlop) : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
+     write(std_out,*) "Work buffers, temporary, bandpp sized  :"
+     write(std_out,'(A,F10.3,1x,A)') "   getghc (inc. fourwf+gemm_nonlop)      : ",  real(getghc_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   invovl                                : ",  real(invovl_wmem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfi2 (RR buffers)                  : ",          chebfiMem(2)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   chebfiwf (cg,resid,eig)               : ",              localMem/(1024*1024), "MiB"
+     write(std_out,*) "---------------------------------------------------------"
+     write(std_out,'(A,F10.3,1x,A)') "Sum                                      : ", real(sum_mem)/(1024*1024), "MiB"
+     flush(std_out)
+
+     if(sum_mem < free_mem) exit
+   end do
+   if(sum_mem > free_mem) then
+     ABI_ERROR("It seems the test case you're trying to run is too big to run with given hardware resources !")
+   end if
+
  end subroutine chebfiwf2_blocksize
 !!****f* m_chebfiwf/chebfiwf2
 !! NAME
