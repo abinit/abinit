@@ -270,11 +270,9 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Set up some quantities required to calculate the Berry 
 !curvature at finite q
- ABI_MALLOC(kg1,(3,mpw1*mk1mem))
  ABI_MALLOC(npwar1,(dtset%nkpt))
  ABI_MALLOC(npwtot1,(dtset%nkpt))
  if (.not.kramers_deg) then
-   ABI_MALLOC(kg1_mq,(3,mpw1_mq*mk1mem))
    ABI_MALLOC(npwar1_mq,(dtset%nkpt))
    ABI_MALLOC(npwtot1_mq,(dtset%nkpt))
  end if
@@ -304,12 +302,13 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    end if
 
    !Set up the basis sphere of planewaves at k+q (and k-q)
+   ABI_MALLOC(kg1,(3,mpw1*mk1mem))
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1,&
    &   kpq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1,&
    &   npwar1,npwtot1,dtset%nsppol)
    ABI_FREE(kpq)
-   WRITE(*,*) "npwar1:", npwar1
    if (.not.kramers_deg) then
+     ABI_MALLOC(kg1_mq,(3,mpw1_mq*mk1mem))
      call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg1_mq,&
    & kmq,mk1mem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,mpw1_mq,&
    & npwar1_mq,npwtot1_mq,dtset%nsppol)
@@ -317,6 +316,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
    end if
 
  else
+   ABI_MALLOC(kg1,(3,mpw*mk1mem))
    mpw1=mpw
    kg1=kg
    npwar1=npwarr
