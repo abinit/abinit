@@ -3295,10 +3295,20 @@ if (dtset%usekden==1) then
  if(tread==1) then
    if (ds_input == 0) then
      tolwfr_=dprarr(1)
-     if(abs(dprarr(1))>tiny(0._dp))itol_gen_wfr=itol_gen_wfr+1
+     if(abs(dprarr(1))>tiny(0._dp)) then
+       itol_gen_wfr=itol_gen_wfr+1
+       ! Set tolwfr_diago to tolwfr by default.
+       ! Will be overwritten below if tolwfr_diago is specified by the user
+       dtset%tolwfr_diago=dprarr(1)
+     end if
    else
      dtset%tolwfr=dprarr(1)
-     if(abs(dprarr(1))>tiny(0._dp))itol_wfr=itol_wfr+1
+     if(abs(dprarr(1))>tiny(0._dp)) then
+       itol_wfr=itol_wfr+1
+       ! Set tolwfr_diago to tolwfr by default.
+       ! Will be overwritten below if tolwfr_diago is specified by the user
+       dtset%tolwfr_diago=dprarr(1)
+     end if
    end if
  end if
 
@@ -3363,6 +3373,7 @@ if (dtset%usekden==1) then
 !if tol/=tolwfr is set without tolwfr, tolwfr should be 0
  if (itol == 1 .and. itol_wfr == 0) then
    dtset%tolwfr=zero
+   dtset%tolwfr_diago=zero
  end if
 !if tolwfr is set without tol/=tolwfr, tol/=tolwfr should be 0
  if (itol == 0 .and. itol_wfr == 1) then

@@ -484,13 +484,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          if (has_cprj_in_memory) then
            call cgwf_cprj(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
-&             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr,wfoptalg)
+&             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr_diago,wfoptalg)
          else
            call cgwf(dtset%berryopt,cg,cgq,dtset%chkexit,cpus,dphase_k,dtefield,dtfil%filnam_ds(1),&
 &           gsc,gs_hamk,icg,igsc,ikpt,inonsc,isppol,dtset%mband,mcg,mcgq,mgsc,mkgq,&
 &           mpi_enreg,mpw,nband_k,dtset%nbdblock,nkpt,dtset%nline,npw_k,npwarr,my_nspinor,&
 &           dtset%nsppol,dtset%ortalg,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,quit,resid_k,&
-&           subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr,use_subovl,use_subvnlx,wfoptalg,zshift)
+&           subham,subovl,subvnlx,dtset%tolrde,dtset%tolwfr_diago,use_subovl,use_subvnlx,wfoptalg,zshift)
          end if
        else
          call rmm_diis(istep, ikpt, isppol, cg(:,icg+1:), dtset, eig_k, occ_k, enlx_k, gs_hamk, kinpw, gsc, &
