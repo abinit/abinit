@@ -88,6 +88,7 @@ module m_gemm_nonlop_ompgpu
  integer, save :: gpu_initialised=0
  integer, save :: mod__cplex=0
  integer, save :: mod__nkpt=0
+ integer, save :: mod__ndat=0
  real(dp), save, allocatable, target :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:), dprojections(:,:,:)
  real(dp), pointer, save :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp), save, allocatable :: sij_typ(:,:)
@@ -106,11 +107,8 @@ contains
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
 #ifdef HAVE_OPENMP_OFFLOAD
 
- subroutine refresh_gemm_nonlop_kpt(ikpt)
+ subroutine refresh_gemm_nonlop_kpt_ompgpu(ikpt)
   integer,intent(in) :: ikpt
-
-  integer :: tmp2i(3)
-  character(len=500) :: msg
 
   if(mod__cplex == 2) then
     !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs)
@@ -151,19 +149,18 @@ contains
   end if
   current_ikpt_in_gpu=ikpt
 
- end subroutine refresh_gemm_nonlop_kpt
+ end subroutine refresh_gemm_nonlop_kpt_ompgpu
 
- subroutine alloc_gpu_buffers(ikpt, cplex, cplex_fac, nspinor, ndat, ntypat, lmnmax, npw)
+ subroutine alloc_gemm_nonlop_kpt_ompgpu(ikpt, cplex)
 
-  integer,intent(in) :: ikpt, nspinor, ndat, cplex, cplex_fac, ntypat, lmnmax, npw
+  integer,intent(in) :: ikpt, cplex
 
-  integer :: tmp2i(3), nprojs, ngrads
   character(len=500) :: msg
 
 
 ! *************************************************************************
 
-  if(gpu_initialised .and. current_ikpt_in_gpu == ikpt) then
+  if(current_ikpt_in_gpu == ikpt) then
     msg="GPU nonlop arrays are already initialized for K-Point %d. Redundant call"
     ABI_ERROR(msg)
   end if
@@ -173,11 +170,9 @@ contains
 &    "Please make sure that make_gemm_nonlop_ompgpu is called for this K-point before reaching this routine."
     ABI_ERROR(msg)
   end if
-  if(gpu_initialised == 1) then
-    call free_gpu_buffers() ! FIXME : Dealloc because projs arrays sizes may varry among K-Points ?
+  if(current_ikpt_in_gpu /= ikpt) then
+    call free_gemm_nonlop_kpt_ompgpu ! FIXME : Dealloc because projs arrays sizes may varry among K-Points ?
   end if
-  nprojs = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs
-  ngrads = gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads
   gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
   current_ikpt_projs   => gemm_nonlop_kpt(ikpt)%projs
   current_ikpt_projs_r => gemm_nonlop_kpt(ikpt)%projs_r
@@ -187,19 +182,6 @@ contains
     current_ikpt_dprojs_r => gemm_nonlop_kpt(ikpt)%dprojs_r
     current_ikpt_dprojs_i => gemm_nonlop_kpt(ikpt)%dprojs_i
   end if
-  if(cplex == 1) then
-    ABI_MALLOC(temp_realvec_r,(npw*nspinor*ndat))
-    ABI_MALLOC(temp_realvec_i,(npw*nspinor*ndat))
-  end if
-
-  ABI_MALLOC(projections,(cplex, nprojs, nspinor*ndat))
-  ABI_MALLOC(s_projections,(cplex, nprojs, nspinor*ndat))
-  ABI_MALLOC(vnl_projections,(cplex_fac, nprojs, nspinor*ndat))
-  !if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-  !  ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
-  !end if
-
-  ABI_MALLOC(sij_typ,(lmnmax*(lmnmax+1)/2,ntypat))
 
   if(cplex == 2) then
     !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs)
@@ -207,8 +189,6 @@ contains
       !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs)
     end if
   else if(cplex == 1) then
-    !$OMP TARGET ENTER DATA MAP(alloc:temp_realvec_r)
-    !$OMP TARGET ENTER DATA MAP(alloc:temp_realvec_i)
     !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_i)
     !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_r)
     if(gpu_nonlop_current_ikpt%ngrads /= -1) then
@@ -216,32 +196,17 @@ contains
       !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_r)
     end if
   end if
-  !FIXME Smarter buffer management
-  !!$OMP TARGET ENTER DATA MAP(alloc:projections,s_projections,vnl_projections)
-  !if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-  !  !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
-  !end if
-  !$OMP TARGET ENTER DATA MAP(alloc:sij_typ)
 
   mod__cplex = cplex
-  gpu_initialised=1
 
-  call refresh_gemm_nonlop_kpt(ikpt)
-
- end subroutine alloc_gpu_buffers
+ end subroutine alloc_gemm_nonlop_kpt_ompgpu
 !!***
 
 !----------------------------------------------------------------------
 
- subroutine free_gpu_buffers()
+ subroutine free_gemm_nonlop_kpt_ompgpu()
 
-  character(len=500) :: msg
-
-  if(gpu_initialised==0) then
-    msg="GPU nonlop arrays aren't initialized. Useless call"
-    ABI_BUG(msg)
-    return;
-  end if
+  if(current_ikpt_in_gpu == -1) return
 
   if(mod__cplex == 2) then
     !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs)
@@ -249,11 +214,6 @@ contains
       !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs)
     end if
   end if
-  !FIXME Smarter buffer management
-  !!$OMP TARGET EXIT DATA MAP(release:projections,s_projections,vnl_projections)
-  !if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-  !  !$OMP TARGET EXIT DATA MAP(release:dprojections)
-  !end if
   if(mod__cplex == 1) then
     !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_i)
     !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_r)
@@ -261,27 +221,66 @@ contains
       !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_i)
       !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_r)
     end if
-    !$OMP TARGET EXIT DATA MAP(release:temp_realvec_r,temp_realvec_i)
   end if
-  !$OMP TARGET EXIT DATA MAP(release:sij_typ)
 
-  if(mod__cplex == 1) then
+  current_ikpt_in_gpu=-1
+
+ end subroutine free_gemm_nonlop_kpt_ompgpu
+
+!----------------------------------------------------------------------
+
+ subroutine alloc_work_buffers(cplex, cplex_fac, ndat, nprojs, ntypat, lmnmax, npw)
+
+  integer,intent(in) :: cplex, cplex_fac, ndat, nprojs, ntypat, lmnmax, npw
+
+! *************************************************************************
+
+  call free_work_buffers()
+
+  mod__ndat=ndat
+
+  if(cplex == 1) then
+    ABI_MALLOC(temp_realvec_r,(npw*ndat))
+    ABI_MALLOC(temp_realvec_i,(npw*ndat))
+    !$OMP TARGET ENTER DATA MAP(alloc:temp_realvec_r,temp_realvec_i)
+  end if
+
+  ABI_MALLOC(sij_typ,(lmnmax*(lmnmax+1)/2,ntypat))
+  !$OMP TARGET ENTER DATA MAP(alloc:sij_typ)
+
+  ABI_MALLOC(projections,(cplex, nprojs, ndat))
+  ABI_MALLOC(s_projections,(cplex, nprojs, ndat))
+  ABI_MALLOC(vnl_projections,(cplex_fac, nprojs, ndat))
+
+  gpu_initialised=1
+
+ end subroutine alloc_work_buffers
+!!***
+
+!----------------------------------------------------------------------
+
+ subroutine free_work_buffers()
+
+  !$OMP TARGET EXIT DATA MAP(release:sij_typ)
+  if(allocated(sij_typ)) then
+    ABI_FREE(sij_typ)
+  end if
+
+  if(allocated(temp_realvec_r)) then
+    !$OMP TARGET EXIT DATA MAP(release:temp_realvec_r,temp_realvec_i)
     ABI_FREE(temp_realvec_r)
     ABI_FREE(temp_realvec_i)
   end if
 
-  ABI_FREE(projections)
-  ABI_FREE(s_projections)
-  ABI_FREE(vnl_projections)
-  !if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-  !  ABI_FREE(dprojections)
-  !end if
-  ABI_FREE(sij_typ)
-
+  if(allocated(projections)) then
+    ABI_FREE(projections)
+    ABI_FREE(s_projections)
+    ABI_FREE(vnl_projections)
+  end if
+  mod__ndat=0
   gpu_initialised=0
-  current_ikpt_in_gpu=-1
 
- end subroutine free_gpu_buffers
+ end subroutine free_work_buffers
 
 !----------------------------------------------------------------------
 
@@ -339,7 +338,8 @@ contains
     ABI_ERROR(msg)
   end if
 
-  call free_gpu_buffers()
+  call free_work_buffers()
+  call free_gemm_nonlop_kpt_ompgpu()
   ! TODO add cycling if kpt parallelism
   do ikpt = 1,mod__nkpt
     call free_gemm_nonlop_ompgpu_ikpt(ikpt)
@@ -427,12 +427,15 @@ contains
   real(dp), intent(in) :: kpt_k(:)
   real(dp), intent(in), target :: kpg_k(:,:)
 
+  integer :: cplex
 ! *************************************************************************
 
+  call free_gemm_nonlop_kpt_ompgpu()
   call make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
 &                            ph3d_k,kpt_k,kg_k,kpg_k, &
 &                            compute_grad_strain=compute_grad_strain,compute_grad_atom=compute_grad_atom)
-  call refresh_gemm_nonlop_kpt(ikpt)
+  cplex=2;if (istwf_k>1) cplex=1
+  call alloc_gemm_nonlop_kpt_ompgpu(ikpt,cplex)
 
  end subroutine make_gemm_nonlop_ompgpu
 !!***
@@ -554,9 +557,9 @@ contains
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
 
   !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl)
-  if(gpu_initialised == 0) then
-    call alloc_gpu_buffers(gemm_nonlop_ikpt_this_proc_being_treated, cplex, cplex_fac,&
-&        nspinor, ndat, ntypat, lmnmax, MAX(npwin,npwout))
+  if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor) then
+    call alloc_work_buffers(cplex, cplex_fac,&
+&        nspinor*ndat, nprojs, ntypat, lmnmax, MAX(npwin,npwout))
     if(paw_opt>=2 .and. choice > 0 .and. choice /= 7) then
       if (cplex_enl==1) then
         do itypat=1, ntypat
@@ -577,7 +580,7 @@ contains
     !$OMP TARGET UPDATE TO(sij_typ)
   end if
   if(current_ikpt_in_gpu /= gemm_nonlop_ikpt_this_proc_being_treated) then
-    call refresh_gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)
+    call refresh_gemm_nonlop_kpt_ompgpu(gemm_nonlop_ikpt_this_proc_being_treated)
   end if
 
    ! If vectproj is provided, use it for further calculations, use static array otherwise
