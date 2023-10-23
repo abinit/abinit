@@ -377,7 +377,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
  integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
@@ -974,10 +974,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
-       call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb)
-       flush(6)
-       call xmpi_barrier(xmpi_world)
-       ABI_BUG("Nooooooo")
+       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+         ! Only compute CHEBFI number of blocks if user didn't set it themselves
+         if(gemm_nonlop_nblocks==1) then
+           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
+           &                        dtset%use_gpu_cuda,nblk_gemm_nonlop)
+           gemm_nonlop_nblocks = nblk_gemm_nonlop
+           if(gemm_nonlop_nblocks > 1) gemm_nonlop_is_distributed = .true.
+         end if
+       end if
 
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
