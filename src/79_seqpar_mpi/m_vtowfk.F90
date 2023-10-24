@@ -481,6 +481,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        ! use_subvnlx=0; if (gs_hamk%usepaw==0) use_subvnlx=1
 
        if (.not. use_rmm_diis) then
+
+         if (isppol==1.and.ikpt==1.and.inonsc==1.and.istep==1) then
+           if (dtset%tolwfr_diago/=zero) then
+             write(msg, '(a,es16.6)' ) ' cgwf: tolwfr_diago=',dtset%tolwfr_diago
+             call wrtout(std_out,msg,'COLL')
+           end if
+         end if
+
          if (has_cprj_in_memory) then
            call cgwf_cprj(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
