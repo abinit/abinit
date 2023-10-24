@@ -48,14 +48,8 @@ rprim 0.0 1/2 1/2
 kptrlatt 1 0 0 0 1 0 0 0 1
 chksymbreak 0
 
-##### DFT+U
-dmatpuopt  1   # choose expression of the density matrix
-lpawu   2 -1   # U on d-orbitals of Ni, no U on oxygen
-upawu  0.30  0.0   # values in Hartree
-jpawu  0.0350 0.0  # values in Hartree
-
- pp_dirpath "$ABI_PSPDIR"
- pseudos "28ni.paw, 8o.2.paw"
+pp_dirpath "$ABI_PSPDIR"
+pseudos "28ni.paw, 8o.2.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -67,7 +61,7 @@ jpawu  0.0350 0.0  # values in Hartree
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. Baguet
-#%% keywords = PAW, DFTU
+#%% keywords = PAW
 #%% description =
 #%%   Test various values of nbdbuf with lobpcg (114).
 #%% topics = DFT+U
