@@ -199,6 +199,7 @@ P           mkmem2          5
            toldfe2     1.00000000E-08 Hartree
            tolvrs1     1.00000000E-07
            tolvrs2     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
            tsmear      3.80017850E-03 Hartree
             typat      1  2  3  3  3
             upawu1     0.00000000E+00  0.00000000E+00  0.00000000E+00 Hartree
@@ -1378,6 +1379,7 @@ P           mkmem2          5
            toldfe2     1.00000000E-08 Hartree
            tolvrs1     1.00000000E-07
            tolvrs2     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
            tsmear      3.80017850E-03 Hartree
             typat      1  2  3  3  3
             upawu1     0.00000000E+00  0.00000000E+00  0.00000000E+00 Hartree
