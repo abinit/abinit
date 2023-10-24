@@ -830,7 +830,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vpsp,(nfftf))
  if(psps%usepaw==1) then
-    ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
+    ABI_MALLOC(xcctau3d,(n3xccc*dtset%usekden))
  else
     ABI_MALLOC(xcctau3d,(0))
  end if
@@ -870,13 +870,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call timab(562,2,tsec)
  end if
 
-! code for xcctau3d computation copied over from setvtr
  if (coretau_method==1) then
    optv=0;optn=1
    optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=4
    call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
-&   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,dtset%mgfft,psps%mqgrid_vl,dtset%natom,nattyp,dtset%nfft,ngfft,ntypat,&
-&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,dtset%qprtrb,&
+&   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,dtset%qprtrb,&
 &   dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
 &   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
@@ -928,7 +927,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &    nhat,psps%usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
 &    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,psps%usepaw, &
 &    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   end if
+ end if
 
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
@@ -949,7 +948,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
  end if
- ABI_FREE(vhartr)
+
+ ABI_FREE(vhartr) 
 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: ground-state density and potential set up.')
 
