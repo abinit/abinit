@@ -390,6 +390,11 @@ module m_lobpcg2
       ABI_ERROR("Error X0 npairs")
     endif
 
+    if (isppol==1.and.ikpt==1.and.inonsc==1.and.istep==1) then
+      write(msg,'(a,es16.6)') 'lobpcg%tolerance(tolwfr_diago)=',lobpcg%tolerance
+      call wrtout(std_out,msg,'COLL')
+    end if
+
     call xg_init(eigenvalues3N,SPACE_R,blockdim3,1)
     call xg_setBlock(eigenvalues3N,eigenvaluesN,1,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,1,blockdim2,1)
