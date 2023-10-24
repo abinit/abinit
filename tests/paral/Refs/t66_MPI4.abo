@@ -144,6 +144,7 @@ P          mk1mem           1
            tolvrs2     1.00000000E-08
            tolwfr1     1.00000000E-18
            tolwfr2     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  2  2  2  2  2  2
            useylm           1
          wfoptalg1        114
@@ -1772,6 +1773,7 @@ P          mk1mem           1
            tolvrs2     1.00000000E-08
            tolwfr1     1.00000000E-18
            tolwfr2     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  2  2  2  2  2  2
            useylm           1
          wfoptalg1        114
