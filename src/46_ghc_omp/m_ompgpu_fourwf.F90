@@ -382,19 +382,17 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option/=3) then
    ! We launch async transfert of denpot
    !!$OMP TARGET UPDATE FROM(denpot)
-   !$OMP TARGET EXIT DATA MAP(release:denpot)
+   !$OMP TARGET EXIT DATA MAP(delete:denpot)
    if(option == 1) then
-     !$OMP TARGET EXIT DATA MAP(release:weight_r,weight_i)
+     !$OMP TARGET EXIT DATA MAP(delete:weight_r,weight_i)
    endif
  endif
 
-#ifdef HAVE_GPU_CUDA
- !$OMP TARGET EXIT DATA MAP(release:work_gpu)
-#endif
+ !!$OMP TARGET EXIT DATA MAP(delete:work_gpu)
 
- !$OMP TARGET EXIT DATA MAP(release:fofgin)  IF(transfer_fofgin)
- !$OMP TARGET EXIT DATA MAP(release:fofgout) IF(transfer_fofgout)
- !$OMP TARGET EXIT DATA MAP(release:fofr)    IF(transfer_fofr)
+ !$OMP TARGET EXIT DATA MAP(delete:fofgin)  IF(transfer_fofgin)
+ !$OMP TARGET EXIT DATA MAP(delete:fofgout) IF(transfer_fofgout)
+ !$OMP TARGET EXIT DATA MAP(delete:fofr)    IF(transfer_fofr)
 
 end subroutine ompgpu_fourwf
 !!***

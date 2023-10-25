@@ -736,7 +736,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            end if ! use_gpu_cuda
 
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(release:kg_k) IF(dtset%use_gpu_cuda==ABI_GPU_OPENMP)
+           !$OMP TARGET EXIT DATA MAP(delete:kg_k) IF(dtset%use_gpu_cuda==ABI_GPU_OPENMP)
 #endif
          else !paral_kgb==1
 
