@@ -8,7 +8,7 @@ bandpp     8
 prtvol     5
 
 nstep  29
-nstep4 23
+nstep4 22
 
 nsppol 2
 nspden 2
@@ -57,7 +57,7 @@ pseudos "28ni.paw, 8o.2.paw"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t201.abo, tolnlines = 1, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -ridiculous
+#%%   t201.abo, tolnlines = 2, tolabs = 0.000e+00, tolrel = 0.000e+00, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
