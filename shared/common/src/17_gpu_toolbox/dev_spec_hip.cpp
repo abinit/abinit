@@ -87,6 +87,14 @@ void get_gpu_max_mem_(int* device, float* max_mem)
    return;
 }
 
+// Gives currently free memory available for current GPU device ---------
+extern "C"
+void gpu_get_free_mem_cpp(size_t* free_mem)
+{
+   size_t max_mem;
+   HIP_API_CHECK(hipMemGetInfo(&max_mem, free_mem));
+   return;
+}
 
 // Set the device if it exists   -----------------
 extern "C"
@@ -391,7 +399,7 @@ extern "C" void copy_from_gpu_(void *cpu_ptr,void **gpu_ptr, const size_t* size)
 /*            the correct one is in xx_gpu_toolbox/dev_spec.cu                */
 /*============================================================================*/
 
-extern "C" void copy_gpu_to_gpu_(void **dest_gpu_ptr, void **src_gpu_ptr, const size_t* size)
+extern "C" void copy_gpu_to_gpu_cpp_(void **dest_gpu_ptr, void **src_gpu_ptr, const size_t* size)
 {
   if (hipMemcpy(*dest_gpu_ptr, *src_gpu_ptr, *size, hipMemcpyDeviceToDevice) != hipSuccess)
   {
