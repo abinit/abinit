@@ -170,9 +170,9 @@ end type invovl_kpt_type
 
  type(invovl_kpt_type), public,save,allocatable, target :: invovl_kpt(:)
 #ifdef HAVE_OPENMP_OFFLOAD
- real(dp), pointer :: current_gram_projs(:,:,:)
- real(dp), pointer :: current_inv_sij(:,:,:,:)
- real(dp), pointer :: current_inv_s_approx(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_gram_projs(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_inv_sij(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: current_inv_s_approx(:,:,:,:)
  real(dp),allocatable, target :: proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: sm1proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: PtPsm1proj_ompgpu(:,:,:)
@@ -691,15 +691,16 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
-   !$OMP TARGET ENTER DATA MAP(alloc:invovl%gram_projs)
+   current_gram_projs   => invovl%gram_projs
+   !$OMP TARGET ENTER DATA MAP(alloc:current_gram_projs)
    !$OMP TARGET ENTER DATA MAP(to:projs)
 
-   !$OMP TARGET DATA USE_DEVICE_PTR(invovl%gram_projs,projs)
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs,projs)
    call abi_gpu_xgemm(cplx, blas_transpose,'N', invovl%nprojs, slice_size, (3-cplx)*ham%npw_k, cone, &
    &                  c_loc(projs), (3-cplx)*ham%npw_k, &
-   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(invovl%gram_projs), invovl%nprojs)
+   &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
-   !$OMP TARGET EXIT DATA MAP(from:invovl%gram_projs)
+   !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
    !$OMP TARGET EXIT DATA MAP(release:projs)
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 #endif
@@ -1279,7 +1280,7 @@ end subroutine apply_block
 
 subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU)
   use, intrinsic :: iso_c_binding
 #endif
 
@@ -1468,7 +1469,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  integer :: additional_steps_to_take,idat,iproj,icplx
  integer :: Ptsize(3)
 #ifdef HAVE_GPU_HIP
- real(dp), ABI_CONTIGUOUS pointer :: invovl__gram_projs(:,:,:)
  type(c_ptr) :: sm1proj_amdcopy
  type(c_ptr) :: PtPsm1proj_amdcopy
 #endif
@@ -1479,7 +1479,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
 #ifdef HAVE_GPU_HIP
- invovl__gram_projs => invovl%gram_projs(:,:,:)
  !$OMP TARGET MAP(to:sm1proj,PtPsm1proj) MAP(from:sm1proj_amdcopy,PtPsm1proj_amdcopy)
  sm1proj_amdcopy = c_loc(sm1proj)
  PtPsm1proj_amdcopy = c_loc(PtPsm1proj)
@@ -1534,9 +1533,9 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
                 PtPsm1proj, nprojs)
 #endif
 #ifdef HAVE_GPU_HIP
-   !$OMP TARGET DATA USE_DEVICE_PTR(invovl__gram_projs, sm1proj, PtPsm1proj)
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                c_loc(invovl__gram_projs), nprojs,&
+                c_loc(current_gram_projs), nprojs,&
                 sm1proj_amdcopy, nlmntot_this_proc, czero, &
                 PtPsm1proj_amdcopy, nprojs)
    !$OMP END TARGET DATA
