@@ -786,15 +786,15 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
 
 !Local variables-------------------------------
 !scalars
- integer :: ifft,iatom,im,re
- real(dp) :: arg
+ integer :: ifft,iatom,i1,i2,i3,im,n1,n2,n3,re
+ real(dp) :: arg,d1,d2,d3,r1,r2,r3
  real(dp) :: phr1d_re,phr1d_im
  character(len=500) :: msg
 !arrays
  real(dp) :: Bloc(cplex*nfft)
  real(dp) :: my_xred(3,natom),xshift(3, natom)
  real(dp) :: v1_tmp(cplex*nfft,nspden)
-
+ real(dp) :: taumr(3)
 
 ! *************************************************************************
 
@@ -892,19 +892,37 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  !Apply the phase factor if qphon/=0 
  if (any(abs(qphon(:))>tol8)) then 
    v1_tmp=v1zeeman
+   n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
+   d1=one/(real(n1)-one)
+   d2=one/(real(n2)-one)
+   d3=one/(real(n3)-one)
 
    ! This routine is not able to handle xred positions that are "far" from the
    ! first unit cell so wrap xred into [0, 1[ interval here.
    call wrap2_zero_one(xred, my_xred, xshift)
 
-   arg=two_pi*dot_product(qphon,my_xred(:,iatom))
-   phr1d_re=dcos(arg)
-   phr1d_im=dsin(arg)
-   do ifft=1,nfft  
-     re=2*ifft-1
-     im=2*ifft
-     v1zeeman(re,:)=phr1d_re*v1_tmp(re,:)-phr1d_im*v1_tmp(im,:)
-     v1zeeman(im,:)=phr1d_im*v1_tmp(re,:)+phr1d_re*v1_tmp(im,:)
+   ifft=0
+   do i3=1,n3
+     r3=(i3-1)*d3
+     do i2=1,n2
+       r2=(i2-1)*d2
+       do i1=1,n1
+         r1=(i1-1)*d1
+         ifft=ifft+1
+         re=2*ifft-1
+         im=2*ifft
+  
+         taumr(:)=my_xred(:,iatom)-(/r1,r2,r3/)
+         arg=two_pi*dot_product(qphon,taumr)
+  
+         phr1d_re=dcos(arg)
+         phr1d_im=dsin(arg)
+
+         v1zeeman(re,:)=phr1d_re*v1_tmp(re,:)-phr1d_im*v1_tmp(im,:)
+         v1zeeman(im,:)=phr1d_im*v1_tmp(re,:)+phr1d_re*v1_tmp(im,:)
+  
+       end do
+     end do
    end do
  end if 
 
