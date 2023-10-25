@@ -7,7 +7,7 @@ bandpp     8
 
 prtvol     5
 
-nstep  100
+nstep 29
 
 nsppol 2
 nspden 2
@@ -21,8 +21,8 @@ nbdbuf3 -10
 nline4  8
 nbdbuf4 -101
 
-tolwfr 1e-10
-tolvrs 1e-8
+tolwfr 1e-20
+tolvrs 1e-15
 
 ##### CONVERGENCE PARAMETERS
 ecut 4
