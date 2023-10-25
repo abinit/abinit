@@ -3588,17 +3588,16 @@ contains
 #endif
 
 #ifdef HAVE_GPU_HIP
-        !$OMP TARGET UPDATE FROM(dot__vecC,xgBlockA__vecC,xgBlockB__vecC)
-        !!$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
-          !!$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
+          !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(i)
           do i = 1, rows
             tmp = tmp + dconjg(xgBlockA__vecC(i,icol))*xgBlockB__vecC(i,icol)
           end do
           dot__vecC(icol,1)=tmp
         end do
-        !$OMP TARGET UPDATE TO(dot__vecC)
+        !$OMP TARGET UPDATE FROM(dot__vecC)
 #endif
 
         !TODO Port this to GPU (reductions)
@@ -3825,13 +3824,14 @@ contains
 !AOMP 15 doesn't support complex division inside OpenMP !?
 #ifdef HAVE_GPU_HIP
 
-        !$OMP TARGET UPDATE FROM(xgBlockA__vecC,xgBlockB__vecC)
+        !!$OMP TARGET UPDATE FROM(xgBlockA__vecC,xgBlockB__vecC)
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecC,xgBlockB__vecC,divResult__vecC)
         do irow = 1, rows
           do icol = 1, cols
             divResult__vecC(irow,icol) = xgBlockA__vecC(irow,icol)/xgBlockB__vecC(irow,icol)
           end do
         end do
-        !$OMP TARGET UPDATE TO(divResult__vecC)
+        !$OMP TARGET UPDATE FROM(divResult__vecC)
 #endif
         if ( present(max_val) ) then
           max_val = maxval(dble(divResult%vecC))
