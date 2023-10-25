@@ -98,7 +98,7 @@ module m_gemm_nonlop_ompgpu
  integer, save :: mod__nkpt=0
  integer, save :: mod__ndat=0
  real(dp), save, allocatable, target :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:), dprojections(:,:,:)
- real(dp), pointer, save :: temp_realvec_r(:),temp_realvec_i(:)
+ real(dp), save, allocatable :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp), save, allocatable :: sij_typ(:,:)
 
 #endif
@@ -795,8 +795,8 @@ contains
   real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
   real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
   real(dp),intent(inout) :: enlout(nnlout*ndat)
-  real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
-  real(dp),intent(inout),target :: vectout(2,npwout*nspinor*ndat) !vz_i
+  real(dp),intent(out),target :: svectout(:,:)
+  real(dp),intent(inout),target :: vectout(:,:) !vz_i
   real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
