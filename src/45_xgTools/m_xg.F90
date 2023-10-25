@@ -118,13 +118,8 @@ module m_xg
     character, public :: normal
     integer, private :: spacedim_comm
     !FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
     real(kind=c_double)            , ABI_CONTIGUOUS pointer, private :: vecR(:,:) => null()
     complex(kind=c_double_complex) , ABI_CONTIGUOUS pointer, private :: vecC(:,:) => null()
-#else
-    real(kind=c_double)            , allocatable, private :: vecR(:,:)
-    complex(kind=c_double_complex) , allocatable, private :: vecC(:,:)
-#endif
     integer, private :: use_gpu
     type(xgBlock_t), public :: self
   end type xg_t
@@ -346,6 +341,10 @@ contains
     integer(kind=c_int32_t), parameter :: izero = 0
     integer(kind=c_size_t)             :: size_bytes
 #endif
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), pointer :: xg__vecC(:,:)
+    real(dp), pointer :: xg__vecR(:,:)
+#endif
 
     if ( rows < 1 ) then
       ABI_ERROR("rows < 1 ")
@@ -390,7 +389,7 @@ contains
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       select case (space)
       case (SPACE_R,SPACE_CR)
-        if ( allocated(xg%vecR) ) then
+        if ( associated(xg%vecR) ) then
           !$OMP TARGET EXIT DATA MAP(release:xg%vecR)
           ABI_FREE(xg%vecR)
         end if
@@ -410,10 +409,11 @@ contains
 #ifdef HAVE_GPU_HIP
         !FIXME Memset doesn't work between HIP and OpenMP
         xg%vecR(:,:) = zero
-        !$OMP TARGET ENTER DATA MAP(to:xg%vecR)
+        xg__vecR => xg%vecR
+        !$OMP TARGET ENTER DATA MAP(to:xg__vecR)
 #endif
       case (SPACE_C)
-        if ( allocated(xg%vecC) ) then
+        if ( associated(xg%vecC) ) then
           !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
           ABI_FREE(xg%vecC)
         end if
@@ -431,7 +431,8 @@ contains
         !FIXME Memset doesn't work between HIP and OpenMP
 #ifdef HAVE_GPU_HIP
         xg%vecC(:,:) = zero
-        !$OMP TARGET ENTER DATA MAP(to:xg%vecC)
+        xg__vecC => xg%vecC
+        !$OMP TARGET ENTER DATA MAP(to:xg__vecC)
 #endif
 
       case default
@@ -444,11 +445,7 @@ contains
       select case (space)
       case (SPACE_R,SPACE_CR)
 !FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
         if ( associated(xg%vecR) ) then
-#else
-        if ( allocated(xg%vecR) ) then
-#endif
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
@@ -456,11 +453,7 @@ contains
         xg%trans = 't'
       case (SPACE_C)
 !FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
         if ( associated(xg%vecC) ) then
-#else
-        if ( allocated(xg%vecC) ) then
-#endif
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
@@ -983,7 +976,12 @@ contains
 
   subroutine xg_free(xg)
 
-    type(xg_t), intent(inout) :: xg
+    type(xg_t),target, intent(inout) :: xg
+
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+    complex(dpc), pointer :: xg__vecC(:,:)
+    real(dp), pointer :: xg__vecR(:,:)
+#endif
 
     if(xg%use_gpu==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -997,32 +995,25 @@ contains
       end if
 
 #endif
-    else if(xg%use_gpu==ABI_GPU_OPENMP) then
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-
-      if ( allocated(xg%vecR) ) then
-        !$OMP TARGET EXIT DATA MAP(release:xg%vecR)
-        ABI_FREE(xg%vecR)
-      end if
-
-      if ( allocated(xg%vecC) ) then
-        !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
-        ABI_FREE(xg%vecC)
-      end if
-
-#endif
     else
+      if(xg%use_gpu==ABI_GPU_OPENMP) then
+        if ( associated(xg%vecR) ) then
+          xg__vecR => xg%vecR
+          !$OMP TARGET EXIT DATA MAP(release:xg__vecR)
+        end if
 
-      !FIXME Settle this
-#ifndef HAVE_YAKL
-      if ( allocated(xg%vecR) ) then
+        if ( associated(xg%vecC) ) then
+          xg__vecC => xg%vecC
+          !$OMP TARGET EXIT DATA MAP(release:xg__vecC)
+        end if
+      end if
+      if ( associated(xg%vecR) ) then
         ABI_FREE(xg%vecR)
       end if
 
-      if ( allocated(xg%vecC) ) then
+      if ( associated(xg%vecC) ) then
         ABI_FREE(xg%vecC)
       end if
-#endif
     end if
 
   end subroutine xg_free
