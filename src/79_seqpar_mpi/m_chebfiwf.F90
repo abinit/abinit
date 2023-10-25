@@ -67,6 +67,10 @@ module m_chebfiwf
  use m_nvtx_data
 #endif
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_YAKL)
  use gator_mod
 #endif
