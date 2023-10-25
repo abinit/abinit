@@ -368,10 +368,6 @@ has_fock=.false.
  !$OMP TARGET ENTER DATA MAP(alloc:ghc,gsc_ptr,cwavef) IF(transfer_omp_args)
  !$OMP TARGET UPDATE TO(cwavef)                        IF(transfer_omp_args)
 
- if(buf_initialized==0 .or. mod__n4/=gs_ham%n4 .or. mod__n5/=gs_ham%n5 &
-&   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
-    call init_getghc_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
-  end if
 !============================================================
 ! Application of the local potential
 !============================================================
@@ -392,6 +388,10 @@ has_fock=.false.
 !  Apply the local potential to the wavefunction
 !  Start from wavefunction in reciprocal space cwavef
 !  End with function ghc in reciprocal space also.
+   if(buf_initialized==0 .or. mod__n4/=gs_ham%n4 .or. mod__n5/=gs_ham%n5 &
+   &   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
+      call init_getghc_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
+   end if
    !$OMP TARGET ENTER DATA MAP(alloc:work)
    weight=one
    if (.not.use_cwavef_r) then
