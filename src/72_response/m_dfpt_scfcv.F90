@@ -383,7 +383,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !scalars
  integer,parameter :: level=12,response=1
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
- integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
+ integer :: has_dijfr,has_diju,has_vxctau,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,istep_fock_outer,istep_mix,itypat,izero,me,mgfftdiel,mvdum !lmn2_size,
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
@@ -557,8 +557,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    has_dijfr=0;if (ipert/=dtset%natom+1.and.ipert/=dtset%natom+10) has_dijfr=1
    has_diju=merge(0,1,dtset%usepawu==0)
+   has_vxctau=dtset%usekden
    call paw_an_init(paw_an1,dtset%natom,dtset%ntypat,0,0,dtset%nspden,&
-&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,&
+&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=has_vxctau,&
 &   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call paw_ij_init(paw_ij1,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,0,dtset%natom,&
 &   dtset%ntypat,dtset%typat,pawtab,&
