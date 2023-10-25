@@ -2264,7 +2264,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ils=lmin,lmax,2
              lm0=ils**2+ils+1
              do mm=-ils,ils
-               ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+               ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                if (isel>0) dijhat_idij(klmn)=dijhat_idij(klmn) &
 &                  +prod(ilslm)*pawtab%qijl(ilslm,klmn)
              end do
@@ -2279,9 +2279,11 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ils=lmin,lmax,2
              lm0=ils**2+ils+1
              do mm=-ils,ils
-               ilslm=lm0+mm;ilslm1=2*ilslm;isel=pawang%gntselect(lm0+mm,klm)
-               if (isel>0) dijhat_idij(klmn1:klmn1+1)=dijhat_idij(klmn1:klmn1+1) &
-&                  +prod(ilslm1-1:ilslm1)*pawtab%qijl(ilslm,klmn)
+               ilslm=lm0+mm;ilslm1=2*ilslm;isel=pawang%gntselect(ilslm,klm)
+               if (isel>0) then
+                 dijhat_idij(klmn1  )=dijhat_idij(klmn1  )+prod(ilslm1-1)*pawtab%qijl(ilslm,klmn)
+                 dijhat_idij(klmn1+1)=dijhat_idij(klmn1+1)+prod(ilslm1  )*pawtab%qijl(ilslm,klmn)
+               end if
              end do
            end do
          end do
@@ -2673,7 +2675,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    else if (idij==2) then
      do klmn=1,lmn2_size
        if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1:klmn1+1,2)=-dijso(klmn1:klmn1+1,1)
+         dijso(klmn1  ,2)=-dijso(klmn1  ,1)
+         dijso(klmn1+1,2)=-dijso(klmn1+1,1)
        end if
        klmn1=klmn1+cplex_dij
      end do
@@ -3508,7 +3511,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij,cplex_nspden,dplex_nsp,dplex_q,iatom,iatom_tot,ic,idij,idijend,ier,ils,ilslm,isel
+ integer :: cplex_dij,cplex_nspden,cplex_p1,iatom,iatom_tot,ic,idij,idijend,ier,ils,ilslm,isel
  integer :: ispden,istr,itypat,jc,klm,klmn,klmn1,klmn2,kln,lm_size,lmn2_size,lm0,lmax,lmin,mesh_size
  integer :: mm,my_comm_atom,my_comm_grid,mu,mua,mub,ndij,nfftot,nfgd,nsploop
  integer :: optgr0,optgr1,optgr2,usexcnhat
@@ -3569,8 +3572,6 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  fact=ucvol/dble(nfftot)
  cplex_nspden=merge(1,2,nspden/=4)
- dplex_nsp=cplex_nspden-1
- dplex_q=qphase-1
 
 !Loops over  atoms
  do iatom=1,my_natom
@@ -3733,10 +3734,18 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 
 !                ----- Retrieve potential Vloc^(1)
                  LIBPAW_ALLOCATE(vloc,(qphase,nfgd))
-                 do ic=1,nfgd
-                   jc=qphase*pawfgrtab(iatom)%ifftsph(ic)-dplex_q
-                   vloc(1:qphase,ic)=vpsp1(jc:jc+dplex_q)
-                 end do
+                 if (qphase==1) then
+                   do ic=1,nfgd
+                     jc=qphase*pawfgrtab(iatom)%ifftsph(ic)
+                     vloc(1,ic)=vpsp1(jc)
+                   end do
+                 else
+                   do ic=1,nfgd
+                     jc=2*pawfgrtab(iatom)%ifftsph(ic)-1
+                     vloc(1,ic)=vpsp1(jc  )
+                     vloc(2,ic)=vpsp1(jc+1)
+                   end do
+                 end if
 
 !                ----- Compute Integral [ Vloc^(1)(r).g_l(r).Y_lm(r) ]
                  LIBPAW_ALLOCATE(intvloc,(qphase,lm_size))
@@ -3794,7 +3803,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
              paw_ij1(iatom)%dijfr(:,ispden)=zero
 
 !            ---- Loop over (i,j) components
-             klmn1=1;klmn2=1+lmn2_size*cplex_dij
+             klmn1=1;klmn2=1+lmn2_size*cplex_dij ; cplex_p1=cplex_nspden+1
              do klmn=1,lmn2_size
                klm =pawtab(itypat)%indklmn(1,klmn)
                lmin=pawtab(itypat)%indklmn(3,klmn)
@@ -3802,17 +3811,33 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
                do ils=lmin,lmax,2
                  lm0=ils**2+ils+1
                  do mm=-ils,ils
-                   ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                   ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                    if (isel>0) then
                      !The following works only because cplex_nspden<=cplex_dij
-                     paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
-    &                 paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
-    &                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
-                     if (qphase==2) then
-                       paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden)= &
-    &                   paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden) &
-    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(1+cplex_nspden:2*cplex_nspden,ilslm)
+                     paw_ij1(iatom)%dijfr(klmn1,ispden)=paw_ij1(iatom)%dijfr(klmn1,ispden) &
+    &                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1,ilslm)
+                     if (cplex_nspden==2) then
+                       paw_ij1(iatom)%dijfr(klmn1+1,ispden)=paw_ij1(iatom)%dijfr(klmn1+1,ispden) &
+    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(2,ilslm)
                      end if
+                     if (qphase==2) then
+                       paw_ij1(iatom)%dijfr(klmn2,ispden)=paw_ij1(iatom)%dijfr(klmn2,ispden) &
+    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(cplex_p1,ilslm)
+                       if (cplex_nspden==2) then
+                         paw_ij1(iatom)%dijfr(klmn2+1,ispden)=paw_ij1(iatom)%dijfr(klmn2+1,ispden) &
+    &                     +pawtab(itypat)%qijl(ilslm,klmn)*intv(4,ilslm)
+                       end if
+                     end if
+!Previous version
+!                    dplex_nsp=cplex_nspden-1
+!                    paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
+!    &                paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
+!    &                +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
+!                    if (qphase==2) then
+!                      paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden)= &
+!    &                  paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden) &
+!    &                  +pawtab(itypat)%qijl(ilslm,klmn)*intv(1+cplex_nspden:2*cplex_nspden,ilslm)
+!                    end if
                    end if
                  end do
                end do
@@ -4009,12 +4034,20 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
              do ils=lmin,lmax,2
                lm0=ils**2+ils+1
                do mm=-ils,ils
-                 ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                 ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                  if (isel>0) then
                    !The following works only because cplex_nspden<=cplex_dij
-                   paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
-&                    paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
-&                    +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
+                   paw_ij1(iatom)%dijfr(klmn1,ispden)=paw_ij1(iatom)%dijfr(klmn1,ispden) &
+&                    +pawtab(itypat)%qijl(ilslm,klmn)*intv(1,ilslm)
+                   if (cplex_nspden==2) then
+                     paw_ij1(iatom)%dijfr(klmn1+1,ispden)=paw_ij1(iatom)%dijfr(klmn1+1,ispden) &
+&                      +pawtab(itypat)%qijl(ilslm,klmn)*intv(2,ilslm)
+                   end if
+!Previous version
+!                  dplex_nsp=cplex_nspden-1
+!                  paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
+!&                   paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
+!&                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
                  end if
                end do
              end do
