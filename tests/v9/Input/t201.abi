@@ -7,7 +7,8 @@ bandpp     8
 
 prtvol     5
 
-nstep 29
+nstep  29
+nstep4 23
 
 nsppol 2
 nspden 2
