@@ -1835,7 +1835,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    lastband = firstband+chunk
  end if
  usegvnlxc=1
- if (size(gvnlxc)==0) usegvnlxc=0
+ if (size(gvnlxc)<=1) usegvnlxc=0
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1

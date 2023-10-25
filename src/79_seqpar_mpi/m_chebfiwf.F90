@@ -274,7 +274,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- real(dp) :: gsc_dummy(0,0)
+ real(dp) :: gsc_dummy(1,1)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -529,7 +529,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
  real(dp), pointer :: gsc(:,:)
- real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp)          :: l_gvnlxc(1,1)
 
 ! *********************************************************************
 
@@ -575,12 +575,10 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
  !end if
 
- ABI_MALLOC(l_gvnlxc,(0,0))
 
  call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
    l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
- ABI_FREE(l_gvnlxc)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  !if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
@@ -774,7 +772,6 @@ subroutine getBm1X(X,Bm1X,transposer)
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
-     call pawcprj_alloc(cwaveprj_next,0,(/1/))
    else
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
@@ -852,7 +849,6 @@ subroutine getBm1X(X,Bm1X,transposer)
  end if
  if (l_paw) then
    if (l_useria /= 121212) then
-     call pawcprj_free(cwaveprj_next)
      ABI_FREE(cwaveprj_next)
    end if
  end if
