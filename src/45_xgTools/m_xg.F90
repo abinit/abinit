@@ -390,7 +390,7 @@ contains
       select case (space)
       case (SPACE_R,SPACE_CR)
         if ( associated(xg%vecR) ) then
-          !$OMP TARGET EXIT DATA MAP(release:xg%vecR)
+          !$OMP TARGET EXIT DATA MAP(delete:xg%vecR)
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
@@ -414,7 +414,7 @@ contains
 #endif
       case (SPACE_C)
         if ( associated(xg%vecC) ) then
-          !$OMP TARGET EXIT DATA MAP(release:xg%vecC)
+          !$OMP TARGET EXIT DATA MAP(delete:xg%vecC)
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
@@ -999,12 +999,12 @@ contains
       if(xg%use_gpu==ABI_GPU_OPENMP) then
         if ( associated(xg%vecR) ) then
           xg__vecR => xg%vecR
-          !$OMP TARGET EXIT DATA MAP(release:xg__vecR)
+          !$OMP TARGET EXIT DATA MAP(delete:xg__vecR)
         end if
 
         if ( associated(xg%vecC) ) then
           xg__vecC => xg%vecC
-          !$OMP TARGET EXIT DATA MAP(release:xg__vecC)
+          !$OMP TARGET EXIT DATA MAP(delete:xg__vecC)
         end if
       end if
       if ( associated(xg%vecR) ) then
@@ -2862,7 +2862,7 @@ contains
           end do
         end do
       end select
-      !$OMP TARGET EXIT DATA MAP(release:vec)
+      !$OMP TARGET EXIT DATA MAP(delete:vec)
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in
       ! input parameter file
@@ -2963,7 +2963,7 @@ contains
           end do
         end do
       end select
-      !$OMP TARGET EXIT DATA MAP(release:vec)
+      !$OMP TARGET EXIT DATA MAP(delete:vec)
 
 #else
       ! we shouldn't be here, it means use_gpu_cuda was wrongly set to 1 in

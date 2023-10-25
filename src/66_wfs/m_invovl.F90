@@ -331,9 +331,9 @@ CONTAINS
   end if
 
   if(current_ikpt_in_gpu /= -1) then
-    !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
-    !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
-    !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
+    !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
+    !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
+    !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
   end if
 
   current_gram_projs   => invovl_kpt(ikpt)%gram_projs
@@ -397,15 +397,15 @@ CONTAINS
   if(use_gpu_cuda==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     if(gpu_initialized==1 .and. current_ikpt_in_gpu == ikpt) then
-      !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
+      !$OMP TARGET EXIT DATA MAP(delete:current_gram_projs)
+      !$OMP TARGET EXIT DATA MAP(delete:current_inv_sij)
+      !$OMP TARGET EXIT DATA MAP(delete:current_inv_s_approx)
       nullify(current_gram_projs)
       nullify(current_inv_sij)
       nullify(current_inv_s_approx)
       current_ikpt_in_gpu = -1
       !FIXME Smater buffer management ?
-      !!$OMP TARGET EXIT DATA MAP(release:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
+      !!$OMP TARGET EXIT DATA MAP(delete:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
       ABI_FREE(proj_ompgpu)
       ABI_FREE(sm1proj_ompgpu)
       ABI_FREE(PtPsm1proj_ompgpu)
@@ -701,7 +701,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
    &                  c_loc(projs), (3-cplx)*ham%npw_k, czero, c_loc(current_gram_projs), invovl%nprojs)
    !$OMP END TARGET DATA
    !$OMP TARGET EXIT DATA MAP(from:current_gram_projs)
-   !$OMP TARGET EXIT DATA MAP(release:projs)
+   !$OMP TARGET EXIT DATA MAP(delete:projs)
    call xmpi_sum(invovl%gram_projs,mpi_enreg%comm_band,ierr)
 #endif
  else
@@ -1425,11 +1425,11 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
-    !$OMP TARGET EXIT DATA MAP(release:sm1cwavef,cwavef)
+    !$OMP TARGET EXIT DATA MAP(delete:sm1cwavef,cwavef)
   end if
 
-  !$OMP TARGET EXIT DATA MAP(release:gvnlxc)
-  !$OMP TARGET EXIT DATA MAP(release:proj,sm1proj,PtPsm1proj)
+  !$OMP TARGET EXIT DATA MAP(delete:gvnlxc)
+  !$OMP TARGET EXIT DATA MAP(delete:proj,sm1proj,PtPsm1proj)
 
 end subroutine apply_invovl_ompgpu
 !!***
@@ -1603,7 +1603,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
      end do
    end do
  end do
- !$OMP TARGET EXIT DATA MAP(release:errs,resid,precondresid,normprojs)
+ !$OMP TARGET EXIT DATA MAP(delete:errs,resid,precondresid,normprojs)
 
  if(maxerr >= precision .and. maxerr >= 1e-10) then
    write(message, *) 'In invovl, max error was', maxerr, ' after 30 iterations'

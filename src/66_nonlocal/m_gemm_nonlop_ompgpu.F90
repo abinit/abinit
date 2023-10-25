@@ -198,16 +198,16 @@ contains
   integer,intent(in) :: ikpt
 
   if(mod__cplex == 2) then
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
     if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
     end if
   else if(mod__cplex == 1) then
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_i)
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_r)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
     if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_i)
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_r)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
     end if
   end if
 
@@ -296,17 +296,17 @@ contains
   if(current_ikpt_in_gpu == -1) return
 
   if(mod__cplex == 2) then
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
     if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
     end if
   end if
   if(mod__cplex == 1) then
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_i)
-    !$OMP TARGET EXIT DATA MAP(release:current_ikpt_projs_r)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
     if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_i)
-      !$OMP TARGET EXIT DATA MAP(release:current_ikpt_dprojs_r)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
+      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
     end if
   end if
 
@@ -355,16 +355,16 @@ contains
 
   !FIXME Smarter buffer management
 #ifdef HAVE_GPU_HIP
-  !$OMP TARGET EXIT DATA MAP(release:projections,s_projections,vnl_projections)
+  !$OMP TARGET EXIT DATA MAP(delete:projections,s_projections,vnl_projections)
 #endif
 
-  !$OMP TARGET EXIT DATA MAP(release:sij_typ)
+  !$OMP TARGET EXIT DATA MAP(delete:sij_typ)
   if(allocated(sij_typ)) then
     ABI_FREE(sij_typ)
   end if
 
   if(allocated(temp_realvec_r)) then
-    !$OMP TARGET EXIT DATA MAP(release:temp_realvec_r,temp_realvec_i)
+    !$OMP TARGET EXIT DATA MAP(delete:temp_realvec_r,temp_realvec_i)
     ABI_FREE(temp_realvec_r)
     ABI_FREE(temp_realvec_i)
   end if
@@ -1554,36 +1554,36 @@ contains
  end if
 
  ! Retrieve and release allocated buffers
- !$OMP TARGET EXIT DATA MAP(release:vectin) IF(transfer_vectin)
+ !$OMP TARGET EXIT DATA MAP(delete:vectin) IF(transfer_vectin)
  !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
  !$OMP TARGET EXIT DATA MAP(from:svectout)  IF(transfer_svectout)
 
 #ifdef HAVE_GPU_CUDA
- !$OMP TARGET EXIT DATA MAP(release:s_projections,vnl_projections)
+ !$OMP TARGET EXIT DATA MAP(delete:s_projections,vnl_projections)
  if(.not. local_vectproj) then
-   !$OMP TARGET EXIT DATA MAP(release:projections_ptr)
+   !$OMP TARGET EXIT DATA MAP(delete:projections_ptr)
  end if
 #endif
 
 ! Release memory
   if(signs == 1) then
-    !$OMP TARGET EXIT DATA MAP(release:enlout)
+    !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
   if(gemm_nonlop_is_distributed) then
-    !$OMP TARGET EXIT DATA MAP(release:projs_recv)
+    !$OMP TARGET EXIT DATA MAP(delete:projs_recv)
     ABI_FREE(projs_recv)
     if (signs==1.and.ngrads>0) then
-      !$OMP TARGET EXIT DATA MAP(release:dprojs_recv)
+      !$OMP TARGET EXIT DATA MAP(delete:dprojs_recv)
       ABI_FREE(dprojs_recv)
     end if
   end if
-  !$OMP TARGET EXIT DATA MAP(release:atindx1,indlmn,enl)
+  !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn,enl)
   if (allocated(dprojections)) then
-    !$OMP TARGET EXIT DATA MAP(release:dprojections)
+    !$OMP TARGET EXIT DATA MAP(delete:dprojections)
     ABI_FREE(dprojections)
   end if
   if (allocated(enlk)) then
-    !$OMP TARGET EXIT DATA MAP(release:enlk,nattyp)
+    !$OMP TARGET EXIT DATA MAP(delete:enlk,nattyp)
     ABI_FREE(enlk)
   end if
 

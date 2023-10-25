@@ -124,7 +124,7 @@ subroutine free_getghc_ompgpu_buffers
 #ifdef HAVE_OPENMP_OFFLOAD
  !FIXME Smater buffer management ?
 #ifdef HAVE_GPU_HIP
- !$OMP TARGET EXIT DATA MAP(release:work)
+ !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
  ABI_FREE(work)
 
@@ -760,7 +760,7 @@ has_fock=.false.
    end if
 
 #ifndef HAVE_GPU_HIP
-   !$OMP TARGET EXIT DATA MAP(release:work)
+   !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
  end if ! type_calc
  ABI_NVTX_END_RANGE()
@@ -916,8 +916,8 @@ has_fock=.false.
 
  end if ! type_calc
 
- !$OMP TARGET EXIT DATA MAP(release:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
- !$OMP TARGET EXIT DATA MAP(release:gvnlxc_)
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
+ !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_)
  if (local_gvnlxc .and. any(type_calc == [0, 2, 3])) then
    ABI_FREE(gvnlxc_)
  end if

@@ -464,7 +464,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_free(chebfi)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%use_gpu_impl==ABI_GPU_OPENMP)
 #endif
 !################    SORRY IT'S ALREADY FINISHED : )  #################
 !######################################################################
