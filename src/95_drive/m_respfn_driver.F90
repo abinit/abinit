@@ -1458,12 +1458,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Complete the d2nfr matrix by symmetrization of the existing elements
    !write(std_out,*)"blkflg before d2sym3: ", blkflg
-   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta)
+   call d2sym3(blkflg,d2nfr,indsym,mpert,natom,dtset%nsym,qphon,symq,symrec,&
+ & dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta,omega=dtset%rfomega)
    !write(std_out,*)"blkflg after d2sym3: ", blkflg
 
    if(rfphon==1.and.psps%n1xccc/=0)then
 !    Complete the dyfrx1 matrix by symmetrization of the existing elements
-     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,symrec,dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta)
+     call d2sym3(blkflgfrx1,dyfrx1,indsym,natom,natom,dtset%nsym,qphon,symq,&
+ & symrec,dtset%symrel,timrev,zero_by_symm,eta=dtset%rfeta,omega=dtset%rfomega)
    end if
 
 !  Note that d2sym3 usually complete the 2nd-order matrix
