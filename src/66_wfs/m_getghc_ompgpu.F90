@@ -48,6 +48,11 @@ module m_getghc_ompgpu
 !!***
 
  public :: getghc_ompgpu      ! Compute <G|H|C> for input vector |C> expressed in reciprocal space
+
+ ! These routines allows to manage work buffers outside of getghc_ompgpu
+ public :: alloc_getghc_ompgpu_buffers
+ public :: free_getghc_ompgpu_buffers
+
 !!***
 #ifdef HAVE_OPENMP_OFFLOAD
  integer, save :: mod__n4=0, mod__n5=0, mod__n6=0, mod__nspinor=0, mod__ndat=0, mod__npw=0
@@ -59,12 +64,19 @@ contains
 !!***
 
 
-#ifdef HAVE_OPENMP_OFFLOAD
-subroutine init_getghc_buffers(npw, nspinor, ndat, n4, n5, n6)
+!!****f* ABINIT/alloc_getghc_ompgpu_buffers
+!! NAME
+!! alloc_getghc_ompgpu_buffers
+!!
+!! FUNCTION
+!! Allocate getghc_ompgpu work buffer
+!!
+subroutine alloc_getghc_ompgpu_buffers(npw, nspinor, ndat, n4, n5, n6)
   integer, intent(in) :: npw, nspinor, ndat, n4, n5, n6
 
+#ifdef HAVE_OPENMP_OFFLOAD
   if (buf_initialized == 1) then
-    call free_getghc_buffers()
+    call free_getghc_ompgpu_buffers()
   end if
 
  ABI_MALLOC(work,(2, n4, n5, n6*ndat))
@@ -79,19 +91,32 @@ subroutine init_getghc_buffers(npw, nspinor, ndat, n4, n5, n6)
 
  buf_initialized = 1
 
-end subroutine init_getghc_buffers
+#else
+ ABI_UNUSED((/npw,nspinor,ndat,n4,n5,n6/))
+#endif
+end subroutine alloc_getghc_ompgpu_buffers
+!!***
 
-subroutine free_getghc_buffers
 
+!!****f* ABINIT/free_getghc_ompgpu_buffers
+!! NAME
+!! free_getghc_ompgpu_buffers
+!!
+!! FUNCTION
+!! Free getghc_ompgpu work buffer
+!!
+subroutine free_getghc_ompgpu_buffers
+
+#ifdef HAVE_OPENMP_OFFLOAD
  !FIXME Smater buffer management ?
  !!$OMP TARGET EXIT DATA MAP(release:work)
  ABI_FREE(work)
 
  buf_initialized = 0
 
-end subroutine free_getghc_buffers
-
 #endif
+end subroutine free_getghc_ompgpu_buffers
+!!***
 
 !!****f* ABINIT/getghc_ompgpu
 !! NAME
@@ -387,10 +412,9 @@ has_fock=.false.
 
 !  Apply the local potential to the wavefunction
 !  Start from wavefunction in reciprocal space cwavef
-!  End with function ghc in reciprocal space also.
    if(buf_initialized==0 .or. mod__n4/=gs_ham%n4 .or. mod__n5/=gs_ham%n5 &
-   &   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
-      call init_getghc_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
+  &   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
+      call alloc_getghc_ompgpu_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
    end if
    !$OMP TARGET ENTER DATA MAP(alloc:work)
    weight=one
