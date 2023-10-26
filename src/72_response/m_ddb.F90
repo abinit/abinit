@@ -2157,7 +2157,7 @@ subroutine ddb_from_file_txt(ddb, filename, brav, ddb_hdr, crystal, comm, prtvol
  lmnmax = ddb_hdr%psps%lmnmax
  occopt = ddb_hdr%occopt
 
- mpert = natom+MPERT_MAX
+ mpert = 2*natom+MPERT_MAX
  msize=3*mpert*3*mpert; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
@@ -4255,7 +4255,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
  ! Allocate arrays
  ! ===============
 
- mpert = matom + MPERT_MAX
+ mpert = 2*matom + MPERT_MAX
  msize = 3 * mpert * 3 * mpert
 
  if (mblktyp==3 .or. mblktyp==33) msize = msize * 3 * mpert

@@ -1421,7 +1421,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta,omega)
 
 !Arguments -------------------------------
 !scalars
@@ -1432,7 +1432,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
- real(dp),optional,intent(in) :: eta
+ real(dp),optional,intent(in) :: eta,omega
 
 !Local variables -------------------------
 !scalars
@@ -1493,7 +1493,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
 !            Either complete the symmetric missing element
-             if(blkflg(idir2,ipert2,idir1,ipert1)==0)then
+             if(blkflg(idir2,ipert2,idir1,ipert1)==0.and.omega<tol8)then
 
                d2(1,idir2,ipert2,idir1,ipert1)= d2(1,idir1,ipert1,idir2,ipert2)
                d2(2,idir2,ipert2,idir1,ipert1)=-d2(2,idir1,ipert1,idir2,ipert2)
@@ -4468,7 +4468,7 @@ end subroutine d3sym
 !! SOURCE
 
 !subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
-subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
+subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel,timdisp)
 
 !Arguments -------------------------------
 !scalars
@@ -4477,6 +4477,7 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ integer,optional,intent(in) :: timdisp
  real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
 ! real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
@@ -4508,13 +4509,14 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
              if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
               (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
 
-               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-               d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
-               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
-              -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               if (timdisp/=1) then
+                 d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+                 d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+                 d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+                -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
-               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
-
+                 blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+               end if
              end if
 
            end do
