@@ -107,7 +107,7 @@ module m_gstate
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_alloc_hamilt_gpu
 #endif
 
@@ -994,8 +994,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Here allocation of GPU for vtorho calculations
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
    call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%use_gpu_cuda)
  end if
 #endif
@@ -1810,8 +1810,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Eventually clean cuda runtime
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU
+ if (dtset%use_gpu_cuda/=ABI_GPU_DISABLED) then
    call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
  end if
 #endif
