@@ -24,7 +24,8 @@ module m_alloc_hamilt_gpu
  use m_abicore
  use m_xmpi
  use m_dtset
-#if defined HAVE_GPU_CUDA
+ use m_ompgpu_fourwf
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -106,7 +107,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
 !Local variables-------------------------------
 !scalars
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  integer :: dimekb1_max,dimekb2_max,dimffnl_max,ierr,ikpt,npw_max_loc,npw_max_nonloc
  integer :: cplex
  integer ::npwarr_tmp(dtset%nkpt)
@@ -118,7 +119,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
  if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+#if defined(HAVE_GPU)
 !=== Local Hamiltonian ===
  if (option==0.or.option==2) then
 !  Compute max of total planes waves
@@ -134,9 +135,15 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    ! ndat=bandpp when paral_kgb=1
    ! no matter paral_kgb=0 or 1, we gathet all bands into a single call gpu_fourwf
    if(use_gpu_cuda == ABI_GPU_LEGACY) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
      call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+#endif
    else if (use_gpu_cuda == ABI_GPU_KOKKOS) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
      call alloc_gpu_fourwf_managed(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
+#endif
+   else if (use_gpu_cuda == ABI_GPU_OPENMP) then
+     call alloc_ompgpu_fourwf(dtset%ngfft,dtset%bandpp)
    end if
 
  end if
@@ -158,33 +165,36 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    if (dtset%usepaw==0) dimekb2_max=psps%ntypat
    if (dtset%usepaw==1) dimekb2_max=dtset%natom
 
-   ! TODO (PK) : disable this allocation when Kokkos is available
-   ! to save memory on GPU side
-   call alloc_nonlop_gpu(npw_max_nonloc, &
-     &                   npw_max_nonloc,&
-     &                   dtset%nspinor,&
-     &                   dtset%natom,&
-     &                   dtset%ntypat,&
-     &                   psps%lmnmax,&
-     &                   psps%indlmn,&
-     &                   nattyp,&
-     &                   atindx1,&
-     &                   gprimd,&
-     &                   dimffnl_max,&
-     &                   dimffnl_max,&
-     &                   dimekb1_max,&
-     &                   dimekb2_max)
+   if (use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) then
 
-   if ((use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) &
-     &  .and. dtset%use_gemm_nonlop == 1) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+     ! TODO (PK) : disable this allocation when Kokkos is available
+     ! to save memory on GPU side
+     call alloc_nonlop_gpu(npw_max_nonloc, &
+       &                   npw_max_nonloc,&
+       &                   dtset%nspinor,&
+       &                   dtset%natom,&
+       &                   dtset%ntypat,&
+       &                   psps%lmnmax,&
+       &                   psps%indlmn,&
+       &                   nattyp,&
+       &                   atindx1,&
+       &                   gprimd,&
+       &                   dimffnl_max,&
+       &                   dimffnl_max,&
+       &                   dimekb1_max,&
+       &                   dimekb2_max)
 
-     call alloc_nonlop_gpu_data(dtset, &
-       &                      psps, &
-       &                      npw_max_nonloc,&
-       &                      npw_max_nonloc,&
-       &                      atindx1,&
-       &                      nattyp,&
-       &                      use_gpu_cuda)
+     if (dtset%use_gemm_nonlop == 1) then
+       call alloc_nonlop_gpu_data(dtset, &
+         &                      psps, &
+         &                      npw_max_nonloc,&
+         &                      npw_max_nonloc,&
+         &                      atindx1,&
+         &                      nattyp,&
+         &                      use_gpu_cuda)
+     end if
+#endif
 
    end if
 
@@ -194,6 +204,8 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
 #else
 
+ ABI_UNUSED(npwarr)
+ ABI_UNUSED_A(psps)
  if (.false.) then
    write(std_out,*) atindx1(1),dtset%natom,gprimd(1,1),mpi_enreg%me,nattyp(1),option
  end if
@@ -235,9 +247,8 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
 
  if (use_gpu_cuda==ABI_GPU_DISABLED) return
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
-
  if (use_gpu_cuda == ABI_GPU_KOKKOS .or. use_gpu_cuda == ABI_GPU_LEGACY) then
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
    if (option==0.or.option==2) then
      if (use_gpu_cuda == ABI_GPU_LEGACY) then
        call free_gpu_fourwf()
@@ -250,16 +261,14 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
      call free_nonlop_gpu()
      call dealloc_nonlop_gpu_data()
    end if ! option 1 or 2
-
+#endif
+ else if(use_gpu_cuda == ABI_GPU_OPENMP) then
+   call free_ompgpu_fourwf()
  end if
-
-#else
 
  if (.false.) then
    write(std_out,*) option
  end if
-
-#endif
 
 end subroutine dealloc_hamilt_gpu
 !!***
