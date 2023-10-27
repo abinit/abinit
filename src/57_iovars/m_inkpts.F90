@@ -212,6 +212,9 @@ subroutine inkpts(bravais,chksymbreak,fockdownsampling,iout,iscf,istwfk,jdtset,&
    ! Normalize the k-point weights when occopt/=2
    ! Check that k point weights add to 1 when occopt==2
    if  (iscf>0.or.iscf==-1.or.iscf==-3.or.(iscf==-2.and.response==1))  then
+#ifdef FC_CRAY
+     wtk=one
+#endif
      call intagm(dprarr,intarr,jdtset,marr,nkpt,string(1:lenstr),'wtk',tread,'DPR')
      if(tread==1) wtk(1:nkpt)=dprarr(1:nkpt)
 

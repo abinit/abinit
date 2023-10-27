@@ -77,6 +77,7 @@ MODULE m_fftw3
  public :: fftw3_fftug          ! G-->R. 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_fftur          ! R-->G, 3D zero-padded FFT of lengths nx, ny, nz. Mainly used for wavefunctions
  public :: fftw3_use_lib_threads
+ public :: fftw3_spawn_threads_here
 
  public :: fftw3_mpifourdp
 
