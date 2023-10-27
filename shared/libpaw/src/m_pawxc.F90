@@ -1316,6 +1316,9 @@ subroutine pawxc(corexc,enxc,enxcdc,hyb_mixing,ixc,kxc,k3xc,lm_size,lmselect,nha
      end if
 
 !    Call to main XC driver
+     !LTEST
+     !write(std_out,*) 'call pawxc_drivexc_wrapper (pawxc)'
+     !LTEST
      call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden_updn,&
 &          usegradient,uselaplacian,usekden,rho_updn,exci,vxci,&
 &          nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc,&
@@ -3061,6 +3064,9 @@ end subroutine pawxc_dfpt
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
+ !LTEST
+ !write(std_out,*) 'call pawxc_drivexc_wrapper (pawxcsph)'
+ !LTEST
  call pawxc_drivexc_wrapper(hyb_mixing,ixc,order,nrad,nspden,&
 &          usegradient,uselaplacian,usekden,rho_updn,exc,vxc,&
 &          nvxcdgr,0,0,ndvxc,0,grho2=grho2,vxcgrho=dvxcdgr,&
@@ -3352,6 +3358,9 @@ subroutine pawxcsph_dfpt(cplex_den,cplex_vxc,ixc,nrad,nspden,pawrad,rho_updn,rho
  LIBPAW_ALLOCATE(dvxcdgr,(nrad,nvxcdgr))
 
 !Call to main XC driver
+!LTEST
+! write(std_out,*) 'call pawxc_drivexc_wrapper (pawxcsph_dfpt)'
+!LTEST
  call pawxc_drivexc_wrapper(hyb_mixing_,ixc,order,nrad,nspden,usegradient,0,0,&
 &             rho_updn,exc,vxc,nvxcdgr,0,0,ndvxc,0,&
 &             grho2=grho2,vxcgrho=dvxcdgr,dvxc=dvxc)
@@ -5793,11 +5802,24 @@ subroutine pawxc_drivexc_abinit()
 
 ! *************************************************************************
 
- test_args=(present(dvxc).and.present(d2vxc))
+ test_args=present(dvxc)
+ if (nd2vxc>0) test_args=(test_args.and.present(d2vxc))
  if (usegradient==1) test_args=(test_args.and.present(grho2).and.present(vxcgrho))
  if (uselaplacian==1) test_args=(test_args.and.present(lrho).and.present(vxclrho))
  if (usekden==1) test_args=(test_args.and.present(tau).and.present(vxctau))
  if (.not.test_args) then
+   !write(std_out,*) 'dvxc',present(dvxc)
+   !write(std_out,*) 'd2vxc',present(d2vxc)
+   !write(std_out,*) 'usegradient',usegradient
+   !write(std_out,*) 'grho2',present(grho2)
+   !write(std_out,*) 'vxcgrho',present(vxcgrho)
+   !write(std_out,*) 'uselaplacian',uselaplacian
+   !write(std_out,*) 'lrho',present(lrho)
+   !write(std_out,*) 'vxclrho',present(vxclrho)
+   !write(std_out,*) 'usekden',usekden
+   !write(std_out,*) 'tau',present(tau)
+   !write(std_out,*) 'vxctau',present(vxctau)
+   !flush(std_out)
    msg='missing mandatory arguments in pawxc_drivexc_wrapper'
    LIBPAW_BUG(msg)
  end if

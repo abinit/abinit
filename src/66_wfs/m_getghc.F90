@@ -35,6 +35,9 @@ module m_getghc
  use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
+#ifdef HAVE_FFTW3_THREADS
+ use m_fftw3,       only : fftw3_spawn_threads_here,fftw3_use_lib_threads
+#endif
 
  implicit none
 
@@ -1665,9 +1668,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: spacedim, spacedim_prj
 #ifdef HAVE_OPENMP
  logical :: is_nested
-#ifdef HAVE_FFTW3_THREADS
- logical ::  fftw3_use_lib_threads_sav
-#endif
+ logical :: fftw3_use_lib_threads_sav
 #endif
 
  integer :: select_k_default
@@ -1675,13 +1676,17 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  ! *************************************************************************
 
  select_k_default = 1; if ( present(select_k) ) select_k_default = select_k
+#ifdef HAVE_OPENMP
+ fftw3_use_lib_threads_sav=.false.
+#endif
 
  spacedim     = size(cwavef  ,dim=2)/ndat
  spacedim_prj = size(cwaveprj,dim=2)/ndat
 
     !$omp parallel default (none) &
     !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
-    !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
+    !$omp& private(fftw3_use_lib_threads_sav), &
+    !$omp& shared(cwavef,ghc,gsc,gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
     !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default)
 #ifdef HAVE_OPENMP
  ithread = omp_get_thread_num()

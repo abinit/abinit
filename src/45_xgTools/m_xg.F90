@@ -2033,8 +2033,9 @@ module m_xg
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
-    integer :: icol
+    integer :: icol, i
     double precision,external :: ddot
+    double precision :: tmp
 
 
     if ( dot%space /= SPACE_R ) then
@@ -2050,16 +2051,29 @@ module m_xg
       end do
       !$omp end parallel do
     case(SPACE_C)
-      !$omp parallel do shared(dot,xgBlock), &
-      !$omp& schedule(static)
-      do icol = 1, xgBlock%cols
-        ! Instead of calling a complex function to get only the real part of the
-        ! resuld
-        !dot%vecR(icol,1) = dble(zdotc(xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1))
-        ! Directely call a real function which gives what we want.
-        dot%vecR(icol,1) = ddot(2*xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1)
-      end do
-      !$omp end parallel do
+#if defined(FC_CRAY)
+        !$omp parallel do private(i,tmp), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlock%cols
+          tmp=0
+          do i = 1, xgBlock%rows
+            tmp = tmp + dconjg(xgBlock%vecC(i,icol))*xgBlock%vecC(i,icol)
+          end do
+          dot%vecR(icol,1)=tmp
+        end do
+        !$omp end parallel do
+#else
+        !$omp parallel do shared(dot,xgBlock), &
+        !$omp& schedule(static)
+        do icol = 1, xgBlock%cols
+          ! Instead of calling a complex function to get only the real part of the
+          ! result
+          !dot%vecR(icol,1) = dble(zdotc(xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1))
+          ! Directely call a real function which gives what we want.
+          dot%vecR(icol,1) = ddot(2*xgBlock%rows,xgBlock%vecC(:,icol),1,xgBlock%vecC(:,icol),1)
+        end do
+        !$omp end parallel do
+#endif
     end select
     call xmpi_sum(dot%vecR,xgBlock%spacedim_comm,icol)
 

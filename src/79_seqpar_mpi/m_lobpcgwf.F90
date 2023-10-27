@@ -111,7 +111,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: l_gvnlxc(:,:)
@@ -235,7 +235,11 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    !if ( size(l_gvnlxc) /= 0 ) then
    !  ABI_FREE(l_gvnlxc)
      !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
+#ifdef FC_CRAY
+   ABI_MALLOC(l_gvnlxc,(1,1))
+#else
    ABI_MALLOC(l_gvnlxc,(0,0))
+#endif
 
    !Call nonlop
    if (mpi_enreg%paral_kgb==0) then
@@ -303,7 +307,7 @@ end subroutine lobpcgwf2
   type(xgBlock_t), intent(inout) :: BX
   integer         :: blockdim
   integer         :: spacedim
-  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0)
+  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
   double precision :: dum
   double precision, parameter :: inv_sqrt2 = 1/sqrt2
   double precision, pointer :: cg(:,:)
