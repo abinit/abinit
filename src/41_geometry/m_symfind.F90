@@ -983,6 +983,25 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        'iholohedry=',iholohedry
        ABI_BUG(msg)
      end if
+!    Try to increase tolsym to find the Bravais lattice. 
+     maxsym=max(192,msym)
+     ABI_MALLOC(ptsymrel,(3,3,maxsym))
+!DEBUG
+!    write(6,*)' symbrav : will call symlatt, 3*tolsym=',3*tolsym
+!ENDDEBUG
+     call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
+     ABI_FREE(ptsymrel)
+     if(bravais(1)==iholohedry)then
+!      Succeeded  
+       exit
+     else
+       write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+       'Could not succeed to determine the bravais lattice, even after considering a larger tolsym',ch10,&
+       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+       'bravais(1)=',bravais(1),ch10,&
+       'iholohedry=',iholohedry
+       ABI_BUG(msg)
+     end if
    end if
 
    if(problem==1)then  ! One is left with the problem=1 case, basically iholohedry is lower than bravais(1)
@@ -1058,7 +1077,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        axis_trial(:)=hexa_axes(:,jaxis)
      end if
 !    DEBUG
-!    write(std_out,*)' symbrav : try jaxis=',jaxis
+!    write(std_out,*)' symbrav : ixaxis, trial jaxis=',iaxis,jaxis
 !    write(std_out,*)' axis_trial=',axis_trial
 !    ENDDEBUG
      invariant=1
@@ -1069,8 +1088,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      end do
      if(invariant==1)then
        iaxis=jaxis
-!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',iaxis
+!DEBUG
+!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',jaxis
 !      call wrtout(std_out,msg)
+!ENDDEBUG
        exit
      end if
    end do
@@ -1094,6 +1115,12 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &   axis_red(2)*rprimdnow(:,2)+ &
 &   axis_red(3)*rprimdnow(:,3)
    norm=sum(axis_cart(:)**2)
+!DEBUG
+!  write(6,*)' axis_trial =',axis_trial
+!  write(6,*)' axis_red =',axis_red
+!  write(6,*)' axis_cart =',axis_cart 
+!  write(6,*)' rprimdnow=',rprimdnow
+!ENDDEBUG
 !  Expand by a uniform, quite arbitrary, dilatation, along the invariant axis
 !  Note : make these dilatation different, according to ideform
 !  XG 20151221  : Still, the interplay between the size of the deformation and the tolsym is not easy to address.
@@ -1105,6 +1132,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      scprod=axis_cart(1)*rprimdnow(1,ii)+axis_cart(2)*rprimdnow(2,ii)+axis_cart(3)*rprimdnow(3,ii)
      rprimdtry(:,ii)=rprimdnow(:,ii)+ideform*(max(tol3,six*tolsym)-tol6)*scprod/norm*axis_cart(:)
    end do
+
+!DEBUG
+!  write(6,*)' rprimdtry=',rprimdtry
+!ENDDEBUG
 
  end do ! ideform
 
