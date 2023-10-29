@@ -1672,7 +1672,7 @@ subroutine symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' m_symfind%symlatt : enter '
+!write(std_out,'(a,es14.6)') ' m_symfind%symlatt : enter, tolsym= ',tolsym
 !call flush(std_out)
 !ENDDEBUG
 

@@ -3167,11 +3167,11 @@ subroutine smallprim(metmin,minim,rprimd)
  end do
 
 !DEBUG
- write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
- write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
- write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
- write(std_out,'(a)')' smallprim : exit '
- call flush(std_out)
+!write(std_out,'(2a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',ch10,rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',ch10,minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',ch10,metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,'(a)')' smallprim : exit '
+!call flush(std_out)
 !ENDDEBUG
 
 end subroutine smallprim
