@@ -144,6 +144,8 @@ module m_anaddb_dataset
   integer:: kptrlatt(3, 3)
   integer:: kptrlatt_fine(3, 3)
   integer:: thermal_supercell(3, 3)
+  integer:: mpatpol(2)
+  integer:: mpdir(3)
 
 ! Real(dp)
   real(dp):: a2fsmear
@@ -161,10 +163,11 @@ module m_anaddb_dataset
   real(dp):: lwf_anchor_qpt(3)
   real(dp):: lwf_mu
   real(dp):: lwf_sigma
+  real(dp):: magpen
+  real(dp):: mustar
   real(dp):: temperinc
   real(dp):: tempermin
   real(dp):: thmtol
-  real(dp):: mustar
   real(dp):: rifcsph
 
   real(dp):: q1shft(3, 4)
@@ -872,6 +875,36 @@ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'lwf_sigma',tread
 if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
 
 !M
+
+ anaddb_dtset%magpen = 0.0_dp
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'magpen',tread, 'DPR')
+ if(tread == 1) anaddb_dtset%magpen = dprarr(1)
+
+ anaddb_dtset%mpdir(:)=0
+ call intagm(dprarr, intarr, jdtset, marr, 3, string(1:lenstr), 'mpdir',tread, 'INT')
+ if(tread == 1) anaddb_dtset%mpdir(:)=intarr(1:3)
+ do ii = 1, 3
+   if(anaddb_dtset%mpdir(ii)<0.or.anaddb_dtset%mpdir(ii)>1)then
+     write(message, '(a, i0, a, i0, 3a, i0, a)' )&
+     'mpdir(',ii, ') is ',anaddb_dtset%mpdir(ii), &
+     ', whereas it can only be 0 or 1.',ch10, &
+     'Action: correct mpdir(',ii, ') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
+
+ anaddb_dtset%mpatpol(:)=0
+ call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'mpatpol',tread, 'INT')
+ if(tread == 1) anaddb_dtset%mpatpol(:)=intarr(1:2)
+ do ii = 1, 2
+   if(anaddb_dtset%mpatpol(ii)<0.or.anaddb_dtset%mpatpol(ii)>natom)then
+     write(message, '(a, i0, a, i0, 3a, i0, a)' )&
+     'mpatpol(',ii, ') is ',anaddb_dtset%mpatpol(ii), &
+     ', which is lower than 0 or larget than the number of atoms in the cell.',ch10, &
+     'Action: correct mpatpol(',ii, ') in your input file.'
+     ABI_ERROR(message)
+   end if
+ end do
 
 !typical value for mustar, but can vary sensibly with the metal
  anaddb_dtset%mustar = 0.1_dp
@@ -2188,6 +2221,13 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    write(nunit, '(10I6)') anaddb_dtset%iatprj_bs
  end if
 
+!magnetic penalty
+ if (abs(anaddb_dtset%magpen) > tol8) then
+   write(nunit, '(a)') 'Second-order quantities calculated with the magnetic penalty will be corrected'
+   write(nunit, '(3x, a9, 7x, 1es16.8)')'    magpen',anaddb_dtset%magpen
+   write(nunit, '(3x, a9, 2i3)') '   mpatpol',anaddb_dtset%mpatpol(1:2)
+   write(nunit, '(3x, a9, 3i3)') '   mpdir',anaddb_dtset%mpdir(1:3)
+ end if
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
 

@@ -1703,6 +1703,9 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      ! Examine the symmetries of the q wavevector
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)
 
+!TMP: Deactivate TRS (MR)
+     timrev=0
+
      nsize=3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,1,1))
      ABI_MALLOC(tmpval,(2,3,mpert,3,mpert,1,1))

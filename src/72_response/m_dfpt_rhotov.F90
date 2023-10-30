@@ -912,7 +912,8 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
          re=2*ifft-1
          im=2*ifft
   
-         taumr(:)=my_xred(:,iatom)-(/r1,r2,r3/)
+!         taumr(:)=my_xred(:,iatom)-(/r1,r2,r3/)
+         taumr(:)=my_xred(:,iatom)
          arg=two_pi*dot_product(qphon,taumr)
   
          phr1d_re=dcos(arg)

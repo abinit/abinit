@@ -1421,7 +1421,7 @@ end subroutine chneu9
 !!
 !! SOURCE
 
-subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta,omega)
+subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timrev,zero_by_symm,eta)
 
 !Arguments -------------------------------
 !scalars
@@ -1432,7 +1432,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
  real(dp),intent(in) :: qpt(3)
  real(dp),intent(inout) :: d2(2,3,mpert,3,mpert)
- real(dp),optional,intent(in) :: eta,omega
+ real(dp),optional,intent(in) :: eta
 
 !Local variables -------------------------
 !scalars
@@ -1493,7 +1493,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
 !            Either complete the symmetric missing element
-             if(blkflg(idir2,ipert2,idir1,ipert1)==0.and.omega<tol8)then
+             if(blkflg(idir2,ipert2,idir1,ipert1)==0)then
 
                d2(1,idir2,ipert2,idir1,ipert1)= d2(1,idir1,ipert1,idir2,ipert2)
                d2(2,idir2,ipert2,idir1,ipert1)=-d2(2,idir1,ipert1,idir2,ipert2)
@@ -5728,7 +5728,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
    do i1=1,3*natom
      do i2=1,3*natom
        index=i1+3*natom*(i2-1)
-       if (abs(displ(2*index)) < tol8) displ(2*index)=zero
+       if (abs(displ(2*index)) < tol14) displ(2*index)=zero
      end do
    end do
  end if
@@ -5772,7 +5772,7 @@ subroutine dfpt_phfrq(amu,displ,d2cart,eigval,eigvec,indsym,&
            i2=i2+1
            index=i1+3*natom*(i2-1)
            displ(2*index-1)=displ(2*index-1)+four_pi/ucvol*zeff(idir1,ipert1)*zeff(idir2,ipert2)/epsq
-           if (abs(displ(2*index)) < tol8) displ(2*index)=zero
+           if (abs(displ(2*index)) < tol14) displ(2*index)=zero
          end do
        end do
      end do
