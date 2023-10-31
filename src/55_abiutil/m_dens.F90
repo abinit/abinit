@@ -1713,8 +1713,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            r2=rx**2+ry**2+rz**2
 
 !          Compute the finite-q real-space phase
-!           taumr(:)=my_xred(:,iatom)-(/s1,s2,s3/)
-           taumr(:)=my_xred(:,iatom)
+           taumr(:)=my_xred(:,iatom)-(/s1,s2,s3/)
            arg=two_pi*dot_product(qphon_,taumr)
            phr1d_re=dcos(arg)
            phr1d_im=dsin(arg)

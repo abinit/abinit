@@ -2431,7 +2431,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
- list_vars = trim(list_vars)//' mustar'
+ list_vars = trim(list_vars)//' magpen mpatpol mpdir mustar'
 !N
  list_vars = trim(list_vars)//' natfix natifc natom natprj_bs nchan ndivsm nfreq ngrids nlflag nph1l nph2l'
  list_vars = trim(list_vars)//' nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
