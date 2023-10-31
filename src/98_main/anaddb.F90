@@ -68,6 +68,7 @@ program anaddb
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
  use m_ddb_flexo
+ use m_ddb_magpen
  use m_lwf,            only : run_lattice_wannier
 
  implicit none
@@ -241,6 +242,12 @@ program anaddb
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  if (mtyp == 33) then
    call ddb_lw_copy(ddb, ddb_lw, mpert, natom, ntypat)
+ end if
+
+ ! MR: Second- and third-order total energy derivatives calculated with the 
+ ! magnetic penalty are converted to physically interesting ones here. 
+ if (abs(inp%magpen) > tol8) then
+   call ddb_magpen(ddb, inp%magpen, inp%mpatpol, inp%mpdir, mpert, natom, ntypat,1)
  end if
 
  ! Acoustic Sum Rule

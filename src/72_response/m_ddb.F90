@@ -935,14 +935,19 @@ end subroutine ddb_bcast
 !!   3 => third derivative of total energy
 !!   4 => first-order derivatives of total energy
 !!  33 => long wave third order derivatives of total energy
+!! [rffreq(4)] = 1=> d/dw (optional)
+!! [rfmagn(4)] = 1=> Uniform Zeeman, 2 => Local Zeeman (optional)
 !! [rfqvec(4)] = 1=> d/dq (optional)
+!! [mpatpol(2)] = atoms on which the magnetic penalty was applied (optional)
+!! [mpdir(3)] = directions alongw which the magnetic penalty was applied (optional)
 !!
 !! OUTPUT
 !! iblok= number of the block that corresponds to the specifications. 0 if not found.
 !!
 !! SOURCE
 
-subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, rfqvec)
+subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, & 
+& mpatpol,mpdir,rffreq,rfmagn,rfqvec)
 
 !Arguments -------------------------------
 !scalars
@@ -952,7 +957,8 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
- integer,optional,intent(in) :: rfqvec(4)
+ integer,optional,intent(in) :: mpatpol(2),mpdir(3)
+ integer,optional,intent(in) :: rfmagn(4),rffreq(4),rfqvec(4)
 
 !Local variables -------------------------
 !scalars
@@ -963,7 +969,8 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  integer :: gamma(3)
  integer,allocatable :: worki(:,:)
  real(dp) :: qpt(3)
- integer :: rfqvec_(4)
+ integer :: mpatpol_(2),mpdir_(3)
+ integer :: rfmagn_(4),rffreq_(4),rfqvec_(4)
 
 ! *********************************************************************
 
@@ -984,7 +991,12 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
    ABI_BUG(msg)
  end if
 
- rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
+ ! Default optionals
+ rfqvec_(:)=0; if (present(rfqvec)) rfqvec_(:)=rfqvec(:)
+ rfmagn_(:)=0; if (present(rfmagn)) rfmagn_(:)=rfmagn(:)
+ rffreq_(:)=0; if (present(rffreq)) rffreq_(:)=rffreq(:)
+ mpatpol_(:)=0; if (present(mpatpol)) mpatpol_(:)=mpatpol(:)
+ mpdir_(:)=0; if (present(mpdir)) mpdir_(:)=mpdir(:)
 
  ! In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
@@ -1037,12 +1049,22 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
    if (rfelfd(ider)==1.or.rfelfd(ider)==3) worki(natom+1,ider)=1
    ! Then the electric field
    if (rfelfd(ider)==2.or.rfelfd(ider)==3) worki(natom+2,ider)=1
-   ! Then the ddq
-   if (rfqvec_(ider)==1) worki(natom+8,ider)=1
    ! Then the uniaxial stress
    if (rfstrs(ider)==1.or.rfstrs(ider)==3) worki(natom+3,ider)=1
-   ! At last, the shear stress
-   if(rfstrs(ider)==2.or.rfstrs(ider)==3) worki(natom+4,ider)=1
+   ! Then the shear stress
+   if (rfstrs(ider)==2.or.rfstrs(ider)==3) worki(natom+4,ider)=1
+   ! Then the uniform Zeeman field
+   if (rfmagn_(ider)==1) worki(natom+5,ider)=1
+   ! Then the ddq
+   if (rfqvec_(ider)==1) worki(natom+8,ider)=1
+   ! Then the ddw
+   if (rffreq_(ider)==1) worki(natom+9,ider)=1
+   ! At last, the local Zeeman fields
+   if (rfmagn_(ider)==2) then
+     do ipert=natom+11+mpatpol_(1),natom+11+mpatpol_(2)
+       worki(ipert,ider)=1
+     end do
+   end if
  end do
 
  ! Examine every blok:
@@ -1107,7 +1129,9 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
          do ipert2=1,mpert
            if (worki(ipert2,2)==1 .and. ok==1 )then
              do idir1=1,3
+               if (ipert1>natom+11.and.ipert1<=2*natom+11.and.mpdir(idir1)==0) cycle
                do idir2=1,3
+                 if (ipert2>natom+11.and.ipert2<=2*natom+11.and.mpdir(idir2)==0) cycle
 
                  if (nder == 2) then
                    index=idir1+ 3*((ipert1-1)+mpert*((idir2-1)+3*(ipert2-1)))
@@ -1148,11 +1172,12 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
      call wrtout(std_out,msg)
      write(msg, '(a,i3)' )' Type (rfmeth) =',rftyp
      call wrtout(std_out,msg)
-     write(msg, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs rfqvec'
+     write(msg, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs rfmagn rfqvec rffreq'
      call wrtout(std_out,msg)
      do ider=1,nder
-       write(msg, '(i4,4f6.2,4i7)' )&
-       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider),rfqvec_(ider)
+       write(msg, '(i4,4f6.2,6i7)' )&
+       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider),&
+     & rfmagn_(ider),rfqvec_(ider),rffreq_(ider)
        call wrtout(std_out,msg)
      end do
    end if
@@ -4755,7 +4780,6 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!***
 
 !----------------------------------------------------------------------
-
 !!****f* m_ddb/symdm9
 !! NAME
 !! symdm9
