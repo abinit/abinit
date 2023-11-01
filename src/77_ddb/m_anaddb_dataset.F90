@@ -2228,7 +2228,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
 
 !magnetic penalty
  if (abs(anaddb_dtset%magpen) > tol8) then
-   write(nunit, '(a)') 'Second-order quantities calculated with the magnetic penalty will be corrected'
+   write(nunit, '(a)') ' Second-order quantities calculated with the magnetic penalty will be corrected'
    write(nunit, '(3x, a9, 7x, 1es16.8)')'    magpen',anaddb_dtset%magpen
    write(nunit, '(3x, a9, 2i3)') '   mpatpol',anaddb_dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)') '   mpdir',anaddb_dtset%mpdir(1:3)
