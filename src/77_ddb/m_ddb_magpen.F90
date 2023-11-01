@@ -89,12 +89,12 @@ contains
 
 ! *********************************************************************
  if (magpen<zero) then
-   nmat=1
+   nmat= 1
  else if (magpen>zero) then
-   nmat=natom
+   nmat= mpatpol(2) - mpatpol(1) + 1
  end if
  nmdir=sum(mpdir(:))
- ABI_MALLOC(magsus,(2,3,nmat,3,nmat))
+ ABI_MALLOC(magsus,(2,nmdir,nmat,nmdir,nmat))
 
  do iblok=1,ddb%nblok
 
@@ -175,91 +175,93 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- real(dp),intent(out) :: magsus(2,3,nmat,3,nmat)
+ real(dp),intent(out) :: magsus(2,nmdir,nmat,nmdir,nmat)
 
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,info,ipert1,ipert2,irow,ndim,unt
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
 !arrays
  real(dp) :: barmagsus(2,nmdir,nmat,nmdir,nmat)
  real(dp) :: idty(2,nmdir,nmat,nmdir,nmat)
- complex(dp),allocatable :: work(:,:)
+ complex(dp),allocatable :: work1(:,:),work2(:,:)
 
 ! *********************************************************************
 
  unt = std_out; if (present(unit)) unt = unit
 
- !Default values
- barmagsus=zero
- if (magpen<zero) then
-   do idir1=1,3
-     barmagsus(1,idir1,1,idir1,1)=one
-     idty(1,idir1,1,idir1,1)=one
-   end do
- else if (magpen>zero) then
-   do ipert1=1,natom
-     do idir1=1,3
-       magsus(1,idir1,ipert1,idir1,ipert1)=one
-       idty(1,idir1,ipert1,idir1,ipert1)=one
-     end do
-   end do
- end if
-
  !Extract the penalized susceptibility
+ idty=zero
+ ipert2_red= 0
  do iat2= mpatpol(1), mpatpol(2)
-   ipert2= natom+11+iat2
+   ipert2= natom + 11 + iat2
+   ipert2_red= ipert2_red + 1
+   idir2_red= 0
    do idir2= 1, 3
      if (mpdir(idir2)==0) cycle
+     idir2_red= idir2_red + 1
+     idty(1,idir2_red,ipert2_red,idir2_red,ipert2_red)=one
+     ipert1_red=0
      do iat1= mpatpol(1), mpatpol(2)
-       ipert1= natom+11+iat1
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
        do idir1= 1, 3
          if (mpdir(idir1)==0) cycle
+         idir1_red=idir1_red+1
 
          !TODO: the two factor needs to be applied in ABINIT when
          !passing the magnetic moments to d2etot
-         barmagsus(:,idir1,iat1,idir2,iat2)=two*blkval(:,idir1,ipert1,idir2,ipert2,iblok)
+         barmagsus(:,idir1_red,ipert1_red,idir2_red,ipert2_red)= &
+       & two*blkval(:,idir1,ipert1,idir2,ipert2,iblok)
 
        end do
      end do
    end do
  end do
 
- !Use magsus to store the intermediate matrix
+ !Use magsus to store the intermediate array
  magsus=idty-magpen*barmagsus
      
- !Invert the susceptibility
- ndim=natom*3
- ABI_MALLOC(work,(ndim,ndim))
- do iat1=1,natom
-   do idir1=1,3
-     irow=idir1+(iat1-1)*3
+ !Invert the arrays
+ write(*,*) nmat, nmdir
+ ndim=nmat*nmdir
+ ABI_MALLOC(work1,(ndim,ndim))
+ ABI_MALLOC(work2,(ndim,ndim))
+ work1= zero; work2= zero
+ do iat1=1,nmat
+   do idir1=1,nmdir
+     irow=idir1+(iat1-1)*nmdir
      iat2=iat1
-     do idir2=idir1,3
-       icol=idir2+(iat2-1)*3
-       work(irow,icol)=cmplx(magsus(1,idir1,iat1,idir2,iat2),magsus(2,idir1,iat1,idir2,iat2),16)
+     do idir2=idir1,nmdir
+       icol=idir2+(iat2-1)*nmdir
+       work1(irow,icol)=cmplx(barmagsus(1,idir1,iat1,idir2,iat2),barmagsus(2,idir1,iat1,idir2,iat2),16)
+       work2(irow,icol)=cmplx(magsus(1,idir1,iat1,idir2,iat2),magsus(2,idir1,iat1,idir2,iat2),16)
      end do
-     do iat2=iat1+1,natom
-       do idir2=1,3
-         icol=idir2+(iat2-1)*3
-         work(irow,icol)=cmplx(magsus(1,idir1,iat1,idir2,iat2),magsus(2,idir1,iat1,idir2,iat2),16)
+     do iat2=iat1+1,nmat
+       do idir2=1,nmdir
+         icol=idir2+(iat2-1)*nmdir
+         work1(irow,icol)=cmplx(barmagsus(1,idir1,iat1,idir2,iat2),barmagsus(2,idir1,iat1,idir2,iat2),16)
+         work2(irow,icol)=cmplx(magsus(1,idir1,iat1,idir2,iat2),magsus(2,idir1,iat1,idir2,iat2),16)
        end do
      end do
    end do
  end do
-      
- call zpotrf( 'U', ndim, work, ndim, info )
+
+ call zpotrf( 'U', ndim, work1, ndim, info )
  ABI_CHECK(info == 0, sjoin('zpotrf returned:', itoa(info)))
 
- call zpotri( 'U', ndim, work, ndim, info )
+ call zpotri( 'U', ndim, work1, ndim, info )
  ABI_CHECK(info == 0, sjoin('zpotri returned:', itoa(info)))
 
- do irow=1,3*natom
-   do icol=irow,3*natom
-     write(*,*) irow,icol,real(work(irow,icol)),aimag(work(irow,icol))
-   end do
- end do
- 
- ABI_FREE(work)
+ call zpotrf( 'U', ndim, work2, ndim, info )
+ ABI_CHECK(info == 0, sjoin('zpotrf returned:', itoa(info)))
+
+ call zpotri( 'U', ndim, work2, ndim, info )
+ ABI_CHECK(info == 0, sjoin('zpotri returned:', itoa(info)))
+
+ ABI_FREE(work1)
+ ABI_FREE(work2)
 
  end subroutine spinsus
 !!***
