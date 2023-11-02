@@ -1208,7 +1208,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      end if ! choice for charge density initialization
 
 !    >>> Initialize kinetic energy density
-     if (dtset%usekden==1) then 
+     if (dtset%usekden==1) then
 
        if (dtfil%ireadkden/=0.and.dtset%positron<=0) then
          ! Choice 1: read kinetic energy density from file
