@@ -5193,6 +5193,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! See https://github.com/pmodels/mpich/issues/2659
 
 #ifdef HAVE_MPI
+#if 0
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5206,6 +5207,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master
