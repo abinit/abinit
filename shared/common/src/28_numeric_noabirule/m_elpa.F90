@@ -202,7 +202,6 @@ end subroutine elpa_func_uninit
 subroutine elpa_func_allocate(elpa_hdl,gpu)
 
 !Arguments ------------------------------------
- integer,intent(in) :: mpi_comm_parent,process_row,process_col
  integer,intent(in),optional :: gpu
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
