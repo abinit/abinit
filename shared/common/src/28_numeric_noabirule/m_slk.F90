@@ -2666,9 +2666,10 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   nev__ = matrix%sizeb_global(1); if (present(nev)) nev__ = nev
 
+  call elpa_func_allocate(elpa_hdl)
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),&
 &                           matrix%sizeb_local(1),matrix%sizeb_local(2))
-  call elpa_func_allocate(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
+  call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   if (istwf_k/=2) then
     call elpa_func_solve_evp_1stage(elpa_hdl,matrix%buffer_cplx,results%buffer_cplx,eigen,nev__)
@@ -2883,8 +2884,9 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
+  call elpa_func_allocate(elpa_hdl)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,na_rows,na_cols)
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol)
+  call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
@@ -2944,8 +2946,9 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 ! *************************************************************************
 
   ! 0. Allocate ELPA handle
+  call elpa_func_allocate(elpa_hdl)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,na_rows,na_cols)
-  call elpa_func_allocate(elpa_hdl,comm,my_prow,my_pcol)
+  call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
   ! 1. Calculate Cholesky factorization of Matrix B = U**T * U
   !    and invert triangular matrix U
