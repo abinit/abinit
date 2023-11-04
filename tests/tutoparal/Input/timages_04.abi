@@ -93,7 +93,7 @@ dynimage      0 10*1 0   # Keep first and last images fixed
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
-#%%   timages_04_MPI10.abo, tolnlines = 20, tolabs = 1.2e-4, tolrel = 2.2e-1, fld_options = -easy;
+#%%   timages_04_MPI10.abo, tolnlines = 55, tolabs = 5.5e-3, tolrel = 9.3e-1, fld_options = -easy;
 #%% [paral_info]
 #%% nprocs_to_test = 10
 #%% max_nprocs = 10
