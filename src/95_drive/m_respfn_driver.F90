@@ -1456,7 +1456,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
 &   usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
-&   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
+&   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0,vxctau=vxctau)
 
 !  #####################################################################
  end if

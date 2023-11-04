@@ -161,6 +161,7 @@ contains
 !!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
+!!  vxctau(nfftf,nspden,4*usekden),optional=derivative of e_xc wrt kin energy density, for mGGA
 !!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -217,7 +218,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
+& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out,vxctau)
 
 !Arguments -------------------------------
 !scalars
@@ -267,6 +268,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
+ real(dp),optional,intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -294,7 +296,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
- logical :: has_vectornd,paral_atom,qne0
+ logical :: has_vectornd,has_vxctau,paral_atom,qne0
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
@@ -314,6 +316,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),resid_k(:)
  real(dp),allocatable :: rho1wfg(:,:),rho1wfr(:,:),rhoaug1(:,:,:,:),rocceig(:,:)
  real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vectornd_pac_idir(:,:,:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:)
+ real(dp),allocatable :: vxctaulocal(:,:,:,:,:)
  real(dp),allocatable :: ylm1_k(:,:),ylm_k(:,:),ylmgr1_k(:,:,:)
  type(pawrhoij_type),pointer :: pawrhoij1_unsym(:)
 
@@ -442,6 +445,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
+ has_vxctau = ( present(vxctau) .AND. (dtset%usekden .EQ. 1) )
+ if(has_vxctau) then
+    ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamkq%nvloc,4))
+ end if
+ 
  has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamkq%nvloc,3))
@@ -495,6 +503,14 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
      vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
      call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
+   end if
+
+   !! add vxctau for mGGA to GS hamiltonian and RF hamiltonian
+   if (has_vxctau) then
+     call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+                                   dtset%nspden, gs_hamkq%nvloc, 4, pawfgr, mpi_enreg, vxctau, vxctaulocal)
+     call gs_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
+     call rf_hamkq%load_spin(isppol, vxctaulocal=vxctaulocal)
    end if
 
    call timab(125,1,tsec)
@@ -754,6 +770,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_FREE(rhoaug1)
  ABI_FREE(vlocal)
  ABI_FREE(vlocal1)
+ if(allocated(vxctaulocal)) then
+    ABI_FREE(vxctaulocal)
+ end if
  if(has_vectornd) then
    ABI_FREE(vectornd_pac)
    ABI_FREE(vectornd_pac_idir)
