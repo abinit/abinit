@@ -3190,7 +3190,7 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
 
 !!! calculating for spin upup and dndn
 
-  do isp=1,2 ! upup and dndn spin componenets are considered
+  do isp=1,2 ! upup and dndn spin components are considered
   do coor=1,3
      do im1=1,2*my_lcur+1
      do im2=1,2*my_lcur+1
