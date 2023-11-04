@@ -1195,6 +1195,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
   do it=1,op%sumtails
     !write(6,*) "        setMAdd before antishift M%mat_tau",(op%M%mat_tau(it,it1),it1=1,op%sumtails)
   enddo
+  if (new_tail>0.and.op%Fshift(aF+1)>op%Fshift(aF)) then
     op%M%mat(op%Fshift(aF)+1:op%Fshift(aF+1) , 1:new_tail) = & 
         CSHIFT( op%M%mat(op%Fshift(aF)+1:op%Fshift(aF+1) , 1:new_tail) , SHIFT=-1 , DIM=1) ! Shift to the bottom
 
@@ -1206,6 +1207,7 @@ SUBROUTINE BathOperatoroffdiag_setMAdd(op,particle)
 
     op%M%mat_tau(1:new_tail , op%Fshift(aF)+1:op%Fshift(aF+1)) = &
         CSHIFT( op%M%mat_tau(1:new_tail , op%Fshift(aF)+1:op%Fshift(aF+1)) , SHIFT=-1 , DIM=2) ! Shift to the right
+  end if
   !CALL matrix_print(M)
   END IF
 
@@ -1407,10 +1409,12 @@ SUBROUTINE BathOperatoroffdiag_setMRemove(op,particle)
     !op%M(aF)%mat_tau(1:new_tail,1:new_tail) = &
     !           CSHIFT(op%M(aF)%mat_tau(1:new_tail,1:new_tail), SHIFT=1, DIM=2) ! Shift to the top
    endif
+   if (new_tail>0.and.op%Fshift(af+1)>op%Fshift(af)) then
     op%M%mat(1:new_tail,op%Fshift(af)+1:op%Fshift(af+1)) = &
                CSHIFT(op%M%mat(1:new_tail,op%Fshift(af)+1:op%Fshift(af+1)), SHIFT=1, DIM=2) ! Shift to the top
     op%M%mat_tau(1:new_tail,op%Fshift(af)+1:op%Fshift(af+1)) = &
                CSHIFT(op%M%mat_tau(1:new_tail,op%Fshift(af)+1:op%Fshift(af+1)), SHIFT=1, DIM=2) ! Shift to the top
+   end if
   END IF
 !  !write(6,*) "after "
 !  CALL MatrixHyb_print(op%M(aF),opt_print=1)
@@ -1491,44 +1495,54 @@ SUBROUTINE BathOperatoroffdiag_swap(op, flavor1, flavor2)
   !enddo
   if(3==3) then
     op%M=op%M_update
+    if (op%sumtails>0) then
 !     shift block flavorb at the place of flavora (column)
-    do ii=1, op%tails(flavorb)
-      op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = & 
+      if (op%Fshift(flavorb+1)>op%Fshift(flavora)) then
+       do ii=1, op%tails(flavorb)
+        op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = & 
           CSHIFT( op%M%mat(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1) 
-      op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = &
+        op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) = &
           CSHIFT( op%M%mat_tau(op%Fshift(flavora)+1:op%Fshift(flavorb+1) , 1:op%sumtails) , SHIFT=-1 , DIM=1) 
-    enddo
+       enddo
+      end if
 
 !     shift block flavora at the place of flavorb (column)
-    do ii=1, op%tails(flavora)
-      op%M%mat(op%Fshift(flavora)+op%tails(flavorb)+&
-&      1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) = & 
+      if (op%Fshift(flavorb)>op%Fshift(flavora)) then
+       do ii=1, op%tails(flavora)
+        op%M%mat(op%Fshift(flavora)+op%tails(flavorb)+&
+&        1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) = & 
           CSHIFT( op%M%mat( op%Fshift(flavora)+op%tails(flavorb)&
 &          +1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1) 
-      op%M%mat_tau(op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+&
-&      op%tails(flavorb) , 1:op%sumtails) = & 
+        op%M%mat_tau(op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+&
+&        op%tails(flavorb) , 1:op%sumtails) = & 
           CSHIFT( op%M%mat_tau( op%Fshift(flavora)+op%tails(flavorb)+&
 &          1:op%Fshift(flavorb)+op%tails(flavorb) , 1:op%sumtails) , SHIFT=1 , DIM=1) 
-    enddo
+       enddo
+      end if
 
 !     shift block flavorb at the place of flavora (row)
-    do ii=1, op%tails(flavorb)
-      op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
+      if (op%Fshift(flavorb+1)>op%Fshift(flavora)) then
+       do ii=1, op%tails(flavorb)
+        op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
           CSHIFT( op%M%mat(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2) 
-      op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
+        op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) = &
           CSHIFT( op%M%mat_tau(1:op%sumtails , op%Fshift(flavora)+1:op%Fshift(flavorb+1)) , SHIFT=-1 , DIM=2) 
-    enddo
+       enddo
+      end if
 
 !     shift block flavora at the place of flavorb (row)
-    do ii=1, op%tails(flavora)
-      op%M%mat(1:op%sumtails , op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb)) = &
+      if (op%Fshift(flavorb)>op%Fshift(flavora)) then
+       do ii=1, op%tails(flavora)
+        op%M%mat(1:op%sumtails , op%Fshift(flavora)+op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb)) = &
           CSHIFT( op%M%mat(1:op%sumtails ,op%Fshift(flavora)+op%tails(flavorb)&
 &          +1:op%Fshift(flavorb)+op%tails(flavorb)) , SHIFT=1 , DIM=2) 
-      op%M%mat_tau(1:op%sumtails ,op%Fshift(flavora)+op%tails(flavorb)+&
-&      1:op%Fshift(flavorb)+op%tails(flavorb) ) = &
+        op%M%mat_tau(1:op%sumtails ,op%Fshift(flavora)+op%tails(flavorb)+&
+&        1:op%Fshift(flavorb)+op%tails(flavorb) ) = &
           CSHIFT( op%M%mat_tau(1:op%sumtails ,op%Fshift(flavora)+&
 &          op%tails(flavorb)+1:op%Fshift(flavorb)+op%tails(flavorb) ) , SHIFT=1 , DIM=2) 
-    enddo
+       enddo
+      end if
+    end if
   endif
   if(3==4) then
     op%M=op%M_update
