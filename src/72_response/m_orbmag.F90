@@ -276,8 +276,6 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  ecut_eff = dtset%ecut*(dtset%dilatmx)**2
  exchn2n3d = 0; ikg1 = 0
 
- write(std_out,'(a,2i12)')'JWZ debug mcg mcg1 ',mcg,mcg1
-
  ! Fermi energy
  call local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
  !fermie = dtset%userra
