@@ -1,11 +1,17 @@
+# Added by runtests.py
+output_file = "t84_MPI10.abo"
+indata_prefix = "t84_MPI10i"
+outdata_prefix = "t84_MPI10o"
+tmpdata_prefix = "t84_MPI10t"
+# end runtests.py section
+
 # _== Convergency and starting
 # DATASET 1: LDA 
 # DATASET 2: LDA+DMFT
 ndtset 2
-jdtset 1 2
 prtvol    4
 pawprtvol 3
-getwfk -1
+getwfk2 1
 
 ##### CONVERGENCE PARAMETERS
 nstep1   30
@@ -76,12 +82,16 @@ upawu2  4.1   eV
 f4of2_sla3    0.0 
 jpawu2  0.5   eV
 
-paral_kgb1 0
-paral_kgb2 1
-np_spkpt2 5
-npband2 2
-npfft2 1
-bandpp2 11
+# == Parallelism
+paral_kgb 1
+np_spkpt 5
+npband 2
+npfft 1
+bandpp 11
+
+# File access
+# This is to avoid issues with some HDF5 configurations
+iomode 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "23v.paw"
