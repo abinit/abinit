@@ -295,7 +295,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  integer :: shift2,shift3
 #ifdef FC_NVHPC
 !Silly trick to prevent NVHPC optimization issue
- logical :: nothing
+ logical :: nothing=.false.
 #endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
