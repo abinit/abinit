@@ -293,6 +293,10 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig2,ig3,ii,itypat
  integer :: jj,me_fft,me_g0,n1,n2,n3,nproc_fft,shift1
  integer :: shift2,shift3
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
  real(dp) :: dqm1,ee,ff,gmag,gsquar!beta,gcart_para,gcart_perp
@@ -428,6 +432,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !              Loop over all atoms of this type:
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
+
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
