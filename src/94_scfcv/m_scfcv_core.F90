@@ -2663,13 +2663,16 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  Compute total (free)- energy by direct scheme
    if (optene==0) then
-     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc + &
-      energies%e_localpsp + energies%e_corepsp +&
-!&    two*energies%e_fock - energies%e_fock0 +&   ! The Fock energy is already included in the non-local one
-!&     energies%e_nlpsp_vfock - energies%e_fock0 +&
-&     energies%e_entropy + energies%e_elecfield + energies%e_magfield + energies%e_nucdip +&
-&     energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v + energies%e_constrained_dft
-     etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
+     etotal = energies%e_kinetic + energies%e_hartree + energies%e_xc &
+&           + energies%e_localpsp + energies%e_corepsp &
+&           + energies%e_entropy + energies%e_elecfield &
+&           + energies%e_magfield + energies%e_nucdip &
+&           + energies%e_hybcomp_E0 - energies%e_hybcomp_v0 + energies%e_hybcomp_v &
+&           + energies%e_constrained_dft + energies%e_ewald &
+&           + energies%e_chempot + energies%e_vdw_dftd
+
+!    +two*energies%e_fock-energies%e_fock0 ! The Fock energy is already included in the non-local one
+!    +energies%e_nlpsp_vfock - energies%e_fock0
 
 !    See similar section in m_energies.F90
 !    XG 20181025 This gives a variational energy in case of NCPP with all bands occupied - not yet for metals.
