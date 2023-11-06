@@ -2974,27 +2974,27 @@ integer :: iatom
 
  ! Incorporate total magnetic moments
  if (nspden==2) then
-   blkflg(idir,ipert,3,natom+5)=1
-   d2lo(1,idir,ipert,3,natom+5)= rhomag(1,2)
-   if (cplex==2) d2lo(2,idir,ipert,3,natom+5)= -rhomag(2,2)
+   blkflg(3,natom+5,idir,ipert)=1
+   d2lo(1,3,natom+5,idir,ipert)= rhomag(1,2)
+   if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= rhomag(2,2)
  else if (nspden==4) then
-   blkflg(idir,ipert,1:3,natom+5)=1
-   d2lo(1,idir,ipert,1:3,natom+5)= rhomag(1,2:4)
-   if (cplex==2) d2lo(2,idir,ipert,1:3,natom+5)= -rhomag(2,2:4)
+   blkflg(1:3,natom+5,idir,ipert)=1
+   d2lo(1,1:3,natom+5,idir,ipert)= rhomag(1,2:4)
+   if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)= rhomag(2,2:4)
  end if
 
  ! Incorporate local magnetic moments
  if (nspden==2) then
    do iatom= 1, natom
-     blkflg(idir,ipert,3,natom+11+iatom)=1
-     d2lo(1,idir,ipert,3,natom+11+iatom)= intgden(1,2,iatom)
-     if (cplex==2) d2lo(2,idir,ipert,3,natom+11+iatom)= -intgden(2,2,iatom)
+     blkflg(3,natom+11+iatom,idir,ipert)=1
+     d2lo(1,3,natom+11+iatom,idir,ipert)= intgden(1,2,iatom)
+     if (cplex==2) d2lo(2,3,natom+11+iatom,idir,ipert)= intgden(2,2,iatom)
    end do
  else if (nspden==4) then
    do iatom= 1, natom
-     blkflg(idir,ipert,1:3,natom+11+iatom)=1
-     d2lo(1,idir,ipert,1:3,natom+11+iatom)= intgden(1,2:4,iatom)
-     if (cplex==2) d2lo(2,idir,ipert,1:3,natom+11+iatom)= -intgden(2,2:4,iatom)
+     blkflg(1:3,natom+11+iatom,idir,ipert)=1
+     d2lo(1,1:3,natom+11+iatom,idir,ipert)= intgden(1,2:4,iatom)
+     if (cplex==2) d2lo(2,1:3,natom+11+iatom,idir,ipert)= intgden(2,2:4,iatom)
    end do
  end if
 

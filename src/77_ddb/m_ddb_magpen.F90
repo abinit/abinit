@@ -137,6 +137,7 @@ contains
 
    end if
 
+
    ! Calculate and write the induced magnetic moments 
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' First-order magnetic moments ',ch10
@@ -144,16 +145,16 @@ contains
 
    ! First atomic-displacement
    ! Look for the induced magnetic moments block in the DDB
-   ! TODO: here we are reading the transpose conjugate, not sure
-   ! whether this is valid at finite q and finite omega.
-   rfphon(1)=1
+   ! TODO: here we are reading the transpose conjugate, 
+   ! this has been de
+   rfphon(2)=1
    rfelfd(1:2)=0
    rfstrs(1:2)=0
    rfmagn(:)=0
    if (magpen<zero) then
-     rfmagn(2)= 1
+     rfmagn(1)= 1
    else if (magpen>zero) then
-     rfmagn(2)= 2
+     rfmagn(1)= 2
    end if
 
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
@@ -162,13 +163,13 @@ contains
    ! Then electric field
    ! Look for the induced magnetic moments block in the DDB
    rfphon(:)=0
-   rfelfd(1)=2
+   rfelfd(2)=2
    rfstrs(1:2)=0
    rfmagn(:)=0
    if (magpen<zero) then
-     rfmagn(2)= 1
+     rfmagn(1)= 1
    else if (magpen>zero) then
-     rfmagn(2)= 2
+     rfmagn(1)= 2
    end if
 
    call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
@@ -271,11 +272,13 @@ contains
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
 
-         !TODO: the two factor needs to be adapted in ABINIT when
-         !passing the magnetic moments to d2etot
+         !TODO: the four factor needs to be adapted in ABINIT: when
+         !passing the magnetic moments to d2etot a 0.5 factor has to 
+         !be applied to be consistent with the Bohr magneton in a.u. 
+         !present in the Zeeman field perturbation
          barmagsus(irow,icol)= &
-       & two*cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-       &  blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
+       & four*cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
+       & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
 
        end do
      end do
@@ -429,39 +432,40 @@ contains
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
  character(len=1000) :: msg
 !arrays
- integer(dp) :: indexat1((natom+2)*3),indexdir1((natom+2)*3)
- integer(dp) :: indexat2(ndim),indexdir2(ndim)
+ integer(dp) :: indexat1(ndim),indexdir1(ndim)
+ integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
  complex(dp) :: barmmom(ndim,(natom+2)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
 
 !Extract the penalized moments
- ipert2_red= 0
- do iat2= mpatpol(1), mpatpol(2)
-   ipert2= natom + 11 + iat2
-   ipert2_red= ipert2_red + 1
-   idir2_red= 0
-   do idir2= 1, 3
-     if (mpdir(idir2)==0) cycle
-     idir2_red= idir2_red + 1
-     irow=idir2_red+(ipert2_red-1)*nmdir
-     indexat2(irow)=iat2
-     indexdir2(irow)=idir2
-     do ipert1=1,natom+2
-       do idir1=1,3
-         icol=idir1+(ipert1-1)*3
-         indexat1(icol)=ipert1
-         indexdir1(icol)=idir1
+ do ipert2=1,natom+2
+   do idir2=1,3
+     icol=idir2+(ipert2-1)*3
+     indexat2(icol)=ipert2
+     indexdir2(icol)=idir2
+
+     ipert1_red= 0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red= idir1_red + 1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         indexat1(irow)=iat1
+         indexdir1(irow)=idir1
          
-         if (iblok /=0 .and. ipert1 <= natom) then
-           barmmom(irow,icol)= &
+         if (iblok /=0 .and. ipert2 <= natom) then
+           barmmom(irow,icol)=two* &
          & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
-         &  -blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
-         else if (jblok /=0 .and. ipert1 == natom+2) then
-           barmmom(irow,icol)= &
+         & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
+         else if (jblok /=0 .and. ipert2 == natom+2) then
+           barmmom(irow,icol)=two* &
          & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,jblok), &
-         &  -blkval(2,idir1,ipert1,idir2,ipert2,jblok),16)
+         & blkval(2,idir1,ipert1,idir2,ipert2,jblok),16)
          end if
 
        end do
@@ -483,7 +487,7 @@ contains
      do irow=1, ndim
        do icol=1, natom*3
          write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-       & indexat2(irow), cart(indexdir2(irow)), indexat1(icol), cart(indexdir1(icol)), &
+       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
        & real(mmom(irow,icol)), aimag(mmom(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
@@ -496,7 +500,7 @@ contains
      do irow=1, ndim
        do icol=(natom+1)*3+1, (natom+2)*3
          write(msg,'(i4,4x,a2,4x,a2,2x,2es18.9)' ) &
-       & indexat2(irow), cart(indexdir2(irow)), cart(indexdir1(icol)), &
+       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
        & real(mmom(irow,icol)), aimag(mmom(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
