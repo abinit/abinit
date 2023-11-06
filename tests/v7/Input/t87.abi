@@ -18,7 +18,7 @@ t85o_DS9_POT2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
-#%% exclude_builders = eos_nvhpc_23.1_elpa
+#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
 #%% [files]
 #%% files_to_test = 
