@@ -165,6 +165,7 @@ contains
  real(dp),allocatable :: rhor1_nohat(:,:),vhartr01(:),vxc1val(:,:)
  real(dp),pointer     :: rhor1_(:,:),vhartr1_(:),vxc1_(:,:),v1zeeman(:,:)
  real(dp),allocatable :: fatsph(:,:),intgden(:,:,:),rhomag(:,:),vmagpen1(:,:)
+ real(dp),allocatable :: taumr(:,:,:)
 
 ! *********************************************************************
 
@@ -216,22 +217,23 @@ contains
    ABI_MALLOC(intgden,(cplex,nspden,natom))
    ABI_MALLOC(rhomag,(2,nspden))
    ABI_MALLOC(fatsph,(nfft,natom))
+   ABI_MALLOC(taumr,(nfft,natom,3))
    call calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,&
-  &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,&
-  &  ratopt,prtopt,cplex,intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon)
+  &  ntypat,ratsm,ratsph,rhor1,rprimd,typat,xred,ratopt,prtopt,cplex,&
+  &  intgden=intgden,rhomag=rhomag,fatsph=fatsph,qphon=qphon,taumr=taumr)
  end if
 
  if(ipert>natom+11.and.ipert<=2*natom+11)then
    ABI_MALLOC(v1zeeman,(cplex*nfft,nspden))
    call dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-&  qphon,v1zeeman,xred)
+&  qphon,taumr,v1zeeman,xred)
  end if
 
  ABI_MALLOC(vmagpen1,(cplex*nfft,nspden))
  vmagpen1=zero
  if (abs(magpen) > tol6) then
-   call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,nspden, &
-& rhomag,vmagpen1)
+   call dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,&
+& mpdir,mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
  end if
 
 !------ Compute 1st-order Hartree potential (and energy) ----------------------
@@ -423,6 +425,7 @@ contains
  ABI_SFREE(intgden)
  ABI_SFREE(rhomag)
  ABI_SFREE(fatsph) 
+ ABI_SFREE(taumr) 
 
  call timab(157,2,tsec)
 
@@ -581,7 +584,11 @@ end subroutine dfpt_v1zeeman
 !!  mpdir(3)=directions of the magnetic moments to be penalized
 !!  mpi_enreg=information about MPI parallelization
 !!  nfft   = numbder of fft grid points
+!!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  nspden = number of density matrix components
+!!  qphon(3)=reduced coordinates for the phonon wavelength
+!!  taumr(nfft,natom,3)= array describing r-xred(iatom) at any point of the FFT grid
+!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
 !!  vmagpen1(nfft*cplex,nspden)= 1st order magnetic penalty potential
@@ -599,32 +606,45 @@ end subroutine dfpt_v1zeeman
 !!
 !! SOURCE
 
-subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_enreg,natom,nfft,nspden, &
-& rhomag,vmagpen1)
+subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
+& mpi_enreg,natom,nfft,ngfft,nspden,qphon,rhomag,taumr,vmagpen1,xred)
 
 !Arguments 
 !scalars:
- integer,intent(in) :: cplex,natom,nfft,nspden
- real(dp),intent(in) :: magpen
+ integer,intent(in)   :: cplex,natom,nfft,nspden
+ real(dp),intent(in)  :: magpen
  real(dp),intent(out) :: emagpen1 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays:
  integer,intent(in)    :: mpatpol(2),mpdir(3)
+ integer,intent(in)    :: ngfft(18)
  real(dp),intent(in)   :: fatsph(nfft,natom)
  real(dp),intent(in)   :: intgden(cplex,nspden,natom)
+ real(dp), intent(in)  :: qphon(3)
  real(dp),intent(in)   :: rhomag(2,nspden)
+ real(dp), intent(in)   :: taumr(nfft,natom,3)   
  real(dp),intent(out)  :: vmagpen1(cplex*nfft,nspden)
+ real(dp), intent(in)  :: xred(3,natom)
 
 !Local variables-------------------------------
 !scalars:
- integer :: i,iatom,ifft,prtopt
+ integer :: i,iatom,ifft,prtopt,i1,i2,i3,im,n1,n2,n3,re
+ real(dp) :: arg,d1,d2,d3,r1,r2,r3
+ real(dp) :: phr1d_re,phr1d_im
+ real(dp) :: Blocx_re,Blocy_re,Blocz_re
+ real(dp) :: Blocx_im,Blocy_im,Blocz_im
  character(len=500) :: msg
 !arrays:
  real(dp) :: Bx(cplex),By(cplex),Bz(cplex)
  real(dp) :: Blocx(cplex*nfft),Blocy(cplex*nfft),Blocz(cplex*nfft)
  real(dp) :: rhomag_eff(2,nspden),intgden_eff(cplex,nspden,natom)
+ real(dp) :: my_xred(3,natom),xshift(3, natom)
 
 ! *************************************************************************
+
+ if (cplex==1.and.any(abs(qphon(:))>tol8)) then
+   ABI_ERROR('Local Zeeman fields are cplex==2 at finite q vector')
+ end if
 
 !Compute magnetic penalty from cell-integrated magnetic moments
  if (magpen < zero) then
@@ -695,7 +715,7 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_
          Blocy(ifft)=Blocy(ifft)+magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
          Blocz(ifft)=Blocz(ifft)+magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
        end do
-     else if (cplex==2) then
+     else if (cplex==2.and.sum(qphon(:)**2) < tol8) then
        do ifft=1,nfft
          Blocx(2*ifft-1)=Blocx(2*ifft-1)+magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
          Blocy(2*ifft-1)=Blocy(2*ifft-1)+magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
@@ -704,9 +724,32 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,mpi_
          Blocy(2*ifft)=Blocy(2*ifft)+magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
          Blocz(2*ifft)=Blocz(2*ifft)+magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
        end do
+     else if (cplex==2.and.sum(qphon(:)**2) > tol8) then
+       do ifft=1,nfft
+         re=2*ifft-1
+         im=2*ifft
+  
+         Blocx_re=magpen*intgden_eff(1,2,iatom)*fatsph(ifft,iatom)
+         Blocy_re=magpen*intgden_eff(1,3,iatom)*fatsph(ifft,iatom)
+         Blocz_re=magpen*intgden_eff(1,4,iatom)*fatsph(ifft,iatom)
+         Blocx_im=magpen*intgden_eff(2,2,iatom)*fatsph(ifft,iatom)
+         Blocy_im=magpen*intgden_eff(2,3,iatom)*fatsph(ifft,iatom)
+         Blocz_im=magpen*intgden_eff(2,4,iatom)*fatsph(ifft,iatom)
+      
+         arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
+         phr1d_re=dcos(arg)
+         phr1d_im=dsin(arg)
+    
+         Blocx(re)= Blocx(re)+phr1d_re*Blocx_re-phr1d_im*Blocx_im
+         Blocx(im)= Blocx(im)+phr1d_im*Blocx_re+phr1d_re*Blocx_im
+         Blocy(re)= Blocy(re)+phr1d_re*Blocy_re-phr1d_im*Blocy_im
+         Blocy(im)= Blocy(im)+phr1d_im*Blocy_re+phr1d_re*Blocy_im
+         Blocz(re)= Blocz(re)+phr1d_re*Blocz_re-phr1d_im*Blocz_im
+         Blocz(im)= Blocz(im)+phr1d_im*Blocz_re+phr1d_re*Blocz_im
+       end do
      end if
 
-   end do 
+   end do  !iatom
 
    if (cplex==1) then
      do ifft=1,nfft
@@ -749,12 +792,14 @@ end subroutine dfpt_v1magpen
 !!  nfft   = numbder of fft grid points
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  cplex  = complex or real density matrix
+!!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
 !!  idir   = direction of the perturbing field in Cartesian frame
 !!           1: along x
 !!           2: along y
 !!           3: along z
 !!           4: identity matrix at each fft point is returned (for density-density response)
 !!  qphon(3)=reduced coordinates for the phonon wavelength
+!!  taumr(nfft,natom,3)= array describing r-xred(iatom) at any point of the FFT grid
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -771,7 +816,7 @@ end subroutine dfpt_v1magpen
 !! SOURCE
 
 subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngfft,nspden,&
-& qphon,v1zeeman,xred)
+& qphon,taumr,v1zeeman,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -782,6 +827,7 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  real(dp), intent(in)   :: fatsph(nfft,natom)
  real(dp), intent(in)   :: qphon(3)
  real(dp), intent(inout):: v1zeeman(cplex*nfft,nspden)
+ real(dp), intent(in)   :: taumr(nfft,natom,3)   
  real(dp), intent(in)   :: xred(3,natom)
 
 !Local variables-------------------------------
@@ -789,12 +835,11 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
  integer :: ifft,iatom,i1,i2,i3,im,n1,n2,n3,re
  real(dp) :: arg,d1,d2,d3,r1,r2,r3
  real(dp) :: phr1d_re,phr1d_im
+ real(dp) :: Bloc_re, Bloc_im 
  character(len=500) :: msg
 !arrays
  real(dp) :: Bloc(cplex*nfft)
  real(dp) :: my_xred(3,natom),xshift(3, natom)
- real(dp) :: v1_tmp(cplex*nfft,nspden)
- real(dp) :: taumr(3)
 
 ! *************************************************************************
 
@@ -811,10 +856,22 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
    end do
  else if (cplex==2) then
    do ifft=1,nfft
-     Bloc(2*ifft-1)=-0.5*fatsph(ifft,iatom)
+     re=2*ifft-1
+     im=2*ifft
+     if (sum(qphon(:)**2)<tol8) then 
+       Bloc(re)=-0.5*fatsph(ifft,iatom)
+       Bloc(im)=zero
+     else 
+       Bloc_re=-0.5*fatsph(ifft,iatom)
+       Bloc_im=zero
+       arg=two_pi*dot_product(qphon,-taumr(ifft,iatom,:))
+       phr1d_re=dcos(arg)
+       phr1d_im=dsin(arg)
+       Bloc(re)=phr1d_re*Bloc_re-phr1d_im*Bloc_im
+       Bloc(im)=phr1d_im*Bloc_re+phr1d_re*Bloc_im
+     end if
    end do
  end if
-
 
  !Build the first-order potential
  select case(cplex)
@@ -856,8 +913,8 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
          v1zeeman(2*ifft-1,3)= Bloc(2*ifft-1) !Re[V^12]
-         v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
-         v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]=Im[V^12]
+         v1zeeman(2*ifft  ,3)= Bloc(2*ifft) !Im[V^12]
+         v1zeeman(2*ifft-1,4)=-Bloc(2*ifft) !Re[i.V^21]=Im[V^12]
          v1zeeman(2*ifft  ,4)= Bloc(2*ifft-1) !Im[i.V^21]=Re[V^12]
        end do
      case(2) !along y, v1 = -sigma_y
@@ -866,17 +923,17 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
          v1zeeman(2*ifft  ,1)= 0.0e0 !Im[V^11]
          v1zeeman(2*ifft-1,2)= 0.0e0 !Re[V^22]
          v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
-         v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
+         v1zeeman(2*ifft-1,3)= Bloc(2*ifft)  !Re[V^12]
          v1zeeman(2*ifft  ,3)=-Bloc(2*ifft-1) !Im[V^12]
          v1zeeman(2*ifft-1,4)=-Bloc(2*ifft-1) !Re[i.V^21]=Im[V^12]
-         v1zeeman(2*ifft  ,4)= 0.0e0 !Im[i.V^21]=Re[V^12]
+         v1zeeman(2*ifft  ,4)=-Bloc(2*ifft) !Im[i.V^21]=Re[V^12]
        end do
      case(3)
        do ifft=1,nfft
          v1zeeman(2*ifft-1,1)= Bloc(2*ifft-1) !Re[V^11]
-         v1zeeman(2*ifft  ,1)= 0.0e0   !Im[V^11]
+         v1zeeman(2*ifft  ,1)= Bloc(2*ifft)   !Im[V^11]
          v1zeeman(2*ifft-1,2)=-Bloc(2*ifft-1) !Re[V^22]
-         v1zeeman(2*ifft  ,2)= 0.0e0 !Im[V^22]
+         v1zeeman(2*ifft  ,2)=-Bloc(2*ifft)  !Im[V^22]
          v1zeeman(2*ifft-1,3)= 0.0e0 !Re[V^12]
          v1zeeman(2*ifft  ,3)= 0.0e0 !Im[V^12]
          v1zeeman(2*ifft-1,4)= 0.0e0 !Re[i.V^21]
@@ -888,43 +945,6 @@ subroutine dfpt_v1zeeman_atsph(cplex,fatsph,idir,ipert,mpi_enreg,natom,nfft,ngff
      ABI_BUG(msg)
    end if
  end select !cplex
-
- !Apply the phase factor if qphon/=0 
- if (any(abs(qphon(:))>tol8)) then 
-   v1_tmp=v1zeeman
-   n1=ngfft(1);n2=ngfft(2);n3=ngfft(3)
-   d1=one/(real(n1)-one)
-   d2=one/(real(n2)-one)
-   d3=one/(real(n3)-one)
-
-   ! This routine is not able to handle xred positions that are "far" from the
-   ! first unit cell so wrap xred into [0, 1[ interval here.
-   call wrap2_zero_one(xred, my_xred, xshift)
-
-   ifft=0
-   do i3=1,n3
-     r3=(i3-1)*d3
-     do i2=1,n2
-       r2=(i2-1)*d2
-       do i1=1,n1
-         r1=(i1-1)*d1
-         ifft=ifft+1
-         re=2*ifft-1
-         im=2*ifft
-  
-         taumr(:)=my_xred(:,iatom)-(/r1,r2,r3/)
-         arg=two_pi*dot_product(qphon,taumr)
-  
-         phr1d_re=dcos(arg)
-         phr1d_im=dsin(arg)
-
-         v1zeeman(re,:)=phr1d_re*v1_tmp(re,:)-phr1d_im*v1_tmp(im,:)
-         v1zeeman(im,:)=phr1d_im*v1_tmp(re,:)+phr1d_re*v1_tmp(im,:)
-  
-       end do
-     end do
-   end do
- end if 
 
 end subroutine dfpt_v1zeeman_atsph
 !!***
