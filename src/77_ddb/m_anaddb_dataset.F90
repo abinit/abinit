@@ -86,6 +86,7 @@ module m_anaddb_dataset
   integer:: lwf_disentangle
   integer:: lwf_nwann
   integer:: lwfflag
+  integer:: mpopt
   integer:: natfix
   integer:: natifc
   integer:: natom
@@ -905,6 +906,10 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
      ABI_ERROR(message)
    end if
  end do
+
+ anaddb_dtset%mpopt=2
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'mpopt',tread, 'INT')
+ if(tread == 1) anaddb_dtset%mpopt=intarr(1)
 
 !typical value for mustar, but can vary sensibly with the metal
  anaddb_dtset%mustar = 0.1_dp
@@ -2223,10 +2228,11 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
 
 !magnetic penalty
  if (abs(anaddb_dtset%magpen) > tol8) then
-   write(nunit, '(a)') 'Second-order quantities calculated with the magnetic penalty will be corrected'
+   write(nunit, '(a)') ' Second-order quantities calculated with the magnetic penalty will be corrected'
    write(nunit, '(3x, a9, 7x, 1es16.8)')'    magpen',anaddb_dtset%magpen
    write(nunit, '(3x, a9, 2i3)') '   mpatpol',anaddb_dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)') '   mpdir',anaddb_dtset%mpdir(1:3)
+   write(nunit, '(3x, a9,  i3)') '   mpopt',anaddb_dtset%mpopt
  end if
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
@@ -2431,7 +2437,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
- list_vars = trim(list_vars)//' magpen mpatpol mpdir mustar'
+ list_vars = trim(list_vars)//' magpen mpatpol mpdir mpopt mustar'
 !N
  list_vars = trim(list_vars)//' natfix natifc natom natprj_bs nchan ndivsm nfreq ngrids nlflag nph1l nph2l'
  list_vars = trim(list_vars)//' nqpath nqshft nsphere nstrfix ntemper nwchan ngqpt ng2qpt'
