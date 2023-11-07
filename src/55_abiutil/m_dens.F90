@@ -1517,12 +1517,13 @@ end subroutine mag_penalty_e
 !!    In non collinear case component 1 is total density, and 2:4 are the magnetization vector
 !!  strs_intgden(6,nspden,natom)=stress contribution due to constrained integrated density (magnetization...), due to each atom. Optional arg
 !!  fatsph(nfft,natom)= functions defining the atomic spheres of integration in real space
+!!  taumr(nfft,natom,3)= array describing r-xred(iatom) at any point of the FFT grid
 !!  Rest is printing
 !!
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon)
+&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1544,6 +1545,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)   
  real(dp),intent(out),optional  :: fatsph(nfft,natom)   
+ real(dp),intent(out),optional  :: taumr(nfft,natom,3)   
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndir=3,ishift=5
@@ -1561,10 +1563,11 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer :: overlap_ij(natom,natom)
  real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4)
  real(dp) :: intg(cplex,4),intg_im(4),intg_re(4),qphon_(3),rhomag_(2,nspden)
- real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),taumr(3),tsec(2)
+ real(dp) :: fatsph_(nfft,natom),taumr_(nfft,natom,3)
+ real(dp) :: strs(3,3),strs_cartred(3,3),strs_intg(6,4),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(cplex,nspden,natom)
  real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
- real(dp), allocatable :: fsm_atom(:,:),fatsph3i(:,:,:,:)
+ real(dp), allocatable :: fsm_atom(:,:)
 
 !real(dp) :: rprimd_mod(3,3),strain
 
@@ -1587,6 +1590,8 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  if(present(qphon))then
    qphon_=qphon
  endif
+ fatsph_=zero
+ taumr_=zero
 
  d1=one/(real(n1)-one)
  d2=one/(real(n2)-one)
@@ -1645,15 +1650,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
    ABI_BUG("Unable to find an allocated distrib for this fft grid")
  end if
 
- if (ratopt==2.and.present(fatsph)) then
-   ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
-   call fatsph_recip(fatsph,fatsph3i,gmet,mpi_enreg,natom,nfft,ngfft,ntypat,ratsm,&
-&  ratsph,rprimd,typat,ucvol,xred) 
- else if (ratopt==1.and.present(fatsph)) then
-   ABI_MALLOC(fatsph3i,(n1,n2,n3,natom))
-   fatsph3i=zero
- end if 
-
 !Loop over atoms
 !-------------------------------------------
  do iatom=1,natom
@@ -1680,7 +1676,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
    do i3=n3a,n3b
      iz=mod(i3+ishift*n3,n3)
-     s3=(iz-1)*d3
 
      if(fftn3_distrib(iz+1)==mpi_enreg%me_fft) then
 
@@ -1689,11 +1684,9 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
        do i2=n2a,n2b
          iy=mod(i2+ishift*n2,n2)
          dify=dble(i2)/dble(n2)-my_xred(2,iatom)
-         s2=(iy-1)*d2
          do i1=n1a,n1b
            ix=mod(i1+ishift*n1,n1)
            difx=dble(i1)/dble(n1)-my_xred(1,iatom)
-           s1=(ix-1)*d1
 !DEBUG
 !          if(present(gr_intgden).and. option<10 .and. ratsm2>tol12)then
 !            difx=dble(i1)/dble(n1)-(my_xred(1,iatom)+0.00005)
@@ -1712,12 +1705,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
            rz=difx*rprimd(3,1)+dify*rprimd(3,2)+difz*rprimd(3,3)
            r2=rx**2+ry**2+rz**2
 
-!          Compute the finite-q real-space phase
-           taumr(:)=my_xred(:,iatom)-(/s1,s2,s3/)
-           arg=two_pi*dot_product(qphon_,taumr)
-           phr1d_re=dcos(arg)
-           phr1d_im=dsin(arg)
-
 !          Identify the fft indexes of the rectangular grid around the atom
            if(r2 > r2atsph) then
              cycle
@@ -1725,13 +1712,16 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 
            call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
-           if (ratopt==1.and.present(fatsph)) then
-             fatsph3i(ix+1,iy+1,iz+1,iatom)=fsm
-           else if (ratopt==2.and.present(fatsph)) then
-             fsm=fatsph3i(ix+1,iy+1,iz+1,iatom)
-           end if
-
            ifft_local=1+ix+n1*(iy+n2*izloc)
+           fatsph_(ifft_local,iatom)=fsm
+
+!          Compute the finite-q real-space phase
+           taumr_(ifft_local,iatom,1)=difx
+           taumr_(ifft_local,iatom,2)=dify
+           taumr_(ifft_local,iatom,3)=difz
+           arg=two_pi*dot_product(qphon_,taumr_(ifft_local,iatom,:))
+           phr1d_re=dcos(arg)
+           phr1d_im=dsin(arg)
 
            if(present(intgf2))then
 !            intgden_(1,iatom)= integral of the square of the spherical integrating function
@@ -1775,19 +1765,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
      end if
    end do
 
-   if (ratopt==1.and.present(fatsph)) then
-     ifft=0
-     do i3=1,n3
-       if (fftn3_distrib(i3)==mpi_enreg%me_fft) then
-         do i2=1,n2
-           do i1=1,n1
-             ifft=ifft+1
-             fatsph(ifft,iatom)=fatsph3i(i1,i2,i3,iatom)
-           end do
-         end do
-       end if
-     end do
-   end if
 
 !DEBUG
 !   n1c=(n1b+n1a)/2
@@ -1796,7 +1773,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
 !     n1c=mod(n1c+ishift*n1,n1)
 !     n2c=mod(n2c+ishift*n2,n2)
 !     iz=mod(i3+ishift*n3,n3)
-!     write(100+iatom,*) iz+1 ,fatsph3i(n1c,n2c,iz+1,iatom)
 !   end do 
 !ENDDEBUG
     
@@ -1964,6 +1940,14 @@ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
    end if
  end if
 
+!TODO: Adapt to fft parallelization
+ if(present(fatsph)) then
+   fatsph=fatsph_
+ end if
+ if(present(taumr)) then
+   taumr=taumr_
+ end if
+
 !EB  - Compute magnetization of the whole cell
  if(present(dentot) .or. present(rhomag))then
    rhomag_(:,:)=zero
@@ -2003,8 +1987,6 @@ if(present(strs_intgden) .and. option<10 .and. ratsm2>tol12) then
    call printmagvtk(mpi_enreg,cplex,nspden,nfft,ngfft,rhor,rprimd,'DEN.vtk')
  endif
 !ENDDEBUG
-
- ABI_SFREE(fatsph3i)
 
 end subroutine calcdenmagsph
 !!***
