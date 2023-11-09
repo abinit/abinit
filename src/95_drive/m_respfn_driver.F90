@@ -1226,7 +1226,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
 !   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,symrel_cart)
-   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel)
+   call sylwtens(indsym,natom+8,natom,dtset%nsym,rfpert_lw,symrec,dtset%symrel,&
+ & dtset%timdisp,dtset%qptn)
 
    write(message,'(7a)') ch10, ' The following reducible perturbations will also be ', ch10, &
                              & ' explicitly calculated for a correct subsequent ', ch10, &
