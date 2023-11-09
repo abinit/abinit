@@ -4984,14 +4984,15 @@ end subroutine sytens
 !! SOURCE
 
 !subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
-subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,timdisp,qphon)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,natom,nsym
+ integer,intent(in) :: mpert,natom,nsym,timdisp
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
+ real(dp), intent(in) :: qphon(3)
 ! real(dp),intent(in) :: symrel_cart(3,3,nsym)
 
 !Local variables -------------------------
@@ -5197,30 +5198,32 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i2pert,i2dir)
 
- do i1pert = 1, mpert
-   do i2pert = 1, mpert
-     do i3pert = 1, mpert
-
-       do i1dir = 1, 3
-         do i2dir = 1, 3
-           do i3dir = 1, 3
-
-             if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
-
-               if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
-                (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
-                 pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
+ if (.not.(timdisp==1.and.sqrt(sum(qphon**2))>tol8)) then
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
+       do i3pert = 1, mpert
+  
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
+  
+               if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
+  
+                 if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
+                  (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
+                   pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
+                 end if
+  
                end if
-
-             end if
-
+  
+             end do
            end do
          end do
+  
        end do
-
      end do
    end do
- end do
+ end if
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 
