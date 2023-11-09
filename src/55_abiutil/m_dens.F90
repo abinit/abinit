@@ -1523,7 +1523,8 @@ end subroutine mag_penalty_e
 !! SOURCE
 
 subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
-&    ratopt,option,cplex,dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
+&    ratopt,option,cplex, &
+&     dentot,gr_intgden,intgden,intgf2,rhomag,strs_intgden,fatsph,qphon,taumr)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -1537,7 +1538,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(in) :: xred(3,natom)
- real(dp),intent(in),optional   :: qphon(3)
  real(dp),intent(out),optional  :: dentot(nspden)
  real(dp),intent(out),optional  :: gr_intgden(3,nspden,natom)   
  real(dp),intent(out),optional  :: intgden(cplex,nspden,natom)
@@ -1545,6 +1545,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  real(dp),intent(out),optional  :: rhomag(2,nspden)
  real(dp),intent(out),optional  :: strs_intgden(6,nspden,natom)   
  real(dp),intent(out),optional  :: fatsph(nfft,natom)   
+ real(dp),intent(in),optional   :: qphon(3)
  real(dp),intent(out),optional  :: taumr(nfft,natom,3)   
 !Local variables ------------------------------
 !scalars
@@ -2958,25 +2959,25 @@ integer :: iatom
  if (nspden==2) then
    blkflg(3,natom+5,idir,ipert)=1
    d2lo(1,3,natom+5,idir,ipert)= rhomag(1,2)
-   if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= rhomag(2,2)
+   if (cplex==2) d2lo(2,3,natom+5,idir,ipert)= half*rhomag(2,2)
  else if (nspden==4) then
    blkflg(1:3,natom+5,idir,ipert)=1
    d2lo(1,1:3,natom+5,idir,ipert)= rhomag(1,2:4)
-   if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)= rhomag(2,2:4)
+   if (cplex==2) d2lo(2,1:3,natom+5,idir,ipert)=half* rhomag(2,2:4)
  end if
 
  ! Incorporate local magnetic moments
  if (nspden==2) then
    do iatom= 1, natom
      blkflg(3,natom+11+iatom,idir,ipert)=1
-     d2lo(1,3,natom+11+iatom,idir,ipert)= intgden(1,2,iatom)
-     if (cplex==2) d2lo(2,3,natom+11+iatom,idir,ipert)= intgden(2,2,iatom)
+     d2lo(1,3,natom+11+iatom,idir,ipert)=half*intgden(1,2,iatom)
+     if (cplex==2) d2lo(2,3,natom+11+iatom,idir,ipert)=half*intgden(2,2,iatom)
    end do
  else if (nspden==4) then
    do iatom= 1, natom
      blkflg(1:3,natom+11+iatom,idir,ipert)=1
-     d2lo(1,1:3,natom+11+iatom,idir,ipert)= intgden(1,2:4,iatom)
-     if (cplex==2) d2lo(2,1:3,natom+11+iatom,idir,ipert)= intgden(2,2:4,iatom)
+     d2lo(1,1:3,natom+11+iatom,idir,ipert)=half*intgden(1,2:4,iatom)
+     if (cplex==2) d2lo(2,1:3,natom+11+iatom,idir,ipert)=half*intgden(2,2:4,iatom)
    end do
  end if
 
