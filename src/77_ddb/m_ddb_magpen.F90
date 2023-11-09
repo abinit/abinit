@@ -80,7 +80,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,jblok,kblok,nblok,nsize,ndim 
+ integer :: iblok,ii,ipert1,ipert2,jblok,kblok,nblok,nsize,ndim 
  integer :: nmat,nmdir
  character(len=500) :: msg
 !arrays
@@ -179,6 +179,15 @@ contains
      call magmom(ddb%val,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol,zfield)
    end if
+
+   !Now calculate the non-magnetic second-order quantities
+   rfmagn(:)=0
+   rfelfd(:)=0
+
+   !Dielectric susceptibility
+   rfelfd(1:2)=2
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+
 
  end do
 
