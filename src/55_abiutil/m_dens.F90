@@ -1554,7 +1554,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer :: n1c, n2c, n3c
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
- real(dp) :: arg,d1,d2,d3,s1,s2,s3,phr1d_im,phr1d_re
+ real(dp) :: arg,phr1d_im,phr1d_re
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
  real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
  logical   :: grid_found
@@ -1592,10 +1592,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  endif
  fatsph_=zero
  taumr_=zero
-
- d1=one/(real(n1)-one)
- d2=one/(real(n2)-one)
- d3=one/(real(n3)-one)
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
