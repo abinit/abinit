@@ -202,7 +202,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Not valid for finite wave-vector perturbations
- if (.not.just_timdisp.and.sqrt(sum(dtset%qptn**2))/=0_dp) then
+ if (.not.just_timdisp.and.sqrt(sum(dtset%qptn**2))>tol8) then
    msg='This routine can only be used at q /= 0 for time dispersion calculation '
    ABI_BUG(msg)
  end if
@@ -391,7 +391,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 ! end do
 
 ! call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,symrel_cart)
- call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel)
+ call sylwtens(indsym,mpert,natom,dtset%nsym,rfpert,symrec,dtset%symrel,dtset%timdisp,dtset%qptn)
 
  write(msg,'(a,a,a,a,a)') ch10, &
 & ' The list of irreducible elements of the dispersion third-order energy derivatives is: ', ch10,& 
