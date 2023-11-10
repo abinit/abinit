@@ -134,6 +134,7 @@ if(ABINIT_ENABLE_GPU_HIP)
 
   find_package(HIP)
   find_package(hipfft)
+  find_package(rocfft)
   find_package(rocblas)
   find_package(hipblas)
   find_package(hipsolver)
