@@ -177,9 +177,19 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option/=3) then
    ! We launch async transfert of denpot
    !$OMP TARGET ENTER DATA MAP(alloc:denpot)
-   !$OMP TARGET UPDATE TO(denpot) NOWAIT DEPEND(OUT:denpot)
+   !FIXME This async transfer might be better handled through CUDA/HIP after all...
+   ! Issues randomly occurs when using Cray compiler, seems fine with NVHPC.
+#ifdef FC_CRAY
+   !$OMP TARGET UPDATE TO(denpot)
+#else
+   !$OMP TARGET UPDATE TO(denpot) NOWAIT
+#endif
    if(option == 1) then
-     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT DEPEND(OUT:weight_r,weight_i)
+#ifdef FC_CRAY
+     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i)
+#else
+     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT
+#endif
    endif
 
 #if defined HAVE_GPU_HIP && defined FC_LLVM
@@ -299,8 +309,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call density accumulation routine on gpu
    !!$OMP TARGET TEAMS LOOP &
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:fofr,denpot,weight_r,weight_i) &
-   !$OMP& DEPEND(in:denpot,weight_r,weight_i)
+   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:fofr,denpot,weight_r,weight_i)
    do i3=1, n3
      do i2=1, n2
        do i1=1, n1
@@ -323,7 +332,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call gpu routine to  Apply local potential
    !!$OMP TARGET TEAMS LOOP &
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:denpot,fofr) DEPEND(in:denpot)
+   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:denpot,fofr)
    do idat = 1, ndat
      do i3=1, n3
        do i2=1, n2
