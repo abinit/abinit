@@ -14,6 +14,7 @@
 
 #include <gpu_linalg.h>
 #include <rocblas/rocblas.h>
+#include <rocfft/rocfft.h>
 
 hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
@@ -158,6 +159,7 @@ extern "C" void gpu_linalg_init_()
   fprintf(stdout, "Initializing hipBLAS, this may take 10 seconds...\n");
   fflush(stdout);
   rocblas_initialize();
+  rocfft_setup();
 }
 
 /*=========================================================================*/

@@ -62,6 +62,7 @@ if(ABINIT_ENABLE_GPU_HIP)
     hip::hipfft
     roc::hipblas
     roc::rocblas
+    roc::rocfft
     roc::hipsolver
     ${ROCTX}
     )
