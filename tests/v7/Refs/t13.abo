@@ -1,5 +1,5 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 9.11.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h04 )
+.Starting date : Fri 10 Nov 2023.
+- ( at 10h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t13/t13.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/TestBot_MPI1/v7_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -102,7 +102,7 @@ P This job should need less than                       0.982 Mbytes of memory.
 _ WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
- DATASET   22 : space group C2/m (# 12); Bravais mC (1-face-center monocl.)
+ DATASET   22 : space group Im m m (# 71); Bravais oI (body-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
@@ -113,12 +113,12 @@ _ WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          25
        mpw =          39          nfft =        1000          nkpt =          25
 ================================================================================
-P This job should need less than                       0.983 Mbytes of memory.
+P This job should need less than                       0.894 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
- DATASET   23 : space group R-3 m (#166); Bravais hR (rhombohedral)
+ DATASET   23 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
@@ -129,7 +129,7 @@ _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          18
        mpw =          36          nfft =        1000          nkpt =          18
 ================================================================================
-P This job should need less than                       0.868 Mbytes of memory.
+P This job should need less than                       0.872 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -166,7 +166,7 @@ P This job should need less than                       1.163 Mbytes of memory.
 _ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
- DATASET   32 : space group Fm m m (# 69); Bravais oF (face-center ortho.)
+ DATASET   32 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
      intxc =       0    ionmov =       0      iscf =       7    lmnmax =       1
@@ -177,7 +177,7 @@ _ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           7
        mpw =          74          nfft =        1728          nkpt =           7
 ================================================================================
-P This job should need less than                       1.095 Mbytes of memory.
+P This job should need less than                       1.066 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -2577,8 +2577,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8803,10 +8803,10 @@ P           mkmem74        40
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.6  wall=          8.2
+- Proc.   0 individual time (sec): cpu=          9.5  wall=         12.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.6  wall=          8.2
++Overall time at end (sec) : cpu=          9.5  wall=         12.1
