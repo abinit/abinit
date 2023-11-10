@@ -428,7 +428,7 @@ end subroutine chkgrp
 !scalars
  integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
  integer :: sym1,sym2,sym3
- integer :: isym
+!integer :: isym
  real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg

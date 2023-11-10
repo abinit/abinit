@@ -119,7 +119,7 @@ contains
 !!    if xcdata%nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                         kxc(:,2)= d2Exc/drho_up drho_dn
 !!                         kxc(:,3)= d2Exc/drho_dn drho_dn
-!!   ===== if GGA
+!!   ===== if GGA or mGGA
 !!    if xcdata%nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -148,6 +148,7 @@ contains
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not output
 !!
 !!  === Only if abs(option)=3 ===
 !!  [k3xc(nfft,nk3xc)]= -- optional -- third derivative of the XC energy functional of the density,
@@ -159,12 +160,15 @@ contains
 !!                  k3xc(:,2)= d3Exc/drho_up drho_up drho_dn
 !!                  k3xc(:,3)= d3Exc/drho_up drho_dn drho_dn
 !!                  k3xc(:,4)= d3Exc/drho_dn drho_dn drho_dn
-
+!!
 !! === Additional optional output ===
 !!  [exc_vdw_out]= vdW-DF contribution to enxc (hartree)
 !!  [vxctau(nfft,xcdata%nspden,4*xcdata%usekden)]=(only for meta-GGA)=
 !!    vxctau(:,:,1): derivative of XC energy density with respect to kinetic energy density (depsxcdtau).
 !!    vxctau(:,:,2:4): gradient of vxctau (gvxctau)
+!! === For the TB09 XC functional (modified Becke-Johnson) ===
+!!  [grho1_over_rho1]=Integral of |Grad(rho^1)|/rho^1 over the augmentation region
+!!                    Used to compute the c parameter of the TB09 XC functional
 !!
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>= -- optional argument -- quantities for the electron-positron annihilation
@@ -243,7 +247,7 @@ contains
 subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option, &
 & rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
-& add_tfw,exc_vdw_out,electronpositron,k3xc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
+& add_tfw,exc_vdw_out,grho1_over_rho1,electronpositron,k3xc,taur,vhartr,vxctau,xc_funcs,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -252,7 +256,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  logical,intent(in) :: non_magnetic_xc
  logical,intent(in),optional :: add_tfw
  real(dp),intent(out) :: enxc,vxcavg
- real(dp),intent(out),optional :: exc_vdw_out
+ real(dp),intent(out),optional :: exc_vdw_out,grho1_over_rho1
  type(MPI_type),intent(in) :: mpi_enreg
  type(electronpositron_type),pointer,optional :: electronpositron
  type(xcdata_type), intent(in) :: xcdata
@@ -280,7 +284,8 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp) :: coeff,divshft,doti,dstrsxc,dvdn,dvdz,epsxc,exc_str,factor,m_norm_min,s1,s2,s3
  real(dp) :: strdiag,strsxc1_tot,strsxc2_tot,strsxc3_tot,strsxc4_tot
  real(dp) :: strsxc5_tot,strsxc6_tot,ucvol
- logical :: test_nhat,need_nhat,need_nhatgr,with_vxctau
+ real(dp) :: deltae_vdw,exc_vdw
+ logical :: test_nhat,test_tb09,need_nhat,need_nhatgr,with_vxctau
  character(len=500) :: message
  real(dp) :: hyb_mixing, hyb_mixing_sr, hyb_range
 !arrays
@@ -294,7 +299,6 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  real(dp),allocatable,target :: rhonow(:,:,:),taunow(:,:,:)
  real(dp),pointer :: rhocorval(:,:),rhor_(:,:),taucorval(:,:),taur_(:,:)
  real(dp),ABI_CONTIGUOUS pointer :: rhonow_ptr(:,:,:)
- real(dp) :: deltae_vdw,exc_vdw
  real(dp) :: decdrho_vdw(nfft,xcdata%nspden),decdgrho_vdw(nfft,3,xcdata%nspden)
  real(dp) :: strsxc_vdw(3,3)
  type(libxc_functional_type) :: xc_funcs_auxc(2)
@@ -407,7 +411,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  end if
  if((usekden==1.or.uselaplacian==1).and.nspden==4)then
    !mGGA en NC-magnetism: how do we rotate tau kinetic energy density?
-   message=' At present, meta-GGA (usekden=1 or uselaplacian=1)  is not comptatible with non-collinear magnetism (nspden=4).'
+   message=' At present, meta-GGA (usekden=1 or uselaplacian=1) is not compatible with non-collinear magnetism (nspden=4).'
    ABI_ERROR(message)
  end if
 
@@ -449,7 +453,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
  decdrho_vdw(:,:) = zero
  decdgrho_vdw(:,:,:) = zero
  strsxc_vdw(:,:) = zero
-
+ if (present(grho1_over_rho1)) grho1_over_rho1=zero
 
  if ((xcdata%xclevel==0.or.ixc==0).and.(.not.my_add_tfw)) then
 !  No xc at all is applied (usually for testing)
@@ -692,6 +696,9 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
      end if
 !    Make the density positive everywhere (but do not care about gradients)
      call mkdenpos(iwarn,nfft,nspden_updn,1,rhonow(:,1:nspden_updn,1),xcdata%xc_denpos)
+     if (usekden==1) then
+       call mkdenpos(iwarn,nfft,nspden_updn,1,taunow(:,1:nspden_updn,1),xcdata%xc_taupos)
+     end if
 
 !    write(std_out,*) 'rhonow',rhonow
 
@@ -1098,6 +1105,25 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
        strsxc2_tot=strsxc2_tot+dstrsxc
        strsxc3_tot=strsxc3_tot+dstrsxc
 
+!      Accumulate integral of |Grad_rho|/Rho (to be used for TB09 XC)
+       if (present(grho1_over_rho1).and.ixc<0) then
+         if (present(xc_funcs)) then
+           test_tb09=libxc_functionals_is_tb09(xc_functionals=xc_funcs)
+         else
+           test_tb09=libxc_functionals_is_tb09()
+         end if
+         if (test_tb09) then
+           factor=merge(two,one,nspden_updn==1)
+           jj=merge(1,3,nspden_updn==1)
+           do ipts=ifft,ifft+npts-1
+             indx=ipts-ifft+1
+             if (abs(rho_b(indx))>tol10) then
+               grho1_over_rho1=grho1_over_rho1+factor*sqrt(grho2_b_updn(indx,jj))/rho_b(indx)
+             end if
+           end do
+         end if
+       end if
+
        ABI_FREE(exc_b)
        ABI_FREE(rho_b)
        ABI_FREE(rho_b_updn)
@@ -1218,12 +1244,16 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
    enxc=epsxc*ucvol/dble(nfftot)*divshft
    vxc=vxc*divshft
    if (with_vxctau) vxctau=vxctau*divshft
+   if (present(grho1_over_rho1)) grho1_over_rho1=grho1_over_rho1*ucvol/dble(nfftot)*divshft
 
 !  Reduction in case of FFT distribution
    if (nproc_fft>1)then
      call timab(48,1,tsec)
      call xmpi_sum(strsxc,comm_fft ,ierr)
      call xmpi_sum(enxc  ,comm_fft ,ierr)
+     if (present(grho1_over_rho1))  then
+       call xmpi_sum(grho1_over_rho1,comm_fft ,ierr)
+     end if
      if (ipositron==2) then
        s1=electronpositron%e_xc;s2=electronpositron%e_xcdc
        call xmpi_sum(s1,comm_fft ,ierr)
