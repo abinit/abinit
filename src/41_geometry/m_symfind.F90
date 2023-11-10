@@ -1265,7 +1265,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 !DEBUG
 !    write(6,*)' symbrav : will call symlatt, 3*tolsym=',3*tolsym
 !ENDDEBUG
-     call symlatt(bravais,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
+     call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
      ABI_FREE(ptsymrel)
      if(bravais(1)==iholohedry)then
 !      Succeeded  
