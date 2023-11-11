@@ -1,9 +1,5 @@
 
-<<<<<<< HEAD
 .Version 9.11.4 of ABINIT 
-=======
-.Version 9.10.4 of ABINIT 
->>>>>>> release-9.10
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -18,17 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-<<<<<<< HEAD
-.Starting date : Fri 10 Nov 2023.
-- ( at 10h11 )
+.Starting date : Sat 11 Nov 2023.
+- ( at 12h25 )
   
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/TestBot_MPI1/v7_t13/t13.abi
-=======
-.Starting date : Sun 29 Oct 2023.
-- ( at 06h34 )
-  
-- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze-9.10/tests/TestBot_MPI1/v7_t13/t13.abi
->>>>>>> release-9.10
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/TestBot_MPI1/v7_t13/t13.abi
 - output file    -> t13.abo
 - root for input  files -> t13i
 - root for output files -> t13o
@@ -113,10 +102,6 @@ P This job should need less than                       0.982 Mbytes of memory.
 _ WF disk file :      0.106 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
-<<<<<<< HEAD
-=======
-
->>>>>>> release-9.10
  DATASET   22 : space group Im m m (# 71); Bravais oI (body-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -133,10 +118,6 @@ P This job should need less than                       0.894 Mbytes of memory.
 _ WF disk file :      0.047 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
 
-<<<<<<< HEAD
-=======
-
->>>>>>> release-9.10
  DATASET   23 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
@@ -185,10 +166,6 @@ P This job should need less than                       1.163 Mbytes of memory.
 _ WF disk file :      0.097 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
-<<<<<<< HEAD
-=======
-
->>>>>>> release-9.10
  DATASET   32 : space group I4/m m m (#139); Bravais tI (body-center tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
@@ -2600,13 +2577,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-<<<<<<< HEAD
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_merge-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-=======
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze-9.10/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
->>>>>>> release-9.10
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8831,18 +8803,10 @@ P           mkmem74        40
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-<<<<<<< HEAD
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         12.1
-=======
-- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.7
->>>>>>> release-9.10
+- Proc.   0 individual time (sec): cpu=          9.9  wall=         12.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  59 WARNINGs and  65 COMMENTs to log file.
-<<<<<<< HEAD
-+Overall time at end (sec) : cpu=          9.5  wall=         12.1
-=======
-+Overall time at end (sec) : cpu=          8.0  wall=          8.7
->>>>>>> release-9.10
++Overall time at end (sec) : cpu=          9.9  wall=         12.5
