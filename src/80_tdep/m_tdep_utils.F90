@@ -245,24 +245,6 @@ contains
 !======== 1/ Determine ideal positions and distances ======================================
 !==========================================================================================
   write(Invar%stdout,*)' Determine ideal positions and distances...'
-!Check that atoms (defined in the input.in file) are set correctly in the unitcell
-  do ii=1,3
-    do iatcell=1,Invar%natom_unitcell
-      if ((Invar%xred_unitcell(ii,iatcell).le.(-0.5)).or.(Invar%xred_unitcell(ii,iatcell).gt.(0.5))) then
-        do while (Invar%xred_unitcell(ii,iatcell).le.(-0.5))
-          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)+1.d0
-        end do
-        do while (Invar%xred_unitcell(ii,iatcell).gt.(0.5))
-          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)-1.d0
-        end do
-!FB        write(Invar%stdout,*) 'xred_unitcell='
-!FB        write(Invar%stdout,*)  Invar%xred_unitcell(:,1:Invar%natom_unitcell)
-!FB        write(Invar%stdout,*) 'Please put the atoms in the ]-0.5;0.5] range'
-!FB        stop -1
-      endif
-    end do
-  end do
-
 ! Define the bigbox with ideal positions
   ABI_MALLOC(Rlatt_red ,(3,Invar%natom_unitcell,Invar%natom)); Rlatt_red (:,:,:)=0.d0
   ABI_MALLOC(xred_ideal,(3,Invar%natom))                     ; xred_ideal(:,:)=0.d0
@@ -311,7 +293,7 @@ contains
   do eatom=1,Invar%natom
     do fatom=1,Invar%natom
       tmp(:)=xred_ideal(:,fatom)-xred_ideal(:,eatom)
-      call tdep_make_inbox(tmp,1,1d-3)
+      call tdep_make_inbox(tmp,1,1d-4)
       call DGEMV('T',3,3,1.d0,Lattice%rprimd_md(:,:),3,tmp(:),1,0.d0,distance(eatom,fatom,2:4),1)
       do ii=1,3
 !       Remove the rounding errors before writing (for non regression testing purposes)
@@ -358,7 +340,7 @@ contains
     foo2=0
     do jatom=1,Invar%natom
       tmp(:)=xred_center(:,jatom)-xred_center(:,iatom)
-      call tdep_make_inbox(tmp,1,1d-3)
+      call tdep_make_inbox(tmp,1,1d-4)
       iatcell=1
       do jatcell=1,Invar%natom_unitcell
         foo=0
@@ -660,7 +642,7 @@ contains
   end do
 
 ! Find the symetry operation between 2 atoms
-  call tdep_SearchS_1at(Invar,Lattice,MPIdata,Sym,xred_ideal)
+  call tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
   ABI_MALLOC(Invar%xred_ideal,(3,Invar%natom)) ; Invar%xred_ideal(:,:)=0.d0
   Invar%xred_ideal(:,:)=xred_ideal(:,:)
   ABI_FREE(xred_ideal)
