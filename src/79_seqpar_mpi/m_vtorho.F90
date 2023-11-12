@@ -1764,8 +1764,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (usecprj_local==1) then
        call pawmkrhoij(atindx,atindx1,cprj,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&       dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
      else
        mcprj_tmp=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        ABI_MALLOC(cprj_tmp,(natom,mcprj_tmp))
@@ -1777,8 +1777,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,&
-&       dtset%usewvl,dtset%wtk)
+&       dtset%nspden,dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,&
+&       dtfil%unpaw,dtset%usewvl,dtset%wtk)
        call pawcprj_free(cprj_tmp)
        ABI_FREE(cprj_tmp)
      end if

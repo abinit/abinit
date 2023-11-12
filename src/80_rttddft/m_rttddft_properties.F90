@@ -142,10 +142,10 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    end if
 
    ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,    &
-                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem, &
-                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,      &
-                 & dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft,            &
+   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,       &
+                 & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem,    &
+                 & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,          &
+                 & dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft, &
                  & pawrhoij_unsym,tdks%unpaw,dtset%usewvl,dtset%wtk)
 
    ! 4-Symetrize rhoij, compute nhat and add it to rhor

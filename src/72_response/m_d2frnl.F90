@@ -198,7 +198,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: shift_rhoij,signs,signs_field,spaceworld,sz2,sz3,tim_nonlop
  integer :: iband_, iband_me, jband_me, nband_me
  real(dp) :: arg,eig_k,enl,enlk,occ_k,ucvol,wtk_k
- logical :: has_ddk_file,need_becfr,need_efmas,need_piezofr,paral_atom,t_test,usetimerev
+ logical :: has_ddk_file,need_becfr,need_efmas,need_piezofr,paral_atom,t_test
+ logical :: use_timerev,use_zeromag
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: gs_ham
 !arrays
@@ -441,7 +442,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      pawrhoij_tot(iatom)%ngrhoij=ngrhoij
      pawrhoij_tot(iatom)%grhoij=zero
    end do
-   usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_timerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_zeromag=(pawrhoij_tot(1)%nspden==4.and.dtset%nspden==1)
 
  else
    ABI_MALLOC(cwaveprj,(0,0))
@@ -661,7 +663,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        !EFMAS: Bug with efmas currently; to be looked into...
        if (psps%usepaw==1.and.(.not.need_efmas)) then
          call pawaccrhoij(gs_ham%atindx,cplex,cwaveprj,cwaveprj,0,isppol,natom,&
-&         natom,dtset%nspinor,occ_k,3,pawrhoij_tot,usetimerev,wtk_k)
+&         natom,dtset%nspinor,occ_k,3,pawrhoij_tot,use_timerev,use_zeromag,wtk_k)
        end if
 
 !      PAW: Compute frozen contribution to piezo electric tensor

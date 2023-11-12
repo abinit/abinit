@@ -76,6 +76,7 @@ CONTAINS  !=====================================================================
 !!  natom=number of atoms in cell
 !!  nband=number of bands for all k points
 !!  nkpt=number of k points
+!!  nspden=number of spin components for the density
 !!  nspinor=number of spinorial components of the wavefunctions
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  occ(mband*nkpt*nsppol)=occupation number for each band for each k
@@ -99,10 +100,10 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawmkrhoij(atindx,atindx1,cprj,dimcprj,istwfk,kptopt,mband,mband_cprj,mcprj,mkmem,mpi_enreg,&
-&                      natom,nband,nkpt,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
+&                natom,nband,nkpt,nspden,nspinor,nsppol,occ,paral_kgb,paw_dmft,pawrhoij,unpaw,usewvl,wtk)
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspinor,nsppol
+ integer,intent(in) :: kptopt,mband,mband_cprj,mcprj,mkmem,natom,nkpt,nspden,nspinor,nsppol
  integer,intent(in) :: paral_kgb,unpaw,usewvl
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -117,18 +118,18 @@ CONTAINS  !=====================================================================
 !scalars
  integer,parameter :: max_nband_cprj=100
  integer :: bdtot_index,cplex
- integer :: iatom,iatom_tot,ib,ib1,iband,ibc1,ibg,ib_this_proc,ierr
+ integer :: cplex_rhoij,iatom,iatom_tot,ib,ib1,iband,ibc1,ibg,ib_this_proc,ierr
  integer :: ikpt,iorder_cprj,isppol,jb_this_proc,jbg,me,my_nspinor,nband_k,nband_k_cprj
- integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij
+ integer :: nbandc1,nband_k_cprj_read,nband_k_cprj_used,nprocband,nrhoij,nspden_rhoij
  integer :: option,spaceComm,use_nondiag_occup_dmft
- logical :: locc_test,paral_atom,usetimerev
+ logical :: locc_test,paral_atom,use_timerev,use_zeromag
  integer :: ib1_this_proc, ib_loop, proc_sender, proc_recver
  real(dp) :: wtk_k
  character(len=500) :: msg
 
 !arrays
  integer :: n2buff
- integer, allocatable :: req_correl(:,:,:)
+ integer, allocatable :: typat(:),req_correl(:,:,:)
  real(dp) :: occup(2)
  real(dp) ABI_ASYNC, allocatable :: buffer_cprj_correl(:,:,:)
  character(len=8),parameter :: dspin(6)=(/"up      ","down    ","dens (n)","magn (x)","magn (y)","magn (z)"/)
@@ -208,16 +209,31 @@ CONTAINS  !=====================================================================
 !Build and initialize unpacked rhoij (to be computed here)
  call pawrhoij_init_unpacked(pawrhoij)
 
-!If pawrhoij is MPI-distributed over atomic sites, gather it
+!If pawrhoij is MPI-distributed over atomic sites, we have to gather it
  if (paral_atom) then
    ABI_MALLOC(pawrhoij_all,(natom))
+   ABI_MALLOC(typat,(natom))
+   typat(:)=0;cplex_rhoij=0;nspden_rhoij=0
+   do iatom=1,nrhoij
+     iatom_tot=mpi_enreg%my_atmtab(iatom)
+     typat(iatom_tot)=pawrhoij(iatom)%itypat
+     cplex_rhoij=max(cplex_rhoij,pawrhoij(iatom)%cplex_rhoij)
+     nspden_rhoij=max(nspden_rhoij,pawrhoij(iatom)%nspden)
+   end do
+   call xmpi_sum(typat,mpi_enreg%comm_atom,ierr)
+   call xmpi_max_ip(cplex_rhoij,mpi_enreg%comm_atom,ierr)
+   call xmpi_max_ip(nspden_rhoij,mpi_enreg%comm_atom,ierr)
+   call pawrhoij_alloc(pawrhoij_all,cplex_rhoij,nspden_rhoij,nspinor,&
+&                      nsppol,typat,lmnsize=dimcprj,use_rhoijp=0,use_rhoij_=1)
+   ABI_FREE(typat)
  else
    pawrhoij_all => pawrhoij
  end if
 
 !LOOP OVER SPINS
  option=1
- usetimerev=(kptopt>0.and.kptopt<3)
+ use_timerev=(kptopt>0.and.kptopt<3)
+ use_zeromag=(pawrhoij_all(1)%nspden==4.and.nspden==1)
  bdtot_index=0;ibg=0;jbg=0
  do isppol=1,nsppol
 
@@ -417,11 +433,11 @@ CONTAINS  !=====================================================================
          if (locc_test) then
            if(use_nondiag_occup_dmft == 1) then
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprjb,0,isppol,nrhoij,natom,&
-&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k,&
-&                             occ_k_2=occup(2))
+&                    nspinor,occup(1),option,pawrhoij_all,use_timerev,use_zeromag,wtk_k,&
+&                    occ_k_2=occup(2))
            else
              call pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj ,0,isppol,nrhoij,natom,&
-&                             nspinor,occup(1),option,pawrhoij_all,usetimerev,wtk_k)
+&                    nspinor,occup(1),option,pawrhoij_all,use_timerev,use_zeromag,wtk_k)
            end if
          end if
        end do ! ib1c
@@ -521,8 +537,11 @@ end subroutine pawmkrhoij
 !!          1: update rhoij (Ground-State)
 !!          2: update 1-st order rhoij (Response Function) according to ipert
 !!          3: update gradients of rhoij with respect to r,strain of both
-!!  usetimerev=.TRUE. if time-reversal symmetry is used (WF(-k)=Conjg[WF(k)])
+!!  use_timerev=.TRUE. if time-reversal symmetry is used (WF(-k)=Conjg[WF(k)])
+!!  use_zeromag=.TRUE. if rhoij "magnetization" is enforced to be zero
+!!               Applies only when nspden_rhoij=4 (note: only the real part is set to zero)
 !!  wtk_k=weight assigned to current k-point
+!!  [occ_k_2]=??
 !!
 !! SIDE EFFECTS
 !!  pawrhoij(natom) <type(pawrhoij_type)>= GS: paw rhoij occupancies and related data
@@ -545,14 +564,14 @@ end subroutine pawmkrhoij
 !! SOURCE
 
  subroutine pawaccrhoij(atindx,cplex,cwaveprj,cwaveprj1,ipert,isppol,my_natom,natom,&
-&                       nspinor,occ_k,option,pawrhoij,usetimerev,wtk_k,occ_k_2, &
+&                       nspinor,occ_k,option,pawrhoij,use_timerev,use_zeromag,wtk_k,occ_k_2, &
 &                       comm_atom,mpi_atmtab ) ! optional (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex,ipert,isppol,my_natom,natom,nspinor,option
  integer,optional,intent(in) :: comm_atom
- logical,intent(in) :: usetimerev
+ logical,intent(in) :: use_timerev,use_zeromag
  real(dp),intent(in) :: occ_k,wtk_k
  real(dp),optional,intent(in) :: occ_k_2
 !arrays
@@ -627,7 +646,7 @@ end subroutine pawmkrhoij
 !  ==================================================================
 !  === OPTION 1: Accumulate (n,k) contribution to rhoij =============
 !  ==================================================================
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
+   compute_impart=((.not.use_timerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
      cplex_rhoij=pawrhoij(1)%cplex_rhoij
@@ -713,14 +732,18 @@ end subroutine pawmkrhoij
                ro12_re=ro12_re+cpi0(iplex,2)*cpj0(iplex,1)
                ro21_re=ro21_re+cpi0(iplex,1)*cpj0(iplex,2)
              end do
-             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+             if (.not.use_zeromag) then
+               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+             end if
              if (cplex==2) then
                !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpi0(1,2)*cpj0(2,1)-cpi0(2,2)*cpj0(1,1)
                ro21_im=cpi0(1,1)*cpj0(2,2)-cpi0(2,1)*cpj0(1,2)
-               pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+               if (.not.use_zeromag) then
+                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+               end if
              end if
            end if
            if (present(occ_k_2)) then
@@ -826,14 +849,18 @@ end subroutine pawmkrhoij
                ro12_re=ro12_re+cpj0(iplex,1)*cpi1(iplex,2)+cpi0(iplex,2)*cpj1(iplex,1)
                ro21_re=ro21_re+cpj0(iplex,2)*cpi1(iplex,1)+cpi0(iplex,1)*cpj1(iplex,2)
              end do
-             pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-             pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+             if (.not.use_zeromag) then
+               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+             end if
              if (cplex==2) then
                !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                ro12_im=cpj0(2,1)*cpi1(1,2)-cpi1(2,2)*cpj0(1,1)+cpi0(1,2)*cpj1(2,1)-cpj1(1,1)*cpi0(2,2)
                ro21_im=cpj0(2,2)*cpi1(1,1)-cpi1(2,1)*cpj0(1,2)+cpi0(1,1)*cpj1(2,2)-cpj1(1,2)*cpi0(2,1)
-               pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+               if (.not.use_zeromag) then
+                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+               end if
              end if
            end if
            if (compute_impart) then
@@ -943,8 +970,10 @@ end subroutine pawmkrhoij
                    ro21_re=ro21_re-cpi0(iplex,1)*cpj0(iplex,2)
                  end do
                end if
-               pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
-               pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+               if (.not.use_zeromag) then
+                 pawrhoij(iatom)%rhoij_(klmn_re,4)=pawrhoij(iatom)%rhoij_(klmn_re,4)+weight*(ro11_re-ro22_re)
+                 pawrhoij(iatom)%rhoij_(klmn_re,2)=pawrhoij(iatom)%rhoij_(klmn_re,2)+weight*(ro12_re+ro21_re)
+               end if
                if (cplex==2) then
                  !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                  ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
@@ -954,7 +983,9 @@ end subroutine pawmkrhoij
                    ro12_im=ro12_im-cpi0(1,2)*cpj0(2,1)+cpi0(2,2)*cpj0(1,1)
                    ro21_im=ro21_im-cpi0(1,1)*cpj0(2,2)+cpi0(2,1)*cpj0(1,2)
                  end if
-                 pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+                 if (.not.use_zeromag) then
+                   pawrhoij(iatom)%rhoij_(klmn_re,3)=pawrhoij(iatom)%rhoij_(klmn_re,3)+weight*(ro21_im-ro12_im)
+                 end if
                end if
              end if
              if (compute_impart) then
@@ -986,7 +1017,7 @@ end subroutine pawmkrhoij
 !  === OPTION 3: Accumulate (n,k) contribution to drhoij/dr =========
 !  ==================================================================
 
-   compute_impart=((.not.usetimerev).and.(pawrhoij(1)%cplex_rhoij==2))
+   compute_impart=((.not.use_timerev).and.(pawrhoij(1)%cplex_rhoij==2))
    compute_impart_cplex=((compute_impart).and.(cplex==2))
    if (nspinor==1) then
      do iatom=1,my_natom
@@ -1053,14 +1084,18 @@ end subroutine pawmkrhoij
                  ro12_re=ro12_re+dcpi0(iplex,2,mu)*cpj0(iplex,1)+cpi0(iplex,2)*dcpj0(iplex,1,mu)
                  ro21_re=ro21_re+dcpi0(iplex,1,mu)*cpj0(iplex,2)+cpi0(iplex,1)*dcpj0(iplex,2,mu)
                end do
-               pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
-               pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
+               if (.not.use_zeromag) then
+                 pawrhoij(iatom)%grhoij(mu,klmn_re,4)=pawrhoij(iatom)%grhoij(mu,klmn_re,4)+weight*(ro11_re-ro22_re)
+                 pawrhoij(iatom)%grhoij(mu,klmn_re,2)=pawrhoij(iatom)%grhoij(mu,klmn_re,2)+weight*(ro12_re+ro21_re)
+               end if
                if (cplex==2) then
                  !Important note: the present implementation follows eq(15) in Hobbs et al, PRB 62, 11556(2000)
                  ! rho^alpha,beta_ij = Sum[<Psi^beta|pi><pj|Psi^alpha]  (alpha and beta exponents inverted)
                  ro12_im=dcpi0(1,2,mu)*cpj0(2,1)+cpi0(1,2)*dcpj0(2,1,mu)-dcpi0(2,2,mu)*cpj0(1,1)-cpi0(2,2)*dcpj0(1,1,mu)
                  ro21_im=dcpi0(1,1,mu)*cpj0(2,2)+cpi0(1,1)*dcpj0(2,2,mu)-dcpi0(2,1,mu)*cpj0(1,2)-cpi0(2,1)*dcpj0(1,2,mu)
-                 pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)
+                 if (.not.use_zeromag) then
+                   pawrhoij(iatom)%grhoij(mu,klmn_re,3)=pawrhoij(iatom)%grhoij(mu,klmn_re,3)+weight*(ro21_im-ro12_im)
+                 end if
                end if
              end if
              if (compute_impart) then
@@ -1165,6 +1200,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 !arrays
  integer,pointer :: my_atmtab(:),lnspinat(:)
  real(dp),allocatable :: occ(:)
+
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -1187,7 +1223,14 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
 &                          nspden=nspden,spnorb=pawspnorb,cpxocc=cpxocc,cplex=qphase)
 
  ratio=one;if (nspden_rhoij==2) ratio=half
- spinat_zero=all(abs(spinat(:,:))<tol10)
+ spinat_zero=(all(abs(spinat(:,:))<tol10).or.(nspden_rhoij==4.and.nspden==1))
+
+! if (nspden_rhoij==4.and.nspden==1.and.(.not.spinat_zero)) then
+!   write(message,'(5a)') 'You are performing a unpolarized calculation (nspden==1)',ch10,&
+!&            'but you start with a magnetization on atom (spinat/=0).',ch10,&
+!&            'This is not expected and my produce unphysical results!'
+!   ABI_WARNING(message)
+! end if
 
  if (my_natom>0) then
    ngrhoij0=0;if (present(ngrhoij)) ngrhoij0=ngrhoij
@@ -1254,8 +1297,8 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
      ratio=one
      if (nspden_rhoij==2) then
        ratio=half
-       if ((spinat(3,iatom)>zero.and.ispden==1).or.&
-&       (spinat(3,iatom)<zero.and.ispden==2)) then
+       if ((spinat(3,iatom)>tol12.and.ispden==1).or.&
+&          (spinat(3,iatom)<tol12.and.ispden==2)) then
          if(abs(zz)>tol12)then
            zratio=two*abs(spinat(3,iatom))/zz
          else
@@ -1264,7 +1307,7 @@ subroutine initrhoij(cpxocc,lexexch,lpawu,my_natom,natom,nspden,nspinor,nsppol,&
        end if
      else if (nspden_rhoij==4.and.ispden>=2) then
        roshift=zero
-       if(abs(zz)>tol12)then
+       if(abs(zz)>tol12.and.(.not.spinat_zero)) then
          zratio=spinat(ispden-1,iatom)/zz
        else
          zratio=zero
