@@ -317,17 +317,17 @@ end subroutine tdep_make_inbox
 &    (abs(rprimd_md(1,1)-Invar%rprimd_md(1,1)).gt.tol5).or.(abs(rprimd_md(2,2)-Invar%rprimd_md(2,2)).gt.tol5).or.&
 &    (abs(rprimd_md(3,3)-Invar%rprimd_md(3,3)).gt.tol5)) then
     do ii=1,3
-      write(Invar%stdlog,'(a,x1,3(f16.10,x1))') 'The rprimd (from the input file or NetCDF file) is=',&
+      write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'The rprimd (from the input file or NetCDF file) is=',&
 &                                             (Invar%rprimd_md(ii,jj),jj=1,3)
     end do  
     do ii=1,3
-      write(Invar%stdlog,'(a,x1,3(f16.10,x1))') 'However, using multiplicity (from the input file)=',&
+      write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'However, using multiplicity (from the input file)=',&
 &                                             (Invar%multiplicity(ii,jj),jj=1,3)
     end do  
     do ii=1,3
-      write(Invar%stdlog,'(a,x1,3(f16.10,x1))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)
+      write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'rprim (from the aTDEP code)=',(rprim(ii,jj),jj=1,3)
     end do  
-    write(Invar%stdlog,'(a,x1,3(f16.10,x1))') 'and acell (from the calculation)=',(acell_unitcell(ii),ii=1,3)
+    write(Invar%stdlog,'(a,1x,3(f16.10,1x))') 'and acell (from the calculation)=',(acell_unitcell(ii),ii=1,3)
     ABI_ERROR(' RPRIMD IS NOT RELATED TO RPRIM AND MULTIPLICITY. MODIFY YOUR RPRIMD.')
   end if
 
