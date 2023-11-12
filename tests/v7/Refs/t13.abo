@@ -8809,4 +8809,8 @@ P           mkmem74        40
 
  Calculation completed.
 .Delivered  59 WARNINGs and  65 COMMENTs to log file.
+<<<<<<< HEAD
 +Overall time at end (sec) : cpu=          9.9  wall=         12.5
+=======
++Overall time at end (sec) : cpu=          8.7  wall=         10.9
+>>>>>>> _fbottin
