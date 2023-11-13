@@ -56,13 +56,13 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
+    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version,mpw
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
     !! Scalars and arrays for numerical extended PW method
-    real(dp) :: ecut
+    real(dp) :: ecut,ecut_eff
     integer,allocatable :: kg(:,:),npwarr(:),npwtot(:)
   contains
     procedure :: compute_e_kinetic
@@ -97,14 +97,19 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nkpt,rprimd,version,ecut)
+  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nkpt,rprimd,version,ecut,&
+  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nkpt,version
-    real(dp) :: ecut
+    integer,intent(in) :: exchn2n3d,mkmem
+    real(dp),intent(in) :: ecut,dilatmx
+    type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
+    integer,intent(in) :: istwfk(nkpt)
     real(dp),intent(in) :: rprimd(3,3)
+    real(dp),intent(in) :: kptns(3,nkpt)
 
     ! Local variables -------------------------
     ! Arrays
@@ -129,9 +134,12 @@ contains
     this%nelectarr(:,:)=zero
     this%shiftfactor=zero
     this%ecut=ecut
+    this%ecut_eff=ecut*dilatmx**2
+    call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     ABI_MALLOC(this%npwarr,(nkpt))
     ABI_MALLOC(this%npwtot,(nkpt))
-    call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
+    call getmpw(this%ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,this%mpw,nkpt)
+    ABI_MALLOC(this%kg,(3,this%mpw*mkmem))
   end subroutine init
   !!***
 
@@ -156,7 +164,13 @@ contains
     class(extfpmd_type),intent(inout) :: this
 
     ! *********************************************************************
-
+    this%kg(:,:)=0
+    ABI_FREE(this%kg)
+    this%npwtot(:)=0
+    ABI_FREE(this%npwtot)
+    this%npwarr(:)=0
+    ABI_FREE(this%npwarr)
+    this%mpw=0
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
@@ -174,6 +188,7 @@ contains
     this%nelect=zero
     this%shiftfactor=zero
     this%ecut=zero
+    this%ecut_eff=zero
     this%ucvol=zero
   end subroutine destroy
   !!***
@@ -354,13 +369,13 @@ contains
     ! *********************************************************************
     if(this%version==5) then
       ecut_eff=this%ecut*dilatmx**2
+      write(0,*) 'Generating kg'
       
-      ABI_MALLOC(this%kg,(3,mpw*mkmem))
-      call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
-
       call kpgio(ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
       & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
       & mpw,this%npwarr,this%npwtot,nsppol)
+      
+      write(0,*) this%kg
     end if
   end subroutine compute_kg
 
