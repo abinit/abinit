@@ -376,6 +376,59 @@ CONTAINS
  end subroutine init_invovl
 !!***
 
+!!****f* m_invovl/destroy_invovl_ikpt
+!! NAME
+!! destroy_invovl_ikpt
+!!
+!! FUNCTION
+!! Destruction of the ikpt-th member of invovl array
+!!
+!! INPUTS
+!! ikpt= index of k-point
+!!
+!! SOURCE
+ subroutine destroy_invovl_ikpt(ikpt, use_gpu_cuda)
+
+   integer, intent(in) :: ikpt
+   integer, intent(in) :: use_gpu_cuda
+
+! *************************************************************************
+
+  if(use_gpu_cuda==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+    if(gpu_initialized==1 .and. current_ikpt_in_gpu == ikpt) then
+      !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
+      !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
+      !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
+      nullify(current_gram_projs)
+      nullify(current_inv_sij)
+      nullify(current_inv_s_approx)
+      current_ikpt_in_gpu = -1
+      !FIXME Smater buffer management ?
+      !!$OMP TARGET EXIT DATA MAP(release:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
+      ABI_FREE(proj_ompgpu)
+      ABI_FREE(sm1proj_ompgpu)
+      ABI_FREE(PtPsm1proj_ompgpu)
+      gpu_initialized = 0
+    end if
+#endif
+  end if
+
+  ABI_FREE(invovl_kpt(ikpt)%gram_projs)
+  ABI_FREE(invovl_kpt(ikpt)%inv_sij)
+  ABI_FREE(invovl_kpt(ikpt)%inv_s_approx)
+  invovl_kpt(ikpt)%nprojs = -1
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
+  if (use_gpu_cuda == ABI_GPU_LEGACY .or. use_gpu_cuda == ABI_GPU_KOKKOS) then
+    call f_gpu_apply_invovl_inner_dealloc()
+    call f_gpu_apply_invovl_matrix_dealloc()
+  end if
+#endif
+
+ end subroutine destroy_invovl_ikpt
+!!***
+
 !!****f* m_invovl/destroy_invovl
 !! NAME
 !! destroy_invovl
@@ -395,47 +448,16 @@ CONTAINS
 
 ! *************************************************************************
 
-  if(use_gpu_cuda==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-    if(gpu_initialized==1) then
-      !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_sij)
-      !$OMP TARGET EXIT DATA MAP(release:current_inv_s_approx)
-      nullify(current_gram_projs)
-      nullify(current_inv_sij)
-      nullify(current_inv_s_approx)
-      current_ikpt_in_gpu = -1
-      !FIXME Smater buffer management ?
-      !!$OMP TARGET EXIT DATA MAP(release:proj_ompgpu,sm1proj_ompgpu,PtPsm1proj_ompgpu)
-      ABI_FREE(proj_ompgpu)
-      ABI_FREE(sm1proj_ompgpu)
-      ABI_FREE(PtPsm1proj_ompgpu)
-      gpu_initialized = 0
-    end if
-#endif
-  end if
-
   ! TODO add cycling if kpt parallelism
   do ikpt=1,nkpt
     if(invovl_kpt(ikpt)%nprojs == -1) then
       ! write(0, *) 'ERROR invovl_kpt is unallocated'
       cycle
     end if
-
-    ABI_FREE(invovl_kpt(ikpt)%gram_projs)
-    ABI_FREE(invovl_kpt(ikpt)%inv_sij)
-    ABI_FREE(invovl_kpt(ikpt)%inv_s_approx)
-    invovl_kpt(ikpt)%nprojs = -1
+    call destroy_invovl_ikpt(ikpt, use_gpu_cuda)
   end do
 
   ABI_FREE(invovl_kpt)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
-  if (use_gpu_cuda == ABI_GPU_LEGACY .or. use_gpu_cuda == ABI_GPU_KOKKOS) then
-    call f_gpu_apply_invovl_inner_dealloc()
-    call f_gpu_apply_invovl_matrix_dealloc()
-  end if
-#endif
 
  end subroutine destroy_invovl
 !!***
@@ -506,10 +528,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  if(invovl%nprojs /= -1) then
    ! We have been here before, cleanup before remaking
-   ABI_FREE(invovl%gram_projs)
-   ABI_FREE(invovl%inv_sij)
-   ABI_FREE(invovl%inv_s_approx)
-   invovl%nprojs = -1
+   call destroy_invovl_ikpt(ikpt_this_proc, ham%use_gpu_impl)
  end if
 
  iaph3d = 1
