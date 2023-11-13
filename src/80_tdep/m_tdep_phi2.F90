@@ -413,6 +413,8 @@ subroutine tdep_write_phi2(distance,Invar,MPIdata,Phi2,Shell2at)
       do jshell=1,nshell
         if ((distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).lt.max_bound).and.&
 &           (distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).ge.min_bound).and.&
+&           (distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1).ne.&
+&            distance(Shell2at%iatref(this_shell),Shell2at%jatref(this_shell),1)).and.&
 &            (tab_shell(jshell).eq.0)) then
           max_bound=distance(Shell2at%iatref(jshell),Shell2at%jatref(jshell),1)
           this_shell=jshell
