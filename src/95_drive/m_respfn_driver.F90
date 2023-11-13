@@ -976,7 +976,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call timab(561,2,tsec)
 
  end if
-
+ 
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
