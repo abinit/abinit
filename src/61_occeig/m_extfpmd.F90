@@ -36,7 +36,7 @@ module m_extfpmd
   use m_xmpi
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
-  use m_kg,             only : mkkin,kpgio
+  use m_kg,             only : kpgio, getmpw
   use m_mpinfo,         only : ptabs_fourdp,proc_distrb_cycle
   use m_numeric_tools,  only : simpson,simpson_int
   use m_spacepar,       only : meanvalue_g
@@ -63,7 +63,7 @@ module m_extfpmd
     real(dp),allocatable :: nelectarr(:,:)
     !! Scalars and arrays for numerical extended PW method
     real(dp) :: ecut
-    real(dp),allocatable :: kg(:,:)
+    integer,allocatable :: kg(:,:),npwarr(:),npwtot(:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -91,22 +91,24 @@ contains
   !!  nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
   !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
   !!  version=extfpmd implementation version
+  !!  ecut=extended plane wave basis set energy cut off
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,rprimd,version)
+  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nkpt,rprimd,version,ecut)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,version
+    integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nkpt,version
+    real(dp) :: ecut
     ! Arrays
     real(dp),intent(in) :: rprimd(3,3)
 
     ! Local variables -------------------------
     ! Arrays
-    real(dp) :: gprimd(3,3),rmet(3,3), gmet(3,3)
+    real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
     ! *********************************************************************
 
@@ -126,7 +128,9 @@ contains
     ABI_MALLOC(this%nelectarr,(nfft,nspden))
     this%nelectarr(:,:)=zero
     this%shiftfactor=zero
-    this%ecut=zero
+    this%ecut=ecut
+    ABI_MALLOC(this%npwarr,(nkpt))
+    ABI_MALLOC(this%npwtot,(nkpt))
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
   !!***
@@ -307,43 +311,56 @@ contains
   !!  compute_kg
   !!
   !! FUNCTION
-  !!  Computes the extended plane wave basis set, computing extended
-  !!  plane wave cutoff energy
+  !!  Computes the extended plane wave basis set vectors
   !!
   !! INPUTS
   !!  this=extfpmd_type object concerned
-  !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !!  eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
-  !!  mband=maximum number of bands
-  !!  nband(nkpt*nsppol)=desired number of bands at each k point
+  !!  exchn2n3d=if 1, n2 and n3 are exchanged
+  !!  gmet(3,3)=reciprocal space metric (bohr^-2)
+  !!  istwfk(nkpt)=input option parameter that describes the storage of wfs
+  !!  kptns(3,nkpt)=reduced coords of k points
+  !!  mkmem =number of k points treated by this node.
+  !!  character(len=4) : mode_paral=either 'COLL' or 'PERS', tells whether
+  !!   the loop over k points must be done by all processors or not,
+  !!   in case of parallel execution.
+  !!  mpi_enreg=information about MPI parallelization
+  !!  mpw=maximum number of planewaves as dimensioned in calling routine
+  !!  nband(nkpt*nsppol)=number of bands at each k point
   !!  nkpt=number of k points
-  !!  nsppol=1 for unpolarized, 2 for spin-polarized
-  !!  wtk(nkpt)=k point weights
+  !!  nsppol=1 for unpolarized, 2 for polarized
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_kg(this)
+  subroutine compute_kg(this,exchn2n3d,gmet,istwfk,kptns,mkmem,nband,nkpt,&
+    & mode_paral,mpi_enreg,nsppol,dilatmx)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    ! integer,intent(in) :: mband,me,nkpt,nsppol
+    integer,intent(in) :: exchn2n3d,mkmem,nkpt,nsppol
+    real(dp),intent(in) :: dilatmx
+    character(len=4),intent(in) :: mode_paral
+    type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
-    ! integer,intent(in) :: nband(nkpt*nsppol)
-    ! real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
-    ! real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
-    ! real(dp),intent(in) :: wtk(nkpt)
-
+    integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
+    real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt)
+    
     ! Local variables -------------------------
     ! Scalars
-    ! integer :: band_index,ii,ikpt,isppol,nband_k
-    ! real(dp) :: abs_err,rel_err
-    ! character(len=500) :: msg
+    integer :: mpw
+    real(dp) :: ecut_eff
 
     ! *********************************************************************
     if(this%version==5) then
+      ecut_eff=this%ecut*dilatmx**2
       
+      ABI_MALLOC(this%kg,(3,mpw*mkmem))
+      call getmpw(ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
+
+      call kpgio(ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
+      & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
+      & mpw,this%npwarr,this%npwtot,nsppol)
     end if
   end subroutine compute_kg
 
