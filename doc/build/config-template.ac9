@@ -497,6 +497,13 @@
 #
 #with_mpi_flavor="native"
 
+# Activate code branches to perform MPI operations on GPU buffers,
+# which allow performance gains on intra-node communications.
+# WARNING: this feature requires a MPI that is "GPU-aware", which usually
+# means "compiled with CUDA/ROCm support"
+#
+#enable_mpi_gpu_aware="no"
+
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
 # is not MPI2 compliant.
