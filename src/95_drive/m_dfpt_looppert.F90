@@ -2167,20 +2167,16 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     !if ( .NOT. ALLOCATED(vxc_local)) then
-     !  ABI_MALLOC(vxc_local,(nfftf,dtset%nspden))
-     !end if
-     !vxc_local = vxc
-     if(dtset%orbmag .NE. 0) then
+     if(present(vxctau)) then
        call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-         & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
+          & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr,vxctau=vxctau)
+     else
+       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
+          & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
      end if
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
-     !if( ALLOCATED(vxc_local) ) then
-     !  ABI_FREE(vxc_local)
-     !end if
      if( ALLOCATED(cg1_3) ) then
        ABI_FREE(cg1_3)
        has_cg1_3(:) = .FALSE.
