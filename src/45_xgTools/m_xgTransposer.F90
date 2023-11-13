@@ -597,8 +597,9 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
      if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
        call timab(tim_all2allv,1,tsec)
        call xmpi_alltoallv(sendbuf,     sendcounts, sdispls, &
@@ -614,21 +615,20 @@ module m_xgTransposer
 
        ABI_FREE(recvbuf_mpi)
 
-     end if
 #endif
 
+     else
 
-    if( xgTransposer%use_gpu == ABI_GPU_DISABLED) then
+       call timab(tim_all2allv,1,tsec)
+       call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
+                           recvbuf, recvcounts, rdispls, &
+                           comm, ierr)
+       call timab(tim_all2allv,2,tsec)
+       !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
+       !                    recvbuf, recvcounts, rdispls, &
+       !                    comm, request(myrequest))
 
-      call timab(tim_all2allv,1,tsec)
-      call xmpi_alltoallv(sendbuf, sendcounts, sdispls, &
-                          recvbuf, recvcounts, rdispls, &
-                          comm, ierr)
-      call timab(tim_all2allv,2,tsec)
-      !call xmpi_ialltoallv(sendbuf, sendcounts, sdispls, &
-      !                    recvbuf, recvcounts, rdispls, &
-      !                    comm, request(myrequest))
-   end if
+     end if
 
    case (TRANS_GATHER)
      !ABI_MALLOC(request,(ncpu))
