@@ -59,10 +59,6 @@ module m_xg
  use gator_mod
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx !FIXME For debug purpose, to be removed
-#endif
-
   implicit none
 
   private
@@ -1301,9 +1297,6 @@ contains
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
         end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-        call nvtxStartRange("MPI_Sum",8) !FIXME Debug only, to be removed
-#endif
 
         if (l_use_gpu_cuda/=ABI_GPU_OPENMP) then
           call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
@@ -1327,9 +1320,6 @@ contains
 #endif
         end if
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-        call nvtxEndRange() !FIXME Debug only, to be removed
-#endif
       end if
 
     case(SPACE_C)
@@ -1452,15 +1442,9 @@ contains
         !FIXME We should avoid that copy using GPU Direct on systems that allow it.
         call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
       end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-      call nvtxStartRange("MPI_Sum",8)
-#endif
 
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-      call nvtxEndRange()
-#endif
       if (l_use_gpu_cuda==ABI_GPU_OPENMP) then
         !Putting data back on GPU
         !FIXME Again, this could be avoided using GPU-direct
