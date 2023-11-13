@@ -46,8 +46,6 @@ module m_orbmag
   use defs_abitypes,      only : MPI_type
   use m_cgprj,            only : getcprj
   use m_cgtools,          only : projbd
-  use m_fft,              only : fftpac
-  use m_fourier_interpol, only : transgrid
   use m_geometry,         only : metric
   use m_getghc,           only : getghc
   use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type, gspot_transgrid_and_pack
