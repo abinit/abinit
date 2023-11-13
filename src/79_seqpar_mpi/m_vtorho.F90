@@ -1202,6 +1202,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       ! Get extended plane wave cutoff
+       call extfpmd%compute_kg(nelec,dtset%tsmear,energies%e_fermie)
      end if
 
 !    Compute the new occupation numbers from eigen

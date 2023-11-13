@@ -61,10 +61,14 @@ module m_extfpmd
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
+    !! Scalars and arrays for numerical extended PW method
+    real(dp) :: ecut
+    real(dp),allocatable :: kg(:,:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
     procedure :: compute_nelect
+    procedure :: compute_kg
     procedure :: compute_shiftfactor
     procedure :: init
     procedure :: destroy
@@ -122,6 +126,7 @@ contains
     ABI_MALLOC(this%nelectarr,(nfft,nspden))
     this%nelectarr(:,:)=zero
     this%shiftfactor=zero
+    this%ecut=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
   end subroutine init
   !!***
@@ -164,6 +169,7 @@ contains
     this%entropy=zero
     this%nelect=zero
     this%shiftfactor=zero
+    this%ecut=zero
     this%ucvol=zero
   end subroutine destroy
   !!***
@@ -212,7 +218,7 @@ contains
     ! Computes U_0 from the sum of local
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
-    if(this%version==1.or.this%version==4.or.this%version==10) then
+    if(this%version==1.or.this%version==4.or.this%version==5.or.this%version==10) then
       this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
 
       ! Computes the relative error of the model vs last eigenvalues
@@ -295,6 +301,51 @@ contains
     end if
   end subroutine compute_shiftfactor
   !!***
+
+  !!****f* ABINIT/m_extfpmd/compute_kg
+  !! NAME
+  !!  compute_kg
+  !!
+  !! FUNCTION
+  !!  Computes the extended plane wave basis set, computing extended
+  !!  plane wave cutoff energy
+  !!
+  !! INPUTS
+  !!  this=extfpmd_type object concerned
+  !!  eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
+  !!  eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
+  !!  mband=maximum number of bands
+  !!  nband(nkpt*nsppol)=desired number of bands at each k point
+  !!  nkpt=number of k points
+  !!  nsppol=1 for unpolarized, 2 for spin-polarized
+  !!  wtk(nkpt)=k point weights
+  !!
+  !! OUTPUT
+  !!  this=extfpmd_type object concerned
+  !!
+  !! SOURCE
+  subroutine compute_kg(this)
+    ! Arguments -------------------------------
+    ! Scalars
+    class(extfpmd_type),intent(inout) :: this
+    ! integer,intent(in) :: mband,me,nkpt,nsppol
+    ! Arrays
+    ! integer,intent(in) :: nband(nkpt*nsppol)
+    ! real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
+    ! real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
+    ! real(dp),intent(in) :: wtk(nkpt)
+
+    ! Local variables -------------------------
+    ! Scalars
+    ! integer :: band_index,ii,ikpt,isppol,nband_k
+    ! real(dp) :: abs_err,rel_err
+    ! character(len=500) :: msg
+
+    ! *********************************************************************
+    if(this%version==5) then
+      
+    end if
+  end subroutine compute_kg
 
   !!****f* ABINIT/m_extfpmd/compute_nelect
   !! NAME
