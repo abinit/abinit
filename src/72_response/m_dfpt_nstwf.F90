@@ -314,7 +314,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3),rhodum(1)
  real(dp) :: sumelfd(2),symfact(3),tsec(2),ylmgr_dum(1,3,1)
- real(dp),allocatable :: buffer(:),cgrvtrial(:,:),ch1c(:,:,:,:),cs1c(:,:,:,:)
+ real(dp),allocatable :: buffer(:),ch1c(:,:,:,:),cs1c(:,:,:,:)
  real(dp),allocatable :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dcwavef(:,:)
@@ -835,15 +835,8 @@ has_vectornd = (with_vectornd .EQ. 1)
      ! Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
-       do nddir = 1, 3
-         ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-           & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
-         call fftpac(isppol,mpi_enreg,dtset%nspden,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),&
-           & dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%ngfft,&
-           & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
-         ABI_FREE(cgrvtrial)
-       end do
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamkq%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
        call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
