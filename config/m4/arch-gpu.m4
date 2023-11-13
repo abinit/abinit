@@ -21,7 +21,6 @@
 AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   # Init
   abi_gpu_cuda_serial="no"
-  abi_gpu_cuda_mpi="no"
   abi_gpu_cuda_old="unknown"
 
   # Display variables
@@ -400,7 +399,6 @@ AC_DEFUN([ABI_GPU_INIT],[
 AC_DEFUN([ABI_GPU_DETECT],[
   # Initial setup
   abi_gpu_serial="no"
-  abi_gpu_mpi="no"
   abi_gpu_precision=`echo "${abi_gpu_flavor}" | cut -d- -f2`
   test "${abi_gpu_precision}" = "" && abi_gpu_precision="single"
 
@@ -420,7 +418,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
       cuda*)
         _ABI_GPU_CHECK_CUDA
         abi_gpu_serial="${abi_gpu_cuda_serial}"
-        abi_gpu_mpi="${abi_gpu_cuda_mpi}"
         if test "${abi_gpu_serial}" = "yes"; then
           AC_DEFINE([HAVE_GPU_CUDA],1,[Define to 1 if you have the Cuda library.])
           if test "${abi_gpu_cuda_old}" = "yes"; then
@@ -460,11 +457,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
     AC_DEFINE([HAVE_GPU],1,[Define to 1 if you have a GPU library.])
     AC_DEFINE([HAVE_GPU_SERIAL],1,[Define to 1 if you have a serial GPU library.])
     abi_gpu_flavor="${abi_gpu_flavor}"
-  fi
-
-  # Transmit MPI status to the source code
-  if test "${abi_gpu_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_GPU_MPI],1,[Define to 1 if you have a MPI-aware GPU library.])
   fi
 
   # Output final flavor
