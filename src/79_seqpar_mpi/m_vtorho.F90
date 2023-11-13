@@ -361,7 +361,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
- integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff !mwarning,
+ integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
@@ -692,6 +692,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
       vectornd_pac=zero
    end if
 
+  nbdbuf_eff = dtset%nbdbuf
+  ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
+  if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
+    write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
+    call wrtout(std_out,msg,'COLL')
+    nbdbuf_eff = 0
+  end if
+
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
      call timab(982,1,tsec)
@@ -942,7 +950,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
-&       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
+&       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
@@ -1261,8 +1269,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          do isppol=1,dtset%nsppol
            do ikpt=1,dtset%nkpt
              nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-             nband_eff=max(1,nband_k-dtset%nbdbuf)
-             residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+             if (nbdbuf_eff>=0) then
+               nband_eff=max(1,nband_k-nbdbuf_eff)
+               residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+             else if (nbdbuf_eff==-101) then
+               residm=max(residm,maxval(occ(ibdkpt:ibdkpt+nband_k-1)*resid(ibdkpt:ibdkpt+nband_k-1)))
+             else
+               ABI_ERROR('Bad value of nbdbuf_eff')
+             end if
              ibdkpt=ibdkpt+nband_k
            end do
          end do
@@ -1685,7 +1699,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      option=2 ; enunit=1 ; vxcavg_dum=zero
      call prteigrs(eigen,enunit,energies%e_fermie,energies%e_fermih,&
 &     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
+&     dtset%nband,nbdbuf_eff,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
    end if
 
@@ -1695,8 +1709,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-       nband_eff=max(1,nband_k-dtset%nbdbuf)
-       residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+       if (nbdbuf_eff>=0) then
+         nband_eff=max(1,nband_k-nbdbuf_eff)
+         residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+       else if (nbdbuf_eff==-101) then
+         residm=max(residm,maxval(occ(ibdkpt:ibdkpt+nband_k-1)*resid(ibdkpt:ibdkpt+nband_k-1)))
+       else
+         ABI_ERROR('Bad value of nbdbuf_eff')
+       end if
        ibdkpt=ibdkpt+nband_k
      end do
    end do

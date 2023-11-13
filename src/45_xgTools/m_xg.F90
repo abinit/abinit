@@ -48,6 +48,9 @@ module m_xg
   integer, parameter, public :: SPACE_C = 2
   integer, parameter, public :: SPACE_CR = 3
 
+  integer, parameter, public :: COLS2ROWS =  1
+  integer, parameter, public :: ROWS2COLS = -1
+
   integer, parameter :: tim_potrf = 1670
   integer, parameter :: tim_trsm  = 1671
   integer, parameter :: tim_gemm  = 1672
@@ -155,6 +158,8 @@ module m_xg
   public :: xgBlock_pack
   public :: xgBlock_getSize
 
+  public :: xgBlock_check
+
   public :: xgBlock_potrf
   public :: xgBlock_trsm
 
@@ -183,15 +188,19 @@ module m_xg
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
+  public :: xgBlock_apply_diag_nospin
+
   public :: xgBlock_zero
   public :: xgBlock_one
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
 
+  public :: xgBlock_minmax
   public :: xgBlock_average
   public :: xgBlock_deviation
 
   public :: xgBlock_reshape
+  public :: xgBlock_reshape_spinor
   public :: xgBlock_print
   public :: xg_finalize
 
@@ -676,7 +685,7 @@ module m_xg
 
   subroutine xgBlock_setBlock(xgBlockA,xgBlockB, fcol, rows, cols)
     use, intrinsic :: iso_c_binding
-    type(xgBlock_t), intent(inout) :: xgBlockA
+    type(xgBlock_t), intent(in   ) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
     integer, intent(in) :: fcol
     integer, intent(in) :: rows
@@ -1827,6 +1836,87 @@ module m_xg
   end subroutine xgBlock_colwiseCymax
 !!***
 
+!!****f* m_xg/xgBlock_apply_diag_nospin
+!!
+!! NAME
+!! xgBlock_apply_diag_nospin
+
+  subroutine xgBlock_apply_diag_nospin(X, diag, nspinor, Y)
+
+    type(xgBlock_t) , intent(inout) :: X
+    type(xgBlock_t) , intent(in)    :: diag
+    integer,          intent(in)    :: nspinor
+    type(xgBlock_t) , optional, intent(inout) :: Y
+
+    integer :: iblock,rows,cols
+    type(xgBlock_t) :: X_spinor, Y_spinor
+
+    if (X%rows/=nspinor*diag%rows) then
+      ABI_ERROR('xgBlock%rows/=nspinor*xgBlock_diag%rows')
+    end if
+    if (diag%cols/=1) then
+      ABI_ERROR('xgBlock_diag should have one column')
+    end if
+    if (diag%space==SPACE_CR) then
+      ABI_ERROR('space(diag) should be SPACE_C or SPACE_R')
+    end if
+    if (X%space==SPACE_R) then
+      if (diag%space/=SPACE_R) then
+        ABI_ERROR('If space(X)==SPACE_R, space(diag) should be SPACE_R')
+      end if
+    end if
+
+    call xgBlock_reshape_spinor(X,X_spinor,nspinor,ROWS2COLS)
+
+    if (present(Y)) then
+      call xgBlock_check(Y,X)
+      call xgBlock_reshape_spinor(Y,Y_spinor,nspinor,ROWS2COLS)
+    else
+      Y_spinor = X_spinor
+    end if
+
+    rows = X_spinor%rows
+    cols = X_spinor%cols
+
+    select case(X%space)
+    case (SPACE_R)
+      !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+      !$omp& schedule(static)
+      do iblock = 1, cols
+        Y_spinor%vecR(1:rows,iblock) = X_spinor%vecR(1:rows,iblock) * diag%vecR(1:rows,1)
+      end do
+    case (SPACE_CR)
+      if (diag%space==SPACE_R) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecR(1:2*rows:2,iblock) = X_spinor%vecR(1:2*rows:2,iblock) * diag%vecR(1:rows,1)
+          Y_spinor%vecR(2:2*rows:2,iblock) = X_spinor%vecR(2:2*rows:2,iblock) * diag%vecR(1:rows,1)
+        end do
+      else
+        ABI_ERROR('Not implemented')
+      end if
+    case (SPACE_C)
+      if (diag%space==SPACE_C) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecC(1:rows,iblock) = X_spinor%vecC(1:rows,iblock) * diag%vecC(1:rows,1)
+        end do
+      else if (diag%space==SPACE_R) then
+        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
+        !$omp& schedule(static)
+        do iblock = 1, cols
+          Y_spinor%vecC(1:rows,iblock) = X_spinor%vecC(1:rows,iblock) * diag%vecR(1:rows,1)
+        end do
+      else
+        ABI_ERROR('Not implemented')
+      end if
+    end select
+
+  end subroutine xgBlock_apply_diag_nospin
+!!***
+
 !!****f* m_xg/xgBlock_colwiseMulR
 !!
 !! NAME
@@ -2295,6 +2385,36 @@ module m_xg
   end subroutine xgBlock_getSize
 !!***
 
+!!****f* m_xg/xgBlock_check
+!!
+!! NAME
+!! xgBlock_check
+
+  subroutine xgBlock_check(X, Y, fact_col)
+
+    type(xgBlock_t) , intent(in) :: X
+    type(xgBlock_t) , intent(in) :: Y
+    integer,optional, intent(in) :: fact_col
+
+    integer :: fact_col_
+
+    fact_col_ = 1
+    if (present(fact_col)) then
+      fact_col_ = fact_col
+    end if
+    if (X%space/=Y%space) then
+      ABI_ERROR('X%space/=Y%space')
+    end if
+    if (X%rows/=Y%rows) then
+      ABI_ERROR('X%rows/=Y%rows')
+    end if
+    if (fact_col_*X%cols/=Y%cols) then
+      ABI_ERROR('X%cols/=Y%cols')
+    end if
+
+  end subroutine xgBlock_check
+!!***
+
 !!****f* m_xg/xgBlock_reshape
 !!
 !! NAME
@@ -2328,6 +2448,45 @@ module m_xg
       call c_f_pointer(cptr,xgBlock%vecC,newshape)
     end select
   end subroutine xgBlock_reshape
+!!***
+
+!!****f* m_xg/xgBlock_reshape_spinor
+!!
+!! NAME
+!! xgBlock_reshape_spinor
+
+  subroutine xgBlock_reshape_spinor(xgBlock,xgBlock_spinor,nspinor,option)
+    use iso_c_binding
+    integer, intent(in   ) :: nspinor,option
+    type(xgBlock_t), intent(in   ) :: xgBlock
+    type(xgBlock_t), intent(inout) :: xgBlock_spinor
+
+    integer :: nrows,ncols
+
+    if (nspinor/=1.and.nspinor/=2) then
+      ABI_ERROR('It should not happen : nspinor must be 1 or 2')
+    end if
+
+    nrows = rows(xgBlock)
+    ncols = cols(xgBlock)
+
+    if (option==COLS2ROWS) then
+      if (modulo(ncols,nspinor)/=0) then
+        ABI_ERROR('nspinor should divide the number of cols')
+      end if
+      call xgBlock_setBlock(xgBlock,xgBlock_spinor,1,nrows,ncols)
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows*nspinor,ncols/nspinor/))
+    else if (option==ROWS2COLS) then
+      if (modulo(nrows,nspinor)/=0) then
+        ABI_ERROR('nspinor should divide the number of rows')
+      end if
+      call xgBlock_setBlock(xgBlock,xgBlock_spinor,1,nrows,ncols)
+      if (nspinor>1) call xgBlock_reshape(xgBlock_spinor,(/nrows/nspinor,ncols*nspinor/))
+    else
+      ABI_ERROR('bad option value')
+    end if
+
+  end subroutine xgBlock_reshape_spinor
 !!***
 
 !!****f* m_xg/xgBlock_zero
@@ -2461,6 +2620,40 @@ module m_xg
     call xgBlock_diagonal(xgBlock,diag%self)
     call xg_free(diag)
   end subroutine xgBlock_diagonalOnly
+!!***
+
+!!****f* m_xg/xgBlock_minmax
+!!
+!! NAME
+!! xgBlock_minmax
+
+  subroutine xgBlock_minmax(xgBlock,minimum,maximum,row_bound)
+
+    type(XgBlock_t) , intent(in)  :: xgBlock
+    double precision, intent(out) :: minimum,maximum
+    integer,optional, intent(in)  :: row_bound
+
+    integer :: row_bound_
+
+    row_bound_ = xgBlock%rows
+    if (present(row_bound)) then
+      if (row_bound<1.or.row_bound>xgBlock%rows) then
+        ABI_ERROR('Bad row_bound')
+      else
+        row_bound_ = row_bound
+      end if
+    end if
+
+    select case(xgBlock%space)
+    case (SPACE_R,SPACE_CR)
+      minimum = minval(xgBlock%vecR(:row_bound_,:))
+      maximum = maxval(xgBlock%vecR(:row_bound_,:))
+    case (SPACE_C)
+      minimum = minval(abs(xgBlock%vecC(:row_bound_,:)))
+      maximum = maxval(abs(xgBlock%vecC(:row_bound_,:)))
+    end select
+
+  end subroutine xgBlock_minmax
 !!***
 
 !!****f* m_xg/xgBlock_average

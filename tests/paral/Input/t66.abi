@@ -20,6 +20,10 @@ bandpp1     6
 npfft1      1
 np_spkpt1      1
 tolwfr1     1.0d-18
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 ###########################################
 # Dataset 2: Phonons with bands para.

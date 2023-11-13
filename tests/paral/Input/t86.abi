@@ -23,6 +23,10 @@ ngfftdg 32 32 32
 pawecutdg 20
 tolvrs1 1.0d-7
 toldfe2 1.0d-8
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 nband     32
 nbdbuf    2
 occopt 3 tsmear 1200 K
