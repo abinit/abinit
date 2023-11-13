@@ -53,6 +53,7 @@ module m_getgh1c
  public :: getgh1dqc
  public :: getgh1dqc_setup
  public :: getgh1ndc
+ public :: getgh1c_mGGA
 !!***
 
 contains
@@ -141,14 +142,14 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: choice,cplex1,cpopt,ipw,ipws,ispinor,istr,i1,i2,i3
  integer :: my_nspinor,natom,ncpgr,nnlout=1,npw,npw1,paw_opt,signs
  integer :: tim_fourwf,tim_nonlop,usecprj
- logical :: compute_conjugate,has_kin,has_nd1,usevnl2
+ logical :: compute_conjugate,has_kin,has_mGGA1,has_nd1,usevnl2
  real(dp) :: weight !, cpu, wall, gflops
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(1),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
  real(dp),allocatable :: cwave_sp(:,:),cwavef1(:,:),cwavef2(:,:)
  real(dp),allocatable :: gh1c_sp(:,:),gh1c1(:,:),gh1c2(:,:),gh1c3(:,:),gh1c4(:,:)
- real(dp),allocatable :: gh1ndc(:,:),gvnl2(:,:)
+ real(dp),allocatable :: gh1c_mGGA(:,:),gh1ndc(:,:),gvnl2(:,:)
  real(dp),allocatable :: nonlop_out(:,:),vlocal1_tmp(:,:,:),work(:,:,:,:)
  real(dp),ABI_CONTIGUOUS pointer :: gvnlx1_(:,:)
  real(dp),pointer :: dkinpw(:),kinpw1(:)
@@ -766,6 +767,31 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end do
    end do
    ABI_FREE(gh1ndc)
+ end if
+
+!======================================================================
+!== Apply the 1st-order mGGA operator to the wavefunction
+!== Only coded for DDK
+!== (add it to nl contribution)
+!======================================================================
+
+ has_mGGA1=( (ipert .EQ. natom+1) .AND. ASSOCIATED(rf_hamkq%vxctaulocal) )
+
+ if (has_mGGA1) then
+   ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor))
+   ! this is hard coded for ndat = 1
+   call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,idir,gs_hamkq%istwf_k,&
+        & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+        & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
+        & gs_hamkq%use_gpu_cuda)
+   do ispinor=1,my_nspinor
+     do ipw=1,npw
+       ipws=ipw+npw*(ispinor-1)
+       gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+gh1c_mGGA(1,ipws)
+       gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+gh1c_mGGA(2,ipws)
+     end do
+   end do
+   ABI_FREE(gh1c_mGGA)
  end if
 
 !======================================================================
@@ -1961,6 +1987,217 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 end subroutine getgh1ndc
 !!***
 
+!!****f* ABINIT/getgh1c_mGGA
+!!
+!! NAME
+!! getgh1c_mGGA
+!!
+!! FUNCTION
+!! Compute first order metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
+!! ONLY FOR DDK PERTURBATION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!  gh1c_mGGA(2,npw_k*my_nspinor*ndat)=metaGGA contribution to <G|H1|C>
+!!
+!! SIDE EFFECTS
+!!
+!! SOURCE
+
+subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
+     & kinpw1,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,&
+     & ngfft,npw_k,nvloc,vxctaulocal,use_gpu_cuda)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: idir,istwf_k,mgfft,my_nspinor,n4,n5,n6,ndat,npw_k,nvloc
+ integer,intent(in),optional :: use_gpu_cuda
+ type(MPI_type),intent(in) :: mpi_enreg
+!arrays
+ integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
+ real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
+ real(dp),pointer,intent(in) :: dkinpw(:),kinpw1(:)
+ 
+!Local variables-------------------------------
+ !scalars
+ integer :: idat,ipw,nspinortot,shift,use_gpu_cuda_
+ integer,parameter :: tim_fourwf=1
+ real(dp) :: weight=one
+ logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ !arrays
+ real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),work(:,:,:,:)
+
+ if(present(use_gpu_cuda)) then
+    use_gpu_cuda_=use_gpu_cuda
+ else
+    use_gpu_cuda_=0
+ end if
+  
+ gh1c_mGGA(:,:)=zero
+ if (nvloc/=1) return
+
+ nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
+ if (mpi_enreg%paral_spinor==0) then
+   shift=npw_k
+   nspinor1TreatedByThisProc=.true.
+   nspinor2TreatedByThisProc=(nspinortot==2)
+ else
+   shift=0
+   nspinor1TreatedByThisProc=(mpi_enreg%me_spinor==0)
+   nspinor2TreatedByThisProc=(mpi_enreg%me_spinor==1)
+ end if
+
+ ABI_MALLOC(work,(2,n4,n5,n6*ndat))
+
+ if (nspinortot==1) then
+
+    ABI_MALLOC(ghc1,(2,npw_k*ndat))
+    ABI_MALLOC(ghc2,(2,npw_k*ndat))
+
+    ! From -1/2 (grad vxctau) \cdot (grad \psi) =
+    ! -1/2 (grad vxctau)\cdot(2\pi i (k + G)\psi), the
+    ! k derivative is -1/2 (grad vxctau)_idir * 2\pi i
+    call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein,ghc1,work,gbound_k,gbound_k,&
+      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+    ! scale by -1/2 * 2\pi i = -i \pi
+    do ipw = 1, npw_k
+       gh1c_mGGA(1,ipw) = pi*ghc1(2,ipw)
+       gh1c_mGGA(2,ipw) = -pi*ghc1(1,ipw)
+    end do
+    
+    ! From -1/2 vxctau (grad . grad \psi), the k derivative is
+    ! vxctau \times dkinpw_dir * \psi
+    do ipw=1,npw_k
+      if(kinpw1(ipw)<huge(zero)*1.d-11)then
+        ghc1(1,ipw)=dkinpw(ipw)*cwavein(1,ipw)
+        ghc1(2,ipw)=dkinpw(ipw)*cwavein(2,ipw)
+      else
+        ghc1(:,ipw) = zero
+      end if
+    end do
+    call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
+      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+    gh1c_mGGA = gh1c_mGGA + ghc2
+
+    ABI_FREE(ghc1)
+    ABI_FREE(ghc2)
+
+ else ! nspinortot==2
+
+   ABI_MALLOC(cwavein1,(2,npw_k*ndat))
+   ABI_MALLOC(cwavein2,(2,npw_k*ndat))
+   do idat=1,ndat
+     do ipw=1,npw_k
+       cwavein1(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+       cwavein2(1:2,ipw+(idat-1)*npw_k)=cwavein(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+     end do
+   end do
+
+   ABI_MALLOC(ghc1,(2,npw_k*ndat))
+   ABI_MALLOC(ghc2,(2,npw_k*ndat))
+
+   if (nspinor1TreatedByThisProc) then
+
+      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein1,ghc1,work,gbound_k,gbound_k,&
+        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+      ! scale by -1/2 * 2\pi i = -i \pi
+      do idat = 1, ndat
+        do ipw = 1, npw_k
+          gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc1(2,ipw+(idat-1)*npw_k)
+          gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc1(1,ipw+(idat-1)*npw_k)
+        end do
+      end do
+
+      ! From -1/2 vxctau (grad . grad \psi), the k derivative is
+      ! vxctau \times dkinpw_dir * \psi
+      do idat = 1, ndat
+        do ipw=1,npw_k
+          if(kinpw1(ipw)<huge(zero)*1.d-11)then
+            ghc1(1,ipw)=dkinpw(ipw)*cwavein1(1,ipw+(idat-1)*npw_k)
+            ghc1(2,ipw)=dkinpw(ipw)*cwavein1(2,ipw+(idat-1)*npw_k)
+          else
+            ghc1(:,ipw+(idat-1)*npw_k) = zero
+          end if
+        end do
+      end do
+   
+      call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
+        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+      do idat = 1, ndat
+        do ipw = 1, npw_k
+           gh1c_mGGA(:,ipw+(idat-1)*npw_k) =  gh1c_mGGA(:,ipw+(idat-1)*npw_k) + &
+                & ghc2(:,ipw+(idat-1)*npw_k)
+        end do
+      end do
+
+    end if ! end spinor 1
+
+    if (nspinor2TreatedByThisProc) then
+
+      ABI_MALLOC(ghc2,(2,npw_k*ndat))
+
+      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein2,ghc2,work,gbound_k,gbound_k,&
+        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+      ! scale by -1/2 * 2\pi i = -i \pi
+      do idat = 1, ndat
+        do ipw = 1, npw_k
+          gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc2(2,ipw+(idat-1)*npw_k)
+          gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc2(1,ipw+(idat-1)*npw_k)
+        end do
+      end do
+
+      ! From -1/2 vxctau (grad . grad \psi), the k derivative is
+      ! vxctau \times dkinpw_dir * \psi
+      do idat = 1, ndat
+        do ipw=1,npw_k
+          if(kinpw1(ipw)<huge(zero)*1.d-11)then
+            ghc1(1,ipw)=dkinpw(ipw)*cwavein2(1,ipw+(idat-1)*npw_k)
+            ghc1(2,ipw)=dkinpw(ipw)*cwavein2(2,ipw+(idat-1)*npw_k)
+          else
+            ghc1(:,ipw+(idat-1)*npw_k) = zero
+          end if
+        end do
+      end do
+   
+      call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
+        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+
+      do idat = 1, ndat
+        do ipw = 1, npw_k
+           gh1c_mGGA(:,ipw+(idat-1)*npw_k) =  gh1c_mGGA(:,ipw+(idat-1)*npw_k) + &
+                & ghc2(:,ipw+(idat-1)*npw_k)
+        end do
+      end do
+
+    end if ! end spinor 2
+
+    ABI_FREE(ghc1)
+    ABI_FREE(ghc2)
+
+    ABI_FREE(cwavein1)
+    ABI_FREE(cwavein2)
+
+ end if ! nspinortot
+
+ ABI_FREE(work)
+
+end subroutine getgh1c_mGGA
+!!***
 
 end module m_getgh1c
 !!***
