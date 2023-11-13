@@ -412,12 +412,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
 end subroutine ompgpu_fourwf
 
-subroutine alloc_ompgpu_fourwf(ngfft, ndat, npwin, npwout)
+subroutine alloc_ompgpu_fourwf(ngfft, ndat)
  implicit none
 !Arguments ------------------------------------
- integer, intent(in) :: ngfft(6), ndat, npwin, npwout
+ integer, intent(in) :: ngfft(6), ndat
 
- ABI_UNUSED((/ngfft,ndat,npwin,npwout/))
+ ABI_UNUSED((/ngfft,ndat/))
  ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
 end subroutine alloc_ompgpu_fourwf
 
