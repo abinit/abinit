@@ -344,7 +344,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp),intent(inout),target :: vectout(:,:)
  type(pawcprj_type),intent(inout),target :: cprjin(:,:)
  type(pawcprj_type),intent(inout),target,optional :: cprjin_left(:,:)
- real(dp),intent(inout),optional :: vectproj(:,:,:)
+ real(dp),intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
 
 
 !Local variables-------------------------------
