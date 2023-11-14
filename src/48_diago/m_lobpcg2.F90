@@ -749,7 +749,8 @@ module m_lobpcg2
       AX = lobpcg%AX
       BX = lobpcg%BX
       !eigenSolver = minloc(eigenSolverTime(7:10), dim=1) + 6
-      eigenSolver = EIGENEV
+      !eigenSolver = EIGENEV
+      eigenSolver = EIGENEVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -765,7 +766,8 @@ module m_lobpcg2
       AWP = lobpcg%AW
       BWP = lobpcg%BW
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
-      eigenSolver = EIGENVX
+      !eigenSolver = EIGENVX
+      eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -781,7 +783,8 @@ module m_lobpcg2
       AWP = lobpcg%AWP
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
-        eigenSolver = EIGENVX
+      !  eigenSolver = EIGENVX
+      eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS

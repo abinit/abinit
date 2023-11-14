@@ -2106,18 +2106,33 @@ module m_xg
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
-    integer :: icol
+    integer :: icol, i
+    double precision :: tmp
+    double complex :: ctmp
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
 
     select case(xgBlockA%space)
     case(SPACE_R,SPACE_CR)
+#if defined(FC_CRAY)
+      !$omp parallel do shared(dot,xgBlockA,xgBlockB) private(i,tmp) &
+      !$omp& schedule(static)
+      do icol = 1, xgBlockA%cols
+        tmp = 0.0
+        do i=1,xgBlockA%rows
+          tmp = tmp + xgBlockA%vecR(i,icol)*xgBlockB%vecR(i,icol)
+        end do
+        dot%vecR(icol,1) = tmp
+      end do
+      !$omp end parallel do
+#else
       !$omp parallel do shared(dot,xgBlockA,xgBlockB) &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
         dot%vecR(icol,1) = ddot(xgBlockA%rows,xgBlockA%vecR(:,icol),1,xgBlockB%vecR(:,icol),1)
       end do
       !$omp end parallel do
+#endif
 
       if ( present(max_val) ) then
         max_val = maxval(dot%vecR(1:xgBlockA%cols,1))
@@ -2133,12 +2148,25 @@ module m_xg
       end if
 
     case(SPACE_C)
+#if defined(FC_CRAY)
+      !$omp parallel do shared(dot,xgBlockA,xgBlockB) private(i,ctmp) &
+      !$omp& schedule(static)
+      do icol = 1, xgBlockA%cols
+        ctmp = 0.0
+        do i=1,xgBlockA%rows
+          ctmp = ctmp + dconjg(xgBlockA%vecC(i,icol))*xgBlockB%vecC(i,icol)
+        end do
+        dot%vecC(icol,1) = ctmp
+      end do
+      !$omp end parallel do
+#else
       !$omp parallel do shared(dot,xgBlockA,xgBlockB), &
       !$omp& schedule(static)
       do icol = 1, xgBlockA%cols
         dot%vecC(icol,1) = zdotc(xgBlockA%rows,xgBlockA%vecC(:,icol),1,xgBlockB%vecC(:,icol),1)
       end do
       !$omp end parallel do
+#endif
 
       if ( present(max_val) ) then
         max_val = maxval(dble(dot%vecC(1:xgBlockA%cols,1)))
