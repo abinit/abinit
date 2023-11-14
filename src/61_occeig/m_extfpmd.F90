@@ -36,7 +36,7 @@ module m_extfpmd
   use m_xmpi
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
-  use m_kg,             only : kpgio, getmpw
+  use m_kg,             only : kpgio, getmpw, mkkin
   use m_mpinfo,         only : ptabs_fourdp,proc_distrb_cycle
   use m_numeric_tools,  only : simpson,simpson_int
   use m_spacepar,       only : meanvalue_g
@@ -56,7 +56,7 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version,mpw,mcg
+    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version,mpw,mcg,mband
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
@@ -68,7 +68,7 @@ module m_extfpmd
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
     procedure :: compute_nelect
-    procedure :: compute_kg
+    procedure :: generate_extpw
     procedure :: compute_shiftfactor
     procedure :: init
     procedure :: destroy
@@ -98,12 +98,12 @@ contains
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nkpt,rprimd,version,ecut,&
-  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx)
+  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nkpt,version
-    integer,intent(in) :: exchn2n3d,mkmem
+    integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband
     real(dp),intent(in) :: ecut,dilatmx
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
@@ -134,6 +134,7 @@ contains
     this%nelectarr(:,:)=zero
     this%shiftfactor=zero
     this%ecut=ecut
+    this%mband=mband
     this%ecut_eff=ecut*dilatmx**2
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     ABI_MALLOC(this%npwarr,(nkpt))
@@ -171,14 +172,15 @@ contains
     ABI_FREE(this%npwtot)
     this%npwarr(:)=0
     ABI_FREE(this%npwarr)
-    this%mpw=0
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
     ABI_FREE(this%nelectarr)
+    this%mpw=0
     this%nfft=0
     this%nspden=0
     this%bcut=0
+    this%mband=0
     this%nbcut=0
     this%nbdbuf=0
     this%version=1
@@ -322,9 +324,9 @@ contains
   end subroutine compute_shiftfactor
   !!***
 
-  !!****f* ABINIT/m_extfpmd/compute_kg
+  !!****f* ABINIT/m_extfpmd/generate_extpw
   !! NAME
-  !!  compute_kg
+  !!  generate_extpw
   !!
   !! FUNCTION
   !!  Computes the extended plane wave basis set vectors
@@ -349,7 +351,7 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_kg(this,exchn2n3d,gmet,istwfk,kptns,mkmem,nband,nkpt,&
+  subroutine generate_extpw(this,exchn2n3d,gmet,istwfk,kptns,mkmem,nband,nkpt,&
     & mode_paral,mpi_enreg,nsppol,dilatmx,nspinor,mband)
     ! Arguments -------------------------------
     ! Scalars
@@ -364,25 +366,52 @@ contains
     
     ! Local variables -------------------------
     ! Scalars
-    integer :: my_nspinor
-    real(dp) :: ecut_eff
+    integer :: isppol,ikpt,nband_k,istwf_k,npw_k,nblockbd
+    integer :: my_nspinor,my_ikpt,blocksize,ikg,bdtot_index
+    real(dp) :: ecut_eff,ekin_max
 
     ! *********************************************************************
     if(this%version==5) then
       ecut_eff=this%ecut*dilatmx**2
-      write(0,*) 'Generating kg'
+      write(0,*) 'DEBUG: Generating ext pw basis set...'
       
+      ! Generating ext pw basis set (this%kg,this%npwarr,this%npwtot)
       call kpgio(ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
       & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
       & this%mpw,this%npwarr,this%npwtot,nsppol)
-
+      
+      ! Get number of ext pw coefficients
       my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-      this%mcg=this%mpw*my_nspinor*mband*mkmem*nsppol
+      this%mcg=this%mpw*my_nspinor*this%mband*mkmem*nsppol
 
-      write(0,*) this%mcg, this%mpw
-
+      ! Get ext pw coefficients
+      ! Loop over spins
+      bdtot_index=0
+      do isppol=1,nsppol
+        ikg=0
+        ! Loop over k points
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          istwf_k=istwfk(ikpt)
+          npw_k=this%npwarr(ikpt)
+          ! Skip this k-point if not the proper processor
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+            bdtot_index=bdtot_index+nband_k
+            cycle
+          end if
+          ! Parallelism over FFT and/or bands: define sizes and tabs
+          if (mpi_enreg%paral_kgb==1) then
+            my_ikpt=mpi_enreg%my_kpttab(ikpt)
+            nblockbd=nband_k/(mpi_enreg%nproc_band*mpi_enreg%bandpp)
+          else
+            my_ikpt=ikpt
+            nblockbd=nband_k/mpi_enreg%bandpp
+          end if
+          blocksize=nband_k/nblockbd
+        end do
+      end do
     end if
-  end subroutine compute_kg
+  end subroutine generate_extpw
 
   !!****f* ABINIT/m_extfpmd/compute_nelect
   !! NAME

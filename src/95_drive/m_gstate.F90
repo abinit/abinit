@@ -874,10 +874,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        ABI_WARNING(msg)
        dtset%extfpmd_nbdbuf = 0
      end if
+     if (dtset%useextfpmd==5.and.(dtset%extfpmd_nband<=dtset%mband)) then
+       write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+       &     "extfpmd_nband = ",dtset%extfpmd_nband," should be strictly greater than nband = ",dtset%mband,".",ch10,&
+       &     "Action: Increase extfpmd_nband or decrease nband."
+       ABI_ERROR(msg)
+     end if
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nkpt,rprimd,dtset%useextfpmd,dtset%extfpmd_ecut,&
-&     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx)
+&     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
+&     dtset%extfpmd_nband)
    end if
  end if
 

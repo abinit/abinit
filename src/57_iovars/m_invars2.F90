@@ -462,6 +462,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbdbuf',tread,'INT')
  if(tread==1) dtset%extfpmd_nbdbuf=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nband',tread,'INT')
+ if(tread==1) dtset%extfpmd_nband=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_ecut',tread,'ENE')
  if(tread==1) dtset%extfpmd_ecut=dprarr(1)
 
