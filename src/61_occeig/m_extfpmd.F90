@@ -56,7 +56,7 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
-    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version,mpw
+    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version,mpw,mcg
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol
     real(dp),allocatable :: vtrial(:,:)
@@ -140,6 +140,7 @@ contains
     ABI_MALLOC(this%npwtot,(nkpt))
     call getmpw(this%ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,this%mpw,nkpt)
     ABI_MALLOC(this%kg,(3,this%mpw*mkmem))
+    this%mcg=0
   end subroutine init
   !!***
 
@@ -349,11 +350,11 @@ contains
   !!
   !! SOURCE
   subroutine compute_kg(this,exchn2n3d,gmet,istwfk,kptns,mkmem,nband,nkpt,&
-    & mode_paral,mpi_enreg,nsppol,dilatmx)
+    & mode_paral,mpi_enreg,nsppol,dilatmx,nspinor,mband)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: exchn2n3d,mkmem,nkpt,nsppol
+    integer,intent(in) :: exchn2n3d,mkmem,nkpt,nsppol,nspinor,mband
     real(dp),intent(in) :: dilatmx
     character(len=4),intent(in) :: mode_paral
     type(MPI_type),intent(inout) :: mpi_enreg
@@ -363,7 +364,7 @@ contains
     
     ! Local variables -------------------------
     ! Scalars
-    integer :: mpw
+    integer :: my_nspinor
     real(dp) :: ecut_eff
 
     ! *********************************************************************
@@ -373,9 +374,13 @@ contains
       
       call kpgio(ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
       & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
-      & mpw,this%npwarr,this%npwtot,nsppol)
-      
-      write(0,*) this%kg
+      & this%mpw,this%npwarr,this%npwtot,nsppol)
+
+      my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+      this%mcg=this%mpw*my_nspinor*mband*mkmem*nsppol
+
+      write(0,*) this%mcg, this%mpw
+
     end if
   end subroutine compute_kg
 

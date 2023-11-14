@@ -1204,7 +1204,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        ! Get extended plane wave cutoff
        call extfpmd%compute_kg(dtset%exchn2n3d,gmet,dtset%istwfk,dtset%kptns,&
-&       dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx)
+&       dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,&
+&       dtset%nspinor,dtset%mband)
      end if
 
 !    Compute the new occupation numbers from eigen
