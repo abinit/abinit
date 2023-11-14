@@ -396,7 +396,7 @@ module m_gemm_nonlop_gpu
   real(dp), target, intent(inout)  ::  vectin (2,npwin*nspinor*ndat)
   real(dp), target, intent(out)    :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp), target, intent(inout)  ::  vectout(2,npwout*nspinor*ndat) !vz_i
-  real(dp), target, intent(inout), optional :: vectproj(:,:,:)
+  real(dp), target, intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
 
   ! locals
   integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend
