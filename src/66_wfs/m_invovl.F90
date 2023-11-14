@@ -882,6 +882,8 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   if((.not. gemm_nonlop_use_gemm) .or. cwaveprj(1,1)%ncpgr/=0) then
     ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
+  else
+    ABI_MALLOC(cwaveprj_in, (1,1))
   end if
   ABI_NVTX_END_RANGE()
 
@@ -1001,8 +1003,8 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     end if
     call pawcprj_axpby(one, one, cwaveprj_in, cwaveprj)
     call pawcprj_free(cwaveprj_in)
-    ABI_FREE(cwaveprj_in)
   end if
+  ABI_FREE(cwaveprj_in)
 
   if (ham%use_gpu_impl == ABI_GPU_LEGACY .or. ham%use_gpu_impl==ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
