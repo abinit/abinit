@@ -839,7 +839,7 @@ contains
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out) :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
   real(dp),intent(inout) :: vectout(2,npwout*nspinor*ndat) !vz_i
-  real(dp),intent(inout),optional,target :: vectproj(:,:,:)
+  real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
