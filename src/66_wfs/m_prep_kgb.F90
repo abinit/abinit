@@ -662,7 +662,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  real(dp),        intent(in)            :: lambdablock(blocksize)
  real(dp),        intent(out),   target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
  real(dp),        intent(inout), target :: cwavef(:,:)
- real(dp),optional,intent(inout)        :: vectproj(:,:,:)
+ real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(inout)           :: mpi_enreg
  type(pawcprj_type),intent(inout)       :: cwaveprj(:,:)
