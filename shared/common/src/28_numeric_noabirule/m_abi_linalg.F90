@@ -895,6 +895,8 @@ CONTAINS  !===========================================================
    call gpu_linalg_shutdown()
  end if
  abi_linalg_gpu_mode = ABI_GPU_DISABLED
+#else
+ ABI_UNUSED(use_gpu_cuda)
 #endif
 
 !Memory freeing
