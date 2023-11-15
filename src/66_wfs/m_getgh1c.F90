@@ -30,8 +30,8 @@ module m_getgh1c
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
- use m_pawcprj
-!,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
+ use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, &
+      & pawcprj_copy, pawcprj_lincom, pawcprj_axpby, pawcprj_mpi_sum
  use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
@@ -780,8 +780,8 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  if (has_mGGA1) then
    ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor))
    ! this is hard coded for ndat = 1
-   call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,idir,gs_hamkq%istwf_k,&
-        & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+   call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
+        & gs_hamkq%kg_k,kinpw1,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
         & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
         & gs_hamkq%use_gpu_cuda)
    do ispinor=1,my_nspinor
@@ -2005,8 +2005,8 @@ end subroutine getgh1ndc
 !!
 !! SOURCE
 
-subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
-     & kinpw1,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,&
+subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg_k,&
+     & kinpw1,kpt,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,&
      & ngfft,npw_k,nvloc,vxctaulocal,use_gpu_cuda)
 
 !Arguments ------------------------------------
@@ -2016,6 +2016,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
+ real(dp),intent(in) :: gprimd(3,3),kpt(3)
  real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
@@ -2023,12 +2024,13 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
  
 !Local variables-------------------------------
  !scalars
- integer :: idat,ipw,nspinortot,shift,use_gpu_cuda_
+ integer :: idat,ii,ipw,nspinortot,shift,use_gpu_cuda_
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
+ real(dp) :: dkcartdk
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  !arrays
- real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:)
+ real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),work(:,:,:,:)
 
  if(present(use_gpu_cuda)) then
@@ -2057,20 +2059,24 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
 
     ABI_MALLOC(ghc1,(2,npw_k*ndat))
     ABI_MALLOC(ghc2,(2,npw_k*ndat))
+    ABI_MALLOC(dgcwavef,(2,npw_k*ndat))
 
-    ! From -1/2 (grad vxctau) \cdot (grad \psi) =
-    ! -1/2 (grad vxctau)\cdot(2\pi i (k + G)\psi), the
-    ! k derivative is -1/2 (grad vxctau)_idir * 2\pi i
-    call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein,ghc1,work,gbound_k,gbound_k,&
+    ! ! From -1/2 (grad vxctau) \cdot (grad \psi) =
+    ! ! -1/2 (grad vxctau)\cdot(2\pi i (k + G)\psi), the
+    do ii=1,3
+       dgcwavef = zero
+     do idat=1,ndat
+       do ipw=1,npw_k
+         dgcwavef(1,ipw+(idat-1)*npw_k)= cwavein(2,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
+         dgcwavef(2,ipw+(idat-1)*npw_k)=-cwavein(1,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
+       end do
+     end do
+    call fourwf(1,vxctaulocal(:,:,:,:,1+idir),dgcwavef,ghc1,work,gbound_k,gbound_k,&
       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
       & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+    gh1c_mGGA(:,:) = gh1c_mGGA(:,:) - half*ghc1
+   end do ! idir
 
-    ! scale by -1/2 * 2\pi i = -i \pi
-    do ipw = 1, npw_k
-       gh1c_mGGA(1,ipw) = pi*ghc1(2,ipw)
-       gh1c_mGGA(2,ipw) = -pi*ghc1(1,ipw)
-    end do
-    
     ! From -1/2 vxctau (grad . grad \psi), the k derivative is
     ! vxctau \times dkinpw_dir * \psi
     do ipw=1,npw_k
@@ -2089,6 +2095,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
 
     ABI_FREE(ghc1)
     ABI_FREE(ghc2)
+    ABI_FREE(dgcwavef)
 
  else ! nspinortot==2
 
@@ -2106,17 +2113,17 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
 
    if (nspinor1TreatedByThisProc) then
 
-      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein1,ghc1,work,gbound_k,gbound_k,&
-        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+      ! call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein1,ghc1,work,gbound_k,gbound_k,&
+      !   & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      !   & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
 
-      ! scale by -1/2 * 2\pi i = -i \pi
-      do idat = 1, ndat
-        do ipw = 1, npw_k
-          gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc1(2,ipw+(idat-1)*npw_k)
-          gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc1(1,ipw+(idat-1)*npw_k)
-        end do
-      end do
+      ! ! scale by -1/2 * 2\pi i = -i \pi
+      ! do idat = 1, ndat
+      !   do ipw = 1, npw_k
+      !     gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc1(2,ipw+(idat-1)*npw_k)
+      !     gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc1(1,ipw+(idat-1)*npw_k)
+      !   end do
+      ! end do
 
       ! From -1/2 vxctau (grad . grad \psi), the k derivative is
       ! vxctau \times dkinpw_dir * \psi
@@ -2148,17 +2155,17 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,idir,istwf_k,kg_k,&
 
       ABI_MALLOC(ghc2,(2,npw_k*ndat))
 
-      call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein2,ghc2,work,gbound_k,gbound_k,&
-        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+      ! call fourwf(1,vxctaulocal(:,:,:,:,1+idir),cwavein2,ghc2,work,gbound_k,gbound_k,&
+      !   & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      !   & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
 
-      ! scale by -1/2 * 2\pi i = -i \pi
-      do idat = 1, ndat
-        do ipw = 1, npw_k
-          gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc2(2,ipw+(idat-1)*npw_k)
-          gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc2(1,ipw+(idat-1)*npw_k)
-        end do
-      end do
+      ! ! scale by -1/2 * 2\pi i = -i \pi
+      ! do idat = 1, ndat
+      !   do ipw = 1, npw_k
+      !     gh1c_mGGA(1,ipw+(idat-1)*npw_k) =  pi*ghc2(2,ipw+(idat-1)*npw_k)
+      !     gh1c_mGGA(2,ipw+(idat-1)*npw_k) = -pi*ghc2(1,ipw+(idat-1)*npw_k)
+      !   end do
+      ! end do
 
       ! From -1/2 vxctau (grad . grad \psi), the k derivative is
       ! vxctau \times dkinpw_dir * \psi
