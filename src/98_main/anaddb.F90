@@ -247,7 +247,7 @@ program anaddb
  ! MR: Second- and third-order total energy derivatives calculated with the 
  ! magnetic penalty are converted to physically interesting ones here. 
  if (abs(inp%magpen) > tol8) then
-   call ddb_magpen(ddb, inp%magpen, inp%mpatpol, inp%mpdir, mpert, natom, ntypat, inp%prtvol, 1)
+   call ddb_magpen(ddb, inp%magpen, inp%mpatpol, inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%prtvol, 1,Crystal%ucvol)
  end if
 
  ! Acoustic Sum Rule
