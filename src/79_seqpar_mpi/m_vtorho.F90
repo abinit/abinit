@@ -1201,11 +1201,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        ! Get extended plane wave cutoff
-       call extfpmd%generate_extpw(dtset%exchn2n3d,gmet,dtset%istwfk,dtset%kptns,&
-&       dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,&
-&       dtset%nspinor,dtset%mband)
+       call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
+       &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+       &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+       &       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
      end if
 
 !    Compute the new occupation numbers from eigen
