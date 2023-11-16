@@ -2582,7 +2582,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  Add the contribution of extfpmd to the entropy
    if(associated(extfpmd)) then
-     energies%entropy=energies%entropy+extfpmd%entropy
+    if (extfpmd%version/=5) energies%entropy=energies%entropy+extfpmd%entropy
    end if
 
 !  When the finite-temperature VG broadening scheme is used,
