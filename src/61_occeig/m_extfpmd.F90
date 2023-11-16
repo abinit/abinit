@@ -71,6 +71,7 @@ module m_extfpmd
     procedure :: compute_entropy
     procedure :: compute_nelect
     procedure :: generate_extpw
+    procedure :: update_ks_occ
     procedure :: compute_shiftfactor
     procedure :: init
     procedure :: destroy
@@ -407,141 +408,200 @@ contains
     real(dp),allocatable :: ext_kinpw(:),eig_k(:)
 
     ! *********************************************************************
-    if(this%version==5) then
-      ! Generating ext pw basis set (this%kg,this%npwarr,this%npwtot)
-      if(.not.allocated(this%cg)) then
-        write(0,*) 'DEBUG: Generating extended plane wave basis set...'
-        call kpgio(this%ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
-        & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
-        & this%mpw,this%npwarr,this%npwtot,nsppol)
-        
-        ! Get number of ext pw coefficients
-        my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-        this%mcg=this%mpw*my_nspinor*this%mband*mkmem*nsppol
-        ABI_MALLOC(this%cg,(2,this%mcg))
-        this%cg(:,:)=zero
-        
-        ! Get ext pw coefficients and kinetic and eigenvalues
-        ! Loop over spins
-        bdtot_index=0
-        ext_bdtot_index=0
-        icg=0
-        ext_icg=0
-        write(0,*) "DEBUG: Starting loops"
-        do isppol=1,nsppol
-          ikg=0
-          ext_ikg=0
-          ! Loop over k points
-          do ikpt=1,nkpt
-            nband_k=nband(ikpt+(isppol-1)*nkpt)
-            ext_nband_k=this%mband
-            istwf_k=istwfk(ikpt)
-            npw_k=npwarr(ikpt)
-            ext_npw_k=this%npwarr(ikpt)
-            ! Skip this k-point if not the proper processor
-            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-              bdtot_index=bdtot_index+nband_k
-              cycle
-            end if
 
-            kpoint(:)=kptns(:,ikpt)
-
-            ABI_MALLOC(eig_k,(nband_k))
-            ABI_MALLOC(kg_k,(3,npw_k))
-            ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
-            ABI_MALLOC(ext_kinpw,(ext_npw_k))
-            eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
-            if (minval(eig_k)>1.d100) eig_k=zero
-            kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
-            ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
-            ext_kinpw(:)=zero
-            call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
-
-            ! Copy non extended plane waves coefficients and eigenvalues here
-            do iband=1,nband_k
-              norm=zero
-              do ipw=1,npw_k*my_nspinor
-                do ext_ipw=1,ext_npw_k*my_nspinor
-                  if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
-                    this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
-                    this%eigen(iband+ext_bdtot_index)=eig_k(iband)
-                  end if
-                end do
-              end do
-            end do
-
-            ! Set extended plane waves coefficients here
-            do iband=nband_k+1,this%mband
-              ! Get fermi gas energy and set eigenvalue
-              fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
-              this%eigen(iband+ext_bdtot_index)=fg_kin+this%shiftfactor
-              ! Find closest values in ext_kinpw
-
-              closest_below=zero
-              closest_above=this%ecut
-              count_below=0
-              count_above=0
-
-              do ext_ipw=1,ext_npw_k*my_nspinor
-                if (ext_kinpw(ext_ipw)<=fg_kin.and.ext_kinpw(ext_ipw)>=closest_below) then
-                  if (ext_kinpw(ext_ipw)==closest_below) then
-                    count_below=count_below+1
-                  else
-                    count_below=1
-                    closest_below=ext_kinpw(ext_ipw)
-                  end if
-                else if (ext_kinpw(ext_ipw)>=fg_kin.and.ext_kinpw(ext_ipw)<=closest_above) then
-                  if (ext_kinpw(ext_ipw)==closest_above) then
-                    count_above=count_above+1
-                  else
-                    count_above=1
-                    closest_above=ext_kinpw(ext_ipw)
-                  end if
-                end if
-              end do
-
-              prop_below=(fg_kin-closest_above)/(count_below*(closest_below-closest_above))
-              prop_above=(1-prop_below*count_below)/count_above
-
-              ! Do a second loop to set cg coefficients
-              do ext_ipw=1,ext_npw_k*my_nspinor
-                if (ext_kinpw(ext_ipw)==closest_below) then
-                  this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)
-                end if
-                if (ext_kinpw(ext_ipw)==closest_above) then
-                  this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_above)
-                end if
-              end do
-            end do
-
-            write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
-            do iband=1,this%mband
-              fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
-              norm=zero
-              do ext_ipw=1,ext_npw_k*my_nspinor
-                norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
-              end do
-              write(0,*) ikpt, iband, norm, this%eigen(iband+ext_bdtot_index), fg_kin
-            end do
-
-            ! Increment indexes
+    ! Generating ext pw basis set (this%kg,this%npwarr,this%npwtot)
+    if(.not.allocated(this%cg)) then
+      write(0,*) 'DEBUG: Generating extended plane wave basis set...'
+      call kpgio(this%ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
+      & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
+      & this%mpw,this%npwarr,this%npwtot,nsppol)
+      
+      ! Get number of ext pw coefficients
+      my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+      this%mcg=this%mpw*my_nspinor*this%mband*mkmem*nsppol
+      ABI_MALLOC(this%cg,(2,this%mcg))
+      this%cg(:,:)=zero
+      
+      ! Get ext pw coefficients and kinetic and eigenvalues
+      ! Loop over spins
+      bdtot_index=0
+      ext_bdtot_index=0
+      icg=0
+      ext_icg=0
+      ! write(0,*) "DEBUG: Starting loops"
+      do isppol=1,nsppol
+        ikg=0
+        ext_ikg=0
+        ! Loop over k points
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          ext_nband_k=this%mband
+          istwf_k=istwfk(ikpt)
+          npw_k=npwarr(ikpt)
+          ext_npw_k=this%npwarr(ikpt)
+          ! Skip this k-point if not the proper processor
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
             bdtot_index=bdtot_index+nband_k
-            ext_bdtot_index=ext_bdtot_index+this%mband
-            if(mkmem/=0) then
-              icg=icg+npw_k*my_nspinor*nband_k
-              ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
-              ikg=ikg+npw_k
-              ext_ikg=ext_ikg+ext_npw_k
-            end if
+            cycle
+          end if
 
-            ABI_FREE(ext_kinpw)
-            ABI_FREE(ext_kg_k)
-            ABI_FREE(kg_k)
-            ABI_FREE(eig_k)
+          kpoint(:)=kptns(:,ikpt)
+
+          ABI_MALLOC(eig_k,(nband_k))
+          ABI_MALLOC(kg_k,(3,npw_k))
+          ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
+          ABI_MALLOC(ext_kinpw,(ext_npw_k))
+          eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
+          if (minval(eig_k)>1.d100) eig_k=zero
+          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+          ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
+
+          ! Compute kinetic energy of extended pw.
+          ! /!\ We don't keep this in memory because it can be heavy.
+          ext_kinpw(:)=zero
+          call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
+
+          ! Copy non extended plane waves coefficients and eigenvalues here
+          do iband=1,nband_k
+            do ipw=1,npw_k*my_nspinor
+              do ext_ipw=1,ext_npw_k*my_nspinor
+                if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
+                  this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
+                  this%eigen(iband+ext_bdtot_index)=eig_k(iband)
+                end if
+              end do
+            end do
           end do
+
+          ! Set extended plane waves coefficients here
+          do iband=nband_k+1,this%mband
+            ! Get fermi gas energy and set eigenvalue
+            fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
+            this%eigen(iband+ext_bdtot_index)=fg_kin+this%shiftfactor
+            ! Find closest values in ext_kinpw
+
+            closest_below=zero
+            closest_above=this%ecut
+            count_below=0
+            count_above=0
+
+            do ext_ipw=1,ext_npw_k*my_nspinor
+              if (ext_kinpw(ext_ipw)<=fg_kin.and.ext_kinpw(ext_ipw)>=closest_below) then
+                if (ext_kinpw(ext_ipw)==closest_below) then
+                  count_below=count_below+1
+                else
+                  count_below=1
+                  closest_below=ext_kinpw(ext_ipw)
+                end if
+              else if (ext_kinpw(ext_ipw)>=fg_kin.and.ext_kinpw(ext_ipw)<=closest_above) then
+                if (ext_kinpw(ext_ipw)==closest_above) then
+                  count_above=count_above+1
+                else
+                  count_above=1
+                  closest_above=ext_kinpw(ext_ipw)
+                end if
+              end if
+            end do
+
+            prop_below=(fg_kin-closest_above)/(count_below*(closest_below-closest_above))
+            prop_above=(1-prop_below*count_below)/count_above
+
+            ! Do a second loop to set cg coefficients
+            do ext_ipw=1,ext_npw_k*my_nspinor
+              if (ext_kinpw(ext_ipw)==closest_below) then
+                this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)
+              end if
+              if (ext_kinpw(ext_ipw)==closest_above) then
+                this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_above)
+              end if
+            end do
+          end do
+
+          ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
+          ! do iband=1,this%mband
+          !   fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
+          !   norm=zero
+          !   do ext_ipw=1,ext_npw_k*my_nspinor
+          !     norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
+          !   end do
+          !   write(0,*) ikpt, iband, norm, this%eigen(iband+ext_bdtot_index), fg_kin
+          ! end do
+
+          ! Increment indexes
+          bdtot_index=bdtot_index+nband_k
+          ext_bdtot_index=ext_bdtot_index+this%mband
+          if(mkmem/=0) then
+            icg=icg+npw_k*my_nspinor*nband_k
+            ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+            ikg=ikg+npw_k
+            ext_ikg=ext_ikg+ext_npw_k
+          end if
+
+          ABI_FREE(ext_kinpw)
+          ABI_FREE(ext_kg_k)
+          ABI_FREE(kg_k)
+          ABI_FREE(eig_k)
         end do
-        write(0,*) "DEBUG: Exiting routine..."
-      end if
+      end do
+      write(0,*) "DEBUG: Exiting routine..."
+    else
+
+      my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+
+      ! Loop over spins
+      bdtot_index=0
+      ext_bdtot_index=0
+      icg=0
+      ext_icg=0
+      do isppol=1,nsppol
+        ikg=0
+        ext_ikg=0
+        ! Loop over k points
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          npw_k=npwarr(ikpt)
+          ext_npw_k=this%npwarr(ikpt)
+          ! Skip this k-point if not the proper processor
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+            bdtot_index=bdtot_index+nband_k
+            cycle
+          end if
+
+          ABI_MALLOC(eig_k,(nband_k))
+          ABI_MALLOC(kg_k,(3,npw_k))
+          ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
+          eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
+          if (minval(eig_k)>1.d100) eig_k=zero
+          kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
+          ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
+
+          ! Copy updated non extended plane waves coefficients and eigenvalues here
+          do iband=1,nband_k
+            do ipw=1,npw_k*my_nspinor
+              do ext_ipw=1,ext_npw_k*my_nspinor
+                if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
+                  this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
+                  this%eigen(iband+ext_bdtot_index)=eig_k(iband)
+                end if
+              end do
+            end do
+          end do
+
+          ! Increment indexes
+          bdtot_index=bdtot_index+nband_k
+          ext_bdtot_index=ext_bdtot_index+this%mband
+          if(mkmem/=0) then
+            icg=icg+npw_k*my_nspinor*nband_k
+            ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+            ikg=ikg+npw_k
+            ext_ikg=ext_ikg+ext_npw_k
+          end if
+
+          ABI_FREE(ext_kg_k)
+          ABI_FREE(kg_k)
+          ABI_FREE(eig_k)
+        end do
+      end do
     end if
   end subroutine generate_extpw
 
@@ -564,16 +624,20 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_nelect(this,fermie,nelect,tsmear)
+  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk)
     ! Arguments -------------------------------
     ! Scalars
+    integer,intent(in) :: nkpt,nsppol
     real(dp),intent(in) :: fermie,tsmear
     real(dp),intent(inout) :: nelect
     class(extfpmd_type),intent(inout) :: this
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifft,ispden
+    integer :: ifft,ispden,isppol,ikpt,iband,index_tot,nband_k
     real(dp) :: factor,gamma,xcut
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
@@ -600,6 +664,21 @@ contains
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       if(this%e_bcut.lt.this%shiftfactor) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
+    end if
+
+    ! Computes extended pw contribution to nelect summing
+    ! over ext pw states from nband_k to this%mband
+    if(this%version==5) then
+      index_tot=0
+      do isppol=1,nsppol
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do iband=nband_k+1,this%mband
+            nelect=nelect+wtk(ikpt)*this%occ(iband+index_tot)
+          end do
+          index_tot=index_tot+this%mband
+        end do
+      end do
     end if
 
     ! Computes extfpmd contribution to nelect using a sum
@@ -629,6 +708,68 @@ contains
   end subroutine compute_nelect
   !!***
 
+  !!****f* ABINIT/m_extfpmd/update_ks_occ
+  !! NAME
+  !!  update_ks_occ
+  !!
+  !! FUNCTION
+  !!  Computes the value of the integral corresponding to the missing
+  !!  free electrons contribution after band cut, with an order 1/2
+  !!  incomplete Fermi-Dirac integral.
+  !!
+  !! INPUTS
+  !!  this=extfpmd_type object concerned
+  !!  fermie=chemical potential (Hartree)
+  !!  nelect=number of electrons per unit cell
+  !!  tsmear=smearing width (or temperature)
+  !!
+  !! OUTPUT
+  !!  this=extfpmd_type object concerned
+  !!
+  !! SOURCE
+  subroutine update_ks_occ(this,occ,doccde,mband,nkpt,nsppol,mpi_enreg,nband)
+    ! Arguments -------------------------------
+    ! Scalars
+    class(extfpmd_type),intent(inout) :: this
+    integer,intent(in) :: mband,nkpt,nsppol
+    type(MPI_type),intent(inout) :: mpi_enreg
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(out) :: doccde(mband*nkpt*nsppol)
+    real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: bdtot_index,ext_bdtot_index,isppol,ikpt,iband,nband_k
+    ! Arrays
+
+    ! *********************************************************************
+    
+    bdtot_index=0
+    ext_bdtot_index=0
+
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        ! Skip this k-point if not the proper processor
+        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          bdtot_index=bdtot_index+nband_k
+          cycle
+        end if
+
+        do iband=1,nband_k
+          occ(iband+bdtot_index)=this%occ(iband+ext_bdtot_index)
+          doccde(iband+bdtot_index)=this%doccde(iband+ext_bdtot_index)
+        end do
+
+        ! Increment indexes
+        bdtot_index=bdtot_index+nband_k
+        ext_bdtot_index=ext_bdtot_index+this%mband
+      end do
+    end do
+
+  end subroutine update_ks_occ
+
   !!****f* ABINIT/m_extfpmd/compute_e_kinetic
   !! NAME
   !!  compute_e_kinetic
@@ -647,21 +788,30 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_e_kinetic(this,fermie,tsmear)
+  subroutine compute_e_kinetic(this,fermie,tsmear,mpi_enreg,effmass_free,gmet,kptns,nkpt,mkmem,istwfk,&
+  & nspinor,nsppol,nband,wtk)
     ! Arguments -------------------------------
     ! Scalars
+    integer,intent(in) :: nkpt,mkmem,nspinor,nsppol
     class(extfpmd_type),intent(inout) :: this
-    real(dp),intent(in) :: fermie,tsmear
+    real(dp),intent(in) :: fermie,tsmear,effmass_free
+    type(MPI_type),intent(inout) :: mpi_enreg
+    ! Arrays
+    integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
+    real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt),wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifft,ispden
-    real(dp) :: factor,gamma,xcut
+    integer :: ikpt,isppol,istwf_k,my_nspinor,nband_k,iband
+    integer :: ifft,ispden,ext_bdtot_index,ext_icg,ext_ikg,ext_npw_k
+    real(dp) :: factor,gamma,xcut,dotr
     real(dp) :: e_kinetic_hybrid_tf
     character(len=500) :: msg
     ! Arrays
-    real(dp),allocatable :: gamma_hybrid_tf(:,:)
-    real(dp),allocatable :: xcut_hybrid_tf(:,:)
+    real(dp) :: kpoint(3)
+    real(dp),allocatable :: gamma_hybrid_tf(:,:),xcut_hybrid_tf(:,:)
+    real(dp),allocatable :: cwavef(:,:),ext_kinpw(:)
+    integer,allocatable :: ext_kg_k(:,:)
 
     ! *********************************************************************
 
@@ -684,6 +834,52 @@ contains
       gamma=(fermie-this%shiftfactor)/tsmear
       xcut=(this%e_bcut-this%shiftfactor)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
+    end if
+
+    ! Computes extended pw contribution to kinetic energy summing
+    ! over ext pw states from nband_k to this%mband
+    if(this%version==5) then
+      my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+      ! Loop over spins
+      ext_bdtot_index=0
+      ext_icg=0
+      do isppol=1,nsppol
+        ext_ikg=0
+        ! Loop over k points
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          istwf_k=istwfk(ikpt)
+          ext_npw_k=this%npwarr(ikpt)
+
+          kpoint(:)=kptns(:,ikpt)
+
+          ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
+          ABI_MALLOC(ext_kinpw,(ext_npw_k))
+          ABI_MALLOC(cwavef,(2,ext_npw_k*my_nspinor*this%mband))
+          ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
+          ext_kinpw(:)=zero
+          call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
+
+          ! Compute kinetic energy of each band
+          do iband=nband_k+1,this%mband
+            cwavef(1:2,1:ext_npw_k*my_nspinor)= &
+            & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
+            call meanvalue_g(dotr,ext_kinpw,0,istwf_k,mpi_enreg,ext_npw_k,my_nspinor,cwavef,cwavef,0)
+            this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
+          end do
+
+          ! Increment indexes
+          ext_bdtot_index=ext_bdtot_index+this%mband
+          if(mkmem/=0) then
+            ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+            ext_ikg=ext_ikg+ext_npw_k
+          end if
+
+          ABI_FREE(cwavef)
+          ABI_FREE(ext_kinpw)
+          ABI_FREE(ext_kg_k)
+        end do
+      end do
     end if
 
     ! Computes extfpmd contribution to kinetic energy using a sum
@@ -716,7 +912,7 @@ contains
     ! Computes the double counting term from the shiftfactor, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
-    if(this%version==1.or.this%version==2.or.this%version==3.or.this%version==4) then
+    if(this%version==1.or.this%version==2.or.this%version==3.or.this%version==4.or.this%version==5) then
       this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
     else if(this%version==10) then
       this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfft*this%nspden))
@@ -754,23 +950,27 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_entropy(this,fermie,tsmear)
+  subroutine compute_entropy(this,fermie,tsmear,nkpt,nsppol,nspinor,wtk,nband)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
+    integer,intent(in) :: nkpt,nsppol,nspinor
     real(dp),intent(in) :: fermie,tsmear
+    ! Arrays
+    integer,intent(in) :: nband(nkpt*nsppol)
+    real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifft,ispden
-    real(dp) :: ix,step,factor,fn,gamma
+    integer :: ii,ifft,ispden,index_tot,isppol,ikpt,iband,nband_k
+    real(dp) :: ix,step,factor,fn,gamma,maxocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
     real(dp),dimension(:,:),allocatable :: gamma_hybrid_tf
     real(dp),dimension(:,:),allocatable :: step_hybrid_tf
 
     ! *********************************************************************
-
+    maxocc=two/(nsppol*nspinor)
     this%entropy=zero
 
     ! Computes extfpmd contribution to the entropy integrating
@@ -830,6 +1030,22 @@ contains
         & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent)
       end if
       ABI_FREE(valuesent)
+    end if
+
+    ! Computes extended pw contribution to nelect summing
+    ! over ext pw states from nband_k to this%mband
+    if(this%version==5) then
+      index_tot=0
+      do isppol=1,nsppol
+        do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do iband=nband_k+1,this%mband
+            fn=this%occ(iband+index_tot)/maxocc
+            this%entropy=this%entropy-two*(fn*log(fn)+(one-fn)*log(one-fn))
+          end do
+          index_tot=index_tot+this%mband
+        end do
+      end do
     end if
 
     ! Computes extfpmd contribution to the entropy using a sum
