@@ -1201,12 +1201,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-       &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
        ! Get extended plane wave cutoff
        call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-       &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-       &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-       &       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
+&       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+&       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
      end if
 
 !    Compute the new occupation numbers from eigen
@@ -1221,6 +1221,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute number of free electrons of extfpmd model
      if(associated(extfpmd)) then
+       if(extfpmd%version==5) then
+         write(0,*) energies%entropy,energies%e_fermie,energies%e_fermih
+         call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
+&         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
+&         dtset%tsmear,dtset%wtk,&
+&         prtstm=dtset%prtstm,stmbias=dtset%stmbias)
+         write(0,*) energies%entropy,energies%e_fermie,energies%e_fermih
+       end if
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)

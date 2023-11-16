@@ -65,7 +65,7 @@ module m_extfpmd
     integer :: mpw,mcg,mband
     real(dp) :: ecut,ecut_eff
     integer,allocatable :: kg(:,:),npwarr(:),npwtot(:),nband(:)
-    real(dp),allocatable :: cg(:,:),eigen(:),occ(:)
+    real(dp),allocatable :: cg(:,:),eigen(:),occ(:),doccde(:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -143,7 +143,7 @@ contains
     & sqrt((2*PI*gprimd(1,1))**2+(2*PI*gprimd(2,1))**2+(2*PI*gprimd(3,1))**2)
     this%ecut_eff=this%ecut*dilatmx**2
     ABI_MALLOC(this%nband,(nkpt*nsppol))
-    this%nband(:)=0
+    this%nband(:)=extfpmd_mband
     ABI_MALLOC(this%npwarr,(nkpt))
     this%npwarr(:)=0
     ABI_MALLOC(this%npwtot,(nkpt))
@@ -156,6 +156,8 @@ contains
     this%eigen(:)=zero
     ABI_MALLOC(this%occ,(extfpmd_mband*nkpt*nsppol))
     this%occ(:)=zero
+    ABI_MALLOC(this%doccde,(extfpmd_mband*nkpt*nsppol))
+    this%doccde(:)=zero
   end subroutine init
   !!***
 
@@ -184,6 +186,8 @@ contains
       this%cg(:,:)=zero
       ABI_FREE(this%cg)
     end if
+    this%doccde(:)=zero
+    ABI_FREE(this%doccde)
     this%eigen(:)=zero
     ABI_FREE(this%eigen)
     this%occ(:)=zero
@@ -510,15 +514,15 @@ contains
               end do
             end do
 
-            ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
-            ! do iband=1,this%mband
-            !   fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
-            !   norm=zero
-            !   do ext_ipw=1,ext_npw_k*my_nspinor
-            !     norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
-            !   end do
-            !   write(0,*) ikpt, iband, norm, this%eigen(iband+ext_bdtot_index), fg_kin
-            ! end do
+            write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
+            do iband=1,this%mband
+              fg_kin=extfpmd_e_fg(one*iband,this%ucvol)
+              norm=zero
+              do ext_ipw=1,ext_npw_k*my_nspinor
+                norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
+              end do
+              write(0,*) ikpt, iband, norm, this%eigen(iband+ext_bdtot_index), fg_kin
+            end do
 
             ! Increment indexes
             bdtot_index=bdtot_index+nband_k
