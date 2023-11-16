@@ -20,6 +20,8 @@
 
 module m_nonlop
 
+ use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr
+
  use defs_basis
  use m_errors
  use m_abicore
@@ -373,6 +375,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  real(dp), pointer :: enl_(:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
+ integer :: proj_shift,ia,nlmn
 
 ! **********************************************************************
 
@@ -570,8 +573,23 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !derivatives of the projectors associated with the displaced atom.
  iatom_only_=-1;if (present(iatom_only)) iatom_only_=iatom_only
  atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==22.or.choice==24.or.choice==25.or.choice==54))
+ proj_shift=0
 
  if (iatom_only_>0.and.atom_pert) then
+
+   if(gemm_nonlop_use_gemm) then
+     iatm=1; proj_shift=0
+     do itypat=1, hamk%ntypat
+       nlmn=count(hamk%indlmn(3,:,itypat)>0)
+       do ia=1,hamk%nattyp(itypat)
+         if(iatm/=iatom_only_) then
+           proj_shift = proj_shift + nlmn
+           iatm = iatm + 1
+         end if
+       end do
+       if(iatm==iatom_only) exit
+     end do
+   end if
 !   We consider only atom with index iatom_only
    iatm=hamk%atindx(iatom_only_);itypat=hamk%typat(iatom_only_)
    natom_=1 ; ntypat_=1 ; dimenl2_=1 ; matblk_=1
@@ -679,8 +697,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if(signs==2) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. &
 &      ( paw_opt /= 2 .and. &
-&        cpopt < 3 .and. hamk%useylm /= 0 .and. &
-&        (choice < 2 .or. choice == 7) ) )
+&        hamk%useylm /= 0 .and.&
+&        (cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
+&        (choice==1 .or. choice==2  .or. choice==3 .or. choice==5 .or. choice==51)))
    end if
    if(signs==1) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
@@ -706,8 +725,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,&
-         gpu_option=hamk%gpu_option)
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,&
+         vectproj=vectproj,gpu_option=hamk%gpu_option)
 
    else if (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS) then
 
@@ -734,7 +753,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,&
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,vectproj=vectproj,&
          gpu_option=hamk%gpu_option)
 
    end if

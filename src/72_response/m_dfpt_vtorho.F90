@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_vtorho
 
  use defs_basis
@@ -28,8 +31,12 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_gemm_nonlop
+ use m_gemm_nonlop_gpu
+ use m_gemm_nonlop_ompgpu
  use m_dtset
  use m_dtfil
+ use m_ompgpu_utils
 
 
  use defs_datatypes, only : pseudopotential_type
@@ -54,6 +61,10 @@ module m_dfpt_vtorho
  use m_dfpt_fef,    only : dfptff_gradberry, dfptff_gbefd
  use m_mpinfo,      only : proc_distrb_cycle,proc_distrb_nband
  use m_fourier_interpol, only : transgrid
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -100,6 +111,7 @@ contains
 !!  indsy1(4,nsym1,natom)=indirect indexing array for atom labels
 !!  ipert=type of the perturbation
 !!  irrzon1(nfft**(1-1/nsym1),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
+!!  istep=index of the number of steps in the routine dfpt_scfcv
 !!  istwfk_rbz(nkpt_rbz)=input option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
@@ -214,7 +226,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,qphon,&
 & edocc,eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,end0,end1,enl0,enl1,&
 & evxctau0,evxctau1,fermie1,gh0c1_set,gh1c_set,gmet,gprimd,idir,indsy1,&
-& ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
+& ipert,irrzon1,istep,istwfk_rbz,kg,kg1,kpt_rbz,mband,mband_mem,&
 & mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
@@ -224,7 +236,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,mband,mk1mem,mkmem
+ integer,intent(in) :: cplex,dbl_nnsclo,dim_eig2rf,idir,ipert,istep,mband,mk1mem,mkmem
  integer,intent(in) :: mband_mem
  integer,intent(in) :: mkqmem,mpw,mpw1,my_natom,natom,ncpgr,nfftf,nkpt_rbz,nspden
  integer,intent(in) :: nsppol,nsym1,ntypat,optres,prtvol,usecprj,useylmgr1,with_vectornd
@@ -326,6 +338,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_VTORHO)
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -635,6 +649,36 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &         nsppol,qmat,pwindall,rprimd)
        end if
      end if
+
+     ! Setup gemm_nonlop
+     if (gemm_nonlop_use_gemm) then
+       !set the global variable indicating to gemm_nonlop where to get its data from
+       gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+       if (istep <= 1) then
+         !Init the arrays
+         if ( dtset%gpu_option == ABI_GPU_DISABLED) then
+           call make_gemm_nonlop(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
+           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k,&
+           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
+           &    idir_pert=idir,&
+           &    compute_grad_atom=(ipert<=dtset%natom), compute_grad_strain=(ipert==dtset%natom+2))
+         else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
+           call make_gemm_nonlop_gpu(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
+           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
+           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k)
+         else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+           !call ompgpu_load_hamilt_buffers(gs_hamkq%kg_k,gs_hamkq%kg_kp)
+           call make_gemm_nonlop_ompgpu(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
+           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
+           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
+           &    idir_pert=idir,&
+           &    compute_grad_atom=(ipert<=dtset%natom), compute_grad_strain=(ipert==dtset%natom+2))
+         end if
+       end if
+     end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk
      ABI_FREE(ylm_k)
@@ -951,6 +995,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end if ! iscf>0
 
  call timab(121,2,tsec)
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT('COLL')
 
