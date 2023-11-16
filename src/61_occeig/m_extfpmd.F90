@@ -1033,7 +1033,9 @@ contains
     end if
 
     ! Computes extended pw contribution to nelect summing
-    ! over ext pw states from nband_k to this%mband
+    ! over ext pw states from nband_k to this%mband.
+    ! In this case, entropy is computed just for information as
+    ! ext pw entropy is already included while computing occupations.
     if(this%version==5) then
       index_tot=0
       do isppol=1,nsppol
