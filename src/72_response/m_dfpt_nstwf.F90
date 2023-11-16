@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_nstwf
 
  use defs_basis
@@ -68,6 +71,10 @@ module m_dfpt_nstwf
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
  use m_cgprj,      only : getcprj
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -344,6 +351,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSTPAW)
 
 !Keep track of total time spent in dfpt_nstpaw
  call timab(566,1,tsec)
@@ -1253,7 +1262,7 @@ has_vectornd = (with_vectornd .EQ. 1)
            sij_opt=-1;if (has_dcwf) sij_opt=1
            if (usepaw==0) sij_opt=0
            call getgh1c(berryopt,cwave0,cwaveprj0_idir1,gh1,dum1,gs1,gs_hamkq,gvnlx1,idir1,ipert1,&
-&           lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&           lambda,mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,use_gpu=ABI_GPU_DISABLED)
            if (sij_opt==1.and.optnl==1) gh1=gh1-lambda*gs1
            ABI_FREE(gvnlx1)
 
@@ -1474,7 +1483,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
              call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
 &               ibgq,icgq,istwf_k,mcgq,&
-&               mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1)
+&               mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1,gpu_option=ABI_GPU_DISABLED)
 
              if (abs(occ_k(iband))>tol8) then
 !              Accumulate 1st-order density due to delta_u^(j1)
@@ -1870,6 +1879,8 @@ has_vectornd = (with_vectornd .EQ. 1)
  call destroy_mpi_enreg(mpi_enreg_seq)
  call timab(566,2,tsec)
 
+ ABI_NVTX_END_RANGE()
+
  DBG_EXIT("COLL")
 
 end subroutine dfpt_nstpaw
@@ -1997,6 +2008,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 ! *********************************************************************
 
  DBG_ENTER("COLL")
+
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSTWF)
 
 !Not valid for PAW
  if (psps%usepaw==1) then
@@ -2153,6 +2166,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !Loop over ALL bands
  iband_me = 0
  do iband=1,nband_k
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSTWF_BAND)
 
 ! if band is mine, retrieve it and then broadcast it
    if(mpi_enreg%proc_distrb(ikpt,iband,isppol) == mpi_enreg%me_kpt) then
@@ -2210,7 +2224,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
                berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnlx1=0;sij_opt=0
                call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnlx1,dum_grad_berry,&
 &               dum_gs1,gs_hamkq,dum_gvnlx1,idir1,ipert1,lambda,mpi_enreg,optlocal,&
-&               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
+&               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,use_gpu=ABI_GPU_DISABLED)
 
 !              ==== Electric field perturbation
              else if( ipert1==dtset%natom+2 )then
@@ -2370,7 +2384,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
      end do  ! idir1
    end if   ! Compute localization tensor, ipert=natom+1
 
+   ABI_NVTX_END_RANGE()
  end do !  End loop over iband
+
 
 ! if(dtset%prtbbb==1)then
 !   ! complete over jband index
@@ -2402,6 +2418,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
  call timab(112,2,tsec)
+
+ ABI_NVTX_END_RANGE()
 
  DBG_EXIT("COLL")
 
