@@ -367,7 +367,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.
+ logical :: do_last_ortho,wvlbigdft=.false.,compute_newocc=.true.
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
@@ -1202,38 +1202,46 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
-       ! Get extended plane wave cutoff
-       call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-&       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-&       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
-     end if
 
-!    Compute the new occupation numbers from eigen
-     call timab(990,1,tsec)
-     call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-&     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
-&     dtset%tsmear,dtset%wtk,&
-&     prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
-     call timab(990,2,tsec)
-
-
-!    Compute number of free electrons of extfpmd model
-     if(associated(extfpmd)) then
-       if(extfpmd%version==5) then
-         write(0,*) energies%entropy,energies%e_fermie,energies%e_fermih
+       if (extfpmd%version==5) then
+         ! Get extended plane wave cutoff
+         call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
+&         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+&         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+&         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
+         ! Compute extended plane wave occupations
+         call timab(990,1,tsec)
          call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
 &         dtset%tsmear,dtset%wtk,&
 &         prtstm=dtset%prtstm,stmbias=dtset%stmbias)
-         write(0,*) energies%entropy,energies%e_fermie,energies%e_fermih
+         call timab(990,2,tsec)
+         compute_newocc=.false.
+         ! Update Kohn-Sham occ and doccde from extended pw arrays
+         call extfpmd%update_ks_occ(occ,doccde,dtset%mband,dtset%nkpt,dtset%nsppol,mpi_enreg,dtset%nband)
        end if
+     end if
+
+!    Compute the new occupation numbers from eigen
+     if (compute_newocc) then
+       call timab(990,1,tsec)
+       call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
+&       dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&       dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
+&       dtset%tsmear,dtset%wtk,&
+&       prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+       call timab(990,2,tsec)
+     end if
+
+!    Compute number of free electrons of extfpmd model
+     if(associated(extfpmd)) then
        extfpmd%nelect=zero
-       call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
-       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
+       call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&       dtset%nsppol,dtset%tsmear,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%effmass_free,gmet,dtset%kptns,&
+&       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband)
      end if
 
 !    !=========  DMFT call begin ============================================
