@@ -513,7 +513,7 @@ CONTAINS  !===========================================================
 !******************************************************************
 
 !Use only abi_linalg in case of GS calculations
- abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS)
+ abi_linalg_in_use=(optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS.or.optdriver==RUNL_RESPFN)
 
  max_eigen_pb_size_eff=0
  lapack_single_precision=.false.
