@@ -1,6 +1,6 @@
 
-.Version 9.6.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu10.2 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 24 Nov 2021.
-- ( at 14h37 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/mroyo/Flexoelectrics/Src/abinit/tests/Test_suite/v9_t75/t75.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t75/t75.abi
 - output file    -> t75.abo
 - root for input  files -> t75i
 - root for output files -> t75o
-
 
  Symmetries : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -44,7 +43,7 @@ _ WF disk file :      0.523 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -54,7 +53,7 @@ _ WF disk file :      0.523 Mbytes ; DEN or POT disk file :      0.697 Mbytes.
               amu      1.00794000E+00  6.94100000E+00
            diemac      2.00000000E+00
              ecut      2.00000000E+01 Hartree
--          fftalg         512
+-          fftalg         312
               ixc           7
               kpt      1.25000000E-01  0.00000000E+00  0.00000000E+00
                        3.75000000E-01  0.00000000E+00  0.00000000E+00
@@ -121,8 +120,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.18561
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
-- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/H.psp8
 - H     ONCVPSP-3.3.0  r_core=   1.00957   0.90680
 -  1.00000   1.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       300   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -135,8 +134,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1   -0.275071
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
-- pspatm: opening atomic psp file    /home/mroyo/Flexoelectrics/Src/abinit/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pw_standard_psp8/Li.psp8
 - Li    ONCVPSP-3.3.0  r_core=   1.20595   1.00838
 -  3.00000   3.00000    171101                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -234,8 +233,8 @@ force_length_stats: {min:   1.08332795E-02, max:   1.08332795E-02, mean:   1.083
  frms,max,avg= 6.2545968E-03 1.0833279E-02  -6.857E-07  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.55706958186691    -0.00000000000000    -0.00000000000000
-    2      0.55706958186691    -0.00000000000000    -0.00000000000000
+    1     -0.55706958186693    -0.00000000000000    -0.00000000000000
+    2      0.55706958186693    -0.00000000000000    -0.00000000000000
  frms,max,avg= 3.2162427E-01 5.5706958E-01  -3.526E-05  0.000E+00  0.000E+00 e/A
  length scales= 10.000000000000 10.000000000000 10.000000000000 bohr
               =  5.291772085900  5.291772085900  5.291772085900 angstroms
@@ -255,11 +254,11 @@ hartree             :  3.03321329610906E+00
 xc                  : -1.86130466122501E+00
 Ewald energy        : -1.21398891830565E+00
 psp_core            :  8.52490259178614E-03
-local_psp           : -9.44685647683691E+00
+local_psp           : -9.44685647683692E+00
 non_local_psp       : -3.87057815424311E+00
 total_energy        : -7.63555875644410E+00
 total_energy_eV     : -2.07774120307185E+02
-band_energy         : -3.97575173152572E+00
+band_energy         : -3.97575173152573E+00
 ...
 
 
@@ -284,7 +283,7 @@ band_energy         : -3.97575173152572E+00
            etotal     -7.6355587564E+00
             fcart     -1.0833279477E-02 -0.0000000000E+00 -0.0000000000E+00
                        1.0833279477E-02 -0.0000000000E+00 -0.0000000000E+00
--          fftalg         512
+-          fftalg         312
               ixc           7
               kpt      1.25000000E-01  0.00000000E+00  0.00000000E+00
                        3.75000000E-01  0.00000000E+00  0.00000000E+00
@@ -414,10 +413,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          2.1
+.Delivered   2 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.3  wall=          1.3

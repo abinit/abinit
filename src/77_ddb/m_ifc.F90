@@ -758,13 +758,12 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  inquire(file=filename, exist=file_exists)
 
  if (file_exists .eqv. .true.)then
-   !Reading the ddb
-   call ddb_hdr%open_read(filename,2,comm,dimonly=1)
 
-   natom = ddb_hdr%natom
+   !Reading the ddb
+   call ddb%from_file(filename, ddb_hdr, ucell_ddb, comm)
    call ddb_hdr%free()
 
-   call ddb%from_file(filename,1, ddb_hdr, ucell_ddb,comm)
+   natom = ddb%natom
 
  else
    ABI_ERROR(sjoin("File:", filename, "is not present in the directory"))
@@ -781,7 +780,7 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
  end if
 
  ABI_MALLOC(qdrp_cart,(3,3,3,natom))
- iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(ddb_hdr%ddb_version,1,3,qdrp_cart)
 
  ! ifc to be calculated for interpolation
  write(msg, '(a,a,(80a),a,a,a,a)' ) ch10,('=',i=1,80),ch10,ch10,' Calculation of the interatomic forces ',ch10
@@ -796,7 +795,6 @@ subroutine ifc_from_file(ifc, dielt,filename,natom,ngqpt,nqshift,qshift,ucell_dd
 
  ! Free them all
  call ddb%free()
- call ddb_hdr%free()
 
 end subroutine ifc_from_file
 !!***

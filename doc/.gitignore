@@ -1,14 +1,15 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-INSTALL_EasyBuild.md
 INSTALL_gpu.md
-INSTALL_Ubuntu.md
+INSTALL_EasyBuild.md
 INSTALL_CentOS.md
 INSTALL_MacOS.md
+INSTALL_Ubuntu.md
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
-variables/atdep.md
+variables/multibinit.md
+variables/aim.md
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -26,15 +27,15 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
-variables/aim.md
 variables/optic.md
-variables/multibinit.md
+variables/atdep.md
 variables/anaddb.md
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md
 topics/Artificial.md
 topics/aTDEP.md
+topics/AtomCentered.md
 topics/AtomManipulator.md
 topics/AtomTypes.md
 topics/Bader.md
@@ -48,7 +49,7 @@ topics/ConstrainedPol.md
 topics/Control.md
 topics/Coulomb.md
 topics/CrossingBarriers.md
-topics/CRPA.md
+topics/CalcUJ.md
 topics/crystal.md
 topics/DFT+U.md
 topics/DeltaSCF.md

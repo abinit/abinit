@@ -301,7 +301,7 @@ CONTAINS  !=====================================================================
    option_core=0
    call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
-&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,znucl,&
+&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
@@ -974,7 +974,7 @@ CONTAINS  !=====================================================================
    option_core=1
    call pawnabla_soc_init(phisocphj,option_core,dtset%ixc,mpi_enreg%my_natom,natom,&
 &       dtset%nspden,dtset%ntypat,pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,&
-&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,znucl,&
+&       dtset%spnorbscl,dtset%typat,dtset%xc_denpos,dtset%xc_taupos,znucl,&
 &       phi_cor=phi_cor,indlmn_cor=indlmn_cor,&
 &       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
@@ -1797,7 +1797,8 @@ CONTAINS  !=====================================================================
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  spnorbscl=scaling factor for spin-orbit coupling
 !!  typat(natom) =Type of each atoms
-!!  xc_denpos= lowest allowe density (usually for the computation of the XC functionals)
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  xc_taupos= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  znucl(ntypat)=gives the nuclear charge for all types of atoms
 !!  [phi_cor(mesh_size,nphicor)]=--optional-- core wave-functions for the current type of atoms;
 !!                               only needed when option_core=1
@@ -1837,14 +1838,14 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
  subroutine pawnabla_soc_init(phisocphj,option_core,ixc,my_natom,natom,nspden,ntypat,pawang, &
-&           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,znucl, &
+&           pawrad,pawrhoij,pawtab,pawxcdev,spnorbscl,typat,xc_denpos,xc_taupos,znucl, &
 &           phi_cor,indlmn_cor,mpi_atmtab,comm_atom) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ixc,my_natom,natom,nspden,ntypat,option_core,pawxcdev
  integer,optional,intent(in) :: comm_atom
- real(dp),intent(in) :: spnorbscl,xc_denpos
+ real(dp),intent(in) :: spnorbscl,xc_denpos,xc_taupos
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in),target,optional :: indlmn_cor(:,:)
@@ -2017,7 +2018,7 @@ CONTAINS  !=====================================================================
      call pawxc(pawtb%coredens,eexc_dum,eexcdc_dum,hyb_mixing_,ixc,kxc_dum,k3xc_dum,&
 &         lm_size,lmselect,nhat_dum,nkxc,nkxc,.false.,mesh_size,nspden,option,pawang,&
 &         pawrd,rho1,usecore,usenhat,vxc,xclevel,xc_denpos,&
-&         coretau=pawtb%coretau,taur=tau1)
+&         coretau=pawtb%coretau,taur=tau1,xc_taupos=xc_taupos)
      potsph(1:mesh_size)=zero
      do ipts=1,pawang%angl_size
        potsph(1:mesh_size)=potsph(1:mesh_size) &

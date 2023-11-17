@@ -869,11 +869,13 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
         do kk=1,3
           write(54,'(4(i5,1x),500(e15.6,1x))') iqpt,ii,jj,kk,Gruneisen(ii,jj,kk)
           if (abs(aimag(Gruneisen(ii,jj,kk))).gt.tol8) then
+            ABI_WARNING('Real part :')
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,real(Gruneisen(ii,jj,kk))
-            ABI_ERROR_NOSTOP(message,ierr)
+            ABI_WARNING(message)
+            ABI_WARNING('Imaginary part :')
             write(message,'(4(i5,1x),100(e15.6,1x))') iqpt,ii,jj,kk,aimag(Gruneisen(ii,jj,kk))
-            ABI_ERROR_NOSTOP(message,ierr)
-            ABI_ERROR('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
+            ABI_WARNING(message)
+            ABI_WARNING('tdep_write_gruneisen : The imaginary part of the Gruneisen is not equal to zero')
          end if  
         end do  
       end do  
@@ -889,11 +891,13 @@ subroutine tdep_write_gruneisen(distance,Eigen2nd,Invar,Phi3_ref,Qpt,Rlatt_cart,
 !   Write the Gruneisen
 !   ===================
     if (sum(abs(aimag(Grun_mean(:)))).gt.3*Invar%natom_unitcell*tol8) then
+      ABI_WARNING('Real part :')
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode)
-      ABI_ERROR_NOSTOP(message,ierr)
+      ABI_WARNING(message)
+      ABI_WARNING('Imaginary part :')
       write(message,'(i5,1x,100(e15.6,1x))') iqpt,(aimag(Grun_mean(ii)),ii=1,nmode)
-      ABI_ERROR_NOSTOP(message,ierr)
-      ABI_ERROR('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
+      ABI_WARNING(message)
+      ABI_WARNING('tdep_write_gruneisen : The imaginary part of Grun_mean is not equal to zero')
     else 
 !FB      write(53,'(i5,1x,500(e15.6,1x))') iqpt,(real(Grun_mean(ii)),ii=1,nmode),&
 !FB                ((real(Grun_shell(ii,jj)),ii=1,nmode),jj=1,Shell3at%nshell)
