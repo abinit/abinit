@@ -19176,8 +19176,8 @@ Variable(
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
@@ -19195,13 +19195,18 @@ vectors), the use of [[toldfe]] is to be avoided. The use of [[toldff]] or
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**toldfe** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19213,8 +19218,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of Forces",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for differences of forces (in hartree/Bohr) that, reached
@@ -19227,12 +19232,17 @@ configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] 
 A value ten times smaller than [[tolmxf]] is suggested (for example 5.0d-6
 hartree/Bohr).
 This stopping criterion is not allowed for RF calculations.
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined generically.
+
+**toldff** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19317,9 +19327,8 @@ eigenenergy due to the last line minimisation, with the one observed for the
 first line minimisation. When the ratio is lower than [[tolrde]], the next
 line minimisations are skipped.
 The number of line minimisations is limited by [[nline]] anyhow.
-This stopping criterion is present for both GS and RF calculations. In RF
-calculations, [[tolrde]] is actually doubled before comparing with the above-
-mentioned ratio, for historical reasons.
+This stopping criterion is present only for band-by-band conjugate gradient ([[wfoptalg]] different than 1,4,14 and 114) and [[rmm_diis]], but both GS and RF calculations.
+In RF calculations, [[tolrde]] is actually doubled before comparing with the above-mentioned ratio, for historical reasons.
 """,
 ),
 
@@ -19331,8 +19340,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the Relative diFference of Forces",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[toldff]] or [[tolvrs]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolvrs]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for the ratio of differences of forces (in hartree/Bohr) to
@@ -19345,13 +19354,18 @@ is to be used when trying to equilibrate a structure to its lowest energy
 configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
 A value of 0.02 is suggested.
 This stopping criterion is not allowed for RF calculations.
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**tolrff** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19389,8 +19403,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the potential V(r) ReSidual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[toldff]] or [[tolrff]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolrff]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for potential residual that, when reached, will cause one SCF
@@ -19411,13 +19425,18 @@ tolerance on the potential residual is imposed by first subtracting the mean
 of the residual of the potential (or the trace of the potential matrix, if the
 system is spin-polarized), then summing the square of this function over all
 FFT grid points. The result should be lower than [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**tolvrs** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19429,8 +19448,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on WaveFunction squared Residual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[toldfe]] or [[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored.",
     added_in_version="before_v9",
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
@@ -19449,26 +19467,52 @@ Note that if [[iscf]] > 0, this criterion should be replaced by those based on
 [[toldfe]] (preferred for [[ionmov]] == 0), [[toldff]] [[tolrff]] (preferred for
 [[ionmov]] /= 0), or [[tolvrs]] (preferred for theoretical reasons!).
 When **tolwfr** is 0.0, this criterion is ignored, and a finite value of
-[[toldfe]], [[toldff]] or [[tolvrs]] must be specified. This also imposes a
+[[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]] must be specified. This also imposes a
 restriction on taking an ion step; ion steps are not permitted unless the
 largest squared residual is less than **tolwfr**, ensuring accurate forces.
 To get accurate stresses may be quite demanding.
 Note that the preparatory GS calculations before a RF calculations must be highly converged.
 Typical values for these preparatory runs are **tolwfr** between 1.0d-16 and 1.0d-22.
 
-Note that **tolwfr** is often used in the test cases, but this is **tolwfr**
-purely for historical reasons: except when [[iscf]] < 0, other criteria should be used.
+Note that **tolwfr** is often used in the test cases, but this is
+purely for historical reasons: except when [[iscf]] < 0, **other criteria should be used**.
+Indeed, the squared residual can be small even with non self-consistent density and potential.
+
+**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]].
+In that case, SCF cycle is stopped when both criteria are satisfied.
+That way one can insure that physical properties are converged (=SCF converged) while insuring that wavefunctions are converged.
+For example, a ground state computations done before DFPT can use stringent values of **tolwfr** in addition to a desired criterion on self-consistency.
+
+**tolwfr** is coupled with an other tolerance only if both criteria are specified for one particular dataset, or if both criteria are given generically.
+If a single criterion is given (for a single dataset or generically), it will not be coupled with another criterion (defined generically or for a single dataset, respectfully).
 
 In the wavelet case (see [[usewvl]] = 1), this criterion is the favoured one.
 It is based on the norm 2 of the gradient of the wavefunctions.
 Typical values range from 5*10^-4  to 5*10^-5.
+""",
+),
 
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and **tolwfr** are aimed
-at the same goal (causing the SCF cycle to stop), they are seen as a unique
-input variable at reading. Hence, it is forbidden that two of these input
-variables have non-zero values for the same dataset, or generically (for all
-datasets). However, a non-zero value for one such variable for one dataset
-will have precedence on the non-zero value for another input variable defined generically.
+Variable(
+    abivarname="tolwfr_diago",
+    varset="basic",
+    vartype="real",
+    topics=['SCFControl_expert'],
+    dimensions="scalar",
+    defaultval="[[tolwfr]]",
+    mnemonics="TOLerance on WaveFunction squared Residual at the DIAGOnalization level",
+    added_in_version="9.11.3",
+    text=r"""
+This criterion is the same than [[tolwfr]], but used to control the diagonalization algorithm instead of the SCF cycles.
+In practice it is used to reduce the number of "lines" done at the diagonalization step (see [[nline]]), saving computational time.
+If the squared residual becomes lower than **tolwfr_diago**, the remaining "lines" to be done are skipped.
+For LOBPCG, "lines" are skipped if the biggest squared residual of the block is less than **tolwfr_diago**.
+If **tolwfr_diago**=0, [[nline]] "lines" are done at every self-consistent step.
+By default **tolwfr_diago** is equal to [[tolwfr]], but can be used independently.
+One can use [[tolvrs]] (or any other tolerance) to define a criterion for SCF cycles, and use **tolwfr_diago** to save computational time.
+However, when [[tolwfr]]>0, **tolwfr_diago**>[[tolwfr]] is forbidden as the SCF cycles cannot converge in that case.
+
+For [[wfoptalg]]=114 only (LOBPCG), if **tolwfr_diago**=0 then it is set to 1e-20 internally.
+As a consequence, to ensure that no lines are skipped one has to set **tolwfr_diago**=1e-30 in the input (instead of 0) in this particular case.
 """,
 ),
 
@@ -21304,7 +21348,7 @@ The different possibilities are:
   * [[wfoptalg]] = 1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime
   where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
   By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
-  For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
+  For usage with [[tolwfr_diago]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
   For more information, see the [performance guide](/theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,

@@ -329,6 +329,7 @@ P          mk1mem3         32
            tolwfr1     1.00000000E-12
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1
          wfoptalg1        114
          wfoptalg2          0
@@ -1316,6 +1317,7 @@ P          mk1mem3         32
            tolwfr1     1.00000000E-12
            tolwfr2     0.00000000E+00
            tolwfr3     0.00000000E+00
+     tolwfr_diago      1.00000000E-30
             typat      1  1
          wfoptalg1        114
          wfoptalg2          0

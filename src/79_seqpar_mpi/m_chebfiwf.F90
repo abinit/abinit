@@ -271,7 +271,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
  end if
 
- call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr,dtset%ecut, &
+ call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw)
