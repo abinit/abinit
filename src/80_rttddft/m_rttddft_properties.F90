@@ -7,7 +7,7 @@
 !!  properties (energy, occupations, eigenvalues..)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2023 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -163,7 +163,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 6-Take care of kinetic energy density
    if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
+     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,  &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
      !FB: Useful?
@@ -184,12 +184,12 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
  else
 
    ! 1-Compute density from WFs
-   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
+   call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,    &
             & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%rhog,tdks%rhor, &
             & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs)
    ! 2-Take care of kinetic energy density
    if(dtset%usekden==1)then
-     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,   &
+     call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg,    &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,tdks%taug,tdks%taur, &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
    end if
@@ -199,7 +199,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 end subroutine rttddft_calc_density
 !!***
 
-!!****f* m_rttddft_properties/rttddft_calc_energy
+!!****f* m_rttddft_properties/rttddft_calc_etot
 !!
 !! NAME
 !!  rttddft_calc_energy

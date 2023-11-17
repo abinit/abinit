@@ -6,7 +6,7 @@
 !!  Contains various subroutines used in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2023 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,6 +50,7 @@ module m_rttddft
 
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
+ public :: rttddft_mkkin
 !!***
 
 contains
@@ -351,6 +352,104 @@ subroutine rttddft_init_hamiltonian(dtset, energies, gs_hamk, istep, mpi_enreg, 
                      & use_gpu_cuda=dtset%use_gpu_cuda)
 
 end subroutine rttddft_init_hamiltonian
+!!***
+
+!!****f* m_rttddft/rttddft_mkkin
+!! NAME
+!! rttddft_mkkin
+!!
+!! FUNCTION
+!! compute elements of kinetic energy operator in reciprocal space at a given k point
+!!
+!! INPUTS
+!!  ecut=cut-off energy for plane wave basis sphere (Ha)
+!!  effmass_free=effective mass for electrons (1. in common case)
+!!  gmet(3,3)=reciprocal lattice metric tensor ($\textrm{Bohr}^{-2}$)
+!!  kg(3,npw)=integer coordinates of planewaves in basis sphere.
+!!  kpt(3)=reduced coordinates of k point
+!!  npw=number of plane waves at kpt.
+!!  tdef_type=TD ext. elec. field type
+!!  vecpot=vector potential associated with TD ext. elec. field
+!!
+!! OUTPUT
+!!  kinpw(npw)=(modified) kinetic energy (or derivative) for each plane wave (Hartree)
+!!
+!! NOTES
+!! This subroutine is based on the m_kg/mkkin subroutine to compute kinetic energy
+!!
+!! The standard expression is $(1/2) (2 \pi)^2 (k+G)^2$, except if a vector potential 
+!! is present due to a time-dependent electric field. In which case, additional terms 
+!! appears and expression is $(1/2) (2\pi)^2 (k+G)^2 + 2\pi \vec{A}.\vec{k+G} + (1/2) A^2$
+!! The present implementation does not allow for the ecutsm modification in order to 
+!! obtain smooth total energy curves with respect to the cut-off energy or the cell 
+!! size and shape as RT-TDDFT is not intended to be used wih cell optimization.
+!!
+!! Also, in order to break slightly the symmetry between axes, that causes
+!! sometimes a degeneracy of eigenvalues and do not allow to obtain the same results 
+!! on different machines, there is a modification by one part over 1.0e12 of the metric 
+!! tensor elements (1,1) and (3,3) only used for the first standard term 
+!! $(1/2) (2 \pi)^2 (k+G)^2$ as in the mkkin subroutine
+!!
+!! SOURCE
+
+subroutine rttddft_mkkin(effmass_free,gmet,kg,kinpw,kpt,npw,tdef_type,vecpot)
+
+!Arguments ------------------------------------
+!scalars
+ integer,  intent(in)  :: npw
+ integer,  intent(in)  :: tdef_type
+ real(dp), intent(in)  :: effmass_free
+!arrays
+ integer,  intent(in)  :: kg(3,npw)
+ real(dp), intent(in)  :: gmet(3,3),kpt(3)
+ real(dp), intent(in), optional :: vecpot(3)
+ real(dp), intent(out) :: kinpw(npw)
+
+!Local variables-------------------------------
+!scalars
+ integer               :: ig
+ real(dp), parameter   :: break_symm=1.0d-11
+ real(dp)              :: gpk1, gpk2, gpk3
+ real(dp)              :: htpisq, kpg2
+!arrays
+ real(dp)              :: gmetdgpk(3)
+ real(dp)              :: gmet_break(3,3)
+
+! *************************************************************************
+
+ !htpisq is (1/2) (2 Pi) **2:
+ htpisq=0.5_dp*(two_pi)**2
+
+ gmet_break(:,:) = gmet(:,:)
+ gmet_break(1,1) = (1.0_dp + break_symm)*gmet(1,1)
+ gmet_break(3,3) = (1.0_dp - break_symm)*gmet(3,3)
+
+!$OMP PARALLEL DO PRIVATE(gpk1,gpk2,gpk3,ig,kpg2,gmetdgpk) &
+!$OMP SHARED(kinpw,vecpot,gmet_break,htpisq,kg,kpt,npw,tdef_type)
+ do ig=1,npw
+   gpk1 = dble(kg(1,ig))+kpt(1)
+   gpk2 = dble(kg(2,ig))+kpt(2)
+   gpk3 = dble(kg(3,ig))+kpt(3)
+   kpg2 = htpisq*&
+&   (gmet_break(1,1)*gpk1**2 + &
+&    gmet_break(2,2)*gpk2**2 + &
+&    gmet_break(3,3)*gpk3**2 + &
+&    2.0_dp*(gpk1*gmet_break(1,2)*gpk2 + &
+&            gpk1*gmet_break(1,3)*gpk3 + &
+&            gpk2*gmet_break(2,3)*gpk3))
+   kinpw(ig) = kpg2
+   if (tdef_type /= 0) then
+      gmetdgpk(1) = gmet(1,1)*gpk1 + gmet(1,2)*gpk2 + gmet(1,3)*gpk3
+      gmetdgpk(2) = gmet(2,1)*gpk1 + gmet(2,2)*gpk2 + gmet(2,3)*gpk3
+      gmetdgpk(3) = gmet(3,1)*gpk1 + gmet(3,2)*gpk2 + gmet(3,3)*gpk3
+      kinpw(ig) = kinpw(ig) + two_pi*(gmetdgpk(1)*vecpot(1) + gmetdgpk(2)*vecpot(2) + gmetdgpk(3)*vecpot(3))
+      kinpw(ig) = 0.5_dp*(kinpw(ig) + vecpot(1)**2 + vecpot(2)**2 + vecpot(3)**2)
+   end if
+   kinpw(ig) = kinpw(ig) / effmass_free
+ end do
+!$OMP END PARALLEL DO
+
+end subroutine rttddft_mkkin
 !!***
  
 end module m_rttddft
