@@ -636,7 +636,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output extended plane waves ground state results in _EXTPWGSR.nc file
 #ifdef HAVE_NETCDF
- if (me==master.and.associated(extfpmd)) then
+ if (associated(extfpmd)) then
    if (extfpmd%version==5.and.dtset%prtgsr==1) then
     extfpmd_bantot=extfpmd%mband*dtset%nkpt*dtset%nsppol
     extfpmd_hdr = hdr
@@ -654,15 +654,17 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
     & extfpmd_hdr%nshiftk_orig,extfpmd_hdr%shiftk_orig,extfpmd_hdr%kptrlatt,&
     & extfpmd_hdr%nshiftk,extfpmd_hdr%shiftk)
     
-    fname = strcat(dtfil%filnam_ds(4), "_EXTPWGSR.nc")
-    ! Write crystal and band structure energies.
-    NCF_CHECK(nctk_open_create(ncid,fname,xmpi_comm_self))
-    NCF_CHECK(extfpmd_hdr%ncwrite(ncid,fform_den,spinat=dtset%spinat,nc_define=.True.))
-    NCF_CHECK(crystal%ncwrite(ncid))
-    NCF_CHECK(ebands_ncwrite(extfpmd_ebands,ncid))
-    ! Add energy, forces, stresses
-    NCF_CHECK(results_gs_ncwrite(results_gs,ncid,dtset%ecut,dtset%pawecutdg))
-    NCF_CHECK(nf90_close(ncid))
+    if(me==master) then
+      fname = strcat(dtfil%filnam_ds(4), "_EXTPWGSR.nc")
+      ! Write crystal and band structure energies.
+      NCF_CHECK(nctk_open_create(ncid,fname,xmpi_comm_self))
+      NCF_CHECK(extfpmd_hdr%ncwrite(ncid,fform_den,spinat=dtset%spinat,nc_define=.True.))
+      NCF_CHECK(crystal%ncwrite(ncid))
+      NCF_CHECK(ebands_ncwrite(extfpmd_ebands,ncid))
+      ! Add energy, forces, stresses
+      NCF_CHECK(results_gs_ncwrite(results_gs,ncid,dtset%ecut,dtset%pawecutdg))
+      NCF_CHECK(nf90_close(ncid))
+    end if
    end if
  end if
 #endif

@@ -411,7 +411,7 @@ contains
 
     ! Generating ext pw basis set (this%kg,this%npwarr,this%npwtot)
     if(.not.allocated(this%cg)) then
-      write(0,*) 'DEBUG: Generating extended plane wave basis set...'
+      ! write(0,*) 'DEBUG: Generating extended plane wave basis set...'
       call kpgio(this%ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
       & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
       & this%mpw,this%npwarr,this%npwtot,nsppol)
@@ -442,6 +442,7 @@ contains
           ! Skip this k-point if not the proper processor
           if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
             bdtot_index=bdtot_index+nband_k
+            ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
 
@@ -543,7 +544,7 @@ contains
           ABI_FREE(eig_k)
         end do
       end do
-      write(0,*) "DEBUG: Exiting routine..."
+      ! write(0,*) "DEBUG: Exiting routine..."
     else
 
       my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -564,6 +565,7 @@ contains
           ! Skip this k-point if not the proper processor
           if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
             bdtot_index=bdtot_index+nband_k
+            ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
 
@@ -624,20 +626,21 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk)
+  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk,mpi_enreg)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nkpt,nsppol
     real(dp),intent(in) :: fermie,tsmear
     real(dp),intent(inout) :: nelect
     class(extfpmd_type),intent(inout) :: this
+    type(MPI_type),intent(inout),optional :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ifft,ispden,isppol,ikpt,iband,index_tot,nband_k
+    integer :: ifft,ispden,isppol,ikpt,iband,ext_bdtot_index,nband_k
     real(dp) :: factor,gamma,xcut
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
@@ -669,14 +672,22 @@ contains
     ! Computes extended pw contribution to nelect summing
     ! over ext pw states from nband_k to this%mband
     if(this%version==5) then
-      index_tot=0
+      ext_bdtot_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
+          ! Skip this k-point if not the proper processor
+          if(present(mpi_enreg))then
+            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+              ext_bdtot_index=ext_bdtot_index+this%mband
+              cycle
+            end if
+          end if
+
           do iband=nband_k+1,this%mband
-            nelect=nelect+wtk(ikpt)*this%occ(iband+index_tot)
+            nelect=nelect+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
           end do
-          index_tot=index_tot+this%mband
+          ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
     end if
@@ -754,6 +765,7 @@ contains
         ! Skip this k-point if not the proper processor
         if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
           bdtot_index=bdtot_index+nband_k
+          ext_bdtot_index=ext_bdtot_index+this%mband
           cycle
         end if
 
@@ -850,6 +862,11 @@ contains
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           istwf_k=istwfk(ikpt)
           ext_npw_k=this%npwarr(ikpt)
+          ! Skip this k-point if not the proper processor
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+            ext_bdtot_index=ext_bdtot_index+this%mband
+            cycle
+          end if
 
           kpoint(:)=kptns(:,ikpt)
 
@@ -950,19 +967,20 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_entropy(this,fermie,tsmear,nkpt,nsppol,nspinor,wtk,nband)
+  subroutine compute_entropy(this,fermie,tsmear,mpi_enreg,nkpt,nsppol,nspinor,wtk,nband)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: nkpt,nsppol,nspinor
     real(dp),intent(in) :: fermie,tsmear
+    type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ii,ifft,ispden,index_tot,isppol,ikpt,iband,nband_k
+    integer :: ii,ifft,ispden,ext_bdtot_index,isppol,ikpt,iband,nband_k
     real(dp) :: ix,step,factor,fn,gamma,maxocc
     ! Arrays
     real(dp),dimension(:),allocatable :: valuesent
@@ -1037,15 +1055,21 @@ contains
     ! In this case, entropy is computed just for information as
     ! ext pw entropy is already included while computing occupations.
     if(this%version==5) then
-      index_tot=0
+      ext_bdtot_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
+          ! Skip this k-point if not the proper processor
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+            ext_bdtot_index=ext_bdtot_index+this%mband
+            cycle
+          end if
+
           do iband=nband_k+1,this%mband
-            fn=this%occ(iband+index_tot)/maxocc
+            fn=this%occ(iband+ext_bdtot_index)/maxocc
             this%entropy=this%entropy-two*(fn*log(fn)+(one-fn)*log(one-fn))
           end do
-          index_tot=index_tot+this%mband
+          ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
     end if
