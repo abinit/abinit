@@ -6,7 +6,7 @@
 !!  Driver to perform electronic or nuclear step
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2023 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -94,10 +94,12 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
 
  ! Update potential vector if time-dependent electric field perturbation is present
  select case (dtset%td_ef_type)
+   !No external field
+   case (0)
    !Dirac pulse: vector potential is just an Heaviside function
    case (1)
       if (istep*tdks%dt >= tdks%ef_tzero) then
-         tdks%ef(:) = tdks%ef_zero
+         tdks%e_field(:) = tdks%ef_zero
          tdks%vec_pot(:) = -tdks%ef_zero
       end if
    !Pulse with sin^2 shape:
@@ -105,10 +107,10 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
    !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
    case(2)
       if (istep*tdks%dt >= tdks%ef_tzero+tdks%ef_tau) then
-         tdks%ef(:) = 0.0_dp
+         tdks%e_field(:) = 0.0_dp
       else if (istep*tdks%dt >= tdks%ef_tzero) then
          t = istep*tdks%dt-tdks%ef_tzero
-         tdks%ef(:) = tdks%ef_zero*cos(tdks%ef_omega*t)*sin(pi*t/tdks%ef_tau)**2
+         tdks%e_field(:) = tdks%ef_zero*cos(tdks%ef_omega*t)*sin(pi*t/tdks%ef_tau)**2
          tdks%vec_pot(:) = tdks%ef_zero*(-sin(tdks%ef_omega*t)/(2.0_dp*tdks%ef_omega) &
                                        & +sin(tdks%ef_sin_a*t)/(4.0_dp*tdks%ef_sin_a) &
                                        & +sin(tdks%ef_sin_b*t)/(4.0_dp*tdks%ef_sin_b))

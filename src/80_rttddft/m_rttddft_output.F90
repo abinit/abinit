@@ -6,7 +6,7 @@
 !!  Manages most output of RT-TDDFT runs
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2023 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,7 +169,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  !** Writes TD elec. field and associated vector potential if needed
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%ef(:), tdks%vec_pot(:)
+   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%e_field(:), tdks%vec_pot(:)
    call wrtout(tdks%tdef_unit,msg)
  end if
 

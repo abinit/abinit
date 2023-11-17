@@ -7,7 +7,7 @@
 !!  the time-dependent Kohn-Sham equations in RT-TDDFT
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2023 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -138,7 +138,7 @@ module m_rttddft_tdks
    integer,allocatable              :: nattyp(:)   !nb of atoms of different types
    integer,allocatable              :: npwarr(:)   !number of PW at each k-point
    integer,allocatable              :: symrec(:,:,:) !sym. operations in recip space
-   real(dp)                         :: ef(3)       ! TD external elec. field perturbation
+   real(dp)                         :: e_field(3)  !TD external elec. field perturbation
    real(dp)                         :: ef_zero(3)  !E_0 = |E_0|*polarization (Elec. field perturbation)
    real(dp)                         :: gprimd(3,3) !prim cell vectors in recip space
    real(dp)                         :: gmet(3,3)   !metric tensor in recip space
@@ -302,9 +302,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  if (dtset%occopt>=3.and.dtset%occopt<=9) then  ! allowing for occopt 9
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
    call newocc(doccde,tdks%eigen0,tdks%energies%entropy,tdks%energies%e_fermie, &
-             & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,     &
-             & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD, &
-             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,   &
+             & tdks%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,      &
+             & dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,  &
+             & dtset%nkpt,dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%occopt,    &
              & dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd=extfpmd)
    ABI_FREE(doccde)
  end if
@@ -334,7 +334,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
  !TD external elec. field perturbation
  !Init vector potential and associated constants
- tdks%ef(:) = 0.0_dp
+ tdks%e_field(:) = 0.0_dp
  tdks%vec_pot(:) = 0.0_dp
  tdks%ef_zero(:) = dtset%td_ef_pol(:)*dtset%td_ef_ezero
  tdks%ef_tau     = dtset%td_ef_tau
@@ -1108,7 +1108,7 @@ subroutine read_wfk(dtfil, dtset, ecut_eff, fname_wfk, mpi_enreg, tdks)
  ABI_MALLOC(tdks%eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
  tdks%eigen(:) = zero
- ask_accurate=0
+ ask_accurate=1
 
  !Actually read the intial KS orbitals here
  if (dtset%td_restart /= 1) then
