@@ -38,7 +38,7 @@ module m_effective_potential_file
  use netcdf
 #endif
 
- use m_io_tools,   only : open_file
+ use m_io_tools,   only : open_file, get_unit
  use m_geometry,   only : xcart2xred, xred2xcart, metric
  use m_symfind,    only : symfind, symlatt
  use m_crystal,    only : crystal_t, crystal_init
@@ -275,11 +275,17 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
 
       call effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt,nrpt)!
 
-      call ddb%from_file(filename,inp%brav, ddb_hdr, Crystal,comm)
+      call ddb%from_file(filename,ddb_hdr,Crystal,comm)
       call ddb_hdr%free()
 
+      call ddb%set_brav(inp%brav)
+
 !     Transfert the ddb to the effective potential
-      call system_ddb2effpot(Crystal,ddb, eff_pot,inp,comm)
+      call system_ddb2effpot(Crystal,ddb,eff_pot,inp,comm)
+
+      ! Free memory
+      call ddb%free()
+      call Crystal%free()
 
 !     Generate long rage interation for the effective potential for both type and generate supercell
       call effective_potential_generateDipDip(eff_pot,inp%dipdip_range,inp%dipdip,inp%asr,comm)
@@ -393,10 +399,6 @@ subroutine effective_potential_file_read(filename,eff_pot,inp,comm,hist)
    ABI_BUG(message)
  end if
 
-! Deallocation of array
-  call crystal%free()
-  call ddb%free()
-
 end subroutine effective_potential_file_read
 !!***
 
@@ -436,7 +438,7 @@ subroutine effective_potential_file_getType(filename,filetype)
  character(len=500) :: message
  character (len=1000) :: line,readline
 #if defined HAVE_NETCDF
- integer :: natom_id,time_id,xyz_id,six_id
+ integer :: natom_id,time_id,xyz_id,six_id,ddb_version
  integer :: ncid,ncerr
  logical :: md_file
 #endif
@@ -445,6 +447,8 @@ subroutine effective_potential_file_getType(filename,filetype)
 ! *************************************************************************
 
  filetype = 0
+
+ ddbun = get_unit()
 
  if (open_file(filename,message,unit=ddbun,form="formatted",status="old",action="read") /= 0) then
    ABI_ERROR(message)
@@ -512,6 +516,18 @@ subroutine effective_potential_file_getType(filename,filetype)
 
  if(filetype/=0) return
 
+! Try to read netcdf DDB file
+#if defined HAVE_NETCDF
+ ncerr=nf90_open(path=trim(filename),mode=NF90_NOWRITE,ncid=ncid)
+ if(ncerr==NF90_NOERR) then
+   ncerr = nf90_get_var(ncid, nctk_idname(ncid, 'ddb_version'), ddb_version)
+   if (ncerr==NF90_NOERR) then
+     filetype = 1
+     return
+   end if
+ end if
+#endif
+
 !Try to get the dim of MD ASCII file
  call effective_potential_file_getDimMD(filename,natom,nstep)
  if(natom /= 0 .and. nstep/=0) filetype = 41
@@ -555,7 +571,6 @@ subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt
  !scalar
  integer :: filetype
 ! integer :: dimekb,lmnmax,mband,mtyp,msym,nblok,nkpt,usepaw
- integer :: ddbun = 666
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
 !arrays
@@ -578,10 +593,9 @@ subroutine effective_potential_file_getDimSystem(filename,comm,natom,ntypat,nqpt
 &    'if you want to predic the number of cell (nrpt)',ch10,' use bigbx9 routines',ch10
    call wrtout(std_out,message,'COLL')
 
-   call ddb_hdr%open_read(filename,ddbun,comm,dimonly=1)
+   call ddb_hdr%open_read(filename,comm,dimonly=1)
    natom = ddb_hdr%natom
    ntypat = ddb_hdr%ntypat
-
    call ddb_hdr%free()
 
 !  Must read some value to initialze  array (nprt for ifc)
@@ -2045,10 +2059,10 @@ end subroutine system_getDimFromXML
  symafm = 0;
  tnons = 0 ;
  space_group = 0;
- call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
+ call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tolsym)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- call symfind(0,(/zero,zero,zero/),gprimd,0,msym,natom,0,nptsym,nsym,&
-&  0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
+ call symfind(gprimd,msym,natom,nptsym,0,nsym,&
+&  0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !Initialisation of crystal
  npsp = ntypat; timrev = 1
@@ -2222,9 +2236,9 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
   ABI_MALLOC(symrel,(3,3,msym))
   ABI_MALLOC(tnons,(3,msym))
   spinat = zero;  symrel = 0;  symafm = 0;  tnons = zero ; space_group = 0;
-  call symlatt(bravais,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
-  call symfind(0,(/zero,zero,zero/),crystal%gprimd,0,msym,crystal%natom,0,nptsym,nsym,&
-&              0,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
+  call symlatt(bravais,std_out,msym,nptsym,ptsymrel,crystal%rprimd,tolsym)
+  call symfind(crystal%gprimd,msym,crystal%natom,nptsym,0,nsym,&
+&              0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,&
 &              crystal%typat,use_inversion,crystal%xred)
   if(crystal%nsym/=nsym)then
     write(message,'(4a,I0,3a,I0,3a)') ch10,&

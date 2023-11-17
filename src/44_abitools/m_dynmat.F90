@@ -56,7 +56,7 @@ module m_dynmat
  public :: d2cart_to_red        ! Transform a second-derivative matrix
                                 ! from cartesian to reduced coordinate.
  public :: chkph3               ! Check the completeness of the dynamical matrix
- public :: chneu9               ! Imposition of the Acoustic sum rule on the Effective charges
+ public :: chneu9               ! Imposition of the charge neutrality sum rule on the Effective charges
  public :: d2sym3               ! Build (nearly) all the other matrix elements that can be build using symmetries.
  public :: q0dy3_apply          ! Takes care of the inclusion of the ewald q=0 term in the dynamical matrix
  public :: q0dy3_calc           ! Calculate the q=0 correction term to the dynamical matrix
@@ -81,7 +81,9 @@ module m_dynmat
  public :: wght9                ! Generates a weight to each R points of the Big Box and for each pair of atoms
  public :: d3sym                ! Given a set of calculated elements of the 3DTE matrix,
                                 ! build (nearly) all the other matrix elements that can be build using symmetries.
- public :: sytens               ! Determines the set of irreductible elements of the non-linear optical susceptibility
+ public :: d3lwsym                                
+ public :: sylwtens             ! Determines the set of irreductible elements of the spatial-dispersion tensors
+ public :: sytens               ! Determines the set of irreductible elements of the nonlinear optical susceptibility
                                 ! and Raman tensors
  public :: axial9               ! Generates the local coordinates system from the  knowledge of the first vector (longitudinal) and
                                 !   the ifc matrix in cartesian coordinates
@@ -93,6 +95,7 @@ module m_dynmat
                                 ! If q is Gamma, the non-analytical behaviour can be included.
  public :: pheigvec_normalize   ! Normalize input eigenvectors in cartesian coordinates.
  public :: phdispl_from_eigvec  ! Phonon displacements from eigenvectors
+ public :: phangmom_from_eigvec ! compute phonon angular momentum for one q-point from eigenvectors
  public :: dfpt_prtph           ! Print phonon frequencies
  public :: massmult_and_breaksym  ! Multiply IFC(q) by atomic masses.
  public :: massmult_and_breaksym_cplx  ! Version for complex array
@@ -1143,11 +1146,11 @@ end subroutine chkph3
 !! chneu9
 !!
 !! FUNCTION
-!! Imposition of the Acoustic sum rule on the Effective charges
+!! Imposition of the charge neutrality sum rule on the Effective charges
 !! and suppress the imaginary part of the dynamical matrix
 !!
 !! INPUTS
-!!  chneut=(0 => no ASR, 1 => equal repartition,2 => weighted repartition )
+!!  chneut=(0 => no ASR, 1 => equal repartition, 2 => weighted repartition )
 !!  mpert =maximum number of ipert
 !!  natom=number of atom
 !!  ntypat=number of types of atoms in unit cell
@@ -1327,7 +1330,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !Write the effective charge tensor
  write(msg, '(a,a,a,a,a,a,a)' )&
    ' Effective charge tensors after ',ch10,&
-   ' imposition of the charge neutrality,',ch10,&
+   ' imposition of the charge neutrality (if requested by user),',ch10,&
    ' and eventual restriction to some part :',ch10,&
   '   atom    displacement  '
  call wrtout(ab_out,msg)
@@ -1483,6 +1486,7 @@ subroutine d2sym3(blkflg,d2,indsym,mpert,natom,nsym,qpt,symq,symrec,symrel,timre
        do ipert2=1,min(natom+2,mpert)
          do idir2=1,3
 
+           ! FIXME use is_type functions
 !          If an element exists
            if(blkflg(idir1,ipert1,idir2,ipert2)==1)then
 
@@ -2243,16 +2247,6 @@ subroutine dfpt_sygra(natom,desym,deunsy,indsym,ipert,nsym,qpt,symrec)
  real(dp) :: arg,im,re,sumi,sumr
 
 ! *********************************************************************
-
-!DEBUG
-!write(std_out,*)' dfpt_sygra : enter '
-!write(std_out,*)' dfpt_sygra : qpt(:)',qpt(:)
-!do ia=1,natom
-!do mu=1,3
-!write(std_out,*)' dfpt_sygra : deunsy(:2,mu,ia)',deunsy(:2,mu,ia)
-!enddo
-!enddo
-!ENDDEBUG
 
  if (nsym==1) then
 
@@ -4426,6 +4420,282 @@ subroutine d3sym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
 end subroutine d3sym
 !!***
 
+!!****f* m_dynmat/d3lwsym
+!! NAME
+!! d3lwsym
+!!
+!! FUNCTION
+!! Given a set of calculated elements of the 3DTE matrix,
+!! build (nearly) all the other matrix elements that can be build using symmetries.
+!!
+!! INPUTS
+!!  has_strain = if .true. i2pert includes strain perturbation
+!!  indsym(4,nsym,natom)=indirect indexing array : for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
+!!
+!! SIDE EFFECTS
+!!  Input/Output
+!!  blkflg(3,mpert,3,mpert,3,mpert)= matrix that indicates if an
+!!   element of d3 is available (1 if available, 0 otherwise)
+!!  d3(2,3,mpert,3,mpert,3,mpert)= matrix of the 3DTE
+!!
+!! PARENTS
+!!      m_ddb,m_nonlinear
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!subroutine d3lwsym(blkflg,d3,has_strain,indsym,mpert,natom,nsym,symrec,symrel,symrel_cart)
+subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,nsym
+! logical,intent(in) :: has_strain
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
+ real(dp),intent(inout) :: d3(2,3,mpert,3,mpert,3,mpert)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
+
+!Local variables -------------------------
+!scalars
+ integer :: found,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idisy1,idisy2,idisy3
+ integer :: ipesy1,ipesy2,ipesy3,isym,ithree
+!integer :: istr,i2dir_a,i2dir_b,disy2_a,idisy2_b
+ real(dp) :: sumi,sumr
+ logical :: is_strain
+!arrays
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+! integer :: strflg(3,mpert,3,3,3,mpert),strflg_car(3,mpert,3,3,3,mpert)
+! real(dp) :: d3str(2,3,mpert,3,3,3,mpert)
+
+! *********************************************************************
+
+!First, take into account the permutations symmetry of
+!(i1pert,i1dir) and (i2pert,i2dir)
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+
+             if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
+              (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
+
+               d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+               d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+               d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
+              -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
+
+               blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
+
+             end if
+
+           end do
+         end do
+       end do
+
+     end do
+   end do
+ end do
+
+!For strain perturbation we need an array with the two strain indexes
+! if (has_strain) then
+!   strflg=0
+!   d3str=zero
+!   do i3pert=1, mpert
+!     do i3dir=1,3
+!       do i2pert=natom+3,natom+4
+!         do i2dir=1,3
+!           if (i2pert==natom+3) istr=i2dir
+!           if (i2pert==natom+4) istr=3+i2dir
+!           i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+!           do i1pert=1,mpert
+!             do i1dir=1,3
+!               if (blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
+!                 strflg(i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)=1
+!                 d3str(:,i1dir,i1pert,i2dir_a,i2dir_b,i3dir,i3pert)= &
+!               & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 if (i2pert==natom+4) then
+!                   strflg(i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)=1
+!                   d3str(:,i1dir,i1pert,i2dir_b,i2dir_a,i3dir,i3pert)= &
+!                 & d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)          
+!                 end if
+!               end if
+!             end do
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end if
+
+!Big Big Loop : symmetrize three times, because
+!of some cases in which one element is not yet available
+!at the first pass, and even at the second one !
+
+ do ithree=1,3
+
+!  Loop over perturbations
+   do i1pert = 1, mpert
+     do i2pert = 1, mpert
+       is_strain=.false.    
+       do i3pert = 1, mpert
+
+         do i1dir = 1, 3
+           do i2dir = 1, 3
+             do i3dir = 1, 3
+
+!              Will get element (idir1,ipert1,idir2,ipert2)
+!              so this element should not yet be present ...
+               if(blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)/=1)then
+
+                 d3(:,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 0_dp
+
+                 do isym = 1, nsym
+
+                   found = 1
+
+                   if (i1pert <= natom) then
+                     ipesy1 = indsym(4,isym,i1pert)
+                     sym1(:,:) = symrec(:,:,isym)
+                   else if (i1pert == natom + 2) then
+                     ipesy1 = i1pert
+                     sym1(:,:) = symrel(:,:,isym)
+                   else
+                     found = 0
+                   end if
+
+                   if (i2pert <= natom) then
+                     ipesy2 = indsym(4,isym,i2pert)
+                     sym2(:,:) = symrec(:,:,isym)
+                   else if (i2pert == natom + 2) then
+                     ipesy2 = i2pert
+                     sym2(:,:) = symrel(:,:,isym)
+                   else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+                     !TODO: Symmetries on strain perturbation do not work yet.
+                     found = 0
+                     is_strain=.true.
+
+!                     ipesy2 = i2pert
+!                     sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                     if (i2pert==natom+3) istr=i2dir
+!                     if (i2pert==natom+4) istr=3+i2dir
+!                     i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                   else
+                     found = 0
+                   end if
+
+                   if (i3pert <= natom) then
+                     ipesy3 = indsym(4,isym,i3pert)
+                     sym3(:,:) = symrec(:,:,isym)
+                   else if (i3pert == natom + 2.or.i3pert == natom + 8) then
+                     ipesy3 = i3pert
+                     sym3(:,:) = symrel(:,:,isym)
+                   else
+                     found = 0
+                   end if
+
+                   sumr = 0_dp ; sumi = 0_dp;
+                   if (.not.is_strain) then
+                     do idisy1 = 1, 3
+                       do idisy2 = 1, 3
+                         do idisy3 = 1, 3
+
+                           if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir,idisy2) /=0) &
+&                           .and.(sym3(i3dir,idisy3) /=0)) then
+
+                             if (blkflg(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 1) then
+
+                               sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(1,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+                               sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir,idisy2)*&
+&                               sym3(i3dir,idisy3)*d3(2,idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3)
+
+                             else
+
+                               found = 0
+
+                             end if
+
+                           end if
+
+                         end do
+                       end do
+                     end do
+                   else 
+!                     do idisy1 = 1, 3
+!                       !do idisy2_a = 1, 3
+!                       !  do idisy2_b = 1, 3
+!                       do idisy2 = 1, 3
+!                         if (ipesy2==natom+3) istr=idisy2
+!                         if (ipesy2==natom+4) istr=3+idisy2
+!                         idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                           do idisy3 = 1, 3
+!
+!                             if ((sym1(i1dir,idisy1) /=0).and.(sym2(i2dir_a,idisy2_a) /=0) &
+!&                             .and.(sym2(i2dir_b,idisy2_b) /=0).and.(sym3(i3dir,idisy3) /=0)) then
+!
+!                               if (strflg(idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3) == 1) then
+!
+!                                 sumr = sumr + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_a)* &
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(1,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!                                 sumi = sumi + sym1(i1dir,idisy1)*sym2(i2dir_a,idisy2_b)*&
+!&                                sym2(i2dir_b,idisy2_b)*sym3(i3dir,idisy3)*& 
+!&                                d3str(2,idisy1,ipesy1,idisy2_a,idisy2_b,idisy3,ipesy3)
+!
+!                               else
+!
+!                                 found = 0
+!
+!                               end if
+!
+!                             end if
+!
+!                           end do
+!                         !end do
+!                       end do
+!                     end do
+                   end if        
+
+                   if (found == 1) then
+                     d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumr
+                     d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = sumi
+                     blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+                   end if
+
+                 end do  ! isym
+
+               end if  ! blkflg
+
+!              Close loop over perturbations
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end do  ! close loop over ithree
+
+end subroutine d3lwsym
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_dynmat/sytens
@@ -4654,6 +4924,291 @@ subroutine sytens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
  ABI_FREE(pertsy)
 
 end subroutine sytens
+!!***
+
+!!****f* m_dynmat/sylwtens
+!!
+!! NAME
+!! sylwtens
+!!
+!! FUNCTION
+!! Determines the set of irreductible elements of the non-linear
+!! optical susceptibility and Raman tensors
+!!
+!! INPUTS
+!!  has_strain = if .true. i2pert includes strain perturbation
+!!  indsym(4,nsym,natom)=indirect indexing array described above: for each
+!!   isym,iatom, fourth element is label of atom into which iatom is sent by
+!!   INVERSE of symmetry operation isym; first three elements are the primitive
+!!   translations which must be subtracted after the transformation to get back
+!!   to the original unit cell.
+!!  mpert =maximum number of ipert
+!!  natom= number of atoms
+!!  nsym=number of space group symmetries
+!!  symrec(3,3,nsym)=3x3 matrices of the group symmetries (reciprocal reduced space)
+!!  symrel(3,3,nsym)=3x3 matrices of the group symmetries (real reduced space)
+!!  symrel_cart(3,3,nsym)=3x3 matrices of the group symmetries (real cartesian space)
+!!
+!! OUTPUT
+!!  (see side effects)
+!!
+!! SIDE EFFECTS
+!!  rfpert(3,mpert,3,mpert,3,mpert) = array defining the type of perturbations
+!!       that have to be computed
+!!    At the input :
+!!       1   ->   element has to be computed explicitely
+!!    At the output :
+!!       1   ->   element has to be computed explicitely
+!!      -1   ->   use symmetry operations to obtain the corresponding element
+!!      -2   ->   element is zero by symmetry
+!!
+!! PARENTS
+!!      m_ddb,m_nonlinear,m_respfn_driver
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+!subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,symrel_cart)
+subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: mpert,natom,nsym
+!arrays
+ integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
+ integer,intent(inout) :: rfpert(3,mpert,3,mpert,3,mpert)
+! real(dp),intent(in) :: symrel_cart(3,3,nsym)
+
+!Local variables -------------------------
+!scalars
+ integer :: flag,found,i1dir,i1dir_,i1pert,i1pert_,i2dir,i2dir_,i2pert,i2pert_
+! integer :: i2dir_a,i2dir_b
+ integer :: i3dir,i3dir_,i3pert,i3pert_,idisy1,idisy2,idisy3,ipesy1,ipesy2
+ integer :: ipesy3,isym
+! integer :: istr,idisy2_a,idisy2_b
+ logical :: is_strain
+! real(dp) :: flag_dp
+!arrays
+! integer,save :: idx(18)=(/1,1,2,2,3,3,3,2,3,1,2,1,2,3,1,3,1,2/)
+ integer :: sym1(3,3),sym2(3,3),sym3(3,3)
+ integer,allocatable :: pertsy(:,:,:,:,:,:)
+
+!***********************************************************************
+
+ ABI_MALLOC(pertsy,(3,mpert,3,mpert,3,mpert))
+ pertsy(:,:,:,:,:,:) = 0
+
+!Loop over perturbations
+
+ do i1pert_ = 1, mpert
+   do i2pert_ = 1, mpert
+     is_strain=.false.    
+     do i3pert_ = 1, mpert
+
+       do i1dir_ = 1, 3
+         do i2dir_ = 1, 3
+           do i3dir_ = 1, 3
+
+             i1pert = (mpert - i1pert_ + 1)
+             if (i1pert <= natom) i1pert = natom + 1 - i1pert
+             i2pert = (mpert - i2pert_ + 1)
+             if (i2pert <= natom) i2pert = natom + 1 - i2pert
+             i3pert = (mpert - i3pert_ + 1)
+             if (i3pert <= natom) i3pert = natom + 1 - i3pert
+
+             if (i1pert <= natom) then
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
+             else if (i2pert <= natom) then
+               i1dir = i2dir_ ; i2dir = i1dir_ ; i3dir = i3dir_
+             else if (i3pert <= natom) then
+               i1dir = i3dir_ ; i2dir = i2dir_ ; i3dir = i1dir_
+             else
+               i1dir = i1dir_ ; i2dir = i2dir_ ; i3dir = i3dir_
+             end if
+
+             if (rfpert(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) /= 0) then
+
+!              Loop over all symmetries
+
+               flag = 0
+               do isym = 1, nsym
+
+                 found = 1
+
+!                Select the symmetric element of i1pert,i2pert,i3pert
+
+                 if (i1pert <= natom) then
+                   ipesy1 = indsym(4,isym,i1pert)
+                   sym1(:,:) = symrec(:,:,isym)
+                 else if (i1pert == natom + 2) then
+                   ipesy1 = i1pert
+                   sym1(:,:) = symrel(:,:,isym)
+                 else
+                   found = 0
+                 end if
+
+                 if (i2pert <= natom) then
+                   ipesy2 = indsym(4,isym,i2pert)
+                   sym2(:,:) = symrec(:,:,isym)
+                 else if (i2pert == natom + 2) then
+                   ipesy2 = i2pert
+                   sym2(:,:) = symrel(:,:,isym)
+                 else if (i2pert == natom + 3.or. i2pert == natom + 4) then
+!                  !TODO: Symmetries on strain perturbation do not work yet.
+                   found = 0
+                   is_strain=.true.
+!
+!                   ipesy2 = i2pert
+!                   sym2(:,:) = NINT(symrel_cart(:,:,isym))
+!                   if (i2pert==natom+3) istr=i2dir
+!                   if (i2pert==natom+4) istr=3+i2dir
+!                   i2dir_a=idx(2*istr-1); i2dir_b=idx(2*istr)
+                 else
+                   found = 0
+                 end if
+
+                 if (i3pert == natom + 8) then
+                   ipesy3 = i3pert
+                   sym3(:,:) = symrel(:,:,isym)
+                 else
+                   found = 0
+                 end if
+
+
+!                See if the symmetric element is available and check if some
+!                of the elements may be zero. In the latter case, they do not need
+!                to be computed.
+
+                 if (.not.is_strain) then
+                   if ((flag /= -1).and.&
+&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+                     flag = sym1(i1dir,i1dir)*sym2(i2dir,i2dir)*sym3(i3dir,i3dir)
+                   end if
+
+                   do idisy1 = 1, 3
+                     do idisy2 = 1, 3
+                       do idisy3 = 1, 3
+
+                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir,idisy2) /= 0).and.&
+&                         (sym3(i3dir,idisy3) /= 0)) then
+                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+                             found = 0
+!                            exit      ! exit loop over symmetries
+                           end if
+                         end if
+
+
+                         if ((flag == -1).and.&
+&                         ((idisy1/=i1dir).or.(idisy2/=i2dir).or.(idisy3/=i3dir))) then
+                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir,idisy2)/=0).and.&
+&                           (sym3(i3dir,idisy3)/=0)) then
+                             flag = 0
+                           end if
+                         end if
+
+                       end do
+                     end do
+                   end do
+!                 else 
+!                   if ((flag_dp /= -1).and.&
+!&                   (ipesy1==i1pert).and.(ipesy2==i2pert).and.(ipesy3==i3pert)) then
+!                     flag = sym1(i1dir,i1dir)*sym2(i2dir_a,i2dir_a)* &
+!                   & sym2(i2dir_b,i2dir_b)*sym3(i3dir,i3dir)
+!                   end if
+!
+!                   do idisy1 = 1, 3
+!                     do idisy2 = 1, 3
+!                       if (ipesy2==natom+3) istr=idisy2
+!                       if (ipesy2==natom+4) istr=3+idisy2
+!                       idisy2_a=idx(2*istr-1); idisy2_b=idx(2*istr)
+!                       do idisy3 = 1, 3
+!
+!                         if ((sym1(i1dir,idisy1) /= 0).and.(sym2(i2dir_a,idisy2_a) /= 0).and.&
+!&                          (sym2(i2dir_b,idisy2_b) /= 0).and.(sym3(i3dir,idisy3) /= 0)) then
+!                           if (pertsy(idisy1,ipesy1,idisy2,ipesy2,idisy3,ipesy3) == 0) then
+!                             found = 0
+!!                            exit      ! exit loop over symmetries
+!                           end if
+!                         end if
+!
+!
+!                         if ((flag == -1).and.&
+!&                         ((idisy1/=i1dir).or.(idisy2_a/=i2dir_a).or.(idisy2_b/=i2dir_b).or.(idisy3/=i3dir))) then
+!                           if ((sym1(i1dir,idisy1)/=0).and.(sym2(i2dir_a,idisy2_a)/=0).and.&
+!&                           (sym2(i2dir_b,idisy2_b)/=0).and.(sym3(i3dir,idisy3)/=0)) then
+!                             flag = 0
+!                           end if
+!                         end if
+!
+!                       end do
+!                     end do
+!                   end do
+                 end if
+
+                 if (found == 1) then
+                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -1
+                 end if
+
+!                In case a symmetry operation only changes the sign of an
+!                element, this element has to be equal to zero
+
+                 if (flag == -1) then
+                   pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = -2
+                   exit
+                 end if
+
+               end do    ! close loop on symmetries
+
+!              If the elemetn i1pert,i2pert,i3pert is not symmetric
+!              to a basis element, it is a basis element
+
+               if (pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) > -1) then
+                 pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = 1
+               end if
+
+             end if ! rfpert /= 0
+
+           end do        ! close loop over perturbations
+         end do
+       end do
+     end do
+   end do
+ end do
+
+!Now, take into account the permutation of (i1pert,i1dir)
+!and (i2pert,i2dir)
+
+ do i1pert = 1, mpert
+   do i2pert = 1, mpert
+     do i3pert = 1, mpert
+
+       do i1dir = 1, 3
+         do i2dir = 1, 3
+           do i3dir = 1, 3
+
+             if ((i1pert /= i2pert).or.(i1dir /= i2dir)) then
+
+               if ((pertsy(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) == 1).and.&
+                (pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) == 1)) then
+                 pertsy(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = -1
+               end if
+
+             end if
+
+           end do
+         end do
+       end do
+
+     end do
+   end do
+ end do
+
+ rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
+
+ ABI_FREE(pertsy)
+
+end subroutine sylwtens
 !!***
 
 !----------------------------------------------------------------------
@@ -5413,6 +5968,59 @@ pure subroutine phdispl_from_eigvec(natom, ntypat, typat, amu, eigvec, displ)
 end subroutine phdispl_from_eigvec
 !!***
 
+!!****f* m_dynmat/phangmom_from_eigvec
+!! NAME
+!! phangmom_from_eigvec
+!!
+!! FUNCTION
+!!  Phonon angular momenta in cart coords from eigenvectors
+!!
+!! INPUTS
+!!  natom: number of atoms in unit cell
+!!  eigvec(2*3*natom*3*natom)= eigenvectors of the dynamical matrix in cartesian coordinates.
+!!
+!! OUTPUT
+!!  phangmom(3*3*natom)= angular momentum of each phonon mode in cartesian coordinates.
+!!    The first index runs on the direction,
+!!    The second index runs on the modes.
+!!
+!! SOURCE
+
+pure subroutine phangmom_from_eigvec(natom, eigvec, phangmom)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: natom
+!arrays
+ real(dp),intent(in) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: phangmom(3*3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer :: imode,ipert, index
+!arrays
+ real(dp) :: eigvecatom(2*3)
+
+! *********************************************************************
+
+ phangmom = zero
+
+ do imode=1,3*natom
+   do ipert=1,natom
+     index = 3*natom*(imode-1) + 3*(ipert-1)
+     eigvecatom = eigvec(2*index+1 : 2*index + 2*3) ! = Re(u_x), Im(u_x), Re(u_y), Im(u_y), Re(u_z), Im(u_z)
+     phangmom(3*(imode-1)+1) = phangmom(3*(imode-1)+1)&
+             + two * (eigvecatom(3) * eigvecatom(6) - eigvecatom(4) * eigvecatom(5)) ! Re(u_y)*Im(u_z) - Im(u_y)*Re(u_z)
+     phangmom(3*(imode-1)+2) = phangmom(3*(imode-1)+2)&
+             + two * (eigvecatom(5) * eigvecatom(2) - eigvecatom(6) * eigvecatom(1)) ! Re(u_z)*Im(u_x) - Im(u_z)*Re(u_x)
+     phangmom(3*(imode-1)+3) = phangmom(3*(imode-1)+3)&
+             + two * (eigvecatom(1) * eigvecatom(4) - eigvecatom(2) * eigvecatom(3)) ! Re(u_x)*Im(u_y) - Im(u_x)*Re(u_y)
+   end do
+ end do
+
+end subroutine phangmom_from_eigvec
+!!***
+
 !!****f* m_dynmat/dfpt_prtph
 !! NAME
 !! dfpt_prtph
@@ -5436,7 +6044,7 @@ end subroutine phdispl_from_eigvec
 !!    0=> Hartree and cm-1, 1=> eV and Thz, other=> Ha,Thz,eV,cm-1 and K
 !!  iout= unit for long print (if negative, the routine only print on unit 6, and in Hartree only).
 !!  natom= number of atom
-!!  phfreq(3*natom)= phonon frequencies in Hartree
+!!  phfrq(3*natom)= phonon frequencies in Hartree
 !!  qphnrm=phonon wavevector normalisation factor
 !!  qphon(3)=phonon wavevector
 !!

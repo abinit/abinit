@@ -326,7 +326,16 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
+ !NVHPC doesn't like using constructor...
+#ifdef FC_NVHPC
+  iso%ntemp=ntemp
+  iso%max_niter=10
+  iso%tolerance=tol10
+  iso%ncid=ncid
+  iso%comm=gstore%comm
+#else
  iso = iso_solver_t(ntemp=ntemp, max_niter=10, tolerance=tol10, ncid=ncid, comm=gstore%comm)
+#endif
 
  do itemp=1,ntemp
    ! Generate Matsubara mesh for this T with cutoff wmax.

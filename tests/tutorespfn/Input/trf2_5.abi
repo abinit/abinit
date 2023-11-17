@@ -1,4 +1,4 @@
-!Input file for the anaddb code. Analysis of the SiO2 DDB                       
+!Input file for the anaddb code. Analysis of the AlAs DDB
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
@@ -94,10 +94,6 @@
 
 !Wavevector list number 2 (Cartesian directions for non-analytic gamma phonons)
 
-!The output for this calculation must be cut-and-pasted into the
-! t59_out.freq file to be used as band2eps input to get proper LO-TO 
-! splitting at gamma.  Note that gamma occurrs twice.
-
   nph2l    1       ! number of directions in list 2
 
   qph2l   1.0  0.0  0.0    0.0
@@ -108,12 +104,11 @@
 #%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% input_ddb = trf2_3.ddb.abo 
 #%% [files]
-#%% files_to_test = 
-#%%   trf2_5.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% files_to_test = trf2_5.abo, tolnlines=0, tolabs=0.000e+00, tolrel=0.000e+00, fld_options=-easy; trf2_5_PHANGMOM, tolnlines=54, tolabs=2.000, tolrel=1.000, fld_options=-easy
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = X. Gonze
 #%% keywords = 
-#%% description = Input file for the anaddb code. Analysis of the SiO2 DDB
+#%% description = Input file for the anaddb code. Analysis of the AlAs DDB
 #%%<END TEST_INFO>

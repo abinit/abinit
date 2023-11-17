@@ -1,73 +1,72 @@
-#######################################################
-# Automatic test for ABINIT:                          #
-#    GS calculation in the PAW case, Nickel 4 atoms,  # 
-#    FCC, nonmagnetic  GGA, PAW                       #
-#    Needed to create intial wavefunctions for the    #
-#    next RT-TDDFT test                               #
-#######################################################
+# Hydrogen diatomic molecule
+# Multidataset testing : write_files testing with different flags for the different options 
+# This is to determine the behaviour of write_files 
+ 
+ ndtset 23
 
-# Unit cell
-acell   3*3.5 angstrom
-ntypat 1  
-natom  4  
-typat *1
-znucl 28
-rprim  
-   1.0  0.0  0.0
-   0.0  1.0  0.0
-   0.0  0.0  1.0
-xred
-   0.0  0.0  0.0
-   0.5  0.5  0.0
-   0.5  0.0  0.5
-   0.0  0.5  0.5
-chkprim 0
+ write_files1  "default"
+ write_files2  "ddb"         # Print only ddb 
+ write_files3  "den_1"       # Print only den  with opt 1. other options to be tested with PAW
+ write_files4  "dos_1"       # Print only dos  with opt 1
+ write_files5  "dos_2"       # Print only dos  with opt 2
+ write_files6  "dos_3"       # Print only dos  with opt 3
+ write_files7  "dos_4"       # Print only dos  with opt 4
+ write_files8  "dos_3, dosm_1"      # Print only dosm with opt 1, dos_3 required
+ write_files9  "ebands_1"    # Print only ebands with opt 1
+ write_files10 "ebands_2"    # Print only ebands with opt 2
+ write_files11 "eig"         # Print only eig
+ write_files12 "elf"         # Print only elf 
+ write_files13 "gden"        # Print only gden
+ write_files14 "geo"         # Print only geo
+ write_files15 "gsr"         # Print only gsr
+ write_files16 "pot"         # Print only pot
+ write_files17 "vha, vclmb_1"     # Print Vcoulomb with opt 1, vha required
+ write_files18 "vha, vclmb_2"     # Print Vcoulomb with opt 2, vha required
+ write_files19 "vha"         # Print only Vha
+ write_files20 "vhxc"        # Print only Vhxc
+ write_files21 "vxc"         # Print only Vxc
+ write_files22 "eig, wf_1"   # Print two random files from options
+ write_files23 ""            # Print nothing
 
-# K-points and occupations
-kptopt 1
-ngkpt 2 2 2 # Not converged
-nshiftk 1
-shiftk 0 0 0
-istwfk *1   # For consistency with following RT-TDDFT test
-occopt 3
-tsmear 300 K
-nband 48
+# Atomic Structure
+#-----------------
+ acell   7 5 5
+ natom   2
+ ntypat  1
+ typat   2*1
+ xcart  -0.385  0 0
+         0.385  0 0   Angstrom
+ znucl   1.0
 
-# Convergence parameters
-ecut 10       # Not converged
-pawecutdg 10  # Not converged
-tolvrs 1.d-4  # Not sufficient
-nstep 50
+# Other Variables
+#----------------
+ ecut     2    #
+ ngkpt    4 1 1   #Used to make it compatible with fsurf
+ nshiftk  1       #Used to make it compatible with fsurf
+ shiftk   0 0 0   #Used to make it compatible with fsurf
+ nband    1
+ nline    3
+ nstep    7
+ occ      2
+ occopt   3       #Used to make it compatible with dos_2:5
+ tolvrs   1.0d-6
 
-pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
-pseudos "Ni.xml"
-  
-# Printing parameters
-prtwf 1  # Wavefunctions needed for next test    
-prtden 0     
-prteig 0    
-prtebands 0  
-prtdos 0     
-pawprtdos 0  
-pawprtvol 0 
-prtgsr 0     
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "PseudosTM_pwteter/1h.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t150.abi, t151.abi, t152.abi
 #%% [files]
-#%% files_to_test =
-#%%   t150.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%% [shell]
-#%% post_commands = ww_mv t150o_WFK t151i_WFK
+#%% files_to_test = 
+#%%  t150.abo, tolnlines = 1, tolabs = 1.010e-08, tolrel = 2.000e-04
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = F. Brieuc
-#%% keywords = RTTDDFT
-#%% description =
-#%%   FCC Nickel, nonmagnetic, GGA, PAW.
-#%%   Generate initial WFK for next RT-TDDFT test.
-#%% topics = RTTDDFT
+#%% keywords = NC
+#%% authors = B. Guster
+#%% description = 
+#%%   Test different printing option with supravariable write_files.
+#%%   Except for DTSET 1, each option should print only one file.
+#%%   TODO: Modify this test file when other prt options are added to ABINIT.
 #%%<END TEST_INFO>

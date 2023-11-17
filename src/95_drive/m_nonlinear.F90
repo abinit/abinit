@@ -916,7 +916,7 @@ end if
    call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)
@@ -1068,9 +1068,9 @@ end if
    dscrpt=' Note : temporary (transfer) database '
    call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,xred=xred,occ=occ)
 
-   call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
+   call ddb%init(dtset, 1, mpert, with_d3E=.true.)
 
-   call ddb%set_d3matr(d3etot, blkflg, iblok=1)
+   call ddb%set_d3matr(1, d3etot, blkflg)
 
    call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
 

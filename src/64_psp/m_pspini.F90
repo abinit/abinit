@@ -36,7 +36,7 @@ module m_pspini
  use m_io_tools,  only : open_file
  use m_pawrad,    only : pawrad_type
  use m_pawtab,    only : pawtab_type, pawtab_set_flags
- use m_psps,      only : psps_print, psps_ncwrite, nctab_init, nctab_free, nctab_mixalch, test_xml_xmlpaw_upf, &
+ use m_psps,      only : psps_print, psps_ncwrite_path, nctab_init, nctab_free, nctab_mixalch, test_xml_xmlpaw_upf, &
                          nctab_eval_tcorespl
  use m_pawpsp,    only : pawpsp_bcast, pawpsp_read_pawheader, pawpsp_read_header_xml,&
                          pawpsp_header_type, pawpsp_wvl, pawpsp_7in, pawpsp_17in
@@ -620,7 +620,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
  ! Write the PSPS.nc file and exit here if requested by the user.
  if (abs(dtset%prtpsps) == 1) then
-   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
+   if (xmpi_comm_rank(xmpi_world) == 0) call psps_ncwrite_path(psps, trim(dtfil%filnam_ds(4))//"_PSPS.nc")
    if (dtset%prtpsps == -1) then
      ABI_ERROR_NODUMP("prtpsps == -1 ==> aborting now")
    end if
@@ -1124,10 +1124,10 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (pspcod==7)then
      ! PAW "pseudopotentials"
      call pawpsp_7in(epsatm,ffspl,dtset%icoulomb,ABS(dtset%hyb_mixing),dtset%ixc,&
-       lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
-       pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
-       dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
-       dtset%xc_denpos,zion,psps%znuclpsp(ipsp))
+&      lmax,psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,&
+&      pawrad,pawtab,dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,&
+&      dtset%usewvl,dtset%usexcnhat_orig,vlspl,xcccrc,dtset%xclevel,&
+&      dtset%xc_denpos,zion,psps%znuclpsp(ipsp),xc_taupos=dtset%xc_taupos)
 
    else if (pspcod==8)then
 
@@ -1171,10 +1171,11 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (pspcod==17)then
      ! PAW XML pseudopotentials
      call pawpsp_17in(epsatm,ffspl,dtset%icoulomb,ipsp,ABS(dtset%hyb_mixing),dtset%ixc,lmax,&
-      psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
-      dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
-      dtset%usexcnhat_orig,vlspl,xcccrc,&
-      dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp))
+&     psps%lnmax,mmax,psps%mqgrid_ff,psps%mqgrid_vl,pawpsp_header,pawrad,pawtab,&
+&     dtset%pawxcdev,psps%qgrid_ff,psps%qgrid_vl,dtset%usewvl,&
+&     dtset%usexcnhat_orig,vlspl,xcccrc,&
+&     dtset%xclevel,dtset%xc_denpos,pspheads_tmp%zionpsp,psps%znuclpsp(ipsp),&
+&     xc_taupos=dtset%xc_taupos)
      call paw_setup_free(paw_setuploc)
    end if
 

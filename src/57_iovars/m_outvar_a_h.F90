@@ -961,6 +961,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%fermie_nest
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'fermie_nest','DPR',0)
 
+ intarr(1,:)=dtsets(:)%ffnl_lw
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ffnl_lw','INT',0)
+
  firstchar_fftalg = "_"
  intarr(1,:)=dtsets(:)%ngfft(7)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'fftalg','INT',0,firstchar="-",forceprint=3)
@@ -1100,6 +1103,11 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gethaydock
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gethaydock','INT',0)
+
+ if (any(dtsets(:)%usekden==1)) then
+   intarr(1,:)=dtsets(:)%getkden
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getkden','INT',0)
+ end if
 
  intarr(1,:)=dtsets(:)%getocc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getocc','INT',0)

@@ -659,8 +659,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !*************************************************************************
 
- call timab(920,1,tsec)
- call timab(921,1,tsec)
+ call timab(920,1,tsec) ; call timab(921,-1,tsec)
 
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
@@ -732,7 +731,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
 & nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
- call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
@@ -937,8 +935,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        end if
 
-     call timab(922,2,tsec)
-
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
 !    blocksize= bandpp (JB 2016/04/16)
@@ -959,6 +955,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          fockcommon%forces_ikpt=zero
        end if
      end if
+
+     call timab(922,2,tsec)
 
      do iblock=1,nblockbd
 
@@ -987,7 +985,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          end if
 
          call timab(923,2,tsec)
-         call timab(926,1,tsec)
+         call timab(924,-1,tsec)
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
          if (mpi_enreg%paral_kgb/=1) then
@@ -1000,7 +998,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
-         call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
          if (optfor==1) then
@@ -1016,9 +1013,11 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end do
          end if
 
+         call timab(924,2,tsec)
+
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
-           call timab(924,1,tsec)
+           call timab(925,1,tsec)
            do iblocksize=1,blocksize
              call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
@@ -1045,12 +1044,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
              kinstr(6)=kinstr(6)+weight(iblocksize)*ar
            end do
-           call timab(924,2,tsec)
+           call timab(925,2,tsec)
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fockcommon%optstr.or.fockcommon%optfor) then
+             call timab(926,1,tsec)
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                ABI_BUG(msg)
@@ -1074,11 +1074,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                end if
              end do
              ABI_FREE(ghc_dum)
+             call timab(926,2,tsec)
            end if
-         end if
+         end if ! usefock_loc
        end if
 
      end do ! End of loop on block of bands
+
+     call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -1127,8 +1130,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(ffnl_str)
      end if
 
+     call timab(927,2,tsec)
+
    end do ! End k point loop
  end do ! End loop over spins
+
+ call timab(928,1,tsec)
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol
@@ -1158,8 +1165,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    end if
  end if
 
- call timab(925,1,tsec)
-
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
    renorm_factor=-(two_pi**2)/effmass_free/gs_hamk%ucvol
@@ -1185,8 +1190,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if
- call timab(925,2,tsec)
- call timab(920,2,tsec)
+ call timab(928,2,tsec) ; call timab(920,-2,tsec)
 
 end subroutine forstrnps
 !!***

@@ -43,7 +43,7 @@ MODULE m_pspheads
  use m_fstrings,     only : basename, lstrip, sjoin, startswith, atoi, itoa, ftoa, toupper, next_token
  use m_pawpsp,       only : pawpsp_read_header_xml,pawpsp_read_pawheader
  use m_pawxmlps,     only : rdpawpsxml,rdpawpsxml_header, paw_setup_free,paw_setuploc
- use pseudo_types,    only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
+ use pseudo_types,   only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
  use read_upf_new_module, only : read_upf_new
 
  implicit none
