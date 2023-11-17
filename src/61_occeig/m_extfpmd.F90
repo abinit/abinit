@@ -37,7 +37,7 @@ module m_extfpmd
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
   use m_kg,             only : kpgio, getmpw, mkkin
-  use m_mpinfo,         only : ptabs_fourdp,proc_distrb_cycle
+  use m_mpinfo,         only : ptabs_fourdp, proc_distrb_cycle, destroy_mpi_enreg, initmpi_seq
   use m_numeric_tools,  only : simpson,simpson_int
   use m_spacepar,       only : meanvalue_g
 
@@ -62,10 +62,11 @@ module m_extfpmd
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
     !! Scalars and arrays for numerical extended PW method
-    integer :: mpw,mcg,mband
+    integer :: mpw,mcg,mband,mkmem
     real(dp) :: ecut,ecut_eff
     integer,allocatable :: kg(:,:),npwarr(:),npwtot(:),nband(:)
     real(dp),allocatable :: cg(:,:),eigen(:),occ(:),doccde(:)
+    type(MPI_type) :: mpi_enreg
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -149,8 +150,9 @@ contains
     this%npwarr(:)=0
     ABI_MALLOC(this%npwtot,(nkpt))
     this%npwtot(:)=0
+    this%mkmem=nkpt
     call getmpw(this%ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,this%mpw,nkpt)
-    ABI_MALLOC(this%kg,(3,this%mpw*mkmem))
+    ABI_MALLOC(this%kg,(3,this%mpw*this%mkmem))
     this%kg(:,:)=0
     this%mcg=0
     ABI_MALLOC(this%eigen,(extfpmd_mband*nkpt*nsppol))
@@ -159,6 +161,11 @@ contains
     this%occ(:)=zero
     ABI_MALLOC(this%doccde,(extfpmd_mband*nkpt*nsppol))
     this%doccde(:)=zero
+    ! Initialize mpi_enreg variable for seq use.
+    call initmpi_seq(this%mpi_enreg)
+    ABI_MALLOC(this%mpi_enreg%proc_distrb,(nkpt,this%mband,nsppol))
+    this%mpi_enreg%proc_distrb=0
+    this%mpi_enreg%me_g0=1
   end subroutine init
   !!***
 
@@ -187,6 +194,9 @@ contains
       this%cg(:,:)=zero
       ABI_FREE(this%cg)
     end if
+    this%mpi_enreg%proc_distrb=0
+    this%mpi_enreg%me_g0=0
+    call destroy_distribfft(this%mpi_enreg%distribfft)
     this%doccde(:)=zero
     ABI_FREE(this%doccde)
     this%eigen(:)=zero
@@ -205,6 +215,7 @@ contains
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
     ABI_FREE(this%nelectarr)
+    this%mkmem=0
     this%mpw=0
     this%nfft=0
     this%nspden=0
@@ -396,12 +407,13 @@ contains
     
     ! Local variables -------------------------
     ! Scalars
-    integer :: isppol,ikpt,iband,icg,ext_icg,ipw,ext_ipw,ikg,ext_ikg
+    integer :: isppol,ikpt,iband,icg,ext_icg,ipw,ext_ipw,ikg,ext_ikg,ierr
     integer :: nband_k,ext_nband_k,istwf_k,npw_k,ext_npw_k,nblockbd
     integer :: my_nspinor,my_ikpt,blocksize,bdtot_index,ext_bdtot_index
     integer :: count_below,count_above,index_below,index_above
     real(dp) :: ecut_eff,ekin_max,fg_kin,closest_below,closest_above,prop_below,prop_above
     real(dp) :: norm
+    real(dp) :: tmp
     ! Arrays
     real(dp) :: kpoint(3)
     integer,allocatable :: kg_k(:,:),ext_kg_k(:,:),indices_below(:),indices_above(:)
@@ -411,14 +423,14 @@ contains
 
     ! Generating ext pw basis set (this%kg,this%npwarr,this%npwtot)
     if(.not.allocated(this%cg)) then
-      ! write(0,*) 'DEBUG: Generating extended plane wave basis set...'
+      write(0,*) 'DEBUG: Generating extended plane wave basis set...'
       call kpgio(this%ecut_eff,exchn2n3d,gmet,istwfk,this%kg, &
-      & kptns,mkmem,nband,nkpt,'PERS',mpi_enreg,&
+      & kptns,this%mkmem,this%nband,nkpt,'COLL',this%mpi_enreg,&
       & this%mpw,this%npwarr,this%npwtot,nsppol)
       
       ! Get number of ext pw coefficients
       my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
-      this%mcg=this%mpw*my_nspinor*this%mband*mkmem*nsppol
+      this%mcg=this%mpw*my_nspinor*this%mband*this%mkmem*nsppol
       ABI_MALLOC(this%cg,(2,this%mcg))
       this%cg(:,:)=zero
       
@@ -440,11 +452,17 @@ contains
           npw_k=npwarr(ikpt)
           ext_npw_k=this%npwarr(ikpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-            bdtot_index=bdtot_index+nband_k
-            ext_bdtot_index=ext_bdtot_index+this%mband
-            cycle
-          end if
+          ! if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          !   bdtot_index=bdtot_index+nband_k
+          !   ext_bdtot_index=ext_bdtot_index+this%mband
+          !   if(mkmem/=0) then
+          !     icg=icg+npw_k*my_nspinor*nband_k
+          !     ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+          !     ikg=ikg+npw_k
+          !     ext_ikg=ext_ikg+ext_npw_k
+          !   end if
+          !   cycle
+          ! end if
 
           kpoint(:)=kptns(:,ikpt)
 
@@ -467,11 +485,11 @@ contains
             do ipw=1,npw_k*my_nspinor
               do ext_ipw=1,ext_npw_k*my_nspinor
                 if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
-                  this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
-                  this%eigen(iband+ext_bdtot_index)=eig_k(iband)
+                  ! this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
                 end if
               end do
             end do
+            this%eigen(iband+ext_bdtot_index)=eig_k(iband)
           end do
 
           ! Set extended plane waves coefficients here
@@ -544,7 +562,7 @@ contains
           ABI_FREE(eig_k)
         end do
       end do
-      ! write(0,*) "DEBUG: Exiting routine..."
+      write(0,*) "DEBUG: Exiting routine..."
     else
 
       my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -563,11 +581,17 @@ contains
           npw_k=npwarr(ikpt)
           ext_npw_k=this%npwarr(ikpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-            bdtot_index=bdtot_index+nband_k
-            ext_bdtot_index=ext_bdtot_index+this%mband
-            cycle
-          end if
+          ! if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          !   bdtot_index=bdtot_index+nband_k
+          !   ext_bdtot_index=ext_bdtot_index+this%mband
+          !   if(mkmem/=0) then
+          !     icg=icg+npw_k*my_nspinor*nband_k
+          !     ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+          !     ikg=ikg+npw_k
+          !     ext_ikg=ext_ikg+ext_npw_k
+          !   end if
+          !   cycle
+          ! end if
 
           ABI_MALLOC(eig_k,(nband_k))
           ABI_MALLOC(kg_k,(3,npw_k))
@@ -582,11 +606,11 @@ contains
             do ipw=1,npw_k*my_nspinor
               do ext_ipw=1,ext_npw_k*my_nspinor
                 if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
-                  this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
-                  this%eigen(iband+ext_bdtot_index)=eig_k(iband)
+                  ! this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
                 end if
               end do
             end do
+            this%eigen(iband+ext_bdtot_index)=eig_k(iband)
           end do
 
           ! Increment indexes
@@ -677,12 +701,12 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           ! Skip this k-point if not the proper processor
-          if(present(mpi_enreg))then
-            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-              ext_bdtot_index=ext_bdtot_index+this%mband
-              cycle
-            end if
-          end if
+          ! if(present(mpi_enreg))then
+          !   if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          !     ext_bdtot_index=ext_bdtot_index+this%mband
+          !     cycle
+          !   end if
+          ! end if
 
           do iband=nband_k+1,this%mband
             nelect=nelect+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
@@ -763,11 +787,11 @@ contains
       do ikpt=1,nkpt
         nband_k=nband(ikpt+(isppol-1)*nkpt)
         ! Skip this k-point if not the proper processor
-        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-          bdtot_index=bdtot_index+nband_k
-          ext_bdtot_index=ext_bdtot_index+this%mband
-          cycle
-        end if
+        ! if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+        !   bdtot_index=bdtot_index+nband_k
+        !   ext_bdtot_index=ext_bdtot_index+this%mband
+        !   cycle
+        ! end if
 
         do iband=1,nband_k
           occ(iband+bdtot_index)=this%occ(iband+ext_bdtot_index)
@@ -863,10 +887,14 @@ contains
           istwf_k=istwfk(ikpt)
           ext_npw_k=this%npwarr(ikpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-            ext_bdtot_index=ext_bdtot_index+this%mband
-            cycle
-          end if
+          ! if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          !   ext_bdtot_index=ext_bdtot_index+this%mband
+          !   if(mkmem/=0) then
+          !     ext_icg=ext_icg+ext_npw_k*my_nspinor*this%mband
+          !     ext_ikg=ext_ikg+ext_npw_k
+          !   end if
+          !   cycle
+          ! end if
 
           kpoint(:)=kptns(:,ikpt)
 
@@ -881,7 +909,7 @@ contains
           do iband=nband_k+1,this%mband
             cwavef(1:2,1:ext_npw_k*my_nspinor)= &
             & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
-            call meanvalue_g(dotr,ext_kinpw,0,istwf_k,mpi_enreg,ext_npw_k,my_nspinor,cwavef,cwavef,0)
+            call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,cwavef,cwavef,0)
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
           end do
 
@@ -1060,10 +1088,10 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-            ext_bdtot_index=ext_bdtot_index+this%mband
-            cycle
-          end if
+          ! if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          !   ext_bdtot_index=ext_bdtot_index+this%mband
+          !   cycle
+          ! end if
 
           do iband=nband_k+1,this%mband
             fn=this%occ(iband+ext_bdtot_index)/maxocc

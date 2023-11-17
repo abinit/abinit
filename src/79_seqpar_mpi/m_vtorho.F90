@@ -1198,7 +1198,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if ! nproc_spkpt>1
 
 !    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
-     if(associated(extfpmd)) then
+     if(associated(extfpmd).and.mpi_enreg%me_kpt==0) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
@@ -1235,7 +1235,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Compute number of free electrons of extfpmd model
-     if(associated(extfpmd)) then
+     if(associated(extfpmd).and.mpi_enreg%me_kpt==0) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
 &       dtset%nsppol,dtset%tsmear,dtset%wtk,mpi_enreg)
