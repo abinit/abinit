@@ -3406,7 +3406,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  symrel and tnons
-!  Check the point group closure 
+!  Check the point group closure
    call sg_multable(dt%nsym,dt%symafm,dt%symrel,ierrgrp, tnons=dt%tnons, tnons_tol=tol5)
    if (ierrgrp==1) ierr=ierr+1
 
@@ -4072,15 +4072,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !end if
 
      ! If SCF calculations, one and only one of these can differ from zero
-     if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
-       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
+     if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
+       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) ) then
+       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-        'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
-        'tolwfr=',dt%tolwfr,', toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
+        'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+        'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
         'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
         'Action: change your input file and resubmit the job.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+
+     if (ttolwfr==1.and.dt%tolwfr_diago>dt%tolwfr) then
+       write(msg, '(2a,2(a,es14.6),a)' )&
+        ' tolwfr diago cannot be bigger than tolwfr !',ch10,&
+        ' tolwfr=',dt%tolwfr,' and tolwfr_diago=',dt%tolwfr_diago,&
+        ' Action: change the value of tolwfr or tolwfr_diago in the input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+
    end if
 
    if (optdriver == RUNL_GWR) then
