@@ -1198,7 +1198,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if ! nproc_spkpt>1
 
 !    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
-     if(associated(extfpmd).and.mpi_enreg%me_kpt==0) then
+     if(associated(extfpmd)) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
 &       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
@@ -1206,16 +1206,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (extfpmd%version==5) then
          ! Get extended plane wave cutoff
          call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-&         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-&         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband)
+         &         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+         &         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+         &         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm)
          ! Compute extended plane wave occupations
          call timab(990,1,tsec)
          call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-&         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
-&         dtset%tsmear,dtset%wtk,&
-&         prtstm=dtset%prtstm,stmbias=dtset%stmbias)
+         &         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+         &         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
+         &         dtset%tsmear,dtset%wtk,&
+         &         prtstm=dtset%prtstm,stmbias=dtset%stmbias)
          call timab(990,2,tsec)
          compute_newocc=.false.
          ! Update Kohn-Sham occ and doccde from extended pw arrays
@@ -1235,7 +1235,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
 !    Compute number of free electrons of extfpmd model
-     if(associated(extfpmd).and.mpi_enreg%me_kpt==0) then
+     if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
 &       dtset%nsppol,dtset%tsmear,dtset%wtk,mpi_enreg)

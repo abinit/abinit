@@ -884,7 +884,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,&
 &     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
-&     dtset%extfpmd_nband)
+&     dtset%extfpmd_nband,dtset%nspinor)
    end if
  end if
 
