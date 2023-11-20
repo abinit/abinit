@@ -54,12 +54,12 @@ prtgsr 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t153.abi, t154.abi, t155.abi
+#%% test_chain = t213.abi, t214.abi, t215.abi
 #%% [files]
 #%% files_to_test =
-#%%   t153.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t213.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [shell]
-#%% post_commands = ww_mv t153o_WFK t154i_WFK
+#%% post_commands = ww_mv t213o_WFK t214i_WFK
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
