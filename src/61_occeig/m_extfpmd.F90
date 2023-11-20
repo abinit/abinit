@@ -58,7 +58,7 @@ module m_extfpmd
   type,public :: extfpmd_type
     integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
-    real(dp) :: nelect,shiftfactor,ucvol,shiftband
+    real(dp) :: nelect,shiftfactor,ucvol,bandshift
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
     !! Scalars and arrays for numerical extended PW method
@@ -139,11 +139,11 @@ contains
     this%nelect=zero
     ABI_MALLOC(this%nelectarr,(nfft,nspden))
     this%nelectarr(:,:)=zero
+    this%bandshift=zero
     this%shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
     if (this%version==5) then
-      this%shiftband=zero
       this%mband=extfpmd_mband
       ! Adding sqrt(...) to extended cutoff energy to make
       ! sure extended pw basis set is large enough.
@@ -242,9 +242,8 @@ contains
       this%mkmem=0
       this%mpw=0
       this%mband=0
-      this%shiftband=zero
     end if
-
+    
     this%vtrial(:,:)=zero
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
@@ -260,6 +259,7 @@ contains
     this%e_kinetic=zero
     this%entropy=zero
     this%nelect=zero
+    this%bandshift=zero
     this%shiftfactor=zero
     this%ucvol=zero
   end subroutine destroy
@@ -378,20 +378,23 @@ contains
       this%shiftfactor=this%shiftfactor/this%nbcut
     end if
 
-    ! Get extended FPMD band energy cutoff for version 1, 3 and 10.
-    if(this%version==1.or.this%version==3.or.this%version==10) then
-      this%e_bcut=0
-      band_index=0
-      do isppol=1,nsppol
-        do ikpt=1,nkpt
-          nband_k=nband(ikpt+(isppol-1)*nkpt)
-          this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)
-          band_index=band_index+nband_k
-        end do
+    ! Get extended FPMD band energy cutoff
+    this%e_bcut=zero
+    this%bandshift=zero
+    band_index=0
+    do isppol=1,nsppol
+      do ikpt=1,nkpt
+        nband_k=nband(ikpt+(isppol-1)*nkpt)
+        this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)/nsppol
+        this%bandshift=this%bandshift+wtk(ikpt)*&
+        & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
+        write(0,*) extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol), (nband_k-this%nbdbuf)
+        band_index=band_index+nband_k
       end do
-    end if
+    end do
+    write(0,*) this%bandshift
   end subroutine compute_shiftfactor
-  !!***
+  !!***eigen(band_index+nband_k-this%nbdbuf)
 
   !!****f* ABINIT/m_extfpmd/generate_extpw
   !! NAME
@@ -642,7 +645,7 @@ contains
     ! order 1/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+      xcut=extfpmd_e_fg(one*this%bcut-this%bandshift,this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
 
@@ -825,7 +828,7 @@ contains
     ! order 3/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=extfpmd_e_fg(dble(this%bcut),this%ucvol)/tsmear
+      xcut=extfpmd_e_fg(one*this%bcut-this%bandshift,this%ucvol)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
 
@@ -872,7 +875,8 @@ contains
             ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
             & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
             call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
-            ! dotr=extfpmd_e_fg(one*iband,this%ucvol) ! SIMPLER WAY (dont forget to shiftband...)
+            ! dotr=extfpmd_e_fg(one*iband,this%ucvol) ! SIMPLER WAY (dont forget to bandshift...)
+            ! dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)/tsmear
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
           end do
 
@@ -994,7 +998,7 @@ contains
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=dble(ii)-one
-        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(extfpmd_e_fg(ix-this%bandshift,this%ucvol)+this%shiftfactor,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
