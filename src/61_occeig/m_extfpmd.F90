@@ -301,8 +301,6 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: band_index,ii,ikpt,isppol,nband_k
-    real(dp) :: abs_err,rel_err
-    character(len=500) :: msg
 
     ! *********************************************************************
 
@@ -311,33 +309,6 @@ contains
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1.or.this%version==4.or.this%version==5.or.this%version==10) then
       this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
-
-      ! Computes the relative error of the model vs last eigenvalues
-      if(me==0.and.this%version==4) then
-        band_index=0
-        rel_err=zero
-        abs_err=zero
-        do isppol=1,nsppol
-          do ikpt=1,nkpt
-            nband_k=nband(ikpt+(isppol-1)*nkpt)
-            rel_err=rel_err+wtk(ikpt)*abs((eigen(band_index+nband_k-this%nbdbuf)-&
-            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)/&
-            & eigen(band_index+nband_k-this%nbdbuf))
-            abs_err=abs_err+wtk(ikpt)*abs(eigen(band_index+nband_k-this%nbdbuf)-&
-            & extfpmd_e_fg(dble(nband_k-this%nbdbuf),this%ucvol)-this%shiftfactor)
-            band_index=band_index+nband_k
-          end do
-        end do
-        if(rel_err.gt.tol1) then
-          write(msg,'(a,es8.2,3a,es8.2,a,es8.2,7a)')&
-          & 'Relative difference between eigenvalues and Fermi gas energy (',rel_err,')',ch10,&
-          & 'is over ',tol1,' at band cut. Absolute difference is ',abs_err,' Ha.',ch10,&
-          & 'Execution will continue as the code will still add contributions in the right',ch10,&
-          & 'direction, but you should likely increase nband to make sure electrons of last',ch10,&
-          & 'band can be considered as free fermions in a constant potential.'
-          ABI_WARNING(msg)
-        end if
-      end if
     end if
 
     ! Computes U_0^{HEG} from the difference between
@@ -388,11 +359,9 @@ contains
         this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)/nsppol
         this%bandshift=this%bandshift+wtk(ikpt)*&
         & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
-        write(0,*) extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol), (nband_k-this%nbdbuf)
         band_index=band_index+nband_k
       end do
     end do
-    write(0,*) this%bandshift
   end subroutine compute_shiftfactor
   !!***eigen(band_index+nband_k-this%nbdbuf)
 
@@ -519,6 +488,8 @@ contains
         cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-1)*npw_k*my_nspinor+icg:nband_k*npw_k*my_nspinor+icg)
         call meanvalue_g(dotr,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,cwavef,cwavef,0)
         bandshift=extfpmd_i_fg(dotr,this%ucvol)-nband_k
+
+        write(0,*) bandshift, this%bandshift
 
         ! Set extended plane waves coefficients here
         do iband=nband_k+1,this%mband
