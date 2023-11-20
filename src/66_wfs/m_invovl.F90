@@ -879,12 +879,12 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernla, 1, tsec)
 
   ! cwaveprj may be dummy or unused if gemm nonlop is turned on
-  if((.not. gemm_nonlop_use_gemm) .or. cwaveprj(1,1)%ncpgr/=0) then
+  if((.not. gemm_nonlop_use_gemm) .or. cwaveprj(1,1)%nlmn/=0) then
     ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
   else
     ABI_MALLOC(cwaveprj_in, (1,1))
-    call pawcprj_alloc(cwaveprj_in,0,(/1/))
+    call pawcprj_alloc(cwaveprj_in,0,(/0/))
   end if
   ABI_NVTX_END_RANGE()
 
@@ -981,7 +981,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
 
   ABI_NVTX_START_RANGE(NVTX_INVOVL_POST2)
-  if(cwaveprj(1,1)%ncpgr/=0) then
+  if(cwaveprj(1,1)%nlmn/=0) then
     ! copy PtPSm1proj to cwaveprj(:,:)
     do idat=1, ndat*nspinor
       shift = 0
@@ -1390,7 +1390,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   call timab(timer_apply_inv_ovl_opernlb, 2, tsec)
   if (ham%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
-  if(cwaveprj(1,1)%ncpgr/=0) then
+  if(cwaveprj(1,1)%nlmn/=0) then
     ABI_MALLOC(cwaveprj_in, (ham%natom,nspinor*ndat))
     call pawcprj_alloc(cwaveprj_in,0,ham%dimcprj)
     !$OMP TARGET UPDATE FROM(PtPsm1proj,proj)

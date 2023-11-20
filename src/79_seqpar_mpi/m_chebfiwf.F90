@@ -766,7 +766,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
-     call pawcprj_alloc(cwaveprj_next,0,(/1/))
+     call pawcprj_alloc(cwaveprj_next,0,(/0/))
    else
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
