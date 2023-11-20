@@ -7,7 +7,7 @@
 # RT-TDDFT calculation
 optdriver 9      # RT-TDDFT
 dtele 0.001      # Electronic timestep
-getwfk_filepath "t157i_WFK" # Initial wavefunctions
+getwfk_filepath "t217i_WFK" # Initial wavefunctions
 ntime 3          # Number of steps
 td_exp_order 4   # Order of the Taylor expansion used to approximate the exponential
 td_propagator 0  # Propagator (0: ER, 1: EMR)
@@ -60,10 +60,10 @@ prtgsr 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t156.abi, t157.abi, t158.abi
+#%% test_chain = t216.abi, t217.abi, t218.abi
 #%% [files]
 #%% files_to_test =
-#%%   t157.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t217.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

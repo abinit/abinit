@@ -988,4 +988,5 @@ KNOWN_KEYWORDS = {
     'magnetic_constraint': "Tests employing magnetic constraints",
     "FOLD2BLOCH": "Fold2Bloch tests.",
     "LWF": "Lattice Wannier function tests",
+    "RTTDDFT": "Real-time time-dependent DFT",
 }

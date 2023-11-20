@@ -59,11 +59,11 @@ prtgsr 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t156.abi, t157.abi, t158.abi
+#%% test_chain = t216.abi, t217.abi, t218.abi
 #%% [files]
 #%% files_to_test =
-#%%   t158.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
-#%%   t157o_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t218.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t217o_TDENER, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

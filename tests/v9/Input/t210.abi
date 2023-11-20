@@ -1,7 +1,7 @@
 #######################################################
 # Automatic test for ABINIT:                          #
 #    GS calculation in the PAW case, Nickel 4 atoms,  # 
-#    FCC, nonmagnetic  GGA, PAW                       #
+#    FCC, nonmagnetic GGA, PAW                       #
 #    Needed to create intial wavefunctions for the    #
 #    next RT-TDDFT test                               #
 #######################################################
@@ -55,12 +55,12 @@ prtgsr 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% test_chain = t150.abi, t151.abi, t152.abi
+#%% test_chain = t210.abi, t211.abi, t212.abi
 #%% [files]
 #%% files_to_test =
-#%%   t150.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
+#%%   t210.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options= -ridiculous;
 #%% [shell]
-#%% post_commands = ww_mv t150o_WFK t151i_WFK
+#%% post_commands = ww_mv t210o_WFK t211i_WFK
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
