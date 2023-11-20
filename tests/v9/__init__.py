@@ -189,3 +189,4 @@ inp_files = [
     "t216.abi",  # GS, Al 4 atoms, NC PSP to generate initial WFK for next RT-TDDFT tests
     "t217.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator to test restart
     "t218.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator - restart from last test
+]
