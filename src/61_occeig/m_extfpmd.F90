@@ -122,7 +122,7 @@ contains
     real(dp) :: gprimd(3,3),rmet(3,3),gmet(3,3)
 
     ! *********************************************************************
-    write(0,*) "DEBUG: Init extfpmd object"
+    ! write(0,*) "DEBUG: Init extfpmd object"
 
     this%bcut=mband-nbdbuf
     this%nbcut=nbcut
@@ -362,6 +362,9 @@ contains
         band_index=band_index+nband_k
       end do
     end do
+    ! if (me==0) then
+    !   write(0,*) this%bandshift
+    ! end if
   end subroutine compute_shiftfactor
   !!***eigen(band_index+nband_k-this%nbdbuf)
 
@@ -423,7 +426,7 @@ contains
 
     ! *********************************************************************
     
-    write(0,*) mpi_enreg%me_kpt,'DEBUG: Generating extended plane wave basis set...'
+    ! write(0,*) mpi_enreg%me_kpt,'DEBUG: Generating extended plane wave basis set...'
     
     this%eigen(:)=zero
     my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -488,17 +491,16 @@ contains
         cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-1)*npw_k*my_nspinor+icg:nband_k*npw_k*my_nspinor+icg)
         call meanvalue_g(dotr,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,cwavef,cwavef,0)
         bandshift=extfpmd_i_fg(dotr,this%ucvol)-nband_k
-
-        write(0,*) bandshift, this%bandshift
+        bandshift=this%bandshift ! TEMPORARY
+        ! write(0,*) bandshift, this%bandshift
 
         ! Set extended plane waves coefficients here
         do iband=nband_k+1,this%mband
           ! Get fermi gas energy and set eigenvalue
           fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
           this%eigen(iband+ext_bdtot_index)=fg_kin+this%shiftfactor
-          ! write(0,*) mpi_enreg%me_kpt, iband, this%eigen(iband+ext_bdtot_index)
-          ! Find closest values in ext_kinpw
 
+          ! Find closest values in ext_kinpw
           closest_below=zero
           closest_above=this%ecut
           count_below=0
@@ -536,6 +538,22 @@ contains
           end do
         end do
 
+        ! Then orthogonalize cg coefficients at this k-point
+        ! if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
+        ! if (has_cprj_in_memory.and.ortalgo==0) then
+        !   write(0,*) "NOT IMPLEMENTED YET"
+        !   ! ABI_FREE(subovl)
+        !   ! ABI_MALLOC(subovl,(nband_k*(nband_k+1)))
+        !   ! call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
+        !   ! call pw_orthon_cprj(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,cprj=cprj_cwavef_bands)
+        ! else
+        call pw_orthon(icg,igsc,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,ortalgo,gsc,gs_hamk%usepaw,this%cg,&
+        & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
+        !!!!!!!!!!!!!!!!!!!! check:  gsc, gs_hamk%usepaw, orthalgo, mgsc, igsc
+        ! end if
+
+
+
         ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
         ! do iband=1,this%mband
         !   fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
@@ -564,7 +582,7 @@ contains
         ABI_FREE(eig_k)
       end do
     end do
-    write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'
+    ! write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'
     call xmpi_sum(this%eigen,xmpi_world,ierr)
   end subroutine generate_extpw
 
@@ -616,7 +634,7 @@ contains
     ! order 1/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=extfpmd_e_fg(one*this%bcut-this%bandshift,this%ucvol)/tsmear
+      xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
 
@@ -638,16 +656,15 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           ! Skip this k-point if not the proper processor
-          if(present(mpi_enreg))then
-            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-              ext_bdtot_index=ext_bdtot_index+this%mband
-              cycle
-            end if
+          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+            ext_bdtot_index=ext_bdtot_index+this%mband
+            cycle
           end if
 
           do iband=nband_k+1,this%mband
             nelect=nelect+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
           end do
+
           ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
@@ -799,7 +816,7 @@ contains
     ! order 3/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
       gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=extfpmd_e_fg(one*this%bcut-this%bandshift,this%ucvol)/tsmear
+      xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
 
@@ -846,10 +863,11 @@ contains
             ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
             & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
             call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
-            ! dotr=extfpmd_e_fg(one*iband,this%ucvol) ! SIMPLER WAY (dont forget to bandshift...)
-            ! dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)/tsmear
+            ! Should dotr should be same if well cg well orthonormalized.
+            ! dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
           end do
+          write(0,*) 'KINETIC= ', this%e_kinetic
 
           ! Increment indexes
           ext_bdtot_index=ext_bdtot_index+this%mband
@@ -934,16 +952,17 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_entropy(this,fermie,tsmear,mpi_enreg,nkpt,nsppol,nspinor,wtk,nband)
+  subroutine compute_entropy(this,fermie,tsmear,mpi_enreg,nkpt,nsppol,nspinor,wtk,nband,mband,occ)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: nkpt,nsppol,nspinor
+    integer,intent(in) :: nkpt,nsppol,nspinor,mband
     real(dp),intent(in) :: fermie,tsmear
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
+    real(dp),intent(in) :: occ(mband*nkpt*nsppol)
 
     ! Local variables -------------------------
     ! Scalars
@@ -969,7 +988,7 @@ contains
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=dble(ii)-one
-        fn=fermi_dirac(extfpmd_e_fg(ix-this%bandshift,this%ucvol)+this%shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(extfpmd_e_fg(ix+this%bandshift,this%ucvol)+this%shiftfactor,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
@@ -1034,8 +1053,9 @@ contains
 
           do iband=nband_k+1,this%mband
             fn=this%occ(iband+ext_bdtot_index)/maxocc
-            this%entropy=this%entropy-two*(fn*log(fn)+(one-fn)*log(one-fn))
+            this%entropy=this%entropy-wtk(ikpt)*maxocc*(fn*log(fn)+(one-fn)*log(one-fn))
           end do
+
           ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
