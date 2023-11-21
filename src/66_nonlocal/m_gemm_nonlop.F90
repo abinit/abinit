@@ -924,7 +924,9 @@ contains
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-  if(.not. local_vectproj) ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
+  if(.not. local_vectproj) then
+    ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
+  end if
   ABI_MALLOC(s_projections,(cplex, nprojs,nspinor*ndat))
   ABI_MALLOC(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
 
@@ -1403,7 +1405,9 @@ contains
  end if
 
 ! Release memory
-  if(.not. local_vectproj) ABI_FREE(projections)
+  if(.not. local_vectproj) then
+    ABI_FREE(projections)
+  end if
   ABI_FREE(s_projections)
   ABI_FREE(vnl_projections)
   if(gemm_nonlop_is_distributed) then
