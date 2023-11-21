@@ -428,7 +428,6 @@ end subroutine chkgrp
 !scalars
  integer :: echo,found,ilist_symrel,nptsymm,prd_symafm,prd_ptsymm,ptsymm1,ptsymm2,ptsymm3
  integer :: sym1,sym2,sym3
-!integer :: isym
  real(dp) :: tnons_tol_
  logical :: found_inv,iseq
  character(len=500) :: msg
@@ -457,14 +456,6 @@ end subroutine chkgrp
  else
    tnons_tol_=tol5
  endif
-
-!DEBUG
-!write(std_out,*)' present(tnons),present(tnons_tol)=',present(tnons),present(tnons_tol)
-!write(std_out,*)' isym   symrel                      symafm  tnons '
-!do isym=1,nsym
-! write(std_out,'(i5,a,9i3,a,i3,a,3f9.4)' )isym,'   ',symrel(:,:,isym),'   ',symafm(isym),'   ',tnons_(:,isym)
-!end do
-!ENDDEBUG
 
  ! 1) Identity must be the first symmetry. Do not check if tnons_ == 0 as cell might not be primitive.
  if (any(symrel(:,:,1) /= identity_3d .or. symafm(1) /= 1)) then
@@ -3135,7 +3126,7 @@ subroutine smallprim(metmin,minim,rprimd)
 
 !Local variables-------------------------------
 !scalars
- integer :: ia,ib,ii,itrial,minimal
+ integer :: ia,ib,ii,ilong,itrial,minimal
  integer :: iiter, maxiter = 100000
  real(dp) :: determinant,length2,metsum
  character(len=500) :: msg
@@ -3216,27 +3207,78 @@ subroutine smallprim(metmin,minim,rprimd)
    ABI_BUG(msg)
  end if
 
+!DEBUG
+!write(std_out,*)' smallprim : after pair optimization '
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',ch10,minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',ch10,metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,*)' smallprim : will start triplet optimization ',ch10
+!call flush(std_out)
+!ENDDEBUG
+
 !At this stage, the three vectors have angles between each other that are
 !comprised between 90 and 120 degrees. It might still be that minus the vector
 !that is the sum of the three vectors is smaller than the longest of these vectors
  do iiter = 1, maxiter
 
 !  Will exit if minimal=1 is still valid after a trial
-!  to replace each of the three vectors by minus the summ of the three vectors
+!  to replace the longest of the three vectors by one of the triplet sum of the three vectors, with plus or minus sign
+
+!  Find longest of the three vectors
+   ilong=1
+   if( metmin(2,2)/metmin(1,1) > one + tol8 )ilong=2
+   if( metmin(3,3)/metmin(ilong,ilong) > one + tol8)ilong=3
+
+!  Try combination with all same signs
    minimal=1
    metsum=sum(metmin(:,:))
-   do itrial=1,3
-     ia=nvecta(itrial) ; ib=nvectb(itrial)
-     if(metmin(ia,ia)/metsum > one + tol8)then
-       minim(:,ia)=-minim(:,1)-minim(:,2)-minim(:,3)
-       metmin(ia,ib)=-sum(metmin(:,ib))
-       metmin(ia,itrial)=-sum(metmin(:,itrial))
-       metmin(ia,ia)=metsum
-       metmin(ib,ia)=metmin(ia,ib)
-       metmin(itrial,ia)=metmin(ia,itrial)
-       minimal=0
-     end if
-   end do
+   itrial=0
+   if( metsum/metmin(ilong,ilong) <  one - tol8)then
+!    Better combination indeed ...
+     minim(:,ilong)=minim(:,1)+minim(:,2)+minim(:,3)
+     metmin=MATMUL(TRANSPOSE(minim),minim)
+     minimal=0
+   else
+!    Try combinations with sign of itrial different from others
+     metsum=two*(metmin(1,1)+metmin(2,2)+metmin(3,3))-metsum
+     do itrial=1,3
+       ia=nvecta(itrial) ; ib=nvectb(itrial)
+       if( (metsum+four*metmin(ia,ib))/metmin(ilong,ilong) <  one - tol8)then
+!        Better combination indeed ...
+         metsum=metsum+four*metmin(ia,ib)
+         minim(:,ilong)=-minim(:,itrial)+minim(:,ia)+minim(:,ib)
+         metmin=MATMUL(TRANSPOSE(minim),minim)
+         minimal=0
+         exit
+       endif
+     enddo
+   endif
+
+!DEBUG
+!write(std_out,*)' smallprim : triplet optimization, iiter,ilong,itrial= ',iiter,ilong,itrial
+!write(std_out,*)' smallprim : predict met for the new vector=',metsum
+!call flush(std_out)
+!ENDDEBUG
+
+!  do itrial=1,3
+!    ia=nvecta(itrial) ; ib=nvectb(itrial)
+!    if(metmin(ia,ia)/metsum > one + tol8)then
+!      minim(:,ia)=-minim(:,1)-minim(:,2)-minim(:,3)
+!      metmin(ia,ib)=-sum(metmin(:,ib))
+!      metmin(ia,itrial)=-sum(metmin(:,itrial))
+!      metmin(ia,ia)=metsum
+!      metmin(ib,ia)=metmin(ia,ib)
+!      metmin(itrial,ia)=metmin(ia,itrial)
+!      minimal=0
+!    end if
+!  end do
+
+!DEBUG
+!write(std_out,*)' smallprim : found better primitive vector using triplets, itrial= ',itrial
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',ch10,minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',ch10,metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,*)' smallprim : will continue triplet optimization ',ch10
+!call flush(std_out)
+!ENDDEBUG
 
    if(minimal==1)exit
 
@@ -3320,9 +3362,9 @@ subroutine smallprim(metmin,minim,rprimd)
  end do
 
 !DEBUG
-!write(std_out,'(a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
-!write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
-!write(std_out,'(a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
+!write(std_out,'(2a,3es14.6,a,3es14.6,a,3es14.6)')' rprimd=',ch10,rprimd(:,1),ch10,rprimd(:,2),ch10,rprimd(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' minim =',ch10,minim(:,1),ch10,minim(:,2),ch10,minim(:,3)
+!write(std_out,'(2a,3es16.8,a,3es16.8,a,3es16.8)')' metmin =',ch10,metmin(:,1),ch10,metmin(:,2),ch10,metmin(:,3)
 !write(std_out,'(a)')' smallprim : exit '
 !call flush(std_out)
 !ENDDEBUG
