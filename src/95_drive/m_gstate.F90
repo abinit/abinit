@@ -278,7 +278,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
- type(ebands_t) :: bstruct,ebands
+ type(ebands_t) :: bstruct,extfpmd_bstruct,ebands
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr, hdr_den, hdr_kfull
@@ -873,18 +873,24 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
        ABI_WARNING(msg)
        dtset%extfpmd_nbdbuf = 0
-     end if
-     if (dtset%useextfpmd==5.and.(dtset%extfpmd_nband<=dtset%mband)) then
-       write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
-       &     "extfpmd_nband = ",dtset%extfpmd_nband," should be strictly greater than nband = ",dtset%mband,".",ch10,&
-       &     "Action: Increase extfpmd_nband or decrease nband."
-       ABI_ERROR(msg)
+      end if
+      if (dtset%useextfpmd==5.and.(dtset%extfpmd_nband<=dtset%mband)) then
+        write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
+        &       "extfpmd_nband = ",dtset%extfpmd_nband," should be strictly greater than nband = ",dtset%mband,".",ch10,&
+        &       "Action: Increase extfpmd_nband or decrease nband."
+        ABI_ERROR(msg)
      end if
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,&
 &     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
 &     dtset%extfpmd_nband,dtset%nspinor)
+     !Initialize extended plane waves header object
+     if (extfpmd%version==5) then
+       extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
+       call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
+&       comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     end if
    end if
  end if
 
