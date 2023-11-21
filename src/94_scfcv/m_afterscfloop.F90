@@ -1009,6 +1009,16 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    ! End CP modified
  end if
 
+ ! Update extended plane waves hdr content
+ if (associated(extfpmd)) then
+   if (extfpmd%version==5) then
+     bantot=extfpmd%hdr%bantot
+     call extfpmd%hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,extfpmd%occ,&
+     pawrhoij,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   end if
+ end if
+
 #ifdef HAVE_LOTF
  if(dtset%ionmov==23 .and. mpi_enreg%nproc_band>1) then
    bufsz=2+2*dtset%natom;if (moved_atm_inside==1) bufsz=bufsz+dtset%natom
