@@ -345,7 +345,7 @@ subroutine xomp_set_default_device(device_id)
 #ifdef HAVE_OPENMP_OFFLOAD
  call omp_set_default_device(device_id)
 #else
- ABI_UNUSED(device_id)
+ if(.false.) write(std_out,*) device_id
 #endif
 
 end subroutine xomp_set_default_device
@@ -514,9 +514,13 @@ function xomp_target_is_present(ptr)
  xomp_target_is_present = .true.
  if(rc==0) xomp_target_is_present = .false.
 #else
+ type(c_ptr) :: dummy
  xomp_target_is_present = .false.
- ABI_UNUSED((/device_id,rc/))
- ABI_UNUSED_A(ptr)
+ if(.false.) then ! Silence compiler warnings
+   device_id = 0
+   rc = 0
+   dummy = ptr
+ end if
 #endif
 
 end function xomp_target_is_present
@@ -557,8 +561,11 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  end if
 #else
  gpu_ptr = c_null_ptr
- ABI_UNUSED((/device_id,rc/))
- ABI_UNUSED_A(ptr)
+ if(.false.) then ! Silence compiler warnings
+   device_id=0
+   rc=0
+   gpu_ptr=ptr
+ end if
 #endif
 
 end function xomp_get_mapped_ptr
