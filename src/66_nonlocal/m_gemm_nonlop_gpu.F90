@@ -908,7 +908,9 @@ module m_gemm_nonlop_gpu
   ABI_FREE_CUDA( lambda_gpu )
 
   ! if projections_cpu was allocated, then free it here
-  if(.not. local_vectproj) ABI_FREE(projections_cpu)
+  if(.not. local_vectproj) then
+    ABI_FREE(projections_cpu)
+  end if
   ABI_FREE(  s_projections_cpu) ! TO BE REMOVED
   ABI_FREE(vnl_projections_cpu) ! TO BE REMOVED
 
