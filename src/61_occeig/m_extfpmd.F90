@@ -34,7 +34,8 @@ module m_extfpmd
   use m_special_funcs
   use m_specialmsg
   use m_xmpi
-  use m_cgtools,        only : pw_orthon
+  use m_hdr,            only : hdr_type, hdr_init
+  use m_cgtools,        only : pw_orthon, cgnc_cholesky
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
   use m_kg,             only : kpgio, getmpw, mkkin
@@ -65,9 +66,10 @@ module m_extfpmd
     !! Scalars and arrays for numerical extended PW method
     integer :: mpw,mcg,mband,mkmem
     real(dp) :: ecut,ecut_eff
+    type(hdr_type) :: hdr
+    type(MPI_type) :: mpi_enreg
     integer,allocatable :: kg(:,:),npwarr(:),npwtot(:),nband(:)
     real(dp),allocatable :: cg(:,:),eigen(:),occ(:),doccde(:)
-    type(MPI_type) :: mpi_enreg
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -551,15 +553,17 @@ contains
         !   ! call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
         !   ! call pw_orthon_cprj(icg,mcg,npw_k*my_nspinor,my_nspinor,nband_k,ortalgo,subovl,cg,cprj=cprj_cwavef_bands)
         ! else
-       igsc=0
-       mgsc = this%mcg * usepaw
-       ABI_MALLOC(gsc, (2, mgsc))
-       gsc = cg
-        write(0,*) "Orthogonalization...."
-        call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
-        & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
-        write(0,*) "Done."
+        igsc=0
+        mgsc = this%mcg * usepaw
+        ABI_MALLOC(gsc, (2, mgsc))
+        gsc = cg
+        ! write(0,*) "Orthogonalization...."
+        ! call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
+        ! & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
+        ! write(0,*) "Done."
         ! end if
+        ABI_FREE(gsc)
+        call cgnc_cholesky(ext_npw_k*my_nspinor,this%mband,this%cg,istwf_k,this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft,use_gemm=.False.)
 
         ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
         do iband=1,this%mband
@@ -866,13 +870,13 @@ contains
           call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
 
           ! Compute kinetic energy of each band
-          ! do iband=nband_k+1,this%mband
-          do iband=1,this%mband
-            ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
-            & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
-            call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
+          do iband=nband_k+1,this%mband
+          ! do iband=1,this%mband
+            ! ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
+            ! & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
+            ! call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
             ! Should dotr should be same if well cg well orthonormalized.
-            ! dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
+            dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
             ! write(0,*) iband, dotr, extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
           end do
