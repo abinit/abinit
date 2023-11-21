@@ -432,7 +432,7 @@ contains
     ! *********************************************************************
     
     ortalgo=mpi_enreg%paral_kgb
-    ! write(0,*) mpi_enreg%me_kpt,'DEBUG: Generating extended plane wave basis set...'
+    write(0,*) mpi_enreg%me_kpt,'DEBUG: Generating extended plane wave basis set...'
     
     this%eigen(:)=zero
     my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
@@ -530,9 +530,10 @@ contains
             end if
           end do
 
+          
           prop_below=(fg_kin-closest_above)/(count_below*(closest_below-closest_above))
           prop_above=(1-prop_below*count_below)/count_above
-
+          
           ! Do a second loop to set cg coefficients
           do ext_ipw=1,ext_npw_k*my_nspinor
             if (ext_kinpw(ext_ipw)==closest_below) then
@@ -557,13 +558,12 @@ contains
         mgsc = this%mcg * usepaw
         ABI_MALLOC(gsc, (2, mgsc))
         gsc = cg
-        ! write(0,*) "Orthogonalization...."
-        ! call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
-        ! & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
-        ! write(0,*) "Done."
+        write(0,*) "DEBUG: Orthogonalization...."
+        call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
+        & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
         ! end if
         ABI_FREE(gsc)
-        call cgnc_cholesky(ext_npw_k*my_nspinor,this%mband,this%cg,istwf_k,this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft,use_gemm=.False.)
+        ! call cgnc_cholesky(ext_npw_k*my_nspinor,this%mband,this%cg,istwf_k,this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft,use_gemm=.False.)
 
         ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
         do iband=1,this%mband
@@ -572,7 +572,7 @@ contains
           do ext_ipw=1,ext_npw_k*my_nspinor
             norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
           end do
-          write(99,*) mpi_enreg%me_kpt, ikpt, iband, this%eigen(iband+ext_bdtot_index)
+          write(99,*) iband, norm
         end do
 
         ! Increment indexes
@@ -593,7 +593,7 @@ contains
         ABI_FREE(eig_k)
       end do
     end do
-    ! write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'
+    write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'
     call xmpi_sum(this%eigen,xmpi_world,ierr)
   end subroutine generate_extpw
 

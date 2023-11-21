@@ -337,6 +337,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_vxc
   character(len=fnlen) :: fnameabo_wan
   character(len=fnlen) :: fnameabo_wfk
+  character(len=fnlen) :: fnameabo_extpwwfk
   character(len=fnlen) :: fnameabo_wfq
   character(len=fnlen) :: fnameabo_w90
   character(len=fnlen) :: fnameabo_1wf
@@ -815,6 +816,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  dtfil%fnameabo_vxc=trim(dtfil%filnam_ds(4))//'_VXC'
  dtfil%fnameabo_wan=trim(dtfil%filnam_ds(4))//'_WAN'
  dtfil%fnameabo_wfk=trim(dtfil%filnam_ds(4))//'_WFK'
+ dtfil%fnameabo_extpwwfk=trim(dtfil%filnam_ds(4))//'_EXTPWWFK'
  dtfil%fnameabo_wfq=trim(dtfil%filnam_ds(4))//'_WFQ'
  dtfil%fnameabo_w90=trim(dtfil%filnam_ds(4))//'_w90'
  dtfil%fnameabo_1wf=trim(dtfil%filnam_ds(4))//'_1WF'
