@@ -16,6 +16,7 @@ module m_lobpcg2
 #ifdef HAVE_OPENMP
   use omp_lib
 #endif
+  use m_xmpi
 
   use m_time, only : timab
 
@@ -159,7 +160,11 @@ module m_lobpcg2
     lobpcg%neigenpairs = neigenpairs
     lobpcg%spacedim    = spacedim
     lobpcg%blockdim    = blockdim
-    lobpcg%tolerance   = tolerance
+    if (tolerance > 0.0) then
+      lobpcg%tolerance = tolerance
+    else
+      lobpcg%tolerance = 1.0e-20
+    end if
     lobpcg%nline       = nline
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
@@ -188,17 +193,17 @@ module m_lobpcg2
       iadvice = iadvice - 1
     end do
 
-    if ( abs(dble(spacedim * blockdim)/advice_target-1.d0) > 0.5 ) then
-      if ( neigenpairs /= blockdim*iadvice ) then
-        write(std_out,'(1x,A,i5)') "You should try to get npband*bandpp=", neigenpairs/iadvice
-        write(std_out,'(1x,A,i8)',advance="no") "For information matrix size is ", spacedim*blockdim
-        if ( nthread > 1 ) then
-          write(std_out,'(1x,A,i3,1x,A)') "and linalg will use", nthread, "threads"
-        else
-          write(std_out,*)
-        end if
-      end if
-    end if
+!    if ( abs(dble(spacedim * blockdim)/advice_target-1.d0) > 0.5 ) then
+!      if ( neigenpairs /= blockdim*iadvice ) then
+!        write(std_out,'(1x,A,i5)') "You should try to get npband*bandpp=", neigenpairs/iadvice
+!        write(std_out,'(1x,A,i8)',advance="no") "For information matrix size is ", spacedim*blockdim
+!        if ( nthread > 1 ) then
+!          write(std_out,'(1x,A,i3,1x,A)') "and linalg will use", nthread, "threads"
+!        else
+!          write(std_out,*)
+!        end if
+!      end if
+!    end if
 
     call lobpcg_allocateAll(lobpcg,space)
     call timab(tim_init,2,tsec)
@@ -309,33 +314,36 @@ module m_lobpcg2
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, residu, prtvol)
+  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, occ, residu, prtvol, isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: X0   ! Full initial vectors
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
+    type(xgBlock_t), intent(inout) :: occ
     type(xgBlock_t), intent(inout) :: residu
     integer        , intent(in   ) :: prtvol
+    integer        , intent(in   ) :: isppol,ikpt,inonsc,istep,nbdbuf
 
     type(xg_t) :: eigenvalues3N   ! eigen values for Rayleight-Ritz
+    type(xg_t) :: residu_eff
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvalues2N   ! eigen values for Rayleight-Ritz
     integer :: blockdim, blockdim3, blockdim2
     integer :: spacedim
     integer :: iblock, nblock
     integer :: iline, nline
-    integer :: rows_tmp, cols_tmp
+    integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
     integer :: RR_var
     type(xgBlock_t) :: eigenBlock   !
-    type(xgBlock_t) :: residuBlock
+    type(xgBlock_t) :: residuBlock,occBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
-    double precision :: maxResidu, minResidu, average, deviation
-    double precision :: prevMaxResidu
+    double precision :: maxResidu, minResidu
     double precision :: dlamch
-    integer :: eigResiduMax, eigResiduMin
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
+    logical :: compute_residu
+    character(len=500) :: msg
 
     interface
       subroutine getAX_BX(X,AX,BX)
@@ -363,7 +371,12 @@ module m_lobpcg2
 
     nblock = lobpcg%nblock
     nline = lobpcg%nline
-    prevMaxResidu = huge(1d0)/1000.d0 ! Divide by 1000 to avoid 10*huge at the first iteration  which is a FPE
+
+    if (nbdbuf>0) then
+       nband_eff = lobpcg%neigenpairs - nbdbuf
+    else
+       nband_eff = lobpcg%neigenpairs
+    end if
 
     call xgBlock_getSize(eigen,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%neigenpairs .and. cols_tmp /= 1 ) then
@@ -377,22 +390,30 @@ module m_lobpcg2
       ABI_ERROR("Error X0 npairs")
     endif
 
+    if (isppol==1.and.ikpt==1.and.inonsc==1.and.istep==1) then
+      write(msg,'(a,es16.6)') 'lobpcg%tolerance(tolwfr_diago)=',lobpcg%tolerance
+      call wrtout(std_out,msg,'COLL')
+    end if
+
     call xg_init(eigenvalues3N,SPACE_R,blockdim3,1)
     call xg_setBlock(eigenvalues3N,eigenvaluesN,1,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,1,blockdim2,1)
 
     call xgBlock_reshape(eigen,(/ blockdim, nblock /))
     call xgBlock_reshape(residu,(/ blockdim, nblock /))
+    call xgBlock_reshape(occ,(/ blockdim, nblock /))
 
     lobpcg%AllX0 = X0
 
+    call xg_init(residu_eff,SPACE_R,blockdim,1)
+
     !! Start big loop over blocks
     do iblock = 1, nblock
-      if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
       nrestart = 0
 
       call lobpcg_getX0(lobpcg,iblock)
       call xgBlock_setBlock(residu,residuBlock,iblock,blockdim,1)
+      call xgBlock_setBlock(occ,occBlock,iblock,blockdim,1)
 
       if ( iblock > 1 ) then
         call lobpcg_setPreviousX0_BX0(lobpcg,iblock)
@@ -411,6 +432,8 @@ module m_lobpcg2
 
       ! Do first RR on X to get the first eigen values
       call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr)
+
+      compute_residu = .true.
 
       do iline = 1, nline
 
@@ -431,25 +454,31 @@ module m_lobpcg2
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax,&
-                                                       min_val=minResidu,min_elt=eigResiduMin)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
-        if ( prtvol == 4 ) then
-          write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
-            "(",minResidu,",",maxResidu, ") for eigen vectors (", &
-            eigResiduMin,",",eigResiduMax,")"
-          call xgBlock_average(residuBlock,average)
-          call xgBlock_deviation(residuBlock,deviation)
-          write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
-          if ( maxResidu < lobpcg%tolerance ) then
-            write(std_out,*) "Block ", iblock, "converged at iline =", iline
-            exit
-          else if ( 10.d0*prevMaxResidu < maxResidu .and. iline > 1) then
-            write(std_out,*) "Block ", iblock, "stopped at iline =", iline
-            exit
-          endif
+
+        if (nbdbuf>=0) then
+          call xgBlock_copy(residuBlock,residu_eff%self)
+          iband_min = 1 + blockdim*(iblock-1)
+          iband_max = blockdim*iblock
+          if (iband_max<=nband_eff) then ! all bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          else if (iband_min<=nband_eff) then ! some bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu,row_bound=(nband_eff-iband_min+1))
+          else ! all bands of this block are above nband_eff
+            minResidu = 0.0
+            maxResidu = 0.0
+          end if
+        else if (nbdbuf==-101) then
+          call xgBlock_apply_diag_nospin(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+        else
+          ABI_ERROR('Bad value of nbdbuf')
         end if
-        prevMaxResidu = maxResidu
+        if ( maxResidu < lobpcg%tolerance ) then
+          compute_residu = .false.
+          exit
+        end if
 
         ! Orthonormalize with respect to previous blocks
         if ( iblock > 1 ) then
@@ -506,13 +535,38 @@ module m_lobpcg2
 
       end do
 
-      ! Recompute AX-Lambda*BX for the last time
-      call lobpcg_getResidu(lobpcg,eigenvaluesN)
-      ! Apply preconditioner
-      call pcond(lobpcg%W)
-      ! Recompute residu norm here !
-      call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax, &
-                                                     min_val=minResidu,min_elt=eigResiduMin)
+      if ( compute_residu ) then
+        ! Recompute AX-Lambda*BX for the last time
+        call lobpcg_getResidu(lobpcg,eigenvaluesN)
+        ! Apply preconditioner
+        call pcond(lobpcg%W)
+        ! Recompute residu norm here !
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
+        if (nbdbuf>=0) then
+          call xgBlock_copy(residuBlock,residu_eff%self)
+          iband_min = 1 + blockdim*(iblock-1)
+          iband_max = blockdim*iblock
+          if (iband_max<=nband_eff) then ! all bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          else if (iband_min<=nband_eff) then ! some bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu,row_bound=(nband_eff-iband_min+1))
+          else ! all bands of this block are above nband_eff
+            minResidu = 0.0
+            maxResidu = 0.0
+          end if
+        else if (nbdbuf==-101) then
+          call xgBlock_apply_diag_nospin(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+        else
+          ABI_ERROR('Bad value of nbdbuf')
+        end if
+      end if
+
+      if (prtvol==5.and.xmpi_comm_rank(lobpcg%spacecom)==0) then
+        write(msg,'(6(a,i4),2(a,es16.6))') 'lobpcg | istep=',istep,'| isppol=',isppol,'| ikpt=',ikpt,&
+          & '| inonsc=',inonsc,'| iblock=',iblock,'| nline_done=',iline-1,'| minRes=',minResidu,'| maxRes=',maxResidu
+        call wrtout(std_out,msg,'PERS')
+      end if
 
       ! Save eigenvalues
       call xgBlock_setBlock(eigen,eigenBlock,iblock,blockdim,1)
@@ -530,8 +584,10 @@ module m_lobpcg2
 
     call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
     call xgBlock_reshape(residu,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(occ,(/ blockdim*nblock, 1 /))
 
     call xg_free(eigenvalues3N)
+    call xg_free(residu_eff)
 
     if ( ierr /= 0 ) then
       ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
