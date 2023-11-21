@@ -79,6 +79,9 @@ module m_slk
    integer :: ictxt = xmpi_comm_null
    ! BLACS context i.e. MPI communicator.
 
+   logical :: use_gpu = .false.
+   ! Wether GPU is used, relevant for determining matrix block size.
+
  contains
    procedure :: init =>  grid_init  ! Set up the processor grid for ScaLAPACK.
  end type grid_scalapack
@@ -401,11 +404,12 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine grid_init(grid, nbprocs, comm, grid_dims)
+subroutine grid_init(grid, nbprocs, comm, use_gpu, grid_dims)
 
 !Arguments ------------------------------------
  class(grid_scalapack),intent(out) :: grid
  integer,intent(in) :: nbprocs,comm
+ logical,intent(in) :: use_gpu
  integer,optional,intent(in) :: grid_dims(2)
 
 !Local variables-------------------------------
@@ -433,6 +437,7 @@ subroutine grid_init(grid, nbprocs, comm, grid_dims)
  ABI_CHECK(product(grid%dims) == nbprocs, sjoin("grid%dims:", ltoa(grid%dims), "does not agree with nprocs:", itoa(nbprocs)))
 
  grid%ictxt = comm
+ grid%use_gpu = use_gpu
 
 #ifdef HAVE_LINALG_SCALAPACK
  ! 'R': Use row-major natural ordering
@@ -523,9 +528,9 @@ subroutine processor_init(processor, comm, grid_dims)
  myproc = xmpi_comm_rank(comm)
 
  if (present(grid_dims)) then
-   call grid%init(nbproc, comm, grid_dims=grid_dims)
+   call grid%init(nbproc, comm, .false., grid_dims=grid_dims)
  else
-   call grid%init(nbproc, comm)
+   call grid%init(nbproc, comm, .false.)
  end if
 
  call build_processor_scalapack(processor, grid, myproc, comm)
@@ -594,13 +599,13 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
 #ifdef HAVE_LINALG_ELPA
- ! FIXME, to be investigated : - ELPA seem to prefer a block size that is a power of 2, hence 32
- !                             - Should we use specific setting based on using ELPA GPU kernel or not ?
- integer, parameter :: DEFAULT_SIZE_BLOCS = 16
+ integer, parameter :: DEFAULT_SIZE_BLOCS = 1
 #else
  ! As recommended by Intel MKL, a more sensible default than the previous value of 40
  integer, parameter :: DEFAULT_SIZE_BLOCS = 24
 #endif
+ ! As recommanded in ELPA, which advises distributions as squared as possible using powers of 2
+ integer, parameter :: DEFAULT_SIZE_BLOCS_GPU = 16
  integer :: info,sizeb
  integer,external :: NUMROC
  !character(len=500) :: msg
@@ -610,6 +615,7 @@ subroutine init_matrix_scalapack(matrix, nbli_global, nbco_global, processor, is
  !call matrix%free()
 
  sizeb = DEFAULT_SIZE_BLOCS
+ if(processor%grid%use_gpu) sizeb = DEFAULT_SIZE_BLOCS_GPU
 
  !Records of the matrix type
  matrix%processor => processor
