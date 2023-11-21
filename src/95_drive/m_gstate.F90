@@ -1481,16 +1481,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
     dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
     occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
-   ! Write extended plane waves wavefunctions
-   if (associated(extfpmd)) then
-     if (extfpmd%version==5) then
-       call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
-&       extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
-&       extfpmd%nband,dtset%nkpt,extfpmd%npwarr,dtset%nsppol,&
-&       extfpmd%occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-     end if
-   end if
-
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
    if (dtset%getkerange_filepath /= ABI_NOFILE) then
      call wfk_klist2mesh(dtfil%fnameabo_wfk, dtset%getkerange_filepath, dtset, comm)
@@ -1498,6 +1488,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
+   
+   ! Write extended plane waves wavefunctions
+   if (associated(extfpmd)) then
+    if (extfpmd%version==5) then
+      call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
+&       extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
+&       extfpmd%nband,dtset%nkpt,extfpmd%npwarr,dtset%nsppol,&
+&       extfpmd%occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+    end if
+  end if
  end if
 
  if (dtset%prtwf==2) call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)

@@ -426,7 +426,7 @@ contains
     real(dp) :: kpoint(3)
     integer,allocatable :: kg_k(:,:),ext_kg_k(:,:),indices_below(:),indices_above(:)
     real(dp),allocatable :: kinpw(:),ext_kinpw(:),eig_k(:)
-    real(dp),allocatable :: cwavef(:,:)
+    real(dp),allocatable :: cwavef(:,:),ext_cwavef(:,:)
     real(dp),allocatable :: gsc(:,:)
 
     ! *********************************************************************
@@ -469,6 +469,7 @@ contains
         ABI_MALLOC(kinpw,(npw_k))
         ABI_MALLOC(ext_kinpw,(ext_npw_k))
         ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*nband_k))
+        ABI_MALLOC(ext_cwavef,(2,ext_npw_k*my_nspinor*this%mband))
         eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
         if (minval(eig_k)>1.d100) eig_k=zero
         kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
@@ -497,7 +498,7 @@ contains
         cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-1)*npw_k*my_nspinor+icg:nband_k*npw_k*my_nspinor+icg)
         call meanvalue_g(dotr,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,cwavef,cwavef,0)
         bandshift=extfpmd_i_fg(dotr,this%ucvol)-nband_k
-        bandshift=this%bandshift ! TEMPORARY
+        ! bandshift=this%bandshift ! TEMPORARY
         ! write(0,*) bandshift, this%bandshift
 
         ! Set extended plane waves coefficients here
@@ -558,22 +559,30 @@ contains
         mgsc = this%mcg * usepaw
         ABI_MALLOC(gsc, (2, mgsc))
         gsc = cg
-        write(0,*) "DEBUG: Orthogonalization...."
-        call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
-        & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
+        ! write(0,*) "DEBUG: Orthogonalization...."
+        ! call pw_orthon(0,0,istwf_k,this%mcg,mgsc,ext_npw_k*my_nspinor,this%mband,4,gsc,usepaw,this%cg,&
+        ! & this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft)
         ! end if
         ABI_FREE(gsc)
         ! call cgnc_cholesky(ext_npw_k*my_nspinor,this%mband,this%cg,istwf_k,this%mpi_enreg%me_g0,this%mpi_enreg%comm_bandspinorfft,use_gemm=.False.)
+        
+        ! Update extpw eigen values with orthogonalized ones (should not be different)
+        ! do iband=1,this%mband
+        !   ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
+        !   & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
+        !   call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
+        !   this%eigen(iband+ext_bdtot_index)=dotr+this%shiftfactor
+        ! end do
 
         ! write(0,*) "DEBUG: Checking extended plane waves coefficients normalization"
-        do iband=1,this%mband
-          fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
-          norm=zero
-          do ext_ipw=1,ext_npw_k*my_nspinor
-            norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
-          end do
-          write(99,*) iband, norm
-        end do
+        ! do iband=1,this%mband
+        !   fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
+        !   norm=zero
+        !   do ext_ipw=1,ext_npw_k*my_nspinor
+        !     norm=norm+(this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2+this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)**2)
+        !   end do
+        !   write(99,*) ikpt, iband, norm
+        ! end do
 
         ! Increment indexes
         bdtot_index=bdtot_index+nband_k
@@ -585,6 +594,7 @@ contains
           ext_ikg=ext_ikg+ext_npw_k
         end if
 
+        ABI_FREE(ext_cwavef)
         ABI_FREE(cwavef)
         ABI_FREE(ext_kinpw)
         ABI_FREE(kinpw)
@@ -875,7 +885,6 @@ contains
             ! ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
             ! & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
             ! call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
-            ! Should dotr should be same if well cg well orthonormalized.
             dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
             ! write(0,*) iband, dotr, extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
