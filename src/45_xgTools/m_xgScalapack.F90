@@ -91,12 +91,13 @@ module m_xgScalapack
 !! OUTPUT
 !!
 !! SOURCE
-  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,usable)
+  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,use_gpu,usable)
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     integer            , intent(in   ) :: comm
     integer            , intent(in   ) :: maxDim
     integer            , intent(in   ) :: verbosity
+    logical            , intent(in   ) :: use_gpu
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -201,7 +202,7 @@ module m_xgScalapack
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK), use_gpu)
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))

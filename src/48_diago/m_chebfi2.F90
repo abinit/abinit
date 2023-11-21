@@ -1018,7 +1018,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   neigenpairs  = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
 
 #ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,use_slk)
+    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,(chebfi%use_gpu_cuda/=ABI_GPU_DISABLED),use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
