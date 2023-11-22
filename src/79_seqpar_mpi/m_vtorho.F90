@@ -1208,8 +1208,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
          &         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
          &         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-         &         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
-         &         gs_hamk%usepaw)
+         &         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm)
          ! Compute extended plane wave occupations
          call timab(990,1,tsec)
          call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
@@ -1243,6 +1242,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%effmass_free,gmet,dtset%kptns,&
 &       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%nkpt,dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband,dtset%mband,occ)
+       write(0,*) extfpmd%nelect, extfpmd%e_kinetic, extfpmd%entropy
      end if
 
 !    !=========  DMFT call begin ============================================
