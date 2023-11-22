@@ -928,8 +928,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(associated(extfpmd)) then
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
-&     dtset%nkpt,dtset%nsppol,dtset%tsmear,dtset%wtk,mpi_enreg)
-     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%effmass_free,&
+&     dtset%nkpt,dtset%nsppol,dtset%tsmear,dtset%wtk)
+     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear,dtset%effmass_free,&
 &     gmet,dtset%kptns,dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk)
    end if
 
