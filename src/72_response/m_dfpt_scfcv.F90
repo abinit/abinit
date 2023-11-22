@@ -1552,7 +1552,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  if (ipert/=dtset%natom+1.and.dtset%prt1mag==1) then
    prtopt=1
-   zeemfac=-half
+   zeemfac=half
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
  & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
  & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
