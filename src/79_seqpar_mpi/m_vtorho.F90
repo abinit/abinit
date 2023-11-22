@@ -45,7 +45,7 @@ module m_vtorho
  use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
- use m_occ,                only : newocc
+ use m_occ,                only : newocc, getnel
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -1206,20 +1206,22 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (extfpmd%version==5) then
          ! Get extended plane wave cutoff
          call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-         &         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-         &         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-         &         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm)
+&         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+&         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+&         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm)
          ! Compute extended plane wave occupations
          call timab(990,1,tsec)
          call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-         &         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-         &         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
-         &         dtset%tsmear,dtset%wtk,&
-         &         prtstm=dtset%prtstm,stmbias=dtset%stmbias)
+&         dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&         dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
+&         dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+         ! Update Kohn-Sham occ and doccde from extended pw arrays
+         call getnel(doccde,zero,eigen,extfpmd%nelect,energies%e_fermie,energies%e_fermih,&
+&         two/(dtset%nsppol*dtset%nspinor),dtset%mband,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&         dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
+&         extfpmd_nbdbuf=extfpmd%nbdbuf)
          call timab(990,2,tsec)
          compute_newocc=.false.
-         ! Update Kohn-Sham occ and doccde from extended pw arrays
-         call extfpmd%update_ks_occ(occ,doccde,dtset%mband,dtset%nkpt,dtset%nsppol,mpi_enreg,dtset%nband)
        end if
      end if
 
@@ -1229,8 +1231,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &       dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &       dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
-&       dtset%tsmear,dtset%wtk,&
-&       prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+&       dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
        call timab(990,2,tsec)
      end if
 
@@ -1243,7 +1244,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
 &       dtset%wtk,dtset%nband,dtset%mband,occ)
-       write(0,*) extfpmd%nelect, extfpmd%e_kinetic, extfpmd%entropy
      end if
 
 !    !=========  DMFT call begin ============================================

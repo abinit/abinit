@@ -421,7 +421,7 @@ contains
     integer :: index_below,index_above
     real(dp) :: ecut_eff,ekin_max,fg_kin,closest_below,closest_above,prop_below,prop_above
     real(dp) :: norm,nband_k_kin,count_below,count_above
-    real(dp) :: tmp,bandshift,dotr
+    real(dp) :: tmp,bandshift,dotr,phase,random_value
     ! Arrays
     real(dp) :: kpoint(3)
     integer,allocatable :: kg_k(:,:),ext_kg_k(:,:),indices_below(:),indices_above(:)
@@ -479,7 +479,7 @@ contains
         call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
 
         ! Copy non extended plane waves coefficients and eigenvalues here
-        do iband=1,nband_k
+        do iband=1,nband_k-this%nbdbuf
           do ipw=1,npw_k*my_nspinor
             do ext_ipw=1,ext_npw_k*my_nspinor
               if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
@@ -491,13 +491,13 @@ contains
         end do
         
         ! Find integration constant of extfpmd (bandshift)
-        cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-1)*npw_k*my_nspinor+icg:nband_k*npw_k*my_nspinor+icg)
+        cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-this%nbdbuf-1)*npw_k*my_nspinor+icg:(nband_k-this%nbdbuf)*npw_k*my_nspinor+icg)
         call meanvalue_g(dotr,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,cwavef,cwavef,0)
-        ! bandshift=extfpmd_i_fg(dotr,this%ucvol)-nband_k
-        bandshift=this%bandshift ! Converges faster, but transition less smooth
+        bandshift=extfpmd_i_fg(dotr,this%ucvol)-(nband_k-this%nbdbuf)
+        ! bandshift=this%bandshift ! Converges faster, but transition less smooth
 
         ! Set extended plane waves coefficients here
-        do iband=nband_k+1,this%mband
+        do iband=nband_k-this%nbdbuf+1,this%mband
           ! Get fermi gas energy and set eigenvalue
           fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
           this%eigen(iband+ext_bdtot_index)=fg_kin+this%shiftfactor
@@ -535,13 +535,19 @@ contains
           prop_above=(one-prop_below*count_below)/count_above
           
           ! Do a second loop to set cg coefficients (and reset old ones).
+          ! Generating random phase between 0 and 2pi.
+          ! random_value=zero
           do ext_ipw=1,ext_npw_k*my_nspinor
+            ! call random_number(random_value)
+            phase=random_value*two*PI
             this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=zero
             if (ext_kinpw(ext_ipw)==closest_below) then
-              this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)
+              this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)*cos(phase)
+              this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)*sin(phase)
             end if
             if (ext_kinpw(ext_ipw)==closest_above) then
-              this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_above)
+              this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_above)*cos(phase)
+              this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_above)*sin(phase)
             end if
           end do
         end do
@@ -770,7 +776,7 @@ contains
             ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
-          do iband=nband_k+1,this%mband
+          do iband=nband_k-this%nbdbuf+1,this%mband
             nelect=nelect+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
           end do
           ext_bdtot_index=ext_bdtot_index+this%mband
@@ -965,7 +971,7 @@ contains
           call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
 
           ! Compute kinetic energy of each band
-          do iband=nband_k+1,this%mband
+          do iband=nband_k-this%nbdbuf+1,this%mband
           ! do iband=1,this%mband
             ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
             & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
@@ -1156,7 +1162,7 @@ contains
             cycle
           end if
 
-          do iband=nband_k+1,this%mband
+          do iband=nband_k-this%nbdbuf+1,this%mband
             fn=this%occ(iband+ext_bdtot_index)/maxocc
             this%entropy=this%entropy-wtk(ikpt)*maxocc*(fn*log(fn)+(one-fn)*log(one-fn))
           end do
