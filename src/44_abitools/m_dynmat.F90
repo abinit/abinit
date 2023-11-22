@@ -4509,14 +4509,14 @@ subroutine d3lwsym(blkflg,d3,indsym,mpert,natom,nsym,symrec,symrel,timdisp)
              if ((blkflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1).and. &
               (blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert)/=1)) then
 
-               if (timdisp/=1) then
+!               if (timdisp/=1) then
                  d3(1,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
                  d3(1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
                  d3(2,i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = &
                 -d3(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)
 
                  blkflg(i2dir,i2pert,i1dir,i1pert,i3dir,i3pert) = 1
-               end if
+!               end if
              end if
 
            end do
