@@ -1238,10 +1238,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nsppol,dtset%tsmear,dtset%wtk,mpi_enreg)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%effmass_free,gmet,dtset%kptns,&
+&       dtset%nsppol,dtset%tsmear,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
 &       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk)
-       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,mpi_enreg,dtset%nkpt,dtset%nsppol,dtset%nspinor,dtset%wtk,dtset%nband,dtset%mband,occ)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+&       dtset%wtk,dtset%nband,dtset%mband,occ)
        write(0,*) extfpmd%nelect, extfpmd%e_kinetic, extfpmd%entropy
      end if
 

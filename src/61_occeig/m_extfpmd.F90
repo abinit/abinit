@@ -534,8 +534,9 @@ contains
           prop_below=(fg_kin-closest_above)/(count_below*(closest_below-closest_above))
           prop_above=(one-prop_below*count_below)/count_above
           
-          ! Do a second loop to set cg coefficients
+          ! Do a second loop to set cg coefficients (and reset old ones).
           do ext_ipw=1,ext_npw_k*my_nspinor
+            this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=zero
             if (ext_kinpw(ext_ipw)==closest_below) then
               this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=sqrt(prop_below)
             end if
@@ -715,14 +716,13 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk,mpi_enreg)
+  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nkpt,nsppol
     real(dp),intent(in) :: fermie,tsmear
     real(dp),intent(inout) :: nelect
     class(extfpmd_type),intent(inout) :: this
-    type(MPI_type),intent(inout),optional :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
@@ -766,7 +766,7 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) then
             ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
@@ -887,14 +887,13 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_e_kinetic(this,fermie,tsmear,mpi_enreg,effmass_free,gmet,kptns,nkpt,mkmem,istwfk,&
+  subroutine compute_e_kinetic(this,fermie,tsmear,effmass_free,gmet,kptns,nkpt,mkmem,istwfk,&
   & nspinor,nsppol,nband,wtk)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nkpt,mkmem,nspinor,nsppol
     class(extfpmd_type),intent(inout) :: this
     real(dp),intent(in) :: fermie,tsmear,effmass_free
-    type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
     real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt),wtk(nkpt)
@@ -914,6 +913,7 @@ contains
 
     ! *********************************************************************
 
+    dotr=zero
     this%e_kinetic=zero
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
 
@@ -938,7 +938,7 @@ contains
     ! Computes extended pw contribution to kinetic energy summing
     ! over ext pw states from nband_k to this%mband
     if(this%version==5) then
-      my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
+      my_nspinor=max(1,nspinor/this%mpi_enreg%nproc_spinor)
       ! Loop over spins
       ext_bdtot_index=0
       ext_icg=0
@@ -950,7 +950,7 @@ contains
           istwf_k=istwfk(ikpt)
           ext_npw_k=this%npwarr(ikpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) then
             ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
@@ -1058,13 +1058,12 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_entropy(this,fermie,tsmear,mpi_enreg,nkpt,nsppol,nspinor,wtk,nband,mband,occ)
+  subroutine compute_entropy(this,fermie,tsmear,nkpt,nsppol,nspinor,wtk,nband,mband,occ)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: nkpt,nsppol,nspinor,mband
     real(dp),intent(in) :: fermie,tsmear
-    type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
@@ -1152,7 +1151,7 @@ contains
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           ! Skip this k-point if not the proper processor
-          if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) then
             ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
