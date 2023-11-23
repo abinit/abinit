@@ -63,6 +63,7 @@ module m_extfpmd
     real(dp) :: nelect,shiftfactor,ucvol,bandshift
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
+    real(dp),allocatable :: bandshiftk(:)
     !! Scalars and arrays for numerical extended PW method
     integer :: mpw,mcg,mband,mkmem
     real(dp) :: ecut,ecut_eff
@@ -144,6 +145,7 @@ contains
     ABI_MALLOC(this%nelectarr,(nfft,nspden))
     this%nelectarr(:,:)=zero
     this%bandshift=zero
+    ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
     this%shiftfactor=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
@@ -252,6 +254,8 @@ contains
     ABI_FREE(this%vtrial)
     this%nelectarr(:,:)=zero
     ABI_FREE(this%nelectarr)
+    this%bandshiftk(:)=zero
+    ABI_FREE(this%bandshiftk)
     this%nfft=0
     this%nspden=0
     this%bcut=0
@@ -356,6 +360,7 @@ contains
     ! Get extended FPMD band energy cutoff
     this%e_bcut=zero
     this%bandshift=zero
+    this%bandshiftk(:)=zero
     band_index=0
     do isppol=1,nsppol
       do ikpt=1,nkpt
@@ -363,12 +368,10 @@ contains
         this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)/nsppol
         this%bandshift=this%bandshift+wtk(ikpt)*&
         & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
+        this%bandshiftk(ikpt+(isppol-1)*nkpt)=extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf)
         band_index=band_index+nband_k
       end do
     end do
-    ! if (me==0) then
-    !   write(0,*) this%bandshift
-    ! end if
   end subroutine compute_shiftfactor
   !!***eigen(band_index+nband_k-this%nbdbuf)
 
@@ -425,8 +428,7 @@ contains
     ! Arrays
     real(dp) :: kpoint(3)
     integer,allocatable :: kg_k(:,:),ext_kg_k(:,:),indices_below(:),indices_above(:)
-    real(dp),allocatable :: kinpw(:),ext_kinpw(:),eig_k(:)
-    real(dp),allocatable :: cwavef(:,:),ext_cwavef(:,:)
+    real(dp),allocatable :: ext_kinpw(:),eig_k(:)
 
     ! *********************************************************************
     
@@ -461,23 +463,14 @@ contains
         ABI_MALLOC(eig_k,(nband_k))
         ABI_MALLOC(kg_k,(3,npw_k))
         ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
-        ABI_MALLOC(kinpw,(npw_k))
         ABI_MALLOC(ext_kinpw,(ext_npw_k))
-        ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*nband_k))
-        ABI_MALLOC(ext_cwavef,(2,ext_npw_k*my_nspinor*this%mband))
 
         eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
         if (minval(eig_k)>1.d100) eig_k=zero
         kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
         ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
         kpoint(:)=kptns(:,ikpt)
-        ! Compute kinetic energy of extended pw.
-        ! /!\ We don't keep this in memory because it can be heavy.
-        kinpw(:)=zero
-        ext_kinpw(:)=zero
-        call mkkin(ecut,ecutsm,effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
-        call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
-
+        
         ! Copy non extended plane waves coefficients and eigenvalues here
         do iband=1,nband_k-this%nbdbuf
           do ipw=1,npw_k*my_nspinor
@@ -490,12 +483,13 @@ contains
           this%eigen(iband+ext_bdtot_index)=eig_k(iband)
         end do
         
-        ! Find integration constant of extfpmd (bandshift)
-        cwavef(1:2,1:npw_k*my_nspinor)=cg(:,1+(nband_k-this%nbdbuf-1)*npw_k*my_nspinor+icg:(nband_k-this%nbdbuf)*npw_k*my_nspinor+icg)
-        call meanvalue_g(dotr,kinpw,0,istwf_k,mpi_enreg,npw_k,my_nspinor,cwavef,cwavef,0)
-        bandshift=extfpmd_i_fg(dotr,this%ucvol)-(nband_k-this%nbdbuf)
         ! bandshift=this%bandshift ! Converges faster, but transition less smooth
-
+        bandshift=this%bandshiftk(ikpt+(isppol-1)*nkpt) 
+        
+        ! Compute kinetic energy of extended pw.
+        ! /!\ We don't keep this in memory because it can be heavy.
+        ext_kinpw(:)=zero
+        call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
         ! Set extended plane waves coefficients here
         do iband=nband_k-this%nbdbuf+1,this%mband
           ! Get fermi gas energy and set eigenvalue
@@ -572,10 +566,7 @@ contains
           ext_ikg=ext_ikg+ext_npw_k
         end if
 
-        ABI_FREE(ext_cwavef)
-        ABI_FREE(cwavef)
         ABI_FREE(ext_kinpw)
-        ABI_FREE(kinpw)
         ABI_FREE(ext_kg_k)
         ABI_FREE(kg_k)
         ABI_FREE(eig_k)
