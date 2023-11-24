@@ -106,7 +106,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: calc_forces
  integer                        :: dimffnl
  integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
- integer                        :: iband
+ integer                        :: iband, ipw
  integer                        :: ibg, icg
  integer                        :: ider, idir
  integer                        :: ierr, ilm
@@ -284,7 +284,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       ! Kinetic energy
       kpoint(:)=dtset%kptns(:,ikpt)
       ABI_MALLOC(kinpw,(npw_k))
-      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0)
+      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0,tdks%vecpot_red)
 
       ! Compute (k+G) vectors (only if useylm=1)
       nkpg=3*calc_forces*dtset%nloalg(3)

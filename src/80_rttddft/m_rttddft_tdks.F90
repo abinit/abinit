@@ -138,13 +138,14 @@ module m_rttddft_tdks
    integer,allocatable              :: nattyp(:)   !nb of atoms of different types
    integer,allocatable              :: npwarr(:)   !number of PW at each k-point
    integer,allocatable              :: symrec(:,:,:) !sym. operations in recip space
-   real(dp)                         :: e_field(3)  !TD external elec. field perturbation
+   real(dp)                         :: efield(3)   !TD external elec. field perturbation
    real(dp)                         :: ef_zero(3)  !E_0 = |E_0|*polarization (Elec. field perturbation)
-   real(dp)                         :: gprimd(3,3) !prim cell vectors in recip space
+   real(dp)                         :: gprimd(3,3) !primitive cell vectors in recip space
    real(dp)                         :: gmet(3,3)   !metric tensor in recip space
    real(dp)                         :: rprimd(3,3) !prim cell vectors in direct space
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
-   real(dp)                         :: vec_pot(3)  !external vector potential (Elec. field perturbation)
+   real(dp)                         :: vecpot(3)   !external vector potential (Elec. field perturbation)
+   real(dp)                         :: vecpot_red(3)  !external vector potential in reduced G coord. (Elec. field perturbation)
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: eigen(:)    !eigen-energies
@@ -334,14 +335,15 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
 
  !TD external elec. field perturbation
  !Init vector potential and associated constants
- tdks%e_field(:) = 0.0_dp
- tdks%vec_pot(:) = 0.0_dp
+ tdks%efield(:)  = 0.0_dp
+ tdks%vecpot(:)  = 0.0_dp
+ tdks%vecpot_red(:)  = 0.0_dp
  tdks%ef_zero(:) = dtset%td_ef_pol(:)*dtset%td_ef_ezero
  tdks%ef_tau     = dtset%td_ef_tau
  tdks%ef_omega   = 2.0_dp*pi*Sp_Lt/dtset%td_ef_lambda !2*pi*f=2*pi*c/lambda
  tdks%ef_tzero   = dtset%td_ef_tzero
- tdks%ef_sin_a   = 2.0_dp*pi/dtset%td_ef_tau+tdks%ef_omega
- tdks%ef_sin_b   = 2.0_dp*pi/dtset%td_ef_tau-tdks%ef_omega
+ tdks%ef_sin_a   = 2.0_dp*pi/dtset%td_ef_tau + tdks%ef_omega
+ tdks%ef_sin_b   = 2.0_dp*pi/dtset%td_ef_tau - tdks%ef_omega
  !FB: That should be all for now but there were few more initializations in
  !g_state.F90 in particular related to electric field, might want to check it out
  !once we reach the point of including external electric field

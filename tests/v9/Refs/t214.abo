@@ -1,5 +1,5 @@
 
-.Version 9.9.3 of ABINIT 
+.Version 9.11.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Apr 2023.
-- ( at 09h51 )
+.Starting date : Mon 20 Nov 2023.
+- ( at 13h33 )
   
-- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t153-t154-t155/t154.abi
-- output file    -> t154.abo
-- root for input  files -> t154i
-- root for output files -> t154o
-
+- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t213-t214-t215/t214.abi
+- output file    -> t214.abo
+- root for input  files -> t214i
+- root for output files -> t214o
 
  Symmetries : the unit cell is not primitive
 ================================================================================
@@ -321,7 +320,7 @@ electrons: {nelect:   1.20000000E+01, charge:   0.00000000E+00, occopt:   3.0000
 meta: {optdriver: 9, }
 ...
 
- mkfilename: getwfk from: t154i_WFK
+ mkfilename: getwfk from: t214i_WFK
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -368,7 +367,7 @@ meta: {optdriver: 9, }
 
 -------------    Reading initial wavefunctions     -------------
 
--inwffil : will read wavefunctions from disk file t154i_WFK
+-inwffil : will read wavefunctions from disk file t214i_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -817,10 +816,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.6
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.1  wall=          2.3

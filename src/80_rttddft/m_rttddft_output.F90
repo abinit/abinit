@@ -122,6 +122,8 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
          call wrtout(tdks%tdener_unit,msg)
       end if
    end if
+ end if
+ if (istep == tdks%first_step .and. dtset%td_ef_type /= 0) then
    ! Open elec field file and writes header if needed
    if (open_file(tdks%fname_tdef, msg, newunit=tdks%tdef_unit, status='unknown', form='formatted') /= 0) then
       write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdef
@@ -169,7 +171,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  !** Writes TD elec. field and associated vector potential if needed
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%e_field(:), tdks%vec_pot(:)
+   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%efield(:), tdks%vecpot(:)
    call wrtout(tdks%tdef_unit,msg)
  end if
 

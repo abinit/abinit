@@ -1,5 +1,5 @@
 
-.Version 9.9.3 of ABINIT 
+.Version 9.11.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,17 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Apr 2023.
-- ( at 09h51 )
+.Starting date : Mon 20 Nov 2023.
+- ( at 13h33 )
   
-- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t150-t151-t152/t151.abi
-- output file    -> t151.abo
-- root for input  files -> t151i
-- root for output files -> t151o
+- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t210-t211-t212/t211.abi
+- output file    -> t211.abo
+- root for input  files -> t211i
+- root for output files -> t211o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-
  Symmetries : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -344,7 +343,7 @@ electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.0000
 meta: {optdriver: 9, }
 ...
 
- mkfilename: getwfk from: t151i_WFK
+ mkfilename: getwfk from: t211i_WFK
 
 
 ---------------------------------------------------------------------------
@@ -398,7 +397,7 @@ meta: {optdriver: 9, }
 
 -------------    Reading initial wavefunctions     -------------
 
--inwffil : will read wavefunctions from disk file t151i_WFK
+-inwffil : will read wavefunctions from disk file t211i_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -419,7 +418,7 @@ Integrated density (ie. total nb of electrons) =      72.004669
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.27    1.27
+- Time - cpu, wall (sec):    1.26    1.27
 
 
 --- Iteration 2
@@ -438,7 +437,7 @@ Integrated density (ie. total nb of electrons) =      72.004669
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.45    0.45
+- Time - cpu, wall (sec):    0.44    0.44
 
 
 --- Iteration 3
@@ -476,7 +475,7 @@ Integrated density (ie. total nb of electrons) =      72.004669
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.45    0.45
+- Time - cpu, wall (sec):    0.44    0.44
 
 
 --- Iteration 5
@@ -872,10 +871,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.5  wall=          5.2
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.5  wall=          5.2
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.4  wall=          4.8
