@@ -322,7 +322,7 @@ end subroutine getmpw
 !!
 !! SOURCE
 
-subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
+subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2,vecpot)
 
 !Arguments ------------------------------------
 !scalars
@@ -333,6 +333,7 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  integer,intent(in) :: kg(3,npw)
  real(dp),intent(in) :: gmet(3,3),kpt(3)
  real(dp),intent(out) :: kinpw(npw)
+ real(dp),optional,intent(in) :: vecpot(3)
 
 !Local variables-------------------------------
 !scalars
@@ -340,10 +341,19 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
  real(dp),parameter :: break_symm=1.0d-11
  real(dp) :: ecutsm_inv,fsm,gpk1,gpk2,gpk3,htpisq,kinetic,kpg2,dkpg2,xx
  real(dp) :: d1kpg2,d2kpg2,ddfsm, dfsm
+ real(dp) :: akpg, asq
+ logical :: l_vecpot
 !arrays
  real(dp) :: gmet_break(3,3) !, tsec(2)
 
 ! *************************************************************************
+
+ l_vecpot = .false.
+ if (present(vecpot)) then
+    if (abs(vecpot(1))>tol12 .or. abs(vecpot(2))>tol12 .or. abs(vecpot(3))>tol12) then
+       l_vecpot = .true.
+    end if
+ end if
 
  ! htpisq is (1/2) (2 Pi) **2:
  htpisq=0.5_dp*(two_pi)**2
@@ -363,23 +373,44 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2)
    end if
  end if
 
-!$OMP PARALLEL DO PRIVATE(dkpg2,d1kpg2,d2kpg2,gpk1,gpk2,gpk3,ig,kinetic,kpg2,xx,fsm,dfsm,ddfsm) &
+ if (l_vecpot) then
+   ! A^2
+   asq=( gmet_break(1,1)*vecpot(1)*vecpot(1) + &
+         gmet_break(2,2)*vecpot(2)*vecpot(2) + &
+         gmet_break(3,3)*vecpot(3)*vecpot(3) + &
+         2.0_dp*( &
+         gmet_break(1,2)*vecpot(1)*vecpot(2) + &
+         gmet_break(1,3)*vecpot(1)*vecpot(3) + &
+         gmet_break(2,3)*vecpot(2)*vecpot(3) ) )
+ end if
+
+!$OMP PARALLEL DO PRIVATE(dkpg2,d1kpg2,d2kpg2,gpk1,gpk2,gpk3,ig,kinetic,kpg2,xx,fsm,dfsm,ddfsm,akpg) &
 !$OMP SHARED(kinpw,ecut,ecutsm,ecutsm_inv) &
-!$OMP SHARED(gmet_break,htpisq,idir1,idir2,kg,kpt,npw)
+!$OMP SHARED(gmet_break,htpisq,idir1,idir2,kg,kpt,npw,vecpot,asq)
  do ig=1,npw
    gpk1=dble(kg(1,ig))+kpt(1)
    gpk2=dble(kg(2,ig))+kpt(2)
    gpk3=dble(kg(3,ig))+kpt(3)
    kpg2=htpisq*&
 &   ( gmet_break(1,1)*gpk1**2+         &
-&   gmet_break(2,2)*gpk2**2+         &
-&   gmet_break(3,3)*gpk3**2          &
-&   +2.0_dp*(gpk1*gmet_break(1,2)*gpk2+  &
+&   gmet_break(2,2)*gpk2**2+           &
+&   gmet_break(3,3)*gpk3**2            &
+&   +2.0_dp*(gpk1*gmet_break(1,2)*gpk2+&
 &   gpk1*gmet_break(1,3)*gpk3+  &
 &   gpk2*gmet_break(2,3)*gpk3 )  )
+   if (l_vecpot) then
+     ! A.(k+G)
+     akpg=( gmet_break(1,1)*vecpot(1)*gpk1  + &
+            gmet_break(2,2)*vecpot(2)*gpk2  + &
+            gmet_break(3,3)*vecpot(3)*gpk3  + &
+            gmet_break(1,2)*(vecpot(1)*gpk2 + vecpot(2)*gpk1) + &
+            gmet_break(1,3)*(vecpot(1)*gpk3 + vecpot(3)*gpk1) + &
+            gmet_break(2,3)*(vecpot(2)*gpk3 + vecpot(3)*gpk2) )
+   end if
    select case (order)
    case(0)
      kinetic=kpg2
+     if (l_vecpot) kinetic=kinetic+two_pi*akpg+0.5_dp*asq
    case(1)
      dkpg2=htpisq*2.0_dp*&
 &     (gmet_break(idir1,1)*gpk1+gmet_break(idir1,2)*gpk2+gmet_break(idir1,3)*gpk3)

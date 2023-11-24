@@ -1,5 +1,5 @@
 
-.Version 9.9.3 of ABINIT 
+.Version 9.11.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,17 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 18 Apr 2023.
-- ( at 09h51 )
+.Starting date : Mon 20 Nov 2023.
+- ( at 13h33 )
   
-- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t150-t151-t152/t152.abi
-- output file    -> t152.abo
-- root for input  files -> t152i
-- root for output files -> t152o
+- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t210-t211-t212/t212.abi
+- output file    -> t212.abo
+- root for input  files -> t212i
+- root for output files -> t212o
 
 - inpspheads : Reading pseudopotential header in XML form from 
 -   /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ni.xml
-
  Symmetries : the unit cell is not primitive
 ================================================================================
  Values of the parameters that define the memory need of the present run
@@ -344,7 +343,7 @@ electrons: {nelect:   7.20000000E+01, charge:   0.00000000E+00, occopt:   3.0000
 meta: {optdriver: 9, }
 ...
 
- mkfilename: getwfk from: t152i_WFK
+ mkfilename: getwfk from: t212i_WFK
 
 
 ---------------------------------------------------------------------------
@@ -398,7 +397,7 @@ meta: {optdriver: 9, }
 
 -------------    Reading initial wavefunctions     -------------
 
--inwffil : will read wavefunctions from disk file t152i_WFK
+-inwffil : will read wavefunctions from disk file t212i_WFK
 
 -------------------------   Starting propagation   ------------------------
 
@@ -420,7 +419,7 @@ Integrated density (ie. total nb of electrons) =      72.004660
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    5.07    5.09
+- Time - cpu, wall (sec):    5.03    5.04
 
 
 --- Iteration 2
@@ -440,7 +439,7 @@ Integrated density (ie. total nb of electrons) =      72.004652
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.77    1.77
+- Time - cpu, wall (sec):    1.74    1.75
 
 
 --- Iteration 3
@@ -460,7 +459,7 @@ Integrated density (ie. total nb of electrons) =      72.004645
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.77    1.77
+- Time - cpu, wall (sec):    1.74    1.74
 
 
 --- Iteration 4
@@ -480,7 +479,7 @@ Integrated density (ie. total nb of electrons) =      72.004637
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.80    1.80
+- Time - cpu, wall (sec):    1.74    1.74
 
 
 --- Iteration 5
@@ -500,7 +499,7 @@ Integrated density (ie. total nb of electrons) =      72.004630
    0.71556    0.71556    0.71556    0.97927    0.97927    0.97927    0.97927    0.97927
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    1.77    1.90
+- Time - cpu, wall (sec):    1.74    1.87
 
 
 ---------------------------------------------------------------------------
@@ -877,10 +876,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         13.6  wall=         14.3
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.6  wall=         14.3
+.Delivered   6 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=         13.4  wall=         13.8

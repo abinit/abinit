@@ -99,22 +99,25 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
    !Dirac pulse: vector potential is just an Heaviside function
    case (1)
       if (istep*tdks%dt >= tdks%ef_tzero) then
-         tdks%e_field(:) = tdks%ef_zero
-         tdks%vec_pot(:) = -tdks%ef_zero
+         tdks%efield(:) = tdks%ef_zero(:)
+         tdks%vecpot(:) = -tdks%ef_zero(:)
       end if
+      tdks%vecpot_red = matmul(transpose(tdks%rprimd),tdks%vecpot)
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
    !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
    case(2)
       if (istep*tdks%dt >= tdks%ef_tzero+tdks%ef_tau) then
-         tdks%e_field(:) = 0.0_dp
+         tdks%efield(:) = 0.0_dp
       else if (istep*tdks%dt >= tdks%ef_tzero) then
          t = istep*tdks%dt-tdks%ef_tzero
-         tdks%e_field(:) = tdks%ef_zero*cos(tdks%ef_omega*t)*sin(pi*t/tdks%ef_tau)**2
-         tdks%vec_pot(:) = tdks%ef_zero*(-sin(tdks%ef_omega*t)/(2.0_dp*tdks%ef_omega) &
-                                       & +sin(tdks%ef_sin_a*t)/(4.0_dp*tdks%ef_sin_a) &
-                                       & +sin(tdks%ef_sin_b*t)/(4.0_dp*tdks%ef_sin_b))
+         tdks%efield(:) = tdks%ef_zero*cos(tdks%ef_omega*t)*sin(pi*t/tdks%ef_tau)**2
+         tdks%vecpot(:) = tdks%ef_zero*(-sin(tdks%ef_omega*t)/(2.0_dp*tdks%ef_omega) &
+                                      & +sin(tdks%ef_sin_a*t)/(4.0_dp*tdks%ef_sin_a) &
+                                      & +sin(tdks%ef_sin_b*t)/(4.0_dp*tdks%ef_sin_b))
       end if
+      tdks%vecpot_red(:) = matmul(transpose(tdks%rprimd),tdks%vecpot)
+      
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
       ABI_ERROR(msg)
