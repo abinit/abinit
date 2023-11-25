@@ -1106,10 +1106,11 @@ contains
       gamma=(fermie-this%shiftfactor)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
 
+      step=(dble(this%bcut)+this%bandshift)/(this%bcut)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
-        ix=dble(ii)-one
-        fn=fermi_dirac(extfpmd_e_fg(ix+this%bandshift,this%ucvol)+this%shiftfactor,fermie,tsmear)
+        ix=(dble(ii)-one)*step
+        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%shiftfactor,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
@@ -1122,7 +1123,7 @@ contains
       if(size(valuesent)>=6) then
         this%entropy=5./3.*factor*dip32(gamma)/tsmear-&
         & gamma*factor*dip12(gamma)/tsmear-&
-        simpson(one,valuesent)
+        simpson(step,valuesent)
       end if
       ABI_FREE(valuesent)
     end if
