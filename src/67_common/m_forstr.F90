@@ -395,12 +395,23 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
        end if
      end if
    end if
-   call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
-&   dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
-&   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
-&   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
-&   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+
+   if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+     call forstrnps(extfpmd%cg,cprj,extfpmd%ecut,dtset%ecutsm,dtset%effmass_free,extfpmd%eigen,&
+&     electronpositron,fock,grnl,dtset%istwfk,extfpmd%kg,kinstr,nlstr,dtset%kptns,extfpmd%mband,&
+&     extfpmd%mcg,mcprj,dtset%mgfft,dtset%mkmem,extfpmd%mpi_enreg,psps%mpsang,extfpmd%mpw,my_natom,&
+&     dtset%natom,extfpmd%nband,dtset%nfft,dtset%ngfft,dtset%nkpt,dtset%nloalg,extfpmd%npwarr,dtset%nspden,&
+&     dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,dtset%nucdipmom,extfpmd%occ,optfor,paw_ij,pawtab,ph1d,&
+&     psps,rprimd,stress_needed,symrec,dtset%typat,usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,&
+&     ylm,ylmgr)
+   else
+     call forstrnps(cg,cprj,dtset%ecut,dtset%ecutsm,dtset%effmass_free,eigen,electronpositron,fock,grnl,&
+&     dtset%istwfk,kg,kinstr,nlstr,dtset%kptns,dtset%mband,mcg,mcprj,dtset%mgfft,dtset%mkmem,&
+&     mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
+&     dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
+&     dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
+&     usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+   end if
 !DEBUG
 !   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
 !ENDDEBUG

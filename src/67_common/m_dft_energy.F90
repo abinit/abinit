@@ -212,15 +212,16 @@ contains
 !! SOURCE
 
 subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-& energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
-& nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
-& pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
-& taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
+& energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,mpw,&
+& my_natom,nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,&
+& paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,&
+& rprimd,strsxc,symrec,taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,&
+& wvl_e,xccc3d,xred,ylm,&
 & add_tfw,vxctau) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mcg,my_natom,n3xccc,nfftf,nhatgrdim,optene,usexcnhat
+ integer,intent(in) :: mcg,mpw,my_natom,n3xccc,nfftf,nhatgrdim,optene,usexcnhat
  logical,intent(in),optional :: add_tfw
  real(dp),intent(in) :: gsqcut
  real(dp),intent(out) :: compch_fft,etotal
@@ -241,7 +242,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !arrays
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: indsym(4,dtset%nsym,dtset%natom)
- integer :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)),kg(3,dtset%mpw*dtset%mkmem)
+ integer :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4)),kg(3,mpw*dtset%mkmem)
  integer, intent(in) :: ngfftf(18),npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp), intent(in) :: cg(2,mcg),eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol),ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
@@ -256,7 +257,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
  real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
- real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp), intent(in) :: ylm(mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  type(paw_ij_type), intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
  type(pawrhoij_type),target,intent(inout) :: pawrhoij(my_natom*psps%usepaw)
@@ -271,7 +272,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
  logical :: add_tfw_,paral_atom,use_timerev,use_zeromag,with_vxctau
- logical :: non_magnetic_xc,wvlbigdft=.false.
+ logical :: non_magnetic_xc,wvlbigdft=.false.,compute_rho=.true.
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
  type(gs_hamiltonian_type) :: gs_hamk
@@ -806,11 +807,15 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  etotal = etotal + energies%e_ewald + energies%e_chempot + energies%e_vdw_dftd
 !Add the contribution of extfpmd to the entropy
  if(associated(extfpmd)) then
+  write(0,*) energies%e_kinetic, energies%e_eigenvalues, energies%entropy
    if(extfpmd%version/=5) energies%entropy=energies%entropy+extfpmd%entropy
    energies%e_extfpmd=extfpmd%e_kinetic
    energies%edc_extfpmd=extfpmd%edc_kinetic
-   if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
-   if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
+   if (dtset%extfpmd_truecg==0.and.dtset%useextfpmd==5) then
+     if(optene==0.or.optene==2) etotal=etotal+energies%e_extfpmd
+     if(optene==1.or.optene==3) etotal=etotal+energies%edc_extfpmd
+   end if
+   
  end if
  if(dtset%occopt>=3 .and. dtset%occopt<=8) etotal=etotal-dtset%tsmear*energies%entropy
 
@@ -839,11 +844,11 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  !paw_dmft%use_sc_dmft=0 ! dmft not used here
  if (psps%usepaw==0) then
    tim_mkrho=3
-   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
 &   npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wfs,&
 &   extfpmd=extfpmd)
    if(dtset%usekden==1)then
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
 &     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
    end if
  else
@@ -869,7 +874,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
    ABI_MALLOC(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
-   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
 &   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs,&
 &   extfpmd=extfpmd)
 
@@ -877,7 +882,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    rhor(:,:)=rhor(:,:)+nhat(:,:)
    call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
    if(dtset%usekden==1)then
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,npwarr,occ,paw_dmft,phnons,&
 &               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
    end if

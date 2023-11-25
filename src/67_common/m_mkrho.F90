@@ -125,13 +125,13 @@ contains
 !!
 !! SOURCE
 
-subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&                rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
+subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mband,mpi_enreg,mpw,nband,npwarr,occ,&
+&                paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl_den,wvl_wfs,&
 &                extfpmd,option) !optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mcg,tim_mkrho
+ integer,intent(in) :: mband,mcg,mpw,tim_mkrho
  integer,intent(in),optional :: option
  real(dp),intent(in) :: ucvol
  type(extfpmd_type),intent(in),pointer,optional :: extfpmd
@@ -144,10 +144,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  integer, intent(in) :: irrzon(dtset%nfft**(1-1/dtset%nsym),2,  &
 &               (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
- integer, intent(in) :: kg(3,dtset%mpw*dtset%mkmem),npwarr(dtset%nkpt)
+ integer, intent(in) :: kg(3,mpw*dtset%mkmem),npwarr(dtset%nkpt),nband(dtset%nkpt*dtset%nsppol)
  real(dp), intent(in) :: gprimd(3,3)
  real(dp), intent(in) :: cg(2,mcg)
- real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
+ real(dp), intent(in) :: occ(mband*dtset%nkpt*dtset%nsppol)
 !nfft**(1-1/nsym) is 1 if nsym==1, and nfft otherwise
  real(dp), intent(in) :: phnons(2,(dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3))**(1-1/dtset%nsym),  &
 &                                 (dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
@@ -282,10 +282,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      n1 = dtset%ngfft(1) ; n2 = dtset%ngfft(2) ; n3 = dtset%ngfft(3)
      n4 = dtset%ngfft(4) ; n5 = dtset%ngfft(5) ; n6 = dtset%ngfft(6)
      ndat = 1 ; if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
+     ABI_MALLOC(cwavef,(2,mpw,my_nspinor))
      ABI_MALLOC(rhoaug,(n4,n5,n6))
      ABI_MALLOC(wfraug,(2,n4,n5,n6*ndat))
-     ABI_MALLOC(cwavefb,(2,dtset%mpw*paw_dmft%use_sc_dmft,my_nspinor))
+     ABI_MALLOC(cwavefb,(2,mpw*paw_dmft%use_sc_dmft,my_nspinor))
      if(dtset%nspden==4) then
        ABI_MALLOC(rhoaug_up,(n4,n5,n6))
        ABI_MALLOC(rhoaug_down,(n4,n5,n6))
@@ -303,7 +303,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        rhoaug(:,:,:)=zero
        do ikpt=1,dtset%nkpt
 
-         nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         nband_k = nband(ikpt+(isppol-1)*dtset%nkpt)
          mband_mem = nband_k
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
@@ -727,14 +727,14 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==1.or.extfpmd%version==2.or.extfpmd%version==3.or.extfpmd%version==4.or.extfpmd%version==5) then
-       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
-     else if(extfpmd%version==10) then
+     if(extfpmd%version==10) then
        do ispden=1,dtset%nspden
          do ifft=1,dtset%nfft
            rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
          end do
        end do
+     else
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
      rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if

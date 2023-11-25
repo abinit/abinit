@@ -621,12 +621,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(254,1,tsec)
 
 !TEMPORARY Orthogonalize extpw wf
-!if (associated(extfpmd)) then
-!  if (extfpmd%version==5) then
+!  if (dtset%useextfpmd==5) then
 !    call extfpmd%extpw_orthon(dtset%effmass_free,gmet,dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nkpt,&
 !    & dtset%nsppol,dtset%nspinor,psps%usepaw)
 !  end if
-!end if
 
 !We use routine mkrho with option=1 to compute kinetic energy density taur (and taug)
  if(dtset%usekden==0 .and. dtset%prtelf/=0)then
@@ -647,15 +645,30 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     extfpmd=extfpmd,option=1)
+     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+       ! Make full electron density with extended plane waves basis set
+       call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
+&       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
+&       paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       option=1)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+&       npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd,option=1)
+     end if
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&     extfpmd=extfpmd,option=1)
+     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+       call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
+&       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
+&       paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       option=1)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+&       npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd,option=1)
+     end if
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)
@@ -1018,13 +1031,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  end if
 
  ! Update extended plane waves hdr content
- if (associated(extfpmd)) then
-   if (extfpmd%version==5) then
-     bantot=extfpmd%hdr%bantot
-     call extfpmd%hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,extfpmd%occ,&
-     pawrhoij,xred,dtset%amu_orig(:,1),&
-     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   end if
+ if (dtset%useextfpmd==5) then
+   bantot=extfpmd%hdr%bantot
+   call extfpmd%hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,extfpmd%occ,&
+&   pawrhoij,xred,dtset%amu_orig(:,1),&
+&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
  end if
 
 #ifdef HAVE_LOTF
