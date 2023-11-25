@@ -58,6 +58,7 @@ module m_extfpmd
   !!
   !! SOURCE
   type,public :: extfpmd_type
+    logical :: truecg
     integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,shiftfactor,ucvol,bandshift
@@ -107,12 +108,12 @@ contains
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,rprimd,version,&
-  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband,nspinor)
+  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband,nspinor,truecg)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,version
-    integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband,nspinor
+    integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband,nspinor,truecg
     real(dp),intent(in) :: dilatmx
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
@@ -128,7 +129,8 @@ contains
 
     ! *********************************************************************
     ! write(0,*) "DEBUG: Init extfpmd object"
-
+    
+    this%truecg=.false.
     this%bcut=mband-nbdbuf
     this%nbcut=nbcut
     this%nbdbuf=nbdbuf
@@ -150,6 +152,7 @@ contains
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
     if (this%version==5) then
+      if (truecg==1) this%truecg=.true.
       this%mband=extfpmd_mband
       ! Adding sqrt(...) to extended cutoff energy to make
       ! sure extended pw basis set is large enough.
@@ -248,6 +251,7 @@ contains
       this%mkmem=0
       this%mpw=0
       this%mband=0
+      this%truecg=.false.
     end if
     
     this%vtrial(:,:)=zero
@@ -885,7 +889,7 @@ contains
   !!
   !! SOURCE
   subroutine compute_e_kinetic(this,fermie,tsmear,effmass_free,gmet,kptns,nkpt,mkmem,istwfk,&
-  & nspinor,nsppol,nband,wtk)
+  & nspinor,nsppol,nband,wtk,total_e_kinetic,total_e_eigenvalues)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: nkpt,mkmem,nspinor,nsppol
@@ -894,13 +898,14 @@ contains
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol)
     real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt),wtk(nkpt)
+    real(dp),intent(inout) :: total_e_kinetic,total_e_eigenvalues
 
     ! Local variables -------------------------
     ! Scalars
-    integer :: ikpt,isppol,istwf_k,my_nspinor,nband_k,iband,ierr
+    integer :: ikpt,isppol,istwf_k,my_nspinor,nband_k,iband,ierr,bandstart
     integer :: ifft,ispden,ext_bdtot_index,ext_icg,ext_ikg,ext_npw_k
-    real(dp) :: factor,gamma,xcut,dotr
-    real(dp) :: e_kinetic_hybrid_tf
+    real(dp) :: factor,gamma,xcut,dotr,e_eigenvalues
+    real(dp) :: e_kinetic_hybrid_tf,maxocc
     character(len=500) :: msg
     ! Arrays
     real(dp) :: kpoint(3)
@@ -911,7 +916,9 @@ contains
     ! *********************************************************************
 
     dotr=zero
+    maxocc=two/(nsppol*nspinor)
     this%e_kinetic=zero
+    e_eigenvalues=zero
     factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
 
     ! Computes extfpmd contribution to kinetic energy integrating
@@ -951,25 +958,30 @@ contains
             ext_bdtot_index=ext_bdtot_index+this%mband
             cycle
           end if
-
-          kpoint(:)=kptns(:,ikpt)
-
-          ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
-          ABI_MALLOC(ext_kinpw,(ext_npw_k))
-          ABI_MALLOC(ext_cwavef,(2,ext_npw_k*my_nspinor*this%mband))
-          ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
-          ext_kinpw(:)=zero
-          call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
-
+          
+          bandstart=nband_k-this%nbdbuf+1
+          if (this%truecg) then
+            kpoint(:)=kptns(:,ikpt)
+            ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
+            ABI_MALLOC(ext_kinpw,(ext_npw_k))
+            ABI_MALLOC(ext_cwavef,(2,ext_npw_k*my_nspinor*this%mband))
+            ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
+            ext_kinpw(:)=zero
+            call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
+            if (this%truecg) bandstart=1
+          end if
+          
           ! Compute kinetic energy of each band
-          do iband=nband_k-this%nbdbuf+1,this%mband
-          ! do iband=1,this%mband
-            ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
-            & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
-            call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
-            ! dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
-            ! write(0,*) iband, dotr, extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
+          do iband=bandstart,this%mband
+            if (this%truecg) then
+              ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
+              & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
+              call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
+            else
+              dotr=extfpmd_e_fg(one*iband+this%bandshift,this%ucvol)
+            end if
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*dotr
+            e_eigenvalues=e_eigenvalues+wtk(ikpt)*this%occ(iband+ext_bdtot_index)*this%eigen(iband+ext_bdtot_index)
           end do
 
           ! Increment indexes
@@ -979,12 +991,19 @@ contains
             ext_ikg=ext_ikg+ext_npw_k
           end if
 
-          ABI_FREE(ext_cwavef)
-          ABI_FREE(ext_kinpw)
-          ABI_FREE(ext_kg_k)
+          if (this%truecg) then
+            ABI_FREE(ext_cwavef)
+            ABI_FREE(ext_kinpw)
+            ABI_FREE(ext_kg_k)
+          end if
         end do
       end do
       call xmpi_sum(this%e_kinetic,xmpi_world,ierr)
+      call xmpi_sum(e_eigenvalues,xmpi_world,ierr)
+      if(this%truecg) then
+        total_e_eigenvalues=e_eigenvalues
+        total_e_kinetic=this%e_kinetic
+      end if
     end if
 
     ! Computes extfpmd contribution to kinetic energy using a sum

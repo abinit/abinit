@@ -501,8 +501,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    paw_dmft%use_dmft=0 ! respfn with dmft not implemented
 
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+&     npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
 ! ABI_FREE(cg)
 
