@@ -2745,7 +2745,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (associated(extfpmd)) then
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
-     if (dtset%extfpmd_truecg==0.and.dtset%useextfpmd==5) then
+     if (dtset%extfpmd_truecg==0) then
        if (optene==0) etotal=etotal+energies%e_extfpmd
        if (optene==1) etotal=etotal+energies%edc_extfpmd
      end if

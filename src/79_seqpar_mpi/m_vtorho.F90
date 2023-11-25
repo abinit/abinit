@@ -1475,7 +1475,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       energies%e_kinetic,energies%e_eigenvalues)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
 &       dtset%wtk,dtset%nband,dtset%mband,occ)
-       write(0,*) energies%e_kinetic, energies%e_eigenvalues
      end if
 
      if(paw_dmft%use_dmft==1) then
@@ -1504,25 +1503,25 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
 &         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
 &         paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-       else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&         npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
-       end if
-     else
-       if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
-         call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-&          extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-&          paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-       else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&         npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&         extfpmd=extfpmd)
-       end if
-     end if
-     ABI_NVTX_END_RANGE()
-     call timab(992,2,tsec)
-
+        else
+          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+          &         npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+          &         extfpmd=extfpmd)
+        end if
+      else
+        if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+          call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
+          &          extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
+          &          paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+        else
+          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+          &         npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+          &         extfpmd=extfpmd)
+        end if
+      end if
+      ABI_NVTX_END_RANGE()
+      call timab(992,2,tsec)
+    
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 
