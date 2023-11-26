@@ -8,6 +8,7 @@ spinat 0 0 4
 #SC GS calculation
    nstep1  20
   tolwfr1  1.0d-18
+   nline1  6  # For testing purposes
 
 #Response-function calculation, with q=0.5
   rfphon2  1     # Will consider phonon-type perturbation
@@ -17,9 +18,8 @@ spinat 0 0 4
   getwfk2  1
    nstep2  3     # Much too small, only for testing purposes
   tolvrs2  1.0d-5
-
-tolrde     0.001 # For testing purposes
-nline      6     # For testing purposes
+  tolrde2   0.00001 # For testing purposes
+   nline2   8       # For testing purposes
 
 kptopt 3
 ecut 10.0
