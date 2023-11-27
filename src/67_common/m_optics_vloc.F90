@@ -151,6 +151,7 @@ contains
  !ABI_CHECK(ierr /= 0, "hdr_fort_write returned ierr = 0")
  !end if
 
+ bdtot_index=0
 !LOOP OVER SPINS
  icg=0
  do isppol=1,nsppol
