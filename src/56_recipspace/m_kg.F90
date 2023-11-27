@@ -298,6 +298,7 @@ end subroutine getmpw
 !!  kg(3,npw)=integer coordinates of planewaves in basis sphere.
 !!  kpt(3)=reduced coordinates of k point
 !!  npw=number of plane waves at kpt.
+!!  vecpot (optional) = vector potential used in case of RT-TDDFT with electric field
 !!
 !! OUTPUT
 !!  kinpw(npw)=(modified) kinetic energy (or derivative) for each plane wave (Hartree)
@@ -314,6 +315,9 @@ end subroutine getmpw
 !! x = (ecut- unmodified energy)/ecutsm.
 !! This smearing factor is also used to derived a modified kinetic
 !! contribution to stress, in another routine (forstrnps.f)
+!! If a vector potential is given then the expression also includes
+!! its contributions so the kinetic energy operator is given by 
+!! $(1/2) (2 \pi)^2 (k+G)^2 + (2 \pi) A\cdot(k+G) + (1/2) A^2$
 !!
 !! Also, in order to break slightly the symmetry between axes, that causes
 !! sometimes a degeneracy of eigenvalues and do not allow to obtain
@@ -415,6 +419,9 @@ subroutine mkkin (ecut,ecutsm,effmass_free,gmet,kg,kinpw,kpt,npw,idir1,idir2,vec
      dkpg2=htpisq*2.0_dp*&
 &     (gmet_break(idir1,1)*gpk1+gmet_break(idir1,2)*gpk2+gmet_break(idir1,3)*gpk3)
      kinetic=dkpg2
+     if (l_vecpot) kinetic=kinetic+two_pi*(gmet_break(idir1,1)*vecpot(1) + &
+                                         & gmet_break(idir1,2)*vecpot(2) + &
+                                         & gmet_break(idir1,3)*vecpot(3) )
    case(2)
      dkpg2=htpisq*2.0_dp*gmet_break(idir1,idir2)
      kinetic=dkpg2
