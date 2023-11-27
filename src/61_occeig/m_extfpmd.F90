@@ -101,20 +101,19 @@ contains
   !!  nbdbuf=Number of bands in the buffer to converge scf cycle with extfpmd models
   !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
   !!  version=extfpmd implementation version
-  !!  ecut=extended plane waves basis set energy cut off
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,rprimd,version,&
-  & exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband,nspinor,truecg)
+  & ecut,exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband,nspinor,truecg)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,version
     integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband,nspinor,truecg
-    real(dp),intent(in) :: dilatmx
+    real(dp),intent(in) :: ecut,dilatmx
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: istwfk(nkpt)
@@ -158,6 +157,8 @@ contains
       ! sure extended pw basis set is large enough.
       this%ecut=extfpmd_e_fg(one*extfpmd_mband,this%ucvol)+&
       & sqrt((2*PI*gprimd(1,1))**2+(2*PI*gprimd(2,1))**2+(2*PI*gprimd(3,1))**2)
+      ! Force extended plane wave kinetic energy to be geq Kohn-Sham ecut.
+      this%ecut=max(this%ecut,ecut)
       this%ecut_eff=this%ecut*dilatmx**2
       ABI_MALLOC(this%nband,(nkpt*nsppol))
       this%nband(:)=extfpmd_mband
