@@ -187,6 +187,7 @@ contains
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
     self%input_path=input_path
     self%filenames(:)=filenames(:)
+#ifndef FC_CRAY
     call xmpi_bcast(self%filenames, master, comm, ierr)
     !TODO: remove params as argument. It is here because the params are read
     ! in the multibinit_main function. Once we use multibinit_main2, remove it.
@@ -231,6 +232,7 @@ contains
 
 
     call self%energy_table%init()
+#endif
 
   end subroutine initialize
 
