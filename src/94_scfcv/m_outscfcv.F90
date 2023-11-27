@@ -639,7 +639,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (associated(extfpmd)) then
    if (extfpmd%version==5.and.dtset%prtgsr==1) then
     extfpmd_bantot=extfpmd%mband*dtset%nkpt*dtset%nsppol
-    extfpmd_hdr = hdr
+    extfpmd_hdr=hdr
     extfpmd_hdr%mband=extfpmd%mband
     extfpmd_hdr%nband=extfpmd%nband
     extfpmd_hdr%npwarr=extfpmd%npwarr
@@ -1150,8 +1150,15 @@ if (dtset%prt_lorbmag==1) then
  end if
  if (prtnabla<0) then
    ! TODO: This routine is not tested but it's used in production.
-   call optics_vloc(cg,dtfil,dtset,eigen,gprimd,hdr,kg,&
-&   mband,mcg,mkmem,mpi_enreg,mpw,nkpt,npwarr,nsppol)
+   call optics_vloc(cg,dtset,eigen,dtfil%fnameabo_app_opt,gprimd,hdr,kg,&
+&   mband,mcg,mkmem,mpi_enreg,mpw,dtset%nband,nkpt,npwarr,nsppol)
+   if (associated(extfpmd)) then
+     if (extfpmd%version==5) then
+       call optics_vloc(extfpmd%cg,dtset,extfpmd%eigen,dtfil%fnameabo_app_extpwopt,&
+&       gprimd,extfpmd_hdr,extfpmd%kg,extfpmd%mband,extfpmd%mcg,mkmem,extfpmd%mpi_enreg,&
+&       extfpmd%mpw,extfpmd%nband,nkpt,extfpmd%npwarr,nsppol)
+     end if
+   end if
  end if
 
  call timab(1169,2,tsec)

@@ -28,7 +28,6 @@ module m_optics_vloc
  use m_xmpi
  use m_hdr
  use m_dtset
- use m_dtfil
 
 use defs_abitypes,   only : MPI_type
  use m_time,         only : timab
@@ -57,9 +56,9 @@ contains
 !!
 !! INPUTS
 !!  cg(2,mcg)=planewave coefficients of wavefunctions.
-!!  dtfil <type(datafiles_type)>=variables related to files
 !!  dtset <type(dataset_type)>=all input variables for this dataset
-!!  fildata= name of the output file
+!!  eigen0(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
+!!  fname=Name of the file.
 !!  gprimd(3,3)=dimensional reciprocal space primitive translations
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
 !!  mband=maximum number of bands
@@ -67,6 +66,7 @@ contains
 !!  mkmem =number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
+!!  nband(nkpt*nsppol)=number of bands per k point, for each spin
 !!  nkpt=number of k points.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -80,17 +80,17 @@ contains
 !!
 !! SOURCE
 
- subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
-&                       nkpt,npwarr,nsppol)
+ subroutine optics_vloc(cg,dtset,eigen0,fname,gprimd,hdr,kg,mband,mcg,mkmem,&
+&                       mpi_enreg,mpw,nband,nkpt,npwarr,nsppol)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mkmem,mpw,nkpt,nsppol
- type(datafiles_type),intent(in) :: dtfil
+ character(fnlen),intent(in) :: fname
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
  type(hdr_type),intent(inout) :: hdr
 !arrays
- integer,intent(in) :: kg(3,mpw*mkmem),npwarr(nkpt)
+ integer,intent(in) :: kg(3,mpw*mkmem),npwarr(nkpt),nband(nkpt*nsppol)
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: eigen0(mband*nkpt*nsppol)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -144,7 +144,7 @@ contains
  iomode= IO_MODE_FORTRAN_MASTER
  fformopt=612
  ount = get_unit()
- call WffOpen(iomode,spaceComm_k,dtfil%fnameabo_app_opt,ierr,wff1,0,me,ount)
+ call WffOpen(iomode,spaceComm_k,fname,ierr,wff1,0,me,ount)
  call hdr_io(fformopt,hdr,2,wff1)
  !if (me == 0) then
  !call hdr_fort_write(hdr, wff1%unwff, fformopt,ierr)
@@ -158,7 +158,7 @@ contains
 !  LOOP OVER k POINTS
    ikg=0
    do ikpt=1,nkpt
-     nband_k=dtset%nband(ikpt+(isppol-1)*nkpt)
+     nband_k=nband(ikpt+(isppol-1)*nkpt)
      etiq=ikpt+(isppol-1)*nkpt
      if (me==0) then
        ABI_MALLOC(eig0_k,(nband_k))

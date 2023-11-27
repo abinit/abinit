@@ -885,12 +885,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,&
 &     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
 &     dtset%extfpmd_nband,dtset%nspinor,dtset%extfpmd_truecg)
-     !Initialize extended plane waves header object
-     if (extfpmd%version==5) then
-       extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
-       call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
-&       comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     end if
    end if
  end if
 
@@ -1508,7 +1502,16 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
    
    ! Write extended plane waves wavefunctions
-   if (dtset%useextfpmd==5) then
+   if (extfpmd%version==5) then
+     extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
+     call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
+&     comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     
+     call extfpmd%hdr%update(extfpmd%hdr%bantot,results_gs%etotal,results_gs%energies%e_fermie,&
+&     results_gs%energies%e_fermih,residm,rprimd,extfpmd%occ,pawrhoij,xred,dtset%amu_orig(:,1),&
+&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     extfpmd%hdr%rprimd=rprimd_for_kg
+
      call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
 &     extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
 &     extfpmd%nband,dtset%nkpt,extfpmd%npwarr,dtset%nsppol,&
