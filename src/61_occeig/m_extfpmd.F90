@@ -425,7 +425,7 @@ contains
     integer :: isppol,ikpt,iband,icg,ext_icg,ipw,ext_ipw,ikg,ext_ikg,ierr
     integer :: nband_k,ext_nband_k,istwf_k,npw_k,ext_npw_k
     integer :: my_nspinor,bdtot_index,ext_bdtot_index
-    integer :: index_below,index_above
+    integer :: index_below,index_above,g0_count_below,g0_count_above
     real(dp) :: ecut_eff,ekin_max,fg_kin,closest_below,closest_above,prop_below,prop_above
     real(dp) :: norm,nband_k_kin,count_below,count_above
     real(dp) :: tmp,bandshift,dotr,phase,random_value
@@ -505,9 +505,16 @@ contains
           closest_above=this%ecut
           count_below=zero
           count_above=zero
+          g0_count_below=0
+          g0_count_above=0
 
           do ext_ipw=1,ext_npw_k*my_nspinor
             if (ext_kinpw(ext_ipw)<=fg_kin.and.ext_kinpw(ext_ipw)>=closest_below) then
+              if (ext_ipw==1) then
+                g0_count_below=1
+              else
+                g0_count_below=0
+              end if
               if (ext_kinpw(ext_ipw)==closest_below) then
                 count_below=count_below+one
               else
@@ -515,6 +522,11 @@ contains
                 closest_below=ext_kinpw(ext_ipw)
               end if
             else if (ext_kinpw(ext_ipw)>=fg_kin.and.ext_kinpw(ext_ipw)<=closest_above) then
+              if (ext_ipw==1) then
+                g0_count_above=1
+              else
+                g0_count_above=0
+              end if
               if (ext_kinpw(ext_ipw)==closest_above) then
                 count_above=count_above+one
               else
@@ -524,10 +536,10 @@ contains
             end if
           end do
           
-          ! Taking time-reversal symmetry into account
+          ! Taking time-reversal symmetry into account excluding g0.
           if (istwf_k >= 2) then
-            count_above=count_above*two
-            count_below=count_below*two
+            count_above=count_above*(two-g0_count_above)
+            count_below=count_below*(two-g0_count_below)
           end if
           prop_below=(fg_kin-closest_above)/(count_below*(closest_below-closest_above))
           prop_above=(one-prop_below*count_below)/count_above
