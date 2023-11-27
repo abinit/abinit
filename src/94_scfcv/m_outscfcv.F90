@@ -375,11 +375,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  !  !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
  !end if
 
+#ifndef FC_CRAY
  ! YAML output
  if (me == master) then
    call results_gs%yaml_write(ab_out, cryst=crystal, info="Summary of ground state results",&
 &   occopt=dtset%occopt, with_conv=(dtset%nstep > 0) )
  end if
+#endif FC_CRAY
 
  call timab(1151,2,tsec)
 
