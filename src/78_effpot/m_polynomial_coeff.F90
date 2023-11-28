@@ -4035,7 +4035,7 @@ function coeffs_compare(c1,c2) result (res)
   integer :: iterm1,iterm2
 !array
   !integer,allocatable :: blkval(:,:)
-  integer :: blkval(2, maxval([c1%nterm, c2%nterm]))
+  integer :: blkval(2, max(c1%nterm,c2%nterm))
 ! *************************************************************************
   res = .false.
   blkval = 0

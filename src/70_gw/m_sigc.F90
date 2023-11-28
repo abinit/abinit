@@ -1668,7 +1668,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
      right(:)    = -AIMAG(omega_imag(nomegaei+1)-omega_imag(nomegaei))*REAL(omegame0i_tmp(:))
      left(:)     = quarter*AIMAG(domegaleft)*AIMAG(domegaright) &
 &                   +REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:))
-     weight(nomegaei+1,:) = ATAN(right(:)/left(:))
+     do ios=1,nomega
+       weight(nomegaei+1,ios) = ATAN(right(ios)/left(ios))
+     end do
      ! Calculate the rest of the weights
      do io=2,nomegaei
        domegaleft  = (omega_imag(io  )+omega_imag(io-1))
@@ -1676,7 +1678,9 @@ subroutine calc_sigc_cd(npwc,npwx,nspinor,nomega,nomegae,nomegaer,nomegaei,rhotw
        right(:)    = -half*AIMAG(omega_imag(io+1)-omega_imag(io-1))*REAL(omegame0i_tmp(:))
        left(:)     = REAL(omegame0i_tmp(:))*REAL(omegame0i_tmp(:)) &
 &       +quarter*AIMAG(domegaleft)*AIMAG(domegaright)
-       weight(io,:) = ATAN(right(:)/left(:))
+       do ios=1,nomega
+         weight(io,ios) = ATAN(right(ios)/left(ios))
+       end do
      end do
 
      ! Use BLAS call to perform matrix-matrix multiplication and accumulation

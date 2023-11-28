@@ -1877,10 +1877,8 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-#if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0) then
-         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
-       end if
+#if (defined FC_NVHPC) || (defined __INTEL_COMPILER && defined HAVE_OPENMP)
+if (ifft<0) stop "prevent from miscompiling this section"
 #endif
        oarrbox(1,ifft+pad_box) = iarrsph(1,ipw+pad_sph)
        oarrbox(2,ifft+pad_box) = iarrsph(2,ipw+pad_sph)
@@ -1910,6 +1908,9 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if(iy<0)iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if(iz<0)iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        ! Construct the coordinates of -k-G
        ixinv=ixinver(ix); iyinv=iyinver(iy); izinv=izinver(iz)
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
@@ -1982,6 +1983,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft)
        oarrsph(2,ig) = iarrbox(2,ifft)
      end do
@@ -1995,6 +1999,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad)
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad)
        end do
@@ -2009,6 +2016,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft) * rscal
        oarrsph(2,ig) = iarrbox(2,ifft) * rscal
      end do
@@ -2022,6 +2032,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad) * rscal
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad) * rscal
        end do
