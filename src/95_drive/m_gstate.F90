@@ -270,7 +270,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
+ real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,extpw_eshift,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
@@ -758,7 +758,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mpw,dtset%nband,ngfft,dtset%nkpt,npwarr,&
 &   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
-&   dtfil%fnamewffk,wvl)
+&   dtfil%fnamewffk,wvl,extpw_eshift)
    hdr%rprimd=rprimd
  end if
 
@@ -905,6 +905,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & (dtset%occopt>=3.and.dtset%occopt<=9) .and. & ! allowing for occopt 9
 ! End CP modified
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
+  
+  ! RESTART FROM WF = save U0 because we do not have vtrial.
+  if(associated(extfpmd)) write(0,*) extfpmd%eshift
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007

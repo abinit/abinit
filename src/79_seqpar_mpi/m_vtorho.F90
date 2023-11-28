@@ -1197,10 +1197,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd u0 energy shiftfactor
+!    Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk,vtrial)
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,&
+&       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
      
 !    Compute occupations
@@ -1616,11 +1616,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd u0 energy shift factor from eigenvalues
+!    Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       extfpmd%vtrial=vtrial
-       call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,dtset%nband,&
+&       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
        if(extfpmd%version==5) then
          ! Get extended plane wave cutoff
          call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&

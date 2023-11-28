@@ -128,7 +128,8 @@ module m_hdr
   real(dp) :: nelect       ! number of electrons (computed from pseudos and cellcharge)
   real(dp) :: ne_qFD=zero  ! CP number of excited electrons (input variable)
   real(dp) :: nh_qFD=zero  ! CP number of excited holes (input variable)
-  real(dp) :: cellcharge       ! input variable (for the first image if more than one)
+  real(dp) :: cellcharge   ! input variable (for the first image if more than one)
+  real(dp) :: extpw_eshift=zero ! Energy shift of the extended for high temperature
 
   ! This record is not a part of the hdr_type, although it is present in the
   ! header of the files. This is because it depends on the kind of file
@@ -1128,6 +1129,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  hdr_cp%ne_qFD      = hdr_in%ne_qFD ! CP added for occopt 9 case
  hdr_cp%nh_qFD      = hdr_in%nh_qFD ! CP added for occopt 9 case
  hdr_cp%cellcharge  = hdr_in%cellcharge
+ hdr_cp%extpw_eshift = hdr_in%extpw_eshift
 
  Hdr_cp%qptn(:)     = Hdr_in%qptn(:)
  Hdr_cp%rprimd(:,:) = Hdr_in%rprimd(:,:)
@@ -2603,6 +2605,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_dpr(1+index)=hdr%ne_qFD; index=index+1 ! CP added line
    list_dpr(1+index)=hdr%nh_qFD; index=index+1 ! CP added line
    list_dpr(1+index)=hdr%cellcharge; index=index+1
+   list_dpr(1+index)=hdr%extpw_eshift; index=index+1
    list_dpr(1+index:index+3*hdr%nshiftk_orig) = reshape(hdr%shiftk_orig, [3*hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    list_dpr(1+index:index+3*hdr%nshiftk) = reshape(hdr%shiftk, [3*hdr%nshiftk])
@@ -2647,6 +2650,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%ne_qFD = list_dpr(1+index); index=index+1 ! CP added line
    hdr%nh_qFD = list_dpr(1+index); index=index+1 ! CP added line
    hdr%cellcharge = list_dpr(1+index); index=index+1
+   hdr%extpw_eshift = list_dpr(1+index); index=index+1
    hdr%shiftk_orig = reshape(list_dpr(1+index:index+3*hdr%nshiftk_orig), [3, hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    hdr%shiftk = reshape(list_dpr(1+index:index+3*hdr%nshiftk), [3, hdr%nshiftk])

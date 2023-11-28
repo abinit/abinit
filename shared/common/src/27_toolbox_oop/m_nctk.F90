@@ -2870,14 +2870,14 @@ end subroutine write_var_netcdf
 !! SOURCE
 
 subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
-& shiftfactor_extfpmd) ! Optional arguments
+& extpw_eshift) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
  real(dp),intent(in) :: fermie
- real(dp),optional,intent(in) :: shiftfactor_extfpmd
+ real(dp),optional,intent(in) :: extpw_eshift
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -2888,7 +2888,7 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
  integer :: eig_id,fermie_id,kpt_id,nbk_id,nbk
- integer :: shiftfactor_extfpmd_id
+ integer :: extpw_eshift_id
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
@@ -2944,9 +2944,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  call ab_define_var(ncid, dimNBK, nbk_id, NF90_INT,"NBandK",&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
- if(present(shiftfactor_extfpmd)) then
-    call ab_define_var(ncid,dim0,shiftfactor_extfpmd_id,NF90_DOUBLE,&
-&    "shiftfactor_extfpmd","Extended FPMD shiftfactor","Hartree")
+ if(present(extpw_eshift)) then
+    call ab_define_var(ncid,dim0,extpw_eshift_id,NF90_DOUBLE,&
+&    "extpw_eshift","Extended FPMD shiftfactor","Hartree")
  end if
 
 !4. End define mode
@@ -2969,9 +2969,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  NCF_CHECK_MSG(ncerr," write variable fermie")
 
 !6.2 Write extfpmd shiftfactor
- if(present(shiftfactor_extfpmd)) then
-   ncerr = nf90_put_var(ncid, shiftfactor_extfpmd_id, shiftfactor_extfpmd)
-   NCF_CHECK_MSG(ncerr," write variable shiftfactor_extfpmd")
+ if(present(extpw_eshift)) then
+   ncerr = nf90_put_var(ncid, extpw_eshift_id, extpw_eshift)
+   NCF_CHECK_MSG(ncerr," write variable extpw_eshift")
  end if
 
 !6.3 Write eigenvalues

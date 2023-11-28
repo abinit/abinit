@@ -61,7 +61,7 @@ module m_extfpmd
     logical :: truecg
     integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: e_bcut,edc_kinetic,e_kinetic,entropy
-    real(dp) :: nelect,shiftfactor,ucvol,bandshift
+    real(dp) :: nelect,eshift,ucvol,bandshift
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
     real(dp),allocatable :: bandshiftk(:)
@@ -77,7 +77,7 @@ module m_extfpmd
     procedure :: compute_entropy
     procedure :: compute_nelect
     procedure :: generate_extpw
-    procedure :: compute_shiftfactor
+    procedure :: compute_eshift
     procedure :: extpw_orthon
     procedure :: init
     procedure :: destroy
@@ -146,7 +146,7 @@ contains
     this%nelectarr(:,:)=zero
     this%bandshift=zero
     ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
-    this%shiftfactor=zero
+    this%eshift=zero
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
     if (this%version==5) then
@@ -274,14 +274,14 @@ contains
     this%entropy=zero
     this%nelect=zero
     this%bandshift=zero
-    this%shiftfactor=zero
+    this%eshift=zero
     this%ucvol=zero
   end subroutine destroy
   !!***
 
-  !!****f* ABINIT/m_extfpmd/compute_shiftfactor
+  !!****f* ABINIT/m_extfpmd/compute_eshift
   !! NAME
-  !!  compute_shiftfactor
+  !!  compute_eshift
   !!
   !! FUNCTION
   !!  Computes the energy shift factor $U_0$ corresponding to constant
@@ -293,8 +293,10 @@ contains
   !!  eknk(mband*nkpt*nsppol)=kinetic energies (hartree)
   !!  mband=maximum number of bands
   !!  nband(nkpt*nsppol)=desired number of bands at each k point
+  !!  nfft=(effective) number of FFT grid points (for this processor)
   !!  nkpt=number of k points
   !!  nsppol=1 for unpolarized, 2 for spin-polarized
+  !!  nspden=number of spin-density components
   !!  wtk(nkpt)=k point weights
   !!  vtrial(nfftf,nspden)=GS potential (Hartree)
   !!
@@ -302,11 +304,11 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk,vtrial)
+  subroutine compute_eshift(this,eigen,eknk,mband,me,nband,nfft,nkpt,nsppol,nspden,wtk,vtrial)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,me,nkpt,nsppol
+    integer,intent(in) :: mband,me,nfft,nkpt,nsppol,nspden
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -325,45 +327,45 @@ contains
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
     if(this%version==1.or.this%version==4.or.this%version==5.or.this%version==10) then
-      this%shiftfactor=sum(this%vtrial)/(this%nfft*this%nspden)
+      this%eshift=sum(this%vtrial)/(this%nfft*this%nspden)
     end if
 
     ! Computes U_0^{HEG} from the difference between
     ! eigenvalues and Fermi gas energies, averaged
     ! over lasts nbcut bands.
     if(this%version==2) then
-      this%shiftfactor=zero
+      this%eshift=zero
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
-            this%shiftfactor=this%shiftfactor+&
+            this%eshift=this%eshift+&
             & wtk(ikpt)*(eigen(band_index+ii)-extfpmd_e_fg(dble(ii),this%ucvol))
           end do
           band_index=band_index+nband_k
         end do
       end do
-      this%shiftfactor=this%shiftfactor/this%nbcut
+      this%eshift=this%eshift/this%nbcut
     end if
 
     ! Computes U_0^K from the difference between
     ! eigenvalues and kinetic energies, averaged
     ! over lasts nbcut bands.
     if(this%version==3) then
-      this%shiftfactor=zero
+      this%eshift=zero
       band_index=0
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do ii=nband_k-this%nbdbuf-this%nbcut+1,nband_k-this%nbdbuf
-            this%shiftfactor=this%shiftfactor+&
+            this%eshift=this%eshift+&
             & wtk(ikpt)*(eigen(band_index+ii)-eknk(band_index+ii))
           end do
           band_index=band_index+nband_k
         end do
       end do
-      this%shiftfactor=this%shiftfactor/this%nbcut
+      this%eshift=this%eshift/this%nbcut
     end if
 
     ! Get extended FPMD band energy cutoff
@@ -376,12 +378,12 @@ contains
         nband_k=nband(ikpt+(isppol-1)*nkpt)
         this%e_bcut=this%e_bcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)/nsppol
         this%bandshift=this%bandshift+wtk(ikpt)*&
-        & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
-        this%bandshiftk(ikpt+(isppol-1)*nkpt)=extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%shiftfactor,this%ucvol)-(nband_k-this%nbdbuf)
+        & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%eshift,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
+        this%bandshiftk(ikpt+(isppol-1)*nkpt)=extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%eshift,this%ucvol)-(nband_k-this%nbdbuf)
         band_index=band_index+nband_k
       end do
     end do
-  end subroutine compute_shiftfactor
+  end subroutine compute_eshift
   !!***eigen(band_index+nband_k-this%nbdbuf)
 
   !!****f* ABINIT/m_extfpmd/generate_extpw
@@ -503,7 +505,7 @@ contains
         do iband=nband_k-this%nbdbuf+1,this%mband
           ! Get fermi gas energy and set eigenvalue
           fg_kin=extfpmd_e_fg(one*iband+bandshift,this%ucvol)
-          this%eigen(iband+ext_bdtot_index)=fg_kin+this%shiftfactor
+          this%eigen(iband+ext_bdtot_index)=fg_kin+this%eshift
 
           ! Find closest values in ext_kinpw
           closest_below=zero
@@ -695,7 +697,7 @@ contains
           ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
           & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
           call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
-          this%eigen(iband+ext_bdtot_index)=dotr+this%shiftfactor
+          this%eigen(iband+ext_bdtot_index)=dotr+this%eshift
         end do
 
         ! Increment indexes
@@ -760,7 +762,7 @@ contains
     ! over accessible states from bcut to infinity with
     ! order 1/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
-      gamma=(fermie-this%shiftfactor)/tsmear
+      gamma=(fermie-this%eshift)/tsmear
       xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
@@ -769,9 +771,9 @@ contains
     ! over energy from e_bcut to infinity with order 1/2
     ! incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==3) then
-      gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=(this%e_bcut-this%shiftfactor)/tsmear
-      if(this%e_bcut.lt.this%shiftfactor) xcut=zero
+      gamma=(fermie-this%eshift)/tsmear
+      xcut=(this%e_bcut-this%eshift)/tsmear
+      if(this%e_bcut.lt.this%eshift) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
     end if
 
@@ -878,7 +880,7 @@ contains
     ! over accessible states from bcut to infinity with
     ! order 3/2 incomplete Fermi-Dirac integral.
     if(this%version==4.or.this%version==2) then
-      gamma=(fermie-this%shiftfactor)/tsmear
+      gamma=(fermie-this%eshift)/tsmear
       xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
@@ -887,8 +889,8 @@ contains
     ! over energy from e_bcut to infinity with order 3/2
     ! incomplete Fermi-Dirac integral.
     if(this%version==1.or.this%version==3) then
-      gamma=(fermie-this%shiftfactor)/tsmear
-      xcut=(this%e_bcut-this%shiftfactor)/tsmear
+      gamma=(fermie-this%eshift)/tsmear
+      xcut=(this%e_bcut-this%eshift)/tsmear
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
     end if
 
@@ -986,16 +988,16 @@ contains
     end if
 
 
-    ! Computes the double counting term from the shiftfactor, and
+    ! Computes the double counting term from the eshift, and
     ! from the contributions to the kinetic energy and
     ! the number of electrons
     if(this%version==1.or.this%version==2.or.this%version==3.or.this%version==4.or.this%version==5) then
-      this%edc_kinetic=this%e_kinetic+this%nelect*this%shiftfactor
+      this%edc_kinetic=this%e_kinetic+this%nelect*this%eshift
     else if(this%version==10) then
       this%edc_kinetic=this%e_kinetic+sum(this%nelectarr(:,:)*this%vtrial(:,:)/(this%nfft*this%nspden))
     end if
 
-    if((this%e_bcut.lt.this%shiftfactor).and.&
+    if((this%e_bcut.lt.this%eshift).and.&
     & (this%version==1.or.this%version==3.or.this%version==10)) then
       write(msg,'(11a)')&
       & 'Extended FPMD could not properly compute the contribution to the energy.',ch10,&
@@ -1056,14 +1058,14 @@ contains
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==2.or.this%version==4) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-      gamma=(fermie-this%shiftfactor)/tsmear
+      gamma=(fermie-this%eshift)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
 
       step=(dble(this%bcut)+this%bandshift)/(this%bcut)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
         ix=(dble(ii)-one)*step
-        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%shiftfactor,fermie,tsmear)
+        fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%eshift,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-two*(fn*log(fn)+(one-fn)*log(one-fn))
         else
@@ -1086,17 +1088,17 @@ contains
     ! substracting 0 to bcut contribution with numeric integration.
     if(this%version==1.or.this%version==3) then
       factor=sqrt(2.)/(PI*PI)*this%ucvol*tsmear**(2.5)
-      gamma=(fermie-this%shiftfactor)/tsmear
+      gamma=(fermie-this%eshift)/tsmear
       ABI_MALLOC(valuesent,(this%bcut+1))
 
-      step=(this%e_bcut-this%shiftfactor)/(this%bcut)
+      step=(this%e_bcut-this%eshift)/(this%bcut)
       !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
       do ii=1,this%bcut+1
-        ix=this%shiftfactor+(dble(ii)-one)*step
+        ix=this%eshift+(dble(ii)-one)*step
         fn=fermi_dirac(ix,fermie,tsmear)
         if(fn>tol16.and.(one-fn)>tol16) then
           valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
-          & extfpmd_dos(ix,this%shiftfactor,this%ucvol)
+          & extfpmd_dos(ix,this%eshift,this%ucvol)
         else
           valuesent(ii)=zero
         end if
@@ -1194,22 +1196,22 @@ contains
   !!
   !! INPUTS
   !!  energy=get the value of the free particle density of states at this energy
-  !!  shiftfactor=energy shift factor
+  !!  eshift=energy shift factor
   !!  ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
   !!  extfpmd_dos=value of free particle density of states at given energy
   !!
   !! SOURCE
-  function extfpmd_dos(energy,shiftfactor,ucvol)
+  function extfpmd_dos(energy,eshift,ucvol)
     ! Arguments -------------------------------
     ! Scalars
-    real(dp),intent(in) :: energy,shiftfactor,ucvol
+    real(dp),intent(in) :: energy,eshift,ucvol
     real(dp) :: extfpmd_dos
 
     ! *********************************************************************
 
-    extfpmd_dos=sqrt(2.)*ucvol*sqrt(energy-shiftfactor)/(PI*PI)
+    extfpmd_dos=sqrt(2.)*ucvol*sqrt(energy-eshift)/(PI*PI)
   end function extfpmd_dos
   !!***
 
