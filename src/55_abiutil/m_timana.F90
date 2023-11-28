@@ -792,16 +792,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  
  names(1091)='listkk                          '; basic(1091) = 1
 
- names(1100)='nonlop_ylm                      '
- names(1101)='nlo_ylm%opernla                 '
- names(1102)='nlo_ylm%opernla_mv              '
- names(1103)='nlo_ylm%opernlb                 '
- names(1104)='nlo_ylm%opernlb_mv              '
- names(1105)='nlo_ylm%opernlc                 '
- names(1106)='nlo_ylm%opernld                 '
- names(1107)='nlo_ylm%opernld(l)              '
- names(1108)='nlo_ylm%opernld(l+im)           '
- names(1119)='nlo_ylm(other)                  '
+! names(1100)='nonlop_ylm                      '
+! names(1101)='nlo_ylm%opernla                 '
+! names(1102)='nlo_ylm%opernla_mv              '
+! names(1103)='nlo_ylm%opernlb                 '
+! names(1104)='nlo_ylm%opernlb_mv              '
+! names(1105)='nlo_ylm%opernlc                 '
+! names(1106)='nlo_ylm%opernld                 '
+! names(1107)='nlo_ylm%opernld(l)              '
+! names(1108)='nlo_ylm%opernld(l+im)           '
+! names(1119)='nlo_ylm(other)                  '
 
  names(1150)='outscfcv                        '
  names(1151)='outscfcv(preparation)           '
@@ -1003,7 +1003,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1650) = 'lobpcgwf2                     ';
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
- names(1653) = 'lobpcg_run                     '
+! names(1653) = 'lobpcg_run                     '
  names(1654) = 'lobpcg_getAX_BX                '
  names(1655) = 'lobpcg_orthoWrtPrev            '
  names(1656) = 'lobpcg_Bortho                  '
@@ -1022,9 +1022,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1667) = 'xgTransposer_init              '
  names(1668) = 'xgTransposer_free              '
  names(1669) = 'xgTransposer_transpose         '
- names(1670) = 'xgBlock_potrf                  '
+ names(1670) = 'xgBlock_gemm                   '
  names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_gemm                   '
+ names(1672) = 'xgBlock_potrf                  '
  names(1673) = 'xgBlock_set                    '
  names(1674) = 'xgBlock_get                    '
  names(1675) = 'xgBlock_heev                   '
@@ -1116,7 +1116,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1750) = 'chebfiwf2                     '; basic(1750) = 1
  names(1751) = 'chebfi2_init                  '
  names(1752) = 'chebfi2_free                  '
- names(1753) = 'chebfi2_run                   '
+! names(1753) = 'chebfi2_run                   '
  names(1754) = 'chebfi2_getAX_BX              '
  names(1755) = 'chebfi2_invovl                '
  names(1756) = 'chebfi2_residu                '
@@ -1403,8 +1403,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
    case(45)
-!      Estimate the complement of nonlop_ylm
-     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+!!      Estimate the complement of nonlop_ylm
+!     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
    case(46)
 !      Sum the calls of getcprj
      tslots(:4)=(/1290,1293,1294,1295/)
@@ -1814,8 +1814,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
-       case(80)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
+!       case(80)
+!         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
          list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(82)

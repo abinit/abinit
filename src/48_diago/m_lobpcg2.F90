@@ -49,7 +49,7 @@ module m_lobpcg2
 
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
-  integer, parameter :: tim_run      = 1653
+!  integer, parameter :: tim_run      = 1653
   integer, parameter :: tim_getAX_BX = 1654
   integer, parameter :: tim_ortho    = 1655
   integer, parameter :: tim_Bortho   = 1656
@@ -352,7 +352,7 @@ module m_lobpcg2
       end subroutine pcond
     end interface
 
-    call timab(tim_run,1,tsec)
+!    call timab(tim_run,1,tsec)
 
     lobpcg%prtvol = prtvol
 
@@ -550,7 +550,7 @@ module m_lobpcg2
       call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,2*dlamch('E'))
     end if
 
-    call timab(tim_run,2,tsec)
+!    call timab(tim_run,2,tsec)
 
   end subroutine lobpcg_run
 
