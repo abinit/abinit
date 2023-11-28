@@ -145,7 +145,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !scalars
  integer, parameter :: tim_chebfiwf2 = 1750
  integer :: ipw,space,blockdim,nline,total_spacedim,ierr,nthreads
- real(dp) :: cputime,walltime,localmem
+! real(dp) :: cputime,walltime,localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
@@ -166,8 +166,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !######################################################################
 
   call timab(tim_chebfiwf2,1,tsec)
-  cputime = abi_cpu_time()
-  walltime = abi_wtime()
+!  cputime = abi_cpu_time()
+!  walltime = abi_wtime()
 
 !Set module variables
  l_paw = (gs_hamk%usepaw==1)
@@ -203,22 +203,22 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
 !Memory info
- if ( prtvol >= 3 ) then
-   if (l_mpi_enreg%paral_kgb == 1) then
-     total_spacedim = l_icplx*l_npw*l_nspinor
-     call xmpi_sum(total_spacedim,l_mpi_enreg%comm_bandspinorfft,ierr)
-   else
-     total_spacedim = 0
-   end if
-   chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
-&                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
-   localMem = (l_npw+2*l_npw*l_nspinor+2*nband)*kind(1.d0) !blockdim
-   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
-   (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",(localMem)/1e9,"GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",(chebfiMem(1))/1e9,"GB"
-   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
- end if
+! if ( prtvol >= 3 ) then
+!   if (l_mpi_enreg%paral_kgb == 1) then
+!     total_spacedim = l_icplx*l_npw*l_nspinor
+!     call xmpi_sum(total_spacedim,l_mpi_enreg%comm_bandspinorfft,ierr)
+!   else
+!     total_spacedim = 0
+!   end if
+!   chebfiMem = chebfi_memInfo(nband,l_icplx*l_npw*l_nspinor,space,l_mpi_enreg%paral_kgb, &
+!&                             total_spacedim,l_mpi_enreg%bandpp) !blockdim
+!   localMem = (l_npw+2*l_npw*l_nspinor+2*nband)*kind(1.d0) !blockdim
+!   write(std_out,'(1x,A,F10.6,1x,A)') "Each MPI process calling chebfi should need around ", &
+!   (localMem+sum(chebfiMem))/1e9,"GB of peak memory as follows :"
+!   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in chebfiwf : ",(localMem)/1e9,"GB"
+!   write(std_out,'(4x,A,F10.6,1x,A)') "Permanent memory in m_chebfi : ",(chebfiMem(1))/1e9,"GB"
+!   write(std_out,'(4x,A,F10.6,1x,A)') "Temporary memory in m_chebfi : ",(chebfiMem(2))/1e9,"GB"
+! end if
 
 !For preconditionning
  ABI_MALLOC(l_pcon,(1:l_icplx*npw))
@@ -257,19 +257,19 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 ! ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*l_nband_filter))
  call timab(tim_chebfiwf2,2,tsec)
 
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
+! cputime = abi_cpu_time() - cputime
+! walltime = abi_wtime() - walltime
 
- nthreads = xomp_get_num_threads(open_parallel = .true.)
+! nthreads = xomp_get_num_threads(open_parallel = .true.)
 
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
+! if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
+!   if ( prtvol >= 3 ) then
+!     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
+!     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+!     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+!   end if
+!   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+! end if
 
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
@@ -311,19 +311,19 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  call timab(tim_chebfiwf2,2,tsec)
 
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
-
- nthreads = xomp_get_num_threads(open_parallel = .true.)
-
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
+! cputime = abi_cpu_time() - cputime
+! walltime = abi_wtime() - walltime
+!
+! nthreads = xomp_get_num_threads(open_parallel = .true.)
+!
+! if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
+!   if ( prtvol >= 3 ) then
+!     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
+!     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+!     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+!   end if
+!   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+! end if
 
  DBG_EXIT("COLL")
 

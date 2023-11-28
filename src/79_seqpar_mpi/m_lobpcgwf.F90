@@ -102,7 +102,7 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  double precision :: localmem
 
  integer, parameter :: tim_lobpcgwf2 = 1650
- double precision :: cputime, walltime
+! double precision :: cputime, walltime
  double precision :: tsec(2)
 
  type(c_ptr) :: cptr
@@ -124,8 +124,8 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !###########################################################################
 
  call timab(tim_lobpcgwf2,1,tsec)
- cputime = abi_cpu_time()
- walltime = abi_wtime()
+! cputime = abi_cpu_time()
+! walltime = abi_wtime()
 
  ! Set module variables
  l_paw = (gs_hamk%usepaw==1)
@@ -277,20 +277,18 @@ subroutine lobpcgwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !################    SORRY IT'S ALREADY FINISHED : )  ######################
 !###########################################################################
 
-
  call timab(tim_lobpcgwf2,2,tsec)
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
- nthreads = xomp_get_num_threads(open_parallel = .true.)
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
-
+! cputime = abi_cpu_time() - cputime
+! walltime = abi_wtime() - walltime
+! nthreads = xomp_get_num_threads(open_parallel = .true.)
+! if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
+!   if ( prtvol >= 3 ) then
+!     write(std_out,'(a)',advance='no') sjoin(" Lobpcg took", sec2str(cputime), "of cpu time")
+!     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
+!     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
+!   end if
+!   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
+! end if
 
  DBG_EXIT("COLL")
 

@@ -48,9 +48,9 @@ module m_xg
   integer, parameter, public :: SPACE_C = 2
   integer, parameter, public :: SPACE_CR = 3
 
-  integer, parameter :: tim_potrf = 1670
+  integer, parameter :: tim_gemm  = 1670
   integer, parameter :: tim_trsm  = 1671
-  integer, parameter :: tim_gemm  = 1672
+  integer, parameter :: tim_potrf = 1672
   integer, parameter :: tim_set   = 1673
   integer, parameter :: tim_get   = 1674
   integer, parameter :: tim_heev  = 1675
