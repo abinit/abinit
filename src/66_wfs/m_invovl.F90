@@ -1296,7 +1296,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
   logical :: transfer_omp_args
 
-  real(dp),pointer :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
+  real(dp),ABI_CONTIGUOUS pointer :: proj(:,:,:),sm1proj(:,:,:),PtPsm1proj(:,:,:)
 
   integer :: idat, iatom, icplx, iproj, nprojs, nlmn, shift
   real(dp) :: tsec(2)
