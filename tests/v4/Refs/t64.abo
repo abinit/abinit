@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t64/t64.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t64/t64.abi
 - output file    -> t64.abo
 - root for input  files -> t64i
 - root for output files -> t64o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -54,7 +53,6 @@ P newvtr chain                          1.616 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.021 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -264,8 +262,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.02508
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1343,10 +1341,10 @@ P          mk1mem2         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.9  wall=          1.3
++Overall time at end (sec) : cpu=          0.7  wall=          0.8

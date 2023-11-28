@@ -1622,8 +1622,8 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
        call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
 
        ! Write d2eig data block
-       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1)
-       call ddb%write_d2eig(ddb_hdr, 1)
+       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
+       call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
 
        ! close and free memory
        call ddb_hdr%close()

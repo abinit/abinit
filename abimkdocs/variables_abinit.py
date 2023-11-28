@@ -1175,7 +1175,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Bethe-Salpeter Number of STATES",
-    requires="[[optdriver]] == 99 and [[bs_algorithm]] in [2, 3]",
+    requires="[[optdriver]] == 99 and [[bs_algorithm]] in [1, 3]",
     added_in_version="before_v9",
     text=r"""
 **bs_nstates** defines the maximum number of excitonic states calculated in
@@ -2390,7 +2390,7 @@ For the time being,
   Otherwise, use [[densfor_pred]] = 2
 
 
-!!! note "concerning the correction of forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
+!!! note "About the correction to forces (use of [[densfor_pred]] = 1, 2, 3, 4 or 6)"
 
     The force on the atom located at R is corrected by the addition of the following
     term: $F_{residual}=\int dr V_{residual} \frac{d \rho_{atomic}}{dR}$,
@@ -2398,21 +2398,23 @@ For the time being,
 
     - When such an atomic density ($\rho_{atomic}$) is found in the pseudopotential or
     PAW file, it is used. If not, a gaussian density (defined by [[densty]] parameter) is used.
+
     - When SCF mixing is done on the density ([[iscf]] >= 10), the potential
-    residual ($V_residual$) is obtained from the density residual with the first
+    residual ($V_{residual}$) is obtained from the density residual with the first
     order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
-    and uses the exchange-correlation kernel
-    $ \frac{dV_{xc}}{d\rho}=K_{xc}$ whose computation is time-consuming for GGA
-    functionals. By default (positive values of [[densfor_pred]]), the local-
-    density part of the GGA exchange-correlation kernel is used (even for GGA, for
-    which it seems to give a reasonable accuracy). Using the full GGA exchange
-    correlation kernel (so, including derivatives with respect to the gradient of
-    the density) is always possible by giving a negative value to
-    [[densfor_pred]]. In case of hybrid functionals, a similar correction term is
+    and uses the exchange-correlation kernel $K_{xc}=\frac{dV_{xc}}{d\rho}$ whose computation
+    is time-consuming for GGA (or meta-GGA) functionals.
+    
+    - By default (positive values of [[densfor_pred]]), even for GGA and meta-GGA,
+    the local-density part of the exchange-correlation kernel is used, which gives a reasonable accuracy.
+    Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of
+    the density) is always possible by giving a negative value to [[densfor_pred]].
+
+    - In case of hybrid functionals, a similar correction term is
     added, although in the density mixing scheme, the related GGA kernel is used
     instead of the hybrid functional kernel.
 
-!!! note "concerning the use of [[densfor_pred]] = 5 or 6 (density prediction)"
+!!! note "About the use of [[densfor_pred]] = 5 or 6 (density prediction)"
 
     The algorithm is described in [[cite:Alfe1999]].
     It uses an atomic (spherical) density. When such an atomic density
@@ -4749,6 +4751,25 @@ The behaviour of ABINIT before v5.5 corresponds to the default value 11.
 ),
 
 Variable(
+    abivarname="field_red",
+    varset="ffield",
+    vartype="real",
+    topics=[],
+    dimensions=[3],
+    defaultval=MultipleValue(number=3, value=0.0),
+    mnemonics="FIELD in REDuced coordinates",
+    requires="[[berryopt]] in [4, 6, 14, 16, 17]",
+    added_in_version="v9.11.2",
+    text=r"""
+Stores the field direction in reduced coordinates, deduced from [[dfield]], [[efield]],
+[[red_efieldbar]], [[red_dfield]], [[red_efield]], and/or [[jfielddir]],
+depending on the value of [[berryopt]], for the purpose of computing
+the symmetries of the system placed in such field.
+""",
+),
+
+
+Variable(
     abivarname="fockdownsampling",
     varset="gstate",
     vartype="integer",
@@ -5628,6 +5649,37 @@ which is a frequently occurring case.
 
   * If [[gethaydock]] is a negative number, it indicates the number of datasets to
 go backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
+""",
+),
+
+Variable(
+    abivarname="getkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval="[[getden]]",
+    mnemonics="GET the Kinetic energy DENsity from...",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+Eventually used when [[ndtset]] > 0 (multi-dataset mode) and, in the case of a
+ground-state calculation, if [[iscf]]<0 (non-SCF calculation), to indicate
+that the starting **kinetic energy density** is to be taken from the output of a previous
+dataset. It can be used to chain the calculations, since it describes from which
+dataset the OUTPUT density is to be taken, as INPUT density of the present dataset.
+
+  * If [[getkden]] == 0, no such use of previously computed output density file is done.
+
+  * If [[getkden]] is positive, its value gives the index of the dataset from which
+the output density is to be used as input. However, if the first dataset is treated, -1
+is equivalent to 0, since no dataset has been computed in the same run.
+
+  * If [[getkden]] is -1, the output density of the previous dataset must be taken,
+which is a frequently occurring case.
+
+  * If [[getkden]] is a negative number, it indicates the number of datasets to go
+backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
 """,
 ),
 
@@ -8154,7 +8206,7 @@ Variable(
     topics=['multidtset_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': 0}),
-    mnemonics="Integer that governs the ReaDing of DEN file",
+    mnemonics="Integer that governs the ReaDing of density DEN file",
     added_in_version="before_v9",
     text=r"""
 If 1, will start the ground-state calculation from the density file of a previous run.
@@ -8162,6 +8214,27 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 Alternative to [[getden_filepath]] and [[getden]].
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
+For further information about the *files file*, consult the [[help:abinit#files-file]].
+""",
+),
+
+Variable(
+    abivarname="irdkden",
+    varset="files",
+    vartype="integer",
+    topics=['multidtset_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[iscf]] < 0': '1', 'defaultval': '[[irdden]]'}),
+    mnemonics="Integer that governs the ReaDing of Kinetic energy density KDEN file",
+    added_in_version="9.10.4",
+    text=r"""
+Only relevant when [[usekden]]=1 (meta GGA exchange-correlation functionals).
+If 1, will start the ground-state calculation from the **kinetic energy density** file
+of a previous run.
+When [[iscf]] < 0, the reading of a KDEN file is always enforced.
+Alternative to [[getkden]].
+
+A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
 """,
 ),
@@ -13258,8 +13331,10 @@ the sum of [[nband]](ikpt) over all k points and spins. The k point weights
 
   * [[occopt]] = 3 to 8 :
 Metallic occupation of levels, using different occupation schemes (see below).
+See the review of the different possibilities in [[cite:Santos2023]], that
+delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable xx is the energy in Ha,
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13270,8 +13345,9 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=0.25 (\cosh(x/2.0))^{-2}$. For usual calculations, at zero temperature, do not use [[occopt]]=3,
-but likely [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+For usual calculations, at zero temperature, do not use [[occopt]]=3,
+but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
 
     * [[occopt]] = 4:
@@ -13283,7 +13359,7 @@ Must be used with caution, see the note below.
 
     * [[occopt]] = 5:
 "Cold smearing" of N. Marzari (see his thesis work), with a=-.8165 (monotonic
-function in the tail)
+function in the tail).
 Same smeared delta function as [[occopt]] = 4, with different a.
 Must be used with caution, see the note below.
 
@@ -13304,7 +13380,7 @@ Uniform smearing (the delta function is replaced by a constant function of
 value one over ]-1/2,1/2[ (with one-half value at the boundaries). Used for
 testing purposes only.
 
-    * [[occopt]] = 9:
+  * [[occopt]] = 9:
 Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]] holes are forced in bands 1 to [[ivalence]] and [[nqfd]] electrons are forced in bands with index > [[ivalence]]. See details in [[cite:Paillard2019]]. At present, the number of holes and electrons should be the same. Note that [[occopt]] = 9 cannot be used with fixed magnetization calculation.
 
 !!! note
@@ -13318,6 +13394,7 @@ Fermi-Dirac occupation is enforced with two distinct quasi-Fermi levels: [[nqfd]
     of this problem, a small variation of input parameters might lead to a jump of
     total energy, because there might be two or even three possible values of the
     Fermi energy, and the bisection algorithm finds one or the other.
+    See a more detailed explanation in [[cite:Santos2023]].
 """,
 ),
 
@@ -18339,17 +18416,26 @@ which is a translation in real space followed by a spin flip.
 Such a Shubnikov type IV magnetic space group might be defined by its Fedorov space
 group (set of spatial symmetries that do not change the magnetization), and an
 additional magnetic space group number [[spgroupma]].
+In this case, the Fedorov space group associated with [[spgroup]] is a subgroup
+of the magnetic space group number associated with [[spgroupma]], the latter
+has twice the number of operations than the former.
 
-A Shubnikov type III magnetic space group does not contain a translation in real space
-wollowed by a spin flip. It might be defined by its Fedorov
+Unlike Shubnikov type IV magnetic space groups, 
+a Shubnikov type III magnetic space group does not contain a translation in real space
+followed by a spin flip. It might be defined by a covering Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
 action), and an additional magnetic space group number [[spgroupma]].
-For the additional number [[spgroupma]], we follow the definition of Table 7.4
-of the above-mentioned [[cite:Bradley1972]].
-
+In this case, the covering Fedorov space group is a supergroup of the
+magnetic space group number [[spgroupma]], the former
+has twice the number of operations than the latter.
 Thus, one way to specify a Shubnikov type IV magnetic space group, is to define
 both [[spgroup]] and [[spgroupma]].
 For example, the group P2_1/c_prime has [[spgroup]] = 14 and [[spgroupma]] = 78.
+
+For the meaning of the number [[spgroupma]], in both Shubnikov type III and IV,
+we follow the definition of Table 7.4
+of the above-mentioned [[cite:Bradley1972]].
+
 Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup]]
 and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
@@ -19090,8 +19176,8 @@ Variable(
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of total Energy",
     characteristics=['[[ENERGY]]'],
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldff]] or [[tolrff]] or [[tolvrs]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for absolute differences of total energy that, reached TWICE
@@ -19109,13 +19195,18 @@ vectors), the use of [[toldfe]] is to be avoided. The use of [[toldff]] or
 characteristics. When all forces vanish by symmetry (e.g. optimization of the
 lattice parameters of a high-symmetry crystal), then place [[toldfe]] to
 1.0d-12, or use (better) [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**toldfe** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19127,8 +19218,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the DiFference of Forces",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[tolrff]] or [[tolvrs]]",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for differences of forces (in hartree/Bohr) that, reached
@@ -19141,12 +19232,17 @@ configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] 
 A value ten times smaller than [[tolmxf]] is suggested (for example 5.0d-6
 hartree/Bohr).
 This stopping criterion is not allowed for RF calculations.
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined generically.
+
+**toldff** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19231,9 +19327,8 @@ eigenenergy due to the last line minimisation, with the one observed for the
 first line minimisation. When the ratio is lower than [[tolrde]], the next
 line minimisations are skipped.
 The number of line minimisations is limited by [[nline]] anyhow.
-This stopping criterion is present for both GS and RF calculations. In RF
-calculations, [[tolrde]] is actually doubled before comparing with the above-
-mentioned ratio, for historical reasons.
+This stopping criterion is present only for band-by-band conjugate gradient ([[wfoptalg]] different than 1,4,14 and 114) and [[rmm_diis]], but both GS and RF calculations.
+In RF calculations, [[tolrde]] is actually doubled before comparing with the above-mentioned ratio, for historical reasons.
 """,
 ),
 
@@ -19245,8 +19340,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the Relative diFference of Forces",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[toldff]] or [[tolvrs]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolvrs]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for the ratio of differences of forces (in hartree/Bohr) to
@@ -19259,13 +19354,18 @@ is to be used when trying to equilibrate a structure to its lowest energy
 configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
 A value of 0.02 is suggested.
 This stopping criterion is not allowed for RF calculations.
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**tolrff** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19303,8 +19403,8 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on the potential V(r) ReSidual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[tolwfr]] or [[toldfe]] or [[toldff]] or [[tolrff]]'",
+    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] can differ from zero.",
+    excludes="[[toldfe]] or [[toldff]] or [[tolrff]]'",
     added_in_version="before_v9",
     text=r"""
 Sets a tolerance for potential residual that, when reached, will cause one SCF
@@ -19325,13 +19425,18 @@ tolerance on the potential residual is imposed by first subtracting the mean
 of the residual of the potential (or the trace of the potential matrix, if the
 system is spin-polarized), then summing the square of this function over all
 FFT grid points. The result should be lower than [[tolvrs]].
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and [[tolwfr]] are aimed
+Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
 at the same goal (causing the SCF cycle to stop), they are seen as a unique
 input variable at reading. Hence, it is forbidden that two of these input
 variables have non-zero values for the same dataset, or generically (for all
 datasets). However, a non-zero value for one such variable for one dataset
 will have precedence on the non-zero value for another input variable defined
 generically.
+
+**tolvrs** can be coupled with [[tolwfr]]. In that case, SCF cycle is stopped when both criteria are satisfied.
+To do so one has to specify both criteria for the same dataset.
+Note that a tolerance defined generically does not couple with a criterion defined for one particular dataset.
+See [[tolwfr]] for more details about coupling two criteria.
 """,
 ),
 
@@ -19343,13 +19448,12 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="TOLerance on WaveFunction squared Residual",
-    commentdefault="The default value implies that this stopping condition is ignored. For the SCF case, one and only one of the input tolerance criteria [[tolwfr]], [[toldff]], [[tolrff]], [[toldfe]] or [[tolvrs]] must differ from zero.",
-    excludes="[[toldfe]] or [[toldff]] or [[tolrff]] or [[tolvrs]]",
+    commentdefault="The default value implies that this stopping condition is ignored.",
     added_in_version="before_v9",
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: < nk| (H-E)^2 |nk>,    E = < nk|H|nk >
+below) for any given band. The squared residual is: 
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
@@ -19363,26 +19467,52 @@ Note that if [[iscf]] > 0, this criterion should be replaced by those based on
 [[toldfe]] (preferred for [[ionmov]] == 0), [[toldff]] [[tolrff]] (preferred for
 [[ionmov]] /= 0), or [[tolvrs]] (preferred for theoretical reasons!).
 When **tolwfr** is 0.0, this criterion is ignored, and a finite value of
-[[toldfe]], [[toldff]] or [[tolvrs]] must be specified. This also imposes a
+[[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]] must be specified. This also imposes a
 restriction on taking an ion step; ion steps are not permitted unless the
 largest squared residual is less than **tolwfr**, ensuring accurate forces.
 To get accurate stresses may be quite demanding.
 Note that the preparatory GS calculations before a RF calculations must be highly converged.
 Typical values for these preparatory runs are **tolwfr** between 1.0d-16 and 1.0d-22.
 
-Note that **tolwfr** is often used in the test cases, but this is **tolwfr**
-purely for historical reasons: except when [[iscf]] < 0, other criteria should be used.
+Note that **tolwfr** is often used in the test cases, but this is
+purely for historical reasons: except when [[iscf]] < 0, **other criteria should be used**.
+Indeed, the squared residual can be small even with non self-consistent density and potential.
+
+**tolwfr** alone should not be used as SCF criterion, but it can be coupled with [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]].
+In that case, SCF cycle is stopped when both criteria are satisfied.
+That way one can insure that physical properties are converged (=SCF converged) while insuring that wavefunctions are converged.
+For example, a ground state computations done before DFPT can use stringent values of **tolwfr** in addition to a desired criterion on self-consistency.
+
+**tolwfr** is coupled with an other tolerance only if both criteria are specified for one particular dataset, or if both criteria are given generically.
+If a single criterion is given (for a single dataset or generically), it will not be coupled with another criterion (defined generically or for a single dataset, respectfully).
 
 In the wavelet case (see [[usewvl]] = 1), this criterion is the favoured one.
 It is based on the norm 2 of the gradient of the wavefunctions.
 Typical values range from 5*10^-4  to 5*10^-5.
+""",
+),
 
-Since [[toldfe]], [[toldff]], [[tolrff]], [[tolvrs]] and **tolwfr** are aimed
-at the same goal (causing the SCF cycle to stop), they are seen as a unique
-input variable at reading. Hence, it is forbidden that two of these input
-variables have non-zero values for the same dataset, or generically (for all
-datasets). However, a non-zero value for one such variable for one dataset
-will have precedence on the non-zero value for another input variable defined generically.
+Variable(
+    abivarname="tolwfr_diago",
+    varset="basic",
+    vartype="real",
+    topics=['SCFControl_expert'],
+    dimensions="scalar",
+    defaultval="[[tolwfr]]",
+    mnemonics="TOLerance on WaveFunction squared Residual at the DIAGOnalization level",
+    added_in_version="9.11.3",
+    text=r"""
+This criterion is the same than [[tolwfr]], but used to control the diagonalization algorithm instead of the SCF cycles.
+In practice it is used to reduce the number of "lines" done at the diagonalization step (see [[nline]]), saving computational time.
+If the squared residual becomes lower than **tolwfr_diago**, the remaining "lines" to be done are skipped.
+For LOBPCG, "lines" are skipped if the biggest squared residual of the block is less than **tolwfr_diago**.
+If **tolwfr_diago**=0, [[nline]] "lines" are done at every self-consistent step.
+By default **tolwfr_diago** is equal to [[tolwfr]], but can be used independently.
+One can use [[tolvrs]] (or any other tolerance) to define a criterion for SCF cycles, and use **tolwfr_diago** to save computational time.
+However, when [[tolwfr]]>0, **tolwfr_diago**>[[tolwfr]] is forbidden as the SCF cycles cannot converge in that case.
+
+For [[wfoptalg]]=114 only (LOBPCG), if **tolwfr_diago**=0 then it is set to 1e-20 internally.
+As a consequence, to ensure that no lines are skipped one has to set **tolwfr_diago**=1e-30 in the input (instead of 0) in this particular case.
 """,
 ),
 
@@ -21218,7 +21348,7 @@ The different possibilities are:
   * [[wfoptalg]] = 1: new algorithm based on Chebyshev filtering, designed for very large number of processors, in the regime
   where LOBPCG does not scale anymore. It is not able to use preconditionning and therefore might converge slower than other algorithms.
   By design, it will **not** converge the last bands: it is recommended to use slightly more bands than necessary.
-  For usage with [[tolwfr]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
+  For usage with [[tolwfr_diago]], it is imperative to use [[nbdbuf]]. For more performance, try [[use_gemm_nonlop]].
   For more information, see the [performance guide](/theory/howto_chebfi.pdf) and the [[cite:Levitt2015]]. Status: experimental but usable.
   Questions and bug reports should be sent to antoine (dot) levitt (at) gmail.com.
 """,
@@ -21503,7 +21633,33 @@ or other quantities that are density-dependent is performed before this replacem
 
 It has been observed that the SCF cycle of the Tran-Blaha mGGA can be quite
 hard to make converge, for systems for which there is some vacuum. In this
-case, setting [[xc_denpos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
+case, setting first [[xc_taupos]] to 1.0e-7 ... 1.0e-6 , and increasing if necessary [[xc_denpos]]
+has been seen to allow good convergence. Of course, this will affect the numerical results somehow,
+and one should play a bit with this value to avoid incorrect calculations.
+""",
+),
+
+Variable(
+    abivarname="xc_taupos",
+    varset="dev",
+    vartype="real",
+    topics=['xc_expert'],
+    dimensions="scalar",
+    defaultval="[[xc_denpos]]",
+    mnemonics="eXchange-Correlation - TAU kinetic energy DENsity POSitivity value",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.10.4",
+    text=r"""
+For the evaluation of the meta-GGA exchange-correlation functionals,
+the kinetic energy density (usually named tau) cannot be negative, or even too small.
+[[xc_taupos]] is the smallest value that the kinetic energy density can assume
+at the time of the evaluation of a XC functional, in ABINIT.
+When then computed kinetic energy density drops below [[xc_taupos]] before
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+
+It has been observed that the SCF cycle using meta-GGA functionals can be quite
+hard to make converge, for systems for which there is some vacuum. In this
+case, setting [[xc_taupos]] to 1.0e-7 ... 1.0e-6 has been seen to allow good
 convergence. Of course, this will affect the numerical results somehow, and
 one should play a bit with this value to avoid incorrect calculations.
 """,

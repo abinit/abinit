@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h13 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v6_t66/t66.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t66/t66.abi
 - output file    -> t66.abo
 - root for input  files -> t66i
 - root for output files -> t66o
-
 
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       4.198 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -55,7 +53,6 @@ P This job should need less than                       2.635 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                       3.683 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   14 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 14 (RF).
@@ -92,7 +88,6 @@ P This job should need less than                       3.683 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   15 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 15.
@@ -108,7 +103,6 @@ P This job should need less than                       4.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -126,7 +120,6 @@ P This job should need less than                       4.198 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -142,7 +135,6 @@ P This job should need less than                       2.635 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -161,7 +153,6 @@ P This job should need less than                       3.683 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   24 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 24 (RF).
@@ -179,7 +170,6 @@ P This job should need less than                       3.683 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   25 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 25.
@@ -195,7 +185,6 @@ P This job should need less than                       4.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   31 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -213,7 +202,6 @@ P This job should need less than                       4.198 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   32 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
@@ -229,7 +217,6 @@ P This job should need less than                       2.635 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -248,7 +235,6 @@ P This job should need less than                       3.683 Mbytes of memory.
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
 
-
  DATASET   34 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 34 (RF).
@@ -265,7 +251,6 @@ P This job should need less than                       3.683 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.123 Mbytes ; DEN or POT disk file :      0.100 Mbytes.
 ================================================================================
-
 
  DATASET   35 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -810,8 +795,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     18.743   => boxcut(ratio)=   2.05249
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5985,6 +5970,11 @@ P          mk1mem           5
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -6074,10 +6064,10 @@ P          mk1mem           5
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.4
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 1111 WARNINGs and   92 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.4
+.Delivered 1111 WARNINGs and   93 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.9  wall=         11.2

@@ -212,6 +212,7 @@ type, public :: dataset_type
  integer :: getden = 0
  integer :: getefmas = 0
  integer :: getgam_eig2nkq = 0
+ integer :: getkden = 0
  integer :: getocc = 0
  integer :: getpawden = 0
  integer :: getqps = 0
@@ -317,6 +318,7 @@ type, public :: dataset_type
  integer :: irdden = 0
  integer :: irdefmas = 0
  integer :: irdhaydock = 0
+ integer :: irdkden = 0
  integer :: irdpawden = 0
  integer :: irdqps = 0
  integer :: irdscr = 0
@@ -854,6 +856,7 @@ type, public :: dataset_type
  real(dp) :: tolsym
  real(dp) :: tolvrs
  real(dp) :: tolwfr
+ real(dp) :: tolwfr_diago
  real(dp) :: tphysel
  real(dp) :: tsmear
  real(dp) :: userra = zero
@@ -887,6 +890,7 @@ type, public :: dataset_type
  real(dp) :: wvl_crmult
  real(dp) :: wvl_frmult
  real(dp) :: xc_denpos
+ real(dp) :: xc_taupos
  real(dp) :: xc_tb09_c
  real(dp) :: zcut
 
@@ -902,6 +906,7 @@ type, public :: dataset_type
  real(dp) :: efield(3)
  real(dp) :: einterp(4) = zero
  real(dp) :: eph_tols_idelta(2) = [tol12, tol12]
+ real(dp) :: field_red(3)
  real(dp) :: genafm(3)
  real(dp) :: goprecprm(3)
  real(dp) :: neb_spring(2)
@@ -1580,6 +1585,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getefmas           = dtin%getefmas
  dtout%getgam_eig2nkq     = dtin%getgam_eig2nkq
  dtout%gethaydock         = dtin%gethaydock
+ dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
  dtout%getddb_filepath        = dtin%getddb_filepath
@@ -1693,6 +1699,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
  dtout%irdhaydock         = dtin%irdhaydock
+ dtout%irdkden            = dtin%irdkden
  dtout%irdpawden          = dtin%irdpawden
  dtout%irdqps             = dtin%irdqps
  dtout%irdscr             = dtin%irdscr
@@ -2032,6 +2039,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%w90prtunk          = dtin%w90prtunk
  dtout%xclevel            = dtin%xclevel
  dtout%xc_denpos          = dtin%xc_denpos
+ dtout%xc_taupos          = dtin%xc_taupos
  dtout%x1rdm              = dtin%x1rdm
 
 !Copy allocated integer arrays from dtin to dtout
@@ -2150,6 +2158,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tolsym             = dtin%tolsym
  dtout%tolvrs             = dtin%tolvrs
  dtout%tolwfr             = dtin%tolwfr
+ dtout%tolwfr_diago       = dtin%tolwfr_diago
  dtout%tphysel            = dtin%tphysel
  dtout%tsmear             = dtin%tsmear
  dtout%ucrpa              = dtin%ucrpa
@@ -2177,6 +2186,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%bfield(:)          = dtin%bfield(:)
  dtout%dfield(:)          = dtin%dfield(:)
  dtout%efield(:)          = dtin%efield(:)
+ dtout%field_red(:)       = dtin%field_red(:)
  dtout%genafm(:)          = dtin%genafm(:)
  dtout%goprecprm(:)       = dtin%goprecprm(:)
  dtout%mdtemp(:)          = dtin%mdtemp(:)
@@ -3343,7 +3353,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
- list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
@@ -3372,7 +3382,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
@@ -3465,10 +3475,6 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
- !These input parameters are obsolete (keep them for compatibility)
- list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
- list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
- list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
@@ -3509,7 +3515,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
@@ -3536,7 +3542,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' w90iniprj w90prtunk'
  list_vars=trim(list_vars)//' write_files'
 !X
- list_vars=trim(list_vars)//' xcart xc_denpos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
+ list_vars=trim(list_vars)//' xcart xc_denpos xc_taupos xc_tb09_c xred xredsph_extra xyzfile x1rdm'
 !Y
 !Z
  list_vars=trim(list_vars)//' zcut zeemanfield znucl'

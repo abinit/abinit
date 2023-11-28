@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 18h55 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h06 )
   
 
 ================================================================================
@@ -184,6 +184,6 @@
 
 ================================================================================
 
-+Total cpu time      0.112  and wall time      0.121 sec
++Total cpu time      0.108  and wall time      0.115 sec
 
  anaddb : the run completed succesfully.

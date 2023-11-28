@@ -53,6 +53,7 @@ contains
 !!  genafm(3)=generator of magnetic translations, in case of
 !!            Shubnikov type IV magnetic groups (if zero, the group is
 !!            not a type IV magnetic group)
+!!  iimage (optional) = index of the image, for possible printing purpose
 !!  iout=unit number of output file
 !!  jdtset= actual number of the dataset to be read
 !!  ptgroupma=magnetic point group, in case of
@@ -64,14 +65,15 @@ contains
 !!
 !! SOURCE
 
-subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
+subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup,iimage)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,jdtset,ptgroupma,spgroup
+ integer,intent(in),optional :: iimage
 !arrays
  integer,intent(in) :: bravais(11)
- real(dp),intent(inout) :: genafm(3)
+ real(dp),intent(in) :: genafm(3)
 
 !Local variables -------------------------------
 !scalars
@@ -81,7 +83,7 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
  character(len=500) :: message
- character(len=80) :: bravais_name
+ character(len=80) :: msg_header,bravais_name
 !arrays
  integer :: genafmint(3)
  real(dp) :: genafmconv(3),rprimdconv(3,3)
@@ -125,26 +127,27 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
    end if
  end if
 
+!Prepare the print : establish message header
+ if(jdtset/=0)then
+   if(present(iimage))then
+     write(msg_header,'(a,i5,a,i5)')' DATASET',jdtset,' IMAGE NUMBER',iimage
+   else
+     write(msg_header,'(a,i5)')' DATASET',jdtset
+   endif
+ else
+   if(present(iimage))then
+     write(msg_header,'(a,i5)')' IMAGE NUMBER',iimage
+   else
+     write(msg_header,'(a)')' Symmetries'
+   endif
+ endif
+
 !Determine whether the space group can be printed
  if(iholohedry<=0)then
-   if(jdtset/=0)then
-     write(message,'(a,a,i5,a)')ch10,&
-&     ' DATASET',jdtset,' : the unit cell is not primitive'
-   else
-     write(message,'(a,a)')ch10,&
-&     ' Symmetries : the unit cell is not primitive'
-   end if
-   call wrtout(std_out,message,'COLL')
+   write(message,'(a,a)')trim(msg_header),' : the unit cell is not primitive'
    call wrtout(iout,message,'COLL')
  else if(spgroup==0)then
-   if(jdtset/=0)then
-     write(message,'(a,a,i5,a)')ch10,&
-&     ' DATASET',jdtset,' : the space group has not been recognized'
-   else
-     write(message,'(a,a)')ch10,&
-&     ' Symmetries : the space group has not been recognized'
-   end if
-   call wrtout(std_out,message,'COLL')
+   write(message,'(a,a)')trim(msg_header),' : the space group has not been recognized'
    call wrtout(iout,message,'COLL')
  else
 
@@ -271,63 +274,46 @@ subroutine prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 !  Prepare print of the dataset, symmetry point group, Bravais lattice
    if(shubnikov==1)then
 
-     if(jdtset/=0)then
-       write(message,'(a,a,i5,a,a,a,a,i3,a,a,a)' )ch10,&
-&       ' DATASET',jdtset,' : space group ',trim(brvsb),trim(intsb),' (#',spgroup,')',&
-&       '; Bravais ',trim(bravais_name)
-     else
-       write(message,'(a,a,a,a,a,i3,a,a,a)' )ch10,&
-&       ' Symmetries : space group ',trim(brvsb),trim(intsb),' (#',spgroup,')',&
-&       '; Bravais ',trim(bravais_name)
-     end if
-     call wrtout(std_out,message,'COLL')
+     write(message,'(5a,i3,a,a,a)' )trim(msg_header), &
+&     ' : space group ',trim(brvsb),trim(intsb),' (#',spgroup,')',&
+&     '; Bravais ',trim(bravais_name)
      call wrtout(iout,message,'COLL')
 
    else if(shubnikov==3)then
 
-     if(jdtset/=0)then
-       write(message,'(a,a,i5,a)' )ch10,&
-&       ' DATASET',jdtset,' : magnetic group, Shubnikov type III '
+     if(jdtset/=0 .or. present(iimage))then
+       write(message,'(2a)' )trim(msg_header),' : magnetic group, Shubnikov type III '
      else
-       write(message,'(2a)' )ch10,&
-&       ' Magnetic group, Shubnikov type III '
+       write(message,'(a)' )' Magnetic group, Shubnikov type III '
      end if
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
      write(message,'(a,a,a,a,i3,a,a,a)' )&
 &     ' Fedorov space group ',trim(brvsb),trim(intsb),' (#',spgroup,')',&
 &     '; Bravais ',trim(bravais_name)
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
      call ptgmadata(ptgroupma,ptgrpmasb)
 
      write(message,'(3a,i3,a)' )&
 &     ' Magnetic point group ',trim(ptgrpmasb),' (#',ptgroupma,')'
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
    else if(shubnikov==4)then
 
-     if(jdtset/=0)then
-       write(message,'(a,a,i5,a)' )ch10,&
-&       ' DATASET',jdtset,' : magnetic group, Shubnikov type IV '
+     if(jdtset/=0 .or. present(iimage))then
+       write(message,'(2a)' )trim(msg_header),' : magnetic group, Shubnikov type IV '
      else
-       write(message,'(2a)' )ch10,&
-&       ' Magnetic group, Shubnikov type IV '
+       write(message,'(a)' )' Magnetic group, Shubnikov type IV '
      end if
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
      write(message,'(a,a,a,a,i3,a)' )&
 &     ' Fedorov space group ',trim(brvsb),trim(intsb),' (#',spgroup,')'
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
      write(message,'(2a)' )&
 &     ' Magnetic Bravais lattice ',trim(bravais_name)
-     call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
 
    end if
