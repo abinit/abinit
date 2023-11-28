@@ -1197,16 +1197,22 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd u0 energy shift factor from eigenvalues.
+!    Compute extfpmd u0 energy shiftfactor
      if(associated(extfpmd)) then
-       extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk,vtrial)
      end if
-      
+     
+!    Compute occupations
      call timab(990,1,tsec)
-     if (dtset%useextfpmd==5) then
-       ! Get extended plane wave cutoff
+     call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
+&     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
+&     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+     call timab(990,2,tsec)
+     
+!    Generate extended plane wave wavefunctions
+     if(dtset%useextfpmd==5) then
        call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
 &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
 &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
@@ -1222,15 +1228,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       two/(dtset%nsppol*dtset%nspinor),dtset%mband,dtset%nband,extfpmd%nelect,dtset%nkpt,&
 &       dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
 &       extfpmd_nbdbuf=extfpmd%nbdbuf)
-     else
-       ! Standard calculation of the occupations
-       call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-&       dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&       dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
-&       dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      end if
-     call timab(990,2,tsec)
-
+     
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
@@ -1638,6 +1637,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       energies%e_kinetic,energies%e_eigenvalues)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
 &       dtset%wtk,dtset%nband,dtset%mband,occ)
+       ! CHECK number of electrons integrating rhor.
+       ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
 
 !    Compute the highest occupied eigenenergy

@@ -77,7 +77,6 @@ module m_extfpmd
     procedure :: compute_entropy
     procedure :: compute_nelect
     procedure :: generate_extpw
-    procedure :: update_ks_occ
     procedure :: compute_shiftfactor
     procedure :: extpw_orthon
     procedure :: init
@@ -297,12 +296,13 @@ contains
   !!  nkpt=number of k points
   !!  nsppol=1 for unpolarized, 2 for spin-polarized
   !!  wtk(nkpt)=k point weights
+  !!  vtrial(nfftf,nspden)=GS potential (Hartree)
   !!
   !! OUTPUT
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk)
+  subroutine compute_shiftfactor(this,eigen,eknk,mband,me,nband,nkpt,nsppol,wtk,vtrial)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
@@ -312,13 +312,15 @@ contains
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
     real(dp),intent(in) :: eknk(mband*nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
+    real(dp),intent(in) :: vtrial(nfft,nspden)
 
     ! Local variables -------------------------
     ! Scalars
     integer :: band_index,ii,ikpt,isppol,nband_k
 
     ! *********************************************************************
-
+    this%vtrial=vtrial
+    
     ! Computes U_0 from the sum of local
     ! potentials (vtrial), averaging over all space.
     ! Simplest and most precise way to evaluate U_0.
@@ -820,69 +822,6 @@ contains
     end if
   end subroutine compute_nelect
   !!***
-
-  !!****f* ABINIT/m_extfpmd/update_ks_occ
-  !! NAME
-  !!  update_ks_occ
-  !!
-  !! FUNCTION
-  !!  Computes the value of the integral corresponding to the missing
-  !!  free electrons contribution after band cut, with an order 1/2
-  !!  incomplete Fermi-Dirac integral.
-  !!
-  !! INPUTS
-  !!  this=extfpmd_type object concerned
-  !!  fermie=chemical potential (Hartree)
-  !!  nelect=number of electrons per unit cell
-  !!  tsmear=smearing width (or temperature)
-  !!
-  !! OUTPUT
-  !!  this=extfpmd_type object concerned
-  !!
-  !! SOURCE
-  subroutine update_ks_occ(this,occ,doccde,mband,nkpt,nsppol,mpi_enreg,nband)
-    ! Arguments -------------------------------
-    ! Scalars
-    class(extfpmd_type),intent(inout) :: this
-    integer,intent(in) :: mband,nkpt,nsppol
-    type(MPI_type),intent(inout) :: mpi_enreg
-    ! Arrays
-    integer,intent(in) :: nband(nkpt*nsppol)
-    real(dp),intent(out) :: doccde(mband*nkpt*nsppol)
-    real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: bdtot_index,ext_bdtot_index,isppol,ikpt,iband,nband_k,ierr
-    ! Arrays
-
-    ! *********************************************************************
-    
-    bdtot_index=0
-    ext_bdtot_index=0
-    occ(:)=zero
-    doccde(:)=zero
-    do isppol=1,nsppol
-      do ikpt=1,nkpt
-        nband_k=nband(ikpt+(isppol-1)*nkpt)
-        ! Skip this k-point if not the proper processor
-        if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,mpi_enreg%me_kpt)) then
-          bdtot_index=bdtot_index+nband_k
-          ext_bdtot_index=ext_bdtot_index+this%mband
-          cycle
-        end if
-        do iband=1,nband_k
-          occ(iband+bdtot_index)=this%occ(iband+ext_bdtot_index)
-          doccde(iband+bdtot_index)=this%doccde(iband+ext_bdtot_index)
-        end do
-        ! Increment indexes
-        bdtot_index=bdtot_index+nband_k
-        ext_bdtot_index=ext_bdtot_index+this%mband
-      end do
-    end do
-    call xmpi_sum(occ,xmpi_world,ierr)
-    call xmpi_sum(doccde,xmpi_world,ierr)
-  end subroutine update_ks_occ
 
   !!****f* ABINIT/m_extfpmd/compute_e_kinetic
   !! NAME
