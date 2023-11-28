@@ -310,6 +310,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_em1
   character(len=fnlen) :: fnameabo_em1_lf
   character(len=fnlen) :: fnameabo_em1_nlf
+  character(len=fnlen) :: fnameabo_extpwwfk
   character(len=fnlen) :: fnameabo_fan
   character(len=fnlen) :: fnameabo_gkk
   character(len=fnlen) :: fnameabo_gw
@@ -337,7 +338,6 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_vxc
   character(len=fnlen) :: fnameabo_wan
   character(len=fnlen) :: fnameabo_wfk
-  character(len=fnlen) :: fnameabo_extpwwfk
   character(len=fnlen) :: fnameabo_wfq
   character(len=fnlen) :: fnameabo_w90
   character(len=fnlen) :: fnameabo_1wf
@@ -363,6 +363,7 @@ module m_dtfil
   character(len=fnlen) :: fnameabo_app_elf_down
   character(len=fnlen) :: fnameabo_app_elf_up
   character(len=fnlen) :: fnameabo_app_eig
+  character(len=fnlen) :: fnameabo_app_extpweig
   character(len=fnlen) :: fnameabo_app_extpwopt
   character(len=fnlen) :: fnameabo_app_fatbands
   character(len=fnlen) :: fnameabo_app_gden1
@@ -1013,6 +1014,7 @@ subroutine dtfil_init_time(dtfil,iapp)
  dtfil%fnameabo_app_elf=trim(filapp)//'_ELF'
  dtfil%fnameabo_app_elf_down=trim(filapp)//'_ELF_DOWN'
  dtfil%fnameabo_app_elf_up=trim(filapp)//'_ELF_UP'
+ dtfil%fnameabo_app_extpweig=trim(filapp)//'_EXTPWEIG'
  dtfil%fnameabo_app_extpwopt=trim(filapp)//'_EXTPWOPT'
  dtfil%fnameabo_app_fatbands=trim(filapp)//'_FATBANDS'
  dtfil%fnameabo_app_gden1=trim(filapp)//'_GDEN1'
