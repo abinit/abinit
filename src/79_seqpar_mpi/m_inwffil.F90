@@ -172,7 +172,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           formeig,hdr,ireadwf,istwfk,kg,kptns,localrdwf,mband,&
 &           mcg,mkmem,mpi_enreg,mpw,nband,ngfft,nkpt,npwarr,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
-&           wffnow,unwff1,wffnm,wvl)
+&           wffnow,unwff1,wffnm,wvl,extpw_eshift)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ask_accurate,exchn2n3d,formeig,ireadwf,localrdwf,mband,mcg,mkmem,mpw
@@ -191,6 +191,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
  real(dp),intent(in) :: kptns(3,nkpt),tnons(3,nsym)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
+ real(dp),optional,intent(out) :: extpw_eshift
 
 !Local variables-------------------------------
  integer,parameter :: master=0

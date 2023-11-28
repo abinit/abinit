@@ -1087,7 +1087,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (associated(extfpmd)) then
    results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
-   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+   results_gs%extpw_eshift=extfpmd%eshift
  end if
 
  results_gs%intgres(:,:)=zero
