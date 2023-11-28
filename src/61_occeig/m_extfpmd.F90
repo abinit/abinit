@@ -71,7 +71,7 @@ module m_extfpmd
     type(hdr_type) :: hdr
     type(MPI_type) :: mpi_enreg
     integer,allocatable :: kg(:,:),npwarr(:),npwtot(:),nband(:)
-    real(dp),allocatable :: cg(:,:),eigen(:),occ(:),doccde(:)
+    real(dp),allocatable :: cg(:,:),eigen(:),occ(:),doccde(:),resid(:)
   contains
     procedure :: compute_e_kinetic
     procedure :: compute_entropy
@@ -164,6 +164,8 @@ contains
       this%nband(:)=extfpmd_mband
       ABI_MALLOC(this%eigen,(extfpmd_mband*nkpt*nsppol))
       this%eigen(:)=zero
+      ABI_MALLOC(this%resid,(extfpmd_mband*nkpt*nsppol))
+      this%resid(:)=zero
       ABI_MALLOC(this%occ,(extfpmd_mband*nkpt*nsppol))
       this%occ(:)=zero
       ABI_MALLOC(this%doccde,(extfpmd_mband*nkpt*nsppol))
@@ -408,7 +410,8 @@ contains
   !!
   !! SOURCE
   subroutine generate_extpw(this,exchn2n3d,effmass_free,gmet,istwfk,kptns,mkmem,nband,nkpt,&
-    & mode_paral,mpi_enreg,nsppol,dilatmx,nspinor,cg,mcg,npwarr,kg,mpw,eigen,mband,ecut,ecutsm)
+    & mode_paral,mpi_enreg,nsppol,dilatmx,nspinor,cg,mcg,npwarr,kg,mpw,eigen,mband,ecut,ecutsm,&
+    & resid)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
@@ -419,7 +422,7 @@ contains
     ! Arrays
     integer,intent(in) :: istwfk(nkpt),nband(nkpt*nsppol),npwarr(nkpt),kg(3,mpw*mkmem)
     real(dp),intent(in) :: gmet(3,3),kptns(3,nkpt)
-    real(dp),intent(in) :: cg(2,mcg),eigen(mband*nkpt*nsppol)
+    real(dp),intent(in) :: cg(2,mcg),eigen(mband*nkpt*nsppol),resid(mband*nkpt*nsppol)
     
     ! Local variables -------------------------
     ! Scalars
@@ -433,12 +436,13 @@ contains
     ! Arrays
     real(dp) :: kpoint(3)
     integer,allocatable :: kg_k(:,:),ext_kg_k(:,:),indices_below(:),indices_above(:)
-    real(dp),allocatable :: ext_kinpw(:),eig_k(:)
+    real(dp),allocatable :: ext_kinpw(:)
 
     ! *********************************************************************
     
     ! write(0,*) mpi_enreg%me_kpt,'DEBUG: Generating extended plane wave basis set...'
     this%eigen(:)=zero
+    this%resid(:)=zero
     my_nspinor=max(1,nspinor/mpi_enreg%nproc_spinor)
     
     ! Get ext pw coefficients and kinetic and eigenvalues
@@ -465,13 +469,10 @@ contains
           cycle
         end if
         ! Temporary allocate k-point dependant arrays
-        ABI_MALLOC(eig_k,(nband_k))
         ABI_MALLOC(kg_k,(3,npw_k))
         ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
         ABI_MALLOC(ext_kinpw,(ext_npw_k))
 
-        eig_k(:)=eigen(1+bdtot_index:nband_k+bdtot_index)
-        if (minval(eig_k)>1.d100) eig_k=zero
         kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
         ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
         kpoint(:)=kptns(:,ikpt)
@@ -485,7 +486,8 @@ contains
               end if
             end do
           end do
-          this%eigen(iband+ext_bdtot_index)=eig_k(iband)
+          this%eigen(iband+ext_bdtot_index)=eigen(iband+bdtot_index)
+          this%resid(iband+ext_bdtot_index)=resid(iband+bdtot_index)
         end do
         
         ! bandshift=this%bandshift ! Converges faster, but transition less smooth
@@ -586,7 +588,6 @@ contains
         ABI_FREE(ext_kinpw)
         ABI_FREE(ext_kg_k)
         ABI_FREE(kg_k)
-        ABI_FREE(eig_k)
       end do
     end do
     ! write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'

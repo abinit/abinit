@@ -1197,7 +1197,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
+!    Compute extfpmd u0 energy shift factor from eigenvalues.
      if(associated(extfpmd)) then
        extfpmd%vtrial=vtrial
        call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
@@ -1210,7 +1210,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
 &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
 &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm)
+&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
+&       resid)
        ! Extended plane waves estimation of the full occupations array
        call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &       dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
@@ -1497,30 +1498,32 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      ABI_NVTX_START_RANGE(NVTX_MKRHO)
+
      if (psps%usepaw==0) then
-       if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
-         ! Make full electron density with extended plane waves basis set
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+&       npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
+&       npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&       extfpmd=extfpmd)
+     end if
+
+     ! Make full electron density with extended plane waves basis set
+     if(dtset%useextfpmd==5.and.dtset%extfpmd_truecg==1) then
+       if(psps%usepaw==0) then
          call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
 &         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
 &         paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
        else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-         &         npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-         &         extfpmd=extfpmd)
-        end if
-     else
-       if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
          call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-         &          extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-         &          paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-       else
-         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-         &         npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-         &         extfpmd=extfpmd)
-        end if
-      end if
-      ABI_NVTX_END_RANGE()
-      call timab(992,2,tsec)
+&         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
+&         paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+       end if
+     end if
+
+     ABI_NVTX_END_RANGE()
+     call timab(992,2,tsec)
     
 !    Treat fixed occupation numbers or non-self-consistent case
    else
@@ -1613,6 +1616,29 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,2,tsec)
 
      end if ! nproc_spkpt>1
+
+!    Compute extfpmd u0 energy shift factor from eigenvalues
+     if(associated(extfpmd)) then
+       extfpmd%vtrial=vtrial
+       call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
+&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       if(extfpmd%version==5) then
+         ! Get extended plane wave cutoff
+         call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
+&         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+&         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+&         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
+&         resid)
+       end if
+       extfpmd%nelect=zero
+       call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&       dtset%nsppol,dtset%tsmear,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
+&       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
+&       energies%e_kinetic,energies%e_eigenvalues)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+&       dtset%wtk,dtset%nband,dtset%mband,occ)
+     end if
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then
@@ -1720,6 +1746,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
 &     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
+     ! Print extended plane waves eigenvalues
+     if(dtset%useextfpmd==5) then
+       call prteigrs(extfpmd%eigen,enunit,energies%e_fermie,energies%e_fermih,&
+&       dtfil%fnameabo_app_extpweig,ab_out,iscf,dtset%kptns,dtset%kptopt,&
+&       extfpmd%mband,extfpmd%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,&
+&       dtset%nsppol,extfpmd%occ,dtset%occopt,option,dtset%prteig,prtvol,&
+&       extfpmd%resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
+     end if
    end if
 
 !  Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
