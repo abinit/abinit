@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 01h01 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t53.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t53.abi
 - output file    -> t53.abo
 - root for input  files -> t53i
 - root for output files -> t53o
- 
- 
+
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +37,7 @@ P This job should need less than                       3.370 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
- 
- 
+
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,13 +53,13 @@ P This job should need less than                       3.370 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -74,7 +72,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
            ecutsm      5.00000000E-01 Hartree
       eph_intmeth           1
          eph_task          -4
--          fftalg         512
+-          fftalg         312
            getddb          20
            getwfk          20
        gw_qprange           2
@@ -168,17 +166,17 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -189,21 +187,21 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
 - Reading GS states from WFK file: t53o_DS20_WFK
 - Reading DDB from file: t53o_DS20_DDB
 - Reading DVDB from file: t53o_DS20_DVDB
- 
- 
- 
- 
+
+
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
@@ -215,7 +213,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000   C
     2)    0.2500000  0.2500000  0.2500000   C
- 
+
  DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t53o_DS20_DDB
  Values initialized with zeros.
@@ -231,12 +229,12 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -249,11 +247,11 @@ meta: {optdriver: 7, eph_task: -4, }
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
- 
+
+
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
  Fundamental gap:     4.517 (eV)
@@ -267,8 +265,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    5.0     0.000    15.265     2.465     2.053
  300.0     0.026    15.169     2.369     2.148
- 
- 
+
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -497,11 +495,11 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -512,21 +510,21 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
- 
+
 - Reading GS states from WFK file: t53o_DS20_WFK
 - Reading DDB from file: t53o_DS20_DDB
 - Reading DVDB from file: t53o_DS20_DVDB
- 
- 
- 
- 
+
+
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
@@ -538,7 +536,7 @@ meta: {optdriver: 7, eph_task: -4, }
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000   C
     2)    0.2500000  0.2500000  0.2500000   C
- 
+
  DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t53o_DS20_DDB
  Values initialized with zeros.
@@ -554,11 +552,11 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
 --------------------------------------------------------------------------------
- 
- 
+
+
  === Gaps, band edges and relative position wrt Fermi level ===
  Indirect band gap semiconductor
  Fundamental gap:     4.517 (eV)
@@ -572,8 +570,8 @@ meta: {optdriver: 7, eph_task: -4, }
   T(K)   kT (eV)  mu_e (eV)  D_v (eV)   D_c (eV)
    5.0     0.000    15.265     2.465     2.053
  300.0     0.026    15.169     2.369     2.148
- 
- 
+
+
 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
@@ -808,7 +806,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
  KS gap:   19.109 (assuming bval:4 ==> bcond:5)
  
 ============================================================================================
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -826,7 +824,7 @@ K-point: [-2.5000E-01,  5.0000E-01,  2.5000E-01], T:  300.0 [K], mu_e:   15.169
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         512
+-          fftalg         312
            getddb          20
            getwfk          20
        gw_qprange           2
@@ -913,7 +911,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
- 
+
 ================================================================================
 
 
@@ -1003,10 +1001,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          5.8
- 
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.5
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          5.8
++Overall time at end (sec) : cpu=          1.4  wall=          1.5

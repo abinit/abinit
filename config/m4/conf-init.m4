@@ -378,6 +378,11 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #define FC_INTEL 1
 #endif
 
+/* FIXME Requyires investigation: as nvcompiler is LLVM-based, should we assume FC_LLVM as well ? */
+#ifdef __NVCOMPILER
+#define FC_NVHPC 1
+#endif
+
 ])
 
   dnl ... as well as bottom

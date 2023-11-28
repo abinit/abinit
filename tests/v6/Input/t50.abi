@@ -76,7 +76,6 @@ diemac 2.0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = scope_gnu_10.2_paral
 #%% test_chain = t50.abi, t51.abi, t52.abi, t53.abi
 #%% [files]
 #%% files_to_test = 

@@ -81,7 +81,8 @@ contains
   call crystal_init(Invar%amu,Crystal,Sym%spgroup,Invar%natom_unitcell,npsp,&
 &   Invar%ntypat,Sym%nsym,Lattice%rprimdt,Invar%typat_unitcell,Sym%xred_zero,&
 &  zion,znucl,timrev,use_antiferro,remove_inv,title,&
-&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
+!BUG&  Sym%ptsymrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
+&  Sym%symrel(:,:,1:Sym%nsym),Sym%tnons(:,1:Sym%nsym),Sym%symafm(1:Sym%nsym)) ! Optional
   ABI_FREE(title)
   ABI_FREE(znucl)
   ABI_FREE(zion)
@@ -475,7 +476,8 @@ contains
   ddb_hdr%amu=Invar%amu
   ddb_hdr%nband=1
   ddb_hdr%symafm=0
-  ddb_hdr%symrel=Sym%ptsymrel
+!BUG  ddb_hdr%symrel=Sym%ptsymrel
+  ddb_hdr%symrel=Sym%symrel
   ddb_hdr%typat=Invar%typat_unitcell
   ddb_hdr%kpt=0
   ddb_hdr%occ=0

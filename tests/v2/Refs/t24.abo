@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 30 May 2023.
-- ( at 21h51 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -123,9 +123,9 @@
  -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
-  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0  0.0 -1.0  1.0 -1.0
+  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
+  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
+  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #   7
        degenerate with vibration modes #   8 to    9
   3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
@@ -133,14 +133,14 @@
   0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
  Symmetry characters of vibration mode #  10
        degenerate with vibration modes #  11 to   12
-  3.0  0.0  0.0 -1.0 -1.0 -1.0  1.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -0.0  0.0 -1.0
- -1.0  1.0  1.0  0.0  0.0 -1.0  1.0 -1.0 -3.0 -0.0 -0.0  1.0  1.0  1.0 -1.0 -0.0
-  0.0 -1.0  1.0  1.0 -1.0  0.0 -0.0  1.0  1.0 -1.0 -1.0 -0.0 -0.0  1.0 -1.0  1.0
+  3.0 -0.0 -0.0 -1.0 -1.0 -1.0  1.0 -0.0  0.0  1.0 -1.0 -1.0  1.0  0.0 -0.0 -1.0
+ -1.0  1.0  1.0 -0.0 -0.0 -1.0  1.0 -1.0 -3.0  0.0  0.0  1.0  1.0  1.0 -1.0  0.0
+ -0.0 -1.0  1.0  1.0 -1.0 -0.0  0.0  1.0  1.0 -1.0 -1.0  0.0  0.0  1.0 -1.0  1.0
  Symmetry characters of vibration mode #  13
        degenerate with vibration modes #  14 to   15
-  3.0  0.0  0.0  1.0  1.0  1.0  1.0  0.0 -0.0 -1.0  1.0  1.0  1.0 -0.0  0.0  1.0
-  1.0 -1.0  1.0  0.0  0.0  1.0 -1.0  1.0 -3.0 -0.0 -0.0 -1.0 -1.0 -1.0 -1.0 -0.0
-  0.0  1.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0 -1.0  1.0 -1.0 -0.0 -0.0 -1.0  1.0 -1.0
+  3.0 -0.0 -0.0  1.0  1.0  1.0  1.0 -0.0  0.0 -1.0  1.0  1.0  1.0  0.0 -0.0  1.0
+  1.0 -1.0  1.0 -0.0 -0.0  1.0 -1.0  1.0 -3.0  0.0  0.0 -1.0 -1.0 -1.0 -1.0  0.0
+ -0.0  1.0 -1.0 -1.0 -1.0 -0.0  0.0 -1.0 -1.0  1.0 -1.0  0.0  0.0 -1.0  1.0 -1.0
 
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -168,15 +168,10 @@
 -  1.998190E+02  2.629638E+02  2.629638E+02  3.886644E+02  3.886644E+02
 -  3.886644E+02  5.127796E+02  5.241847E+02  5.241847E+02  6.747139E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.044  and wall time      0.045 sec
++Total cpu time      0.042  and wall time      0.070 sec
 
  anaddb : the run completed succesfully.
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:
--   There were 0 allocations and 0 deallocations in C code
-- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:
--   There were 208 allocations and 208 deallocations in Fortran
--   Remaining memory at the end of the calculation is 0

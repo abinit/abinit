@@ -734,7 +734,7 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 !arrays
  real(dp),pointer :: ncore(:),tcoretau(:),tncore(:),tnvale(:),tproj(:,:),vlocr(:)
  type(pawrad_type),intent(inout) :: pawrad
- type(pawrad_type),intent(out)::core_mesh,tproj_mesh,vale_mesh,vloc_mesh
+ type(pawrad_type),intent(out) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
  type(pawrad_type),pointer :: radmesh(:)
  type(pawtab_type),intent(inout) :: pawtab
  integer,intent(out)::nmesh
@@ -1743,6 +1743,7 @@ end subroutine pawpsp_rw_atompaw
 !!            1 if compensation charge density is included in XC terms
 !!  vale_mesh<type(pawrad_type)>= radial mesh for the valence density
 !!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  vlocopt= option for the local potential.(0=Vbare, 1=VH(tnzc) with hat in XC, 2=VH(tnzc) w/o hat in XC)
 !!  vlocr(vloc_mesh%mesh_size)= local potential according to vlocopt.
 !!  xclevel= XC functional level
@@ -1754,7 +1755,6 @@ end subroutine pawpsp_rw_atompaw
 !!  ffspl(mqgrid_ff,2,lnmax)=form factor f_l(q) and second derivative
 !!   from spline fit for each angular momentum and each projector;
 !!  vlspl(mqgrid_vl,2)=q^2 Vloc(q) and second derivatives from spline fit
-!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!
 !! SIDE EFFECTS
@@ -1771,7 +1771,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &          mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &          qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &          vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&          tcoretau,coretau_mesh) !optional
+&          tcoretau,coretau_mesh,xc_taupos) !optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1780,6 +1780,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  integer,intent(in) ::mmax
  integer,intent(in) :: xclevel
  real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
+ real(dp),intent(in),optional :: xc_taupos
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawrad_type),intent(in) :: core_mesh,tproj_mesh,vale_mesh
  type(pawrad_type),intent(in),optional :: coretau_mesh
@@ -1803,7 +1804,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  integer :: j0lmn,jlm,jlmn,jln,klmn,msz,msz1,msz_tmp,mst_tmp,nspden,usekden
  logical :: has_dij0,non_magnetic_xc,reduced_ncor,reduced_taucor,reduced_nval,reduced_vloc,testval
  real(dp),parameter :: reduced_rstep=0.00025_dp,rm_vloc=20.0_dp
- real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,qcore,qq,rstep_tmp,yp1,ypn
+ real(dp) :: d2nvdq0,intg,intvh,lstep_tmp,my_xc_taupos,qcore,qq,rstep_tmp,yp1,ypn
  character(len=500) :: msg
  type(pawang_type) :: pawang_tmp
  type(pawrad_type) :: rcore_mesh,rcoretau_mesh,rvale_mesh,rvloc_mesh,tproj_mesh_new
@@ -1831,6 +1832,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 
 !Check optional arguments
  usekden=merge(0,1,pawtab%has_coretau==0)
+ my_xc_taupos=xc_denpos;if (present(xc_taupos)) my_xc_taupos=xc_taupos
  if (present(tcoretau)) then
    if (usekden>=1) then
      if (.not.(present(coretau_mesh))) then
@@ -2186,13 +2188,13 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &     'It is only possible to modify the use of compensation charge density',ch10,&
 &     'for a file format containing the pseudo valence density (format>=paw4 or XML)!',ch10,&
 &     'Action: use usexcnhat=-1 in input file or change psp file format.'
-     LIBPAW_WARNING(msg)
+     LIBPAW_ERROR(msg)
    else if (usekden>=1) then
      write(msg, '(5a)' ) &
 &     'It is not possible to modify the use of compensation charge density',ch10,&
 &     'within the metaGGA XC functional (need valence kinetic density)!',ch10,&
 &     'Action: use usexcnhat=-1 in input file or change psp file format.'
-     LIBPAW_WARNING(msg)
+     LIBPAW_ERROR(msg)
    else
      msz=vloc_mesh%mesh_size
 !    Retrieve tvale and nhat onto vloc mesh
@@ -2588,7 +2590,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
  else
    if (present(tcoretau)) then
      call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
-&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau)
+&     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau,xc_taupos=my_xc_taupos)
    else
      call pawxc(ncore,pawtab%exccore,yp1,hyb_mixing,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos)
@@ -2964,6 +2966,8 @@ end subroutine pawpsp_wvl_calc
 !!  qgrid_ff(psps%mqgrid_ff)=values of q on grid from 0 to qmax (bohr^-1) for nl form factors
 !!  qgrid_vl(psps%mqgrid_vl)=values of q on grid from 0 to qmax (bohr^-1) for Vloc
 !!  xclevel= XC functional level
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  zion=nominal valence of atom as specified in psp file
 !!  znucl=atomic number of atom as specified in input file to main routine
 !!
@@ -2975,7 +2979,6 @@ end subroutine pawpsp_wvl_calc
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data
 !!  vlspl(psps%mqgrid_vl,2)=q^2 Vloc(q) and second derivatives from spline fit
 !!  wvl_crmult,wvl_frmult= variables definining the fine and coarse grids in a wavelets calculation
-!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!
 !! NOTES
@@ -2997,7 +3000,8 @@ end subroutine pawpsp_wvl_calc
 subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 & lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 & pawxcdev, qgrid_ff,qgrid_vl,usewvl,usexcnhat_in,vlspl,xcccrc,&
-& xclevel,xc_denpos,zion,znucl)
+& xclevel,xc_denpos,zion,znucl,&
+& xc_taupos) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3005,6 +3009,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  integer,intent(inout) ::mmax
  integer,intent(in) :: xclevel,icoulomb,usewvl
  real(dp),intent(in) :: hyb_mixing,xc_denpos,zion,znucl
+ real(dp),intent(in),optional :: xc_taupos
  real(dp),intent(out) :: epsatm,xcccrc
  type(pawpsp_header_type),intent(in) :: pawpsp_header
  type(pawrad_type),intent(inout) :: pawrad
@@ -3020,7 +3025,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  integer :: ir,iread1,ishpfmesh,ivalemesh,ivlocmesh,j0lmn,jlm,pngau
  integer :: jlmn,jln,klmn,msz,nmesh,nval,pspversion,shft,sz10,usexcnhat,vlocopt
  real(dp), parameter :: rmax_vloc=10.0_dp
- real(dp) :: fourpi,occ,rc,yp1,ypn
+ real(dp) :: fourpi,my_xc_taupos,occ,rc,yp1,ypn
  logical :: save_core_msz
  character(len=500) :: msg
  type(pawrad_type) :: core_mesh,coretau_mesh,shpf_mesh,tproj_mesh,vale_mesh,vloc_mesh
@@ -3050,6 +3055,7 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
  save_core_msz=(usewvl==1 .or. icoulomb .ne. 0)
  imainmesh=-1;icoremesh=-1;icoretaumesh=-1;iprojmesh=-1
  ishpfmesh=-1;ivalemesh=-1;ivlocmesh=-1
+ my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
 
 !==========================================================
 !Initialize partial waves quantum numbers
@@ -3836,7 +3842,7 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&     tcoretau=tcoretau,coretau_mesh=coretau_mesh)
+&     tcoretau=tcoretau,coretau_mesh=coretau_mesh,xc_taupos=my_xc_taupos)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -3883,10 +3889,12 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
  if (paw_setuploc%pseudo_valence_density%tread) then
    call pawrad_free(vale_mesh)
  end if
+ if (paw_setuploc%ae_core_kinetic_energy_density%tread.and.pawtab%has_coretau>=1) then
+   call pawrad_free(coretau_mesh)
+ end if
  if (allocated(tnvale)) then
    LIBPAW_DEALLOCATE(tnvale)
  end if
-
 
 end subroutine pawpsp_17in
 !!***
@@ -3910,6 +3918,8 @@ end subroutine pawpsp_17in
 !!  lmax=value of lmax mentioned at the second line of the psp file
 !!  pawxcdev=choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
 !!  xclevel= XC functional level
+!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
+!!  [xc_taupos]= lowest allowed kinetic energy density (for mGGA XC functionals)
 !!  zion=nominal valence of atom as specified in psp file
 !!
 !! OUTPUT
@@ -3919,7 +3929,6 @@ end subroutine pawpsp_17in
 !!  pawrad <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab <type(pawtab_type)>=paw tabulated starting data
 !!  vlspl(mqgrid_vl,2)=q^2 Vloc(q) and second derivatives from spline fit
-!!  xc_denpos= lowest allowed density (usually for the computation of the XC functionals)
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!
 !! NOTES
@@ -3930,7 +3939,8 @@ end subroutine pawpsp_17in
 subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 & lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 & pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
-& usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
+& usewvl,usexcnhat_in,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
+& xc_taupos) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3939,6 +3949,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
  integer, intent(in):: mqgrid_ff,mqgrid_vl,pawxcdev
  integer, intent(in):: usewvl,usexcnhat_in,xclevel
  real(dp), intent(in):: hyb_mixing,xc_denpos,zion,znucl
+ real(dp), intent(in),optional:: xc_taupos
  real(dp), intent(out):: epsatm,xcccrc
  type(pawrad_type), intent(inout):: pawrad
  type(pawtab_type), intent(inout) :: pawtab
@@ -3952,6 +3963,7 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
  integer :: imainmesh,nmesh
  integer :: pspversion,usexcnhat,vlocopt
  logical :: save_core_msz
+ real(dp) :: my_xc_taupos
  type(pawrad_type) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
 !arrays
  real(dp),pointer :: ncore(:),tncore(:),tcoretau(:),tnvale(:),tproj(:,:),vlocr(:)
@@ -3974,11 +3986,12 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &  tcoretau,tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat,&
 &  vale_mesh,vlocopt,vlocr,vloc_mesh,znucl)
 
+ my_xc_taupos=xc_denpos;if(present(xc_taupos)) my_xc_taupos=xc_taupos
  call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,hyb_mixing,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
 &     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
-&     tcoretau=tcoretau,coretau_mesh=core_mesh)
+&     tcoretau=tcoretau,coretau_mesh=core_mesh,xc_taupos=my_xc_taupos)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -4436,7 +4449,7 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 !Local variables-------------------------------
  integer :: il
 #if defined LIBPAW_HAVE_LIBXC
- integer :: ii
+ integer :: ii,id
 #endif
  character(len=100) :: xclibxc
  character(len=500) :: msg
@@ -4557,13 +4570,24 @@ subroutine pawpsp_read_header_xml(lloc,lmax,pspcod,pspxc,&
 &        xclibxc(1:6)=='MGGA_X'.or.xclibxc(1:6)=='MGGA_C'.or. &
 &        xclibxc(1:6)=='mgga_x'.or.xclibxc(1:6)=='mgga_c') then
 #if defined LIBPAW_HAVE_LIBXC
-       ii=index(xclibxc,'+')
+       pspxc=0
+       ii=index(xclibxc,'+') ; if (ii<=0) ii=0
        if (ii>0) then
-         pspxc=-(libxc_functionals_getid(xclibxc(1:ii-1))*1000 &
-&               +libxc_functionals_getid(xclibxc(ii+1:)))
-       else
-         pspxc=-libxc_functionals_getid(xclibxc)
+         id=libxc_functionals_getid(xclibxc(1:ii-1))
+         if (id<=0) then
+           write(msg, '(3a)' ) 'The ',xclibxc(1:ii-1), &
+&             ' functional (read from PAW-XML file) was not found in the libXC library!'
+           LIBPAW_ERROR(msg)
+         end if
+         pspxc=pspxc-id*1000
        end if
+       id=libxc_functionals_getid(xclibxc(ii+1:))
+       if (id<=0) then
+         write(msg, '(3a)' ) 'The ',xclibxc(ii+1:), &
+&             ' functional (read from PAW-XML file) was not found in the libXC library!'
+         LIBPAW_ERROR(msg)
+       end if
+       pspxc=pspxc-id
 #else
        msg='Cannot use LibXC functional because ABINIT is not compiled with LibXC !'
        LIBPAW_ERROR(msg)
@@ -4793,12 +4817,13 @@ end subroutine pawpsp_bcast
 !!  zionpsp=valence of atom as specified in input file
 !!  znuclpsp=atomic number of atom as specified in input file
 !!  ===== Optional arguments for wvl =====
-!!    wvl_ngauss
+!!    [wvl_ngauss]
 !!  ===== Other optional arguments =====
-!!    psxml=datastructure containing a XMP PAW dataset
-!!    comm_mpi=MPI communicator
-!!    xc_denpos=tolerance on density/potential for the calculation of XC potential
+!!    [psxml]=datastructure containing a XMP PAW dataset
+!!    [comm_mpi]=MPI communicator
+!!    [xc_denpos]=tolerance on density for the calculation of XC potential
 !!              (if density<xc_denpos, density=zero)
+!!    [xc_taupos]=tolerance on kinetic energy density for the calculation of XC potential (mGGA)
 !!
 !! OUTPUT
 !!  pawrad <type(pawrad_type)>=data containing PAW radial grid information
@@ -4815,7 +4840,7 @@ subroutine pawpsp_main( &
 & pawrad,pawtab,&
 & filpsp,usewvl,icoulomb,hyb_mixing,ixc,xclevel,pawxcdev,usexcnhat,&
 & qgrid_ff,qgrid_vl,ffspl,vlspl,epsatm,xcccrc,zionpsp,znuclpsp,&
-& wvl_ngauss,psxml,comm_mpi,xc_denpos)
+& wvl_ngauss,psxml,comm_mpi,xc_denpos,xc_taupos) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -4823,7 +4848,7 @@ subroutine pawpsp_main( &
  integer,intent(in) :: pawxcdev,usewvl,usexcnhat,xclevel
  integer,optional,intent(in) :: comm_mpi
  real(dp),intent(in):: hyb_mixing,zionpsp,znuclpsp
- real(dp),optional,intent(in) :: xc_denpos
+ real(dp),optional,intent(in) :: xc_denpos,xc_taupos
  real(dp),intent(out) :: epsatm,xcccrc
  character(len=fnlen),intent(in):: filpsp   ! name of the psp file
  type(pawrad_type),intent(inout) :: pawrad
@@ -4839,7 +4864,7 @@ subroutine pawpsp_main( &
  integer :: has_coretau,has_tproj,has_wvl,ipsp,lmax,lloc,lnmax,mmax,me,mqgrid_ff,mqgrid_vl
  integer :: pspcod,pspxc,usexml
  real(dp),parameter :: xc_denpos_default=tol14
- real(dp) :: my_xc_denpos,r2well,zion,znucl
+ real(dp) :: my_xc_denpos,my_xc_taupos,r2well,zion,znucl
  character(len=500) :: msg
  type(pawpsp_header_type) :: pawpsp_header
 !arrays
@@ -4867,6 +4892,7 @@ subroutine pawpsp_main( &
  end if
 
  my_xc_denpos=xc_denpos_default;if (present(xc_denpos)) my_xc_denpos=xc_denpos
+ my_xc_taupos=my_xc_denpos;if (present(xc_taupos)) my_xc_taupos=xc_taupos
  pawtab%usexcnhat=usexcnhat
  me=0;if (present(comm_mpi))me=xmpi_comm_rank(comm_mpi)
 
@@ -4919,7 +4945,7 @@ subroutine pawpsp_main( &
      call pawpsp_7in(epsatm,ffspl,icoulomb,hyb_mixing,ixc,&
 &     lmax,lnmax,mmax,mqgrid_ff,mqgrid_vl,&
 &     pawrad,pawtab,pawxcdev,qgrid_ff,qgrid_vl,&
-&     usewvl,usexcnhat,vlspl,xcccrc,xclevel,my_xc_denpos,zion,znucl)
+&     usewvl,usexcnhat,vlspl,xcccrc,xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)
 
    else if (pspcod==17)then
 !    XML format
@@ -4927,7 +4953,7 @@ subroutine pawpsp_main( &
      call pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,hyb_mixing,ixc,lmax,&
 &     lnmax,mmax,mqgrid_ff,mqgrid_vl,pawpsp_header,pawrad,pawtab,&
 &     pawxcdev,qgrid_ff,qgrid_vl,usewvl,usexcnhat,vlspl,xcccrc,&
-&     xclevel,my_xc_denpos,zion,znucl)
+&     xclevel,my_xc_denpos,zion,znucl,xc_taupos=my_xc_taupos)
 
    end if
  end if!me==0

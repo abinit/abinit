@@ -8,7 +8,6 @@ flexoflag  1
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% exclude_builders = scope_gnu_10.2_paral
 #%% input_ddb = tlw_2.ddb.out
 #%% test_chain =  tlw_1.abi, tlw_2.abi, tlw_3.abi
 #%% [files]

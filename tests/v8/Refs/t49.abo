@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h56 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h08 )
   
 
 ================================================================================
@@ -51,8 +51,8 @@
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3082654  5.3082654  G(1)= -0.0941927  0.0941927  0.0941927
@@ -64,41 +64,41 @@
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Al
     2)    0.2500000  0.2500000  0.2500000  As
- 
+
  DDB file with 2 blocks has been read.
- 
+
 ================================================================================
- 
+
  Dielectric Tensor and Effective Charges 
- 
- 
+
+
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
- 
+
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
  displacement     direction
        1               1       -1.429236        0.000000
-       1               2        0.000000        0.000000
+       1               2       -0.000000        0.000000
        1               3       -0.000000        0.000000
-       2               1        0.000000        0.000000
+       2               1       -0.000000        0.000000
        2               2       -1.429236        0.000000
-       2               3       -0.000000        0.000000
+       2               3        0.000000        0.000000
        3               1        0.000000        0.000000
        3               2        0.000000        0.000000
        3               3       -1.429236        0.000000
- 
+
  Effective charge tensors after 
  imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.992108E+00    0.000000E+00    4.573202E-20
-         1         2    0.000000E+00    1.992108E+00    4.573202E-20
-         1         3    0.000000E+00    0.000000E+00    1.992108E+00
-         2         1   -1.992108E+00    0.000000E+00   -4.573202E-20
-         2         2    0.000000E+00   -1.992108E+00   -4.573202E-20
-         2         3    0.000000E+00    0.000000E+00   -1.992108E+00
+         1         1    1.992108E+00    2.282375E-17    2.293757E-17
+         1         2    2.282375E-17    1.992108E+00   -2.270993E-17
+         1         3   -2.282375E-17   -2.282375E-17    1.992108E+00
+         2         1   -1.992108E+00   -2.282375E-17   -2.293757E-17
+         2         2   -2.282375E-17   -1.992108E+00    2.270993E-17
+         2         3    2.282375E-17    2.282375E-17   -1.992108E+00
  Now, the imaginary part of the dynamical matrix is zeroed
  
 
@@ -115,15 +115,15 @@
        1        0.000000000        0.000000000        0.000000000
                 0.000000000        0.000000000       -0.005004057
                 0.000000000       -0.005004057       -0.000000000
- 
+
        2       -0.000000000        0.000000000       -0.005004057
                 0.000000000        0.000000001        0.000000000
                -0.005004057        0.000000000        0.000000000
- 
+
        3        0.000000000       -0.005004057        0.000000000
                -0.005004057        0.000000000        0.000000000
                 0.000000000        0.000000000        0.000000000
- 
+
  
 
   First-order change in the electronic dielectric 
@@ -132,31 +132,31 @@
   (after imposing the sum over all atoms to vanish)
    atom  displacement
     1          1        0.000000000        0.000000000        0.000000000
-                        0.000000000        0.000000000       -0.192466932
+                        0.000000000       -0.000000000       -0.192466932
                         0.000000000       -0.192466932       -0.000000000
     1          2       -0.000000000        0.000000000       -0.192466932
                         0.000000000        0.000000000        0.000000000
                        -0.192466932        0.000000000        0.000000000
     1          3        0.000000000       -0.192466932        0.000000000
-                       -0.192466932        0.000000000        0.000000000
+                       -0.192466932       -0.000000000        0.000000000
                         0.000000000        0.000000000        0.000000000
- 
+
     2          1       -0.000000000       -0.000000000       -0.000000000
-                       -0.000000000        0.000000000        0.192466932
+                       -0.000000000       -0.000000000        0.192466932
                        -0.000000000        0.192466932        0.000000000
     2          2        0.000000000       -0.000000000        0.192466932
                        -0.000000000       -0.000000000       -0.000000000
                         0.192466932       -0.000000000       -0.000000000
     2          3       -0.000000000        0.192466932       -0.000000000
-                        0.192466932        0.000000000       -0.000000000
+                        0.192466932       -0.000000000       -0.000000000
                        -0.000000000       -0.000000000       -0.000000000
- 
- 
+
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  1.620427E-03  1.620427E-03
@@ -164,7 +164,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.556426E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -172,16 +172,16 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.38627046E-07  2.32020394E-03
+-  1  0.00000000E+00  0.00000000E+00 -2.32020398E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  4.38627075E-07  2.32020410E-03
+-  2  0.00000000E+00  0.00000000E+00 -2.32020414E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.32020394E-03 -4.38627046E-07
+-  1  0.00000000E+00 -2.32020398E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  2.32020410E-03 -4.38627076E-07
+-  2  0.00000000E+00 -2.32020414E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -191,44 +191,44 @@
 -  2  2.32020414E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    4   Energy    1.620427E-03
--  1  0.00000000E+00  0.00000000E+00  3.86630696E-03
+-  1  0.00000000E+00  0.00000000E+00 -3.86630696E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  0.00000000E+00 -1.39237441E-03
+-  2  0.00000000E+00  0.00000000E+00  1.39237441E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    5   Energy    1.620427E-03
--  1  1.08146522E-06  3.86630681E-03  0.00000000E+00
+-  1  0.00000000E+00  3.86630696E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2 -3.89468432E-07 -1.39237436E-03  0.00000000E+00
+-  2  0.00000000E+00 -1.39237441E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    6   Energy    1.620427E-03
--  1  3.86630681E-03 -1.08146522E-06  0.00000000E+00
+-  1  3.86630696E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2 -1.39237436E-03  3.89468432E-07  0.00000000E+00
+-  2 -1.39237441E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
-  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0 -0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
- -0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0
+  3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0 -0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0
+ -0.0 -0.0  0.0 -0.0  1.0  1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
   0.0  0.0 -0.0 -0.0  1.0  1.0 -1.0 -1.0
- 
+
 ================================================================================
- 
+
  The alphon input variable is non-zero, will mix the degenerate phonon modes
  in order to align the mode effective charges with the cartesian axes.
   
  Mode effective charges 
  Mode number.    x            y            z            length 
--     1         -0.000000    -0.000000    -0.000000     0.000000
--     2         -0.000000    -0.000000     0.000000     0.000000
+-     1          0.000000     0.000000     0.000000     0.000000
+-     2         -0.000000     0.000000     0.000000     0.000000
 -     3         -0.000000    -0.000000    -0.000000     0.000000
--     4          0.000000    -0.000000     2.549253     2.549253
+-     4         -0.000000    -0.000000    -2.549253     2.549253
 -     5          0.000000     2.549253    -0.000000     2.549253
 -     6          2.549253    -0.000000     0.000000     2.549253
   
@@ -246,21 +246,21 @@
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
 -   6     Real    1.0974E-04  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  1.0974E-04
 -         Imag    0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00  0.0000E+00
- 
+
  Electronic dielectric tensor
      14.90775987      0.00000000      0.00000000
-      0.00000000     14.90775987      0.00000000
-      0.00000000      0.00000000     14.90775987
- 
- 
+      0.00000000     14.90775987     -0.00000000
+     -0.00000000     -0.00000000     14.90775987
+
+
  Relaxed ion dielectric tensor
      16.66342787      0.00000000      0.00000000
       0.00000000     16.66342787      0.00000000
       0.00000000      0.00000000     16.66342787
- 
- 
+
+
  Frequency dependent dielectric constant:
- 
+
  ddb_diel : the number of frequencies is larger than 10 => I will consider only
  the three principal directions, assume that the tensor
  is diagonalized, and give dielectric constant and 
@@ -367,12 +367,12 @@
   1.9596E-03  1.1111E+01  1.1111E+01  1.1111E+01  2.8994E-01  2.8994E-01  2.8994E-01
   1.9798E-03  1.1345E+01  1.1345E+01  1.1345E+01  2.9392E-01  2.9392E-01  2.9392E-01
   2.0000E-03  1.1553E+01  1.1553E+01  1.1553E+01  2.9741E-01  2.9741E-01  2.9741E-01
- 
+
 ================================================================================
- 
+
  Treat the second list of vectors 
- 
- 
+
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -381,7 +381,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -389,16 +389,16 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.38308915E-07  2.32020394E-03
+-  1  0.00000000E+00  0.00000000E+00 -2.32020398E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  4.38308944E-07  2.32020410E-03
+-  2  0.00000000E+00  0.00000000E+00 -2.32020414E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -2.32020394E-03  4.38308915E-07
+-  1  0.00000000E+00 -2.32020398E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00 -2.32020410E-03  4.38308944E-07
+-  2  0.00000000E+00 -2.32020414E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -422,7 +422,7 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 ;  2 -1.39237442E-03  0.00000000E+00  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
@@ -431,7 +431,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -439,16 +439,16 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.60560009E-07  2.32020397E-03
+-  1  0.00000000E+00  0.00000000E+00 -2.32020398E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  2.60560024E-07  2.32020413E-03
+-  2  0.00000000E+00  0.00000000E+00 -2.32020414E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.32020398E-03 -2.60560007E-07
+-  1  0.00000000E+00 -2.32020399E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  2.32020412E-03 -2.60560025E-07
+-  2  0.00000000E+00 -2.32020413E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -458,9 +458,9 @@
 -  2  2.32020414E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    4   Energy    1.620427E-03
--  1  0.00000000E+00  0.00000000E+00  3.86630696E-03
+-  1  0.00000000E+00  0.00000000E+00 -3.86630696E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  0.00000000E+00 -1.39237441E-03
+-  2  0.00000000E+00  0.00000000E+00  1.39237441E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    5   Energy    1.620427E-03
 -  1  3.86630696E-03  0.00000000E+00  0.00000000E+00
@@ -472,7 +472,7 @@
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 ;  2  0.00000000E+00 -1.39237442E-03  0.00000000E+00
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -481,7 +481,7 @@
  Phonon frequencies in cm-1    :
 -  0.000000E+00  0.000000E+00  0.000000E+00  3.556426E+02  3.556426E+02
 -  3.760017E+02
- 
+
  Eigendisplacements 
  (will be given, for each mode : in cartesian coordinates
    for each atom the real part of the displacement vector,
@@ -489,16 +489,16 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  2.60719615E-07  2.32020398E-03
+-  1  0.00000000E+00  0.00000000E+00 -2.32020399E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00  2.60719633E-07  2.32020412E-03
+-  2  0.00000000E+00  0.00000000E+00 -2.32020413E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -2.32020397E-03  2.60719617E-07
+-  1  0.00000000E+00  2.32020398E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00 -2.32020413E-03  2.60719632E-07
+-  2  0.00000000E+00  2.32020414E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -508,31 +508,31 @@
 -  2  2.32020414E-03  0.00000000E+00  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    4   Energy    1.620427E-03
--  1  0.00000000E+00  3.86630696E-03  0.00000000E+00
+-  1  4.27070346E-07 -3.86630694E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2  0.00000000E+00 -1.39237441E-03  0.00000000E+00
+-  2 -1.53800986E-07  1.39237441E-03  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    5   Energy    1.620427E-03
--  1  3.86630696E-03  0.00000000E+00  0.00000000E+00
+-  1  3.86630694E-03  4.27070346E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
--  2 -1.39237441E-03  0.00000000E+00  0.00000000E+00
+-  2 -1.39237441E-03 -1.53800986E-07  0.00000000E+00
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    6   Energy    1.713190E-03
 ;  1  0.00000000E+00  0.00000000E+00  3.86630695E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 ;  2  0.00000000E+00  0.00000000E+00 -1.39237442E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
  Generalized Lyddane-Sachs-Teller relation at zero frequency :
  Direction                     Dielectric constant
    1.00000   0.00000   0.00000     16.66342787
    0.00000   1.00000   0.00000     16.66342787
    0.00000   0.00000   1.00000     16.66342787
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.9
- 
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+
 ================================================================================
- 
-+Total cpu time      0.161  and wall time      0.873 sec
- 
+
++Total cpu time      0.162  and wall time      0.179 sec
+
  anaddb : the run completed succesfully.

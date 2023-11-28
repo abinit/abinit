@@ -2215,7 +2215,6 @@ subroutine paw_an_isendreceive_fillbuffer(paw_an, atmtab_send,atm_indx_send,npaw
        end do
      end do
    end if
-
    if (paw_an1%has_vxcval==2) then
      do i1=1,nspden
        do i2=1,v_size

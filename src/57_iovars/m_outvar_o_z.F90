@@ -1122,6 +1122,11 @@ contains
  dprarr(1,:)=dtsets(:)%tolwfr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr','DPR',0)
 
+ if ( any( abs(dtsets(:)%tolwfr-dtsets(:)%tolwfr_diago)>tiny(zero) ) ) then ! output tolwfr_diago only if different than tolwfr
+   dprarr(1,:)=dtsets(:)%tolwfr_diago
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr_diago','DPR',0)
+ end if
+
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
 
@@ -1480,6 +1485,11 @@ contains
 
  dprarr(1,:)=dtsets(:)%xc_denpos
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_denpos','DPR',0)
+
+ if (any(dtsets(:)%usekden==1).and.any(dtsets(:)%xc_taupos/=dtsets(:)%xc_denpos)) then
+   dprarr(1,:)=dtsets(:)%xc_taupos
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_taupos','DPR',0)
+ end if
 
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)

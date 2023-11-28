@@ -1,5 +1,5 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Jul 2023.
-- ( at 22h16 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/TestBot_MPI1/v7_t96/t96.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v7_t96/t96.abi
 - output file    -> t96.abo
 - root for input  files -> t96i
 - root for output files -> t96o
-
 
  DATASET    1 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
@@ -58,7 +57,6 @@ P newvtr chain                          5.032 Mbytes.
 _ WF disk file :      0.134 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -93,7 +91,6 @@ P newvtr chain                          5.032 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.134 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Cm c 2_1 (# 36); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -130,7 +127,6 @@ P newvtr chain                          5.121 Mbytes.
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Cm c 2_1 (# 36); Bravais oC (1-face-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -165,7 +161,6 @@ P newvtr chain                          5.120 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Cm c 2_1 (# 36); Bravais oC (1-face-center ortho.)
 ================================================================================
@@ -202,7 +197,6 @@ P newvtr chain                          5.121 Mbytes.
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Cm c 2_1 (# 36); Bravais oC (1-face-center ortho.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -237,7 +231,6 @@ P newvtr chain                          5.120 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET   22 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
@@ -274,7 +267,6 @@ P newvtr chain                          5.032 Mbytes.
 _ WF disk file :      0.134 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET   23 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 23.
@@ -308,7 +300,6 @@ P newvtr chain                          4.987 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET   24 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -344,7 +335,6 @@ P newvtr chain                          4.987 Mbytes.
 _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET   25 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 25.
@@ -378,7 +368,6 @@ P newvtr chain                          4.987 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET   26 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -414,7 +403,6 @@ P newvtr chain                          4.987 Mbytes.
 _ WF disk file :      0.266 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12 (RF).
@@ -442,7 +430,6 @@ P Main chain + nonlop.f + opernl.f     17.202 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.529 Mbytes ; DEN or POT disk file :      0.076 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group P6_3 m c (#186); Bravais hP (primitive hexag.)
 ================================================================================
@@ -1321,8 +1308,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16976
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/al_ps.abinit.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/al_ps.abinit.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/al_ps.abinit.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/al_ps.abinit.paw
 - Paw atomic data for element Al - Generated by AtomPAW + AtomPAW2Abinit v3.2.1
 - 13.00000   3.00000  20091223                znucl, zion, pspdat
     7    7    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1344,8 +1331,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/as_ps.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/as_ps.paw
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/as_ps.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/as_ps.paw
 - Paw atomic data for element As - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 33.00000   5.00000  20090611                znucl, zion, pspdat
     7    7    1    0       495   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10715,8 +10702,8 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.16976
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/al_ps.abinit.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/al_ps.abinit.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/al_ps.abinit.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/al_ps.abinit.paw
 - Paw atomic data for element Al - Generated by AtomPAW + AtomPAW2Abinit v3.2.1
 - 13.00000   3.00000  20091223                znucl, zion, pspdat
     7    7    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -10738,8 +10725,8 @@ meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/as_ps.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze2/tests/Psps_for_tests/as_ps.paw
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/as_ps.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/as_ps.paw
 - Paw atomic data for element As - Generated by AtomPAW + AtomPAW2Abinit v3.2.0
 - 33.00000   5.00000  20090611                znucl, zion, pspdat
     7    7    1    0       495   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -15965,10 +15952,10 @@ P          mk1mem13         8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         69.1  wall=         69.6
+- Proc.   0 individual time (sec): cpu=         68.9  wall=         69.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  28 WARNINGs and  42 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         69.1  wall=         69.6
+.Delivered  28 WARNINGs and  58 COMMENTs to log file.
++Overall time at end (sec) : cpu=         68.9  wall=         69.3
