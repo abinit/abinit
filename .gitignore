@@ -66,6 +66,10 @@ topology.so
 *.stderr
 *.stdout
 buildbot.ac
+CMakeFiles
+CMakeCache.txt
+install_manifest.txt
+cmake_install.cmake
 tests/TestBot_MPI*/*
 /.abilint
 /abilint.log

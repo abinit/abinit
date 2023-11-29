@@ -2455,11 +2455,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (usepaw==1) dtset%useylm=1
  if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
  if (dtset%efmas==1 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) dtset%useylm=1
- if (dtset%use_gpu_cuda /= 0 .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
+ if (dtset%use_gpu_cuda /= ABI_GPU_DISABLED .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
  end if
+
+ ! Read distribute_gemm_nonlop
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'distribute_gemm_nonlop',tread,'INT')
+ if(tread==1) dtset%distribute_gemm_nonlop=intarr(1)
 
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt

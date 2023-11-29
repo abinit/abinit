@@ -22,6 +22,7 @@
 MODULE m_xomp
 
  use defs_basis,    only : std_out
+ use, intrinsic :: iso_c_binding, only : c_ptr, c_size_t, c_int, c_null_ptr
 #ifdef HAVE_OPENMP
  use omp_lib
 #endif
@@ -37,6 +38,16 @@ MODULE m_xomp
  public :: xomp_set_num_threads
  public :: xomp_in_parallel
  public :: xomp_get_num_cores_node
+ ! OpenMP 5.0 GPU device routines
+ public :: xomp_set_default_device
+ public :: xomp_get_default_device
+ public :: xomp_get_initial_device
+ public :: xomp_get_num_devices
+ public :: xomp_is_initial_device
+ public :: xomp_target_is_present
+ ! OpenMP 5.1 GPU device routine
+ public :: xomp_get_mapped_ptr
+
 
 !----------------------------------------------------------------------
 
@@ -307,6 +318,258 @@ function xomp_get_num_cores_node()
 #endif
 
 end function xomp_get_num_cores_node
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_set_default_device
+!! NAME
+!!  xomp_set_default_device
+!!
+!! FUNCTION
+!!  Wrapper for omp_set_default_device
+!!
+!! INPUTS
+!!  device_id = id of offload device (ie: GPU, accelerator) to be used
+!!
+!! SOURCE
+
+subroutine xomp_set_default_device(device_id)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: device_id
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ call omp_set_default_device(device_id)
+#else
+ if(.false.) write(std_out,*) device_id
+#endif
+
+end subroutine xomp_set_default_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_default_device
+!! NAME
+!!  xomp_get_default_device
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_default_device
+!!
+!! OUTPUT
+!!  (integer) id of default offload device (ie: GPU, accelerator) on which
+!!      "target" regions will be run on.
+!!      -1 if no offload device is used.
+!!
+!! SOURCE
+
+function xomp_get_default_device()
+
+!Arguments ------------------------------------
+!scalars
+ integer :: xomp_get_default_device
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_get_default_device = omp_get_default_device()
+#else
+ xomp_get_default_device = -1
+#endif
+
+end function xomp_get_default_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_initial_device
+!! NAME
+!!  xomp_get_initial_device
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_initial_device
+!!
+!! OUTPUT
+!!  (integer) id of OpenMP device which targets host rather than
+!!    acclerator devices.
+!!
+!! SOURCE
+
+function xomp_get_initial_device()
+
+!Arguments ------------------------------------
+!scalars
+ integer :: xomp_get_initial_device
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_get_initial_device = omp_get_initial_device()
+#else
+ xomp_get_initial_device = -1
+#endif
+
+end function xomp_get_initial_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_num_devices
+!! NAME
+!!  xomp_get_num_devices
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_num_devices
+!!
+!! OUTPUT
+!!  (integer) id of OpenMP device which targets host rather than
+!!    acclerator devices.
+!!
+!! SOURCE
+
+function xomp_get_num_devices()
+
+!Arguments ------------------------------------
+!scalars
+ integer :: xomp_get_num_devices
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_get_num_devices = omp_get_num_devices()
+#else
+ xomp_get_num_devices = 0
+#endif
+
+end function xomp_get_num_devices
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_is_initial_device
+!! NAME
+!!  xomp_is_initial_device
+!!
+!! FUNCTION
+!!  Wrapper for omp_is_initial_device
+!!
+!! OUTPUT
+!!  (integer) id of OpenMP device which targets host rather than
+!!    acclerator devices.
+!!
+!! SOURCE
+
+function xomp_is_initial_device()
+
+!Arguments ------------------------------------
+!scalars
+ logical :: xomp_is_initial_device
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ xomp_is_initial_device = omp_is_initial_device()
+#else
+ xomp_is_initial_device = .true.
+#endif
+
+end function xomp_is_initial_device
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_target_is_present
+!! NAME
+!!  xomp_target_is_present
+!!
+!! FUNCTION
+!!  Wrapper for omp_target_is_present
+!!
+!! INPUTS
+!!  ptr = C pointer, likely matching a Fortran array wrapped in c_loc
+!!
+!! OUTPUT
+!!  (logical) .true. if given ptr has an associate pointer in device
+!!    memory, .false. otherwise
+!!
+!! SOURCE
+
+function xomp_target_is_present(ptr)
+
+!Arguments ------------------------------------
+ type(c_ptr),intent(in) :: ptr
+
+ logical :: xomp_target_is_present
+ integer(kind=c_int) :: device_id, rc
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ device_id = xomp_get_default_device()
+ rc = omp_target_is_present(ptr, device_id)
+ xomp_target_is_present = .true.
+ if(rc==0) xomp_target_is_present = .false.
+#else
+ type(c_ptr) :: dummy
+ xomp_target_is_present = .false.
+ if(.false.) then ! Silence compiler warnings
+   device_id = 0
+   rc = 0
+   dummy = ptr
+ end if
+#endif
+
+end function xomp_target_is_present
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xomp/xomp_get_mapped_ptr
+!! NAME
+!!  xomp_get_mapped_ptr
+!!
+!! FUNCTION
+!!  Wrapper for omp_get_mapped_ptr
+!!
+!! INPUTS
+!!  ptr = C pointer, likely matching a Fortran array wrapped in c_loc
+!!
+!! OUTPUT
+!!  (c_ptr) Pointer to device memory matching given input ptr
+!!
+!! SOURCE
+
+function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
+
+!Arguments ------------------------------------
+ type(c_ptr),intent(in) :: ptr
+ integer :: device_id, rc
+ type(c_ptr) :: gpu_ptr
+
+! *************************************************************************
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ device_id = xomp_get_default_device()
+ if(xomp_target_is_present(ptr)) then
+   gpu_ptr = omp_get_mapped_ptr(ptr, device_id)
+ else
+   gpu_ptr = c_null_ptr
+ end if
+#else
+ gpu_ptr = c_null_ptr
+ if(.false.) then ! Silence compiler warnings
+   device_id=0
+   rc=0
+   gpu_ptr=ptr
+ end if
+#endif
+
+end function xomp_get_mapped_ptr
+!!***
 
 !----------------------------------------------------------------------
 
