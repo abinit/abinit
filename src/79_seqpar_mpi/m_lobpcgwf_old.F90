@@ -467,7 +467,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
      resid_k(bblocksize+1:bblocksize+blocksize)=residualnorms(1:blocksize)
 
 !    If residual sufficiently small stop line minimizations
-     if (abs(maxval(residualnorms(1:blocksize)))<dtset%tolwfr) then
+     if (abs(maxval(residualnorms(1:blocksize)))<dtset%tolwfr_diago) then
        if (prtvol > 0) then
          write(message, '(a,i0,a,i0,a,es12.4)' ) &
 &         ' lobpcgwf: block ',iblock,' converged after ',iterationnumber,&
