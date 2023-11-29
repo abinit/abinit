@@ -270,7 +270,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  integer :: me_distrb,mpi_comm_sphgrid,my_ikpt,my_nspinor,n1,n2,n3,n4,n5,n6
  integer :: nband_k,nblockbd,nfftotf,nkpg,nkxc,nk3xc,nnlout,npw_k,nspden_rhoij,option
  integer :: option_rhoij,paw_opt,signs,spaceComm,tim_mkrho,tim_nonlop
- logical :: add_tfw_,paral_atom,usetimerev,with_vxctau
+ logical :: add_tfw_,paral_atom,use_timerev,use_zeromag,with_vxctau
  logical :: non_magnetic_xc,wvlbigdft=.false.
  real(dp) :: dotr,doti,eeigk,ekk,enlk,evxc,e_xcdc_vxctau,ucvol,ucvol_local,vxcavg
  !character(len=500) :: message
@@ -549,7 +549,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      call pawrhoij_init_unpacked(pawrhoij_unsym)
    end if
    option_rhoij=1
-   usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_timerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+   use_zeromag=(pawrhoij_unsym(1)%nspden==4.and.dtset%nspden==1)
  else
    ABI_MALLOC(cwaveprj,(0,0))
  end if
@@ -718,10 +719,10 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
              call pawcprj_gather_spin(cwaveprj,cwaveprj_gat,dtset%natom,1,my_nspinor,dtset%nspinor,&
 &             mpi_enreg%comm_spinor,ierr)
              call pawaccrhoij(gs_hamk%atindx,cplex,cwaveprj_gat,cwaveprj_gat,0,isppol,dtset%natom,dtset%natom,&
-&             dtset%nspinor,occ_k(iband),option_rhoij,pawrhoij_unsym,usetimerev,dtset%wtk(ikpt))
+&             dtset%nspinor,occ_k(iband),option_rhoij,pawrhoij_unsym,use_timerev,use_zeromag,dtset%wtk(ikpt))
            else
              call pawaccrhoij(gs_hamk%atindx,cplex,cwaveprj,cwaveprj,0,isppol,dtset%natom,dtset%natom,&
-&             dtset%nspinor,occ_k(iband),option_rhoij,pawrhoij_unsym,usetimerev,dtset%wtk(ikpt))
+&             dtset%nspinor,occ_k(iband),option_rhoij,pawrhoij_unsym,use_timerev,use_zeromag,dtset%wtk(ikpt))
            end if
          end if
 

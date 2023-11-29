@@ -3449,6 +3449,8 @@ end subroutine pawrhoij_print_rhoij
 !!  symrec(3,3,nsym)=symmetries of group in terms of operations on
 !!                   reciprocal space primitive translations
 !!  typat(natom)=type for each atom
+!!  [use_zeromag]=--optional-- .TRUE. if rhoij "magnetization" is enforced to be zero
+!!                Applies only when nspden_rhoij=4 (note: only the real part is set to zero)
 !!
 !! OUTPUT
 !!
@@ -3472,12 +3474,13 @@ end subroutine pawrhoij_print_rhoij
 
 subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,natom,nsym,&
 &                            ntypat,optrhoij,pawang,pawprtvol,pawtab,rprimd,symafm,symrec,typat, &
-&                            mpi_atmtab,comm_atom,qphon) ! optional arguments (parallelism)
+&                            mpi_atmtab,comm_atom,qphon,use_zeromag) ! optional arguments (parallelism)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: choice,ipert,natom,nsym,ntypat,optrhoij,pawprtvol
  integer,optional,intent(in) :: comm_atom
+ logical,optional,intent(in) :: use_zeromag
  type(pawang_type),intent(in) :: pawang
 !arrays
  integer,intent(in) :: indsym(4,nsym,natom)
@@ -3499,6 +3502,7 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  integer :: natinc,ngrhoij,nrhoij,nrhoij1,nrhoij_unsym
  integer :: nselect,nu,nushift,qphase,sz1,sz2
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used with non-collinear magnetism
+ logical :: use_zeromag_
  real(dp) :: arg,factafm,ro,syma,zarot2
  logical :: antiferro,has_qphase,my_atmtab_allocated,noncoll
  logical :: paral_atom,paral_atom_unsym,use_afm,use_res
@@ -3551,7 +3555,9 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
  noncoll=.false.;if (nrhoij>0) noncoll=(pawrhoij(1)%nspden==4)
 !Do we use antiferro symmetries ?
  use_afm=((antiferro).or.(noncoll.and.afm_noncoll))
-
+!Do we impose zero magnetization?
+ use_zeromag_=.false. ; if (present(use_zeromag)) use_zeromag_=use_zeromag
+ 
 ! Does not symmetrize imaginary part for GS calculations
  cplex_eff=1
  if (nrhoij>0.and.(ipert>0.or.antiferro.or.noncoll)) cplex_eff=pawrhoij(1)%cplex_rhoij
@@ -4046,7 +4052,11 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
              do mu=2,4
                do iq=1,qphase
                  klmn1q=klmn1+(iq-1)*lmn2_size
-                 pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
+                 if (use_zeromag_) then
+                   pawrhoij(iatm)%rhoijp(klmn1q,mu)=zero
+                 else
+                   pawrhoij(iatm)%rhoijp(klmn1q,mu)=rotmag(1,mu-1,iq)/nsym_used(1)
+                 end if
                  if (cplex_rhoij==2) then
                    if (cplex_eff==1) ro=pawrhoij_unsym_all(iatom)%rhoij_(klmn1q+1,mu)
                    if (cplex_eff==2) ro=rotmag(2,mu-1,iq)/nsym_used(1)
@@ -4080,9 +4090,13 @@ subroutine pawrhoij_symrhoij(pawrhoij,pawrhoij_unsym,choice,gprimd,indsym,ipert,
                    pawrhoij(iatm)%grhoij(mu,klmn1q,ispden)=rotgr(iplex,mu,1,iq)/nsym_used(1)
                  end do
                  if (noncoll) then
-                   do nu=1,3
-                     pawrhoij(iatm)%grhoij(mu,klmn1q,1+nu)=rotmaggr(iplex,mu,nu,iq)/nsym_used(1)
-                   end do
+                   if (use_zeromag_.and.iplex==1) then
+                     pawrhoij(iatm)%grhoij(mu,klmn1q,2:4)=zero
+                   else
+                     do nu=1,3
+                       pawrhoij(iatm)%grhoij(mu,klmn1q,1+nu)=rotmaggr(iplex,mu,nu,iq)/nsym_used(1)
+                     end do
+                   end if
                  end if
                  if (antiferro.and.nsym_used(2)>0) then
                    do mu=1,ngrhoij

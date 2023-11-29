@@ -151,6 +151,7 @@ P           mkmem           1
            toldff      1.00000000E-06
            tolimg      5.00000000E-06 Hartree
            tolmxf      1.00000000E-05
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  1  2  2  2  2
            useylm           1
          wfoptalg         114
@@ -6345,6 +6346,7 @@ P           mkmem           1
            toldff      1.00000000E-06
            tolimg      5.00000000E-06 Hartree
            tolmxf      1.00000000E-05
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  1  2  2  2  2
            useylm           1
          wfoptalg         114
