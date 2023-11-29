@@ -214,7 +214,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,coretau_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,has_vxctau,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
+ integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -679,7 +679,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_an_nullify(paw_an)
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
-   has_vxctau=dtset%usekden
    has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
    has_diju=merge(0,1,dtset%usepawu==0)
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
@@ -687,7 +686,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=has_vxctau,&
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=dtset%usekden,&
         &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
@@ -1455,8 +1454,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&   usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
-&   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0,vxctau=vxctau)
+&   usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !  #####################################################################
  end if

@@ -191,7 +191,7 @@ CONTAINS  !=====================================================================
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  rprimd(3,3)=real space translation vectors
 !!  vtrial(nfftf,dtset%nspden)=GS potential (Hartree)
-!!  vxctau(nfftf,nspden,4*usekden),optional=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
 !!  xred(3,dtset%natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)=all ylm's
 !!  ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)=gradients of ylm's
@@ -211,8 +211,7 @@ CONTAINS  !=====================================================================
 
 subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,&
     & nfftf,ngfftf,npwarr,occ,paw_ij,pawfgr,pawrad,&
-    & pawtab,psps,rprimd,vtrial,xred,ylm,ylmgr,&
-    & vxctau)
+    & pawtab,psps,rprimd,vtrial,vxctau,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
  !scalars
@@ -230,7 +229,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  real(dp), intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: rprimd(3,3),xred(3,dtset%natom)
  real(dp),intent(inout) :: vtrial(nfftf,dtset%nspden)
- real(dp),optional,intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm)
  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
@@ -244,7 +243,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  integer :: iat,iatom,icg,icmplx,icprj,ider,idir,ierr
  integer :: ikg,ikg1,ikpt,ilm,indx,isppol,istwf_k,iterm,itypat,lmn2max
  integer :: me,mcgk,mcprjk,my_lmax,my_nspinor,nband_k,nband_me,ngfft1,ngfft2,ngfft3,ngfft4
- integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm,with_vectornd
+ integer :: ngfft5,ngfft6,ngnt,nl1_option,nn,nkpg,npw_k,npwsp,nproc,spaceComm
  real(dp) :: arg,ecut_eff,fermie,ucvol
  logical :: has_nucdip,has_vxctau
  type(dterm_type) :: dterm
@@ -347,23 +346,22 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
    call gs_hamk%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
 
    !========  compute nuclear dipole vector potential (may be zero) ==========
-   with_vectornd=0
    has_nucdip = ANY( ABS(dtset%nucdipmom) .GT. tol8 )
-   if (has_nucdip) with_vectornd=1
-   ABI_MALLOC(vectornd,(with_vectornd*nfftf,dtset%nspden,3))
-   vectornd = zero
    if(has_nucdip) then
+     ABI_MALLOC(vectornd,(nfftf,dtset%nspden,3))
+     vectornd = zero
      call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,&
        & dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
      ABI_MALLOC(vectornd_pac,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,3))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
-       & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
+          & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
+     ABI_FREE(vectornd)
      call gs_hamk%load_spin(isppol,vectornd=vectornd_pac)
    end if
 
    !========  compute vxctaulocal if vxctau present =====================
 
-   has_vxctau = ( present(vxctau) .AND. (dtset%usekden .EQ. 1) )
+   has_vxctau = ( size(vxctau) > 0 )
    if(has_vxctau) then
      ABI_MALLOC(vxctaulocal,(ngfft4,ngfft5,ngfft6,gs_hamk%nvloc,4))
      call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
@@ -579,11 +577,10 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
    end do ! end loop over kpts
 
    ABI_FREE(vlocal)
-   ABI_FREE(vectornd)
-   if(has_nucdip) then
+   if(allocated(vectornd_pac)) then
      ABI_FREE(vectornd_pac)
    end if
-   if(has_vxctau) then
+   if(allocated(vxctaulocal)) then
       ABI_FREE(vxctaulocal)
    end if
 
