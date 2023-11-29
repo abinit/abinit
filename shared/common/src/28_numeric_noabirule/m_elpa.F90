@@ -206,7 +206,7 @@ end subroutine elpa_func_uninit
 !!
 !! SOURCE
 
-subroutine elpa_func_allocate(elpa_hdl,gpu,blac_ctx)
+subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
 !Arguments ------------------------------------
  integer,intent(in),optional :: gpu,blacs_ctx
