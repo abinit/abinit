@@ -861,8 +861,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    else
 
 #ifdef FC_NVHPC
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
      !Related to FIXME above
      if (gs_ham%use_gpu_impl == ABI_GPU_KOKKOS) call gpu_device_synchronize()
+#endif
 #endif
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
