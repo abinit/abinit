@@ -210,7 +210,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(dp),allocatable :: occ_diag(:)
 ! real(dp),allocatable :: occ_nd(2, :, :)
  real(dp),allocatable :: cwavef_rot(:,:,:,:)
- real(dp),allocatable :: weight_t(:) ! only allocated and used when use_gpu_cuda = 1
 
 ! *************************************************************************
 
