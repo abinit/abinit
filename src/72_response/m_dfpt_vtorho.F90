@@ -161,7 +161,7 @@ contains
 !!  vectornd(with_vectornd*nfftf,nspden,3)=nuclear dipole moment vector potential
 !!  vtrial(nfftf,nspden)=GS Vtrial(r).
 !!  vtrial1(cplex*nfftf,nspden)=INPUT RF Vtrial(r).
-!!  vxctau(nfftf,nspden,4*usekden),optional=derivative of e_xc wrt kin energy density, for mGGA
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc wrt kin energy density, for mGGA
 !!  with_vectornd = 1 if vectornd allocated
 !!  wtk_rbz(nkpt_rbz)=weight assigned to each k point.
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
@@ -220,7 +220,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
 & phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
-& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out,vxctau)
+& usecprj,useylmgr1,ddk_f,vectornd,vtrial,vtrial1,vxctau,with_vectornd,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
 !scalars
@@ -270,7 +270,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
- real(dp),optional,intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -449,7 +449,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ABI_MALLOC(vlocal1,(cplex*n4,n5,n6,gs_hamkq%nvloc))
 
- has_vxctau = ( present(vxctau) .AND. (dtset%usekden .EQ. 1) )
+ has_vxctau = ( size(vxctau) > 0 )
  if(has_vxctau) then
     ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamkq%nvloc,4))
  end if
@@ -779,11 +779,13 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  if(allocated(vxctaulocal)) then
     ABI_FREE(vxctaulocal)
  end if
- if(has_vectornd) then
-   ABI_FREE(vectornd_pac)
-   ABI_FREE(vectornd_pac_idir)
+ if(allocated(vectornd_pac)) then
+    ABI_FREE(vectornd_pac)
  end if
-
+ if(allocated(vectornd_pac_idir)) then
+    ABI_FREE(vectornd_pac_idir)
+ end if
+ 
  call timab(124,2,tsec)
 
 !=== MPI communications ==================

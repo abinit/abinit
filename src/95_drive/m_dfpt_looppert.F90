@@ -177,7 +177,7 @@ contains
 !!  vtrial(nfftf,nspden)=GS potential (Hartree)
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  vxcavg=average of vxc potential
-!!  vxctau(nfftf,nspden,4*usekden),optional=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -200,8 +200,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &  nfftf,nhat,nkpt,nkxc,nspden,nsym,occ,&
 &  paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &  pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&  usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
-&  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0,vxctau)
+&  usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&  eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !Arguments ------------------------------------
  integer, intent(in) :: dim_eigbrd,dim_eig2nkq,dyfr_cplex,dyfr_nondiag,mk1mem,mkmem,mkqmem,mpert
@@ -238,7 +238,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: occ(dtset%mband*nkpt*dtset%nsppol)
  real(dp), intent(in) :: rhog(2,nfftf),rhor(nfftf,nspden),vxc(nfftf,nspden)
  real(dp), intent(in) :: vtrial(nfftf,nspden)
- real(dp),optional,intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp), intent(inout) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp), intent(inout) :: xred(3,dtset%natom)
  real(dp), intent(inout) :: d2bbb(2,3,3,mpert,dtset%mband,dtset%mband*prtbbb)!vz_i
  real(dp), intent(inout) :: d2lo(2,3,mpert,3,mpert),d2nl(2,3,mpert,3,mpert) !vz_i
@@ -362,7 +362,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    kramers_deg=.false.
  end if
 
- has_vxctau = present(vxctau)
+ has_vxctau = (size(vxctau) > 0)
  evxctau0=zero; evxctau1=0
  has_nd = ANY(ABS(dtset%nucdipmom(:,:))>tol8)
  end0=zero; end1=zero
@@ -1868,9 +1868,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
+&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,vxctau,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
-&       kramers_deg,vxctau=vxctau)
+&       kramers_deg)
      else
        call dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,&
 &       dielt,dim_eig2rf,doccde_rbz,docckqde,dtfil,dtset_tmp,&
@@ -1888,13 +1888,13 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
 &       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
+&       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,vxctau,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg,&
 &       cg_mq=cg_mq,cg1_mq=cg1_mq,cg1_active_mq=cg1_active_mq,docckde_mq=docckde_mq,eigen_mq=eigen_mq,&
 &       eigen1_mq=eigen1_mq,gh0c1_set_mq=gh0c1_set_mq,gh1c_set_mq=gh1c_set_mq,&
 &       kg1_mq=kg1_mq,npwar1_mq=npwar1_mq,occk_mq=occk_mq,resid_mq=resid_mq,residm_mq=residm_mq,&
-&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq,vxctau=vxctau)
+&       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
      end if
 
 !    2nd-order eigenvalues stuff
@@ -2175,13 +2175,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
      end if
      vtrial_local = vtrial
-     if(present(vxctau)) then
-       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-          & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr,vxctau=vxctau)
-     else
-       call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-          & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,xred,ylm,ylmgr)
-     end if
+     call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
+        & npwarr,occ,paw_ij,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
      if( ALLOCATED(vtrial_local) ) then
        ABI_FREE(vtrial_local)
      end if
@@ -2189,8 +2184,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
        ABI_FREE(cg1_3)
        has_cg1_3(:) = .FALSE.
      end if
-
-   end if
+   end if ! end call orbmag
 
    if(mpi_enreg%paral_pert==1) then
      if (ipert_me < npert_me -1) then
@@ -2940,7 +2934,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    if(ipert>=1.and.ipert<=natom)then
      erelax=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+1.or.ipert==natom+2)then
-     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
+      !     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
+      ! JWZ debug: I think enl0 does not include end0 and evxctau0, while enl1 does include 1st order
+      ! counterparts
+     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+evxctau0
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
    else if(ipert==natom+5)then
@@ -3045,6 +3042,9 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    write(msg, '(a,es20.10,a)' ) &
 &   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective)+eovl1,' Ha)'
    call wrtout(iout,msg)
+!    write(msg, '(a,4es20.10,a)' ) &
+! &   '    JWZ debug ek1 enl1_effective enl1 eovl1 :',ek1,enl1_effective,enl1,eovl1, ' Ha)'
+!    call wrtout(iout,msg)
    call wrtout(std_out,msg)
 
  else if(ipert==natom+3 .or. ipert==natom+4) then
