@@ -295,7 +295,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
 !* PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,paw_ij=paw_ij0)
+& usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_impl=dtset%use_gpu_cuda,paw_ij=paw_ij0)
 
  ABI_MALLOC(vpsp1,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))

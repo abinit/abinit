@@ -29,6 +29,7 @@ module m_invars1
  use m_atomdata
  use m_dtset
  use m_nctk
+ use m_xomp
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -554,17 +555,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  end do
 
- dtsets(:)%diago_apply_block_sliced=1
- do idtset=1,ndtset_alloc
-    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
-    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
- end do
-
-
 !GPU information
- use_gpu_cuda=0
- dtsets(:)%use_gpu_cuda=0
+ use_gpu_cuda=ABI_GPU_DISABLED
+ dtsets(:)%use_gpu_cuda=ABI_GPU_DISABLED
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
  call Get_ndevice(ii)
  if (ii>0) then
@@ -577,7 +570,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
    if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
+   if (dtsets(idtset)%use_gpu_cuda/=ABI_GPU_DISABLED) use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
 end do
 
  dtsets(:)%use_nvtx=0
@@ -589,7 +582,16 @@ end do
  end do
 #endif
 
- if (use_gpu_cuda==1) then
+ dtsets(:)%use_gpu_openmp_threads=xomp_get_num_threads(open_parallel=.true.)
+#if defined HAVE_GPU_CUDA
+ do idtset=1,ndtset_alloc
+   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_openmp_threads',tread,'INT')
+   if(tread==1) dtsets(idtset)%use_gpu_openmp_threads=intarr(1)
+ end do
+#endif
+
+ if (use_gpu_cuda/=ABI_GPU_DISABLED) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
      write(msg,'(5a)')&
@@ -598,6 +600,38 @@ end do
 &     'Action: change the input variable use_gpu_cuda.'
      ABI_ERROR(msg)
    end if
+   if(use_gpu_cuda==ABI_GPU_OPENMP) then
+#if !defined HAVE_OPENMP_OFFLOAD
+     write(msg,'(7a)')&
+&     'Input variables use_gpu_cuda is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+&     'with OpenMP GPU offloading enabled !',ch10,&
+&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     ABI_ERROR(msg)
+#endif
+     if(xomp_get_num_devices() == 0) then
+       write(msg,'(13a)')&
+&       'Input variables use_gpu_cuda is set to use OpenMP GPU backend ',ch10,&
+&       'but no GPU is visible by OpenMP.',ch10,&
+&       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+&       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+&       'as to which CUDA version is supported.',ch10,&
+&       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+       ABI_ERROR(msg)
+     end if
+
+   else if(use_gpu_cuda==ABI_GPU_KOKKOS) then
+#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+     write(msg,'(7a)')&
+&     'Input variables use_gpu_cuda is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
+&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     ABI_ERROR(msg)
+#endif
+   end if
+
 #else
    write(msg,'(7a)')&
 &   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
@@ -607,6 +641,22 @@ end do
    ABI_ERROR(msg)
 #endif
  end if
+
+ dtsets(:)%diago_apply_block_sliced=1
+ if(use_gpu_cuda/=ABI_GPU_DISABLED) dtsets(:)%diago_apply_block_sliced=0
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
+    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
+ end do
+
+
+ dtsets(:)%gemm_nonlop_split_size=1
+ do idtset=1,ndtset_alloc
+    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gemm_nonlop_split_size',tread,'INT')
+    if(tread==1)dtsets(idtset)%gemm_nonlop_split_size=intarr(1)
+ end do
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
@@ -2179,9 +2229,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
    if (dtsets(idtset)%use_gpu_cuda==-1) then
      if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=0
+       dtsets(idtset)%use_gpu_cuda=ABI_GPU_DISABLED
      else
-       dtsets(idtset)%use_gpu_cuda=1
+       dtsets(idtset)%use_gpu_cuda=ABI_GPU_LEGACY
      end if
   end if
 
@@ -2257,6 +2307,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dielam=half
    dtsets(idtset)%diismemory=8
    dtsets(idtset)%dilatmx=one
+   dtsets(idtset)%distribute_gemm_nonlop=0
    dtsets(idtset)%dmatpuopt=2
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0

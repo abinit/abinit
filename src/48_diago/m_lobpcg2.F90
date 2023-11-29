@@ -5,11 +5,14 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_lobpcg2
 
   use m_xg
   use m_xgScalapack
-  use defs_basis, only : std_err, std_out
+  use defs_basis
   use m_abicore
   use m_errors
   use m_xomp
@@ -17,6 +20,10 @@ module m_lobpcg2
   use omp_lib
 #endif
   use m_xmpi
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+ use m_nvtx_data
+#endif
 
   use m_time, only : timab
 
@@ -76,6 +83,7 @@ module m_lobpcg2
     integer :: blockdim                      ! Number of vectors in one block
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
+    integer :: use_gpu_cuda
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
@@ -133,7 +141,7 @@ module m_lobpcg2
   contains
 
 
-  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, space, spacecom)
+  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, space, spacecom, use_gpu_cuda)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -143,6 +151,7 @@ module m_lobpcg2
     integer         , intent(in   ) :: nline
     integer         , intent(in   ) :: space
     integer         , intent(in   ) :: spacecom
+    integer         , intent(in   ) :: use_gpu_cuda
     double precision :: tsec(2)
     double precision :: advice
     double precision :: advice_target
@@ -168,6 +177,7 @@ module m_lobpcg2
     lobpcg%nline       = nline
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
+    lobpcg%use_gpu_cuda = use_gpu_cuda
 
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -223,21 +233,21 @@ module m_lobpcg2
     call lobpcg_free(lobpcg) ! Make sure everything is not allocated and
     ! pointer point to null()
 
-    call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom)
+    call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
     call xg_setBlock(lobpcg%XWP,lobpcg%X,1,spacedim,blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%W,blockdim+1,spacedim,blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%P,2*blockdim+1,spacedim,blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%XW,1,spacedim,2*blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%WP,blockdim+1,spacedim,2*blockdim)
 
-    call xg_init(lobpcg%AXWP,space,spacedim,3*blockdim,lobpcg%spacecom)
+    call xg_init(lobpcg%AXWP,space,spacedim,3*blockdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AX,1,spacedim,blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AW,blockdim+1,spacedim,blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AP,2*blockdim+1,spacedim,blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AXW,1,spacedim,2*blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AWP,blockdim+1,spacedim,2*blockdim)
 
-    call xg_init(lobpcg%BXWP,space,spacedim,3*blockdim,lobpcg%spacecom)
+    call xg_init(lobpcg%BXWP,space,spacedim,3*blockdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BX,1,spacedim,blockdim)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BW,blockdim+1,spacedim,blockdim)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BP,2*blockdim+1,spacedim,blockdim)
@@ -245,8 +255,8 @@ module m_lobpcg2
     call xg_setBlock(lobpcg%BXWP,lobpcg%BWP,blockdim+1,spacedim,2*blockdim)
 
     if ( lobpcg%nblock /= 1 ) then
-      call xg_init(lobpcg%AllBX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom)
-      call xg_init(lobpcg%AllAX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom)
+      call xg_init(lobpcg%AllBX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
+      call xg_init(lobpcg%AllAX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
     else
       lobpcg%AllBX0%self = lobpcg%BX
       lobpcg%AllAX0%self = lobpcg%AX
@@ -354,9 +364,10 @@ module m_lobpcg2
       end subroutine getAX_BX
     end interface
     interface
-      subroutine pcond(W)
+      subroutine pcond(W,use_gpu_cuda)
         use m_xg, only : xgBlock_t
         type(xgBlock_t), intent(inout) :: W
+        integer, intent(in) :: use_gpu_cuda
       end subroutine pcond
     end interface
 
@@ -395,7 +406,7 @@ module m_lobpcg2
       call wrtout(std_out,msg,'COLL')
     end if
 
-    call xg_init(eigenvalues3N,SPACE_R,blockdim3,1)
+    call xg_init(eigenvalues3N,SPACE_R,blockdim3,1, use_gpu=lobpcg%use_gpu_cuda)
     call xg_setBlock(eigenvalues3N,eigenvaluesN,1,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,1,blockdim2,1)
 
@@ -409,6 +420,7 @@ module m_lobpcg2
 
     !! Start big loop over blocks
     do iblock = 1, nblock
+      ABI_NVTX_START_RANGE(NVTX_LOBPCG2_BLOCK)
       nrestart = 0
 
       call lobpcg_getX0(lobpcg,iblock)
@@ -436,6 +448,7 @@ module m_lobpcg2
       compute_residu = .true.
 
       do iline = 1, nline
+        ABI_NVTX_START_RANGE(NVTX_LOBPCG2_LINE)
 
         if ( ierr /= 0 ) then
           !ABI_COMMENT("Consider using more bands and nbdbuf if necessary.")
@@ -449,14 +462,15 @@ module m_lobpcg2
 
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
-        call pcond(lobpcg%W)
+        call pcond(lobpcg%W,lobpcg%use_gpu_cuda)
         call timab(tim_pcond,2,tsec)
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,use_gpu_cuda=lobpcg%use_gpu_cuda)
         call timab(tim_maxres,2,tsec)
 
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
           call xgBlock_copy(residuBlock,residu_eff%self)
           iband_min = 1 + blockdim*(iblock-1)
@@ -501,9 +515,9 @@ module m_lobpcg2
           ! Do RR on XW to get the eigen vectors
           call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
           RR_var = VAR_XW
-          call xgBlock_zero(lobpcg%P)
-          call xgBlock_zero(lobpcg%AP)
-          call xgBlock_zero(lobpcg%BP)
+          call xgBlock_zero(lobpcg%P, use_gpu_cuda=lobpcg%use_gpu_cuda)
+          call xgBlock_zero(lobpcg%AP, use_gpu_cuda=lobpcg%use_gpu_cuda)
+          call xgBlock_zero(lobpcg%BP, use_gpu_cuda=lobpcg%use_gpu_cuda)
           RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
             ABI_COMMENT("This is embarrasing. Let's pray")
@@ -519,9 +533,9 @@ module m_lobpcg2
             call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
             RR_var = VAR_XW
             RR_eig = eigenvalues2N
-            call xgBlock_zero(lobpcg%P)
-            call xgBlock_zero(lobpcg%AP)
-            call xgBlock_zero(lobpcg%BP)
+            call xgBlock_zero(lobpcg%P, use_gpu_cuda=lobpcg%use_gpu_cuda)
+            call xgBlock_zero(lobpcg%AP, use_gpu_cuda=lobpcg%use_gpu_cuda)
+            call xgBlock_zero(lobpcg%BP, use_gpu_cuda=lobpcg%use_gpu_cuda)
             nrestart = nrestart + 1
           end if
           !RR_eig = eigenvalues3N%self
@@ -533,15 +547,17 @@ module m_lobpcg2
           exit
         end if
 
+        ABI_NVTX_END_RANGE()
       end do
 
       if ( compute_residu ) then
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
         ! Apply preconditioner
-        call pcond(lobpcg%W)
+        call pcond(lobpcg%W,lobpcg%use_gpu_cuda)
         ! Recompute residu norm here !
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
           call xgBlock_copy(residuBlock,residu_eff%self)
           iband_min = 1 + blockdim*(iblock-1)
@@ -570,7 +586,7 @@ module m_lobpcg2
 
       ! Save eigenvalues
       call xgBlock_setBlock(eigen,eigenBlock,iblock,blockdim,1)
-      call xgBlock_copy(eigenvaluesN,eigenBlock)
+      call xgBlock_copy(eigenvaluesN,eigenBlock,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       ! Save new X in X0
       call lobpcg_setX0(lobpcg,iblock)
@@ -580,6 +596,7 @@ module m_lobpcg2
         call lobpcg_transferAX_BX(lobpcg,iblock)
       end if
 
+      ABI_NVTX_END_RANGE()
     end do !! End iblock loop
 
     call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
@@ -623,7 +640,7 @@ module m_lobpcg2
 
     !lobpcg%XWP(:,X+1:X+blockdim) = lobpcg%X0(:,(iblock-1)*blockdim+1:iblock*blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X0,lobpcg%X)
+    call xgBlock_copy(lobpcg%X0,lobpcg%X, use_gpu_cuda=lobpcg%use_gpu_cuda)
 
   end subroutine lobpcg_getX0
 
@@ -650,22 +667,26 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_ortho,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_ORTHO_X_WRT)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
     previousBlock = (iblock-1)*lobpcg%blockdim
 
-    call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom)
+    call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self)
+    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self,&
+        use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
-    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
+    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,&
+        var,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     call xg_free(buffer)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_ortho,2,tsec)
 
   end subroutine lobpcg_orthoXwrtBlocks
@@ -684,6 +705,7 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_Bortho,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
 
     select case (var)
     case (VAR_X) ! Select X vectors
@@ -714,13 +736,13 @@ module m_lobpcg2
       ABI_ERROR("Bortho")
     end select
 
-    call xg_init(buffer,space(X),cols(X),cols(X),lobpcg%spacecom)
+    call xg_init(buffer,space(X),cols(X),cols(X),lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
 
     ! Compute X^TBX
-    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self)
+    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     ! Compute Cholesky decomposition (Upper part)
-    call xgBlock_potrf(buffer%self,'u',info)
+    call xgBlock_potrf(buffer%self,'u',info,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     if ( info /= 0 ) then
       ABI_COMMENT("An old style abi_xorthonormalize happened but now I'll try to continue ;-)")
@@ -732,18 +754,18 @@ module m_lobpcg2
 !!$omp single
 !!$omp task
     ! Solve YU=X
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X,use_gpu_cuda=lobpcg%use_gpu_cuda)
 !!$omp end task
 
 !!$omp task
     ! Solve BYU=BX
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX,use_gpu_cuda=lobpcg%use_gpu_cuda)
 !!$omp end task
 
 !!$omp task
     if ( BorthoA .eqv. .true. ) then
       ! Solve AYU=AX
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
+      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX,use_gpu_cuda=lobpcg%use_gpu_cuda)
     end if
 !!$omp end task
 !!$omp end single nowait
@@ -751,6 +773,7 @@ module m_lobpcg2
 
     call xg_free(buffer)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_Bortho,2,tsec)
 
   end subroutine lobpcg_Borthonormalize
@@ -793,6 +816,7 @@ module m_lobpcg2
 #endif
 
     call timab(tim_RR, 1, tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RR)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -806,6 +830,7 @@ module m_lobpcg2
       BX = lobpcg%BX
       !eigenSolver = minloc(eigenSolverTime(7:10), dim=1) + 6
       eigenSolver = EIGENEV
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -822,6 +847,7 @@ module m_lobpcg2
       BWP = lobpcg%BW
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
       eigenSolver = EIGENVX
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -838,6 +864,7 @@ module m_lobpcg2
       BWP = lobpcg%BWP
       !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
         eigenSolver = EIGENVX
+      if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) eigenSolver = EIGENVD
 #ifdef HAVE_LINALG_MKL_THREADS
       if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
 #elif HAVE_LINALG_OPENBLAS_THREADS
@@ -849,7 +876,7 @@ module m_lobpcg2
     end select
 
 #ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim,lobpcg%prtvol-2,use_slk)
+    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim,lobpcg%prtvol-2,(lobpcg%use_gpu_cuda/=ABI_GPU_DISABLED),use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
@@ -859,18 +886,18 @@ module m_lobpcg2
 
     abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
 
-    call xg_init(subA,space(X),subdim,subdim,lobpcg%spacecom)
+    call xg_init(subA,space(X),subdim,subdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
     !call xgBlock_zero(subA%self)
     if ( var /= VAR_X ) then
-      call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom)
+      call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom, use_gpu=lobpcg%use_gpu_cuda)
       !call xgBlock_zero(subB%self)
       !call xgBlock_one(subB%self)
     end if
 
     if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
-      call xg_init(vec,space(x),subdim,blockdim)
+      call xg_init(vec,space(x),subdim,blockdim, use_gpu=lobpcg%use_gpu_cuda)
     else if ( EIGPACK(eigenSolver) ) then
-      call xg_init(vec,space(x),subdim,subdim)
+      call xg_init(vec,space(x),subdim,subdim, use_gpu=lobpcg%use_gpu_cuda)
     else
       call xg_setBlock(subA,vec%self,1,subdim,blockdim)
     endif
@@ -882,31 +909,35 @@ module m_lobpcg2
     ! |  *  |   *   | PAP |  |  *  |   *   |  I  |
 
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
-    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub)
+    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     if ( var /= VAR_X ) then
       call xg_setBlock(subB,subsub,1,blockdim,blockdim)
-      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
+      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub,use_gpu_cuda=lobpcg%use_gpu_cuda)
     endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%AW%normal,1.0d0,lobpcg%XW,lobpcg%AW,0.d0,subsub)
+      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%AW%normal,1.0d0,lobpcg%XW,lobpcg%AW,0.d0,subsub,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       ! subB
       call xg_setBlock(subB,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%BW%normal,1.0d0,lobpcg%XW,lobpcg%BW,0.d0,subsub)
+      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%BW%normal,1.0d0,lobpcg%XW,lobpcg%BW,0.d0,subsub,&
+        use_gpu_cuda=lobpcg%use_gpu_cuda)
     end if
 
     if ( var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%AP%normal,1.0d0,lobpcg%XWP%self,lobpcg%AP,0.d0,subsub)
+      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%AP%normal,1.0d0,lobpcg%XWP%self,lobpcg%AP,0.d0,subsub,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       ! subB
       call xg_setBlock(subB,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%BP%normal,1.0d0,lobpcg%XWP%self,lobpcg%BP,0.d0,subsub)
+      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%BP%normal,1.0d0,lobpcg%XWP%self,lobpcg%BP,0.d0,subsub,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
     end if
 
     if ( EIGPACK(eigenSolver) ) then
@@ -916,6 +947,7 @@ module m_lobpcg2
       end if
     end if
 
+    !FIXME Avoid those transfers
     ! Compute X*AX subspace matrix
     !call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
 
@@ -926,11 +958,12 @@ module m_lobpcg2
     call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
     if ( var == VAR_X ) then
+      ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
     ! Solve Hermitian eigen problem
       select case (eigenSolver)
       case (EIGENEVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heevd"
-        call xgBlock_heevd('v','u',subA%self,eigenvalues,info)
+        call xgBlock_heevd('v','u',subA%self,eigenvalues,info,use_gpu_cuda=lobpcg%use_gpu_cuda)
       case (EIGENEV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heev"
         call xgBlock_heev('v','u',subA%self,eigenvalues,info)
@@ -942,12 +975,13 @@ module m_lobpcg2
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
-        call xgScalapack_heev(scalapack,subA%self,eigenvalues)
+        call xgScalapack_heev(scalapack,subA%self,eigenvalues,use_gpu=lobpcg%use_gpu_cuda)
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEEV")
       end select
     else
+      ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
       ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
       select case (eigenSolver)
       case (EIGENVX)
@@ -956,7 +990,7 @@ module m_lobpcg2
           eigenvalues,vec%self,info)
       case (EIGENVD)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
-        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info)
+        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info,use_gpu_cuda=lobpcg%use_gpu_cuda)
       case (EIGENV)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegv"
         call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info)
@@ -972,7 +1006,7 @@ module m_lobpcg2
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
-        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues)
+        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues,use_gpu=lobpcg%use_gpu_cuda)
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEGV")
@@ -988,54 +1022,61 @@ module m_lobpcg2
 !    end if
     if ( lobpcg%prtvol == 4 ) write(std_out,*) tsec(2)
     call timab(tim_hegv,2,tsec)
+    ABI_NVTX_END_RANGE()
 
     if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
       call xg_free(subA)
     end if
     call xg_free(subB)
 
+    !FIXME Avoid those transfers
     if ( info == 0 ) then
-      call xg_init(subB,space(X),spacedim,blockdim)
+      call xg_init(subB,space(X),spacedim,blockdim, use_gpu=lobpcg%use_gpu_cuda)
 
       !/* Easy basic solution */
       !/* Compute first part of X here */
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%X%normal,Cwp%normal,1.0d0,lobpcg%X,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%X)
+      call xgBlock_gemm(lobpcg%X%normal,Cwp%normal,1.0d0,lobpcg%X,Cwp,0.d0,subB%self,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
+      call xgBlock_copy(subB%self,lobpcg%X,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(lobpcg%AX%normal,Cwp%normal,1.0d0,lobpcg%AX,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%AX)
+      call xgBlock_gemm(lobpcg%AX%normal,Cwp%normal,1.0d0,lobpcg%AX,Cwp,0.d0,subB%self,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
+      call xgBlock_copy(subB%self,lobpcg%AX,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self)
-      call xgBlock_copy(subB%self,lobpcg%BX)
+      call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self,&
+          use_gpu_cuda=lobpcg%use_gpu_cuda)
+      call xgBlock_copy(subB%self,lobpcg%BX,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
       if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(vec%self) !FIXME Avoid that transfer
         call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
+        if(lobpcg%use_gpu_cuda==ABI_GPU_OPENMP) call xgBlock_copy_to_gpu(vec%self) !FIXME Avoid that transfer
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%P)
+        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_copy(subB%self,lobpcg%P,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
         !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%AP)
+        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_copy(subB%self,lobpcg%AP,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
         !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self)
-        call xgBlock_copy(subB%self,lobpcg%BP)
+        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_copy(subB%self,lobpcg%BP,use_gpu_cuda=lobpcg%use_gpu_cuda)
 
         !/* Maybe faster solution
         ! * Sum previous contribution plus P direction
         ! */
-        call xgBlock_add(lobpcg%X,lobpcg%P)
-        call xgBlock_add(lobpcg%AX,lobpcg%AP)
-        call xgBlock_add(lobpcg%BX,lobpcg%BP)
+        call xgBlock_add(lobpcg%X,lobpcg%P,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_add(lobpcg%AX,lobpcg%AP,use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_add(lobpcg%BX,lobpcg%BP,use_gpu_cuda=lobpcg%use_gpu_cuda)
       end if
     end if
 
@@ -1044,6 +1085,7 @@ module m_lobpcg2
     call xg_free(subA)
     call xg_free(subB)
 
+    ABI_NVTX_END_RANGE()
     call timab(tim_RR, 2, tsec)
 
   end subroutine lobpcg_rayleighRitz
@@ -1056,8 +1098,10 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_maxres,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RESIDUE)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX, use_gpu_cuda=lobpcg%use_gpu_cuda)
+    ABI_NVTX_END_RANGE()
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
 
@@ -1075,7 +1119,7 @@ module m_lobpcg2
 
     !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,Xtmp,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X,Xtmp)
+    call xgBlock_copy(lobpcg%X,Xtmp, use_gpu_cuda=lobpcg%use_gpu_cuda)
   end subroutine lobpcg_setX0
 
 
@@ -1090,11 +1134,11 @@ module m_lobpcg2
 
     ! BX
     call xg_setBlock(lobpcg%AllBX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%BX,CXtmp)
+    call xgBlock_copy(lobpcg%BX,CXtmp, use_gpu_cuda=lobpcg%use_gpu_cuda)
 
     ! AX
     call xg_setBlock(lobpcg%AllAX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%AX,CXtmp)
+    call xgBlock_copy(lobpcg%AX,CXtmp, use_gpu_cuda=lobpcg%use_gpu_cuda)
   end subroutine lobpcg_transferAX_BX
 
 

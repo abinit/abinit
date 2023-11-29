@@ -125,6 +125,7 @@ type, public :: dataset_type
  integer :: diismemory
  integer :: dipdip = 1
  integer :: dipquad = 1
+ integer :: distribute_gemm_nonlop = 0
  integer :: dmatpuopt
  integer :: dmatudiag
  integer :: dmft_dc
@@ -202,6 +203,7 @@ type, public :: dataset_type
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
+ integer :: gemm_nonlop_split_size = 1
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
@@ -616,6 +618,7 @@ type, public :: dataset_type
 !U
  integer :: ucrpa
  integer :: use_gpu_cuda
+ integer :: use_gpu_openmp_threads
  integer :: use_nvtx
  integer :: usedmatpu
  integer :: usedmft
@@ -1439,6 +1442,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%diago_apply_block_sliced = dtin%diago_apply_block_sliced
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
+ dtout%distribute_gemm_nonlop = dtin%distribute_gemm_nonlop
  dtout%dmatpuopt          = dtin%dmatpuopt
  dtout%dmatudiag          = dtin%dmatudiag
  dtout%dmft_dc            = dtin%dmft_dc
@@ -1571,6 +1575,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
  dtout%ga_n_rules         = dtin%ga_n_rules
+ dtout%gemm_nonlop_split_size = dtin%gemm_nonlop_split_size
  dtout%getbseig           = dtin%getbseig
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
@@ -1980,6 +1985,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_cuda       = dtin%use_gpu_cuda
+ dtout%use_gpu_openmp_threads = dtin%use_gpu_openmp_threads
  dtout%useextfpmd         = dtin%useextfpmd
  dtout%use_nvtx           = dtin%use_nvtx
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
@@ -3303,7 +3309,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diago_apply_block_sliced diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
- list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
+ list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range distribute_gemm_nonlop'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
  list_vars=trim(list_vars)//' dmftbandi dmftbandf dmftctqmc_basis'
  list_vars=trim(list_vars)//' dmftctqmc_check dmftctqmc_correl dmftctqmc_gmove'
@@ -3351,7 +3357,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' gemm_nonlop_split_size genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
@@ -3521,7 +3527,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_nvtx use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
+ list_vars=trim(list_vars)//' use_gpu_cuda use_gpu_openmp_threads use_nvtx'
+ list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'

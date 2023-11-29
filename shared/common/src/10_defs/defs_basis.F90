@@ -264,11 +264,13 @@ module defs_basis
  !double precision
  complex(dpc), parameter :: czero = (0._dp,0._dp)
  complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
  complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
  complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
@@ -348,6 +350,18 @@ module defs_basis
 ! GA: But this is not actually the maximum perturbation,
 !     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
+
+! Parameters telling wether to use CPU implementation of algorithms
+! or one of available GPU implementations.
+! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
+ ! Not using any GPU implementation, implies running on CPU
+ integer,parameter,public :: ABI_GPU_DISABLED = 0
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ integer,parameter,public :: ABI_GPU_LEGACY   = 1
+ ! GPU implementation relying on OpenMP v5 "TARGET" construct
+ integer,parameter,public :: ABI_GPU_OPENMP   = 2
+ ! GPU implementation relying on Kokkos framework
+ integer,parameter,public :: ABI_GPU_KOKKOS   = 3
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file

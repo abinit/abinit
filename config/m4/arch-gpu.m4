@@ -21,7 +21,6 @@
 AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   # Init
   abi_gpu_cuda_serial="no"
-  abi_gpu_cuda_mpi="no"
   abi_gpu_cuda_old="unknown"
 
   # Display variables
@@ -37,7 +36,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   AC_LANG_PUSH([C])
 
   # Check usability of headers
-  AC_CHECK_HEADERS([cuda_runtime_api.h cufft.h cublas.h])
+  AC_CHECK_HEADERS([cuda_runtime_api.h cufft.h cublas.h cusolver_common.h])
 
   # Look for libraries and routines
   AC_MSG_CHECKING([whether Cuda programs can be compiled])
@@ -72,6 +71,39 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
+  # call this macro here to make sure variable `abi_gpu_cuda_version_10`
+  #
+  # check if we are using CUDA runtime version at least 10
+  # version 10 of CUDA is required for NVTX (header only)
+  #
+  AC_MSG_CHECKING([whether we have Cuda >= 10])
+  AC_LANG_PUSH(C)
+  AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+      [[
+      #include <cuda_runtime_api.h>
+      ]],
+      [[
+#if CUDART_VERSION < 10000
+#error
+#endif
+      ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
+  AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
+
+  if test "${abi_gpu_cuda_version_10}" = "yes"; then
+    if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
+      # always add link flags to nvtx if available
+      if test "${GPU_LIBS}" = ""; then
+        abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
+      else
+        abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
+      fi
+      abi_gpu_nvtx_v3="yes"
+      abi_result="${abi_result} nvtx_v3"
+    else
+      AC_MSG_NOTICE([Cuda Nvtx: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
+    fi
+  fi
+
   # Restore build environment
   AC_LANG_POP([C])
   LIBS="${abi_saved_LIBS}"
@@ -94,6 +126,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_has_cc="no"
   abi_gpu_cuda_has_common="no"
   abi_gpu_cuda_has_fft="no"
+  abi_gpu_cuda_has_cusolver="no"
   abi_gpu_cuda_has_incs="no"
   abi_gpu_cuda_has_libs="no"
   abi_gpu_cuda_has_linalg="no"
@@ -129,35 +162,17 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
     # nVidia C compiler
     AC_MSG_CHECKING([for the nVidia C compiler])
-    if test -x "${abi_gpu_cuda_root}/bin/nvcc"; then
-      abi_gpu_cuda_has_cc="yes"
-      NVCC="${abi_gpu_cuda_root}/bin/nvcc"
+    if test "${NVCC}" = ""; then
+      if test -x "${abi_gpu_cuda_root}/bin/nvcc"; then
+        abi_gpu_cuda_has_cc="yes"
+        NVCC="${abi_gpu_cuda_root}/bin/nvcc"
+      fi
     fi
     if test "${NVCC}" = ""; then
       AC_MSG_RESULT([none found])
     else
       AC_MSG_RESULT([${NVCC}])
     fi
-
-    # call this macro here to make sure variable `abi_gpu_cuda_version_10`
-    #
-    # check if we are using CUDA runtime version at least 10
-    # version 10 of CUDA is required for NVTX (header only)
-    #
-    AC_MSG_CHECKING([whether we have Cuda >= 10])
-    ac_compile_old=${ac_compile}
-    ac_compile='$NVCC -c $CFLAGS conftest.$ac_ext >&5'
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-        [[
-        #include <cuda_runtime_api.h>
-        ]],
-        [[
-        #if CUDART_VERSION < 10000
-        #error
-        #endif
-        ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
-    AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
-    ac_compile=${ac_compile_old}
 
     # Headers
     AC_MSG_CHECKING([for Cuda headers])
@@ -174,6 +189,9 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     fi
     if test -s "${abi_gpu_cuda_root}/include/cublas.h"; then
       abi_result="${abi_result} blas"
+    fi
+    if test -s "${abi_gpu_cuda_root}/include/cusolver_common.h"; then
+      abi_result="${abi_result} cusolver"
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/common/inc/cutil.h"; then
       if test "${GPU_CPPFLAGS}" = ""; then
@@ -232,27 +250,16 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
       fi
+      if test -e "${abi_gpu_cuda_libdir}/libcusolver.${abi_so_ext}"; then
+        if test "${GPU_LIBS}" = ""; then
+          abi_gpu_cuda_libs="-lcusolver ${abi_gpu_cuda_libs}"
+        fi
+        abi_gpu_cuda_has_cusolver="yes"
+        abi_result="${abi_result} cusolver"
+      fi
       if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
       fi
-    fi
-    if test "${abi_gpu_cuda_version_10}" = "yes"; then
-      if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
-        # always add link flags to nvtx if available
-        if test "${GPU_LIBS}" = ""; then
-          abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
-        else
-          abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
-        fi
-        abi_gpu_nvtx_v3="yes"
-        abi_result="${abi_result} nvtx_v3"
-      else
-        AC_MSG_NOTICE([Cuda Nvtx: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
-      fi
-    fi
-
-    if test "${abi_gpu_nvtx_v3}" = "yes"; then
-       AC_DEFINE([HAVE_GPU_NVTX_V3],1,[Define to 1 if you have library nvtx (v3).])
     fi
 
     if test -s "${abi_gpu_cuda_root}/SDK/C/lib/libcutil.a"; then
@@ -348,6 +355,7 @@ AC_DEFUN([ABI_GPU_INIT],[
         _ABI_GPU_INIT_CUDA
         abi_gpu_has_cc="${abi_gpu_cuda_has_cc}"
         abi_gpu_has_fft="${abi_gpu_cuda_has_fft}"
+        abi_gpu_has_cublas="${abi_gpu_cuda_has_cublas}"
         abi_gpu_has_incs="${abi_gpu_cuda_has_incs}"
         abi_gpu_has_libs="${abi_gpu_cuda_has_libs}"
         abi_gpu_has_linalg="${abi_gpu_cuda_has_linalg}"
@@ -391,7 +399,6 @@ AC_DEFUN([ABI_GPU_INIT],[
 AC_DEFUN([ABI_GPU_DETECT],[
   # Initial setup
   abi_gpu_serial="no"
-  abi_gpu_mpi="no"
   abi_gpu_precision=`echo "${abi_gpu_flavor}" | cut -d- -f2`
   test "${abi_gpu_precision}" = "" && abi_gpu_precision="single"
 
@@ -411,7 +418,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
       cuda*)
         _ABI_GPU_CHECK_CUDA
         abi_gpu_serial="${abi_gpu_cuda_serial}"
-        abi_gpu_mpi="${abi_gpu_cuda_mpi}"
         if test "${abi_gpu_serial}" = "yes"; then
           AC_DEFINE([HAVE_GPU_CUDA],1,[Define to 1 if you have the Cuda library.])
           if test "${abi_gpu_cuda_old}" = "yes"; then
@@ -419,6 +425,9 @@ AC_DEFUN([ABI_GPU_DETECT],[
           fi
           if test "${abi_gpu_cuda_version_10}" = "yes"; then
             AC_DEFINE([HAVE_GPU_CUDA10],1,[Define to 1 if you have a Cuda version >= 10 (for nvtx v3).])
+          fi
+          if test "${abi_gpu_nvtx_v3}" = "yes"; then
+             AC_DEFINE([HAVE_GPU_NVTX_V3],1,[Define to 1 if you have library nvtx (v3).])
           fi
           case "${abi_gpu_precision}" in
             single)
@@ -448,11 +457,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
     AC_DEFINE([HAVE_GPU],1,[Define to 1 if you have a GPU library.])
     AC_DEFINE([HAVE_GPU_SERIAL],1,[Define to 1 if you have a serial GPU library.])
     abi_gpu_flavor="${abi_gpu_flavor}"
-  fi
-
-  # Transmit MPI status to the source code
-  if test "${abi_gpu_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_GPU_MPI],1,[Define to 1 if you have a MPI-aware GPU library.])
   fi
 
   # Output final flavor

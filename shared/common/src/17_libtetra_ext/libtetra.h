@@ -15,7 +15,6 @@
 #  define TETRA_ALLOCATE(ARR,SIZE) allocate(ARR SIZE)
 #  define TETRA_DEALLOCATE(ARR)  deallocate(ARR)
 #  define TETRA_ERROR(MSG) write (stdout,'(a)') MSG ; stop "ERROR"
-#  define USE_MEMORY_PROFILING 
-#  define USE_MSG_HANDLING 
+#  define USE_MEMORY_PROFILING
+#  define USE_MSG_HANDLING
 #endif
-

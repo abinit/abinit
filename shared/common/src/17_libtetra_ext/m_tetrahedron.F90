@@ -28,6 +28,10 @@
 
 module m_tetrahedron
 
+  ! make sure stdout is defined, as libtetra.h needs it
+ use, intrinsic :: iso_fortran_env, only : stdin=>input_unit, &
+                                          stdout=>output_unit, &
+                                          stderr=>error_unit
  USE_MEMORY_PROFILING
  USE_MSG_HANDLING
  use m_krank

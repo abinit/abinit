@@ -98,7 +98,7 @@ module m_respfn_driver
  use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
- use m_manage_cuda
+ use m_alloc_hamilt_gpu
 #endif
 
  implicit none
@@ -547,7 +547,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Here allocation of GPU for fft calculations
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%use_gpu_cuda)
  end if
 #endif
@@ -1866,7 +1866,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Clean GPU data
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
+ if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
    call dealloc_hamilt_gpu(0,dtset%use_gpu_cuda)
  end if
 #endif

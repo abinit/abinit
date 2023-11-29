@@ -2485,16 +2485,18 @@ Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 
 Variable(
     abivarname="diago_apply_block_sliced",
-    varset="rlx",
+    varset="dev",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
-    defaultval=1,
-    mnemonics="Inverse Overlapp block matrix applied in a sliced fashion",
+    mnemonics="Inverse Overlap block matrix applied in a sliced fashion",
     added_in_version="9.7.2",
+    defaultval=ValueWithConditions({'[[use_gpu_cuda]] > 0': '0', 'defaultval': 1}),
     text=r"""
+Only relevant if: [[wfoptalg]] == 111
 In the Chebyshev-filtered subspace method, one need to apply inverse overlapp matrix.
 This parameter allows to choose between two variants, sliced (1) or non-sliced (0).
+Default value is set wether user request GPU execution and should be optimal.
 """,
 ),
 
@@ -2780,6 +2782,26 @@ Variable(
     text=r"""
 This variable defines the treatment of the dipole-dipole interaction. Same
 meaning as the corresponding anaddb variable [[dipdip@anaddb]]
+""",
+),
+
+Variable(
+    abivarname="distribute_gemm_nonlop",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Force the DISTRIBution of GEMM variant of the application of NON-Local OPerator.",
+    characteristics=['[[DEVELOP]]'],
+    commentdefault="because it is not usually worth using it unless bandpp is large, in which case code should fallback to it.",
+    added_in_version="9.11.4",
+    text=r"""
+This variables forces the distribution of GEMM of the application of NON-Local OPerator.
+It exists mostly for testing purposes.
+In normal circumstances, distribution is only needed on large use cases to address the high memory needs of GEMM variant.
+Therefore ABINIT should use the "distributed mode" automatically when needed.
+Irrelevant when use_gemm_nonlop=0.
 """,
 ),
 
@@ -5144,6 +5166,26 @@ direction and creating the spring offs from the pieces of the two parents.
 it is inverted.
 3) Random strain. A random anisotropic deformation is given to the unit cell.
 4) Coordinates mutation of 1/4 of the whole coordinates.
+""",
+),
+
+Variable(
+    abivarname="gemm_nonlop_split_size",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="GEMM variant of the application of NON-Local OPerator split size.",
+    characteristics=['[[DEVELOP]]'],
+    commentdefault="because it is not usually worth using it unless bandpp is large, in which case code should fallback to it.",
+    added_in_version="9.11.4",
+    text=r"""
+This variables forces the distribution of GEMM of the application of NON-Local OPerator.
+It exists mostly for testing purposes.
+In normal circumstances, distribution is only needed on large use cases to address the high memory needs of GEMM variant.
+Therefore ABINIT should use the "distributed mode" automatically when needed.
+Irrelevant when use_gemm_nonlop=0.
 """,
 ),
 
@@ -19783,6 +19825,22 @@ nonlocal operator.
 This option is available only if [[useylm]] is 1. ABINIT will automatically set [[useylm]] to 1
 if [[use_gemm_nonlop]] is set to 1 in the input file (actually, this is only needed when NC pseudos are used as
 PAW already uses 1 for [[useylm]]).
+""",
+),
+
+Variable(
+    abivarname="use_gemm_nonlop_gpu",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="USE the GEMM routine for the application of the NON-Local OPerator on GPU",
+    characteristics=['[[DEVELOP]]'],
+    commentdefault="because it is not usually worth using it unless bandpp is large and it requires additional memory",
+    added_in_version="9.7.5",
+    text=r"""
+This variable has the same meaning as [[use_gemm_nonlop]], but triggers execution on GPU.
 """,
 ),
 

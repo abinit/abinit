@@ -801,7 +801,7 @@ subroutine set_precondition(lambda,omega)
 !--------------------------------------------------------------------------------
 
 ! TODO :
-! - eliminate the 2 "if(kinpw(i) < huge(0.0_dp)*1.0d-11)"
+! - eliminate the 2 "if(kinpw(i) < huge(zero)*1.0d-11)"
 !   since ecutsm = 0.0 always (check if that's true in this gw_sternheimer subroutine).
 
 real(dp), intent(in), optional :: lambda, omega
@@ -858,7 +858,7 @@ else
   x = kinpw_gather(i)
 end if
 
-if(x < huge(0.0_dp)*1.0d-11) then
+if(x < huge(zero)*1.0d-11) then
   poly    = 27.0 + x*(18.0 + x*(12.0 + 8.0*x))
   pcon(i) = poly/(poly + 16.0*(x**4))
   !pcon(i) = 1.0/(1.0+x) !I don't know why, it gives better results for Silane than the above polynomial.
