@@ -2940,10 +2940,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 
 ! Allocate ELPA handle
   call elpa_func_allocate(elpa_hdl,gpu=use_gpu_,blacs_ctx=sc_desc(CTXT_))
-  call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev,&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
-  call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
-
+  call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,tmp1,ev,nev)
