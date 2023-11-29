@@ -20,6 +20,10 @@ rfphon2   1        # Do phonon response
 getwfk2  1         # Use GS wave functions from dataset 1
 kptopt2  2         # Use time-reversal symmetry for k-points
 toldfe2 1d-10
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 # Dataset 3: Restart Response calculation from previous wavefunctions.
 rfphon3   1        # Do phonon response

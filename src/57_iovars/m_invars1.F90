@@ -2696,6 +2696,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tolwfr_diago=zero
 
    dtsets(idtset)%tsmear=0.01_dp
 !  U

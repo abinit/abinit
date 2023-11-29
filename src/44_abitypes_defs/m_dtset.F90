@@ -858,6 +858,7 @@ type, public :: dataset_type
  real(dp) :: tolsym
  real(dp) :: tolvrs
  real(dp) :: tolwfr
+ real(dp) :: tolwfr_diago
  real(dp) :: tphysel
  real(dp) :: tsmear
  real(dp) :: userra = zero
@@ -2162,6 +2163,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tolsym             = dtin%tolsym
  dtout%tolvrs             = dtin%tolvrs
  dtout%tolwfr             = dtin%tolwfr
+ dtout%tolwfr_diago       = dtin%tolwfr_diago
  dtout%tphysel            = dtin%tphysel
  dtout%tsmear             = dtin%tsmear
  dtout%ucrpa              = dtin%ucrpa
@@ -3520,7 +3522,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix transport_ngkpt'
  list_vars=trim(list_vars)//' tl_nprccg tl_radius tnons tolcum toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tolwfr_diago tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
