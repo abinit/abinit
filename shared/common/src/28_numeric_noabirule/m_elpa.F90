@@ -259,16 +259,11 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
  call elpa_func_error_handler(err_code=err,err_varname=varname)
 
- elpa_hdl%is_allocated=.true.
-! Setting communicators
-
  if (present(blacs_ctx)) then
    if (err==ELPA_OK) call elpa_hdl%elpa%set("blacs_context",int(blacs_ctx,kind=c_int),err)
  end if
 
-! Proper ELPA setup
- err = elpa_hdl%elpa%setup()
- call elpa_func_error_handler(err_code=err,err_msg='Error during ELPA setup')
+ elpa_hdl%is_allocated=.true.
 
 end subroutine elpa_func_allocate
 !!***
@@ -419,6 +414,10 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
    varname='process_col'
    call elpa_hdl%elpa%set(trim(varname),process_col,err)
  end if
+ if (err==ELPA_OK) then
+   varname=''
+   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
+ endif
 #else
  elpa_hdl%mpi_comm_parent=mpi_comm_parent
  elpa_hdl%process_row=process_row
