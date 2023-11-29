@@ -21,11 +21,12 @@ module m_tdep_sym
  type,public :: Symetries_type
 
    integer :: msym
-   integer :: nsym
    integer :: nptsym
+   integer :: nsym
    integer :: spgroup
    integer, allocatable :: ptsymrel(:,:,:)
    integer, allocatable :: symrec(:,:,:)
+   integer, allocatable :: symrel(:,:,:)
    integer, allocatable :: symafm(:)
    integer, allocatable :: indsym(:,:,:)
    double precision, allocatable :: S_ref(:,:,:,:)
@@ -50,12 +51,21 @@ contains
 
   implicit none
 
-  integer :: isym,ii,jj
-  double precision, allocatable :: tmp1(:,:)
   type(Symetries_type),intent(out) :: Sym
   type(Input_type),intent(inout) :: Invar
   type(Lattice_type),intent(in) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
+
+  integer :: nspden,use_inversion,chkprim
+  integer :: ptgroupma,isym,ii,jj,iatom_unitcell
+  integer :: bravais(11)
+  integer, allocatable :: symrel(:,:,:),symafm(:)
+  double precision :: genafm(3)
+  double precision :: temp1(3,1), temp2(3,1)
+  double precision, allocatable :: spinat(:,:)
+  double precision, allocatable :: tnons(:,:)
+  double precision, allocatable :: tmp1(:,:)
+
 
 ! Compute all the symetries coming from the bravais lattice
 ! The routine used is symlatt (from Abinit code)
@@ -65,8 +75,72 @@ contains
   write(Invar%stdout,'(a,1x,11(i4,1x))')' bravais=',Invar%bravais(:)
   Sym%nsym=Sym%nptsym
 
+! Initialize all the symetries using the first atom at (0.0;0.0;0.0)
+  ABI_MALLOC(Sym%xred_zero,(3,Invar%natom_unitcell))        ; Sym%xred_zero(:,:)=0.d0
+  do iatom_unitcell=1,Invar%natom_unitcell
+    temp1(:,1)=Invar%xred_unitcell(:,iatom_unitcell)-Invar%xred_unitcell(:,1)
+    do ii=1,3
+      if (temp1(ii,1).lt.0.d0) then
+        jj=int(temp1(ii,1)+1.0)
+      else if (temp1(ii,1).ge.0.d0) then
+        jj=int(temp1(ii,1)+0.0)
+      end if
+      temp2(ii,1)=temp1(ii,1)-real(jj)
+    end do
+    Sym%xred_zero(:,iatom_unitcell)=temp2(:,1)
+  end do
+
+! Calculation of the (non-symmorphic) translations
+  nspden=1
+  ABI_MALLOC(spinat,(3,Invar%natom_unitcell)); spinat(:,:)=0.d0
+  use_inversion=1
+  ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
+  ABI_MALLOC(tnons       ,(3,Sym%msym)) ; tnons       (:,:)=0.d0
+  ABI_MALLOC(symafm        ,(Sym%msym)) ; symafm        (:)=1
+  call symfind(Lattice%gprimd,Sym%msym,Invar%natom_unitcell,Sym%nptsym,nspden,Sym%nsym,&
+&      0,Sym%ptsymrel,spinat,symafm,symrel,tnons,tol8,Invar%typat_unitcell,use_inversion,Sym%xred_zero)
+  ABI_FREE(spinat)
+  ABI_MALLOC(Sym%symrel,(3,3,Sym%nsym)) ; Sym%symrel(:,:,:)=0
+  ABI_MALLOC(Sym%tnons   ,(3,Sym%nsym)) ; Sym%tnons   (:,:)=0.d0
+  ABI_MALLOC(Sym%symafm    ,(Sym%nsym)) ; Sym%symafm    (:)=1
+  Sym%symrel(:,:,:)=symrel(:,:,1:Sym%nsym)
+  Sym%tnons   (:,:)=tnons   (:,1:Sym%nsym)
+  Sym%symafm    (:)=symafm    (1:Sym%nsym)
+  ABI_FREE(symrel)
+  ABI_FREE(tnons)
+  ABI_FREE(symafm)
+  if (Sym%nptsym.ne.Sym%nsym) then
+    write(Invar%stdlog,'(a,i4,a,i4)') 'WARNING: nsym=',Sym%nsym,' is not equal to nptsym=',Sym%nptsym
+    write(Invar%stdlog,'(a)') ' Symrel='
+    do isym=1,Sym%nsym
+      write(Invar%stdlog,*) ' For sym=',isym
+      write(Invar%stdlog,*) Sym%symrel(1,:,isym)
+      write(Invar%stdlog,*) Sym%symrel(2,:,isym)
+      write(Invar%stdlog,*) Sym%symrel(3,:,isym)
+    end do  
+    write(Invar%stdlog,'(a)') ' Ptsymrel='
+    do isym=1,Sym%nptsym
+      write(Invar%stdlog,*) ' For sym=',isym
+      write(Invar%stdlog,*) Sym%ptsymrel(1,:,isym)
+      write(Invar%stdlog,*) Sym%ptsymrel(2,:,isym)
+      write(Invar%stdlog,*) Sym%ptsymrel(3,:,isym)
+    end do
+  end if
+
+! Calculation of symrec
+  ABI_MALLOC(Sym%symrec,(3,3,Sym%nsym)); Sym%symrec(:,:,:)=0
+  do isym=1,Sym%nsym
+    call mati3inv(Sym%symrel(:,:,isym),Sym%symrec(:,:,isym))
+  end do
+! Calculation of spgroup
+  chkprim=0
+  genafm(:)=0.d0
+  ptgroupma=0
+  Sym%spgroup=0
+  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nsym,ptgroupma,Lattice%rprimdt,Sym%spgroup,Sym%symafm,Sym%symrel,Sym%tnons,tol8)
+
 ! Transform S_ref in cartesian coordinates
-  ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%ptsymrel(:,:,1:Sym%nsym))
+  ABI_MALLOC(Sym%S_ref,(3,3,Sym%nsym,2)) ; Sym%S_ref(:,:,:,1)=real(Sym%symrel(:,:,1:Sym%nsym))
   ABI_MALLOC(Sym%S_inv,(3,3,Sym%nsym,2)) ; Sym%S_inv(:,:,:,1)=zero
   ABI_MALLOC(tmp1,(3,3)); tmp1(:,:)=0.d0
   if (MPIdata%iam_master) open(unit=75,file=trim(Invar%output_prefix)//'sym.dat')
@@ -123,26 +197,21 @@ contains
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
- subroutine tdep_SearchS_1at(Invar,Lattice,MPIdata,Sym,xred_ideal)
+ subroutine tdep_SearchS_1at(Invar,MPIdata,Sym,xred_ideal)
 
   implicit none
 
   type(Input_type), intent(in) :: Invar
-  type(Lattice_type), intent(in) :: Lattice
   type(Symetries_type), intent(inout) :: Sym
   type(MPI_enreg_type), intent(in) :: MPIdata
   double precision, intent(in) :: xred_ideal(3,Invar%natom)
 
-  integer :: ptgroupma,isym,jatom,ii,jj,mu
-  integer :: nsym,iatom_unitcell,jatom_unitcell,iatom
-  integer :: use_inversion,chkprim,counter
-  integer :: bravais(11)
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
-  integer, allocatable :: symrel(:,:,:),symrel_tmp(:,:,:)
+  integer :: isym,jatom,mu
+  integer :: iatom_unitcell,jatom_unitcell,iatom
+  integer :: vecti(3),vectj(3),vectsym(4,Sym%nsym)
   integer, allocatable :: indsym2(:,:,:,:)
-  double precision :: genafm(3)
-  double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),temp3(3,1),tmp_store(3,Invar%natom_unitcell)
-  double precision, allocatable :: spinat(:,:),xred_temp(:,:),tnons_tmp(:,:)
+  double precision :: temp3(3,1)
+  double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),tmp_store(3,Invar%natom_unitcell)
 
   write(Invar%stdout,*) ' '
   write(Invar%stdout,*) '#############################################################################'
@@ -153,102 +222,15 @@ contains
 !  write(Invar%stdout,'(a)') 'Begining SearchS'
 ! TODO: Initialize the local variables at 0
 
-! Initialize the all the symetries using the first atom at (0.0;0.0;0.0)
-  ABI_MALLOC(    xred_temp,(3,Invar%natom_unitcell))        ;     xred_temp(:,:)=0.d0
-  ABI_MALLOC(Sym%xred_zero,(3,Invar%natom_unitcell))        ; Sym%xred_zero(:,:)=0.d0
-  if (Invar%natom_unitcell.gt.1) then
-    do iatom_unitcell=2,Invar%natom_unitcell
-      temp3(:,1)=xred_ideal(:,iatom_unitcell)-xred_ideal(:,1)
-      call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,temp3(:,1),1,0.d0,xred_temp(:,iatom_unitcell),1)
-      Sym%xred_zero(:,iatom_unitcell)=xred_temp(:,iatom_unitcell)
-    end do
-  end if
-
-!  write(Invar%stdout,'(a)') 'Before tnons'
-
-! Calcul des tnons
-  ABI_MALLOC(spinat,(3,Invar%natom_unitcell)); spinat(:,:)=0.d0
-  use_inversion=1
-  ABI_MALLOC(symrel    ,(3,3,Sym%msym)) ; symrel    (:,:,:)=0
-  ABI_MALLOC(symrel_tmp,(3,3,Sym%msym)) ; symrel_tmp(:,:,:)=0
-  ABI_MALLOC(Sym%tnons   ,(3,Sym%msym)) ; Sym%tnons   (:,:)=0.d0
-  ABI_MALLOC(Sym%symafm    ,(Sym%msym)) ; Sym%symafm(:)    =1
-  ABI_MALLOC(tnons_tmp   ,(3,Sym%msym)) ; tnons_tmp   (:,:)=0.d0
-  call symfind(Lattice%gprimd,Sym%msym,Invar%natom_unitcell,Sym%nptsym,1,nsym,&
-&      0,Sym%ptsymrel,spinat,Sym%symafm,symrel_tmp,tnons_tmp,tol8,Invar%typat_unitcell,use_inversion,xred_temp)
-  ABI_FREE(spinat)
-  if (Sym%nptsym.eq.nsym) then
-    symrel(:,:,:) =symrel_tmp(:,:,:)
-    Sym%tnons(:,:)=tnons_tmp   (:,:)
-  else
-    write(Invar%stdout,'(a,i4,a,i4)') 'WARNING: nsym=',nsym,' is not equal to nptsym=',Sym%nptsym
-!   Warning: EXPERIMENTAL
-!   This case is only useful for testing purpose
-!   when the unitcell is not primitive (chkprim=0)
-    if (nsym.eq.Sym%nptsym*Invar%natom_unitcell) then
-      write(Invar%stdout,'(a)') 'The unitcell is probably non-primitive, with probably nsym=nptsym*natom_unitcell'
-      do isym=1,Sym%nptsym
-        symrel(:,:,isym)=symrel_tmp(:,:,(isym-1)*Invar%natom_unitcell+1)
-        Sym%tnons(:,isym)=tnons_tmp(:,(isym-1)*Invar%natom_unitcell+1)
-      end do
-    else
-      ABI_ERROR('There is no relationship between nsym and nptsym')
-    end if
-  end if
-  ABI_FREE(symrel_tmp)
-  ABI_FREE(tnons_tmp)
-  do isym=1,Sym%nptsym
-    counter=0
-    do ii=1,3
-      do jj=1,3
-        counter=counter+abs(Sym%ptsymrel(ii,jj,isym)-symrel(ii,jj,isym))
-      end do
-    end do
-    if (counter.ne.0) then
-      exit
-    end if
-  end do
-
-  if (counter.ne.0) then
-    do isym=1,nsym
-      write(Invar%stdout,*) ' For sym=',isym
-      write(Invar%stdout,'(a)') ' Symrel='
-      write(Invar%stdout,*) symrel(1,:,isym)
-      write(Invar%stdout,*) symrel(2,:,isym)
-      write(Invar%stdout,*) symrel(3,:,isym)
-      write(Invar%stdout,'(a)') ' Ptsymrel='
-      write(Invar%stdout,*) Sym%ptsymrel(1,:,isym)
-      write(Invar%stdout,*) Sym%ptsymrel(2,:,isym)
-      write(Invar%stdout,*) Sym%ptsymrel(3,:,isym)
-    end do
-    ABI_ERROR('The symrel and ptsymrel tabs do not correspond')
-  end if
-
-!Calcul des symrec
-  ABI_MALLOC(Sym%symrec,(3,3,Sym%nptsym)); Sym%symrec(:,:,:)=0
-  do isym=1,Sym%nptsym
-    call mati3inv(symrel(:,:,isym),Sym%symrec(:,:,isym))
-  end do
-! Calcul du spgroup
-!FB  chkprim=1
-  chkprim=0
-  genafm(:)=0.d0
-  ptgroupma=0
-  Sym%spgroup=0
-  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nptsym,ptgroupma,Lattice%rprimdt,Sym%spgroup,Sym%symafm,symrel,Sym%tnons,tol8)
-!FB  call symanal(bravais,chkprim,genafm,Sym%msym,Sym%nptsym,ptgroupma,Lattice%rprimd,Sym%spgroup,Sym%symafm,symrel,Sym%tnons,tol8)
-  ABI_FREE(symrel)
-
 ! Compute the indsym fundamental quantity
 ! === Obtain a list of rotated atoms ===
 ! $ R^{-1} (xred(:,iat)-\tau) = xred(:,iat_sym) + R_0 $
 ! * indsym(4,  isym,iat) gives iat_sym in the original unit cell.
 ! * indsym(1:3,isym,iat) gives the lattice vector $R_0$.
   write(Invar%stdout,'(a)') ' Search the matrix transformation going from (k) to (i)...'
-  ABI_MALLOC(Sym%indsym,(4,Sym%nptsym,Invar%natom)); Sym%indsym(:,:,:)=zero
-  call symatm(Sym%indsym(:,:,1:Invar%natom_unitcell),Invar%natom_unitcell,Sym%nptsym,&
-&   Sym%symrec,Sym%tnons,tol8,Invar%typat_unitcell,xred_temp)
-  ABI_FREE(xred_temp)
+  ABI_MALLOC(Sym%indsym,(4,Sym%nsym,Invar%natom)); Sym%indsym(:,:,:)=zero
+  call symatm(Sym%indsym(:,:,1:Invar%natom_unitcell),Invar%natom_unitcell,Sym%nsym,&
+&   Sym%symrec,Sym%tnons,tol8,Invar%typat_unitcell,Sym%xred_zero)
 
 ! Store the positions of the atoms in the motif
   do iatom=1,Invar%natom_unitcell
@@ -260,7 +242,7 @@ contains
     do iatom=1,Invar%natom_unitcell
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end do
@@ -270,7 +252,7 @@ contains
 
 ! Search the matrix transformation going from (k,l) to (i,j)
   write(Invar%stdout,'(a)') ' Search the matrix transformation going from (k,l) to (i,j)...'
-  ABI_MALLOC(indsym2,(8,Sym%nptsym,Invar%natom,Invar%natom)); indsym2(:,:,:,:)=0
+  ABI_MALLOC(indsym2,(8,Sym%nsym,Invar%natom,Invar%natom)); indsym2(:,:,:,:)=0
   tmpi(:,:)=0.d0
   tmpj(:,:)=0.d0
   do iatom=1,Invar%natom
@@ -278,7 +260,7 @@ contains
     call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,xred_ideal(:,iatom),1,0.d0,tmpi(:,iatom),1)
     iatom_unitcell=mod(iatom-1,Invar%natom_unitcell)+1
     vecti(:)=nint(tmpi(:,iatom)-tmp_store(:,iatom_unitcell))
-    do isym=1,Sym%nptsym
+    do isym=1,Sym%nsym
       vectsym(:,:)=0
       do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
         vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vecti(1)+Sym%symrec(2,mu,isym)*vecti(2)+Sym%symrec(3,mu,isym)*vecti(3)
@@ -294,7 +276,7 @@ contains
     do iatom=1,Invar%natom
       write(40,*) '=========================================='
       write(40,'(a,i4,a,3(f10.5,1x))') 'For iatom=',iatom,' with xred (supercell)=',xred_ideal(:,iatom)
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         write(40,'(a,i2,a,i4,a,3(i4,1x),a,i2,a,3(f10.5,1x))') '  indsym(isym=',isym,',',iatom,')=',&
 &         Sym%indsym(1:3,isym,iatom),'|iat=',Sym%indsym(4,isym,iatom),'| with tnons=',Sym%tnons(:,isym)
       end do
@@ -312,7 +294,7 @@ contains
       call DGEMV('T',3,3,1.d0,Invar%multiplicity(:,:),3,temp3(:,1),1,0.d0,tmpj(:,jatom),1)
       jatom_unitcell=mod(jatom-1,Invar%natom_unitcell)+1
       vectj(:)=nint(tmpj(:,jatom)-tmp_store(:,jatom_unitcell))
-      do isym=1,Sym%nptsym
+      do isym=1,Sym%nsym
         vectsym(:,:)=0
         do mu=1,3 ! Apply inverse transformation to original coordinates. Note transpose of symrec.
           vectsym(mu,isym) = Sym%symrec(1,mu,isym)*vectj(1)+Sym%symrec(2,mu,isym)*vectj(2)+Sym%symrec(3,mu,isym)*vectj(3)
@@ -329,7 +311,7 @@ contains
       do jatom=1,Invar%natom
         write(40,*) '  =========================================='
         write(40,'(a,i4,a,3(f10.5,1x))') '  For jatom=',jatom,' with xred (supercell)=',xred_ideal(:,jatom)
-        do isym=1,Sym%nptsym
+        do isym=1,Sym%nsym
           write(40,'(a,i2,a,i4,a,i4,a,3(i4,1x),a,i2,a,3(i4,1x),a,i2,a)') '  indsym2(isym=',isym,',',iatom,',',jatom,')=',&
 &           indsym2(1:3,isym,iatom,jatom),&
 &           '|iat=',indsym2(4,isym,iatom,jatom),'|',indsym2(5:7,isym,iatom,jatom),'|iat=',indsym2(8,isym,iatom,jatom),'|'
@@ -682,7 +664,7 @@ contains
 
   integer :: isym,mu,ii
   integer :: iatom_unitcell,jatom_unitcell
-  integer :: vecti(3),vectj(3),vectsym(4,Sym%nptsym)
+  integer :: vecti(3),vectj(3),vectsym(4,Sym%nsym)
   double precision :: tmpi(3,Invar%natom),tmpj(3,Invar%natom),temp3(3,1),tmp_store(3,Invar%natom_unitcell)
 
 ! Store the positions of the atoms in the motif
@@ -739,6 +721,7 @@ contains
   ABI_FREE(Sym%tnons)
   ABI_FREE(Sym%symafm)
   ABI_FREE(Sym%symrec)
+  ABI_FREE(Sym%symrel)
   ABI_FREE(Sym%indsym)
 
  end subroutine tdep_destroy_sym
