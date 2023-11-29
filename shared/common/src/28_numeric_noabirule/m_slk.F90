@@ -2646,6 +2646,7 @@ end subroutine slk_pgemm_sp
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!  [nev]= Number of eigenvalues needed. Default: full set
+!!  [use_gpu]= Flag to activate the use of GPU
 !!
 !! OUTPUT
 !!  results= ScaLAPACK matrix coming out of the operation (global dimensions must be equal to matrix
@@ -2669,15 +2670,16 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   !Local variables ------------------------------
   type(elpa_hdl_t) :: elpa_hdl
-  integer :: nev__
+  integer :: nev__,use_gpu_
 
 !************************************************************************
 
   nev__ = matrix%sizeb_global(1); if (present(nev)) nev__ = nev
+  use_gpu_=0;if (present(use_gpu)) use_gpu_=use_gpu
 
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu)
-  call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2),nev__)
+  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_)
+  call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev__,&
+&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   if (istwf_k/=2) then
@@ -2862,6 +2864,7 @@ end subroutine compute_eigen_problem
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
+!!  [use_gpu]= Flag to activate the use of GPU
 !!
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -2888,16 +2891,18 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   complex*16 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   complex*16 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
-  integer :: i, n_col, n_row
+  integer :: i, n_col, n_row, use_gpu_
   integer,external :: indxl2g,numroc
   complex*16, parameter :: CZERO = (0.d0,0.d0), CONE = (1.d0,0.d0)
   type(elpa_hdl_t) :: elpa_hdl
 
 ! *************************************************************************
 
+  use_gpu_=0 ; if (present(use_gpu)) use_gpu_=use_gpu
+  
 ! Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu,blacs_ctx=sc_desc(CTXT_))
-  call elpa_func_set_matrix(elpa_hdl,na,nblk,na_rows,na_cols,nev)
+  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_,blacs_ctx=sc_desc(CTXT_))
+  call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
@@ -2925,16 +2930,18 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
-  integer :: i, n_col, n_row
+  integer :: i, n_col, n_row, use_gpu_
   integer,external :: indxl2g,numroc
   type(elpa_hdl_t) :: elpa_hdl
 
 ! *************************************************************************
 
+  use_gpu_=0 ; if (present(use_gpu)) use_gpu_=use_gpu
+
 ! Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu,blacs_ctx=sc_desc(CTXT_))
-  call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2),nev__)
+  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_,blacs_ctx=sc_desc(CTXT_))
+  call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev,&
+&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)

@@ -462,11 +462,11 @@ end subroutine elpa_func_get_communicators
 !!
 !! SOURCE
 
-subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
+subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,nev,local_nrows,local_ncols)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: na,nblk,local_nrows,local_ncols,nev
+ integer,intent(in) :: na,nblk,nev,local_nrows,local_ncols
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 !arrays
 
@@ -492,6 +492,10 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
    call elpa_hdl%elpa%set(trim(varname),nblk,err)
  end if
  if (err==ELPA_OK) then
+   varname="nev"
+   call elpa_hdl%elpa%set(trim(varname),nev,err)
+ end if
+ if (err==ELPA_OK) then
    varname="local_nrows"
    call elpa_hdl%elpa%set(trim(varname),local_nrows,err)
  end if
@@ -499,13 +503,10 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
    varname="local_ncols"
    call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
  end if
- if (err==ELPA_OK) then
-   varname="nev"
-   call elpa_hdl%elpa%set(trim(varname),nev,err)
- end if
 #else
  elpa_hdl%na=na
  elpa_hdl%nblk=nblk
+ elpa_hdl%nev=nev
  elpa_hdl%local_nrows=local_nrows
  elpa_hdl%local_ncols=local_ncols
 #endif
