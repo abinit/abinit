@@ -339,6 +339,7 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
    if (nkpg<3) then
 !$OMP PARALLEL DO PRIVATE(ig,kpg1,kpg2,kpg3,kpgc1,kpgc2,kpgc3)
      do ig=1,npw
+       !FBr-TODO: + vecpot_red ??
        kpg1=kpt(1)+dble(kg(1,ig))
        kpg2=kpt(2)+dble(kg(2,ig))
        kpg3=kpt(3)+dble(kg(3,ig))
