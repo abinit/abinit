@@ -2101,9 +2101,9 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if (typevarphys=='TIM' .and. b2>=2) then
          if(string(b1+1:b1+2)=='SE' .or. string(b1+1:b1+2)=='S ') then
             factor=one/Time_Sec
-         else if(string(b1+1:b1+3)=='FS ') then
+         else if(string(b1+1:b1+2)=='FS') then
             factor=tol15/Time_Sec
-         else if(string(b1+1:b1+3)=='AS ') then
+         else if(string(b1+1:b1+2)=='AS') then
             factor=tol17/Time_Sec
          endif
        endif

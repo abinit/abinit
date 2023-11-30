@@ -753,12 +753,14 @@ contains
      ABI_MALLOC(kpg_k,(npw_nk,nkpg))
      if (nkpg>0) then
        call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_nk)
+       !FBr-TODO: if (lvecpot) kpg_k = kpg_k + vecpot_red
      end if
 !    Allocate and compute the arrays phkxred and ph3d
      ABI_MALLOC(phkxred,(2,ncprj))
      do ia=iatom1,iatom2
        iatm=min(atindx_atm(ia),ncprj)
        arg=two_pi*(kpoint(1)*xred(1,ia)+kpoint(2)*xred(2,ia)+kpoint(3)*xred(3,ia))
+       !FBr-TODO: if (l_vecpot): arg = arg + two_pi*(vecpot(1)*xred(1)+vecpot(2)*xred(2)+vecpot(3)*xred(3)
        phkxred(1,iatm)=cos(arg);phkxred(2,iatm)=sin(arg)
      end do
      matblk=ncprj;if (nloalg(2)<=0) matblk=0

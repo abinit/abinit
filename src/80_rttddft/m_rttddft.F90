@@ -50,7 +50,6 @@ module m_rttddft
 
  public :: rttddft_setup_ele_step
  public :: rttddft_init_hamiltonian
-!!***
 
 contains
 !!***

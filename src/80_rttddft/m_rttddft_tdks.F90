@@ -67,6 +67,7 @@ module m_rttddft_tdks
  use m_paw_tools,        only: chkpawovlp
  use m_pspini,           only: pspini
  use m_profiling_abi,    only: abimem_record
+ use m_rttddft_tdef,     only: tdef_type
  use m_spacepar,         only: setsym
  use m_specialmsg,       only: wrtout
  use m_symtk,            only: symmetrize_xred
@@ -106,11 +107,6 @@ module m_rttddft_tdks
    real(dp)                         :: dt          !propagation time step
    real(dp)                         :: ecore       !core energy
    real(dp)                         :: etot        !total energy
-   real(dp)                         :: ef_tzero    !time at which elec field is switched on (Elec. field perturbation)
-   real(dp)                         :: ef_omega    !angular freq. of TD elec field (Elec. field perturbation)
-   real(dp)                         :: ef_tau      !time width of the pulse (Elec. field perturbation)
-   real(dp)                         :: ef_sin_a    !useful constant for sin^2 pulse (Elec. field perturbation)
-   real(dp)                         :: ef_sin_b    !useful constant for sin^2 pulse (Elec. field perturbation)
    real(dp)                         :: gsqcut      !cut-off on G^2
    real(dp)                         :: ucvol       !primitive cell volume
    real(dp)                         :: zion        !total ionic charge
@@ -122,6 +118,7 @@ module m_rttddft_tdks
                                                    !required by various routines)
    type(pawfgr_type)                :: pawfgr      !FFT fine grid in PAW sphere
    type(pawang_type),pointer        :: pawang => NULL() !angular grid in PAW sphere
+   type(tdef_type)                  :: tdef        !Object containing variables related to TD electric field
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
@@ -138,14 +135,10 @@ module m_rttddft_tdks
    integer,allocatable              :: nattyp(:)   !nb of atoms of different types
    integer,allocatable              :: npwarr(:)   !number of PW at each k-point
    integer,allocatable              :: symrec(:,:,:) !sym. operations in recip space
-   real(dp)                         :: efield(3)   !TD external elec. field perturbation
-   real(dp)                         :: ef_zero(3)  !E_0 = |E_0|*polarization (Elec. field perturbation)
    real(dp)                         :: gprimd(3,3) !primitive cell vectors in recip space
    real(dp)                         :: gmet(3,3)   !metric tensor in recip space
    real(dp)                         :: rprimd(3,3) !prim cell vectors in direct space
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
-   real(dp)                         :: vecpot(3)   !external vector potential (Elec. field perturbation)
-   real(dp)                         :: vecpot_red(3)  !external vector potential in reduced G coord. (Elec. field perturbation)
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: eigen(:)    !eigen-energies
@@ -313,6 +306,12 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !5) Some further initialization (Mainly for PAW)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
+ !6) TD external elec. field perturbation
+ !Init vector potential and associated constants
+ call tdks%tdef%init(dtset%td_ef_type, dtset%td_ef_pol, dtset%td_ef_ezero, dtset%td_ef_tzero, dtset%td_ef_lambda, dtset%td_ef_tau)
+ call tdks%tdef%update(tdks%first_step*dtset%dtele, tdks%rprimd)
+
+ !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory
  if (dtset%td_restart == 0) then
    ABI_MALLOC(tdks%cg0,(2,tdks%mcg))
@@ -333,17 +332,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  end if
  ABI_MALLOC(tdks%occ,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
- !TD external elec. field perturbation
- !Init vector potential and associated constants
- tdks%efield(:)  = 0.0_dp
- tdks%vecpot(:)  = 0.0_dp
- tdks%vecpot_red(:)  = 0.0_dp
- tdks%ef_zero(:) = dtset%td_ef_pol(:)*dtset%td_ef_ezero
- tdks%ef_tau     = dtset%td_ef_tau
- tdks%ef_omega   = 2.0_dp*pi*Sp_Lt/dtset%td_ef_lambda !2*pi*f=2*pi*c/lambda
- tdks%ef_tzero   = dtset%td_ef_tzero
- tdks%ef_sin_a   = 2.0_dp*pi/dtset%td_ef_tau + tdks%ef_omega
- tdks%ef_sin_b   = 2.0_dp*pi/dtset%td_ef_tau - tdks%ef_omega
  !FB: That should be all for now but there were few more initializations in
  !g_state.F90 in particular related to electric field, might want to check it out
  !once we reach the point of including external electric field
@@ -352,6 +340,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%unpaw  = dtfil%unpaw
  tdks%dt     = dtset%dtele
  tdks%ntime  = dtset%ntime
+ print*, '******************* HERE-dtele=', tdks%dt
+ print*, '***', tol15, Time_Sec, tol15/Time_Sec
+ print*, '***', tol17, Time_Sec, tol17/Time_Sec
 
  tdks%pawang => pawang
  tdks%pawrad => pawrad

@@ -284,7 +284,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       ! Kinetic energy
       kpoint(:)=dtset%kptns(:,ikpt)
       ABI_MALLOC(kinpw,(npw_k))
-      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0,tdks%vecpot_red)
+      call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0,tdks%tdef%vecpot_red)
 
       ! Compute (k+G) vectors (only if useylm=1)
       nkpg=3*calc_forces*dtset%nloalg(3)
@@ -323,7 +323,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
       !** Build inverse of overlap matrix
       if(psps%usepaw == 1 .and. istep <= tdks%first_step) then
-         call make_invovl(ham_k, dimffnl, ffnl, ph3d, mpi_enreg)
+         call make_invovl(ham_k,dimffnl,ffnl,ph3d,mpi_enreg)
       end if
 
       ! Setup gemm_nonlop
