@@ -106,13 +106,14 @@ contains
   !!
   !! SOURCE
   subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,rprimd,version,&
-  & ecut,exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_mband,nspinor,truecg)
+  & ecut,exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_ecut,extfpmd_mband,&
+  & nspinor,truecg)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,version
     integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband,nspinor,truecg
-    real(dp),intent(in) :: ecut,dilatmx
+    real(dp),intent(in) :: ecut,extfpmd_ecut,dilatmx
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: istwfk(nkpt)
@@ -152,12 +153,17 @@ contains
     if (this%version==5) then
       if (truecg==1) this%truecg=.true.
       this%mband=extfpmd_mband
-      ! Adding sqrt(...) to extended cutoff energy to make
-      ! sure extended pw basis set is large enough.
-      this%ecut=extfpmd_e_fg(one*extfpmd_mband,this%ucvol)+&
-      & sqrt((2*PI*gprimd(1,1))**2+(2*PI*gprimd(2,1))**2+(2*PI*gprimd(3,1))**2)
-      ! Force extended plane wave kinetic energy to be geq Kohn-Sham ecut.
-      this%ecut=max(this%ecut,ecut)
+      if (extfpmd_ecut==zero) then
+        ! Adding sqrt(...) to extended cutoff energy to make
+        ! sure extended pw basis set is large enough.
+        this%ecut=extfpmd_e_fg(one*extfpmd_mband,this%ucvol)+&
+        & sqrt((2*PI*gprimd(1,1))**2+(2*PI*gprimd(2,1))**2+(2*PI*gprimd(3,1))**2)
+        ! Force extended plane wave kinetic energy to be geq Kohn-Sham ecut.
+        this%ecut=max(this%ecut,ecut)
+      else
+        ! Automatically determine extended plane waves energy cutoff
+        this%ecut=extfpmd_ecut
+      end if
       this%ecut_eff=this%ecut*dilatmx**2
       ABI_MALLOC(this%nband,(nkpt*nsppol))
       this%nband(:)=extfpmd_mband
