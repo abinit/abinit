@@ -270,7 +270,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,extpw_eshift,fermie,fermih ! CP added fermih
+ real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
@@ -758,7 +758,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%mpw,dtset%nband,ngfft,dtset%nkpt,npwarr,&
 &   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
-&   dtfil%fnamewffk,wvl,extpw_eshift)
+&   dtfil%fnamewffk,wvl)
    hdr%rprimd=rprimd
  end if
 
@@ -895,7 +895,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 !### 08. Compute new occupation numbers
- write(0,*) dtfil%ireadwf==1, hdr%extpw_eshift
 
 !Compute new occupation numbers, in case wavefunctions and eigenenergies
 !were read from disk, occupation scheme is metallic (this excludes iscf=-1),
@@ -906,9 +905,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & (dtset%occopt>=3.and.dtset%occopt<=9) .and. & ! allowing for occopt 9
 ! End CP modified
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
-  
-  ! RESTART FROM WF = save U0 because we do not have vtrial.
-  if(associated(extfpmd)) write(0,*) extfpmd%eshift
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
 !  Warning : ideally, results_gs%entropy should not be set up here XG 20011007
@@ -921,16 +917,36 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   extfpmd=extfpmd)
    if (dtset%dmftcheck>=0.and.dtset%usedmft>=1.and.(sum(args_gs%upawu(:))>=tol8.or.  &
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
-   ABI_FREE(doccde)
 
    if(associated(extfpmd)) then
+!    Generate extended plane wave wavefunctions
+     if(extfpmd%version==5) then
+       call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet_for_kg,&
+&       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
+&       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
+&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
+&       resid)
+       ! Extended plane waves estimation of the full occupations array
+       call newocc(extfpmd%doccde,extfpmd%eigen,results_gs%energies%entropy,results_gs%energies%e_fermie,&
+&       results_gs%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,&
+&       dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,&
+&       dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd=extfpmd)
+       ! Update Kohn-Sham occ and doccde from extended pw arrays
+       call getnel(doccde,zero,eigen,extfpmd%nelect,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
+&       two/(dtset%nsppol*dtset%nspinor),dtset%mband,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&       dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
+&       extfpmd_nbdbuf=extfpmd%nbdbuf)
+     end if
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
 &     dtset%nkpt,dtset%nsppol,dtset%tsmear,dtset%wtk)
      call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear,dtset%effmass_free,&
 &     gmet,dtset%kptns,dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
 &     results_gs%energies%e_kinetic,results_gs%energies%e_eigenvalues)
+     call extfpmd%compute_entropy(results_gs%energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,&
+&     dtset%nspinor,dtset%wtk,dtset%nband,dtset%mband,occ)
    end if
+   ABI_FREE(doccde)
 
 !  Transfer occupations to bigdft object:
    if(dtset%usewvl==1 .and. .not. wvlbigdft) then
