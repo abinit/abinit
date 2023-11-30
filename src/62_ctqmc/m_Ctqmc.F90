@@ -122,7 +122,8 @@ TYPE, PUBLIC :: Ctqmc
 
   INTEGER _PRIVATE :: flavors
 !
-
+  INTEGER _PRIVATE :: nspinor
+!
   INTEGER _PRIVATE :: measurements
 ! nb of measure in the MC
 
@@ -217,6 +218,21 @@ TYPE, PUBLIC :: Ctqmc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occup_histo_time
 ! nflavor
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: occupconfig
+! 2**nflavor
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: suscep
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chi
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: chicharge
+! samples
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: ntot
+! occupation total, t2g, eg
+
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) _PRIVATE :: measCorrelation 
 ! segment,antisegment,nflavor,nflavor
 
@@ -269,6 +285,7 @@ PUBLIC  :: Ctqmc_printPerturbation
 PUBLIC  :: Ctqmc_printCorrelation
 PUBLIC  :: Ctqmc_printSpectra
 PUBLIC  :: Ctqmc_destroy
+PUBLIC  :: Ctqmc_setMagmom
 
 CONTAINS
 !!***
@@ -314,7 +331,7 @@ include 'mpif.h'
   INTEGER  , INTENT(IN   )                      :: ostream
   INTEGER  , INTENT(IN   )                      :: istream
   LOGICAL  , INTENT(IN   )                      :: bFile
-  DOUBLE PRECISION, DIMENSION(1:9), OPTIONAL, INTENT(IN) :: iBuffer
+  DOUBLE PRECISION, DIMENSION(1:10), OPTIONAL, INTENT(IN) :: iBuffer
   INTEGER  , OPTIONAL, INTENT(IN   )                      :: MY_COMM
 !Local variables ------------------------------
 #ifdef HAVE_MPI
@@ -326,7 +343,7 @@ include 'mpif.h'
 !  CHARACTER(LEN=5)                              :: Cpid
 !
 #endif
-  DOUBLE PRECISION, DIMENSION(1:9)             :: buffer
+  DOUBLE PRECISION, DIMENSION(1:10)             :: buffer
 
   this%ostream = ostream
   this%istream = istream
@@ -376,6 +393,7 @@ include 'mpif.h'
       READ(istream,*) buffer(7) !this%beta
       READ(istream,*) buffer(8) !U
       READ(istream,*) buffer(9) !iTech
+      READ(istream,*) buffer(10)!this%nspinor
       !READ(istream,*) buffer(9) !Wmax
 !#ifdef CTCtqmc_ANALYSIS
       !READ(istream,*) buffer(10) !order
@@ -384,11 +402,11 @@ include 'mpif.h'
 
 #ifdef HAVE_MPI
     IF ( this%have_MPI .EQV. .TRUE. ) &
-      CALL MPI_Bcast(buffer, 9, MPI_DOUBLE_PRECISION, 0,    &
+      CALL MPI_Bcast(buffer, 10, MPI_DOUBLE_PRECISION, 0,    &
                    this%MY_COMM, ierr)
 #endif
   ELSE IF ( PRESENT(iBuffer) ) THEN
-    buffer(1:9) = iBuffer(1:9)
+    buffer(1:10) = iBuffer(1:10)
   ELSE
     CALL ERROR("Ctqmc_init : No input parameters                    ")
   END IF
@@ -457,7 +475,7 @@ SUBROUTINE Ctqmc_setParameters(this,buffer)
 
 !Arguments ------------------------------------
   TYPE(Ctqmc), INTENT(INOUT)                         :: this
-  DOUBLE PRECISION, DIMENSION(1:9), INTENT(IN   ) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:10), INTENT(IN   ) :: buffer
 
 
   this%thermalization = INT(buffer(3)) !this%thermalization
@@ -469,6 +487,7 @@ SUBROUTINE Ctqmc_setParameters(this,buffer)
   this%samples        = INT(buffer(6)) !this%samples
   this%beta           = buffer(7)      !this%beta
   this%U              = buffer(8)      !U
+  this%nspinor        = INT(buffer(10))!this%nspinor
 !  this%mu             = buffer(9)      !this%mu
   !this%Wmax           = INT(buffer(9)) !Freq
 !#ifdef CTCtqmc_ANALYSIS
@@ -701,6 +720,21 @@ SUBROUTINE Ctqmc_allocateOpt(this)
     FREEIF(this%occup_histo_time)
     MALLOC(this%occup_histo_time,(1:this%flavors+1))
     this%occup_histo_time= 0.d0
+    FREEIF(this%occupconfig)
+    MALLOC(this%occupconfig,(1:2**this%flavors))
+    this%occupconfig= 0.d0
+    FREEIF(this%suscep)
+    MALLOC(this%suscep,(1:3,1:this%samples))
+    this%suscep= 0.d0
+    FREEIF(this%chi)
+    MALLOC(this%chi,(1:3,1:this%samples))
+    this%chi= 0.d0
+    FREEIF(this%chicharge)
+    MALLOC(this%chicharge,(1:3,1:this%samples))
+    this%chicharge= 0.d0
+    FREEIF(this%ntot)
+    MALLOC(this%ntot,(1:3))
+    this%ntot= 0.d0
   END IF
 
   IF ( this%opt_noise .EQ. 1 ) THEN
@@ -1510,6 +1544,11 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
   sp1            = this%samples+1
   IF ( this%opt_histo .GT. 0 ) THEN
     this%occup_histo_time= 0.d0
+    this%occupconfig= 0.d0
+    this%suscep= 0.d0
+    this%chi= 0.d0
+    this%chicharge= 0.d0
+    this%ntot = 0.d0
   END IF
   old_percent    = 0
 
@@ -1586,7 +1625,7 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       IF ( this%opt_histo .GT. 0 ) THEN
-        CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time)
+        CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time,this%occupconfig,this%suscep,this%samples,this%chi,this%chicharge,this%ntot,this%opt_histo,this%nspinor)
       ENDIF
     ENDIF
 
@@ -2086,7 +2125,7 @@ END SUBROUTINE Ctqmc_measPerturbation
 !!  reduce everything to get the result of the simulation
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2022 ABINIT group (J. Bieder,F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2102,7 +2141,7 @@ END SUBROUTINE Ctqmc_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmc_getResult(this)
+SUBROUTINE Ctqmc_getResult(this,Iatom)
 
 
 #ifdef HAVE_MPI1
@@ -2110,6 +2149,7 @@ include 'mpif.h'
 #endif
 !Arguments ------------------------------------
   TYPE(Ctqmc)  , INTENT(INOUT)                    :: this
+  INTEGER, INTENT(IN ) :: Iatom
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
   INTEGER                                       :: flavors
@@ -2126,17 +2166,21 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)   :: freqs
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: counts
   INTEGER, ALLOCATABLE, DIMENSION(:)   :: displs
-  INTEGER                                       :: sp1
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: occtot
+  INTEGER, ALLOCATABLE, DIMENSION(:)   :: spintot
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)   :: occ
+  INTEGER                                       :: sp1,spinmax,spinmin,dspin,nelec,spin
   INTEGER                                       :: spAll
   INTEGER                                       :: last
   INTEGER                                       :: n1
-  INTEGER                                       :: n2
+  INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
 !  INTEGER                                       :: fin
+  character(len=2)                              :: atomnb
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
-  DOUBLE PRECISION                              :: inv_size,sumh
+  DOUBLE PRECISION                              :: inv_size,sumh,sumtot
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   TYPE(FFTHyb) :: FFTmrka
 
@@ -2247,6 +2291,11 @@ include 'mpif.h'
   this%measDE(:,:) = this%measDE(:,:) * DBLE(this%measurements) /(DBLE(this%sweeps)*this%beta)
   IF ( this%opt_histo .GT. 0 ) THEN
     this%occup_histo_time(:) = this%occup_histo_time(:) / INT(this%sweeps/this%measurements)
+    this%occupconfig(:) = this%occupconfig(:) / INT(this%sweeps/this%measurements)
+    this%suscep(:,:) = this%suscep(:,:) / INT(this%sweeps/this%measurements)
+    this%chi(:,:) = this%chi(:,:) / INT(this%sweeps/this%measurements)
+    this%chicharge(:,:) = this%chicharge(:,:) / INT(this%sweeps/this%measurements)
+    this%ntot(:) = this%ntot(:) / INT(this%sweeps/this%measurements)
   END IF
  ! write(6,*) "=== Histogram of occupations for complete simulation ====",INT(this%sweeps/this%measurements)
  ! sumh=0
@@ -2436,6 +2485,16 @@ include 'mpif.h'
     IF ( this%opt_histo .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                this%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occupconfig, 2**flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%suscep, 3*this%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%chi, 3*this%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%chicharge, 3*this%samples, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%ntot, 3, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
     END IF
 #endif
 
@@ -2530,6 +2589,109 @@ include 'mpif.h'
     enddo
        write(this%ostream,'(a,f10.4)') " all" , sumh
     write(this%ostream,*) "================================="
+
+
+    MALLOC(occ,(2**this%flavors,1:flavors))
+    MALLOC(occtot,(2**this%flavors))
+    MALLOC(spintot,(2**this%flavors))
+    do n1=1,2**this%flavors
+      ! Compute occupations of individual Orbitals
+      n3=n1-1
+      occtot(n1)=0
+      spintot(n1)=0
+      signe=1
+      do n2=1,this%flavors
+        remainder=modulo(n3,2)
+        quotient=(n3-remainder)/2
+        occ(n1,n2)=remainder
+        n3=quotient
+        occtot(n1)=occtot(n1)+occ(n1,n2)
+        if(n2>=6) signe =-1
+        spintot(n1)=spintot(n1)+occ(n1,n2)*signe
+      enddo
+      this%occupconfig(n1)=this%occupconfig(n1)/float(this%size)
+    enddo
+
+    write(this%ostream,*) "=== Histogram of occupations of configurations for complete simulation  ===="
+    sumh=0
+    do n1=1,2**this%flavors
+       write(this%ostream,'(i4,10i2,f20.2)')  n1, (occ(n1,n2),n2=1,10),this%occupconfig(n1)
+       sumh=sumh+this%occupconfig(n1)
+    enddo
+    write(this%ostream,'(a,f10.4)') " all" , sumh
+    
+    sumtot=0
+    do nelec=0,10
+      spinmin=modulo(nelec,2)
+      if(nelec<=5) spinmax=nelec
+      if(nelec>=6) spinmax=10-nelec
+      dspin=2
+      write(this%ostream,*) "=== Histogram of occupations of configurations for total number of electrons",nelec
+      do spin=spinmin,spinmax,dspin
+        sumh=0
+        do n1=1,2**this%flavors
+          if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
+            sumh=sumh+this%occupconfig(n1)
+            write(this%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+          endif
+        enddo
+        write(this%ostream,'(a,i4,a,i4,a,f10.4)') " === Sum of weights for",nelec," electrons and spin",spin," is ",sumh
+        sumtot=sumtot+sumh
+      enddo
+    enddo
+    write(this%ostream,'(a,f10.4)') "Full sum is",sumtot
+    FREE(occ)
+    FREE(occtot)
+    FREE(spintot)
+
+    !==============================
+    ! Print Susceptibilities
+    !==============================
+    write(atomnb, '("0",i1)') Iatom
+    !Local Magnetic Susceptibility
+    if(this%opt_histo .gt. 1) then
+      !Scalar
+      if(this%nspinor .eq. 1) then
+        open (unit=735,file='LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total t2g eg'
+        do n1=1,this%samples
+          this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%suscep(n2,n1),n2=1,3)
+        enddo
+
+      else
+        !SOC
+        open (unit=735,file='LocalMagneticSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        write(735,*) '#Tau Total Orbital Spin'
+        do n1=1,this%samples
+          this%chi(:,n1)=this%chi(:,n1)/float(this%size)/float(this%samples)
+          write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%chi(n2,n1),n2=1,3)
+        enddo
+      endif
+    endif
+   
+    !Local Charge Susceptibility
+    if(this%opt_histo .gt. 2) then
+      this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
+      open (unit=735,file='LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+      write(735,*) '#Tau Total t2g eg <ntot>'
+      do n1=1,this%samples
+        this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size)/float(this%samples))-(this%ntot(1)*this%ntot(1))
+        this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size)/float(this%samples))-(this%ntot(2)*this%ntot(2))
+        this%chicharge(3,n1)=(this%chicharge(3,n1)/float(this%size)/float(this%samples))-(this%ntot(3)*this%ntot(3))
+        write(735,'(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
+      enddo
+    endif
+ 
+#if defined HAVE_FC_FLUSH
+             call flush(735)
+#elif defined HAVE_FC_FLUSH_
+             call flush(735)
+#endif
+
+
+
+
   ENDIF
 
 END SUBROUTINE Ctqmc_getResult
@@ -3377,6 +3539,11 @@ SUBROUTINE Ctqmc_destroy(this)
   FREEIF(this%measPerturbation)
   IF ( this%opt_histo .GT. 0 ) THEN
     FREEIF(this%occup_histo_time)
+    FREEIF(this%occupconfig)
+    FREEIF(this%suscep)
+    FREEIF(this%chi)
+    FREEIF(this%chicharge)
+    FREEIF(this%ntot)
   ENDIF
   FREEIF(this%measN)
   FREEIF(this%measDE)
@@ -3417,6 +3584,62 @@ SUBROUTINE Ctqmc_destroy(this)
   this%init = .FALSE.
 END SUBROUTINE Ctqmc_destroy
 !!***
+
+!!****f* ABINIT/m_Ctqmcoffdiag/Ctqmc_setMagmom
+!! NAME
+!!  Ctqmcoffdiag_setMagmom
+!!
+!! FUNCTION
+!!  set the Magnetic moment matrix for susceptibility
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2021 ABINIT group (F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
+
+SUBROUTINE Ctqmc_setMagmom(this,Magmom_orb,Magmom_spin,Magmom_tot)
+
+!Arguments ------------------------------------
+  TYPE(Ctqmc), INTENT(INOUT) :: this
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
+!Local variables ------------------------------
+  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  IF ( SIZE(Magmom_orb) .NE. this%flavors*this%flavors ) &
+    CALL ERROR("Ctqmc_setMagmomm : Wrong Magnetic Moment matrix (size)        ")
+
+  CALL ImpurityOperator_setMagmommat(this%Impurity, Magmom_orb, Magmom_spin, Magmom_tot)
+
+END SUBROUTINE Ctqmc_setMagmom
+!!***
+
 
 END MODULE m_Ctqmc
 !!***
