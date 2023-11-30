@@ -73,6 +73,18 @@ TYPE, PUBLIC :: ImpurityOperator
    !  for each flavor, particles(iflavor)%list(2,maxnbofsegment) 
    !  gives the beginning and end of each segment.
 
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_orb 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  orbital magnetic moments 
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_spin 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  spin magnetic moments 
+
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)          :: Magmommat_tot 
+   !  for iflavor1 and iflavor2, Magmommat(iflavor1,iflavor2) is the
+   !  total magnetic moments 
+
   DOUBLE PRECISION _PRIVATE :: checkNumber
   DOUBLE PRECISION _PRIVATE :: tolerance
   DOUBLE PRECISION _PRIVATE :: meanError
@@ -109,6 +121,7 @@ PRIVATE :: ImpurityOperator_checkOverlap
 PUBLIC  :: ImpurityOperator_getError
 PUBLIC  :: ImpurityOperator_printLatex
 PUBLIC  :: ImpurityOperator_occup_histo_time
+PUBLIC  :: ImpurityOperator_setMagmommat
 
 CONTAINS
 !!***
@@ -131,6 +144,7 @@ CONTAINS
 !!  this=ImpurtiyOperator
 !!  flavors=number of flavors
 !!  beta=inverse temperature
+!!  opt_histo=opt_histo
 !!
 !! OUTPUT
 !!
@@ -175,6 +189,12 @@ SUBROUTINE ImpurityOperator_init(this, flavors, beta)
   FREEIF(this%updates)
   MALLOC(this%updates,(1:flavors))
   this%updates = 0.d0
+  FREEIF(this%Magmommat_orb)
+  MALLOC(this%Magmommat_orb,(1:flavors,1:flavors))
+  FREEIF(this%Magmommat_spin)
+  MALLOC(this%Magmommat_spin,(1:flavors,1:flavors))
+  FREEIF(this%Magmommat_tot)
+  MALLOC(this%Magmommat_tot,(1:flavors,1:flavors))
   !CALL ImpurityOperator_computeU(this, U, J)
   !this%mat_U = U
   !IF ( ASSOCIATED(this%mu) ) FREE(this%mu)
@@ -1734,6 +1754,9 @@ SUBROUTINE ImpurityOperator_destroy(this)
   ENDIF
   CALL ListCdagC_destroy(this%list_swap)
   FREEIF(this%mat_U)
+  FREEIF(this%Magmommat_orb)
+  FREEIF(this%Magmommat_spin)
+  FREEIF(this%Magmommat_tot)
   FREEIF(this%overlaps)
   FREEIF(this%updates)
   this%activeFlavor = 0
@@ -2110,7 +2133,7 @@ END SUBROUTINE ImpurityOperator_printLatex
 !!  Compute histogrammes of occupations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (B. Amadon)
+!!  Copyright (C) 2013-2022 ABINIT group (B. Amadon, F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2128,34 +2151,57 @@ END SUBROUTINE ImpurityOperator_printLatex
 !!
 !! SOURCE
 
-SUBROUTINE ImpurityOperator_occup_histo_time(this,histo)
+SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,chi,chicharge,ntot,opt_histo,nspinor)
 
 !Arguments ------------------------------------
-  TYPE(ImpurityOperator), INTENT(IN)          :: this
-  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT) :: histo
-
-!Local variables ------------------------------
-  DOUBLE PRECISION                   :: tau
-  INTEGER                            :: scanning
-  INTEGER                            :: iflavor, itau, noccup,ntau
+  TYPE(ImpurityOperator), INTENT(IN)            :: this
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: histo
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: occupconfig
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: suscep
+  INTEGER, INTENT(IN)                           :: ntau
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: chi
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: chicharge
+  DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: ntot
+ !Local variables ------------------------------
+  DOUBLE PRECISION                   :: tau,tauj
+  INTEGER                            :: scanning, natom, opt_histo,nspinor
+  INTEGER                            :: iflavor, itau,jtau,kdeltatau,noccup,iconfig,sumh,nmeas
+  INTEGER                            :: iflavor1, iflavor2     
   INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: occup
   INTEGER, ALLOCATABLE, DIMENSION(:)          :: occuptot
+  INTEGER, ALLOCATABLE, DIMENSION(:,:)          :: spinup,spindn
+  INTEGER, ALLOCATABLE, DIMENSION(:)          :: occupconfig_loc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc_config
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_orb
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_spin
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_tot
+  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: mu_tmp
+ !-------------------------------------------------------------
 
 
-  ntau=100
   MALLOC(occuptot,(1:ntau))
+  MALLOC(spinup,(1:3,1:ntau))
+  MALLOC(spindn,(1:3,1:ntau))
   MALLOC(occup,(1:this%flavors,1:ntau))
+  MALLOC(occupconfig_loc,(2**this%flavors))
   MALLOC(histo_loc,(1:this%flavors+1))
+  occupconfig_loc=0
+  nmeas=0
+
   do itau=1,ntau
     tau=float(itau-1)/float(ntau)*this%beta
     occuptot(itau)=0
+    spinup(:,itau)=0
+    spindn(:,itau)=0
 !    write(6,*) "tau",tau
+    iconfig=0
     do iflavor = 1, this%flavors
       occup(iflavor,itau)=0
       do scanning = 1, this%particles(iflavor)%tail
-  !      write(6,*) itau,iflavor,scanning
+!        write(6,*) itau,iflavor,scanning
 !        write(6,*) "tau",tau,this%particles(iflavor)%list(scanning,Cdag_),this%particles(iflavor)%list(scanning,C_)
+!        write(6,*) "Hello Fred 2",tau,iflavor,this%particles(iflavor)%list(scanning,C_)-this%particles(iflavor)%list(scanning,Cdag_),this%beta
 
         if(this%particles(iflavor)%list(scanning,C_)>this%beta.and.tau<this%particles(iflavor)%list(scanning,Cdag_)) then
 
@@ -2167,16 +2213,60 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo)
         else
 
           if(tau<this%particles(iflavor)%list(scanning,C_).and.tau>this%particles(iflavor)%list(scanning,Cdag_)) then 
-            occup(iflavor,itau)=occup(iflavor,itau)+1
-          endif 
+             occup(iflavor,itau)=occup(iflavor,itau)+1
+          endif
 
-        endif
+       endif
 
       enddo
+
+      !full orbital
+      if ( this%particles(iflavor)%list(0,C_) .eq. 0.d0 ) then
+        !write(6,*) "Yes",this%particles(iflavor)%list(0,C_)
+        occup(iflavor,itau)=occup(iflavor,itau)+1
+      endif
+
       occuptot(itau)= occuptot(itau) + occup(iflavor,itau)
-!      write(6,*) "A",itau,iflavor,occup(iflavor,itau),this%particles(iflavor)%tail
+      if(iflavor<this%flavors/2+1) THEN
+        spinup(1,itau)= spinup(1,itau) + occup(iflavor,itau)
+        if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+          spinup(2,itau)= spinup(2,itau) + occup(iflavor,itau)
+        else
+          spinup(3,itau)= spinup(3,itau) + occup(iflavor,itau)
+          !if(spinup(3,itau)>4) THEN
+          ! write(6,*) "Error",spinup(:,itau),occup(:,itau)
+          ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+          !   write(6,*) iflavor,occup(iflavor,itau)
+          ! endif
+          ! stop
+          !endif
+        endif
+      else
+        spindn(1,itau)= spindn(1,itau) + occup(iflavor,itau)
+        if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+          spindn(2,itau)= spindn(2,itau) + occup(iflavor,itau)
+        else
+          spindn(3,itau)= spindn(3,itau) + occup(iflavor,itau)
+          !if(spindn(3,itau)>4) THEN
+          ! write(6,*) "Error spin",spindn(:,itau),occup(:,itau)
+          ! write(6,*) "Error occup",occup(:,itau)
+          ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+          !   write(6,*) iflavor,occup(iflavor,itau)
+          ! endif
+          ! stop
+          !endif
+        endif
+      endif
+
+!   === Construct index of configuration in base 10
+      iconfig=iconfig+2**(iflavor-1)*occup(iflavor,itau)
+
     enddo
-!      write(6,*) "B",itau,occuptot(itau)
+
+!   === After the loop over flavor, iconfig has a meaning and can be used 
+    occupconfig_loc(iconfig+1)= occupconfig_loc(iconfig+1)+1
+  nmeas=nmeas+1
+
   enddo
 
   histo_loc=0
@@ -2193,13 +2283,184 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo)
   enddo
 !  write(6,*) "================================="
 !  write(6,*)
+
+!  write(6,*) "================================="
+  sumh=zero
+  do iconfig=1,2**(this%flavors)
+   ! occupconfig_loc(iconfig)=occupconfig_loc(iconfig)/float(ntau)*100.0 
+    occupconfig(iconfig)=occupconfig(iconfig)+float(occupconfig_loc(iconfig))/float(ntau)*100.0
+!    write(6,*) "one step",float(occupconfig_loc(iconfig))/float(ntau)*100.0
+    sumh=sumh+occupconfig_loc(iconfig)
+  enddo
+!  write(6,*) "sumh",sumh,ntau,nmeas
+
+!============================================================
+! Susceptibility Section
+!============================================================
+if(opt_histo .gt. 1) then
+  if(nspinor .eq. 1) then
+    ! == Scalar Spin Susceptibility
+    do itau=1,ntau
+    !tau=float(itau-1)/float(ntau)*this%beta
+    ! write(7735,*) float(itau-1)/float(ntau)*this%beta,spinup(itau),spindn(itau),(spinup(itau)-spindn(itau))**2
+    ! write(7736,*) float(itau-1)/float(ntau)*this%beta,(spinup(1,itau)-spindn(1,itau)),(spinup(2,itau)-spindn(2,itau)),(spinup(3,itau)-spindn(3,itau))
+      do jtau=1,ntau
+        !tauj=float(jtau-1)/float(ntau)*this%beta
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+        suscep(1,kdeltatau)=suscep(1,kdeltatau)+float((spinup(1,jtau)-spindn(1,jtau)))*float((spinup(1,itau)-spindn(1,itau)))
+        suscep(2,kdeltatau)=suscep(2,kdeltatau)+float((spinup(2,jtau)-spindn(2,jtau)))*float((spinup(2,itau)-spindn(2,itau)))
+        suscep(3,kdeltatau)=suscep(3,kdeltatau)+float((spinup(3,jtau)-spindn(3,jtau)))*float((spinup(3,itau)-spindn(3,itau)))
+        ! write(6,*) "Su",suscep(kdeltatau),spinup(tau)-spindn(jtau),spinup(itau)-spindn(itau)
+        ! write(6,*) "Su",itau,jtau,kdeltatau
+      enddo
+      !write(7735,*) float(itau-1)/float(ntau)*this%beta,spinup(itau),spindn(itau),(spinup(itau)-spindn(itau))**2
+      !write(7736,*) float(itau-1)/float(ntau)*this%beta,(spinup(itau)-spindn(itau))**2
+      !write(7737,*) float(itau-1)/float(ntau)*this%beta,suscep(1)
+    enddo
+
+  else
+    ! == Spin Orbit Susceptibility
+    MALLOC(magmommat_orb,(1:this%flavors,1:this%flavors))
+    magmommat_orb=this%Magmommat_orb
+    MALLOC(magmommat_spin,(1:this%flavors,1:this%flavors))
+    magmommat_spin=this%Magmommat_spin
+    MALLOC(magmommat_tot,(1:this%flavors,1:this%flavors))
+    magmommat_tot=this%Magmommat_tot
+    MALLOC(mu_tmp,(1:3,1:ntau))
+
+    ! == Product of occupation matrix with magnetic moment matrix
+    do itau=1,ntau
+      mu_tmp(:,itau)=0
+      do iflavor1=1,this%flavors
+        do iflavor2=1,this%flavors
+          if(iflavor1==iflavor2) then
+            mu_tmp(1,itau) = mu_tmp(1,itau) + magmommat_tot(iflavor1,iflavor2)*occup(iflavor1,itau)
+            mu_tmp(2,itau) = mu_tmp(2,itau) + magmommat_orb(iflavor1,iflavor2)*occup(iflavor1,itau)
+            mu_tmp(3,itau) = mu_tmp(3,itau) + magmommat_spin(iflavor1,iflavor2)*occup(iflavor1,itau)
+            !write(6,*) itau, magmommat(iflavor1,iflavor2), mu_tmp(:,itau)/ntau
+          end if
+        end do
+      end do
+    end do
+
+    ! == Correlation function of mu_tmp for magnetic susceptibility with SOC (Approach 1)
+    do itau=1,ntau
+      do jtau=1,ntau
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+        chi(1,kdeltatau) = chi(1,kdeltatau) + (mu_tmp(1,itau))*(mu_tmp(1,jtau))
+        chi(2,kdeltatau) = chi(2,kdeltatau) + (mu_tmp(2,itau))*(mu_tmp(2,jtau))
+        chi(3,kdeltatau) = chi(3,kdeltatau) + (mu_tmp(3,itau))*(mu_tmp(3,jtau))
+      end do
+    end do
+
+    FREE(mu_tmp)
+    FREE(magmommat_orb)
+    FREE(magmommat_spin)
+    FREE(magmommat_tot)
+  endif
+endif
+  
+if(opt_histo .gt. 2) then
+! == Scalar Charge Susceptibility
+
+ do itau = 1,ntau
+   ntot(1) = ntot(1) + occuptot(itau)
+   ntot(2) = ntot(2) + float(spinup(2,itau)+spindn(2,itau))
+   ntot(3) = ntot(3) + float(spinup(3,itau)+spindn(3,itau))
+ enddo
+
+ do itau=1,ntau
+   do jtau=1,ntau
+     kdeltatau=jtau-itau+1
+     if(jtau<itau) kdeltatau=kdeltatau+ntau
+     if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+     chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float((spinup(1,jtau)+spindn(1,jtau)))*float((spinup(1,itau)+spindn(1,itau)))
+     chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float((spinup(2,jtau)+spindn(2,jtau)))*float((spinup(2,itau)+spindn(2,itau)))
+     chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float((spinup(3,jtau)+spindn(3,jtau)))*float((spinup(3,itau)+spindn(3,itau)))
+   enddo
+ enddo
+
+! == Spin-orbit Charge Susceptibility
+! Rotation of occupation matrix ... to be done
+endif
+
   FREE(occup)
-  FREE(occuptot)
+  FREE(occupconfig_loc)
   FREE(histo_loc)
+  FREE(occuptot)
+  FREE(spinup)
+  FREE(spindn)
 
 
 END SUBROUTINE ImpurityOperator_occup_histo_time
 !!***
 
+!!****f* ABINIT/m_ImpurityOperator/ImpurityOperator_setMagmommat
+!! NAME
+!!  ImpurityOperator_setMagmommat
+!!
+!! FUNCTION
+!!  Set directly the Magnetic moment this
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2013-2021 ABINIT group (F. Gendron)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  this=ImpurtityOperator
+!!  matU=interaction this
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!  Will be filled automatically by the parent script
+!!
+!! CHILDREN
+!!  Will be filled automatically by the parent script
+!!
+!! SOURCE
+
+SUBROUTINE ImpurityOperator_setMagmommat(this, Magmom_orb, Magmom_spin, Magmom_tot)
+
+!Arguments ------------------------------------
+  TYPE(ImpurityOperator), INTENT(INOUT) :: this
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN   ) :: Magmom_tot
+!Local-----------------------------------------
+  INTEGER :: iflavor1
+  INTEGER :: iflavor2
+
+ !debug
+ ! write(6,*) "Inside Impurity_set Magmommat"
+ !
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
+
+  DO iflavor1 = 1, this%flavors
+    DO iflavor2 = 1, this%flavors
+      this%Magmommat_orb(iflavor1,iflavor2) = Magmom_orb(iflavor1,iflavor2)
+      this%Magmommat_spin(iflavor1,iflavor2) = Magmom_spin(iflavor1,iflavor2)
+      this%Magmommat_tot(iflavor1,iflavor2) = Magmom_tot(iflavor1,iflavor2)
+    END DO
+  END DO
+
+END SUBROUTINE ImpurityOperator_setMagmommat
+!!***
 END MODULE m_ImpurityOperator
 !!***

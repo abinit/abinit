@@ -85,6 +85,7 @@ CONTAINS
 !!  U=interaction parameter
 !!  ostream=where to write output
 !!  MPI_COMM=mpi communicator for the run
+!!  nspinor=number of spinor
 !!
 !! OUTPUT
 !!
@@ -95,7 +96,7 @@ CONTAINS
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
-&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag)
+&measurements,flavors,samples,beta,U,ostream,MPI_COMM,opt_nondiag,nspinor)
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -111,10 +112,11 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   INTEGER, INTENT(IN) :: opt_nondiag
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
+  INTEGER, INTENT(IN) :: nspinor
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
   INTEGER          :: ifstream
-  DOUBLE PRECISION, DIMENSION(1:10) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:11) :: buffer
 
   ifstream = 42
 
@@ -128,6 +130,7 @@ SUBROUTINE CtqmcoffdiagInterface_init(op,iseed,sweeps,thermalization,&
   buffer(8)=U
   buffer(9)=GREENHYB_TAU
   buffer(10)=DBLE(opt_nondiag)
+  buffer(11)=nspinor
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
 
@@ -253,7 +256,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit) 
+SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,Magmom_spin,Magmom_tot,Iatom) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -268,6 +271,20 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: opt_sym
   DOUBLE PRECISION, DIMENSION(:),OPTIONAL,  INTENT(IN ) :: opt_levels
   COMPLEX(KIND=8) , DIMENSION(:,:),OPTIONAL,  INTENT(IN ) :: hybri_limit
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
+  INTEGER, INTENT(IN ) :: Iatom
+!local variables--------------------------------
+  INTEGER :: iflavor1,iflavor2
+
+ ! do iflavor1=1,10
+ !   do iflavor2=1,10
+ !      if(iflavor1==iflavor2) THEN
+ !        write(6,*) iflavor1, iflavor2, Magmom(iflavor1,iflavor2)
+ !      end if
+ !   end do
+ ! end do
 
   CALL Ctqmcoffdiag_reset(op%Hybrid)
 
@@ -292,6 +309,11 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
     CALL Ctqmcoffdiag_setU(op%Hybrid, matU)
      !call xmpi_barrier(op%Hybrid%MY_COMM)
 
+  IF ( PRESENT(Magmom_orb) ) &
+    CALL Ctqmcoffdiag_setMagmom(op%Hybrid, Magmom_orb, Magmom_spin, Magmom_tot)
+     !call xmpi_barrier(op%Hybrid%MY_COMM)
+
+
   CALL Ctqmcoffdiag_run(op%Hybrid,opt_order=op%opt_order, &
                            opt_histo=op%opt_histo, &
                            opt_movie=op%opt_movie, &
@@ -305,7 +327,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
 
-  CALL Ctqmcoffdiag_getResult(op%Hybrid)
+  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)
