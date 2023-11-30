@@ -881,7 +881,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
         ABI_ERROR(msg)
      end if
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+     call extfpmd%init(dtset%mband,hdr%extpw_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,dtset%ecut,&
 &     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
 &     dtset%extfpmd_ecut,dtset%extfpmd_nband,dtset%nspinor,dtset%extfpmd_truecg)
@@ -1517,8 +1517,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &     results_gs%energies%e_fermih,residm,rprimd,extfpmd%occ,pawrhoij,xred,dtset%amu_orig(:,1),&
 &     comm_atom=mpi_enreg%comm_atom,extpw_eshift=results_gs%extpw_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
      extfpmd%hdr%rprimd=rprimd_for_kg
-     
-     write(0,*) extfpmd%eigen
 
      call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
 &     extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
