@@ -105,15 +105,15 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine init(this,mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,rprimd,version,&
-  & ecut,exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_ecut,extfpmd_mband,&
+  subroutine init(this,mband,extpw_eshift,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,rprimd,&
+  & version,ecut,exchn2n3d,istwfk,kptns,mpi_enreg,mkmem,dilatmx,extfpmd_ecut,extfpmd_mband,&
   & nspinor,truecg)
     ! Arguments -------------------------------
     ! Scalars
     class(extfpmd_type),intent(inout) :: this
     integer,intent(in) :: mband,nbcut,nbdbuf,nfft,nspden,nsppol,nkpt,version
     integer,intent(in) :: exchn2n3d,mkmem,extfpmd_mband,nspinor,truecg
-    real(dp),intent(in) :: ecut,extfpmd_ecut,dilatmx
+    real(dp),intent(in) :: ecut,extfpmd_ecut,extpw_eshift,dilatmx
     type(MPI_type),intent(inout) :: mpi_enreg
     ! Arrays
     integer,intent(in) :: istwfk(nkpt)
@@ -147,7 +147,7 @@ contains
     this%nelectarr(:,:)=zero
     this%bandshift=zero
     ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
-    this%eshift=zero
+    this%eshift=extpw_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
     if (this%version==5) then
