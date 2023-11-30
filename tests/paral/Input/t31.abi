@@ -316,6 +316,7 @@ prtvol 4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = .*_elpa
 #%% [files]
 #%% [NCPU_10]
 #%% files_to_test = 
