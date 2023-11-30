@@ -455,6 +455,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
+ 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_ecut',tread,'ENE')
+ if(tread==1) dtset%extfpmd_ecut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbcut',tread,'INT')
  if(tread==1) dtset%extfpmd_nbcut=intarr(1)

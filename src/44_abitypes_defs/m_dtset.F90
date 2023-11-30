@@ -782,6 +782,7 @@ type, public :: dataset_type
  real(dp) :: eshift
  real(dp) :: esmear
  real(dp) :: exchmix
+ real(dp) :: extfpmd_ecut = zero
  real(dp) :: fband
  real(dp) :: fermie_nest = zero
  real(dp) :: focktoldfe
@@ -1550,6 +1551,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%exchn2n3d          = dtin%exchn2n3d
  dtout%expert_user        = dtin%expert_user
+ dtout%extfpmd_ecut       = dtin%extfpmd_ecut
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extfpmd_nbdbuf     = dtin%extfpmd_nbdbuf
  dtout%extfpmd_nband      = dtin%extfpmd_nband
@@ -3338,7 +3340,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
- list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extfpmd_truecg extrapwf'
+ list_vars=trim(list_vars)//' extfpmd_ecut extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extfpmd_truecg extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'

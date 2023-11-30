@@ -2346,14 +2346,15 @@ end subroutine hdr_skip_wfftype
 !!
 !! SOURCE
 ! CP added fermih to the list of arguments
-subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu, &
-                      comm_atom,mpi_atmtab) ! optional arguments (parallelism)
+subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu,&
+                      comm_atom,extpw_eshift,mpi_atmtab) ! optional arguments (parallelism)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot
  integer,optional,intent(in) :: comm_atom
  real(dp),intent(in) :: etot,fermie,fermih,residm ! CP added fermih
+ real(dp),optional,intent(in) :: extpw_eshift
  class(hdr_type),intent(inout) :: hdr
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
@@ -2363,15 +2364,16 @@ subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,x
 ! *************************************************************************
 
  !@hdr_type
-!Update of the "evolving" data
- hdr%etot     =etot
- hdr%fermie   =fermie
- hdr%fermih   =fermih
- hdr%residm   =residm
- hdr%rprimd(:,:)=rprimd(:,:)
- hdr%occ(:)   =occ(:)
- hdr%xred(:,:)=xred(:,:)
- hdr%amu(:) = amu
+ !Update of the "evolving" data
+ hdr%etot         = etot
+ hdr%fermie       = fermie
+ hdr%fermih       = fermih
+ hdr%residm       = residm
+ hdr%rprimd(:,:)  = rprimd(:,:)
+ hdr%occ(:)       = occ(:)
+ hdr%xred(:,:)    = xred(:,:)
+ hdr%amu(:)       = amu
+ if(present(extpw_eshift)) hdr%extpw_eshift = extpw_eshift
 
  if (hdr%usepaw==1) then
    if (present(comm_atom)) then
@@ -3481,7 +3483,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-    "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"])
+    "ecut_eff", "ecutdg", "ecutsm", "etot", "extpw_eshift", "residm", "stmbias", "tphysel", "tsmear"])
    NCF_CHECK(ncerr)
 
    ! Multi-dimensional variables.
@@ -3615,8 +3617,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  "ecut_eff", "ecutdg", "ecutsm", "etot", "residm", "stmbias", "tphysel", "tsmear"],&
-&  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
+&  "ecut_eff", "ecutdg", "ecutsm", "etot", "extpw_eshift", "residm", "stmbias", "tphysel", "tsmear"],&
+&  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%extpw_eshift, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
  NCF_CHECK(ncerr)
 
  ! Write Abinit array variables.

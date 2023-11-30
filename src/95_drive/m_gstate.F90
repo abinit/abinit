@@ -884,7 +884,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call extfpmd%init(dtset%mband,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,dtset%ecut,&
 &     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
-&     dtset%extfpmd_nband,dtset%nspinor,dtset%extfpmd_truecg)
+&     dtset%extfpmd_ecut,dtset%extfpmd_nband,dtset%nspinor,dtset%extfpmd_truecg)
    end if
  end if
 
@@ -895,6 +895,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 !### 08. Compute new occupation numbers
+ write(0,*) dtfil%ireadwf==1, hdr%extpw_eshift
 
 !Compute new occupation numbers, in case wavefunctions and eigenenergies
 !were read from disk, occupation scheme is metallic (this excludes iscf=-1),
@@ -1448,7 +1449,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Update the header, before using it
  call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
    results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   comm_atom=mpi_enreg%comm_atom,extpw_eshift=results_gs%extpw_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero
@@ -1490,7 +1491,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call outresid(dtset,dtset%kptns,dtset%mband,&
 &                dtset%nband,dtset%nkpt,&
 &                dtset%nsppol,resid)
-
+   
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
     dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
@@ -1509,11 +1510,15 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
      call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
 &     comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     extfpmd%hdr%ecut_eff=extfpmd%ecut_eff
+     extfpmd%hdr%ecutdg=extfpmd%ecut_eff
      
      call extfpmd%hdr%update(extfpmd%hdr%bantot,results_gs%etotal,results_gs%energies%e_fermie,&
 &     results_gs%energies%e_fermih,residm,rprimd,extfpmd%occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+&     comm_atom=mpi_enreg%comm_atom,extpw_eshift=results_gs%extpw_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
      extfpmd%hdr%rprimd=rprimd_for_kg
+     
+     write(0,*) extfpmd%eigen
 
      call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
 &     extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
