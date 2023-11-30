@@ -172,7 +172,7 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
 &           formeig,hdr,ireadwf,istwfk,kg,kptns,localrdwf,mband,&
 &           mcg,mkmem,mpi_enreg,mpw,nband,ngfft,nkpt,npwarr,&
 &           nsppol,nsym,occ,optorth,symafm,symrel,tnons,unkg,wff1,&
-&           wffnow,unwff1,wffnm,wvl,extpw_eshift)
+&           wffnow,unwff1,wffnm,wvl)
 
 !Arguments ------------------------------------
  integer,intent(in) :: ask_accurate,exchn2n3d,formeig,ireadwf,localrdwf,mband,mcg,mkmem,mpw
@@ -191,7 +191,6 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
  real(dp),intent(inout),target :: cg(2,mcg),eigen((2*mband)**formeig*mband*nkpt*nsppol)
  real(dp),intent(in) :: kptns(3,nkpt),tnons(3,nsym)
  real(dp),intent(inout) :: occ(mband*nkpt*nsppol)
- real(dp),optional,intent(out) :: extpw_eshift
 
 !Local variables-------------------------------
  integer,parameter :: master=0
@@ -316,6 +315,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    nkpt0=hdr0%nkpt
    nsppol0=hdr0%nsppol
    headform0=hdr0%headform
+   
+!  Extended plane waves energy shift is required in order to restart from wave function.
+   hdr%extpw_eshift=hdr0%extpw_eshift
 
    write(message,'(2a)')'-inwffil : will read wavefunctions from disk file ',trim(wff1%fname)
    call wrtout(std_out,message,'COLL')

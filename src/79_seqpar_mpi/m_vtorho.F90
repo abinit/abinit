@@ -1616,7 +1616,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd energy shift
+!    Compute extended plane waves contributions
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,dtset%nband,&
 &       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
