@@ -91,7 +91,8 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Update various quantities after a nuclear step
  if (dtset%ionmov /= 0) call rttddft_setup_ele_step(dtset,mpi_enreg,psps,tdks)
 
- call tdks%tdef%update(istep*tdks%dt, tdks%rprimd)
+ ! Update electric field and vector potential
+ call tdks%tdef%update(istep*tdks%dt, tdks%rprimd, dtset%kptns)
 
  ! Propagate cg
  select case (dtset%td_propagator) 
