@@ -303,13 +303,18 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    ABI_FREE(doccde)
  end if
 
- !5) Some further initialization (Mainly for PAW)
- call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
-
- !6) TD external elec. field perturbation
+ !5) TD external elec. field perturbation
+ !Test that we use spherical harmonics if TD electric field
+ if (dtset%td_ef_type/=0 .and. psps%useylm/=1) then
+   ABI_ERROR("TD Electric field only work with spherical harmonics (useylm=1)")
+ end if
  !Init vector potential and associated constants
- call tdks%tdef%init(dtset%td_ef_type, dtset%td_ef_pol, dtset%td_ef_ezero, dtset%td_ef_tzero, dtset%td_ef_lambda, dtset%td_ef_tau)
- call tdks%tdef%update(tdks%first_step*dtset%dtele, tdks%rprimd)
+ call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
+                   & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%nkpt,dtset%kptns)
+ call tdks%tdef%update(tdks%first_step*dtset%dtele, tdks%rprimd, dtset%kptns)
+
+ !6) Some further initialization (Mainly for PAW)
+ call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory
@@ -323,7 +328,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
     ABI_MALLOC(tdks%cprj0,(dtset%natom,tdks%mcprj))
     call pawcprj_alloc(tdks%cprj0,ncpgr,tdks%dimcprj)
     call ctocprj(tdks%atindx,tdks%cg0,1,tdks%cprj0,tdks%gmet,tdks%gprimd,0,0,0,         &
-               & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+               & dtset%istwfk,tdks%kg,tdks%tdef%kpa,tdks%mcg,tdks%mcprj,dtset%mgfft,    &
                & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
                & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
                & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
@@ -340,9 +345,6 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%unpaw  = dtfil%unpaw
  tdks%dt     = dtset%dtele
  tdks%ntime  = dtset%ntime
- print*, '******************* HERE-dtele=', tdks%dt
- print*, '***', tol15, Time_Sec, tol15/Time_Sec
- print*, '***', tol17, Time_Sec, tol17/Time_Sec
 
  tdks%pawang => pawang
  tdks%pawrad => pawrad
@@ -438,6 +440,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    ABI_SFREE(tdks%xcctau3d)
    ABI_SFREE(tdks%ylm)
    ABI_SFREE(tdks%ylmgr)
+   ABI_SFREE(tdks%tdef%kpa)
 
    if(allocated(tdks%cprj)) then
       call pawcprj_free(tdks%cprj)
@@ -486,6 +489,37 @@ end subroutine tdks_free
 !!  psp_gencond <integer> = store conditions for generating psp
 !!  ecut_eff <real(dp)> = effective PW cutoff energy
 !!
+!! NOTES
+!! USE OF FFT GRIDS:
+!! =================
+!! In case of PAW:
+!! ---------------
+!!    Two FFT grids are used:
+!!    - A "coarse" FFT grid (defined by ecut)
+!!      for the application of the Hamiltonian on the plane waves basis.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      Hamiltonian, wave-functions, density related to WFs (rhor here), ...
+!!      are expressed on this grid.
+!!    - A "fine" FFT grid (defined) by ecutdg)
+!!      for the computation of the density inside PAW spheres.
+!!      It is defined by nfftf, ngfftf, mgfftf, ...
+!!      Total density, potentials, ...
+!!      are expressed on this grid.
+!! In case of norm-conserving:
+!! ---------------------------
+!!    - Only the usual FFT grid (defined by ecut) is used.
+!!      It is defined by nfft, ngfft, mgfft, ...
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
+!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!! In case of wavelets:
+!! --------------------
+!!    - Only the usual FFT grid (defined by wvl_crmult) is used.
+!!      It is defined by nfft, ngfft, mgfft, ... This is strictly not
+!!      an FFT grid since its dimensions are not suited for FFTs. They are
+!!      defined by wvl_setngfft().
+!!      For compatibility reasons, (nfftf,ngfftf,mgfftf)
+!!      are set equal to (nfft,ngfft,mgfft) in that case.
+!!
 !! SOURCE
 subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,psp_gencond,tdks)
 
@@ -513,7 +547,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  integer              :: iatom, ierr, itypat, indx
  integer              :: mgfftf, my_natom
  integer              :: npwmin, nfftot
- integer              :: ylm_option
  real(dp)             :: gsqcut_eff, gsqcutc_eff
  real(dp)             :: ecutdg_eff
  type(ebands_t)       :: bstruct
@@ -529,7 +562,7 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
  my_natom=mpi_enreg%my_natom
 
  !** Init FFT grid(s) sizes (be careful !)
- !See NOTES in the comments at the beginning of this file.
+ !See NOTES in the comments at the beginning of this subroutine.
  tdks%nfft = dtset%nfft
  call pawfgr_init(tdks%pawfgr,dtset,mgfftf,tdks%nfftf,ecut_eff,ecutdg_eff, &
                 & ngfft,ngfftf)
@@ -572,23 +605,15 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%gemm_nonlop_use_gemm = .false.
  end if
 
- !** Setup the Ylm for each k point
- if (psps%useylm==1) then
-   ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
-   ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
-   ylm_option=0
-   if ((dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) .or. &
-   &   (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) .or. &
-   &   (dtset%orbmag<0 .and. psps%usepaw==1)) then
-      ylm_option = 1 ! gradients of YLM
-   end if
-   call initylmg(tdks%gprimd,tdks%kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
-   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
-   & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
- else
-   ABI_MALLOC(tdks%ylm,(0,0))
-   ABI_MALLOC(tdks%ylmgr,(0,0,0))
+ !** Initialize band structure datatype
+ ABI_MALLOC(npwarr_,(dtset%nkpt))
+ npwarr_(:)=tdks%npwarr(:)
+ if (dtset%paral_kgb/=0) then
+   call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
  end if
+ bstruct = ebands_from_dtset(dtset, npwarr_)
+ ABI_FREE(npwarr_)
+ call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
  !** Open and read pseudopotential files
  comm_psp=mpi_enreg%comm_cell
@@ -610,16 +635,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%energies%e_corepsp   = zero
    tdks%energies%e_corepspdc = zero
  end select
-
- !** Initialize band structure datatype
- ABI_MALLOC(npwarr_,(dtset%nkpt))
- npwarr_(:)=tdks%npwarr(:)
- if (dtset%paral_kgb/=0) then
-   call xmpi_sum(npwarr_,mpi_enreg%comm_bandfft,ierr)
- end if
- bstruct = ebands_from_dtset(dtset, npwarr_)
- ABI_FREE(npwarr_)
- call unpack_eneocc(dtset%nkpt,dtset%nsppol,bstruct%mband,bstruct%nband,dtset%occ_orig(:,1),bstruct%occ,val=zero)
 
  !** Initialize PAW atomic occupancies
  ABI_MALLOC(tdks%pawrhoij,(my_natom*psps%usepaw))
@@ -783,6 +798,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  integer             :: optcut, optgr0, optgr1, optgr2, optrad
  integer             :: stress_needed
  integer             :: use_hybcomp
+ integer             :: ylm_option
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -809,6 +825,25 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
                  & tdks%paw_dmft,dtset%usedmft,dtset%dmft_solv,mpi_enreg)
 
  !*** Main PAW initialization ***
+
+ !** Setup the Ylm for each k point
+ if (psps%useylm==1) then
+   ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
+   ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
+   ylm_option=0
+   if ((dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) .or. &
+   &   (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) .or. &
+   &   (dtset%orbmag<0 .and. psps%usepaw==1)) then
+      ylm_option = 1 ! gradients of YLM
+   end if
+   call initylmg(tdks%gprimd,tdks%kg,tdks%tdef%kpa,dtset%mkmem,mpi_enreg,&
+   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
+   & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
+ else
+   ABI_MALLOC(tdks%ylm,(0,0))
+   ABI_MALLOC(tdks%ylmgr,(0,0,0))
+ end if
+
  tdks%mcprj=0;tdks%mband_cprj=0
  if(psps%usepaw==1) then
    gnt_option=1

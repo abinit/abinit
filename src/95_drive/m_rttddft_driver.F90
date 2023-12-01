@@ -101,6 +101,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  !scalars
  character(len=500)   :: msg
  integer              :: istep
+ real(dp)             :: integrated_density, stability
  type(tdks_type)      :: tdks
  !arrays
  real(dp)             :: cpu, wall, gflops
@@ -150,6 +151,19 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
    !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
+
+   !Test of stability
+   integrated_density = sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
+   stability = abs(integrated_density-dtset%nelect)/dtset%nelect
+   if (stability > 0.1_dp) then 
+      write(msg,"(3a)") "The integrated density has changed by more than 10%!", ch10, &
+                     &  "The integration is unstable, you should probably decrease the timestep dtele."
+      ABI_ERROR(msg)
+   else if (stability > 0.05_dp) then
+      write(msg,"(3a)") "The integrated density has changed by more than 5%!", ch10, &
+                     &  "You should be careful, the integration might become unstable"
+      ABI_WARNING(msg)
+   end if
 
    !TODO: If Ehrenfest dynamics perform nuclear step
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
