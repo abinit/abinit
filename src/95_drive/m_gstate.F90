@@ -937,14 +937,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &       dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
 &       extfpmd_nbdbuf=extfpmd%nbdbuf)
      end if
+!    Get nelect to build density
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
 &     dtset%nkpt,dtset%nsppol,dtset%tsmear,dtset%wtk)
-     call extfpmd%compute_e_kinetic(results_gs%energies%e_fermie,dtset%tsmear,dtset%effmass_free,&
-&     gmet,dtset%kptns,dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
-&     results_gs%energies%e_kinetic,results_gs%energies%e_eigenvalues)
-     call extfpmd%compute_entropy(results_gs%energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,&
-&     dtset%nspinor,dtset%wtk,dtset%nband,dtset%mband,occ)
    end if
    ABI_FREE(doccde)
 
