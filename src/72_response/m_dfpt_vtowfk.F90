@@ -556,8 +556,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !        There is an additional factor of 4 with respect to the bare matrix element
          evxctau1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vxctau(1,1:npw_k*nspinor))+&
               & DOT_PRODUCT(cwave0(2,1:npw_k*nspinor),ghc_vxctau(2,1:npw_k*nspinor)))
-         !! JWZ debug
-         ! evxctau1_k(iband) = zero
          ABI_FREE(ghc_vxctau)
        end if
 !
@@ -578,16 +576,20 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        enl0_k(iband)=energy_factor*scprod
 
        if(ipert/=natom+10.and.ipert/=natom+11) then
-!        <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
+          !        <G|Vnl1|Cnk> is contained in gvnlx1 (with cwave1)
+          ! gvnlx1 contains at this stage first order kinetic energy, first order nuclear dipole,
+          ! first order vxctau1
          call dotprod_g(scprod,ai,gs_hamkq%istwf_k,npw1_k*nspinor,1,cwave1,gvnlx1,mpi_enreg%me_g0,&
 &         mpi_enreg%comm_spinorfft)
          enl1_k(iband)=two*energy_factor*scprod
        end if
 
-!      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
+       !      Removal of the 1st-order kinetic energy from the 1st-order non-local part.
        if(ipert==natom+1 .or. ipert==natom+3 .or. ipert==natom+4) then
          enl1_k(iband)=enl1_k(iband)-ek1_k(iband)
        end if
+       ! enl1_k still contains first order nuclear dipole, first order vxctau1 in addition to
+       ! first order nonlocal
 
 !      Accumulate 1st-order density (only at the last inonsc)
 !      Accumulate zero-order potential part of the 2nd-order total energy

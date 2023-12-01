@@ -2865,21 +2865,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 & ' ',trim(numb),': 0th-order hamiltonian combined with 1st-order wavefunctions'
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
- if ( (.NOT. has_nd) .AND. (.NOT. has_vxctau) ) then
-   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' )&
-        &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0
- end if
- if ( (has_nd) .AND. (.NOT. has_vxctau) ) then
-   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
-        &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  nuc. dip.=',end0
- end if
- if ( (.NOT. has_nd) .AND. (has_vxctau) ) then
-   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
-        &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  evxctau0=',evxctau0,'  evxctau1=',evxctau1
- end if
- if ( (has_nd) .AND. (has_vxctau) ) then
-   write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
-        &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  evxctau=',evxctau0,'  evxctau1=',evxctau1,'  nuc. dip.=',end0
+ write(msg, '(a,es17.8,a,es17.8,a,es17.8)' )&
+      &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0
+ if (has_nd) then
+    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
+         &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  nclr dpl0=',end0
  end if
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
@@ -2894,12 +2884,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
 &   ' loc psp =',elpsp1,'  Hartree=',ehart1,'     xc=',exc1,ch10,&
 &   ' note that "loc psp" includes a xc core correction that could be resolved'
  else if(ipert==natom+1) then
-   if ( abs(end1) < tol10 ) then
-     write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
+   write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
 &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1
-   else
-     write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
-&     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nuc. dip.=',end1
+   if (has_nd) then
+      write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
+           &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nclr dpl1=',end1
    end if
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &
@@ -2933,10 +2922,11 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    erelax=0.0_dp
    if(ipert>=1.and.ipert<=natom)then
      erelax=ek0+edocc+eeig0+eloc0+elpsp1+ehart1+exc1+enl0+enl1+epaw1
-   else if(ipert==natom+1.or.ipert==natom+2)then
-      !     erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+end1+evxctau0+evxctau1
-      ! JWZ debug: I think enl0 does not include end0 and evxctau0, while enl1 does include 1st order
-      ! counterparts
+  else if(ipert==natom+1.or.ipert==natom+2)then
+     ! JWZ: end0 and evxctau0 are included as "local" in getghc, while
+     ! JWZ: end1 and evxctau1 are included in gvnlx1 (non local) in getgh1c
+     ! JWZ: therefore, in erelax, end0 and evxctau0 are added in explicitly while
+     ! JWZ: end1 and evxctau1 are already present in enl1
      erelax=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+epaw1+end0+evxctau0
    else if(ipert==natom+3.or.ipert==natom+4)then
      erelax=ek0+edocc+eeig0+eloc0+ek1+elpsp1+ehart1+exc1+enl0+enl1+epaw1
@@ -3042,9 +3032,6 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    write(msg, '(a,es20.10,a)' ) &
 &   '    (  non-var. 2DEtotal :',0.5_dp*(ek1+enl1_effective)+eovl1,' Ha)'
    call wrtout(iout,msg)
-!    write(msg, '(a,4es20.10,a)' ) &
-! &   '    JWZ debug ek1 enl1_effective enl1 eovl1 :',ek1,enl1_effective,enl1,eovl1, ' Ha)'
-!    call wrtout(iout,msg)
    call wrtout(std_out,msg)
 
  else if(ipert==natom+3 .or. ipert==natom+4) then
