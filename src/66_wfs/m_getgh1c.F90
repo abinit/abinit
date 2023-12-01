@@ -171,10 +171,6 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  npw1 =gs_hamkq%npw_kp
  natom=gs_hamkq%natom
 
- ! JWZ debug
- write(std_out,'(a,6i3)')'JWZ debug getgh1c idir optlocal optnl opt_gvnlx1 sij_opt usevnl ',&
-      & idir,optlocal,optnl,opt_gvnlx1,sij_opt,usevnl
-
  ! Compatibility tests
  if(gs_hamkq%usepaw==1.and.(ipert>=0.and.(ipert<=natom.or.ipert==natom+3.or.ipert==natom+4))) then
    if ((optnl>=1.and.(.not.associated(rf_hamkq%e1kbfr))) .or. &
@@ -1931,8 +1927,6 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
     ! scale by 2\pi\alpha^2
     gh1ndc=two_pi*FineStructureConstant2*ghc1
-    ! JWZ debug
-    !gh1ndc=zero
 
     ABI_FREE(ghc1)
 
