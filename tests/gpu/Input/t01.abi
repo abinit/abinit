@@ -4,7 +4,7 @@
 #
 # Test for Abinit: use of a Graphics Processing Unit
 #
-# Test automatic use of GPU (automatic setting of use_gpu_cuda)
+# Test automatic use of GPU (automatic setting of use_gpu_flavor)
 # Low cut-off for test; few k-points
 # ================================================================
 
@@ -70,8 +70,8 @@
 #%% description = 
 #%%   GaAs phonons calculation - norm-conserving psp
 #%%   Test the automatic detection of the GPU and the automatic setting of
-#%%   use_gpu_cuda keyword according to the requested calculation.
-#%%   Ground-states calculations should be run with use_gpu_cuda activated
+#%%   use_gpu_flavor keyword according to the requested calculation.
+#%%   Ground-states calculations should be run with use_gpu_flavor activated
 #%%   (except if set to 0 in input file) while response fonction calculations
-#%%   should be run with use_gpu_cuda deactivated (at present : ABINIT v7.0).
+#%%   should be run with use_gpu_flavor deactivated (at present : ABINIT v9.10).
 #%%<END TEST_INFO>

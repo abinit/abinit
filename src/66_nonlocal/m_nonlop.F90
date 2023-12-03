@@ -155,7 +155,7 @@ contains
 !!     | phkpxred(2,natom)=phase factors exp(2 pi k^prime.xred)
 !!     | sij(dimekb1,ntypat)=overlap matrix components (only if paw_opt=2, 3 or 4)
 !!     | ucvol=unit cell volume (bohr^3)
-!!     | use_gpu_impl=governs wheter we do the hamiltonian calculation on gpu or not
+!!     | use_gpu_flavor= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
@@ -399,11 +399,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if (hamk%dimekbq/=1) then
      ABI_BUG('If useylm=0, ie no PAW, then dimekbq/=-1 is not allowed !')
    end if
-   if (hamk%use_gpu_impl/=ABI_GPU_DISABLED) then
-     ABI_BUG('When use_gpu_impl/=0 you must use ylm version of nonlop! Set useylm to 1.')
+   if (hamk%use_gpu_flavor/=ABI_GPU_DISABLED) then
+     ABI_BUG('When use_gpu_flavor/=0 you must use ylm version of nonlop! Set useylm to 1.')
    end if
  end if
- if (hamk%use_gpu_impl/=ABI_GPU_DISABLED.and.hamk%dimekbq/=1) then
+ if (hamk%use_gpu_flavor/=ABI_GPU_DISABLED.and.hamk%dimekbq/=1) then
    ABI_BUG('GPU version of nonlop not compatible with a exp(-iqR) phase!')
  end if
  if ((.not.associated(hamk%kg_k)).or.(.not.associated(hamk%kg_kp))) then
@@ -687,14 +687,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        ! Rho ij
 &      choice == 0  )
      !FIXME forces and constraints computation not handled in CUDA GEMM nonlop
-     if(choice > 0 .and. (hamk%use_gpu_impl==ABI_GPU_LEGACY .or. hamk%use_gpu_impl==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
+     if(choice > 0 .and. (hamk%use_gpu_flavor==ABI_GPU_LEGACY .or. hamk%use_gpu_flavor==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
    end if
  end if
 
  if(use_gemm_nonlop) then
 
    !FIXME Settle this
-   if(hamk%use_gpu_impl==ABI_GPU_OPENMP) then
+   if(hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
 
      call gemm_nonlop_ompgpu(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
          dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
@@ -703,9 +703,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,&
+         use_gpu_flavor=hamk%use_gpu_flavor)
 
-   else if (hamk%use_gpu_impl==ABI_GPU_LEGACY .or. hamk%use_gpu_impl==ABI_GPU_KOKKOS) then
+   else if (hamk%use_gpu_flavor==ABI_GPU_LEGACY .or. hamk%use_gpu_flavor==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU_CUDA
      call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
@@ -716,7 +717,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
          sij_, svectout, &
          hamk%useylm, vectin, vectout, &
-         vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
+         vectproj=vectproj,use_gpu_flavor=hamk%use_gpu_flavor)
 #else
    ABI_ERROR("abinit was not compiled with GPU support")
 #endif
@@ -730,7 +731,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,use_gpu_cuda=hamk%use_gpu_impl)
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,vectproj=vectproj,&
+         use_gpu_flavor=hamk%use_gpu_flavor)
 
    end if
 
@@ -738,7 +740,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    !$omp parallel do default(shared), &
    !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
    !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
-   !!$omp& schedule(static), if(hamk%use_gpu_impl==ABI_GPU_DISABLED)
+   !!$omp& schedule(static), if(hamk%use_gpu_flavor==ABI_GPU_DISABLED)
    do idat=1, ndat
      !vectin_idat => vectin(:,1+npwin*my_nspinor*(idat-1):npwin*my_nspinor*idat)
      b0 = 1+npwin*my_nspinor*(idat-1)
@@ -791,7 +793,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       ntypat_,only_SO_,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,hamk%ucvol,&
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
-     else if (hamk%use_gpu_impl==ABI_GPU_DISABLED) then
+     else if (hamk%use_gpu_flavor==ABI_GPU_DISABLED) then
        if (present(cprjin_left).and.present(enlout_im)) then
          call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
 &         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&

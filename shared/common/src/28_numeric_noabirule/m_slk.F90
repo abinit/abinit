@@ -6,7 +6,7 @@
 !!  High-level objects and wrappers around the ScaLAPACK and ELPA API.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2022 ABINIT group (CS,GZ,FB,MG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2646,7 +2646,7 @@ end subroutine slk_pgemm_sp
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!  [nev]= Number of eigenvalues needed. Default: full set
-!!  [use_gpu]= Flag to activate the use of GPU
+!!  [use_gpu_elpa]= Flag to activate the use of GPU (ELPA only)
 !!
 !! OUTPUT
 !!  results= ScaLAPACK matrix coming out of the operation (global dimensions must be equal to matrix
@@ -2656,7 +2656,8 @@ end subroutine slk_pgemm_sp
 !!
 !! SOURCE
 
-subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, nev, use_gpu)
+subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_k, &
+&                                nev, use_gpu_elpa) ! Optional arguments
 
 #ifdef HAVE_LINALG_ELPA
   !Arguments ------------------------------------
@@ -2666,18 +2667,21 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
 
   !Local variables ------------------------------
   type(elpa_hdl_t) :: elpa_hdl
-  integer :: nev__,use_gpu_
+  integer :: nev__,use_gpu_elpa_
 
 !************************************************************************
 
   nev__ = matrix%sizeb_global(1); if (present(nev)) nev__ = nev
-  use_gpu_=0;if (present(use_gpu)) use_gpu_=use_gpu
+  use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_)
+  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev__,&
 &                           matrix%sizeb_local(1),matrix%sizeb_local(2))
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
@@ -2698,7 +2702,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
 
 #ifdef HAVE_LINALG_SCALAPACK
   !Local variables-------------------------------
@@ -2728,7 +2732,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
 ! *************************************************************************
 
-  ABI_UNUSED(use_gpu) ! No GPU implementation is using scaLAPACK
+  ABI_UNUSED(use_gpu_elpa) ! No GPU implementation is using scaLAPACK
   nev__ = matrix%sizeb_global(1); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -2864,7 +2868,7 @@ end subroutine compute_eigen_problem
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
-!!  [use_gpu]= Flag to activate the use of GPU
+!!  [use_gpu_elpa]= Flag to activate the use of GPU (ELPA only)
 !!
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -2875,7 +2879,8 @@ end subroutine compute_eigen_problem
 #ifdef HAVE_LINALG_ELPA
 
 subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                              my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,use_gpu)
+&                             my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,&
+&                             use_gpu_elpa) ! Optional parameter
 
   !-Arguments
   integer,intent(in) :: na
@@ -2886,22 +2891,25 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
   integer,intent(in) :: comm
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
   real*8 :: ev(na)
   complex*16 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   complex*16 :: tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
-  integer :: i, n_col, n_row, use_gpu_
+  integer :: i, n_col, n_row, use_gpu_elpa_
   integer,external :: indxl2g,numroc
   complex*16, parameter :: CZERO = (0.d0,0.d0), CONE = (1.d0,0.d0)
   type(elpa_hdl_t) :: elpa_hdl
 
 ! *************************************************************************
-
-  use_gpu_=0 ; if (present(use_gpu)) use_gpu_=use_gpu
   
+  use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
+
 ! Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_,blacs_ctx=sc_desc(CTXT_))
+  call elpa_func_allocate(elpa_hdl,blacs_ctx=sc_desc(CTXT_),gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
@@ -2914,7 +2922,8 @@ end subroutine solve_gevp_complex
 !----------------------------------------------------------------------
 
 subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
-                           my_prow,my_pcol,np_rows,np_cols,sc_desc,comm,use_gpu)
+&                          my_prow,my_pcol,np_rows,np_cols,sc_desc,comm, &
+&                          use_gpu_elpa) ! Optional argument
 
   !-Arguments
   integer,intent(in) :: na
@@ -2925,21 +2934,24 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   integer,intent(in) :: np_cols,np_rows
   integer,intent(in) :: sc_desc(9)
   integer,intent(in) :: comm
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
   real*8 :: ev(na)
   real*8 :: a(na_rows,na_cols),b(na_rows,na_cols),z(na_rows,na_cols)
   real*8::tmp1(na_rows,na_cols),tmp2(na_rows,na_cols)
   !-Local variables
-  integer :: i, n_col, n_row, use_gpu_
+  integer :: i, n_col, n_row, use_gpu_elpa_
   integer,external :: indxl2g,numroc
   type(elpa_hdl_t) :: elpa_hdl
 
 ! *************************************************************************
 
-  use_gpu_=0 ; if (present(use_gpu)) use_gpu_=use_gpu
+  use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
 ! Allocate ELPA handle
-  call elpa_func_allocate(elpa_hdl,gpu=use_gpu_,blacs_ctx=sc_desc(CTXT_))
+  call elpa_func_allocate(elpa_hdl,blacs_ctx=sc_desc(CTXT_),gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
   call elpa_func_get_communicators(elpa_hdl,comm,my_prow,my_pcol)
 
@@ -2968,6 +2980,7 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 !!  comm= MPI communicator
 !!  istwf_k= 2 if we have a real matrix else complex.
 !!  [nev]= Number of eigenvalues needed. Default: full set
+!!  [use_gpu_elpa]= Flag to activate the use of GPU (ELPA only)
 !!
 !! OUTPUT
 !!  results= ScaLAPACK matrix coming out of the operation (global dimensions must be equal to matrix
@@ -2977,7 +2990,8 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
 !!
 !! SOURCE
 
-subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,nev,use_gpu)
+subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,eigen,comm,istwf_k,&
+&                                            nev,use_gpu_elpa) ! Optional arguments
 
 #ifdef HAVE_LINALG_ELPA
 !Arguments ------------------------------------
@@ -2987,13 +3001,17 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
 !Local
   type(matrix_scalapack) :: tmp1, tmp2
-  integer :: i,n_col, n_row, nev__
+  integer :: i,n_col, n_row, nev__,use_gpu_elpa__
   integer,external :: indxl2g,numroc
 
   nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
+  use_gpu_elpa__ = 0
+#ifdef HAVE_LINALG_ELPA
+  if (present(use_gpu_elpa)) use_gpu_elpa__ = use_gpu_elpa
+#endif
 
   call tmp1%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
   call tmp2%init(matrix1%sizeb_global(1),matrix1%sizeb_global(2),processor,istwf_k)
@@ -3005,7 +3023,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          tmp1%buffer_cplx,tmp2%buffer_cplx, &
 &          processor%coords(1),processor%coords(2), &
 &          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm,use_gpu=use_gpu)
+&          matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   else
      call solve_gevp_real(matrix1%sizeb_global(1), nev__, &
 &          matrix1%sizeb_local(1),matrix1%sizeb_local(2),matrix1%sizeb_blocs(1), &
@@ -3013,7 +3031,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 &          tmp1%buffer_real,tmp2%buffer_real, &
 &          processor%coords(1),processor%coords(2), &
 &          processor%grid%dims(1),processor%grid%dims(2), &
-&          matrix1%descript%tab,processor%comm,use_gpu=use_gpu)
+&          matrix1%descript%tab,processor%comm,use_gpu_elpa=use_gpu_elpa__)
   end if
   call tmp1%free()
   call tmp2%free()
@@ -3026,7 +3044,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   DOUBLE PRECISION,intent(inout) :: eigen(:)
   integer,intent(in)  :: comm,istwf_k
   integer,optional,intent(in) :: nev
-  integer,optional,intent(in) :: use_gpu
+  integer,optional,intent(in) :: use_gpu_elpa
 
 #ifdef HAVE_LINALG_SCALAPACK
 !Local variables-------------------------------
@@ -3051,7 +3069,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 
 ! *************************************************************************
 
-  ABI_UNUSED(use_gpu) ! No GPU implementation is using scaLAPACK
+  ABI_UNUSED(use_gpu_elpa) ! No GPU implementation is using scaLAPACK
   nev__ = matrix1%sizeb_global(2); range = "A"; il = 0; iu = 0
   if (present(nev)) then
     nev__ = nev; range = "I"; il = 1; iu = nev
@@ -3186,6 +3204,7 @@ end subroutine compute_generalized_eigen_problem
 !!  matrix= the matrix to process
 !!  vector= eigenvalues of the matrix
 !!  istwf_k= 2 if we have a real matrix else complex.
+!!  [use_gpu_elpa]= Flag to activate the use of GPU (ELPA only)
 !!
 !! OUTPUT
 !!  vector
@@ -3196,7 +3215,8 @@ end subroutine compute_generalized_eigen_problem
 !!
 !! SOURCE
 
-subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k,use_gpu)
+subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,vector,istwf_k,&
+&                         use_gpu_elpa) ! Optional argument
 
 !Arguments ------------------------------------
 !scalaras
@@ -3204,7 +3224,7 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  integer,intent(in) :: cplex,nbli_global,nbco_global
  integer,intent(in) :: istwf_k
  class(processor_scalapack),intent(in) :: processor
- integer,intent(in),optional :: use_gpu
+ integer,intent(in),optional :: use_gpu_elpa
 !arrays
  real(dp),intent(inout) :: matrix(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: vector(:)
@@ -3213,13 +3233,18 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
 #ifdef HAVE_LINALG_ELPA
  integer :: i,j
 #endif
- integer :: ierr
+ integer :: ierr,use_gpu_elpa_
  type(matrix_scalapack) :: sca_matrix1
  type(matrix_scalapack) :: sca_matrix2
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
 
 ! *************************************************************************
+
+ use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
@@ -3262,7 +3287,8 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ! ================================
  ! COMPUTE EIGEN VALUES AND VECTORS : A * X = lambda  * X
  ! ================================
- call compute_eigen_problem(processor,sca_matrix1, sca_matrix2,vector, comm,istwf_k, use_gpu=use_gpu)
+ call compute_eigen_problem(processor,sca_matrix1, sca_matrix2,vector, comm,istwf_k, &
+&                           use_gpu_elpa=use_gpu_elpa_)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS
@@ -3308,6 +3334,7 @@ end subroutine compute_eigen1
 !!  matrix2= second ScaLAPACK matrix (matrix B)
 !!  vector=
 !!  istwf_k= 2 if we have a real matrix else complex.
+!!  [use_gpu_elpa]= Flag to activate the use of GPU (ELPA only)
 !!
 !! SIDE EFFECTS
 !!  results= ScaLAPACK matrix coming out of the operation
@@ -3315,7 +3342,8 @@ end subroutine compute_eigen1
 !!
 !! SOURCE
 
-subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k,use_gpu)
+subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k, &
+&                         use_gpu_elpa) ! Optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -3323,7 +3351,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  integer,intent(in) :: comm
  integer,intent(in) :: istwf_k
  class(processor_scalapack),intent(in) :: processor
- integer,optional,intent(in) :: use_gpu
+ integer,optional,intent(in) :: use_gpu_elpa
 !arrays
  real(dp),intent(inout) :: matrix1(cplex*nbli_global,nbco_global)
  real(dp),intent(inout) :: matrix2(cplex*nbli_global,nbco_global)
@@ -3333,12 +3361,17 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
 #ifdef HAVE_LINALG_ELPA
  integer :: i,j
 #endif
- integer :: ierr
+ integer :: ierr,use_gpu_elpa_
  type(matrix_scalapack) :: sca_matrix1, sca_matrix2, sca_matrix3
  real(dp),allocatable :: r_tmp_evec(:,:)
  complex(dpc),allocatable :: z_tmp_evec(:,:)
 
 ! *************************************************************************
+
+ use_gpu_elpa_=0
+#if defined HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
@@ -3386,10 +3419,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
 
  ! ================================
  ! COMPUTE EIGEN VALUES AND VECTORS : A * X = lambda * B * X
- ! ===============================
+ ! ================================
  call compute_generalized_eigen_problem(processor,sca_matrix1,sca_matrix2,&
-&                     sca_matrix3,vector,&
-&                     comm,istwf_k,use_gpu=use_gpu)
+&             sca_matrix3,vector,comm,istwf_k,use_gpu_elpa=use_gpu_elpa_)
 
  ! ==============================
  ! CONCATENATE EIGEN VECTORS

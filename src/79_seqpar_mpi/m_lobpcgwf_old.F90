@@ -210,7 +210,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 
 !Iniitializations/allocations of GPU parallelism
  use_linalg_gpu=0;use_lapack_gpu=0
- if ((dtset%use_gpu_cuda/=ABI_GPU_DISABLED).and. &
+ if ((dtset%use_gpu_flavor==ABI_GPU_LEGACY).and. &
 & (vectsize*blocksize*blocksize>dtset%gpu_linalg_limit)) use_linalg_gpu=1
 #if defined HAVE_LINALG_MAGMA
  use_lapack_gpu=use_linalg_gpu
@@ -404,7 +404,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
    ABI_MALLOC(eigen,(blocksize))
 
    call abi_xheev('v','u',blocksize,gramxax,blocksize,eigen,x_cplx=cplx,istwf_k=istwf_k, &
-   timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
+   timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu_magma=use_lapack_gpu)
 
 !  blockvectorx=matmul(blockvectorx,gramxax)
    call abi_xgemm('n','n',vectsize,blocksize,blocksize,cone,blockvectorx,&
@@ -835,7 +835,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
        tmpgramb=gramb
 
        call abi_xheev('v','u',bigorder,tmpgramb,bigorder,tmpeigen,x_cplx=cplx,istwf_k=istwf_k, &
-&       timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
+&       timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu_magma=use_lapack_gpu)
 
        condestgramb=tmpeigen(bigorder)/tmpeigen(1)
        ABI_FREE(tmpgramb)
@@ -874,7 +874,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
 !    ###########################################################################
 
      call abi_xhegv(1,'v','u',bigorder,grama,bigorder,gramb,bigorder,eigen,x_cplx=cplx,istwf_k=istwf_k, &
-     timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu=use_lapack_gpu)
+     timopt=timopt,tim_xeigen=tim_xeigen,use_slk=dtset%use_slk,use_gpu_magma=use_lapack_gpu)
 
      deltae=-one
      do iblocksize=1,blocksize

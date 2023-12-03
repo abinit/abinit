@@ -98,7 +98,7 @@ module m_xgTransposer
     integer :: mpiAlgo
     integer :: type
     integer :: perPair
-    integer :: use_gpu = ABI_GPU_DISABLED
+    integer :: use_gpu_flavor = ABI_GPU_DISABLED
     integer :: gpu_num_openmp_threads = 1
 #if defined HAVE_GPU && defined HAVE_YAKL
     real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
@@ -123,7 +123,7 @@ module m_xgTransposer
 !! NAME
 !! xgTransposer_constructor
 
-  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo,use_gpu)
+  subroutine xgTransposer_constructor(xgTransposer,xgBlock_linalg,xgBlock_colsrows,ncpuRows,ncpuCols,state,algo,use_gpu_flavor)
 
     type(xgTransposer_t)   , intent(inout) :: xgTransposer
     type(xgBlock_t), target, intent(in   ) :: xgBlock_linalg
@@ -132,7 +132,7 @@ module m_xgTransposer
     integer                , intent(in   ) :: ncpuCols
     integer                , intent(in   ) :: state
     integer                , intent(in   ) :: algo
-    integer , optional     , intent(in   ) :: use_gpu
+    integer , optional     , intent(in   ) :: use_gpu_flavor
     integer :: commLinalg
     integer :: ncols
     integer :: nrows
@@ -148,8 +148,8 @@ module m_xgTransposer
     xgTransposer%xgBlock_linalg => xgBlock_linalg
     xgTransposer%xgBlock_colsrows => xgBlock_colsrows
     xgTransposer%state = state
-    xgTransposer%use_gpu = ABI_GPU_DISABLED
-    if(present(use_gpu)) xgTransposer%use_gpu = use_gpu
+    xgTransposer%use_gpu_flavor = ABI_GPU_DISABLED
+    if(present(use_gpu_flavor)) xgTransposer%use_gpu_flavor = use_gpu_flavor
     commLinalg = comm(xgBlock_linalg)
     xgTransposer%mpiData(MPI_LINALG)%comm = commLinalg
     xgTransposer%mpiData(MPI_LINALG)%rank = xmpi_comm_rank(commLinalg)
@@ -267,7 +267,7 @@ module m_xgTransposer
     xgTransposer%mpiData(MPI_ROWS)%size = xmpi_comm_size(xgTransposer%mpiData(MPI_ROWS)%comm)
 
     xgTransposer%mpiAlgo = xgTransposerInitialized%mpiAlgo
-    xgTransposer%use_gpu = xgTransposerInitialized%use_gpu
+    xgTransposer%use_gpu_flavor = xgTransposerInitialized%use_gpu_flavor
 
     ncpuCols = xgTransposer%mpiData(MPI_COLS)%size
     ncpuRows = xgTransposer%mpiData(MPI_ROWS)%size
@@ -423,7 +423,7 @@ module m_xgTransposer
     case (STATE_LINALG)
       ! Assume xgBlock_colsrows is empty and not constructed because user cannot
       ! predict the size
-      if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+      if(xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
         if ( associated(xgTransposer%buffer) ) then
           ABI_FREE_MANAGED(xgTransposer%buffer)
@@ -436,7 +436,7 @@ module m_xgTransposer
 #else
         if ( allocated(xgTransposer%buffer) ) then
 #endif
-          if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+          if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
             !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
 #endif
@@ -448,14 +448,14 @@ module m_xgTransposer
       if ( xgTransposer%mpiData(MPI_COLS)%size == 1 ) then
         xgTransposer%xgBlock_colsrows = xgTransposer%xgBlock_linalg
       else
-        if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+        if(xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
           ABI_MALLOC_MANAGED(xgTransposer%buffer,(/2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows/))
 #endif
         else
           ABI_MALLOC(xgTransposer%buffer,(2,xgTransposer%ncolsColsRows*xgTransposer%nrowsColsRows))
         end if
-        if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+        if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
           !$OMP TARGET ENTER DATA MAP(alloc:xgTransposer%buffer)
 #endif
@@ -573,7 +573,7 @@ module m_xgTransposer
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
    ! just for debug
-   if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+   if( xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
       !call gpu_managed_ptr_status(C_LOC(recvbuf))
       buffer_size = size(recvbuf) * dp
       call gpu_data_prefetch_async(C_LOC(recvbuf), buffer_size, CPU_DEVICE_ID)
@@ -597,7 +597,7 @@ module m_xgTransposer
      !ABI_MALLOC(request,(1))
      !myrequest = 1
 
-     if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+     if( xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -650,7 +650,7 @@ module m_xgTransposer
    end select
 
    xgTransposer%state = STATE_LINALG
-   if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+   if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
      !$OMP TARGET UPDATE TO(recvbuf)
 #endif
@@ -761,7 +761,7 @@ module m_xgTransposer
 
      call xgBlock_reverseMap(xgTransposer%xgBlock_linalg,sendbuf, &
 &      xgTransposer%perPair,cols(xgTransposer%xgBlock_linalg)*nrowsLinalgMe)
-     if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+     if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
        !$OMP TARGET UPDATE FROM(sendbuf)
 #endif
@@ -769,7 +769,7 @@ module m_xgTransposer
      !write(*,*) "Before ialltoall"
 
     ! if gpu is enabled, data are located in GPU memory, so we copy them on a host buffer
-    if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if( xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       ABI_MALLOC(sendbuf_mpi, (size(sendbuf,1), size(sendbuf,2)) )
 
@@ -912,14 +912,14 @@ module m_xgTransposer
     ! if gpu is enabled, data are located in GPU memory, so we prefetch them on host
     ! to do the following reorganization.
     ! Alternatively, we should provide a GPU implementation of this data layout reorganization
-    if( xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if( xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
        buffer_size = size(bufferOrdered) * dp
        call gpu_data_prefetch_async(C_LOC(bufferOrdered), buffer_size, CPU_DEVICE_ID)
        call gpu_device_synchronize()
     end if
 
     ! if gpu enabled increase locally OpenMP num threads
-    if (xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if (xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
        call xomp_set_num_threads(xgTransposer%gpu_num_openmp_threads)
     end if
 #endif
@@ -938,13 +938,13 @@ module m_xgTransposer
           bufferOrdered(:,tos:toe) = bufferMess(:,froms:frome)
         end do
       end do
-      if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+      if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
         !$OMP TARGET UPDATE TO(bufferOrdered)
 #endif
       end if
     case (STATE_COLSROWS)
-      if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+      if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
         !$OMP TARGET UPDATE FROM(bufferOrdered)
 #endif
@@ -965,13 +965,13 @@ module m_xgTransposer
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     ! if gpu enable restore OpenMP num threads to 1
-    if (xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if (xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
        ! restore OMP_NUM_THREADS=1
        call xomp_set_num_threads(1)
     end if
 
     ! if gpu is enabled, transfer back data on GPU
-    if (xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if (xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
        buffer_size = size(bufferOrdered) * dp
        call gpu_data_prefetch_async(C_LOC(bufferOrdered), buffer_size)
        call gpu_device_synchronize()
@@ -1045,7 +1045,7 @@ module m_xgTransposer
       ABI_FREE(xgTransposer%nrowsLinalg)
     end if
 
-    if(xgTransposer%use_gpu == ABI_GPU_KOKKOS) then
+    if(xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
       if ( associated(xgTransposer%buffer) ) then
         ABI_FREE_MANAGED(xgTransposer%buffer)
@@ -1058,7 +1058,7 @@ module m_xgTransposer
 #else
       if ( allocated(xgTransposer%buffer) ) then
 #endif
-        if(xgTransposer%use_gpu == ABI_GPU_OPENMP) then
+        if(xgTransposer%use_gpu_flavor == ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
           !$OMP TARGET EXIT DATA MAP(release:xgTransposer%buffer)
 #endif

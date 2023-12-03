@@ -29,10 +29,12 @@ module m_dft_energy
  use m_xmpi
  use m_gemm_nonlop
  use m_gemm_nonlop_gpu
+ use m_gemm_nonlop_ompgpu
  use m_xcdata
  use m_cgtools
  use m_dtset
  use m_extfpmd
+ use m_ompgpu_utils
 
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -526,7 +528,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & dtset%natom,dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,&
-& nucdipmom=dtset%nucdipmom,use_gpu_impl=dtset%use_gpu_cuda)
+& nucdipmom=dtset%nucdipmom,use_gpu_flavor=dtset%use_gpu_flavor)
 
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
  if (with_vxctau) then
@@ -670,16 +672,34 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &       ph3d_k   =my_bandfft_kpt%ph3d_gather)
      end if
 
+!    If OpenMP GPU, load "hamiltonian" on GPU device
+     if (dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+       if(dtset%paral_kgb==0) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+       else if(istwf_k==1) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+       else if(istwf_k==2) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+       else
+         ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+       end if
+     end if
+
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       if(dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
+       if(dtset%use_gpu_flavor==ABI_GPU_DISABLED) then
          call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol, gs_hamk%ffnl_k, &
              gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
-       else if(dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+       else if(dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
          call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+             gs_hamk%ucvol, gs_hamk%ffnl_k, &
+             gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
+       else if(dtset%use_gpu_flavor==ABI_GPU_OPENMP) then
+         call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol, gs_hamk%ffnl_k, &
              gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k)
@@ -687,7 +707,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
 
 #if defined HAVE_GPU_CUDA
-     if (dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+     if (dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
        call gpu_update_ffnl_ph3d( &
          & ph3d, INT(size(ph3d),c_int64_t), &
          & ffnl, INT(size(ffnl),c_int64_t) )
@@ -762,7 +782,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
      end if
 
 #if defined HAVE_GPU_CUDA
-     if(dtset%use_gpu_cuda==ABI_GPU_LEGACY .or. dtset%use_gpu_cuda==ABI_GPU_KOKKOS) then
+     if(dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
        call gpu_finalize_ffnl_ph3d()
      end if
 #endif
@@ -784,6 +804,9 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  end do
 
  call gs_hamk%free()
+ if ( dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+   call ompgpu_free_hamilt_buffers()
+ end if
 
  if(xmpi_paral==1)then
 !  Accumulate enl eeig and ek on all proc.

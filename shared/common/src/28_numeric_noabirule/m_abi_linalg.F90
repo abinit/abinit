@@ -478,7 +478,7 @@ CONTAINS  !===========================================================
 !! optdriver= type of calculation (ground-state, response function, GW, ...)
 !! wfoptalg= wave functions optimization algorithm (CG, LOBPCG, CHEBFI, ...)
 !! paral_kgb= 1 if (k,g,b) parallelism is on
-!! use_gpu_cuda= 1 if Cuda (GPU) is on
+!! use_gpu_flavor = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !! use_slk= 1 if use of Scalapack is on
 !! np_slk= max. number of processes to be used in Scalapack calls
 !! comm_scalapack= global communicator to be used in case of Scalapack
@@ -487,13 +487,13 @@ CONTAINS  !===========================================================
 !!
 
  subroutine abi_linalg_init(max_eigen_pb_size,optdriver,wfoptalg,paral_kgb,&
-&                           use_gpu_cuda,use_slk,np_slk,comm_scalapack)
+&                           use_gpu_flavor,use_slk,np_slk,comm_scalapack)
 
 !Arguments ------------------------------------
  integer,intent(in) :: max_eigen_pb_size
  integer,intent(in) :: optdriver,wfoptalg,paral_kgb
  integer,intent(in) :: comm_scalapack,np_slk
- integer,intent(in) :: use_gpu_cuda,use_slk
+ integer,intent(in) :: use_gpu_flavor,use_slk
 
 !Local variables ------------------------------
  integer :: max_eigen_pb_size_eff=0
@@ -537,8 +537,8 @@ CONTAINS  !===========================================================
 
 !Set Lapack parameters
  max_eigen_pb_size_eff=max_eigen_pb_size
- if (wfoptalg==4.or.wfoptalg==14.or.use_gpu_cuda/=0) max_eigen_pb_size_eff=3*max_eigen_pb_size_eff
- lapack_full_storage=(wfoptalg==4.or.wfoptalg==14.or.use_gpu_cuda/=0)
+ if (wfoptalg==4.or.wfoptalg==14.or.use_gpu_flavor/=ABI_GPU_DISABLED) max_eigen_pb_size_eff=3*max_eigen_pb_size_eff
+ lapack_full_storage=(wfoptalg==4.or.wfoptalg==14.or.use_gpu_flavor/=ABI_GPU_DISABLED)
  lapack_packed_storage=.true.
  lapack_single_precision=.false.
  lapack_double_precision=.true.
@@ -613,8 +613,8 @@ CONTAINS  !===========================================================
 
 #ifdef HAVE_GPU_CUDA
 !Cublas initialization
- if (use_gpu_cuda/=ABI_GPU_DISABLED) call gpu_linalg_init()
- abi_linalg_gpu_mode = use_gpu_cuda !FIXME Add a check for this
+ if (use_gpu_flavor/=ABI_GPU_DISABLED) call gpu_linalg_init()
+ abi_linalg_gpu_mode = use_gpu_flavor !FIXME Add a check for this
 #endif
 
  if (need_work_space) call abi_linalg_work_allocate()
@@ -829,10 +829,10 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 !!
- subroutine abi_linalg_finalize(use_gpu_cuda)
+ subroutine abi_linalg_finalize(use_gpu_flavor)
 
 !Arguments ------------------------------------
- integer, intent(in) :: use_gpu_cuda
+ integer, intent(in) :: use_gpu_flavor
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
@@ -890,13 +890,13 @@ CONTAINS  !===========================================================
 #endif
 
 #ifdef HAVE_GPU_CUDA
- if (use_gpu_cuda/=ABI_GPU_DISABLED) then
+ if (use_gpu_flavor/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()
  end if
  abi_linalg_gpu_mode = ABI_GPU_DISABLED
 #else
- ABI_UNUSED(use_gpu_cuda)
+ ABI_UNUSED(use_gpu_flavor)
 #endif
 
 !Memory freeing

@@ -91,13 +91,13 @@ module m_xgScalapack
 !! OUTPUT
 !!
 !! SOURCE
-  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,use_gpu,usable)
+  subroutine  xgScalapack_init(xgScalapack,comm,maxDim,verbosity,use_gpu_flavor,usable)
 
     type(xgScalapack_t), intent(inout) :: xgScalapack
     integer            , intent(in   ) :: comm
     integer            , intent(in   ) :: maxDim
     integer            , intent(in   ) :: verbosity
-    logical            , intent(in   ) :: use_gpu
+    logical            , intent(in   ) :: use_gpu_flavor
     logical            , intent(  out) :: usable
     double precision :: tsec(2)
 #ifdef HAVE_LINALG_MKL_THREADS
@@ -202,7 +202,7 @@ module m_xgScalapack
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK), use_gpu)
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK), use_gpu_flavor)
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))
@@ -263,12 +263,12 @@ module m_xgScalapack
 
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
-  subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues,use_gpu)
+  subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues,use_gpu_flavor)
     use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
-    integer, optional  , intent(in)    :: use_gpu
+    integer, optional  , intent(in)    :: use_gpu_flavor
 #ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: eigenvalues_tmp(:,:)
@@ -279,16 +279,20 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
     integer :: req(2), status(MPI_STATUS_SIZE,2), ierr
-    integer :: l_use_gpu
+    integer :: l_use_gpu_flavor,l_use_gpu_elpa
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_heev,1,tsec)
 
-    l_use_gpu=ABI_GPU_DISABLED
-    if (present(use_gpu)) then
-      l_use_gpu = use_gpu
+    l_use_gpu_flavor=ABI_GPU_DISABLED
+    if (present(use_gpu_flavor)) then
+      l_use_gpu_flavor = use_gpu_flavor
     end if
+    l_use_gpu_elpa=0
+#ifdef HAVE_LINALG_ELPA
+    if (l_use_gpu_flavor/=ABI_GPU_DISABLED) l_use_gpu_elpa=1
+#endif
 
     ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
@@ -308,7 +312,7 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      if(l_use_gpu==ABI_GPU_OPENMP) then
+      if(l_use_gpu_flavor==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(matrixA)
         call xgBlock_copy_from_gpu(eigenvalues)
       end if
@@ -320,7 +324,8 @@ module m_xgScalapack
 
       call compute_eigen1(xgScalapack%comms(M__SLK), &
         toProcessorScalapack(xgScalapack), &
-        cplex,nbli_global,nbco_global,matrix,vector,istwf_k,use_gpu=use_gpu)
+        cplex,nbli_global,nbco_global,matrix,vector,istwf_k,&
+        use_gpu_elpa=l_use_gpu_elpa)
 
     end if
 
@@ -338,7 +343,7 @@ module m_xgScalapack
     end if
 #endif
 
-    if(l_use_gpu==ABI_GPU_OPENMP) then
+    if(l_use_gpu_flavor==ABI_GPU_OPENMP) then
       call xgBlock_copy_to_gpu(matrixA)
       call xgBlock_copy_to_gpu(eigenvalues)
     end if
@@ -354,13 +359,13 @@ module m_xgScalapack
 
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
-  subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues,use_gpu)
+  subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues,use_gpu_flavor)
     use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB
     type(xgBlock_t)    , intent(inout) :: eigenvalues
-    integer, optional  , intent(in)    :: use_gpu
+    integer, optional  , intent(in)    :: use_gpu_flavor
 #ifdef HAVE_LINALG_SCALAPACK
     double precision, pointer :: matrix1(:,:) !(cplex*nbli_global,nbco_global)
     double precision, pointer :: matrix2(:,:) !(cplex*nbli_global,nbco_global)
@@ -372,16 +377,20 @@ module m_xgScalapack
     integer :: nbli_global, nbco_global
     type(c_ptr) :: cptr
     integer :: req(2), status(MPI_STATUS_SIZE,2),ierr
-    integer :: l_use_gpu
+    integer :: l_use_gpu_flavor,l_use_gpu_elpa
 #endif
 
 #ifdef HAVE_LINALG_SCALAPACK
     call timab(M__tim_hegv,1,tsec)
 
-    l_use_gpu=ABI_GPU_DISABLED
-    if (present(use_gpu)) then
-      l_use_gpu = use_gpu
+    l_use_gpu_flavor=ABI_GPU_DISABLED
+    if (present(use_gpu_flavor)) then
+      l_use_gpu_flavor = use_gpu_flavor
     end if
+    l_use_gpu_elpa=0
+#ifdef HAVE_LINALG_ELPA
+    if (l_use_gpu_flavor/=ABI_GPU_DISABLED) l_use_gpu_elpa=1
+#endif
 
     ! Keep only working processors
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
@@ -405,7 +414,7 @@ module m_xgScalapack
 
       call xgBlock_getSize(matrixA,nbli_global,nbco_global)
 
-      if(l_use_gpu==ABI_GPU_OPENMP) then
+      if(l_use_gpu_flavor==ABI_GPU_OPENMP) then
         call xgBlock_copy_from_gpu(matrixA)
         call xgBlock_copy_from_gpu(matrixB)
         call xgBlock_copy_from_gpu(eigenvalues)
@@ -419,7 +428,8 @@ module m_xgScalapack
 
       call compute_eigen2(xgScalapack%comms(M__SLK), &
         toProcessorScalapack(xgScalapack), &
-        cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k,use_gpu=use_gpu)
+        cplex,nbli_global,nbco_global,matrix1,matrix2,vector,istwf_k,&
+        use_gpu_elpa=l_use_gpu_elpa)
     end if
 
     call timab(M__tim_hegv,2,tsec)
@@ -436,7 +446,7 @@ module m_xgScalapack
     end if
 #endif
 
-    if(l_use_gpu==ABI_GPU_OPENMP) then
+    if(l_use_gpu_flavor==ABI_GPU_OPENMP) then
       call xgBlock_copy_to_gpu(matrixA)
       call xgBlock_copy_to_gpu(eigenvalues)
     end if

@@ -803,6 +803,7 @@ contains
 !! Replacement of nonlop. same prototype as nonlop although not all options are implemented.
 !!
 !! INPUTS
+!! [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! SOURCE
 
@@ -813,7 +814,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 vectproj,use_gpu_cuda)
+&                 vectproj,use_gpu_flavor)
 
   !Arguments ------------------------------------
   !scalars
@@ -821,7 +822,7 @@ contains
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
-  integer,optional,intent(in) :: use_gpu_cuda
+  integer,optional,intent(in) :: use_gpu_flavor
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
@@ -871,7 +872,7 @@ contains
   ABI_UNUSED((/phkxredin,phkxredout,ucvol/))
   ABI_UNUSED((/mgfft,mpsang,mpssoang/))
   ABI_UNUSED((/kptin,kptout/))
-  ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,use_gpu_cuda/))
+  ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,use_gpu_flavor/))
 
   ! Check supported options
   if (.not.gemm_nonlop_use_gemm) then

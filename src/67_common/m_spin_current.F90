@@ -266,28 +266,28 @@ subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
 &       dpsidr(:,:,:,:,ispinor,1),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_flavor=dtset%use_gpu_flavor)
 
 !      FT Gpsi_y to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,2),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,2),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_flavor=dtset%use_gpu_flavor)
 
 !      FT Gpsi_z to real space
        call fourwf(cplex,dummy_denpot,gpsi(:,:,ispinor,3),dummy_fofgout,&
 &       dpsidr(:,:,:,:,ispinor,3),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_flavor=dtset%use_gpu_flavor)
 
 !      FT psi to real space
        call fourwf(cplex,dummy_denpot,psi(:,:,ispinor),dummy_fofgout,&
 &       psi_r(:,:,:,:,ispinor),gbound,gbound,&
 &       hdr%istwfk(ikpt),kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,npw,&
 &       npw,dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),&
-&       fft_option,0,one,one,use_gpu_cuda=dtset%use_gpu_cuda)
+&       fft_option,0,one,one,use_gpu_flavor=dtset%use_gpu_flavor)
 
      end do ! ispinor
 

@@ -152,7 +152,8 @@ contains
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' ';if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%use_gpu_flavor)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
  natom=dtsets(1)%natom
  nimage=dtsets(1)%nimage
@@ -1250,8 +1251,8 @@ contains
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%useylm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useylm','INT',0,firstchar=firstchar_gpu)
 
- intarr(1,:)=dtsets(:)%use_gpu_cuda
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gpu_cuda','INT',0,firstchar=firstchar_gpu)
+ intarr(1,:)=dtsets(:)%use_gpu_flavor
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gpu_flavor','INT',0,firstchar=firstchar_gpu)
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
