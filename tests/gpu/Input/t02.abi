@@ -3,14 +3,14 @@
 #
 # Test for Abinit: use of a Graphics Processing Unit
 #
-# Test multidataset mode with different values for use_gpu_cuda
+# Test multidataset mode with different values for use_gpu_flavor
 # Low cut-off for test; too few k-points
 # ================================================================
 
 #Datasets
  ndtset 2
- use_gpu_cuda1 0 ! No use of the GPU
- use_gpu_cuda2 1 !    Use of the GPU
+ use_gpu_flavor1 0 ! No use of the GPU
+ use_gpu_flavor2 1 !    Use of the GPU with legacy 2013 Cuda version
  prtwf1 1  getwfk2 -1
 
 #Unit cell

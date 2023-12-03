@@ -109,7 +109,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda
+ integer :: treads, use_gpu_flavor
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath
@@ -556,21 +556,21 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
 !GPU information
- use_gpu_cuda=ABI_GPU_DISABLED
- dtsets(:)%use_gpu_cuda=ABI_GPU_DISABLED
+ use_gpu_flavor=ABI_GPU_DISABLED
+ dtsets(:)%use_gpu_flavor=ABI_GPU_DISABLED
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
  call Get_ndevice(ii)
  if (ii>0) then
    do i1=1,ndtset_alloc
-     dtsets(i1)%use_gpu_cuda=-1
+     dtsets(i1)%use_gpu_flavor=ABI_GPU_UNKNOWN
    end do
  end if
 #endif
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda/=ABI_GPU_DISABLED) use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_flavor',tread,'INT')
+   if(tread==1)dtsets(idtset)%use_gpu_flavor=intarr(1)
+   if (dtsets(idtset)%use_gpu_flavor/=ABI_GPU_DISABLED) use_gpu_flavor=dtsets(idtset)%use_gpu_flavor
 end do
 
  dtsets(:)%use_nvtx=0
@@ -591,27 +591,27 @@ end do
  end do
 #endif
 
- if (use_gpu_cuda/=ABI_GPU_DISABLED) then
+ if (use_gpu_flavor/=ABI_GPU_DISABLED) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
      write(msg,'(5a)')&
-&     'Input variables use_gpu_cuda is on',ch10,&
+&     'Input variable use_gpu_flavor is on (:=0),',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
-&     'Action: change the input variable use_gpu_cuda.'
+&     'Action: change the input variable use_gpu_flavor.'
      ABI_ERROR(msg)
    end if
-   if(use_gpu_cuda==ABI_GPU_OPENMP) then
+   if(use_gpu_flavor==ABI_GPU_OPENMP) then
 #if !defined HAVE_OPENMP_OFFLOAD
      write(msg,'(7a)')&
-&     'Input variables use_gpu_cuda is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+&     'Input variable use_gpu_flavor is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
 &     'with OpenMP GPU offloading enabled !',ch10,&
-&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     'Action: change the input variable use_gpu_flavor',ch10,&
 &     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
 #endif
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
-&       'Input variables use_gpu_cuda is set to use OpenMP GPU backend ',ch10,&
+&       'Input variable use_gpu_flavor is set to use OpenMP GPU backend ',ch10,&
 &       'but no GPU is visible by OpenMP.',ch10,&
 &       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
 &       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
@@ -621,12 +621,12 @@ end do
        ABI_ERROR(msg)
      end if
 
-   else if(use_gpu_cuda==ABI_GPU_KOKKOS) then
+   else if(use_gpu_flavor==ABI_GPU_KOKKOS) then
 #if !defined HAVE_KOKKOS || !defined HAVE_YAKL
      write(msg,'(7a)')&
-&     'Input variables use_gpu_cuda is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+&     'Input variable use_gpu_flavor is set to use Kokkos backend but abinit hasn''t been built',ch10,&
 &     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
-&     'Action: change the input variable use_gpu_cuda',ch10,&
+&     'Action: change the input variable use_gpu_flavor',ch10,&
 &     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
      ABI_ERROR(msg)
 #endif
@@ -634,16 +634,16 @@ end do
 
 #else
    write(msg,'(7a)')&
-&   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
+&   'Input variable use_gpu_flavor is on but abinit hasn''t been built',ch10,&
 &   'with (double precision) gpu mode enabled !',ch10,&
-&   'Action: change the input variable use_gpu_cuda',ch10,&
+&   'Action: change the input variable use_gpu_flavor',ch10,&
 &   '        or re-compile ABINIT with double-precision Cuda enabled.'
    ABI_ERROR(msg)
 #endif
  end if
 
  dtsets(:)%diago_apply_block_sliced=1
- if(use_gpu_cuda/=ABI_GPU_DISABLED) dtsets(:)%diago_apply_block_sliced=0
+ if(use_gpu_flavor/=ABI_GPU_DISABLED) dtsets(:)%diago_apply_block_sliced=0
  do idtset=1,ndtset_alloc
     jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
@@ -2225,13 +2225,13 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    wvl_bigdft=.false.
    if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
-!  Special case of use_gpu_cuda (can be undertermined at this point)
-!  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
-   if (dtsets(idtset)%use_gpu_cuda==-1) then
+!  Special case of use_gpu_flavor (can be undertermined at this point)
+!  use_gpu_flavor=ABI_GPU_UNKNOWN means undetermined ; here impose its value due to some restrictions
+   if (dtsets(idtset)%use_gpu_flavor==ABI_GPU_UNKNOWN) then
      if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=ABI_GPU_DISABLED
+       dtsets(idtset)%use_gpu_flavor=ABI_GPU_DISABLED
      else
-       dtsets(idtset)%use_gpu_cuda=ABI_GPU_LEGACY
+       dtsets(idtset)%use_gpu_flavor=ABI_GPU_LEGACY
      end if
   end if
 

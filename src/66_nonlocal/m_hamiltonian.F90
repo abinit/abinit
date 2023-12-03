@@ -187,11 +187,10 @@ module m_hamiltonian
   integer :: n4,n5,n6
    ! same as ngfft(4:6)
 
-  integer :: use_gpu_impl
-  ! governs wheter we do the hamiltonian calculation on gpu or not
+  integer :: use_gpu_flavor
+  ! Governs the choice of the GPU implementation:
   !        = 0 ==> do not use GPU
-  !        = 1 ==> use CUDA GPU implementation of hamiltonian operators
-  !        = 666 ==> use openMP GPU implementation of hamiltonian operators
+  !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
 
   integer :: usecprj
    ! usecprj= 1 if cprj projected WF are stored in memory
@@ -597,7 +596,7 @@ subroutine destroy_hamiltonian(Ham)
  end if
 
  ! Integer arrays
- if(Ham%use_gpu_impl == ABI_GPU_KOKKOS) then
+ if(Ham%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_SFREE_MANAGED(Ham%atindx)
    ABI_SFREE_MANAGED(Ham%atindx1)
@@ -644,7 +643,7 @@ subroutine destroy_hamiltonian(Ham)
  ABI_SFREE(Ham%ekb_spin)
  ABI_SFREE(Ham%sij)
  ABI_SFREE(Ham%nucdipmom)
- if(Ham%use_gpu_impl == ABI_GPU_KOKKOS) then
+ if(Ham%use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_SFREE_MANAGED(Ham%ph1d)
 #endif
@@ -657,7 +656,7 @@ subroutine destroy_hamiltonian(Ham)
  if (associated(Ham%fockACE_k)) nullify(Ham%fockACE_k)
  if (associated(Ham%fockbz)) nullify(Ham%fockbz)
 #if defined HAVE_GPU_CUDA
- if(Ham%use_gpu_impl==ABI_GPU_LEGACY .or. Ham%use_gpu_impl==ABI_GPU_KOKKOS) then
+ if(Ham%use_gpu_flavor==ABI_GPU_LEGACY .or. Ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
    call gpu_finalize_ham_data()
  end if
 #endif
@@ -679,8 +678,7 @@ end subroutine destroy_hamiltonian
 !!
 !! INPUTS
 !!  [comm_atom]=optional, MPI communicator over atoms
-!!  [fockcommon <type(fock_common_type)>]= common quantities to calculate Fock exact exchange
-!!  [fockbz <type(fock_BZ_type)>]= quantities to calculate Fock exact exchange in the total BZ
+!!  [fock <type(fock_type)>]= common quantities to calculate Fock exact exchange
 !!  natom=Number of atoms in the unit cell.
 !!  nfft=Number of FFT grid points (for this processors).
 !!  nspinor=Number of spinorial components
@@ -702,6 +700,7 @@ end subroutine destroy_hamiltonian
 !!  rprimd(3,3)=Direct lattice vectors in Bohr.
 !!  typat(natom)=Type of each atom.
 !!  [usecprj]=flag use only for PAW; 1 if cprj datastructure is allocated
+!!  [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!  xred(3,natom)=Reduced coordinates of the atoms.
 !!  pawtab(ntypat*psps%usepaw)<pawtab_type>=PAW TABulated data initialized at start.
 !!  [paw_ij(:) <type(paw_ij_type)>]=optional, paw arrays given on (i,j) channels
@@ -717,12 +716,12 @@ end subroutine destroy_hamiltonian
 subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 &                           xred,nfft,mgfft,ngfft,rprimd,nloalg,&
 &                           ph1d,usecprj,comm_atom,mpi_atmtab,mpi_spintab,paw_ij,&  ! optional
-&                           electronpositron,fock,nucdipmom,use_gpu_impl)           ! optional
+&                           electronpositron,fock,nucdipmom,use_gpu_flavor)         ! optional
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft,natom,nspinor,nsppol,nspden,mgfft
- integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_impl
+ integer,optional,intent(in) :: comm_atom,usecprj,use_gpu_flavor
  class(gs_hamiltonian_type),intent(inout),target :: ham
  type(electronpositron_type),optional,pointer :: electronpositron
  type(fock_type),optional,pointer :: fock
@@ -738,7 +737,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !Local variables-------------------------------
 !scalars
- integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp,l_use_gpu_impl
+ integer :: my_comm_atom,my_nsppol,itypat,iat,ilmn,indx,isp,cplex_dij,jsp,l_use_gpu_flavor
  real(dp) :: ucvol
 !arrays
  integer :: my_spintab(2)
@@ -755,14 +754,14 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
  my_spintab=0;my_spintab(1:nsppol)=1;if (present(mpi_spintab)) my_spintab(1:2)=mpi_spintab(1:2)
  my_nsppol=count(my_spintab==1)
- l_use_gpu_impl=ABI_GPU_DISABLED; if(present(use_gpu_impl)) l_use_gpu_impl=use_gpu_impl
+ l_use_gpu_flavor=ABI_GPU_DISABLED; if(present(use_gpu_flavor)) l_use_gpu_flavor=use_gpu_flavor
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ABI_CHECK(mgfft==MAXVAL(ngfft(1:3)),"Wrong mgfft")
 
 !Allocate the arrays of the Hamiltonian whose dimensions do not depend on k
- if(l_use_gpu_impl == ABI_GPU_KOKKOS) then
+ if(l_use_gpu_flavor == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_MALLOC_MANAGED(ham%atindx,(/natom/))
    ABI_MALLOC_MANAGED(ham%atindx1,(/natom/))
@@ -820,7 +819,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
  ham%usepaw     =psps%usepaw
  ham%ucvol      =ucvol
  ham%useylm     =psps%useylm
- ham%use_gpu_impl=ABI_GPU_DISABLED ; if(PRESENT(use_gpu_impl)) ham%use_gpu_impl=use_gpu_impl
+ ham%use_gpu_flavor=ABI_GPU_DISABLED ; if(PRESENT(use_gpu_flavor)) ham%use_gpu_flavor=use_gpu_flavor
 
  ham%pspso(:)   =psps%pspso(1:psps%ntypat)
  if (psps%usepaw==1) then
@@ -883,7 +882,7 @@ subroutine init_hamiltonian(ham,Psps,pawtab,nspinor,nsppol,nspden,natom,typat,&
 
 !  Update enl on GPU (will do it later for PAW)
 #if defined HAVE_GPU_CUDA
-   if (ham%use_gpu_impl==ABI_GPU_LEGACY .or. ham%use_gpu_impl==ABI_GPU_KOKKOS) then
+   if (ham%use_gpu_flavor==ABI_GPU_LEGACY .or. ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
      call gpu_update_ham_data(&
        & ham%ekb(:,:,:,1), INT(size(ham%ekb),   c_int64_t), &
        & ham%sij,          INT(size(ham%sij),   c_int64_t), &
@@ -1318,7 +1317,7 @@ subroutine copy_hamiltonian(gs_hamk_out,gs_hamk_in)
  gs_hamk_out%n4 = gs_hamk_in%n4
  gs_hamk_out%n5 = gs_hamk_in%n5
  gs_hamk_out%n6 = gs_hamk_in%n6
- gs_hamk_out%use_gpu_impl = gs_hamk_in%use_gpu_impl
+ gs_hamk_out%use_gpu_flavor = gs_hamk_in%use_gpu_flavor
  gs_hamk_out%usecprj = gs_hamk_in%usecprj
  gs_hamk_out%usepaw = gs_hamk_in%usepaw
  gs_hamk_out%useylm = gs_hamk_in%useylm
@@ -1492,7 +1491,7 @@ subroutine load_spin_hamiltonian(Ham,isppol,vectornd,vlocal,vxctaulocal,with_non
 
  ! Update enl and sij on GPU
 #if defined HAVE_GPU_CUDA
- if (Ham%use_gpu_impl==ABI_GPU_LEGACY .or. Ham%use_gpu_impl==ABI_GPU_KOKKOS) then
+ if (Ham%use_gpu_flavor==ABI_GPU_LEGACY .or. Ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
    call gpu_update_ham_data(&
      & Ham%ekb(:,:,:,1), INT(size(Ham%ekb),   c_int64_t), &
      & Ham%sij,          INT(size(Ham%sij),   c_int64_t), &

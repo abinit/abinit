@@ -351,17 +351,18 @@ module defs_basis
 !     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
 
-! Parameters telling wether to use CPU implementation of algorithms
-! or one of available GPU implementations.
-! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
+! Parameters for the GPU implementation(s)
+ ! GPU implementation undetermined
+ integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
  ! Not using any GPU implementation, implies running on CPU
  integer,parameter,public :: ABI_GPU_DISABLED = 0
  ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
  integer,parameter,public :: ABI_GPU_LEGACY   = 1
  ! GPU implementation relying on OpenMP v5 "TARGET" construct
  integer,parameter,public :: ABI_GPU_OPENMP   = 2
- ! GPU implementation relying on Kokkos framework
+ ! GPU implementation relying on Kokkos + cuda framework
  integer,parameter,public :: ABI_GPU_KOKKOS   = 3
+ ! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file

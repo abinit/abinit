@@ -754,7 +754,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  linalg initialisation
    linalg_max_size=maxval(dtset%nband(:))
    call abi_linalg_init(linalg_max_size,dtset%optdriver,dtset%wfoptalg,dtset%paral_kgb,&
-        dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
+        dtset%use_gpu_flavor,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
 
@@ -927,7 +927,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    ABI_FREE(xred)
    ABI_FREE(npwtot)
 
-   call abi_linalg_finalize(dtset%use_gpu_cuda)
+   call abi_linalg_finalize(dtset%use_gpu_flavor)
    call xg_finalize()
 
    call cwtime_report(sjoin(" dataset:", itoa(idtset)), cpu, wall, gflops)

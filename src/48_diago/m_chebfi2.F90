@@ -118,9 +118,9 @@ module m_chebfi2
    ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
    ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
    ! wherever it is safe to do; in that case we use gpu_num_openmp_threads to specify
-   ! the number of OpenMP threads. This value is controlly by dtset variable
+   ! the number of OpenMP threads. This value is controlled by dtset variable
    ! dtset%use_gpu_openmp_threads
-   integer :: use_gpu_cuda
+   integer :: use_gpu_flavor
    integer :: gpu_num_openmp_threads = 1 ! only used if gpu is enabled, number of OpenMP threads used
    integer :: me_g0
 
@@ -194,7 +194,7 @@ module m_chebfi2
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
      paral_kgb,nproc_band,bandpp,nproc_fft, &
-     nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,use_gpu_cuda, &
+     nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,use_gpu_flavor, &
      gpu_num_openmp_threads)
 
  implicit none
@@ -212,7 +212,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
  integer       , intent(in   ) :: space
  integer       , intent(in   ) :: spacecom
  integer       , intent(in   ) :: spacedim
- integer       , intent(in   ) :: use_gpu_cuda
+ integer       , intent(in   ) :: use_gpu_flavor
  logical       , intent(in   ) :: paw
  real(dp)      , intent(in   ) :: ecut
  real(dp)      , intent(in   ) :: tolerance
@@ -241,7 +241,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
  chebfi%istwf_k      = istwf_k
  chebfi%me_g0        = me_g0
  chebfi%paw          = paw
- chebfi%use_gpu_cuda = use_gpu_cuda
+ chebfi%use_gpu_flavor = use_gpu_flavor
 
  if (present(gpu_num_openmp_threads)) then
     chebfi%gpu_num_openmp_threads = gpu_num_openmp_threads
@@ -301,14 +301,14 @@ subroutine chebfi_allocateAll(chebfi)
  call timab(tim_X_NP_init,1,tsec)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
-   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda) !regular arrays
+   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor) !regular arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1, spacedim, neigenpairs)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1, spacedim, neigenpairs)
  else
    total_spacedim = spacedim
    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
    chebfi%total_spacedim = total_spacedim
-   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda) !transposed arrays
+   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor) !transposed arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,               1, total_spacedim, chebfi%bandpp)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, chebfi%bandpp+1, total_spacedim, chebfi%bandpp)
  end if
@@ -316,8 +316,8 @@ subroutine chebfi_allocateAll(chebfi)
 
  call timab(tim_AX_BX_init,1,tsec)
  !transposer will handle these arrays automatically
- call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
- call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
+ call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor)
+ call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor)
  call timab(tim_AX_BX_init,2,tsec)
 
 end subroutine chebfi_allocateAll
@@ -515,10 +515,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    end subroutine getBm1X
  end interface
  interface
-   subroutine pcond(W, use_gpu_cuda)
+   subroutine pcond(W, use_gpu_flavor)
      use m_xg, only : xgBlock_t
      type(xgBlock_t), intent(inout)           :: W
-     integer        , intent(in   ), optional :: use_gpu_cuda
+     integer        , intent(in   ), optional :: use_gpu_flavor
    end subroutine pcond
  end interface
 
@@ -558,10 +558,10 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
 
  if (chebfi%paral_kgb == 0) then
    ABI_MALLOC(nline_bands,(neigenpairs))
-   call xg_init(DivResults, chebfi%space, neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(DivResults, chebfi%space, neigenpairs, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
  else
    ABI_MALLOC(nline_bands,(chebfi%bandpp))
-   call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
  end if
 
  tolerance = chebfi%tolerance
@@ -574,7 +574,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    nCpuCols = chebfi%nproc_band
 
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL,&
-       use_gpu=chebfi%use_gpu_cuda)
+       use_gpu_flavor=chebfi%use_gpu_flavor)
 
    !save existing ABinit communicators
    comm_fft_save = mpi_enreg%comm_fft
@@ -589,9 +589,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
 
    ! only used if GPU is enabled
-   chebfi%xgTransposerX%use_gpu  = chebfi%use_gpu_cuda
-   chebfi%xgTransposerAX%use_gpu = chebfi%use_gpu_cuda
-   chebfi%xgTransposerBX%use_gpu = chebfi%use_gpu_cuda
+   chebfi%xgTransposerX%use_gpu_flavor  = chebfi%use_gpu_flavor
+   chebfi%xgTransposerAX%use_gpu_flavor = chebfi%use_gpu_flavor
+   chebfi%xgTransposerBX%use_gpu_flavor = chebfi%use_gpu_flavor
 
    chebfi%xgTransposerX%gpu_num_openmp_threads  = chebfi%gpu_num_openmp_threads
    chebfi%xgTransposerAX%gpu_num_openmp_threads = chebfi%gpu_num_openmp_threads
@@ -625,7 +625,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  ! they are no longer necessary as chebfi_rayleighRitzQuotients can fully run on GPU
  ! it is no longer necessary to issue a data prefetch, data are already present on device
 
-!  if (chebfi%use_gpu_cuda == ABI_GPU_KOKKOS) then
+!  if (chebfi%use_gpu_flavor == ABI_GPU_KOKKOS) then
 ! #if defined(HAVE_GPU_CUDA)
 !    call xgBlock_prefetch_async(chebfi%xXColsRows,  CPU_DEVICE_ID)
 !    call xgBlock_prefetch_async(chebfi%xAXColsRows, CPU_DEVICE_ID)
@@ -743,9 +743,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
  ABI_FREE(nline_bands)
 
  if (xmpi_comm_size(chebfi%spacecom) > 1) then
-   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%use_gpu_cuda)    !copy cannot be avoided :(
+   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%use_gpu_flavor)    !copy cannot be avoided :(
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-   if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
+   if (chebfi%use_gpu_flavor==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
    end if
 #endif
@@ -812,23 +812,23 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 !Doesnt work with npfft (ncols=1 in the formula below) ???
 
  if (chebfi%paral_kgb == 0) then
-   call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
-   call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
+   call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
  else
-   call xg_init(Results1, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
-   call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, use_gpu=chebfi%use_gpu_cuda)
+   call xg_init(Results1, chebfi%space, chebfi%bandpp, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
+   call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, use_gpu_flavor=chebfi%use_gpu_flavor)
  end if
 
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, &
-   & use_gpu_cuda=chebfi%use_gpu_cuda)
+   & use_gpu_flavor=chebfi%use_gpu_flavor)
 
 !PAW
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, &
-   & use_gpu_cuda=chebfi%use_gpu_cuda)
+   & use_gpu_flavor=chebfi%use_gpu_flavor)
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
    & maxeig, maxeig_pos, mineig, mineig_pos, &
-   & use_gpu_cuda=chebfi%use_gpu_cuda)
+   & use_gpu_flavor=chebfi%use_gpu_flavor)
 
  call xg_free(Results1)
  call xg_free(Results2)
@@ -892,28 +892,28 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
-   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1, chebfi%use_gpu_cuda)
+   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1, chebfi%use_gpu_flavor)
  end if
 
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
- call xgBlock_scale(chebfi%xXColsRows, center, 1, chebfi%use_gpu_cuda) !scale by center
+ call xgBlock_scale(chebfi%xXColsRows, center, 1, chebfi%use_gpu_flavor) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
- call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows, chebfi%use_gpu_cuda)
+ call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows, chebfi%use_gpu_flavor)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1, chebfi%use_gpu_cuda) !counter scale by 1/center
+ call xgBlock_scale(chebfi%xXColsRows, 1/center, 1, chebfi%use_gpu_flavor) !counter scale by 1/center
 
  if (iline == 0) then
-   call xgBlock_scale(chebfi%X_next, one_over_r, 1, chebfi%use_gpu_cuda)
+   call xgBlock_scale(chebfi%X_next, one_over_r, 1, chebfi%use_gpu_flavor)
  else
-   call xgBlock_scale(chebfi%X_next, two_over_r, 1, chebfi%use_gpu_cuda)
+   call xgBlock_scale(chebfi%X_next, two_over_r, 1, chebfi%use_gpu_flavor)
 
-   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev, chebfi%use_gpu_cuda)
+   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev, chebfi%use_gpu_flavor)
  end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
+ if (chebfi%use_gpu_flavor==ABI_GPU_KOKKOS) then
    call gpu_device_synchronize()
  end if
 #endif
@@ -1018,46 +1018,46 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   neigenpairs  = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
 
 #ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,(chebfi%use_gpu_cuda/=ABI_GPU_DISABLED),use_slk)
+    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,(chebfi%use_gpu_flavor/=ABI_GPU_DISABLED),use_slk)
     if ( use_slk) then
       eigenSolver = EIGENSLK
     end if
 #endif
 
-  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
-  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu=chebfi%use_gpu_cuda)
+  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor)
+  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,use_gpu_flavor=chebfi%use_gpu_flavor)
 
   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_SCALE)
   call timab(tim_RR_gemm_1,1,tsec)
   call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self, &
-    &               use_gpu_cuda=chebfi%use_gpu_cuda)
+    &               use_gpu_flavor=chebfi%use_gpu_flavor)
 
   if (chebfi%paw) then
     call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self, &
-      &               use_gpu_cuda=chebfi%use_gpu_cuda)
+      &               use_gpu_flavor=chebfi%use_gpu_flavor)
   else
     call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self, &
-       &              use_gpu_cuda=chebfi%use_gpu_cuda)
+       &              use_gpu_flavor=chebfi%use_gpu_flavor)
   end if
   call timab(tim_RR_gemm_1,2,tsec)
 
   call timab(tim_RR_scale,1,tsec)
   if(chebfi%istwf_k == 2) then
-    call xgBlock_scale(chebfi%X, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+    call xgBlock_scale(chebfi%X, 1/sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
     if (me_g0 == 1)  then
       call xgBlock_setBlock(chebfi%X, X_first_row, 1, 2, neigenpairs) !has to be 2 rows in SPACE_CR
-      call xgBlock_scale(X_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+      call xgBlock_scale(X_first_row, sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
     end if
-    call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+    call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
     if (me_g0 == 1)  then
       call xgBlock_setBlock(chebfi%AX%self, AX_first_row, 1, 2, neigenpairs)
-      call xgBlock_scale(AX_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+      call xgBlock_scale(AX_first_row, sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
     end if
     if (chebfi%paw) then
-      call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+      call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
       if (me_g0 == 1)  then
         call xgBlock_setBlock(chebfi%BX%self, BX_first_row, 1, 2, neigenpairs)
-        call xgBlock_scale(BX_first_row, sqrt2, 1,use_gpu_cuda=chebfi%use_gpu_cuda)
+        call xgBlock_scale(BX_first_row, sqrt2, 1,use_gpu_flavor=chebfi%use_gpu_flavor)
       end if
     end if
   end if
@@ -1069,11 +1069,11 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   select case (eigenSolver)
   case (EIGENVD)
     call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info, &
-      &              use_gpu_cuda=1*chebfi%use_gpu_cuda)
+      &              use_gpu_flavor=1*chebfi%use_gpu_flavor)
   case (EIGENV)
     call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
   case (EIGENSLK)
-    call xgScalapack_hegv(scalapack,A_und_X%self,B_und_X%self,chebfi%eigenvalues,use_gpu=chebfi%use_gpu_cuda)
+    call xgScalapack_hegv(scalapack,A_und_X%self,B_und_X%self,chebfi%eigenvalues,use_gpu_flavor=chebfi%use_gpu_flavor)
     info = 0 ! No error code returned for the moment
   case default
     ABI_ERROR("Error for Eigen Solver HEGV")
@@ -1092,11 +1092,11 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
   if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
     call xg_free(chebfi%X_NP)
 
-    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom, use_gpu=chebfi%use_gpu_cuda)
+    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom, use_gpu_flavor=chebfi%use_gpu_flavor)
 
     call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1,spacedim,neigenpairs)
     call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1,spacedim,neigenpairs)
-    call xgBlock_zero(chebfi%X_NP%self, chebfi%use_gpu_cuda)
+    call xgBlock_zero(chebfi%X_NP%self, chebfi%use_gpu_flavor)
   end if
   call timab(tim_RR_XNP_reset,2,tsec)
   ABI_NVTX_END_RANGE()
@@ -1109,7 +1109,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap,  1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_flavor=chebfi%use_gpu_flavor)
 
   else if (remainder == 2) then
     call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
@@ -1117,7 +1117,7 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap,  1, spacedim, neigenpairs)
 
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_cuda=chebfi%use_gpu_cuda)
+      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, use_gpu_flavor=chebfi%use_gpu_flavor)
 
   else if (remainder == 0) then
     call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
@@ -1125,11 +1125,11 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
     call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
     call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
       &               chebfi%X, A_und_X%self, 0.d0, chebfi%X_next, &
-      &               use_gpu_cuda=chebfi%use_gpu_cuda)
-    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1, use_gpu_cuda=chebfi%use_gpu_cuda)    !copy cannot be avoided :(
+      &               use_gpu_flavor=chebfi%use_gpu_flavor)
+    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1, use_gpu_flavor=chebfi%use_gpu_flavor)    !copy cannot be avoided :(
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
+    if (chebfi%use_gpu_flavor==ABI_GPU_KOKKOS) then
       call gpu_device_synchronize()
     end if
 #endif
@@ -1138,18 +1138,18 @@ subroutine chebfi_rayleighRitz(chebfi,nline)
 
   call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &
     &               chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap, &
-    &               use_gpu_cuda=chebfi%use_gpu_cuda)
+    &               use_gpu_flavor=chebfi%use_gpu_flavor)
 
   if (chebfi%paw) then
     call xgBlock_gemm(chebfi%BX%self%normal, A_und_X%self%normal, 1.0d0, &
       &               chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap, &
-      &               use_gpu_cuda=chebfi%use_gpu_cuda)
+      &               use_gpu_flavor=chebfi%use_gpu_flavor)
   end if
 
   call timab(tim_RR_gemm_2,2,tsec)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-  if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
+  if (chebfi%use_gpu_flavor==ABI_GPU_KOKKOS) then
     call gpu_device_synchronize()
   end if
 #endif
@@ -1189,10 +1189,10 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
   type(chebfi_t)  , intent(inout) :: chebfi
   type(xgBlock_t) , intent(inout) :: residu
   interface
-    subroutine pcond(W, use_gpu_cuda)
+    subroutine pcond(W, use_gpu_flavor)
       use m_xg, only : xgBlock_t
       type(xgBlock_t), intent(inout)           :: W
-      integer        , intent(in   ), optional :: use_gpu_cuda
+      integer        , intent(in   ), optional :: use_gpu_flavor
     end subroutine pcond
   end interface
 
@@ -1206,18 +1206,18 @@ real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
   ! *********************************************************************
 
   if (chebfi%paw) then
-    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%BX_swap, chebfi%AX_swap, chebfi%use_gpu_cuda)
+    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%BX_swap, chebfi%AX_swap, chebfi%use_gpu_flavor)
   else
-    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%X_swap,  chebfi%AX_swap, chebfi%use_gpu_cuda)
+    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%X_swap,  chebfi%AX_swap, chebfi%use_gpu_flavor)
   end if
 
   ! pcond call
   call timab(tim_pcond,1,tsec)
-  call pcond(chebfi%AX_swap, chebfi%use_gpu_cuda)
+  call pcond(chebfi%AX_swap, chebfi%use_gpu_flavor)
   call timab(tim_pcond,2,tsec)
 
   call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
-    min_val=minResidu, min_elt=eigResiduMin, use_gpu_cuda=chebfi%use_gpu_cuda)
+    min_val=minResidu, min_elt=eigResiduMin, use_gpu_flavor=chebfi%use_gpu_flavor)
 
   chebfi_computeResidue = maxResidu
 
@@ -1286,12 +1286,12 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
     call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
     call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
 
-    call xgBlock_scale(X_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
-    call xgBlock_scale(AX_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
+    call xgBlock_scale(X_part, 1/ampfactor, 1, chebfi%use_gpu_flavor)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1, chebfi%use_gpu_flavor)
 
     if(chebfi%paw) then
       call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-      call xgBlock_scale(BX_part, 1/ampfactor, 1, chebfi%use_gpu_cuda)
+      call xgBlock_scale(BX_part, 1/ampfactor, 1, chebfi%use_gpu_flavor)
     end if
   end do
 

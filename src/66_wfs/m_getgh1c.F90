@@ -267,7 +267,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gh1c,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
        gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
        npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-       use_gpu_cuda=gs_hamkq%use_gpu_impl)
+       use_gpu_flavor=gs_hamkq%use_gpu_flavor)
      if(gs_hamkq%nspinor==2)then
        ABI_MALLOC(cwave_sp,(2,npw))
        ABI_MALLOC(gh1c_sp,(2,npw1))
@@ -279,7 +279,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave_sp,gh1c_sp,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
          gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
          npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-         use_gpu_cuda=gs_hamkq%use_gpu_impl)
+         use_gpu_flavor=gs_hamkq%use_gpu_flavor)
 !$OMP PARALLEL DO
        do ipw=1,npw1
          gh1c(1,ipw+npw1)=gh1c_sp(1,ipw)
@@ -310,13 +310,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef1,gh1c1,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
          gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
          npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-         use_gpu_cuda=gs_hamkq%use_gpu_impl)
+         use_gpu_flavor=gs_hamkq%use_gpu_flavor)
        ! gh1c2=v22*phi2
        vlocal1_tmp(:,:,:)=rf_hamkq%vlocal1(:,:,:,2)
        call fourwf(rf_hamkq%cplex,vlocal1_tmp,cwavef2,gh1c2,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
          gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
          npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-         use_gpu_cuda=gs_hamkq%use_gpu_impl)
+         use_gpu_flavor=gs_hamkq%use_gpu_flavor)
        ABI_FREE(vlocal1_tmp)
        cplex1=2
        ABI_MALLOC(vlocal1_tmp,(cplex1*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
@@ -345,7 +345,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call fourwf(cplex1,vlocal1_tmp,cwavef1,gh1c3,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
          gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
          npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-         use_gpu_cuda=gs_hamkq%use_gpu_impl)
+         use_gpu_flavor=gs_hamkq%use_gpu_flavor)
        ! gh1c4=(re(v12)+im(v12))*phi2 => v^12*phi2
        if(rf_hamkq%cplex==1) then
          do i3=1,gs_hamkq%n6
@@ -369,7 +369,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        call fourwf(cplex1,vlocal1_tmp,cwavef2,gh1c4,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
          gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
          npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
-         use_gpu_cuda=gs_hamkq%use_gpu_impl)
+         use_gpu_flavor=gs_hamkq%use_gpu_flavor)
        ABI_FREE(vlocal1_tmp)
        ! Build gh1c from pieces
        ! gh1c_1 = (v11, v12) (psi1) matrix vector product
@@ -757,7 +757,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    call getgh1ndc(cwave,gh1ndc,gs_hamkq%gbound_k,gs_hamkq%istwf_k,gs_hamkq%kg_k,&
      & gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,&
      & gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,my_nspinor,rf_hamkq%vectornd,&
-     & gs_hamkq%use_gpu_impl)
+     & gs_hamkq%use_gpu_flavor)
    do ispinor=1,my_nspinor
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
@@ -1485,7 +1485,7 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
    call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gvloc1dqc,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
  & gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
  & npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
- & use_gpu_cuda=gs_hamkq%use_gpu_impl)
+ & use_gpu_flavor=gs_hamkq%use_gpu_flavor)
 
    ABI_FREE(work)
 
@@ -1849,11 +1849,11 @@ end subroutine getgh1dqc_setup
 !! SOURCE
 
 subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
-&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_cuda)
+&                      ndat,ngfft,npw_k,nvloc,n4,n5,n6,my_nspinor,vectornd,use_gpu_flavor)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_cuda
+ integer,intent(in) :: istwf_k,mgfft,my_nspinor,ndat,npw_k,nvloc,n4,n5,n6,use_gpu_flavor
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
@@ -1897,7 +1897,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
     ! apply vector potential in direction ipert to input wavefunction
     call fourwf(1,vectornd,cwavein,ghc1,work,gbound_k,gbound_k,&
       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+      & tim_fourwf,weight,weight,use_gpu_flavor=use_gpu_flavor)
 
     ! scale by 2\pi\alpha^2
     gh1ndc=two_pi*FineStructureConstant2*ghc1
@@ -1921,7 +1921,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
        call fourwf(1,vectornd,cwavein1,ghc1,work,gbound_k,gbound_k,&
          & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+         & tim_fourwf,weight,weight,use_gpu_flavor=use_gpu_flavor)
 
        do idat=1,ndat
          do ipw=1,npw_k
@@ -1939,7 +1939,7 @@ subroutine getgh1ndc(cwavein,gh1ndc,gbound_k,istwf_k,kg_k,mgfft,mpi_enreg,&
 
        call fourwf(1,vectornd,cwavein2,ghc2,work,gbound_k,gbound_k,&
          & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-         & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+         & tim_fourwf,weight,weight,use_gpu_flavor=use_gpu_flavor)
 
        do idat=1,ndat
          do ipw=1,npw_k

@@ -96,7 +96,7 @@ module m_elpa
    integer :: elpa_comm_rows,elpa_comm_cols
    integer :: process_row,process_col
    integer :: local_nrows,local_ncols
-   integer :: na,nblk
+   integer :: na,nblk,nev
    integer :: gpu=0
 #endif
  end type elpa_hdl_t
@@ -199,7 +199,7 @@ end subroutine elpa_func_uninit
 !!
 !! INPUTS
 !!  [blacs_ctx]= -- optional -- Blacs context
-!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
+!!  [gpu]= -- optional -- Flag (0 or 1): use GPU version (currently only NVidia)
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
