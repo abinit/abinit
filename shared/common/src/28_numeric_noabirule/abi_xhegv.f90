@@ -130,6 +130,10 @@
 
  ABI_CHECK(info==0,"abi_dhegv returned info!=0!")
 
+#ifndef HAVE_LINALG_ELPA
+ ABI_UNUSED(use_gpu_elpa)
+#endif
+
 end subroutine abi_dhegv
 !!***
 
