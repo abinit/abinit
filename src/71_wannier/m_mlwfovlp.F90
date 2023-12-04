@@ -233,7 +233,8 @@ contains
  leig=.true.          ! .false. and .true. are possible
 !
  gamma_only=.false. !not yet implemented
- spinors=.false. !not yet implemented
+ spinors=.false. 
+ if (dtset%nspinor == 2) spinors = .true.
 !
 !mpi initialization
 !
@@ -1690,6 +1691,7 @@ end subroutine mlwfovlp_seedname
    ngkpt(1)=dtset%kptrlatt(1,1)
    ngkpt(2)=dtset%kptrlatt(2,2) !  have to verif kptrlatt is diagonal
    ngkpt(3)=dtset%kptrlatt(3,3)
+   ABI_CHECK((sum(abs(dtset%kptrlatt)) == sum(abs(ngkpt))), 'kptrlatt must be diagonal')
    do iatom=1,natom
      itypat=dtset%typat(iatom)
      znucl1=dtset%znucl(itypat)
@@ -1698,8 +1700,8 @@ end subroutine mlwfovlp_seedname
 !    write(309,*) symbol
      atom_symbols(iatom)=symbol
      xcart(:,iatom)=rprimd(:,1)*xred(1,iatom)+&
-&     rprimd(:,2)*xred(2,iatom)+&
-&     rprimd(:,3)*xred(3,iatom)
+&                   rprimd(:,2)*xred(2,iatom)+&
+&                   rprimd(:,3)*xred(3,iatom)
    end do ! iatom
 !  write(std_out,*) xcart
 !  write(std_out,*) Bohr_Ang
