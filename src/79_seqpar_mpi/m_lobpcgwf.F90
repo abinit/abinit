@@ -143,7 +143,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 !Variables
  nline=dtset%nline
- blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+ blockdim=nband/dtset%nblock_lobpcg !=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
 
 !Depends on istwfk
  if ( l_istwf == 2 ) then ! Real only
