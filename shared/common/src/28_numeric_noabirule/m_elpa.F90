@@ -192,9 +192,6 @@ end subroutine elpa_func_uninit
 !!  Allocate a ELPA handle and set it up with communicators specification
 !!
 !! INPUTS
-!!  mpi_comm_parent=Global communicator for the calculations
-!!  process_row=Row coordinate of the calling process in the process grid
-!!  process_col=Column coordinate of the calling process in the process grid
 !!  [gpu]= -- optional -- Flag (0 or 1): use GPU version
 !!
 !! SIDE EFFECTS
@@ -202,10 +199,9 @@ end subroutine elpa_func_uninit
 !!
 !! SOURCE
 
-subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,gpu)
+subroutine elpa_func_allocate(elpa_hdl,gpu)
 
 !Arguments ------------------------------------
- integer,intent(in) :: mpi_comm_parent,process_row,process_col
  integer,intent(in),optional :: gpu
  type(elpa_hdl_t),intent(inout) :: elpa_hdl
 
@@ -226,8 +222,6 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
  call elpa_func_error_handler(err_code=err,err_varname="gpu")
 
  elpa_hdl%is_allocated=.true.
-
- call elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,process_col)
 
 end subroutine elpa_func_allocate
 !!***
