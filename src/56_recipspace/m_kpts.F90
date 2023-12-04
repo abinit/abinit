@@ -796,7 +796,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
 
 ! *************************************************************************
 
- call timab(1021, 1, tsec)
+ call timab(1091, 1, tsec)
  !call cwtime(cpu, wall, gflops, "start")
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
@@ -1102,7 +1102,7 @@ subroutine listkk(dksqmax, gmet, indkk, kptns1, kptns2, nkpt1, nkpt2, nsym, sppo
    call xmpi_max(dksqmn, dksqmax, comm, ierr)
  end if
 
- call timab(1021, 2, tsec)
+ call timab(1091, 2, tsec)
  !call cwtime_report(" listkk_end", cpu, wall, gflops)
 
 end subroutine listkk

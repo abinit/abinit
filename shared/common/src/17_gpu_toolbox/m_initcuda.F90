@@ -121,7 +121,7 @@ CONTAINS !===========================================================
  write (msg,formatdev)&
        & '  Device             ',device,' : ',name(1:lenname)
  call wrtout(std_out,msg,'PERS')
- write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i2,a,i4,4a,2(a,i7,2a),a,i7,a)')&
+ write (msg,'(a,2(i1,a),a,i6,a,a,a,f7.1,a,a,a,i4,a,i4,4a,2(a,i7,2a),a,i7,a)')&
        & ' Revision number:                   ',vers(0),'.',vers(1),ch10, &
        & ' Total amount of global memory: ',nint(globalmem),' Mbytes',ch10, &
        & ' Clock rate:                    ',clockRate,' GHz',ch10, &
@@ -444,7 +444,7 @@ end subroutine Get_Mem_Dev
 &                    sharemem,regist,nprocs,ncores)
    flops(ii+1)=dble(gflops) ; mem(ii+1)=dble(globalmem)
    call unset_dev()
-   write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i2,a,i4,a)') &
+   write(msg,'(a,i2,3a,i1,a,i1,a,i6,a,f7.1,a,i7,a,i4,a,i4,a)') &
 &   '  Device ',ii,': ',trim(name(1:lenname)),', v',vers(0),'.',vers(1),', Mem=',nint(globalmem),&
 &   ' Mbytes, Clock=',clockrate,' GHz, ',gflops,' GFLOPS, ',nprocs,' processors, ',ncores,' cores'
    call wrtout(std_out,msg,'PERS')

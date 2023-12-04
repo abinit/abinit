@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t54/t54.in
-- output file    -> t54.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t54/t54.abi
+- output file    -> t54.abo
 - root for input  files -> t54i
 - root for output files -> t54o
-
 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -36,17 +35,17 @@
  For the susceptibility and dielectric matrices, or tddft :
    mgfft =        18  nbnd_in_blk=     4    nfft =      2592     npw =        59
 ================================================================================
-P This job should need less than                       3.815 Mbytes of memory.
-P Max. in XC chain
-P            3 blocks of mpw  integer numbers, for      0.004 Mbytes.
-P           32 blocks of mpw  real(dp)  numbers, for      0.083 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      2.747 Mbytes.
-P              Additional     real(dp)  numbers, for      0.744 Mbytes.
+P This job should need less than                       3.975 Mbytes of memory.
+P Max. in main chain + fourwf.f
+P            6 blocks of mpw  integer numbers, for      0.008 Mbytes.
+P           49 blocks of mpw  real(dp)  numbers, for      0.126 Mbytes.
+P           31 blocks of nfft real(dp)  numbers, for      2.838 Mbytes.
+P              Additional     real(dp)  numbers, for      0.764 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.624 Mbytes.
-P Main chain + nonlop.f + opernl.f      3.304 Mbytes.
+P Main chain + fourwf.f                 3.975 Mbytes.
+P Main chain + nonlop.f + opernl.f      3.655 Mbytes.
 P XC chain                              3.815 Mbytes.
 P mkrho chain                           3.012 Mbytes.
 P fourdp chain                          2.808 Mbytes.
@@ -145,8 +144,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -544,9 +543,9 @@ force_length_stats: {min:   1.77515116E-02, max:   1.77515116E-02, mean:   1.775
 
  Mean square residual over all n,k,spin=   90.298E-17; max=  35.993E-16
    0.0000  0.0000  0.0000    1  3.59933E-15 kpt; spin; max resid(k); each band:
-   3.44E-15  1.46E-16  3.60E-15  3.89E-16  3.83E-16  1.07E-16  1.01E-16  1.43E-15
+  3.44E-15 1.46E-16 3.60E-15 3.89E-16 3.83E-16 1.07E-16 1.01E-16 1.43E-15
    0.0000  0.0000  0.0000    2  1.80021E-15 kpt; spin; max resid(k); each band:
-   1.58E-15  8.47E-17  1.80E-15  1.63E-16  1.58E-16  4.46E-17  4.15E-17  9.81E-16
+  1.58E-15 8.47E-17 1.80E-15 1.63E-16 1.58E-16 4.46E-17 4.15E-17 9.81E-16
  reduced coordinates (array xred) for    2 atoms
       -0.176833333333      0.000000000000      0.000000000000
        0.176833333333      0.000000000000      0.000000000000
@@ -711,6 +710,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -803,10 +807,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.1
+.Delivered   1 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          0.9  wall=          0.9

@@ -46,7 +46,7 @@ module m_lgroup
  use m_numeric_tools, only : wrap2_pmhalf
  use m_geometry,      only : normv
  use m_kpts,          only : listkk
- use m_symtk,         only : chkgrp, littlegroup_q
+ use m_symtk,         only : sg_multable, littlegroup_q
 
  implicit none
 
@@ -215,7 +215,7 @@ type(lgroup_t) function lgroup_new(cryst, kpoint, timrev, nkbz, kbz, nkibz, kibz
 
  ! Check group closure.
  if (debug /= 0) then
-   call chkgrp(new%nsym_lg, symafm_lg, symrec_lg, ierr)
+   call sg_multable(new%nsym_lg, symafm_lg, symrec_lg, ierr)
    ABI_CHECK(ierr == 0, "Error in group closure")
  end if
 

@@ -1,5 +1,5 @@
 
-.Version 9.11.0 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 17 May 2023.
-- ( at 11h15 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h13 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/TestBot_MPI1/v9_t150/t150.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t150/t150.abi
 - output file    -> t150.abo
 - root for input  files -> t150i
 - root for output files -> t150o
-
 
  DATASET    1 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,7 +117,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -141,7 +134,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET    8 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -157,7 +149,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -175,7 +166,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   10 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -191,7 +181,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   11 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -209,7 +198,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -225,7 +213,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -243,7 +230,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   14 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 14.
@@ -259,7 +245,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   15 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -277,7 +262,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   16 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 16.
@@ -293,7 +277,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   17 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -311,7 +294,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   18 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 18.
@@ -327,7 +309,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   19 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -345,7 +326,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   20 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 20.
@@ -361,7 +341,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -379,7 +358,6 @@ P This job should need less than                       1.350 Mbytes of memory.
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -395,7 +373,6 @@ P This job should need less than                       1.350 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group P4/m m m (#123); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -904,8 +881,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/bguster_print_save/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5194,11 +5171,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered 161 WARNINGs and 120 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          6.0
-
++Overall time at end (sec) : cpu=          5.1  wall=          5.2

@@ -4119,6 +4119,7 @@ end subroutine wfd_sym_ur
 !!  cryst: Crystalline structure and symmetries
 !!  work_ngfft: Define the size of the workspace array work
 !!  work: Workspace array used to symmetrize wavefunctions
+!!  force_rotate:  optional, use cgtk_rotate for kpoint even if it is in the IBZ.
 !!
 !! OUTPUT
 !!  istwf_kbz: Time-reversal flag associated to output wavefunctions
@@ -4129,7 +4130,7 @@ end subroutine wfd_sym_ur
 !! SOURCE
 
 subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, indkk, cryst, &
-                         work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz)
+                         work_ngfft, work, istwf_kbz, npw_kbz, kg_kbz, cgs_kbz, force_rotate)
 
 !Arguments ------------------------------------
 !scalars
@@ -4145,12 +4146,13 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
  real(dp),intent(in) :: kk_bz(3), kk_ibz(3)
  real(dp),intent(out) :: cgs_kbz(2, mpw*self%nspinor, nband)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
+ logical ,optional, intent(in) :: force_rotate
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
  integer :: ik_ibz, isym_k, trev_k, ib, band, istwf_kirr, npw_kirr
- logical :: isirr_k
+ logical :: isirr_k, rotate
 !arrays
  integer :: g0_k(3)
  integer,allocatable :: gtmp(:,:)
@@ -4162,9 +4164,19 @@ subroutine wfd_sym_ug_kg(self, ecut, kk_bz, kk_ibz, bstart, nband, spin, mpw, in
  ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
 
+ rotate= .not. isirr_k
+ if (present(force_rotate)) then
+   if (force_rotate) then
+     rotate=.True.
+   endif
+ endif
+
+
+
+
  ! Get npw_kbz, kg_kbz and symmetrize wavefunctions from IBZ (if needed).
  ! Be careful with time-reversal symmetry.
- if (isirr_k) then
+ if (.not. rotate) then
    ! Copy u_k(G)
    istwf_kbz = self%istwfk(ik_ibz); npw_kbz = self%npwarr(ik_ibz)
    ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")

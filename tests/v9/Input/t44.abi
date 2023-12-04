@@ -76,6 +76,6 @@ pseudos="Ne.xml"
 #%% [extra_info]
 #%% authors = J. Zwanziger
 #%% keywords = PAW
-#%% description = 
-#%% topics = DFPT
+#%% description = Calculate chemical shielding for isolated neon atom	
+#%% topics = MagField
 #%%<END TEST_INFO>
