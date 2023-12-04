@@ -51,11 +51,12 @@ contains
 !! ddb_magpen
 !!
 !! FUNCTION
-!! Convert the second-order derivatives calculated with the magnetic penalty
+!! Convert the second- and possibly third-order derivatives calculated with the magnetic penalty
 !! into physically relevant quantities.
 !!
 !! INPUTS
 !! ddb (INOUT) = ddb block datastructure
+!! ddb_lw (INOUT) = ddb_lw block datastructure
 !! magpen = amplitude (in Ha) of the applied magnetic penalty 
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
 !! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
@@ -64,6 +65,7 @@ contains
 !!         2 calculate the spin-relaxed second-order quantities 
 !! natom= number of atoms in unit cell
 !! ntypat= number of atom types
+!! timdisp= 1 calculate the third-order Berry curvatures
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
@@ -71,14 +73,14 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,magpen,mpatpol,mpdir,mpert,mpopt,natom,ntypat,prtvol,rftyp,ucvol)
+ subroutine ddb_magpen(ddb,ddb_lw,magpen,mpatpol,mpdir,mpert,mpopt,natom,ntypat,prtvol,rftyp,ucvol,timdisp)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,mpopt,natom,ntypat,prtvol,rftyp
+ integer,intent(in) :: mpert,mpopt,natom,ntypat,prtvol,rftyp,timdisp
  real(dp),intent(in) :: magpen,ucvol
 !arrays
- type(ddb_type),intent(inout) :: ddb
+ type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
 
 !Local variables -------------------------
@@ -87,9 +89,10 @@ contains
  integer :: nmat,nmdir
  character(len=500) :: msg
 !arrays
- integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4)
+ integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: qphnrm(3),qphon(3,3)
- complex(dp), allocatable :: barmagsus(:,:),invbarmagsus(:,:), magsus(:,:)
+ complex(dp), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
+ complex(dp), allocatable :: invmagsus(:,:), magsus(:,:)
  complex(dp), allocatable :: mmom(:,:), zfield(:,:)
 
 ! *********************************************************************
@@ -107,6 +110,7 @@ contains
  ABI_MALLOC(barmagsus,(ndim,ndim))
  ABI_MALLOC(magsus,(ndim,ndim))
  ABI_MALLOC(invbarmagsus,(ndim,ndim))
+ ABI_MALLOC(invmagsus,(ndim,ndim))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
 
@@ -115,8 +119,8 @@ contains
 
    ! Look for the spin-susceptibility block in the DDB
    qphon=zero
-   qphon(:,1)=ddb%qpt(:,kblok)
-   qphnrm(1)=ddb%nrm(1,kblok)
+   qphon(:,1)=ddb%qpt(1:3,kblok)
+   qphnrm(:)=ddb%nrm(1,kblok)
    rfphon(1:2)=0
    rfelfd(1:2)=0
    rfstrs(1:2)=0
@@ -141,7 +145,7 @@ contains
        call wrtout([std_out, ab_out], msg)
      end if
 
-     call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,magpen,magsus,&
+     call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,magpen,magsus,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol)
 
    end if
@@ -224,13 +228,42 @@ contains
    & natom,nblok,ndim,prtvol,ucvol,zfield)
    end if
 
-
  end do
+
+ if (timdisp==1) then
+   write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+   ' Frequency-derivatives magnetic penalty section ',ch10
+   call wrtout([std_out, ab_out], msg)
+
+   rffreq(:)=0
+   do kblok=1,nblok
+
+     !Look for the Berry-curvature of the penalized spin-susceptibility
+     qphon=zero
+     qphon(:,1)=ddb_lw%qpt(1:3,kblok)
+     qphnrm(:)=ddb_lw%nrm(1,kblok)
+     rfphon(1:3)=0
+     rfelfd(1:3)=0
+     rfstrs(1:3)=0
+     rffreq(3)=1
+     iblok=0
+     if (magpen<zero) then
+       rfmagn(1:2)= 1
+     else if (magpen>zero) then
+       rfmagn(1:2)= 2
+     end if
+     call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
+    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+
+   end do 
+
+ end if
 
 !Deallocations
  ABI_FREE(barmagsus)
  ABI_FREE(magsus)
  ABI_FREE(invbarmagsus)
+ ABI_FREE(invmagsus)
  ABI_FREE(mmom)
  ABI_FREE(zfield)
 
@@ -264,10 +297,11 @@ contains
 !! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
 !! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
 !! magsus(ndim,ndim)= Spin-sussceptibility tensor
+!! invmagsus(ndim,ndim)= Inverse of spin-sussceptibility tensor
 !!
 !! SOURCE
 
- subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,magpen,magsus,&
+ subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,magpen,magsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol)
 
 !Arguments -------------------------------
@@ -280,6 +314,7 @@ contains
  complex(dp),intent(out) :: barmagsus(ndim,ndim)
  complex(dp),intent(out) :: invbarmagsus(ndim,ndim)
  complex(dp),intent(out) :: magsus(ndim,ndim)
+ complex(dp),intent(out) :: invmagsus(ndim,ndim)
 
 !Local variables -------------------------
 !scalars
@@ -321,7 +356,7 @@ contains
 
          !TODO: is the four factor still necessary?
          barmagsus(irow,icol)= &
-       & four*cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
+       & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
        & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
 
        end do
@@ -368,12 +403,14 @@ contains
  !use idty here to store an intermediate array
  invbarmagsus=work1
  
- !At last, calculate the susceptibility
+ !At last, calculate the susceptibility and its inverse
  magsus=matmul(work2,barmagsus)
+ invmagsus=invbarmagsus-magpen*idty
 
  ABI_FREE(ipiv)
  ABI_FREE(work1)
  ABI_FREE(work2)
+
 
  !Write results in output
  if (magpen > zero) then
@@ -384,6 +421,18 @@ contains
        write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
      & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
      & real(magsus(irow,icol)), aimag(magsus(irow,icol))
+       call wrtout([ab_out,std_out], msg)
+     end do
+   end do
+   call wrtout([ab_out,std_out], '   ')
+
+   call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
+   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+   do irow=1, ndim
+     do icol=1, ndim
+       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+     & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+     & real(invmagsus(irow,icol)), aimag(invmagsus(irow,icol))
        call wrtout([ab_out,std_out], msg)
      end do
    end do
@@ -501,11 +550,11 @@ contains
          indexdir1(irow)=idir1
          
          if (iblok /=0 .and. ipert2 <= natom) then
-           barmmom(irow,icol)=two* &
+           barmmom(irow,icol)= &
          & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
          & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
          else if (jblok /=0 .and. ipert2 == natom+2) then
-           barmmom(irow,icol)=two* &
+           barmmom(irow,icol)= &
          & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,jblok), &
          & blkval(2,idir1,ipert1,idir2,ipert2,jblok),16)
          end if
@@ -548,6 +597,34 @@ contains
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
+   end if
+   if (prtvol > 1) then
+     if (iblok /= 0) then
+       call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by atomic displacements ')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, natom*3
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+         & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+     end if
+     if (jblok /= 0) then
+       call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by electric field ')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+1)*3+1, (natom+2)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+     end if
    end if
  end if
   
@@ -784,6 +861,19 @@ contains
      do idir2= 1, 3
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
      & real(srepsilon(idir1,idir2)), aimag(srepsilon(idir1,idir2))
+       call wrtout([ab_out,std_out], msg)
+     end do
+   end do
+   call wrtout([ab_out,std_out], '   ')
+ end if
+ 
+ if (prtvol > 1) then
+   call wrtout([ab_out,std_out], ' Penalized dielectric tensor (clamped ion)')
+   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+   do idir1= 1, 3
+     do idir2= 1, 3
+       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
+     & real(barepsilon(idir1,idir2)), aimag(barepsilon(idir1,idir2))
        call wrtout([ab_out,std_out], msg)
      end do
    end do
