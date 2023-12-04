@@ -1074,6 +1074,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
+!  gpu_kokkos_nthreads
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthreads',dt%gpu_kokkos_nthreads,1,iout)
+
    ! RT-TDDFT
    if (dt%optdriver == RUNL_RTTDDFT) then
      ! getwfk / getwfk_filepath / irdwfk

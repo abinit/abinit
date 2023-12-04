@@ -99,7 +99,7 @@ module m_xgTransposer
     integer :: type
     integer :: perPair
     integer :: use_gpu_flavor = ABI_GPU_DISABLED
-    integer :: gpu_num_openmp_threads = 1
+    integer :: gpu_kokkos_nthreads = 1
 #if defined HAVE_GPU && defined HAVE_YAKL
     real(kind=c_double), ABI_CONTIGUOUS pointer:: buffer(:,:) => null()
 #else
@@ -920,7 +920,7 @@ module m_xgTransposer
 
     ! if gpu enabled increase locally OpenMP num threads
     if (xgTransposer%use_gpu_flavor == ABI_GPU_KOKKOS) then
-       call xomp_set_num_threads(xgTransposer%gpu_num_openmp_threads)
+       call xomp_set_num_threads(xgTransposer%gpu_kokkos_nthreads)
     end if
 #endif
 

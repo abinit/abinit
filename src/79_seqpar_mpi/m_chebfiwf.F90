@@ -416,7 +416,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
 &                 l_gs_hamk%use_gpu_flavor, &
-&                 gpu_num_openmp_threads=dtset%use_gpu_openmp_threads)
+&                 gpu_kokkos_nthreads=dtset%gpu_kokkos_nthreads)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################
