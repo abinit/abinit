@@ -982,6 +982,9 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
 
+ intarr(1,:)=dtsets(:)%nblock_lobpcg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
+
  intarr(1,:)=dtsets(:)%nloalg(1)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nloc_alg','INT',0)
 

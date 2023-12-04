@@ -758,6 +758,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
  dtsets(0)%bandpp=1
+ dtsets(0)%nblock_lobpcg=1
 
  symafm_(:,0)=1
  symrel_(:,:,:,0)=0
@@ -991,6 +992,7 @@ subroutine indefo1(dtset)
  dtset%natsph=0
  dtset%natsph_extra=0
  dtset%natvshift=0
+ dtset%nblock_lobpcg=1
  dtset%nconeq=0
  dtset%ndynimage=1
  dtset%ne_qFD=zero

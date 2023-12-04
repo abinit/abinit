@@ -185,7 +185,50 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread(7)==1) dtsets(idtset)%npband=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bandpp',tread(8),'INT')
-   if(tread(8)==1) dtsets(idtset)%bandpp=intarr(1)
+   !Nband might have different values for different kpoint, but not bandpp.
+   !In this case, we just use the largest nband (mband_upper), and the input will probably fail
+   !at the bandpp check later on
+   if(tread(8)==1) then
+     dtsets(idtset)%bandpp=intarr(1)
+     if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+       if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
+         dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+       else
+         write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
+           'Change nband, npband or bandpp in the input.',ch10,&
+           'A simpler solution is to use nblock_lobpcg instead of bandpp.'
+         ABI_ERROR(msg)
+       end if
+     end if
+   else if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+     if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg)==0) then
+       dtsets(idtset)%bandpp=mband_upper/dtsets(idtset)%nblock_lobpcg
+     else
+       write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg.',ch10,&
+         'Change nband or nblock_lobpcg in the input.'
+       ABI_ERROR(msg)
+     end if
+   end if
+   !When using chebfi, the number of blocks is equal to the number of processors
+   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
+     dtsets(idtset)%bandpp = mband_upper/dtsets(idtset)%npband
+     if(tread(8)==1) then
+       write(msg, '(a,i8,3a)' ) &
+       'bandpp has been internally set to ',dtsets(idtset)%bandpp,'.',ch10,&
+       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111).'
+       ABI_WARNING(msg)
+     end if
+   end if
+
+   ! Warning when using different number of bands for different kpoints (occopt=2)
+   if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
+     & ((dtsets(idtset)%bandpp > 1) .or. (dtsets(idtset)%npband > 1)) ) then
+     write(msg, '(4a)' ) &
+       'When working with blocks of bands (bandpp>1 or npband>1),'&
+      &' the number of bands should be the same for every kpoints.',ch10,&
+      &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
+     ABI_WARNING(msg)
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_slk',tread(9),'INT')
    if(tread(9)==1) dtsets(idtset)%use_slk=intarr(1)
@@ -487,14 +530,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        ABI_ERROR(msg)
      end if
    end if ! Fock
-
-   !When using chebfi, the number of blocks is equal to the number of processors
-   if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
-     !Nband might have different values for different kpoint, but not bandpp.
-     !In this case, we just use the largest nband, and the input will probably fail
-     !at the bandpp check later on
-     dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
-   end if
 
    !Check parallelization in case of RTTDDFT
    !In particular ensure that bandpp = nband / npband
