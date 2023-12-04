@@ -543,7 +543,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
        if (dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
          ! Kokkos GPU branch is not OpenMp thread-safe, restoring OpenMP threads num
-         call xomp_set_num_threads(dtset%use_gpu_openmp_threads)
+         call xomp_set_num_threads(dtset%gpu_kokkos_nthreads)
        end if
 
      end if

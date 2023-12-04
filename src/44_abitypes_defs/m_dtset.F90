@@ -233,6 +233,7 @@ type, public :: dataset_type
  integer :: getbscoup = 0
  integer :: gethaydock = 0
  integer :: goprecon
+ integer :: gpu_kokkos_nthreads
  integer :: gpu_linalg_limit
 
  integer :: gstore_cplex = 2
@@ -618,7 +619,6 @@ type, public :: dataset_type
 !U
  integer :: ucrpa
  integer :: use_gpu_flavor
- integer :: use_gpu_openmp_threads
  integer :: use_nvtx
  integer :: usedmatpu
  integer :: usedmft
@@ -1615,6 +1615,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1den            = dtin%get1den
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
+ dtout%gpu_kokkos_nthreads= dtin%gpu_kokkos_nthreads
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
 
  dtout%gstore_cplex       = dtin%gstore_cplex
@@ -1985,7 +1986,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
  dtout%use_gpu_flavor     = dtin%use_gpu_flavor
- dtout%use_gpu_openmp_threads = dtin%use_gpu_openmp_threads
  dtout%useextfpmd         = dtin%useextfpmd
  dtout%use_nvtx           = dtin%use_nvtx
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
@@ -3366,7 +3366,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
- list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gpu_kokkos_nthreads gwaclowrank gwcalctyp'
+ list_vars=trim(list_vars)//' gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
@@ -3528,7 +3529,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
  list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
- list_vars=trim(list_vars)//' use_gpu_flavor use_gpu_openmp_threads use_nvtx'
+ list_vars=trim(list_vars)//' use_gpu_flavor use_nvtx'
  list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'
 !V
