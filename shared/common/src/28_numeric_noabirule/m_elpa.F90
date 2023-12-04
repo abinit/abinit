@@ -250,8 +250,10 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
    end if
 
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
-   if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err)
-   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+
+   !if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
+   !call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+
  end if
 #else
  if (err==0.and.l_gpu==1) elpa_hdl%gpu=l_gpu
