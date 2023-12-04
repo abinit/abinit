@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v6_t17/t17.in
-- output file    -> t17.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v6_t17/t17.abi
+- output file    -> t17.abo
 - root for input  files -> t17i
 - root for output files -> t17o
-
 
  DATASET   11 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                       9.054 Mbytes of memory.
+P This job should need less than                       9.631 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group Pm -3 m (#221); Bravais cP (primitive cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =           1
        mpw =         523          nfft =       19683          nkpt =           1
 ================================================================================
-P This job should need less than                       9.791 Mbytes of memory.
+P This job should need less than                      10.368 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.066 Mbytes ; DEN or POT disk file :      0.302 Mbytes.
 ================================================================================
-
 
  DATASET   21 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                      16.185 Mbytes of memory.
 _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -90,7 +86,6 @@ P This job should need less than                      16.922 Mbytes of memory.
 _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
 
-
  DATASET   31 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -106,7 +101,6 @@ P This job should need less than                      16.185 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
 ================================================================================
-
 
  DATASET   32 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -396,8 +390,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.04204
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/83bi.5.hgh
 - Hartwigsen-Goedecker-Hutter psp for Bi,  from PRB58, 3641 (1998)
 - 83.00000   5.00000     10605                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1711,6 +1705,11 @@ P           mkmem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1798,10 +1797,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.4  wall=          7.5
+- Proc.   0 individual time (sec): cpu=          6.9  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  11 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.4  wall=          7.5
+.Delivered  19 WARNINGs and  24 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.9  wall=          7.1

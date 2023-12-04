@@ -788,8 +788,8 @@ contains
  intarr(1,:)=dtsets(:)%restartxf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'restartxf','INT',0)
 
- intarr(1,:)=dtsets(:)%rfasr
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
+!intarr(1,:)=dtsets(:)%rfasr
+!call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'rfasr','INT',0)
 
  test_write=0
  do idtset=1,ndtset_alloc
@@ -1480,6 +1480,11 @@ contains
 
  dprarr(1,:)=dtsets(:)%xc_denpos
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_denpos','DPR',0)
+
+ if (any(dtsets(:)%usekden==1).and.any(dtsets(:)%xc_taupos/=dtsets(:)%xc_denpos)) then
+   dprarr(1,:)=dtsets(:)%xc_taupos
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_taupos','DPR',0)
+ end if
 
  dprarr(1,:)=dtsets(:)%xc_tb09_c
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'xc_tb09_c','DPR',0)

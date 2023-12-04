@@ -2014,7 +2014,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
 !Keep track of total time spent in dfpt_nstwf
- call timab(102,1,tsec)
+ call timab(112,1,tsec)
  tim_getgh1c=2
 
 !Miscelaneous inits
@@ -2410,7 +2410,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_FREE(eig2_ddk)
  end if
 
- call timab(102,2,tsec)
+ call timab(112,2,tsec)
 
  DBG_EXIT("COLL")
 

@@ -12,7 +12,7 @@
 #Second dataset : d/dk response calculation
  iscf2 -3     
  rfelfd2 2     getwfk2 1    getden2 1
- getddk2 2   ! This is needed for the licalisation tensor 
+ getddk2 2   ! This is needed for the localisation tensor 
  rfdir2  1 0 0
  kptopt2 2
 
@@ -50,6 +50,8 @@
  rfdir7  1 1 1
  kptopt7 2
 
+#Keep backward compatibility
+ chneut 0
 
 #Common data
  acell 3*10.18

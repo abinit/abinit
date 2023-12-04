@@ -1753,12 +1753,12 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
  dtsets(0)%timopt = 1
  if (xmpi_paral == 1) dtsets(0)%timopt = 0
 
- call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
  ! Initialize pspheads, that contains the important information
  ! from the pseudopotential headers, as well as the psp filename
- call timab(42,1,tsec)
+ call timab(102,1,tsec)
+ call timab(1021,3,tsec)
 
  usepaw = 0
  ABI_MALLOC(pspheads, (npsp))
@@ -1845,11 +1845,14 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
                msym, ndtset, ndtset_alloc, string, npsp, zionpsp, comm)
 
  ABI_FREE(zionpsp)
- call timab(42,2,tsec)
- call timab(43,3,tsec)
+ call timab(1021,2,tsec)
+ call timab(1022,3,tsec)
 
  ! Provide defaults for the variables that have not yet been initialized.
  call indefo(dtsets, ndtset_alloc, nprocs)
+
+ call timab(1022,2,tsec)
+ call timab(1023,3,tsec)
 
  ! Perform some global initialization, depending on the value of
  ! pseudopotentials, parallelism variables, or macro input variables
@@ -1870,7 +1873,8 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
     mx%mband = max(dtsets(ii)%mband, mx%mband)
  end do
 
- call timab(43,2,tsec)
+ call timab(1023,2,tsec)
+ call timab(102,2,tsec)
 
  ABI_FREE(mband_upper_)
 

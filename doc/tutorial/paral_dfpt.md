@@ -320,8 +320,8 @@ delivered at the end of the run are meaningless.
 
 As in the previous case, a preparatory ground-state calculation is needed.
 We use the input variable [[autoparal]]=1 . It does not delivers the best repartition of
-processors among [[npkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
-With 24 processors, it selects [[npkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
+processors among [[np_spkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
+With 24 processors, it selects [[np_spkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
 For information, the speeup going from 24 cores to 64 cores is 1.76, not quite the increase of number of processor (2.76).
 Anyhow, the topics of the tutorial is not the GS calculation.
 
@@ -340,7 +340,7 @@ The preparatory step takes about 3 minutes, and the DFPT step takes about
 You can run now these test cases. For tdfpt_03, with [[autoparal]]=1, 
 you will be able to run on different numbers of processors compatible with [[nkpt]]=4,
 [[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly 
-define [[npkpt]], [[npband]] and [[npfft]].
+define [[np_spkpt]], [[npband]] and [[npfft]].
 At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
 To launch the ground-state computation, type:

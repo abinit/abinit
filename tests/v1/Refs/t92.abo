@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h58 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v1_t92/t92.in
-- output file    -> t92.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v1_t92/t92.abi
+- output file    -> t92.abo
 - root for input  files -> t92i
 - root for output files -> t92o
-
 
  DATASET    1 : space group Pn m a (# 62); Bravais oP (primitive ortho.)
 ================================================================================
@@ -34,18 +33,18 @@
 -    mband =          16        mffmem =           1         mkmem =           1
        mpw =          29          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.847 Mbytes of memory.
+P This job should need less than                       0.876 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            6 blocks of mpw  integer numbers, for      0.001 Mbytes.
-P           69 blocks of mpw  real(dp)  numbers, for      0.015 Mbytes.
+P           63 blocks of mpw  real(dp)  numbers, for      0.014 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.008 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.229 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.259 Mbytes.
 P              Additional     real(dp)  numbers, for      0.321 Mbytes.
 P              With residue estimated to be             0.272 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 0.815 Mbytes.
-P Main chain + nonlop.f + opernl.f      0.847 Mbytes.
+P Main chain + fourwf.f                 0.844 Mbytes.
+P Main chain + nonlop.f + opernl.f      0.876 Mbytes.
 P XC chain                              0.780 Mbytes.
 P mkrho chain                           0.754 Mbytes.
 P fourdp chain                          0.753 Mbytes.
@@ -54,7 +53,6 @@ P newvtr chain                          0.747 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Pn m a (# 62); Bravais oP (primitive ortho.)
 ================================================================================
@@ -67,18 +65,18 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          16        mffmem =           1         mkmem =           1
        mpw =          29          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.847 Mbytes of memory.
+P This job should need less than                       0.876 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            6 blocks of mpw  integer numbers, for      0.001 Mbytes.
-P           69 blocks of mpw  real(dp)  numbers, for      0.015 Mbytes.
+P           63 blocks of mpw  real(dp)  numbers, for      0.014 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.008 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.229 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.259 Mbytes.
 P              Additional     real(dp)  numbers, for      0.321 Mbytes.
 P              With residue estimated to be             0.272 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 0.815 Mbytes.
-P Main chain + nonlop.f + opernl.f      0.847 Mbytes.
+P Main chain + fourwf.f                 0.844 Mbytes.
+P Main chain + nonlop.f + opernl.f      0.876 Mbytes.
 P XC chain                              0.780 Mbytes.
 P mkrho chain                           0.754 Mbytes.
 P fourdp chain                          0.753 Mbytes.
@@ -87,7 +85,6 @@ P newvtr chain                          0.747 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pn m a (# 62); Bravais oP (primitive ortho.)
 ================================================================================
@@ -100,18 +97,18 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          16        mffmem =           1         mkmem =           1
        mpw =          29          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.847 Mbytes of memory.
+P This job should need less than                       0.876 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            6 blocks of mpw  integer numbers, for      0.001 Mbytes.
-P           69 blocks of mpw  real(dp)  numbers, for      0.015 Mbytes.
+P           63 blocks of mpw  real(dp)  numbers, for      0.014 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.008 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.229 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.259 Mbytes.
 P              Additional     real(dp)  numbers, for      0.321 Mbytes.
 P              With residue estimated to be             0.272 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 0.815 Mbytes.
-P Main chain + nonlop.f + opernl.f      0.847 Mbytes.
+P Main chain + fourwf.f                 0.844 Mbytes.
+P Main chain + nonlop.f + opernl.f      0.876 Mbytes.
 P XC chain                              0.780 Mbytes.
 P mkrho chain                           0.754 Mbytes.
 P fourdp chain                          0.753 Mbytes.
@@ -120,7 +117,6 @@ P newvtr chain                          0.747 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Pn m a (# 62); Bravais oP (primitive ortho.)
 ================================================================================
@@ -133,18 +129,18 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =          16        mffmem =           1         mkmem =           1
        mpw =          29          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.847 Mbytes of memory.
+P This job should need less than                       0.876 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P            6 blocks of mpw  integer numbers, for      0.001 Mbytes.
-P           69 blocks of mpw  real(dp)  numbers, for      0.015 Mbytes.
+P           63 blocks of mpw  real(dp)  numbers, for      0.014 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.008 Mbytes.
-P           30 blocks of nfft real(dp)  numbers, for      0.229 Mbytes.
+P           34 blocks of nfft real(dp)  numbers, for      0.259 Mbytes.
 P              Additional     real(dp)  numbers, for      0.321 Mbytes.
 P              With residue estimated to be             0.272 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 0.815 Mbytes.
-P Main chain + nonlop.f + opernl.f      0.847 Mbytes.
+P Main chain + fourwf.f                 0.844 Mbytes.
+P Main chain + nonlop.f + opernl.f      0.876 Mbytes.
 P XC chain                              0.780 Mbytes.
 P mkrho chain                           0.754 Mbytes.
 P fourdp chain                          0.753 Mbytes.
@@ -361,8 +357,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      1.000   => boxcut(ratio)=   2.16449
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosGTH_pwteter/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -481,8 +477,8 @@ force_length_stats: {min:   1.46923215E+01, max:   1.46923215E+01, mean:   1.469
 
  Mean square residual over all n,k,spin=   12.363E-03; max=  22.976E-03
    0.0000  0.0000  0.0000    1  2.29759E-02 kpt; spin; max resid(k); each band:
-   1.82E-02  1.25E-02  2.30E-02  2.13E-02  1.14E-02  9.75E-03  2.69E-03  7.70E-03
-   4.93E-03  1.05E-02  1.23E-02  1.05E-02  1.32E-02  1.05E-02  1.89E-02  1.04E-02
+  1.82E-02 1.25E-02 2.30E-02 2.13E-02 1.14E-02 9.75E-03 2.69E-03 7.70E-03
+  4.93E-03 1.05E-02 1.23E-02 1.05E-02 1.32E-02 1.05E-02 1.89E-02 1.04E-02
  reduced coordinates (array xred) for    8 atoms
        0.100000000000      0.200000000000      0.300000000000
        0.400000000000      0.800000000000      0.800000000000
@@ -741,8 +737,8 @@ force_length_stats: {min:   8.25621855E-01, max:   8.25621855E-01, mean:   8.256
 
  Mean square residual over all n,k,spin=   39.426E-04; max=  11.680E-03
    0.0000  0.0000  0.0000    1  1.16802E-02 kpt; spin; max resid(k); each band:
-   5.53E-03  5.72E-03  1.17E-02  4.74E-03  4.35E-04  4.00E-03  1.01E-03  2.95E-03
-   2.20E-03  2.23E-03  1.98E-03  2.43E-03  1.51E-03  3.86E-03  7.97E-03  4.84E-03
+  5.53E-03 5.72E-03 1.17E-02 4.74E-03 4.35E-04 4.00E-03 1.01E-03 2.95E-03
+  2.20E-03 2.23E-03 1.98E-03 2.43E-03 1.51E-03 3.86E-03 7.97E-03 4.84E-03
  reduced coordinates (array xred) for    8 atoms
        0.100000000000      0.200000000000      0.300000000000
        0.900000000000      0.700000000000      0.200000000000
@@ -1001,8 +997,8 @@ force_length_stats: {min:   8.30262831E-01, max:   8.30262831E-01, mean:   8.302
 
  Mean square residual over all n,k,spin=   41.138E-04; max=  13.479E-03
    0.0000  0.0000  0.0000    1  1.34787E-02 kpt; spin; max resid(k); each band:
-   7.90E-03  4.93E-03  1.24E-02  2.54E-03  9.08E-04  4.04E-03  1.19E-03  3.08E-03
-   1.32E-03  1.15E-03  9.95E-04  3.91E-03  2.38E-03  1.81E-03  3.83E-03  1.35E-02
+  7.90E-03 4.93E-03 1.24E-02 2.54E-03 9.08E-04 4.04E-03 1.19E-03 3.08E-03
+  1.32E-03 1.15E-03 9.95E-04 3.91E-03 2.38E-03 1.81E-03 3.83E-03 1.35E-02
  reduced coordinates (array xred) for    8 atoms
        0.100000000000      0.200000000000      0.300000000000
        0.900000000000      0.300000000000      0.800000000000
@@ -1261,8 +1257,8 @@ force_length_stats: {min:   1.46923215E+01, max:   1.46923215E+01, mean:   1.469
 
  Mean square residual over all n,k,spin=   12.363E-03; max=  22.976E-03
    0.0000  0.0000  0.0000    1  2.29759E-02 kpt; spin; max resid(k); each band:
-   1.82E-02  1.25E-02  2.30E-02  2.13E-02  1.14E-02  9.75E-03  2.69E-03  7.70E-03
-   4.93E-03  1.05E-02  1.23E-02  1.05E-02  1.32E-02  1.05E-02  1.89E-02  1.04E-02
+  1.82E-02 1.25E-02 2.30E-02 2.13E-02 1.14E-02 9.75E-03 2.69E-03 7.70E-03
+  4.93E-03 1.05E-02 1.23E-02 1.05E-02 1.32E-02 1.05E-02 1.89E-02 1.04E-02
  reduced coordinates (array xred) for    8 atoms
        0.100000000000      0.200000000000      0.300000000000
        0.400000000000      0.800000000000      0.800000000000
@@ -1691,10 +1687,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.7
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.6  wall=          1.7
+.Delivered   8 WARNINGs and  30 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.5  wall=          1.6

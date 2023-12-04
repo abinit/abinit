@@ -26,6 +26,11 @@ kptopt    3          # Need full k-point set for finite-Q response
 rfphon    1          # Do phonon response
 tolvrs    1.0d-4     # This default is active for sets 3-10
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #####################################################################
 # COMMON VARIABLES
 #####################################################################

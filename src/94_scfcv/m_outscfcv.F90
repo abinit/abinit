@@ -75,7 +75,8 @@ module m_outscfcv
  use m_mlwfovlp_qp,      only : mlwfovlp_qp
  use m_paw_mkaewf,       only : pawmkaewf
  use m_dens,             only : mag_penalty_e, calcdenmagsph, prtdenmagsph
- use m_mlwfovlp,         only : mlwfovlp
+ !use m_mlwfovlp,         only : mlwfovlp
+ use m_wfd_wannier,      only : wfd_run_wannier
  use m_datafordmft,      only : datafordmft
  use m_mkrho,            only : read_atomden
  use m_positron,         only : poslifetime, posdoppler
@@ -383,15 +384,25 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call timab(1151,2,tsec)
 
+
+
+
 !wannier interface
  call timab(1152,1,tsec)
 
  if (dtset%prtwant==2) then
+       call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
+         & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
+         & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
+         &  kg=kg, cg=cg, cprj=cprj)
+!    else
+!
+!       call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
 
-   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+
 
  else if (dtset%prtwant==3) then
 
@@ -403,10 +414,16 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &   nkpt,npwarr,nspden,nsppol,ntypat,Hdr,pawtab,rprimd,MPI_enreg)
 
 !  Call Wannier90
-   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
-&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
-&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
-&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+!   call mlwfovlp(crystal, ebands, hdr, atindx1,cg,cprj,dtset,dtfil,eigen2,gprimd,kg,&
+!&   mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpw,natom,&
+!&   nattyp,nfft,ngfft,nkpt,npwarr,nsppol,ntypat,occ,&
+!&   pawang,pawrad,pawtab,prtvol,psps,rprimd,ucvol,xred)
+
+   call wfd_run_wannier(cryst=crystal, ebands=ebands, hdr=hdr, mpi_enreg=mpi_enreg, &
+     & ngfftc=ngfft, ngfftf=ngfft, dtset=dtset, dtfil=dtfil,  &
+     & pawang=pawang,  pawrad=pawrad, pawtab=pawtab, psps=psps, &
+     &  kg=kg, cg=cg, cprj=cprj)
+
 
 !  this is the old implementation, risky due to unpredictable size effects
 !  now eigen is not overwritten, one should use other ways to print the GW corrections
@@ -976,6 +993,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 #endif
 
+!TODO: do not free dos here, but use the fractions below in calcdenmagsph
    call dos%free()
  end if ! prtdos > 1
 
@@ -1003,7 +1021,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
        call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,ab_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
        call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,21,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      endif
-   end if
+   end if !end prtdensph==1 .and. usewvl==0
 
 !!!!!!!!!!!!!!!!!!!!!!!!if prt_lorbmag value is equal 1 and the calculations are noncollinear then the local orbital magnetic moments are calculated
 if (dtset%prt_lorbmag==1) then
@@ -1013,7 +1031,7 @@ if (dtset%prt_lorbmag==1) then
         call wrtout([std_out, ab_out], msg)
         write (msg,'(a)')"WARNING*"
         call wrtout([std_out, ab_out], msg)
-        write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation, calculations need to be noncollinear"
+        write (msg,'(a)')"prt_lorbmag=1, To calculate orbital magnetisation, calculations need to be noncollinear"
         call wrtout([std_out, ab_out], msg)
     else
         if (dtset%usepawu .ne. 0)then
@@ -1026,7 +1044,7 @@ if (dtset%prt_lorbmag==1) then
             call wrtout([std_out, ab_out], msg)
             write (msg,'(a)')"WARNING*"
             call wrtout([std_out, ab_out], msg)
-            write (msg,'(a)')"prt_lorbmag=1, To calcualte orbital magnetisation LDA+U calculations should be activated"
+            write (msg,'(a)')"prt_lorbmag=1, To calculate orbital magnetisation LDA+U calculations should be activated"
             call wrtout([std_out, ab_out], msg)
         end if
      endif
@@ -1052,7 +1070,7 @@ if (dtset%prt_lorbmag==1) then
      call wrtout([std_out, ab_out], msg)
    end if
    ABI_SFREE(intgden)
- end if
+ end if ! end if prtdensph or magnetic field
 
  call timab(1166,2,tsec)
  call timab(1167,1,tsec)

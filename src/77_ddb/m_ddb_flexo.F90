@@ -29,6 +29,7 @@ module m_ddb_flexo
  use m_errors
 
  use m_fstrings,       only : itoa,sjoin
+ use m_ddb_hdr
  use m_ddb
  use m_crystal,        only : crystal_t
  use m_dynmat,       only : asria_corr,cart39
@@ -131,7 +132,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg
   
    write(msg, '(2a)' ) ch10," Extract the electronic flexoelectric coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
   
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -153,7 +154,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(ddb_version,lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(ddb_version,lwsym,BLKTYP_d3E_lw,pol1)
    end if
 
    rfphon(:)=0
@@ -170,7 +171,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg
   
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL') 
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -240,7 +241,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg
 
    write(msg, '(2a)' ) ch10," Extract the Phi^(1) coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (iblok == 0) then
      call wrtout(std_out, "  ")
@@ -259,7 +260,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,ddb_version,crystal,filnamddb,flexoflg
 
    write(msg, '(2a)' ) ch10," Extract the FxE force response coeficients from 3DTE"
    call wrtout(std_out,msg,'COLL')
-   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,33,rfqvec=rfqvec)
+   call ddb_lw%get_block(jblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,BLKTYP_d3E_lw,rfqvec=rfqvec)
 
    if (jblok == 0) then
      call wrtout(std_out, "  ")

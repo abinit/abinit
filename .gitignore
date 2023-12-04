@@ -84,6 +84,7 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
+/configure~
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
