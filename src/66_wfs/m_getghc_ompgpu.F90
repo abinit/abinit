@@ -417,8 +417,8 @@ has_fock=.false.
    ABI_BUG("Fock exchange term calculation not supported in GPU mode")
  end if
 
- if (gs_ham%use_gpu_flavor/=ABI_GPU_OPENMP) then
-   ABI_BUG('Unexpected value for gs_ham%use_gpu_flavor (debugging) ! ')
+ if (gs_ham%gpu_option/=ABI_GPU_OPENMP) then
+   ABI_BUG('Unexpected value for gs_ham%gpu_option (debugging) ! ')
  end if
 
 !Parallelization over spinors management
@@ -510,7 +510,7 @@ has_fock=.false.
        call fourwf(1,gs_ham%vlocal,cwavef,ghc,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&       weight,weight,use_gpu_flavor=gs_ham%use_gpu_flavor)
+&       weight,weight,gpu_option=gs_ham%gpu_option)
 
      else
        ! nspinortot==2
@@ -530,7 +530,7 @@ has_fock=.false.
          call fourwf(1,gs_ham%vlocal,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,&
-&         weight,weight,use_gpu_flavor=gs_ham%use_gpu_flavor)
+&         weight,weight,gpu_option=gs_ham%gpu_option)
          do idat=1,ndat
            do ipw =1, npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc1(1:2,ipw+(idat-1)*npw_k2)
@@ -554,7 +554,7 @@ has_fock=.false.
          call fourwf(1,gs_ham%vlocal,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &         gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &         npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&         use_gpu_flavor=gs_ham%use_gpu_flavor)
+&         gpu_option=gs_ham%gpu_option)
          do idat=1,ndat
            do ipw=1,npw_k2
              ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc2(1:2,ipw+(idat-1)*npw_k2)
@@ -605,7 +605,7 @@ has_fock=.false.
        call fourwf(1,vlocal_tmp,cwavef1,ghc1,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_flavor=gs_ham%use_gpu_flavor)
+&       gpu_option=gs_ham%gpu_option)
      end if
 !    ghc2=v22*phi2
      if (nspinor2TreatedByThisProc) then
@@ -634,7 +634,7 @@ has_fock=.false.
        call fourwf(1,vlocal_tmp,cwavef2,ghc2,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_flavor=gs_ham%use_gpu_flavor)
+&       gpu_option=gs_ham%gpu_option)
      end if
      ABI_FREE(vlocal_tmp)
      cplex=2
@@ -667,7 +667,7 @@ has_fock=.false.
        call fourwf(cplex,vlocal_tmp,cwavef1,ghc3,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_flavor=gs_ham%use_gpu_flavor)
+&       gpu_option=gs_ham%gpu_option)
      end if
 !    ghc4=(re(v12)+im(v12))*phi2
      if (nspinor2TreatedByThisProc) then
@@ -693,7 +693,7 @@ has_fock=.false.
        call fourwf(cplex,vlocal_tmp,cwavef2,ghc4,work,gbound_k1,gbound_k2,&
 &       gs_ham%istwf_k,kg_k1,kg_k2,gs_ham%mgfft,mpi_enreg,ndat,gs_ham%ngfft,&
 &       npw_k1,npw_k2,gs_ham%n4,gs_ham%n5,gs_ham%n6,option_fft,tim_fourwf,weight,weight,&
-&       use_gpu_flavor=gs_ham%use_gpu_flavor)
+&       gpu_option=gs_ham%gpu_option)
      end if
      ABI_FREE(vlocal_tmp)
 !    Build ghc from pieces

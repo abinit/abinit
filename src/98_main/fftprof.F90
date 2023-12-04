@@ -117,7 +117,7 @@ program fftprof
  integer,allocatable :: osc_gvec(:,:), fft_setups(:,:),fourwf_params(:,:)
 ! ==========  INPUT FILE ==============
  integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1
- integer :: mixprec = 0, use_gpu_flavor = 0, init_gpu_flavor
+ integer :: mixprec = 0, gpu_option = 0, init_gpu_flavor
  character(len=500) :: tasks="all"
  integer :: fftalgs(MAX_NFFTALGS) = 0, use_gpu_fftalgs(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
@@ -252,7 +252,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); use_gpu_flavor = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
      do paral_kgb=1,1
        write(msg,"(5(a,i0))")&
         "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
@@ -263,7 +263,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); use_gpu_flavor = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
      do cplex=1,2
        write(msg,"(4(a,i0))")&
          "MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
@@ -296,20 +296,20 @@ program fftprof
 
  ntests = max_nthreads * nfftalgs
 
- ! First dimension contains [fftalg, fftcache, ndat, nthreads, available, use_gpu_flavor]
+ ! First dimension contains [fftalg, fftcache, ndat, nthreads, available, gpu_option]
  ABI_MALLOC(fft_setups, (6, ntests))
 
  ! Default Goedecker library.
  idx=0
  do alg=1,nfftalgs
-   fftalg = fftalgs(alg); use_gpu_flavor = use_gpu_fftalgs(alg)
+   fftalg = fftalgs(alg); gpu_option = use_gpu_fftalgs(alg)
    fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
    avail = merge(1, 0, fftalg_isavailable(fftalg))
    !fftcache is machine-dependent.
    fftcache = get_cache_kb()
    do ith=1,max_nthreads
      idx = idx + 1
-     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail, use_gpu_flavor]
+     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail, gpu_option]
    end do
  end do
 
@@ -423,19 +423,19 @@ program fftprof
 
    nfailed = 0
    do idx=1,ntests
-     ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,use_gpu_flavor]
+     ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,gpu_option]
      fftalg   = fft_setups(1, idx)
      fftcache = fft_setups(2, idx)
      ndat     = fft_setups(3, idx)
      nthreads = fft_setups(4, idx)
      ! Skip the test if library is not available.
      if (fft_setups(5,idx) == 0) CYCLE
-     use_gpu_flavor = fft_setups(6, idx)
+     gpu_option = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
 
-     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, use_gpu_flavor)
+     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
      ! Initialize ngfft(7:8) here.
      ut_ngfft = -1

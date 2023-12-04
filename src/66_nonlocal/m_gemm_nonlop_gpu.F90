@@ -359,7 +359,7 @@ module m_gemm_nonlop_gpu
 !! Replacement of nonlop.
 !!
 !! INPUTS
-!! [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! PARENTS
 !!      m_nonlop
@@ -375,7 +375,7 @@ module m_gemm_nonlop_gpu
 &                        nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
 &                        sij,svectout,&
 &                        useylm,vectin,vectout,&
-&                        vectproj,use_gpu_flavor)
+&                        vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
@@ -383,7 +383,7 @@ module m_gemm_nonlop_gpu
   integer,intent(in) :: istwf_k,lmnmax,matblk,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat
   integer,intent(in) :: paw_opt,useylm
-  integer,optional,intent(in)      :: use_gpu_flavor
+  integer,optional,intent(in)      :: gpu_option
   real(dp), target, intent(in)     :: lambda(ndat)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
   type(MPI_type),   intent(in)     :: mpi_enreg
@@ -454,7 +454,7 @@ module m_gemm_nonlop_gpu
 ! *************************************************************************
 
   ! This function should only be called within CUDA legacy or Kokkos code paths
-  if(use_gpu_flavor/=ABI_GPU_LEGACY .and. use_gpu_flavor/=ABI_GPU_KOKKOS) then
+  if(gpu_option/=ABI_GPU_LEGACY .and. gpu_option/=ABI_GPU_KOKKOS) then
     ABI_BUG("Unhandled GPU value !")
   end if
 
@@ -480,7 +480,7 @@ module m_gemm_nonlop_gpu
 
   vectin_size = 2*npwin*nspinor*ndat*dp
 
-  if(use_gpu_flavor==ABI_GPU_LEGACY) then
+  if(gpu_option==ABI_GPU_LEGACY) then
     vectin_ptr  = gemm_nonlop_gpu_data%vectin_gpu
     vectout_ptr = gemm_nonlop_gpu_data%vectout_gpu
     svectout_ptr= gemm_nonlop_gpu_data%svectout_gpu
@@ -490,7 +490,7 @@ module m_gemm_nonlop_gpu
       call copy_on_gpu(svectout, gemm_nonlop_gpu_data%svectout_gpu, INT(2, c_size_t) * npwout*nspinor*ndat * dp)
     end if
 
-  else if(use_gpu_flavor==ABI_GPU_KOKKOS) then
+  else if(gpu_option==ABI_GPU_KOKKOS) then
     vectin_ptr  =C_LOC(vectin)
     vectout_ptr =C_LOC(vectout)
     svectout_ptr=C_LOC(svectout)
@@ -719,7 +719,7 @@ module m_gemm_nonlop_gpu
         end if
 
         ! Use the Kokkos implementation of opernlc if available
-        if (use_gpu_flavor == ABI_GPU_KOKKOS) then
+        if (gpu_option == ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
           call opernlc_ylm_allwf_kokkos(cplex, cplex_enl, cplex_fac, &
             &                           dimenl1, dimenl2, dimekbq, &
@@ -831,7 +831,7 @@ module m_gemm_nonlop_gpu
 
       endif
 
-      if(use_gpu_flavor==ABI_GPU_LEGACY) then
+      if(gpu_option==ABI_GPU_LEGACY) then
         ! copy back results on host
         call copy_from_gpu(svectout, svectout_ptr, INT(2, c_size_t)*npwout*nspinor*(paw_opt/3)*ndat * dp)
       end if
@@ -883,7 +883,7 @@ module m_gemm_nonlop_gpu
       end if  ! cplex_fac == 2
 
       ! copy back results on host
-      if(use_gpu_flavor==ABI_GPU_LEGACY) then
+      if(gpu_option==ABI_GPU_LEGACY) then
         call copy_from_gpu(vectout, vectout_ptr, INT(2, c_size_t)*npwout*nspinor*ndat * dp)
       end if
 
@@ -968,7 +968,7 @@ module m_gemm_nonlop_gpu
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 vectproj,use_gpu_flavor)
+&                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
@@ -976,7 +976,7 @@ module m_gemm_nonlop_gpu
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
-  integer,optional,intent(in) :: use_gpu_flavor
+  integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
@@ -1000,7 +1000,7 @@ module m_gemm_nonlop_gpu
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
   ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
-  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,use_gpu_flavor/))
+  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
   ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout,phkxredin,phkxredout/))
   ABI_UNUSED((/ucvol,lambda,sij,ph1d(1,1),ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))

@@ -414,7 +414,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%use_gpu_flavor,dtset%wtk,xred,ylm,ylmgr)
+&   usecprj,dtset%usefock,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr)
 !DEBUG
 !   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
 !ENDDEBUG
@@ -594,7 +594,7 @@ end subroutine forstr
 !!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  use_gpu_flavor= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -616,13 +616,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,use_gpu_flavor,wtk,xred,ylm,ylmgr)
+&  stress_needed,symrec,typat,usecprj,usefock,gpu_option,wtk,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,use_gpu_flavor
+ integer,intent(in) :: usecprj,usefock,gpu_option
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -749,7 +749,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,use_gpu_flavor=use_gpu_flavor)
+& nucdipmom=nucdipmom,gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
@@ -809,7 +809,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
-     if(use_gpu_flavor == ABI_GPU_KOKKOS) then
+     if(gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
        ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
 #endif
@@ -954,7 +954,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      end if
 
 !    If OpenMP GPU, load "hamiltonian" on GPU device
-     if (use_gpu_flavor == ABI_GPU_OPENMP) then
+     if (gpu_option == ABI_GPU_OPENMP) then
        if(mpi_enreg%paral_kgb==0) then
          call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
        else if(gs_hamk%istwf_k==1) then
@@ -969,20 +969,20 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       if ( use_gpu_flavor == ABI_GPU_DISABLED) then
+       if ( gpu_option == ABI_GPU_DISABLED) then
          call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
              gs_hamk%kg_k, gs_hamk%kpg_k, &
              compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        !!FIXME signs==1 not handled in CUDA GEMM nonlop
-       !else if ( use_gpu_flavor /= ABI_GPU_LEGACY) then
+       !else if ( gpu_option /= ABI_GPU_LEGACY) then
        !  call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
        !      gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
        !      gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
        !      gs_hamk%kg_k, gs_hamk%kpg_k, &
        !      compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
-       else if ( use_gpu_flavor == ABI_GPU_OPENMP) then
+       else if ( gpu_option == ABI_GPU_OPENMP) then
          call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
@@ -1049,10 +1049,10 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
-           ! here we MUST pass option use_gpu_flavor=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
+           ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
-&           already_transposed=.False.,use_gpu_flavor=ABI_GPU_DISABLED)
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
          end if
          ABI_NVTX_END_RANGE()
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
@@ -1076,7 +1076,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          call timab(924,2,tsec)
 
 #if defined HAVE_GPU && defined HAVE_YAKL
-         if(use_gpu_flavor==ABI_GPU_KOKKOS) then
+         if(gpu_option==ABI_GPU_KOKKOS) then
            ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
            call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
            call gpu_device_synchronize()
@@ -1146,7 +1146,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end if
          end if ! usefock_loc
        end if
-       if ( use_gpu_flavor == ABI_GPU_OPENMP) then
+       if ( gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
 
@@ -1178,7 +1178,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      end if
      ABI_FREE(cwaveprj)
 
-     if(use_gpu_flavor == ABI_GPU_KOKKOS) then
+     if(gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
        ABI_FREE_MANAGED(cwavef)
 #endif

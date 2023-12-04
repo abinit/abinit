@@ -754,7 +754,7 @@ contains
 !! Replacement of nonlop. same prototype as nonlop although not all options are implemented.
 !!
 !! INPUTS
-!! [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! SOURCE
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
@@ -764,7 +764,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 vectproj,use_gpu_flavor)
+&                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
@@ -772,7 +772,7 @@ contains
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
-  integer,optional,intent(in) :: use_gpu_flavor
+  integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
@@ -823,7 +823,7 @@ contains
   ABI_UNUSED((/phkxredin,phkxredout,ucvol/))
   ABI_UNUSED((/mgfft,mpsang,mpssoang/))
   ABI_UNUSED((/kptin,kptout/))
-  ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,use_gpu_flavor/))
+  ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,gpu_option/))
 
   ! Check supported options
   if ( (choice>1.and.choice/=7.and.signs==2) .or. &
@@ -1489,7 +1489,7 @@ contains
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
 &                 tim_nonlop,ucvol,useylm,vectin,vectout,&
-&                 vectproj,use_gpu_flavor)
+&                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
@@ -1497,7 +1497,7 @@ contains
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
   integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm
-  integer,optional,intent(in) :: use_gpu_flavor
+  integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
@@ -1521,7 +1521,7 @@ contains
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
   ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
-  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,use_gpu_flavor/))
+  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
   ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout,phkxredin,phkxredout/))
   ABI_UNUSED((/ucvol,lambda,sij,ph1d(1,1),ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))

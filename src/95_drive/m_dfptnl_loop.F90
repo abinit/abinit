@@ -296,7 +296,7 @@ subroutine dfptnl_loop(atindx,blkflg,cg,dtfil,dtset,d3etot,eigen0,gmet,gprimd,gs
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,dtset%nsppol,dtset%nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,paw_ij=paw_ij0,&
-& use_gpu_flavor=dtset%use_gpu_flavor)
+& gpu_option=dtset%gpu_option)
 
  ABI_MALLOC(vpsp1,(cplex*nfftf))
  ABI_MALLOC(xccc3d1,(cplex*nfftf))

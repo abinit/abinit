@@ -615,7 +615,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-& nucdipmom=dtset%nucdipmom,use_gpu_flavor=dtset%use_gpu_flavor)
+& nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
 !Initializations for PAW (projected wave functions)
  mcprj_local=0 ; mband_cprj=0
@@ -725,7 +725,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      nkpt1 = dtefield%mkmem_max
    end if
 
-   if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_MALLOC_MANAGED(rhoaug, (/n4,n5,n6,gs_hamk%nvloc/))
      ABI_MALLOC_MANAGED(vlocal, (/n4,n5,n6,gs_hamk%nvloc/))
@@ -877,7 +877,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_MALLOC(zshift,(nband_k))
        ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
 
-       if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_MALLOC_MANAGED(eig_k,(/nband_k/))
          ABI_MALLOC_MANAGED(resid_k,(/nband_k/))
@@ -899,7 +899,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
-       if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
 #endif
@@ -918,7 +918,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Set up remaining of the Hamiltonian
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
-       if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
 #endif
@@ -975,7 +975,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 !      If OpenMP GPU, load "hamiltonian" on GPU device
-       if (dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+       if (dtset%gpu_option == ABI_GPU_OPENMP) then
          if(dtset%paral_kgb==0) then
            call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
          else if(istwf_k==1) then
@@ -992,7 +992,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          ! Only compute CHEBFI number of blocks if user didn't set it themselves
          if(gemm_nonlop_nblocks==1) then
            call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
-           &                        dtset%use_gpu_flavor,nblk_gemm_nonlop)
+           &                        dtset%gpu_option,nblk_gemm_nonlop)
            gemm_nonlop_nblocks = nblk_gemm_nonlop
          end if
          if(gemm_nonlop_nblocks > 1) gemm_nonlop_is_distributed = .true.
@@ -1012,19 +1012,19 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if (istep <= 1) then
            !Init the arrays
            !FIXME Settle this
-           if ( dtset%use_gpu_flavor == ABI_GPU_DISABLED) then
+           if ( dtset%gpu_option == ABI_GPU_DISABLED) then
              call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
                  gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
                  gs_hamk%ucvol, gs_hamk%ffnl_k,&
                  gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,&
                  compute_grad_atom=(optforces>0))
-           else if ( dtset%use_gpu_flavor == ABI_GPU_LEGACY .or. dtset%use_gpu_flavor == ABI_GPU_KOKKOS) then
+           else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
              call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
                  gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
                  gs_hamk%ucvol, gs_hamk%ffnl_k, &
                  gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
                  compute_grad_atom=(optforces>0))
-           else if ( dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+           else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
              call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
                  gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
                  gs_hamk%ucvol, gs_hamk%ffnl_k, &
@@ -1035,7 +1035,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
 #if defined HAVE_GPU_CUDA
-       if (dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
          if (mpi_enreg%paral_kgb==1) then
            call gpu_update_ffnl_ph3d( &
              & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
@@ -1082,11 +1082,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
-       if(dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
+       if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_FREE(ffnl)
 
-       if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_FREE_MANAGED(kinpw)
          ABI_FREE_MANAGED(kg_k)
@@ -1155,7 +1155,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
-       if ( dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+       if ( dtset%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
        call timab(985,2,tsec)
@@ -1168,7 +1168,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        ABI_FREE(zshift)
        ABI_FREE(enlx_k)
 
-       if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
          ABI_FREE_MANAGED(eig_k)
          ABI_FREE_MANAGED(resid_k)
@@ -1238,7 +1238,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_FREE(dphasek)
    end if ! berryflag
 
-   if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_FREE_MANAGED(rhoaug)
      ABI_FREE_MANAGED(vlocal)
@@ -2078,7 +2078,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_FREE(EigMin)
    ABI_FREE(doccde)
 #if defined HAVE_GPU_CUDA
-   if(dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) call gpu_finalize_ham_data()
+   if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ham_data()
 #endif
  end if
 

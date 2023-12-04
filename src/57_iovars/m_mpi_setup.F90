@@ -206,6 +206,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_linalg_limit',tread(11),'INT')
    if(tread(11)==1) dtsets(idtset)%gpu_linalg_limit=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthreads',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_kokkos_nthreads=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
@@ -771,7 +773,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if (mpi_enregs(idtset)%nproc_cell>0) then
          if(mpi_enregs(idtset)%paral_kgb == 1) then
 
-           if((dtsets(idtset)%use_gpu_flavor/=ABI_GPU_DISABLED).and.(mpi_enregs(idtset)%nproc_fft/=1))then
+           if((dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED).and.(mpi_enregs(idtset)%nproc_fft/=1))then
              write(msg,'(3a,i0)') &
              'When the use of GPU is on, the number of FFT processors, npfft, must be 1',ch10,&
              'However, npfft=',mpi_enregs(idtset)%nproc_fft
@@ -884,7 +886,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
 &   ngfft,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
-&   use_gpu_flavor=dtsets(idtset)%use_gpu_flavor)
+&   gpu_option=dtsets(idtset)%gpu_option)
 
    dtsets(idtset)%ngfft(:)=ngfft(:)
    dtsets(idtset)%mgfft=mgfft
@@ -941,7 +943,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      call getng(dtsets(idtset)%bxctmindg,dtsets(idtset)%chksymtnons,&
 &     ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
 &     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,ngfftc,&
-&     use_gpu_flavor=dtsets(idtset)%use_gpu_flavor)
+&     gpu_option=dtsets(idtset)%gpu_option)
 
      dtsets(idtset)%ngfftdg(:)=ngfftdg(:)
      dtsets(idtset)%mgfftdg=mgfftdg
@@ -970,7 +972,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%use_gpu_flavor/=ABI_GPU_DISABLED.or.dtsets(idtset)%use_gpu_flavor==ABI_GPU_UNKNOWN) then
+   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.or.dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize
@@ -1274,7 +1276,7 @@ end subroutine mpi_setup
    end if
    npf_max=min(npf_max,ngmin(2))
    ! Deactivate MPI FFT parallelism for GPU
-   if (dtset%use_gpu_flavor/=ABI_GPU_DISABLED) then
+   if (dtset%gpu_option/=ABI_GPU_DISABLED) then
      npf_min=1;npf_max=1
    end if
    !Deactivate MPI FFT parallelism for GPU
@@ -1853,7 +1855,7 @@ end subroutine mpi_setup
      ii=isort(jj)
      npf=my_distp(4,ii);npb=my_distp(5,ii);bpp=my_distp(6,ii)
      if ((npb*npf*bpp>1).and.(npf*npb<=mpi_enreg%nproc)) then
-       use_linalg_gpu=dtset%use_gpu_flavor
+       use_linalg_gpu=dtset%gpu_option
        call compute_kgb_indicator(acc_kgb,bpp,xmpi_world,mband,mpw,npb,npf,np_slk,use_linalg_gpu)
        if (autoparal/=2) then
          my_distp(9,ii)=np_slk

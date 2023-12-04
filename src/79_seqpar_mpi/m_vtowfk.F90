@@ -448,7 +448,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          ABI_ERROR(msg)
        end if
 
-       if (dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if (dtset%gpu_option==ABI_GPU_KOKKOS) then
          ! Kokkos GPU branch is not OpenMP thread-safe, setting OpenMP num threads to 1
          call xomp_set_num_threads(1)
        end if
@@ -541,7 +541,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                        mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
        end if
 
-       if (dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+       if (dtset%gpu_option==ABI_GPU_KOKKOS) then
          ! Kokkos GPU branch is not OpenMp thread-safe, restoring OpenMP threads num
          call xomp_set_num_threads(dtset%gpu_kokkos_nthreads)
        end if
@@ -720,7 +720,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  if(iscf>0 .and. fixed_occ)  then
-   if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_MALLOC_MANAGED(wfraug,(/2,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6*ndat/))
 #endif
@@ -750,7 +750,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ABI_MALLOC(enlout,(nnlout*blocksize))
 
  ! Allocation of memory space for one block of waveforms containing blocksize waveforms
- if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_MALLOC_MANAGED(cwavef, (/2,npw_k*my_nspinor*blocksize/))
 #endif
@@ -798,7 +798,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
        call getghc_nucdip(cg(:,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
          & ghc_vectornd,gs_hamk%gbound_k,gs_hamk%istwf_k,kg_k,gs_hamk%kpt_k,&
          & gs_hamk%mgfft,mpi_enreg,ndat,gs_hamk%ngfft,npw_k,gs_hamk%nvloc,&
-         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%use_gpu_flavor)
+         & gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,my_nspinor,gs_hamk%vectornd,gs_hamk%gpu_option)
        end_k(iband)=DOT_PRODUCT(cg(1,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
          &                      ghc_vectornd(1,1:npw_k*my_nspinor))+&
          &          DOT_PRODUCT(cg(2,1+(iband-1)*npw_k*my_nspinor+icg:iband*npw_k*my_nspinor+icg),&
@@ -823,7 +823,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      if (fixed_occ .and. mpi_enreg%paral_kgb/=1) then
 
        ! treat all bands at once on GPU
-       if (dtset%use_gpu_flavor /= ABI_GPU_DISABLED) then
+       if (dtset%gpu_option /= ABI_GPU_DISABLED) then
 
          ABI_MALLOC(weight_t,(blocksize))
 
@@ -834,7 +834,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            if (abs(occ_k(iband)) < tol8) weight_t(iblocksize) = zero
          end do
 
-         if (dtset%use_gpu_flavor == ABI_GPU_LEGACY) then
+         if (dtset%gpu_option == ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
            call gpu_fourwf(1,&        ! cplex
              &     rhoaug(:,:,:,1),&  ! denpot
@@ -861,7 +861,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              &     weight_t,&            ! weight_r
              &     weight_t)             ! weight_i
 #endif
-         else if (dtset%use_gpu_flavor == ABI_GPU_KOKKOS) then
+         else if (dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU_CUDA
            call gpu_fourwf_managed(1,&        ! cplex
              &     rhoaug(:,:,:,1),&  ! denpot
@@ -888,7 +888,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              &     weight_t,&            ! weight_r
              &     weight_t)             ! weight_i
 #endif
-         else if (dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+         else if (dtset%gpu_option == ABI_GPU_OPENMP) then
 #if defined HAVE_OPENMP_OFFLOAD
            call ompgpu_fourwf(1,&     ! cplex
              &     rhoaug(:,:,:,1),&  ! denpot
@@ -935,7 +935,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              call fourwf(1,rhoaug(:,:,:,1),cwavef_iband,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
                &           istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
                &           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-               &           tim_fourwf,weight,weight,use_gpu_flavor=dtset%use_gpu_flavor)
+               &           tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
              if(dtset%nspinor==2)then
                ABI_MALLOC(cwavef1,(2,npw_k))
@@ -947,7 +947,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                    &               gs_hamk%gbound_k,gs_hamk%gbound_k,&
                    &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
                    &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,use_gpu_flavor=dtset%use_gpu_flavor)
+                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
                else if(dtset%nspden==4) then
                  ! Build the four components of rho. We use only norm quantities and, so fourwf.
@@ -965,17 +965,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                  call fourwf(1,rhoaug(:,:,:,4),cwavef1,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
                    &             istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
                    &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,use_gpu_flavor=dtset%use_gpu_flavor)
+                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
                  ! x component
                  call fourwf(1,rhoaug(:,:,:,2),cwavef_x,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
                    &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
                    &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,use_gpu_flavor=dtset%use_gpu_flavor)
+                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
                  ! y component
                  call fourwf(1,rhoaug(:,:,:,3),cwavef_y,dummy,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
                    &               istwf_k,gs_hamk%kg_k,gs_hamk%kg_k,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%ngfft,npw_k,1,&
                    &               gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,1,&
-                   &               tim_fourwf,weight,weight,use_gpu_flavor=dtset%use_gpu_flavor)
+                   &               tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
                  ABI_FREE(cwavef_x)
                  ABI_FREE(cwavef_y)
@@ -988,7 +988,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
          end do  ! Loop inside a block of bands
 
-       end if ! dtset%use_gpu_flavor
+       end if ! dtset%gpu_option
 
 !      In case of fixed occupation numbers,in bandFFT mode accumulates the partial density
      else if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
@@ -998,7 +998,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavef,wfraug,iblock,istwf_k,&
 &         gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
 &         gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,&
-&         1,gs_hamk%ucvol,wtk,use_gpu_flavor=dtset%use_gpu_flavor)
+&         1,gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
          call timab(537,2,tsec)
        else if (dtset%nspinor==2) then
          ABI_MALLOC(cwavefb,(2,npw_k*blocksize,2))
@@ -1024,14 +1024,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,1),wfraug,iblock,&
 &           istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,npw_k,&
 &           gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&           use_gpu_flavor=dtset%use_gpu_flavor)
+&           gpu_option=dtset%gpu_option)
          end if
          if(dtset%nspden==1) then
            if (nspinor2TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,1),blocksize,cwavefb(:,:,2),wfraug,&
 &             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,&
 &             gs_hamk%ngfft,npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,&
-&             gs_hamk%ucvol,wtk,use_gpu_flavor=dtset%use_gpu_flavor)
+&             gs_hamk%ucvol,wtk,gpu_option=dtset%gpu_option)
            end if
          else if(dtset%nspden==4) then
            ABI_MALLOC(cwavef_x,(2,npw_k*blocksize))
@@ -1043,17 +1043,17 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
              call prep_fourwf(rhoaug(:,:,:,4),blocksize,cwavefb(:,:,2),wfraug,&
 &             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             use_gpu_flavor=dtset%use_gpu_flavor)
+&             gpu_option=dtset%gpu_option)
            end if
            if (nspinor2TreatedByThisProc) then
              call prep_fourwf(rhoaug(:,:,:,2),blocksize,cwavef_x,wfraug,&
 &             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             use_gpu_flavor=dtset%use_gpu_flavor)
+&             gpu_option=dtset%gpu_option)
              call prep_fourwf(rhoaug(:,:,:,3),blocksize,cwavef_y,wfraug,&
 &             iblock,istwf_k,gs_hamk%mgfft,mpi_enreg,nband_k,ndat,gs_hamk%ngfft,&
 &             npw_k,gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,occ_k,1,gs_hamk%ucvol,wtk,&
-&             use_gpu_flavor=dtset%use_gpu_flavor)
+&             gpu_option=dtset%gpu_option)
            end if
            ABI_FREE(cwavef_x)
            ABI_FREE(cwavef_y)
@@ -1139,7 +1139,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end do !  End of loop on blocks
  !call cwtime_report(" Block loop", cpu, wall, gflops)
 
- if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_FREE_MANAGED(cwavef)
 #endif
@@ -1159,7 +1159,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  end if
 
  if (fixed_occ.and.iscf>0) then
-   if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_FREE_MANAGED(wfraug)
 #endif
