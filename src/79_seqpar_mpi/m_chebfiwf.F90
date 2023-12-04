@@ -118,10 +118,10 @@ module m_chebfiwf
  CONTAINS  !========================================================================================
 !!***
 
-subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,use_gpu_flavor,nblk_gemm_nonlop)
+subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_option,nblk_gemm_nonlop)
    implicit none
 
-   integer,intent(in) :: ndat,npw,nband,nspinor,paral_kgb,use_gpu_flavor
+   integer,intent(in) :: ndat,npw,nband,nspinor,paral_kgb,gpu_option
    type(gs_hamiltonian_type),intent(in) :: gs_hamk
    integer, intent(out)  :: nblk_gemm_nonlop
 
@@ -134,12 +134,12 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,use_gpu_
 
    free_mem=256*1e9 ! Dummy value
 #ifdef HAVE_GPU
-   if(use_gpu_flavor /= ABI_GPU_DISABLED) then
+   if(gpu_option /= ABI_GPU_DISABLED) then
      call gpu_get_free_mem(free_mem)
      free_mem = 0.95 * free_mem ! Cutting 5% out to be safe
    end if
 #else
-   ABI_UNUSED(use_gpu_flavor)
+   ABI_UNUSED(gpu_option)
 #endif
    rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
    if ( gs_hamk%istwf_k == 2 ) then ! Real only
@@ -339,7 +339,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
  !For preconditionning
- if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_MALLOC_MANAGED(l_pcon, (/l_icplx*npw/))
 #endif
@@ -358,7 +358,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end do
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- if(l_gs_hamk%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if(l_gs_hamk%gpu_option==ABI_GPU_KOKKOS) then
    ! upload l_pcon to device / gpu
    l_pcon_size_bytes =l_icplx * npw * dp
    call gpu_data_prefetch_async(C_LOC(l_pcon), l_pcon_size_bytes)
@@ -381,7 +381,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 
 !Trick with C is to change rank of arrays (:) to (:,:)
@@ -415,7 +415,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
-&                 l_gs_hamk%use_gpu_flavor, &
+&                 l_gs_hamk%gpu_option, &
 &                 gpu_kokkos_nthreads=dtset%gpu_kokkos_nthreads)
  ABI_NVTX_END_RANGE()
 
@@ -425,7 +425,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg)
 
 !Free preconditionning since not needed anymore
- if(dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if(dtset%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
    ABI_FREE_MANAGED(l_pcon)
 #endif
@@ -456,7 +456,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_free(chebfi)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 !################    SORRY IT'S ALREADY FINISHED : )  #################
 !######################################################################
@@ -536,8 +536,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !Scale back cg
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-   if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -575,7 +575,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  ABI_FREE(l_gvnlxc)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- !if (chebfi%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ !if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
    call gpu_device_synchronize()
  !end if
 #endif
@@ -583,10 +583,10 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X ,sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-   call xgBlock_scale(AX,sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
+   call xgBlock_scale(X ,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(AX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
 
-   if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -622,8 +622,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
      end if
    end if
    if(l_paw) then
-     call xgBlock_scale(BX,sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-     if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+     call xgBlock_scale(BX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then
@@ -649,7 +649,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if ! l_paw
  end if ! l_istwf==2
 
- if ( .not. l_paw ) call xgBlock_copy(X,BX,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
+ if ( .not. l_paw ) call xgBlock_copy(X,BX,gpu_option=l_gs_hamk%gpu_option)
 
 end subroutine getghc_gsc1
 !!***
@@ -704,8 +704,8 @@ subroutine getBm1X(X,Bm1X,transposer)
 
  !scale back cg
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-   if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0 ) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -732,8 +732,8 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,inv_sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-     if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+     call xgBlock_scale(Bm1X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then
@@ -783,8 +783,8 @@ subroutine getBm1X(X,Bm1X,transposer)
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST1)
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X,sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-   if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+   call xgBlock_scale(X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
        if(l_mpi_enreg%me_g0 == 1) then
@@ -813,8 +813,8 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,sqrt2,1,use_gpu_flavor=l_gs_hamk%use_gpu_flavor)
-     if(l_gs_hamk%use_gpu_flavor==ABI_GPU_OPENMP) then
+     call xgBlock_scale(Bm1X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
          if(l_mpi_enreg%me_g0 == 1) then
@@ -863,37 +863,37 @@ end subroutine getBm1X
 !! This routine applies a preconditionning to a block of memory
 !!
 !! INPUTS
-!! [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !! SIDE EFFECTS
 !!  W <type(xgBlock_t)>= memory block
 !!
 !! SOURCE
 
-subroutine precond1(W, use_gpu_flavor)
+subroutine precond1(W, gpu_option)
 
  implicit none
 
  ! Arguments ------------------------------------
  type(xgBlock_t), intent(inout)           :: W
- integer        , intent(in   ), optional :: use_gpu_flavor
+ integer        , intent(in   ), optional :: gpu_option
 
 
  ! Local variables-------------------------------
  ! scalars
  integer :: ispinor
- integer :: l_use_gpu_flavor = ABI_GPU_DISABLED
+ integer :: l_gpu_option = ABI_GPU_DISABLED
 
  ! *********************************************************************
 
  ! if optional parameter is present, use it
  ! else use default value, i.e. don't use GPU
- if (present(use_gpu_flavor)) then
-   l_use_gpu_flavor = use_gpu_flavor
+ if (present(gpu_option)) then
+   l_gpu_option = gpu_option
  end if
 
  ! Precondition resid_vec
  do ispinor = 1,l_nspinor
-   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1), l_use_gpu_flavor)
+   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1), l_gpu_option)
  end do
 
 end subroutine precond1

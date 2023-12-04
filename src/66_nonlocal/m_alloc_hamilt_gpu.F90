@@ -86,18 +86,18 @@ contains
 !!         1: allocate data for nonlocal operator
 !!         2: allocate both
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  use_gpu_flavor= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (no output - only allocation on GPU)
 !!
 !! SOURCE
 
-subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_flavor)
+subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: option,use_gpu_flavor
+ integer,intent(in) :: option,gpu_option
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
@@ -117,7 +117,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
 
 ! *************************************************************************
 
- if (use_gpu_flavor==ABI_GPU_DISABLED) return
+ if (gpu_option==ABI_GPU_DISABLED) return
 
 #if defined(HAVE_GPU)
 !=== Local Hamiltonian ===
@@ -134,15 +134,15 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    ! Initialize gpu data needed in fourwf
    ! ndat=bandpp when paral_kgb=1
    ! no matter paral_kgb=0 or 1, we gathet all bands into a single call gpu_fourwf
-   if(use_gpu_flavor == ABI_GPU_LEGACY) then
+   if(gpu_option == ABI_GPU_LEGACY) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
      call alloc_gpu_fourwf(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
 #endif
-   else if (use_gpu_flavor == ABI_GPU_KOKKOS) then
+   else if (gpu_option == ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
      call alloc_gpu_fourwf_managed(dtset%ngfft,dtset%bandpp,npw_max_loc,npw_max_loc)
 #endif
-   else if (use_gpu_flavor == ABI_GPU_OPENMP) then
+   else if (gpu_option == ABI_GPU_OPENMP) then
      call alloc_ompgpu_fourwf(dtset%ngfft,dtset%bandpp)
    end if
 
@@ -165,7 +165,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
    if (dtset%usepaw==0) dimekb2_max=psps%ntypat
    if (dtset%usepaw==1) dimekb2_max=dtset%natom
 
-   if (use_gpu_flavor == ABI_GPU_KOKKOS .or. use_gpu_flavor == ABI_GPU_LEGACY) then
+   if (gpu_option == ABI_GPU_KOKKOS .or. gpu_option == ABI_GPU_LEGACY) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
      ! TODO (PK) : disable this allocation when Kokkos is available
@@ -192,7 +192,7 @@ subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,
          &                      npw_max_nonloc,&
          &                      atindx1,&
          &                      nattyp,&
-         &                      use_gpu_flavor)
+         &                      gpu_option)
      end if
 #endif
 
@@ -227,32 +227,32 @@ end subroutine alloc_hamilt_gpu
 !!  option=0: deallocate data for local operator (FFT)
 !!         1: deallocate data for nonlocal operator
 !!         2: deallocate both
-!!  use_gpu_flavor= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (no output - only deallocation on GPU)
 !!
 !! SOURCE
 
-subroutine dealloc_hamilt_gpu(option,use_gpu_flavor)
+subroutine dealloc_hamilt_gpu(option,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: option,use_gpu_flavor
+ integer,intent(in) :: option,gpu_option
 !arrays
 
 !Local variables-------------------------------
 
 ! *************************************************************************
 
- if (use_gpu_flavor==ABI_GPU_DISABLED) return
+ if (gpu_option==ABI_GPU_DISABLED) return
 
- if (use_gpu_flavor == ABI_GPU_KOKKOS .or. use_gpu_flavor == ABI_GPU_LEGACY) then
+ if (gpu_option == ABI_GPU_KOKKOS .or. gpu_option == ABI_GPU_LEGACY) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
    if (option==0.or.option==2) then
-     if (use_gpu_flavor == ABI_GPU_LEGACY) then
+     if (gpu_option == ABI_GPU_LEGACY) then
        call free_gpu_fourwf()
-     else if(use_gpu_flavor == ABI_GPU_KOKKOS) then
+     else if(gpu_option == ABI_GPU_KOKKOS) then
        call free_gpu_fourwf_managed()
      end if
    end if
@@ -262,7 +262,7 @@ subroutine dealloc_hamilt_gpu(option,use_gpu_flavor)
      call dealloc_nonlop_gpu_data()
    end if ! option 1 or 2
 #endif
- else if(use_gpu_flavor == ABI_GPU_OPENMP) then
+ else if(gpu_option == ABI_GPU_OPENMP) then
    call free_ompgpu_fourwf()
  end if
 
@@ -288,7 +288,7 @@ end subroutine dealloc_hamilt_gpu
 !!  npwin is the number of plane waves for vectin
 !!  npwout is the number of plane waves for vectout
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  use_gpu_flavor= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (no output - only allocation on GPU, member of gemm_nonlop_gpu_data)
@@ -301,7 +301,7 @@ subroutine alloc_nonlop_gpu_data(dtset,&
   &                            npwout,&
   &                            atindx1,&
   &                            nattyp,&
-  &                            use_gpu_flavor)
+  &                            gpu_option)
 
   !Arguments ------------------------------------
   !scalars
@@ -315,7 +315,7 @@ subroutine alloc_nonlop_gpu_data(dtset,&
   !integer,                   intent(in) :: npwarr(dtset%nkpt)
 
   ! other
-  integer,                   intent(in) :: use_gpu_flavor
+  integer,                   intent(in) :: gpu_option
 
   !Local variables-------------------------------
   !scalars
@@ -369,7 +369,7 @@ subroutine alloc_nonlop_gpu_data(dtset,&
 #else
 
   if (.false.) then
-    write(std_out,*) psps%indlmn(1,1,1),dtset%natom,npwin,npwout,atindx1(1),nattyp(1),use_gpu_flavor
+    write(std_out,*) psps%indlmn(1,1,1),dtset%natom,npwin,npwout,atindx1(1),nattyp(1),gpu_option
   end if
 
 #endif

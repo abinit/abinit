@@ -426,7 +426,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,use_gpu_flavor=dtset%use_gpu_flavor)
+&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,gpu_option=dtset%gpu_option)
  else
    ABI_MALLOC(kg,(0,0))
    npwarr(:) = 0
@@ -443,23 +443,23 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  gemm_nonlop_use_gemm = .false.
 
  ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop_ompgpu(dtset%nkpt)
  else if(dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
    ! CUDA & Kokkos case (same routine used)
-   if(dtset%use_gpu_flavor == ABI_GPU_LEGACY .or. dtset%use_gpu_flavor == ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
      call init_gemm_nonlop(dtset%nkpt)
      call init_gemm_nonlop_gpu(dtset%nkpt)
    ! CPU case
-   else if(dtset%use_gpu_flavor == ABI_GPU_DISABLED) then
+   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
      call init_gemm_nonlop(dtset%nkpt)
    end if
  end if
 
  gemm_nonlop_is_distributed = .false.
- if(dtset%distribute_gemm_nonlop == 1) gemm_nonlop_is_distributed = .true.
+ if(dtset%gemm_nonlop_distribute == 1) gemm_nonlop_is_distributed = .true.
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -725,7 +725,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
-   if(dtset%use_gpu_flavor == ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_MALLOC_MANAGED(cg, (/2,mcg/))
 #endif
@@ -998,8 +998,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Here allocation of GPU for vtorho calculations
 #if defined HAVE_GPU
- if (dtset%use_gpu_flavor/=ABI_GPU_DISABLED) then
-   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%use_gpu_flavor)
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%gpu_option)
  end if
 #endif
 
@@ -1671,7 +1671,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
-   if(dtset%use_gpu_flavor == ABI_GPU_KOKKOS) then
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
      ABI_FREE_MANAGED(cg)
 #endif
@@ -1797,29 +1797,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt,dtset%use_gpu_flavor)
+   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
 !Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   if(dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+   if(dtset%gpu_option == ABI_GPU_OPENMP) then
      call destroy_gemm_nonlop_ompgpu()
-   else if(dtset%use_gpu_flavor==ABI_GPU_LEGACY .or. dtset%use_gpu_flavor==ABI_GPU_KOKKOS) then
+   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
      call destroy_gemm_nonlop_gpu(dtset%nkpt)
      call destroy_gemm_nonlop(dtset%nkpt)
-   else if(dtset%use_gpu_flavor==ABI_GPU_DISABLED) then
+   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
      call destroy_gemm_nonlop(dtset%nkpt)
    end if
    gemm_nonlop_use_gemm = .false.
  end if
 
 !Clean GPU work spaces
- if(dtset%use_gpu_flavor == ABI_GPU_OPENMP) then
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
    call free_getghc_ompgpu_buffers()
  end if
 #if defined HAVE_GPU
- if (dtset%use_gpu_flavor/=ABI_GPU_DISABLED) then
-   call dealloc_hamilt_gpu(2,dtset%use_gpu_flavor)
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call dealloc_hamilt_gpu(2,dtset%gpu_option)
  end if
 #endif
 

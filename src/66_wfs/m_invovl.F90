@@ -387,14 +387,14 @@ CONTAINS
 !! ikpt= index of k-point
 !!
 !! SOURCE
- subroutine destroy_invovl_ikpt(ikpt, use_gpu_flavor)
+ subroutine destroy_invovl_ikpt(ikpt, gpu_option)
 
    integer, intent(in) :: ikpt
-   integer, intent(in) :: use_gpu_flavor
+   integer, intent(in) :: gpu_option
 
 ! *************************************************************************
 
-  if(use_gpu_flavor==ABI_GPU_OPENMP) then
+  if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     if(gpu_initialized==1 .and. current_ikpt_in_gpu == ikpt) then
       !$OMP TARGET EXIT DATA MAP(release:current_gram_projs)
@@ -420,7 +420,7 @@ CONTAINS
   invovl_kpt(ikpt)%nprojs = -1
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_FC_ISO_C_BINDING)
-  if (use_gpu_flavor == ABI_GPU_LEGACY .or. use_gpu_flavor == ABI_GPU_KOKKOS) then
+  if (gpu_option == ABI_GPU_LEGACY .or. gpu_option == ABI_GPU_KOKKOS) then
     call f_gpu_apply_invovl_inner_dealloc()
     call f_gpu_apply_invovl_matrix_dealloc()
   end if
@@ -440,10 +440,10 @@ CONTAINS
 !! nkpt= number of k-points
 !!
 !! SOURCE
- subroutine destroy_invovl(nkpt, use_gpu_flavor)
+ subroutine destroy_invovl(nkpt, gpu_option)
 
    integer, intent(in) :: nkpt
-   integer, intent(in) :: use_gpu_flavor
+   integer, intent(in) :: gpu_option
    integer :: ikpt
 
 ! *************************************************************************
@@ -454,7 +454,7 @@ CONTAINS
       ! write(0, *) 'ERROR invovl_kpt is unallocated'
       cycle
     end if
-    call destroy_invovl_ikpt(ikpt, use_gpu_flavor)
+    call destroy_invovl_ikpt(ikpt, gpu_option)
   end do
 
   ABI_FREE(invovl_kpt)
@@ -528,7 +528,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  if(invovl%nprojs /= -1) then
    ! We have been here before, cleanup before remaking
-   call destroy_invovl_ikpt(ikpt_this_proc, ham%use_gpu_flavor)
+   call destroy_invovl_ikpt(ikpt_this_proc, ham%gpu_option)
  end if
 
  iaph3d = 1
@@ -687,7 +687,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
  ABI_MALLOC(invovl%gram_projs, (cplx,invovl%nprojs,array_nprojs_pp(mpi_enreg%me_fft+1)))
  shift = 0
- if (ham%use_gpu_flavor==ABI_GPU_OPENMP .and. mpi_enreg%nproc_fft==1) then
+ if (ham%gpu_option==ABI_GPU_OPENMP .and. mpi_enreg%nproc_fft==1) then
 #ifdef HAVE_OPENMP_OFFLOAD
    ! compute gram_projs in one GEMM, only one FFT proc expected in GPU mode
    slice_size = array_nprojs_pp(1)
@@ -729,7 +729,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
  ! upload inverse overlap matrices (sij and s_approx) to GPU memory
- if (ham%use_gpu_flavor==ABI_GPU_LEGACY .or. ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
+ if (ham%gpu_option==ABI_GPU_LEGACY .or. ham%gpu_option==ABI_GPU_KOKKOS) then
    ! allocate memory for sij and s_approx on GPU
    write(message,'(a,a,i12,a,a,i6,a,a,i6,a,a,es12.4,a)') &
      & 'Allocate GPU memory for inverse overlap computations (sij and s_approx) : ',&
@@ -749,7 +749,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 #endif
 
 #ifdef HAVE_OPENMP_OFFLOAD
- if (ham%use_gpu_flavor==ABI_GPU_OPENMP) then
+ if (ham%gpu_option==ABI_GPU_OPENMP) then
    call refresh_invovl_ompgpu_kpt(ikpt_this_proc)
  end if
 #endif
@@ -815,7 +815,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   ! *************************************************************************
 
-  if(ham%use_gpu_flavor==ABI_GPU_OPENMP) then
+  if(ham%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
     call apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, nspinor, block_sliced)
     return
@@ -851,7 +851,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
 
   !! memory allocation of data used in solve_inner_gpu
   !! note : this is actually done only once
-  if (ham%use_gpu_flavor==ABI_GPU_LEGACY .or. ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
+  if (ham%gpu_option==ABI_GPU_LEGACY .or. ham%gpu_option==ABI_GPU_KOKKOS) then
 
 #ifdef DEBUG_VERBOSE_GPU
     if(xmpi_comm_rank(xmpi_world) == 0) then
@@ -897,7 +897,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
     call prep_nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,ndat,mpi_enreg,&
       &                   nnlout,paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,&
       &                   already_transposed=.true.,&
-      &                   use_gpu_flavor=ham%use_gpu_flavor,&
+      &                   gpu_option=ham%gpu_option,&
       &                   vectproj=proj)
   else
     call nonlop(choice,cpopt,cwaveprj_in,enlout,ham,idir,lambda_block,mpi_enreg,ndat,&
@@ -924,7 +924,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   !multiply by S^1
   ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER)
   ! TODO : when solve_inner_gpu is ready, update the following to activate GPU computation
-  if (ham%use_gpu_flavor == ABI_GPU_LEGACY .or. ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
+  if (ham%gpu_option == ABI_GPU_LEGACY .or. ham%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
 
@@ -971,7 +971,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   if (mpi_enreg%paral_kgb==1) then
     call prep_nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,ndat,mpi_enreg,nnlout,&
       &                   paw_opt,signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,already_transposed=.true.,&
-      &                   use_gpu_flavor=ham%use_gpu_flavor,vectproj=sm1proj)
+      &                   gpu_option=ham%gpu_option,vectproj=sm1proj)
   else
     call nonlop(choice,cpopt,cwaveprj,enlout,ham,idir,lambda_block,mpi_enreg,ndat,nnlout,paw_opt,&
       &              signs,sm1cwavef,tim_nonlop,cwavef,gvnlxc,vectproj=sm1proj)
@@ -1007,7 +1007,7 @@ subroutine apply_invovl(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_enreg, 
   call pawcprj_free(cwaveprj_in)
   ABI_FREE(cwaveprj_in)
 
-  if (ham%use_gpu_flavor == ABI_GPU_LEGACY .or. ham%use_gpu_flavor==ABI_GPU_KOKKOS) then
+  if (ham%gpu_option == ABI_GPU_LEGACY .or. ham%gpu_option==ABI_GPU_KOKKOS) then
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
     cwavef_size = 2*npw*nspinor*ndat
     call add_array_kokkos(c_loc(sm1cwavef), c_loc(cwavef), cwavef_size)

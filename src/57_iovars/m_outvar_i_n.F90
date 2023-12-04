@@ -151,7 +151,7 @@ subroutine outvar_i_n (dtsets,iout,&
  end do
 
  firstchar_gpu=' '
- if (maxval(dtsets(1:ndtset_alloc)%use_gpu_flavor)/=ABI_GPU_DISABLED) firstchar_gpu='-'
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom

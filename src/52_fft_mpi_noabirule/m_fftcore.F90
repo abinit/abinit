@@ -696,13 +696,13 @@ end subroutine bound
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
 !! [ngfftc(1:18)]= -optional- value of ngfft for the "coarse" grid
 !! [unit] = -optional-  output unit number (DEFAULT std_out)
-!! [use_gpu_flavor] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!
 !! SOURCE
 
 subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
                 nproc_fft, nsym,paral_fft, symrel, tnons, &
-                ngfftc, unit, use_gpu_flavor) ! optional
+                ngfftc, unit, gpu_option) ! optional
 
  use defs_fftdata,  only : mg
 
@@ -710,7 +710,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
 !scalars
  integer,intent(in) :: chksymtnons,me_fft,nproc_fft,nsym,paral_fft
  integer,intent(out) :: mgfft,nfft
- integer,optional,intent(in) :: unit,use_gpu_flavor
+ integer,optional,intent(in) :: unit,gpu_option
  real(dp),intent(in) :: boxcutmin,ecut
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
@@ -1195,8 +1195,8 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(6)=ngfft(3)
  end if
 
- if (present(use_gpu_flavor)) then
-   if (use_gpu_flavor/=ABI_GPU_DISABLED) then
+ if (present(gpu_option)) then
+   if (gpu_option/=ABI_GPU_DISABLED) then
      ngfft(4)=ngfft(1)
      ngfft(5)=ngfft(2)
      ngfft(6)=ngfft(3)
