@@ -1871,7 +1871,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: icg,icg_pos,id1,id2,id3,ierr,ig1,ig2,ig3,igamma,ii,ikg,ikg_pos,ikpt
  integer :: ikpt_pos,il,ilm,ilmn,iln,indx,indx0,iorder_cprj,iproc,ir,isppol,isppol_pos,istwf_k
  integer :: istwf_k_pos,itypat,iwarn,iwavef,iwavef_pos,j2,j3,jj,jkpt,jl,jlm,jlmn,jln
- integer :: klm,kln,klmn,l_size,ll,llmax,llmin,lm,lmn_size,lmn2_size
+ integer :: klm,kln,klmn,l_size,l_size_max,ll,llmax,llmin,lm,lmn_size,lmn_size_c,lmn2_size
  integer :: mband_cprj,mband_cprj_pos,mcg_pos
  integer :: mcprj_k,mcprj_k_pos,me_band,me_fft,me_kpt,me_kptband
  integer :: mesh_size,meshsz,mm,my_ngrid,my_nspinor,my_nsppol,my_n2,n1,n2,n3,n4,n5,n6
@@ -2132,17 +2132,21 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      lmn_size = pawtab(itypat)%lmn_size
      lmn2_size = pawtab(itypat)%lmn2_size
      basis_size = pawtab(itypat)%basis_size
-
-     ABI_MALLOC(j_bessel,(mesh_size,l_size))
-     ABI_MALLOC(ylmp,(l_size*l_size))
-     ABI_MALLOC(have_intc,(l_size,basis_size,nphicor(itypat)))
+     
+     lmn_size_c=lmncmax(itypat)
+     llmax=maxval(indlmncor(itypat)%value(1,1:lmn_size_c))
+     l_size_max=max(l_size,2*llmax+1)
+     
+     ABI_MALLOC(j_bessel,(mesh_size,l_size_max))
+     ABI_MALLOC(ylmp,(l_size_max*l_size_max))
+     ABI_MALLOC(have_intc,(l_size_max,basis_size,nphicor(itypat)))
+     ABI_MALLOC(intc,(l_size_max,basis_size,nphicor(itypat)))
      ABI_MALLOC(have_rad,(l_size,pawtab(itypat)%ij_size))
-     ABI_MALLOC(intc,(l_size,basis_size,nphicor(itypat)))
      ABI_MALLOC(radint1,(l_size,pawtab(itypat)%ij_size))
      ABI_MALLOC(radint2,(l_size,pawtab(itypat)%ij_size))
      ABI_MALLOC(radint3,(l_size,pawtab(itypat)%ij_size))
 
-     ABI_MALLOC(radsumc(itypat)%value,(2,lmn_size,lmncmax(itypat),n1,my_n2,n3,my_ngrid))
+     ABI_MALLOC(radsumc(itypat)%value,(2,lmn_size,lmn_size_c,n1,my_n2,n3,my_ngrid))
      ABI_MALLOC(radsum1(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
      ABI_MALLOC(radsum2(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
      ABI_MALLOC(radsum3(itypat)%value,(2,lmn2_size,n1,my_n2,n3,my_ngrid))
@@ -2151,7 +2155,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
      radsum2(itypat)%value=zero
      radsum3(itypat)%value=zero
 
-     ABI_MALLOC(jbes,(l_size))
+     ABI_MALLOC(jbes,(l_size_max))
      ABI_MALLOC(ff,(mesh_size))
      meshsz=pawrad(itypat)%int_meshsz
      if (meshsz>mesh_size) ff(meshsz+1:mesh_size)=zero
@@ -2197,7 +2201,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 
              have_intc(:,:,:)=.FALSE. ; intc(:,:,:)=zero
 
-             do jlmn = 1,lmncmax(itypat)
+             do jlmn = 1,lmn_size_c
                jln = indlmncor(itypat)%value(5,jlmn)
                jlm = indlmncor(itypat)%value(4,jlmn)
                jl  = indlmncor(itypat)%value(1,jlmn)
