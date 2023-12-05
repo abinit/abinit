@@ -628,6 +628,18 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 #endif
  end if
 
+!Set gpu_option default value
+!gpu_option=ABI_GPU_UNKNOWN means undetermined
+ if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+#if defined HAVE_OPENMP_OFFLOAD
+   dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+   dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+#else
+   dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+#endif
+ end if
+
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
 
@@ -2097,6 +2109,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
+!Some special cases require are not compatible with GPU implementation
+ if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
+
  ABI_FREE(nband)
  ABI_FREE(ratsph)
  ABI_FREE(intarr)
@@ -2195,16 +2212,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    wvl_bigdft=.false.
    if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
-
-!  Special case of gpu_option (can be undertermined at this point)
-!  gpu_option=ABI_GPU_UNKNOWN means undetermined ; here impose its value due to some restrictions
-   if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
-     if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
-     else
-       dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
-     end if
-  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
