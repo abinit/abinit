@@ -251,7 +251,7 @@ class(abstract_wf), pointer :: mywfc
  leig=.true.          ! .false. and .true. are possible
 !
  gamma_only=.false. !not yet implemented
- spinors=.false.
+ spinors=.false. 
  if (dtset%nspinor == 2) spinors = .true.
 !
 !mpi initialization
@@ -1263,8 +1263,8 @@ end subroutine mlwfovlp_seedname
 !    write(309,*) symbol
      atom_symbols(iatom)=symbol
      xcart(:,iatom)=rprimd(:,1)*xred(1,iatom)+&
-&     rprimd(:,2)*xred(2,iatom)+&
-&     rprimd(:,3)*xred(3,iatom)
+&                   rprimd(:,2)*xred(2,iatom)+&
+&                   rprimd(:,3)*xred(3,iatom)
    end do ! iatom
 !  write(std_out,*) xcart
 !  write(std_out,*) Bohr_Ang
