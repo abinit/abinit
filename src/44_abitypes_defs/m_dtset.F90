@@ -121,7 +121,7 @@ type, public :: dataset_type
 !D
  integer :: delayperm
  integer :: densfor_pred
- integer :: diago_apply_block_sliced = 1
+ integer :: diago_blk_sliced = 1
  integer :: diismemory
  integer :: dipdip = 1
  integer :: dipquad = 1
@@ -202,8 +202,6 @@ type, public :: dataset_type
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
- integer :: gemm_nonlop_distribute = 0
- integer :: gemm_nonlop_split_size = 1
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
@@ -234,8 +232,10 @@ type, public :: dataset_type
  integer :: gethaydock = 0
  integer :: goprecon
 
- integer :: gpu_kokkos_nthreads
+ integer :: gpu_kokkos_nthrd
  integer :: gpu_linalg_limit
+ integer :: gpu_nl_distrib = 0
+ integer :: gpu_nl_splitsize = 1
  integer :: gpu_option
  integer :: gpu_use_nvtx
 
@@ -1440,7 +1440,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
- dtout%diago_apply_block_sliced = dtin%diago_apply_block_sliced
+ dtout%diago_blk_sliced   = dtin%diago_blk_sliced
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -1575,8 +1575,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
  dtout%ga_n_rules         = dtin%ga_n_rules
- dtout%gemm_nonlop_distribute = dtin%gemm_nonlop_distribute
- dtout%gemm_nonlop_split_size = dtin%gemm_nonlop_split_size
  dtout%getbseig           = dtin%getbseig
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
@@ -1617,8 +1615,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
 
- dtout%gpu_kokkos_nthreads= dtin%gpu_kokkos_nthreads
+ dtout%gpu_kokkos_nthrd   = dtin%gpu_kokkos_nthrd
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
+ dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
+ dtout%gpu_nl_splitsize   = dtin%gpu_nl_splitsize
  dtout%gpu_option         = dtin%gpu_option
  dtout%gpu_use_nvtx       = dtin%gpu_use_nvtx
 
@@ -3309,7 +3309,7 @@ subroutine chkvars(string)
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
- list_vars=trim(list_vars)//' dfpt_sciss diago_apply_block_sliced diecut diegap dielam dielng diemac'
+ list_vars=trim(list_vars)//' dfpt_sciss diago_blk_sliced diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
  list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -3359,7 +3359,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' gemm_nonlop_distribute gemm_nonlop_split_size genafm getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
@@ -3368,7 +3368,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
- list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gpu_kokkos_nthreads gpu_option gpu_use_nvtx'
+ list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
+ list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option gpu_use_nvtx'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'

@@ -809,8 +809,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
  end do
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
- if(tread==1)dtset%diago_apply_block_sliced=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_blk_sliced',tread,'INT')
+ if(tread==1)dtset%diago_blk_sliced=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)
@@ -2445,13 +2445,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usexcnhat',tread,'INT')
  if(tread==1) dtset%usexcnhat_orig=intarr(1)
 
- ! gemm_nonlop parameters (must read them before useylm)
+ ! gemm_nonlop (must read them before useylm)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gemm_nonlop_distribute',tread,'INT')
- if(tread==1) dtset%gemm_nonlop_distribute=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gemm_nonlop_split_size',tread,'INT')
- if(tread==1) dtset%gemm_nonlop_split_size=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
  if(tread==1) dtset%useylm=intarr(1)

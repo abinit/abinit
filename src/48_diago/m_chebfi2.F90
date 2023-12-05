@@ -117,11 +117,11 @@ module m_chebfi2
 
    ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
    ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
-   ! wherever it is safe to do; in that case we use gpu_kokkos_nthreads to specify
+   ! wherever it is safe to do; in that case we use gpu_kokkos_nthrd to specify
    ! the number of OpenMP threads. This value is controlled by dtset variable
-   ! dtset%gpu_kokkos_nthreads
+   ! dtset%gpu_kokkos_nthrd
    integer :: gpu_option
-   integer :: gpu_kokkos_nthreads = 1 ! only used if gpu is enabled, number of OpenMP threads used
+   integer :: gpu_kokkos_nthrd = 1 ! only used if gpu is enabled, number of OpenMP threads used
    integer :: me_g0
 
    !ARRAYS
@@ -195,7 +195,7 @@ module m_chebfi2
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
      paral_kgb,nproc_band,bandpp,nproc_fft, &
      nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,gpu_option, &
-     gpu_kokkos_nthreads)
+     gpu_kokkos_nthrd)
 
  implicit none
 
@@ -217,7 +217,7 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
  real(dp)      , intent(in   ) :: ecut
  real(dp)      , intent(in   ) :: tolerance
  type(chebfi_t), intent(inout) :: chebfi
- integer       , intent(in   ), optional :: gpu_kokkos_nthreads
+ integer       , intent(in   ), optional :: gpu_kokkos_nthrd
 
  ! Local variables-------------------------------
  real(dp)                      :: tsec(2)
@@ -243,10 +243,10 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut, &
  chebfi%paw          = paw
  chebfi%gpu_option = gpu_option
 
- if (present(gpu_kokkos_nthreads)) then
-    chebfi%gpu_kokkos_nthreads = gpu_kokkos_nthreads
+ if (present(gpu_kokkos_nthrd)) then
+    chebfi%gpu_kokkos_nthrd = gpu_kokkos_nthrd
  else
-    chebfi%gpu_kokkos_nthreads = 1
+    chebfi%gpu_kokkos_nthrd = 1
  end if
 
  call chebfi_allocateAll(chebfi)
@@ -593,9 +593,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,mpi_enreg)
    chebfi%xgTransposerAX%gpu_option = chebfi%gpu_option
    chebfi%xgTransposerBX%gpu_option = chebfi%gpu_option
 
-   chebfi%xgTransposerX%gpu_kokkos_nthreads  = chebfi%gpu_kokkos_nthreads
-   chebfi%xgTransposerAX%gpu_kokkos_nthreads = chebfi%gpu_kokkos_nthreads
-   chebfi%xgTransposerBX%gpu_kokkos_nthreads = chebfi%gpu_kokkos_nthreads
+   chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
+   chebfi%xgTransposerBX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
 
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
    call xgTransposer_transpose(chebfi%xgTransposerX,STATE_COLSROWS)
