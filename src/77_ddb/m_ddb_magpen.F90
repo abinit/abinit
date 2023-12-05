@@ -146,10 +146,9 @@ contains
      end if
 
      call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,magpen,magsus,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
 
    end if
-
 
    ! Calculate and write the induced magnetic moments 
    write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
@@ -157,9 +156,6 @@ contains
    call wrtout([std_out, ab_out], msg)
 
    ! First atomic-displacement
-   ! Look for the induced magnetic moments block in the DDB
-   ! TODO: here we are reading the transpose conjugate, 
-   ! this has been de
    rfphon(2)=1
    rfelfd(1:2)=0
    rfstrs(1:2)=0
@@ -190,7 +186,7 @@ contains
 
    if (iblok /= 0 .or. jblok /=0) then
      call magmom(ddb%val,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol,zfield)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -253,7 +249,32 @@ contains
        rfmagn(1:2)= 2
      end if
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+
+     call berrycurv_ss(ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
+   & natom,nblok,ndim,nmdir,prtvol)
+
+     ! Look for the Berry-curvature of the penalized magnetic moments
+
+     ! First atomic-displacement
+     rfphon(2)=1
+     rfmagn(:)=0
+     if (magpen<zero) then
+       rfmagn(1)= 1
+     else if (magpen>zero) then
+       rfmagn(1)= 2
+     end if
+
+     call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
+   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+
+     ! Then electric field
+     rfphon(2)=0
+     rfelfd(2)=2
+
+     call ddb_lw%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
+   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+
 
    end do 
 
@@ -287,8 +308,6 @@ contains
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
-!! nmat= number of atoms on which the magnetic penalty was applied
-!!  (=1 if uniform Zeeman case)
 !! nmdir= number of directions along which the magnetic penalty was applied
 !! ndim= dimension of the square susceptibilities 
 !! prtvol= control the volume of information written on output
@@ -302,11 +321,11 @@ contains
 !! SOURCE
 
  subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,magpen,magsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmat,nmdir,prtvol
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
  real(dp),intent(in) :: magpen
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
@@ -354,7 +373,6 @@ contains
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
 
-         !TODO: is the four factor still necessary?
          barmagsus(irow,icol)= &
        & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
        & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
@@ -490,8 +508,6 @@ contains
 !! mpert =maximum number of ipert
 !! natom= number of atoms in unit cell
 !! nblok= number of blocks in the DDB
-!! nmat= number of atoms on which the magnetic penalty was applied
-!!  (=1 if uniform Zeeman case)
 !! nmdir= number of directions along which the magnetic penalty was applied
 !! ndim= dimension of the square susceptibilities 
 !! prtvol= control the volume of information written on output
@@ -504,11 +520,11 @@ contains
 !! SOURCE
 
  subroutine magmom(blkval,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmat,nmdir,prtvol,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmat,nmdir,prtvol
+ integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtvol
  real(dp),intent(in) :: magpen
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -948,8 +964,8 @@ contains
        barzeff(idir1,icol)=half * &
      & (cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
      &        blkval(2,idir1,ipert1,idir2,ipert2,iblok),16) + &
-     &  cmplx(blkval(1,idir2,ipert2,idir1,ipert1,iblok), &
-     &        blkval(2,idir2,ipert2,idir1,ipert1,iblok),16))
+     &  conjg(cmplx(blkval(1,idir2,ipert2,idir1,ipert1,iblok), &
+     &        blkval(2,idir2,ipert2,idir1,ipert1,iblok),16)))
      end do
    end do
  end do
@@ -998,8 +1014,169 @@ contains
    end do 
  end if
 
+ if (prtvol > 1) then
+   call wrtout([ab_out,std_out], ' Penalized Born effective charges')
+   call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
+   do idir1= 1, 3
+     do ipert2= 1, natom
+       do idir2= 1, 3
+         icol=( ipert2-1)*3 + idir2
+         write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
+       & cart(idir1), ipert2, cart(idir2), &
+       & real(barzeff(idir1,icol)), aimag(barzeff(idir1,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end do 
+ end if
 
  end subroutine mp_zeff
+!!***
+
+!!****f* m_ddb_magpen/berrycurv_ss
+!! NAME
+!! berrycurv_ss
+!!
+!! FUNCTION
+!! Calculate the Berry curvature of the inverse magnetic susceptibility
+!! (this is equivalent to the G^(ss) matrix of S.Ren et al.)
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert,nblok)=  Third-order derivative matrices
+!!  In our case, the nblok is restricted to iblok
+!! iblok= index of the current block
+!! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
+!! mpatpol(2) = Atoms on which the magnetic penalty has been applied
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpert =maximum number of ipert
+!! natom= number of atoms in unit cell
+!! nblok= number of blocks in the DDB
+!! nmdir= number of directions along which the magnetic penalty was applied
+!! ndim= dimension of the square susceptibilities 
+!! prtvol= control the volume of information written on output
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine berrycurv_ss(blkval,iblok,invbarmagsus,&
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+!arrays
+ integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+!Local variables -------------------------
+!scalars
+ integer :: iat1,iat2,icol,idir1,idir2,idir3,info,ipert1,ipert2,ipert3,irow,lwork
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ character(len=1000) :: msg
+!arrays
+ complex(dp) :: bc_barmagsus(ndim,ndim),bc_ss(ndim,ndim)
+ complex(dp) :: idty(ndim,ndim)
+ integer(dp) :: indexat(ndim),indexdir(ndim)
+ integer, allocatable :: ipiv(:)
+ complex(dp),allocatable :: work(:),work1(:,:),work2(:,:)
+ character(len=1) :: cart(3)=(/'x','y','z'/)
+
+! *********************************************************************
+
+ !Extract the Berry-curvature of the penalized susceptibility
+ idty=(zero,zero)
+ ipert2_red= 0
+ ipert3= natom + 9
+ idir3= 1
+ do iat2= mpatpol(1), mpatpol(2)
+   ipert2= natom + 11 + iat2
+   ipert2_red= ipert2_red + 1
+   idir2_red= 0
+   do idir2= 1, 3
+     if (mpdir(idir2)==0) cycle
+     idir2_red= idir2_red + 1
+     icol=idir2_red+(ipert2_red-1)*nmdir
+     indexat(icol)=iat2
+     indexdir(icol)=idir2
+     idty(icol,icol)=(one,zero)
+     ipert1_red=0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red=idir1_red+1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+
+         bc_barmagsus(irow,icol)= -one* &
+       & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok), &
+       & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok),16)
+
+       end do
+     end do
+   end do
+ end do
+
+!Calculate the Berry-curvature of the inverse magnetic susceptibility
+ bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) &
+& *(2.511494255019)**2/four !TMP
+
+ call wrtout([ab_out,std_out], ' Berry curvature of the inverse spin susceptibility ')
+ call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+ do irow=1, ndim
+   do icol=1, ndim
+     write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+   & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+   & real(bc_ss(irow,icol)), aimag(bc_ss(irow,icol))
+     call wrtout([ab_out,std_out], msg)
+   end do
+ end do
+ call wrtout([ab_out,std_out], '   ')
+
+
+ end subroutine berrycurv_ss
+!!***
+
+!!****f* m_ddb_magpen/berrycurv_tt
+!! NAME
+!! berrycurv_tt
+!!
+!! FUNCTION
+!! Calculate the Berry curvature of the spin-spin Hessian
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert,nblok)=  Third-order derivative matrices
+!!  In our case, the nblok is restricted to iblok
+!! iblok= index of the current block
+!! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
+!! mpatpol(2) = Atoms on which the magnetic penalty has been applied
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpert =maximum number of ipert
+!! natom= number of atoms in unit cell
+!! nblok= number of blocks in the DDB
+!! nmdir= number of directions along which the magnetic penalty was applied
+!! ndim= dimension of the square susceptibilities 
+!! prtvol= control the volume of information written on output
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine berrycurv_tt(blkval,iblok,invbarmagsus,&
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+!arrays
+ integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+
+ end subroutine berrycurv_tt
 !!***
 
 end module m_ddb_magpen
