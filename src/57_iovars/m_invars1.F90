@@ -630,15 +630,17 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Set gpu_option default value
 !gpu_option=ABI_GPU_UNKNOWN means undetermined
- if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+ do idtset=1,ndtset_alloc
+   if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
 #if defined HAVE_OPENMP_OFFLOAD
-   dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
 #elif defined HAVE_KOKKOS && defined HAVE_YAKL
-   dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
 #else
-   dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
 #endif
- end if
+   end if
+ end do
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
