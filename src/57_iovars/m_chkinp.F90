@@ -1074,8 +1074,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-!  gpu_kokkos_nthreads
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthreads',dt%gpu_kokkos_nthreads,1,iout)
+!  gpu_kokkos_nthrd
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
 
 !  gpu_option
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &

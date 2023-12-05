@@ -298,7 +298,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
- l_block_sliced = dtset%diago_apply_block_sliced
+ l_block_sliced = dtset%diago_blk_sliced
 
 !Variables
  nline=dtset%nline
@@ -416,7 +416,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
 &                 l_gs_hamk%gpu_option, &
-&                 gpu_kokkos_nthreads=dtset%gpu_kokkos_nthreads)
+&                 gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################

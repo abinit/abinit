@@ -2265,8 +2265,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
    dtsets(idtset)%dfpt_sciss=zero
-   dtsets(idtset)%diago_apply_block_sliced=1
-   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%diago_apply_block_sliced=0
+   dtsets(idtset)%diago_blk_sliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%diago_blk_sliced=0
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
    dtsets(idtset)%diemac=1.0d6
@@ -2375,10 +2375,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
-   dtsets(idtset)%gpu_kokkos_nthreads=xomp_get_num_threads(open_parallel=.true.)
+   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
-   dtsets(idtset)%gemm_nonlop_distribute=0
-   dtsets(idtset)%gemm_nonlop_split_size=1
+   dtsets(idtset)%gpu_nl_distrib=0
+   dtsets(idtset)%gpu_nl_splitsize=1
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero

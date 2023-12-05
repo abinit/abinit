@@ -459,7 +459,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  gemm_nonlop_is_distributed = .false.
- if(dtset%gemm_nonlop_distribute == 1) gemm_nonlop_is_distributed = .true.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
