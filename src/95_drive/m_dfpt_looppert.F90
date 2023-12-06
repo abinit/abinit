@@ -2871,6 +2871,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
     write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
          &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  nclr dpl0=',end0
  end if
+ if (has_vxctau) then
+    write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' )&
+         &   '     kin0=',ek0,   ' eigvalue=',eeig0,'  local=',eloc0,'  evxctau0=',evxctau0
+ end if
  call wrtout(iout,msg)
  call wrtout(std_out,msg)
 
@@ -2889,6 +2893,10 @@ subroutine dfpt_prtene(berryopt,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrn
    if (has_nd) then
       write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
            &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  nclr dpl1=',end1
+   end if
+   if (has_vxctau) then
+      write(msg, '(a,es17.8,a,es17.8,a,es17.8,a,es17.8)' ) &
+           &     '     kin1=',ek1,   '  Hartree=',ehart1,'     xc=',exc1,'  evxctau1=',evxctau1
    end if
  else if(ipert==natom+2) then
    write(msg, '(a,es17.8,a,es17.8,a,es17.8)' ) &

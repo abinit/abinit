@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  1 Dec 2023.
-- ( at 10h37 )
+.Starting date : Wed  6 Dec 2023.
+- ( at 16h12 )
   
 - input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit-code/abinit-forge/abinit/tmp-build/gcc/fast/tests/Test_suite/v9_t143/t143.abi
 - output file    -> t143.abo
@@ -620,12 +620,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307670577362     -6.931E+00 2.313E-02 0.000E+00
- ETOT  2  -6.9307918867741     -2.483E-05 1.276E-05 0.000E+00
- ETOT  3  -6.9307918877065     -9.324E-10 1.051E-07 0.000E+00
- ETOT  4  -6.9307918877066     -1.386E-13 5.608E-11 0.000E+00
- ETOT  5  -6.9307918877066     -2.665E-15 3.374E-13 0.000E+00
- ETOT  6  -6.9307918877066      2.665E-15 9.959E-15 0.000E+00
+-ETOT  1  -6.9307670444686     -6.931E+00 2.313E-02 0.000E+00
+ ETOT  2  -6.9307918734492     -2.483E-05 1.276E-05 0.000E+00
+ ETOT  3  -6.9307918743813     -9.321E-10 1.051E-07 0.000E+00
+ ETOT  4  -6.9307918743814     -1.403E-13 5.608E-11 0.000E+00
+ ETOT  5  -6.9307918743814     -2.665E-15 3.374E-13 0.000E+00
+ ETOT  6  -6.9307918743814      2.665E-15 9.959E-15 0.000E+00
 
  At SCF step    6   max residual=  9.96E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -680,12 +680,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307670598107     -6.931E+00 1.698E-02 0.000E+00
- ETOT  2  -6.9307918862822     -2.483E-05 1.078E-05 0.000E+00
- ETOT  3  -6.9307918872075     -9.253E-10 5.987E-08 0.000E+00
- ETOT  4  -6.9307918872076     -7.994E-14 4.236E-11 0.000E+00
- ETOT  5  -6.9307918872076      0.000E+00 1.971E-13 0.000E+00
- ETOT  6  -6.9307918872076      8.882E-16 9.978E-15 0.000E+00
+-ETOT  1  -6.9307670532261     -6.931E+00 1.698E-02 0.000E+00
+ ETOT  2  -6.9307918796441     -2.483E-05 1.078E-05 0.000E+00
+ ETOT  3  -6.9307918805690     -9.250E-10 5.987E-08 0.000E+00
+ ETOT  4  -6.9307918805691     -8.171E-14 4.236E-11 0.000E+00
+ ETOT  5  -6.9307918805691      0.000E+00 1.971E-13 0.000E+00
+ ETOT  6  -6.9307918805691      8.882E-16 9.978E-15 0.000E+00
 
  At SCF step    6   max residual=  9.98E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -740,12 +740,12 @@ tolerances: {tolwfr: 1.00E-14, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -6.9307670501954     -6.931E+00 1.698E-02 0.000E+00
- ETOT  2  -6.9307918815137     -2.483E-05 1.078E-05 0.000E+00
- ETOT  3  -6.9307918824571     -9.434E-10 5.987E-08 0.000E+00
- ETOT  4  -6.9307918824573     -1.918E-13 4.236E-11 0.000E+00
- ETOT  5  -6.9307918824573      8.882E-16 1.971E-13 0.000E+00
- ETOT  6  -6.9307918824573      0.000E+00 9.959E-15 0.000E+00
+-ETOT  1  -6.9307670435762     -6.931E+00 1.698E-02 0.000E+00
+ ETOT  2  -6.9307918748493     -2.483E-05 1.078E-05 0.000E+00
+ ETOT  3  -6.9307918757924     -9.431E-10 5.987E-08 0.000E+00
+ ETOT  4  -6.9307918757926     -1.936E-13 4.236E-11 0.000E+00
+ ETOT  5  -6.9307918757926      8.882E-16 1.971E-13 0.000E+00
+ ETOT  6  -6.9307918757926      0.000E+00 9.959E-15 0.000E+00
 
  At SCF step    6   max residual=  9.96E-15 < tolwfr=  1.00E-14 =>converged.
 ================================================================================
@@ -951,7 +951,7 @@ tolerances: {tolwfr: 1.00E-14, }
               amu      2.29897680E+01
              ecut      5.00000000E+00 Hartree
            etotal1    -4.3447028108E+01
-           etotal2    -6.9307918825E+00
+           etotal2    -6.9307918758E+00
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
@@ -1286,10 +1286,10 @@ P          mk1mem         256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         84.1  wall=         84.4
+- Proc.   0 individual time (sec): cpu=         84.4  wall=         84.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         84.1  wall=         84.4
++Overall time at end (sec) : cpu=         84.4  wall=         84.7
