@@ -1689,7 +1689,9 @@ subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc
        evar=ek0+edocc+eeig0+eloc0+enl0+ehart1+exc1+enl1+epaw1+elpsp1
 
      else if (ipert==natom+1) then
-       evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+end1+evxctau0+evxctau1
+        ! evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+end1+evxctau0+evxctau1
+        ! JWZ debug end1 and evxctau1 already appear in enl1 (?!)
+       evar=ek0+edocc+eeig0+eloc0+ek1+ehart1+exc1+enl0+enl1+end0+evxctau0
 
      else if (ipert==natom+10 .or. ipert==natom+11) then
        evar=ek0+edocc+eeig0+eloc0+enl0                 +ek1 ! here ek1 contains a lot of contributions

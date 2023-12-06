@@ -2063,38 +2063,37 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
 
     ! From -1/2 (grad vxctau) \cdot (grad \psi) =
     ! -1/2 (grad vxctau)\cdot(2\pi i (k + G)\psi), the
-    ! do ii=1,3
-    !   dgcwavef = zero
-    !   do idat=1,ndat
-    !     do ipw=1,npw_k
-    !       dgcwavef(1,ipw+(idat-1)*npw_k)= cwavein(2,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
-    !       dgcwavef(2,ipw+(idat-1)*npw_k)=-cwavein(1,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
-    !     end do
-    !   end do
-    !   call fourwf(1,vxctaulocal(:,:,:,:,1+idir),dgcwavef,ghc1,work,gbound_k,gbound_k,&
-    !     & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-    !     & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
-    !   gh1c_mGGA(:,:) = gh1c_mGGA(:,:) - half*ghc1
-    ! end do ! idir
+    do ii=1,3
+      dgcwavef = zero
+      do idat=1,ndat
+        do ipw=1,npw_k
+          dgcwavef(1,ipw+(idat-1)*npw_k)= cwavein(2,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
+          dgcwavef(2,ipw+(idat-1)*npw_k)=-cwavein(1,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
+        end do
+      end do
+      call fourwf(1,vxctaulocal(:,:,:,:,1+ii),dgcwavef,ghc1,work,gbound_k,gbound_k,&
+        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+      gh1c_mGGA(:,:) = gh1c_mGGA(:,:) - half*ghc1
+    end do ! ii
 
     ! From -1/2 vxctau (grad . grad \psi), the k derivative is
     ! vxctau \times dkinpw_dir * \psi
-    ! do ipw=1,npw_k
-    !   if(kinpw1(ipw)<huge(zero)*1.d-11)then
-    !     ghc1(1,ipw)=dkinpw(ipw)*cwavein(1,ipw)
-    !     ghc1(2,ipw)=dkinpw(ipw)*cwavein(2,ipw)
-    !   else
-    !     ghc1(:,ipw) = zero
-    !   end if
-    ! end do
-    ! call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
-    !   & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-    !   & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+    do ipw=1,npw_k
+      if(kinpw1(ipw)<huge(zero)*1.d-11)then
+        ghc1(:,ipw)=dkinpw(ipw)*cwavein(:,ipw)
+      else
+        ghc1(:,ipw) = zero
+      end if
+    end do
+    call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
+      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
 
-    !gh1c_mGGA = gh1c_mGGA + ghc2
+    gh1c_mGGA = gh1c_mGGA + ghc2
 
     ! JWZ debug
-    gh1c_mGGA = zero
+    ! gh1c_mGGA = zero
 
     ABI_FREE(ghc1)
     ABI_FREE(ghc2)

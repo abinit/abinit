@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri  1 Dec 2023.
-- ( at 10h35 )
+.Starting date : Wed  6 Dec 2023.
+- ( at 16h12 )
   
 - input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit-code/abinit-forge/abinit/tmp-build/gcc/fast/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
@@ -532,12 +532,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.46223821464595     -4.622E-01 7.283E-05 0.000E+00
- ETOT  2 -0.46226093273661     -2.272E-05 2.705E-08 0.000E+00
- ETOT  3 -0.46226093707254     -4.336E-09 2.958E-12 0.000E+00
- ETOT  4 -0.46226093707407     -1.529E-12 1.963E-15 0.000E+00
- ETOT  5 -0.46226093707407     -3.941E-15 4.582E-19 0.000E+00
- ETOT  6 -0.46226093707407      1.055E-15 4.996E-21 0.000E+00
+-ETOT  1 -0.46223821346453     -4.622E-01 7.283E-05 0.000E+00
+ ETOT  2 -0.46226093155782     -2.272E-05 2.705E-08 0.000E+00
+ ETOT  3 -0.46226093589154     -4.334E-09 2.958E-12 0.000E+00
+ ETOT  4 -0.46226093589309     -1.552E-12 1.963E-15 0.000E+00
+ ETOT  5 -0.46226093589309     -2.165E-15 4.582E-19 0.000E+00
+ ETOT  6 -0.46226093589309      9.992E-16 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -592,12 +592,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.46223821463995     -4.622E-01 7.283E-05 0.000E+00
- ETOT  2 -0.46226093273061     -2.272E-05 2.705E-08 0.000E+00
- ETOT  3 -0.46226093706654     -4.336E-09 2.958E-12 0.000E+00
- ETOT  4 -0.46226093706807     -1.531E-12 1.963E-15 0.000E+00
- ETOT  5 -0.46226093706807     -1.943E-15 4.582E-19 0.000E+00
- ETOT  6 -0.46226093706807     -4.441E-16 4.996E-21 0.000E+00
+-ETOT  1 -0.46223821345853     -4.622E-01 7.283E-05 0.000E+00
+ ETOT  2 -0.46226093155182     -2.272E-05 2.705E-08 0.000E+00
+ ETOT  3 -0.46226093588553     -4.334E-09 2.958E-12 0.000E+00
+ ETOT  4 -0.46226093588709     -1.554E-12 1.963E-15 0.000E+00
+ ETOT  5 -0.46226093588709     -1.665E-16 4.582E-19 0.000E+00
+ ETOT  6 -0.46226093588709     -4.996E-16 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -742,7 +742,7 @@ tolerances: {tolwfr: 1.00E-20, }
              ecut      5.00000000E+00 Hartree
            enunit           2
            etotal1    -3.3612090135E+01
-           etotal2    -4.6226093707E-01
+           etotal2    -4.6226093589E-01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
@@ -909,10 +909,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         26.2  wall=         26.6
+- Proc.   0 individual time (sec): cpu=         26.4  wall=         26.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  57 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.2  wall=         26.6
++Overall time at end (sec) : cpu=         26.4  wall=         26.8
