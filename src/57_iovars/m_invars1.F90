@@ -638,8 +638,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
 #elif defined HAVE_KOKKOS && defined HAVE_YAKL
      dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
-#else
+#elif defined HAVE_GPU_CUDA
      dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+#else
+     dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
 #endif
    end if
  end do
