@@ -567,6 +567,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      dtsets(i1)%gpu_option=ABI_GPU_UNKNOWN
    end do
  end if
+#else
+ ABI_UNUSED(idev)
 #endif
 
  gpu_option=ABI_GPU_DISABLED
