@@ -121,7 +121,6 @@ type, public :: dataset_type
 !D
  integer :: delayperm
  integer :: densfor_pred
- integer :: diago_blk_sliced = 1
  integer :: diismemory
  integer :: dipdip = 1
  integer :: dipquad = 1
@@ -312,6 +311,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
+ integer :: invol_blk_sliced
  integer :: iomode
  integer :: ionmov
  integer :: iprcel
@@ -1440,7 +1440,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
- dtout%diago_blk_sliced   = dtin%diago_blk_sliced
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -1694,6 +1693,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
+ dtout%invol_blk_sliced   = dtin%invol_blk_sliced
  dtout%ionmov             = dtin%ionmov
  dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
@@ -3309,7 +3309,7 @@ subroutine chkvars(string)
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
- list_vars=trim(list_vars)//' dfpt_sciss diago_blk_sliced diecut diegap dielam dielng diemac'
+ list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
  list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -3390,7 +3390,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invol_blk_sliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'

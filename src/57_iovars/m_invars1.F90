@@ -2278,8 +2278,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
    dtsets(idtset)%dfpt_sciss=zero
-   dtsets(idtset)%diago_blk_sliced=1
-   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%diago_blk_sliced=0
+   dtsets(idtset)%invol_blk_sliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%invol_blk_sliced=0
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
    dtsets(idtset)%diemac=1.0d6
