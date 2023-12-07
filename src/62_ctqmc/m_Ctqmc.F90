@@ -2607,6 +2607,7 @@ include 'mpif.h'
         n3=quotient
         occtot(n1)=occtot(n1)+occ(n1,n2)
         if(n2>=6) signe =-1
+        !if(n2>=7) signe =0
         spintot(n1)=spintot(n1)+occ(n1,n2)*signe
       enddo
       this%occupconfig(n1)=this%occupconfig(n1)/float(this%size)
@@ -2614,10 +2615,17 @@ include 'mpif.h'
 
     write(this%ostream,*) "=== Histogram of occupations of configurations for complete simulation  ===="
     sumh=0
-    do n1=1,2**this%flavors
-       write(this%ostream,'(i4,10i2,f20.2)')  n1, (occ(n1,n2),n2=1,10),this%occupconfig(n1)
-       sumh=sumh+this%occupconfig(n1)
-    enddo
+    if(this%flavors==14) then
+      do n1=1,2**this%flavors
+         write(this%ostream,'(i4,14i2,f20.2)')  n1, (occ(n1,n2),n2=1,14),this%occupconfig(n1)
+         sumh=sumh+this%occupconfig(n1)
+      enddo
+    else if (this%flavors==10) then
+      do n1=1,2**this%flavors
+         write(this%ostream,'(i4,10i2,f20.2)')  n1, (occ(n1,n2),n2=1,10),this%occupconfig(n1)
+         sumh=sumh+this%occupconfig(n1)
+      enddo
+    end if
     write(this%ostream,'(a,f10.4)') " all" , sumh
     
     sumtot=0
@@ -2625,14 +2633,18 @@ include 'mpif.h'
       spinmin=modulo(nelec,2)
       if(nelec<=5) spinmax=nelec
       if(nelec>=6) spinmax=10-nelec
-      dspin=2
+      dspin=1
       write(this%ostream,*) "=== Histogram of occupations of configurations for total number of electrons",nelec
       do spin=spinmin,spinmax,dspin
         sumh=0
         do n1=1,2**this%flavors
           if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
             sumh=sumh+this%occupconfig(n1)
-            write(this%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+            if(this%flavors==10) then
+              write(this%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+            else if(this%flavors==14) then
+              write(this%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+            end if
           endif
         enddo
         write(this%ostream,'(a,i4,a,i4,a,f10.4)') " === Sum of weights for",nelec," electrons and spin",spin," is ",sumh
