@@ -3520,8 +3520,8 @@ include 'mpif.h'
         occ(n1,n2)=remainder
         n3=quotient
         occtot(n1)=occtot(n1)+occ(n1,n2)
-        !if(n2>=7) signe =-1
-        if(n2>=7) signe =0
+        if(n2>=7) signe =-1
+        !if(n2>=7) signe =0
         spintot(n1)=spintot(n1)+occ(n1,n2)*signe
       enddo
       op%occupconfig(n1)=op%occupconfig(n1)/float(nbprocs)
