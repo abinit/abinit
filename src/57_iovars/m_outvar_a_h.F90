@@ -565,10 +565,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%dfpt_sciss
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dfpt_sciss','ENE',0)
 
- intarr(1,:)=dtsets(:)%diago_blk_sliced
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'diago_blk_sliced',&
-&             'INT',0,firstchar=firstchar_gpu)
-
  dprarr(1,:)=dtsets(:)%diecut
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'diecut','ENE',0)
 

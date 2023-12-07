@@ -170,7 +170,7 @@ contains
 
    !** Also apply S^-1 in PAW case
    if (l_paw) then
-      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%diago_blk_sliced)
+      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%invol_blk_sliced)
       tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
       tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
    else
