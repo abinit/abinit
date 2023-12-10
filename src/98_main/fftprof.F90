@@ -84,7 +84,8 @@ program fftprof
  use m_fftcore,      only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
  use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,        only : fftw3_init_threads
- use m_fft_prof,     only : fft_test_t
+ use m_fft_prof,     only : fft_test_t, fft_prof_t, fft_tests_free, fftprof_ncalls_per_test, fftprofs_free, &
+& fftprofs_print, prof_fourdp, prof_fourwf, prof_rhotwg
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
