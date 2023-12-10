@@ -60,10 +60,10 @@ def generate_mkdocs_yml():
     with open('mkdocs.yml.in', 'r') as mkdocs_yml_in :
         yml_data = mkdocs_yml_in.read()
 
-    yml_data = yml_data.replace('ABINIT_VERSION', abinit_version)
+    yml_data = yml_data.replace('ABINIT_VERSION', str(abinit_version))
 
     # Write mkdocs.yml
-    with open('mkdocs.yml.out', 'w') as mkdocs_yml:
+    with open('mkdocs.yml', 'w') as mkdocs_yml:
         mkdocs_yml.write(yml_data)
 
 def prof_main(main):
