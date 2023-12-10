@@ -64,11 +64,9 @@
 program fftprof
 
  use defs_basis
- use m_build_info
  use m_xmpi
  use m_xomp
  use m_errors
- use m_FFT_prof
  use m_abicore
  use m_dfti
 #ifdef HAVE_GPU_CUDA
@@ -76,16 +74,18 @@ program fftprof
  use m_manage_cuda
 #endif
 
- use defs_abitypes,only : MPI_type
- use m_fstrings,   only : lower
- use m_specialmsg, only : specialmsg_getcount, herald
- use m_argparse,   only : get_arg !, get_arg_list, get_start_step_num
- use m_io_tools,   only : flush_unit
- use m_geometry,   only : metric
- use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
- use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
- use m_fftw3,      only : fftw3_init_threads
- use m_mpinfo,     only : destroy_mpi_enreg, initmpi_seq
+ use defs_abitypes,  only : MPI_type
+ use m_build_info,   only : abinit_version
+ use m_fstrings,     only : lower
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_argparse,     only : get_arg !, get_arg_list, get_start_step_num
+ use m_io_tools,     only : flush_unit
+ use m_geometry,     only : metric
+ use m_fftcore,      only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
+ use m_fft,          only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
+ use m_fftw3,        only : fftw3_init_threads
+ use m_fft_prof,     only : fft_test_t
+ use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
