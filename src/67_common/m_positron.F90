@@ -1798,7 +1798,7 @@ end subroutine poslifetime
 !!   | nspinor=number of spinorial components of the wavefunctions
 !!   | nsppol=1 for unpolarized, 2 for spin-polarized
 !!   | usepaw=flag for PAW
-!!   | use_gpu_cuda=flag for Cuda use
+!!   | gpu_option=GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!   | wtk(=weights associated with various k points
 !!  filpsp(ntypat)=name(s) of the pseudopotential file(s)
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates.
@@ -2506,12 +2506,12 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &         gbound_pos,gbound_pos,istwf_k_pos,kg_k_pos,kg_k_pos,&
 &         dtset%mgfft,mpi_enreg,1,ngfft,npw_k_pos,npw_k_pos,&
 &         n4,n5,n6,option,tim_fourwf,weight_pos,weight_pos,&
-&         use_gpu_cuda=dtset%use_gpu_cuda)
+&         gpu_option=dtset%gpu_option)
        else
          call prep_fourwf(denpot_dum,blocksize,cwaveg_pos,cwaveaug_pos,&
 &         iblock_pos,istwf_k_pos,dtset%mgfft,mpi_enreg,nband_k_pos,&
 &         bandpp,ngfft,npw_k_pos,n4,n5,n6,occ_k_pos,option,Crystal%ucvol,wtk_k_pos,&
-&         bandfft_kpt_tab=bandfft_kpt_pos,use_gpu_cuda=dtset%use_gpu_cuda)
+&         bandfft_kpt_tab=bandfft_kpt_pos,gpu_option=dtset%gpu_option)
        end if
 
        cwaver_pos_block=zero
@@ -2734,12 +2734,12 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &                       gbound,gbound,istwf_k,kg_k,kg_k,&
 &                       dtset%mgfft,mpi_enreg,1,ngfft,npw_k,npw_k,&
 &                       n4,n5,n6,option,tim_fourwf,weight,weight,&
-&                       use_gpu_cuda=dtset%use_gpu_cuda)
+&                       gpu_option=dtset%gpu_option)
                      else
                        call prep_fourwf(denpot_dum,blocksize,cwaveg,cwaveaug,&
 &                       iblock,istwf_k,dtset%mgfft,mpi_enreg,nband_k,&
 &                       bandpp,ngfft,npw_k,n4,n5,n6,occ_k,option,Crystal%ucvol,wtk_k,&
-&                       bandfft_kpt_tab=bandfft_kpt_el,use_gpu_cuda=dtset%use_gpu_cuda)
+&                       bandfft_kpt_tab=bandfft_kpt_el,gpu_option=dtset%gpu_option)
                      end if
 
                      cwaver=zero

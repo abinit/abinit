@@ -156,7 +156,7 @@ program abinit
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
- integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
+ integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
  logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
@@ -181,9 +181,7 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
-#ifdef HAVE_GPU_CUDA
  integer :: gpu_devices(5)
-#endif
 
 !******************************************************************
 
@@ -365,24 +363,27 @@ program abinit
  end if
 
 !Activate GPU is required
- use_gpu_cuda=0
+ gpu_option=ABI_GPU_DISABLED
  use_nvtx=.false.
-#if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
-   if (dtsets(ii)%use_gpu_cuda==1) then
-     use_gpu_cuda=1
+   if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
+     gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%use_nvtx==1) then
-      use_nvtx=.true.
-   end if
+   if (dtsets(ii)%gpu_use_nvtx==1) use_nvtx=.true.
  end do
- call setdevice_cuda(gpu_devices,use_gpu_cuda)
+#ifdef HAVE_GPU
+ call setdevice_cuda(gpu_devices,gpu_option)
+#else
+ if (gpu_option/=ABI_GPU_DISABLED) then
+   write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'
+   ABI_ERROR(msg)
+ end if
+#endif
 
 #ifdef HAVE_GPU_NVTX_V3
-    NVTX_INIT(use_nvtx)
-#endif
+ NVTX_INIT(use_nvtx)
 #endif
 
 !------------------------------------------------------------------------------
@@ -619,7 +620,7 @@ program abinit
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA
- call unsetdevice_cuda(use_gpu_cuda)
+ call unsetdevice_cuda(gpu_option)
 #endif
 
  call xpapi_shutdown()
