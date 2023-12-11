@@ -1241,7 +1241,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
              ABI_MALLOC(rhowfg,(2,dtset%nfft))
              ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !          1-Compute density from WFs
-             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
                ! Make full electron density with extended plane waves basis set
                call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
                           extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
@@ -1276,7 +1276,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
              ABI_FREE(rhowfr)
            else
              write(std_out,*)' scfcv_core : recompute the density after the wf mixing '
-             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
                call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
                           extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
                           paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -2090,7 +2090,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ABI_MALLOC(nhatgr,(0,0,0))
    end if
 
-   if (dtset%useextfpmd==5.and.dtset%extfpmd_truecg==1) then
+   if (dtset%useextfpmd==11.and.dtset%extfpmd_truecg==1) then
      call energy(extfpmd%cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &     energies,extfpmd%eigen,etotal,gsqcut,extfpmd,indsym,irrzon,extfpmd%kg,&
 &     extfpmd%mcg,extfpmd%mpi_enreg,extfpmd%mpw,my_natom,&
@@ -2609,7 +2609,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  Add the contribution of extfpmd to the entropy
    if(associated(extfpmd)) then
-    if (extfpmd%version/=5) energies%entropy=energies%entropy+extfpmd%entropy
+     if(extfpmd%version/=11) energies%entropy=energies%entropy+extfpmd%entropy
    end if
 
 !  When the finite-temperature VG broadening scheme is used,

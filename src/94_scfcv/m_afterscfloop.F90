@@ -621,7 +621,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(254,1,tsec)
 
 !TEMPORARY Orthogonalize extpw wf
- if (dtset%useextfpmd==5) then
+ if (dtset%useextfpmd==11) then
    call extfpmd%extpw_orthon(dtset%effmass_free,gmet,dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nkpt,&
    & dtset%nsppol,dtset%nspinor,psps%usepaw)
  end if
@@ -645,7 +645,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
-     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
        ! Make full electron density with extended plane waves basis set
        call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
 &       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
@@ -659,7 +659,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
-     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
        call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
 &       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
 &       paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&

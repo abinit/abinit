@@ -564,7 +564,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! Set extfpmd band buffer if needed
  if(present(extfpmd)) then
-   if(associated(extfpmd).and.extfpmd%version/=5) then
+   if(associated(extfpmd).and.extfpmd%version/=11) then
      extfpmd_nbdbuf=extfpmd%nbdbuf
    end if
  end if
@@ -631,7 +631,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! Compute the number of free electrons with corresponding chemical
  ! potential and add to nelect bounds.
  if(present(extfpmd)) then
-   if(associated(extfpmd).and.extfpmd%version/=5) then
+   if(associated(extfpmd).and.extfpmd%version/=11) then
      call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nsppol,tsmear,wtk)
      call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nsppol,tsmear,wtk)
    end if
@@ -713,7 +713,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! Compute the number of free electrons of the extfpmd model
        ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
-         if(associated(extfpmd).and.extfpmd%version/=5) then
+         if(associated(extfpmd).and.extfpmd%version/=11) then
            call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nsppol,tsmear,wtk)
          end if
        end if

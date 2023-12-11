@@ -854,32 +854,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Initialize (eventually) extfpmd object
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
-   if(dtset%useextfpmd/=1.and.dtset%extfpmd_nbcut>dtset%mband) then
-     write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
-&     "extfpmd_nbcut = ",dtset%extfpmd_nbcut," should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&     "Action: Increase nband or decrease extfpmd_nbcut."
-     ABI_ERROR(msg)
-   else
-     if(dtset%useextfpmd/=1.and.(dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut)>dtset%mband) then
-       write(msg,'(a,i0,a,i0,a,i0,2a,i0,3a)') "(extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf," + extfpmd_nbcut = ",&
-&       dtset%extfpmd_nbcut,") = ",dtset%extfpmd_nbdbuf+dtset%extfpmd_nbcut,ch10,&
-&       "should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
-       ABI_WARNING(msg)
-       dtset%extfpmd_nbdbuf = 0
-     else if(dtset%extfpmd_nbdbuf>dtset%mband) then
-       write(msg,'(a,i0,a,i0,3a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
-&       " should be less than or equal to nband = ",dtset%mband,".",ch10,&
-&       "Assume experienced user. Execution will continue with extfpmd_nbdbuf = 0."
-       ABI_WARNING(msg)
-       dtset%extfpmd_nbdbuf = 0
-      end if
-      if (dtset%useextfpmd==5.and.(dtset%extfpmd_nband<=dtset%mband)) then
-        write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
-        &       "extfpmd_nband = ",dtset%extfpmd_nband," should be strictly greater than nband = ",dtset%mband,".",ch10,&
-        &       "Action: Increase extfpmd_nband or decrease nband."
-        ABI_ERROR(msg)
-     end if
+   if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extpw_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,dtset%ecut,&
@@ -920,7 +895,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    if(associated(extfpmd)) then
 !    Generate extended plane wave wavefunctions
-     if(extfpmd%version==5) then
+     if(extfpmd%version==11) then
        call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet_for_kg,&
 &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
 &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
@@ -1187,7 +1162,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (psps%usepaw==1) then
          ABI_MALLOC(rhowfg,(2,dtset%nfft))
          ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
           ! Make full electron density with extended plane waves basis set
            call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
                 extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
@@ -1201,7 +1176,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          ABI_FREE(rhowfg)
          ABI_FREE(rhowfr)
        else
-         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
            call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
                 extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
                 paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
@@ -1518,7 +1493,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
    
    ! Write extended plane waves wavefunctions
-   if (dtset%useextfpmd==5) then
+   if (dtset%useextfpmd==11) then
      extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
      call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
 &     comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
