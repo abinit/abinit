@@ -170,6 +170,53 @@ subroutine xmpi_max_dpv(xval,xmax,comm,ier)
 end subroutine xmpi_max_dpv
 !!***
 
+!!****f* ABINIT/xmpi_max_int0d_ip
+!! NAME
+!!  xmpi_max_int0d_ip
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute
+!!  the result back to all processes.
+!!  Target: scalar integer. In place operation
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= 
+!!    in input: the value on the local processor 
+!!    in output: the maximum inside the given communicator.
+!!
+!! SOURCE
+
+subroutine xmpi_max_int0d_ip(ioval,comm,ier)
+
+!Arguments-------------------------
+ integer ,intent(inout) :: ioval
+ integer ,intent(in) :: comm
+ integer ,intent(out)   :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: xmax
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_ALLREDUCE(ioval,xmax,1,MPI_INTEGER,MPI_MAX,comm,ier)
+   ioval = xmax
+ end if
+#endif
+
+end subroutine xmpi_max_int0d_ip
+!!***
+
 !!****f* ABINIT/xmpi_max_dp0d_ip
 !! NAME
 !!  xmpi_max_dp0d_ip

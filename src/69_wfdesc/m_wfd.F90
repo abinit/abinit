@@ -5807,7 +5807,7 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 !scalars
  integer :: cplex,cplex_rhoij,qphase,iatom,band,ik_ibz
  integer :: spin,natinc,nband_k,option,lmn2_size,nspden
- logical :: usetimerev
+ logical :: use_timerev,use_zeromag
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
 !arrays
@@ -5837,7 +5837,9 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
    pawrhoij(iatom)%rhoij_=zero
  end do
 
- option=1; usetimerev=(kptopt>0.and.kptopt<3)
+ option=1
+ use_timerev=(kptopt>0.and.kptopt<3)
+ use_zeromag=.false. ; if (Wfd%natom>0) use_zeromag=(pawrhoij(1)%nspden==4.and.Wfd%nspden==1)
 
  ! Distribute (b,k,s).
  where (ABS(Bst%occ)>tol8)
@@ -5869,7 +5871,7 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
           ! Accumulate contribution from (occupied) current band
           !if (locc_test) then
            call pawaccrhoij(Cryst%atindx,cplex,cwaveprj,cwaveprj ,0,spin,Wfd%natom,Wfd%natom,&
-&            Wfd%nspinor,occup,option,pawrhoij,usetimerev,wtk_k)
+&            Wfd%nspinor,occup,option,pawrhoij,use_timerev,use_zeromag,wtk_k)
           !end if
        end if
      end do !band

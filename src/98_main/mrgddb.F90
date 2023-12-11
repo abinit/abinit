@@ -42,13 +42,13 @@
 program mrgddb
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_errors
  use m_xmpi
  use m_ddb_hdr
  use m_ddb
 
+ use m_build_info,   only : abinit_version
  use m_specialmsg,   only : herald
  use m_time ,        only : asctime, timein
  use m_io_tools,     only : file_exists

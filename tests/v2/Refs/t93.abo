@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v2_t93/t93.in
-- output file    -> t93.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v2_t93/t93.abi
+- output file    -> t93.abo
 - root for input  files -> t93i
 - root for output files -> t93o
-
 
  DATASET    1 : the unit cell is not primitive
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          12        mffmem =           1         mkmem =           3
        mpw =         266          nfft =        4000          nkpt =           3
 ================================================================================
-P This job should need less than                       2.578 Mbytes of memory.
+P This job should need less than                       2.688 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.148 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    2 : the unit cell is not primitive
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.148 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           4
        mpw =         266          nfft =        4000          nkpt =           4
 ================================================================================
-P This job should need less than                       2.630 Mbytes of memory.
+P This job should need less than                       2.740 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.197 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Pm m a (# 51); Bravais oP (primitive ortho.)
 ================================================================================
@@ -68,7 +65,7 @@ _ WF disk file :      0.197 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           4
        mpw =         266          nfft =        4000          nkpt =           4
 ================================================================================
-P This job should need less than                       2.629 Mbytes of memory.
+P This job should need less than                       2.739 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.197 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
@@ -329,8 +326,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.02747
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1165,10 +1162,10 @@ P           mkmem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.4  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.4  wall=          5.5
+.Delivered   4 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.6  wall=          4.7

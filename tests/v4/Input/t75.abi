@@ -57,6 +57,11 @@ ndtset 3     jdtset 1 2 3
     nband3   4
    kptopt3   2
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 nbdbuf 0
 
  pp_dirpath "$ABI_PSPDIR"

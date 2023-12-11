@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v5_t26-t27-t28/t26.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t26-t27-t28/t26.abi
 - output file    -> t26.abo
 - root for input  files -> t26i
 - root for output files -> t26o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.956 Mbytes of memory.
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -56,7 +54,6 @@ P This job should need less than                       2.642 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.368 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -88,6 +85,8 @@ _ WF disk file :      0.368 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0200586501E+01  1.0200586501E+01  1.0200586501E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
              ecut      5.00000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
 -          fftalg         312
@@ -298,8 +297,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1491,6 +1490,8 @@ tolerances: {tolvrs: 1.00E-04, }
  -outvars: echo values of variables after computation  --------
             acell      1.0200586501E+01  1.0200586501E+01  1.0200586501E+01 Bohr
               amu      2.80855000E+01
+              asr           0
+           chneut           0
              ecut      5.00000000E+00 Hartree
            ecutsm      5.00000000E-01 Hartree
            etotal1    -8.8456856342E+00
@@ -1674,6 +1675,11 @@ P          mk1mem3         32
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -1770,10 +1776,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.4
+- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.1  wall=         14.4
+.Delivered   0 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.2  wall=         10.3

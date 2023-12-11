@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h48 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h03 )
   
 
 ================================================================================
@@ -70,8 +70,8 @@
 ================================================================================
 
  read the DDB information and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8000000  3.8000000  G(1)= -0.1315789  0.1315789  0.1315789
@@ -82,14 +82,14 @@
  Time-reversal symmetry is present
  Reduced atomic positions [iatom, xred, symbol]:
     1)    0.0000000  0.0000000  0.0000000  Al
- 
+
  DDB file with 6 blocks has been read.
- 
+
 ================================================================================
- 
+
  Calculation of the interatomic forces 
- 
--begin at tcpu      0.055  and twall      0.790 sec
+
+-begin at tcpu      0.037  and twall      0.044 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -97,18 +97,18 @@
   3)   2.50000000E-01  5.00000000E-01  2.50000000E-01
   4)   2.50000000E-01  2.50000000E-01  5.00000000E-01
   5)   0.00000000E+00  5.00000000E-01  5.00000000E-01
-  6)   2.50000000E-01  0.00000000E+00 -2.50000000E-01
-  7)   2.50000000E-01 -2.50000000E-01  0.00000000E+00
+  6)   2.50000000E-01 -1.11022302E-16 -2.50000000E-01
+  7)   2.50000000E-01 -2.50000000E-01 -1.11022302E-16
   8)   5.00000000E-01  0.00000000E+00  5.00000000E-01
-  9)   0.00000000E+00  2.50000000E-01 -2.50000000E-01
- 10)  -2.50000000E-01  2.50000000E-01  0.00000000E+00
+  9)  -1.11022302E-16  2.50000000E-01 -2.50000000E-01
+ 10)  -2.50000000E-01  2.50000000E-01 -1.11022302E-16
  11)  -2.50000000E-01 -2.50000000E-01 -5.00000000E-01
  12)   5.00000000E-01  5.00000000E-01  0.00000000E+00
- 13)   0.00000000E+00 -2.50000000E-01  2.50000000E-01
- 14)  -2.50000000E-01  0.00000000E+00  2.50000000E-01
+ 13)  -1.11022302E-16 -2.50000000E-01  2.50000000E-01
+ 14)  -2.50000000E-01 -1.11022302E-16  2.50000000E-01
  15)  -2.50000000E-01 -5.00000000E-01 -2.50000000E-01
  16)  -5.00000000E-01 -2.50000000E-01 -2.50000000E-01
- 
+
  The interatomic forces have been obtained
        Homogeneous q point set in the B.Z.
  Grid q points  :      128
@@ -127,13 +127,13 @@
  12)   1.25000000E-01 -3.75000000E-01 -2.50000000E-01
  13)   0.00000000E+00 -2.50000000E-01 -2.50000000E-01
  14)   2.50000000E-01 -1.25000000E-01 -1.25000000E-01
- 15)   1.25000000E-01  2.77555756E-17 -1.25000000E-01
- 16)   1.25000000E-01 -1.25000000E-01  2.77555756E-17
+ 15)   1.25000000E-01 -5.55111512E-17 -1.25000000E-01
+ 16)   1.25000000E-01 -1.25000000E-01 -5.55111512E-17
  17)   2.50000000E-01  0.00000000E+00  2.50000000E-01
  18)   5.00000000E-01  1.25000000E-01  3.75000000E-01
  19)   3.75000000E-01  2.50000000E-01  3.75000000E-01
  20)   3.75000000E-01  1.25000000E-01  5.00000000E-01
- 
+
  The interatomic forces have been obtained
 
  Analysis of interatomic force constants 
@@ -191,7 +191,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.000000       -0.707107
  Second local vector :        0.707107        0.000000       -0.707107
- Third  local vector :        0.000000       -1.000000        0.000000
+ Third  local vector :        0.000000       -1.000000       -0.000000
   -0.00702  0.00000  0.00000
    0.00000 -0.00366  0.00000
    0.00000  0.00000  0.00437
@@ -206,7 +206,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.707107        0.000000        0.707107
  Second local vector :        0.707107        0.000000        0.707107
- Third  local vector :        0.000000        1.000000        0.000000
+ Third  local vector :        0.000000        1.000000       -0.000000
   -0.00702  0.00000  0.00000
    0.00000 -0.00366  0.00000
    0.00000  0.00000  0.00437
@@ -251,7 +251,7 @@
  Transformation to local coordinates 
  First  local vector :        0.000000       -0.707107        0.707107
  Second local vector :        1.000000        0.000000        0.000000
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
   -0.00702  0.00000  0.00000
    0.00000  0.00437  0.00000
    0.00000  0.00000 -0.00366
@@ -266,7 +266,7 @@
  Transformation to local coordinates 
  First  local vector :        0.707107       -0.707107        0.000000
  Second local vector :        0.707107        0.707107        0.000000
- Third  local vector :        0.000000        0.000000        1.000000
+ Third  local vector :       -0.000000        0.000000        1.000000
   -0.00702  0.00000  0.00000
    0.00000 -0.00366  0.00000
    0.00000  0.00000  0.00437
@@ -326,7 +326,7 @@
  Transformation to local coordinates 
  First  local vector :        0.707107        0.000000        0.707107
  Second local vector :        0.707107        0.000000       -0.707107
- Third  local vector :        0.000000        1.000000        0.000000
+ Third  local vector :       -0.000000        1.000000        0.000000
   -0.00702  0.00000  0.00000
    0.00000 -0.00366  0.00000
    0.00000  0.00000  0.00437
@@ -371,7 +371,7 @@
  Transformation to local coordinates 
  First  local vector :        0.000000       -1.000000        0.000000
  Second local vector :        1.000000        0.000000        0.000000
- Third  local vector :        0.000000        0.000000        1.000000
+ Third  local vector :       -0.000000        0.000000        1.000000
    0.00146  0.00000  0.00000
    0.00000 -0.00144  0.00000
    0.00000  0.00000 -0.00144
@@ -446,16 +446,16 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :       -0.577350        0.577350        0.577350
- Third  local vector :       -0.000000        0.707107       -0.707107
+ Third  local vector :        0.000000        0.707107       -0.707107
    0.00060  0.00047  0.00000
    0.00047  0.00026  0.00000
    0.00000  0.00000 -0.00152
- 
+
 ================================================================================
- 
+
  Treat the first list of vectors 
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -467,16 +467,16 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  0.000000E+00
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
  Phonon energies in Hartree :
    1.205590E-04  3.036315E-04  3.036315E-04
@@ -494,22 +494,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.5935991801E-03
    in SI units K  :            187.44357
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1836329554E-02
    in units km/s:              4.01732
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1494998283E-02
    in SI units K  :            472.08256
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1836329554E-02
    in units km/s:              4.01732
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1494998283E-02
    in SI units K  :            472.08256
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.20000  0.20000  0.00000
  Phonon energies in Hartree :
   -1.932078E-04  3.374067E-04  3.374067E-04
@@ -521,7 +521,7 @@
 - -1.271246E+00  2.220030E+00  2.220030E+00
  Phonon energies in Kelvin  :
 - -6.101013E+01  1.065445E+02  1.065445E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.30000  0.30000  0.00000
  Phonon energies in Hartree :
    3.847404E-04  3.847404E-04  8.223009E-04
@@ -533,7 +533,7 @@
 -  2.531470E+00  2.531470E+00  5.410480E+00
  Phonon energies in Kelvin  :
 -  1.214913E+02  1.214913E+02  2.596618E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.40000  0.40000  0.00000
  Phonon energies in Hartree :
    4.414850E-04  4.414850E-04  1.313956E-03
@@ -545,7 +545,7 @@
 -  2.904832E+00  2.904832E+00  8.645416E+00
  Phonon energies in Kelvin  :
 -  1.394098E+02  1.394098E+02  4.149140E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.00000
  Phonon energies in Hartree :
    3.702297E-04  3.702297E-04  1.413109E-03
@@ -557,7 +557,7 @@
 -  2.435994E+00  2.435994E+00  9.297808E+00
  Phonon energies in Kelvin  :
 -  1.169091E+02  1.169091E+02  4.462239E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.42900  0.42900  0.85800
  Phonon energies in Hartree :
    4.238032E-04  4.881808E-04  1.365213E-03
@@ -569,7 +569,7 @@
 -  2.788491E+00  3.212075E+00  8.982667E+00
  Phonon energies in Kelvin  :
 -  1.338263E+02  1.541551E+02  4.310995E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.35800  0.35800  0.71600
  Phonon energies in Hartree :
    4.867107E-04  5.616880E-04  1.217894E-03
@@ -581,7 +581,7 @@
 -  3.202402E+00  3.695729E+00  8.013358E+00
  Phonon energies in Kelvin  :
 -  1.536909E+02  1.773668E+02  3.845801E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.28600  0.28600  0.57200
  Phonon energies in Hartree :
    5.312970E-04  6.456200E-04  1.010612E-03
@@ -593,7 +593,7 @@
 -  3.495766E+00  4.247975E+00  6.649510E+00
  Phonon energies in Kelvin  :
 -  1.677701E+02  2.038704E+02  3.191258E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.21500  0.21500  0.43000
  Phonon energies in Hartree :
    5.081795E-04  6.275570E-04  7.169680E-04
@@ -605,7 +605,7 @@
 -  3.343661E+00  4.129127E+00  4.717423E+00
  Phonon energies in Kelvin  :
 -  1.604702E+02  1.981666E+02  2.264003E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.14300  0.14300  0.28600
  Phonon energies in Hartree :
    3.933528E-04  4.515691E-04  4.831841E-04
@@ -617,7 +617,7 @@
 -  2.588137E+00  2.971182E+00  3.179199E+00
  Phonon energies in Kelvin  :
 -  1.242108E+02  1.425941E+02  1.525773E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.07200  0.07200  0.14400
  Phonon energies in Hartree :
    2.326749E-04  3.170878E-04  3.372542E-04
@@ -635,22 +635,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1125111989E-02
    in SI units K  :            355.28184
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1883370704E-02
    in units km/s:              4.12023
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1533295570E-02
    in SI units K  :            484.17587
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2003150764E-02
    in units km/s:              4.38228
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1630811281E-02
    in SI units K  :            514.96886
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00
@@ -662,16 +662,16 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00
  Phonon energies in Kelvin  :
 -  0.000000E+00  0.000000E+00  0.000000E+00
- 
+
  Analysis of degeneracies and characters (maximum tolerance=1.00E-06 a.u.)
  For each vibration mode, or group of modes if degenerate,
  the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
- 
+  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
    3.047695E-04  3.047695E-04  3.606299E-04
@@ -689,22 +689,22 @@
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1386195855E-02
    in SI units K  :            437.72551
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.1702685846E-02
    in units km/s:              3.72495
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1386195855E-02
    in SI units K  :            437.72551
- 
+
  Speed of sound for this q and mode:
    in atomic units:     0.2014766671E-02
    in units km/s:              4.40769
  Partial Debye temperature for this q and mode:
    in atomic units:     0.1640268059E-02
    in SI units K  :            517.95507
- 
- 
+
+
   Phonon wavevector (reduced coordinates) :  0.25000  0.25000  0.25000
  Phonon energies in Hartree :
    4.944388E-04  4.947345E-04  4.947345E-04
@@ -716,7 +716,7 @@
 -  3.253251E+00  3.255196E+00  3.255196E+00
  Phonon energies in Kelvin  :
 -  1.561312E+02  1.562246E+02  1.562246E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.37500
  Phonon energies in Hartree :
    4.809031E-04  4.809031E-04  1.006750E-03
@@ -728,7 +728,7 @@
 -  3.164191E+00  3.164191E+00  6.624094E+00
  Phonon energies in Kelvin  :
 -  1.518570E+02  1.518570E+02  3.179060E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    3.984722E-04  3.984722E-04  1.340991E-03
@@ -741,10 +741,10 @@
  Phonon energies in Kelvin  :
 -  1.258274E+02  1.258274E+02  4.234511E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          1.5
- 
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+
 ================================================================================
- 
-+Total cpu time      0.105  and wall time      1.468 sec
- 
+
++Total cpu time      0.070  and wall time      0.093 sec
+
  anaddb : the run completed succesfully.

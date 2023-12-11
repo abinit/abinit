@@ -48,6 +48,11 @@ mixesimgf -59.00 +80.0 -20.0    # Must be coherent with the occupation numbers
  toldff 1.0d-6   # For geometry optimization of linear combination of images, the criterion usually preferred, based on tolrff
                  # cannot be used straighforwardly, because each image will have non zero forces,
                  # and only the linear combination of forces gives 
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
+ 
  diemac 2.0d0
 
 # k-point grid   # Not for production. Simply, to yield one k point thanks to symmetries.

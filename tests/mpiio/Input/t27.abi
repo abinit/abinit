@@ -74,6 +74,10 @@ kptrlatt 4 0 0 0 4 0 0 0 4
 nshiftk 4 
 shiftk 1/2 1/2 1/2 1/2 0.0 0.0 0.0 1/2 0.0 0.0 0.0 1/2
 tolwfr 1d-20
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 # Unit cell
 acell 3*7.0

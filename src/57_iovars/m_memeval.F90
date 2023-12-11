@@ -155,6 +155,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    symrel(:,:,1:nsym)=dtsets(idtset)%symrel(:,:,1:nsym)
 
 !  Space group output
+   call prtspgroup(bravais,genafm,std_out,jdtset,ptgroupma,spgroup)
    call prtspgroup(bravais,genafm,iout,jdtset,ptgroupma,spgroup)
 
    if (dtsets(idtset)%toldff>tol16.and.optforces==0) optforces=1

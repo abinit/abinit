@@ -74,7 +74,6 @@
 program abinit
 
  use defs_basis
- use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
@@ -90,8 +89,9 @@ program abinit
  use mpi
 #endif
 
- use defs_datatypes, only : pspheader_type
+ use defs_datatypes,only : pspheader_type
  use defs_abitypes, only : MPI_type
+ use m_build_info,  only : abinit_version, dump_config
  use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
@@ -110,6 +110,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
@@ -426,12 +427,16 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     !  so there is only one call to the latter, for both units)
+     ! both 
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       if(ii==2)call out_spg_anal (dtsets,(ii-1),ab_out,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if

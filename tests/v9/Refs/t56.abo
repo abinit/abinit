@@ -1,6 +1,6 @@
 
-.Version 9.11.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 19h03 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t56.abi
 - output file    -> t56.abo
 - root for input  files -> t56i
 - root for output files -> t56o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       3.370 Mbytes of memory.
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       3.370 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       4.102 Mbytes of memory.
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       4.102 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -365,8 +360,8 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1815,58 +1810,10 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          1.5        0.03      0.000
-- Total wall clock time (s,m,h):          1.6        0.03      0.000
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.5, wall_time =            1.6
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- invars2                           0.214  14.1         0.215  13.7              5      -1.00        1.00       1.00
-- pspini                            0.145   9.5         0.145   9.2              5      -1.00        1.00       1.00
-- timing timab                      0.139   9.2         0.140   8.9             11      -1.00        0.99       0.99
-- dvdb_readsym_allv1                0.096   6.3         0.099   6.3             30      -1.00        0.97       0.97
-- fourwf%(pot)                      0.070   4.6         0.066   4.2            720      -1.00        1.06       1.06
-- abinit(2)                         0.069   4.6         0.070   4.5              1      -1.00        0.99       0.99
-- dvdb_qcache_read                  0.052   3.5         0.053   3.4              5      -1.00        0.99       0.99
-- dvdb_readsym_qbz                  0.046   3.0         0.048   3.1             15      -1.00        0.96       0.96
-- sigph_bsum                        0.027   1.8         0.027   1.7             15      -1.00        1.02       1.02
-- sigph_bsum_4                      0.025   1.7         0.024   1.5            120      -1.00        1.05       1.05
-- fourdp                            0.021   1.4         0.017   1.1            300      -1.00        1.23       1.23
-- nonlop(forces)                    0.009   0.6         0.010   0.6            720      -1.00        0.92       0.92
-- others (140)                     -0.175 -11.5        -0.166 -10.6             -1      -1.00        1.05       1.05
--<END_TIMER>
--
-- subtotal                          0.741  48.8         0.748  47.7                                  0.99       0.99
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           1.5, wall_time =           1.6
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- invars2                           0.214  14.1         0.215  13.7              5      -1.00        1.00       1.00
-- pspini                            0.145   9.5         0.145   9.2              5      -1.00        1.00       1.00
-- timing timab                      0.139   9.2         0.140   8.9             11      -1.00        0.99       0.99
-- dvdb_readsym_allv1                0.096   6.3         0.099   6.3             30      -1.00        0.97       0.97
-- fourwf%(pot)                      0.070   4.6         0.066   4.2            720      -1.00        1.06       1.06
-- abinit(2)                         0.069   4.6         0.070   4.5              1      -1.00        0.99       0.99
-- dvdb_qcache_read                  0.052   3.5         0.053   3.4              5      -1.00        0.99       0.99
-- dvdb_readsym_qbz                  0.046   3.0         0.048   3.1             15      -1.00        0.96       0.96
-- sigph_bsum                        0.027   1.8         0.027   1.7             15      -1.00        1.02       1.02
-- sigph_bsum_4                      0.025   1.7         0.024   1.5            120      -1.00        1.05       1.05
-- fourdp                            0.021   1.4         0.017   1.1            300      -1.00        1.23       1.23
-- nonlop(forces)                    0.009   0.6         0.010   0.6            720      -1.00        0.92       0.92
-- others (140)                     -0.175 -11.5        -0.166 -10.6             -1      -1.00        1.05       1.05
--<END_TIMER>
 
-- subtotal                          0.741  48.8         0.748  47.7                                  0.99       0.99
 
 ================================================================================
 
@@ -1950,10 +1897,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  33 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.6
+.Delivered   7 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

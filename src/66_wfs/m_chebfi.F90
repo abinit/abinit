@@ -318,7 +318,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! if(mpi_enreg%me == 0) write(0, *) nline_max
  do iband=1, nband_filter
    ! nline necessary to converge to tolwfr
-   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr / resids_filter(iband), dtset%nline)
+   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr_diago / resids_filter(iband), dtset%nline)
    ! nline necessary to decrease residual by a constant factor
    nline_decrease = cheb_oracle(eig(iband), filter_low, dtset%ecut, 0.1_dp, dtset%nline)
 

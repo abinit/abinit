@@ -25,7 +25,6 @@
 program lapackprof
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_xmpi
  use m_xomp
@@ -36,6 +35,7 @@ program lapackprof
  use m_yaml
 
  use defs_abitypes,   only : MPI_type
+ use m_build_info,    only : abinit_version
  use m_fstrings,      only : lower, itoa, sjoin !, strcat
  use m_specialmsg,    only : specialmsg_getcount, herald
  use m_argparse,      only : get_arg, get_arg_list, get_start_step_num

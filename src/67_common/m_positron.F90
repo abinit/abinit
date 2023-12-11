@@ -1884,7 +1884,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev,abinitcorewf,xmlcorewf
+ logical :: cprj_paral_band,ex,mykpt,mykpt_pos,use_timerev,use_zeromag,abinitcorewf,xmlcorewf
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
@@ -2789,9 +2789,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
                                pawrhoij_dop_el(iatom)%rhoij_=zero
                              end do
                              cplex_rhoij=2;if (istwf_k>1) cplex_rhoij=1
-                             usetimerev=(dtset%kptopt>0.and.dtset%kptopt<3)
-                             call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),cprj_k(:,ib_cprj),0,isppol,&
-&                             dtset%natom,dtset%natom,dtset%nspinor,occ_el,1,pawrhoij_dop_el,usetimerev,wtk_k)
+                             use_timerev=(dtset%kptopt>0.and.dtset%kptopt<3)
+                             use_zeromag=(pawrhoij_dop_el(1)%nspden==4.and.dtset%nspden==1)
+                             call pawaccrhoij(Crystal%atindx,cplex_rhoij,cprj_k(:,ib_cprj),&
+&                                 cprj_k(:,ib_cprj),0,isppol,dtset%natom,dtset%natom,dtset%nspinor,&
+&                                 occ_el,1,pawrhoij_dop_el,use_timerev,use_zeromag,wtk_k)
 !                            Is it correct to apply symetries here (on a single band)?
 !                            If not, call pawrhoij_symrhoij with nsym=1
                              call pawrhoij_symrhoij(pawrhoij_dop_el,pawrhoij_dop_el,1,Crystal%gprimd,&
