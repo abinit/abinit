@@ -930,7 +930,7 @@ contains
           nband_k=nband(ikpt+(isppol-1)*nkpt)
           do iband=nband_k-this%nbdbuf+1,this%mband
             dotr=extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)
-            fn=fermi_dirac(dotr,fermie,tsmear)
+            fn=fermi_dirac(dotr+this%eshift,fermie,tsmear)
             this%e_kinetic=this%e_kinetic+wtk(ikpt)*maxocc*fn*dotr
           end do
         end do
