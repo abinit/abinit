@@ -1,0 +1,19 @@
+!!****d* ABINIT/44_manage_kokkos
+!! NAME
+!!  44_manage_kokkos
+!!
+!! DESCRIPTION
+!!  This directory adds support in ABINIT for Kokkos core.
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2009-2022 ABINIT group (Marco Mancini, Yann Pouillon)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!  For the initials of contributors, see
+!!  ~abinit/doc/developers/contributors.txt .
+!!
+!! CHILDREN
+!! m_xg_kokkos.F90
+!!
+!!***

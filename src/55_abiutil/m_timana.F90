@@ -1127,6 +1127,13 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1761) = 'chebfi2_swap                  '
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
+ names(1764) = 'chebfi2_RR@hegv               '
+ names(1765) = 'chebfi2_RR@scale              '
+ names(1766) = 'chebfi2_RR@XNP_reset          '
+ names(1767) = 'chebfi2_RR@gemm_1             '
+ names(1768) = 'chebfi2_RR@gemm_2             '
+ names(1769) = 'chebfi2_X_NP@init             '
+ names(1770) = 'chebfi2_AX_BX@init            '
 
  names(1780)='ctgk_rotate'; basic(1780) = 1
 
@@ -1987,8 +1994,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         ' Detailed analysis of some time consuming routines ',&
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
-       nlist=8
-       list(:nlist)=(/802,803,9,75,76,77,210,11/)
+       nlist=10
+       list(:nlist)=(/802,803,9,75,76,77,210,11,1661,1764/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then

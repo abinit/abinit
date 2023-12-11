@@ -1932,7 +1932,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !    the later sorting : neighbors 0 and neighb+1 are non-existent, while
 !    neighbor 1 will be the atom itself ...
      list_neighb(0:mneighb+1,1:4,1)=0
-     sqrlength(1:mneighb+1)=huge(0.0d0)
+     sqrlength(1:mneighb+1)=huge(zero)
      sqrlength(0)=-1.0d0
 
 !    Here search on all atoms inside the box defined by tmax

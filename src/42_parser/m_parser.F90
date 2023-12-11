@@ -328,7 +328,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  integer :: done,idig,index_slash,sign
  real(dp) :: den,num
  logical :: logi
- character(len=500) :: msg,iomsg
+ character(len=500) :: msg
+ character(len=100) :: iomsg
 
 ! *************************************************************************
 

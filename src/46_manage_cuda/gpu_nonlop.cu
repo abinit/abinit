@@ -676,11 +676,10 @@ extern "C" void free_nonlop_gpu_(){
 /**
  *
  */
-extern "C" void gpu_update_ham_data_(double *enl,    int *size_enl,
-                                     double *sij,    int *size_sij,
-                                     double *gprimd, int *size_gprimd)
+extern "C" void gpu_update_ham_data_(double *enl,    int64_t *size_enl,
+                                     double *sij,    int64_t *size_sij,
+                                     double *gprimd, int64_t *size_gprimd)
 {
-
   CHECK_CUDA_ERROR( cudaMemcpy(enl_gpu, enl, (*size_enl)*sizeof(double),cudaMemcpyHostToDevice) );
 
   if((*size_sij)>0){
@@ -692,8 +691,8 @@ extern "C" void gpu_update_ham_data_(double *enl,    int *size_enl,
 
 } // gpu_update_ham_data_
 
-extern "C" void gpu_update_ffnl_ph3d_(double *ph3din, int *dimph3din,
-                                      double *ffnlin, int *dimffnlin)
+extern "C" void gpu_update_ffnl_ph3d_(double *ph3din, int64_t *dimph3din,
+                                      double *ffnlin, int64_t *dimffnlin)
 {
 
   CHECK_CUDA_ERROR( cudaMemcpy(ffnlin_gpu,ffnlin,(*dimffnlin)*sizeof(double),cudaMemcpyHostToDevice) );
