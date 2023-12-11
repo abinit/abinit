@@ -29,7 +29,6 @@
 program anaddb
 
  use defs_basis
- use m_build_info
  use m_xmpi
  use m_xomp
  use m_abicore
@@ -47,6 +46,7 @@ program anaddb
  use netcdf
 #endif
 
+ use m_build_info,     only : abinit_version
  use m_io_tools,       only : open_file, flush_unit
  use m_fstrings,       only : int2char4, itoa, sjoin, strcat, inupper
  use m_specialmsg,     only : specialmsg_getcount, herald
