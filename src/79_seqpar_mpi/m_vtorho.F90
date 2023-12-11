@@ -1469,7 +1469,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nsppol,dtset%tsmear,dtset%wtk)
+&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
 &       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
 &       energies%e_kinetic,energies%e_eigenvalues)
@@ -1630,7 +1630,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nsppol,dtset%tsmear,dtset%wtk)
+&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
        call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
 &       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
 &       energies%e_kinetic,energies%e_eigenvalues)

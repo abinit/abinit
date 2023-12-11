@@ -632,8 +632,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! potential and add to nelect bounds.
  if(present(extfpmd)) then
    if(associated(extfpmd).and.extfpmd%version/=11) then
-     call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nsppol,tsmear,wtk)
-     call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nsppol,tsmear,wtk)
+     call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nspinor,nsppol,tsmear,wtk)
+     call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nspinor,nsppol,tsmear,wtk)
    end if
  end if
 
@@ -714,7 +714,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
          if(associated(extfpmd).and.extfpmd%version/=11) then
-           call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nsppol,tsmear,wtk)
+           call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nspinor,nsppol,tsmear,wtk)
          end if
        end if
 

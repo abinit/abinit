@@ -65,7 +65,7 @@ module m_extfpmd
     real(dp) :: nelect,eshift,ucvol,bandshift
     real(dp),allocatable :: vtrial(:,:)
     real(dp),allocatable :: nelectarr(:,:)
-    real(dp),allocatable :: bandshiftk(:),ebcutk(:)
+    real(dp),allocatable :: bandshiftk(:)
     !! Scalars and arrays for numerical extended PW method
     integer :: mpw,mcg,mband,mkmem
     real(dp) :: ecut,ecut_eff
@@ -133,6 +133,7 @@ contains
     this%truecg=.false.
     this%bcut=mband-nbdbuf
     this%nbcut=nbcut
+    this%mband=extfpmd_mband
     this%nbdbuf=nbdbuf
     this%version=version
     ABI_MALLOC(this%vtrial,(nfft,nspden))
@@ -149,14 +150,11 @@ contains
     this%bandshift=zero
     ABI_MALLOC(this%bandshiftk,(nkpt*nsppol))
     this%bandshiftk(:)=zero
-    ABI_MALLOC(this%ebcutk,(nkpt*nsppol))
-    this%ebcutk(:)=zero
     this%eshift=extpw_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
     if (this%version==11) then
       if (truecg==1) this%truecg=.true.
-      this%mband=extfpmd_mband
       if (extfpmd_ecut==zero) then
         ! Adding dsqrt(...) to extended cutoff energy to make
         ! sure extended pw basis set is large enough.
@@ -262,7 +260,6 @@ contains
       this%ecut_eff=zero
       this%mkmem=0
       this%mpw=0
-      this%mband=0
       this%truecg=.false.
     end if
     
@@ -272,11 +269,10 @@ contains
     ABI_FREE(this%nelectarr)
     this%bandshiftk(:)=zero
     ABI_FREE(this%bandshiftk)
-    this%ebcutk(:)=zero
-    ABI_FREE(this%ebcutk)
     this%nfft=0
     this%nspden=0
     this%bcut=0
+    this%mband=0
     this%nbcut=0
     this%nbdbuf=0
     this%version=1
@@ -378,7 +374,6 @@ contains
 
     ! Get extended FPMD band energy cutoff
     this%ebcut=zero
-    this%ebcutk(:)=zero
     this%bandshift=zero
     this%bandshiftk(:)=zero
     band_index=0
@@ -386,7 +381,6 @@ contains
       do ikpt=1,nkpt
         nband_k=nband(ikpt+(isppol-1)*nkpt)
         this%ebcut=this%ebcut+wtk(ikpt)*eigen(band_index+nband_k-this%nbdbuf)/nsppol
-        this%ebcutk(ikpt+(isppol-1)*nkpt)=eigen(band_index+nband_k-this%nbdbuf)
         this%bandshift=this%bandshift+wtk(ikpt)*&
         & (extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%eshift,this%ucvol)-(nband_k-this%nbdbuf))/nsppol
         this%bandshiftk(ikpt+(isppol-1)*nkpt)=extfpmd_i_fg(eigen(band_index+nband_k-this%nbdbuf)-this%eshift,this%ucvol)-(nband_k-this%nbdbuf)
@@ -505,7 +499,7 @@ contains
         end do
         
         ! bandshift=this%bandshift ! Converges faster, but transition less smooth
-        bandshift=this%bandshiftk(ikpt+(isppol-1)*nkpt) 
+        bandshift=this%bandshiftk(ikpt+(isppol-1)*nkpt)
         
         ! Compute kinetic energy of extended pw.
         ! /!\ We don't keep this in memory because it can be heavy.
@@ -739,10 +733,10 @@ contains
   !!  this=extfpmd_type object concerned
   !!
   !! SOURCE
-  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nsppol,tsmear,wtk)
+  subroutine compute_nelect(this,fermie,nband,nelect,nkpt,nspinor,nsppol,tsmear,wtk)
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: nkpt,nsppol
+    integer,intent(in) :: nkpt,nsppol,nspinor
     real(dp),intent(in) :: fermie,tsmear
     real(dp),intent(inout) :: nelect
     class(extfpmd_type),intent(inout) :: this
@@ -753,32 +747,24 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ifft,ispden,isppol,ikpt,iband,ext_bdtot_index,nband_k,ierr
-    real(dp) :: factor,gamma,xcut
+    real(dp) :: factor,gamma,xcut,fn,maxocc
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
 
     ! *********************************************************************
-
+    
+    maxocc=two/(nsppol*nspinor)
     factor=dsqrt(two)/(PI*PI)*this%ucvol*tsmear**(1.5)
     gamma=(fermie-this%eshift)/tsmear
 
     ! Computes extfpmd contribution to nelect integrating
     ! over accessible states from bcut to infinity with
     ! order 1/2 incomplete Fermi-Dirac integral.
-    if(this%version==4.or.this%version==2) then
+    if(this%version==2.or.this%version==4) then
       xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       if(one*this%bcut+this%bandshift.lt.zero) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
-    else if(this%version==6) then
-      ! k-point dependant version
-      do isppol=1,nsppol
-        do ikpt=1,nkpt
-          xcut=extfpmd_e_fg(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)/tsmear
-          if(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt).lt.zero) xcut=zero
-          nelect=nelect+wtk(ikpt)*factor*djp12(xcut,gamma)/nsppol
-        end do
-      end do
     end if
 
     ! Computes extfpmd contribution to nelect integrating
@@ -788,13 +774,20 @@ contains
       xcut=(this%ebcut-this%eshift)/tsmear
       if(this%ebcut.lt.this%eshift) xcut=zero
       nelect=nelect+factor*djp12(xcut,gamma)
-    else if(this%version==5) then
-      ! k-point dependant version
+    end if
+    
+    ! Computes extfpmd contribution to nelect summing
+    ! over accessible states from bcut to infinity, with
+    ! integer band numbers. Total number of bands
+    ! is controlled with the input variable extfpmd_nband.
+    if(this%version==5) then
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          xcut=(this%ebcutk(ikpt+(isppol-1)*nkpt)-this%eshift)/tsmear
-          if(this%ebcutk(ikpt+(isppol-1)*nkpt).lt.this%eshift) xcut=zero
-          nelect=nelect+wtk(ikpt)*factor*djp12(xcut,gamma)/nsppol
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do iband=nband_k-this%nbdbuf+1,this%mband
+            fn=fermi_dirac(extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift,fermie,tsmear)
+            nelect=nelect+wtk(ikpt)*maxocc*fn
+          end do
         end do
       end do
     end if
@@ -883,7 +876,7 @@ contains
     integer :: ikpt,isppol,istwf_k,my_nspinor,nband_k,iband,ierr,bandstart
     integer :: ifft,ispden,ext_bdtot_index,ext_icg,ext_ikg,ext_npw_k
     real(dp) :: factor,gamma,xcut,dotr,e_eigenvalues
-    real(dp) :: e_kinetic_hybrid_tf,maxocc
+    real(dp) :: e_kinetic_hybrid_tf,maxocc,fn
     character(len=500) :: msg
     ! Arrays
     real(dp) :: kpoint(3)
@@ -903,25 +896,13 @@ contains
     ! Computes extfpmd contribution to kinetic energy integrating
     ! over accessible states from bcut to infinity with
     ! order 3/2 incomplete Fermi-Dirac integral.
-    if(this%version==4.or.this%version==2) then
+    if(this%version==2.or.this%version==4) then
       xcut=extfpmd_e_fg(one*this%bcut+this%bandshift,this%ucvol)/tsmear
       if(one*this%bcut+this%bandshift.lt.zero) then
         cut_warn=.true.
         xcut=zero
       end if
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
-    else if(this%version==6) then
-      ! k-point dependant version
-      do isppol=1,nsppol
-        do ikpt=1,nkpt
-          xcut=extfpmd_e_fg(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)/tsmear
-          if(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt).lt.zero) then
-            cut_warn=.true.
-            xcut=zero
-          end if
-          this%e_kinetic=this%e_kinetic+wtk(ikpt)*factor*djp32(xcut,gamma)/nsppol
-        end do
-      end do
     end if
 
     ! Computes extfpmd contribution to kinetic energy integrating
@@ -934,18 +915,52 @@ contains
         xcut=zero
       end if
       this%e_kinetic=this%e_kinetic+factor*djp32(xcut,gamma)
-    else if(this%version==5) then
-      ! k-point dependant version
+    end if
+    
+    ! Computes extfpmd contribution to kinetic energy summing
+    ! over accessible states from bcut to infinity, with
+    ! integer band numbers. Total number of bands
+    ! is controlled with the input variable extfpmd_nband.
+    if(this%version==5) then
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          xcut=(this%ebcutk(ikpt+(isppol-1)*nkpt)-this%eshift)/tsmear
-          if(this%ebcutk(ikpt+(isppol-1)*nkpt).lt.this%eshift) then
+          if(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt).lt.zero) then
             cut_warn=.true.
-            xcut=zero
           end if
-          this%e_kinetic=this%e_kinetic+wtk(ikpt)*factor*djp32(xcut,gamma)/nsppol
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do iband=nband_k-this%nbdbuf+1,this%mband
+            dotr=extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift
+            fn=fermi_dirac(dotr,fermie,tsmear)
+            this%e_kinetic=this%e_kinetic+wtk(ikpt)*maxocc*fn*dotr
+          end do
         end do
       end do
+    end if
+
+    ! Computes extfpmd contribution to kinetic energy using a sum
+    ! of Fermi gas contributions for each point of the fftf grid.
+    ! Warning: This is not yet operational. Work in progress.
+    if(this%version==10) then
+      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
+      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
+      gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
+      xcut_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/tsmear
+      e_kinetic_hybrid_tf=zero
+
+      !$OMP PARALLEL DO REDUCTION (+:e_kinetic_hybrid_tf)
+      do ifft=1,this%nfft
+        do ispden=1,this%nspden
+          e_kinetic_hybrid_tf=e_kinetic_hybrid_tf+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
+          & (this%nfft*this%nspden)
+        end do
+      end do
+      !$OMP END PARALLEL DO
+
+      this%e_kinetic=e_kinetic_hybrid_tf
+      gamma_hybrid_tf(:,:)=zero
+      xcut_hybrid_tf(:,:)=zero
+      ABI_FREE(gamma_hybrid_tf)
+      ABI_FREE(xcut_hybrid_tf)
     end if
 
     ! Computes extended pw contribution to kinetic energy summing
@@ -1014,33 +1029,6 @@ contains
         total_e_kinetic=this%e_kinetic
       end if
     end if
-
-    ! Computes extfpmd contribution to kinetic energy using a sum
-    ! of Fermi gas contributions for each point of the fftf grid.
-    ! Warning: This is not yet operational. Work in progress.
-    if(this%version==10) then
-      ABI_MALLOC(gamma_hybrid_tf,(this%nfft,this%nspden))
-      ABI_MALLOC(xcut_hybrid_tf,(this%nfft,this%nspden))
-      gamma_hybrid_tf(:,:)=(fermie-this%vtrial(:,:))/tsmear
-      xcut_hybrid_tf(:,:)=(this%ebcut-this%vtrial(:,:))/tsmear
-      e_kinetic_hybrid_tf=zero
-
-      !$OMP PARALLEL DO REDUCTION (+:e_kinetic_hybrid_tf)
-      do ifft=1,this%nfft
-        do ispden=1,this%nspden
-          e_kinetic_hybrid_tf=e_kinetic_hybrid_tf+factor*djp32(xcut_hybrid_tf(ifft,ispden),gamma_hybrid_tf(ifft,ispden))/&
-          & (this%nfft*this%nspden)
-        end do
-      end do
-      !$OMP END PARALLEL DO
-
-      this%e_kinetic=e_kinetic_hybrid_tf
-      gamma_hybrid_tf(:,:)=zero
-      xcut_hybrid_tf(:,:)=zero
-      ABI_FREE(gamma_hybrid_tf)
-      ABI_FREE(xcut_hybrid_tf)
-    end if
-
 
     ! Computes the double counting term from the eshift, and
     ! from the contributions to the kinetic energy and
@@ -1132,30 +1120,6 @@ contains
         & gamma*factor*dip12(gamma)/tsmear-&
         simpson(step,valuesent)
       end if
-    else if(this%version==6) then
-      ! k-point dependant version
-      this%entropy=5./3.*factor*dip32(gamma)/tsmear-gamma*factor*dip12(gamma)/tsmear
-      do isppol=1,nsppol
-        do ikpt=1,nkpt
-          step=(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt))/(this%bcut)
-          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
-          do ii=1,this%bcut+1
-            ix=(dble(ii)-one)*step
-            fn=fermi_dirac(extfpmd_e_fg(ix,this%ucvol)+this%eshift,fermie,tsmear)
-            if(fn>tol16.and.(one-fn)>tol16) then
-              valuesent(ii)=-maxocc*(fn*log(fn)+(one-fn)*log(one-fn))
-            else
-              valuesent(ii)=zero
-            end if
-          end do
-          !$OMP END PARALLEL DO
-
-          ! We need at least 6 elements in valuesent to call simpson function.
-          if(size(valuesent)>=6) then
-            this%entropy=this%entropy-wtk(ikpt)*simpson(step,valuesent)/nsppol
-          end if
-        end do
-      end do
     end if
 
     ! Computes extfpmd contribution to the entropy integrating
@@ -1181,29 +1145,20 @@ contains
         this%entropy=5./3.*factor*dip32(gamma)/tsmear-&
         & gamma*factor*dip12(gamma)/tsmear-simpson(step,valuesent)
       end if
-    else if(this%version==5) then
-      ! k-point dependant version
-      this%entropy=5./3.*factor*dip32(gamma)/tsmear-gamma*factor*dip12(gamma)/tsmear
+    end if
+
+    ! Computes extfpmd contribution to the entropy summing
+    ! over accessible states from bcut to infinity, with
+    ! integer band numbers. Total number of bands
+    ! is controlled with the input variable extfpmd_nband.
+    if(this%version==5) then
       do isppol=1,nsppol
         do ikpt=1,nkpt
-          step=(this%ebcutk(ikpt+(isppol-1)*nkpt)-this%eshift)/(this%bcut)
-          !$OMP PARALLEL DO PRIVATE(fn,ix) SHARED(valuesent)
-          do ii=1,this%bcut+1
-            ix=this%eshift+(dble(ii)-one)*step
-            fn=fermi_dirac(ix,fermie,tsmear)
-            if(fn>tol16.and.(one-fn)>tol16) then
-              valuesent(ii)=-(fn*log(fn)+(one-fn)*log(one-fn))*&
-              & extfpmd_dos(ix,this%eshift,this%ucvol)
-            else
-              valuesent(ii)=zero
-            end if
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          do iband=nband_k-this%nbdbuf+1,this%mband
+            fn=fermi_dirac(extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift,fermie,tsmear)
+            this%entropy=this%entropy-wtk(ikpt)*maxocc*(fn*log(fn)+(one-fn)*log(one-fn))/nsppol
           end do
-          !$OMP END PARALLEL DO
-
-          ! We need at least 6 elements in valuesent to call simpson function.
-          if(size(valuesent)>=6) then
-            this%entropy=this%entropy-wtk(ikpt)*simpson(step,valuesent)/nsppol
-          end if
         end do
       end do
     end if
@@ -1405,7 +1360,7 @@ contains
       write(msg,'(a,i0,a,i0,a)') "extfpmd_nbdbuf = ",dtset%extfpmd_nbdbuf,&
       & " should be less than or equal to nband = ",dtset%mband,"."
       ABI_ERROR(msg)
-    else if(dtset%useextfpmd==11.and.(dtset%extfpmd_nband<=dtset%mband)) then
+    else if((dtset%useextfpmd==5.or.dtset%useextfpmd==11).and.(dtset%extfpmd_nband<=dtset%mband)) then
       write(msg,'(3a,i0,a,i0,3a)') "Not enough bands to activate ExtFPMD routines.",ch10,&
       & "extfpmd_nband = ",dtset%extfpmd_nband," should be strictly greater than nband = ",dtset%mband,".",ch10,&
       & "Action: Increase extfpmd_nband or decrease nband."

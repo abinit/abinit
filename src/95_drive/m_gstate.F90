@@ -915,7 +915,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !    Get nelect to build density
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
-&     dtset%nkpt,dtset%nsppol,dtset%tsmear,dtset%wtk)
+&     dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
    end if
    ABI_FREE(doccde)
 
