@@ -1212,7 +1212,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call timab(990,2,tsec)
      
 !    Generate extended plane wave wavefunctions
-     if(dtset%useextfpmd==5) then
+     if(dtset%useextfpmd==11) then
        call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
 &       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
 &       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
@@ -1509,7 +1509,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      ! Make full electron density with extended plane waves basis set
-     if(dtset%useextfpmd==5.and.dtset%extfpmd_truecg==1) then
+     if(dtset%useextfpmd==11.and.dtset%extfpmd_truecg==1) then
        if(psps%usepaw==0) then
          call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
 &         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
@@ -1620,7 +1620,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(associated(extfpmd)) then
        call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,dtset%nband,&
 &       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
-       if(extfpmd%version==5) then
+       if(extfpmd%version==11) then
          ! Get extended plane wave cutoff
          call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
 &         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
@@ -1747,7 +1747,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
      ! Print extended plane waves eigenvalues
-     if(dtset%useextfpmd==5) then
+     if(dtset%useextfpmd==11) then
        call prteigrs(extfpmd%eigen,enunit,energies%e_fermie,energies%e_fermih,&
 &       dtfil%fnameabo_app_extpweig,ab_out,iscf,dtset%kptns,dtset%kptopt,&
 &       extfpmd%mband,extfpmd%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,&

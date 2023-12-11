@@ -637,7 +637,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Output extended plane waves ground state results in _EXTPWGSR.nc file
 #ifdef HAVE_NETCDF
  if (associated(extfpmd)) then
-   if (extfpmd%version==5.and.dtset%prtgsr==1) then
+   if (extfpmd%version==11.and.dtset%prtgsr==1) then
     extfpmd_bantot=extfpmd%mband*dtset%nkpt*dtset%nsppol
     extfpmd_hdr=hdr
     extfpmd_hdr%mband=extfpmd%mband
@@ -1152,13 +1152,6 @@ if (dtset%prt_lorbmag==1) then
    ! TODO: This routine is not tested but it's used in production.
    call optics_vloc(cg,dtset,eigen,dtfil%fnameabo_app_opt,gprimd,hdr,kg,&
 &   mband,mcg,mkmem,mpi_enreg,mpw,dtset%nband,nkpt,npwarr,nsppol)
-   if (associated(extfpmd)) then
-     if (extfpmd%version==5) then
-       call optics_vloc(extfpmd%cg,dtset,extfpmd%eigen,dtfil%fnameabo_app_extpwopt,&
-&       gprimd,extfpmd_hdr,extfpmd%kg,extfpmd%mband,extfpmd%mcg,mkmem,extfpmd%mpi_enreg,&
-&       extfpmd%mpw,extfpmd%nband,nkpt,extfpmd%npwarr,nsppol)
-     end if
-   end if
  end if
 
  call timab(1169,2,tsec)

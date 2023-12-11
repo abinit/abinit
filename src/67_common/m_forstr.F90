@@ -396,7 +396,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      end if
    end if
 
-   if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==5) then
+   if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
      call forstrnps(extfpmd%cg,cprj,extfpmd%ecut,dtset%ecutsm,dtset%effmass_free,extfpmd%eigen,&
 &     electronpositron,fock,grnl,dtset%istwfk,extfpmd%kg,kinstr,nlstr,dtset%kptns,extfpmd%mband,&
 &     extfpmd%mcg,mcprj,dtset%mgfft,dtset%mkmem,extfpmd%mpi_enreg,psps%mpsang,extfpmd%mpw,my_natom,&
