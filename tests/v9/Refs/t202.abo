@@ -106,6 +106,7 @@ P           mkmem           1
             ngfft          10      10      10
           ngfftdg          16      16      16
              nkpt           1
+    nblock_lobpcg           2
             nstep         100
              nsym          48
            ntypat           2
@@ -1044,6 +1045,7 @@ P           mkmem           1
             ngfft          10      10      10
           ngfftdg          16      16      16
              nkpt           1
+    nblock_lobpcg           2
             nstep         100
              nsym          48
            ntypat           2
