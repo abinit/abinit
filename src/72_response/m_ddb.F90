@@ -1653,7 +1653,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
  ! Read the block type and number of elements
  read(nunit,*)
- read(nunit, '(a32,12x,i8)' )name,nelmts
+ read(nunit, '(a32,12x,i12)' )name,nelmts
 
  ! TODO: Replace with STRING_d2E, etc.
  ! GA: Note that older versions used the expression '2rd' instead of '2nd'
@@ -1765,7 +1765,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(2i4,2d22.14)')idir1,ipert1,ar,ai
+     read(nunit,'(2i6,2d22.14)')idir1,ipert1,ar,ai
      index=idir1 + 3*(ipert1 - 1)
      ddb%flg(index,iblok)=1
      ddb%val(1,index,iblok)=ar
@@ -4576,19 +4576,19 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  ! Write the block type and number of elements
  write(nunit,*)' '
  if (ddb%typ(iblok) == BLKTYP_d0E_xx) then
-   write(nunit, '(a,i8)' )' Total energy                 - # elements :',nelmts
+   write(nunit, '(a,i12)' )' Total energy                 - # elements :',nelmts
  else if (ddb%typ(iblok)==BLKTYP_d2E_ns) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d2E_st) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (stationary) - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (stationary) - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_xx) then
-   write(nunit, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d1E_xx) then
-   write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d2eig_re) then
-   write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_lw) then
-   write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives (long wave)  - # elements :',nelmts
  end if
 
  ! Write the 2nd derivative block
@@ -4635,7 +4635,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                do idir1=1,3
                  ii=ii+1
                  if(ddb%flg(ii,iblok)==1)then
-                   write(nunit, '(6i4,2d22.14)' )&
+                   write(nunit, '(6i6,2d22.14)' )&
                     idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
                  end if
                end do
@@ -4659,7 +4659,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
        do idir1 = 1, 3
          ii = ii + 1
          if (ddb%flg(ii,iblok) == 1) then
-           write(nunit,'(2i4,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+           write(nunit,'(2i6,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
          end if
        end do
      end do
