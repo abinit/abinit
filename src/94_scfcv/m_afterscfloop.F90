@@ -621,10 +621,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(254,1,tsec)
 
 !TEMPORARY Orthogonalize extpw wf
- if (dtset%useextfpmd==11) then
-   call extfpmd%extpw_orthon(dtset%effmass_free,gmet,dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nkpt,&
-   & dtset%nsppol,dtset%nspinor,psps%usepaw)
- end if
+!if (dtset%useextfpmd==11) then
+!  call extfpmd%extpw_orthon(dtset%effmass_free,gmet,dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nkpt,&
+!  & dtset%nsppol,dtset%nspinor,psps%usepaw)
+!end if
 
 !We use routine mkrho with option=1 to compute kinetic energy density taur (and taug)
  if(dtset%usekden==0 .and. dtset%prtelf/=0)then
