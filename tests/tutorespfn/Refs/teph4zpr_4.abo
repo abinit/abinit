@@ -200,7 +200,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               3       -0.085945        0.000000
  
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.040887E+00    0.000000E+00    7.479592E-20

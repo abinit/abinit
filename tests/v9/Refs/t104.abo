@@ -1,5 +1,5 @@
 
-.Version 9.8.2 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 17 Jan 2023.
-- ( at 16h45 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h12 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/TestBot_MPI1/v9_t104/t104.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t104/t104.abi
 - output file    -> t104.abo
 - root for input  files -> t104i
 - root for output files -> t104o
-
 
  Symmetries : space group Cm (#  8); Bravais mC (1-face-center monocl.)
 ================================================================================
@@ -150,8 +149,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 6, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/Pb_abi_LDA_1012.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/Pb_abi_LDA_1012.psp8
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pb_abi_LDA_1012.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pb_abi_LDA_1012.psp8
 - Pb    ONCVPSP  r_core=  2.32  2.61  2.10
 - 82.00000  14.00000    170103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -165,8 +164,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 6, iscf: 7, paral_kgb: 0, }
              2   -3.305481   -0.998987
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/Ti_abi_LDA_1012.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/Ti_abi_LDA_1012.psp8
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Ti_abi_LDA_1012.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Ti_abi_LDA_1012.psp8
 - Ti    ONCVPSP  r_core=  1.36  1.31  1.66
 - 22.00000  12.00000    170103                znucl, zion, pspdat
     8   -1012    2    4       600   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -180,8 +179,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 6, iscf: 7, paral_kgb: 0, }
              2   -5.552723   -1.700384
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/08_O_r_LDA_1012_m.psp8
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_fixoptcell/tests/Psps_for_tests/08_O_r_LDA_1012_m.psp8
+- pspini: atom type   3  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/08_O_r_LDA_1012_m.psp8
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/08_O_r_LDA_1012_m.psp8
 - O     ONCVPSP  r_core=  1.60  1.60
 -  8.00000   6.00000    150722                znucl, zion, pspdat
     8   -1012    1    4       400   0.00000   pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -703,10 +702,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         34.9  wall=         35.1
+- Proc.   0 individual time (sec): cpu=         34.2  wall=         34.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.9  wall=         35.1
++Overall time at end (sec) : cpu=         34.2  wall=         34.4

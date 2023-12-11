@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h26 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v3_t42/t42.in
-- output file    -> t42.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v3_t42/t42.abi
+- output file    -> t42.abo
 - root for input  files -> t42i
 - root for output files -> t42o
-
 
  DATASET    1 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          98          nfft =        1800          nkpt =           4
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          98          nfft =        1800          nkpt =           4
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          98          nfft =        1800          nkpt =           4
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          98          nfft =        1800          nkpt =           4
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -102,11 +97,10 @@ _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          98          nfft =        1800          nkpt =           4
 ================================================================================
-P This job should need less than                       1.822 Mbytes of memory.
+P This job should need less than                       1.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -119,11 +113,10 @@ _ WF disk file :      0.020 Mbytes ; DEN or POT disk file :      0.016 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          74          nfft =        1600          nkpt =           4
 ================================================================================
-P This job should need less than                       1.762 Mbytes of memory.
+P This job should need less than                       1.808 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group P6_3/m m c (#194); Bravais hP (primitive hexag.)
 ================================================================================
@@ -136,7 +129,7 @@ _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           4
        mpw =          74          nfft =        1600          nkpt =           4
 ================================================================================
-P This job should need less than                       1.762 Mbytes of memory.
+P This job should need less than                       1.808 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.016 Mbytes ; DEN or POT disk file :      0.014 Mbytes.
 ================================================================================
@@ -299,8 +292,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.630   => boxcut(ratio)=   2.02362
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2461,11 +2454,11 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  1  -2.2007285461192    -2.201E+00 1.274E-11 1.610E-05
  ETOT  2  -2.2007285910809    -4.496E-08 2.341E-15 8.334E-07
  ETOT  3  -2.2007285940231    -2.942E-09 7.822E-11 4.175E-09
- ETOT  4  -2.2007285940360    -1.283E-11 3.027E-13 3.301E-12
- ETOT  5  -2.2007285940360    -8.882E-15 1.526E-17 4.733E-14
+ ETOT  4  -2.2007285940360    -1.282E-11 3.027E-13 3.301E-12
+ ETOT  5  -2.2007285940360    -9.770E-15 1.526E-17 4.733E-14
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  8.882E-15 < toldfe=  1.000E-10
+  for the second time, diff in etot=  9.770E-15 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.66037331E-05  sigma(3 2)=  0.00000000E+00
@@ -2483,7 +2476,7 @@ lattice_vectors:
 lattice_lengths: [   5.80000,    5.80000,    9.44428, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7514107E+02
-convergence: {deltae: -8.882E-15, res2:  4.733E-14, residm:  1.526E-17, diffor: null, }
+convergence: {deltae: -9.770E-15, res2:  4.733E-14, residm:  1.526E-17, diffor: null, }
 etotal    :  -2.20072859E+00
 entropy   :   0.00000000E+00
 fermie    :   1.59855081E-01
@@ -2511,7 +2504,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Cartesian coordinates (xcart) [bohr]
   4.07081775695891E-17  3.34863156129983E+00  2.36106973172050E+00
-  2.90000000000000E+00  1.67431578064991E+00  7.08320919516150E+00
+  2.90000000000000E+00  1.67431578064991E+00  7.08320919516151E+00
  Reduced coordinates (xred)
   3.33333333333333E-01  6.66666666666667E-01  2.50000000000000E-01
   6.66666666666667E-01  3.33333333333333E-01  7.50000000000000E-01
@@ -2522,20 +2515,20 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.44427892688200E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.44427892688201E+00
  Real space primitive translations (rprimd) [bohr]
   5.80000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.90000000000000E+00  5.02294734194974E+00  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  9.44427892688200E+00
+  0.00000000000000E+00  0.00000000000000E+00  9.44427892688201E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  2.75141071248001E+02
  Angles (23,13,12)= [degrees]
   9.00000000000000E+01  9.00000000000000E+01  1.20000000000000E+02
  Lengths [Bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.44427892688200E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.44427892688201E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -8.66037331424084E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -8.66037331424084E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.33885167233231E-04
+ -8.66037331423944E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -8.66037331423945E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.33885167233212E-04
  Total energy (etotal) [Ha]= -2.20072859403597E+00
 
  Difference of energy with previous step (new-old):
@@ -2555,14 +2548,14 @@ tolerances: {toldfe: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.2012566588455    -2.201E+00 3.050E-10 6.898E-04
- ETOT  2  -2.2012587226663    -2.064E-06 7.093E-14 3.701E-05
+ ETOT  2  -2.2012587226662    -2.064E-06 7.093E-14 3.701E-05
  ETOT  3  -2.2012588587510    -1.361E-07 4.443E-09 1.706E-07
  ETOT  4  -2.2012588592443    -4.933E-10 1.472E-11 1.878E-10
- ETOT  5  -2.2012588592446    -3.424E-13 1.273E-15 2.223E-12
- ETOT  6  -2.2012588592446     0.000E+00 1.926E-17 1.573E-14
+ ETOT  5  -2.2012588592446    -3.437E-13 1.273E-15 2.223E-12
+ ETOT  6  -2.2012588592446    -6.661E-15 1.926E-17 1.573E-14
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  0.000E+00 < toldfe=  1.000E-10
+  for the second time, diff in etot=  6.661E-15 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.58829416E-05  sigma(3 2)=  0.00000000E+00
@@ -2580,7 +2573,7 @@ lattice_vectors:
 lattice_lengths: [   5.80000,    5.80000,    9.70898, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.8285265E+02
-convergence: {deltae:  0.000E+00, res2:  1.573E-14, residm:  1.926E-17, diffor: null, }
+convergence: {deltae: -6.661E-15, res2:  1.573E-14, residm:  1.926E-17, diffor: null, }
 etotal    :  -2.20125886E+00
 entropy   :   0.00000000E+00
 fermie    :   1.51882575E-01
@@ -2607,8 +2600,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  4.07081775695891E-17  3.34863156129983E+00  2.42724511162939E+00
-  2.90000000000000E+00  1.67431578064991E+00  7.28173533488816E+00
+  4.07081775695891E-17  3.34863156129983E+00  2.42724511162934E+00
+  2.90000000000000E+00  1.67431578064991E+00  7.28173533488803E+00
  Reduced coordinates (xred)
   3.33333333333333E-01  6.66666666666667E-01  2.50000000000000E-01
   6.66666666666667E-01  3.33333333333333E-01  7.50000000000000E-01
@@ -2619,20 +2612,20 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.70898044651754E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.70898044651737E+00
  Real space primitive translations (rprimd) [bohr]
   5.80000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.90000000000000E+00  5.02294734194974E+00  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  9.70898044651754E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  2.82852645655888E+02
+  0.00000000000000E+00  0.00000000000000E+00  9.70898044651737E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  2.82852645655884E+02
  Angles (23,13,12)= [degrees]
   9.00000000000000E+01  9.00000000000000E+01  1.20000000000000E+02
  Lengths [Bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.70898044651754E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.70898044651737E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -8.58829416062245E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -8.58829416062245E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -6.85827679474467E-06
+ -8.58829416062169E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -8.58829416062170E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -6.85827679482000E-06
  Total energy (etotal) [Ha]= -2.20125885924463E+00
 
  Difference of energy with previous step (new-old):
@@ -2655,10 +2648,10 @@ tolerances: {toldfe: 1.00E-10, }
  ETOT  2  -2.2012604187723    -6.381E-09 2.117E-16 1.130E-07
  ETOT  3  -2.2012604191904    -4.180E-10 1.423E-11 5.519E-10
  ETOT  4  -2.2012604191920    -1.640E-12 5.249E-14 5.924E-13
- ETOT  5  -2.2012604191920    -2.220E-15 5.764E-18 6.649E-15
+ ETOT  5  -2.2012604191920    -8.882E-16 5.764E-18 6.649E-15
 
  At SCF step    5, etot is converged : 
-  for the second time, diff in etot=  2.220E-15 < toldfe=  1.000E-10
+  for the second time, diff in etot=  8.882E-16 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.59425628E-05  sigma(3 2)=  0.00000000E+00
@@ -2676,7 +2669,7 @@ lattice_vectors:
 lattice_lengths: [   5.80000,    5.80000,    9.72369, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.8328132E+02
-convergence: {deltae: -2.220E-15, res2:  6.649E-15, residm:  5.764E-18, diffor: null, }
+convergence: {deltae: -8.882E-16, res2:  6.649E-15, residm:  5.764E-18, diffor: null, }
 etotal    :  -2.20126042E+00
 entropy   :   0.00000000E+00
 fermie    :   1.51453047E-01
@@ -2704,7 +2697,7 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
  Cartesian coordinates (xcart) [bohr]
   4.07081775695891E-17  3.34863156129983E+00  2.43092367544812E+00
-  2.90000000000000E+00  1.67431578064991E+00  7.29277102634436E+00
+  2.90000000000000E+00  1.67431578064991E+00  7.29277102634435E+00
  Reduced coordinates (xred)
   3.33333333333333E-01  6.66666666666667E-01  2.50000000000000E-01
   6.66666666666667E-01  3.33333333333333E-01  7.50000000000000E-01
@@ -2726,9 +2719,9 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  Lengths [Bohr]
   5.80000000000000E+00  5.80000000000000E+00  9.72369470179247E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -8.59425628437222E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -8.59425628437223E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -4.28520258392373E-07
+ -8.59425628437221E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -8.59425628437222E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -4.28520258395897E-07
  Total energy (etotal) [Ha]= -2.20126041919202E+00
 
  Difference of energy with previous step (new-old):
@@ -2749,10 +2742,10 @@ tolerances: {toldfe: 1.00E-10, }
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.2012604253090    -2.201E+00 3.238E-15 9.556E-09
  ETOT  2  -2.2012604253374    -2.844E-11 1.164E-18 5.033E-10
- ETOT  3  -2.2012604253393    -1.869E-12 6.352E-14 2.466E-12
+ ETOT  3  -2.2012604253393    -1.867E-12 6.352E-14 2.466E-12
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.869E-12 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.867E-12 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.59466984E-05  sigma(3 2)=  0.00000000E+00
@@ -2770,7 +2763,7 @@ lattice_vectors:
 lattice_lengths: [   5.80000,    5.80000,    9.72468, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.8330993E+02
-convergence: {deltae: -1.869E-12, res2:  2.466E-12, residm:  6.352E-14, diffor: null, }
+convergence: {deltae: -1.867E-12, res2:  2.466E-12, residm:  6.352E-14, diffor: null, }
 etotal    :  -2.20126043E+00
 entropy   :   0.00000000E+00
 fermie    :   1.51424427E-01
@@ -2809,20 +2802,20 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00 -0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.72467693965739E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.72467693965738E+00
  Real space primitive translations (rprimd) [bohr]
   5.80000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  -2.90000000000000E+00  5.02294734194974E+00  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  9.72467693965739E+00
+  0.00000000000000E+00  0.00000000000000E+00  9.72467693965738E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  2.83309933075158E+02
  Angles (23,13,12)= [degrees]
   9.00000000000000E+01  9.00000000000000E+01  1.20000000000000E+02
  Lengths [Bohr]
-  5.80000000000000E+00  5.80000000000000E+00  9.72467693965739E+00
+  5.80000000000000E+00  5.80000000000000E+00  9.72467693965738E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -8.59466984165914E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -8.59466984165914E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.45598070530389E-09
+ -8.59466984165918E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -8.59466984165918E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.45598070703861E-09
  Total energy (etotal) [Ha]= -2.20126042533930E+00
 
  Difference of energy with previous step (new-old):
@@ -2872,18 +2865,18 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 4, itime: 5, icycle: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  7.06748507147910E-01
-hartree             :  5.30047390779810E-03
+kinetic             :  7.06748507147911E-01
+hartree             :  5.30047390779812E-03
 xc                  : -1.37535731030893E+00
 Ewald energy        : -2.21598370241198E+00
 psp_core            : -4.35971576001310E-02
 local_psp           :  2.38561952353577E-01
 non_local_psp       :  4.82599470829771E-01
 internal            : -2.20172776608199E+00
-'-kT*entropy'       :  4.67340742683838E-04
+'-kT*entropy'       :  4.67340742683851E-04
 total_energy        : -2.20126042533930E+00
 total_energy_eV     : -5.98993424097346E+01
-band_energy         :  2.10212727858840E-01
+band_energy         :  2.10212727858839E-01
 ...
 
 
@@ -3506,8 +3499,8 @@ meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=      3.060   => boxcut(ratio)=   2.16145
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5072,7 +5065,7 @@ P           mkmem           4
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3    -1.1125221861E-04 -1.1125221861E-04 -1.1125346011E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4    -8.5946698417E-05 -8.5946698417E-05 -1.4559807053E-09
+           strten4    -8.5946698417E-05 -8.5946698417E-05 -1.4559807070E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten5    -3.1321489621E-10 -3.1321489613E-10 -1.5008590894E-04
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -5229,10 +5222,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         22.7  wall=         23.1
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         20.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  19 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.7  wall=         23.1
+.Delivered  12 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=         19.3  wall=         20.2

@@ -3,8 +3,8 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 9.11.0 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 9.11.2 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -32,15 +32,15 @@
 
 
 
-.Starting date : Wed 31 May 2023.
-- ( at 00h55 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
 -  nproc =    1
- 
+
 ================================================================================
- 
+
  Read the information in the reference structure in 
--/home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/v8/Input/t13_ddb.in
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -89,8 +89,8 @@
 ================================================================================
 
  Read the DDB information of the reference system and perform some checks
- 
- 
+
+
   ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.4265196  0.0000000  0.0000000  G(1)=  0.1346526  0.0000000  0.0000000
@@ -105,54 +105,54 @@
     3)    0.0000000  0.5000000  0.5000000   O
     4)    0.5000000  0.0000000  0.5000000   O
     5)    0.5000000  0.5000000  0.0000000   O
- 
+
  DDB file with 5 blocks has been read.
- 
+
 ================================================================================
- 
+
  Extraction of the energy of the structure (unit: Hartree)
- 
+
  Energy  =       -1.735221724034E+02
- 
+
 ================================================================================
- 
+
  Extraction of the stress tensor (unit: GPa) and forces (unit: Ha/bohr)
- 
+
  --- !WARNING:
      The stress tensor of the reference structure is not specify
      The stress tensor will be set to zero
  ---
- 
+
 ================================================================================
- 
+
  Extraction of the clamped elastic tensor (unit:10^2GPa)
- 
+
    3.1281435   1.0182533   1.0182548  -0.0000004  -0.0000033  -0.0000014
    1.0182569   3.1281493   1.0182548  -0.0000007  -0.0000003  -0.0000014
    1.0182569   1.0182533   3.1281273  -0.0000007  -0.0000033   0.0000003
    0.0000000   0.0000000  -0.0000000   0.6540901   0.0000000   0.0000000
    0.0000000   0.0000000  -0.0000000   0.0000000   0.6540918   0.0000000
    0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000   0.6540936
- 
+
 ================================================================================
- 
+
  Calculation of acoustic sum rule
- 
- 
+
+
 ================================================================================
- 
+
  Calculation of the interatomic forces from DDB
- 
+
        Homogeneous q point set in the B.Z.
  Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
- 
+
  The interatomic forces have been obtained
- 
+
 ================================================================================
- 
+
  Calculation of dynamical matrix for each ph1l points
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -163,13 +163,13 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  9.652673E+01  9.652673E+01
 -  9.652673E+01  1.280218E+02  1.280218E+02  1.280218E+02  1.909500E+02
 -  1.909500E+02  1.909500E+02  6.023639E+02  6.023639E+02  6.023639E+02
- 
+
 ================================================================================
- 
+
  Calculation of the internal-strain  tensor
- 
+
  Force-response internal strain tensor(Unit:Hartree/bohr)
- 
+
  Atom dir   strainxx    strainyy    strainzz    strainyz    strainxz    strainxy
   1  x     0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000  -0.0000000
   1  y     0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000   0.0000000
@@ -186,138 +186,138 @@
   5  x     0.0000000   0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000
   5  y     0.0000000   0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000
   5  z    -0.0000000  -0.0000000  -0.0000000  -0.0000000   0.0000000  -0.0000000
- 
- 
- 
+
+
+
  Bound for ifc SR:
- 
+
  x=[ -1  1], y=[ -1  1] and z=[ -1  1]
- 
+
 ================================================================================
- 
+
  Impose acoustic sum rule on total ifc
- 
+
 ================================================================================
- 
+
 ================================================================================
- 
+
  There is no file for the coefficients from polynomial fitting
- 
+
 ================================================================================
- 
+
 -Reading the training-set file :
--/home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/v8/Input/t13_HIST
- 
- 
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
+
+
 ================================================================================
- 
+
   Starting Fit Iterations  
   -----------------------  
   Select in total fit_ncoeff =   6 coefficients
   In   1 iterations
   Over   3 irreducible atoms
   Selecting   2 coefficients per atom in each iteration
- 
- 
+
+
 --------------------------------------------------------------------------------
- 
+
  Start Iteration (  1/  1)
- 
- 
+
+
 --------------------------------------------------------------------------------
- 
+
  Starting Fit process
- 
+
 --------------------------------------------------------------------------------
- 
+
  The coefficients for the fit around atom  1: Sr, will be generated
- 
+
  307 coefficients generated 
- 
- 
+
+
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507287E-03
-   Forces          :   7.3678370383277007E-03
-   Stresses        :   1.1267081492302765E-04
- 
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
+
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
  1     101         3.6539816213E-05  7.1737339567E-03  7.0615782438E-03  1.1215571290E-04
  2     175         3.5781888938E-05  7.0936342089E-03  6.9812431484E-03  1.1239106055E-04
- 
+
  Fitted coefficients at the end of the fit process:
  101 =>  -4.4327826448E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
  175 =>  -1.5201595294E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
- 
+
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   3.5781888938353220E-05
-   Forces+Stresses :   7.0936342089015147E-03
-   Forces          :   6.9812431483529209E-03
-   Stresses        :   1.1239106054859281E-04
- 
- 
+   Energy          :   3.5781888938353268E-05
+   Forces+Stresses :   7.0936342089015650E-03
+   Forces          :   6.9812431483529721E-03
+   Stresses        :   1.1239106054859269E-04
+
+
 --------------------------------------------------------------------------------
- 
+
  Starting Fit process
- 
+
 --------------------------------------------------------------------------------
- 
+
  The coefficients present in the effective potential will be used for the fit
- 
+
  The coefficients for the fit around atom  2: Ru, will be generated
- 
+
  76 coefficients generated 
- 
- 
+
+
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507287E-03
-   Forces          :   7.3678370383277007E-03
-   Stresses        :   1.1267081492302765E-04
- 
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
+
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
  3     10          2.6136693942E-05  6.2292079095E-03  6.1165315838E-03  1.1267632575E-04
  4     9           2.4682517226E-05  6.0193720010E-03  5.9065263782E-03  1.1284562285E-04
- 
+
  Fitted coefficients at the end of the fit process:
  1 =>  -4.4614935853E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
  2 =>  -1.1721157619E-02 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
  10 =>  -1.2609313029E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y[1 0 0])^1
  9 =>   8.0818747419E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
- 
+
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   2.4682517225956656E-05
-   Forces+Stresses :   6.0193720010109694E-03
-   Forces          :   5.9065263781562967E-03
-   Stresses        :   1.1284562285467297E-04
- 
- 
+   Energy          :   2.4682517225956633E-05
+   Forces+Stresses :   6.0193720010110223E-03
+   Forces          :   5.9065263781563496E-03
+   Stresses        :   1.1284562285467288E-04
+
+
 --------------------------------------------------------------------------------
- 
+
  Starting Fit process
- 
+
 --------------------------------------------------------------------------------
- 
+
  The coefficients present in the effective potential will be used for the fit
- 
+
  The coefficients for the fit around atom  3: O1, will be generated
- 
+
  693 coefficients generated 
- 
- 
+
+
  Goal function values at the begining of the fit process (eV^2/A^2):
    Energy          :   4.0372994902680415E-05
-   Forces+Stresses :   7.4805078532507287E-03
-   Forces          :   7.3678370383277007E-03
-   Stresses        :   1.1267081492302765E-04
- 
+   Forces+Stresses :   7.4805078532507747E-03
+   Forces          :   7.3678370383277467E-03
+   Stresses        :   1.1267081492302757E-04
+
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
  5     29          1.9883441054E-05  5.3923186870E-03  5.2797231212E-03  1.1259556580E-04
  6     150         1.3594815614E-05  4.8795087695E-03  4.7673550808E-03  1.1215368867E-04
- 
+
  Fitted coefficients at the end of the fit process:
  1 =>  -4.6180590616E-02 (Sr_x-O1_x)^1(Sr_y-O1_y[0 -1 0])^1(Sr_y-O3_y[-1 -1 0])^1
  2 =>  -8.0659628443E-03 (Sr_y-O1_y)^2(Sr_x-O2_x[-1 0 -1])^1
@@ -325,27 +325,27 @@
  4 =>   9.1023906095E-02 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_y-O1_y)^1
  29 =>   1.4292922066E-01 (O1_x-Ru_x)^1(O1_y-Ru_y[-1 0 0])^1(O1_x-O2_x[-1 1 0])^1
  150 =>   7.9592927971E-02 (O1_y-Ru_y)^1(O1_x-Sr_x)^1(O1_z-Sr_z[0 1 1])^1
- 
+
  Goal function values at the end of the fit process (eV^2/A^2):
-   Energy          :   1.3594815613709635E-05
-   Forces+Stresses :   4.8795087694940564E-03
-   Forces          :   4.7673550808230453E-03
-   Stresses        :   1.1215368867101119E-04
- 
- 
+   Energy          :   1.3594815613709570E-05
+   Forces+Stresses :   4.8795087694940677E-03
+   Forces          :   4.7673550808230566E-03
+   Stresses        :   1.1215368867101115E-04
+
+
 ================================================================================
- 
+
  Generation of the xml file for the model in t13_sys.xml
- 
+
  Generation of the xml file for the fitted polynomial in t13_coeffs.xml
- 
+
 ================================================================================
- 
+
 -
-- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.5
- 
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
+
 ================================================================================
- 
-+Total cpu time      5.254  and wall time      5.515 sec
- 
+
++Total cpu time      3.885  and wall time      3.896 sec
+
  multibinit : the run completed succesfully.

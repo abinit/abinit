@@ -598,7 +598,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
  if (fockcommon%usepaw==1) then
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
+     call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
      call xmpi_sum(forikpt,mpi_enreg%comm_hf,ier)
+     call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
      do iatom=1,natom !Loop over atom
        ia=gs_ham%atindx(iatom)
        fockcommon%forces_ikpt(:,ia,fockcommon%ieigen)=forikpt(:,iatom)
@@ -606,7 +608,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    end if
  end if
  if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
+   call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
    call xmpi_sum(fockcommon%stress_ikpt,mpi_enreg%comm_hf,ier)
+   call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
  end if
 
  if (.not.need_ghc) then
@@ -674,7 +678,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !  * If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
    ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
 
+   call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
    call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
+   call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
 
 !   ===============================
 !   === Deallocate local PAW arrays ===
@@ -712,7 +718,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
      end do
      if(gs_ham%istwf_k>=2) eigen=two*eigen
+     call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
      call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
+     call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
      fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
      if(fockcommon%use_ACE==0) fockcommon%ieigen = 0
    end if

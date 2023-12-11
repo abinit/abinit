@@ -122,6 +122,7 @@ P           mkmem           4
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
            tolvrs1     1.00000000E-06
            tolvrs2     1.00000000E-10
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  2  2  2  2  2  2
   use_gemm_nonlop           1
            useylm           1
@@ -689,6 +690,7 @@ P           mkmem           4
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
            tolvrs1     1.00000000E-06
            tolvrs2     1.00000000E-10
+     tolwfr_diago      1.00000000E-30
             typat      1  1  1  2  2  2  2  2  2
   use_gemm_nonlop           1
            useylm           1
