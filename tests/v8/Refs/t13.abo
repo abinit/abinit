@@ -3,7 +3,7 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 9.8.2 of MULTIBINIT 
+.Version 9.11.2 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -32,15 +32,15 @@
 
 
 
-.Starting date : Thu 19 Jan 2023.
-- ( at 15h43 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h07 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_mbfix98_v5/tests/v8/Input/t13_ddb.in
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -90,13 +90,23 @@
 
  Read the DDB information of the reference system and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.4265196  0.0000000  0.0000000  G(1)=  0.1346526  0.0000000  0.0000000
  R(2)=  0.0000000  7.4265196  0.0000000  G(2)=  0.0000000  0.1346526  0.0000000
  R(3)=  0.0000000  0.0000000  7.4265196  G(3)=  0.0000000  0.0000000  0.1346526
  Unit cell volume ucvol=  4.0959627E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Sr
+    2)    0.5000000  0.5000000  0.5000000  Ru
+    3)    0.0000000  0.5000000  0.5000000   O
+    4)    0.5000000  0.0000000  0.5000000   O
+    5)    0.5000000  0.5000000  0.0000000   O
+
+ DDB file with 5 blocks has been read.
 
 ================================================================================
 
@@ -196,7 +206,7 @@
 ================================================================================
 
 -Reading the training-set file :
--/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_mbfix98_v5/tests/v8/Input/t13_HIST
+-/home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
 
 
 ================================================================================
@@ -332,10 +342,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
 
 ================================================================================
 
-+Total cpu time      3.942  and wall time      3.951 sec
++Total cpu time      3.885  and wall time      3.896 sec
 
  multibinit : the run completed succesfully.

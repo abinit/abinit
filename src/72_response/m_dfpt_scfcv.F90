@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_dfpt_scfcv
 !! NAME
 !!  m_dfpt_scfcv
@@ -876,7 +875,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      call pawdenpot(dum,epaw1,epawdc1_dum,ipert,dtset%ixc,my_natom,dtset%natom,&
 &     dtset%nspden,psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,&
 &     dtset%pawprtvol,pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&     dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
 !    First-order Dij computation
@@ -1090,7 +1089,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
        call pawdenpot(dum,epaw1,epawdc1_dum,ipert,dtset%ixc,my_natom,dtset%natom,dtset%nspden,&
 &       psps%ntypat,dtset%nucdipmom,nzlmopt,option,paw_an1,paw_an,paw_ij1,pawang,dtset%pawprtvol,&
 &       pawrad,pawrhoij1,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%spnorbscl,&
-&       dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp,&
+&       dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp,&
 &       mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
      end if
 
@@ -2912,7 +2911,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
        do ispinor=1,nspinor
          do ipw=1,npw1_k
            ipws=ipw+npw1_k*(ispinor-1)
-           if(kinpw1(ipw)<huge(0.0_dp)*1.d-11)then
+           if(kinpw1(ipw)<huge(zero)*1.d-11)then
              gvnlx1(1,ipws)=gvnlx1(1,ipws)+dkinpw(ipw)*cwave0(1,ipws)
              gvnlx1(2,ipws)=gvnlx1(2,ipws)+dkinpw(ipw)*cwave0(2,ipws)
            else
@@ -3111,7 +3110,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 
 !Keep track of total time spent in dfpt_nstdy
- call timab(101,1,tsec)
+ call timab(111,1,tsec)
 
 !Init parallelism
  spaceworld=mpi_enreg%comm_cell
@@ -3191,7 +3190,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !3) Constant kleimann-Bylander energies are copied from psps to gs_hamk.
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,nfft,dtset%mgfft,ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
-& use_gpu_cuda=dtset%use_gpu_cuda)
+& gpu_option=dtset%gpu_option)
 
 !LOOP OVER SPINS
  bdtot_index=0
@@ -3490,7 +3489,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  ABI_FREE(eig_k)
  ABI_FREE(eig1_k)
 
- call timab(101,2,tsec)
+ call timab(111,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -3778,7 +3777,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !Initialize most of the Hamiltonian (arrays and quantities that do not depend on k + nl form factors)
  call init_hamiltonian(gs_hamkq,psps,pawtab,dtset%nspinor,nsppol,nspden,natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
-& paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,use_gpu_cuda=dtset%use_gpu_cuda,&
+& paw_ij=paw_ij,usecprj=usecprj,ph1d=ph1d,gpu_option=dtset%gpu_option,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)
  call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,paw_ij1=paw_ij1fr,&
 & mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom,mpi_spintab=mpi_enreg%my_isppoltab)

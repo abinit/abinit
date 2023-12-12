@@ -216,9 +216,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 !* REAL SPHERICAL HARMONICS
 !* REAL GAUNT COEFFICIENTS
 
-!if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
  usekden=pawxc_get_usekden(ixc)
- nabgnt_option=0;if (usekden>0) nabgnt_option=1
+ nabgnt_option=0;if (usekden>0) nabgnt_option=1 ! If kin. ene. density is used, need nabla Gaunt coeffs
  use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1

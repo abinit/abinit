@@ -474,7 +474,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
        call fourwf(cplex,denpot,fofgin(:,1:npw_k),fofgout,fofr(:,:,:,1:n6),gbound,gbound,istwf_k,kg_k,kg_k,&
          mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
-         use_gpu_cuda=Dtset%use_gpu_cuda)
+         gpu_option=Dtset%gpu_option)
 
 !      Here I do not know if fourwf works in the case of spinors,
 !      It seems that not all fftalg option support ndata! should check!

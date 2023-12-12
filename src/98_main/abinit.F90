@@ -74,7 +74,6 @@
 program abinit
 
  use defs_basis
- use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
@@ -90,8 +89,9 @@ program abinit
  use mpi
 #endif
 
- use defs_datatypes, only : pspheader_type
+ use defs_datatypes,only : pspheader_type
  use defs_abitypes, only : MPI_type
+ use m_build_info,  only : abinit_version, dump_config
  use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
@@ -110,6 +110,7 @@ program abinit
  use m_builtin_tests, only : testfi
  use m_mpi_setup,     only : mpi_setup
  use m_outvars,       only : outvars
+ use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
 #ifdef HAVE_GPU_CUDA
@@ -155,7 +156,7 @@ program abinit
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
- integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
+ integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
  logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
@@ -180,9 +181,7 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
-#ifdef HAVE_GPU_CUDA
  integer :: gpu_devices(5)
-#endif
 
 !******************************************************************
 
@@ -225,7 +224,7 @@ program abinit
 !read names of files (input, output, rootinput, rootoutput, roottemporaries),
 !create the name of the status file, initialize the status subroutine.
 
- call timab(41,3,tsec)
+ call timab(101,3,tsec)
  call iofn1(args%input_path, filnam, filstat, xmpi_world)
 
 !------------------------------------------------------------------------------
@@ -255,13 +254,15 @@ program abinit
    call wrtout([std_out, ab_out], msg)
  end if
 
- call timab(44,1,tsec)
-
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
+ call timab(101,2,tsec)
+
  call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
                           timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+
+ call timab(103,1,tsec)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -337,12 +338,13 @@ program abinit
 !there are problems with Tv1#93 in parallel, PGI compiler, on Intel/PC
  call abi_io_redirect(new_io_comm=xmpi_world)
 
- call timab(44,2,tsec)
+ call timab(103,2,tsec)
+ call timab(104,3,tsec)
 
 !------------------------------------------------------------------------------
 
 !13) Perform additional checks on input data
- call timab(45,3,tsec)
+
  call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
  ! Check whether the string only contains valid keywords
@@ -361,30 +363,33 @@ program abinit
  end if
 
 !Activate GPU is required
- use_gpu_cuda=0
+ gpu_option=ABI_GPU_DISABLED
  use_nvtx=.false.
-#if defined HAVE_GPU_CUDA
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
-   if (dtsets(ii)%use_gpu_cuda==1) then
-     use_gpu_cuda=1
+   if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
+     gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%use_nvtx==1) then
-      use_nvtx=.true.
-   end if
+   if (dtsets(ii)%gpu_use_nvtx==1) use_nvtx=.true.
  end do
- call setdevice_cuda(gpu_devices,use_gpu_cuda)
+#ifdef HAVE_GPU
+ call setdevice_cuda(gpu_devices,gpu_option)
+#else
+ if (gpu_option/=ABI_GPU_DISABLED) then
+   write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'
+   ABI_ERROR(msg)
+ end if
+#endif
 
 #ifdef HAVE_GPU_NVTX_V3
-    NVTX_INIT(use_nvtx)
-#endif
+ NVTX_INIT(use_nvtx)
 #endif
 
 !------------------------------------------------------------------------------
 
 !15) Perform main calculation
- call timab(45,2,tsec)
+ call timab(104,2,tsec)
 
  test_exit=.false.
  prtvol=dtsets(1)%prtvol
@@ -403,7 +408,7 @@ program abinit
 !------------------------------------------------------------------------------
 
  ! 16) Give final echo of coordinates, etc.
- call timab(46,1,tsec)
+ call timab(105,1,tsec)
 
  write(msg,'(a,a,a,62a,80a)') ch10,'== END DATASET(S) ',('=',mu=1,62),ch10,('=',mu=1,80)
  call wrtout([std_out, ab_out], msg)
@@ -423,12 +428,16 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     !  so there is only one call to the latter, for both units)
+     ! both 
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
        if(ii==2)iounit=std_out
        write(iounit,*)' '
        call outvars (choice,dmatpuflag,dtsets, filnam(4), iounit,mx,ndtset,ndtset_alloc,npsp,results_out_all,timopt)
+       if(ii==2)call out_spg_anal (dtsets,(ii-1),ab_out,ndtset,ndtset_alloc,results_out_all)
        if(ii==2)write(std_out,*)' '
      end do
    end if
@@ -459,7 +468,7 @@ program abinit
  strten(:)  =results_out(1)%strten(:,1)
  xred(:,:)  =results_out(1)%xred(:,1:natom,1)
 
- call timab(46,2,tsec)
+ call timab(105,2,tsec)
 
 !------------------------------------------------------------------------------
 
@@ -611,7 +620,7 @@ program abinit
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA
- call unsetdevice_cuda(use_gpu_cuda)
+ call unsetdevice_cuda(gpu_option)
 #endif
 
  call xpapi_shutdown()
