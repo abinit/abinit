@@ -323,7 +323,7 @@ end subroutine upf1_to_abinit
 !!  nproj= number of projectors for each channel
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives,
 !!                              from psp file (used in NC only)
-!!  tccc1d(n1xccc*(1-usepaw),6)=1D core charge kinetic energy density function and five derivatives,
+!!  xcctau1d(n1xccc*(1-usepaw),6)=1D core charge kinetic energy density function and five derivatives,
 !!                              from psp file (used in NC only)
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
@@ -332,7 +332,7 @@ end subroutine upf1_to_abinit
 !! SOURCE
 
 subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
-                          psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, tccc1d, nctab, maxrad)
+                          psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, xcctau1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
  use read_upf_new_module, only : read_upf_new
@@ -354,7 +354,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  real(dp), intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax)
  real(dp), intent(out) :: vlspl(psps%mqgrid_vl,2)
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
- real(dp), intent(inout) :: tccc1d(psps%n1xccc,6)
+ real(dp), intent(inout) :: xcctau1d(psps%n1xccc,6)
 
 !Local variables -------------------------
  integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc !, iq
@@ -578,7 +578,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! if we find a core density, do something about it
  ! rho_atc contains the nlcc density
  ! rho_at contains the total density
- xcccrc = zero; xccc1d = zero; tccc1d = zero
+ xcccrc = zero; xccc1d = zero; xcctau1d = zero
 
  if (upf%nlcc) then
    ABI_MALLOC(ff, (mmax))
@@ -640,7 +640,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
 
    ! use same xcccrc and rad_cc as for density above ??
 
-   call cc_derivatives(rad_cc, ff, ff1, ff2, mmax, psps%n1xccc, xcccrc, tccc1d)
+   call cc_derivatives(rad_cc, ff, ff1, ff2, mmax, psps%n1xccc, xcccrc, xcctau1d)
 
    ABI_FREE(ff)
    ABI_FREE(ff1)
@@ -664,7 +664,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, znucl, zion, pspxc, lmax, lloc, mmax, &
  ! TODO: use the tau_at pseudo atomic kinetic energy density as well, in upf%tau_at
  ! would also need to be splined as below for the atomic pseudo charge
  !  NB: there are no r**2 or 4 pi factors in the tau quantities from Don Hamann in oncvpsp metagga
- ! TODO: as well, nctab contents with the form factors of xccc1d and tccc1d could be calculated here instead of in m_pspini
+ ! TODO: as well, nctab contents with the form factors of xccc1d and xcctau1d could be calculated here instead of in m_pspini
 
  ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
  call pawrad_init(mesh, mesh_size=mmax, mesh_type=1, rstep=amesh)
