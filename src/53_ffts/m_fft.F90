@@ -54,6 +54,7 @@ MODULE m_fft
  !use m_manage_cuda
 #endif
  use, intrinsic :: iso_c_binding
+ use m_ompgpu_fourwf
 
  implicit none
 
@@ -122,14 +123,14 @@ MODULE m_fft
 
  type,public :: fftbox_plan3_t
 
-   integer :: fftalg = 112     ! The library to call.
-   integer :: fftcache = 16    ! Cache size in kB. Only used in SG routines.
-   integer :: nfft = -1        ! Total number of points in the FFT box.
-   integer :: ldxyz = -1       ! Physical dimension of the array to transform
-   integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
-   integer :: dims(3) = -1     ! The number of FFT divisions.
-   integer :: embed(3) = -1    ! Leading dimensions of the input, output arrays.
-   integer :: use_gpu = 0      ! /= 0 if FFTs should be offloaded to the GPU.
+   integer :: fftalg = 112       ! The library to call.
+   integer :: fftcache = 16      ! Cache size in kB. Only used in SG routines.
+   integer :: nfft = -1          ! Total number of points in the FFT box.
+   integer :: ldxyz = -1         ! Physical dimension of the array to transform
+   integer :: batch_size = -1    ! MAXIMUM number of FFTs associated to the plan.
+   integer :: dims(3) = -1       ! The number of FFT divisions.
+   integer :: embed(3) = -1      ! Leading dimensions of the input, output arrays.
+   integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU
 
    type(c_ptr) :: gpu_plan_ip_spc = c_null_ptr
    type(c_ptr) :: gpu_data_ip_spc = c_null_ptr
@@ -209,8 +210,8 @@ MODULE m_fft
    integer :: batch_size = -1  ! MAXIMUM number of FFTs associated to the plan.
    integer :: istwfk = -1
    integer :: kind = -1
-   integer :: use_gpu = 0      ! /= 0 if FFTs should be offloaded to the GPU.
-   integer :: nfft = -1       ! Total number of points in the FFT box.
+   integer :: gpu_option = ABI_GPU_DISABLED  ! /= 0 if FFTs should be offloaded to the GPU.
+   integer :: nfft = -1  ! Total number of points in the FFT box.
    integer :: mgfft = -1
    integer :: ngfft(18)
    integer, contiguous, pointer :: kg_k(:,:)
@@ -296,12 +297,12 @@ end subroutine fft_allow_ialltoall
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, use_gpu)
+subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: batch_size, fftalg, fftcache, use_gpu
+ integer,intent(in) :: batch_size, fftalg, fftcache, gpu_option
 !arrays
  integer,intent(in) :: dims(3), embed(3)
 
@@ -312,7 +313,7 @@ subroutine fftbox_plan3_init(plan, batch_size, dims, embed, fftalg, fftcache, us
  plan%embed    = embed                      ! ngfft(4:6)
  plan%fftalg   = fftalg                     ! ngfft(7)
  if (fftcache > 0) plan%fftcache = fftcache ! ngfft(8)
- plan%use_gpu  = use_gpu
+ plan%gpu_option  = gpu_option
  plan%nfft  = product(plan%dims)
  plan%ldxyz = product(plan%embed)
 
@@ -330,15 +331,15 @@ end subroutine fftbox_plan3_init
 !!
 !! SOURCE
 
-subroutine fftbox_plan3_from_ngfft(plan, ngfft, batch_size, use_gpu)
+subroutine fftbox_plan3_from_ngfft(plan, ngfft, batch_size, gpu_option)
 
 !Arguments ------------------------------------
  class(fftbox_plan3_t),intent(out) :: plan
- integer,intent(in) :: ngfft(18), batch_size, use_gpu
+ integer,intent(in) :: ngfft(18), batch_size, gpu_option
 
 ! *************************************************************************
 
- call plan%init(batch_size, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), use_gpu)
+ call plan%init(batch_size, ngfft(1:3), ngfft(4:6), ngfft(7), ngfft(8), gpu_option)
 
 end subroutine fftbox_plan3_from_ngfft
 !!***
@@ -419,7 +420,7 @@ subroutine fftbox_execute_ip_spc(plan, ff, isign, ndat, iscale)
  ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
- if (plan%use_gpu /= 0) then
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_spc, plan%gpu_data_ip_spc)
    return
@@ -472,7 +473,7 @@ subroutine fftbox_execute_ip_dpc(plan, ff, isign, ndat, iscale)
  ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
- if (plan%use_gpu /= 0) then
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
    call xgpu_fftbox_c2c_ip(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), &
                            plan%gpu_plan_ip_dpc, plan%gpu_data_ip_dpc)
    return
@@ -525,7 +526,7 @@ subroutine fftbox_execute_op_spc(plan, ff, gg, isign, ndat, iscale)
  ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
- if (plan%use_gpu /= 0) then
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
    call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, spc, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_spc, plan%gpu_idata_op_spc, plan%gpu_odata_op_spc)
    return
@@ -578,7 +579,7 @@ subroutine fftbox_execute_op_dpc(plan, ff, gg, isign, ndat, iscale)
  ABI_DEFAULT(iscale__, iscale, 1)
 
 #if defined HAVE_GPU_CUDA
- if (plan%use_gpu /= 0) then
+ if (plan%gpu_option /= ABI_GPU_DISABLED) then
    call xgpu_fftbox_c2c_op(plan%dims, plan%embed, ndat__, isign, dpc, iscale__, c_loc(ff), c_loc(gg), &
                            plan%gpu_plan_op_dpc, plan%gpu_idata_op_dpc, plan%gpu_odata_op_dpc)
    return
@@ -1184,7 +1185,7 @@ end subroutine fft_use_lib_threads
 !! fftalg =fftalg input variable.
 !! ndat = Number of transform to execute
 !! nthreads = Number of OpenMP threads.
-!! use_gpu= /= to activate GPU version.
+!! gpu_option=  GPU version to active (0: no GPU).
 !! [unit]=Output Unit number (DEFAULT std_out)
 !!
 !! OUTPUT
@@ -1192,11 +1193,11 @@ end subroutine fft_use_lib_threads
 !!
 !! SOURCE
 
-integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfailed)
+integer function fftbox_utests(fftalg, ndat, nthreads, gpu_option, unit) result(nfailed)
 
 !Arguments -----------------------------------
 !scalars
- integer,intent(in) :: fftalg, ndat, nthreads, use_gpu
+ integer,intent(in) :: fftalg, ndat, nthreads, gpu_option
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
@@ -1246,7 +1247,7 @@ integer function fftbox_utests(fftalg, ndat, nthreads, use_gpu, unit) result(nfa
    ldx=pars(4,iset); ldy=pars(5,iset); ldz=pars(6,iset)
 
    ! Create the FFT plan
-   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, use_gpu)
+   call box_plan%init(ndat, pars(1,iset), pars(4,iset), fftalg, fftcache0, gpu_option)
 
    ldxyz = ldx*ldy*ldz
    !
@@ -2243,10 +2244,11 @@ end function fftu_mpi_utests
 !!         (needed only when option=1)
 !! weight_i=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1 and (fftalg=4 and fftalgc/=0))
-!! fofginb(2,npwin)=holds second input wavefunction in G vector basis sphere.
+!! [fofginb(2,npwin)]=holds second input wavefunction in G vector basis sphere.
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
-!! use_ndo = use non diagonal occupations.
+!! [use_ndo] = use non diagonal occupations.
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2279,13 +2281,13 @@ end function fftu_mpi_utests
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                   kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
                   tim_fourwf,weight_r,weight_i, &
-                  use_gpu_cuda,use_ndo,fofginb) ! Optional arguments
+                  gpu_option,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option
  integer,intent(in) :: tim_fourwf
- integer,intent(in),optional :: use_gpu_cuda,use_ndo
+ integer,intent(in),optional :: gpu_option,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -2300,10 +2302,10 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 !scalars
  integer :: fftalg,fftalga,fftalgc,fftcache,i1,i2,i2_local,i3,i3_local,i3_glob,idat,ier
  integer :: iflag,ig,comm_fft,me_g0,me_fft,n1,n2,n3,nd2proc,nd3proc
- integer :: nfftot,nproc_fft,option_ccfft,paral_kgb
+ integer :: nfftot,nproc_fft,option_ccfft,paral_kgb,gpu_option_
  real(dp) :: fim,fre,xnorm
  character(len=500) :: msg
- logical :: luse_gpu_cuda,luse_ndo
+ logical :: luse_ndo
 !arrays
  integer,parameter :: shiftg0(3)=0
  integer,parameter :: symmE(3,3)=reshape([1,0,0,0,1,0,0,0,1],[3,3])
@@ -2312,6 +2314,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
+ real(dp) :: weight_array_r(ndat), weight_array_i(ndat)
 
 ! *************************************************************************
 
@@ -2347,16 +2350,33 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !end if
 
 !Cuda version of fourwf
- luse_gpu_cuda=PRESENT(use_gpu_cuda)
- if (luse_gpu_cuda) luse_gpu_cuda=(luse_gpu_cuda.and.(use_gpu_cuda==1))
+ gpu_option_=ABI_GPU_DISABLED
+ if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
- if(luse_gpu_cuda) then
+ if(option==1) then
+   weight_array_r(:)=weight_r
+   weight_array_i(:)=weight_i
+ end if
+ if(gpu_option_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
    call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_r,weight_i) !,&
+     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
 !  &  use_ndo,fofginb)
 #endif
+   call timab(840+tim_fourwf,2,tsec); return
+ else if(gpu_option_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA
+   call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+     kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
+!  &  use_ndo,fofginb)
+#endif
+   call timab(840+tim_fourwf,2,tsec); return
+ else if(gpu_option_==ABI_GPU_OPENMP) then
+   call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+     weight_array_r,weight_array_i)
    call timab(840+tim_fourwf,2,tsec); return
  end if
 
@@ -4709,12 +4729,12 @@ end subroutine fft_output_counters
 !!
 !! SOURCE
 
-subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind, use_gpu)
+subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  class(uplan_t),intent(out) :: uplan
- integer,intent(in) :: npw, nspinor, batch_size, istwfk, kind, use_gpu
+ integer,intent(in) :: npw, nspinor, batch_size, istwfk, kind, gpu_option
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,target,intent(in) :: kg_k(3,npw)
@@ -4726,7 +4746,7 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  uplan%istwfk = istwfk
  uplan%batch_size = batch_size
  uplan%kind  = kind
- uplan%use_gpu  = use_gpu
+ uplan%gpu_option  = gpu_option
  uplan%ngfft = ngfft
  uplan%mgfft = maxval(ngfft(1:3))
  uplan%nfft  = product(ngfft(1:3))
@@ -4735,7 +4755,7 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
  call sphereboundary(uplan%gbound, uplan%istwfk, uplan%kg_k, uplan%mgfft, uplan%npw)
 
- if (uplan%use_gpu /= 0) then
+ if (uplan%gpu_option /= ABI_GPU_DISABLED) then
    ! Allocate memory on the device and transfer data.
    NOT_IMPLEMENTED_ERROR()
  end if
@@ -4762,7 +4782,7 @@ subroutine uplan_free(uplan)
 ! *************************************************************************
 
  ABI_SFREE(uplan%gbound)
- if (uplan%use_gpu /= 0) then
+ if (uplan%gpu_option /= ABI_GPU_DISABLED) then
    ! Free memory on the GPU
  end if
 
@@ -4805,7 +4825,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
- if (uplan%use_gpu == 0) then
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
@@ -4862,7 +4882,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
- if (uplan%use_gpu == 0) then
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftug(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, &
@@ -4919,7 +4939,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
- if (uplan%use_gpu == 0) then
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &
@@ -4973,7 +4993,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
  nx = uplan%ngfft(1); ny = uplan%ngfft(2); nz = uplan%ngfft(3)
  ldx = nx; ldy = ny; ldz = nz ! No augmentation, the caller does not support it.
 
- if (uplan%use_gpu == 0) then
+ if (uplan%gpu_option == ABI_GPU_DISABLED) then
    select case (fftalga)
    case (FFT_FFTW3)
      call fftw3_fftur(fftalg, fftcache, uplan%npw, nx, ny, nz, ldx, ldy, ldz, uplan%nspinor*ndat, uplan%istwfk, uplan%mgfft, &

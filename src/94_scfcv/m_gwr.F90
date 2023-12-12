@@ -1250,7 +1250,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_FREE(gvec_)
    call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecut, cryst%gmet, &
               kk_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, paral_fft0, &
-              cryst%symrel, cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
+              cryst%symrel, cryst%tnons, gpu_option=gwr%dtset%gpu_option, unit=dev_null)
    gwr%green_mpw = max(gwr%green_mpw, npw_)
  end do
 
@@ -1261,7 +1261,7 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    ABI_FREE(gvec_)
    call getng(dtset%gwr_boxcutmin, dtset%chksymtnons, dtset%ecuteps, cryst%gmet, &
               qq_bz, me_fft0, gwr%g_mgfft, gwr%g_nfft, gwr%g_ngfft, nproc_fft1, cryst%nsym, &
-              paral_fft0, cryst%symrel, cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
+              paral_fft0, cryst%symrel, cryst%tnons, gpu_option=gwr%dtset%gpu_option, unit=dev_null)
    gwr%tchi_mpw = max(gwr%tchi_mpw, npw_)
    if (iq_bz == 1) then
      ABI_CHECK(all(abs(qq_bz) < tol16), "First qpoint in the qbz should be Gamma!")
@@ -1418,7 +1418,7 @@ end block
  else
    ! Automatic detection
    gwr%uc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) gwr%uc_batch_size = 4 * omp_nt
+   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) gwr%uc_batch_size = 4 * omp_nt
  end if
 
  if (gwr%dtset%gwr_ucsc_batch(2) > 0) then
@@ -1427,7 +1427,7 @@ end block
  else
    ! Automatic detection
    gwr%sc_batch_size = 1 * omp_nt
-   if (gwr%dtset%use_gpu_cuda /= 0) gwr%sc_batch_size = 4 * omp_nt
+   if (gwr%dtset%gpu_option /= ABI_GPU_DISABLED) gwr%sc_batch_size = 4 * omp_nt
  end if
 
  ! Make sure all procs agree.
@@ -2917,7 +2917,7 @@ subroutine gwr_get_myk_green_gpr(gwr, itau, spin, desc_mykbz, gt_gpr)
 
    associate (desc_k => desc_mykbz(my_ikf))
    call uplan_k%init(desc_k%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_k%istwfk, &
-                     desc_k%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                     desc_k%gvec, gwpc, gwr%dtset%gpu_option)
 
    do ipm=1,2
      ! Allocate rgp PBLAS matrix to store G_kbz(r,g')
@@ -3019,7 +3019,7 @@ subroutine gwr_get_gkbz_rpr_pm(gwr, ik_bz, itau, spin, gk_rpr_pm, g0, ipm_list)
  call gwr%rotate_gpm(ik_bz, itau, spin, desc_kbz, gt_pm, ipm_list=ipm_list__)
 
  call uplan_k%init(desc_kbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_kbz%istwfk, &
-                   desc_kbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                   desc_kbz%gvec, gwpc, gwr%dtset%gpu_option)
 
  ! For each tau in imp_list__
  do ii=1,num_pm
@@ -3113,7 +3113,7 @@ end subroutine gwr_get_gkbz_rpr_pm
 !!  ! call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
 !!  !
 !!  ! call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
-!!  !                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+!!  !                   desc%gvec, gwpc, gwr%dtset%gpu_option)
 !!  !
 !!  ! ! F(g,g') --> F(r,g') and store results in rgp.
 !!  ! do ig2=1, g_gp%sizeb_local(2), gwr%uc_batch_size
@@ -3174,7 +3174,7 @@ subroutine gwr_rpr_to_ggp(gwr, desc, rp_r, g_gp)
  call gp_r%init(npwsp, nrsp, gwr%g_slkproc, desc%istwfk, size_blocs=[-1, col_bsize])
 
  call uplan_k%init(desc%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc%istwfk, &
-                   desc%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                   desc%gvec, gwpc, gwr%dtset%gpu_option)
 
  isign = +1 ! This should be ok
  !isign = -1
@@ -3361,7 +3361,7 @@ subroutine gwr_get_myq_wc_gpr(gwr, itau, spin, desc_myqbz, wc_gpr)
    call rgp%init(gwr%g_nfft * gwr%nspinor, npwsp, gwr%g_slkproc, desc_q%istwfk, size_blocs=[-1, col_bsize])
 
    call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_q%istwfk, &
-                     desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                     desc_q%gvec, gwpc, gwr%dtset%gpu_option)
 
    ! FFT and store results in rgp
    do ig2=1,wc_qbz%sizeb_local(2), gwr%uc_batch_size
@@ -3442,7 +3442,7 @@ subroutine gwr_get_wc_rpr_qbz(gwr, g0_q, iq_bz, itau, spin, wc_rpr)
  call rgp%init(nrsp, npwsp, gwr%g_slkproc, desc_qbz%istwfk, size_blocs=[-1, col_bsize])
 
  call uplan_k%init(desc_qbz%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, desc_qbz%istwfk, &
-                   desc_qbz%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                   desc_qbz%gvec, gwpc, gwr%dtset%gpu_option)
 
  ! FFT Wc(g,g') -> Wc(r,g') and store results in rgp
  do ig2=1,wc_ggp%sizeb_local(2), gwr%uc_batch_size
@@ -4126,7 +4126,7 @@ subroutine gwr_build_tchi(gwr)
    end if
 
    ! Build plan for dense FFTs.
-   call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
+   call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%gpu_option)
 
    ! The g-vectors in the supercell for G and tchi.
    ABI_MALLOC(green_scgvec, (3, gwr%green_mpw))
@@ -4277,7 +4277,7 @@ end if
 
          ! FFT tchi_q(r,g') --> tchi_q(g,g'). Results stored in gwr%tchi_qibz.
          call uplan_q%init(desc_q%npw, gwr%nspinor, gwr%uc_batch_size, gwr%g_ngfft, istwfk1, &
-                           desc_q%gvec, gwpc, gwr%dtset%use_gpu_cuda)
+                           desc_q%gvec, gwpc, gwr%dtset%gpu_option)
 
          do ig2=1, chi_rgp%sizeb_local(2), gwr%uc_batch_size
            ndat = blocked_loop(ig2, chi_rgp%sizeb_local(2), gwr%uc_batch_size)
@@ -5250,8 +5250,8 @@ if (gwr%use_supercell_for_sigma) then
  end if
 
  ! Build plans for dense FFTs.
- call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%use_gpu_cuda)
- call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat, gwr%dtset%use_gpu_cuda)
+ call green_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat*2, gwr%dtset%gpu_option)
+ call wt_plan%from_ngfft(sc_ngfft, gwr%nspinor*max_ndat, gwr%dtset%gpu_option)
 
  sigma_fact = one / (sck_ucvol * scq_ucvol)
 
@@ -7886,7 +7886,7 @@ subroutine gwr_get_u_ngfft(gwr, boxcutmin, u_ngfft, u_nfft, u_mgfft, u_mpw, gmax
    ABI_FREE(gvec_)
    call getng(boxcutmin, gwr%dtset%chksymtnons, gwr%dtset%ecut, gwr%cryst%gmet, &
               kk_bz, me_fft0, u_mgfft, u_nfft, u_ngfft, nproc_fft1, gwr%cryst%nsym, paral_fft0, &
-              gwr%cryst%symrel, gwr%cryst%tnons, use_gpu_cuda=gwr%dtset%use_gpu_cuda, unit=dev_null)
+              gwr%cryst%symrel, gwr%cryst%tnons, gpu_option=gwr%dtset%gpu_option, unit=dev_null)
  end do
 
 end subroutine gwr_get_u_ngfft

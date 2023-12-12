@@ -33,10 +33,10 @@ program mrgdv
  use defs_basis
  use m_xmpi
  use m_errors
- use m_build_info
  use m_abicore
  use m_dvdb
 
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print

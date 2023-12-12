@@ -637,6 +637,9 @@ class FortranKissParser(HasRegex):
                         napp(comment)
                 continue
 
+            # Ignore preprocessor line
+            if line.startswith("#"): continue
+
             # 3) Handle continuation line
             # http://fortranwiki.org/fortran/show/Continuation+lines
             # NB: I'm not gonna consider `;` in line because it's costly.

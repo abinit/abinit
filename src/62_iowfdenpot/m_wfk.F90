@@ -49,7 +49,6 @@ module m_wfk
 
  use defs_basis
  use m_abicore
- use m_build_info
  use m_errors
  use m_dtset
 #ifdef HAVE_MPI2
@@ -72,6 +71,7 @@ module m_wfk
  use defs_abitypes,  only : MPI_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_wvltypes,  only : wvl_internal_type
+ use m_build_info,   only : abinit_version
  use m_geometry,     only : metric
  use m_time,         only : cwtime, cwtime_report, asctime
  use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa, ftoa

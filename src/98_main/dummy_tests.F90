@@ -43,11 +43,11 @@
 program dummy_tests
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dummy_tests
+ use m_build_info,   only : abinit_version
  implicit none
 
 !Local variables-------------------------------
