@@ -122,7 +122,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
 
    ! 2-Compute cprj = <\psi_{n,k}|p_{i,j}>
    call ctocprj(tdks%atindx,tdks%cg,1,tdks%cprj,tdks%gmet,tdks%gprimd,0,0,0,           &
-              & dtset%istwfk,tdks%kg,dtset%kptns,tdks%mcg,tdks%mcprj,dtset%mgfft,      &
+              & dtset%istwfk,tdks%kg,tdks%tdef%kpa,tdks%mcg,tdks%mcprj,dtset%mgfft,    &
               & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,tdks%nattyp,   &
               & dtset%nband,dtset%natom,dtset%ngfft,dtset%nkpt,dtset%nloalg,           &
               & tdks%npwarr,dtset%nspinor,dtset%nsppol,dtset%nsppol,psps%ntypat,       &
@@ -142,7 +142,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
    end if
 
    ! 3-Compute pawrhoij = \rho_{i,j} = \sum_{n,k}f_{n,k} \tilde{c}^{i,*}_{n,k} \tilde{c}^{j}_{n,k}
-   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj,dtset%istwfk,       &
+   call pawmkrhoij(tdks%atindx,tdks%atindx1,tdks%cprj,tdks%dimcprj_srt,dtset%istwfk,   &
                  & dtset%kptopt,dtset%mband,tdks%mband_cprj,tdks%mcprj,dtset%mkmem,    &
                  & mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,          &
                  & dtset%nspinor,dtset%nsppol,tdks%occ0,dtset%paral_kgb,tdks%paw_dmft, &

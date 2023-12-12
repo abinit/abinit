@@ -143,23 +143,6 @@ subroutine rttddft_setup_ele_step(dtset, mpi_enreg, psps, tdks)
                 & distribfft=mpi_enreg%distribfft)
  endif
 
-!!FB: @MT Needed? If yes, then don't forget to put it back in tdks_init/second_setup as well
-!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-!!atomic position so should be done for nstep = 1 and for updated ion positions
-!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-!   with_vectornd = 1
-!else
-!   with_vectornd = 0
-!end if
-!if(allocated(vectornd)) then
-!   ABI_FREE(vectornd)
-!end if
-!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
-!vectornd=zero
-!if(with_vectornd .EQ. 1) then
-!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-!        & rprimd,vectornd,xred)
-
 end subroutine rttddft_setup_ele_step
 !!***
 

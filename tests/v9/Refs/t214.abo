@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 20 Nov 2023.
-- ( at 13h33 )
+.Starting date : Tue  5 Dec 2023.
+- ( at 18h40 )
   
-- input  file    -> /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/build/opt/Test_suite/v9_t213-t214-t215/t214.abi
+- input  file    -> /tmp/abinit/opt/Test_suite/v9_t213-t214-t215/t214.abi
 - output file    -> t214.abo
 - root for input  files -> t214i
 - root for output files -> t214o
@@ -53,6 +53,7 @@ _ WF disk file :      0.677 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
               amu      2.69815390E+01
            bandpp          24
           chkprim           0
+            dtele      1.00000000E-03
              ecut      1.00000000E+01 Hartree
 -          fftalg         512
            istwfk        1    1    1    1
@@ -346,8 +347,8 @@ meta: {optdriver: 9, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.12421
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
-- pspatm: opening atomic psp file    /cea/dsku/u-basque/hal1/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspini: atom type   1  psp file is /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
+- pspatm: opening atomic psp file    /cea/home/abinit/abinit/REPOSITORY/BRIEUC/abinit/gitlab/tests/Psps_for_tests/Pseudodojo_nc_sr_04_pbe_standard_psp8/Al.psp8
 - Al    ONCVPSP-3.2.3.1  r_core=   1.76802   1.76802   1.70587
 - 13.00000   3.00000    170504                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -385,7 +386,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.92    0.93
+- Time - cpu, wall (sec):    0.97    0.98
 
 
 --- Iteration 2
@@ -401,7 +402,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 3
@@ -417,7 +418,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.11    0.11
 
 
 --- Iteration 4
@@ -433,7 +434,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.10
+- Time - cpu, wall (sec):    0.12    0.12
 
 
 --- Iteration 5
@@ -449,7 +450,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
    0.96244    0.96244    0.96244    0.99807    0.99807    0.99807    1.16616    1.19524
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-- Time - cpu, wall (sec):    0.10    0.17
+- Time - cpu, wall (sec):    0.12    0.12
 
 
 ---------------------------------------------------------------------------
@@ -465,6 +466,7 @@ Integrated density (ie. total nb of electrons) =      12.000000
               amu      2.69815390E+01
            bandpp          24
           chkprim           0
+            dtele      1.00000000E-03
              ecut      1.00000000E+01 Hartree
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -816,10 +818,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.3
++Overall time at end (sec) : cpu=          2.1  wall=          2.2

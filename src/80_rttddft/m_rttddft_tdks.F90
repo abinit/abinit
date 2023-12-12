@@ -103,7 +103,6 @@ module m_rttddft_tdks
    integer                          :: tdrestart_unit !unit nb of the restart file
    integer                          :: unpaw       !paw data tmp file unit
    integer                          :: usexcnhat   !use nhat in the computation of the XC term
-   real(dp)                         :: boxcut      !boxcut ratio (gcut(box)/gcut(sphere))
    real(dp)                         :: dt          !propagation time step
    real(dp)                         :: ecore       !core energy
    real(dp)                         :: etot        !total energy
@@ -129,6 +128,7 @@ module m_rttddft_tdks
    integer,allocatable              :: atindx(:)   !index table of atom ordered by type
    integer,allocatable              :: atindx1(:)  !nb of the atom for each index in atindx
    integer,allocatable              :: dimcprj(:)  !Contains dimension for cprj array
+   integer,allocatable              :: dimcprj_srt(:) !Contains dimension for cprj array ordered by atom type
    integer,allocatable              :: indsym(:,:,:) !atom indexing for symmetries
    integer,allocatable              :: irrzon(:,:,:) !irreducible Brillouin zone
    integer,allocatable              :: kg(:,:)     !red. coord. of G vecs
@@ -311,9 +311,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !Init vector potential and associated constants
  call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
                    & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%nkpt,dtset%kptns)
- call tdks%tdef%update(tdks%first_step*dtset%dtele, tdks%rprimd, dtset%kptns)
+ call tdks%tdef%update((tdks%first_step-1)*dtset%dtele, tdks%rprimd, dtset%kptns)
 
- !6) Some further initialization (Mainly for PAW)
+ !6) Some further initialization (Mainly for PAW and allocation of arrays for Hamiltonian and densities)
  call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
 
  !7) Keep initial cg and cproj in memory for occupations
@@ -409,6 +409,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    ABI_SFREE(tdks%cg)
    ABI_SFREE(tdks%cg0)
    ABI_SFREE(tdks%dimcprj)
+   ABI_SFREE(tdks%dimcprj_srt)
    ABI_SFREE(tdks%eigen)
    ABI_SFREE(tdks%eigen0)
    ABI_SFREE(tdks%grvdw)
@@ -578,14 +579,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
            & dtset%nsppol,response,tdks%rmet,dtset%rprim_orig,tdks%rprimd,     &
            & tdks%ucvol,psps%usepaw)
 
-!FB: @MT Needed?
-!!In some cases (e.g. getcell/=0), the plane wave vectors have
-!! to be generated from the original simulation cell
-!rprimd_for_kg=rprimd
-!if (dtset%getcell/=0.and.dtset%usewvl==0) rprimd_for_kg=args_gs%rprimd_orig
-!call matr3inv(rprimd_for_kg,gprimd_for_kg)
-!gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
-
  !** Set up the basis sphere of planewaves
  ABI_MALLOC(tdks%npwarr,(dtset%nkpt))
  ABI_MALLOC(tdks%kg,(3,dtset%mpw*dtset%mkmem))
@@ -740,10 +733,6 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
    tdks%zion=tdks%zion+psps%ziontypat(dtset%typat(iatom))
  end do
 
- !FB: probably not needed
- !Further setup
- !call setup2(dtset,npwtot,start,tdks%wvl%wfs,tdks%xred)
-
 end subroutine first_setup
 !!***
 
@@ -799,6 +788,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  integer             :: stress_needed
  integer             :: use_hybcomp
  integer             :: ylm_option
+ real(dp)            :: boxcut
  real(dp)            :: gsqcut_shp
  real(dp)            :: hyb_range_fock
  real(dp),parameter  :: k0(3)=(/zero,zero,zero/)
@@ -831,11 +821,6 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    ylm_option=0
-   if ((dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) .or. &
-   &   (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) .or. &
-   &   (dtset%orbmag<0 .and. psps%usepaw==1)) then
-      ylm_option = 1 ! gradients of YLM
-   end if
    call initylmg(tdks%gprimd,tdks%kg,tdks%tdef%kpa,dtset%mkmem,mpi_enreg,&
    & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
    & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
@@ -879,11 +864,11 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    ncpgr=0
    !FB: @MT dimcprj_srt needed?
    ABI_MALLOC(tdks%dimcprj,(dtset%natom))
-   !ABI_MALLOC(dimcprj_srt,(dtset%natom))
+   ABI_MALLOC(tdks%dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(tdks%dimcprj,dtset%natom,tdks%nattyp,dtset%ntypat, &
                      & dtset%typat,pawtab,'R')
-   !call pawcprj_getdim(dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
-   !                  & dtset%typat,pawtab,'O')
+   call pawcprj_getdim(tdks%dimcprj_srt,dtset%natom,tdks%nattyp,dtset%ntypat,  &
+                     & dtset%typat,pawtab,'O')
    !call pawcprj_alloc(tdks%cprj,ncpgr,dimcprj_srt)
    call pawcprj_alloc(tdks%cprj,ncpgr,tdks%dimcprj)
    !ABI_FREE(dimcprj_srt)
@@ -998,10 +983,10 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
 
  !Compute large sphere G^2 cut-off (gsqcut) and box / sphere ratio
  if (psps%usepaw==1) then
-   call getcut(tdks%boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   call getcut(boxcut,dtset%pawecutdg,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  else
-   call getcut(tdks%boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
+   call getcut(boxcut,dtset%ecut,tdks%gmet,tdks%gsqcut,dtset%iboxcut, &
              & std_out,k0,tdks%pawfgr%ngfft)
  end if
 
@@ -1016,25 +1001,6 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
  else
    tdks%ph1df(:,:)=tdks%ph1d(:,:)
  end if
-
-!!FB: @MT Needed? If yes, then don't forget to put it back in the begining of
-!! propagate_ele as well
-!!if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-!!atomic position so should be done for nstep = 1 and for updated ion positions
-!if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
-!   with_vectornd = 1
-!else
-!   with_vectornd = 0
-!end if
-!if(allocated(vectornd)) then
-!   ABI_FREE(vectornd)
-!end if
-!ABI_MALLOC(vectornd,(with_vectornd*nfftf,3))
-!vectornd=zero
-!if(with_vectornd .EQ. 1) then
-!   call make_vectornd(1,gsqcut,psps%usepaw,mpi_enreg,dtset%natom,nfftf,ngfftf,dtset%nucdipmom,&
-!        & rprimd,vectornd,xred)
-!endif
 
  !Allocate memory for density
  ABI_MALLOC(tdks%rhor,(tdks%nfftf,dtset%nspden))

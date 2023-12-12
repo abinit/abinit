@@ -135,6 +135,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  real(dp), allocatable          :: ffnl(:,:,:,:)
  real(dp), allocatable          :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
+ real(dp)                       :: kpa(3)
  real(dp), allocatable          :: kinpw(:)
  real(dp), pointer              :: occ(:) => null()
  real(dp), pointer              :: occ0(:) => null()
@@ -282,31 +283,33 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       end if
 
       !** Set up the remaining k-dependent part of the Hamiltonian
+      kpoint(:)=dtset%kptns(:,ikpt) !k-point
+      kpa(:)=tdks%tdef%kpa(:,ikpt)  !k+A
       ! Kinetic energy
-      kpoint(:)=dtset%kptns(:,ikpt)
       ABI_MALLOC(kinpw,(npw_k))
       call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,tdks%gmet,kg_k,kinpw,kpoint,npw_k,0,0,tdks%tdef%vecpot_red)
 
       ! Compute (k+G) vectors (only if useylm=1)
       nkpg=3*calc_forces*dtset%nloalg(3)
       ABI_MALLOC(kpg_k,(npw_k,nkpg))
-      if ((mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step).and.nkpg>0) call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
       ! Compute nonlocal form factors ffnl at all (k+G):
       ider=0;idir=0;dimffnl=1
       ABI_MALLOC(ffnl,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
-      if (mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step) then
-        call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
-                  & ider,idir,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,     &
-                  & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
-                  & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
+      if (mpi_enreg%paral_kgb/=1 .or. istep<=tdks%first_step .or. tdks%tdef%ef_type/=0) then
+            if (nkpg > 0) call mkkpg(kg_k,kpg_k,kpa,nkpg,npw_k)
+            call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnl,psps%ffspl,tdks%gmet,tdks%gprimd, &
+                      & ider,idir,psps%indlmn,kg_k,kpg_k,kpa,psps%lmnmax,psps%lnmax,        &
+                      & psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,       &
+                      & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
       end if
 
+      !!! HERE - FB !!!
       !** Load k-dependent part in the Hamiltonian datastructure
       !**  - Compute 3D phase factors
       !**  - Prepare various tabs in case of band-FFT parallelism
       !**  - Load k-dependent quantities in the Hamiltonian
       ABI_MALLOC(ph3d,(2,npw_k,ham_k%matblk))
-      call ham_k%load_k(kpt_k=dtset%kptns(:,ikpt),istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k, &
+      call ham_k%load_k(kpt_k=kpa,istwf_k=istwf_k,npw_k=npw_k,kinpw_k=kinpw,kg_k=kg_k,kpg_k=kpg_k, &
                       & ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=(mpi_enreg%paral_kgb/=1.or.istep<=tdks%first_step),   &
                       & compute_gbound=(mpi_enreg%paral_kgb/=1))
 
@@ -368,7 +371,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          end if
          ! occupations
          if (lproperties(4)) then
-            !note that occupations are computed at istep-1 like energies and eigenvalues
+            !computed at istep-1 like energies and eigenvalues
             call rttddft_calc_occ(cg,cg0,dtset,ham_k,ikpt,ibg,isppol,mpi_enreg, &
                                 & nband_k,npw_k,my_nspinor,occ,occ0,tdks)
          end if
