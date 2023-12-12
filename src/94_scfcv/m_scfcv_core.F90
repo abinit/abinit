@@ -654,12 +654,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  n1xccc=0;if (psps%n1xccc/=0) n1xccc=psps%n1xccc
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
+ ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
 
 !Allocations/initializations for PAW only
  lpawumax=-1
  if(psps%usepaw==1) then
 !  Variables/arrays related to the fine FFT grid
-   ABI_MALLOC(xcctau3d,(nfftf*dtset%usekden))
    ABI_MALLOC(nhat,(nfftf,dtset%nspden*psps%usepaw))
    if (nstep==0) nhat=zero
    ABI_MALLOC(pawfgrtab,(my_natom))
@@ -743,7 +743,6 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    ABI_MALLOC(dimcprj,(0))
    ABI_MALLOC(dimcprj_srt,(0))
    ABI_MALLOC(nhat,(0,0))
-   ABI_MALLOC(xcctau3d,(0))
    ABI_MALLOC(paw_ij,(0))
    ABI_MALLOC(paw_an,(0))
    ABI_MALLOC(pawfgrtab,(0))

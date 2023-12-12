@@ -1118,6 +1118,7 @@ subroutine upfxc2abi(dft, pspxc)
    igcx = get_igcx()
    igcc = get_igcc()
  end if
+print *, ' iexch,icorr,igcx,igcc ', iexch,icorr,igcx,igcc
 
  !reset dft string to avoid stray spaces
  call set_dft_from_indices(iexch,icorr,igcx,igcc)
@@ -1156,6 +1157,8 @@ subroutine upfxc2abi(dft, pspxc)
    pspxc = -106132
  case (00030603)  !(" NOX  LYP OPTX BLYP") ! OLYP
    pspxc = -110131
+! case () !("R2SCAN01") ! R2SCAN01
+!   pspxc = -645642
 !    FIXME: important cases left to be patched with libxc:
 !    vosko wilkins nusair
 !    ortiz ballone
@@ -1196,6 +1199,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  ! It should be OK as long as the UPF2 NC pseudos are generated with oncvpsp
  ! but it does not cover all QE possibilities.
  ierr = 0; msg = ""
+print *, "dft = ", trim(dft)
  select case (dft)
  case ("PZ")
    ixc = -001009
@@ -1215,6 +1219,8 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -118130
  case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
    ixc = -1012
+ case ('R2SCAN01')
+   ixc = -645642
  case default
    ierr = 1
  end select

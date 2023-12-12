@@ -576,7 +576,7 @@ end subroutine mkcore
 !!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
 !!  xccc1d(n1xccc,6,ntypat)=1D core charge function and 5 derivatives for each atom type
 !!  xred(3,natom)=reduced coordinates for atoms in unit cell
-!!  [usekden]= --optional-- if TRUE, output the kinetic enrgy density instead of the density
+!!  [usekden]= --optional-- if TRUE, output the kinetic energy density instead of the density
 !!
 !! OUTPUT
 !!  === if option==1 ===

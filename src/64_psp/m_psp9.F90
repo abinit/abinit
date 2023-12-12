@@ -408,6 +408,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  rmatch = zero
  nders  = 0
+ maxrad = zero
  if (has_nlcc) then
 
 !    In Abinit, at least for the Troullier-Martins pseudopotential,
