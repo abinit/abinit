@@ -635,6 +635,7 @@ gw_icutcoul: 6
 green_mpw: 832
 tchi_mpw: 303
 g_ngfft: [12, 12, 15, 12, 12, 15, ]
+gwr_boxcutmin:   1.00000000E+00
 P gwr_np_kgts: [1, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, ]
