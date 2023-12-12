@@ -228,6 +228,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:),ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  integer,save :: idx(12)=(/1,1,2,2,3,3,3,2,3,1,2,1/)
  integer  :: delta(6)=(/1,1,1,0,0,0/)
  real(dp) :: dgm(3,3,6),d2gm(3,3,6,6),gcart(3),tsec(2)
@@ -239,7 +240,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-
+print *, 'in atm2fft'
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
@@ -368,10 +369,16 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
      ttaucorespl => pawtab(itypat)%tcoretauspl
+     dncdq0 => pawtab(itypat)%dncdq0
+     dnvdq0 => pawtab(itypat)%dnvdq0
+     dtaucdq0 => pawtab(itypat)%dtaucdq0
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
-     ttaucorespl => null()
+     ttaucorespl => psps%nctab(itypat)%taucorespl
+     dncdq0 => psps%nctab(itypat)%dncdq0
+     dnvdq0 => psps%nctab(itypat)%dnvdq0
+     dtaucdq0 => psps%nctab(itypat)%dtaucdq0
    end if
 
    do i3=1,n3
@@ -547,21 +554,13 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
                if (optn==1) then
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw ==1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                      dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
-                   else if (optn2==4.and.usepaw==1) then
-                     dn_at=pawtab(itypat)%dtaucdq0
+                   else if (optn2==4) then
+                     dn_at=dtaucdq0
                    end if
                    if (opteltfr==1) then
                      d2n_at = 0
@@ -1029,6 +1028,8 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: eps1(6)=(/1,2,3,2,3,1/),eps2(6)=(/1,2,3,3,1,2/),jdir(ndir)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:)
  real(dp), ABI_CONTIGUOUS pointer :: tvalespl(:,:),tcorespl(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: ttaucorespl(:,:)
+ real(dp), pointer :: dncdq0, dtaucdq0, dnvdq0
  real(dp) ::  gq(6),gcart(3)
  real(dp),allocatable :: phim_igia(:),phre_igia(:),workn(:,:,:),workv(:,:,:)
 
@@ -1213,9 +1214,17 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      if (usepaw == 1) then
        tcorespl => pawtab(itypat)%tcorespl
        tvalespl => pawtab(itypat)%tvalespl
+       ttaucorespl => pawtab(itypat)%tcoretauspl
+       dncdq0 => pawtab(itypat)%dncdq0
+       dnvdq0 => pawtab(itypat)%dnvdq0
+       dtaucdq0 => pawtab(itypat)%dtaucdq0
      else
        tcorespl => psps%nctab(itypat)%tcorespl
        tvalespl => psps%nctab(itypat)%tvalespl
+       ttaucorespl => psps%nctab(itypat)%taucorespl
+       dncdq0 => psps%nctab(itypat)%dncdq0
+       dnvdq0 => psps%nctab(itypat)%dnvdq0
+       dtaucdq0 => psps%nctab(itypat)%dtaucdq0
      end if
 
      ii=0
@@ -1316,17 +1325,9 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
 !                Also get (dn^AT(q)/dq)/q:
                  if (have_g0) then
                    if (optn2==1) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dncdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dncdq0
-                     end if
+                     dn_at=dncdq0
                    else if (optn2==2) then
-                     if (usepaw == 1) then
-                       dn_at=pawtab(itypat)%dnvdq0
-                     else
-                       dn_at=psps%nctab(itypat)%dnvdq0
-                     end if
+                     dn_at=dnvdq0
                    else if (optn2==3) then
                      dn_at=-two*gauss1*alf2pi2
                    end if

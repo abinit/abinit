@@ -256,7 +256,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
  coretau_method=0
- if (dtset%usekden==1.and.psps%usepaw==1) then
+ if (dtset%usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
  end if
 
@@ -793,7 +793,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
  ABI_FREE(work)
 
-!Determine wether a gaussan atomic density has to be used or not
+!Determine whether a gaussan atomic density has to be used or not
  usegauss=.true.
  if (usepaw==0) usegauss = any(.not.psps%nctab(1:ntypat)%has_tvale)
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)

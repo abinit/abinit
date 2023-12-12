@@ -450,9 +450,12 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      ABI_SFREE(psps%xccc1d)
+     ABI_SFREE(psps%tccc1d)
    end if
    ABI_MALLOC(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   ABI_MALLOC(psps%tccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
    psps%xccc1d = zero
+   psps%tccc1d = zero
    usepaw_old=psps%usepaw
  end if
 
@@ -515,6 +518,7 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%vlspl)
  ABI_SFREE(psps%dvlspl)
  ABI_SFREE(psps%xccc1d)
+ ABI_SFREE(psps%tccc1d)
  ABI_SFREE(psps%xcccrc)
  ABI_SFREE(psps%ziontypat)
  ABI_SFREE(psps%zionpsp)
@@ -618,6 +622,7 @@ subroutine psps_copy(pspsin, pspsout)
  if (pspsin%n1xccc > 0) then
    if (allocated(pspsin%xcccrc)) call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
    if (allocated(pspsin%xccc1d)) call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
+   if (allocated(pspsin%tccc1d)) call alloc_copy(pspsin%tccc1d, pspsout%tccc1d)
  end if
 
  ! allocate and copy character strings
@@ -982,6 +987,7 @@ subroutine psps_ncwrite(psps, ncid)
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ekb", "dp", "dimekb, ntypat")))
    !if (with_xccc > 0) then
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xccc1d", "dp", "n1xccc, six, ntypat")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("tccc1d", "dp", "n1xccc, six, ntypat")))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcccrc", "dp", "ntypat")))
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -1034,6 +1040,7 @@ subroutine psps_ncwrite(psps, ncid)
  ! Pseudo-core charge for each type of atom, on the real-space radial
    NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), psps%xcccrc))
    NCF_CHECK(nf90_put_var(ncid, vid("xccc1d"), psps%xccc1d))
+   NCF_CHECK(nf90_put_var(ncid, vid("tccc1d"), psps%tccc1d))
 
  !else
 
@@ -1069,11 +1076,13 @@ subroutine psps_ncwrite(psps, ncid)
      end if
      if (psps%nctab(itypat)%has_tcore) then
        ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
+       ncerr = nf90_put_var(ncid, vid("nc_taucorespl"), psps%nctab(itypat)%taucorespl, start=[1,1,itypat])
        NCF_CHECK(ncerr)
      else
        ABI_MALLOC(dummy3, (psps%mqgrid_vl, 2, psps%ntypat))
        dummy3 = zero
        ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), dummy3)
+       ncerr = nf90_put_var(ncid, vid("nc_taucorespl"), dummy3)
        NCF_CHECK(ncerr)
        ABI_FREE(dummy3)
      end if
@@ -1201,12 +1210,15 @@ subroutine psps_ncread(psps, ncid)
  ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lmnmax,psps%ntypat))
  ABI_MALLOC(psps%ekb,(psps%dimekb,psps%ntypat * (1 - psps%usepaw)))
  ABI_MALLOC(psps%xccc1d,(psps%n1xccc,6,psps%ntypat))
+ ABI_MALLOC(psps%tccc1d,(psps%n1xccc,6,psps%ntypat))
  ABI_MALLOC(psps%nctab,(psps%ntypat))
  if (psps%usepaw == 0) then
    do itypat=1,psps%ntypat
      psps%nctab(itypat)%mqgrid_vl  = psps%mqgrid_vl
      psps%nctab(itypat)%dncdq0     = zero
      psps%nctab(itypat)%d2ncdq0    = zero
+     psps%nctab(itypat)%dtaucdq0     = zero
+     psps%nctab(itypat)%d2taucdq0    = zero
      psps%nctab(itypat)%dnvdq0     = zero
      psps%nctab(itypat)%num_tphi   = zero
      psps%nctab(itypat)%has_jtot   = .False.
@@ -1216,14 +1228,17 @@ subroutine psps_ncread(psps, ncid)
      ! GA: Do we even need those?
      ABI_MALLOC(psps%nctab(itypat)%tvalespl,(psps%mqgrid_vl,2))
      ABI_MALLOC(psps%nctab(itypat)%tcorespl,(psps%mqgrid_vl,2))
+     ABI_MALLOC(psps%nctab(itypat)%taucorespl,(psps%mqgrid_vl,2))
      psps%nctab(itypat)%tvalespl = zero
      psps%nctab(itypat)%tcorespl = zero
+     psps%nctab(itypat)%taucorespl = zero
    end do
  end if
 
  psps%ekb = zero
  psps%indlmn = zero
  psps%xccc1d = zero
+ psps%tccc1d = zero
  psps%xcccrc = zero
  psps%vlspl = zero
  psps%ffspl = zero
@@ -1260,12 +1275,14 @@ subroutine psps_ncread(psps, ncid)
    if (with_xccc > 0) then
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcccrc"), psps%xcccrc))
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xccc1d"), psps%xccc1d))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "tccc1d"), psps%tccc1d))
    end if
 
    ! GA: Why bother reading it?
    do itypat=1,psps%ntypat
      ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tvalespl"), psps%nctab(itypat)%tvalespl, start=[1,1,itypat])
      ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
+     ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_taucorespl"), psps%nctab(itypat)%taucorespl, start=[1,1,itypat])
    end do
 
  end if
@@ -1440,7 +1457,9 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  ! has_tcore tells us whether the model core charge is present or not.
  nctab%has_tcore = has_tcore
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
+ nctab%dtaucdq0 = zero; nctab%d2taucdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
+ ABI_CALLOC(nctab%taucorespl, (mqgrid_vl, 2))
 
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
@@ -1470,6 +1489,7 @@ subroutine nctab_free(nctab)
 
  ABI_SFREE(nctab%tvalespl)
  ABI_SFREE(nctab%tcorespl)
+ ABI_SFREE(nctab%taucorespl)
  ABI_SFREE(nctab%tphi_qspl)
  ABI_SFREE(nctab%tphi_n)
  ABI_SFREE(nctab%tphi_l)
@@ -1501,11 +1521,14 @@ subroutine nctab_copy(nctabin, nctabout)
  nctabout%has_tcore  = nctabin%has_tcore
  nctabout%dncdq0     = nctabin%dncdq0
  nctabout%d2ncdq0    = nctabin%d2ncdq0
+ nctabout%dtaucdq0   = nctabin%dtaucdq0
+ nctabout%d2taucdq0  = nctabin%d2taucdq0
  nctabout%dnvdq0     = nctabin%dnvdq0
 
  ! TODO Why not check values of has_tvale and has_tcore?
  if (allocated(nctabin%tvalespl)) call alloc_copy(nctabin%tvalespl, nctabout%tvalespl)
  if (allocated(nctabin%tcorespl)) call alloc_copy(nctabin%tcorespl, nctabout%tcorespl)
+ if (allocated(nctabin%taucorespl)) call alloc_copy(nctabin%taucorespl, nctabout%taucorespl)
 
 end subroutine nctab_copy
 !!***
@@ -1526,7 +1549,8 @@ end subroutine nctab_copy
 !!
 !! SIDE EFFECTS
 !!  nctabl%tvalspl(mqgrid_vl,2)
-!!  nctab%d2ncdq0
+!!  nctab%dnvdq0
+!!  nctab%d2nvdq0
 !!
 !! SOURCE
 
@@ -1586,15 +1610,22 @@ end subroutine nctab_eval_tvalespl
 !!  xccc1d(n1xccc,6)= The component xccc1d(n1xccc,1) is the pseudo-core charge
 !!   on the radial grid. The components xccc1d(n1xccc,ideriv) give the ideriv-th derivative of the
 !!   pseudo-core charge with respect to the radial distance.
+!!  tccc1d(n1xccc,6)= The component tccc1d(n1xccc,1) is the pseudo-core kinetic energy density
+!!   on the radial grid. The components tccc1d(n1xccc,ideriv) give the ideriv-th derivative of the
+!!   pseudo-core kinE den with respect to the radial distance.
 !!
 !! SIDE EFFECTS
 !!  nctabl%tcorespl(mqgrid_vl,2)
 !!  nctab%d2ncdq0
 !!  nctab%dncdq0
+!!  
+!!  nctabl%taucorespl(mqgrid_vl,2)
+!!  nctab%d2taucdq0
+!!  nctab%dtaucdq0
 !!
 !! SOURCE
 
-subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_vl)
+subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, tccc1d, mqgrid_vl, qgrid_vl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1603,6 +1634,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
  real(dp),intent(in) :: xcccrc
 !arrays
  real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl)
+ real(dp),intent(in) :: tccc1d(n1xccc,6)
 
 !Local variables-------------------------------
  real(dp) :: amesh,yp1,ypn
@@ -1616,6 +1648,12 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
    ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
  else
    ABI_CHECK(size(nctab%tcorespl, dim=1) == mqgrid_vl, "wrong mqgrid_vl")
+ end if
+
+ if (.not. allocated(nctab%taucorespl)) then
+   ABI_CALLOC(nctab%taucorespl, (mqgrid_vl, 2))
+ else
+   ABI_CHECK(size(nctab%taucorespl, dim=1) == mqgrid_vl, "wrong mqgrid_vl")
  end if
 
  ! Skip loop if this atom has no core charge
@@ -1636,6 +1674,12 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, mqgrid_vl, qgrid_v
 
  ! Compute second derivative of tcorespl(q)
  call paw_spline(qgrid_vl, nctab%tcorespl(:,1), mqgrid_vl, yp1, ypn, nctab%tcorespl(:,2))
+
+ ! idem for kinetic energy density
+ call pawpsp_cg(nctab%dtaucdq0, nctab%d2taucdq0, mqgrid_vl, qgrid_vl, nctab%taucorespl(:,1), &
+                core_mesh, tccc1d(:,1), yp1, ypn)
+ call paw_spline(qgrid_vl, nctab%taucorespl(:,1), mqgrid_vl, yp1, ypn, nctab%taucorespl(:,2))
+
  call pawrad_free(core_mesh)
 
 end subroutine nctab_eval_tcorespl
@@ -1706,8 +1750,11 @@ subroutine nctab_mixalch(nctabs, npspalch, ntypalch, algalch, mixalch, mixtabs)
      ! Mix core for NLCC
      if (has_tcore) then
        mix%tcorespl = mix%tcorespl + mc * nctabs(ipspalch)%tcorespl
+       mix%taucorespl = mix%taucorespl + mc * nctabs(ipspalch)%taucorespl
        mix%dncdq0 = mix%dncdq0 + mc * nctabs(ipspalch)%dncdq0
        mix%d2ncdq0 = mix%d2ncdq0 + mc * nctabs(ipspalch)%d2ncdq0
+       mix%dtaucdq0 = mix%dtaucdq0 + mc * nctabs(ipspalch)%dtaucdq0
+       mix%d2taucdq0 = mix%d2taucdq0 + mc * nctabs(ipspalch)%d2taucdq0
      end if
      ! Mix pseudo valence charge.
      if (has_tvale) then
