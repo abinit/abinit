@@ -31,7 +31,16 @@ module m_initcuda
 
  use defs_basis
  use m_abicore
+ use m_xomp
  use m_xmpi, only: xmpi_world,xmpi_comm_rank,xmpi_comm_size,xmpi_abort
+
+#ifdef HAVE_KOKKOS
+ use m_kokkos_utils
+#endif
+
+#ifdef HAVE_YAKL
+ use gator_mod
+#endif
 
  implicit none
 
@@ -275,11 +284,11 @@ end subroutine Get_Mem_Dev
 !!                  if set to 5*-1, will choose the devices by order of performances.
 !!
 !! SIDE EFFECTS
-!!  use_gpu_cuda= 1 if CUDA is on; will be set to 0 if no GPU device is free.
+!!  gpu_option= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
 !!
 !! SOURCE
 
- subroutine setdevice_cuda(gpu_devices_node,use_gpu_cuda)
+ subroutine setdevice_cuda(gpu_devices_node,gpu_option)
 
 #ifdef FC_NAG
  use f90_unix_proc
@@ -288,7 +297,7 @@ end subroutine Get_Mem_Dev
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(inout) :: use_gpu_cuda
+ integer,intent(inout) :: gpu_option
 !arrays
  integer, intent(in) :: gpu_devices_node(5)
 !Local variables ------------------------------
@@ -301,7 +310,7 @@ end subroutine Get_Mem_Dev
  integer,allocatable :: fastest_devices(:)
 ! *********************************************************************
 
- if (use_gpu_cuda==0) return
+ if (gpu_option==ABI_GPU_DISABLED) return
 
  nproc=xmpi_comm_size(xmpi_world)
  me=xmpi_comm_rank(xmpi_world)
@@ -325,8 +334,32 @@ end subroutine Get_Mem_Dev
      end do
      device=gpu_devices_node(1+mod(me,nb_devices))
    end if
+
+   ! Initialize Kokkos and YAKL if requested
+   if(gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+#ifdef HAVE_KOKKOS
+     ! initialize kokkos
+     if (xmpi_comm_rank(xmpi_world) == 0) then
+       write(std_out,*)'initializinging kokkos in MPI process ', xmpi_comm_rank(xmpi_world)
+     end if
+     call kokkos_initialize()
+
+     ! only master MPI process print kokkos config
+     if (xmpi_comm_rank(xmpi_world) == 0) then
+       call abinit_kokkos_print_config()
+     endif
+#endif
+
+#ifdef HAVE_YAKL
+     call gator_init()
+#endif
+   end if
+
    call set_dev(device)
    call check_context(nb_devices,msg)
+   if(gpu_option==ABI_GPU_OPENMP) then
+     call xomp_set_default_device(device)
+   end if
    if(nb_devices==1) then !allocation succeed
      write(msg, '(4a,i1,2a)' ) ch10,&
 &     ' setdevice_cuda : COMMENT -',ch10,&
@@ -349,7 +382,7 @@ end subroutine Get_Mem_Dev
    call InitGPU(gpuinfo,device)
    call CleanGPU(gpuinfo)
  else
-   use_gpu_cuda=0
+   gpu_option=ABI_GPU_DISABLED
  end if
 #endif
  end subroutine setdevice_cuda
@@ -363,24 +396,44 @@ end subroutine Get_Mem_Dev
 !! FUNCTION
 !! Deactivate a GPU device from current CPU core
 !!
+!! INPUTS
+!!  gpu_option= which GPU implementation is used (None, CUDA, OpenMP, Kokkos)
+!!
 !! SOURCE
 
- subroutine unsetdevice_cuda(use_gpu_cuda)
+ subroutine unsetdevice_cuda(gpu_option)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: use_gpu_cuda
+ integer,intent(in) :: gpu_option
 !Local variables ------------------------------
 !scalars
  character(len=500) :: msg
 ! *********************************************************************
 
- if (use_gpu_cuda==0) return
+ if (gpu_option==ABI_GPU_DISABLED) return
 
 #if defined HAVE_GPU_CUDA
- call unset_dev()
+
+ ! Closing YAKL and Kokkos if opened
+ if (gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+#ifdef HAVE_YAKL
+   call gator_finalize()
+   write(std_out,*)'yakl gator finalized'
+#endif
+
+#ifdef HAVE_KOKKOS
+   ! finalize kokkos
+   call kokkos_finalize()
+   write(std_out,*)'kokkos finalized'
+#endif
+ end if
+
+ ! kokkos_finalize already reset GPU context
+ !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
+
 #endif
  end subroutine unsetdevice_cuda
 !!***

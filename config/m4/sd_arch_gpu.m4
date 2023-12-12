@@ -167,16 +167,6 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_fcflags="${sd_gpu_fcflags_def}"
         sd_gpu_ldflags="${sd_gpu_ldflags_def}"
         sd_gpu_libs="${sd_gpu_libs_def}"
-        test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
-        test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
-        if test "${sd_gpu_enable_cxx}" = "yes"; then
-          test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
-        fi
-        if test "${sd_gpu_enable_fc}" = "yes"; then
-          test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
-        fi
-        test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
-        test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
         ;;
 
       *)
@@ -184,6 +174,17 @@ AC_DEFUN([SD_GPU_INIT], [
         ;;
 
     esac
+
+    test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
+    test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
+    if test "${sd_gpu_enable_cxx}" = "yes"; then
+      test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
+    fi
+    if test "${sd_gpu_enable_fc}" = "yes"; then
+      test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
+    fi
+    test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
+    test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
 
   fi
 

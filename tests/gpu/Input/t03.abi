@@ -4,7 +4,7 @@
 # Test for Abinit: use of a Graphics Processing Unit
 #
 # Test collinear and non-collinear magnetsm
-# use_gpu_cuda should be automatically set
+# gpu_option should be automatically set
 # Low cut-off for test; too few k-points
 # ================================================================
 

@@ -324,7 +324,7 @@ subroutine tdep_write_phi4(distance,Invar,Phi4_ref,Shell4at,Sym)
         write(Invar%stdout,'(a,i4,a,i4)') '  For latom  =',latom ,' ,with type=',mod(latom -1,Invar%natom_unitcell)+1
         do ii=1,3
           do jj=1,3
-            write(Invar%stdout,'(a,i2,i2,a)') '  \Phi4^{',ii,jj,'kl}='
+            write(Invar%stdout,'(a,i2,i2,a)') '  Phi4^{',ii,jj,'kl}='
             do kk=1,3
               if (abs(Phi4_3333(ii,jj,1,kk)).lt.5.d-7) then
                 tmp1=0.d0
