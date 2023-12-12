@@ -29,7 +29,8 @@
 !!                 gw_fft --> Test the FFT transforms used in the GW code.
 !!                 all    --> Test all FFT routines (DEFAULT)
 !!     fftalgs = list of fftalg values (used to select the FFT libraries to use, see abinit doc for more info)
-!!     use_gpu_fftalgs = for each fftalg in fftalgs, it is set to 1 if the GPU version should be used.
+!!     use_gpu_fftalgs = for each fftalg in fftalgs, it is set to 0 if the GPU version doesnt have
+!!                       to be used, or to the value selecting the GPU implementation (see defs_basis.F90)
 !!     ncalls = integer defining the number of calls for each tests. The final Wall time and CPU time
 !!              are computed by averaging the final results over ncalls executions.
 !!     max_nthreads = Maximum number of threads (DEFAULT 1, meaningful only if the code
@@ -116,7 +117,8 @@ program fftprof
  type(FFT_prof_t),allocatable :: Ftprof(:)
  integer,allocatable :: osc_gvec(:,:), fft_setups(:,:),fourwf_params(:,:)
 ! ==========  INPUT FILE ==============
- integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0, use_gpu = 0, init_gpu
+ integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1
+ integer :: mixprec = 0, gpu_option = 0, init_gpu_flavor
  character(len=500) :: tasks="all"
  integer :: fftalgs(MAX_NFFTALGS) = 0, use_gpu_fftalgs(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
@@ -229,12 +231,12 @@ program fftprof
  call fft_use_lib_threads(use_lib_threads)
  !write(std_out,*)"use_lib_threads: ",use_lib_threads
 
- init_gpu = maxval(use_gpu_fftalgs)
+ init_gpu_flavor = maxval(use_gpu_fftalgs)
 #if defined HAVE_GPU_CUDA
- if (init_gpu /= 0) then
+ if (init_gpu_flavor /= ABI_GPU_DISABLED) then
    gpu_devices(:)=-1
-   call setdevice_cuda(gpu_devices, init_gpu)
-   ABI_CHECK(init_gpu /= 0, "Cannot find any free GPU device!")
+   call setdevice_cuda(gpu_devices, init_gpu_flavor)
+   ABI_CHECK(init_gpu_flavor /= ABI_GPU_DISABLED, "Cannot find any free GPU device!")
    ! Cublas initialization
    call gpu_linalg_init()
  end if
@@ -251,7 +253,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); use_gpu = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
      do paral_kgb=1,1
        write(msg,"(5(a,i0))")&
         "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
@@ -262,7 +264,7 @@ program fftprof
 
    nfailed = 0; nthreads = 0
    do ii=1,nfftalgs
-     fftalg = fftalgs(ii); use_gpu = use_gpu_fftalgs(ii)
+     fftalg = fftalgs(ii); gpu_option = use_gpu_fftalgs(ii)
      do cplex=1,2
        write(msg,"(4(a,i0))")&
          "MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
@@ -295,20 +297,20 @@ program fftprof
 
  ntests = max_nthreads * nfftalgs
 
- ! First dimension contains [fftalg, fftcache, ndat, nthreads, available, use_gpu]
+ ! First dimension contains [fftalg, fftcache, ndat, nthreads, available, gpu_option]
  ABI_MALLOC(fft_setups, (6, ntests))
 
  ! Default Goedecker library.
  idx=0
  do alg=1,nfftalgs
-   fftalg = fftalgs(alg); use_gpu = use_gpu_fftalgs(alg)
+   fftalg = fftalgs(alg); gpu_option = use_gpu_fftalgs(alg)
    fftalga = fftalg/100; fftalgc = mod(fftalg, 10)
    avail = merge(1, 0, fftalg_isavailable(fftalg))
    !fftcache is machine-dependent.
    fftcache = get_cache_kb()
    do ith=1,max_nthreads
      idx = idx + 1
-     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail, use_gpu]
+     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail, gpu_option]
    end do
  end do
 
@@ -422,19 +424,19 @@ program fftprof
 
    nfailed = 0
    do idx=1,ntests
-     ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,use_gpu]
+     ! fft_setups(:,idx) = [fftalg,fftcache,ndat,ith,avail,gpu_option]
      fftalg   = fft_setups(1, idx)
      fftcache = fft_setups(2, idx)
      ndat     = fft_setups(3, idx)
      nthreads = fft_setups(4, idx)
      ! Skip the test if library is not available.
      if (fft_setups(5,idx) == 0) CYCLE
-     use_gpu = fft_setups(6, idx)
+     gpu_option = fft_setups(6, idx)
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
      call wrtout(std_out, msg)
 
-     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, use_gpu)
+     nfailed = nfailed + fftbox_utests(fftalg, ndat, nthreads, gpu_option)
 
      ! Initialize ngfft(7:8) here.
      ut_ngfft = -1
@@ -509,7 +511,7 @@ program fftprof
 
 #if defined HAVE_GPU_CUDA
  call gpu_linalg_shutdown()
- call unsetdevice_cuda(init_gpu)
+ call unsetdevice_cuda(init_gpu_flavor)
 #endif
 
  call flush_unit(std_out)

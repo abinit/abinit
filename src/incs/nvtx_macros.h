@@ -26,10 +26,14 @@
 #define ABI_NVTX_START_RANGE(id) call abi_nvtx_start_range(id)
 #define ABI_NVTX_END_RANGE() call abi_nvtx_end_range()
 #define NVTX_INIT(value) call nvtx_init(value)
+#define NVTX_PROFILER_START() call nvtxProfilerStart()
+#define NVTX_PROFILER_STOP() call nvtxProfilerStop()
 #else
 #define ABI_NVTX_START_RANGE(id)
 #define ABI_NVTX_END_RANGE()
 #define NVTX_INIT(value)
+#define NVTX_PROFILER_START()
+#define NVTX_PROFILER_STOP()
 #endif
 
 #endif /* ABINIT_52_MANAGE_CUDA_NVTX_MACRO_H */

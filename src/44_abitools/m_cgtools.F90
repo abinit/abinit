@@ -1877,10 +1877,8 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
-#if defined __INTEL_COMPILER && defined HAVE_OPENMP
-       if (ifft==0) then
-         ABI_ERROR("prevent ifort+OMP from miscompiling this section on cronos")
-       end if
+#if (defined FC_NVHPC) || (defined __INTEL_COMPILER && defined HAVE_OPENMP)
+if (ifft<0) stop "prevent from miscompiling this section"
 #endif
        oarrbox(1,ifft+pad_box) = iarrsph(1,ipw+pad_sph)
        oarrbox(2,ifft+pad_box) = iarrsph(2,ipw+pad_sph)
@@ -1910,6 +1908,9 @@ subroutine cg_gsph2box(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,iarrsph,oarr
        iy=kg_k(2,ipw); if(iy<0)iy=iy+ny; iy=iy+1
        iz=kg_k(3,ipw); if(iz<0)iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        ! Construct the coordinates of -k-G
        ixinv=ixinver(ix); iyinv=iyinver(iy); izinv=izinver(iz)
        ifft_inv = ixinv + (iyinv-1)*ldx + (izinv-1)*ldx*ldy
@@ -1982,6 +1983,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft)
        oarrsph(2,ig) = iarrbox(2,ifft)
      end do
@@ -1995,6 +1999,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad)
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad)
        end do
@@ -2009,6 +2016,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
        iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
        iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
        ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
        oarrsph(1,ig) = iarrbox(1,ifft) * rscal
        oarrsph(2,ig) = iarrbox(2,ifft) * rscal
      end do
@@ -2022,6 +2032,9 @@ subroutine cg_box2gsph(nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,kg_k,iarrbox,oarrsph,rsca
          iy=kg_k(2,ig); if (iy<0) iy=iy+ny; iy=iy+1
          iz=kg_k(3,ig); if (iz<0) iz=iz+nz; iz=iz+1
          ifft = ix + (iy-1)*ldx + (iz-1)*ldx*ldy
+#if defined FC_NVHPC
+if (ifft<0) stop "prevent from miscompiling this section"
+#endif
          oarrsph(1,ig+sph_pad) = iarrbox(1,ifft+box_pad) * rscal
          oarrsph(2,ig+sph_pad) = iarrbox(2,ifft+box_pad) * rscal
        end do
@@ -3343,7 +3356,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
      do ig=1+igs,npw+igs
-       if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+       if(kinpw(ig-igs)<huge(zero)*1.d-11)then
          ek0=ek0+kinpw(ig-igs)*(cg(1,ig)**2+cg(2,ig)**2)
        end if
      end do
@@ -3352,14 +3365,14 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
  else if (istwf_k>=2)then
    if (istwf_k==2 .and. me_g0 == 1)then
      ek0=zero ; ipw1=2
-     if(kinpw(1)<huge(0.0_dp)*1.d-11)ek0=0.5_dp*kinpw(1)*cg(1,1)**2
+     if(kinpw(1)<huge(zero)*1.d-11)ek0=0.5_dp*kinpw(1)*cg(1,1)**2
    else
      ek0=zero ; ipw1=1
    end if
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw
      do ig=ipw1+igs,npw+igs
-       if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+       if(kinpw(ig)<huge(zero)*1.d-11)then
          ek0=ek0+kinpw(ig)*(cg(1,ig)**2+cg(2,ig)**2)
        end if
      end do
@@ -3388,7 +3401,7 @@ subroutine cg_precon(cg, eval, istwf_k, kinpw, npw, nspinor, me_g0, optekin, pco
    igs=(ispinor-1)*npw
 !$OMP PARALLEL DO PRIVATE(fac,ig,poly,xx) SHARED(cg,ek0_inv,eval,kinpw,igs,npw,vect,pcon)
    do ig=1+igs,npw+igs
-     if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+     if(kinpw(ig-igs)<huge(zero)*1.d-11)then
        xx=kinpw(ig-igs)*ek0_inv
 !      Teter polynomial ratio
        poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3479,7 +3492,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      if (me_g0 == 1) then
        do ig=1+igs,1+igs !g=0
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3503,7 +3516,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        end do
        do ig=2+igs,npw+igs
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3533,7 +3546,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      else
        do ig=1+igs,npw+igs
          if (iterationnumber==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3571,9 +3584,9 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      do iblocksize=1,blocksize
        if (me_g0 == 1)then
          ek0(iblocksize)=0.0_dp ; ipw1=2
-         if(kinpw(1)<huge(0.0_dp)*1.d-11)ek0(iblocksize)=0.5_dp*kinpw(1)*cg(1,iblocksize)**2
+         if(kinpw(1)<huge(zero)*1.d-11)ek0(iblocksize)=0.5_dp*kinpw(1)*cg(1,iblocksize)**2
          do ig=ipw1,npw
-           if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+&
 &             kinpw(ig)*(cg(ig,iblocksize)**2+cg(ig+npw-1,iblocksize)**2)
            end if
@@ -3581,7 +3594,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        else
          ek0(iblocksize)=0.0_dp ; ipw1=1
          do ig=ipw1,npw
-           if(kinpw(ig)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+&
 &             kinpw(ig)*(cg(ig,iblocksize)**2+cg(ig+npw,iblocksize)**2)
            end if
@@ -3614,7 +3627,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        if (me_g0 == 1) then
          do ig=1+igs,1+igs !g=0
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3634,7 +3647,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
          end do
          do ig=2+igs,npw+igs
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3660,7 +3673,7 @@ subroutine cg_precon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        else
          do ig=1+igs,npw+igs
            if (iterationnumber==1.or.optpcon==1) then
-             if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+             if(kinpw(ig-igs)<huge(zero)*1.d-11)then
                xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !              teter polynomial ratio
                poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3766,7 +3779,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
      igs=(ispinor-1)*npw
      do ig=1+igs,npw+igs
        if (iterationnumber==1) then
-         if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+         if(kinpw(ig-igs)<huge(zero)*1.d-11)then
            xx=kinpw(ig-igs)
 !          teter polynomial ratio
            poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))
@@ -3798,7 +3811,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        do ispinor=1,nspinor
          igs=(ispinor-1)*npw
          do ig=1+igs,npw+igs
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              ek0(iblocksize)=ek0(iblocksize)+kinpw(ig-igs)*&
 &             (real(cg(ig,iblocksize))**2+aimag(cg(ig,iblocksize))**2)
            end if
@@ -3827,7 +3840,7 @@ subroutine cg_zprecon_block(cg,eval,blocksize,iterationnumber,kinpw,&
        igs=(ispinor-1)*npw
        do ig=1+igs,npw+igs
          if (iterationnumber==1.or.optpcon==1) then
-           if(kinpw(ig-igs)<huge(0.0_dp)*1.d-11)then
+           if(kinpw(ig-igs)<huge(zero)*1.d-11)then
              xx=kinpw(ig-igs)*ek0_inv(iblocksize)
 !            teter polynomial ratio
              poly=27._dp+xx*(18._dp+xx*(12._dp+xx*8._dp))

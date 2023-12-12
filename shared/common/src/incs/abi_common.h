@@ -205,6 +205,24 @@
 
 #endif
 
+#define ABI_MALLOC_CUDA(array,size) call alloc_on_gpu(array,size)
+#define ABI_FREE_CUDA(array) call dealloc_on_gpu(array)
+
+/* these routine should only be use when HAVE_YAKL is defined.
+ * They provide acces to memory available in both host and device
+ * (cuda/hip/openacc) code. The final goal would be to always use managed memory
+ * when HAVE_GPU is defined */
+
+/* gator_allocate can have 2 or 3 args, here is a trick to define a macro
+ * that make sure gator_allocate have 2 or 3 arguments */
+
+#define ABI_MALLOC_MANAGED(array,size) call gator_allocate(array,size)
+#define ABI_MALLOC_MANAGED_BOUNDS(array,size,lbounds) call gator_allocate(array,size,lbounds)
+
+#define ABI_FREE_MANAGED(array) call gator_deallocate(array)
+#define ABI_SFREE_MANAGED(array) if (associated(array)) then NEWLINE ABI_FREE_MANAGED(array) NEWLINE endif
+
+
 /* Macros to allocate zero-initialized arrays. */
 #define ABI_CALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = zero
 #define ABI_ICALLOC(ARR, SIZE) ABI_MALLOC(ARR, SIZE) NEWLINE ARR = 0

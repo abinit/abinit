@@ -65,9 +65,9 @@
  nband  20
 
 
-# use_gpu_cuda keyword has to be put to zero when using recursion
+# gpu_option keyword has to be put to zero when using recursion
 # (done by default) Use of GPU is done with another mechanism
- use_gpu_cuda 0
+ gpu_option 0
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "PseudosHGH_pwteter/2he.2.hgh"
