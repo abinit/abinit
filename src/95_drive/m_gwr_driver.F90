@@ -1291,7 +1291,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%gpu_option)
  call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%gpu_option)
- call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, istwfk1, m_gvec, dp, dtset%gpu_option)
+ call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, m_istwfk, m_gvec, dp, dtset%gpu_option)
 
  M_ = m_npw
 
