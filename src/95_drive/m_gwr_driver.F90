@@ -1289,9 +1289,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! 4) Treatment of q--> 0 in vc_coul
  ! 4) See other TODOs below.
 
- call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
- call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%use_gpu_cuda)
- call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, m_istwfk, m_gvec, dp, dtset%use_gpu_cuda)
+ call uplan_1%init(npw_k, nspinor, batch1_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%gpu_option)
+ call uplan_2%init(npw_k, nspinor, batch2_size, u_ngfft, ugb%istwf_k, ugb%kg_k, dp, dtset%gpu_option)
+ call uplan_m%init(m_npw, nspinor, batch2_size, u_ngfft, istwfk1, m_gvec, dp, dtset%gpu_option)
 
  M_ = m_npw
 

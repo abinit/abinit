@@ -38,7 +38,10 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.11.6],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],
+    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
+    [https://bugs.launchpad.net/abinit/],
+    [abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -278,9 +281,6 @@ ABI_FC_EXTENSIONS
 # Get module file case
 ABI_FC_MOD_CASE
 
-# Determine Fortran-C name mangling scheme
-AC_FC_WRAPPERS
-
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -387,6 +387,24 @@ fi
 # Adjust OpenMP flags if not used
 if test "${abi_openmp_enable}" != "yes"; then
   FCFLAGS_OPENMP=""
+fi
+
+# Handling OpenMP offload
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  # Fail if GPU support is not enabled
+  if test "${abi_gpu_enable}" = "no"; then
+    AC_MSG_ERROR([OpenMP offload is enabled with no GPU support (ie: CUDA), please check your config.])
+  fi
+  # Enable OpenMP if OpenMP offload is requested, to remain consistent
+  abi_openmp_enable="yes"
+  if test "${GPU_ARCH}" = ""; then
+    AC_MSG_WARN([GPU arch wasn't not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
+    GPU_ARCH=80
+  fi
+  # Perform pattern replacement in OpenMP offload flags with requested GPU arch
+  FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
+else
+  FCFLAGS_OPENMP_OFFLOAD=""
 fi
 
 # Set Fortran preprocessing flags
@@ -548,7 +566,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
@@ -561,6 +579,11 @@ test "${XPPFLAGS}" = "" && \
   XPPFLAGS="${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
 test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
   FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
+
+# Determine Fortran-C name mangling scheme
+# This is needed after FCFLAGS has been set as some compilers have extra
+# libraries linked due to optimizations levels or OpenMP
+AC_FC_WRAPPERS
 
 # FIXME: temporary workaround for Macs
 if test "${abi_cpu_platform}" = "apple"; then
@@ -632,6 +655,7 @@ if test "${abi_openmp_enable}" = "yes"; then
   AC_MSG_CHECKING([Fortran flags for OpenMP])
   AC_MSG_RESULT([${FCFLAGS_OPENMP}])
   ABI_OMP_CHECK_COLLAPSE
+  ABI_OMP_CHECK_GPU_OFFLOAD
   AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
 fi
 
@@ -696,6 +720,14 @@ SD_WANNIER90_INIT([optional warn], [-lwannier90])
 # Init XMLF90
 #SD_XMLF90_INIT([optional fail])
 SD_XMLF90_INIT([optional warn])
+
+# Init KOKKOS
+SD_KOKKOS_INIT([optional fail])
+#SD_KOKKOS_INIT([optional warn])
+
+# Init YAKL
+SD_YAKL_INIT([optional fail])
+#SD_YAKL_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -870,6 +902,12 @@ SD_WANNIER90_DETECT
 
 # AtomPAW integration support
 ABI_CHECK_ATOMPAW_BINS
+
+# KOKKOS library support
+SD_KOKKOS_DETECT
+
+# YAKL library support
+SD_YAKL_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1049,7 +1087,7 @@ fi
 # Help to produce libraires
 if test ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-fi 
+fi
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
