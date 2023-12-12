@@ -145,13 +145,6 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
    end if
  end if
 
-!!FB: This is most probably not needed
-!!Update header, with evolving variables
-!call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
-!                   & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                 &
-!                   & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
-!                   & mpi_atmtab=mpi_enreg%my_atmtab)
-
  !** Writes some info in main output file
  write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
  call wrtout(ab_out,msg)
@@ -170,12 +163,20 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(tdks%tdener_unit,msg)
 
  !** Writes TD elec. field and associated vector potential if needed
+ ! Update electric field and vector potential value
+ call tdks%tdef%update((istep-1)*tdks%dt, tdks%rprimd, dtset%kptns)
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
+   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
    call wrtout(tdks%tdef_unit,msg)
  end if
 
  !** Writes additional optional properties
+ !Update header, with evolving variables
+ call tdks%hdr%update(tdks%bantot,tdks%etot,tdks%energies%e_fermie,tdks%energies%e_fermih, &
+                    & tdks%hdr%residm,tdks%rprimd,tdks%occ0,tdks%pawrhoij,                 &
+                    & tdks%xred,dtset%amu_orig,comm_atom=mpi_enreg%comm_atom,              &
+                    & mpi_atmtab=mpi_enreg%my_atmtab)
+
  !Computed at actual step
  if (mod(istep,dtset%td_prtstr) == 0) then
    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)

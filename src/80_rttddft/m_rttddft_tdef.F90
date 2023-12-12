@@ -113,8 +113,14 @@ subroutine tdef_init(tdef, td_ef_type, td_ef_pol, td_ef_ezero, td_ef_tzero, td_e
  tdef%ef_tzero    = td_ef_tzero
  tdef%ef_sin_a    = 2.0_dp*pi/td_ef_tau + tdef%ef_omega
  tdef%ef_sin_b    = 2.0_dp*pi/td_ef_tau - tdef%ef_omega
+ 
+ tdef%efield = 0.0_dp
+ tdef%vecpot = 0.0_dp
+ tdef%vecpot_red = 0.0_dp
+ 
  ABI_MALLOC(tdef%kpa,(3,nkpt))
  tdef%kpa = kpts
+
 
 end subroutine tdef_init
 !!***
@@ -179,13 +185,12 @@ subroutine tdef_update(tdef, time, rprimd, kpts)
                                        & +sin(tdef%ef_sin_b*t)/(4.0_dp*tdef%ef_sin_b))
       end if
       tdef%vecpot_red(:) = matmul(transpose(rprimd),tdef%vecpot)
-      
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
       ABI_ERROR(msg)
  end select
- !Update the k+A grid used in cprojs
  if (tdef%ef_type /= 0) then
+   !Update the k+A grid used in cprojs
    do i = 1,3
       tdef%kpa(i,:) = kpts(i,:) + tdef%vecpot_red(i)
    end do

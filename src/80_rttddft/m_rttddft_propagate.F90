@@ -28,6 +28,7 @@ module m_rttddft_propagate
  use m_dtset,               only: dataset_type
  use m_errors,              only: msg_hndl
  use m_hamiltonian,         only: gs_hamiltonian_type
+ use m_initylmg,            only: initylmg
  use m_rttddft,             only: rttddft_setup_ele_step
  use m_rttddft_propagators, only: rttddft_propagator_er, &
                                 & rttddft_propagator_emr
@@ -91,8 +92,14 @@ subroutine rttddft_propagate_ele(dtset, istep, mpi_enreg, psps, tdks)
  ! Update various quantities after a nuclear step
  if (dtset%ionmov /= 0) call rttddft_setup_ele_step(dtset,mpi_enreg,psps,tdks)
 
- ! Update electric field and vector potential
- call tdks%tdef%update(istep*tdks%dt, tdks%rprimd, dtset%kptns)
+ ! Update electric field and vector potential value
+ call tdks%tdef%update((istep-1)*tdks%dt, tdks%rprimd, dtset%kptns)
+ if (tdks%tdef%ef_type/=0) then
+   ! update the spherical harmonics (computed at k+G+A)
+   call initylmg(tdks%gprimd,tdks%kg,tdks%tdef%kpa,dtset%mkmem,mpi_enreg,&
+   & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
+   & tdks%npwarr,dtset%nsppol,0,tdks%rprimd,tdks%ylm,tdks%ylmgr)
+ end if
 
  ! Propagate cg
  select case (dtset%td_propagator) 
