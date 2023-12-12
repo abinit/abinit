@@ -33,6 +33,11 @@
   getwfk3     -1
 getxcart3     -2
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 ### Structure parameters ###
 
  acell 3*14.0

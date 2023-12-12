@@ -990,15 +990,15 @@
   For iatcell=   1 ,with type=   1
   For jatom  =   1 ,with type=   1
   For katom  =   1 ,with type=   1
-  \Phi3^{\alpha\beta x}=
+  Phi3^{alpha beta x}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  \Phi3^{\alpha\beta y}=
+  Phi3^{alpha beta y}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
-  \Phi3^{\alpha\beta z}=
+  Phi3^{alpha beta z}=
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000
    0.000000  0.000000  0.000000

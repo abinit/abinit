@@ -274,8 +274,8 @@ program atdep
  ABI_MALLOC(Rlatt4Abi ,(3,natom_unitcell,natom))   ; Rlatt4Abi (:,:,:)=0.d0
  ABI_MALLOC(distance,(natom,natom,4))              ; distance(:,:,:)=0.d0
  ABI_MALLOC(Rlatt_cart,(3,natom_unitcell,natom))   ; Rlatt_cart(:,:,:)=0.d0
- ABI_MALLOC(ucart,(3,natom,Invar%my_nstep))           ; ucart(:,:,:)=0.d0
- ABI_MALLOC(Forces_MD,(3*natom*Invar%my_nstep))       ; Forces_MD(:)=0.d0
+ ABI_MALLOC(ucart,(3,natom,Invar%my_nstep))        ; ucart(:,:,:)=0.d0
+ ABI_MALLOC(Forces_MD,(3*natom*Invar%my_nstep))    ; Forces_MD(:)=0.d0
 
  call tdep_MatchIdeal2Average(distance,Forces_MD,Invar,Lattice,MPIdata,Rlatt_cart,Rlatt4Abi,Sym,ucart)
 

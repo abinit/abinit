@@ -1426,10 +1426,11 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
 !scalars
  character(len=*),intent(in) :: arr_name
  class(ebands_t),intent(inout) :: ebands
- real(dp),intent(in) :: vect(ebands%bantot)
+ real(dp),intent(in) :: vect(:)
 
 !Local variables-------------------------------
  integer :: nkpt,nsppol,mband,bantot
+ real(dp) :: val
 ! *************************************************************************
 
  mband =ebands%mband; bantot=ebands%bantot; nkpt  =ebands%nkpt; nsppol=ebands%nsppol
@@ -1438,10 +1439,11 @@ subroutine put_eneocc_vect(ebands,arr_name,vect)
  case ('occ')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%occ, val=zero)
  case ('eig')
-   ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SIGFAULT
+   ! DFPT routines call ebands_init with the wrong bantot. Using maxval(vect) causes SEGFAULT
    ! so I have to recompute the correct bantot here
    !ABI_CHECK(sum(ebands%nband) == ebands%bantot, "bantot and nband are incosistent")
-   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=maxval(vect(1:sum(ebands%nband))))
+   val = maxval(vect(1:sum(ebands%nband)))
+   call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%eig, val=val)
  case ('doccde')
    call unpack_eneocc(nkpt,nsppol,mband,ebands%nband,vect,ebands%doccde, val=zero)
  case default

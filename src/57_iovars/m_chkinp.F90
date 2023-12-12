@@ -35,7 +35,7 @@ module m_chkinp
  use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : iseven, isdiagmat
- use m_symtk,          only : chkgrp, chkorthsy, symmetrize_xred
+ use m_symtk,          only : sg_multable, chkorthsy, symmetrize_xred
  use m_fstrings,       only : string_in, sjoin
  use m_geometry,       only : metric
  use m_fftcore,        only : fftalg_has_mpi
@@ -89,15 +89,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !Local variables-------------------------------
 !scalars
- logical :: twvl,allow, berryflag
- logical :: wvlbigdft=.false.
  integer :: bantot,fixed_mismatch,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
- integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
+ integer :: mband,miniatsph,minidyn,mod10,mpierr,all_nprocs
  integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu
  integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
- integer :: fftalg,need_kden,usepaw,usewvl
+ integer :: fftalg,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
+ logical :: twvl,allowed,berryflag
+ logical :: wvlbigdft=.false.
+ logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -109,6 +110,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
  character(len=32) :: cond_string(4)
  character(len=32) :: input_name
+ type(libxc_functional_type) :: xcfunc(2)
 
 ! *************************************************************************
 
@@ -160,9 +162,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &   .or.dt%d3e_pert2_phon/=0.or.dt%d3e_pert3_phon/=0) response=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    nproc=mpi_enregs(idtset)%nproc
-   mgga=0;if(dt%ixc>=31.and.dt%ixc<=35)mgga=1
-   if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
-   need_kden=mgga;if (dt%ixc==32.or.dt%ixc==33) need_kden=0
+
+!  Some properties of the XC functional
+   if (dt%ixc>=0) then
+     xc_is_lda=((dt%ixc>=1.and.dt%ixc<=10).or.dt%ixc==50)
+     xc_is_gga=((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
+     xc_is_mgga=(dt%ixc>=31.and.dt%ixc<=35)
+     xc_is_tb09=.false.
+     xc_is_hybrid=(dt%ixc==40.or.dt%ixc==41.or.dt%ixc==42)
+     xc_need_kden=(dt%ixc==31.or.dt%ixc==34.or.dt%ixc==35)
+   else
+     call libxc_functionals_init(dt%ixc,nspden,xc_functionals=xcfunc,xc_tb09_c=dt%xc_tb09_c)
+     xc_is_lda=libxc_functionals_islda(xc_functionals=xcfunc)
+     xc_is_gga=libxc_functionals_isgga(xc_functionals=xcfunc)
+     xc_is_mgga=libxc_functionals_ismgga(xc_functionals=xcfunc)
+     xc_is_tb09=libxc_functionals_is_tb09(xc_functionals=xcfunc)
+     xc_is_hybrid=libxc_functionals_is_hybrid(xc_functionals=xcfunc)
+     xc_need_kden=xc_is_mgga  ! We shoud discriminate with Laplacian based mGGa functionals
+     call libxc_functionals_end(xc_functionals=xcfunc)
+   end if
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -451,7 +469,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
           '   Please, read the description of the input variable chksymtnons.',ch10,&
           '   If you are planning cDFT, GW or BSE calculations, such tnons value is very problematic.',ch10,&
           '   Otherwise, you might set chksymtnons=0.',&
-          '   But do not be surprised if ABINIT do not converge for cDFT, or crashes for GW or BSE.',ch10,&
+          '   But do not be surprised if ABINIT does not converge for cDFT, or crashes for GW or BSE.',ch10,&
           '   Better solution : you might shift your atomic positions to better align the FFT grid and the symmetry axes.'
          call wrtout(std_out,msg)
          if(fixed_mismatch==1)then
@@ -521,6 +539,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(2)='iprcel';cond_values(2)=dt%iprcel
        call chkint_ge(1,2,cond_string,cond_values,ierr,'densfor_pred',dt%densfor_pred,0,iout)
      end if
+     ! densfor_pred<0 not valid for mGGA
+     ! Yet it is but contribution from Laplacian and/or kin. ene. density are not taken into account
+     !if(dt%densfor_pred<0.and.xc_is_mgga.and.dt%iscf>=10)then
+     !  msg='densfor_pred<0 (full correction for forces) is not allowed for density mixing and meta-GGA XC!'
+     !  ABI_ERROR_NOSTOP(msg, ierr)
+     !end if
    end if
 
 !  diecut
@@ -838,7 +862,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  effmass_free
-   if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc/=31.and.dt%ixc/=35).and.mgga==1)then
+   if(abs(dt%effmass_free-one)>tol8.and.dt%ixc/=31.and.dt%ixc/=35.and.xc_is_mgga)then
      write(msg, '(5a)' )&
       'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
       'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
@@ -1039,7 +1063,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,[0,1,2,3],iout)
 
    ! gpu_devices
-   if (dt%use_gpu_cuda==1) then
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then
      if (all(gpu_devices(:)==-2)) then
        gpu_devices(:)=dt%gpu_devices(:)
      else if (any(dt%gpu_devices(:)/=gpu_devices(:))) then
@@ -1048,6 +1072,66 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         'Action: change gpu_devices in input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+   end if
+
+!  gpu_kokkos_nthrd
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
+
+!  gpu_option
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &
+   &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then
+     if (dt%nspinor==2) then
+       write(msg,'(3a)')&
+&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
+&       'Action: impose gpu_option=0 in your input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+!    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
+!    write(msg,'(6a)') ch10,&
+!    &       ' chkinp : ERROR -',ch10,&
+!    &       '  When GPU is in use (gpu_option>0), wfoptalg must be 4 or 14 !',ch10,&
+!    &       '  Action: change wfoptalg in your input file.'
+!    call wrtout(std_out,msg)
+!    ierr=ierr+1
+!    end if
+     if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
+       write(msg,'(3a)')&
+        'Use of GPU is not allowed when useylm==0 !',ch10,&
+        'Action: impose uselym=1 in your input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     if (dt%tfkinfunc>0) then
+       write(msg,'(5a)')&
+&       'gpu_option/=0 (use of GPU) is not allowed when tfkinfunc>0 !',ch10,&
+&       'Action: suppress gpu_option from your input file',ch10,&
+&       '        (GPU will be used but with another mechanism)'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     if (dt%ngfft(4)/=dt%ngfft(1).or.dt%ngfft(5)/=dt%ngfft(2).or.dt%ngfft(6)/=dt%ngfft(3)) then
+       write(msg,'(3a)')&
+&       'When GPU is in use (gpu_option/=0), ngfft(4:6) must be equal to ngfft(1:3) !',ch10,&
+&       'Action: suppress ngfft in input file or change it.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+#ifndef HAVE_GPU_CUDA
+     write(msg,'(6a)') ch10,&
+&     ' invars0: ERROR -',ch10,&
+&     '   Input variable gpu_option is on but abinit hasn''t been built with GPU mode enabled !',ch10,&
+&     '   Action: suppress the input variable gpu_option or re-compile ABINIT with GPU enabled.'
+     call wrtout(std_out,msg)
+     ierr=ierr+1
+#endif
+#ifndef HAVE_GPU_CUDA_DP
+     write(msg,'(10a)') ch10,&
+&     ' invars0: ERROR -',ch10,&
+&     '   Input variable gpu_option is on but abinit hasn''t been built',ch10,&
+&     '   with GPU mode in DOUBLE PRECISION enabled !',ch10,&
+&     '   Action: suppress input variable use_gpu_cuda',ch10,&
+&     '   or re-compile ABINIT with double precision GPU enabled.'
+     call wrtout(std_out,msg)
+     ierr=ierr+1
+#endif
    end if
 
    ! RT-TDDFT
@@ -1090,8 +1174,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         ABI_ERROR_NOSTOP('RT-TDDFT with DFT+U has not been tested yet, set usepawu to 0.', ierr)
      endif
      ! usekden
-     if (dt%usekden==1) then
-        ABI_ERROR_NOSTOP('RT-TDDFT with mGGA has not been tested yet, set usekden to 0.', ierr)
+     if (xc_is_mgga) then
+        ABI_ERROR_NOSTOP('RT-TDDFT with mGGA has not been tested yet! Not available.', ierr)
      end if
      ! vdw_xc
      if (dt%vdw_xc /= 0) then
@@ -1455,22 +1539,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint(1,1,cond_string,cond_values,ierr,&
 &     'ixc',dt%ixc,25,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,35,40,41,42/),-1,0,iout)
    end if
-   if(dt%usepaw>0.and.dt%ixc<0) then
-     if (libxc_functionals_is_hybrid()) then
-       ABI_ERROR_NOSTOP('Meta-GGA functionals are not compatible with PAW!', ierr)
-     end if
-   end if
    if (dt%usepaw>0.and.(dt%ixc==-427.or.dt%ixc==-428)) then
      ABI_WARNING('Range-separated Hybrid Functionals have not been extensively tested in PAW!!!')
    end if
-   allow=(dt%ixc > 0).and.(dt%ixc /= 3).and.(dt%ixc /= 7).and.(dt%ixc /= 8)
-   if(.not.allow)then
-     allow=(dt%ixc < 0).and.(libxc_functionals_is_hybrid().or.libxc_functionals_ismgga())
-   end if
-   if(allow)then
+   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
+   if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
+   if (xc_is_mgga) then
+!    mGGA not allowed for different drivers
+     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,5, &
+&      (/RUNL_SCREENING,RUNL_SIGMA,RUNL_BSE,RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
+   end if
+
+
 
 !  ixcpositron
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcpositron',dt%ixcpositron,8,(/0,-1,1,11,2,3,31,4/),iout)
@@ -2110,7 +2194,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='iprcel' ; cond_values(1)=dt%iprcel
      call chkint_eq(1,1,cond_string,cond_values,ierr,'nspden',nspden,2,(/1,2/),iout)
    end if
-   if(mgga==1.and.nspden==4)then
+   if(xc_is_mgga.and.nspden==4)then
      write(msg, '(3a)' )&
       'The meta-GGA XC kernel is not yet implemented for non-colinear magnetism case',ch10, &
       'Please use "nspden=1 or 2".'
@@ -2445,18 +2529,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
    end if
    !Linear Response function only for LDA/GGA
-   allow=(dt%ixc>0).and.((dt%ixc>16.and.dt%ixc<23).or.(dt%ixc>=40))
-   if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_ismgga()
-   if(allow)then
+   allowed=((xc_is_lda.or.xc_is_gga.or.dt%ixc==0).and.dt%ixc/=50)
+   if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
    !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
-     allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
-     if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
-     if(allow) then
+     if( xc_is_gga.and. &
+&       (dt%rfphon/=0.or.dt%rfelfd==1.or.dt%rfelfd==3.or.dt%rfstrs/=0.or.dt%rf2_dkde/=0) ) then
        if (dt%pawxcdev/=0)then
          write(msg,'(7a)' )&
          'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
@@ -2480,7 +2562,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
    !PAW+mGGA function restricted to pawxcdev=0
-   if (dt%usepaw==1.and.mgga==1.and.dt%pawxcdev/=0) then
+   if (dt%usepaw==1.and.xc_is_mgga.and.dt%pawxcdev/=0) then
      write(msg,'(5a)' ) &
      'You are performing a PAW calculation using a meta-GGA XC functional:',ch10,&
      '  This is restricted to pawxcdev = 0!',ch10,&
@@ -2488,9 +2570,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
-   allow=(dt%ixc>0).and.(dt%ixc/=3.and.dt%ixc/=7.and.dt%ixc/=8)
-   if(.not.allow) allow=(dt%ixc<0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())
-   if(allow)then
+   allowed=((xc_is_lda.and.dt%ixc<0).or.dt%ixc==0.or.dt%ixc==3.or.dt%ixc==7.or.dt%ixc==8)
+   if(.not.allowed)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
@@ -2557,11 +2638,26 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  optstress
+!  Por mGGA, optstress not yet allowed (temporary, hopefully)
+   if(dt%optstress>0.and.xc_is_mgga)then
+     msg='Computation of stress tensor is not yet implemented for meta-GGA XC functionals!'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 !  When optcell>0, optstress must be >0
    if(dt%optcell>0)then
      cond_string(1)='optcell' ; cond_values(1)=dt%optcell
      call chkint_eq(1,1,cond_string,cond_values,ierr,'optstress',dt%optstress,1,(/1/),iout)
    end if
+!  TB09 XC functional cannot provide forces/stresses
+   if((dt%optforces/=0.or.dt%optstress/=0).and.xc_is_tb09)then
+     write(msg, '(9a)' ) &
+&      'When the selected XC functional is Tran-Blaha 2009 functional (modified Becke-Johnson),',ch10,&
+&        'which is a potential-only functional, calculations cannot be self-consistent',ch10,&
+&        'with respect to the total energy.',ch10, &
+&        'For that reason, neither forces nor stresses can be computed.',ch10,&
+&        'You should set optforces and optstress to 0!'
+     ABI_WARNING(msg)
+  end if
 
   !  orbmag
   ! only values of 0,1,2 are allowed. 0 is the default.
@@ -2878,7 +2974,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
-   if (dt%positron/=0.and.mgga==1) then
+   if (dt%positron/=0.and.xc_is_mgga) then
      msg='Electron-positron calculation is not compatible with meta-GGA XC functional!'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
@@ -3249,7 +3345,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     ABI_CHECK(dt%use_gpu_cuda == 0, "RMM-DIIS does not support GPUs.")
+     ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
@@ -3287,6 +3383,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end do ! ipsp
    end if ! usepaw==0
 
+!  spinat
+!  Not allowed with nspden=1 (PAW)
+   !if(any(abs(dt%spinat)>tol8).and.nspden==1.and.usepaw==1) then
+   !  write(msg, '(3a)' )&
+   !   'A spinat/=0 is not allowed when magnetization is forced to zero (nspden=1)!',ch10,&
+   !   'Action: re-run with spinat zero '
+   !  ABI_ERROR_NOSTOP(msg, ierr)
+   !end if
+
 !  spinmagntarget
    if(abs(dt%spinmagntarget+99.99d0)>tol8 .and. abs(dt%spinmagntarget)>tol8)then
      if(nsppol==1)then
@@ -3297,17 +3402,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(optdriver==RUNL_RESPFN)then
-       write(msg, '(a,f8.2,4a)' )&
+       write(msg, '(a,f8.2,8a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'For a response function run, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized response function calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
+&      '  the default value of spinmagntarget, and explicit definition of occ. ',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%prtdos==1)then
-       write(msg, '(a,f8.2,4a)' )&
+       write(msg, '(a,f8.2,8a)' )&
        'spinmagntarget was input as ',dt%spinmagntarget,ch10,&
        'When prtdos==1, spinmagntarget is required to be 0.0d0 or the default value.',ch10,&
-       'Action: modify value spinmagntarget or nsppol in input file.'
+       'A spin-polarized DOS calculation for a ferromagnetic insulator needs occopt=0, 1 or 2',ch10,&
+&      '  the default value of spinmagntarget, and explicit definition of occ.',ch10,&
+       'Action: modify spinmagntarget, occopt or nsppol in your input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
    end if
@@ -3357,8 +3466,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  symrel and tnons
-!  Check the point group closure (TODO should check the spatial group closure !!)
-   call chkgrp(dt%nsym,dt%symafm,dt%symrel,ierrgrp)
+!  Check the point group closure
+   call sg_multable(dt%nsym,dt%symafm,dt%symrel,ierrgrp, tnons=dt%tnons, tnons_tol=tol5)
    if (ierrgrp==1) ierr=ierr+1
 
 !  Check the orthogonality of the symmetry operations
@@ -3529,9 +3638,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(dt%usekden<need_kden)then
+     if(xc_need_kden.and.dt%usekden<1)then
        write(msg, '(3a)' )&
-       'The functional is a MGGA, but the kinetic energy density',ch10, &
+       'The functional is a MGGA using kinetic energy density, but the kinetic energy density',ch10, &
        'is not present. Please set "usekden 1" in the input file.'
        ABI_ERROR(msg)
      end if
@@ -3643,62 +3752,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
    end if
 
-!  use_gpu_cuda
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,2,(/0,1/),iout)
-   if (dt%use_gpu_cuda==1) then
-     if (dt%nspinor==2) then
-       write(msg,'(3a)')&
-&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
-&       'Action: impose use_gpu_cuda=0 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-!    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
-!    write(msg,'(6a)') ch10,&
-!    &       ' chkinp : ERROR -',ch10,&
-!    &       '  When GPU is in use (use_gpu_cuda=1), wfoptalg must be 4 or 14 !',ch10,&
-!    &       '  Action: change wfoptalg in your input file.'
-!    call wrtout(std_out,msg)
-!    ierr=ierr+1
-!    end if
-     if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
-       write(msg,'(3a)')&
-        'Use of GPU is not allowed when useylm==0 !',ch10,&
-        'Action: impose uselym=1 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-     if (dt%tfkinfunc>0) then
-       write(msg,'(5a)')&
-&       'use_gpu_cuda=1 is not allowed when tfkinfunc>0 !',ch10,&
-&       'Action: suppress use_gpu_cuda=0 from your input file',ch10,&
-&       '        (GPU will be used but with another mechanism)'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-     if (dt%ngfft(4)/=dt%ngfft(1).or.dt%ngfft(5)/=dt%ngfft(2).or.dt%ngfft(6)/=dt%ngfft(3)) then
-       write(msg,'(3a)')&
-&       'When GPU is in use (use_gpu_cuda=1), ngfft(4:6) must be equal to ngfft(1:3) !',ch10,&
-&       'Action: suppress ngfft in input file or change it.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-#ifndef HAVE_GPU_CUDA
-     write(msg,'(6a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built with gpu mode enabled !',ch10,&
-&     '   Action: change the input variable use_gpu_cuda or re-compile ABINIT with Cuda enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
-#ifndef HAVE_GPU_CUDA_DP
-     write(msg,'(10a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
-&     '   with gpu mode in DOUBLE PRECISION enabled !',ch10,&
-&     '   Action: change the input variable use_gpu_cuda',ch10,&
-&     '   or re-compile ABINIT with double precision Cuda enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
-   end if
-
 !  use_slk
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
@@ -3723,11 +3776,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
 !    Restriction for DFT-D2
      if (dt%vdw_xc==5) then
-!    Only with PBE, BP86  or BLYP GGA XC
+!    Only with PBE, BP86 or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202) then
+&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+&         dt%ixc/=-202231.and.dt%ixc/=-231202) then
          write(msg,'(8a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D2 correction (vdw_xc=5) only available for the following XC functionals:',ch10,&
@@ -3751,11 +3804,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%vdw_xc==6.or.dt%vdw_xc==7) then
 !    Only with PBE, BP86  or BLYP GGA XC
        if(dt%ixc/=11.and.dt%ixc/=-101130.and.dt%ixc/=-130101.and. &
-&       dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
-&       dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
-&       dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
-&       dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
-&       dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
+&         dt%ixc/=18.and.dt%ixc/=-106131.and.dt%ixc/=-131106.and. &
+&         dt%ixc/=19.and.dt%ixc/=-106132.and.dt%ixc/=-132106.and. &
+&         dt%ixc/=-202231.and.dt%ixc/=-231202.and.&
+&         dt%ixc/=14.and.dt%ixc/=-102130.and.dt%ixc/=-130102.and. &
+&         dt%ixc/=-170.and.dt%ixc/=41.and.dt%ixc/=-406) then
          write(msg,'(4a,i2,5a)') ch10,&
 &         ' chkinp : ERROR -',ch10,&
 &         '  Van der Waals DFT-D correction (vdw_xc=',dt%vdw_xc,') only available for the following XC functionals:',ch10,&
@@ -3844,8 +3897,17 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  xc_denpos
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_denpos',dt%xc_denpos,1,tiny(one),iout)
 
+!  xc_taupos
+!  Allow for negative value of xc_taupos (to deactivate it)
+!  call chkdpr(0,0,cond_string,cond_values,ierr,'xc_taupos',dt%xc_taupos,1,tiny(one),iout)
+
 !  xc_tb09_c
    call chkdpr(0,0,cond_string,cond_values,ierr,'xc_tb09_c',dt%xc_tb09_c,1,0.0_dp,iout)
+   !if (dt%xc_tb09_c>99._dp.and.dt%iscf==22) then
+   !  write(msg, '(a,i4,a,i4,a,a,a,a,a,a)' )&
+   !&   'TB09 XC functional with variable c is not compatible with ODA mixing (iscf=22)!'
+   !  ABI_ERROR_NOSTOP(msg,ierr)
+   !end if
 
 !  xred
 !  Check that two atoms are not on top of each other
@@ -4014,15 +4076,25 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      !end if
 
      ! If SCF calculations, one and only one of these can differ from zero
-     if(ttolwfr+ttoldff+ttoldfe+ttolvrs+ttolrff /= 1 .and. (dt%iscf>0 .or. dt%iscf==-3))then
-       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
+     if ( (dt%iscf>0 .or. dt%iscf==-3) .and. &
+       & ( (ttolwfr==1.and.ttoldff+ttoldfe+ttolvrs+ttolrff>1) .or. (ttolwfr==0.and.ttoldff+ttoldfe+ttolvrs+ttolrff/=1) ) ) then
+       write(msg,'(6a,es14.6,a,es14.6,a,es14.6,a,a,es14.6,a,i0,2a)' )&
         'For the SCF case, one and only one of the input tolerance criteria ',ch10,&
-        'tolwfr, toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
-        'tolwfr=',dt%tolwfr,', toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
+        'toldff, tolrff, toldfe or tolvrs ','must differ from zero, while they are',ch10,&
+        'toldff=',dt%toldff,', tolrff=',dt%tolrff,', toldfe=',dt%toldfe,ch10,&
         'and tolvrs=',dt%tolvrs,' for idtset: ', idtset, ch10,&
         'Action: change your input file and resubmit the job.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+
+     if (ttolwfr==1.and.dt%tolwfr_diago>dt%tolwfr) then
+       write(msg, '(2a,2(a,es14.6),a)' )&
+        ' tolwfr diago cannot be bigger than tolwfr !',ch10,&
+        ' tolwfr=',dt%tolwfr,' and tolwfr_diago=',dt%tolwfr_diago,&
+        ' Action: change the value of tolwfr or tolwfr_diago in the input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+
    end if
 
    if (optdriver == RUNL_GWR) then
@@ -4071,8 +4143,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  iatfixy and iatfixz (diagonal symmetry operations)
 
 !  Should check values of fftalg
-
-!  rfasr=2 possible only when electric field response is computed.
 
 !  Must have nqpt=1 for rfphon=1
 

@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h24 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
 
 ================================================================================
@@ -62,19 +62,26 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1002933  5.1002933  G(1)= -0.0980336  0.0980336  0.0980336
  R(2)=  5.1002933  0.0000000  5.1002933  G(2)=  0.0980336 -0.0980336  0.0980336
  R(3)=  5.1002933  5.1002933  0.0000000  G(3)=  0.0980336  0.0980336 -0.0980336
  Unit cell volume ucvol=  2.6534777E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Si
+    2)    0.2500000  0.2500000  0.2500000  Si
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.031  and twall      0.038 sec
+-begin at tcpu      0.026  and twall      0.035 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -372,10 +379,10 @@
      4        4.921878E-04       -1.021121E-06
      5       -2.068650E-04       -1.197535E-06
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.290  and wall time      0.305 sec
++Total cpu time      0.229  and wall time      0.248 sec
 
  anaddb : the run completed succesfully.

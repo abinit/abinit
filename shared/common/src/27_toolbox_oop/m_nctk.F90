@@ -186,6 +186,7 @@ MODULE m_nctk
  public :: nctk_use_classic_for_seq ! Use netcdf-classic for files that are used in sequential.
                                     ! instead of the default that is netcdf4/hdf5.
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
+ public :: nctk_idgroup             ! Return the nc identifier from the name of a group.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
  public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
  public :: nctk_fort_or_ncfile      ! Test wheter a path exists (fortran or nc file) and
@@ -234,6 +235,9 @@ MODULE m_nctk
 
  public :: nctk_write_datar
  public :: nctk_read_datar
+
+ ! FIXME These routines are specific to anaddb
+ !       and should be moved at the level of 77_ddb
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
  public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
@@ -287,6 +291,8 @@ subroutine nctk_use_classic_for_seq()
 end subroutine nctk_use_classic_for_seq
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_nctk/nctk_idname
 !! NAME
 !!  nctk_idname
@@ -328,6 +334,46 @@ end function nctk_idname
 
 !----------------------------------------------------------------------
 
+!!****f* m_nctk/nctk_idgroup
+!! NAME
+!!  nctk_idgroup
+!!
+!! FUNCTION
+!!  Return the nc identifier from the name of a group
+!!
+!! SOURCE
+
+integer function nctk_idgroup(ncid, grpname) result(grpid)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ncid
+ character(len=*),intent(in) :: grpname
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr
+ character(len=1000) :: msg
+
+! *********************************************************************
+
+#ifdef HAVE_NETCDF
+ ncerr = nf90_inq_ncid(ncid, grpname, grpid)
+
+ if (ncerr /= nf90_noerr) then
+   write(msg,'(6a)')&
+     "NetCDF library returned: `",trim(nf90_strerror(ncerr)), "`", ch10,&
+     "while trying to get the ncid of group: ",trim(grpname)
+   ABI_ERROR(msg)
+ end if
+#else
+ ABI_ERROR("Netcdf support is not activated")
+ write(std_out,*)ncid,grpname
+#endif
+
+end function nctk_idgroup
+!!***
+
+!----------------------------------------------------------------------
 !!****f* m_nctk/nctk_ncify
 !! NAME
 !!  nctk_ncify
@@ -750,14 +796,16 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
-   call wrtout(std_out, sjoin("- Creating HDf5 file with MPI-IO support:", path))
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   call wrtout(std_out,my_string)
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=comm, info=xmpio_info)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   call wrtout(std_out, sjoin("- Creating netcdf file WITHOUT MPI-IO support:", path))
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   call wrtout(std_out,my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create
    ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
@@ -1919,8 +1967,10 @@ integer function nctk_get_dim(ncid, dimname, dimlen, datamode) result(ncerr)
    end if
  end if
 
- NCF_CHECK(nf90_inq_dimid(ncid, dimname, dimid))
- NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=dimlen))
+ ncerr = nf90_inq_dimid(ncid, dimname, dimid)
+ if (ncerr == nf90_noerr) then
+   ncerr = nf90_inquire_dimension(ncid, dimid, len=dimlen)
+ end if
 
 end function nctk_get_dim
 !!***

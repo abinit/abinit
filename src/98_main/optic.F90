@@ -45,7 +45,6 @@ program optic
  use m_xmpi
  use m_xomp
  use m_abicore
- use m_build_info
  use m_optic_tools
  use m_wfk
  use m_nctk
@@ -58,6 +57,7 @@ program optic
  use netcdf
 #endif
 
+ use m_build_info,     only : abinit_version
  use defs_datatypes,   only : ebands_t
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_time ,          only : asctime, timein

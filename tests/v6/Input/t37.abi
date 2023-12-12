@@ -30,7 +30,6 @@ ieig2rf     1
 bdeigrf     8
 smdelta     1
 elph2_imagden  0.1 eV
-rfasr       1
 getwfk      1          # Use GS wave functions from dataset1
 getden      1          # Use density from dataset1
 kptopt      3          # Need full k-point set for finite-Q response

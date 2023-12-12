@@ -30,7 +30,7 @@ revPBE, the RPBE and the HCTH GGAs (spin unpolarized as well as polarized) are
 also available.  
 
 (The following section is obsolete and should be upgraded. ABINIT is currently 
-interfaced with LibXC 5).
+interfaced with LibXC 6).
 In the LibXC 2.0 library, as interfaced with ABINIT, there are 24 functional
 forms of the 3D LDA type, and over 80 functional forms of the GGA type. They
 can be used with norm-conserving pseudopotentials as well as PAW atomic data.

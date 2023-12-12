@@ -29,6 +29,7 @@ module m_invars1
  use m_atomdata
  use m_dtset
  use m_nctk
+ use m_xomp
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -68,6 +69,7 @@ contains
 !! needed for allocating some input arrays in abinit, and also useri
 !! and userr. The variable usewvl is also read here for later reading
 !! of input path for the atomic orbital file (if required).
+!! Also initialize as soon as possible GPU related parameters
 !!
 !! INPUTS
 !!  lenstr=actual length of string
@@ -107,8 +109,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
+ integer :: tread_pseudos,cnt,tread_geo,treads
+ integer :: idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath
@@ -121,7 +124,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !******************************************************************
 
- !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
+!DEBUG
+!write(std_out,"(3a)")" m_invars1%invars0 : enter with string:", ch10, trim(string)
+!ENDDEBUG
 
  marr=max(9,ndtset_alloc,2)
  ABI_MALLOC(dprarr,(marr))
@@ -548,63 +553,98 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
-
-
  end do
 
- dtsets(:)%diago_apply_block_sliced=1
- do idtset=1,ndtset_alloc
-    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
-    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
- end do
+ ! GPU related parameters
 
+ dtsets(:)%gpu_option=ABI_GPU_DISABLED
+ dtsets(:)%gpu_use_nvtx=0
 
-!GPU information
- use_gpu_cuda=0
- dtsets(:)%use_gpu_cuda=0
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
- call Get_ndevice(ii)
- if (ii>0) then
+ call Get_ndevice(idev)
+ if (idev>0) then
    do i1=1,ndtset_alloc
-     dtsets(i1)%use_gpu_cuda=-1
+     dtsets(i1)%gpu_option=ABI_GPU_UNKNOWN
    end do
  end if
+#else
+ ABI_UNUSED(idev)
 #endif
- do idtset=1,ndtset_alloc
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
-end do
 
- dtsets(:)%use_nvtx=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ gpu_option=ABI_GPU_DISABLED
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_option',tread,'INT')
+   if(tread==1)dtsets(idtset)%gpu_option=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
+   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
-#endif
 
- if (use_gpu_cuda==1) then
+ if (gpu_option/=ABI_GPU_DISABLED) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
-   if (ii<=0) then
+   if (idev<=0) then
      write(msg,'(5a)')&
-&     'Input variables use_gpu_cuda is on',ch10,&
+&     'Input variable gpu_option is on (/=0),',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
-&     'Action: change the input variable use_gpu_cuda.'
+&     'Action: change the input variable gpu_option.'
      ABI_ERROR(msg)
+   end if
+   if(gpu_option==ABI_GPU_OPENMP) then
+#if !defined HAVE_OPENMP_OFFLOAD
+     write(msg,'(7a)')&
+&     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+&     'with OpenMP GPU offloading enabled !',ch10,&
+&     'Action: change the input variable gpu_option',ch10,&
+&     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     ABI_ERROR(msg)
+#endif
+     if(xomp_get_num_devices() == 0) then
+       write(msg,'(13a)')&
+&       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
+&       'but no GPU is visible by OpenMP.',ch10,&
+&       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+&       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+&       'as to which CUDA version is supported.',ch10,&
+&       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+       ABI_ERROR(msg)
+     end if
+   else if(gpu_option==ABI_GPU_KOKKOS) then
+#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+     write(msg,'(7a)')&
+&     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
+&     'Action: change the input variable gpu_option',ch10,&
+&     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     ABI_ERROR(msg)
+#endif
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
+&   'Input variable gpu_option is on but ABINIT hasn''t been built',ch10,&
 &   'with (double precision) gpu mode enabled !',ch10,&
-&   'Action: change the input variable use_gpu_cuda',ch10,&
+&   'Action: change the input variable gpu_option',ch10,&
 &   '        or re-compile ABINIT with double-precision Cuda enabled.'
    ABI_ERROR(msg)
 #endif
  end if
+
+!Set gpu_option default value
+!gpu_option=ABI_GPU_UNKNOWN means undetermined
+ do idtset=1,ndtset_alloc
+   if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+#if defined HAVE_OPENMP_OFFLOAD
+     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+#elif defined HAVE_GPU_CUDA
+     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+#else
+     dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+#endif
+   end if
+ end do
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
@@ -958,6 +998,7 @@ subroutine indefo1(dtset)
  dtset%efmas_calc_dirs=0
  dtset%efmas_n_dirs=0
 !F
+ dtset%field_red(:)=zero
 !G
  dtset%ga_n_rules=1
  dtset%gw_customnfreqsp=0
@@ -1154,7 +1195,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  integer :: cond_values(4),vacuum(3)
  integer,allocatable :: iatfix(:,:),intarr(:),istwfk(:),nband(:),typat(:)
  real(dp) :: acell(3),rprim(3,3)
-!real(dp) :: field(3)
  real(dp),allocatable :: amu(:),chrgat(:),dprarr(:),kpt(:,:),kpthf(:,:),mixalch(:,:),nucdipmom(:,:)
  real(dp),allocatable :: ratsph(:),reaalloc(:),spinat(:,:)
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
@@ -1505,7 +1545,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    spinat(1:3,1:natom)=dtset%spinat(1:3,1:natom)
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
-   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before ingeo '
+!call flush(std_out)
+!ENDDEBUG
+
+   call ingeo(acell,amu,bravais,chrgat,dtset,dtset%field_red(1:3),dtset%genafm(1:3),iatfix,&
     dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
     msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
     dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
@@ -1513,6 +1558,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
     rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
     string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
     typat,vel,vel_cell,xred,znucl, comm)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after ingeo '
+!call flush(std_out)
+!ENDDEBUG
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
@@ -1567,6 +1617,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! Examine whether there is some vacuum space in the unit cell
  call invacuum(jdtset,lenstr,natom,dtset%rprimd_orig(1:3,1:3,intimage),string,vacuum,&
 & dtset%xred_orig(1:3,1:natom,intimage))
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after invacuum '
+!call flush(std_out)
+!ENDDEBUG
 
 !write(std_out,*)' invars1: before inkpts, dtset%mixalch_orig(1:npspalch,1:ntypalch,:)=',&
 !dtset%mixalch_orig(1:npspalch,1:ntypalch,1:dtset%nimage)
@@ -1659,6 +1714,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ! test that the value of nkpt is OK, if kptopt/=0
  ! Set up dummy arrays istwfk, kpt, wtk
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before nkpt/=0 '
+!call flush(std_out)
+!ENDDEBUG
+
  if(nkpt/=0 .or. dtset%kptopt/=0)then
    ABI_MALLOC(istwfk,(nkpt))
    ABI_MALLOC(kpt,(3,nkpt))
@@ -1686,6 +1746,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    ! Use the first image to predict k and/or q points, except if an intermediate image is available
    intimage=1; if(dtset%nimage>2)intimage=(1+dtset%nimage)/2
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before inqpt'
+!call flush(std_out)
+!ENDDEBUG
+
    ! Find the q-point, if any.
    if(nqpt/=0)then
      call inqpt(chksymbreak,std_out,jdtset,lenstr,msym,natom,dtset%qptn,dtset%wtq,&
@@ -1693,12 +1758,23 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
        vacuum,dtset%xred_orig(1:3,1:natom,intimage),dtset%qptrlatt)
    endif
 
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before inkpts'
+!call flush(std_out)
+!ENDDEBUG
+
+
    ! Find the k point grid
    call inkpts(bravais,chksymbreak,dtset%fockdownsampling,iout,iscf,istwfk,jdtset,&
      kpt,kpthf,dtset%kptopt,kptnrm,dtset%kptrlatt_orig,dtset%kptrlatt,kptrlen,lenstr,msym, dtset%getkerange_filepath, &
      nkpt,nkpthf,nqpt,dtset%ngkpt,dtset%nshiftk,dtset%nshiftk_orig,dtset%shiftk_orig,dtset%nsym,&
      occopt,dtset%qptn,response,dtset%rprimd_orig(1:3,1:3,intimage),dtset%shiftk,&
      string,symafm,symrel,vacuum,wtk,comm)
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after inkpts'
+!call flush(std_out)
+!ENDDEBUG
 
    ABI_FREE(istwfk)
    ABI_FREE(kpt)
@@ -1709,6 +1785,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    dtset%nkpt=nkpt
    dtset%nkpthf=nkpthf
  end if
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : after nkpt/=0 '
+!call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqptdm',tread,'INT')
  if(tread==1) dtset%nqptdm=intarr(1)
@@ -1774,6 +1855,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  end if
 
 !---------------------------------------------------------------------------
+
+!DEBUG
+!write(std_out,'(a)')' m_invars1%invars1 : before nnos '
+!call flush(std_out)
+!ENDDEBUG
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nnos',tread,'INT')
  if(tread==1) dtset%nnos=intarr(1)
@@ -2029,6 +2115,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
+!Some special cases are not compatible with GPU implementation
+ if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
+
  ABI_FREE(nband)
  ABI_FREE(ratsph)
  ABI_FREE(intarr)
@@ -2127,15 +2218,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    wvl_bigdft=.false.
    if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
-!  Special case of use_gpu_cuda (can be undertermined at this point)
-!  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
-   if (dtsets(idtset)%use_gpu_cuda==-1) then
-     if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=0
-     else
-       dtsets(idtset)%use_gpu_cuda=1
-     end if
-  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2156,6 +2238,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%adpimd=0
    dtsets(idtset)%adpimd_gamma=one
    dtsets(idtset)%accuracy=0
+   dtsets(idtset)%asr=1
    dtsets(idtset)%atvshift(:,:,:)=zero
    dtsets(idtset)%auxc_ixc=11
    dtsets(idtset)%auxc_scal=one
@@ -2185,6 +2268,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chkexit=0
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
+   dtsets(idtset)%chneut=1      
    dtsets(idtset)%cineb_start=7
    dtsets(idtset)%corecs(:) = zero
    dtsets(idtset)%cprj_update_lvl=0
@@ -2194,6 +2278,8 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
    dtsets(idtset)%dfpt_sciss=zero
+   dtsets(idtset)%invol_blk_sliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%invol_blk_sliced=0
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
    dtsets(idtset)%diemac=1.0d6
@@ -2302,7 +2388,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
+   dtsets(idtset)%gpu_nl_distrib=0
+   dtsets(idtset)%gpu_nl_splitsize=1
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero
@@ -2584,7 +2673,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%rectolden=zero
    dtsets(idtset)%rcut=zero
    dtsets(idtset)%restartxf=0
-   dtsets(idtset)%rfasr=0
+!  dtsets(idtset)%rfasr=0
    dtsets(idtset)%rfatpol(1:2)=-1
    dtsets(idtset)%rfddk=0
    dtsets(idtset)%rfdir(1:3)=1
@@ -2639,6 +2728,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%tolmxf=5.0d-5
    dtsets(idtset)%tolvrs=zero
    dtsets(idtset)%tolwfr=zero
+   dtsets(idtset)%tolwfr_diago=zero
 
    dtsets(idtset)%tsmear=0.01_dp
 !  U
@@ -2704,6 +2794,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 !  X
    dtsets(idtset)%xclevel  = 0
    dtsets(idtset)%xc_denpos = tol14
+   dtsets(idtset)%xc_taupos = tol14
    dtsets(idtset)%xc_tb09_c = 99.99_dp
    dtsets(idtset)%xredsph_extra(:,:)=zero
 !  Y

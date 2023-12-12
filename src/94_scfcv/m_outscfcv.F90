@@ -83,8 +83,8 @@ module m_outscfcv
  use m_green,            only : green_type,compute_green,&
                                 fourier_green,print_green,init_green,destroy_green,init_green_tau
  use m_self,             only : self_type,initialize_self,rw_self,destroy_self,destroy_self,selfreal2imag_self
-
  use m_paw_correlations, only : loc_orbmom_cal
+
  implicit none
 
  private

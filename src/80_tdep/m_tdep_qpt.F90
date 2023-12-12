@@ -45,7 +45,7 @@ contains
 
   implicit none
   integer :: qpt_tot,qptbound_tot
-  double precision :: zeta,eta,nu,angle_alpha
+  double precision :: zeta,eta,delta,mu,nu,angle_alpha
   type(Input_type),intent(in) :: Invar
   type(QptBound_type), allocatable,intent(out) :: QptBound(:)
   type(Lattice_type),intent(in) :: Lattice
@@ -109,6 +109,26 @@ contains
 &                  QptBound_type (3, 0,'X ', 0.500, 0.000, 0.000),&
 &                  QptBound_type (3, 0,'Y ', 0.000, 0.500, 0.000),&
 &                  QptBound_type (3, 0,'Z ', 0.000, 0.000, 0.500) /)
+  else if ((Invar%bravais(1).eq.3).and.(Invar%bravais(2).eq.-1)) then
+    zeta =(1.d0+Lattice%acell_unitcell(1)**2/Lattice%acell_unitcell(3)**2)/4.d0
+    eta  =(1.d0+Lattice%acell_unitcell(2)**2/Lattice%acell_unitcell(3)**2)/4.d0
+    delta=(Lattice%acell_unitcell(2)**2-Lattice%acell_unitcell(1)**2)/(4.d0*Lattice%acell_unitcell(3)**2)
+    mu   =(Lattice%acell_unitcell(1)**2+Lattice%acell_unitcell(2)**2)/(4.d0*Lattice%acell_unitcell(3)**2)
+    qptbound_tot=13
+    ABI_MALLOC(QptBound,(qptbound_tot))
+    QptBound(:)=(/ QptBound_type (3,-1,'G ', 0.000    , 0.000    , 0.000),&
+&                  QptBound_type (3,-1,'L ',-mu       , mu       , 0.5-delta),&
+&                  QptBound_type (3,-1,'L1', mu       ,-mu       , 0.5+delta),&
+&                  QptBound_type (3,-1,'L2', 0.5-delta, 0.5+delta,-mu),&
+&                  QptBound_type (3,-1,'R ', 0.000    , 0.500    , 0.000),&
+&                  QptBound_type (3,-1,'S ', 0.500    , 0.000    , 0.000),&
+&                  QptBound_type (3,-1,'T ', 0.000    , 0.000    , 0.500),&
+&                  QptBound_type (3,-1,'W ', 0.250    , 0.250    , 0.250),&
+&                  QptBound_type (3,-1,'X ',-zeta     , zeta     , zeta ),&
+&                  QptBound_type (3,-1,'X1', zeta     , 1-zeta   ,-zeta),&
+&                  QptBound_type (3,-1,'Y ', eta      ,-eta      , eta),&
+&                  QptBound_type (3,-1,'Y1', 1-eta    , eta      ,-eta),&
+&                  QptBound_type (3,-1,'Z ', 0.500    , 0.500    ,-0.500) /)
   else if ((Invar%bravais(1).eq.3).and.(Invar%bravais(2).eq.3)) then
     zeta=(1.d0+Lattice%acell_unitcell(1)**2/Lattice%acell_unitcell(2)**2)/4.d0
     qptbound_tot=13
@@ -255,6 +275,22 @@ contains
       Qpt%special_qpt(4)="Y "
       Qpt%special_qpt(5)="G "
       Qpt%special_qpt(6)="Z "
+    else if ((Invar%bravais(1).eq.3).and.(Invar%bravais(2).eq.-1)) then
+!     BCO: G-X-L-T-W-R-X1-Z-G-Y-S-W
+      qpt_tot=12
+      ABI_MALLOC(Qpt%special_qpt,(qpt_tot))
+      Qpt%special_qpt(1)="G "
+      Qpt%special_qpt(2)="X "
+      Qpt%special_qpt(3)="L "
+      Qpt%special_qpt(4)="T "
+      Qpt%special_qpt(5)="W "
+      Qpt%special_qpt(6)="R "
+      Qpt%special_qpt(7)="X1"
+      Qpt%special_qpt(8)="Z "
+      Qpt%special_qpt(9)="G "
+      Qpt%special_qpt(10)="Y "
+      Qpt%special_qpt(11)="S "
+      Qpt%special_qpt(12)="W "
     else if ((Invar%bravais(1).eq.3).and.(Invar%bravais(2).eq.3)) then
 !     ORTH-C: G-Yp-Gp-Z
       qpt_tot=4
