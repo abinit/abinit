@@ -494,12 +494,12 @@ module defs_datatypes
    ! xccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge with respect to the radial distance.
 
-  real(dp), allocatable :: tccc1d(:,:,:)
-   ! tccc1d(n1xccc*(1-usepaw),6,ntypat)
+  real(dp), allocatable :: xcctau1d(:,:,:)
+   ! xcctau1d(n1xccc*(1-usepaw),6,ntypat)
    ! Norm-conserving psps only
-   ! The component tccc1d(n1xccc,1,ntypat) is the pseudo-core charge kinetic energy density
+   ! The component xcctau1d(n1xccc,1,ntypat) is the pseudo-core charge kinetic energy density
    ! for each type of atom, on the radial grid. The components
-   ! tccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
+   ! xcctau1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge kinetic energy density with respect to the radial distance.
 
   real(dp), allocatable :: zionpsp(:)

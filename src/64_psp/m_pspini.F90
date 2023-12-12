@@ -166,9 +166,9 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  real(dp),allocatable :: dvlspl(:,:),dvlspl_alch(:,:,:),ekb(:),ekb_alch(:,:)
  real(dp),allocatable :: epsatm_alch(:),ffspl(:,:,:),ffspl_alch(:,:,:,:)
  real(dp),allocatable :: vlspl(:,:),vlspl_alch(:,:,:),xccc1d(:,:)
- real(dp),allocatable :: tccc1d(:,:)
+ real(dp),allocatable :: xcctau1d(:,:)
  real(dp),allocatable :: xccc1d_alch(:,:,:),xcccrc_alch(:)
- real(dp),allocatable :: tccc1d_alch(:,:,:)
+ real(dp),allocatable :: xcctau1d_alch(:,:,:)
  type(nctab_t),target,allocatable :: nctab_alch(:)
 
 ! *************************************************************************
@@ -307,7 +307,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 
    ABI_MALLOC(ekb,(psps%dimekb*(1-psps%usepaw)))
    ABI_MALLOC(xccc1d,(psps%n1xccc*(1-psps%usepaw),6))
-   ABI_MALLOC(tccc1d,(psps%n1xccc*(1-psps%usepaw),6))
+   ABI_MALLOC(xcctau1d,(psps%n1xccc*(1-psps%usepaw),6))
    ABI_MALLOC(ffspl,(psps%mqgrid_ff,2,psps%lnmax))
    ABI_MALLOC(vlspl,(psps%mqgrid_vl,2))
    if (.not.psps%vlspl_recipSpace) then
@@ -338,7 +338,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        if (.not.psps%vlspl_recipSpace) dvlspl(:, :)=zero
        if (psps%usepaw==0) then
          xccc1d(:,:)=zero
-         tccc1d(:,:)=zero
+         xcctau1d(:,:)=zero
        end if
        indlmn=>psps%indlmn(:,:,ipsp)
        indlmn(:,:)=0
@@ -350,14 +350,14 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        ! Cannot use the same call in case of bound checking, because of pawrad/pawtab
        if(psps%usepaw==0)then
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
-           pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,tccc1d,psps%nctab(ipsp))
+           pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,xcctau1d,psps%nctab(ipsp))
          psps%ekb(:,ipsp)=ekb(:)
          psps%xccc1d(:,:,ipsp)=xccc1d(:,:)
-         psps%tccc1d(:,:,ipsp)=tccc1d(:,:)
+         psps%xcctau1d(:,:,ipsp)=xcctau1d(:,:)
        else
          comm_mpi_=xmpi_comm_self;if (present(comm_mpi)) comm_mpi_=comm_mpi
          call pspatm(dq,dtset,dtfil,ekb,epsatm(ipsp),ffspl,indlmn,ipsp,&
-           pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,tccc1d,nctab_dum,comm_mpi=comm_mpi_)
+           pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,xcctau1d,nctab_dum,comm_mpi=comm_mpi_)
          if (dtset%usefock==1.and.pawtab(ipsp)%has_fock==0) then
            ABI_BUG('The PAW data file does not contain Fock information. Change the PAW data file!')
          end if
@@ -381,7 +381,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
      ABI_MALLOC(ekb_alch,(psps%dimekb,npspalch*(1-psps%usepaw)))
      ABI_MALLOC(ffspl_alch,(psps%mqgrid_ff,2,psps%lnmax,npspalch))
      ABI_MALLOC(xccc1d_alch,(psps%n1xccc*(1-psps%usepaw),6,npspalch))
-     ABI_MALLOC(tccc1d_alch,(psps%n1xccc*(1-psps%usepaw),6,npspalch))
+     ABI_MALLOC(xcctau1d_alch,(psps%n1xccc*(1-psps%usepaw),6,npspalch))
      ABI_MALLOC(xcccrc_alch,(npspalch))
      ABI_MALLOC(vlspl_alch,(psps%mqgrid_vl,2,npspalch))
      if (.not.psps%vlspl_recipSpace) then
@@ -407,7 +407,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        if (.not.psps%vlspl_recipSpace) dvlspl(:, :)=zero
        if (psps%usepaw==0) then
          xccc1d(:,:)=zero
-         tccc1d(:,:)=zero
+         xcctau1d(:,:)=zero
        end if
        indlmn(:,:)=0
 
@@ -422,12 +422,12 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          end if
 
          call pspatm(dq,dtset,dtfil,ekb,epsatm_psp,ffspl,indlmn,ipsp,&
-&         pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,tccc1d,nctab_ptr)
+&         pawrad_dum,pawtab_dum,psps,vlspl,dvlspl,xcccrc,xccc1d,xcctau1d,nctab_ptr)
 
        else if (psps%usepaw==1) then
          comm_mpi_=xmpi_comm_self;if (present(comm_mpi)) comm_mpi_=comm_mpi
          call pspatm(dq,dtset,dtfil,ekb,epsatm_psp,ffspl,indlmn,ipsp,&
-&         pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,tccc1d,nctab_dum,&
+&         pawrad(ipsp),pawtab(ipsp),psps,vlspl,dvlspl,xcccrc,xccc1d,xcctau1d,nctab_dum,&
 &         comm_mpi=comm_mpi_)
        end if
 
@@ -441,7 +441,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, ipsp)=dvlspl(:, :)
          if (psps%usepaw==0) then
            psps%xccc1d(:,:,ipsp)=xccc1d(:,:)
-           psps%tccc1d(:,:,ipsp)=tccc1d(:,:)
+           psps%xcctau1d(:,:,ipsp)=xcctau1d(:,:)
          end if
          psps%xcccrc(ipsp)=xcccrc
          psps%indlmn(:,:,ipsp)=indlmn(:,:)
@@ -456,7 +456,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          if (psps%usepaw==0) then
            ekb_alch(:,ipspalch)=ekb(:)
            xccc1d_alch(:,:,ipspalch)=xccc1d(:,:)
-           tccc1d_alch(:,:,ipspalch)=tccc1d(:,:)
+           xcctau1d_alch(:,:,ipspalch)=xcctau1d(:,:)
          end if
          xcccrc_alch(ipspalch)=xcccrc
          indlmn_alch(:,:,ipspalch)=indlmn(:,:)
@@ -476,7 +476,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        xcccrc=zero
        if (psps%usepaw==0) then
          xccc1d(:,:)=zero
-         tccc1d(:,:)=zero
+         xcctau1d(:,:)=zero
        end if
 
 !      Here, linear combination of the quantities
@@ -491,7 +491,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          xcccrc = xcccrc + xcccrc_alch(ipspalch) * psps%mixalch(ipspalch,itypalch)
          if (psps%usepaw==0) then
            xccc1d(:,:) = xccc1d(:,:) + xccc1d_alch(:,:,ipspalch) * psps%mixalch(ipspalch,itypalch)
-           tccc1d(:,:) = tccc1d(:,:) + tccc1d_alch(:,:,ipspalch) * psps%mixalch(ipspalch,itypalch)
+           xcctau1d(:,:) = xcctau1d(:,:) + xcctau1d_alch(:,:,ipspalch) * psps%mixalch(ipspalch,itypalch)
          end if
        end do ! ipspalch
 
@@ -499,7 +499,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
        if (.not.psps%vlspl_recipSpace) psps%dvlspl(:, :, itypat) = dvlspl(:, :)
        if (psps%usepaw==0) then
          psps%xccc1d(:,:,itypat)=xccc1d(:,:)
-         psps%tccc1d(:,:,itypat)=tccc1d(:,:)
+         psps%xcctau1d(:,:,itypat)=xcctau1d(:,:)
        end if
        psps%xcccrc(itypat)=xcccrc
 
@@ -554,7 +554,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
      ABI_FREE(ekb_alch)
      ABI_FREE(ffspl_alch)
      ABI_FREE(xccc1d_alch)
-     ABI_FREE(tccc1d_alch)
+     ABI_FREE(xcctau1d_alch)
      ABI_FREE(xcccrc_alch)
      ABI_FREE(vlspl_alch)
      if (.not.psps%vlspl_recipSpace) then
@@ -577,7 +577,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
    ABI_FREE(ffspl)
    ABI_FREE(vlspl)
    ABI_FREE(xccc1d)
-   ABI_FREE(tccc1d)
+   ABI_FREE(xcctau1d)
 
    if (.not.psps%vlspl_recipSpace) then
      ABI_FREE(dvlspl)
@@ -757,7 +757,7 @@ end subroutine pspcor
 !!   each projector; if any, spin-orbit components begin at l=mpsang+1
 !!  xcccrc=XC core correction cutoff radius (bohr) from psp file
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives, from psp file (used in NC only)
-!!  tccc1d(n1xccc*(1-usepaw),6)=1D core charge kinetic energy, and five derivatives, from psp file (used in NC only)
+!!  xcctau1d(n1xccc*(1-usepaw),6)=1D core charge kinetic energy, and five derivatives, from psp file (used in NC only)
 !!  nctab=<nctab_t>
 !!    has_tvale=True if the pseudo provides the valence density (used in NC only)
 !!    tvalespl(mqgrid_vl(1-usepaw),2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
@@ -807,7 +807,7 @@ end subroutine pspcor
 !! SOURCE
 
 subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
-                  psps,vlspl,dvlspl,xcccrc,xccc1d,tccc1d,nctab,comm_mpi)
+                  psps,vlspl,dvlspl,xcccrc,xccc1d,xcctau1d,nctab,comm_mpi)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -828,7 +828,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  real(dp),intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax)
  real(dp),intent(out) :: vlspl(psps%mqgrid_vl,2)
  real(dp),intent(inout) :: xccc1d(psps%n1xccc*(1-psps%usepaw),6)
- real(dp),intent(inout) :: tccc1d(psps%n1xccc*(1-psps%usepaw),6)
+ real(dp),intent(inout) :: xcctau1d(psps%n1xccc*(1-psps%usepaw),6)
 
 !Local variables ---------------------------------------
 !scalars
@@ -991,12 +991,12 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      else
        pspcod = 12
        call upf2_to_abinit(ipsp, psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
-                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, tccc1d, nctab, maxrad)
+                           psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, xcctau1d, nctab, maxrad)
 
        if (nc_debug) then
          call psp_dump_outputs("UPF2", pspcod, psps%lmnmax, psps%lnmax, psps%mpssoang, &
            psps%mqgrid_ff, psps%n1xccc, mmax, maxrad, epsatm, qchrg, xcccrc, nctab, &
-           indlmn, nproj, ekb, ffspl, vlspl, xccc1d, tccc1d)
+           indlmn, nproj, ekb, ffspl, vlspl, xccc1d, xcctau1d)
        end if
      end if
 
@@ -1262,7 +1262,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    ! TODO: Be careful, because we will be using the PAW routines in which tcore is always available!
    ! Should add a test with 2 NC pseudos: one with NLCC and the other without!
    if (psps%usepaw == 0) then
-     call nctab_eval_tcorespl(nctab, psps%n1xccc, xcccrc, xccc1d, tccc1d, psps%mqgrid_vl, psps%qgrid_vl)
+     call nctab_eval_tcorespl(nctab, psps%n1xccc, xcccrc, xccc1d, xcctau1d, psps%mqgrid_vl, psps%qgrid_vl)
    end if
 
    write(msg,'(3a)') ' pspatm: atomic psp has been read ',' and splines computed',ch10
@@ -1310,8 +1310,8 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
      end do
      write (unt,*) '#  r, pseudochg kinE, 1st, 2nd, 3rd, 4th, 5th derivatives'
      do ii = 1, psps%n1xccc
-       write (unt,*) xcccrc*(ii-1)/(psps%n1xccc-1), tccc1d(ii,1), tccc1d(ii,2), &
-                     tccc1d(ii,3), tccc1d(ii,4), tccc1d(ii,5), tccc1d(ii,6)
+       write (unt,*) xcccrc*(ii-1)/(psps%n1xccc-1), xcctau1d(ii,1), xcctau1d(ii,2), &
+                     xcctau1d(ii,3), xcctau1d(ii,4), xcctau1d(ii,5), xcctau1d(ii,6)
      end do
      close(unt)
    end if
@@ -1388,7 +1388,7 @@ end subroutine pspatm
 
 subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
                             mqgrid,n1xccc,mmax,maxrad,epsatm,qchrg,xcccrc,nctab, &
-                            indlmn,nproj,ekb,ffspl,vlspl,xccc1d,tccc1d)
+                            indlmn,nproj,ekb,ffspl,vlspl,xccc1d,xcctau1d)
 
 !Arguments ------------------------------------
 !scalars
@@ -1401,7 +1401,7 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
  integer,intent(in) :: indlmn(6,lmnmax),nproj(mpssoang)
  real(dp),intent(in) :: ekb(lnmax),ffspl(mqgrid,2,lnmax),vlspl(mqgrid,2)
  real(dp),intent(in) :: xccc1d(n1xccc,6)
- real(dp),intent(in),optional :: tccc1d(n1xccc,6)
+ real(dp),intent(in),optional :: xcctau1d(n1xccc,6)
 
 !Local variables ------------------------------
 !scalars
@@ -1528,15 +1528,15 @@ subroutine psp_dump_outputs(pfx,pspcod,lmnmax,lnmax,mpssoang, &
    end do
  end do
 
- if (present(tccc1d)) then
-   write(dump, '(2a)') ch10, "# Array: tccc1d(n1xccc,6)"
-   write(dump, '(a)') "tccc1d:"
+ if (present(xcctau1d)) then
+   write(dump, '(2a)') ch10, "# Array: xcctau1d(n1xccc,6)"
+   write(dump, '(a)') "xcctau1d:"
    do j=1,6
      do i=1,n1xccc
        if ( i == 1 ) then
-         write(dump,'(4x,a,1x,e12.5)') "- -", tccc1d(i,j)
+         write(dump,'(4x,a,1x,e12.5)') "- -", xcctau1d(i,j)
        else
-         write(dump,'(4x,a,1x,e12.5)') "  -", tccc1d(i,j)
+         write(dump,'(4x,a,1x,e12.5)') "  -", xcctau1d(i,j)
        end if
      end do
    end do

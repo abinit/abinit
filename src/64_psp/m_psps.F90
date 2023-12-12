@@ -450,12 +450,12 @@ subroutine psps_init_from_dtset(psps, dtset, idtset, pspheads)
    changed = changed + 1
    if(idtset/=1) then
      ABI_SFREE(psps%xccc1d)
-     ABI_SFREE(psps%tccc1d)
+     ABI_SFREE(psps%xcctau1d)
    end if
    ABI_MALLOC(psps%xccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
-   ABI_MALLOC(psps%tccc1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
+   ABI_MALLOC(psps%xcctau1d,(psps%n1xccc*(1-psps%usepaw),6,dtset%ntypat))
    psps%xccc1d = zero
-   psps%tccc1d = zero
+   psps%xcctau1d = zero
    usepaw_old=psps%usepaw
  end if
 
@@ -518,7 +518,7 @@ subroutine psps_free(psps)
  ABI_SFREE(psps%vlspl)
  ABI_SFREE(psps%dvlspl)
  ABI_SFREE(psps%xccc1d)
- ABI_SFREE(psps%tccc1d)
+ ABI_SFREE(psps%xcctau1d)
  ABI_SFREE(psps%xcccrc)
  ABI_SFREE(psps%ziontypat)
  ABI_SFREE(psps%zionpsp)
@@ -622,7 +622,7 @@ subroutine psps_copy(pspsin, pspsout)
  if (pspsin%n1xccc > 0) then
    if (allocated(pspsin%xcccrc)) call alloc_copy(pspsin%xcccrc, pspsout%xcccrc)
    if (allocated(pspsin%xccc1d)) call alloc_copy(pspsin%xccc1d, pspsout%xccc1d)
-   if (allocated(pspsin%tccc1d)) call alloc_copy(pspsin%tccc1d, pspsout%tccc1d)
+   if (allocated(pspsin%xcctau1d)) call alloc_copy(pspsin%xcctau1d, pspsout%xcctau1d)
  end if
 
  ! allocate and copy character strings
@@ -987,7 +987,7 @@ subroutine psps_ncwrite(psps, ncid)
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ekb", "dp", "dimekb, ntypat")))
    !if (with_xccc > 0) then
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xccc1d", "dp", "n1xccc, six, ntypat")))
-   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("tccc1d", "dp", "n1xccc, six, ntypat")))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcctau1d", "dp", "n1xccc, six, ntypat")))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcccrc", "dp", "ntypat")))
 
    ncerr = nctk_def_arrays(ncid, [&
@@ -1040,7 +1040,7 @@ subroutine psps_ncwrite(psps, ncid)
  ! Pseudo-core charge for each type of atom, on the real-space radial
    NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), psps%xcccrc))
    NCF_CHECK(nf90_put_var(ncid, vid("xccc1d"), psps%xccc1d))
-   NCF_CHECK(nf90_put_var(ncid, vid("tccc1d"), psps%tccc1d))
+   NCF_CHECK(nf90_put_var(ncid, vid("xcctau1d"), psps%xcctau1d))
 
  !else
 
@@ -1210,7 +1210,7 @@ subroutine psps_ncread(psps, ncid)
  ABI_MALLOC(psps%ffspl,(psps%mqgrid_ff,2,psps%lmnmax,psps%ntypat))
  ABI_MALLOC(psps%ekb,(psps%dimekb,psps%ntypat * (1 - psps%usepaw)))
  ABI_MALLOC(psps%xccc1d,(psps%n1xccc,6,psps%ntypat))
- ABI_MALLOC(psps%tccc1d,(psps%n1xccc,6,psps%ntypat))
+ ABI_MALLOC(psps%xcctau1d,(psps%n1xccc,6,psps%ntypat))
  ABI_MALLOC(psps%nctab,(psps%ntypat))
  if (psps%usepaw == 0) then
    do itypat=1,psps%ntypat
@@ -1238,7 +1238,7 @@ subroutine psps_ncread(psps, ncid)
  psps%ekb = zero
  psps%indlmn = zero
  psps%xccc1d = zero
- psps%tccc1d = zero
+ psps%xcctau1d = zero
  psps%xcccrc = zero
  psps%vlspl = zero
  psps%ffspl = zero
@@ -1275,7 +1275,7 @@ subroutine psps_ncread(psps, ncid)
    if (with_xccc > 0) then
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcccrc"), psps%xcccrc))
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xccc1d"), psps%xccc1d))
-     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "tccc1d"), psps%tccc1d))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcctau1d"), psps%xcctau1d))
    end if
 
    ! GA: Why bother reading it?
@@ -1610,8 +1610,8 @@ end subroutine nctab_eval_tvalespl
 !!  xccc1d(n1xccc,6)= The component xccc1d(n1xccc,1) is the pseudo-core charge
 !!   on the radial grid. The components xccc1d(n1xccc,ideriv) give the ideriv-th derivative of the
 !!   pseudo-core charge with respect to the radial distance.
-!!  tccc1d(n1xccc,6)= The component tccc1d(n1xccc,1) is the pseudo-core kinetic energy density
-!!   on the radial grid. The components tccc1d(n1xccc,ideriv) give the ideriv-th derivative of the
+!!  xcctau1d(n1xccc,6)= The component xcctau1d(n1xccc,1) is the pseudo-core kinetic energy density
+!!   on the radial grid. The components xcctau1d(n1xccc,ideriv) give the ideriv-th derivative of the
 !!   pseudo-core kinE den with respect to the radial distance.
 !!
 !! SIDE EFFECTS
@@ -1625,7 +1625,7 @@ end subroutine nctab_eval_tvalespl
 !!
 !! SOURCE
 
-subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, tccc1d, mqgrid_vl, qgrid_vl)
+subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, xcctau1d, mqgrid_vl, qgrid_vl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1634,7 +1634,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, tccc1d, mqgrid_vl,
  real(dp),intent(in) :: xcccrc
 !arrays
  real(dp),intent(in) :: xccc1d(n1xccc,6),qgrid_vl(mqgrid_vl)
- real(dp),intent(in) :: tccc1d(n1xccc,6)
+ real(dp),intent(in) :: xcctau1d(n1xccc,6)
 
 !Local variables-------------------------------
  real(dp) :: amesh,yp1,ypn
@@ -1677,7 +1677,7 @@ subroutine nctab_eval_tcorespl(nctab, n1xccc, xcccrc, xccc1d, tccc1d, mqgrid_vl,
 
  ! idem for kinetic energy density
  call pawpsp_cg(nctab%dtaucdq0, nctab%d2taucdq0, mqgrid_vl, qgrid_vl, nctab%taucorespl(:,1), &
-                core_mesh, tccc1d(:,1), yp1, ypn)
+                core_mesh, xcctau1d(:,1), yp1, ypn)
  call paw_spline(qgrid_vl, nctab%taucorespl(:,1), mqgrid_vl, yp1, ypn, nctab%taucorespl(:,2))
 
  call pawrad_free(core_mesh)
