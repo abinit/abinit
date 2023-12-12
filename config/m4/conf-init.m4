@@ -389,7 +389,7 @@ AC_DEFUN([ABI_INIT_HEADER],[
   AH_BOTTOM([/* *** BEGIN sanity checks *** */
 
 /* MPI options */
-#if defined HAVE_MPI 
+#if defined HAVE_MPI
 
 /* Check that one MPI level is actually defined */
 #if ! defined HAVE_MPI1 && ! defined HAVE_MPI2 && ! defined HAVE_MPI3
@@ -418,7 +418,7 @@ AC_DEFUN([ABI_INIT_HEADER],[
 #else /* HAVE_MPI */
 
 /* Check that no MPI level is defined */
-#if defined HAVE_MPI1 || defined HAVE_MPI2 || HAVE_MPI3
+#if defined HAVE_MPI1 || defined HAVE_MPI2 || defined HAVE_MPI3
 #error "HAVE_MPI1, HAVE_MPI2, and HAVE_MPI3, must be undefined"
 #endif
 
@@ -481,7 +481,7 @@ AC_DEFUN([ABI_INIT_INSTALL_DIRS],[
 AC_DEFUN([ABI_INIT_TARGET],[
   dnl Clean-up operating system name
   [abi_target_os=`echo ${target_os} | sed -e 's/-.*//'`]
-  
+
   ABINIT_TARGET="${target_cpu}_${abi_target_os}_${abi_fc_vendor}${abi_fc_version}"
   AC_DEFINE_UNQUOTED(ABINIT_TARGET,"${ABINIT_TARGET}",
     [Abinit target description.])
