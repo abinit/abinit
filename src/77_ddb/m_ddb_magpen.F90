@@ -93,7 +93,8 @@ contains
  real(dp) :: qphnrm(3),qphon(3,3)
  complex(dp), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dp), allocatable :: invmagsus(:,:), magsus(:,:)
- complex(dp), allocatable :: mmom(:,:), zfield(:,:)
+ complex(dp), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
+ complex(dp), allocatable :: bc_ss(:,:)
 
 ! *********************************************************************
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -111,6 +112,7 @@ contains
  ABI_MALLOC(magsus,(ndim,ndim))
  ABI_MALLOC(invbarmagsus,(ndim,ndim))
  ABI_MALLOC(invmagsus,(ndim,ndim))
+ ABI_MALLOC(barmmom,(ndim,(natom+2)*3))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
 
@@ -185,7 +187,7 @@ contains
   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
 
    if (iblok /= 0 .or. jblok /=0) then
-     call magmom(ddb%val,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
+     call magmom(barmmom,ddb%val,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
    end if
 
@@ -227,6 +229,9 @@ contains
  end do
 
  if (timdisp==1) then
+
+   ABI_MALLOC(bc_ss,(ndim,ndim))
+
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Frequency-derivatives magnetic penalty section ',ch10
    call wrtout([std_out, ab_out], msg)
@@ -251,8 +256,10 @@ contains
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
 
-     call berrycurv_ss(ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
-   & natom,nblok,ndim,nmdir,prtvol)
+     if (iblok /= 0) then
+       call berrycurv_ss(bc_ss,ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
+     & natom,nblok,ndim,nmdir,prtvol)
+     end if
 
      ! Look for the Berry-curvature of the penalized magnetic moments
 
@@ -275,9 +282,14 @@ contains
      call ddb_lw%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
 
+     if (iblok /= 0 .or. jblok /=0) then
+       call berrycurv_sp(barmmom,bc_ss,ddb_lw%val,iblok,invbarmagsus,jblok, &
+     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+     end if
 
    end do 
 
+   ABI_FREE(bc_ss)
  end if
 
 !Deallocations
@@ -513,13 +525,15 @@ contains
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
+!! barmmom(ndim,(natom+2)*3)= penalized first order magnetic moments on the atoms and 
+!!  directions of the penalty induced by atomic displacements and/or electric fields.
 !! mmom(ndim,(natom+2)*3)= first order magnetic moments on the atoms and 
 !!  directions of the penalty induced by atomic displacements and/or electric fields.
 !! zfield(ndim,(natom+2)*3)= Zeeman fields at constrained magnetic moments.
 !!
 !! SOURCE
 
- subroutine magmom(blkval,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
+ subroutine magmom(barmmom,blkval,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
 
 !Arguments -------------------------------
@@ -529,6 +543,7 @@ contains
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ complex(dp),intent(out) :: barmmom(ndim,(natom+2)*3)
  complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dp),intent(in) :: magsus(ndim,ndim)
  complex(dp),intent(out) :: mmom(ndim,(natom+2)*3)
@@ -537,11 +552,11 @@ contains
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,ipert1,ipert2,irow
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ real(dp) :: fac
  character(len=1000) :: msg
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dp) :: barmmom(ndim,(natom+2)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -586,9 +601,27 @@ contains
 !Compute the moments
  mmom=matmul(magsus,zfield)
 
+ fac=2.511494255019/two*27.2114/0.529177
+
+ do icol=1, natom*3
+   write(100,'(4es18.9)') real(zfield(:,icol))*fac
+ end do 
+
 !Write the results
  if (magpen > zero) then
    if (iblok /= 0) then
+     call wrtout([ab_out,std_out], ' Local Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do irow=1, ndim
+       do icol=1, natom*3
+         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+       & real(zfield(irow,icol))*fac, aimag(zfield(irow,icol))*fac
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+
      call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements ')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do irow=1, ndim
@@ -1057,10 +1090,11 @@ contains
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
+!! bc_ss(ndim,ndim)= Berry-curvature of the inverse local-spin susceptibility
 !!
 !! SOURCE
 
- subroutine berrycurv_ss(blkval,iblok,invbarmagsus,&
+ subroutine berrycurv_ss(bc_ss,blkval,iblok,invbarmagsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
 
 !Arguments -------------------------------
@@ -1070,13 +1104,15 @@ contains
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dp),intent(out) :: bc_ss(ndim,ndim)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,info,ipert1,ipert2,ipert3,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ real(dp) :: fac
  character(len=1000) :: msg
 !arrays
- complex(dp) :: bc_barmagsus(ndim,ndim),bc_ss(ndim,ndim)
+ complex(dp) :: bc_barmagsus(ndim,ndim)
  complex(dp) :: idty(ndim,ndim)
  integer(dp) :: indexat(ndim),indexdir(ndim)
  integer, allocatable :: ipiv(:)
@@ -1121,8 +1157,9 @@ contains
  end do
 
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
- bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) &
-& *(2.511494255019)**2/four !TMP
+ bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
+
+ fac=2.511494255019**2/four !TMP
 
  call wrtout([ab_out,std_out], ' Berry curvature of the inverse spin susceptibility ')
  call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -1130,7 +1167,7 @@ contains
    do icol=1, ndim
      write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
    & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-   & real(bc_ss(irow,icol)), aimag(bc_ss(irow,icol))
+   & real(bc_ss(irow,icol))*fac, aimag(bc_ss(irow,icol))*fac
      call wrtout([ab_out,std_out], msg)
    end do
  end do
@@ -1139,6 +1176,122 @@ contains
 
  end subroutine berrycurv_ss
 !!***
+
+!!****f* m_ddb_magpen/berrycurv_sp
+!! NAME
+!! berrycurv_sp
+!!
+!! FUNCTION
+!! Calculate the Berry curvature of the spin-phonon Hessian
+!! (equivalent to the Berry curvature of the induced Zeeman fields at constrained
+!! magnetic moments)
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert*3*mpert,nblok)=  Third-order derivative matrices
+!!  In our case, the nblok is restricted to iblok
+!! iblok= index of the current block
+!! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
+!! mpatpol(2) = Atoms on which the magnetic penalty has been applied
+!! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
+!! mpert =maximum number of ipert
+!! natom= number of atoms in unit cell
+!! nblok= number of blocks in the DDB
+!! nmdir= number of directions along which the magnetic penalty was applied
+!! ndim= dimension of the square susceptibilities 
+!! prtvol= control the volume of information written on output
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+ subroutine berrycurv_sp(barmmom,bc_ss,blkval,iblok,invbarmagsus,&
+& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtvol
+!arrays
+ integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ complex(dp),intent(in) :: barmmom(ndim,(natom+2)*3)
+ complex(dp),intent(in) :: bc_ss(ndim,ndim)
+ complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+!Local variables -------------------------
+!scalars
+ integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ real(dp) :: fac
+ character(len=1000) :: msg
+!arrays
+ integer(dp) :: indexat1(ndim),indexdir1(ndim)
+ integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
+ complex(dp) :: bc_barsp(ndim,(natom+2)*3),bc_sp(ndim,(natom+2)*3)
+ character(len=1) :: cart(3)=(/'x','y','z'/)
+
+! *********************************************************************
+
+!Extract the berry curvature of the penalized moments
+ bc_barsp=(zero,zero)
+ ipert3= natom + 9
+ idir3= 1
+ do ipert2=1,natom+2
+   do idir2=1,3
+     icol=idir2+(ipert2-1)*3
+     indexat2(icol)=ipert2
+     indexdir2(icol)=idir2
+
+     ipert1_red= 0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red= idir1_red + 1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         indexat1(irow)=iat1
+         indexdir1(irow)=idir1
+         
+         if (iblok /=0 .and. ipert2 <= natom) then
+           bc_barsp(irow,icol)= -one* &
+         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok), &
+         & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok),16)
+         else if (jblok /=0 .and. ipert2 == natom+2) then
+           bc_barsp(irow,icol)= -one* &
+         & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,jblok), &
+         & blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,jblok),16)
+         end if
+
+       end do
+     end do
+   end do
+ end do
+
+ !Calculate the Berry curvature of the induced Zeeman fields
+ bc_sp= matmul(bc_ss,barmmom) + matmul(invbarmagsus,bc_barsp)
+
+ fac=2.511494255019/two/0.52917 !TMP
+
+ do icol=1, natom*3
+   write(101,'(4es18.9)') -aimag(bc_sp(:,icol))*fac
+ end do 
+ if (iblok /= 0) then
+   call wrtout([ab_out,std_out], ' Berry curvature of the Zeeman fields induced by atomic displacements')
+   call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+   do irow=1, ndim
+     do icol=1, natom*3
+       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+     & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+     & real(bc_sp(irow,icol))*fac, aimag(bc_sp(irow,icol))*fac
+       call wrtout([ab_out,std_out], msg)
+     end do
+   end do
+   call wrtout([ab_out,std_out], '   ')
+ end if
+
+ end subroutine berrycurv_sp
+!!***
+
 
 !!****f* m_ddb_magpen/berrycurv_tt
 !! NAME
