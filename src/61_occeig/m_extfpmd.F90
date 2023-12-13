@@ -753,7 +753,7 @@ contains
     ! Local variables -------------------------
     ! Scalars
     integer :: ifft,ispden,isppol,ikpt,iband,ext_bdtot_index,nband_k,ierr
-    real(dp) :: factor,gamma,xcut,fn,maxocc
+    real(dp) :: factor,gamma,xcut,fn,maxocc,nelect_tmp
     ! Arrays
     real(dp),allocatable :: gamma_hybrid_tf(:,:)
     real(dp),allocatable :: xcut_hybrid_tf(:,:)
@@ -763,6 +763,7 @@ contains
     maxocc=two/(nsppol*nspinor)
     factor=dsqrt(two)/(PI*PI)*this%ucvol*tsmear**(1.5)
     gamma=(fermie-this%eshift)/tsmear
+    nelect_tmp=zero
 
     ! Computes extfpmd contribution to nelect integrating
     ! over accessible states from bcut to infinity with
@@ -793,11 +794,12 @@ contains
           if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) cycle
           do iband=nband_k-this%nbdbuf+1,this%mband
             fn=fermi_dirac(extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift,fermie,tsmear)
-            nelect=nelect+wtk(ikpt)*maxocc*fn
+            nelect_tmp=nelect_tmp+wtk(ikpt)*maxocc*fn
           end do
         end do
       end do
-      call xmpi_sum(nelect,xmpi_world,ierr)
+      call xmpi_sum(nelect_tmp,xmpi_world,ierr)
+      nelect=nelect+nelect_tmp
     end if
 
     ! Computes extended pw contribution to nelect summing
@@ -813,12 +815,13 @@ contains
             cycle
           end if
           do iband=nband_k-this%nbdbuf+1,this%mband
-            nelect=nelect+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
+            nelect_tmp=nelect_tmp+wtk(ikpt)*this%occ(iband+ext_bdtot_index)
           end do
           ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
-      call xmpi_sum(nelect,xmpi_world,ierr)
+      call xmpi_sum(nelect_tmp,xmpi_world,ierr)
+      nelect=nelect+nelect_tmp
     end if
 
     ! Computes extfpmd contribution to nelect using a sum
