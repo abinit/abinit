@@ -153,9 +153,9 @@ contains
     this%eshift=extpw_eshift
     call metric(gmet,gprimd,-1,rmet,rprimd,this%ucvol)
     
-    if (this%version==11) then
-      if (truecg==1) this%truecg=.true.
-      if (extfpmd_ecut==zero) then
+    if(this%version==11) then
+      if(truecg==1) this%truecg=.true.
+      if(extfpmd_ecut==zero) then
         ! Adding dsqrt(...) to extended cutoff energy to make
         ! sure extended pw basis set is large enough.
         this%ecut=extfpmd_e_fg(one*extfpmd_mband,this%ucvol)+&
@@ -185,7 +185,7 @@ contains
       this%mpi_enreg%proc_distrb=0
       this%mpi_enreg%me_g0=1
 
-      ! WARNING: using sequential full array for this%kg. Otherwise :memory leak when using 
+      ! WARNING: using sequential full array for this%kg. Otherwise: memory leak when using 
       ! kpgsph subroutine in m_fftcore "integer, save :: alloc_size=0" ?
       call getmpw(this%ecut_eff,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,this%mpw,nkpt)
       ABI_MALLOC(this%kg,(3,this%mpw*nkpt))
@@ -212,6 +212,9 @@ contains
       this%mcg=this%mpw*my_nspinor*this%mband*this%mkmem*nsppol
       ABI_MALLOC(this%cg,(2,this%mcg))
       this%cg(:,:)=zero
+    else if(this%version==5) then
+      ! Make a copy of mpi_enreg in order to cycle.
+      call copy_mpi_enreg(mpi_enreg,this%mpi_enreg)
     end if
 
   end subroutine init
@@ -238,10 +241,9 @@ contains
     class(extfpmd_type),intent(inout) :: this
 
     ! *********************************************************************
-    if (this%version==11) then
+    if(this%version==11) then
       this%cg(:,:)=zero
       ABI_FREE(this%cg)
-      call destroy_mpi_enreg(this%mpi_enreg)
       this%npwtot(:)=0
       ABI_FREE(this%npwtot)
       this%npwarr(:)=0
@@ -261,6 +263,10 @@ contains
       this%mkmem=0
       this%mpw=0
       this%truecg=.false.
+    end if
+    
+    if(this%version==5.or.this%version==11) then
+      call destroy_mpi_enreg(this%mpi_enreg)
     end if
     
     this%vtrial(:,:)=zero
@@ -489,7 +495,7 @@ contains
         do iband=1,nband_k-this%nbdbuf
           do ipw=1,npw_k*my_nspinor
             do ext_ipw=1,ext_npw_k*my_nspinor
-              if (all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
+              if(all(kg_k(:,ipw)==ext_kg_k(:,ext_ipw))) then
                 this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=cg(:,ipw+(iband-1)*npw_k*my_nspinor+icg)
               end if
             end do
@@ -520,25 +526,25 @@ contains
           g0_count_above=0
 
           do ext_ipw=1,ext_npw_k*my_nspinor
-            if (ext_kinpw(ext_ipw)<=fg_kin.and.ext_kinpw(ext_ipw)>=closest_below) then
-              if (ext_ipw==1) then
+            if(ext_kinpw(ext_ipw)<=fg_kin.and.ext_kinpw(ext_ipw)>=closest_below) then
+              if(ext_ipw==1) then
                 g0_count_below=1
               else
                 g0_count_below=0
               end if
-              if (ext_kinpw(ext_ipw)==closest_below) then
+              if(ext_kinpw(ext_ipw)==closest_below) then
                 count_below=count_below+one
               else
                 count_below=one
                 closest_below=ext_kinpw(ext_ipw)
               end if
-            else if (ext_kinpw(ext_ipw)>=fg_kin.and.ext_kinpw(ext_ipw)<=closest_above) then
-              if (ext_ipw==1) then
+            else if(ext_kinpw(ext_ipw)>=fg_kin.and.ext_kinpw(ext_ipw)<=closest_above) then
+              if(ext_ipw==1) then
                 g0_count_above=1
               else
                 g0_count_above=0
               end if
-              if (ext_kinpw(ext_ipw)==closest_above) then
+              if(ext_kinpw(ext_ipw)==closest_above) then
                 count_above=count_above+one
               else
                 count_above=one
@@ -548,7 +554,7 @@ contains
           end do
           
           ! Taking time-reversal symmetry into account excluding g0.
-          if (istwf_k >= 2) then
+          if(istwf_k >= 2) then
             count_above=count_above*(two-g0_count_above)
             count_below=count_below*(two-g0_count_below)
           end if
@@ -562,11 +568,11 @@ contains
             ! call random_number(random_value)
             phase=random_value*two*PI
             this%cg(:,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=zero
-            if (ext_kinpw(ext_ipw)==closest_below) then
+            if(ext_kinpw(ext_ipw)==closest_below) then
               this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=dsqrt(prop_below)*cos(phase)
               this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=dsqrt(prop_below)*sin(phase)
             end if
-            if (ext_kinpw(ext_ipw)==closest_above) then
+            if(ext_kinpw(ext_ipw)==closest_above) then
               this%cg(1,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=dsqrt(prop_above)*cos(phase)
               this%cg(2,ext_ipw+(iband-1)*ext_npw_k*my_nspinor+ext_icg)=dsqrt(prop_above)*sin(phase)
             end if
@@ -784,12 +790,14 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) cycle
           do iband=nband_k-this%nbdbuf+1,this%mband
             fn=fermi_dirac(extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift,fermie,tsmear)
             nelect=nelect+wtk(ikpt)*maxocc*fn
           end do
         end do
       end do
+      call xmpi_sum(nelect,xmpi_world,ierr)
     end if
 
     ! Computes extended pw contribution to nelect summing
@@ -924,10 +932,11 @@ contains
     if(this%version==5) then
       do isppol=1,nsppol
         do ikpt=1,nkpt
+          nband_k=nband(ikpt+(isppol-1)*nkpt)
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) cycle
           if(one*this%bcut+this%bandshiftk(ikpt+(isppol-1)*nkpt).lt.zero) then
             cut_warn=.true.
           end if
-          nband_k=nband(ikpt+(isppol-1)*nkpt)
           do iband=nband_k-this%nbdbuf+1,this%mband
             dotr=extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)
             fn=fermi_dirac(dotr+this%eshift,fermie,tsmear)
@@ -935,6 +944,7 @@ contains
           end do
         end do
       end do
+      call xmpi_sum(this%e_kinetic,xmpi_world,ierr)
     end if
 
     ! Computes extfpmd contribution to kinetic energy using a sum
@@ -984,7 +994,7 @@ contains
           end if
           
           bandstart=nband_k-this%nbdbuf+1
-          if (this%truecg) then
+          if(this%truecg) then
             kpoint(:)=kptns(:,ikpt)
             ABI_MALLOC(ext_kg_k,(3,ext_npw_k))
             ABI_MALLOC(ext_kinpw,(ext_npw_k))
@@ -992,12 +1002,12 @@ contains
             ext_kg_k(:,1:ext_npw_k)=this%kg(:,1+ext_ikg:ext_npw_k+ext_ikg)
             ext_kinpw(:)=zero
             call mkkin(this%ecut,zero,effmass_free,gmet,ext_kg_k,ext_kinpw,kpoint,ext_npw_k,0,0)
-            if (this%truecg) bandstart=1
+            if(this%truecg) bandstart=1
           end if
           
           ! Compute kinetic energy of each band
           do iband=bandstart,this%mband
-            if (this%truecg) then
+            if(this%truecg) then
               ext_cwavef(1:2,1:ext_npw_k*my_nspinor)= &
               & this%cg(:,1+(iband-1)*ext_npw_k*my_nspinor+ext_icg:iband*ext_npw_k*my_nspinor+ext_icg)
               call meanvalue_g(dotr,ext_kinpw,0,istwf_k,this%mpi_enreg,ext_npw_k,my_nspinor,ext_cwavef,ext_cwavef,0)
@@ -1015,7 +1025,7 @@ contains
             ext_ikg=ext_ikg+ext_npw_k
           end if
 
-          if (this%truecg) then
+          if(this%truecg) then
             ABI_FREE(ext_cwavef)
             ABI_FREE(ext_kinpw)
             ABI_FREE(ext_kg_k)
@@ -1155,12 +1165,14 @@ contains
       do isppol=1,nsppol
         do ikpt=1,nkpt
           nband_k=nband(ikpt+(isppol-1)*nkpt)
+          if(proc_distrb_cycle(this%mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,this%mpi_enreg%me_kpt)) cycle
           do iband=nband_k-this%nbdbuf+1,this%mband
             fn=fermi_dirac(extfpmd_e_fg(one*iband+this%bandshiftk(ikpt+(isppol-1)*nkpt),this%ucvol)+this%eshift,fermie,tsmear)
             this%entropy=this%entropy-wtk(ikpt)*maxocc*(fn*log(fn)+(one-fn)*log(one-fn))/nsppol
           end do
         end do
       end do
+      call xmpi_sum(this%entropy,xmpi_world,ierr)
     end if
 
     ! Computes extended pw contribution to nelect summing
