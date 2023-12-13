@@ -1287,7 +1287,7 @@ contains
 
     ! *********************************************************************
 
-    extfpmd_e_fg=.5*(iband*6*PI*PI/ucvol)**(2./3.)
+    extfpmd_e_fg=half*(iband*six*PI*PI/ucvol)**(two/three)
   end function extfpmd_e_fg
 
   !!***
@@ -1315,7 +1315,7 @@ contains
 
     ! *********************************************************************
 
-    extfpmd_i_fg=(two*ekin)**(3./2.)*ucvol/(6*PI*PI)
+    extfpmd_i_fg=(two*ekin)**(three/two)*ucvol/(six*PI*PI)
   end function extfpmd_i_fg
   !!***
   
