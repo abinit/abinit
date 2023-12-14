@@ -605,7 +605,7 @@ contains
       end do
     end do
     ! write(0,*) mpi_enreg%me_kpt,'DEBUG: End...'
-    call xmpi_sum(this%eigen,xmpi_world,ierr)
+    call xmpi_sum(this%eigen,mpi_enreg%comm_kpt,ierr)
   end subroutine generate_extpw
 
   !!****f* ABINIT/m_extfpmd/extpw_orthon
@@ -716,7 +716,7 @@ contains
         ABI_FREE(ext_kg_k)
       end do
     end do
-    call xmpi_sum(this%eigen,xmpi_world,ierr)
+    call xmpi_sum(this%eigen,this%mpi_enreg%comm_kpt,ierr)
     write(0,*) this%mpi_enreg%me_kpt,'DEBUG: End...'
   end subroutine extpw_orthon
 
@@ -798,7 +798,7 @@ contains
           end do
         end do
       end do
-      call xmpi_sum(nelect_tmp,xmpi_world,ierr)
+      call xmpi_sum(nelect_tmp,this%mpi_enreg%comm_kpt,ierr)
       nelect=nelect+nelect_tmp
     end if
 
@@ -820,7 +820,7 @@ contains
           ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
-      call xmpi_sum(nelect_tmp,xmpi_world,ierr)
+      call xmpi_sum(nelect_tmp,this%mpi_enreg%comm_kpt,ierr)
       nelect=nelect+nelect_tmp
     end if
 
@@ -947,7 +947,7 @@ contains
           end do
         end do
       end do
-      call xmpi_sum(this%e_kinetic,xmpi_world,ierr)
+      call xmpi_sum(this%e_kinetic,this%mpi_enreg%comm_kpt,ierr)
     end if
 
     ! Computes extfpmd contribution to kinetic energy using a sum
@@ -1035,8 +1035,8 @@ contains
           end if
         end do
       end do
-      call xmpi_sum(this%e_kinetic,xmpi_world,ierr)
-      call xmpi_sum(e_eigenvalues,xmpi_world,ierr)
+      call xmpi_sum(this%e_kinetic,this%mpi_enreg%comm_kpt,ierr)
+      call xmpi_sum(e_eigenvalues,this%mpi_enreg%comm_kpt,ierr)
       if(this%truecg) then
         total_e_eigenvalues=e_eigenvalues
         total_e_kinetic=this%e_kinetic
@@ -1175,7 +1175,7 @@ contains
           end do
         end do
       end do
-      call xmpi_sum(this%entropy,xmpi_world,ierr)
+      call xmpi_sum(this%entropy,this%mpi_enreg%comm_kpt,ierr)
     end if
 
     ! Computes extended pw contribution to nelect summing
@@ -1201,7 +1201,7 @@ contains
           ext_bdtot_index=ext_bdtot_index+this%mband
         end do
       end do
-      call xmpi_sum(this%entropy,xmpi_world,ierr)
+      call xmpi_sum(this%entropy,this%mpi_enreg%comm_kpt,ierr)
     end if
 
     ! Computes extfpmd contribution to the entropy using a sum
