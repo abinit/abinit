@@ -32,7 +32,7 @@
 !!  None
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -58,7 +58,7 @@ end subroutine gpu_device_synchronize
 !!  None
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! SOURCE
@@ -264,7 +264,7 @@ end subroutine dealloc_on_gpu
 !!  gpu_ptr= C_PTR on gpu memory location
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
@@ -300,7 +300,7 @@ end subroutine gpu_memset
 !!  is_allocate= logical(c_bool) : true (if allocated), false (if not allocated)
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS
@@ -334,7 +334,7 @@ end subroutine gpu_allocated_impl
 !! OUTPUT
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_gpu_toolbox/dev_spec.cu
 !!
 !! PARENTS

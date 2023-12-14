@@ -582,16 +582,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
  if (gpu_option/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU_CUDA
-   if (idev<=0) then
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_openmp_threads',tread,'INT')
-   if(tread==1) dtsets(idtset)%use_gpu_openmp_threads=intarr(1)
- end do
-#endif
-
- if (use_gpu_cuda/=ABI_GPU_DISABLED) then
 #if defined HAVE_GPU
+   if (idev<=0) then
      write(msg,'(5a)')&
 &     'Input variable gpu_option is on (/=0),',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
@@ -607,6 +599,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
 #endif
+#if defined HAVE_OPENMP_OFFLOAD
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
 &       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
@@ -618,6 +611,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
        ABI_ERROR(msg)
      end if
+#endif
    else if(gpu_option==ABI_GPU_KOKKOS) then
 #if !defined HAVE_KOKKOS || !defined HAVE_YAKL
      write(msg,'(7a)')&

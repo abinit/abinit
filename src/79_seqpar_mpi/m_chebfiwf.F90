@@ -587,9 +587,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- !if (chebfi%use_gpu_cuda==ABI_GPU_KOKKOS) then
-   call gpu_device_synchronize()
- !end if
+ call gpu_device_synchronize()
 #endif
 
 

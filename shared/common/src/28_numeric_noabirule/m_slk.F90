@@ -2920,7 +2920,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
   call nvtxEndRange()
 #endif
 
