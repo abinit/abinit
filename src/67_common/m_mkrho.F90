@@ -462,7 +462,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  &     weight_t,&            ! weight_r
                  &     weight_t)             ! weight_i
 #endif
-             else if (dtset%use_gpu_cuda == ABI_GPU_KOKKOS) then
+             else if (dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
                call gpu_fourwf_managed(1,&     ! cplex
                  &     rhoaug,&        ! denpot
@@ -489,7 +489,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  &     weight_t,&            ! weight_r
                  &     weight_t)             ! weight_i
 #endif
-             else if (dtset%use_gpu_cuda == ABI_GPU_OPENMP) then
+             else if (dtset%gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                call ompgpu_fourwf(1,&     ! cplex
                  &     rhoaug,&        ! denpot

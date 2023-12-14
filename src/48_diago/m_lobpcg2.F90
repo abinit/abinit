@@ -21,11 +21,7 @@ module m_lobpcg2
 #endif
   use m_xmpi
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
-#endif
-
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -471,8 +467,9 @@ module m_lobpcg2
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
-                                                       use_gpu_cuda=lobpcg%use_gpu_cuda)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax,&
+                                                       min_val=minResidu,min_elt=eigResiduMin,&
+                                                       gpu_option=lobpcg%gpu_option)
         call timab(tim_maxres,2,tsec)
 
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)

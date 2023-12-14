@@ -1286,7 +1286,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
 #if defined HAVE_GPU && defined HAVE_YAKL
- if(use_gpu_cuda_==ABI_GPU_KOKKOS) then
+ if(gpu_option_==ABI_GPU_KOKKOS) then
     ABI_MALLOC(cwavef_mpi,(2,npw_k*blocksize))
 
     call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*blocksize, CPU_DEVICE_ID)
