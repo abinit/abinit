@@ -36,7 +36,7 @@ module m_abi_linalg
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -121,6 +121,7 @@ module m_abi_linalg
  integer,                       allocatable,save,private,target :: i_work(:)
  real(kind=c_double),           allocatable,save,private,target :: r_work(:)
  complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
+ type(c_ptr),save,private :: gpu_work
 
  !FIXME *_managed arrays are only used with YAKL, in place of previous ones
  integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer,save,private :: i_work_managed(:) => null()
@@ -130,6 +131,7 @@ module m_abi_linalg
  integer, save, private :: r_work_len = 0
  integer, save, private :: c_work_len = 0
  integer, save, private :: i_work_len = 0
+ integer(c_size_t), save, private :: gpu_work_len = 0
 #endif
 
 !----------------------------------------------------------------------
@@ -324,7 +326,7 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 
   interface
 
@@ -611,7 +613,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 !Cublas initialization
  if (gpu_option/=ABI_GPU_DISABLED) call gpu_linalg_init()
  abi_linalg_gpu_mode = gpu_option !FIXME Add a check for this
@@ -889,7 +891,7 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  if (gpu_option/=ABI_GPU_DISABLED) then
    call abi_gpu_work_finalize()
    call gpu_linalg_shutdown()

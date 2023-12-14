@@ -257,10 +257,10 @@ SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondia
   FREEIF(op%F)
   MALLOC(op%F,(1:op%sizeHybrid+1,1:flavors,1:flavors))
   DT_FREEIF(op%tails)
-  DT_MALLOC(op%tails,(1:op%flavors))
+  DT_MALLOC(op%tails, (1:op%flavors))
   op%tails=0
   DT_FREEIF(op%Fshift)
-  DT_MALLOC(op%Fshift,(1:op%flavors+1))
+  DT_MALLOC(op%Fshift, (1:op%flavors+1))
   op%Fshift=0
   
   CALL Vector_init(op%R,100*op%flavors)

@@ -5083,7 +5083,7 @@ subroutine gwr_build_sigmac(gwr)
  type(sigma_pade_t) :: spade
 
 ! *************************************************************************
-
+#ifndef FC_CRAY
  call cwtime(cpu_all, wall_all, gflops_all, "start")
  call timab(1925, 1, tsec)
 
@@ -5842,6 +5842,7 @@ subroutine print_sigma_header()
  call wrtout(std_out, sjoin("- FFT sc_batch_size:", itoa(gwr%sc_batch_size)), do_flush=.True.)
 end subroutine print_sigma_header
 
+#endif
 end subroutine gwr_build_sigmac
 !!***
 
@@ -7091,9 +7092,9 @@ subroutine gwr_build_chi0_head_and_wings(gwr)
 
  ! Save quantities for later use as this routine must be called before build_tchi.
  if (gwr%kpt_comm%me == 0) then
-   ABI_REMALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau))
-   ABI_REMALLOC(gwr%chi0_uwing_myw, (3, npwe, gwr%my_ntau))
-   ABI_REMALLOC(gwr%chi0_lwing_myw, (3, npwe, gwr%my_ntau))
+   ABI_REMALLOC(gwr%chi0_head_myw, (3, 3, gwr%my_ntau) )
+   ABI_REMALLOC(gwr%chi0_uwing_myw, (3, npwe, gwr%my_ntau) )
+   ABI_REMALLOC(gwr%chi0_lwing_myw, (3, npwe, gwr%my_ntau) )
 
    do my_it=1,gwr%my_ntau
      itau = gwr%my_itaus(my_it)

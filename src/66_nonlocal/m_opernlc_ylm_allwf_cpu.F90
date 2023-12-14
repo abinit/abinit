@@ -516,7 +516,7 @@ contains
           !    --- Parallelization over spinors ---
 
           !
-          ! this case is removed for GPU parallelization, npspinor>1 is forbidden when gpu_option is ON
+          ! this case is removed for GPU parallelization, npspinor>1 is forbidden when use_gpu_cuda is ON
           !
 
         ! else if (nspinortot==2 .and. nspinor/=nspinortot) then

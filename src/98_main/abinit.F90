@@ -113,12 +113,15 @@ program abinit
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  use m_gpu_toolbox
+#endif
+
+#ifdef HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -382,7 +385,7 @@ program abinit
  end if
 #endif
 
-#ifdef HAVE_GPU_NVTX_V3
+#ifdef HAVE_GPU_MARKERS
  NVTX_INIT(use_nvtx)
 #endif
 

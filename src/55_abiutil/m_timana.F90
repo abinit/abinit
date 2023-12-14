@@ -1513,7 +1513,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  percent_limit=0.5_dp
  if (timopt<0) percent_limit=0.0001_dp
- !if (timopt<0) percent_limit=tol12
+ if (timopt<0) percent_limit=tol12
 
 !In case there is parallelism, report times for node 0
 !if (me==0 .and. nproc>1) then
@@ -1591,10 +1591,10 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  end if
 
 !Now, gather all information
- call xmpi_sum(times,spaceworld,ierr)
- call xmpi_sum(ncount,spaceworld,ierr)
- call xmpi_sum(ftimes,spaceworld,ierr)
- call xmpi_sum(nflops,spaceworld,ierr)
+ !call xmpi_sum(times,spaceworld,ierr)
+ !call xmpi_sum(ncount,spaceworld,ierr)
+ !call xmpi_sum(ftimes,spaceworld,ierr)
+ !call xmpi_sum(nflops,spaceworld,ierr)
 
  if (me==0) then ! Only the world master writes
 
@@ -1622,7 +1622,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      '- as well as % of the total time and number of calls '
 
    write(ount,"(2(a,i0),a)")&
-     "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = world>"
+     "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = 0>"
 
    write(ount,"(2(a,f13.1))")"- cpu_time = ",tsec(1),   ", wall_time = ",tsec(2)
    write(ount,"(a)")"-"
@@ -1979,6 +1979,23 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        if(ncount(isort)/=0)then
          if(flag_write==1)then
            write(ount, '(/,a)' ) ' Additional information about PAW segments'
+           flag_write=0
+         end if
+         times(2,isort)=times(2,isort)+tol14
+         write(ount,format01040)names(isort),&
+           times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+           times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+       end if
+     end do
+
+     nlist=6
+     list(:nlist)=(/1661,1764,1765,1766,1767,1768/)
+     flag_write=1
+     do ilist=1,nlist
+       isort = list(ilist)
+       if(ncount(isort)/=0)then
+         if(flag_write==1)then
+           write(ount, '(/,a)' ) ' Additional information about segments I want to see'
            flag_write=0
          end if
          times(2,isort)=times(2,isort)+tol14

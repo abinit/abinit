@@ -42,7 +42,8 @@ module m_getghc
  use m_gemm_nonlop, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -52,10 +53,6 @@ module m_getghc
 
 #if defined HAVE_YAKL
  use gator_mod
-#endif
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
 #endif
 
 #ifdef HAVE_KOKKOS
@@ -843,7 +840,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
 #ifdef FC_NVHPC
-   !FIXME This Kokkos kernel seem to cause issue under NVHPC so it is disabled
+   !FIXME This Kokkos kernel seems to cause issues under NVHPC so it is disabled
    if (.false.) then
 #else
    if (gs_ham%gpu_option == ABI_GPU_KOKKOS) then
@@ -861,11 +858,10 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    else
 
 #ifdef FC_NVHPC
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
      !Related to FIXME above
      if (gs_ham%gpu_option == ABI_GPU_KOKKOS) call gpu_device_synchronize()
 #endif
-#endif
+
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
@@ -1841,7 +1837,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    lastband = firstband+chunk
  end if
  usegvnlxc=1
- if (size(gvnlxc)==0) usegvnlxc=0
+ if (size(gvnlxc)<=1) usegvnlxc=0
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1

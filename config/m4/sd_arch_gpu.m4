@@ -77,7 +77,7 @@ AC_DEFUN([SD_GPU_INIT], [
     [ sd_gpu_enable="${sd_gpu_enable_def}"; sd_gpu_init="def"])
 
   # Declare flavor option
-  sd_gpu_flavors_supported="cuda-double cuda-single"
+  sd_gpu_flavors_supported="cuda-double cuda-single hip-double"
   AC_ARG_WITH([gpu-flavor],
     [AS_HELP_STRING(
       [--with-gpu-flavor],

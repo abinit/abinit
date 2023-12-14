@@ -69,7 +69,7 @@ module m_vtowfk
  use m_ompgpu_fourwf
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -1165,6 +1165,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 #endif
    else
      ABI_FREE(wfraug)
+   end if
    end if
  end if
 

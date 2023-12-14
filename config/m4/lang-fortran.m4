@@ -201,7 +201,7 @@ AC_DEFUN([_ABI_FC_CHECK_LLVM],[
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Flang Fortran compiler])
   fc_info_string=`$1 --version 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep -e '^[[CcFf]]lang'`
+  abi_result=`echo "${fc_info_string}" | grep -e '[[CcFf]]lang'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     fc_info_string=""

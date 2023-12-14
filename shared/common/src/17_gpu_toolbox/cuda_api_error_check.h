@@ -36,6 +36,7 @@
 #pragma once
 
 #include <cuda.h>
+#include <cuda_runtime_api.h>
 #include <string>
 #include <stdio.h> // for fflush
 #include <cassert>
