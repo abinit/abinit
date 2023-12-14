@@ -32,6 +32,10 @@ module m_slk
  use mpi
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  use m_nvtx, only : nvtxStartRange, nvtxEndRange
+#endif
+
  use m_fstrings,      only : firstchar, toupper, itoa, sjoin, ltoa
  use m_time,          only : cwtime, cwtime_report
  use m_numeric_tools, only : blocked_loop !, print_arr
@@ -2683,7 +2687,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   call elpa_func_allocate(elpa_hdl,gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev__,&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
+&                           matrix%sizeb_local(1),matrix%sizeb_local(2),nev__,gpu=use_gpu)
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   if (istwf_k/=2) then
@@ -2916,6 +2920,9 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+  call nvtxEndRange()
+#endif
 
 end subroutine solve_gevp_complex
 
@@ -3040,6 +3047,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   integer :: i,n_col, n_row, nev__,use_gpu_elpa__
   integer,external :: indxl2g,numroc
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxStartRange("slk_compute_generalized_eigen", 10)
+#endif
   nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
   use_gpu_elpa__ = 0
 #ifdef HAVE_LINALG_ELPA
@@ -3069,6 +3079,9 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
   call tmp1%free()
   call tmp2%free()
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxEndRange()
+#endif
 #else
 !Arguments ------------------------------------
   class(processor_scalapack),intent(in)       :: processor
@@ -3486,6 +3499,9 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  ABI_UNUSED(use_gpu_elpa)
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
 end subroutine compute_eigen2
 !!***
 

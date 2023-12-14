@@ -29,6 +29,7 @@ module m_getghc_ompgpu
  use m_abicore
  use m_xmpi
  use m_xomp
+ use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
@@ -46,7 +47,7 @@ module m_getghc_ompgpu
  use iso_c_binding
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -97,7 +98,10 @@ subroutine alloc_getghc_ompgpu_buffers(npw, nspinor, ndat, n4, n5, n6)
  mod__ndat = ndat
  mod__npw = npw
  !FIXME Smater buffer management ?
- !!$OMP TARGET ENTER DATA MAP(alloc:work)
+#ifdef HAVE_GPU_HIP
+  !Work buffer allocated once to save time in HIP (alloc costful)
+ !$OMP TARGET ENTER DATA MAP(alloc:work)
+#endif
 
  buf_initialized = 1
 
@@ -119,7 +123,9 @@ subroutine free_getghc_ompgpu_buffers
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !FIXME Smater buffer management ?
- !!$OMP TARGET EXIT DATA MAP(release:work)
+#ifdef HAVE_GPU_HIP
+ !$OMP TARGET EXIT DATA MAP(delete:work)
+#endif
  ABI_FREE(work)
 
  buf_initialized = 0
@@ -441,8 +447,15 @@ has_fock=.false.
  transfer_omp_args =  .not. ( xomp_target_is_present(c_loc(ghc)) &
    .and. xomp_target_is_present(c_loc(gsc_ptr)) &
    .and. xomp_target_is_present(c_loc(cwavef)) )
- !$OMP TARGET ENTER DATA MAP(alloc:ghc,gsc_ptr,cwavef) IF(transfer_omp_args)
- !$OMP TARGET UPDATE TO(cwavef)                        IF(transfer_omp_args)
+
+ if (type_calc == 2) then
+   !$OMP TARGET ENTER DATA MAP(to:ghc) IF(transfer_omp_args)
+   !$OMP TARGET ENTER DATA MAP(to:gsc_ptr) IF(transfer_omp_args)
+ else
+   !$OMP TARGET ENTER DATA MAP(alloc:ghc) IF(transfer_omp_args)
+   !$OMP TARGET ENTER DATA MAP(alloc:gsc_ptr) IF(transfer_omp_args)
+ end if
+ !$OMP TARGET ENTER DATA MAP(to:cwavef) IF(transfer_omp_args)
 
 !============================================================
 ! Application of the local potential
@@ -467,7 +480,11 @@ has_fock=.false.
   &   .or. mod__n6/=gs_ham%n6 .or. mod__nspinor/=my_nspinor .or. mod__ndat/=ndat .or. npw_k1/=mod__npw) then
       call alloc_getghc_ompgpu_buffers(npw_k1, my_nspinor, ndat, gs_ham%n4, gs_ham%n5, gs_ham%n6)
    end if
+!  End with function ghc in reciprocal space also.
+#ifndef HAVE_GPU_HIP
+   !Work buffer allocated at each call to save memory (but too costful on HIP)
    !$OMP TARGET ENTER DATA MAP(alloc:work)
+#endif
    weight=one
    if (.not.use_cwavef_r) then
      option_fft=2
@@ -739,7 +756,9 @@ has_fock=.false.
      end if
    end if
 
-   !$OMP TARGET EXIT DATA MAP(release:work)
+#ifndef HAVE_GPU_HIP
+   !$OMP TARGET EXIT DATA MAP(delete:work)
+#endif
  end if ! type_calc
  ABI_NVTX_END_RANGE()
 
@@ -750,19 +769,12 @@ has_fock=.false.
 ! Application of the non-local potential and the Fock potential
 !============================================================
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
-   if (type_calc==2) then
-     !$OMP TARGET UPDATE TO(gvnlxc_)
-     if(transfer_omp_args) then
-       !$OMP TARGET UPDATE TO(ghc,gsc_ptr)
-     end if
-   end if
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
      cwaveprj_nonlop=>cwaveprj
      lambda_ndat = lambda
 
-     !$OMP TASKWAIT
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
 
@@ -901,8 +913,8 @@ has_fock=.false.
 
  end if ! type_calc
 
- !$OMP TARGET EXIT DATA MAP(release:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
- !$OMP TARGET EXIT DATA MAP(release:gvnlxc_)
+ !$OMP TARGET EXIT DATA MAP(delete:cwavef,gsc_ptr,ghc) IF(transfer_omp_args)
+ !$OMP TARGET EXIT DATA MAP(delete:gvnlxc_)
  if (local_gvnlxc .and. any(type_calc == [0, 2, 3])) then
    ABI_FREE(gvnlxc_)
  end if

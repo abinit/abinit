@@ -25,6 +25,10 @@ module m_lobpcg2
  use m_nvtx_data
 #endif
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
+
   use m_time, only : timab
 
   implicit none
@@ -83,7 +87,7 @@ module m_lobpcg2
     integer :: blockdim                      ! Number of vectors in one block
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
-    integer :: gpu_option                ! Which GPU version is used (0=none)
+    integer :: gpu_option                    ! Which GPU version is used (0=none)
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
     type(xgBlock_t) :: AllX0 ! Block of initial and final solution.
@@ -468,6 +472,7 @@ module m_lobpcg2
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
+                                                       use_gpu_cuda=lobpcg%use_gpu_cuda)
         call timab(tim_maxres,2,tsec)
 
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)

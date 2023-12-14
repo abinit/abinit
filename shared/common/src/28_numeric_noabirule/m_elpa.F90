@@ -31,6 +31,10 @@ module m_elpa
  use defs_basis
  use m_errors
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  use m_nvtx, only : nvtxStartRange, nvtxEndRange
+#endif
+
 #ifdef HAVE_LINALG_ELPA
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  use elpa
@@ -200,6 +204,11 @@ end subroutine elpa_func_uninit
 !! INPUTS
 !!  [blacs_ctx]= -- optional -- Blacs context
 !!  [gpu]= -- optional -- Flag (0 or 1): use GPU version (currently only NVidia)
+!!  na=Order of matrix A
+!!  nblk=Blocksize of cyclic distribution, must be the same in both directions!
+!!  local_nrows=Leading dimension of A
+!!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)= ELPA handle
@@ -217,6 +226,10 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
  character(len=10) :: varname
 
 ! *********************************************************************
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("ELPA_FUNC_ALLOCATE", 6)
+#endif
 
  err=0
  ! if optional parameter is present, use it
@@ -250,6 +263,16 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
    end if
 
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
+   if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err)
+   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+ end if
+#else
+ if (err==0.and.l_gpu==1) elpa_hdl%gpu=l_gpu
+#endif
+
+ call elpa_func_error_handler(err_code=err,err_varname=varname)
+
+   call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
 
    !if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
    !call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
@@ -267,6 +290,20 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
  elpa_hdl%is_allocated=.true.
 
+ ! Setting matrix size
+ call elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols,nev)
+
+ if (present(blacs_ctx)) then
+   if (err==ELPA_OK) call elpa_hdl%elpa%set("blacs_context",int(blacs_ctx,kind=c_int),err)
+ end if
+
+ ! Proper ELPA setup
+ err = elpa_hdl%elpa%setup()
+ call elpa_func_error_handler(err_code=err,err_msg='Error during ELPA setup')
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
 end subroutine elpa_func_allocate
 !!***
 
@@ -416,10 +453,6 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
    varname='process_col'
    call elpa_hdl%elpa%set(trim(varname),process_col,err)
  end if
- if (err==ELPA_OK) then
-   varname=''
-   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
- endif
 #else
  elpa_hdl%mpi_comm_parent=mpi_comm_parent
  elpa_hdl%process_row=process_row
@@ -457,6 +490,7 @@ end subroutine elpa_func_get_communicators
 !!  nev=Number of eigenvalues needed.
 !!  local_nrows=Leading dimension of A
 !!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
@@ -503,6 +537,10 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,nev,local_nrows,local_ncols)
  if (err==ELPA_OK) then
    varname="local_ncols"
    call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
+ end if
+ if (err==ELPA_OK) then
+   varname="nev"
+   call elpa_hdl%elpa%set(trim(varname),nev,err)
  end if
 #else
  elpa_hdl%na=na
@@ -722,7 +760,13 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("ELPA_SOLVE_REAL", 9)
+#endif
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
  success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_real_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
@@ -812,7 +856,13 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("ELPA_SOLVE_COMPLEX", 9)
+#endif
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
  success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_complex_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&

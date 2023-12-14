@@ -143,6 +143,9 @@
 /* Define to 1 if you are using the Nvidia nvhpc compiler. */
 #cmakedefine FC_NVHPC 1
 
+/* Define to 1 if you are using the CRAY Fortran compiler. */
+#cmakedefine FC_CRAY 1
+
 /* Define to 1 if you want to enable memory profiling. */
 #cmakedefine HAVE_MEM_PROFILING @HAVE_MEM_PROFILING@
 
@@ -327,6 +330,9 @@
 /* Define to 1 if you want to perform single-precision Cuda calculations. */
 #cmakedefine HAVE_GPU_CUDA_SP @HAVE_GPU_CUDA_SP@
 
+/* Define to 1 if you have the HIP library. */
+#cmakedefine HAVE_GPU_HIP @HAVE_GPU_HIP@
+
 /* Define to 1 if Kokkos is enabled */
 #cmakedefine HAVE_KOKKOS @HAVE_KOKKOS@
 
@@ -349,7 +355,7 @@
 /* TODO #cmakedefine HAVE_GPU_MPI */
 
 /* Define to 1 if you have library nvtx (v3). */
-#cmakedefine HAVE_GPU_NVTX_V3 @HAVE_GPU_NVTX_V3@
+#cmakedefine HAVE_GPU_MARKERS @HAVE_GPU_MARKERS@
 
 /* Define to 1 if you have a serial GPU library. */
 #cmakedefine HAVE_GPU_SERIAL @HAVE_GPU_SERIAL@

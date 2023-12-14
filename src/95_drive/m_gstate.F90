@@ -111,7 +111,7 @@ module m_gstate
  use m_alloc_hamilt_gpu
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -454,6 +454,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call init_gemm_nonlop_gpu(dtset%nkpt)
    ! CPU case
    else if(dtset%gpu_option == ABI_GPU_DISABLED) then
+     call init_gemm_nonlop(dtset%nkpt)
+   end if
+   else if(dtset%use_gpu_cuda == ABI_GPU_DISABLED) then
      call init_gemm_nonlop(dtset%nkpt)
    end if
  end if
@@ -1806,6 +1809,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call destroy_gemm_nonlop_ompgpu()
    else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
      call destroy_gemm_nonlop_gpu(dtset%nkpt)
+     call destroy_gemm_nonlop(dtset%nkpt)
+   else if(dtset%use_gpu_cuda==ABI_GPU_DISABLED) then
      call destroy_gemm_nonlop(dtset%nkpt)
    else if(dtset%gpu_option==ABI_GPU_DISABLED) then
      call destroy_gemm_nonlop(dtset%nkpt)

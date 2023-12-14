@@ -403,6 +403,14 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
   fi
   # Perform pattern replacement in OpenMP offload flags with requested GPU arch
   FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
+
+  #FIXME With LLVM 16 embedded with ROCm 5.6.0, issues occurs if OpenMP offload is enabled everywhere
+  #Therefore, we enable it only if subfolders where it's needed and link time.
+  if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
+    amd_openmp_flags="${FCFLAGS_OPENMP_OFFLOAD}"
+    FC_LDFLAGS_EXTRA="${FCFLAGS_OPENMP_OFFLOAD} ${FC_LDFLAGS_EXTRA}"
+    FCFLAGS_OPENMP_OFFLOAD=""
+  fi
 else
   FCFLAGS_OPENMP_OFFLOAD=""
 fi
@@ -488,11 +496,24 @@ fi
 ABI_OPTIM_INIT([${abi_optim_flavor}])
 
 # FIXME: 20_datashare does not support optimizations
-if test "${abi_optim_flavor}" != "none"; then
   AC_MSG_NOTICE([disabling optimizations for src/20_datashare/])
   fcflags_opt_20_datashare="-O0"
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
+
+# FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
+# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
+if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
+  if test "${abi_openmp_offload_enable}" = "yes"; then
+    fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
+    fcflags_opt_45_xgTools="${amd_openmp_flags}"
+    fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
+    fcflags_opt_66_nonlocal="${amd_openmp_flags}"
+    fcflags_opt_66_wfs="${amd_openmp_flags}"
+    fcflags_opt_67_common="${amd_openmp_flags}"
+    fcflags_opt_79_seqpar_mpi="${amd_openmp_flags}"
+    fcflags_opt_98_main="${amd_openmp_flags}"
+  fi
 fi
 
 # Set per-directory Fortran optimizations
@@ -902,6 +923,12 @@ SD_WANNIER90_DETECT
 
 # AtomPAW integration support
 ABI_CHECK_ATOMPAW_BINS
+
+# KOKKOS library support
+SD_KOKKOS_DETECT
+
+# YAKL library support
+SD_YAKL_DETECT
 
 # KOKKOS library support
 SD_KOKKOS_DETECT

@@ -3,7 +3,6 @@
 #
 add_library(46_manage_cuda STATIC
   m_manage_cuda.F90
-  m_nvtx_data.F90
   abi_gpu_header.h
   cuda_rec.cu
   cuda_rec_cut.cu
