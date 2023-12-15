@@ -276,7 +276,6 @@ if(OpenMP_FOUND)
   # check for OpenMP collapse clause support
   try_compile(HAVE_OMP_COLLAPSE_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_omp_collapse.F90
     LINK_LIBRARIES OpenMP::OpenMP_Fortran)
-
   if(HAVE_OMP_COLLAPSE_BOOL)
     set(HAVE_OMP_COLLAPSE 1)
   endif()
@@ -308,6 +307,19 @@ if(OpenMP_FOUND)
         get_offload_flags(TARGET ${CMAKE_CUDA_ARCHITECTURES}    RESULT OPENMP_OFFLOAD_FLAGS)
       elseif(ABINIT_ENABLE_GPU_HIP)
         get_offload_flags(ARCH   ${CMAKE_HIP_ARCHITECTURES}     RESULT OPENMP_OFFLOAD_FLAGS)
+      endif()
+
+      # check whether compiler implements omp_get_mapped_ptr
+      try_compile(HAVE_OPENMP_GET_MAPPED_PTR_BOOL ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_openmp_get_mapped_ptr.F90
+      LINK_LIBRARIES OpenMP::OpenMP_Fortran)
+      if(HAVE_OPENMP_GET_MAPPED_PTR_BOOL)
+        set(HAVE_OPENMP_GET_MAPPED_PTR 1)
+      endif()
+
+      # some compilers do not correctly handle structured types in OMP OFFLOAD directives
+      # at present only NVHPC can do it
+      if ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "NVHPC")
+        set(HAVE_OPENMP_OFFLOAD_DATASTRUCTURE 1)
       endif()
 
     endif()

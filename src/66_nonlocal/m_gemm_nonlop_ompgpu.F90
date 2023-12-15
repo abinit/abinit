@@ -343,6 +343,7 @@ contains
   !Work buffer allocated once to save time in HIP (alloc costful)
   !$OMP TARGET ENTER DATA MAP(alloc:projections,s_projections,vnl_projections)
 #endif
+
   gpu_initialised=1
 
  end subroutine alloc_work_buffers
@@ -352,10 +353,6 @@ contains
 
  subroutine free_work_buffers()
 
-  !FIXME Smarter buffer management
-#ifdef HAVE_GPU_HIP
-  !$OMP TARGET EXIT DATA MAP(delete:projections,s_projections,vnl_projections)
-#endif
 
   !$OMP TARGET EXIT DATA MAP(delete:sij_typ)
   if(allocated(sij_typ)) then
@@ -368,11 +365,17 @@ contains
     ABI_FREE(temp_realvec_i)
   end if
 
+  !FIXME Smarter buffer management
+#ifdef HAVE_GPU_HIP
+  !$OMP TARGET EXIT DATA MAP(delete:projections,s_projections,vnl_projections)
+#endif
+
   if(allocated(projections)) then
     ABI_FREE(projections)
     ABI_FREE(s_projections)
     ABI_FREE(vnl_projections)
   end if
+
   mod__ndat=0
   gpu_initialised=0
 
@@ -940,7 +943,14 @@ contains
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-#ifdef HAVE_GPU_HIP
+#if defined HAVE_GPU_CUDA
+  byte_count=sizeof(projections_ptr)
+  !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
+  if(cpopt < 2) call gpu_memset(c_loc(projections_ptr),     0, byte_count)
+  call gpu_memset(c_loc(s_projections),   0, byte_count)
+  call gpu_memset(c_loc(vnl_projections), 0, byte_count)
+  !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
   if(cpopt < 2) then
     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
     !$OMP& MAP(to:projections_ptr) PRIVATE(i1,i2)
@@ -959,19 +969,16 @@ contains
     end do
   end do
 #endif
-#ifdef HAVE_GPU_CUDA
-  byte_count=sizeof(projections_ptr)
-  !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
-  if(cpopt < 2) call gpu_memset(c_loc(projections_ptr),     0, byte_count)
-  call gpu_memset(c_loc(s_projections),   0, byte_count)
-  call gpu_memset(c_loc(vnl_projections), 0, byte_count)
-  !$OMP END TARGET DATA
-#endif
 
   if (signs==1.and.ngrads>0) then
     ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
-#ifdef HAVE_GPU_HIP
+#if defined HAVE_GPU_CUDA
+    byte_count=sizeof(dprojections)
+    !$OMP TARGET DATA USE_DEVICE_PTR(dprojections)
+    call gpu_memset(c_loc(dprojections), 0, byte_count)
+    !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
     !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
     do i2=1, nspinor*ndat
@@ -979,12 +986,6 @@ contains
         dprojections(:,i1,i2) = zero
       end do
     end do
-#endif
-#ifdef HAVE_GPU_CUDA
-    byte_count=sizeof(dprojections)
-    !$OMP TARGET DATA USE_DEVICE_PTR(dprojections)
-    call gpu_memset(c_loc(dprojections), 0, byte_count)
-    !$OMP END TARGET DATA
 #endif
     if(choice==1.or.choice==3.or.choice==23) then
       ABI_MALLOC(enlk,(ndat))
@@ -1051,7 +1052,7 @@ contains
     if(cplex == 2) then
       if(.not. gemm_nonlop_is_distributed) then
 
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
         call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                current_ikpt_projs, npwin,&
 &                vectin, npwin, czero, projections_ptr, nprojs)
@@ -1060,25 +1061,23 @@ contains
                    current_ikpt_dprojs, npwin,&
                    vectin, npwin, czero, dprojections, ngrads*nprojs)
         end if
-#endif
+#elif defined HAVE_GPU_HIP
+        !$OMP TARGET MAP(to:vectin) MAP(from:vectin_amdcopy)
+        vectin_amdcopy = c_loc(vectin)
+        !$OMP END TARGET
 
-#ifdef HAVE_GPU_HIP
-      !$OMP TARGET MAP(to:vectin) MAP(from:vectin_amdcopy)
-      vectin_amdcopy = c_loc(vectin)
-      !$OMP END TARGET
-
-      !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin)
-      call   abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
+        !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin)
+        call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                c_loc(current_ikpt_projs), npwin,&
 &                vectin_amdcopy, npwin, czero, c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
-      if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin)
-        call   abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
+        !$OMP END TARGET DATA
+        if(signs==1.and.ngrads>0) then
+          !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin)
+          call abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
                  c_loc(current_ikpt_dprojs), npwin,&
                  vectin_amdcopy, npwin, czero, c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
-      end if
+          !$OMP END TARGET DATA
+        end if
 #endif
       else
         call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
@@ -1259,12 +1258,11 @@ contains
         ! Get svectout from s_projections
         if(cplex == 2) then
           if(.not. gemm_nonlop_is_distributed) then
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
             call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                     current_ikpt_projs, npwout,&
                     s_projections, nprojs, czero, svectout, npwout)
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
             !$OMP TARGET MAP(to:svectout) MAP(from:svectout_amdcopy)
             svectout_amdcopy = c_loc(svectout)
             !$OMP END TARGET
@@ -1317,12 +1315,11 @@ contains
         ! Get vectout from vnl_projections
         if(cplex_fac == 2) then
           if(.not. gemm_nonlop_is_distributed) then
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
             call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                     current_ikpt_projs, npwout, &
                     vnl_projections, nprojs, czero, vectout, npwout)
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
             !$OMP TARGET MAP(to:vectout) MAP(from:vectout_amdcopy)
             vectout_amdcopy = c_loc(vectout)
             !$OMP END TARGET

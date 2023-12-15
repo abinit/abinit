@@ -201,11 +201,16 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !$OMP END TARGET
 #endif
 
-
    ! GPU_SPHERE_IN
 
    cfft_size = 2*n1*n2*n3*ndat
 
+#ifdef HAVE_GPU_CUDA
+   byte_count=sizeof(work_gpu)
+   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
+   call gpu_memset(c_loc(work_gpu), 0, byte_count)
+   !$OMP END TARGET DATA
+#endif
 #ifdef HAVE_GPU_HIP
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)  MAP(to:work_gpu)
    do i3=1,n3*ndat
@@ -215,12 +220,6 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        end do
      end do
    end do
-#endif
-#ifdef HAVE_GPU_CUDA
-   byte_count=sizeof(work_gpu)
-   !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
-   call gpu_memset(c_loc(work_gpu), 0, byte_count)
-   !$OMP END TARGET DATA
 #endif
 
    ! During GPU calculation we do some pre-calculation on symetries
