@@ -164,9 +164,8 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
 
  !** Writes TD elec. field and associated vector potential if needed
  ! Update electric field and vector potential value
- call tdks%tdef%update((istep-1)*tdks%dt, tdks%rprimd, dtset%kptns)
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
+   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
    call wrtout(tdks%tdef_unit,msg)
  end if
 

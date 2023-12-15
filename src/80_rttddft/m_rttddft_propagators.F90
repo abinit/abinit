@@ -488,6 +488,9 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  diff = tdks%cg
  ! estimate psi(t+dt/2) = (psi(t)+psi(t+dt))/2
  tdks%cg(:,:) = 0.5_dp*(tdks%cg(:,:)+cg(:,:))
+ ! update electric field and vector potential to t+dt/2
+ call tdks%tdef%update(dtset,mpi_enreg,(istep-0.5_dp)*tdks%dt,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                     & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
  ! calc associated density at t+dt/2
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
  ! go back to time t ..

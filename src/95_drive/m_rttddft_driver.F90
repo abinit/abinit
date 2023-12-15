@@ -146,6 +146,10 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    !Compute total energy at time t-dt
    call rttddft_calc_etot(dtset,tdks%energies,tdks%etot,tdks%occ)
 
+   !Update electric field and vector potential value
+   call tdks%tdef%update(dtset,mpi_enreg,istep*tdks%dt,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                       & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
+
    !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 

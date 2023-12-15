@@ -23,11 +23,11 @@
 module m_rttddft_tdef
 
  use defs_basis
- use defs_abitypes,      only: MPI_type
- use defs_datatypes,     only: pseudopotential_type
+ use defs_abitypes,  only: MPI_type
 
- use m_dtset,            only: dataset_type
- use m_errors,           only: msg_hndl
+ use m_dtset,        only: dataset_type
+ use m_errors,       only: msg_hndl
+ use m_initylmg,     only: initylmg
 
  implicit none
 
@@ -121,7 +121,6 @@ subroutine tdef_init(tdef, td_ef_type, td_ef_pol, td_ef_ezero, td_ef_tzero, td_e
  ABI_MALLOC(tdef%kpa,(3,nkpt))
  tdef%kpa = kpts
 
-
 end subroutine tdef_init
 !!***
 
@@ -142,16 +141,23 @@ end subroutine tdef_init
 !!  [tdef = updated tdef structure]
 !!
 !! SOURCE
-subroutine tdef_update(tdef, time, rprimd, kpts)
+subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang, npwarr, ylm, ylmgr)
 
  implicit none
 
  !Arguments ------------------------------------
  !scalars
- class(tdef_type), intent(inout) :: tdef
- real(dp),         intent(in)    :: time 
- real(dp),         intent(in)    :: rprimd(3,3)
- real(dp),         intent(in)    :: kpts(:,:)
+ class(tdef_type),   intent(inout) :: tdef
+ type(dataset_type), intent(inout) :: dtset
+ type(MPI_type),     intent(inout) :: mpi_enreg
+ real(dp),           intent(in)    :: time 
+ real(dp),           intent(in)    :: rprimd(3,3)
+ real(dp),           intent(in)    :: gprimd(3,3)
+ integer,            intent(in)    :: kg(:,:)
+ integer,            intent(in)    :: mpsang
+ integer,            intent(in)    :: npwarr(:)
+ real(dp),           intent(out)   :: ylm(:,:)
+ real(dp),           intent(out)   :: ylmgr(:,:,:)
 
  !Local variables-------------------------------
  character(len=500) :: msg
@@ -192,8 +198,11 @@ subroutine tdef_update(tdef, time, rprimd, kpts)
  if (tdef%ef_type /= 0) then
    !Update the k+A grid used in cprojs
    do i = 1,3
-      tdef%kpa(i,:) = kpts(i,:) + tdef%vecpot_red(i)
+      tdef%kpa(i,:) = dtset%kptns(i,:) + tdef%vecpot_red(i)
    end do
+      ! update the spherical harmonics (computed at k+G+A)
+      call initylmg(gprimd,kg,tdef%kpa,dtset%mkmem,mpi_enreg,mpsang,dtset%mpw,dtset%nband, &
+                  & dtset%nkpt,npwarr,dtset%nsppol,0,rprimd,ylm,ylmgr)
  end if
 
 end subroutine tdef_update
