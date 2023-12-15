@@ -303,7 +303,10 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    ABI_FREE(doccde)
  end if
 
- !5) TD external elec. field perturbation
+ !5) Some further initialization (Mainly for PAW and allocation of arrays for Hamiltonian and densities)
+ call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
+
+ !6) TD external elec. field perturbation
  !Test that we use spherical harmonics if TD electric field
  if (dtset%td_ef_type/=0 .and. psps%useylm/=1) then
    ABI_ERROR("TD Electric field only work with spherical harmonics (useylm=1)")
@@ -311,10 +314,8 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  !Init vector potential and associated constants
  call tdks%tdef%init(dtset%td_ef_type,dtset%td_ef_pol,dtset%td_ef_ezero,dtset%td_ef_tzero, &
                    & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%nkpt,dtset%kptns)
- call tdks%tdef%update((tdks%first_step-1)*dtset%dtele, tdks%rprimd, dtset%kptns)
-
- !6) Some further initialization (Mainly for PAW and allocation of arrays for Hamiltonian and densities)
- call second_setup(dtset,mpi_enreg,pawang,pawrad,pawtab,psps,psp_gencond,tdks)
+ call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
+                   & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
 
  !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory
@@ -821,7 +822,7 @@ subroutine second_setup(dtset, mpi_enreg, pawang, pawrad, pawtab, psps, psp_genc
    ABI_MALLOC(tdks%ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_MALLOC(tdks%ylmgr,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm))
    ylm_option=0
-   call initylmg(tdks%gprimd,tdks%kg,tdks%tdef%kpa,dtset%mkmem,mpi_enreg,&
+   call initylmg(tdks%gprimd,tdks%kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
    & psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
    & tdks%npwarr,dtset%nsppol,ylm_option,tdks%rprimd,tdks%ylm,tdks%ylmgr)
  else
