@@ -67,16 +67,14 @@ module m_nvtx
 
   interface nvtxRangePush
      ! push range with custom label and standard color
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
      subroutine nvtxRangePushA(name) bind(C, name='roctxRangePushA')
 #endif
        use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
-
 #ifdef HAVE_GPU_CUDA
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
@@ -85,26 +83,21 @@ module m_nvtx
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx
 #endif
-
   end interface nvtxRangePush
 
   interface nvtxRangePop
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePop() bind(C, name='nvtxRangePop')
-#endif
-
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
      subroutine nvtxRangePop() bind(C, name='roctxRangePop')
 #endif
      end subroutine nvtxRangePop
   end interface nvtxRangePop
 
   interface
-
     ! start profiling
     subroutine nvtxProfilerStart() bind(C, name='cudaProfilerStart')
     end subroutine nvtxProfilerStart
-
     ! stop profiling
     subroutine nvtxProfilerStop() bind(C, name='cudaProfilerStop')
     end subroutine nvtxProfilerStop
@@ -130,7 +123,7 @@ contains
        tempName(i) = trimmed_name(i:i)
     enddo
 
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
     if ( .not. present(id)) then
        call nvtxRangePush(tempName)
     else
@@ -138,8 +131,7 @@ contains
        event%message=c_loc(tempName)
        call nvtxRangePushEx(event)
     end if
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
     call nvtxRangePush(tempName)
 #endif
 

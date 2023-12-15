@@ -176,14 +176,12 @@ end type invovl_kpt_type
  real(dp),allocatable, target :: proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: sm1proj_ompgpu(:,:,:)
  real(dp),allocatable, target :: PtPsm1proj_ompgpu(:,:,:)
-
  !Module variable keeping track of which K-point data is so=tored on GPU
  integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialized=0
-
 #endif
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA)
+#if defined(HAVE_GPU_CUDA)
 
  !> this interface is only useful when gpu is enabled
  !! these functions are defined in 46_manage_gpu/gpu_apply_invovl_inner.cu
@@ -1491,8 +1489,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  !FIXME LLVM has trouble with performing team reduction (AOMP 15.0.2)
 #ifdef FC_LLVM
  !$OMP TARGET UPDATE FROM(proj)
-#endif
-#ifndef FC_LLVM
+#else
  !$OMP TARGET TEAMS DISTRIBUTE MAP(to:normprojs,proj) PRIVATE(idat,sum_tmp)
 #endif
  do idat = 1,ndat
@@ -1527,13 +1524,12 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 invovl%gram_projs, nprojs,&
                 sm1proj, nlmntot_this_proc, czero, &
                 PtPsm1proj, nprojs)
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
    !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
@@ -1557,8 +1553,7 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
    !FIXME LLVM has trouble with performing team reduction (v16.0.0 from AMD ROCm 5.6.0)
    !$OMP TARGET UPDATE FROM(resid)
    errs = SUM(SUM(resid**2, 1),1)
-#endif
-#ifndef FC_LLVM
+#else
    !$OMP TARGET TEAMS DISTRIBUTE MAP(to:errs,resid) PRIVATE(idat,sum_tmp)
    do idat = 1,ndat
      sum_tmp=0
@@ -1570,7 +1565,6 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
      end do
      errs(idat)=sum_tmp
    end do
-
    !$OMP TARGET UPDATE FROM(errs)
 #endif
 
