@@ -35,7 +35,8 @@ module m_rttddft_driver
  use m_rttddft_tdks,       only: tdks_type
  use m_rttddft_propagate,  only: rttddft_propagate_ele
  use m_rttddft_properties, only: rttddft_calc_density, &
-                               & rttddft_calc_etot
+                               & rttddft_calc_etot,    &
+                               & rttddft_calc_current
  use m_specialmsg,         only: wrtout
  use m_time,               only: cwtime
 
@@ -139,7 +140,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
    call cwtime(cpu, wall, gflops, "start")
  
-   !Perform electronic step
+   !*** Perform electronic step ***
    !Compute new WF at time t and energy contribution at time t-dt
    call rttddft_propagate_ele(dtset,istep,mpi_enreg,psps,tdks)
 
@@ -152,6 +153,9 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
 
    !Compute new electronic density at t
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
+
+   !Compute current at t
+   call rttddft_calc_current(tdks,dtset,mpi_enreg)
 
    !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
@@ -169,7 +173,8 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
       ABI_WARNING(msg)
    end if
 
-   !TODO: If Ehrenfest dynamics perform nuclear step
+   !TODO: *** Perform nuclear step *** 
+   ! For Ehrenfest dynamics
    !call rttddft_propagate_nuc(dtset,istep,mpi_enreg,psps,tdks)
 
    call cwtime(cpu,wall,gflops,"stop")

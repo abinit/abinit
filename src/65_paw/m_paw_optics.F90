@@ -132,7 +132,7 @@ CONTAINS  !=====================================================================
 
  subroutine optics_paw(atindx1,cg,cprj,dimcprj,dtfil,dtset,eigen0,gprimd,hdr,kg,&
 &               mband,mcg,mcprj,mkmem,mpi_enreg,mpsang,mpw,natom,nkpt,npwarr,nsppol,&
-&               pawang,pawrad,pawrhoij,pawtab,znucl)
+&               pawang,pawrad,pawrhoij,pawtab,znucl,psinablapsi_out)
 
 !Arguments ------------------------------------
 !scalars
@@ -142,6 +142,7 @@ CONTAINS  !=====================================================================
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
+ real(dp),optional,intent(out) :: psinablapsi_out(:,:,:,:)
 !arrays
  integer,intent(in) :: atindx1(natom),dimcprj(natom),npwarr(nkpt)
  integer,intent(in),target :: kg(3,mpw*mkmem)
@@ -219,6 +220,16 @@ CONTAINS  !=====================================================================
  i_am_master_band=(xmpi_comm_rank(spaceComm_band)==master)
  i_am_master_spfft=(xmpi_comm_rank(spaceComm_spinorfft)==master)
  my_nspinor=max(1,dtset%nspinor/mpi_enreg%nproc_spinor)
+
+ write_file = .true.
+ diag_only = .false.
+ if (present(psinablapsi_out)) then
+   write_file = .false.
+   if (size(psinablapsi_out(1,1,:,1)>mband)) then
+      diag_only = .true.
+   end if
+ end if
+
 
 !----------------------------------------------------------------------------------
 !1- Opening of OPT file and header writing
