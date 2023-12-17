@@ -128,9 +128,9 @@ module m_abi_linalg
  real(kind=c_double),            ABI_CONTIGUOUS pointer,save,private :: r_work_managed(:) => null()
  complex(kind=c_double_complex), ABI_CONTIGUOUS pointer,save,private :: c_work_managed(:) => null()
 
+ integer, save, private :: i_work_len = 0
  integer, save, private :: r_work_len = 0
  integer, save, private :: c_work_len = 0
- integer, save, private :: i_work_len = 0
  integer(c_size_t), save, private :: gpu_work_len = 0
 #endif
 

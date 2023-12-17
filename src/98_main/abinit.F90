@@ -67,10 +67,7 @@
 #endif
 
 #include "abi_common.h"
-
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
 #include "nvtx_macros.h"
-#endif
 
 program abinit
 
