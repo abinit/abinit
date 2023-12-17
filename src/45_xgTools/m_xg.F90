@@ -3327,7 +3327,8 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:),dot__vecR(:,:)
 #endif
-#if defined FC_CRAY
+
+#if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined FC_CRAY
     integer :: ii
     double precision :: tmp
 #endif
@@ -3506,7 +3507,7 @@ contains
     double complex,external :: zdotc !conjugated dot product
     integer :: l_gpu_option
 
-#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+#if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined(FC_NVHPC) || defined(FC_CRAY)
     integer :: rows,cols,ii
     double precision :: tmp
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
@@ -3578,7 +3579,8 @@ contains
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         dot__vecR => dot%vecR
-#if defined FC_NVHPC        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
+#if defined FC_NVHPC
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
@@ -3621,7 +3623,8 @@ contains
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
         dot__vecC => dot%vecC
-#if defined FC_NVHPC        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
+#if defined FC_NVHPC
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
