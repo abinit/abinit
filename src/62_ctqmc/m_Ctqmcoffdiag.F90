@@ -2056,7 +2056,8 @@ SUBROUTINE Ctqmcoffdiag_loop(op,itotal,ilatex)
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       IF ( op%opt_histo .GT. 0 ) THEN
-        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time,op%occupconfig,op%suscep,op%samples,op%chi,op%chicharge,op%ntot,op%opt_histo,op%nspinor)
+        CALL ImpurityOperator_occup_histo_time(op%Impurity,op%occup_histo_time,op%occupconfig,op%suscep,op%samples,op%chi,&
+& op%chicharge,op%ntot,op%opt_histo,op%nspinor)
       END IF
     ENDIF
 
@@ -2987,8 +2988,8 @@ include 'mpif.h'
   INTEGER, INTENT(IN ) :: Iatom
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
-  INTEGER                                       :: iflavor1
-  INTEGER                                       :: iflavor2
+!  INTEGER                                       :: iflavor1
+!  INTEGER                                       :: iflavor2
   INTEGER                                       :: flavors
   INTEGER                                       :: itau
   INTEGER                                       :: endDensity
@@ -3556,9 +3557,11 @@ include 'mpif.h'
           if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
             sumh=sumh+op%occupconfig(n1)
             if(op%flavors==14) then
-              write(op%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1), op%occupconfig(n1)
+              write(op%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+& op%occupconfig(n1)
             else if(op%flavors==10) then
-              write(op%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1), op%occupconfig(n1)
+              write(op%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,op%flavors),"  ",occtot(n1),spintot(n1),&
+ op%occupconfig(n1)
             end if
           endif
         enddo
@@ -4826,7 +4829,7 @@ SUBROUTINE Ctqmcoffdiag_setMagmom(op,Magmom_orb, Magmom_spin, Magmom_tot)
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
 !Local variables ------------------------------
-  INTEGER :: iflavor1,iflavor2
+!  INTEGER :: iflavor1,iflavor2
 
  ! do iflavor1=1,10
  !   do iflavor2=1,10

@@ -2882,12 +2882,12 @@ end subroutine add_matlu
 !Local variables-------------------------------
 !scalars
  integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,jm,ml1,ml2,jc1,ms1,lcor,im1,im2,tndim
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
  character(len=500) :: message
  real(dp) :: xj
 !arrays
  complex(dpc),allocatable :: mat_out_c(:,:)
- integer, allocatable :: ind_msml(:,:)
+! integer, allocatable :: ind_msml(:,:)
  complex(dpc), allocatable :: temp_mat(:,:)
  type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muorb(:)
@@ -3042,8 +3042,8 @@ end subroutine add_matlu
            do ispinor2=1,matlu(1)%nspinor
              mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
 
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Orbital angular momentum matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Orbital angular momentum matrix, isppol=", isppol, ", ispinor=",&
+&            ispinor,", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -3125,7 +3125,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
 !scalars
  integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,mm,jm,ii,jj,ml1,ml2,jc1,ms1,lcor,im1,im2,tndim
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
  character(len=500) :: message
  real(dp) :: xj
 !arrays
@@ -3392,7 +3392,7 @@ end subroutine add_matlu
 !Local variables-------------------------------
 !scalars
  integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,jm,ii,jj,ml1,ml2,jc1,ms1,lcor,im1,im2,tndim
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
  character(len=500) :: message
  real(dp) :: xj
 !arrays
@@ -3605,8 +3605,8 @@ end subroutine add_matlu
            do ispinor2=1,matlu(1)%nspinor
              mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
 
-             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Zeeman angular momentum matrix, isppol=", isppol, ", ispinor=", ispinor,&
-&             ", ispinor2=", ispinor2
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Zeeman angular momentum matrix, isppol=", isppol, ", ispinor=",&
+&            ispinor,", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -3686,13 +3686,13 @@ end subroutine add_matlu
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,im,ispinor,isppol,ispinor2
- integer :: lpawu,ll,jm,ii,jj,ml1,ml2,jc1,ms1,lcor,im1,im2,tndim
+ integer :: iatom,im,ispinor2
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,tndim
  character(len=500) :: message
  real(dp) :: xj
 !arrays
  integer, allocatable :: ind_msml(:,:)
- type(coeff2c_type), allocatable :: gathermatlu(:)
+! type(coeff2c_type), allocatable :: gathermatlu(:)
  type(coeff2c_type), allocatable :: muchi(:)
 !************************************************************************
 

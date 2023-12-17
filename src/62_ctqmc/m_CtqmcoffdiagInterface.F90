@@ -256,7 +256,8 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,Magmom_spin,Magmom_tot,Iatom) 
+SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
+&Magmom_spin,Magmom_tot,Iatom) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -276,7 +277,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN ) :: Iatom
 !local variables--------------------------------
-  INTEGER :: iflavor1,iflavor2
+!  INTEGER :: iflavor1,iflavor2
 
  ! do iflavor1=1,10
  !   do iflavor2=1,10
