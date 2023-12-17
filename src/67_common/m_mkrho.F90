@@ -180,6 +180,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !arrays
  integer,allocatable :: gbound(:,:)
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp),allocatable :: occ_diag(:),cwavef_rot(:,:,:,:)
+#if defined HAVE_GPUL
+ real(dp),allocatable :: weight_t(:) ! only allocated and used when use_gpu_cuda = 1
+#endif
 #if defined HAVE_GPU && defined HAVE_YAKL
  integer(int32),ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(real64) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))

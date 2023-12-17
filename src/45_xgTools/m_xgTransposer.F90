@@ -605,7 +605,7 @@ module m_xgTransposer
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
 
-     if( xgTransposer%gou_option == ABI_GPU_KOKKOS) then
+     if( xgTransposer%gpu_option == ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
        call timab(tim_all2allv,1,tsec)
@@ -621,7 +621,6 @@ module m_xgTransposer
        recvbuf(:,:) = recvbuf_mpi(:,:)
 
        ABI_FREE(recvbuf_mpi)
-
 #endif
 
      else

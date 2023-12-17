@@ -122,7 +122,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
+ type(pawcprj_type) :: cprj_dum(1,1)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: l_gvnlxc(:,:)
@@ -355,7 +355,7 @@ end subroutine lobpcgwf2
   type(xgBlock_t), intent(inout) :: BX
   integer         :: blockdim
   integer         :: spacedim
-  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
+  type(pawcprj_type) :: cprj_dum(1,1)
   double precision :: dum
   double precision, parameter :: inv_sqrt2 = 1/sqrt2
   double precision, pointer :: cg(:,:)

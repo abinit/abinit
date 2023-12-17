@@ -191,7 +191,6 @@ module m_hamiltonian
   ! Governs the choice of the GPU implementation:
   !        = 0 ==> do not use GPU
   !        > 0 ==> see defs_basis.F90 to have the list of possible GPU implementations
-  !        = 666 ==> use openMP GPU implementation of hamiltonian operators
 
   integer :: usecprj
    ! usecprj= 1 if cprj projected WF are stored in memory

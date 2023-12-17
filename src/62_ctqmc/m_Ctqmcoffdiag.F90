@@ -665,7 +665,7 @@ SUBROUTINE Ctqmcoffdiag_allocateAll(op)
   op%measDE = 0.d0
 
   FREEIF(op%mu)
-  MALLOC(op%mu, (1:flavors) )
+  MALLOC(op%mu,(1:flavors) )
   op%mu = 0.d0
   FREEIF(op%hybri_limit)
   MALLOC(op%hybri_limit, (flavors,flavors) )

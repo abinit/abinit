@@ -2687,7 +2687,7 @@ subroutine compute_eigen_problem(processor, matrix, results, eigen, comm, istwf_
 
   call elpa_func_allocate(elpa_hdl,gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,matrix%sizeb_global(1),matrix%sizeb_blocs(1),nev__,&
-&                           matrix%sizeb_local(1),matrix%sizeb_local(2),nev__,gpu=use_gpu)
+&                           matrix%sizeb_local(1),matrix%sizeb_local(2))
   call elpa_func_get_communicators(elpa_hdl,processor%comm,processor%coords(1),processor%coords(2))
 
   if (istwf_k/=2) then
@@ -2912,6 +2912,10 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxStartRange("solve_gevp_complex",12)
+#endif
+
 ! Allocate ELPA handle
   call elpa_func_allocate(elpa_hdl,blacs_ctx=sc_desc(CTXT_),gpu=use_gpu_elpa_)
   call elpa_func_set_matrix(elpa_hdl,na,nblk,nev,na_rows,na_cols)
@@ -2920,6 +2924,7 @@ subroutine solve_gevp_complex(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   call elpa_func_solve_gevp_2stage(elpa_hdl,a,b,z,ev,nev)
 
   call elpa_func_deallocate(elpa_hdl)
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
   call nvtxEndRange()
 #endif
@@ -2955,6 +2960,10 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   use_gpu_elpa_=0
 #ifdef HAVE_LINALG_ELPA
   if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxStartRange("solve_gevp_real",12)
 #endif
 
 ! Allocate ELPA handle
@@ -2998,6 +3007,10 @@ subroutine solve_gevp_real(na,nev,na_rows,na_cols,nblk,a,b,ev,z,tmp1,tmp2, &
   end if
 
   call elpa_func_deallocate(elpa_hdl)
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+  call nvtxEndRange()
+#endif
 
  end subroutine solve_gevp_real
 !!***
@@ -3050,6 +3063,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
   call nvtxStartRange("slk_compute_generalized_eigen", 10)
 #endif
+
   nev__ = matrix1%sizeb_global(2); if (present(nev)) nev__ = nev
   use_gpu_elpa__ = 0
 #ifdef HAVE_LINALG_ELPA
@@ -3082,6 +3096,7 @@ subroutine compute_generalized_eigen_problem(processor,matrix1,matrix2,results,e
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
   call nvtxEndRange()
 #endif
+
 #else
 !Arguments ------------------------------------
   class(processor_scalapack),intent(in)       :: processor
@@ -3292,6 +3307,10 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
 #endif
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("slk_compute_eigen1", 7)
+#endif
+
  ! ================================
  ! INITIALISATION SCALAPACK MATRIX
  ! ================================
@@ -3358,6 +3377,10 @@ subroutine compute_eigen1(comm,processor,cplex,nbli_global,nbco_global,matrix,ve
  ABI_SFREE(z_tmp_evec)
  ABI_SFREE(r_tmp_evec)
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
+
 #ifndef HAVE_LINALG_ELPA
  ABI_UNUSED(use_gpu_elpa)
 #endif
@@ -3421,6 +3444,10 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  use_gpu_elpa_=0
 #if defined HAVE_LINALG_ELPA
  if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("slk_compute_eigen2", 7)
 #endif
 
  ! ================================
@@ -3495,13 +3522,14 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  call sca_matrix2%free()
  call sca_matrix3%free()
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
+
 #ifndef HAVE_LINALG_ELPA
  ABI_UNUSED(use_gpu_elpa)
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
 end subroutine compute_eigen2
 !!***
 

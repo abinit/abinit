@@ -278,12 +278,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- ! other
- integer(kind=c_size_t) :: l_pcon_size_bytes
-#endif
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- ! other
  integer(kind=c_size_t) :: l_pcon_size_bytes
 #endif
 
@@ -581,7 +575,6 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
  !end if
 
-
  call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
    l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
@@ -589,14 +582,6 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
  call gpu_device_synchronize()
 #endif
-
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- !if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
-   call gpu_device_synchronize()
- !end if
-#endif
-
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
@@ -784,7 +769,6 @@ subroutine getBm1X(X,Bm1X,transposer)
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
    else
-   else
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
    end if
@@ -859,11 +843,11 @@ subroutine getBm1X(X,Bm1X,transposer)
      end if
    end if
  end if
+
  if (l_paw) then
-   if (l_useria /= 121212) then
-     ABI_FREE(cwaveprj_next)
-   end if
+   ABI_FREE(cwaveprj_next)
  end if
+
  ABI_NVTX_END_RANGE()
 
 end subroutine getBm1X
