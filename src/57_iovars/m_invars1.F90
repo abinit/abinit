@@ -2295,7 +2295,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%dielam=half
    dtsets(idtset)%diismemory=8
    dtsets(idtset)%dilatmx=one
-   dtsets(idtset)%distribute_gemm_nonlop=0
    dtsets(idtset)%dmatpuopt=2
    if (size(dtsets(idtset)%dmatpawu,4)>0) dtsets(idtset)%dmatpawu=-10._dp
    dtsets(idtset)%dmatudiag=0

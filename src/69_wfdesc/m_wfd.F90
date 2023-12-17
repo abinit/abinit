@@ -3718,7 +3718,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
 
  ! Recalculate FFT tables.
  ! Calculate the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Rk.
- ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym) )
+ ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
  if (.not. iscompatibleFFT) then

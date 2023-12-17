@@ -456,9 +456,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if(dtset%gpu_option == ABI_GPU_DISABLED) then
      call init_gemm_nonlop(dtset%nkpt)
    end if
-   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
-     call init_gemm_nonlop(dtset%nkpt)
-   end if
  end if
 
  gemm_nonlop_is_distributed = .false.
@@ -1809,8 +1806,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call destroy_gemm_nonlop_ompgpu()
    else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
      call destroy_gemm_nonlop_gpu(dtset%nkpt)
-     call destroy_gemm_nonlop(dtset%nkpt)
-   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
      call destroy_gemm_nonlop(dtset%nkpt)
    else if(dtset%gpu_option==ABI_GPU_DISABLED) then
      call destroy_gemm_nonlop(dtset%nkpt)

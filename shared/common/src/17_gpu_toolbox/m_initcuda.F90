@@ -418,38 +418,23 @@ end subroutine Get_Mem_Dev
 #if defined HAVE_GPU
 
  ! Closing YAKL and Kokkos if opened
- if (gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
+ if (gpu_option==ABI_GPU_KOKKOS) then
 #ifdef HAVE_YAKL
    call gator_finalize()
    write(std_out,*)'yakl gator finalized'
 #endif
-
 #ifdef HAVE_KOKKOS
    ! finalize kokkos
    call kokkos_finalize()
    write(std_out,*)'kokkos finalized'
 #endif
+ !kokkos_finalize already reset GPU context
+ !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
  end if
 
- ! kokkos_finalize already reset GPU context
- !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
-
- ! Closing YAKL and Kokkos if opened
- if (gpu_option==ABI_GPU_KOKKOS .or. gpu_option==ABI_GPU_LEGACY) then
-#ifdef HAVE_YAKL
-   call gator_finalize()
-   write(std_out,*)'yakl gator finalized'
-#endif
-
-#ifdef HAVE_KOKKOS
-   ! finalize kokkos
-   call kokkos_finalize()
-   write(std_out,*)'kokkos finalized'
-#endif
+ if (gpu_option==ABI_GPU_LEGACY) then
+   call unset_dev()
  end if
-
- ! kokkos_finalize already reset GPU context
- !if (gpu_option/=ABI_GPU_KOKKOS) call unset_dev()
 
 #endif
  end subroutine unsetdevice_cuda

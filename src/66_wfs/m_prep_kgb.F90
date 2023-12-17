@@ -53,7 +53,7 @@ module m_prep_kgb
  use m_ompgpu_fourwf
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
   use m_nvtx
 #endif
 
@@ -295,7 +295,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 
  if(do_transpose) then
    call timab(545,3,tsec)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
    if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
@@ -306,7 +306,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
 &     recvcountsloc,rdisplsloc,spaceComm,ier)
    end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
    call timab(545,2,tsec)
@@ -527,56 +527,56 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 &   ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
      if (sij_opt==1) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
        call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
        call xmpi_alltoallv(swavef_alltoall1,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
      end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
      if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
      call xmpi_alltoallv(gwavef_alltoall1,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
    else
      if (sij_opt==1) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
        call xmpi_alltoallv(swavef_alltoall2,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
      end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
      if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
      call xmpi_alltoallv(gwavef_alltoall2,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
    end if
@@ -860,7 +860,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
  if(do_transpose) then
    call timab(581,1,tsec)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
    if (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)) then
@@ -892,7 +892,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
       call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
            &     recvcountsloc,rdisplsloc,spaceComm,ier)
    end if
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
    call timab(581,2,tsec)
@@ -1000,43 +1000,43 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      call timab(581,1,tsec)
      if(bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2))then
        if (paw_opt/=3) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
          call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
        end if
        if (paw_opt==3.or.paw_opt==4) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
          call xmpi_alltoallv(gsc_alltoall1,recvcountsloc,rdisplsloc,gsc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
        end if
      else
        if (paw_opt/=3) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
          call xmpi_alltoallv(gvnlc_alltoall2,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
        end if
        if (paw_opt==3.or.paw_opt==4) then
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
          call xmpi_alltoallv(gsc_alltoall2,recvcountsloc,rdisplsloc,gsc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
        end if
@@ -1282,7 +1282,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  sdisplsloc(:)=sdispls(:)*2
 
  call timab(547,1,tsec)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxStartRange("MPI_AllToAllV", 8)
 #endif
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -1305,7 +1305,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
       & recvcountsloc,rdisplsloc,spaceComm,ier)
 #endif
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
      call nvtxEndRange()
 #endif
  call timab(547,2,tsec)

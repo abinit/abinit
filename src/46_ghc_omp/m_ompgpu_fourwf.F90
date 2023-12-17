@@ -205,13 +205,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    cfft_size = 2*n1*n2*n3*ndat
 
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
    byte_count=sizeof(work_gpu)
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
    call gpu_memset(c_loc(work_gpu), 0, byte_count)
    !$OMP END TARGET DATA
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)  MAP(to:work_gpu)
    do i3=1,n3*ndat
      do i2=1,n2
@@ -266,12 +265,11 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
          i1=kg_kin(1,ipw); if(i1<0)i1=i1+n1;
          i2=kg_kin(2,ipw); if(i2<0)i2=i2+n2;
          i3=kg_kin(3,ipw); if(i3<0)i3=i3+n3;
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
          i1inv = modulo(shift_inv1 - i1, n1) + 1
          i2inv = modulo(shift_inv2 - i2, n2) + 1
          i3inv = modulo(shift_inv3 - i3, n3) + 1
-#endif
-#ifdef HAVE_GPU_HIP
+#elif defined HAVE_GPU_HIP
          i1inv = (shift_inv1-i1) - ( ((shift_inv1-i1)/n1) * n1 ) + 1
          i2inv = (shift_inv2-i2) - ( ((shift_inv2-i2)/n2) * n2 ) + 1
          i3inv = (shift_inv3-i3) - ( ((shift_inv3-i3)/n3) * n3 ) + 1

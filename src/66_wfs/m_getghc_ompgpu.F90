@@ -759,6 +759,7 @@ has_fock=.false.
 #ifndef HAVE_GPU_HIP
    !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
+
  end if ! type_calc
  ABI_NVTX_END_RANGE()
 
@@ -768,6 +769,7 @@ has_fock=.false.
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
+
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1

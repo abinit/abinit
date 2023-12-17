@@ -5002,7 +5002,7 @@ end subroutine abi_gpu_xcopy_2z
 !!  b
 !!
 !! SIDE EFFECTS
-!!   WARNING! : this routine is a dummy one when HAVE_GPU_CUDA is not enabled
+!!   WARNING! : this routine is a dummy one when HAVE_GPU is not enabled
 !!   the correct one is in 17_toolbox/gpu_linalg.cu
 !!
 !! SOURCE

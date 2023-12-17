@@ -366,6 +366,9 @@
 /* Define to 1 if you want to activate support for OpenMP GPU offload. */
 #cmakedefine HAVE_OPENMP_OFFLOAD @HAVE_OPENMP_OFFLOAD@
 
+/* Define to 1 if you want to activate support for OpenMP GPU offload. */
+#cmakedefine HAVE_OPENMP_OFFLOAD @HAVE_OPENMP_OFFLOAD_DATASTRUCTURE@
+
 /* Set to 1 if OpenMP has a working implementation of COLLAPSE. */
 #cmakedefine HAVE_OMP_COLLAPSE @HAVE_OMP_COLLAPSE@
 

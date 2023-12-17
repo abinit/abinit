@@ -68,8 +68,9 @@
 
 #include "abi_common.h"
 
-! nvtx related macro definition
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
 #include "nvtx_macros.h"
+#endif
 
 program abinit
 
@@ -385,7 +386,7 @@ program abinit
  end if
 #endif
 
-#ifdef HAVE_GPU_MARKERS
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  NVTX_INIT(use_nvtx)
 #endif
 

@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2022 ABINIT group (AL)
+!! Copyright (C) 2014-2022 ABINIT group (MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -360,7 +360,7 @@ contains
   end if
 
   if(allocated(temp_realvec_r)) then
-    !$OMP TARGET EXIT DATA MAP(delete:temp_realvec_r,temp_realvec_i)
+    !$OMP TARGET EXIT DATA MAP(delete:kwa m_hamiltonian.F90,temp_realvec_i)
     ABI_FREE(temp_realvec_r)
     ABI_FREE(temp_realvec_i)
   end if
@@ -800,7 +800,7 @@ contains
   real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out),target :: svectout(:,:)
-  real(dp),intent(inout),target :: vectout(:,:) !vz_i
+  real(dp),intent(inout),target :: vectout(:,:)
   real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
@@ -826,9 +826,7 @@ contains
   character(len=500) :: msg
   integer(C_SIZE_T) :: byte_count
 #ifdef HAVE_GPU_HIP
-  type(c_ptr) :: vectin_amdcopy
-  type(c_ptr) :: vectout_amdcopy
-  type(c_ptr) :: svectout_amdcopy
+  type(c_ptr) :: vectin_amdcopy,vectout_amdcopy,svectout_amdcopy
 #endif
 
 ! *************************************************************************
