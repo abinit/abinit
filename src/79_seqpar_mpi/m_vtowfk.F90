@@ -1166,7 +1166,6 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    else
      ABI_FREE(wfraug)
    end if
-   end if
  end if
 
 !Write the number of one-way 3D ffts skipped until now (in case of fixed occupation numbers

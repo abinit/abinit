@@ -990,35 +990,34 @@ contains
 
     if(xg%gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-
       if ( associated(xg%vecR) ) then
         ABI_FREE_MANAGED(xg%vecR)
       end if
-
       if ( associated(xg%vecC) ) then
         ABI_FREE_MANAGED(xg%vecC)
       end if
-
 #endif
+
     else
       if(xg%gpu_option==ABI_GPU_OPENMP) then
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
         if ( associated(xg%vecR) ) then
           xg__vecR => xg%vecR
           !$OMP TARGET EXIT DATA MAP(delete:xg__vecR)
         end if
-
         if ( associated(xg%vecC) ) then
           xg__vecC => xg%vecC
           !$OMP TARGET EXIT DATA MAP(delete:xg__vecC)
         end if
+#endif
       end if
       if ( associated(xg%vecR) ) then
         ABI_FREE(xg%vecR)
       end if
-
       if ( associated(xg%vecC) ) then
         ABI_FREE(xg%vecC)
       end if
+
     end if
 
   end subroutine xg_free
@@ -4291,7 +4290,7 @@ contains
   subroutine xgBlock_reshape_spinor(xgBlock,xgBlock_spinor,nspinor,option)
     use iso_c_binding
     integer, intent(in   ) :: nspinor,option
-    type(xgBlock_t), intent(in   ) :: xgBlock
+    type(xgBlock_t), intent(inout) :: xgBlock
     type(xgBlock_t), intent(inout) :: xgBlock_spinor
 
     integer :: nrows,ncols
@@ -4400,8 +4399,6 @@ contains
           end do
         end do
       end select
-#endif
-
 #endif
 
     else

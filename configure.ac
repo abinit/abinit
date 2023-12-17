@@ -930,12 +930,6 @@ SD_KOKKOS_DETECT
 # YAKL library support
 SD_YAKL_DETECT
 
-# KOKKOS library support
-SD_KOKKOS_DETECT
-
-# YAKL library support
-SD_YAKL_DETECT
-
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 

@@ -667,9 +667,6 @@ AC_DEFUN([ABI_GPU_DETECT],[
           if test "${abi_gpu_cuda_version_10}" = "yes"; then
             AC_DEFINE([HAVE_GPU_CUDA10],1,[Define to 1 if you have a Cuda version >= 10 (for nvtx v3).])
           fi
-          if test "${abi_gpu_nvtx_v3}" = "yes"; then
-             AC_DEFINE([HAVE_GPU_NVTX_V3],1,[Define to 1 if you have library nvtx (v3).])
-          fi
           case "${abi_gpu_precision}" in
             single)
               AC_DEFINE(HAVE_GPU_CUDA_SP,1,[Define to 1 if you want to perform single-precision Cuda calculations.])
@@ -711,14 +708,10 @@ AC_DEFUN([ABI_GPU_DETECT],[
     abi_gpu_flavor="${abi_gpu_flavor}"
   fi
 
-  # Transmit MPI status to the source code
-  if test "${abi_gpu_mpi}" = "yes"; then
-    AC_DEFINE([HAVE_GPU_MPI],1,[Define to 1 if you have a MPI-aware GPU library.])
-  fi
-
   # Transmit the possible use of NVTX/ROCTX
   if test "${abi_gpu_nvtx_v3}" = "yes" -o "${abi_gpu_roctx}" = "yes"; then
     AC_DEFINE([HAVE_GPU_MARKERS],1,[Define to 1 if you have library for GPU range markers.])
+  fi
 
   # Output final flavor
   if test "${abi_gpu_enable}" = "yes"; then
