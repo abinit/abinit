@@ -119,16 +119,11 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc) :: omega_current,integral(2,2)
  real(dp) :: doccsum,noise,omega,EE
  logical :: nondiaglevels
- real(dp) :: beta
  complex(dpc), allocatable :: muorb
  complex(dpc), allocatable :: muspin
  complex(dpc), allocatable :: muzeem
 ! arrays
  real(dp), allocatable :: docc(:,:)
- real(dp), allocatable :: occmag(:,:,:)
- real(dp), allocatable :: tracelocmag_x(:,:)
- real(dp), allocatable :: tracelocmag_y(:,:)
- real(dp), allocatable :: tracelocmag_z(:,:)
  real(dp), allocatable, target :: gtmp(:,:), levels_ctqmc(:) !modif
  complex(dpc), allocatable :: levels_ctqmc_nd(:,:)
  complex(dpc), allocatable :: hybri_limit(:,:)
@@ -146,7 +141,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  type(coeff2c_type), allocatable :: magmom_spin(:)
  type(coeff2c_type), allocatable :: magmom_tot(:)
 ! Type    -----------------------------------------
- type(coeff2c_type), allocatable :: eigvectmatlu(:,:),gathermatlu(:)
+ type(coeff2c_type), allocatable :: eigvectmatlu(:,:)
  type(green_type)  :: weiss_for_rot
  type(matlu_type), allocatable :: dmat_diag(:)
  type(matlu_type), allocatable :: matlu1(:)
@@ -1400,7 +1395,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &         Gw=gw_tmp,D=docc(:,:),E=green%ecorr_qmc(iatom),&
 !&       matU=hu(itypat)%udens,opt_levels=levels_ctqmc)
 &         matU=udens_atoms(iatom)%value,opt_levels=levels_ctqmc,Magmom_orb=REAL(magmom_orb(iatom)%value),&
-&	 Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
+&        Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
          call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc)
          ABI_FREE(docc)
          !DO iflavor = 1, nflavor
@@ -1467,7 +1462,8 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
          call CtqmcoffdiagInterface_run(hybridoffdiag,fw1_nd(1:paw_dmft%dmftqmc_l,:,:),Gtau=gtmp_nd,&
 &        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
 &        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit,&
-&	 Magmom_orb=REAL(magmom_orb(iatom)%value),Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
+&        Magmom_orb=REAL(magmom_orb(iatom)%value),Magmom_spin=REAL(magmom_spin(iatom)%value),&
+&        Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
 
          ! For entropy (alternative formulation)
          if(paw_dmft%ientropy==1) then

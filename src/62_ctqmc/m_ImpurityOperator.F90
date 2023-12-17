@@ -2163,8 +2163,8 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(OUT) :: chicharge
   DOUBLE PRECISION, DIMENSION(:), INTENT(OUT)   :: ntot
  !Local variables ------------------------------
-  DOUBLE PRECISION                   :: tau,tauj
-  INTEGER                            :: scanning, natom, opt_histo,nspinor
+  DOUBLE PRECISION                   :: tau
+  INTEGER                            :: scanning, opt_histo,nspinor
   INTEGER                            :: iflavor, itau,jtau,kdeltatau,noccup,iconfig,sumh,nmeas
   INTEGER                            :: iflavor1, iflavor2     
   INTEGER, ALLOCATABLE, DIMENSION(:,:)        :: occup
@@ -2172,7 +2172,7 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
   INTEGER, ALLOCATABLE, DIMENSION(:,:)          :: spinup,spindn
   INTEGER, ALLOCATABLE, DIMENSION(:)          :: occupconfig_loc
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc
-  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc_config
+!  DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:)          :: histo_loc_config
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_orb
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_spin
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:)  :: magmommat_tot
@@ -2308,7 +2308,7 @@ if(opt_histo .gt. 1) then
         !tauj=float(jtau-1)/float(ntau)*this%beta
         kdeltatau=jtau-itau+1
         if(jtau<itau) kdeltatau=kdeltatau+ntau
-        if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
         suscep(1,kdeltatau)=suscep(1,kdeltatau)+float((spinup(1,jtau)-spindn(1,jtau)))*float((spinup(1,itau)-spindn(1,itau)))
         suscep(2,kdeltatau)=suscep(2,kdeltatau)+float((spinup(2,jtau)-spindn(2,jtau)))*float((spinup(2,itau)-spindn(2,itau)))
         suscep(3,kdeltatau)=suscep(3,kdeltatau)+float((spinup(3,jtau)-spindn(3,jtau)))*float((spinup(3,itau)-spindn(3,itau)))
@@ -2350,7 +2350,7 @@ if(opt_histo .gt. 1) then
       do jtau=1,ntau
         kdeltatau=jtau-itau+1
         if(jtau<itau) kdeltatau=kdeltatau+ntau
-        if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
         chi(1,kdeltatau) = chi(1,kdeltatau) + (mu_tmp(1,itau))*(mu_tmp(1,jtau))
         chi(2,kdeltatau) = chi(2,kdeltatau) + (mu_tmp(2,itau))*(mu_tmp(2,jtau))
         chi(3,kdeltatau) = chi(3,kdeltatau) + (mu_tmp(3,itau))*(mu_tmp(3,jtau))
@@ -2377,7 +2377,7 @@ if(opt_histo .gt. 2) then
    do jtau=1,ntau
      kdeltatau=jtau-itau+1
      if(jtau<itau) kdeltatau=kdeltatau+ntau
-     if(kdeltatau> ntau) write(6,*) "Warning kdeltatau"
+     if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
      chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float((spinup(1,jtau)+spindn(1,jtau)))*float((spinup(1,itau)+spindn(1,itau)))
      chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float((spinup(2,jtau)+spindn(2,jtau)))*float((spinup(2,itau)+spindn(2,itau)))
      chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float((spinup(3,jtau)+spindn(3,jtau)))*float((spinup(3,itau)+spindn(3,itau)))

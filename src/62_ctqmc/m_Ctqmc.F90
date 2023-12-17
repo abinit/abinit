@@ -34,6 +34,8 @@ USE m_Stat
 USE m_FFTHyb
 USE m_OurRng
 USE m_Vector
+use m_io_tools, only : open_file
+
 #ifdef HAVE_MPI2
 USE mpi
 #endif
@@ -1625,7 +1627,8 @@ SUBROUTINE Ctqmc_loop(this,itotal,ilatex)
 
     IF ( MOD(isweep,measurements) .EQ. 0 ) THEN
       IF ( this%opt_histo .GT. 0 ) THEN
-        CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time,this%occupconfig,this%suscep,this%samples,this%chi,this%chicharge,this%ntot,this%opt_histo,this%nspinor)
+        CALL ImpurityOperator_occup_histo_time(this%Impurity,this%occup_histo_time,this%occupconfig,this%suscep,this%samples,&
+& this%chi,this%chicharge,this%ntot,this%opt_histo,this%nspinor)
       ENDIF
     ENDIF
 
@@ -2175,8 +2178,10 @@ include 'mpif.h'
   INTEGER                                       :: n1
   INTEGER                                       :: n2,n3,quotient,remainder,signe
   INTEGER                                       :: debut
-!  INTEGER                                       :: fin
+!  INTEGER                                      :: fin
   character(len=2)                              :: atomnb
+  character(len=fnlen)                          :: tmpfile
+  INTEGER                                       :: unt  
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
@@ -2641,9 +2646,11 @@ include 'mpif.h'
           if(occtot(n1)==nelec.and.abs(spintot(n1))==spin) then
             sumh=sumh+this%occupconfig(n1)
             if(this%flavors==10) then
-              write(this%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+              write(this%ostream,'(i8,10i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1),&
+&this%occupconfig(n1)
             else if(this%flavors==14) then
-              write(this%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1), this%occupconfig(n1)
+              write(this%ostream,'(i8,14i2,a,i2,i3,f10.4)')  n1,(occ(n1,n2),n2=1,this%flavors),"  ",occtot(n1),spintot(n1),&
+&this%occupconfig(n1)
             end if
           endif
         enddo
@@ -2664,7 +2671,7 @@ include 'mpif.h'
     if(this%opt_histo .gt. 1) then
       !Scalar
       if(this%nspinor .eq. 1) then
-        open (unit=735,file='LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        open(unit=735,file='LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total t2g eg'
         do n1=1,this%samples
           this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
@@ -2686,12 +2693,13 @@ include 'mpif.h'
     if(this%opt_histo .gt. 2) then
       this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
       open (unit=735,file='LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-      write(735,*) '#Tau Total t2g eg <ntot>'
+      write(735,*) '#Tau Total <ntot>'
       do n1=1,this%samples
         this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size)/float(this%samples))-(this%ntot(1)*this%ntot(1))
-        this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size)/float(this%samples))-(this%ntot(2)*this%ntot(2))
-        this%chicharge(3,n1)=(this%chicharge(3,n1)/float(this%size)/float(this%samples))-(this%ntot(3)*this%ntot(3))
-        write(735,'(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
+        !this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size)/float(this%samples))-(this%ntot(2)*this%ntot(2))
+        !this%chicharge(3,n1)=(this%chicharge(3,n1)/float(this%size)/float(this%samples))-(this%ntot(3)*this%ntot(3))
+        !write(735 '(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
+        write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(1,n1)),this%ntot(1)
       enddo
     endif
  
@@ -3634,7 +3642,7 @@ SUBROUTINE Ctqmc_setMagmom(this,Magmom_orb,Magmom_spin,Magmom_tot)
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:), INTENT(IN) :: Magmom_tot
 !Local variables ------------------------------
-  INTEGER :: iflavor1,iflavor2
+!  INTEGER :: iflavor1,iflavor2
 
  ! do iflavor1=1,10
  !   do iflavor2=1,10
