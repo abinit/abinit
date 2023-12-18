@@ -350,7 +350,7 @@ contains
     integer(kind=c_int32_t), parameter :: izero = 0
     integer(kind=c_size_t)             :: size_bytes
 #endif
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), pointer :: xg__vecC(:,:)
     real(dp), pointer :: xg__vecR(:,:)
 #endif
@@ -405,7 +405,7 @@ contains
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
         xg%trans = 't'
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecR)
@@ -426,7 +426,7 @@ contains
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
         xg%trans = 'c'
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
         !FIXME To be wrapped
         size_bytes = sizeof(xg%vecC)
@@ -1054,9 +1054,11 @@ contains
   !! setComm
 
   subroutine xgBlock_setComm(xgBlock,comm)
+
     type(xgBlock_t), intent(inout) :: xgBlock
     integer :: comm
     xgBlock%spacedim_comm = comm
+
   end subroutine xgBlock_setComm
   !!***
 
@@ -1110,7 +1112,7 @@ contains
     integer :: size
     double precision :: tsec(2)
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
@@ -1136,14 +1138,14 @@ contains
     size = min(size1,size2)
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xcopy(1, size, xgBlockA%vecR, incx, xgBlockB%vecR, incy)
       case(SPACE_C)
         call abi_gpu_xcopy(2, size, xgBlockA%vecC, incx, xgBlockB%vecC, incy)
       end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -1288,7 +1290,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
@@ -1320,14 +1322,14 @@ contains
 
     case (SPACE_R,SPACE_CR)
       if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecR, xgBlockA%LDim, &
           xgBlockB%vecR, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecR, xgBlockW%LDim)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
@@ -1361,6 +1363,7 @@ contains
         else
 #ifdef HAVE_GPU_MPI
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
+#if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
@@ -1375,6 +1378,7 @@ contains
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #endif
+#endif
 
 #else
           ! With "regular" MPI, perform reduction by passing CPU buffers
@@ -1388,14 +1392,14 @@ contains
     case(SPACE_C)
 
       if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecC, xgBlockA%LDim, &
           xgBlockB%vecC, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecC, xgBlockW%LDim)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
@@ -1433,6 +1437,7 @@ contains
         else
 #ifdef HAVE_GPU_MPI
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
+#if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
@@ -1446,6 +1451,7 @@ contains
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
+#endif
 #endif
 
 #else
@@ -1562,7 +1568,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
@@ -1581,14 +1587,14 @@ contains
     endif
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xpotrf(1,uplo,xgBlock%rows,xgBlock%vecR,xgBlock%LDim,info)
       case (SPACE_C)
         call abi_gpu_xpotrf(2,uplo,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
       end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -1691,7 +1697,7 @@ contains
     integer         , intent(in   ), optional :: gpu_option
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockW__vecR(:,:)
 #endif
@@ -1710,7 +1716,7 @@ contains
     end if
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
 
       case (SPACE_R,SPACE_CR)
@@ -1723,7 +1729,7 @@ contains
             xgBlockA%vecC,xgBlockA%LDim, &
             xgBlockW%vecR,info)
       end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlockA%space)
 
@@ -2120,7 +2126,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
 #endif
@@ -2147,14 +2153,14 @@ contains
 
       case (SPACE_R,SPACE_CR)
 
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xhegvd(1, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             xgBlockA%vecR, xgBlockA%ldim, &
           &             xgBlockB%vecR, xgBlockB%ldim, &
           &             xgBlockW%vecR, &
           &             info)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
@@ -2191,14 +2197,14 @@ contains
         !call xgBlock_prefetch_async(xgBlockA, 0)
         !call xgBlock_prefetch_async(xgBlockB, 0)
         !call xgBlock_prefetch_async(xgBlockW, 0)
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xhegvd(2, itype, jobz, uplo, &
           &             xgBlockA%rows, &
           &             xgBlockA%vecC, xgBlockA%ldim, &
           &             xgBlockB%vecC, xgBlockB%ldim, &
           &             xgBlockW%vecR, &
           &             info)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
@@ -2287,7 +2293,6 @@ contains
     call timab(tim_hegvd,2,tsec)
 
   end subroutine xgBlock_hegvd
-
   !!***
 
   !!****f* m_xg/xgBlock_hpgv
@@ -2515,7 +2520,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:)
 #endif
@@ -2535,7 +2540,7 @@ contains
     calpha = dcmplx(alpha,0.d0)
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
@@ -2544,7 +2549,7 @@ contains
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
       end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -2600,7 +2605,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
 #endif
 
@@ -2618,10 +2623,10 @@ contains
     end if
 
     if (l_gpu_option == ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC)
       xgBlockA__vecC => xgBlockA%vecC
@@ -2685,7 +2690,7 @@ contains
 
     if (l_gpu_option==ABI_GPU_KOKKOS) then
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
+#if defined HAVE_GPU && defined HAVE_KOKKOS
 
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -2848,7 +2853,7 @@ contains
     end select
 
   end subroutine xgBlock_apply_diag_nospin
-!!***
+  !!***
 
   !!****f* m_xg/xgBlock_colwiseMulR
   !!
@@ -3072,7 +3077,7 @@ contains
 
     integer      :: l_gpu_option
     complex(dpc) :: da_cplx
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
 #endif
@@ -3097,14 +3102,14 @@ contains
     end if
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
         call abi_gpu_xaxpy(1, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecR,1,xgBlock1%vecR,1)
       case (SPACE_C)
         call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da_cplx, xgBlock2%vecC,1,xgBlock1%vecC,1)
       end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
@@ -3149,7 +3154,7 @@ contains
 
     integer      :: l_gpu_option
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
 #endif
 
@@ -3174,9 +3179,9 @@ contains
     end if
 
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       xgBlock1__vecC => xgBlock1%vecC
       xgBlock2__vecC => xgBlock2%vecC
@@ -3951,7 +3956,7 @@ contains
     integer      :: l_gpu_option = ABI_GPU_DISABLED
     complex(dpc) :: valc
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
@@ -3968,14 +3973,14 @@ contains
     if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
 
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           call abi_gpu_xscal(1, xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecR, inc)
         case (SPACE_C)
           call abi_gpu_xscal(2, xgBlock%ldim*xgBlock%cols/inc, valc, xgBlock%vecC, inc)
         end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
@@ -3993,7 +3998,7 @@ contains
 
       else
         !FIXME Do loop that calls scal on each column sequentially, might be improved
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
           do i=1,xgBlock%cols
@@ -4004,7 +4009,7 @@ contains
             call abi_gpu_xscal(2, xgBlock%rows/inc, valc, xgBlock%vecC(:,i), inc)
           end do
         end select
-#else
+#elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
         select case(xgBlock%space)
         case (SPACE_R,SPACE_CR)
@@ -4196,7 +4201,7 @@ contains
     end if
 
   end subroutine xgBlock_check
-!!***
+  !!***
 
   !!****f* m_xg/xgBlock_copy_to_gpu
   !!
@@ -4221,6 +4226,7 @@ contains
 #else
     ABI_UNUSED_A(xgBlock)
 #endif
+
   end subroutine xgBlock_copy_to_gpu
   !!***
 
@@ -4247,6 +4253,7 @@ contains
 #else
     ABI_UNUSED_A(xgBlock)
 #endif
+
   end subroutine xgBlock_copy_from_gpu
   !!***
 
@@ -4282,6 +4289,7 @@ contains
       cptr = getClocC(xgBlock%LDim,xgBlock%cols,xgBlock%vecC)
       call c_f_pointer(cptr,xgBlock%vecC,newshape)
     end select
+
   end subroutine xgBlock_reshape
   !!***
 
@@ -4322,7 +4330,7 @@ contains
     end if
 
   end subroutine xgBlock_reshape_spinor
-!!***
+  !!***
 
   !!****f* m_xg/xgBlock_zero
   !!
@@ -4340,7 +4348,7 @@ contains
     integer(C_SIZE_T) :: byte_count
 #endif
 
-#ifndef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
     integer :: rows,cols,iblock,jblock
@@ -4355,7 +4363,7 @@ contains
 
     if (l_gpu_option==ABI_GPU_KOKKOS) then
 
-#if defined HAVE_GPU
+#if defined HAVE_GPU && defined HAVE_KOKKOS
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
         byte_count = xgBlock%ldim * xgBlock%cols * dp
@@ -4368,6 +4376,7 @@ contains
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
 
+#if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -4402,6 +4411,7 @@ contains
           end do
         end do
       end select
+#endif
 #endif
 
     else
@@ -4527,6 +4537,7 @@ contains
     call xgBlock_zero(xgBlock)
     call xgBlock_diagonal(xgBlock,diag%self)
     call xg_free(diag)
+
   end subroutine xgBlock_diagonalOnly
   !!***
 
@@ -4562,7 +4573,7 @@ contains
     end select
 
   end subroutine xgBlock_minmax
-!!***
+  !!***
 
   !!****f* m_xg/xgBlock_average
   !!
@@ -4704,6 +4715,7 @@ contains
     liwork = 0
     lrwork = 0
     lcwork = 0
+
   end subroutine xg_finalize
   !!***
 
