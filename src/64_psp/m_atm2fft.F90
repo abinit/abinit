@@ -375,7 +375,7 @@ print *, 'in atm2fft'
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl
-     ttaucorespl => psps%nctab(itypat)%taucorespl
+     ttaucorespl => psps%nctab(itypat)%ttaucorespl
      dncdq0 => psps%nctab(itypat)%dncdq0
      dnvdq0 => psps%nctab(itypat)%dnvdq0
      dtaucdq0 => psps%nctab(itypat)%dtaucdq0
@@ -1221,7 +1221,7 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
      else
        tcorespl => psps%nctab(itypat)%tcorespl
        tvalespl => psps%nctab(itypat)%tvalespl
-       ttaucorespl => psps%nctab(itypat)%taucorespl
+       ttaucorespl => psps%nctab(itypat)%ttaucorespl
        dncdq0 => psps%nctab(itypat)%dncdq0
        dnvdq0 => psps%nctab(itypat)%dnvdq0
        dtaucdq0 => psps%nctab(itypat)%dtaucdq0
