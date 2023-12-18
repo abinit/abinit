@@ -272,10 +272,10 @@ module defs_datatypes
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
 
-   real(dp), allocatable :: taucorespl(:,:)
-    ! taucorespl(mqgrid_vl,2)
+   real(dp), allocatable :: ttaucorespl(:,:)
+    ! ttaucorespl(mqgrid_vl,2)
     ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
-    ! taucorespl is **always** allocated and initialized with zeros if not has_tcore
+    ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
 
    integer :: num_tphi = 0
    ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
