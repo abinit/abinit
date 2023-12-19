@@ -16,6 +16,10 @@
 #include <rocblas/rocblas.h>
 #include <rocfft/rocfft.h>
 
+// SYEVG/SYGVD are too slow when using HIP (on CRAY)
+// We choose instead SYEVJ/SYGVJ (Jacobi) instead
+//  with a ridiculous number of iterations
+// This has to be tested forward...
 hipblasHandle_t hipblas_handle;
 hipsolverDnHandle_t hipsolverDn_handle;
 static hipStream_t stream_compute;
@@ -156,8 +160,8 @@ extern "C" void gpu_linalg_init_()
   HIP_API_CHECK(hipsolverCreateSyevjInfo(&syevj_params));
   HIP_API_CHECK(hipsolverXsyevjSetTolerance(syevj_params, TOLERANCE));
   HIP_API_CHECK(hipsolverXsyevjSetMaxSweeps(syevj_params, MAX_SWEEPS));
-  fprintf(stdout, "Initializing hipBLAS, this may take 10 seconds...\n");
-  fflush(stdout);
+  //fprintf(stdout, "Initializing hipBLAS, this may take 10 seconds...\n");
+  //fflush(stdout);
   rocblas_initialize();
   rocfft_setup();
 }
