@@ -1622,7 +1622,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      '- as well as % of the total time and number of calls '
 
    write(ount,"(2(a,i0),a)")&
-     "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = 0>"
+     "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = world>"
 
    write(ount,"(2(a,f13.1))")"- cpu_time = ",tsec(1),   ", wall_time = ",tsec(2)
    write(ount,"(a)")"-"
@@ -1995,7 +1995,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        isort = list(ilist)
        if(ncount(isort)/=0)then
          if(flag_write==1)then
-           write(ount, '(/,a)' ) ' Additional information about segments I want to see'
+           write(ount, '(/,a)' ) ' Additional information about diagonalization algorithm segments'
            flag_write=0
          end if
          times(2,isort)=times(2,isort)+tol14
