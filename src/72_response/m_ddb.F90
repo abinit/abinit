@@ -1879,7 +1879,7 @@ subroutine ddb_read_d2eig(ddb, ddb_hdr, iblok_store, iblok_read, comm)
       ! Read the next block and store it
       call ddb%read_d2eig_txt(ddb_hdr%unddb, iblok_store)
 
-    else 
+    else
       write(msg, '(3a)' )&
       ! File has not beed open by ddb_hdr
       'Attempting to read from unopen file DDB.',ch10,&
@@ -2866,7 +2866,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
   do ii=1,3
     ddb1%nrm(ii,iblok1) = ddb2%nrm(ii,iblok2)
   end do
-  
+
   if (is_type_d0E(blktyp)) then
      ! --------------
      ! Copy d0E block
@@ -3548,6 +3548,7 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
+ real(dp), allocatable :: tmpval(:,:,:,:,:,:)
 
 ! *********************************************************************
 
@@ -3577,14 +3578,20 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
    '   and impose the ASR on the effective charges ',ch10
    call wrtout([std_out, ab_out], msg)
 
+   ABI_MALLOC(tmpval,(2,3,ddb%mpert,3,ddb%mpert,ddb%nblok))
+   tmpval(1,:,:,:,:,iblok) = reshape(ddb%val(1,:,iblok), shape = (/3,ddb%mpert,3,ddb%mpert/))
+   tmpval(2,:,:,:,:,iblok) = reshape(ddb%val(2,:,iblok), shape = (/3,ddb%mpert,3,ddb%mpert/))
+
    ! Extrac Zeff before enforcing sum rule.
-   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
+   call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
-   call chneu9(chneut,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
+   call chneu9(chneut,tmpval(:,:,:,:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
 
    ! Extraction of the dielectric tensor and the effective charges
-   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
+   call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
+
+   ABI_FREE(tmpval)
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw
@@ -3840,7 +3847,7 @@ end function ddb_get_dchidet
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3902,7 +3909,7 @@ end function ddb_get_pel
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3977,7 +3984,7 @@ end function ddb_get_gred
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -4163,7 +4170,7 @@ end function ddb_get_asrq0
 !!  iblock=the block index on which to act
 !!
 !! SIDE EFFECTS
-!!  ddb<type(ddb_type)>= 
+!!  ddb<type(ddb_type)>=
 !!
 !! OUTPUT
 !!
@@ -4846,7 +4853,7 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 
     call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok)
 
-  else 
+  else
     write(msg, '(3a)' )&
     ! File has not been opened by ddb_hdr
     'Attempting to write into unopen DDB file.',ch10,&
@@ -5233,7 +5240,7 @@ end subroutine ddb_write_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 0th order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5283,7 +5290,7 @@ end subroutine ddb_read_d0E_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 1st order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5457,7 +5464,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_values'), matrix_d3E, start=[1,1,1,1,1,1,1,iblok_d3E]))
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_mask'), flg_d3E, start=[1,1,1,1,1,1,iblok_d3E]))
 
- 
+
  blktyp = ddb%typ(iblok) ! Save block type so it doesnt get overwritten.
 
  call ddb%set_d3matr(iblok, matrix_d3E, flg_d3E)
@@ -5835,7 +5842,7 @@ end subroutine ddb_get_d2eig
 !!
 !! OUTPUT
 !!
-!! NOTE   
+!! NOTE
 !!  Does not handle spin index. Also, sometimes, d2eig is available with flat index
 !! SOURCE
 
@@ -5890,8 +5897,8 @@ end subroutine ddb_set_d2eig
 !!  iblok=index of the block we are setting.
 !!  d2eig=the second-order derivative of eigenvalues.
 !!  flg=flag to indicate presence of a given element.
-!!  blktyp=block type 
-!!   5->real part 
+!!  blktyp=block type
+!!   5->real part
 !!   6->imaginary part (broadening)
 !!
 !! OUTPUT
@@ -6556,7 +6563,7 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Define a factor to apply if DDB file has been created with the old version of 
+!Define a factor to apply if DDB file has been created with the old version of
 !the longwave driver.
  if (ddb_version <= cvrsio8) then
    fac=-two
