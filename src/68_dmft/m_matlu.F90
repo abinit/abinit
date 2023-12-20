@@ -3686,7 +3686,7 @@ end subroutine add_matlu
  type(matlu_type), intent(inout) :: matlu(natom)
 !Local variables-------------------------------
 !scalars
- integer :: iatom,im,ispinor2
+ integer :: iatom,im
  integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,tndim
  character(len=500) :: message
  real(dp) :: xj

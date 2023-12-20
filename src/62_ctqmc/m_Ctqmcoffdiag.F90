@@ -3600,6 +3600,7 @@ include 'mpif.h'
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chi(n2,n1),n2=1,3)
         end do
       endif
+    close(unit=735)
     endif
 
     ! Local Charge Susceptiblity
@@ -3613,6 +3614,7 @@ include 'mpif.h'
         !op%chicharge(3,n1)=(op%chicharge(3,n1)/float(nbprocs)/float(op%samples))-(op%ntot(3)*op%ntot(3))
         write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*op%beta/op%samples,(op%chicharge(1,n1)),op%ntot(1)
       enddo
+      close(unit=735)
     endif
 
   END IF
@@ -4748,6 +4750,8 @@ SUBROUTINE Ctqmcoffdiag_destroy(op)
   FREEIF(op%measN)
   IF ( op%opt_histo .GT. 0 ) THEN
     FREEIF(op%occup_histo_time)
+    FREEIF(op%suscep)
+    FREEIF(op%occupconfig)
     FREEIF(op%chi)
     FREEIF(op%chicharge)
     FREEIF(op%ntot)

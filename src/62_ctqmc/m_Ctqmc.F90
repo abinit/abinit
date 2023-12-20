@@ -2180,8 +2180,8 @@ include 'mpif.h'
   INTEGER                                       :: debut
 !  INTEGER                                      :: fin
   character(len=2)                              :: atomnb
-  character(len=fnlen)                          :: tmpfile
-  INTEGER                                       :: unt  
+!  character(len=fnlen)                          :: tmpfile
+!  INTEGER                                       :: unt  
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
 #endif
@@ -2687,6 +2687,7 @@ include 'mpif.h'
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%chi(n2,n1),n2=1,3)
         enddo
       endif
+    close(unit=735)
     endif
    
     !Local Charge Susceptibility
@@ -2701,6 +2702,7 @@ include 'mpif.h'
         !write(735 '(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
         write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(1,n1)),this%ntot(1)
       enddo
+      close(unit=735)
     endif
  
 #if defined HAVE_FC_FLUSH
