@@ -92,7 +92,7 @@ contains
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: qphnrm(3),qphon(3,3)
  complex(dp), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
- complex(dp), allocatable :: invmagsus(:,:), magsus(:,:)
+ complex(dp), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dp), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
  complex(dp), allocatable :: bc_ss(:,:)
 
@@ -112,6 +112,7 @@ contains
  ABI_MALLOC(magsus,(ndim,ndim))
  ABI_MALLOC(invbarmagsus,(ndim,ndim))
  ABI_MALLOC(invmagsus,(ndim,ndim))
+ ABI_MALLOC(invhmat,(ndim,ndim))
  ABI_MALLOC(barmmom,(ndim,(natom+2)*3))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
@@ -147,7 +148,7 @@ contains
        call wrtout([std_out, ab_out], msg)
      end if
 
-     call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,magpen,magsus,&
+     call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
 
    end if
@@ -187,7 +188,7 @@ contains
   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
 
    if (iblok /= 0 .or. jblok /=0) then
-     call magmom(barmmom,ddb%val,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
+     call magmom(barmmom,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
    end if
 
@@ -332,7 +333,7 @@ contains
 !!
 !! SOURCE
 
- subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,magpen,magsus,&
+ subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
 
 !Arguments -------------------------------
@@ -344,6 +345,7 @@ contains
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  complex(dp),intent(out) :: barmagsus(ndim,ndim)
  complex(dp),intent(out) :: invbarmagsus(ndim,ndim)
+ complex(dp),intent(out) :: invhmat(ndim,ndim)
  complex(dp),intent(out) :: magsus(ndim,ndim)
  complex(dp),intent(out) :: invmagsus(ndim,ndim)
 
@@ -434,6 +436,7 @@ contains
  invbarmagsus=work1
  
  !At last, calculate the susceptibility and its inverse
+ invhmat=work2
  magsus=matmul(work2,barmagsus)
  invmagsus=invbarmagsus-magpen*idty
 
@@ -492,6 +495,18 @@ contains
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
+
+     call wrtout([ab_out,std_out], ' Inverse of H matrix (I-\alpha \barchi)^{-1} ')
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do irow=1, ndim
+       do icol=1, ndim
+         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+       & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+       & real(invhmat(irow,icol)), aimag(invhmat(irow,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
    end if
 
  end if
@@ -533,7 +548,7 @@ contains
 !!
 !! SOURCE
 
- subroutine magmom(barmmom,blkval,invbarmagsus,iblok,jblok,magpen,magsus,mmom,&
+ subroutine magmom(barmmom,blkval,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
 
 !Arguments -------------------------------
@@ -545,6 +560,7 @@ contains
  integer,intent(in) :: mpatpol(2),mpdir(3)
  complex(dp),intent(out) :: barmmom(ndim,(natom+2)*3)
  complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dp),intent(in) :: invhmat(ndim,ndim)
  complex(dp),intent(in) :: magsus(ndim,ndim)
  complex(dp),intent(out) :: mmom(ndim,(natom+2)*3)
  complex(dp),intent(out) :: zfield(ndim,(natom+2)*3)
@@ -557,6 +573,7 @@ contains
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
+ complex(dp) :: mmom_alt(ndim,(natom+2)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -600,6 +617,7 @@ contains
 
 !Compute the moments
  mmom=matmul(magsus,zfield)
+ mmom_alt=matmul(invhmat,barmmom)
 
  fac=2.511494255019/two*27.2114/0.529177
 
@@ -622,13 +640,25 @@ contains
      end do
      call wrtout([ab_out,std_out], '   ')
 
-     call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements ')
+     call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced Zeeman fields)')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do irow=1, ndim
        do icol=1, natom*3
          write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
        & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
        & real(mmom(irow,icol)), aimag(mmom(irow,icol))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+
+     call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced penalized moments)')
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do irow=1, ndim
+       do icol=1, natom*3
+         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+       & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
      end do
