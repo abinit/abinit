@@ -749,15 +749,15 @@ end subroutine rttddft_calc_ent
 !!  rttddft_calc_current
 !!
 !! FUNCTION
-!!  Computes macroscopic current
+!!  Computes macroscopic current density
 !!  In NC:
-!!    J(t) = -1/Omega Im[\sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]  - AN_v/Omega
+!!    J(t) = -1/Omega Im[\sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]  - A N_v/Omega
+!!           + Gauge-dependent terms? 
 !!  In PAW:
 !!    J(t) = -1/Omega Im[ \sum_{n,k} f_{nk}(0) <\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}> +
 !!                        \sum_{aij} \rho_{aij} <\phi_{aij}|\nabla|\phi_{aij}> - 
 !!                        \sum_{aij} \rho_{aij} <\tilde{\phi}_{aij}|\nabla|\tilde{\phi}_{aij}> ]  
 !!           - A/Omega \int \tilde{n}(r,t)dr
-!!
 !! INPUTS
 !!  tdks <type(tdks_type)> = Main RT-TDDFT object
 !!  dtset <type(dataset_type)> = all input variables for this dataset
@@ -766,6 +766,9 @@ end subroutine rttddft_calc_ent
 !! OUTPUT
 !!  current = the macroscopic current
 !!
+!! NOTES
+!!  Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>] = <\tilde{psi}_{nk}|-i\nabla|\tilde{psi}_{nk}> 
+!!
 !! SOURCE
 subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
 
@@ -773,22 +776,99 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
 
  !Arguments ------------------------------------
  !scalars
- type(tdks_type), target,   intent(inout) :: tdks
- type(dataset_type),        intent(in)    :: dtset
- type(datafiles_type),      intent(in)    :: dtfil
- type(MPI_type),            intent(in)    :: mpi_enreg
+ type(tdks_type), target,    intent(inout) :: tdks
+ type(dataset_type),         intent(in)    :: dtset
+ type(datafiles_type),       intent(in)    :: dtfil
+ type(pseudopotential_type), intent(in)    :: psps
+ type(MPI_type),             intent(in)    :: mpi_enreg
 
  !Local variables-------------------------------
  !scalars
+ integer  :: iband, ikpt, bdtot_index
+ real(dp) :: current(3), current_k(3)
+ !arrays
+ real(dp), target :: psinablapsi(2,3,dtset%mband*(dtset%mband+1)/2,dtset%nkpt)
 
 ! ***********************************************************************
 
  print*, "Soon I'll compute the current here!!"
 
+ !print*, "nkpt:", dtset%nkpt
+ !print*, "mband", dtset%mband
+ !dtfil%fnameabo_app_opt = "test"
+
+ ! 1 - Computes <\psi_{kn}|v|\psi_{kn}> = <\psi_{kn}|-i\nabla|\psi_{kn}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
  call optics_paw(tdks%atindx1,tdks%cg,tdks%cprj,tdks%dimcprj,dtfil,dtset,tdks%eigen,tdks%gprimd,tdks%hdr, &
-               & tdks%kg,dtset%mband,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%natom,  &
-               & dtset%nkpt,tdks%npwarr,dtset%nsspol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,tdks%pawtab,   &
-               & dtset%znucl)
+               & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
+               & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
+               & tdks%pawtab,dtset%znucl,psinablapsi)
+ 
+ 
+! 2 - Sum over bands and k-points
+ current = 0.0_dp
+ bdtot_index=0
+ !Loop over spins
+ do isppol=1, dtset%nsppol
+   !Loop over kpoints
+   do ikpt = 1, dtset%nkpt
+      current_k = 0.0_dp
+      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+      do iband = 1, nband_k
+         current_k(1) = current_k(1) + psinablapsi(1,1,iband,ikpt)
+      end do
+      current(:) = current(:) + dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*current_k(:)
+      bdtot_index = bdtot_index+nband_k
+   end do !nkpt
+ end do !nsspol
+
+ current = -current/tdks%ucvol
+
+ ! 3 - Add last contribution from vector potential x integral of the density
+
+
+ !FB-TODO: Minus sign at the end
+!open(911,file="dip_x_real_new") 
+!open(912,file="dip_x_imag_new") 
+!open(913,file="dip_y_real_new") 
+!open(914,file="dip_y_imag_new") 
+!open(915,file="dip_z_real_new") 
+!open(916,file="dip_z_imag_new") 
+
+!do i = 1, dtset%nkpt
+!  write(911,*) psinablapsi(1,1,:,i)
+!  write(912,*) psinablapsi(2,1,:,i)
+!  write(913,*) psinablapsi(1,2,:,i)
+!  write(914,*) psinablapsi(2,2,:,i)
+!  write(915,*) psinablapsi(1,3,:,i)
+!  write(916,*) psinablapsi(2,3,:,i)
+!end do
+
+!close(911)
+!close(912)
+!close(913)
+!close(914)
+!close(915)
+!close(916)
+
+!print*, " "
+!print*, "y"
+!do i = 1, dtset%nkpt
+!  print*,  ""
+!  print*, "k=", i
+!  print*, "real:", psinablapsi(1,2,:,i)
+!  print*, "imag:", psinablapsi(2,2,:,i)
+!end do
+
+!print*, " "
+!print*, "z"
+!do i = 1, dtset%nkpt
+!  print*,  ""
+!  print*, "k=", i
+!  print*, "real:", psinablapsi(1,3,:,i)
+!  print*, "imag:", psinablapsi(2,3,:,i)
+!end do
+
+
 
 end subroutine rttddft_calc_current
 !!***

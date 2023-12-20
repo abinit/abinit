@@ -155,7 +155,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
    !Compute current at t
-   call rttddft_calc_current(tdks,dtset,mpi_enreg)
+   call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
 
    !Compute and output useful electronic values
    call rttddft_output(dtfil,dtset,istep,mpi_enreg,psps,tdks)
