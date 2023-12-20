@@ -870,11 +870,11 @@ subroutine init_dmft(dmatpawu, dtset, fermie_dft, fnametmp_app, fnamei, nspinor,
 #ifdef HAVE_MPI
        call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&       std_out,paw_dmft%spacecomm,nspinor)
+&       std_out,paw_dmft%spacecomm,nspinor=paw_dmft%nspinor)
 #else
        call CtqmcInterface_init(paw_dmft%hybrid(iatom),paw_dmft%dmftqmc_seed,paw_dmft%dmftqmc_n, &
 &       paw_dmft%dmftqmc_therm, paw_dmft%dmftctqmc_meas,nflavor,paw_dmft%dmftqmc_l,one/paw_dmft%temp,zero,&
-&       std_out,nspinor)
+&       std_out,nspinor=paw_dmft%nspinor)
 #endif
        call CtqmcInterface_setOpts(paw_dmft%hybrid(iatom),&
                                    opt_Fk      =1,&
