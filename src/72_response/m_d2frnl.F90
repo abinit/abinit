@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_d2frnl
 
  use defs_basis
@@ -56,6 +59,10 @@ module m_d2frnl
  use m_mkffnl,   only : mkffnl
  use m_nonlop,   only : nonlop
  use m_paw_occupancies, only : pawaccrhoij
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -230,6 +237,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  DBG_ENTER("COLL")
 
  call timab(159,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_D2FRNL)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivatives, this can take some time...',ch10
  call wrtout(std_out,msg,'COLL')
@@ -487,6 +495,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        bdtot_index=bdtot_index+nband_k
        cycle
      end if
+     ABI_NVTX_START_RANGE(NVTX_D2FRNL_KPT)
 
 !    If needed, manage ddk files
      if (need_becfr.or.need_piezofr) then
@@ -604,6 +613,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_MALLOC(ph3d,(2,npw_k,gs_ham%matblk))
      call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
+
 
 !    Initialize contributions from current k point
      if(rfphon==1) dyfrnlk(:,:)=zero
@@ -886,6 +896,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ABI_FREE(gs2c)
      end if
 
+     ABI_NVTX_END_RANGE()
    end do ! End loops on isppol and ikpt
  end do
  if(rfphon==1) then
@@ -1118,6 +1129,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  end if
 
  call gs_ham%free()
+
+ ABI_NVTX_END_RANGE()
  call timab(159,2,tsec)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivative done',ch10

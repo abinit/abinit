@@ -2417,7 +2417,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 
 
 ! *********************************************************************
-
+ ABI_NVTX_START_RANGE(NVTX_DFPT_NSELT)
 !Init me
  comm = mpi_enreg%comm_cell
  me   = mpi_enreg%me_kpt
@@ -2696,6 +2696,7 @@ g0term=0; if (rfstrs_ref_==1) g0term=1
  ABI_FREE(kg_k)
  ABI_FREE(kg1_k)
  ABI_FREE(vpsp1)
+ ABI_NVTX_END_RANGE()
 
 end subroutine dfpt_nselt
 !!***
@@ -3668,6 +3669,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_RHOFERMI)
 
 !Check arguments validity
  if (ipert>natom.and.ipert/=natom+3.and.ipert/=natom+4.and.ipert/=natom+5) then
@@ -4179,6 +4181,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  call timab(127,2,tsec)
  call timab(121,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_rhofermi
@@ -4294,6 +4297,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 ! *********************************************************************
 
  DBG_ENTER('COLL')
+ ABI_NVTX_START_RANGE(NVTX_DFPT_WFKFERMI)
 
 !Check arguments validity
  if (ipert>gs_hamkq%natom.and.ipert/=gs_hamkq%natom+3.and.ipert/=gs_hamkq%natom+4.and.ipert/=gs_hamkq%natom+5) then !SPr rfmagn deb
@@ -4432,6 +4436,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
  call timab(130,2,tsec)
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT('COLL')
 
 end subroutine dfpt_wfkfermi
