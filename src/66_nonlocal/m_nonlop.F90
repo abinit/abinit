@@ -18,6 +18,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_nonlop
 
  use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr, c_associated
@@ -45,6 +48,10 @@ module m_nonlop
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
 #endif
 
  implicit none

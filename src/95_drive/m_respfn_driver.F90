@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_respfn_driver
 
  use defs_basis
@@ -100,6 +103,10 @@ module m_respfn_driver
 
 #if defined HAVE_GPU
  use m_alloc_hamilt_gpu
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
 #endif
 
  implicit none
@@ -291,6 +298,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  call timab(132,1,tsec)
  call timab(133,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_RESPFN)
 
 !Some data for parallelism
 
@@ -340,7 +348,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
   ecutdg_eff,ecut_eff,gmet,gprimd,gsqcut_eff,gsqcutc_eff,&
   ngfftf,ngfft,dtset%nkpt,dtset%nsppol,&
   response,rmet,dtset%rprim_orig(1:3,1:3,1),rprimd,ucvol,psps%usepaw)
-
 !In some cases (e.g. getcell/=0), the plane wave vectors have
 ! to be generated from the original simulation cell
  rprimd_for_kg=rprimd
@@ -713,6 +720,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !>>> Initialize charge density
 
+ ABI_NVTX_START_RANGE(NVTX_MKRHO)
  if (dtset%getden/=0.or.dtset%irdden/=0) then
    ! Choice 1: read charge density from a disk file and broadcast data
    !   This part is not compatible with MPI-FFT (note single_proc=.True. below)
@@ -759,6 +767,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    end if
 
  end if ! choice for charge density initialization
+ ABI_NVTX_END_RANGE()
 
 !>>> Initialize kinetic energy density
  if (dtset%usekden==1) then
@@ -1098,6 +1107,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Section for the strain perturbation
  if(rfstrs/=0) then
 
+   ABI_NVTX_START_RANGE(NVTX_DFPT_ELT)
 !  Verify that k-point set has full space-group symmetry; otherwise exit
    timrev=1
    if (symkchk(dtset%kptns,dtset%nkpt,dtset%nsym,symrec,timrev,message) /= 0) then
@@ -1153,6 +1163,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !  elteew:   Ewald contribution
 !  eltvdw:   vdw DFT-D contribution
 !  In case of PAW, it misses a term coming from the perturbed overlap operator
+ABI_NVTX_END_RANGE()
  end if
 
  ABI_FREE(vpsp)
@@ -1365,6 +1376,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_MALLOC(dyfrx1,(2,3,natom,3,natom))
  dyfrx1(:,:,:,:,:)=zero
  if(rfphon==1.and.psps%n1xccc/=0)then
+   ABI_NVTX_START_RANGE(NVTX_DFPT_DYXC)
    ABI_MALLOC(blkflgfrx1,(3,natom,3,natom))
 !FR non-collinear magnetism
    if (dtset%nspden==4) then
@@ -1378,6 +1390,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ntypat,psps%n1xccc,psps,pawtab,ph1df,psps%qgrid_vl,qphon,&
 &     rfdir,rfpert,rprimd,timrev,dtset%typat,ucvol,psps%usepaw,psps%xcccrc,psps%xccc1d,xred)
    end if
+   ABI_NVTX_END_RANGE()
  end if
 
 !Deallocate the arrays that were needed only for the frozen wavefunction part
@@ -1929,6 +1942,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 #endif
 
+ ABI_NVTX_END_RANGE()
  call timab(138,2,tsec)
  call timab(132,2,tsec)
 

@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_dfpt_mkrho
 
  use defs_basis
@@ -40,6 +43,10 @@ module m_dfpt_mkrho
  use m_paral_atom,      only : get_my_atmtab
  use m_mpinfo,          only : proc_distrb_cycle
  use m_cgprj,           only : getcprj
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -156,6 +163,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 ! *************************************************************************
 
 !DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_MKRHO)
 
  if(nspden==4)then
 !  NOTE: see mkrho for the modifications needed for non-collinear treatment
@@ -530,6 +538,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).
 
+ ABI_NVTX_END_RANGE()
 !DBG_EXIT("COLL")
 
 end subroutine dfpt_mkrho
@@ -638,6 +647,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 ! *********************************************************************
  DBG_ENTER("COLL")
+ ABI_NVTX_START_RANGE(NVTX_DFPT_ACCRHO)
 
  if (option/=1.and.option/=2.and.option/=3) return
 
@@ -969,6 +979,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
  end if
 
+ ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
 
 end subroutine dfpt_accrho
