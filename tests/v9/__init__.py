@@ -105,6 +105,7 @@ inp_files = [
     "t92.abi",  # check extended fpmd routines with low number of bands
     "t93.abi",  # energy, forces for PAW non-collinear, with usexcnhat=0
     "t94.abi",  # energy, stress for PAW non-collinear, with usexcnhat=0
+    "t95.abi",  # energy, convergence for NC mGGA input with UPFv2.0 format psp
 
     # Optics with spin-orbit coupling
     "t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
