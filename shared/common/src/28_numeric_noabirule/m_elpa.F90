@@ -31,10 +31,6 @@ module m_elpa
  use defs_basis
  use m_errors
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
-  use m_nvtx, only : nvtxStartRange, nvtxEndRange
-#endif
-
 #ifdef HAVE_LINALG_ELPA
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  use elpa
@@ -223,10 +219,6 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
 ! *********************************************************************
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxStartRange("ELPA_FUNC_ALLOCATE", 6)
-#endif
-
  err=0
  ! if optional parameter is present, use it
  ! else use default value, i.e. don't use GPU
@@ -278,10 +270,6 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
  end if
 
  elpa_hdl%is_allocated=.true.
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
 
 end subroutine elpa_func_allocate
 !!***
@@ -742,13 +730,7 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxStartRange("ELPA_SOLVE_REAL", 9)
-#endif
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
  success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_real_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
@@ -838,13 +820,7 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxStartRange("ELPA_SOLVE_COMPLEX", 9)
-#endif
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
  success=(err==ELPA_OK)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_complex_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
