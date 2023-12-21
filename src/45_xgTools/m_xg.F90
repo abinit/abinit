@@ -3821,7 +3821,7 @@ contains
         xgBlockA__vecC => xgBlockA%vecC
         xgBlockB__vecC => xgBlockB%vecC
         divResult__vecC => divResult%vecC
-        !AOMP 15 doesn't support complex division inside OpenMP !?
+#if !defined FC_LLVM
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecC,xgBlockB__vecC,divResult__vecC)
         do irow = 1, rows
           do icol = 1, cols
@@ -3830,6 +3830,16 @@ contains
         end do
         !FIXME Port this on GPU to avoid copy below ?
         !$OMP TARGET UPDATE FROM(divResult__vecC)
+#else
+        !FIXME LLVM AOMP 16 doesn't support complex division inside OpenMP !?
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecC,xgBlockB__vecC)
+        do irow = 1, rows
+          do icol = 1, cols
+            divResult__vecC(irow,icol) = xgBlockA__vecC(irow,icol)/xgBlockB__vecC(irow,icol)
+          end do
+        end do
+        !$OMP TARGET UPDATE TO(divResult__vecC)
+#endif
         if ( present(max_val) ) then
           max_val = maxval(dble(divResult%vecC))
         end if
