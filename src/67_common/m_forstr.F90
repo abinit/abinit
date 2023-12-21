@@ -466,7 +466,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      optnc=1;if (dtset%nspden==4.and.(abs(dtset%densfor_pred)==4.or.abs(dtset%densfor_pred)==6)) optnc=2
      call nres2vres(dtset,gsqcut,psps%usepaw,kxc,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 &     nkxc,nvresid,n3xccc,optnc,option,pawang,pawfgrtab,pawrhoij,pawtab,&
-&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc)
+&     rhor,rprimd,psps%usepaw,resid,xccc3d,xred,vxc,xcctau3d)
    else
      resid => nvresid
    end if
@@ -1238,6 +1238,7 @@ end subroutine forstrnps
 !! rprimd(3,3)=dimensional primitive translation vectors (bohr)
 !! usepaw= 0 for non paw calculation; =1 for paw calculation
 !! xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
+!! xcctau3d(n3xccc)=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !! xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! === optional inputs ===
@@ -1250,7 +1251,8 @@ end subroutine forstrnps
 
 subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
 &                 nkxc,nresid,n3xccc,optnc,optxc,pawang,pawfgrtab,pawrhoij,pawtab,&
-&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,vxc)
+&                 rhor,rprimd,usepaw,vresid,xccc3d,xred,&
+&                 vxc, xcctau3d)
 
 !Arguments ------------------------------------
 !scalars
@@ -1263,6 +1265,7 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: kxc(nfft,nkxc),nresid(nfft,dtset%nspden)
  real(dp),intent(in) :: rhor(nfft,dtset%nspden),rprimd(3,3),xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(in),optional :: xcctau3d(n3xccc*dtset%usekden)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(out) :: vresid(nfft,dtset%nspden)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*usepaw)
@@ -1413,7 +1416,8 @@ subroutine nres2vres(dtset,gsqcut,izero,kxc,mpi_enreg,my_natom,nfft,ngfft,nhat,&
    nk3xc=1
    call rhotoxc(energy,kxc_cur,mpi_enreg,nfft,ngfft,&
 &   nhat,usepaw,nhatgr,nhatgrdim,nkxc_cur,nk3xc,non_magnetic_xc,n3xccc,option,&
-&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres)  !vresid=work space
+&   rhor0,rprimd,dummy6,usexcnhat,vresid,vxcavg,xccc3d,xcdata,vhartr=vhres,&
+&   xcctau3d=xcctau3d)  !vresid=work space
    if (dtset%nspden/=4)  then
      ABI_FREE(rhor0)
    end if

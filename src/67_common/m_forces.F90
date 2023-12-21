@@ -249,12 +249,13 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (dtset%icoulomb>0) vloc_method=2
  if (psps%usewvl==1) vloc_method=2
 !Pseudo core charge density:
-! Method 1: PAW, nc_xccc_gspace
-! Method 2: Norm-conserving PP, wavelets
+! Method 1 construct through G space FT: PAW, nc_xccc_gspace==1
+! Method 2 construct in real space     : Norm-conserving PP default, wavelets
  coredens_method=1;if (psps%usepaw==0) coredens_method=2
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+!Pseudo core charge kinetic energy density: same convention as coredens_method
  coretau_method=0
  if (dtset%usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2

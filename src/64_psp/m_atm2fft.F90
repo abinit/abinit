@@ -457,6 +457,8 @@ print *, 'in atm2fft'
                else
                  n_at=zero
                end if
+!DEBUG MJV for mGGA NC potentials
+!write (1003, *)  jj, n_at, '#optn==1 jj n_at xccc/xcctau in recip space'
              end if
 
 !            Compute sum of local atomic potentials or densities
