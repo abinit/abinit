@@ -53,10 +53,6 @@ module m_prep_kgb
  use m_ompgpu_fourwf
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-  use m_nvtx
-#endif
-
  implicit none
 
  private
@@ -295,9 +291,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 
  if(do_transpose) then
    call timab(545,3,tsec)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
    if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 &   ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
@@ -306,9 +299,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
 &     recvcountsloc,rdisplsloc,spaceComm,ier)
    end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    call timab(545,2,tsec)
  else
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
@@ -527,58 +517,22 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    if ( ((.not.flag_inv_sym) .and. bandpp==1 .and. mpi_enreg%paral_spinor==0 .and. my_nspinor==2 ).or. &
 &   ((.not.flag_inv_sym) .and. bandpp>1) .or.  flag_inv_sym  ) then
      if (sij_opt==1) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
        call xmpi_alltoallv(swavef_alltoall1,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
      end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
      if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall1,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
      call xmpi_alltoallv(gwavef_alltoall1,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    else
      if (sij_opt==1) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
        call xmpi_alltoallv(swavef_alltoall2,recvcountsloc,rdisplsloc,swavef,&
 &       sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
      end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
      if (.not.local_gvnlxc) call xmpi_alltoallv(gvnlxc_alltoall2,recvcountsloc,rdisplsloc,gvnlxc,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
      call xmpi_alltoallv(gwavef_alltoall2,recvcountsloc,rdisplsloc,gwavef,&
 &     sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    end if
 
    call timab(545,2,tsec)
@@ -860,13 +814,9 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
 
  if(do_transpose) then
    call timab(581,1,tsec)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
    if (bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2)) then
-#if defined HAVE_GPU && defined HAVE_YAKL
    if (l_gpu_option == ABI_GPU_KOKKOS) then
-
+#if defined HAVE_GPU && defined HAVE_YAKL
       ABI_MALLOC_CUDA(cwavef_mpi_c,  INT(2, c_size_t) * npw * my_nspinor * blocksize * dp)
       call c_f_pointer(cwavef_mpi_c, cwavef_mpi, (/2, npw * my_nspinor * blocksize/))
 
@@ -877,24 +827,17 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
            &     recvcountsloc,rdisplsloc,spaceComm,ier)
 
       ABI_FREE_CUDA(cwavef_mpi_c)
-
+#endif
    else
-      call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
-           &     recvcountsloc,rdisplsloc,spaceComm,ier)
+     call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
+         &     recvcountsloc,rdisplsloc,spaceComm,ier)
    end if
 
-#else
-    call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall1,&
-         &     recvcountsloc,rdisplsloc,spaceComm,ier)
-#endif
 
    else
       call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
            &     recvcountsloc,rdisplsloc,spaceComm,ier)
    end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    call timab(581,2,tsec)
  else
    ! Here, we cheat, and use DCOPY to bypass some compiler's overzealous bound-checking
@@ -967,7 +910,7 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
    call nonlop(choice,cpopt,cwaveprj,enlout,hamk,idir,lambda_nonlop,mpi_enreg,bandpp,nnlout,paw_opt,&
 &   signs,gsc_alltoall2,tim_nonlop,cwavef_alltoall2,gvnlc_alltoall2,vectproj=vectproj)
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-   call gpu_device_synchronize()
+   if(hamk%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
    !call gpu_data_prefetch_async_f(C_LOC(cwavef_alltoall2), cwavef_alltoall2_size, CPU_DEVICE_ID)
    !call gpu_data_prefetch_async_f(C_LOC(gvnlc_alltoall2), gvnlc_alltoall2_size, CPU_DEVICE_ID)
    !if (associated(gsc_alltoall2)) then
@@ -1000,45 +943,21 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
      call timab(581,1,tsec)
      if(bandpp/=1 .or. (bandpp==1 .and. mpi_enreg%paral_spinor==0.and.nspinortot==2))then
        if (paw_opt/=3) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
          call xmpi_alltoallv(gvnlc_alltoall1,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
        end if
        if (paw_opt==3.or.paw_opt==4) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
          call xmpi_alltoallv(gsc_alltoall1,recvcountsloc,rdisplsloc,gsc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
        end if
      else
        if (paw_opt/=3) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
          call xmpi_alltoallv(gvnlc_alltoall2,recvcountsloc,rdisplsloc,gvnlc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
        end if
        if (paw_opt==3.or.paw_opt==4) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
          call xmpi_alltoallv(gsc_alltoall2,recvcountsloc,rdisplsloc,gsc,&
 &         sendcountsloc,sdisplsloc,spaceComm,ier)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
        end if
      end if
      call timab(581,2,tsec)
@@ -1282,11 +1201,8 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  sdisplsloc(:)=sdispls(:)*2
 
  call timab(547,1,tsec)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("MPI_AllToAllV", 8)
-#endif
-#if defined HAVE_GPU && defined HAVE_YAKL
  if(gpu_option_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
     ABI_MALLOC(cwavef_mpi,(2,npw_k*blocksize))
 
     call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*blocksize, CPU_DEVICE_ID)
@@ -1297,17 +1213,11 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
     call xmpi_alltoallv(cwavef_mpi,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
          & recvcountsloc,rdisplsloc,spaceComm,ier)
     ABI_FREE(cwavef_mpi)
+#endif
  else
-    call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
-& recvcountsloc,rdisplsloc,spaceComm,ier)
+   call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
+        & recvcountsloc,rdisplsloc,spaceComm,ier)
  end if
-#else
- call xmpi_alltoallv(cwavef,sendcountsloc,sdisplsloc,cwavef_alltoall2,&
-      & recvcountsloc,rdisplsloc,spaceComm,ier)
-#endif
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
  call timab(547,2,tsec)
 
 !If me_fft==0, I have the G=0 vector, but keep for the record the old value
