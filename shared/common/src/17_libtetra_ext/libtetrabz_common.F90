@@ -771,7 +771,7 @@ END SUBROUTINE libtetrabz_triangle_c1
 SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
   !
 #if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
+  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM, MPI_allREDUCE
 #endif
   IMPLICIT NONE
   !
@@ -792,7 +792,7 @@ END SUBROUTINE libtetrabz_mpisum_d
 SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
   !
 #if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM
+  USE mpi, ONLY : MPI_DOUBLE_PRECISION, MPI_IN_PLACE, MPI_SUM, MPI_allREDUCE
 #endif
   IMPLICIT NONE
   !
@@ -813,7 +813,7 @@ END SUBROUTINE libtetrabz_mpisum_dv
 SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
   !
 #if defined HAVE_MPI2
-  USE mpi, ONLY : MPI_DOUBLE_COMPLEX, MPI_IN_PLACE, MPI_SUM
+  USE mpi, ONLY : MPI_DOUBLE_COMPLEX, MPI_IN_PLACE, MPI_SUM, MPI_allREDUCE
 #endif
   IMPLICIT NONE
   !

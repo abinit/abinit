@@ -515,7 +515,8 @@ function xomp_target_is_present(ptr)
  if(rc==0) xomp_target_is_present = .false.
 #else
  xomp_target_is_present = .false.
- ABI_UNUSED((/device_id,rc/))
+ ABI_UNUSED(device_id)
+ ABI_UNUSED(rc)
  ABI_UNUSED_A(ptr)
 #endif
 
@@ -561,7 +562,8 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  end if
 #else
  gpu_ptr = c_null_ptr
- ABI_UNUSED((/device_id,rc/))
+ ABI_UNUSED(device_id)
+ ABI_UNUSED(rc)
  ABI_UNUSED_A(ptr)
 #endif
 
