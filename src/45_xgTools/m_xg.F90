@@ -2690,11 +2690,6 @@ contains
           &                              c_loc(xgBlockW%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
       end select
 
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
-      call abi_abort('COLL')
 #endif
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
@@ -2731,12 +2726,6 @@ contains
         end do
       end select
 
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,&
-          "We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
-      call abi_abort('COLL')
 #endif
 
     else
@@ -2891,11 +2880,6 @@ contains
           &                                 xgBlock%ldim, rows)
       end select
 
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
-      call abi_abort('COLL')
 #endif
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
@@ -2924,11 +2908,6 @@ contains
         end do
       end select
       !$OMP TARGET EXIT DATA MAP(delete:vec)
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
-      call abi_abort('COLL')
 #endif
 
     else
@@ -2999,11 +2978,6 @@ contains
           &                               xgBlock%ldim, rows)
       end select
 
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
-      call abi_abort('COLL')
 #endif
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
@@ -3026,11 +3000,6 @@ contains
       end select
       !$OMP TARGET EXIT DATA MAP(delete:vec)
 
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
-      call abi_abort('COLL')
 #endif
 
     else
@@ -4086,11 +4055,6 @@ contains
         ABI_ERROR("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
 
       end if
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 1 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with GPU/CUDA support (Kokkos+YAKL).")
-      call abi_abort('COLL')
 #endif
 
     else if (l_gpu_option==ABI_GPU_OPENMP) then
@@ -4109,11 +4073,6 @@ contains
         ABI_BUG("Scaling a xgBlock when xgBlock%ldim != xgBlock%rows is not implemented for GPU. FIX ME if needed.")
 
       end if
-#else
-      ! we shouldn't be here, it means gpu_option was wrongly set to 666 in
-      ! input parameter file
-      call wrtout(std_out,"We shouldn't be here : abinit was not compiled with OpenMP GPU offload support.")
-      call abi_abort('COLL')
 #endif
     else
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
