@@ -360,7 +360,7 @@ contains
   end if
 
   if(allocated(temp_realvec_r)) then
-    !$OMP TARGET EXIT DATA MAP(delete:kwa m_hamiltonian.F90,temp_realvec_i)
+    !$OMP TARGET EXIT DATA MAP(delete:,temp_realvec_i)
     ABI_FREE(temp_realvec_r)
     ABI_FREE(temp_realvec_i)
   end if
