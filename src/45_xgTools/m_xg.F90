@@ -59,10 +59,6 @@ module m_xg
  use gator_mod
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-  use m_nvtx
-#endif
-
   implicit none
 
   private
@@ -1428,10 +1424,6 @@ contains
           call gpu_device_synchronize()
         end if
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-          call nvtxStartRange("MPI_Sum",8)
-#endif
-
         if (l_gpu_option/=ABI_GPU_OPENMP) then
           call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
         else
@@ -1461,9 +1453,6 @@ contains
           call xgBlock_copy_to_gpu(xgBlockW)
 #endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-          call nvtxEndRange()
-#endif
         end if
       end if
 
