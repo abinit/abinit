@@ -1273,9 +1273,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &                         rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
              end if
            end if
-         end if
-       end if
+         end if ! false
 !ENDDEBUG
+
+       end if
 
        call timab(1445,1,tsec)
 
@@ -1394,6 +1395,16 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     rmet,rprimd,strsxc,ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,&
 &     xccc3d,xred,electronpositron=electronpositron,&
 &     taur=taur,vxc_hybcomp=vxc_hybcomp,vxctau=vxctau,add_tfw=tfw_activated,xcctau3d=xcctau3d)
+
+!DEBUG MJV for kinetic energy mGGA NC psp 
+!write (1001, *) '# xccc3d, n3xccc = ', n3xccc
+!do ii=1,n3xccc
+!  write (1001, *) xccc3d(ii)
+!end do
+!write (1002, *) '# xcctau3d, n3xccc = ', n3xccc
+!do ii=1,n3xccc*dtset%usekden
+!  write (1002, *) xcctau3d(ii)
+!end do
 
      ! set the zero of the potentials here
      if(dtset%usepotzero==2) vpsp(:) = vpsp(:) + ecore / ( zion * ucvol )
@@ -1696,7 +1707,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &     nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,psps%ntypat,nvresid,n1xccc,n3xccc,&
 &     optene,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &     ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
-&     psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
+&     psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred,&
+&     xcctau3d=xcctau3d)
     !if (wvlbigdft) energies_copy(energies,energies_wvl) ! TO BE ACTIVATED LATER
    end if
    call timab(1452,2,tsec)
@@ -1901,7 +1913,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &       nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,dtset%ntypat,nvresid,n1xccc, &
 &       n3xccc,0,computed_forces,optres,pawang,pawfgrtab,pawrad,pawrhoij,&
 &       pawtab,ph1df,red_ptot,psps,rhog,rhor,rmet,rprimd,symrec,synlgr,ucvol,&
-&       psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred)
+&       psps%usepaw,vhartr,vpsp,vxc,vxctau,wvl%descr,wvl%den,xccc3d,xred, &
+&       xcctau3d=xcctau3d)
      end if
 
    end if
@@ -2079,7 +2092,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
 &   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
 &   vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
-&   add_tfw=tfw_activated,vxctau=vxctau)
+&   add_tfw=tfw_activated,vxctau=vxctau,xcctau3d=xcctau3d)
 
    if (nhatgrdim>0)  then
      ABI_FREE(nhatgr)
@@ -2514,7 +2527,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 &  grxc,gsqcut,extfpmd,indsym,kxc,maxfor,mgfft,mpi_enreg,my_natom,nattyp,&
 &  nfft,ngfft,ngrvdw,nhat,nkxc,ntypat,nvresid,n1xccc,n3xccc,optene,optforces,optres,&
 &  pawang,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,red_ptot,psps,rhog,rhor,rmet,rprimd,&
-&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,vxctau,wvl,wvl_den,xccc3d,xred)
+&  symrec,synlgr,ucvol,usepaw,vhartr,vpsp,vxc,vxctau,wvl,wvl_den,xccc3d,xred,&
+&  xcctau3d)
 
 !Arguments ------------------------------------
 !scalars
@@ -2544,6 +2558,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
  real(dp),intent(in) :: vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
  real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: xccc3d(n3xccc)
+ real(dp),intent(in),optional :: xcctau3d(n3xccc)
  real(dp),intent(inout) :: forold(3,dtset%natom),grnl(3*dtset%natom)
  real(dp),intent(inout) :: nhat(nfft,dtset%nspden*psps%usepaw)
  real(dp),intent(inout),target :: nvresid(nfft,dtset%nspden)

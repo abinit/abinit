@@ -153,6 +153,7 @@ contains
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
 !!  wvl <type(wvl_internal_type)>=wavelets internal data
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction (bohr^-3)
+!!  xcctau3d(n3xccc)=3D core electron kinetic energy density for XC core correction (bohr^-3)
 !!  xred(3,natom)=reduced coordinates of atoms (dimensionless)
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!
@@ -216,7 +217,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
 & taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
-& add_tfw,vxctau) ! optional argument
+& add_tfw,vxctau,xcctau3d) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -254,6 +255,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(inout) :: taug(2,nfftf*dtset%usekden),taur(nfftf,dtset%nspden*dtset%usekden)
  real(dp), intent(out) :: strsxc(6)
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp), intent(in) :: xcctau3d(nfftf*dtset%usekden)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
  real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -360,14 +362,16 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_,&
+&       xcctau3d=xcctau3d)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_, &
+&       xcctau3d=xcctau3d)
      end if
      ABI_FREE(kxc)
    else if (dtset%usewvl == 0) then
