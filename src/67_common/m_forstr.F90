@@ -976,6 +976,15 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              gs_hamk%kg_k, gs_hamk%kpg_k, &
              compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        else if ( gpu_option == ABI_GPU_OPENMP) then
+         if(mpi_enreg%paral_kgb==0) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         else if(gs_hamk%istwf_k==1) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+         else if(gs_hamk%istwf_k==2) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+         else
+           ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+         end if
          call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
              gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
              gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
