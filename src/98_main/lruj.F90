@@ -41,20 +41,20 @@ program lruj
  use defs_basis
  use m_xmpi
  use m_abicore
- use m_build_info
  use m_errors
  use m_argparse
  use m_crystal
  use netcdf
  use m_nctk
 
- use m_fstrings,    only : itoa, sjoin, ltoa
- use m_specialmsg,  only : specialmsg_getcount, herald
+ use m_build_info,    only : abinit_version
+ use m_fstrings,      only : itoa, sjoin, ltoa
+ use m_specialmsg,    only : specialmsg_getcount, herald
  use m_numeric_tools, only : polynomial_regression
- use m_sort,        only : sort_dp
- use m_common,      only : crystal_from_file
- use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
- use m_paw_uj,      only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
+ use m_sort,          only : sort_dp
+ use m_common,        only : crystal_from_file
+ use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
+ use m_paw_uj,        only : pawuj_ini,pawuj_free,pawuj_det, macro_uj_type
 
  implicit none
 

@@ -21,14 +21,14 @@
 module m_nvtx_data
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
-  use m_nvtx, only : nvtxStartRange, nvtxEndRange
+  use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
   implicit none
 
   logical :: nvtx_activated = .false.
 
-  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 27
+  integer, parameter :: NUMBER_OF_NVTX_REGIONS = 65
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
 
@@ -42,23 +42,61 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2 = 8
   integer, parameter :: NVTX_ORTHO_WF = 9
   integer, parameter :: NVTX_GETGHC = 10
-  integer, parameter :: NVTX_CHEBFI2_RR = 11 ! Rayleigh Ritz
-  integer, parameter :: NVTX_CHEBFI2_RRQ = 12 ! Rayleigh Ritz Quotient
-  integer, parameter :: NVTX_CHEBFI2_CORE = 13 ! core
-  integer, parameter :: NVTX_CHEBFI2_NONLOP = 14
-  integer, parameter :: NVTX_CTOCPRJ = 15
-  integer, parameter :: NVTX_SCF_FOURWF = 16
-  integer, parameter :: NVTX_MKRHO = 17
-  integer, parameter :: NVTX_INVOVL = 18
-  integer, parameter :: NVTX_INVOVL_NONLOP1 = 19
-  integer, parameter :: NVTX_INVOVL_NONLOP2 = 20
-  integer, parameter :: NVTX_INVOVL_INNER = 21
-  integer, parameter :: NVTX_INVOVL_INNER_APPLY_BLOCK = 22
-  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 23
-  integer, parameter :: NVTX_SUB_SPC_DIAGO = 24
-  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 25
-  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 26
-  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 27
+  integer, parameter :: NVTX_GETGHC_LOCPOT = 11
+  integer, parameter :: NVTX_GETGHC_NLOCPOT = 12
+  integer, parameter :: NVTX_GETGHC_KIN = 13
+  integer, parameter :: NVTX_CHEBFI2_RR = 14 ! Rayleigh Ritz
+  integer, parameter :: NVTX_CHEBFI2_RRQ = 15 ! Rayleigh Ritz Quotient
+  integer, parameter :: NVTX_CHEBFI2_CORE = 16 ! core
+  integer, parameter :: NVTX_CHEBFI2_NONLOP = 17
+  integer, parameter :: NVTX_CTOCPRJ = 18
+  integer, parameter :: NVTX_VTOWFK_FOURWF = 19
+  integer, parameter :: NVTX_MKRHO = 20
+  integer, parameter :: NVTX_INVOVL = 21
+  integer, parameter :: NVTX_INVOVL_PREP = 22
+  integer, parameter :: NVTX_INVOVL_NONLOP1 = 23
+  integer, parameter :: NVTX_INVOVL_NONLOP2 = 24
+  integer, parameter :: NVTX_INVOVL_INNER = 25
+  integer, parameter :: NVTX_INVOVL_POST1 = 26
+  integer, parameter :: NVTX_INVOVL_POST2 = 27
+  integer, parameter :: NVTX_INVOVL_POST3 = 28
+  integer, parameter :: NVTX_SUB_SPC_DIAGO = 29
+  integer, parameter :: NVTX_CHEBFI2_NEXT_ORDER = 30
+  integer, parameter :: NVTX_CHEBFI2_SWAP_BUF = 31
+  integer, parameter :: NVTX_CHEBFI2_GET_AX_BX = 32
+  integer, parameter :: NVTX_VTOWFK_EXTRA1 = 33
+  integer, parameter :: NVTX_VTOWFK_EXTRA2 = 34
+  integer, parameter :: NVTX_VTORHO_EXTRA = 35
+  integer, parameter :: NVTX_SCFCV_PAWKNHAT = 36
+  integer, parameter :: NVTX_SCFCV_RHOTOV = 37
+  integer, parameter :: NVTX_SCFCV_NEWRHO = 38
+  integer, parameter :: NVTX_SCFCV_PAWDENPOT = 39
+  integer, parameter :: NVTX_SCFCV_ETOTFOR = 40
+  integer, parameter :: NVTX_SCFCV_SCPRQT = 41
+  integer, parameter :: NVTX_SCFCV_DIJ = 42
+  integer, parameter :: NVTX_SCFCV_SETVTR = 43
+  integer, parameter :: NVTX_CHEBFI2_SQRT2 = 44
+  integer, parameter :: NVTX_CHEBFI2_INIT = 45
+  integer, parameter :: NVTX_INIT_INWFFIL = 46
+  integer, parameter :: NVTX_INIT_INWFFIL2 = 47
+  integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48
+  integer, parameter :: NVTX_RR_HEGV = 49
+  integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
+  integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
+  integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
+  integer, parameter :: NVTX_CHEBFI2_TRANSPOSE = 53
+  integer, parameter :: NVTX_CHEBFI2_GET_BM1X = 54
+  integer, parameter :: NVTX_LOBPCG2_BLOCK = 55
+  integer, parameter :: NVTX_LOBPCG2_LINE = 56
+  integer, parameter :: NVTX_LOBPCG2_ORTHO_X_WRT = 57
+  integer, parameter :: NVTX_LOBPCG2_RESIDUE = 58
+  integer, parameter :: NVTX_LOBPCG2_RR = 59
+  integer, parameter :: NVTX_LOBPCG2_B_ORTHO = 60
+  integer, parameter :: NVTX_LOBPCG2_GET_AX_BX = 61
+  integer, parameter :: NVTX_RR_HEEV = 62
+  integer, parameter :: NVTX_FORSTRNPS = 63
+  integer, parameter :: NVTX_FORSTR_NONLOP = 64
+  integer, parameter :: NVTX_VTOWFK_NONLOP = 65
 
 contains
 
@@ -84,23 +122,61 @@ contains
          & "CHEBFI2", &
          & "ORTHO_WF", &
          & "GETGHC", &
-         & "CHEBFI2_RR", &
-         & "CHEBFI2_RRQ", &
+         & "LOCPOT", &
+         & "NLOCPOT", &
+         & "KINETIC", &
+         & "RAYLRITZ", &
+         & "RAYLRITZ_Q", &
          & "CHEBFI2_CORE", &
          & "CHEBFI2_NONLOP", &
          & "CTOCPRJ", &
-         & "SCF_FOURWF", &
+         & "VTOWFK_FOURWF", &
          & "MKRHO", &
          & "INVOVL", &
+         & "INVOVL_PREP", &
          & "INVOVL_NONLOP1", &
          & "INVOVL_NONLOP2", &
          & "INVOVL_INNER", &
-         & "INVOVL_INNER_APPLY_BLOCK", &
-         & "INVOVL_INNER_GEMM", &
+         & "INVOVL_POST1", &
+         & "INVOVL_POST2", &
+         & "INVOVL_POST3", &
          & "SUB_SPC_DIAGO", &
-         & "CHEBFI2_NEXT_ORDER", &
-         & "CHEBFI2_SWAP_BUF", &
-         & "CHEBFI2_GET_AX_BX" &
+         & "NEXT_ORDER", &
+         & "SWAP_BUF", &
+         & "GET_AX_BX", &
+         & "VTOWFK_EXTRA1", &
+         & "VTOWFK_EXTRA2", &
+         & "VTORHO_EXTRA", &
+         & "SCFCV_PAWKNHAT", &
+         & "SCFCV_RHOTOV", &
+         & "SCFCV_NEWRHO", &
+         & "SCFCV_PAWDENPOT", &
+         & "SCFCV_ETOTFOR", &
+         & "SCFCV_SCPRQT", &
+         & "SCFCV_DIJ", &
+         & "SCFCV_SETVTR", &
+         & "CHEBFI2_SQRT2", &
+         & "CHEBFI2_INIT", &
+         & "INIT_INWFFIL", &
+         & "INIT_INWFFIL2", &
+         & "CHEBFI2_RR_SCALE", &
+         & "RR_HEGV", &
+         & "CHEBFI2_RR_XNP", &
+         & "CHEBFI2_RR_GEMM", &
+         & "INVOVL_INNER_GEMM", &
+         & "TRANSPOSE", &
+         & "GET_BM1X", &
+         & "LOBPCG2_BLOCK", &
+         & "LOBPCG2_LINE", &
+         & "LOBPCG2_ORTHO_X_WRT", &
+         & "LOBPCG2_RESIDUE", &
+         & "LOBPCG2_RR", &
+         & "LOBPCG2_B_ORTHO", &
+         & "GET_AX_BX", &
+         & "RR_HEEV", &
+         & "FORSTRNPS", &
+         & "FORSTR_NONLOP", &
+         & "VTOWFK_NONLOP" &
          ]
 
     nvtx_ids(1) = NVTX_MAIN_COMPUTATION
@@ -112,24 +188,62 @@ contains
     nvtx_ids(7) = NVTX_CHEBFI1
     nvtx_ids(8) = NVTX_CHEBFI2
     nvtx_ids(9) = NVTX_ORTHO_WF
-    nvtx_ids(10) = NVTX_GETGHC
-    nvtx_ids(11)= NVTX_CHEBFI2_RR
-    nvtx_ids(12)= NVTX_CHEBFI2_RRQ
-    nvtx_ids(13)= NVTX_CHEBFI2_CORE
-    nvtx_ids(14)= NVTX_CHEBFI2_NONLOP
-    nvtx_ids(15)= NVTX_CTOCPRJ
-    nvtx_ids(16)= NVTX_SCF_FOURWF
-    nvtx_ids(17)= NVTX_MKRHO
-    nvtx_ids(18)= NVTX_INVOVL
-    nvtx_ids(19)= NVTX_INVOVL_NONLOP1
-    nvtx_ids(20)= NVTX_INVOVL_NONLOP2
-    nvtx_ids(21)= NVTX_INVOVL_INNER
-    nvtx_ids(22)= NVTX_INVOVL_INNER_APPLY_BLOCK
-    nvtx_ids(23)= NVTX_INVOVL_INNER_GEMM
-    nvtx_ids(24)= NVTX_SUB_SPC_DIAGO
-    nvtx_ids(25)= NVTX_CHEBFI2_NEXT_ORDER
-    nvtx_ids(26)= NVTX_CHEBFI2_SWAP_BUF
-    nvtx_ids(27)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(10)= NVTX_GETGHC
+    nvtx_ids(11)= NVTX_GETGHC_LOCPOT
+    nvtx_ids(12)= NVTX_GETGHC_NLOCPOT
+    nvtx_ids(13)= NVTX_GETGHC_KIN
+    nvtx_ids(14)= NVTX_CHEBFI2_RR
+    nvtx_ids(15)= NVTX_CHEBFI2_RRQ
+    nvtx_ids(16)= NVTX_CHEBFI2_CORE
+    nvtx_ids(17)= NVTX_CHEBFI2_NONLOP
+    nvtx_ids(18)= NVTX_CTOCPRJ
+    nvtx_ids(19)= NVTX_VTOWFK_FOURWF
+    nvtx_ids(20)= NVTX_MKRHO
+    nvtx_ids(21)= NVTX_INVOVL
+    nvtx_ids(22)= NVTX_INVOVL_PREP
+    nvtx_ids(23)= NVTX_INVOVL_NONLOP1
+    nvtx_ids(24)= NVTX_INVOVL_NONLOP2
+    nvtx_ids(25)= NVTX_INVOVL_INNER
+    nvtx_ids(26)= NVTX_INVOVL_POST1
+    nvtx_ids(27)= NVTX_INVOVL_POST2
+    nvtx_ids(28)= NVTX_INVOVL_POST3
+    nvtx_ids(29)= NVTX_SUB_SPC_DIAGO
+    nvtx_ids(30)= NVTX_CHEBFI2_NEXT_ORDER
+    nvtx_ids(31)= NVTX_CHEBFI2_SWAP_BUF
+    nvtx_ids(32)= NVTX_CHEBFI2_GET_AX_BX
+    nvtx_ids(33)= NVTX_VTOWFK_EXTRA1
+    nvtx_ids(34)= NVTX_VTOWFK_EXTRA2
+    nvtx_ids(35)= NVTX_VTORHO_EXTRA
+    nvtx_ids(36)= NVTX_SCFCV_PAWKNHAT
+    nvtx_ids(37)= NVTX_SCFCV_RHOTOV
+    nvtx_ids(38)= NVTX_SCFCV_NEWRHO
+    nvtx_ids(39)= NVTX_SCFCV_PAWDENPOT
+    nvtx_ids(40)= NVTX_SCFCV_ETOTFOR
+    nvtx_ids(41)= NVTX_SCFCV_SCPRQT
+    nvtx_ids(42)= NVTX_SCFCV_DIJ
+    nvtx_ids(43)= NVTX_SCFCV_SETVTR
+    nvtx_ids(44)= NVTX_CHEBFI2_SQRT2
+    nvtx_ids(45)= NVTX_CHEBFI2_INIT
+    nvtx_ids(46)= NVTX_INIT_INWFFIL
+    nvtx_ids(47)= NVTX_INIT_INWFFIL2
+    nvtx_ids(48)= NVTX_CHEBFI2_RR_SCALE
+    nvtx_ids(49)= NVTX_RR_HEGV
+    nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
+    nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
+    nvtx_ids(52)= NVTX_INVOVL_INNER_GEMM
+    nvtx_ids(53)= NVTX_CHEBFI2_TRANSPOSE
+    nvtx_ids(54)= NVTX_CHEBFI2_GET_BM1X
+    nvtx_ids(55)= NVTX_LOBPCG2_BLOCK
+    nvtx_ids(56)= NVTX_LOBPCG2_LINE
+    nvtx_ids(57)= NVTX_LOBPCG2_ORTHO_X_WRT
+    nvtx_ids(58)= NVTX_LOBPCG2_RESIDUE
+    nvtx_ids(59)= NVTX_LOBPCG2_RR
+    nvtx_ids(60)= NVTX_LOBPCG2_B_ORTHO
+    nvtx_ids(61)= NVTX_LOBPCG2_GET_AX_BX
+    nvtx_ids(62)= NVTX_RR_HEEV
+    nvtx_ids(63)= NVTX_FORSTRNPS
+    nvtx_ids(64)= NVTX_FORSTR_NONLOP
+    nvtx_ids(65)= NVTX_VTOWFK_NONLOP
 
   end subroutine nvtx_init
 

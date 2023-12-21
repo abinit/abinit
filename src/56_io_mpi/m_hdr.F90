@@ -34,7 +34,6 @@
 module m_hdr
 
  use defs_basis
- use m_build_info
  use m_xmpi
  use m_abicore
  use m_errors
@@ -48,6 +47,7 @@ module m_hdr
  use m_nctk
  use m_dtset
 
+ use m_build_info,    only : abinit_version
  use m_copy,          only : alloc_copy
  use m_io_tools,      only : flush_unit, isncfile, file_exists, open_file
  use m_fstrings,      only : sjoin, itoa, ftoa, ltoa, replace_ch0, startswith, endswith, ljust, strcat, atoi
