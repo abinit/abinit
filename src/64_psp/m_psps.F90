@@ -925,6 +925,7 @@ subroutine psps_ncwrite(psps, ncid)
 !scalars
  integer :: ipsp,itypat,ncerr
  integer :: with_xccc, n1xccc, with_alch
+ integer :: with_xcctau
 !arrays
  real(dp), allocatable :: dummy3(:,:,:)
  !real(dp), allocatable :: dummy1(:)
@@ -941,12 +942,18 @@ subroutine psps_ncwrite(psps, ncid)
  !NCF_CHECK(nctk_set_defmode(ncid))
 
  with_xccc = 0
- if (psps%n1xccc > 0) with_xccc = 1
+ if (psps%n1xccc > 0) then
+   with_xccc = 1
+   with_xcctau = 1
+ end if
  n1xccc = max(1, psps%n1xccc)
 
- if (.not. allocated(psps%xcccrc)) with_xccc = 0
- if (.not. allocated(psps%xccc1d)) with_xccc = 0
- if (psps%usepaw /= 0) with_xccc = 0
+ if (.not. allocated(psps%xcccrc) .or. .not. allocated(psps%xccc1d) .or. psps%usepaw /= 0) then
+   with_xccc = 0
+ end if
+ if (.not. allocated(psps%xcctau1d) .or. psps%usepaw /= 0) then
+   with_xcctau = 0
+ end if
 
  ! Define dimensions
  ncerr = nctk_def_dims(ncid, [ &
@@ -965,7 +972,7 @@ subroutine psps_ncwrite(psps, ncid)
 
  ! Define variables
  ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-                                  "usepaw", "useylm", "with_xccc", "with_alch"])
+                                  "usepaw", "useylm", "with_xccc", "with_xcctau", "with_alch"])
  NCF_CHECK(ncerr)
 
  ! Arrays
@@ -987,12 +994,15 @@ subroutine psps_ncwrite(psps, ncid)
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("ekb", "dp", "dimekb, ntypat")))
    !if (with_xccc > 0) then
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xccc1d", "dp", "n1xccc, six, ntypat")))
-   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcctau1d", "dp", "n1xccc, six, ntypat")))
+   if (with_xcctau > 0) then
+     NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcctau1d", "dp", "n1xccc, six, ntypat")))
+   end if
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("xcccrc", "dp", "ntypat")))
 
    ncerr = nctk_def_arrays(ncid, [&
      nctkarr_t("nc_tvalespl", "dp", "mqgrid_vl, two, ntypat"), &
-     nctkarr_t("nc_tcorespl", "dp", "mqgrid_vl, two, ntypat")  &
+     nctkarr_t("nc_tcorespl", "dp", "mqgrid_vl, two, ntypat"),  &
+     nctkarr_t("nc_ttaucorespl", "dp", "mqgrid_vl, two, ntypat")  &
    ])
    NCF_CHECK(ncerr)
  end if
@@ -1003,8 +1013,8 @@ subroutine psps_ncwrite(psps, ncid)
  ! Note that znuclpsp and ziopsp are not read, since we set with_alch=0
 
  ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-                             "usepaw", "useylm", "with_xccc", "with_alch"], &
-                             [psps%usepaw, psps%useylm, with_xccc, with_alch])
+                             "usepaw", "useylm", "with_xccc", "with_xcctau", "with_alch"], &
+                             [psps%usepaw, psps%useylm, with_xccc, with_xcctau, with_alch])
  NCF_CHECK(ncerr)
 
  if (allocated(psps%pspso)) then
@@ -1040,7 +1050,9 @@ subroutine psps_ncwrite(psps, ncid)
  ! Pseudo-core charge for each type of atom, on the real-space radial
    NCF_CHECK(nf90_put_var(ncid, vid("xcccrc"), psps%xcccrc))
    NCF_CHECK(nf90_put_var(ncid, vid("xccc1d"), psps%xccc1d))
-   NCF_CHECK(nf90_put_var(ncid, vid("xcctau1d"), psps%xcctau1d))
+   if (with_xcctau > 0) then
+     NCF_CHECK(nf90_put_var(ncid, vid("xcctau1d"), psps%xcctau1d))
+   end if
 
  !else
 
@@ -1076,14 +1088,20 @@ subroutine psps_ncwrite(psps, ncid)
      end if
      if (psps%nctab(itypat)%has_tcore) then
        ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
-       ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
        NCF_CHECK(ncerr)
+       if (with_xcctau > 0) then
+         ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
+         NCF_CHECK(ncerr)
+       end if
      else
        ABI_MALLOC(dummy3, (psps%mqgrid_vl, 2, psps%ntypat))
        dummy3 = zero
        ncerr = nf90_put_var(ncid, vid("nc_tcorespl"), dummy3)
-       ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), dummy3)
        NCF_CHECK(ncerr)
+       if (with_xcctau > 0) then
+         ncerr = nf90_put_var(ncid, vid("nc_ttaucorespl"), dummy3)
+         NCF_CHECK(ncerr)
+       end if
        ABI_FREE(dummy3)
      end if
    end do
@@ -1130,6 +1148,7 @@ subroutine psps_ncread(psps, ncid)
  integer :: ipsp,itypat
  integer :: ncerr
  integer :: with_xccc
+ integer :: with_xcctau
 
 ! *********************************************************************
 
@@ -1176,8 +1195,13 @@ subroutine psps_ncread(psps, ncid)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "usepaw"), psps%usepaw))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "useylm"), psps%useylm))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xccc"), with_xccc))
+ NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xcctau"), with_xcctau))
+print *, 'in ncread with_xcctau ', with_xcctau
 
- if (psps%usepaw > 0) with_xccc = 0
+ if (psps%usepaw > 0) then
+   with_xccc = 0
+   with_xcctau = 0
+ end if
  if (with_xccc == 0) psps%n1xccc = 0
 
  ! Allocate arrays
@@ -1275,15 +1299,21 @@ subroutine psps_ncread(psps, ncid)
    if (with_xccc > 0) then
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcccrc"), psps%xcccrc))
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xccc1d"), psps%xccc1d))
-     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcctau1d"), psps%xcctau1d))
+     if (with_xcctau > 0) then
+       NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xcctau1d"), psps%xcctau1d))
+     end if
    end if
 
    ! GA: Why bother reading it?
    do itypat=1,psps%ntypat
      ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tvalespl"), psps%nctab(itypat)%tvalespl, start=[1,1,itypat])
      ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_tcorespl"), psps%nctab(itypat)%tcorespl, start=[1,1,itypat])
-     ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
    end do
+   if (with_xcctau > 0) then
+     do itypat=1,psps%ntypat
+       ncerr = nf90_get_var(ncid, nctk_idname(ncid, "nc_ttaucorespl"), psps%nctab(itypat)%ttaucorespl, start=[1,1,itypat])
+     end do
+   end if
 
  end if
 
