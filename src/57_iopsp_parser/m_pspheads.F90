@@ -1118,7 +1118,6 @@ subroutine upfxc2abi(dft, pspxc)
    igcx = get_igcx()
    igcc = get_igcc()
  end if
-print *, ' iexch,icorr,igcx,igcc ', iexch,icorr,igcx,igcc
 
  !reset dft string to avoid stray spaces
  call set_dft_from_indices(iexch,icorr,igcx,igcc)
@@ -1199,7 +1198,6 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  ! It should be OK as long as the UPF2 NC pseudos are generated with oncvpsp
  ! but it does not cover all QE possibilities.
  ierr = 0; msg = ""
-print *, "dft = ", trim(dft)
  select case (dft)
  case ("PZ")
    ixc = -001009

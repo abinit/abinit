@@ -240,7 +240,6 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-print *, 'in atm2fft'
 !Check optional arguments
  if (present(comm_fft)) then
    if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
