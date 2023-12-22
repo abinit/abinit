@@ -1196,7 +1196,6 @@ subroutine psps_ncread(psps, ncid)
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "useylm"), psps%useylm))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xccc"), with_xccc))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "with_xcctau"), with_xcctau))
-print *, 'in ncread with_xcctau ', with_xcctau
 
  if (psps%usepaw > 0) then
    with_xccc = 0
