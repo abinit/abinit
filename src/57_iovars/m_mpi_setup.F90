@@ -201,11 +201,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        end if
      end if
    else if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
-     if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg)==0) then
-       dtsets(idtset)%bandpp=mband_upper/dtsets(idtset)%nblock_lobpcg
+     if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
+       dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
      else
-       write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg.',ch10,&
-         'Change nband or nblock_lobpcg in the input.'
+       write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
+         'Change nband, npband or nblock_lobpcg in the input.'
        ABI_ERROR(msg)
      end if
    end if
@@ -1386,7 +1386,11 @@ end subroutine mpi_setup
    end if
 
 !  >> banddp level
-   bpp_min=max(1,dtset%bandpp)
+   if (tread(8)==1) then
+     bpp_min = dtset%bandpp
+   else
+     bpp_min = 1
+   end if
    bpp_max=mband
    if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
@@ -1952,6 +1956,9 @@ end subroutine mpi_setup
    dtset%npfft    = my_distp(4,icount)
    dtset%npband   = my_distp(5,icount)
    dtset%bandpp   = my_distp(6,icount)
+   if (dtset%wfoptalg==114.or.dtset%wfoptalg==14.or.dtset%wfoptalg==4) then !if LOBPCG
+     dtset%nblock_lobpcg = mband / (dtset%npband*dtset%bandpp)
+   end if
    if (tread(1)==0)  dtset%paral_kgb= merge(0,1,my_algo(icount)==ALGO_CG)
 !  The following lines are mandatory : the DFT+DMFT must use ALL the
 !  available procs specified by the user. So nproc1=nproc.
