@@ -41,7 +41,7 @@ module m_invars1
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -558,7 +558,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
  dtsets(:)%gpu_use_nvtx=0
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
    do i1=1,ndtset_alloc
