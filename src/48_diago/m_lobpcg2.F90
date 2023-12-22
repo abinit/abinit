@@ -21,7 +21,7 @@ module m_lobpcg2
 #endif
   use m_xmpi
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
