@@ -524,10 +524,6 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,nev,local_nrows,local_ncols)
    varname="local_ncols"
    call elpa_hdl%elpa%set(trim(varname),local_ncols,err)
  end if
- if (err==ELPA_OK) then
-   varname="nev"
-   call elpa_hdl%elpa%set(trim(varname),nev,err)
- end if
 #else
  elpa_hdl%na=na
  elpa_hdl%nblk=nblk
