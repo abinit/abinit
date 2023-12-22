@@ -197,7 +197,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  real(real64), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
  real(real64), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
  real(real64), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
- real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)
+ real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
 #else
  integer,allocatable :: kg_k(:,:)
  real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
@@ -322,7 +322,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
      if (dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw,my_nspinor/))
+       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
 #endif
      else
        if (dtset%gpu_option/=ABI_GPU_DISABLED) then
@@ -850,6 +850,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          end if
 
          ABI_FREE(gbound)
+
          if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
            ABI_FREE_MANAGED(kg_k)

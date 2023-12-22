@@ -277,6 +277,8 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
    call elpa_func_error_handler(err_code=err,err_varname=varname)
  end if
 
+ elpa_hdl%is_allocated=.true.
+
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_MARKERS)
  call nvtxEndRange()
 #endif
@@ -454,8 +456,6 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
 #endif
 
  call elpa_func_error_handler(err_code=err,err_msg='Error in elpa_get_communicators',err_varname=varname)
-
- elpa_hdl%is_allocated=.true.
 
 end subroutine elpa_func_get_communicators
 !!***
