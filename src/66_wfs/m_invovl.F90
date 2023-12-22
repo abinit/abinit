@@ -1691,7 +1691,7 @@ subroutine apply_block_ompgpu(ham, cplx, mat, nprojs, ndat, x, y, block_sliced)
 
 end subroutine apply_block_ompgpu
 !!***
-#endif // HAVE_OPENMP_OFFLOAD
+#endif
 
 end MODULE m_invovl
 !!***

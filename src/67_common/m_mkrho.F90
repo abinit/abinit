@@ -168,9 +168,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !scalars
  integer,save :: nskip=0
  integer :: alpha,use_nondiag_occup_dmft,bdtot_index,beta,blocksize,iband,iband1,ibandc1,ib,iblock,icg,ierr
- integer :: ifft,ikg,ikpt,ioption,ipw,ipwsp,ishf,ispden,ispinor,ispinor_index
+ integer :: ifft,ikg,ikpt,ioption,ipw,ipwbd,ipwsp,ishf,ispden,ispinor,ispinor_index
  integer :: isppol,istwf_k,jspinor_index
- integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
+ integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nband_occ,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  integer :: iband_me
  integer :: mband_mem
@@ -179,41 +179,24 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:)
+ integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
+ real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
  real(dp),allocatable :: kg_k_cart_block(:),taur_alphabeta(:,:,:,:),weight_t(:)
-#if defined HAVE_GPU && defined HAVE_YAKL
- integer(int32),ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
- real(real64) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
- real(real64), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
- real(real64), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
- real(real64), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
- real(real64), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
- real(real64), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
- real(real64), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
- real(real64), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
- real(real64), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
-#else
- integer,allocatable :: kg_k(:,:)
- real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
- real(dp),allocatable :: cwavef(:,:,:)
- real(dp),allocatable :: cwavefb(:,:,:)
- real(dp),allocatable :: cwavef_x(:,:)
- real(dp),allocatable :: cwavef_y(:,:)
- real(dp),allocatable :: cwavefb_x(:,:)
- real(dp),allocatable :: cwavefb_y(:,:)
- real(dp),allocatable :: rhoaug(:,:,:)
- real(dp),allocatable :: rhoaug_down(:,:,:)
- real(dp),allocatable :: rhoaug_up(:,:,:)
- real(dp),allocatable :: rhoaug_mx(:,:,:)
- real(dp),allocatable :: rhoaug_my(:,:,:)
- real(dp),allocatable :: wfraug(:,:,:,:)
-#endif
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
+ real(dp), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
+ real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
 
 ! *************************************************************************
 
@@ -221,6 +204,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  call timab(790+tim_mkrho,1,tsec)
  call timab(799,1,tsec)
+
+ if(mpi_enreg%paralbd==0) tim_fourwf=3
+ if(mpi_enreg%paralbd==1) tim_fourwf=6
 
  if(.not.(present(option))) then
    ioption=0
@@ -317,8 +303,11 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      n4 = dtset%ngfft(4) ; n5 = dtset%ngfft(5) ; n6 = dtset%ngfft(6)
 
      ndat = 1
-     if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     if (dtset%gpu_option/=ABI_GPU_DISABLED)  ndat = mpi_enreg%bandpp
+     if (mpi_enreg%paral_kgb==1) then
+       ndat = mpi_enreg%bandpp
+     else if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+       ndat = dtset%mband
+     end if
 
      if (dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -326,7 +315,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 #endif
      else
        if (dtset%gpu_option/=ABI_GPU_DISABLED) then
-         ! should we use nband_k instead of ndat here ? (PK)
          ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
        else
          ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
@@ -373,6 +361,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
          mband_mem = nband_k
+         if (dtset%paral_kgb==0) mband_mem = nband_k/mpi_enreg%nproc_band
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -406,30 +395,25 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            if (dtset%gpu_option /= ABI_GPU_DISABLED) then
              !On GPU, treat all bands at once
              ABI_MALLOC(weight_t,(nband_k))
-             mband_mem = nband_k/mpi_enreg%nproc_band
-             iband_me = 0
+             nband_occ = 0
              do iband=1,nband_k
-               iband_me = iband_me + 1
+               ipwsp = (iband-1)*npw_k*my_nspinor + icg
                weight_t(iband) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
                locc_test = abs(occ(iband+bdtot_index))>tol8
                if (locc_test) then
-                 ipwsp = (iband_me-1) * npw_k * my_nspinor + icg
-                 cwavef(:,   1+ipwsp:      ipwsp+  npw_k, 1) = cg(:, 1+ipwsp      :ipwsp+  npw_k)
-                 if (my_nspinor==2) then
-                   cwavef(:, 1+ipwsp+npw_k:ipwsp+2*npw_k, 2) = cg(:, 1+ipwsp+npw_k:ipwsp+2*npw_k)
-                 end if
-                 if (ioption==1) then
-                   ! Multiplication by 2pi i (k+G)_alpha
-                   gp2pi1 = gprimd(alpha,1)*two_pi
-                   gp2pi2 = gprimd(alpha,2)*two_pi
-                   gp2pi3 = gprimd(alpha,3)*two_pi
+                 nband_occ = nband_occ +1
+                 ipwbd = (nband_occ-1) * npw_k
+                 cwavef(:,ipwbd+1:ipwbd+npw_k,1) = cg(:,ipwsp+1:ipwsp+npw_k)
+                 if (my_nspinor==2) cwavef(:,ipwbd+1:ipwbd+npw_k,2) = cg(:,ipwsp+npw_k+1:ipwsp+npw_k+npw_k)
+                 if (ioption==1) then ! Multiplication by 2pi i (k+G)_alpha
+                   gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi3 = gprimd(alpha,3)*two_pi
                    kpt_cart = gp2pi1*dtset%kptns(1,ikpt) + gp2pi2*dtset%kptns(2,ikpt) + gp2pi3*dtset%kptns(3,ikpt)
                    do ispinor=1,my_nspinor
                      do ipw=1,npw_k
                        kg_k_cart = gp2pi1*kg_k(1,ipw) + gp2pi2*kg_k(2,ipw) + gp2pi3*kg_k(3,ipw) + kpt_cart
-                       cwftmp = -cwavef(2,ipwsp+ipw,ispinor)*kg_k_cart
-                       cwavef(2,ipwsp+ipw,ispinor) = cwavef(1,ipwsp+ipw,ispinor)*kg_k_cart
-                       cwavef(1,ipwsp+ipw,ispinor) = cwftmp
+                       cwftmp = -cwavef(2,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(2,ipwbd+ipw,ispinor) = cwavef(1,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(1,ipwbd+ipw,ispinor) = cwftmp
                      end do
                    end do
                  else if (ioption==2) then
@@ -437,91 +421,17 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end if ! end if ioption==1
                end if ! end if locc_test
              end do ! end iband=1,nband_k
-
-             if (dtset%gpu_option == ABI_GPU_LEGACY) then
-#if defined HAVE_GPU_CUDA
-               call gpu_fourwf(1,&     ! cplex
-                 &     rhoaug,&        ! denpot
-                 &     cwavef(:,:,1),& ! fofgin
-                 &     dummy,&         ! fofgout
-                 &     wfraug,&        ! fofr
-                 &     gbound,&        ! gboundin
-                 &     gbound,&        ! gboundout
-                 &     istwf_k,&       ! istwf_k
-                 &     kg_k,&          ! kg_kin
-                 &     kg_k,&          ! kg_kout
-                 &     dtset%mgfft,&   ! mgfft
-                 &     mpi_enreg,&     ! mpi_enreg
-                 &     nband_k,&       ! ndat
-                 &     dtset%ngfft,&   ! ngfft
-                 &     npw_k,&         ! npwin
-                 &     1,&             ! npwout
-                 &     n4,&            ! n4
-                 &     n5,&            ! n5
-                 &     n6,&            ! n6
-                 &     1,&             ! option
-                 &     mpi_enreg%paral_kgb,& ! paral_kgb
-                 &     tim_fourwf,&          ! tim_fourwf
-                 &     weight_t,&            ! weight_r
-                 &     weight_t)             ! weight_i
-#endif
-             else if (dtset%gpu_option == ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-               call gpu_fourwf_managed(1,&     ! cplex
-                 &     rhoaug,&        ! denpot
-                 &     cwavef(:,:,1),& ! fofgin
-                 &     dummy,&         ! fofgout
-                 &     wfraug,&        ! fofr
-                 &     gbound,&        ! gboundin
-                 &     gbound,&        ! gboundout
-                 &     istwf_k,&       ! istwf_k
-                 &     kg_k,&          ! kg_kin
-                 &     kg_k,&          ! kg_kout
-                 &     dtset%mgfft,&   ! mgfft
-                 &     mpi_enreg,&     ! mpi_enreg
-                 &     nband_k,&       ! ndat
-                 &     dtset%ngfft,&   ! ngfft
-                 &     npw_k,&         ! npwin
-                 &     1,&             ! npwout
-                 &     n4,&            ! n4
-                 &     n5,&            ! n5
-                 &     n6,&            ! n6
-                 &     1,&             ! option
-                 &     mpi_enreg%paral_kgb,& ! paral_kgb
-                 &     tim_fourwf,&          ! tim_fourwf
-                 &     weight_t,&            ! weight_r
-                 &     weight_t)             ! weight_i
-#endif
-             else if (dtset%gpu_option == ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-               call ompgpu_fourwf(1,&     ! cplex
-                 &     rhoaug,&        ! denpot
-                 &     cwavef(:,:,1),& ! fofgin
-                 &     dummy,&         ! fofgout
-                 &     wfraug,&        ! fofr
-                 &     gbound,&        ! gboundin
-                 &     gbound,&        ! gboundout
-                 &     istwf_k,&       ! istwf_k
-                 &     kg_k,&          ! kg_kin
-                 &     kg_k,&          ! kg_kout
-                 &     dtset%mgfft,&   ! mgfft
-                 &     nband_k,&       ! ndat
-                 &     dtset%ngfft,&   ! ngfft
-                 &     npw_k,&         ! npwin
-                 &     1,&             ! npwout
-                 &     n4,&            ! n4
-                 &     n5,&            ! n5
-                 &     n6,&            ! n6
-                 &     1,&             ! option
-                 &     weight_t,&            ! weight_r
-                 &     weight_t)             ! weight_i
-#endif
+             if (nband_occ>0) then
+               call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,1),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                gpu_option=dtset%gpu_option)
              end if
              ABI_FREE(weight_t)
 
            else ! CPU version
 
-             mband_mem = nband_k/mpi_enreg%nproc_band
              iband_me = 0
              do iband=1,nband_k
                if(mpi_enreg%paralbd==1)then
@@ -580,8 +490,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                      weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
                      weight_i=weight
                    end if
-                   if(mpi_enreg%paralbd==0) tim_fourwf=3
-                   if(mpi_enreg%paralbd==1) tim_fourwf=6
 
                    ! The same section of code is also found in vtowfk.F90 : should be rationalized !
 
@@ -603,10 +511,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                        ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
                        ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
                        ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-                       ABI_MALLOC(cwavef_x,(2,npw_k))
-                       ABI_MALLOC(cwavef_y,(2,npw_k))
-                       ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
-                       ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                       if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
+                         ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
+#endif
+                       else
+                         ABI_MALLOC(cwavef_x,(2,npw_k))
+                         ABI_MALLOC(cwavef_y,(2,npw_k))
+                         ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
+                         ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                       end if
                        ! $(\Psi^{1}+\Psi^{2})$
                        cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
                        ! $(\Psi^{1}-i \Psi^{2})$
@@ -635,10 +552,19 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                          &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
                          &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
                          &                     gpu_option=dtset%gpu_option)
-                       ABI_FREE(cwavef_x)
-                       ABI_FREE(cwavef_y)
-                       ABI_FREE(cwavefb_x)
-                       ABI_FREE(cwavefb_y)
+                       if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_FREE_MANAGED(cwavef_x)
+                         ABI_FREE_MANAGED(cwavef_y)
+                         ABI_FREE_MANAGED(cwavefb_x)
+                         ABI_FREE_MANAGED(cwavefb_y)
+#endif
+                       else
+                         ABI_FREE(cwavef_x)
+                         ABI_FREE(cwavef_y)
+                         ABI_FREE(cwavefb_x)
+                         ABI_FREE(cwavefb_y)
+                       end if
                      end if ! dtset%nspden/=4
                    end if
                  else
@@ -669,12 +595,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*blocksize,dtset%nspinor/))
 #endif
            else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
              if(associated(cwavef))  then
-#else
-             if(allocated(cwavef))  then
-#endif
                ABI_FREE(cwavef)
              end if
              ABI_MALLOC(cwavef,(2,npw_k*blocksize,dtset%nspinor))
@@ -829,19 +750,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              ABI_FREE(kg_k_cart_block)
            end if
 
-           if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+           if (associated(cwavef))  then
+             if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-             if (associated(cwavef))  then
                ABI_FREE_MANAGED(cwavef)
-             end if
 #endif
-           else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
-             if (associated(cwavef))  then
-#else
-             if (allocated(cwavef))  then
-#endif
+             else
                ABI_FREE(cwavef)
              end if
            end if
@@ -924,20 +838,10 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
        ABI_FREE_MANAGED(wfraug)
 #endif
      else
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
        if(associated(cwavef))  then
-#else
-       if(allocated(cwavef))  then
-#endif
          ABI_FREE(cwavef)
        end if
-!FIXME Settle this
-#if defined HAVE_GPU && defined HAVE_YAKL
        if(associated(cwavefb))  then
-#else
-       if(allocated(cwavefb))  then
-#endif
          ABI_FREE(cwavefb)
        endif
        ABI_FREE(rhoaug)
