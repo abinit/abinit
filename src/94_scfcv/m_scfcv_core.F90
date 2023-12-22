@@ -2456,6 +2456,7 @@ end subroutine scfcv_core
 !!  vxctau(nfftf,dtset%nspden,4*usekden)]=derivative of XC energy density wrt
 !!      kinetic energy density (metaGGA cases)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc)=3D core electron kinetic energy density for XC core correction, Ha / bohr^-3 (TODO: check unit)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
