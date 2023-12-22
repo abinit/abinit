@@ -385,7 +385,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    endif
  endif
 
- !!$OMP TARGET EXIT DATA MAP(delete:work_gpu)
+#ifdef HAVE_GPU_CUDA
+ !Work buffer allocated at each call to save memory in CUDA
+ !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
+#endif
 
  !$OMP TARGET EXIT DATA MAP(delete:fofgin)  IF(transfer_fofgin)
  !$OMP TARGET EXIT DATA MAP(delete:fofgout) IF(transfer_fofgout)
