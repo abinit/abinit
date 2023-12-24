@@ -51,5 +51,5 @@ nc_xccc_gspace 0 # calculates model core contribution in real space. Cleaner
 #%%   Tests the reading of the upf2 potential, and inputs related to the model core kinetic energy density, then their usage.
 #%%   nc_xccc_gspace 0 calculates model core contribution in real space, and is much cleaner (0 kinE and density outside NLCC radius)
 #%%   Density (+kinE) mixing works much better than potential mixing: in the vacuum the mGGA potential is very sensitive
-#%% topics = metaGGA
+#%% topics = xc
 #%%<END TEST_INFO>
