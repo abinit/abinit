@@ -174,18 +174,21 @@ contains
 
    ! Then electric field
    ! Look for the induced magnetic moments block in the DDB
-   rfphon(2)=0
-   rfelfd(2)=2
-   rfstrs(1:2)=0
-   rfmagn(:)=0
-   if (magpen<zero) then
-     rfmagn(1)= 1
-   else if (magpen>zero) then
-     rfmagn(1)= 2
-   end if
+   jblok=0
+   if (qphnrm(1)<tol8) then
+     rfphon(2)=0
+     rfelfd(2)=2
+     rfstrs(1:2)=0
+     rfmagn(:)=0
+     if (magpen<zero) then
+       rfmagn(1)= 1
+     else if (magpen>zero) then
+       rfmagn(1)= 2
+     end if
 
-   call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-  & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
+     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
+   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
+   end if
 
    if (iblok /= 0 .or. jblok /=0) then
      call magmom(barmmom,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
@@ -210,18 +213,24 @@ contains
    end if
 
    !Born effective charges block
-   rfphon(1:2)=1
-   rfelfd(1:2)=2
-   call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+   jblok=0
+   if (qphnrm(1)<tol8) then
+     rfphon(1:2)=1
+     rfelfd(1:2)=2
+     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+   end if
    if (jblok /= 0 ) then
      call mp_zeff(barmagsus,ddb%val,jblok,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtvol,ucvol,zfield)
    end if
 
    !Dielectric susceptibility block
-   rfphon(:)=0
-   rfelfd(1:2)=2
-   call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+   lblok=0
+   if (qphnrm(1)<tol8) then
+     rfphon(:)=0
+     rfelfd(1:2)=2
+     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+   end if
    if (lblok /= 0 ) then
      call mp_diel(barmagsus,ddb%val,lblok,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtvol,ucvol,zfield)
@@ -277,11 +286,14 @@ contains
    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
 
      ! Then electric field
-     rfphon(2)=0
-     rfelfd(2)=2
+     jblok=0
+     if (qphnrm(1)<tol8) then
+       rfphon(2)=0
+       rfelfd(2)=2
 
-     call ddb_lw%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+       call ddb_lw%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
+     & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+     end if
 
      if (iblok /= 0 .or. jblok /=0) then
        call berrycurv_sp(barmmom,bc_ss,ddb_lw%val,iblok,invbarmagsus,jblok, &
