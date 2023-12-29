@@ -963,7 +963,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
 !Local variables -------------------------
 !scalars
  integer :: blkgam,ider,idir,idir1,idir2,idir3,ii,index,ipert,ipert1,ipert2
- integer :: ipert3,nder,ok,mpert,natom
+ integer :: ipert3,nder,ok,mpert,natom,ndir3
  character(len=500) :: msg
 !arrays
  integer :: gamma(3)
@@ -1007,7 +1007,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  end if
 
  ! In case of a third derivative, the sum of wavevectors to gamma is checked
- if (nder == 3) then
+ if (nder == 3.and.rffreq_(3)==0) then
    qpt(:) = qphon(:,1)/qphnrm(1) + qphon(:,2)/qphnrm(2) + qphon(:,3)/qphnrm(3)
    call gamma9(gamma(nder),qpt,qphnrm(1),DDB_QTOL)
    if (gamma(nder) == 0) then
@@ -1140,7 +1140,12 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
                  else if (nder == 3) then
                    do ipert3 = 1, mpert
                      if (worki(ipert3,3) == 1 .and. ok == 1) then
-                       do idir3 = 1, 3
+                       if (ipert3==natom+9) then
+                         ndir3= 1
+                       else
+                         ndir3= 3
+                       end if
+                       do idir3 = 1, ndir3
                          index = idir1 + &
                            3*((ipert1 - 1) + mpert*((idir2 - 1) + &
                            3*((ipert2 -1 ) + mpert*((idir3 - 1) + 3*(ipert3 - 1)))))
@@ -1394,7 +1399,6 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
      ddb%val(1,index,iblok)=ar
      ddb%val(2,index,iblok)=ai
    end do
-
 
  else if(ddb%typ(iblok)==0)then
    ! Read the total energy

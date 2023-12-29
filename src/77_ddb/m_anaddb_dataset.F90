@@ -134,6 +134,7 @@ module m_anaddb_dataset
   integer:: ep_nspline
   integer:: ep_prt_yambo
   integer:: symgkq
+  integer:: timdisp
   integer:: use_k_fine
   integer:: prtbltztrp
 
@@ -1451,6 +1452,10 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
    ABI_ERROR(message)
  end if
 
+ anaddb_dtset%timdisp = 0
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'timdisp',tread, 'INT')
+ if(tread == 1) anaddb_dtset%timdisp = intarr(1)
+
  anaddb_dtset%ep_prt_yambo = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'ep_prt_yambo',tread, 'INT')
  if(tread == 1) anaddb_dtset%ep_prt_yambo = intarr(1)
@@ -2233,6 +2238,10 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    write(nunit, '(3x, a9, 2i3)') '   mpatpol',anaddb_dtset%mpatpol(1:2)
    write(nunit, '(3x, a9, 3i3)') '   mpdir',anaddb_dtset%mpdir(1:3)
    write(nunit, '(3x, a9,  i3)') '   mpopt',anaddb_dtset%mpopt
+   if (anaddb_dtset%timdisp == 1) then 
+     write(nunit, '(a)') ' Third-order frequency derivatives calculated with the penalized response functions will be corrected'
+   write(nunit, '(3x, a9,  i3)') '   timdisp',anaddb_dtset%timdisp
+   end if
  end if
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
@@ -2453,7 +2462,7 @@ subroutine anaddb_chkvars(string)
 !S
  list_vars = trim(list_vars)//' selectz symdynmat symgkq'
 !T
- list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol'
+ list_vars = trim(list_vars)//' targetpol telphint thmflag temperinc tempermin thermal_supercell thmtol timdisp'
 !U
  list_vars = trim(list_vars)//' use_k_fine'
 !V
