@@ -284,6 +284,7 @@ contains
   end if
 
   mod__cplex = cplex
+  current_ikpt_in_gpu=ikpt
 
  end subroutine alloc_gemm_nonlop_kpt_ompgpu
 !!***
