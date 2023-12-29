@@ -826,9 +826,7 @@ contains
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
   character(len=500) :: msg
   integer(C_SIZE_T) :: byte_count
-#ifdef HAVE_GPU_HIP
-  type(c_ptr) :: vectin_amdcopy,vectout_amdcopy,svectout_amdcopy
-#endif
+  real(dp), ABI_CONTIGUOUS pointer :: vectin_(:,:),vectout_(:,:),svectout_(:,:)
 
 ! *************************************************************************
 
@@ -888,6 +886,14 @@ contains
   !$OMP TARGET ENTER DATA MAP(to:vectin)      IF(transfer_vectin)
   !$OMP TARGET ENTER DATA MAP(alloc:vectout)  IF(transfer_vectout)
   !$OMP TARGET ENTER DATA MAP(alloc:svectout) IF(transfer_svectout)
+
+  !FIXME These seemingly useless pointers are used in BLAS operations for
+  ! working around a bug in AOMP LLVM misreading mapped device pointers.
+  ! I chose to generalise the workaround to avoid dupplicating each
+  ! BLAS call specifically for handling AOMP LLVM.
+  vectin_   => vectin
+  vectout_  => vectout
+  svectout_ => svectout
 
   !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl)
   if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor) then
@@ -1050,34 +1056,18 @@ contains
     ! opernla
     if(cplex == 2) then
       if(.not. gemm_nonlop_is_distributed) then
-
-#if defined HAVE_GPU_CUDA
-        call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                current_ikpt_projs, npwin,&
-&                vectin, npwin, czero, projections_ptr, nprojs)
-        if(signs==1.and.ngrads>0) then
-          call   abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                   current_ikpt_dprojs, npwin,&
-                   vectin, npwin, czero, dprojections, ngrads*nprojs)
-        end if
-#elif defined HAVE_GPU_HIP
-        !$OMP TARGET MAP(to:vectin) MAP(from:vectin_amdcopy)
-        vectin_amdcopy = c_loc(vectin)
-        !$OMP END TARGET
-
-        !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin)
+        !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin_)
         call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
 &                c_loc(current_ikpt_projs), npwin,&
-&                vectin_amdcopy, npwin, czero, c_loc(projections_ptr), nprojs)
+&                c_loc(vectin_), npwin, czero, c_loc(projections_ptr), nprojs)
         !$OMP END TARGET DATA
         if(signs==1.and.ngrads>0) then
-          !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin)
+          !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin_)
           call abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
                  c_loc(current_ikpt_dprojs), npwin,&
-                 vectin_amdcopy, npwin, czero, c_loc(dprojections), ngrads*nprojs)
+                 c_loc(vectin_), npwin, czero, c_loc(dprojections), ngrads*nprojs)
           !$OMP END TARGET DATA
         end if
-#endif
       else
         call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
         &                                         nprojs,&
@@ -1257,20 +1247,11 @@ contains
         ! Get svectout from s_projections
         if(cplex == 2) then
           if(.not. gemm_nonlop_is_distributed) then
-#if defined HAVE_GPU_CUDA
-            call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                    current_ikpt_projs, npwout,&
-                    s_projections, nprojs, czero, svectout, npwout)
-#elif defined HAVE_GPU_HIP
-            !$OMP TARGET MAP(to:svectout) MAP(from:svectout_amdcopy)
-            svectout_amdcopy = c_loc(svectout)
-            !$OMP END TARGET
-            !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_projs)
+            !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_projs,svectout_)
             call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                     c_loc(current_ikpt_projs), npwout,&
-                    c_loc(s_projections), nprojs, czero, svectout_amdcopy, npwout)
+                    c_loc(s_projections), nprojs, czero, c_loc(svectout_), npwout)
             !$OMP END TARGET DATA
-#endif
           else
             call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
             &                                         nprojs,&
@@ -1314,20 +1295,11 @@ contains
         ! Get vectout from vnl_projections
         if(cplex_fac == 2) then
           if(.not. gemm_nonlop_is_distributed) then
-#if defined HAVE_GPU_CUDA
-            call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                    current_ikpt_projs, npwout, &
-                    vnl_projections, nprojs, czero, vectout, npwout)
-#elif defined HAVE_GPU_HIP
-            !$OMP TARGET MAP(to:vectout) MAP(from:vectout_amdcopy)
-            vectout_amdcopy = c_loc(vectout)
-            !$OMP END TARGET
-            !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_projs)
+            !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_projs,vectout_)
             call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
                     c_loc(current_ikpt_projs), npwout, &
-                    c_loc(vnl_projections), nprojs, czero, vectout_amdcopy, npwout)
+                    c_loc(vnl_projections), nprojs, czero, c_loc(vectout_), npwout)
             !$OMP END TARGET DATA
-#endif
           else
             call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
             &                                         nprojs,&
