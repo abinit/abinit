@@ -784,46 +784,56 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
 
  !Local variables-------------------------------
  !scalars
- integer  :: iband, ikpt, bdtot_index
+ integer  :: iband, ikpt, isppol, bdtot_index, nband_k
  real(dp) :: current(3), current_k(3)
  !arrays
- real(dp), target :: psinablapsi(2,3,dtset%mband*(dtset%mband+1)/2,dtset%nkpt)
+ real(dp), target :: psinablapsi(2,3,dtset%mband,dtset%nkpt)
 
 ! ***********************************************************************
 
- print*, "Soon I'll compute the current here!!"
+ !print*, "Soon I'll compute the current here!!"
 
  !print*, "nkpt:", dtset%nkpt
  !print*, "mband", dtset%mband
  !dtfil%fnameabo_app_opt = "test"
 
- ! 1 - Computes <\psi_{kn}|v|\psi_{kn}> = <\psi_{kn}|-i\nabla|\psi_{kn}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
- call optics_paw(tdks%atindx1,tdks%cg,tdks%cprj,tdks%dimcprj,dtfil,dtset,tdks%eigen,tdks%gprimd,tdks%hdr, &
-               & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
-               & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
-               & tdks%pawtab,dtset%znucl,psinablapsi)
+ if (psps%usepaw==1) then
+   ! 1 - Computes <\psi_{kn}|v|\psi_{kn}> = <\psi_{kn}|-i\nabla|\psi_{kn}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
+   call optics_paw(tdks%atindx1,tdks%cg,tdks%cprj,tdks%dimcprj,dtfil,dtset,tdks%eigen,tdks%gprimd,tdks%hdr, &
+                 & tdks%kg,dtset%mband,tdks%mcg,tdks%mcprj,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,     &
+                 & dtset%natom,dtset%nkpt,tdks%npwarr,dtset%nsppol,tdks%pawang,tdks%pawrad,tdks%pawrhoij,   &
+                 & tdks%pawtab,dtset%znucl,psinablapsi)
  
  
-! 2 - Sum over bands and k-points
- current = 0.0_dp
- bdtot_index=0
- !Loop over spins
- do isppol=1, dtset%nsppol
-   !Loop over kpoints
-   do ikpt = 1, dtset%nkpt
-      current_k = 0.0_dp
-      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-      do iband = 1, nband_k
-         current_k(1) = current_k(1) + psinablapsi(1,1,iband,ikpt)
-      end do
-      current(:) = current(:) + dtset%wtk(ikpt)*tdks%occ0(bdtot_index+iband)*current_k(:)
-      bdtot_index = bdtot_index+nband_k
-   end do !nkpt
- end do !nsspol
+   ! 2 - Sum over bands and k-points
+   current = 0.0_dp
+   bdtot_index=0
+   !Loop over spins
+   do isppol=1, dtset%nsppol
+      !Loop over kpoints
+      do ikpt = 1, dtset%nkpt
+         current_k = 0.0_dp
+         nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+         do iband = 1, nband_k
+            current_k(1) = current_k(1) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,1,iband,ikpt)
+            current_k(2) = current_k(2) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,2,iband,ikpt)
+            current_k(3) = current_k(3) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,3,iband,ikpt)
+         end do
+         current(:) = current(:) + dtset%wtk(ikpt)*current_k(:)
+         bdtot_index = bdtot_index + nband_k
+      end do !nkpt
+   end do !nsspol
 
- current = -current/tdks%ucvol
+   print*, current
 
- ! 3 - Add last contribution from vector potential x integral of the density
+   ! 3 - Add last contribution from vector potential times integral of the density
+   current(:) = current(:) + tdks%tdef%vecpot(:)*sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
+
+   current(:) = -current(:)/tdks%ucvol
+
+   print*, "Current: ", current
+   
+ end if
 
 
  !FB-TODO: Minus sign at the end

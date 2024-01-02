@@ -1,8 +1,8 @@
-#######################################################
-# Automatic test for ABINIT:                          #
-#    Test of RT-TDDFT in the PAW case, ER propagator  #
-#    Al 4 atoms, FCC, GGA, NC                         #
-#######################################################
+#################################################
+# Automatic test for ABINIT:                    #
+#    Test of RT-TDDFT in NC case, ER propagator #
+#    Al 4 atoms, FCC, GGA, NC                   #
+#################################################
 
 # RT-TDDFT calculation
 optdriver 9      # RT-TDDFT
