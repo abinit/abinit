@@ -1,8 +1,8 @@
-#######################################################
-# Automatic test for ABINIT:                          #
-#    Test of RT-TDDFT in the PAW case, EMR propagator #
-#    Nickel 4 atoms, FCC, nonmagnetic  GGA, PAW       #
-#######################################################
+###################################################
+# Automatic test for ABINIT:                      #
+#    Test of RT-TDDFT in PAW case, EMR propagator #
+#    Nickel 4 atoms, FCC, nonmagnetic  GGA, PAW   #
+###################################################
 
 # RT-TDDFT calculation
 optdriver 9      # RT-TDDFT

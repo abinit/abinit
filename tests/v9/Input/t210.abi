@@ -1,10 +1,10 @@
-#######################################################
-# Automatic test for ABINIT:                          #
-#    GS calculation in the PAW case, Nickel 4 atoms,  # 
-#    FCC, nonmagnetic GGA, PAW                       #
-#    Needed to create intial wavefunctions for the    #
-#    next RT-TDDFT test                               #
-#######################################################
+#####################################################
+# Automatic test for ABINIT:                        #
+#    GS calculation in PAW case, Nickel 4 atoms,    #
+#    FCC, nonmagnetic GGA, PAW                      #
+#    Needed to create initial wavefunctions for the #
+#    next RT-TDDFT test                             #
+#####################################################
 
 # Unit cell
 acell   3*3.5 angstrom
