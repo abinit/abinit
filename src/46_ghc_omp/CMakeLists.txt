@@ -30,6 +30,7 @@ target_link_libraries(46_ghc_omp
   PUBLIC
   abinit::10_defs
   abinit::16_hideleave
+  abinit::28_numeric_noabirule
   )
 
 if(ABINIT_ENABLE_GPU_CUDA)

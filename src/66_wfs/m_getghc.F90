@@ -42,7 +42,8 @@ module m_getghc
  use m_gemm_nonlop, only : gemm_nonlop_use_gemm
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -52,10 +53,6 @@ module m_getghc
 
 #if defined HAVE_YAKL
  use gator_mod
-#endif
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
 #endif
 
 #ifdef HAVE_KOKKOS
@@ -235,6 +232,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
                   kg_fft_k,kg_fft_kp,select_k,cwavef_r)
    return
  end if
+
 !Keep track of total time spent in getghc:
  call timab(350+tim_getghc,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_GETGHC)
@@ -366,6 +364,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 ! Application of the local potential
 !============================================================
+
  ABI_NVTX_START_RANGE(NVTX_GETGHC_LOCPOT)
 
  if (any(type_calc == [0, 1, 3])) then
@@ -756,6 +755,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
 
  end if ! type_calc
+
  ABI_NVTX_END_RANGE()
 
 
@@ -764,7 +764,9 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 ! Application of the non-local potential and the Fock potential
 !============================================================
+
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
+
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
@@ -835,21 +837,23 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      ! for kinetic and local only, nonlocal and vfock should be zero
      gvnlxc_(:,:) = zero
    end if ! if(type_calc...
+
    ABI_NVTX_END_RANGE()
 
 !============================================================
 ! Assemble kinetic, local, nonlocal and Fock contributions
 !============================================================
+
    ABI_NVTX_START_RANGE(NVTX_GETGHC_KIN)
 
 #ifdef FC_NVHPC
-   !FIXME This Kokkos kernel seem to cause issue under NVHPC so it is disabled
+   !FIXME This Kokkos kernel seems to cause issues under NVHPC so it is disabled
    if (.false.) then
 #else
    if (gs_ham%gpu_option == ABI_GPU_KOKKOS) then
 #endif
 
-#if defined(HAVE_FC_ISO_C_BINDING) && defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
      call assemble_energy_contribution_kokkos(c_loc(ghc), &
        & c_loc(gsc), c_loc(kinpw_k2), c_loc(cwavef), c_loc(gvnlxc_), &
        & ndat, my_nspinor, npw_k2, sij_opt, k1_eq_k2, hugevalue)
@@ -861,11 +865,12 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    else
 
 #ifdef FC_NVHPC
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS)
      !Related to FIXME above
      if (gs_ham%gpu_option == ABI_GPU_KOKKOS) call gpu_device_synchronize()
 #endif
 #endif
+
      !  Assemble modified kinetic, local and nonlocal contributions
      !  to <G|H|C(n,k)>. Take also into account build-in debugging.
      if(prtvol/=-level)then
@@ -958,6 +963,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        end do ! idat
      end if
    end if ! gs_ham%gpu_option
+
    ABI_NVTX_END_RANGE()
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
@@ -1841,7 +1847,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    lastband = firstband+chunk
  end if
  usegvnlxc=1
- if (size(gvnlxc)==0) usegvnlxc=0
+ if (size(gvnlxc)<=1) usegvnlxc=0
 
  if ( lastband /= 0 ) then
    firstelt = (firstband-1)*spacedim+1
