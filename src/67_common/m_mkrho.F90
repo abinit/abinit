@@ -168,9 +168,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !scalars
  integer,save :: nskip=0
  integer :: alpha,use_nondiag_occup_dmft,bdtot_index,beta,blocksize,iband,iband1,ibandc1,ib,iblock,icg,ierr
- integer :: ifft,ikg,ikpt,ioption,ipw,ipwsp,ishf,ispden,ispinor,ispinor_index
+ integer :: ifft,ikg,ikpt,ioption,ipw,ipwbd,ipwsp,ishf,ispden,ispinor,ispinor_index
  integer :: isppol,istwf_k,jspinor_index
- integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
+ integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nband_occ,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
  integer :: iband_me
  integer :: mband_mem
@@ -179,37 +179,24 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  !character(len=500) :: message
 !arrays
  integer,allocatable :: gbound(:,:)
-
- integer(int32),ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
-
+ integer, ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  logical :: locc_test,nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: dummy(2,1) = reshape( (/0.0, 0.0/), shape(dummy))
- real(dp)     ::tsec(2)
-
+ real(dp) :: tsec(2)
+ real(dp),allocatable :: cwavef_rot(:,:,:,:),occ_diag(:),occ_k(:)
+ real(dp),allocatable :: kg_k_cart_block(:),taur_alphabeta(:,:,:,:),weight_t(:)
  real(dp), ABI_CONTIGUOUS pointer :: cwavef(:,:,:)  => null()
  real(dp), ABI_CONTIGUOUS pointer :: cwavefb(:,:,:) => null()
-
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_x(:,:)  => null()
  real(dp), ABI_CONTIGUOUS pointer :: cwavef_y(:,:)  => null()
  real(dp), ABI_CONTIGUOUS pointer :: cwavefb_x(:,:) => null() ! only use when paral_kgb=0
  real(dp), ABI_CONTIGUOUS pointer :: cwavefb_y(:,:) => null() ! only use when paral_kgb=0
-
- real(dp),allocatable :: kg_k_cart_block(:)
- real(dp),allocatable :: occ_k(:)
-
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:)      => null()
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_down(:,:,:) => null()
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_up(:,:,:)   => null()
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_mx(:,:,:)   => null()
  real(dp), ABI_CONTIGUOUS pointer :: rhoaug_my(:,:,:)   => null()
-
- real(dp),allocatable :: taur_alphabeta(:,:,:,:)
-
  real(dp), ABI_CONTIGUOUS pointer :: wfraug(:,:,:,:)    => null()
-
- real(dp),allocatable :: occ_diag(:)
-! real(dp),allocatable :: occ_nd(2, :, :)
- real(dp),allocatable :: cwavef_rot(:,:,:,:)
 
 ! *************************************************************************
 
@@ -217,6 +204,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
  call timab(790+tim_mkrho,1,tsec)
  call timab(799,1,tsec)
+
+ if(mpi_enreg%paralbd==0) tim_fourwf=3
+ if(mpi_enreg%paralbd==1) tim_fourwf=6
 
  if(.not.(present(option))) then
    ioption=0
@@ -233,7 +223,6 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbandc1=1
  end if
  use_nondiag_occup_dmft=0
-
 
 !if(dtset%nspinor==2.and.paw_dmft%use_sc_dmft==1) then
 !write(message, '(a,a,a,a)' )ch10,&
@@ -314,16 +303,18 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
      n4 = dtset%ngfft(4) ; n5 = dtset%ngfft(5) ; n6 = dtset%ngfft(6)
 
      ndat = 1
-     if (mpi_enreg%paral_kgb==1) ndat = mpi_enreg%bandpp
-     if (dtset%gpu_option/=ABI_GPU_DISABLED)  ndat = mpi_enreg%bandpp
+     if (mpi_enreg%paral_kgb==1) then
+       ndat = mpi_enreg%bandpp
+     else if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+       ndat = dtset%mband
+     end if
 
-     if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+     if (dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
-         ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
+       ABI_MALLOC_MANAGED(cwavef,(/2,dtset%mpw*ndat,my_nspinor/))
 #endif
      else
        if (dtset%gpu_option/=ABI_GPU_DISABLED) then
-         ! should we use nband_k instead of ndat here ? (PK)
          ABI_MALLOC(cwavef,(2,dtset%mpw*ndat,my_nspinor))
        else
          ABI_MALLOC(cwavef,(2,dtset%mpw,my_nspinor))
@@ -370,6 +361,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 
          nband_k = dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
          mband_mem = nband_k
+         if (dtset%paral_kgb==0) mband_mem = nband_k/mpi_enreg%nproc_band
          npw_k=npwarr(ikpt)
          istwf_k = dtset%istwfk(ikpt)
 
@@ -393,195 +385,205 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Loop over bands to fft and square for rho(r)
 !        Should be changed to treat bands by batch always
 
-         if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+         if (mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
 
 #ifdef HAVE_OPENMP_OFFLOAD
            ! With OpenMP GPU, uploading kg_k when paral_kgb==0
            !$OMP TARGET ENTER DATA MAP(to:kg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
 
-
-           mband_mem = nband_k/mpi_enreg%nproc_band
-           iband_me = 0
-           do iband=1,nband_k
-             ! if(paw_dmft%use_sc_dmft==1) then
-             !   write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index),paw_dmft%occnd(iband,iband,ikpt,isppol)
-             ! else
-             !   write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index)
-             ! end if
-             if(mpi_enreg%paralbd==1)then
-               if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+           if (dtset%gpu_option /= ABI_GPU_DISABLED) then
+             !On GPU, treat all bands at once
+             ABI_MALLOC(weight_t,(nband_k))
+             nband_occ = 0
+             do iband=1,nband_k
+               ipwsp = (iband-1)*npw_k*my_nspinor + icg
+               weight_t(iband) = occ(iband+bdtot_index) * dtset%wtk(ikpt)/ucvol
+               locc_test = abs(occ(iband+bdtot_index))>tol8
+               if (locc_test) then
+                 nband_occ = nband_occ +1
+                 ipwbd = (nband_occ-1) * npw_k
+                 cwavef(:,ipwbd+1:ipwbd+npw_k,1) = cg(:,ipwsp+1:ipwsp+npw_k)
+                 if (my_nspinor==2) cwavef(:,ipwbd+1:ipwbd+npw_k,2) = cg(:,ipwsp+npw_k+1:ipwsp+npw_k+npw_k)
+                 if (ioption==1) then ! Multiplication by 2pi i (k+G)_alpha
+                   gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi2 = gprimd(alpha,2)*two_pi ; gp2pi3 = gprimd(alpha,3)*two_pi
+                   kpt_cart = gp2pi1*dtset%kptns(1,ikpt) + gp2pi2*dtset%kptns(2,ikpt) + gp2pi3*dtset%kptns(3,ikpt)
+                   do ispinor=1,my_nspinor
+                     do ipw=1,npw_k
+                       kg_k_cart = gp2pi1*kg_k(1,ipw) + gp2pi2*kg_k(2,ipw) + gp2pi3*kg_k(3,ipw) + kpt_cart
+                       cwftmp = -cwavef(2,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(2,ipwbd+ipw,ispinor) = cwavef(1,ipwbd+ipw,ispinor)*kg_k_cart
+                       cwavef(1,ipwbd+ipw,ispinor) = cwftmp
+                     end do
+                   end do
+                 else if (ioption==2) then
+                   ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                 end if ! end if ioption==1
+               end if ! end if locc_test
+             end do ! end iband=1,nband_k
+             if (nband_occ>0) then
+               call fourwf(1,rhoaug,cwavef(:,1:nband_occ*npw_k,1),dummy,wfraug(:,:,:,1:n6*nband_occ),&
+&                gbound,gbound,istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,nband_occ,dtset%ngfft,&
+&                npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+&                weight_array_r=weight_t(1:nband_occ),weight_array_i=weight_t(1:nband_occ),&
+&                gpu_option=dtset%gpu_option)
              end if
-             iband_me = iband_me + 1
-             do ibandc1=1,nbandc1 ! in case of DMFT
-               ! Check if DMFT and only treat occupied states (check on occ.)
-               if(paw_dmft%use_sc_dmft == 1) then
-                 iband1 = paw_dmft%include_bands(ibandc1)
-                 if(paw_dmft%band_in(iband)) then
-                   if(.not. paw_dmft%band_in(iband1))  stop
-                   use_nondiag_occup_dmft = 1
-                   locc_test = abs(paw_dmft%occnd(1,iband,iband1,ikpt,isppol)) +&
-                     &                   abs(paw_dmft%occnd(2,iband,iband1,ikpt,isppol))>tol8
-                   ! write(std_out,*) "mkrho,ikpt,iband,use_occnd",ikpt,iband
+             ABI_FREE(weight_t)
+
+           else ! CPU version
+
+             iband_me = 0
+             do iband=1,nband_k
+               if(mpi_enreg%paralbd==1)then
+                 if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+               end if
+               iband_me = iband_me + 1
+               do ibandc1=1,nbandc1 ! in case of DMFT
+                 ! Check if DMFT and only treat occupied states (check on occ.)
+                 if(paw_dmft%use_sc_dmft == 1) then
+                   iband1 = paw_dmft%include_bands(ibandc1)
+                   if(paw_dmft%band_in(iband)) then
+                     if(.not. paw_dmft%band_in(iband1))  stop
+                     use_nondiag_occup_dmft = 1
+                     locc_test = abs(paw_dmft%occnd(1,iband,iband1,ikpt,isppol)) +&
+                       &                   abs(paw_dmft%occnd(2,iband,iband1,ikpt,isppol))>tol8
+                   else
+                     use_nondiag_occup_dmft = 0
+                     locc_test = abs(occ(iband+bdtot_index))>tol8
+                     if(ibandc1 /=1 .and. .not. paw_dmft%band_in(iband)) cycle
+                   end if
                  else
                    use_nondiag_occup_dmft = 0
                    locc_test = abs(occ(iband+bdtot_index))>tol8
-                   if(ibandc1 /=1 .and. .not. paw_dmft%band_in(iband)) cycle
                  end if
-               else
-                 use_nondiag_occup_dmft = 0
-                 locc_test = abs(occ(iband+bdtot_index))>tol8
-               end if
-
-               if (locc_test) then
-                 ! Obtain Fourier transform in fft box and accumulate the density or
-                 ! the kinetic energy density
-                 ! Not yet parallelized on nspinor if paral_kgb non equal to 1
-                 ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
-                 cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
-                 if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,1+ipwsp+npw_k:ipwsp+2*npw_k)
-
-                 if(ioption==1)then
-                   ! Multiplication by 2pi i (k+G)_alpha
-                   gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
-                   kpt_cart=gp2pi1*dtset%kptns(1,ikpt)+gp2pi2*dtset%kptns(2,ikpt)+gp2pi3*dtset%kptns(3,ikpt)
-                   do ispinor=1,my_nspinor
-                     do ipw=1,npw_k
-                       kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
-                       cwftmp=-cwavef(2,ipw,ispinor)*kg_k_cart
-                       cwavef(2,ipw,ispinor)=cwavef(1,ipw,ispinor)*kg_k_cart
-                       cwavef(1,ipw,ispinor)=cwftmp
+                 if (locc_test) then
+                   ! Obtain Fourier transform in fft box and accumulate the density or
+                   ! the kinetic energy density
+                   ! Not yet parallelized on nspinor if paral_kgb/=1
+                   ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
+                   cwavef(:,1:npw_k,1) =                  cg(:,1+ipwsp      :ipwsp+npw_k)
+                   if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,1+ipwsp+npw_k:ipwsp+2*npw_k)
+                   if(ioption==1)then
+                     ! Multiplication by 2pi i (k+G)_alpha
+                     gp2pi1=gprimd(alpha,1)*two_pi ; gp2pi2=gprimd(alpha,2)*two_pi ; gp2pi3=gprimd(alpha,3)*two_pi
+                     kpt_cart=gp2pi1*dtset%kptns(1,ikpt)+gp2pi2*dtset%kptns(2,ikpt)+gp2pi3*dtset%kptns(3,ikpt)
+                     do ispinor=1,my_nspinor
+                       do ipw=1,npw_k
+                         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+                         cwftmp=-cwavef(2,ipw,ispinor)*kg_k_cart
+                         cwavef(2,ipw,ispinor)=cwavef(1,ipw,ispinor)*kg_k_cart
+                         cwavef(1,ipw,ispinor)=cwftmp
+                       end do
                      end do
-                   end do
-                 else if(ioption==2)then
-                   ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
-                 end if
+                   else if(ioption==2)then
+                     ABI_ERROR('kinetic energy density tensor (taur_(alpha,beta)) is not yet implemented.')
+                   end if
+                   ! Non diag occupation in DMFT.
+                   ! TODO : this will break in full distrib of band memory
+                   if(use_nondiag_occup_dmft==1) then
+                     ipwsp=(iband1-1)*npw_k*my_nspinor +icg
+                     cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
+                     if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
+                     weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                     weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   else
+                     weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
+                     weight_i=weight
+                   end if
 
-                 ! Non diag occupation in DMFT.
-                 ! TODO : this will break in full distrib of band memory
-                 if(use_nondiag_occup_dmft==1) then
-                   ipwsp=(iband1-1)*npw_k*my_nspinor +icg
-                   cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
-                   if (my_nspinor==2) cwavefb(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
-                   weight  =paw_dmft%occnd(1,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
-                   weight_i=paw_dmft%occnd(2,iband,iband1,ikpt,isppol)*dtset%wtk(ikpt)/ucvol
+                   ! The same section of code is also found in vtowfk.F90 : should be rationalized !
 
+                   call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
+                     &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                     &                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                     &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
+                     &                 gpu_option=dtset%gpu_option)
+                   if(dtset%nspinor==2)then
+                     if(dtset%nspden==1) then
+                       ! We need only the total density : accumulation continues on top of rhoaug
+                       call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
+                         &                     gpu_option=dtset%gpu_option)
+                     else if(dtset%nspden==4) then
+                       ! Build the four components of rho. We use only norm quantities and, so fourwf.
+                       ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
+                       ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
+                       ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
+                       if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
+                         ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
+                         ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
+#endif
+                       else
+                         ABI_MALLOC(cwavef_x,(2,npw_k))
+                         ABI_MALLOC(cwavef_y,(2,npw_k))
+                         ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
+                         ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
+                       end if
+                       ! $(\Psi^{1}+\Psi^{2})$
+                       cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
+                       ! $(\Psi^{1}-i \Psi^{2})$
+                       cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
+                       cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
+                       if(use_nondiag_occup_dmft==1) then
+                         cwavefb_x(:,:)=cwavefb(:,1:npw_k,1)+cwavefb(:,1:npw_k,2)
+                         cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
+                         cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
+                       end if
+                       rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
+                       call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
+                         &                     gpu_option=dtset%gpu_option)
+
+                       call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
+                         &                     gpu_option=dtset%gpu_option)
+
+                       call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
+                         &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
+                         &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
+                         &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
+                         &                     gpu_option=dtset%gpu_option)
+                       if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+                         ABI_FREE_MANAGED(cwavef_x)
+                         ABI_FREE_MANAGED(cwavef_y)
+                         ABI_FREE_MANAGED(cwavefb_x)
+                         ABI_FREE_MANAGED(cwavefb_y)
+#endif
+                       else
+                         ABI_FREE(cwavef_x)
+                         ABI_FREE(cwavef_y)
+                         ABI_FREE(cwavefb_x)
+                         ABI_FREE(cwavefb_y)
+                       end if
+                     end if ! dtset%nspden/=4
+                   end if
                  else
-                   weight=occ(iband+bdtot_index)*dtset%wtk(ikpt)/ucvol
-                   weight_i=weight
-                 end if
+                   ! Accumulate the number of one-way 3D ffts skipped
+                   nskip=nskip+1
+                 end if ! abs(occ(iband+bdtot_index))>tol8
+               end do ! iband1=1,(nband_k-1)*paw_dmft%use_sc_dmft+1
+             end do ! iband=1,nband_k
 
-                 if(mpi_enreg%paralbd==0) tim_fourwf=3
-                 if(mpi_enreg%paralbd==1) tim_fourwf=6
-
-                 ! The same section of code is also found in vtowfk.F90 : should be rationalized !
-
-                 call fourwf(1,rhoaug,cwavef(:,:,1),dummy,wfraug,gbound,gbound,&
-                   &                 istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-                   &                 npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-                   &                 use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,1),&
-                   &                 gpu_option=dtset%gpu_option)
-
-
-                 if(dtset%nspinor==2)then
-                   ! DEBUG GZ !To obtain a x-directed magnetization(test)
-                   ! cwavef1(1,1:npw_k)=-cwavef(2,1:npw_k)
-                   ! cwavef1(2,1:npw_k)= cwavef(1,1:npw_k)
-                   ! ENDDEBUG
-
-                   if(dtset%nspden==1) then
-                     ! We need only the total density : accumulation continues on top of rhoaug
-
-                     call fourwf(1,rhoaug,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
-                       &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-                       &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-                       &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
-                       &                     gpu_option=dtset%gpu_option)
-
-
-                   else if(dtset%nspden==4) then
-                     ! Build the four components of rho. We use only norm quantities and, so fourwf.
-                     ! $\sum_{n} f_n \Psi^{* \alpha}_n \Psi^{\alpha}_n =\rho^{\alpha \alpha}$
-                     ! $\sum_{n} f_n (\Psi^{1}+\Psi^{2})^*_n (\Psi^{1}+\Psi^{2})_n=rho+m_x$
-                     ! $\sum_{n} f_n (\Psi^{1}-i \Psi^{2})^*_n (\Psi^{1}-i \Psi^{2})_n=rho+m_y$
-
-                     if(dtset%gpu_option == ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-                       ABI_MALLOC_MANAGED(cwavef_x, (/2,npw_k/))
-                       ABI_MALLOC_MANAGED(cwavef_y, (/2,npw_k/))
-                       ABI_MALLOC_MANAGED(cwavefb_x,(/2,npw_k*paw_dmft%use_sc_dmft/))
-                       ABI_MALLOC_MANAGED(cwavefb_y,(/2,npw_k*paw_dmft%use_sc_dmft/))
-#endif
-                     else
-                       ABI_MALLOC(cwavef_x,(2,npw_k))
-                       ABI_MALLOC(cwavef_y,(2,npw_k))
-                       ABI_MALLOC(cwavefb_x,(2,npw_k*paw_dmft%use_sc_dmft))
-                       ABI_MALLOC(cwavefb_y,(2,npw_k*paw_dmft%use_sc_dmft))
-                     end if
-
-                     ! $(\Psi^{1}+\Psi^{2})$
-                     cwavef_x(:,:)=cwavef(:,1:npw_k,1)+cwavef(:,1:npw_k,2)
-                     ! $(\Psi^{1}-i \Psi^{2})$
-                     cwavef_y(1,:)=cwavef(1,1:npw_k,1)+cwavef(2,1:npw_k,2)
-                     cwavef_y(2,:)=cwavef(2,1:npw_k,1)-cwavef(1,1:npw_k,2)
-                     if(use_nondiag_occup_dmft==1) then
-                       cwavefb_x(:,:)=cwavefb(:,1:npw_k,1)+cwavefb(:,1:npw_k,2)
-                       cwavefb_y(1,:)=cwavefb(1,1:npw_k,1)+cwavefb(2,1:npw_k,2)
-                       cwavefb_y(2,:)=cwavefb(2,1:npw_k,1)-cwavefb(1,1:npw_k,2)
-                     end if
-                     rhoaug_up(:,:,:)=rhoaug(:,:,:) !Already computed
-
-                     call fourwf(1,rhoaug_down,cwavef(:,:,2),dummy,wfraug,gbound,gbound,&
-                       &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-                       &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-                       &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb(:,:,2),&
-                       &                     gpu_option=dtset%gpu_option)
-
-                     call fourwf(1,rhoaug_mx,cwavef_x,dummy,wfraug,gbound,gbound,&
-                       &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-                       &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-                       &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_x,&
-                       &                     gpu_option=dtset%gpu_option)
-
-                     call fourwf(1,rhoaug_my,cwavef_y,dummy,wfraug,gbound,gbound,&
-                       &                     istwf_k,kg_k,kg_k,dtset%mgfft,mpi_enreg,1,dtset%ngfft,&
-                       &                     npw_k,1,n4,n5,n6,1,tim_fourwf,weight,weight_i,&
-                       &                     use_ndo=use_nondiag_occup_dmft,fofginb=cwavefb_y,&
-                       &                     gpu_option=dtset%gpu_option)
-
-
-                     if(dtset%gpu_option == ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU && defined HAVE_YAKL
-                       ABI_FREE_MANAGED(cwavef_x)
-                       ABI_FREE_MANAGED(cwavef_y)
-                       ABI_FREE_MANAGED(cwavefb_x)
-                       ABI_FREE_MANAGED(cwavefb_y)
-#endif
-                     else
-                       ABI_FREE(cwavef_x)
-                       ABI_FREE(cwavef_y)
-                       ABI_FREE(cwavefb_x)
-                       ABI_FREE(cwavefb_y)
-                     end if
-
-                   end if ! dtset%nspden/=4
-                 end if
-
-               else
-                 ! Accumulate the number of one-way 3D ffts skipped
-                 nskip=nskip+1
-               end if ! abs(occ(iband+bdtot_index))>tol8
-             end do ! iband1=1,(nband_k-1)*paw_dmft%use_sc_dmft+1
-           end do ! iband=1,nband_k
+           end if ! gpu_option
 
 #ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(release:kg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+           !$OMP TARGET EXIT DATA MAP(delete:kg_k) IF(dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
          else !paral_kgb==1
+
            if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) cycle
 
            call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
-
            nbdblock=nband_k/(mpi_enreg%nproc_band * mpi_enreg%bandpp)
            blocksize=nband_k/nbdblock
 
@@ -711,6 +713,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  cwavef_x(:,:)=cwavef(:,:,1)+cwavef(:,:,2)
                  cwavef_y(1,:)=cwavef(1,:,1)+cwavef(2,:,2)
                  cwavef_y(2,:)=cwavef(2,:,1)-cwavef(1,:,2)
+
                  call timab(538,1,tsec)
                  if (nspinor1TreatedByThisProc) then
                    call prep_fourwf(rhoaug_down,blocksize,cwavef(:,:,2),wfraug,&
@@ -746,6 +749,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
            if(ioption==1)  then
              ABI_FREE(kg_k_cart_block)
            end if
+
            if (associated(cwavef))  then
              if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
@@ -755,10 +759,12 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                ABI_FREE(cwavef)
              end if
            end if
+
            ABI_FREE(occ_k)
          end if
 
          ABI_FREE(gbound)
+
          if(dtset%gpu_option == ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
            ABI_FREE_MANAGED(kg_k)
