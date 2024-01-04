@@ -131,7 +131,7 @@ contains
  integer,intent(in) :: ntypat,optene,optres,usepaw,usexcnhat,ixcrot,ratopt
  logical,intent(in) :: non_magnetic_xc
  real(dp),intent(in) :: gsqcut,magpen,ratsm,ucvol
- real(dp),intent(inout) :: ehart01
+ real(dp),intent(inout) :: ehart01,elpsp1,ehart1,exc1,elmag1,emagpen1
  real(dp),intent(out) :: vres2
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -147,7 +147,7 @@ contains
  real(dp),target,intent(in) :: rhor(nfft,nspden),rhor1(cplex*nfft,nspden)
  real(dp),intent(in) :: rprimd(3,3),vpsp1(cplex*nfft)
  real(dp),intent(in) :: xccc3d1(cplex*n3xccc)
- real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden),elpsp1,ehart1,exc1,elmag1,emagpen1
+ real(dp),intent(inout) :: vtrial1(cplex*nfft,nspden)
  real(dp),intent(out) :: vresid1(cplex*nfft,nspden)
  real(dp),target,intent(out) :: vhartr1(:),vxc1(:,:)
  real(dp),intent(in) :: vcutgeo(3)
@@ -291,6 +291,7 @@ contains
      call dotprod_vn(cplex,rhor1,elpsp1 ,doti,nfft,nfftot,1     ,1,vpsp1,ucvol)
      if (ipert==natom+5.or.(ipert>natom+11.and.ipert<=2*natom+11)) then
        call dotprod_vn(cplex,rhor1,elmag1 ,doti,nfft,nfftot,nspden,1,v1zeeman,ucvol)
+       elmag1=two*elmag1
      end if
    else
      if (usexcnhat/=0) then
