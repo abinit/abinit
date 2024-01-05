@@ -176,7 +176,7 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
          tdef%efield(:) = tdef%ef_ezero(:)
          tdef%vecpot(:) = -tdef%ef_ezero(:)
       end if
-      tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)
+      tdef%vecpot_red = matmul(transpose(rprimd),tdef%vecpot)/(2.0_dp*pi)
    !Pulse with sin^2 shape:
    !E(t) = E0*cos(w*(t-t0))*sin^2(pi*(t-t0)/tau)
    !A(t) = -(E0/2w)*sin(w*(t-t0))+E0/(4*(2pi/tau+w))*sin((2pi/tau+w)*(t-t0))+E0/(4(2pi/taur-w))*sin((2pi/tau-w)*(t-t0))
@@ -190,7 +190,7 @@ subroutine tdef_update(tdef, dtset, mpi_enreg, time, rprimd, gprimd, kg, mpsang,
                                        & +sin(tdef%ef_sin_a*t)/(4.0_dp*tdef%ef_sin_a) &
                                        & +sin(tdef%ef_sin_b*t)/(4.0_dp*tdef%ef_sin_b))
       end if
-      tdef%vecpot_red(:) = matmul(transpose(rprimd),tdef%vecpot)
+      tdef%vecpot_red(:) = matmul(transpose(rprimd),tdef%vecpot)/(2.0_dp*pi)
    case default
       write(msg,"(a)") "Unknown electric field type - check the value of td_ef_type"
       ABI_ERROR(msg)

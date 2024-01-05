@@ -511,6 +511,9 @@ contains
  intarr(1,:)=dtsets(:)%prtcif
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcif','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtcurrent
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtcurrent','INT',0)
+
  intarr(1,:)=dtsets(:)%prtden
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtden','INT',0)
 
