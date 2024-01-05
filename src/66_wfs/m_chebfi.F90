@@ -140,7 +140,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer :: mcg
  real(dp) :: dprod_r, dprod_i
  character(len=500) :: message
- integer :: rdisplsloc(mpi_enreg%nproc_band),recvcountsloc(mpi_enreg%nproc_band)
+ integer :: rdisplsloc(mpi_enreg%nproc_band), recvcountsloc(mpi_enreg%nproc_band)
  integer :: sdisplsloc(mpi_enreg%nproc_band), sendcountsloc(mpi_enreg%nproc_band)
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
@@ -171,23 +171,23 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
    ikpt_this_proc = bandfft_kpt_get_ikpt()
-   npw_filter = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   nband_filter = mpi_enreg%bandpp
+   npw_filter     = bandfft_kpt(ikpt_this_proc)%ndatarecv
+   nband_filter   = mpi_enreg%bandpp
 
-   ABI_MALLOC(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall1,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
    ABI_MALLOC(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall2,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
    ABI_MALLOC(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
 
    ! Init tranpose variables
-   recvcountsloc=bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*mpi_enreg%bandpp
-   rdisplsloc=bandfft_kpt(ikpt_this_proc)%rdispls*2*nspinor*mpi_enreg%bandpp
-   sendcountsloc=bandfft_kpt(ikpt_this_proc)%sendcounts*2*nspinor
-   sdisplsloc=bandfft_kpt(ikpt_this_proc)%sdispls*2*nspinor
+   recvcountsloc = bandfft_kpt(ikpt_this_proc)%recvcounts * 2 * nspinor * mpi_enreg%bandpp
+   rdisplsloc    = bandfft_kpt(ikpt_this_proc)%rdispls    * 2 * nspinor * mpi_enreg%bandpp
+   sendcountsloc = bandfft_kpt(ikpt_this_proc)%sendcounts * 2 * nspinor
+   sdisplsloc    = bandfft_kpt(ikpt_this_proc)%sdispls    * 2 * nspinor
 
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
@@ -212,9 +212,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    ! sort according to bandpp (from lobpcg, I don't fully understand what's going on but it works and it's fast)
    call prep_index_wavef_bandpp(mpi_enreg%nproc_band,mpi_enreg%bandpp,&
-&   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
-&   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
-&   index_wavef_band)
+        &   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
+        &   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
+        &   index_wavef_band)
+
    cg_alltoall2(:,:) = cg_alltoall1(:,index_wavef_band)
 
    cg_filter => cg_alltoall2
@@ -370,7 +371,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor, dtset%diago_apply_block_sliced)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%invol_blk_sliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)

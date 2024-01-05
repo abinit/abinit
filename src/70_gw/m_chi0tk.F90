@@ -1056,14 +1056,14 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
    ! Calculation without symmetries
    ! rhotwg(1)= R^-1q*rhotwx_ibz
    ! rhotwg(1)=-R^-1q*conjg(rhotwx_ibz) for inversion
-   if (wl<huge(0.0_dp)*1.d-11) then
+   if (wl<huge(zero)*1.d-11) then
      !this is awful but it is still a first coding
      ! Num is single precision needed for cgerc check factocc
      num=-wl*factocc
      call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,sf_chi0(:,:,iomegal),npwe)
    end if
    ! Last point, must accumulate left point but not the right one
-   if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+   if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
      num=-wr*factocc
      call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,sf_chi0(:,:,iomegar),npwe)
    end if
@@ -1081,7 +1081,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
    if (itim_kbz==2) mir_kbz=conjg(mir_kbz)
 
    do jdir=1,3
-     if (wl<huge(0.0_dp)*1.d-11) then
+     if (wl<huge(zero)*1.d-11) then
        ! this is awful but it is still a first coding
        ! Num is single precision needed for cgerc check factocc
        num=-wl*factocc
@@ -1093,7 +1093,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
      end if
 
      ! Last point, must accumulate left point but not the right one
-     if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+     if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
        num=-wr*factocc
        sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * conjg(rhotwg(1:npwepG0))
        sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg(1:npwepG0) * conjg(mir_kbz(jdir))
@@ -1136,13 +1136,13 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
          END SELECT
 
          ! Multiply elements G,Gp of rhotwg_sym*num and accumulate in sf_chi0(G,Gp,io)
-         if (wl<huge(0.0_dp)*1.d-11) then
+         if (wl<huge(zero)*1.d-11) then
            num=-wl*factocc
            call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,sf_chi0(:,:,iomegal),npwe)
          end if
 
          ! Last point, must accumulate left point but not the right one
-         if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+         if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
            num=-wr*factocc
            call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,sf_chi0(:,:,iomegar),npwe)
          end if
@@ -1157,7 +1157,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
          if (itim==2) mir_kbz=conjg(mir_kbz)
 
          do jdir=1,3
-           if (wl<huge(0.0_dp)*1.d-11) then
+           if (wl<huge(zero)*1.d-11) then
              ! this is awful but it is still a first coding
              ! Num is single precision needed for cgerc check factocc
              num=-wl*factocc
@@ -1169,7 +1169,7 @@ subroutine accumulate_sfchi0_q0(ikbz,isym_kbz,itim_kbz,nspinor,symchi,npwepG0,np
            end if
 
            ! Last point, must accumulate left point but not the right one
-           if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+           if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
              num=-wr*factocc
              sf_uwing(:,iomegar,jdir) = sf_uwing(:,iomegar,jdir) + num * mir_kbz(jdir) * conjg(rhotwg_sym(1:npwe))
              sf_lwing(:,iomegar,jdir) = sf_lwing(:,iomegar,jdir) + num * rhotwg_sym(1:npwe) * conjg(mir_kbz(jdir))
@@ -1284,14 +1284,14 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 !$omp PARALLEL private(num)
 !$omp SECTIONS
 !$omp SECTION
-   if (wl<huge(0.0_dp)*1.d-11) then !FIXME this is awful
+   if (wl<huge(zero)*1.d-11) then !FIXME this is awful
      num=-wl*factocc
      call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,chi0sf(:,:,iomegal),npwe)
    end if
 
    ! Last point, must accumulate left point but not the right one
 !$omp SECTION
-   if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+   if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
      num=-wr*factocc
      call XGERC(npwe,npwe,num,rhotwg,1,rhotwg,1,chi0sf(:,:,iomegar),npwe)
    end if
@@ -1344,14 +1344,14 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 !$omp SECTIONS
 
 !$omp SECTION
-         if (wl<huge(0.0_dp)*1.d-11) then
+         if (wl<huge(zero)*1.d-11) then
            num=-wl*factocc
            call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegal),npwe)
          end if
 !$omp SECTION
          !
          ! Last point, must accumulate left point but not the right one
-         if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+         if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
            num=-wr*factocc
            call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegar),npwe)
          end if
@@ -1359,7 +1359,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
 !$omp end PARALLEL
 #else
 
-         if (wl<huge(0.0_dp)*1.d-11) then
+         if (wl<huge(zero)*1.d-11) then
            !call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegal),npwe)
            num=-wl*factocc
 !$omp parallel do
@@ -1371,7 +1371,7 @@ subroutine assemblychi0sf(ik_bz,symchi,Ltg_q,npwepG0,npwe,rhotwg,Gsph_epsG0,&
          end if
 
          ! Last point, must accumulate left point but not the right one
-         if (iomegar/=nomegasf+1 .and. wr<huge(0.0_dp)*1.d-11) then
+         if (iomegar/=nomegasf+1 .and. wr<huge(zero)*1.d-11) then
            !call XGERC(npwe,npwe,num,rhotwg_sym,1,rhotwg_sym,1,chi0sf(:,:,iomegar),npwe)
            num=-wr*factocc
 !$omp parallel do
