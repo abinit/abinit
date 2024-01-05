@@ -783,7 +783,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
         & gs_hamkq%kg_k,kinpw1,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
         & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
-        & gs_hamkq%use_gpu_cuda)
+        & gs_hamkq%gpu_option)
    do ispinor=1,my_nspinor
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
@@ -2007,12 +2007,12 @@ end subroutine getgh1ndc
 
 subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg_k,&
      & kinpw1,kpt,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,&
-     & ngfft,npw_k,nvloc,vxctaulocal,use_gpu_cuda)
+     & ngfft,npw_k,nvloc,vxctaulocal,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: idir,istwf_k,mgfft,my_nspinor,n4,n5,n6,ndat,npw_k,nvloc
- integer,intent(in),optional :: use_gpu_cuda
+ integer,intent(in),optional :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
@@ -2024,7 +2024,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  
 !Local variables-------------------------------
  !scalars
- integer :: idat,ii,ipw,nspinortot,shift,use_gpu_cuda_
+ integer :: idat,ii,ipw,nspinortot,shift,gpu_option_
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
  real(dp) :: dkcartdk
@@ -2033,10 +2033,10 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),work(:,:,:,:)
 
- if(present(use_gpu_cuda)) then
-    use_gpu_cuda_=use_gpu_cuda
+ if(present(gpu_option)) then
+    gpu_option_=gpu_option
  else
-    use_gpu_cuda_=0
+    gpu_option_=0
  end if
   
  gh1c_mGGA(:,:)=zero
@@ -2073,7 +2073,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
       end do
       call fourwf(1,vxctaulocal(:,:,:,:,1+ii),dgcwavef,ghc1,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+        & tim_fourwf,weight,weight,gpu_option=gpu_option_)
       gh1c_mGGA(:,:) = gh1c_mGGA(:,:) - half*ghc1
     end do ! ii
 
@@ -2088,7 +2088,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
     end do
     call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
       & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-      & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+      & tim_fourwf,weight,weight,gpu_option=gpu_option_)
 
     gh1c_mGGA = gh1c_mGGA + ghc2
 
@@ -2142,7 +2142,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
    
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+        & tim_fourwf,weight,weight,gpu_option=gpu_option_)
 
       do idat = 1, ndat
         do ipw = 1, npw_k
@@ -2184,7 +2184,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
    
       call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
         & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda_)
+        & tim_fourwf,weight,weight,gpu_option=gpu_option_)
 
       do idat = 1, ndat
         do ipw = 1, npw_k
