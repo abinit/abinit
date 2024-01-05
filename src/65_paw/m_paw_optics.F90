@@ -122,7 +122,10 @@ CONTAINS  !=====================================================================
 !!  znucl(ntypat)=atomic number of atom type
 !!
 !! OUTPUT
-!!  (only writing in a file)
+!!  psinablapsi_out=contains the matrix elements 
+!!   (The size of the psinablapsi_out decide wehter we compute the full matrix or 
+!!    only the diagonal part)
+!!   (if not present only writing in a file)
 !!
 !! SIDE EFFECTS
 !!
@@ -247,10 +250,6 @@ CONTAINS  !=====================================================================
    end if
    psinablapsi_out = zero
  end if
- print*, "iomode:", iomode
- print*, "iomode_etsf_mpiio:", iomode_etsf_mpiio
- print*, "diag_only:", diag_only
- print*, "store_half_dipoles:", store_half_dipoles
 
 !----------------------------------------------------------------------------------
 !1- Opening of OPT file and header writing

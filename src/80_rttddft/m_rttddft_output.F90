@@ -95,7 +95,8 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  !scalars
  character            :: tmp
  character(len=500)   :: msg
- integer              :: stat
+ character(len=100)   :: fmt
+ integer              :: stat, i
  !arrays
 
 ! *************************************************************************
@@ -144,6 +145,27 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
       end if
    end if
  end if
+ if (istep == tdks%first_step .and. dtset%prtcurrent /= 0) then
+   ! Open current file and writes header if needed
+   if (open_file(tdks%fname_current, msg, newunit=tdks%current_unit, status='unknown', form='formatted') /= 0) then
+      write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_current
+      ABI_ERROR(msg)
+   end if 
+   if (mpi_enreg%me == 0) then
+      if (dtset%td_restart>0) then
+         do
+            read(tdks%current_unit,*,iostat=stat) tmp
+            if (stat /= 0) exit
+         end do
+         backspace(tdks%current_unit)
+      else
+         write(msg,'(a)') "# RT-TDDFT -- Current density file. All quantities are in Hartree atomic units."
+         call wrtout(tdks%current_unit,msg)
+         write(msg,'(a)') "# step  time  J_x  J_y  J_z"
+         call wrtout(tdks%current_unit,msg)
+      end if
+   end if
+ end if
 
  !** Writes some info in main output file
  write(msg,'(a,a,f14.6,a)') ch10, 'Total energy = ', tdks%etot,' Ha'
@@ -156,17 +178,27 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (do_write_log) call wrtout(std_out,msg)
 
  !** Writes in energy file
- write(msg,'(i0,1X,f10.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,              &
+ write(msg,'(i0,1X,f15.5,11(f14.8,1X))') istep-1, (istep-1)*tdks%dt, tdks%etot, tdks%energies%e_kinetic,              &
                                     & tdks%energies%e_hartree, tdks%energies%e_xc, tdks%energies%e_ewald,             &
                                     & tdks%energies%e_corepsp, tdks%energies%e_localpsp, tdks%energies%e_nlpsp_vfock, &
                                     & tdks%energies%e_paw, tdks%energies%e_entropy, tdks%energies%e_vdw_dftd
  call wrtout(tdks%tdener_unit,msg)
 
  !** Writes TD elec. field and associated vector potential if needed
- ! Update electric field and vector potential value
  if (dtset%td_ef_type /= 0) then
-   write(msg,'(i0,1X,f10.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
+   write(msg,'(i0,1X,f15.5,1X,3(f14.8,1X),3(f14.8,1X))') istep, istep*tdks%dt, tdks%tdef%efield(:), tdks%tdef%vecpot(:)
    call wrtout(tdks%tdef_unit,msg)
+ end if
+
+ !** Writes TD current density if needed
+ if (dtset%prtcurrent /= 0) then
+   if (dtset%nsppol == 1) then
+      fmt = '(i0,1X,f15.5,1X,3(f14.8,1X))'
+   else 
+      fmt = '(i0,1X,f15.5,1X,3(f14.8,1X),3(f14.8,1X))'
+   end if
+   write(msg,fmt) istep, istep*tdks%dt, (tdks%current(:,i),i=1,dtset%nsppol)
+   call wrtout(tdks%current_unit,msg)
  end if
 
  !** Writes additional optional properties

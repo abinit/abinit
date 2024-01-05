@@ -98,6 +98,7 @@ module m_rttddft_tdks
    integer                          :: nhatgrdim   !dimension of nhatgr array
    integer                          :: ngrvdw      !dimension of grvdw array
    integer                          :: ntime       !max nb of time steps
+   integer                          :: current_unit!unit nb of the current density file
    integer                          :: tdener_unit !unit nb of the energy file
    integer                          :: tdef_unit   !unit nb of the efield file
    integer                          :: tdrestart_unit !unit nb of the restart file
@@ -120,6 +121,7 @@ module m_rttddft_tdks
    type(tdef_type)                  :: tdef        !Object containing variables related to TD electric field
    type(wvl_data)                   :: wvl         !wavelets ojects (unused but
                                                    !required by various routines)
+   character(len=fnlen)             :: fname_current!Name of the TDCURRENT file
    character(len=fnlen)             :: fname_tdener!Name of the TDENER file
    character(len=fnlen)             :: fname_tdef  !Name of the TDEFIELD file
    character(len=fnlen)             :: fname_wfk0  !Name of the input WFK file containing
@@ -141,6 +143,7 @@ module m_rttddft_tdks
    real(dp)                         :: rmet(3,3)   !metric tensor in direct space
    real(dp),allocatable             :: cg(:,:)     !WF coefficients in PW basis <k+G|psi_nk>
    real(dp),allocatable             :: cg0(:,:)    !Initial WF coefficients in PW basis <k+G|psi_nk>
+   real(dp),allocatable             :: current(:,:)!Current density
    real(dp),allocatable             :: eigen(:)    !eigen-energies
    real(dp),allocatable             :: eigen0(:)   !Initial eigen-energies (at t=0)
    real(dp),allocatable             :: grvdw(:,:)  !Gradient of the total energy coming
@@ -258,6 +261,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
  tdks%fname_wfk0 = dtfil%fnamewffk
  fname_wfk = dtfil%fnamewffk
  tdks%fname_tdef = dtfil%fnameabo_td_ef
+ tdks%fname_current = dtfil%fnameabo_td_current
  if (dtset%td_restart > 0) then
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='old', form='formatted') /= 0) then
@@ -270,6 +274,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       read(tdks%tdrestart_unit,*) tdks%fname_wfk0
       read(tdks%tdrestart_unit,*) fname_wfk
       read(tdks%tdrestart_unit,*) tdks%fname_tdef
+      read(tdks%tdrestart_unit,*) tdks%fname_current
    end if
    !Send to all procs
    call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
@@ -277,6 +282,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    call xmpi_bcast(tdks%fname_wfk0,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(fname_wfk,0,mpi_enreg%comm_world,ierr)
    call xmpi_bcast(tdks%fname_tdef,0,mpi_enreg%comm_world,ierr)
+   call xmpi_bcast(tdks%fname_current,0,mpi_enreg%comm_world,ierr)
  else
    if (mpi_enreg%me == 0) then
       if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
@@ -316,6 +322,9 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
                    & dtset%td_ef_lambda,dtset%td_ef_tau,dtset%nkpt,dtset%kptns)
  call tdks%tdef%update(dtset,mpi_enreg,(tdks%first_step-1)*dtset%dtele,tdks%rprimd,tdks%gprimd,tdks%kg, &
                    & psps%mpsang,tdks%npwarr,tdks%ylm,tdks%ylmgr)
+ if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
+    ABI_MALLOC(tdks%current,(3,dtset%nsppol))
+ end if
 
  !7) Keep initial cg and cproj in memory for occupations
  !Keep initial wavefunction in memory
@@ -409,6 +418,7 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    ABI_SFREE(tdks%atindx1)
    ABI_SFREE(tdks%cg)
    ABI_SFREE(tdks%cg0)
+   ABI_SFREE(tdks%current)
    ABI_SFREE(tdks%dimcprj)
    ABI_SFREE(tdks%dimcprj_srt)
    ABI_SFREE(tdks%eigen)

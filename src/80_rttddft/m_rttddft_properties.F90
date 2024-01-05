@@ -785,17 +785,11 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
  !Local variables-------------------------------
  !scalars
  integer  :: iband, ikpt, isppol, bdtot_index, nband_k
- real(dp) :: current(3), current_k(3)
+ real(dp) :: current_k(3)
  !arrays
  real(dp), target :: psinablapsi(2,3,dtset%mband,dtset%nkpt)
 
 ! ***********************************************************************
-
- !print*, "Soon I'll compute the current here!!"
-
- !print*, "nkpt:", dtset%nkpt
- !print*, "mband", dtset%mband
- !dtfil%fnameabo_app_opt = "test"
 
  if (psps%usepaw==1) then
    ! 1 - Computes <\psi_{kn}|v|\psi_{kn}> = <\psi_{kn}|-i\nabla|\psi_{kn}> = Im[<\tilde{psi}_{nk}|\nabla|\tilde{psi}_{nk}>]
@@ -806,7 +800,7 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
  
  
    ! 2 - Sum over bands and k-points
-   current = 0.0_dp
+   tdks%current = 0.0_dp
    bdtot_index=0
    !Loop over spins
    do isppol=1, dtset%nsppol
@@ -819,66 +813,19 @@ subroutine rttddft_calc_current(tdks, dtset, dtfil, psps, mpi_enreg)
             current_k(2) = current_k(2) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,2,iband,ikpt)
             current_k(3) = current_k(3) + tdks%occ0(bdtot_index+iband)*psinablapsi(1,3,iband,ikpt)
          end do
-         current(:) = current(:) + dtset%wtk(ikpt)*current_k(:)
+         tdks%current(:,isppol) = tdks%current(:,isppol) + dtset%wtk(ikpt)*current_k(:)
          bdtot_index = bdtot_index + nband_k
       end do !nkpt
+
+      ! 3 - Add last contribution from vector potential times integral of the density
+      tdks%current(:,isppol) = tdks%current(:,isppol) + & 
+                             & tdks%tdef%vecpot(:)*sum(tdks%rhor(:,isppol)-tdks%nhat(:,isppol))*tdks%ucvol/tdks%nfftf
+
+      tdks%current(:,isppol) = -tdks%current(:,isppol)/tdks%ucvol
+
    end do !nsspol
 
-   print*, current
-
-   ! 3 - Add last contribution from vector potential times integral of the density
-   current(:) = current(:) + tdks%tdef%vecpot(:)*sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf
-
-   current(:) = -current(:)/tdks%ucvol
-
-   print*, "Current: ", current
-   
  end if
-
-
- !FB-TODO: Minus sign at the end
-!open(911,file="dip_x_real_new") 
-!open(912,file="dip_x_imag_new") 
-!open(913,file="dip_y_real_new") 
-!open(914,file="dip_y_imag_new") 
-!open(915,file="dip_z_real_new") 
-!open(916,file="dip_z_imag_new") 
-
-!do i = 1, dtset%nkpt
-!  write(911,*) psinablapsi(1,1,:,i)
-!  write(912,*) psinablapsi(2,1,:,i)
-!  write(913,*) psinablapsi(1,2,:,i)
-!  write(914,*) psinablapsi(2,2,:,i)
-!  write(915,*) psinablapsi(1,3,:,i)
-!  write(916,*) psinablapsi(2,3,:,i)
-!end do
-
-!close(911)
-!close(912)
-!close(913)
-!close(914)
-!close(915)
-!close(916)
-
-!print*, " "
-!print*, "y"
-!do i = 1, dtset%nkpt
-!  print*,  ""
-!  print*, "k=", i
-!  print*, "real:", psinablapsi(1,2,:,i)
-!  print*, "imag:", psinablapsi(2,2,:,i)
-!end do
-
-!print*, " "
-!print*, "z"
-!do i = 1, dtset%nkpt
-!  print*,  ""
-!  print*, "k=", i
-!  print*, "real:", psinablapsi(1,3,:,i)
-!  print*, "imag:", psinablapsi(2,3,:,i)
-!end do
-
-
 
 end subroutine rttddft_calc_current
 !!***
