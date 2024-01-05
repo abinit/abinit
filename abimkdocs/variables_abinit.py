@@ -1192,7 +1192,7 @@ Variable(
     topics=['Control_expert'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="BUIT-IN TEST number",
+    mnemonics="BUILT-IN TEST number",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
@@ -1746,6 +1746,27 @@ For [[optdriver]]=1, it does not modify the self-consistent calculations, neithe
 of the Born effective charge, and the subsequent echo of the phonon frequencies at Gamma, LO part only.
 
 See also the variables [[asr]] and [[asr@anaddb]], that govern the imposition of the acoustic sum rule.
+""",
+),
+
+Variable(
+    abivarname="chrgat",
+    varset="gstate",
+    vartype="real",
+    topics=['ConstrainedDFT_useful'],
+    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[ [[natrd]] ]', 'defaultval': '[ [[natom]] ]'}),
+    defaultval=0.0,
+    mnemonics="CHARGE of the AToms",
+    added_in_version="before_v9",
+    text=r"""
+Gives the target integrated charge in case of constrained DFT calculations, see [[constraint_kind]].
+Given in atomic unit of charge (=minus the charge of the electron).
+Note that this number is the net positive charge inside the sphere: one subtract from the
+nucleus charge [[ziontypat]] the integrated valence electron density in a sphere defined by [[ratsph]].
+The latter has indeed a negative value. Note that if the sphere radius [[ratsph]] is not sufficiently large,
+the amount of electrons will be smaller than expected based on chemical intuition. This means that there
+is in this case a bias toward too positive integrated charges. By contrast, if the sphere radius is too large,
+the spheres will overlap, and the electrons in the interatomic region will be double counted.
 """,
 ),
 
@@ -2333,27 +2354,6 @@ When [[delayperm]] is zero, there are no permutation trials.
 ),
 
 Variable(
-    abivarname="chrgat",
-    varset="gstate",
-    vartype="real",
-    topics=['ConstrainedDFT_useful'],
-    dimensions=ValueWithConditions({'[[natrd]]<[[natom]]': '[ [[natrd]] ]', 'defaultval': '[ [[natom]] ]'}),
-    defaultval=0.0,
-    mnemonics="CHARGE of the AToms",
-    added_in_version="before_v9",
-    text=r"""
-Gives the target integrated charge in case of constrained DFT calculations, see [[constraint_kind]].
-Given in atomic unit of charge (=minus the charge of the electron).
-Note that this number is the net positive charge inside the sphere: one subtract from the
-nucleus charge [[ziontypat]] the integrated valence electron density in a sphere defined by [[ratsph]].
-The latter has indeed a negative value. Note that if the sphere radius [[ratsph]] is not sufficiently large,
-the amount of electrons will be smaller than expected based on chemical intuition. This means that there
-is in this case a bias toward too positive integrated charges. By contrast, if the sphere radius is too large,
-the spheres will overlap, and the electrons in the interatomic region will be double counted.
-""",
-),
-
-Variable(
     abivarname="densfor_pred",
     varset="dev",
     vartype="integer",
@@ -2480,21 +2480,6 @@ Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
 Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 ([[rfelfd]] = 2) and phonon responses.
-""",
-),
-
-Variable(
-    abivarname="diago_apply_block_sliced",
-    varset="rlx",
-    vartype="integer",
-    topics=['parallelism_expert'],
-    dimensions="scalar",
-    defaultval=1,
-    mnemonics="Inverse Overlapp block matrix applied in a sliced fashion",
-    added_in_version="9.7.2",
-    text=r"""
-In the Chebyshev-filtered subspace method, one need to apply inverse overlapp matrix.
-This parameter allows to choose between two variants, sliced (1) or non-sliced (0).
 """,
 ),
 
@@ -4636,7 +4621,7 @@ In this case, the default value of [[fftalg]] is changed accordingly.
 !!! important
 
     This keyword is **ignored** when Fast Fourier Transforms are done using
-    **Graphics Processing Units** (GPU), i.e. when [[use_gpu_cuda]] = 1
+    **Graphics Processing Units** (GPU), i.e. when [[gpu_option]] > 0.
 """,
 ),
 
@@ -6081,10 +6066,11 @@ Variable(
     dimensions=[5],
     defaultval=[-1, -1, -1, -1, -1],
     mnemonics="GPU: choice of DEVICES on one node",
-    requires="[[use_gpu_cuda]] == 1 (CUDA functionality)",
+    requires="[[gpu_option]] > 0 and [[CUDA]] (Nvidia GPU)",
     added_in_version="before_v9",
     text=r"""
-To be used when several GPU devices are present on each node, assuming the
+@legacy  
+This variable is intended to be used when several GPU devices are present on each node, assuming the
 same number of devices on all nodes.
 Allows to choose in which order the GPU devices are chosen and distributed
 among MPI processes (see examples below). When the default value (-1) is set,
@@ -6110,27 +6096,162 @@ GPU card are numbered starting from 0; to get the GPU devices list, type
 ),
 
 Variable(
+    abivarname="gpu_kokkos_nthrd",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval="number of [[OPENMP]] threads",
+    mnemonics="GPU KOKKOS implementation: Number of THReaDs",
+    requires="[[gpu_option]] == 3 ([[KOKKOS]] GPU implementation)",
+    added_in_version="v9.12",
+    text=r"""
+When GPU acceleration is enabled (via [[KOKKOS]] implementation), OpenMP parallelism
+on CPU cores is not fully supported. ABINIT will ignore `OMP_NUM_THREADS` value,
+using 1 instead. But we may locally increase the number of OpenMP threads to speed-up
+some specific parts of the code. In that case we use [[gpu_kokkos_nthrd]] to specify
+the number of OpenMP threads.
+""",
+),
+
+Variable(
     abivarname="gpu_linalg_limit",
     varset="paral",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
     defaultval=2000000,
-    mnemonics="GPU (Cuda): LINear ALGebra LIMIT",
-    requires="[[use_gpu_cuda]] == 1 (CUDA functionality)",
+    mnemonics="GPU: LINear ALGebra LIMIT",
+    requires="[[gpu_option]] == 1 and [[CUDA]] (Nvidia GPU, old CUDA implementation)",
     added_in_version="before_v9",
     text=r"""
-Use of linear algebra and matrix algebra on GPU is only efficient if the size
+@legacy  
+This variable is obsolete and is only intended to be used with the old 2013 cuda
+implementation of ABINIT on GPU ([[gpu_option]]=1).  
+In that case, the use of linear/matrix algebra on GPU is only efficient if the size
 of the involved matrices is large enough. The [[gpu_linalg_limit]] parameter
 defines the threshold above which linear (and matrix) algebra operations are
 done on the Graphics Processing Unit.
-The considered matrix size is equal to:
-
-* SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$
-
+The matrix size is evaluated as to: SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$  
 When SIZE>=[[gpu_linalg_limit]], [[wfoptalg]] parameter is automatically set
-to 14 which corresponds to the use of LOBPCG algorithm for the calculation of
+to 14 which corresponds to the use of the legacy LOBPCG algorithm for the calculation of
 the eigenstates.
+""",
+),
+
+Variable(
+    abivarname="gpu_nl_distrib",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GPU: Non-Local operator, DISTRIBute projections",
+    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    added_in_version="9.12",
+    text=r"""
+When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
+in the non-local operator) are all stored on all GPU devices.  
+[[gpu_nl_distrib]] forces the distribution of these projections on several GPU devices. This
+uses less memory per GPU but requires communications beween GPU devices. These communication
+penalize the execution time.
+[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.  
+In standard executions, the distribution is only needed on large use cases to address
+the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
+when needed.
+""",
+),
+
+Variable(
+    abivarname="gpu_nl_splitsize",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="GPU: Non-Local operator SPLITing SIZE",
+    requires="[[use_gemm_nonlop]] == 1 and [[gpu_option]] == 2 ([[OPENMP_OFFLOAD]])",
+    added_in_version="9.12",
+    text=r"""
+Only relevant when [[gpu_nl_distrib]] = 1.
+When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
+in the non-local operator) are all stored on all GPU devices.  
+[[gpu_nl_splitsize]] defines the number of blocks used to split these projections
+on several GPU devices.   
+In standard executions, the distribution is only needed on large use cases to address
+the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
+when needed.
+""",
+),
+
+Variable(
+    abivarname="gpu_option",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_useful'],
+    dimensions="scalar",
+    defaultval=ValueWithConditions({'[[OPENMP_OFFLOAD]]': 2, '[[KOKKOS]]': 3, '[[CUDA]]': 1, 'defaultval': 0}),
+    mnemonics="GPU: OPTION to choose the implementation",
+    added_in_version="v9.12",
+    text=r"""
+Only relevant for Ground-State calculations ([[optdriver]] == 0).
+This option is only available if ABINIT executable has been compiled for the purpose
+of being used with GPU accelerators. It allows to choose between the different
+GPU programming models available in ABINIT:  
+
+- [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
+
+- [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
+  implementation, using the `nvcc` [[CUDA]] compiler. The old LOBPCG algorithm is automatically
+  used to compute the eigenstates ([[wfoptalg]]=14). The external linear algebra library
+  `MAGMA can also be linked to ABINIT to improve performances on large systems
+  (see [[gpu_linalg_limit]]).
+
+- [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
+  parts of the code on GPU. This implementation works on NVidia accelerators, if ABINIT has been
+  compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
+  libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
+  [cuBLAS](https://docs.nvidia.com/cuda/cublas) and
+  [cuSOLVER](https://docs.nvidia.com/cuda/cusolvermp)).
+  It also works on `AMD accelerators (EXPERIMENTAL),
+  if ABINIT has been compiled with a AMD compatible compiler and linked with NVidia
+  FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
+  or [HIP](https://github.com/ROCm/HIP)).
+
+- [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
+  parts of the code on GPU. This implementation -- at present -- is only compatible with
+  NVidia accelerators. It required that ABINIT has been linked to the
+  [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
+  performance libraries. It also uses NVidia FFT/linear algebra libraries
+  ([cuFFT](https://docs.nvidia.com/cuda/cufft), [cuBLAS](https://docs.nvidia.com/cuda/cublas)).
+  The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
+  on CPU (see [[gpu_kokkos_nthrd]]).
+
+For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See
+[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
+""",
+),
+
+Variable(
+    abivarname="gpu_use_nvtx",
+    varset="paral",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="GPU: activate USE of NVTX tracing/profiling",
+    added_in_version="9.7.2",
+    text=r"""
+Only available if ABINIT executable has been linked with the [[NVTX]] (Nvidia) or
+[[ROCTX]] (AMD) library.
+When [[gpu_use_nvtx]] = 1 on Nvidia GPU(s),
+the use of [NVTX](https://github.com/NVIDIA/NVTX)
+ tracing/profiling ((NVIDIA Tools eXtension Library) is activated.
+ The trace can be used for instance with
+ [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
+When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
+the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
+ tracing/profiling (ROCm Tools eXtension Library) is activated.  
 """,
 ),
 
@@ -7639,6 +7760,24 @@ but the continuation of the development of the code lead to prefer the default
 it available for all cases is a non-negligible development effort.
 Other targets are prioritary. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
+""",
+),
+
+Variable(
+    abivarname="invol_blk_sliced",
+    varset="dev",
+    vartype="integer",
+    topics=['parallelism_expert'],
+    dimensions="scalar",
+    mnemonics="INVerse OverLap: BLocK-diagonal matrix applied SLICED",
+    added_in_version="9.7.2",
+    defaultval=ValueWithConditions({'[[gpu_option]] > 0': '0', 'defaultval': 1}),
+    text=r"""
+Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).  
+In the Chebyshev-filtered subspace method (iterative diagonalization algorithm))
+one needs to apply the inverse of the overlap matrix. [[invol_blk_sliced]] allows one
+to choose between two variants, sliced (1) or non-sliced (0).  
+Default value is different for an execution on GPU.
 """,
 ),
 
@@ -19787,46 +19926,6 @@ PAW already uses 1 for [[useylm]]).
 ),
 
 Variable(
-    abivarname="use_gpu_cuda",
-    varset="paral",
-    vartype="integer",
-    topics=['parallelism_expert'],
-    dimensions="scalar",
-    defaultval=ValueWithConditions({'[[optdriver]] == 0 and [[CUDA]]': 1, 'defaultval': 0}),
-    mnemonics="activate USE of GPU accelerators with CUDA (nvidia)",
-    added_in_version="before_v9",
-    text=r"""
-Only available if ABINIT executable has been compiled with cuda nvcc compiler.
-This parameter activates the use of NVidia graphic accelerators (GPU) if present.
-If [[use_gpu_cuda]] = 1, some parts of the computation are transmitted to the GPUs.
-If [[use_gpu_cuda]] = 0, no computation is done on GPUs, even if present.
-
-Note that, while running ABINIT on GPUs, it is recommended to use MAGMA
-external library (i.e. Lapack on GPUs). The latter is activated during
-compilation stage (see "configure" step of ABINIT compilation process). If
-MAGMA is not used, ABINIT performances on GPUs can be poor.
-""",
-),
-
-Variable(
-    abivarname="use_nvtx",
-    varset="paral",
-    vartype="integer",
-    topics=['parallelism_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="activate USE of NVTX tracing/profiling",
-    added_in_version="9.7.2",
-    text=r"""
-Only available if ABINIT executable has been compiled with cuda nvcc compiler,
-and only meaningful when [[use_gpu_cuda]]=1.
-This parameter activates the use of nvtx tracing/profiling if present.
-If [[use_nvtx]] = 1, when profiling with nsys, additional information with be added in the report.
-If [[use_nvtx]] = 0, nothing happens.
-""",
-),
-
-Variable(
     abivarname="use_nonscf_gkk",
     varset="dev",
     vartype="integer",
@@ -20392,7 +20491,7 @@ Variable(
     vartype="integer",
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[tfkinfunc]] == 1': 1, '[[usepaw]] == 1': 1, 'defaultval': 0}),
+    defaultval=ValueWithConditions({'[[usepaw]] == 1': 1, '[[gpu_option]] > 0': 1, '[[tfkinfunc]] == 1': 1, 'defaultval': 0}),
     mnemonics="USE YLM (the spherical harmonics)",
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",

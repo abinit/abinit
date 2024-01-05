@@ -40,7 +40,6 @@
 program mrggkk
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_xmpi
  use m_errors
@@ -51,6 +50,7 @@ program mrggkk
 #endif
  use m_hdr
 
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin
  use m_io_tools,        only : flush_unit, open_file, file_exists

@@ -34,18 +34,18 @@ program aim
  use defs_basis
  use m_abicore
  use m_xmpi
- use m_build_info
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_time,     only : timein
- use m_io_tools, only : open_file, file_exists
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_fstrings, only : int2char4
- use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
+ use m_build_info,   only : abinit_version
+ use m_time,         only : timein
+ use m_io_tools,     only : open_file, file_exists
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_fstrings,     only : int2char4
+ use m_bader !,      only : adini, drvaim, inpar, defad, aim_shutdown
 
  implicit none
 
