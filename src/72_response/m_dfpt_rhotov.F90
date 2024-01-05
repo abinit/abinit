@@ -663,6 +663,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                         & + rhomag_eff(1,3)**2+rhomag_eff(2,3)**2 &
                         & + rhomag_eff(1,4)**2+rhomag_eff(2,4)**2 )
    end if
+   
+   !MR: a factor of two is needed (not sure yet why).
+   emagpen1=two*emagpen1
 
    !A 0.5 factor has been applied here to be consistent with the Zeeman field perturbation
    Bx(:)=-half*magpen*rhomag_eff(:,2)
@@ -711,6 +714,9 @@ subroutine dfpt_v1magpen(cplex,emagpen1,fatsph,intgden,magpen,mpatpol,mpdir,&
                           & + intgden_eff(1,3,iatom)**2+intgden_eff(2,3,iatom)**2 &
                           & + intgden_eff(1,4,iatom)**2+intgden_eff(2,4,iatom)**2 )
      end if
+
+     !MR: a factor of two is needed (not sure yet why).
+     emagpen1=two*emagpen1
 
      if (cplex==1) then
        do ifft=1,nfft
