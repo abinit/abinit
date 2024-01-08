@@ -1309,7 +1309,7 @@ subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
-   call MPI_BCAST(xval,1,MPI_INTEGER,master,spaceComm,ier)
+   call MPI_BCAST([xval],1,MPI_INTEGER,master,spaceComm,ier)
  end if
 #endif
 end subroutine xpaw_mpi_bcast_int
@@ -2689,9 +2689,9 @@ subroutine xpaw_mpi_sum_int(xval,comm,ier)
    call MPI_COMM_SIZE(comm,nproc,ier)
    if (nproc /= 1) then
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,1,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([MPI_IN_PLACE],[xval],1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
-     call MPI_ALLREDUCE(xval,xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([xval],[xsum],1,MPI_INTEGER,MPI_SUM,comm,ier)
      xval=xsum
 #endif
    end if
@@ -2741,7 +2741,7 @@ subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
      xval(:)=xsum(:)
@@ -2793,7 +2793,7 @@ subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:)=xsum(:)
@@ -2845,7 +2845,7 @@ subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2)
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:,:)=xsum(:,:)
@@ -2897,7 +2897,7 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2) ; n3=size(xval,dim=3)
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:,:,:)=xsum(:,:,:)

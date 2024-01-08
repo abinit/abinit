@@ -24,7 +24,7 @@ subroutine xmpi_land_log0d(xval, comm)
 ! *************************************************************************
 
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_ALLREDUCE(xval, out_val, 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
+   call MPI_ALLREDUCE([xval], [out_val], 1, MPI_LOGICAL, MPI_LAND, comm, ierr)
    xval = out_val
  end if
 #endif
@@ -186,7 +186,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    n3 = size(xval,3)
 
 !  #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-!  call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
+!  call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
 !  #else
    ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
    if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_lor_log3d')

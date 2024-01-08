@@ -1360,20 +1360,22 @@ contains
 #ifdef HAVE_GPU_MPI
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
-#ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if !defined HAVE_MPI2_INPLACE
+          ABI_ERROR("OpenMP offload needs MPI_IN_PLACE. Recompile with MPI2!")
+#endif
+ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW%vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
+          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW__vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
-#endif
 #endif
 
 #else
@@ -1430,16 +1432,19 @@ contains
 #ifdef HAVE_GPU_MPI
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
+#if !defined HAVE_MPI2_INPLACE
+          ABI_ERROR("OpenMP offload needs MPI_IN_PLACE. Recompile with MPI2!")
+#endif
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
+          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA

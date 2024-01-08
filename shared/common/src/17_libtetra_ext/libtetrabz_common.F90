@@ -781,7 +781,7 @@ SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
 #if defined(HAVE_MPI)
   INTEGER :: ierr
   !
-  CALL MPI_allREDUCE(MPI_IN_PLACE, scaler, 1, &
+  CALL MPI_allREDUCE([MPI_IN_PLACE], scaler, 1, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
 #endif
   !
@@ -802,7 +802,7 @@ SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
 #if defined(HAVE_MPI)
   INTEGER :: ierr
   !
-  CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
+  CALL MPI_allREDUCE([MPI_IN_PLACE], vector, ndim, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
 #endif
   !
@@ -823,7 +823,7 @@ SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
 #if defined(HAVE_MPI)
   INTEGER :: ierr
   !
-  CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
+  CALL MPI_allREDUCE([MPI_IN_PLACE], vector, ndim, &
   &                  MPI_DOUBLE_COMPLEX, MPI_SUM, comm, ierr)
 #endif
   !

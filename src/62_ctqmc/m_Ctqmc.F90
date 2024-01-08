@@ -1405,7 +1405,7 @@ include 'mpif.h'
 
   estimatedTime = this%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE(this%runTime, estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+  CALL MPI_REDUCE([this%runTime], [estimatedTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              0, this%MY_COMM, ierr)
 #endif
 
@@ -2144,6 +2144,10 @@ include 'mpif.h'
   DOUBLE PRECISION                              :: inv_size,sumh
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   TYPE(FFTHyb) :: FFTmrka
+#if !defined HAVE_MPI2_INPLACE
+  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
+  DOUBLE PRECISION                             :: rtime(1)
+#endif
 
   IF ( .NOT. this%done ) &
     CALL ERROR("Ctqmc_getResult : Simulation not run                ")
@@ -2272,13 +2276,22 @@ include 'mpif.h'
     FREEIF(freqs)
     MALLOC(freqs,(1:this%size*n1))
     freqs = 0.d0
-    freqs(n1*this%rank+1:n1*(this%rank+1)) = this%measNoise(1)%vec(1:n1) 
     counts(:) = n1
     displs(:) = (/ ( iflavor*n1, iflavor=0, this%size-1 ) /)
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
+#if defined HAVE_MPI2_INPLACE
+    freqs(n1*this%rank+1:n1*(this%rank+1)) = this%measNoise(1)%vec(1:n1) 
+    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n1))
+    freqs_buf(1:n1)=this%measNoise(1)%vec(1:n1)
+    CALL MPI_ALLGATHERV(freqs_buf, n1, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n1 = this%size*n1
     CALL Vector_setSize(this%measNoise(1),n1)
@@ -2287,13 +2300,22 @@ include 'mpif.h'
     FREE(freqs)
     MALLOC(freqs,(1:this%size*n2))
     freqs = 0.d0
-    freqs(n2*this%rank+1:n2*(this%rank+1)) = this%measNoise(2)%vec(1:n2) 
     counts(:) = n2
     displs(:) = (/ ( iflavor*n2, iflavor=0, this%size-1 ) /)
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+    freqs(n2*this%rank+1:n2*(this%rank+1)) = this%measNoise(2)%vec(1:n2) 
+    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
+#else
+    MALLOC(freqs_buf,(n2))
+    freqs_buf(1:n2)=this%measNoise(2)%vec(1:n2)
+    CALL MPI_ALLGATHERV(freqs_buf, n2, MPI_DOUBLE_PRECISION, &
+                        freqs, counts, displs, &
+                        MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
+    FREE(freqs_buf)
+#endif
 #endif
     n2 = this%size*n2
     CALL Vector_setSize(this%measNoise(2),n2)
@@ -2434,14 +2456,32 @@ include 'mpif.h'
 !#endif
 
 #ifdef HAVE_MPI
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, buffer, spAll*flavors, &
+#if defined HAVE_MPI2_INPLACE
+    CALL MPI_ALLREDUCE([MPI_IN_PLACE], buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%runTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+    CALL MPI_ALLREDUCE([MPI_IN_PLACE], [this%runTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              this%MY_COMM, ierr)
     IF ( this%opt_histo .GT. 0 ) THEN
-      CALL MPI_ALLREDUCE(MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+      CALL MPI_ALLREDUCE([MPI_IN_PLACE], this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                this%MY_COMM, ierr)
     END IF
+#else
+    MALLOC(buffer_out,(spAll*flavors))
+    CALL MPI_ALLREDUCE(buffer, buffer_out, spAll*flavors, &
+                     MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
+    buffer(1:spAll*flavors)=buffer_out(1:spAll*flavors)
+    FREE(buffer_out)
+    CALL MPI_ALLREDUCE([this%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+             this%MY_COMM, ierr)
+    this%runTime=rtime(1)
+    IF ( this%opt_histo .GT. 0 ) THEN
+      MALLOC(buffer_out,(flavors+1))
+      CALL MPI_ALLREDUCE(this%occup_histo_time, buffer_out, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+               this%MY_COMM, ierr)
+      this%occup_histo_time(1:flavors+1)=buffer_out(1:flavors+1)
+      FREE(buffer_out)
+    END IF
+#endif
 #endif
 
   

@@ -41,6 +41,7 @@ MODULE m_wffile
  use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
+ use iso_c_binding
 
  implicit none
 
@@ -289,7 +290,7 @@ subroutine getRecordMarkerLength_wffile(wff)
      if (ii==3) rml=2
      if (ii==4) rml=16
      posit=rml+6*wff%nbOct_ch
-     call MPI_FILE_READ_AT(wff%fhwff,posit,headform,1,MPI_INTEGER,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,[headform],1,MPI_INTEGER,statux,ierr)
      if (ierr==MPI_SUCCESS) then
        if (headform==wff%headform) wff%nbOct_recMarker=rml
      end if
@@ -328,7 +329,7 @@ subroutine getRecordMarkerLength_wffile(wff)
 
 !Broadcast record marker length
  if (wff%spaceComm/=MPI_COMM_SELF) then
-   call MPI_BCAST(wff%nbOct_recMarker,1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
+   call MPI_BCAST([wff%nbOct_recMarker],1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
  end if
 
 !Select MPI datatype for markers
@@ -396,11 +397,11 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
 
 !Local variables-------------------------------
 !scalars
- integer(kind=2)  :: delim_record2(1)
- integer(kind=4)  :: delim_record4(1)
- integer(kind=8)  :: delim_record8(1)
+ integer(kind=2)  :: delim_record2
+ integer(kind=4)  :: delim_record4
+ integer(kind=8)  :: delim_record8
 #if defined HAVE_FC_INT_QUAD
- integer(kind=16) :: delim_record16(1)
+ integer(kind=16) :: delim_record16
 #endif
 !character(len=500) :: msg
 !arrays
@@ -412,19 +413,19 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
 
  if (option==1) then
    if (wff%nbOct_recMarker==4) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record4(1)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,[delim_record4],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record4
    else if (wff%nbOct_recMarker==8) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record8(1)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,[delim_record8],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record8
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record16(1)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,[delim_record16],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record16
 #endif
    else if (wff%nbOct_recMarker==2) then
-     call MPI_FILE_READ_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record2(1)
+     call MPI_FILE_READ_AT(wff%fhwff,posit,[delim_record2],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record2
    else
      ABI_BUG('Wrong record marker length!')
    end if
@@ -432,37 +433,37 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
  else if (option==2) then
    if (wff%nbOct_recMarker==4) then
      delim_record4 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,[delim_record4],1,wff%marker_mpi_type,statux,ierr)
    else if (wff%nbOct_recMarker==8) then
      delim_record8 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,[delim_record8],1,wff%marker_mpi_type,statux,ierr)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
      delim_record16 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,[delim_record16],1,wff%marker_mpi_type,statux,ierr)
 #endif
    else if (wff%nbOct_recMarker==2) then
      delim_record2 = recordmarker
-     call MPI_FILE_WRITE_AT(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT(wff%fhwff,posit,[delim_record2],1,wff%marker_mpi_type,statux,ierr)
    else
      ABI_BUG('Wrong record marker length!')
    end if
 
  else if (option==3) then
    if (wff%nbOct_recMarker==4) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record4(1)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,[delim_record4],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record4
    else if (wff%nbOct_recMarker==8) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record8(1)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,[delim_record8],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record8
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record16(1)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,[delim_record16],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record16
 #endif
    else if (wff%nbOct_recMarker==2) then
-     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
-     recordmarker = delim_record2(1)
+     call MPI_FILE_READ_AT_ALL(wff%fhwff,posit,[delim_record2],1,wff%marker_mpi_type,statux,ierr)
+     recordmarker = delim_record2
    else
      ABI_BUG('Wrong record marker length !')
    end if
@@ -470,18 +471,18 @@ subroutine rwRecordMarker(option,posit,recordmarker,wff,ierr)
  else if (option==4) then
    if (wff%nbOct_recMarker==4) then
      delim_record4 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record4 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,[delim_record4],1,wff%marker_mpi_type,statux,ierr)
    else if (wff%nbOct_recMarker==8) then
      delim_record8 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record8 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,[delim_record8],1,wff%marker_mpi_type,statux,ierr)
 #if defined HAVE_FC_INT_QUAD
    else if (wff%nbOct_recMarker==16) then
      delim_record16 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record16,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,[delim_record16],1,wff%marker_mpi_type,statux,ierr)
 #endif
    else if (wff%nbOct_recMarker==2) then
      delim_record2 = recordmarker
-     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,delim_record2 ,1,wff%marker_mpi_type,statux,ierr)
+     call MPI_FILE_WRITE_AT_ALL(wff%fhwff,posit,[delim_record2],1,wff%marker_mpi_type,statux,ierr)
    else
      ABI_BUG('Wrong record marker length!')
    end if
@@ -1279,7 +1280,6 @@ subroutine WffOffset(wff,sender,spaceComm,ier)
 !Local variables ------------------------------
 #if defined HAVE_MPI_IO
  integer :: icom
- integer(kind=MPI_OFFSET_KIND) :: ima
 #endif
 
 ! *********************************************************************
@@ -1288,9 +1288,7 @@ subroutine WffOffset(wff,sender,spaceComm,ier)
  if (wff%iomode == IO_MODE_MPI) then
    call xmpi_max(sender,icom,spaceComm,ier)
    if (icom>=0)then
-     ima=wff%offwff
-     call MPI_BCAST(ima,1,wff%offset_mpi_type,icom,spaceComm,ier)
-     wff%offwff=ima
+     call MPI_BCAST([wff%offwff],1,wff%offset_mpi_type,icom,spaceComm,ier)
    end if
  end if ! iomode
 #else
@@ -2120,7 +2118,7 @@ subroutine WffWriteNpwRec(ierr,nband_disk,npw,nspinor,wff,&
    end if
    if (opt_paral_==2.and.wff%spaceComm_mpiio/=MPI_COMM_SELF) then
      call xmpi_barrier(wff%spaceComm_mpiio)
-     call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ierr)
+     call MPI_BCAST([wff%offwff],1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ierr)
    end if
 #endif
  else
@@ -2161,7 +2159,6 @@ subroutine xderiveRead_int(wff,xval,ierr)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- integer :: tmparr(1)
 #endif
  character(len=500) :: msg
 
@@ -2170,8 +2167,7 @@ subroutine xderiveRead_int(wff,xval,ierr)
  xval=0; ierr=0
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_INTEGER,statux,ierr)
- xval = tmparr(1)
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,[xval],1,MPI_INTEGER,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_int
  RETURN
 #endif
@@ -2218,7 +2214,7 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,nboct,dispoct,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2237,21 +2233,21 @@ subroutine xderiveRead_int1d(wff,xval,n1,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-     posit = posit+dispoct-nboct
+     call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     posit = posit + dispoct - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1,MPI_INTEGER,statux,ierr)
 
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
      call xmpi_max(dispoct,totoct,spaceComm,ierr)
-     !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+     !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2301,7 +2297,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2320,7 +2316,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
      posit = posit + dispoct - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1*n2,MPI_INTEGER,statux,ierr)
@@ -2334,7 +2330,7 @@ subroutine xderiveRead_int2d(wff,xval,n1,n2,spaceComm,ierr)
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2382,7 +2378,6 @@ subroutine xderiveRead_dp(wff,xval,ierr)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- real(dp) :: tmparr(1)
 #endif
  character(len=500) :: msg
 
@@ -2391,8 +2386,7 @@ subroutine xderiveRead_dp(wff,xval,ierr)
  xval=zero ; ierr=0
  if(.false.)write(std_out,*)wff%me
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_DOUBLE_PRECISION,statux,ierr)
- xval = tmparr(1)
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,[xval],1,MPI_DOUBLE_PRECISION,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_dp
  return
 #endif
@@ -2437,7 +2431,7 @@ end subroutine xderiveRead_dp
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,nboct,dispoct,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2456,7 +2450,7 @@ end subroutine xderiveRead_dp
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
      posit = posit + dispoct - nboct
    end if
 
@@ -2465,13 +2459,13 @@ end subroutine xderiveRead_dp
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
      call xmpi_max(dispoct,totoct,spaceComm,ierr)
-     !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+     !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2520,7 +2514,7 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
@@ -2539,7 +2533,7 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 !  Compute offset for local part
 !  dispoct = sum (nboct, rank=0..me)
    if (spaceComm/=MPI_COMM_SELF) then
-     call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+     call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
      posit = posit + dispoct - nboct
    end if
    call MPI_FILE_READ_AT(wff%fhwff,posit,xval,n1*n2,MPI_DOUBLE_PRECISION,statux,ierr)
@@ -2547,13 +2541,13 @@ subroutine xderiveRead_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 !  get the total number of bits wrote by processors
    if (spaceComm/=MPI_COMM_SELF) then
      call xmpi_max(dispoct,totoct,spaceComm,ierr)
-     !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+     !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
    else
      totoct=nboct
    end if
  else
    ierr = 1
-   nboct =0
+   nboct = 0
    totoct = 0
  end if
 
@@ -2858,12 +2852,13 @@ subroutine xderiveReadVal_char(wff,xval,n,ierr)
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
  integer,intent(out) :: ierr
- character(len=*),intent(out) :: xval
+ character(len=*),intent(out),target :: xval
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- character(len=len(xval)) :: tmparr(1)
+ character,pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 ! *********************************************************************
@@ -2872,8 +2867,8 @@ subroutine xderiveReadVal_char(wff,xval,n,ierr)
  if(.false.)write(std_out,*)wff%me,n
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,tmparr,n,MPI_CHARACTER,statux,ierr)
- xval = tmparr(1)
+ cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[n])
+ call MPI_FILE_READ_AT(wff%fhwff,wff%offwff,arr_xval,n,MPI_CHARACTER,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_ch * n
 #endif
 
@@ -2998,7 +2993,6 @@ subroutine xderiveWrite_int(wff,xval,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer :: tmparr(1)
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 ! *********************************************************************
@@ -3006,8 +3000,7 @@ subroutine xderiveWrite_int(wff,xval,ierr)
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- tmparr(1) = xval
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_INTEGER,statux,ierr)
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_INTEGER,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_int
 #endif
 
@@ -3048,7 +3041,7 @@ subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 ! *********************************************************************
@@ -3061,19 +3054,19 @@ subroutine xderiveWrite_int1d(wff,xval,n1,spaceComm,ierr)
 
 !dispoct = sum (nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit+dispoct-nboct
+   call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1,MPI_INTEGER,statux,ierr)
 !gather the bigest offset
 
  if (spaceComm/=MPI_COMM_SELF) then
    call xmpi_max(dispoct,totoct,spaceComm,ierr)
-   !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+   !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
- wff%offwff = wff%offwff+totoct
+ wff%offwff = wff%offwff + totoct
 
 !Disable old code
 #endif
@@ -3115,7 +3108,7 @@ subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: dispoct,nboct,posit,totoct
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,posit,totoct
  integer  :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3129,14 +3122,14 @@ subroutine xderiveWrite_int2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !dispoct = sum(nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit + dispoct-nboct
+   call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1*n2,MPI_INTEGER,statux,ierr)
 !gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
    call xmpi_max(dispoct,totoct,spaceComm,ierr)
-   !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+   !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
@@ -3178,15 +3171,13 @@ subroutine xderiveWrite_dp(wff,xval,ierr)
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
- real(dp) :: tmparr(1)
 #endif
 ! *********************************************************************
 
  ierr=0
  if(.false.)write(std_out,*)wff%me,xval
 #if defined HAVE_MPI_IO
- tmparr(1) = xval
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,tmparr,1,MPI_DOUBLE_PRECISION,statux,ierr)
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,[xval],1,MPI_DOUBLE_PRECISION,statux,ierr)
  wff%offwff = wff%offwff+wff%nbOct_dp
 #endif
 
@@ -3227,7 +3218,7 @@ subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,totoct,posit
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,posit,totoct
  integer  :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3240,14 +3231,14 @@ subroutine xderiveWrite_dp1d(wff,xval,n1,spaceComm,ierr)
  posit = wff%offwff
 !dispoct = sum (nboct, rank = 0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
    posit = posit + dispoct - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1,MPI_DOUBLE_PRECISION,statux,ierr)
 !Gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
    call xmpi_max(dispoct,totoct,spaceComm,ierr)
-   !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+   !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
@@ -3291,7 +3282,7 @@ subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,totoct,posit
+ integer(kind=MPI_OFFSET_KIND) :: nboct,dispoct,posit,totoct
  integer :: statux(MPI_STATUS_SIZE)
 #endif
 
@@ -3305,19 +3296,19 @@ subroutine xderiveWrite_dp2d(wff,xval,n1,n2,spaceComm,ierr)
  posit = wff%offwff
 !dispoct = sum(nboct, rank=0..me)
  if (spaceComm/=MPI_COMM_SELF) then
-   call MPI_SCAN(nboct,dispoct,1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
-   posit = posit+dispoct-nboct
+   call MPI_SCAN([nboct],[dispoct],1,wff%offset_mpi_type,MPI_SUM,spaceComm,ierr)
+   posit = posit + dispoct - nboct
  end if
  call MPI_FILE_WRITE_AT(wff%fhwff,posit,xval,n1*n2,MPI_DOUBLE_PRECISION,statux,ierr)
- posit = posit+nboct
+ posit = posit + nboct
 !gather the biggest offset
  if (spaceComm/=MPI_COMM_SELF) then
    call xmpi_max(dispoct,totoct,spaceComm,ierr)
-   !call MPI_ALLREDUCE(dispoct,totoct,1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
+   !call MPI_ALLREDUCE([dispoct],[totoct],1,wff%offset_mpi_type,MPI_MAX,spaceComm,ierr)
  else
    totoct=nboct
  end if
- wff%offwff = wff%offwff+totoct
+ wff%offwff = wff%offwff + totoct
 #endif
 
 end subroutine xderiveWrite_dp2d
@@ -3630,11 +3621,13 @@ subroutine xderiveWrite_char(wff,xval,n,ierr)
  type(wffile_type),intent(inout) :: wff
  integer,intent(in) :: n
  integer,intent(out) :: ierr
- character(len=*),intent(in) :: xval
+ character(len=*),intent(in),target :: xval
 
 !Local variables-------------------------------
 #if defined HAVE_MPI_IO
  integer :: statux(MPI_STATUS_SIZE)
+ character,pointer :: buf(:)
+ type(c_ptr) :: cptr
 #endif
 ! *********************************************************************
 
@@ -3642,7 +3635,8 @@ subroutine xderiveWrite_char(wff,xval,n,ierr)
  if(.false.)write(std_out,*)wff%me,xval,n
 
 #if defined HAVE_MPI_IO
- call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,xval,n,MPI_CHARACTER,statux,ierr)
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,buf,[n])
+ call MPI_FILE_WRITE_AT(wff%fhwff,wff%offwff,buf,n,MPI_CHARACTER,statux,ierr)
  wff%offwff = wff%offwff + wff%nbOct_ch * n
 #endif
 
