@@ -61,7 +61,11 @@ if(ABINIT_ENABLE_MPI_IO_DEFAULT)
   set(HAVE_MPI_IO_DEFAULT 1)
 endif()
 
-option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: no)" OFF)
+option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: no)" AUTO)
+if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
+  try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
+    LINK_LIBRARIES MPI::MPI_Fortran)
+endif()
 if(ABINIT_ENABLE_MPI_INPLACE)
   set(HAVE_MPI2_INPLACE 1)
 endif()
