@@ -168,6 +168,51 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
                     # ------------------------------------ #
 
 
+# _ABI_MPI_CHECK_MPI_INPLACE()
+# ------------------------------------
+#
+# Checks whether the MPI library provides MPI_INPLACE.
+#
+AC_DEFUN([_ABI_MPI_CHECK_MPI_INPLACE], [
+  # Set default values
+  abi_mpi_inplace="no"
+
+  if test "${abi_mpi_fc_level}" -ge "2"; then
+
+    # Back-up build environment
+    ABI_ENV_BACKUP
+
+    # Prepare build environment
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+    LDFLAGS="${FC_LDFLAGS}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    AC_MSG_CHECKING([whether MPI provides MPI_IN_PLACE])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use mpi
+        integer :: comm,ierr,counts(3),displs(3)
+        real*8 :: xval(5)
+        call mpi_init(ierr)
+        call mpi_allreduce([MPI_IN_PLACE],xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+        call mpi_allgather([MPI_IN_PLACE],1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_allgatherv([MPI_IN_PLACE],1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_finalize(ierr)
+      ]])],
+      [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${abi_mpi_inplace}])
+
+    # Restore build environment
+    ABI_ENV_RESTORE
+  fi
+]) # _ABI_MPI_CHECK_MPI_INPLACE
+
+
+                    # ------------------------------------ #
+
+
 # _ABI_MPI_CHECK_INTEGER16()
 # --------------------------
 #
@@ -908,6 +953,21 @@ AC_DEFUN([ABI_MPI_DETECT], [
           AC_MSG_ERROR([invalid MPI level: MPI-${abi_mpi_level}])
           ;;
       esac
+
+      # Test the availability of MPI_IN_PLACE
+      if test "${abi_mpi_inplace_enable}" = "yes" -o "${abi_mpi_inplace_enable}" = "auto"; then
+        _ABI_MPI_CHECK_MPI_INPLACE
+        if test "${abi_mpi_inplace}" = "no" -a "${abi_mpi_inplace_enable}" = "yes"; then
+          AC_MSG_ERROR([--enable-mpi-inplace option is activated but MPI_IN_PLACE is not available!])
+        fi
+        if test "${abi_mpi_inplace_enable}" = "auto"; then
+          abi_mpi_inplace_enable="${abi_mpi_inplace}"
+        fi
+      fi
+      if test "${abi_mpi_inplace_enable}" = "yes"; then
+        AC_DEFINE([HAVE_MPI2_INPLACE], 1,
+          [Define to 1 if you want MPI_IN_PLACE support.])
+      fi
 
       # Test the availability of problematic MPI constants
       _ABI_MPI_CHECK_INTEGER16
