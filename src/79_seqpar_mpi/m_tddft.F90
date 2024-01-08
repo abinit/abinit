@@ -32,6 +32,7 @@ module m_tddft
  use m_sort
  use m_dtset
  use m_dtfil
+ use m_xmpi, only : xmpi_bcast,xmpi_scatterv
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -948,10 +949,7 @@ contains
 
  end if ! am_master
 
-
-#if defined HAVE_MPI
- call MPI_BCAST(count_to_do,1,MPI_INTEGER,master,spaceComm,ierr)
-#endif
+ call xmpi_bcast(count_to_do,master,spaceComm,ierr)
 
  displ=(me_loc*count_to_do)/nproc_loc
  count=min(((me_loc+1)*count_to_do)/nproc_loc,count_to_do)-displ
@@ -961,18 +959,17 @@ contains
  write(message,'(A,I6)') 'Maximum number of matrix elements per processor = ',countmax
  call wrtout(std_out,message,'COLL')
 
-
-#if defined HAVE_MPI
-!Need to dispatch the elements to compute to the different processes
- ABI_MALLOC(tmpbuf,(nexcit_win**2))
- tmpbuf=0
- call MPI_Scatterv(excit_coords(1,1),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
- excit_coords(:,1)=tmpbuf(:)
- tmpbuf=0
- call MPI_Scatterv(excit_coords(1,2),counts,displs,MPI_INTEGER,tmpbuf,count,MPI_INTEGER,0,spaceComm,ierr)
- excit_coords(:,2)=tmpbuf(:)
- ABI_FREE(tmpbuf)
-#endif
+if (xmpi_paral==1) then
+!  Need to dispatch the elements to compute to the different processes
+   ABI_MALLOC(tmpbuf,(nexcit_win**2))
+   tmpbuf=0
+   call xmpi_scatterv(excit_coords(:,1),counts,displs,tmpbuf,count,0,spaceComm,ierr)
+   excit_coords(:,1)=tmpbuf(:)
+   tmpbuf=0
+   call xmpi_scatterv(excit_coords(:,2),counts,displs,tmpbuf,count,0,spaceComm,ierr)
+   excit_coords(:,2)=tmpbuf(:)
+   ABI_FREE(tmpbuf)
+ end if
 
  nfftdiel=ndiel1*ndiel2*ndiel3
  ABI_MALLOC(wfprod,(ndiel1,ndiel2,ndiel3))

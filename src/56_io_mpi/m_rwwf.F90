@@ -785,6 +785,8 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
  integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
  character(len=nctk_slen) :: kdep
 #endif
+#ifdef HAVE_MPI
+#endif
 
 ! *********************************************************************
 
@@ -916,7 +918,7 @@ subroutine writewf(cg,eigen,formeig,icg,ikpt,isppol,kg_k,mband,mcg,mpi_enreg,&
        call xderiveWRecEnd(wff,ios)
      end if
 #ifdef HAVE_MPI
-     call MPI_BCAST(wff%offwff,1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
+     call MPI_BCAST([wff%offwff],1,wff%offset_mpi_type,0,wff%spaceComm_mpiio,ios)
 #endif
 #ifdef HAVE_NETCDF
    else if (wff%iomode == IO_MODE_ETSF) then

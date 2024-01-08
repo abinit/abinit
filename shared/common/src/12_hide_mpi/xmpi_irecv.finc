@@ -68,7 +68,7 @@ subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
-   call MPI_IRECV(xval,1,MPI_INTEGER,source,my_tag,comm,request,ier)
+   call MPI_IRECV([xval],1,MPI_INTEGER,source,my_tag,comm,request,ier)
    xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if

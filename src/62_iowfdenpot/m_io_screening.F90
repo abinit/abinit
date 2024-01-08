@@ -1743,7 +1743,7 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
-   call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
+   call MPI_FILE_READ_AT(mpio_fh,positloc,[nqlwl],1,MPI_INTEGER,statux,ierr)
    call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl)))
 
    do isk=1,5

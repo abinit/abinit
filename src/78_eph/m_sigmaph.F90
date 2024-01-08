@@ -725,6 +725,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
+#if !defined HAVE_MPI2_INPLACE
+ real(dp),allocatable :: cgq_buf(:,:,:)
+#endif
 
 !************************************************************************
 
@@ -1546,11 +1549,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            nelem = 2 * npw_kq * nspinor
            call sigma%bsum_comm%prep_gatherv(nelem, sigma%nbsum_rank(:,1), sendcount, recvcounts, displs)
 #ifdef HAVE_MPI
-           !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+           !call MPI_ALLGATHERV([MPI_IN_PLACE], sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
-           call MPI_IALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+#if defined HAVE_MPI2_INPLACE
+           call MPI_IALLGATHERV([MPI_IN_PLACE], sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+#else
+           ABI_MALLOC(cgq_buf,(sendcount))
+           cgq_buf(1:sendcount)=cgq(displs(1+my_rank)+1:displs(1+my_rank)+sendcount)
+           call MPI_IALLGATHERV(cgq_buf, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
+                                MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+           ABI_FREE(cgq_buf)
+#endif
            call xmpi_requests_add(+1)
 #endif
 
@@ -1796,7 +1807,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            ! TODO
            !nelem = 2*npw_kq*nspinor*sigma%my_npert
-           !call MPI_ALLGATHER(MPI_IN_PLACE, nelem, MPI_DOUBLE_PRECISION, cg1s_kq(:,:,:,ib_k), nelem, &
+           !call MPI_ALLGATHER([MPI_IN_PLACE], nelem, MPI_DOUBLE_PRECISION, cg1s_kq(:,:,:,ib_k), nelem, &
            !                   MPI_DOUBLE_PRECISION, sigma%pert_comm%value, ierr)
 
            call xmpi_allgather(h1kets_kq(:,:,:,ib_k), 2*npw_kq*nspinor*sigma%my_npert, &
