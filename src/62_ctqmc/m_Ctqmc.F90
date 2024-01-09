@@ -643,7 +643,12 @@ SUBROUTINE Ctqmc_allocateAll(this)
   this%measDE = 0.d0
 
   FREEIF(this%mu)
-  MALLOC(this%mu,(1:flavors) )
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  MALLOC(this%mu, (1:flavors) )
+#else
+  MALLOC(this%mu, (1:flavors))
+#endif
   this%mu = 0.d0
 END SUBROUTINE Ctqmc_allocateAll
 !!***
