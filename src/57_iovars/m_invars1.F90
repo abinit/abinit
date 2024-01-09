@@ -41,7 +41,7 @@ module m_invars1
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -556,11 +556,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  end do
 
  ! GPU related parameters
-
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
  dtsets(:)%gpu_use_nvtx=0
-
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
+#if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
    do i1=1,ndtset_alloc
@@ -576,13 +574,15 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_option',tread,'INT')
    if(tread==1)dtsets(idtset)%gpu_option=intarr(1)
+#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
    if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
+#endif
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
 
  if (gpu_option/=ABI_GPU_DISABLED) then
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
+#if defined HAVE_GPU
    if (idev<=0) then
      write(msg,'(5a)')&
 &     'Input variable gpu_option is on (/=0),',ch10,&
@@ -594,11 +594,12 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 #if !defined HAVE_OPENMP_OFFLOAD
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
-&     'with OpenMP GPU offloading enabled !',ch10,&
+&     'with OpenMP GPU offloading enabled!',ch10,&
 &     'Action: change the input variable gpu_option',ch10,&
 &     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
      ABI_ERROR(msg)
 #endif
+#if defined HAVE_OPENMP_OFFLOAD
      if(xomp_get_num_devices() == 0) then
        write(msg,'(13a)')&
 &       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
@@ -610,11 +611,12 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
        ABI_ERROR(msg)
      end if
+#endif
    else if(gpu_option==ABI_GPU_KOKKOS) then
 #if !defined HAVE_KOKKOS || !defined HAVE_YAKL
      write(msg,'(7a)')&
 &     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
-&     'with Kokkos and/or YAKL dependencies enabled !',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
 &     'Action: change the input variable gpu_option',ch10,&
 &     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
      ABI_ERROR(msg)
@@ -2280,8 +2282,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism
    dtsets(idtset)%dfpt_sciss=zero
-   dtsets(idtset)%invol_blk_sliced=1
-   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) dtsets(idtset)%invol_blk_sliced=0
    dtsets(idtset)%diecut=2.2_dp
    dtsets(idtset)%dielng=1.0774841_dp
    dtsets(idtset)%diemac=1.0d6
@@ -2445,6 +2445,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   dtsets(idtset)%invol_blk_sliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invol_blk_sliced=0
+   end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism

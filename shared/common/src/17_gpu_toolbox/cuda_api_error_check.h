@@ -36,6 +36,7 @@
 #pragma once
 
 #include <cuda.h>
+#include <cuda_runtime_api.h>
 #include <string>
 #include <stdio.h> // for fflush
 #include <cassert>
@@ -484,6 +485,8 @@ inline const char* _ConvertSMVer2ArchName(int major, int minor) {
       {0x75, "Turing"},
       {0x80, "Ampere"},
       {0x86, "Ampere"},
+      {0x89, "AdaLovelace"},
+      {0x90, "Hopper"},
       {-1, "Graphics Device"}};
 
   int index = 0;

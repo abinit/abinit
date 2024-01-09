@@ -58,6 +58,7 @@ AC_DEFUN([ABI_OMP_CHECK_GPU_OFFLOAD],[
   dnl Init
   abi_omp_has_gpu_offload="unknown"
   abi_omp_has_gpu_get_mapped_ptr="unknown"
+  abi_omp_has_gpu_offload_datastructure="unknown"
 
   dnl Check whether OpenMP's TARGET offload directives are recognized
   AC_LANG_PUSH([Fortran])
@@ -100,11 +101,11 @@ AC_DEFUN([ABI_OMP_CHECK_GPU_OFFLOAD],[
     ]])], [abi_omp_has_gpu_offload="yes"], [abi_omp_has_gpu_offload="no"])
   AC_MSG_RESULT([${abi_omp_has_gpu_offload}])
 
-  dnl Propagate result
   if test "${abi_omp_has_gpu_offload}" != "yes"; then
     AC_MSG_ERROR([OpenMP GPU offload is enabled but is not supported by your compiler. Perhaps do you have flags missing ?])
   fi
 
+  dnl Check whether compiler implements omp_get_mapped_ptr
   if test "${abi_omp_has_gpu_offload}" == "yes"; then
     AC_MSG_CHECKING([whether compiler implements omp_get_mapped_ptr])
     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],
@@ -125,5 +126,24 @@ AC_DEFUN([ABI_OMP_CHECK_GPU_OFFLOAD],[
         [Define to 1 if compiler support omp_get_mapped_ptr Fortran routine from OpenMP 5.1.])
     fi
   fi
+
+  dnl Check whether compiler correctly handles structured types in OMP TARGET directives
+  if test "${abi_omp_has_gpu_offload}" == "yes"; then
+    AC_MSG_CHECKING([whether compiler correctly handles structured types in OMP TARGET directives])
+
+    dnl At present (2023) only NVHPC implements correctly structured types in OMP TARGET
+    if test "${abi_fc_vendor}" == "nvhpc"; then
+      abi_omp_has_gpu_offload_datastructure="yes"
+    else
+      abi_omp_has_gpu_offload_datastructure="no"
+    fi
+
+    AC_MSG_RESULT([${abi_omp_has_gpu_offload_datastructure}])
+    if test "${abi_omp_has_gpu_offload_datastructure}" == "yes"; then
+      AC_DEFINE([HAVE_OPENMP_OFFLOAD_DATASTRUCTURE], 1,
+        [Define to 1 if compiler correctly handles structured types in OMP TARGET directives.])
+    fi
+  fi
+
   AC_LANG_POP([Fortran])
 ]) # ABI_OMP_CHECK_GPU_OFFLOAD
