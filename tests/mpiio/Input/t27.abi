@@ -29,6 +29,8 @@ prtvclmb 1
 
 ndtset 6
 
+bandpp 1
+
 # Dataset 1
 # Output the GS WFK with MPI-FFT.
 npband1 1 np_spkpt1 2 npfft1 2

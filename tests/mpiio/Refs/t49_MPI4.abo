@@ -91,6 +91,7 @@ P           mkmem           1
            ndtset           2
             ngfft          16      16      16
              nkpt           1
+    nblock_lobpcg           4
 -          npband           2
 -           npfft           2
             nstep           4
@@ -503,6 +504,7 @@ P           mkmem           1
            ndtset           2
             ngfft          16      16      16
              nkpt           1
+    nblock_lobpcg           4
 -          npband           2
 -           npfft           2
             nstep           4

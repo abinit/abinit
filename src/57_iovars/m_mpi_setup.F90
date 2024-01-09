@@ -421,6 +421,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%np_spkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
+     dtsets(idtset)%bandpp=1
      dtsets(idtset)%np_spkpt = 1
      dtsets(idtset)%npfft = 1
      dtsets(idtset)%npspinor = 1
