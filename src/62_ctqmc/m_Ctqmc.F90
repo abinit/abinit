@@ -1331,7 +1331,7 @@ include 'mpif.h'
   INTEGER                            :: ilatex
   CHARACTER(LEN=4)                   :: Cchar
 !#endif
-  DOUBLE PRECISION                   :: estimatedTime
+  DOUBLE PRECISION                   :: estimatedTime(1)
 
   IF ( .NOT. this%set  ) &
     CALL ERROR("Ctqmc_run : QMC not set up                          ")
@@ -1405,14 +1405,14 @@ include 'mpif.h'
 
   estimatedTime = this%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE([this%runTime], [estimatedTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
+  CALL MPI_REDUCE([this%runTime], estimatedTime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
              0, this%MY_COMM, ierr)
 #endif
 
   IF ( this%rank .EQ. 0 ) THEN
     WRITE(this%ostream,'(A26,I6,A11)') "Thermalization done in    ", CEILING(estimatedTime), "    seconds"
     WRITE(this%ostream,'(A25,I7,A15,I5,A5)') "The QMC should run in    ", &
-           CEILING(estimatedTime*DBLE(this%sweeps)/DBLE(this%thermalization)),&
+           CEILING(estimatedTime(1)*DBLE(this%sweeps)/DBLE(this%thermalization)),&
                         "    seconds on ", this%size, " CPUs"
   END IF
 
@@ -2140,13 +2140,13 @@ include 'mpif.h'
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
+  DOUBLE PRECISION,              DIMENSION(1)   :: rtime
 #endif
   DOUBLE PRECISION                              :: inv_size,sumh
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   TYPE(FFTHyb) :: FFTmrka
 #if !defined HAVE_MPI2_INPLACE
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
-  DOUBLE PRECISION                             :: rtime(1)
 #endif
 
   IF ( .NOT. this%done ) &
@@ -2456,11 +2456,11 @@ include 'mpif.h'
 !#endif
 
 #ifdef HAVE_MPI
+    CALL MPI_ALLREDUCE([this%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, this%MY_COMM, ierr)
+    this%runTime=rtime(1)
 #if defined HAVE_MPI2_INPLACE
     CALL MPI_ALLREDUCE([MPI_IN_PLACE], buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
-    CALL MPI_ALLREDUCE([MPI_IN_PLACE], [this%runTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             this%MY_COMM, ierr)
     IF ( this%opt_histo .GT. 0 ) THEN
       CALL MPI_ALLREDUCE([MPI_IN_PLACE], this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                this%MY_COMM, ierr)
@@ -2471,9 +2471,6 @@ include 'mpif.h'
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
     buffer(1:spAll*flavors)=buffer_out(1:spAll*flavors)
     FREE(buffer_out)
-    CALL MPI_ALLREDUCE([this%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             this%MY_COMM, ierr)
-    this%runTime=rtime(1)
     IF ( this%opt_histo .GT. 0 ) THEN
       MALLOC(buffer_out,(flavors+1))
       CALL MPI_ALLREDUCE(this%occup_histo_time, buffer_out, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &

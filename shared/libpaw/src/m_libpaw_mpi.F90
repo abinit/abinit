@@ -1304,12 +1304,17 @@ subroutine xpaw_mpi_bcast_int(xval,master,spaceComm,ier)
  integer, intent(out) :: ier
 
 !Local variables-------------------------------
+#if defined HAVE_MPI
+ integer :: arr_xval(1)
+#endif
 
 ! *************************************************************************
  ier=0
 #if defined HAVE_MPI
  if (spaceComm /= xpaw_mpi_comm_self .and. spaceComm /= xpaw_mpi_comm_null) then
-   call MPI_BCAST([xval],1,MPI_INTEGER,master,spaceComm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_INTEGER,master,spaceComm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 end subroutine xpaw_mpi_bcast_int
@@ -2678,7 +2683,7 @@ subroutine xpaw_mpi_sum_int(xval,comm,ier)
 #if defined HAVE_MPI
  integer :: nproc
 #if !defined HAVE_MPI2 || !defined HAVE_MPI2_INPLACE
- integer :: xsum
+ integer :: arr_xsum(1)
 #endif
 #endif
 
@@ -2691,7 +2696,8 @@ subroutine xpaw_mpi_sum_int(xval,comm,ier)
 #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
      call MPI_ALLREDUCE([MPI_IN_PLACE],[xval],1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
-     call MPI_ALLREDUCE([xval],[xsum],1,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE([xval],arr_xsum,1,MPI_INTEGER,MPI_SUM,comm,ier)
+     xsum=arr_xsum(1)
      xval=xsum
 #endif
    end if

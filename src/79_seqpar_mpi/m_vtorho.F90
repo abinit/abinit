@@ -1801,11 +1801,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end do
        end do
        call xmpi_max(energies%e_fermie,spaceComm_distrb,ierr)
-       ! CP added in the case occopt = 9
        if (dtset%occopt == 9) then
           call xmpi_max(energies%e_fermih,spaceComm_distrb,ierr)
        end if
-       ! End CP added
        call timab(993,2,tsec)
      end if
 
