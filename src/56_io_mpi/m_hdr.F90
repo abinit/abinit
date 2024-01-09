@@ -1603,7 +1603,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
  integer :: headform,ierr,mu,usepaw,npsp
 !arrays
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: iread(1),statux(MPI_STATUS_SIZE)
 #endif
  character(len=500) :: msg
 
@@ -1619,7 +1619,8 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 !Reading the first record of the file -------------------------------------
 !read (unitfi)   codvsn,headform,..............
  positloc = bsize_frm + 8*xmpi_bsize_ch
- call MPI_FILE_READ_AT(mpio_fh,positloc,[fform],1,MPI_INTEGER,statux,ierr)
+ call MPI_FILE_READ_AT(mpio_fh,positloc,iread,1,MPI_INTEGER,statux,ierr)
+ fform=iread(1)
 
  if (ANY(fform == [1,2,51,52,101,102] )) then
    ! This is the old format !read (unitfi) codvsn,fform
@@ -1632,9 +1633,11 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 
  else
    !read (unitfi)codvsn,headform,fform
-   call MPI_FILE_READ_AT(mpio_fh,positloc,[headform],1,MPI_INTEGER,statux,ierr)
+   call MPI_FILE_READ_AT(mpio_fh,positloc,iread,1,MPI_INTEGER,statux,ierr)
+   headform=iread(1)
    positloc = positloc + xmpi_bsize_int
-   call MPI_FILE_READ_AT(mpio_fh,positloc,[fform],1,MPI_INTEGER,statux,ierr)
+   call MPI_FILE_READ_AT(mpio_fh,positloc,iread,1,MPI_INTEGER,statux,ierr)
+   fform=iread(1)
  end if
 
  if (headform < 80) then
@@ -1650,9 +1653,11 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 
 !Read npsp and usepaw from the second record and skip it
  positloc  = offset + bsize_frm + xmpi_bsize_int*13
- call MPI_FILE_READ_AT(mpio_fh,positloc,[npsp],1,MPI_INTEGER,statux,ierr)
+ call MPI_FILE_READ_AT(mpio_fh,positloc,iread,1,MPI_INTEGER,statux,ierr)
+ npsp=iread(1)
  positloc = positloc +  xmpi_bsize_int*4
- call MPI_FILE_READ_AT(mpio_fh,positloc,[usepaw],1,MPI_INTEGER,statux,ierr)
+ call MPI_FILE_READ_AT(mpio_fh,positloc,iread,1,MPI_INTEGER,statux,ierr)
+ usepaw=iread(1)
  call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
 
  ! Skip the rest of the file ---------------------------------------------
@@ -1848,7 +1853,7 @@ subroutine hdr_io_wfftype(fform,hdr,rdwr,wff)
  if(rdwr==1)then
    if (wff%iomode==IO_MODE_FORTRAN_MASTER .or. wff%iomode==IO_MODE_MPI) then
      if (wff%spaceComm/=MPI_COMM_SELF) then
-       call MPI_BCAST([fform],1,MPI_INTEGER,wff%master,wff%spaceComm,ierr)
+       call xmpi_bcast(fform,wff%master,wff%spaceComm,ierr)
        call hdr%bcast(wff%master, wff%me, wff%spaceComm)
      end if
      wff%headform=hdr%headform
@@ -2201,8 +2206,8 @@ subroutine hdr_skip_wfftype(wff,ierr)
  character(len=8) :: codvsn
  character(len=500) :: msg,errmsg
 #if defined HAVE_MPI_IO
- integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,positloc
- integer :: statux(MPI_STATUS_SIZE)
+ integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,positloc,off(1)
+ integer :: iread(1),statux(MPI_STATUS_SIZE)
 #endif
 
 !*************************************************************************
@@ -2277,11 +2282,13 @@ subroutine hdr_skip_wfftype(wff,ierr)
 !    read(unitfi) bantot, hdr%date, hdr%intxc.................
 !    Pick off npsp and usepaw from WF file
      positloc  = posit + wff%nbOct_recMarker + wff%nbOct_int*13
-     call MPI_FILE_READ_AT(wff%fhwff,positloc,[npsp],1,MPI_INTEGER,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,positloc,iread,1,MPI_INTEGER,statux,ierr)
+     npsp=iread(1)
 
      ! Read usepaw and skip the fortran record
      positloc = positloc +  wff%nbOct_int*4
-     call MPI_FILE_READ_AT(wff%fhwff,positloc,[usepaw],1,MPI_INTEGER,statux,ierr)
+     call MPI_FILE_READ_AT(wff%fhwff,positloc,iread,1,MPI_INTEGER,statux,ierr)
+     usepaw=iread(1)
      call rwRecordMarker(1,posit,delim_record,wff,ierr)
 
      ! Skip the rest of the file ---------------------------------------------
@@ -2298,7 +2305,9 @@ subroutine hdr_skip_wfftype(wff,ierr)
    end if
 
    if (wff%spaceComm/=MPI_COMM_SELF) then
-     call MPI_BCAST([wff%offwff],1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
+     off(1)=wff%offwff
+     call MPI_BCAST(off,1,wff%offset_mpi_type,wff%master,wff%spaceComm,ierr)
+     wff%offwff=off(1)
    end if
 #endif
  end if

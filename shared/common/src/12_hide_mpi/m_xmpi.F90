@@ -3279,11 +3279,11 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 !Local variables-------------------------------
 !scalars
  integer :: bsize_frm,mpi_type_frm,myfh
- integer(kind=int16) :: delim_record2
- integer(kind=int32) :: delim_record4
- integer(kind=int64) :: delim_record8
+ integer(kind=int16) :: delim_record2(1)
+ integer(kind=int32) :: delim_record4(1)
+ integer(kind=int64) :: delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
- integer*16 :: delim_record16
+ integer*16 :: delim_record16(1)
 #endif
  character(len=500) :: msg
 !arrays
@@ -3302,19 +3302,19 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  CASE (xmpio_single)
 
    if (bsize_frm==4) then
-     call MPI_FILE_READ_AT(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     call MPI_FILE_READ_AT(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
-     call MPI_FILE_READ_AT(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     call MPI_FILE_READ_AT(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
-     call MPI_FILE_READ_AT(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     call MPI_FILE_READ_AT(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT(myfh,offset,[delim_record2],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3322,19 +3322,19 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  CASE (xmpio_collective)
 
    if (bsize_frm==4) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,[delim_record2],1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if

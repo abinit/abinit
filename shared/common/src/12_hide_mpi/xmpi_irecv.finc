@@ -59,7 +59,8 @@ subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 
 !Local variables-------------------
 #if defined HAVE_MPI
-  integer :: ier,my_tag
+  integer :: my_tag
+  integer :: arr_xval(1)
 #endif
 
 ! *************************************************************************
@@ -68,9 +69,9 @@ subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
-   call MPI_IRECV([xval],1,MPI_INTEGER,source,my_tag,comm,request,ier)
+   call MPI_IRECV(arr_xval,1,MPI_INTEGER,source,my_tag,comm,request,ierr)
+   xval=arr_xval(1)
    xmpi_count_requests = xmpi_count_requests + 1
-   ierr=ier
  end if
 #endif
 
@@ -113,7 +114,7 @@ subroutine xmpi_irecv_int1d(xval,source,tag,comm,request,ierr)
 !Local variables-------------------
 
 #if defined HAVE_MPI
-  integer :: ier,n1,my_tag
+  integer :: n1,my_tag
 #endif
 
 ! *************************************************************************
@@ -123,9 +124,8 @@ subroutine xmpi_irecv_int1d(xval,source,tag,comm,request,ierr)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
    n1=size(xval)
-   call MPI_IRECV(xval,n1,MPI_INTEGER,source,my_tag,comm,request,ier)
+   call MPI_IRECV(xval,n1,MPI_INTEGER,source,my_tag,comm,request,ierr)
    xmpi_count_requests = xmpi_count_requests + 1
-   ierr=ier
  end if
 #endif
 
@@ -171,7 +171,7 @@ subroutine xmpi_irecv_dp1d(xval,source,tag,comm,request,ierr)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: ier,my_tag,n1
+ integer :: my_tag,n1
 #endif
 
 ! *************************************************************************
@@ -181,9 +181,8 @@ subroutine xmpi_irecv_dp1d(xval,source,tag,comm,request,ierr)
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    n1=size(xval,dim=1)
    my_tag=MOD(tag,xmpi_tag_ub)
-   call MPI_IRECV(xval,n1,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ier)
+   call MPI_IRECV(xval,n1,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ierr)
    xmpi_count_requests = xmpi_count_requests + 1
-   ierr=ier
  end if
 #endif
 
@@ -229,7 +228,7 @@ subroutine xmpi_irecv_dp2d(xval,source,tag,comm,request,ierr)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: ier,my_dt,my_op,my_tag,n1,n2
+ integer :: my_dt,my_op,my_tag,n1,n2
  integer(kind=int64) :: ntot
 #endif
 
@@ -248,15 +247,14 @@ subroutine xmpi_irecv_dp2d(xval,source,tag,comm,request,ierr)
    ntot=int(n1*n2,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_IRECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ier)
+     call MPI_IRECV(xval,n1*n2,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ierr)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_IRECV(xval,1,my_dt,source,my_tag,comm,request,ier)
+     call MPI_IRECV(xval,1,my_dt,source,my_tag,comm,request,ierr)
      call xmpi_largetype_free(my_dt,my_op)
    end if
 
    xmpi_count_requests = xmpi_count_requests + 1
-   ierr=ier
  end if
 #endif
 
@@ -302,7 +300,7 @@ subroutine xmpi_irecv_dp3d(xval,source,tag,comm,request,ierr)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: ier,my_dt,my_op,my_tag,n1,n2,n3
+ integer :: my_dt,my_op,my_tag,n1,n2,n3
  integer(kind=int64) :: ntot
 #endif
 
@@ -322,15 +320,14 @@ subroutine xmpi_irecv_dp3d(xval,source,tag,comm,request,ierr)
    ntot=int(n1*n2*n3,kind=int64)
 
    if (ntot<=xmpi_maxint32_64) then
-     call MPI_IRECV(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ier)
+     call MPI_IRECV(xval,n1*n2*n3,MPI_DOUBLE_PRECISION,source,my_tag,comm,request,ierr)
    else
      call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
-     call MPI_IRECV(xval,1,my_dt,source,my_tag,comm,request,ier)
+     call MPI_IRECV(xval,1,my_dt,source,my_tag,comm,request,ierr)
      call xmpi_largetype_free(my_dt,my_op)
    end if
 
    xmpi_count_requests = xmpi_count_requests + 1
-   ierr=ier
  end if
 #endif
 

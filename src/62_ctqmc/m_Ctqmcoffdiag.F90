@@ -1735,6 +1735,7 @@ include 'mpif.h'
 !Local variables ------------------------------
 #ifdef HAVE_MPI
   INTEGER                            :: ierr
+  DOUBLE PRECISION                   :: rtime(1)
 #endif
 !#ifdef CTCtqmcoffdiag_MOVIE
   INTEGER                            :: ilatex
@@ -1820,8 +1821,8 @@ include 'mpif.h'
 
   estimatedTime = op%runTime
 #ifdef HAVE_MPI
-  CALL MPI_REDUCE([op%runTime], [estimatedTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             0, op%MY_COMM, ierr)
+  CALL MPI_REDUCE([op%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, 0, op%MY_COMM, ierr)
+  estimatedTime=rtime(1)
 #endif
 
   IF ( op%rank .EQ. 0 ) THEN
@@ -2980,6 +2981,7 @@ include 'mpif.h'
 !  INTEGER                                       :: fin
 #ifdef HAVE_MPI
   INTEGER                                       :: ierr
+  DOUBLE PRECISION,              DIMENSION(1)   :: arr
 #endif
   INTEGER                                       :: sizeoper,nbprocs,myrank
   DOUBLE PRECISION                              :: inv_size,sumh
@@ -2989,7 +2991,6 @@ include 'mpif.h'
   TYPE(FFTHyb) :: FFTmrka
 #if !defined HAVE_MPI2_INPLACE
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
-  DOUBLE PRECISION                             :: arr(1)
 #endif
 
   IF ( .NOT. op%done ) &
@@ -3352,16 +3353,10 @@ include 'mpif.h'
 #endif
     CALL MPI_ALLREDUCE( buffer2, buffer2s, sizeoper*flavors*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
-#if defined HAVE_MPI2_INPLACE
-    CALL MPI_ALLREDUCE([MPI_IN_PLACE], [op%runTime], 1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             op%MY_COMM, ierr)
-#else
-    CALL MPI_ALLREDUCE([op%runTime], arr,1, MPI_DOUBLE_PRECISION, MPI_MAX, &
-             op%MY_COMM, ierr)
-    op%runTime=arr(1)
-#endif
-    CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], [signvaluemeassum], 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE([op%runtime], arr, 1, MPI_DOUBLE_PRECISION, MPI_MAX, op%MY_COMM, ierr)
+    op%runtime=arr(1)
+    CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
+    signvaluemeassum=arr(1)
     IF ( op%opt_histo .GT. 0 ) THEN
 #if defined HAVE_MPI2_INPLACE
       CALL MPI_ALLREDUCE([MPI_IN_PLACE],op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
@@ -3374,14 +3369,8 @@ include 'mpif.h'
       FREE(buffer_out)
 #endif
     END IF
-#if defined HAVE_MPI2_INPLACE
-    CALL MPI_ALLREDUCE([MPI_IN_PLACE],[sumh], 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             op%MY_COMM, ierr)
-#else
-    CALL MPI_ALLREDUCE([sumh], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, &
-             op%MY_COMM, ierr)
+    CALL MPI_ALLREDUCE([sumh], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
     sumh=arr(1)
-#endif
     IF ( op%opt_order .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(op%meas_fullemptylines, fullempty, 2*flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &
                op%MY_COMM, ierr)
