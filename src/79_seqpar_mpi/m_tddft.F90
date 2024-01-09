@@ -32,10 +32,8 @@ module m_tddft
  use m_sort
  use m_dtset
  use m_dtfil
- use m_xmpi, only : xmpi_bcast,xmpi_scatterv
-#if defined HAVE_MPI2
- use mpi
-#endif
+ use m_xmpi, only : xmpi_bcast,xmpi_gatherv,xmpi_scatterv
+ use iso_c_binding, only : c_ptr,c_loc,c_f_pointer
 
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : get_unit
@@ -159,7 +157,7 @@ contains
  real(dp) :: sum_kernel(2/nsppol)
  real(dp) :: weight,xx
  logical :: am_master,file_exist
- logical, allocatable :: done_excit(:,:),done_sexc(:),done_sexc2(:)
+ logical, allocatable :: done_excit(:,:),done_sexc(:) !,done_sexc2(:)
  character(len=18) :: chain1,chain2
  character(len=500) :: message
  integer,allocatable :: flag_state_win(:),gbound(:,:),indarr(:),index_state(:)
@@ -173,6 +171,7 @@ contains
  integer :: formeig,icg,ikg,nband_k_
  logical :: mydata, tmaster, swrite
  integer,allocatable ::  kg_disk(:,:)
+ integer,allocatable :: counts(:),displs(:),recvcounts(:),tmpbuf(:)
  real(dp),allocatable :: cg_disk(:,:),cg_tmp(:,:)
  real(dp),allocatable :: cwavef(:,:),eexcit(:)
  real(dp),allocatable :: eexcit2(:)
@@ -183,12 +182,12 @@ contains
  real(dp) :: omega_tddft_casida_dummy(2/nsppol)
  real(dp),allocatable :: wfraug(:,:,:,:),wfrspa(:,:,:,:),work(:),zhpev1(:,:)
  real(dp),allocatable :: zhpev2(:)
-#if defined HAVE_MPI
+
  integer :: iproc
  integer :: ipwnbd
- integer,allocatable :: counts(:),displs(:),recvcounts(:),tmpbuf(:)
- real(dp), allocatable :: recvbuf(:,:)
-#endif
+ real(dp), allocatable,target :: recvbuf(:,:)
+ real(dp),pointer :: recvbuf_ptr(:)
+ type(c_ptr) :: cptr
 
 ! *************************************************************************
 
@@ -847,12 +846,12 @@ contains
 
  ABI_MALLOC(excit_coords,(nexcit_win**2,2))
 
-#if defined HAVE_MPI
- ABI_MALLOC(counts,(0:nproc_loc-1))
- ABI_MALLOC(displs,(0:nproc_loc-1))
- ABI_MALLOC(recvcounts,(0:nproc_loc-1))
- ABI_MALLOC(recvbuf,(5-nsppol,nproc_loc-1))
-#endif
+if (xmpi_paral==1) then
+  ABI_MALLOC(counts,(0:nproc_loc-1))
+  ABI_MALLOC(displs,(0:nproc_loc-1))
+  ABI_MALLOC(recvcounts,(0:nproc_loc-1))
+  ABI_MALLOC(recvbuf,(5-nsppol,nproc_loc-1))
+end if
 
 !DEBUG
 !write(std_out,*)'before first loop'
@@ -939,13 +938,13 @@ contains
 
 
 
-#if defined HAVE_MPI
-!  Compute limits for load balancing
-   do iproc=0,nproc_loc-1
-     displs(iproc)=(iproc*count_to_do)/nproc_loc
-     counts(iproc)=min(((iproc+1)*count_to_do)/nproc_loc,count_to_do)-displs(iproc)
-   end do
-#endif
+if (xmpi_paral==1) then
+! Compute limits for load balancing
+  do iproc=0,nproc_loc-1
+    displs(iproc)=(iproc*count_to_do)/nproc_loc
+    counts(iproc)=min(((iproc+1)*count_to_do)/nproc_loc,count_to_do)-displs(iproc)
+  end do
+end if
 
  end if ! am_master
 
@@ -976,7 +975,7 @@ if (xmpi_paral==1) then
  ABI_MALLOC(work,(nfftdiel))
  ABI_MALLOC(sexc,(3,nexcit_win))
  ABI_MALLOC(done_sexc,(nexcit_win))
- ABI_MALLOC(done_sexc2,(nexcit_win))
+!ABI_MALLOC(done_sexc2,(nexcit_win))
  ABI_MALLOC(rhog,(2,nfftdiel))
  ABI_MALLOC(vhartr,(nfftdiel))
 
@@ -1169,7 +1168,7 @@ if (xmpi_paral==1) then
 
    end if ! ijexcit <= count
 
-#if defined HAVE_MPI
+if (xmpi_paral==1) then
    if (am_master) then
 
 !    Compute displacements and counts for the gathering of the results
@@ -1189,8 +1188,8 @@ if (xmpi_paral==1) then
 !  ***********************************************
 !  ***** I have to ask about that ****************
 !  ***********************************************
-   call MPI_Gatherv(sendbuf,sendcount,MPI_DOUBLE_PRECISION,recvbuf,recvcounts,displs, &
-&   MPI_DOUBLE_PRECISION,0,spaceComm,ierr)
+   cptr=c_loc(recvbuf) ; call c_f_pointer(cptr,recvbuf_ptr,[size(recvbuf)])
+   call xmpi_gatherv(sendbuf,sendcount,recvbuf_ptr,recvcounts,displs,0,spaceComm,ierr)
 
    if (am_master) then
 
@@ -1240,7 +1239,7 @@ if (xmpi_paral==1) then
      end do
 
    end if
-#endif
+end if ! MPI parallel
 
 !  End indices loops
  end do ! ijexcit
@@ -1249,14 +1248,15 @@ if (xmpi_paral==1) then
 !--------------------------------------------------------------------
 
 
-#if defined HAVE_MPI
-!sexc needs to be summed here since it used only by master
- call xmpi_barrier(spaceComm)
-!call xmpi_sum_master(sexc,master,spaceComm,ierr) ! Does not work on some machines
- call xmpi_sum(sexc,spaceComm,ierr)
- done_sexc2=done_sexc
- call MPI_Reduce(done_sexc2,done_sexc,nexcit_win,MPI_LOGICAL,MPI_LOR,master,spaceComm,ierr)
-#endif
+if (xmpi_paral==1) then
+! sexc needs to be summed here since it used only by master
+  call xmpi_barrier(spaceComm)
+! call xmpi_sum_master(sexc,master,spaceComm,ierr) ! Does not work on some machines
+  call xmpi_sum(sexc,spaceComm,ierr)
+  call xmpi_lor(done_sexc,spaceComm)
+  !done_sexc2=done_sexc
+  !call MPI_Reduce(done_sexc2,done_sexc,nexcit_win,MPI_LOGICAL,MPI_LOR,master,spaceComm,ierr)
+end if
 
 
  if (am_master) then
@@ -1312,12 +1312,12 @@ if (xmpi_paral==1) then
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
 
-#if defined HAVE_MPI
+if (xmpi_paral==1) then
  ABI_FREE(counts)
  ABI_FREE(displs)
  ABI_FREE(recvbuf)
  ABI_FREE(recvcounts)
-#endif
+end if
 
  if (am_master) then
 
@@ -1666,7 +1666,7 @@ if (xmpi_paral==1) then
  ABI_FREE(sexc)
  ABI_FREE(done_sexc)
  ABI_FREE(indarr)
- ABI_FREE(done_sexc2)
+!ABI_FREE(done_sexc2)
 
 end subroutine tddft
 !!***
