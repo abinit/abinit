@@ -3718,7 +3718,12 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
 
  ! Recalculate FFT tables.
  ! Calculate the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Rk.
+#ifdef FC_LLVM
+ ! LLVM 16 doesn't recognize this macro here
+ ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym) )
+#else
  ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
+#endif
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
  if (.not. iscompatibleFFT) then

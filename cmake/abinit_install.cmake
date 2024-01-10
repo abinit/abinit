@@ -57,7 +57,7 @@ if (ABINIT_KOKKOS_WANTED)
     APPEND FILE ${PROJECT_BINARY_DIR}/${targets_export_name}.cmake)
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA)
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   export(
     TARGETS 17_gpu_toolbox
     NAMESPACE abinit::
@@ -99,7 +99,7 @@ if (ABINIT_KOKKOS_WANTED)
     )
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA)
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   install(
     TARGETS 17_gpu_toolbox
     EXPORT ${targets_export_name}

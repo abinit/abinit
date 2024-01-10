@@ -3,14 +3,14 @@
 #
 add_library(17_gpu_toolbox STATIC
   abi_gpu_header_common.h
-  dev_spec.cu
-  gpu_fft.cu
-  gpu_linalg.cu
+  dev_spec.cpp
+  gpu_fft.cpp
+  gpu_linalg.cpp
   m_gpu_detect.F90
   m_gpu_toolbox.F90
   m_initcuda.F90
   m_nvtx.F90
-  timing_cuda.cu
+  timing.cpp
 )
 
 set_target_properties(17_gpu_toolbox
@@ -52,6 +52,19 @@ if(ABINIT_ENABLE_GPU_CUDA)
     CUDA::cublas
     CUDA::cusolver
     CUDA::nvToolsExt
+    )
+endif()
+
+if(ABINIT_ENABLE_GPU_HIP)
+  target_link_libraries(17_gpu_toolbox
+    PUBLIC
+    hip::amdhip64
+    hip::hipfft
+    roc::hipblas
+    roc::rocblas
+    roc::rocfft
+    roc::hipsolver
+    ${ROCTX}
     )
 endif()
 
