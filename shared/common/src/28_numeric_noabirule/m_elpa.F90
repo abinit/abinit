@@ -214,6 +214,7 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
 
 !Local variables-------------------------------
  integer :: err,l_gpu,l_blacs_ctx
+ logical :: gpu_debug_mode=.false.
  character(len=10) :: varname
 
 ! *********************************************************************
@@ -248,21 +249,24 @@ subroutine elpa_func_allocate(elpa_hdl,gpu,blacs_ctx)
      ABI_ERROR("You seem to use an old version of ELPA ( < 2021.x ) which only supports NVIDIA GPUs.")
 #endif
    end if
-
    call elpa_func_error_handler(err_code=err,err_msg='Error when enabling GPU on ELPA')
 
-   !if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
-   !call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+   if (gpu_debug_mode) then
+     if (err==ELPA_OK) call elpa_hdl%elpa%set("debug",1,err) 
+     call elpa_func_error_handler(err_code=err,err_msg='Error when enabling debug on ELPA')
+   end if
 
  end if
 #else
- if (err==0.and.l_gpu==1) elpa_hdl%gpu=l_gpu
+ if (err==0.and.l_gpu==1) then
+   elpa_hdl%gpu=l_gpu
+   if (gpu_debug_mode) elpa_hdl%debug=1
+ end if
 #endif
-
- call elpa_func_error_handler(err_code=err,err_varname=varname)
 
  if (present(blacs_ctx)) then
    if (err==ELPA_OK) call elpa_hdl%elpa%set("blacs_context",int(blacs_ctx,kind=c_int),err)
+   call elpa_func_error_handler(err_code=err,err_varname=varname)
  end if
 
  elpa_hdl%is_allocated=.true.
@@ -418,8 +422,10 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
  end if
  if (err==ELPA_OK) then
    varname=''
-   if (elpa_hdl%elpa%setup()/=ELPA_OK) err=ELPA_ERROR
+   err = elpa_hdl%elpa%setup()
+   call elpa_func_error_handler(err_code=err,err_msg='Error during ELPA setup')
  endif
+
 #else
  elpa_hdl%mpi_comm_parent=mpi_comm_parent
  elpa_hdl%process_row=process_row
@@ -434,6 +440,7 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
 !ELPA-LEGACY-2017
  err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #endif
+
 #endif
 
  call elpa_func_error_handler(err_code=err,err_msg='Error in elpa_get_communicators',err_varname=varname)
@@ -457,6 +464,7 @@ end subroutine elpa_func_get_communicators
 !!  nev=Number of eigenvalues needed.
 !!  local_nrows=Leading dimension of A
 !!  local_ncols=Local columns of matrixes A and Q (eigenvectors)
+!!  nev=Number of eigenvalues needed.
 !!
 !! SIDE EFFECTS
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object

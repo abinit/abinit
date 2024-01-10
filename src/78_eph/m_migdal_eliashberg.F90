@@ -326,8 +326,8 @@ subroutine migdal_eliashberg_iso(gstore, dtset, dtfil)
  call edos%free()
 
  call dtset%get_ktmesh(ntemp, ktmesh)
- !NVHPC doesn't like using constructor...
-#ifdef FC_NVHPC
+ !NVHPC and LLVM don't like using this constructor because allocatable arrays aren't set.
+#if defined FC_NVHPC || defined FC_LLVM
   iso%ntemp=ntemp
   iso%max_niter=10
   iso%tolerance=tol10

@@ -22,7 +22,7 @@
  * only exists when GPU is enabled.
  */
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
 #define ABI_NVTX_START_RANGE(id) call abi_nvtx_start_range(id)
 #define ABI_NVTX_END_RANGE() call abi_nvtx_end_range()
 #define NVTX_INIT(value) call nvtx_init(value)

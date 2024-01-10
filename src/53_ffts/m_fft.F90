@@ -2244,6 +2244,12 @@ end function fftu_mpi_utests
 !!         (needed only when option=1)
 !! weight_i=weight to be used for the accumulation of the density in real space
 !!         (needed only when option=1 and (fftalg=4 and fftalgc/=0))
+!! [weight_array_r]= -- optional -- same as weight_r when ndat>1
+!!                   weight_array_r(i)=weight_r to be used for band i
+!!                   at present only used for the GPU version
+!! [weight_array_i]= -- optional -- same as weight_i when ndat>1
+!!                   weight_array_i(i)=weight_i to be used for band i
+!!                   at present only used for the GPU version
 !! [fofginb(2,npwin)]=holds second input wavefunction in G vector basis sphere.
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
@@ -2281,7 +2287,7 @@ end function fftu_mpi_utests
 subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
                   kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
                   tim_fourwf,weight_r,weight_i, &
-                  gpu_option,use_ndo,fofginb) ! Optional arguments
+                  weight_array_r,weight_array_i,gpu_option,use_ndo,fofginb) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -2289,6 +2295,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  integer,intent(in) :: tim_fourwf
  integer,intent(in),optional :: gpu_option,use_ndo
  real(dp),intent(in) :: weight_r,weight_i
+ real(dp),intent(in),optional,target :: weight_array_r(ndat),weight_array_i(ndat)
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gboundin(2*mgfft+8,2),gboundout(2*mgfft+8,2)
@@ -2314,7 +2321,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  real(dp) :: tsec(2)
  real(dp),allocatable :: work1(:,:,:,:),work2(:,:,:,:),work3(:,:,:,:)
  real(dp),allocatable :: work4(:,:,:,:),work_sum(:,:,:,:)
- real(dp) :: weight_array_r(ndat), weight_array_i(ndat)
+ real(dp),pointer :: weight_ptr_r(:),weight_ptr_i(:)
 
 ! *************************************************************************
 
@@ -2349,36 +2356,51 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  !  ABI_ERROR("Option 0 is buggy when fftalgc ==0 is used!")
  !end if
 
-!Cuda version of fourwf
+!GPU version of fourwf
  gpu_option_=ABI_GPU_DISABLED
  if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
- if(option==1) then
-   weight_array_r(:)=weight_r
-   weight_array_i(:)=weight_i
- end if
- if(gpu_option_==ABI_GPU_LEGACY) then
+ if(gpu_option_/=ABI_GPU_DISABLED) then
+   if (present(weight_array_r)) then
+     weight_ptr_r => weight_array_r
+   else
+     ABI_MALLOC(weight_ptr_r,(ndat))
+     weight_ptr_r(:)=weight_r
+   end if
+   if (present(weight_array_i)) then
+     weight_ptr_i => weight_array_i
+   else
+     ABI_MALLOC(weight_ptr_i,(ndat))
+     weight_ptr_i(:)=weight_i
+   end if
+   if(gpu_option_==ABI_GPU_LEGACY) then
 #if defined HAVE_GPU_CUDA
-   call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
-!  &  use_ndo,fofginb)
+     call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
 #endif
-   call timab(840+tim_fourwf,2,tsec); return
- else if(gpu_option_==ABI_GPU_KOKKOS) then
-#if defined HAVE_GPU_CUDA
-   call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     paral_kgb,tim_fourwf,weight_array_r,weight_array_i) !,&
-!  &  use_ndo,fofginb)
+   else if(gpu_option_==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU_CUDA && defined HAVE_YAKL
+     call gpu_fourwf_managed(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
 #endif
-   call timab(840+tim_fourwf,2,tsec); return
- else if(gpu_option_==ABI_GPU_OPENMP) then
-   call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
-     kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
-     weight_array_r,weight_array_i)
-   call timab(840+tim_fourwf,2,tsec); return
- end if
+   else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     call ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
+       kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
+       weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
+#endif
+   end if
+   if (.not.present(weight_array_r)) then
+     ABI_FREE(weight_ptr_r)
+   end if
+   if (.not.present(weight_array_i)) then
+     ABI_FREE(weight_ptr_i)
+   end if
+   call timab(840+tim_fourwf,2,tsec)
+   return
+ end if ! GPU
 
  if ((fftalgc < 0 .or. fftalgc > 2)) then
    write(msg, '(a,i0,5a)' )&

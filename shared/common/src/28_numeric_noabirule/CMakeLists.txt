@@ -80,7 +80,7 @@ if (ABINIT_YAKL_WANTED)
     ${YAKL_BINARY_DIR})
 endif()
 
-if(ABINIT_ENABLE_GPU_CUDA)
+if(ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   target_link_libraries(28_numeric_noabirule
     PUBLIC
     abinit::17_gpu_toolbox

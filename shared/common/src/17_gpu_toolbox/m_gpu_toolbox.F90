@@ -42,7 +42,7 @@ module m_gpu_toolbox
 
   !Interfaces for C bindings --- To be completed
 #ifdef HAVE_FC_ISO_C_BINDING
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 
   ! mirroring cuda enum cudaMemoryAdvise usually defined in
   ! /usr/local/cuda/targets/x86_64-linux/include/driver_types.h
@@ -74,8 +74,8 @@ module m_gpu_toolbox
     enumerator :: CUDA_MEM_ADVISE_UNSET_ACCESSED_BY        = 6
   end enum
 
-  ! CUFFT Transform Types
-  ! Replicates cuFFT_type enum.
+  ! CUFFT/hipFFT Transform Types
+  ! Replicates cuFFT_type enum, matched (obviously) by hipFFT_type.
   ! We could use enum from official CUDA Fortran interface but it is only
   ! accessible using NVHPC compiler.
   ! Only Z2Z is mostly used so an assert on its value will check for enum changes
@@ -89,7 +89,8 @@ module m_gpu_toolbox
     enumerator :: FFT_Z2Z = 105  !  z'69'     ! Double-Complex to Double-Complex
   end enum
 
-  ! CUFFT Direction enum
+  ! CUFFT/hipFFT Direction enum
+  ! In hipFFT, "BACKWARD" is used instead of "INVERSE" (from cuFFT)
   enum, bind(C)
     enumerator :: FFT_INVERSE =  1
     enumerator :: FFT_FORWARD = -1
@@ -181,7 +182,7 @@ contains
   !!***
 
 #ifdef HAVE_FC_ISO_C_BINDING
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
 
   ! prefetch data (memory managed pointer) to device
   ! device can be a GPU (deviceId >=0)
