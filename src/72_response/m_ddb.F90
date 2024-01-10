@@ -1732,7 +1732,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(6i4,2d22.14)')idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
+     read(nunit,*)idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
      index=idir1+                     &
        3*((ipert1-1)+mpert*((idir2-1)+ &
        3*((ipert2-1)+mpert*((idir3-1)+3*(ipert3-1)))))
@@ -1773,7 +1773,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(2i6,2d22.14)')idir1,ipert1,ar,ai
+     read(nunit,*)idir1,ipert1,ar,ai
      index=idir1 + 3*(ipert1 - 1)
      ddb%flg(index,iblok)=1
      ddb%val(1,index,iblok)=ar
