@@ -1185,11 +1185,10 @@ if (xmpi_paral==1) then
      end do
    end if
 
-!  ***********************************************
-!  ***** I have to ask about that ****************
-!  ***********************************************
-   cptr=c_loc(recvbuf) ; call c_f_pointer(cptr,recvbuf_ptr,[size(recvbuf)])
-   call xmpi_gatherv(sendbuf,sendcount,recvbuf_ptr,recvcounts,displs,0,spaceComm,ierr)
+   if (nproc_loc>1) then
+     cptr=c_loc(recvbuf) ; call c_f_pointer(cptr,recvbuf_ptr,[size(recvbuf)])
+     call xmpi_gatherv(sendbuf,sendcount,recvbuf_ptr,recvcounts,displs,0,spaceComm,ierr)
+   end if
 
    if (am_master) then
 
