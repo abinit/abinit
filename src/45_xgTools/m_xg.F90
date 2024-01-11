@@ -3599,7 +3599,7 @@ contains
         !$OMP TARGET UPDATE FROM(dot__vecC)
 #else
 !FIXME For several compilers, this section doesnt work properly
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecC,xgBlockA__vecC,xgBlockB__vecC) PRIVATE(icol,tmp)
+        !$OMP TARGET UPDATE FROM(xgBlockA__vecC,xgBlockB__vecC)
         do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
@@ -3608,7 +3608,7 @@ contains
           end do
           dot__vecC(icol,1)=tmp
         end do
-        !$OMP TARGET UPDATE FROM(dot__vecC)
+        !$OMP TARGET UPDATE TO(dot__vecC)
 #endif
 
         !TODO Port this to GPU (reductions)

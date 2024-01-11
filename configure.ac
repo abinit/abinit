@@ -1281,13 +1281,14 @@ if test "${sd_linalg_flavor}" = "netlib-fallback"; then
   ABI_MSG_NOTICE([linalg-abinit],
     [Suboptimal linear algebra configuration])
 fi
-if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
-  ABI_MSG_NOTICE([gpu-without-magma],
-    [Suboptimal GPU configuration])
-fi
 if test "${sd_libxc_kxc_ok}" = "no"; then
   ABI_MSG_NOTICE([libxc-kxc],
     [Suboptimal libxc configuration])
 fi
+# GPU 2024 implementation : deactivate this warning
+#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
+#  ABI_MSG_NOTICE([gpu-without-magma],
+#    [Suboptimal GPU configuration])
+#fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END
