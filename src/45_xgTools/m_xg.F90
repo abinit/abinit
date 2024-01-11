@@ -39,7 +39,7 @@ module m_xg
   use m_abicore
   use defs_basis
   use m_time, only : timab
-  use m_xmpi, only : xmpi_sum
+  use m_xmpi
   use m_xomp
   use m_abi_linalg
 
@@ -1365,14 +1365,14 @@ contains
 #endif
 ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
-          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW%vecR,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
-          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW__vecR,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -1437,14 +1437,14 @@ ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 #endif
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW%vecC,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE([MPI_IN_PLACE],xgBlockW__vecC,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA

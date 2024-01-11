@@ -176,6 +176,7 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
 AC_DEFUN([_ABI_MPI_CHECK_MPI_INPLACE], [
   # Set default values
   abi_mpi_inplace="no"
+  abi_mpi_inplace_buggy="no"
 
   if test "${abi_mpi_fc_level}" -ge "2"; then
 
@@ -195,12 +196,28 @@ AC_DEFUN([_ABI_MPI_CHECK_MPI_INPLACE], [
         integer :: comm,ierr,counts(3),displs(3)
         real*8 :: xval(5)
         call mpi_init(ierr)
-        call mpi_allreduce([MPI_IN_PLACE],xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
-        call mpi_allgather([MPI_IN_PLACE],1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
-        call mpi_allgatherv([MPI_IN_PLACE],1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_allreduce(MPI_IN_PLACE,xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+        call mpi_allgather(MPI_IN_PLACE,1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_allgatherv(MPI_IN_PLACE,1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
         call mpi_finalize(ierr)
       ]])],
       [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
+    if test "${abi_mpi_inplace}" = "no"; then
+      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+        [[
+          use mpi
+          integer :: comm,ierr,counts(3),displs(3),in_place(1)
+          real*8 :: xval(5)
+          call mpi_init(ierr)
+          in_place(1)=MPI_IN_PLACE
+          call mpi_allreduce(in_place,xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+          call mpi_allgather(in_place,1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
+          call mpi_allgatherv(in_place,1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
+          call mpi_finalize(ierr)
+        ]])],
+        [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
+      abi_mpi_inplace_buggy="${abi_mpi_inplace}" 
+    fi
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_mpi_inplace}])
 
@@ -963,10 +980,17 @@ AC_DEFUN([ABI_MPI_DETECT], [
         if test "${abi_mpi_inplace_enable}" = "auto"; then
           abi_mpi_inplace_enable="${abi_mpi_inplace}"
         fi
+        if test "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
+          abi_mpi_interfaces_bugfix_enable="${abi_mpi_inplace_buggy}"
+        fi
       fi
       if test "${abi_mpi_inplace_enable}" = "yes"; then
         AC_DEFINE([HAVE_MPI2_INPLACE], 1,
           [Define to 1 if you want MPI_IN_PLACE support.])
+      fi
+      if test "${abi_mpi_interfaces_bugfix_enable}" = "yes"; then
+        AC_DEFINE([HAVE_MPI_BUGGY_INTERFACES], 1,
+          [Define to 1 if you want to fix buggy MPI interfaces.])
       fi
 
       # Test the availability of problematic MPI constants

@@ -2989,7 +2989,16 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:,:) :: buffer2,buffer2s
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: fullempty
   TYPE(FFTHyb) :: FFTmrka
-#if !defined HAVE_MPI2_INPLACE
+
+#ifdef HAVE_MPI
+# ifdef HAVE_MPI2_INPLACE
+#  ifndef HAVE_MPI_BUGGY_INTERFACES
+    INTEGER :: CTQMC_MPI_IN_PLACE
+#  else
+    INTEGER :: CTQMC_MPI_IN_PLACE(1)
+#  endif
+# endif
+#else
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
 #endif
 
@@ -3165,7 +3174,8 @@ include 'mpif.h'
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
     freqs(n1*op%rank+1:n1*(op%rank+1)) = op%measNoise(1)%vec(1:n1) 
-    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
 #else
@@ -3189,7 +3199,8 @@ include 'mpif.h'
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
     freqs(n2*op%rank+1:n2*(op%rank+1)) = op%measNoise(2)%vec(1:n2) 
-    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, op%MY_COMM, ierr)
 #else
@@ -3342,7 +3353,8 @@ include 'mpif.h'
 
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    CALL MPI_ALLREDUCE([MPI_IN_PLACE], buffer, spAll*flavors, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLREDUCE(CTQMC_MPI_IN_PLACE, buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
 #else
     MALLOC(buffer_out,(spAll*flavors))
@@ -3359,7 +3371,8 @@ include 'mpif.h'
     signvaluemeassum=arr(1)
     IF ( op%opt_histo .GT. 0 ) THEN
 #if defined HAVE_MPI2_INPLACE
-      CALL MPI_ALLREDUCE([MPI_IN_PLACE],op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+      CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+      CALL MPI_ALLREDUCE(CTQMC_MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
 #else
       MALLOC(buffer_out,(flavors+1))

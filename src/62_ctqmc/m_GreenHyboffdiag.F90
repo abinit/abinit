@@ -34,7 +34,6 @@ MODULE m_GreenHyboffdiag
  
  IMPLICIT NONE
 
-
  public ::  GreenHyboffdiag_init
  public ::  GreenHyboffdiag_reset
  public ::  GreenHyboffdiag_clear
@@ -1091,7 +1090,16 @@ include 'mpif.h'
   CHARACTER(len=5) :: funct
   character(len=4) :: tag_proc
   character(len=30) :: tmpfil
-#if !defined HAVE_MPI2_INPLACE
+
+#ifdef HAVE_MPI
+# ifdef HAVE_MPI2_INPLACE
+#  ifndef HAVE_MPI_BUGGY_INTERFACES
+    INTEGER :: CTQMC_MPI_IN_PLACE
+#  else
+    INTEGER :: CTQMC_MPI_IN_PLACE(1)
+#  endif
+# endif
+#else
   INTEGER :: my_count
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: opertau_buf
 #endif
@@ -1328,7 +1336,8 @@ include 'mpif.h'
 ! rassembler les resultats
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-        CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+        CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+        CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                           opertau, counts, displs, &
                           MPI_DOUBLE_PRECISION, op%MY_COMM, residu)
 #else
@@ -1447,7 +1456,16 @@ include 'mpif.h'
   COMPLEX(KIND=8) :: iwtau
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
-#if !defined HAVE_MPI2_INPLACE
+
+#ifdef HAVE_MPI
+# ifdef HAVE_MPI2_INPLACE
+#  ifndef HAVE_MPI_BUGGY_INTERFACES
+    INTEGER :: CTQMC_MPI_IN_PLACE
+#  else
+    INTEGER :: CTQMC_MPI_IN_PLACE(1)
+#  endif
+# endif
+#else
   INTEGER :: my_count
   COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
 #endif
@@ -1664,7 +1682,8 @@ include 'mpif.h'
        IF ( op%have_MPI .EQV. .TRUE. ) THEN
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-        CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+        CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+        CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
                           Gwtmp  , counts, displs, &
                           MPI_DOUBLE_COMPLEX, op%MY_COMM, residu)
 #else

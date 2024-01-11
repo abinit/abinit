@@ -62,12 +62,23 @@ if(ABINIT_ENABLE_MPI_IO_DEFAULT)
 endif()
 
 option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: auto)" AUTO)
+option(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX "Enable a bugfix for buggy MPI interfaces (default: auto)" AUTO)
 if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
   try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
     LINK_LIBRARIES MPI::MPI_Fortran)
+  if(NOT ABINIT_ENABLE_MPI_INPLACE)
+    try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
+      LINK_LIBRARIES MPI::MPI_Fortran)
+    if(ABINIT_ENABLE_MPI_INPLACE)
+      ABINIT_ENABLE_MPI_INTERFACES_BUGFIX = "yes"
+    endif()
+  endif()
 endif()
 if(ABINIT_ENABLE_MPI_INPLACE)
   set(HAVE_MPI2_INPLACE 1)
+endif()
+if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
+  set(HAVE_MPI_BUGGY_INTERFACES 1)
 endif()
 
 option(ABINIT_ENABLE_PARALLEL_HDF5 "Enable the use of parallel HDF5 (default: no)" OFF)

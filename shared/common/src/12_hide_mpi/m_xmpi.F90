@@ -66,6 +66,7 @@ module m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
+
 #else
  ! Fake replacements for the sequential version. Values are taken from
  ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
@@ -138,6 +139,19 @@ module m_xmpi
 
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
+
+ ! Some MPI implementations have buggy interfaces
+ ! For these, we can apply a dirty trick to use MPI_IN_PLACE
+ ! xmpi_in_place will be set to MPI_IN_PLACE after MPI initialization
+#ifdef HAVE_MPI
+#ifndef HAVE_MPI_BUGGY_INTERFACES
+ integer,save,public ABI_PROTECTED :: xmpi_in_place      = 0
+ integer,public,parameter          :: xmpi_datatype_null = MPI_DATATYPE_NULL
+#else
+ integer,save,public ABI_PROTECTED :: xmpi_in_place(1)   =[0]
+ integer,public,parameter          :: xmpi_datatype_null = MPI_INTEGER
+#endif
+#endif
 
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
@@ -788,7 +802,12 @@ subroutine xmpi_init()
 
  if (lflag) xmpi_tag_ub = attribute_val
 
-!  Define type values.
+ ! Set xmpi_in_place (needed for buggy MPI libs)
+#if defined HAVE_MPI2
+ xmpi_in_place = MPI_IN_PLACE
+#endif
+
+ ! Define type values.
  call MPI_TYPE_SIZE(MPI_CHARACTER,xmpi_bsize_ch,mpierr)
  call MPI_TYPE_SIZE(MPI_INTEGER,xmpi_bsize_int,mpierr)
  call MPI_TYPE_SIZE(MPI_REAL,xmpi_bsize_sp,mpierr)
