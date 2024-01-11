@@ -217,6 +217,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
  integer :: itypat,jj,js,ka,kb,kd,kg,me_fft,my_comm_fft,ndir,n1,n2,n3,nproc_fft,paral_kgb_fft
  integer :: shift1,shift2,shift3
  logical :: have_g0
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp, vcutgeo(3)=zero
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,dg1,dg2,d2g,diff
  real(dp) :: dn_at,d2n_at,d2n_at2,dq,dq2div6,dqdiv6,dqm1,dv_at,ee,ff,gauss1,gauss2,gg,gmag,gsquar,n_at
@@ -398,6 +402,10 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
 
 !            Compute structure factor for all atoms of given type:
              do ia=ia1,ia2
+#ifdef FC_NVHPC
+               !Silly trick to prevent NVHPC optimization issue
+               if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                shift1=1+n1+(ia-1)*(2*n1+1)
                shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -1018,6 +1026,10 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: ii,itypat,jj,me_fft,my_comm_fft,n1,n2,n3,nattyp,nproc_fft,ntype,paral_kgb_fft
  integer :: optn,optv,optn2,shift1,shift2,shift3,type1,type2
  logical :: have_g0,qeq0,qeq05
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,alf2pi2,bb,cc,cutoff,dd,diff,dq,dq2div6,dqdiv6,dqm1,ee,ff
  real(dp) :: gauss1,gauss2,gmag,gq1,gq2,gq3,gsquar,n_at,dn_at,ph12i,ph12r,ph1i
@@ -1262,6 +1274,10 @@ subroutine dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,idir,ipert,&
                phim_igia(:) = zero
 
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)

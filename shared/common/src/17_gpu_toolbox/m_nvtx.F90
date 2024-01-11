@@ -15,12 +15,21 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! SOURCE
-module m_nvtx
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+module m_nvtx
   use, intrinsic :: iso_c_binding
   implicit none
 
-  integer,private,parameter :: nbcol=14
+  integer,private,parameter :: nbcol=19
   integer(kind=C_INT32_T),private :: col(nbcol) = [ &
        & int(Z'0000ff00',kind=C_INT32_T), & ! GREEN
        & int(Z'000000ff',kind=C_INT32_T), & ! BLUE
@@ -35,7 +44,12 @@ module m_nvtx
        & int(Z'00b832ff',kind=C_INT32_T), &
        & int(Z'00f9fa7d',kind=C_INT32_T), & ! LIGHT YELLOW
        & int(Z'00f96c56',kind=C_INT32_T), &
-       & int(Z'0094b5dc',kind=C_INT32_T) ]
+       & int(Z'0094b5dc',kind=C_INT32_T), &
+       & int(Z'00cc99ff',kind=C_INT32_T), & ! LIGHT PURPLE
+       & int(Z'00a50201',kind=C_INT32_T), & ! DARK RED
+       & int(Z'0001a4a5',kind=C_INT32_T), & ! KIND OF CYAN
+       & int(Z'00d8fb08',kind=C_INT32_T), & ! FLASHY YELLOW
+       & int(Z'0090aacc',kind=C_INT32_T) ]
   character,private,target :: tempName(256)
 
   type, bind(C):: nvtxEventAttributes
@@ -53,23 +67,42 @@ module m_nvtx
 
   interface nvtxRangePush
      ! push range with custom label and standard color
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
+#elif defined HAVE_GPU_HIP
+     subroutine nvtxRangePushA(name) bind(C, name='roctxRangePushA')
+#endif
        use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
-
+#ifdef HAVE_GPU_CUDA
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
        use, intrinsic :: iso_c_binding
        import:: nvtxEventAttributes
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx
+#endif
   end interface nvtxRangePush
 
   interface nvtxRangePop
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePop() bind(C, name='nvtxRangePop')
+#elif defined HAVE_GPU_HIP
+     subroutine nvtxRangePop() bind(C, name='roctxRangePop')
+#endif
      end subroutine nvtxRangePop
   end interface nvtxRangePop
+
+  interface
+    ! start profiling
+    subroutine nvtxProfilerStart() bind(C, name='cudaProfilerStart')
+    end subroutine nvtxProfilerStart
+    ! stop profiling
+    subroutine nvtxProfilerStop() bind(C, name='cudaProfilerStop')
+    end subroutine nvtxProfilerStop
+
+  end interface
 
 contains
 
@@ -90,7 +123,7 @@ contains
        tempName(i) = trimmed_name(i:i)
     enddo
 
-
+#if defined HAVE_GPU_CUDA
     if ( .not. present(id)) then
        call nvtxRangePush(tempName)
     else
@@ -98,6 +131,10 @@ contains
        event%message=c_loc(tempName)
        call nvtxRangePushEx(event)
     end if
+#elif defined HAVE_GPU_HIP
+    call nvtxRangePush(tempName)
+#endif
+
   end subroutine nvtxStartRange
 
   subroutine nvtxEndRange
