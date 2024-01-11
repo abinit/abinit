@@ -655,7 +655,7 @@ end function kpts_map
 !!
 !! FUNCTION
 !!  Print the symmetry table bz2ibz associated to the BZ bz and the IBZ ibz
-!!  to a list of units with header. Mode correspons to the value passed to kpts_map
+!!  to a list of units with header. Mode corresponds to the value passed to kpts_map
 !!  If prtvol is 0, max 20 entries are printed. Use prtvol > 0 to print all k-points.
 !!
 !! SOURCE
