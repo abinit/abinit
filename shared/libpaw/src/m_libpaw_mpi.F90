@@ -2728,13 +2728,7 @@ subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,nproc
-#if defined HAVE_MPI2_INPLACE
-#ifndef HAVE_MPI_BUGGY_INTERFACES
- integer :: xpaw_mpi_in_place
-#else
- integer :: xpaw_mpi_in_place(1)
-#endif
-#else
+#if !defined HAVE_MPI2_INPLACE
  integer :: xsum(size(xval,dim=1))
 #endif
 #endif
@@ -2747,8 +2741,7 @@ subroutine xpaw_mpi_sum_int1d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
 #if defined HAVE_MPI2_INPLACE
-     xpaw_mpi_in_place = MPI_IN_PLACE
-     call MPI_ALLREDUCE(xpaw_mpi_in_place,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_INTEGER,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_INTEGER,MPI_SUM,comm,ier)
      xval(:)=xsum(:)
@@ -2787,13 +2780,7 @@ subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,nproc
-#if defined HAVE_MPI2_INPLACE
-#ifndef HAVE_MPI_BUGGY_INTERFACES
- integer :: xpaw_mpi_in_place
-#else
- integer :: xpaw_mpi_in_place(1)
-#endif
-#else
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1))
 #endif
 #endif
@@ -2806,8 +2793,7 @@ subroutine xpaw_mpi_sum_dp1d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1)
 #if defined HAVE_MPI2_INPLACE
-     xpaw_mpi_in_place = MPI_IN_PLACE
-     call MPI_ALLREDUCE(xpaw_mpi_in_place,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:)=xsum(:)
@@ -2846,13 +2832,7 @@ subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,n2,nproc
-#if defined HAVE_MPI2_INPLACE
-#ifndef HAVE_MPI_BUGGY_INTERFACES
- integer :: xpaw_mpi_in_place
-#else
- integer :: xpaw_mpi_in_place(1)
-#endif
-#else
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1),size(xval,dim=2))
 #endif
 #endif
@@ -2865,8 +2845,7 @@ subroutine xpaw_mpi_sum_dp2d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2)
 #if defined HAVE_MPI2_INPLACE
-     xpaw_mpi_in_place = MPI_IN_PLACE
-     call MPI_ALLREDUCE(xpaw_mpi_in_place,xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:,:)=xsum(:,:)
@@ -2905,13 +2884,7 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
 !Local variables-------------------
 #if defined HAVE_MPI
  integer :: n1,n2,n3,nproc
-#if defined HAVE_MPI2_INPLACE
-#ifndef HAVE_MPI_BUGGY_INTERFACES
- integer :: xpaw_mpi_in_place
-#else
- integer :: xpaw_mpi_in_place(1)
-#endif
-#else
+#if !defined HAVE_MPI2_INPLACE
  real(dp) :: xsum(size(xval,dim=1),size(xval,dim=2),size(xval,dim=3))
 #endif
 #endif
@@ -2924,8 +2897,7 @@ subroutine xpaw_mpi_sum_dp3d(xval,comm,ier)
    if (nproc /= 1) then
      n1=size(xval,dim=1) ; n2=size(xval,dim=2) ; n3=size(xval,dim=3)
 #if defined HAVE_MPI2_INPLACE
-     xpaw_mpi_in_place = MPI_IN_PLACE
-     call MPI_ALLREDUCE(xpaw_mpi_in_place,xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
+     call MPI_ALLREDUCE(MPI_IN_PLACE,xval,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
 #else
      call MPI_ALLREDUCE(xval,xsum,n1*n2*n3,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ier)
      xval(:,:,:)=xsum(:,:,:)

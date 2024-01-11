@@ -783,15 +783,11 @@ SUBROUTINE libtetrabz_mpisum_d(comm,scaler)
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
-#ifndef HAVE_MPI_BUGGY_INTERFACES
-  INTEGER :: libtetrabz_mpi_in_place
-#else
-  INTEGER :: libtetrabz_mpi_in_place(1)
-#endif
+  REAL(8) :: arr_scaler(1)
   !
-  libtetrabz_mpi_in_place = MPI_IN_PLACE
-  CALL MPI_allREDUCE(libtetrabz_mpi_in_place, scaler, 1, &
+  CALL MPI_allREDUCE([scaler], arr_scaler, 1, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+  scaler=arr_scaler(1)
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_d
@@ -807,15 +803,18 @@ SUBROUTINE libtetrabz_mpisum_dv(comm,ndim,vector)
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
-#ifndef HAVE_MPI_BUGGY_INTERFACES
-  INTEGER :: libtetrabz_mpi_in_place
-#else
-  INTEGER :: libtetrabz_mpi_in_place(1)
+#ifndef HAVE_MPI2_INPLACE
+  REAL(8) :: vector_out(ndim)
 #endif
   !
-  libtetrabz_mpi_in_place = MPI_IN_PLACE
-  CALL MPI_allREDUCE(libtetrabz_mpi_in_place, vector, ndim, &
+#ifdef HAVE_MPI2_INPLACE
+  CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
   &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+#else
+  CALL MPI_allREDUCE(vector, vector_out, ndim, &
+  &                  MPI_DOUBLE_PRECISION, MPI_SUM, comm, ierr)
+  vector(1:ndim)=vector_out(1:ndim)
+#endif
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_dv
@@ -831,15 +830,18 @@ SUBROUTINE libtetrabz_mpisum_zv(comm,ndim,vector)
   !
 #if defined(HAVE_MPI)
   INTEGER :: ierr
-#ifndef HAVE_MPI_BUGGY_INTERFACES
-  INTEGER :: libtetrabz_mpi_in_place
-#else
-  INTEGER :: libtetrabz_mpi_in_place(1)
+#ifndef HAVE_MPI2_INPLACE
+  COMPLEX(8) :: vector_out(ndim)
 #endif
   !
-  libtetrabz_mpi_in_place = MPI_IN_PLACE
-  CALL MPI_allREDUCE(libtetrabz_mpi_in_place, vector, ndim, &
+#ifdef HAVE_MPI2_INPLACE
+  CALL MPI_allREDUCE(MPI_IN_PLACE, vector, ndim, &
   &                  MPI_DOUBLE_COMPLEX, MPI_SUM, comm, ierr)
+#else
+  CALL MPI_allREDUCE(vector, vector_out, ndim, &
+  &                  MPI_DOUBLE_COMPLEX, MPI_SUM, comm, ierr)
+  vector(1:ndim)=vector_out(1:ndim)
+#endif
 #endif
   !
 END SUBROUTINE libtetrabz_mpisum_zv

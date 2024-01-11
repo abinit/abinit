@@ -720,17 +720,9 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: Domega
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: A_omega
 
-#ifdef HAVE_MPI
-# ifdef HAVE_MPI2_INPLACE
-#  ifndef HAVE_MPI_BUGGY_INTERFACES
-    INTEGER :: CTQMC_MPI_IN_PLACE
-#  else
-    INTEGER :: CTQMC_MPI_IN_PLACE(1)
-#  endif
-# else
-   INTEGER :: my_count
-   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: oper_buf
-# endif
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: oper_buf
 #endif
 
   IF ( this%set .EQV. .FALSE. ) &
@@ -801,8 +793,7 @@ include 'mpif.h'
 ! rassembler les resultats
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
-    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                       this%oper, counts, displs, &
                       MPI_DOUBLE_PRECISION, this%MY_COMM, residu)
 #else
@@ -894,17 +885,9 @@ include 'mpif.h'
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
 
-#ifdef HAVE_MPI
-# ifdef HAVE_MPI2_INPLACE
-#  ifndef HAVE_MPI_BUGGY_INTERFACES
-    INTEGER :: CTQMC_MPI_IN_PLACE
-#  else
-    INTEGER :: CTQMC_MPI_IN_PLACE(1)
-#  endif
-# else
-   INTEGER :: my_count
-   COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
-# endif
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
 #endif
 
   IF ( this%set .EQV. .FALSE. ) &
@@ -1107,8 +1090,7 @@ include 'mpif.h'
   IF ( this%have_MPI .EQV. .TRUE. ) THEN
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
-    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
-    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
                       Gwtmp  , counts, displs, &
                       MPI_DOUBLE_COMPLEX, this%MY_COMM, residu)
 #else
