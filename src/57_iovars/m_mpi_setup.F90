@@ -190,6 +190,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !at the bandpp check later on
    if(tread(8)==1) then
      dtsets(idtset)%bandpp=intarr(1)
+     ! check if nblock_lobpcg is read from the input, if so error msg
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
+     if (tread0==1) then
+       write(msg,'(3a)') 'Both bandpp and nblock_lobpcg are defined for the same dataset, this is confusing.',ch10,&
+         'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
+       ABI_ERROR(msg)
+     end if
      if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
        if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
          dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
