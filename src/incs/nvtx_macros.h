@@ -22,14 +22,18 @@
  * only exists when GPU is enabled.
  */
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
 #define ABI_NVTX_START_RANGE(id) call abi_nvtx_start_range(id)
 #define ABI_NVTX_END_RANGE() call abi_nvtx_end_range()
 #define NVTX_INIT(value) call nvtx_init(value)
+#define NVTX_PROFILER_START() call nvtxProfilerStart()
+#define NVTX_PROFILER_STOP() call nvtxProfilerStop()
 #else
 #define ABI_NVTX_START_RANGE(id)
 #define ABI_NVTX_END_RANGE()
 #define NVTX_INIT(value)
+#define NVTX_PROFILER_START()
+#define NVTX_PROFILER_STOP()
 #endif
 
 #endif /* ABINIT_52_MANAGE_CUDA_NVTX_MACRO_H */
