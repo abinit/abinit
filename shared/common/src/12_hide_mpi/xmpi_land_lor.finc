@@ -189,7 +189,7 @@ subroutine xmpi_lor_log3d(xval,comm)
    n3 = size(xval,3)
 
 !  #if defined HAVE_MPI2 && defined HAVE_MPI2_INPLACE
-!  call MPI_ALLREDUCE([MPI_IN_PLACE],xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
+!  call MPI_ALLREDUCE(xmpi_in_place,xval,n1*n2*n3,MPI_LOGICAL,MPI_LOR,comm,ierr)
 !  #else
    ABI_STAT_MALLOC(xsum,(n1,n2,n3), ierr)
    if (ierr/= 0) call xmpi_abort(msg='error allocating xsum in xmpi_lor_log3d')

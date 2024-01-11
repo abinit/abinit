@@ -52,15 +52,16 @@
 subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 
 !Arguments-------------------------
-  integer ABI_ASYNC, intent(inout) :: xval
-  integer,intent(in) :: source,tag,comm
-  integer,intent(out) :: ierr
-  integer, intent(out) :: request
+ integer ABI_ASYNC, intent(inout), target :: xval
+ integer,intent(in) :: source,tag,comm
+ integer,intent(out) :: ierr
+ integer, intent(out) :: request
 
 !Local variables-------------------
 #if defined HAVE_MPI
-  integer :: my_tag
-  integer :: arr_xval(1)
+ integer :: my_tag
+ integer, pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 ! *************************************************************************
@@ -69,8 +70,8 @@ subroutine xmpi_irecv_intv(xval,source,tag,comm,request,ierr)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    my_tag=MOD(tag,xmpi_tag_ub)
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[1])
    call MPI_IRECV(arr_xval,1,MPI_INTEGER,source,my_tag,comm,request,ierr)
-   xval=arr_xval(1)
    xmpi_count_requests = xmpi_count_requests + 1
  end if
 #endif

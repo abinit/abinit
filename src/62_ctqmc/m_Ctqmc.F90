@@ -54,7 +54,6 @@ INTEGER, PARAMETER :: CTQMC_ADDED =  3
 INTEGER, PARAMETER :: CTQMC_REMOV =  4
 INTEGER, PARAMETER :: CTQMC_DETSI =  5
 
-
 !!****t* m_Ctqmc/Ctqmc
 !! NAME
 !!  Ctqmc
@@ -2145,7 +2144,16 @@ include 'mpif.h'
   DOUBLE PRECISION                              :: inv_size,sumh
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:,:) :: buffer 
   TYPE(FFTHyb) :: FFTmrka
-#if !defined HAVE_MPI2_INPLACE
+
+#ifdef HAVE_MPI
+# ifdef HAVE_MPI2_INPLACE
+#  ifndef HAVE_MPI_BUGGY_INTERFACES
+    INTEGER :: CTQMC_MPI_IN_PLACE
+#  else
+    INTEGER :: CTQMC_MPI_IN_PLACE(1)
+#  endif
+# endif
+#else
   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
 #endif
 
@@ -2281,7 +2289,8 @@ include 'mpif.h'
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
     freqs(n1*this%rank+1:n1*(this%rank+1)) = this%measNoise(1)%vec(1:n1) 
-    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
 #else
@@ -2305,7 +2314,8 @@ include 'mpif.h'
 #ifdef HAVE_MPI
 #if defined HAVE_MPI2_INPLACE
     freqs(n2*this%rank+1:n2*(this%rank+1)) = this%measNoise(2)%vec(1:n2) 
-    CALL MPI_ALLGATHERV([MPI_IN_PLACE], 0, MPI_DATATYPE_NULL, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLGATHERV(CTQMC_MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                         freqs, counts, displs, &
                         MPI_DOUBLE_PRECISION, this%MY_COMM, ierr)
 #else
@@ -2459,10 +2469,12 @@ include 'mpif.h'
     CALL MPI_ALLREDUCE([this%runTime], rtime, 1, MPI_DOUBLE_PRECISION, MPI_MAX, this%MY_COMM, ierr)
     this%runTime=rtime(1)
 #if defined HAVE_MPI2_INPLACE
-    CALL MPI_ALLREDUCE([MPI_IN_PLACE], buffer, spAll*flavors, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+    CALL MPI_ALLREDUCE(CTQMC_MPI_IN_PLACE, buffer, spAll*flavors, &
                      MPI_DOUBLE_PRECISION, MPI_SUM, this%MY_COMM, ierr)
     IF ( this%opt_histo .GT. 0 ) THEN
-      CALL MPI_ALLREDUCE([MPI_IN_PLACE], this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
+    CTQMC_MPI_IN_PLACE = MPI_IN_PLACE
+      CALL MPI_ALLREDUCE(CTQMC_MPI_IN_PLACE, this%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
                this%MY_COMM, ierr)
     END IF
 #else

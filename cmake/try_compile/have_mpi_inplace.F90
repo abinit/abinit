@@ -4,7 +4,6 @@ program have_mpi_inplace
 
   implicit none
 
-  integer, parameter :: ii = MPI_INTEGER16
   integer :: comm,ierr,counts(3),displs(3)
   real*8 :: xval(5)
  
