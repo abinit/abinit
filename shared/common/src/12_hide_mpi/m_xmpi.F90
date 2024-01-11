@@ -140,19 +140,6 @@ module m_xmpi
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
 
- ! Some MPI implementations have buggy interfaces
- ! For these, we can apply a dirty trick to use MPI_IN_PLACE
- ! xmpi_in_place will be set to MPI_IN_PLACE after MPI initialization
-#ifdef HAVE_MPI
-#ifndef HAVE_MPI_BUGGY_INTERFACES
- integer,save,public ABI_PROTECTED :: xmpi_in_place      = 0
- integer,public,parameter          :: xmpi_datatype_null = MPI_DATATYPE_NULL
-#else
- integer,save,public ABI_PROTECTED :: xmpi_in_place(1)   =[0]
- integer,public,parameter          :: xmpi_datatype_null = MPI_INTEGER
-#endif
-#endif
-
  ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
  ! To exchange more than 2^32 data we need to create specific user-defined datatypes
  ! For this, we need some parameters:
@@ -802,11 +789,6 @@ subroutine xmpi_init()
 
  if (lflag) xmpi_tag_ub = attribute_val
 
- ! Set xmpi_in_place (needed for buggy MPI libs)
-#if defined HAVE_MPI2
- xmpi_in_place = MPI_IN_PLACE
-#endif
-
  ! Define type values.
  call MPI_TYPE_SIZE(MPI_CHARACTER,xmpi_bsize_ch,mpierr)
  call MPI_TYPE_SIZE(MPI_INTEGER,xmpi_bsize_int,mpierr)
@@ -841,6 +823,14 @@ subroutine xmpi_init()
      if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
      if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
    end if
+
+   ! If MPI interfaces are buggy, MPI_IN_PLACE is not allowed
+#if defined HAVE_MPI2_INPLACE && defined HAVE_MPI_BUGGY_INTERFACES
+   write(std_out, "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   write(ab_out , "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   call xmpi_abort(msg="Stopping here!")
+#endif
+
  end if
 
 end subroutine xmpi_init

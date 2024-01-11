@@ -168,15 +168,14 @@ AC_DEFUN([_ABI_MPI_CHECK_FC_LEVEL], [
                     # ------------------------------------ #
 
 
-# _ABI_MPI_CHECK_MPI_INPLACE()
+# _ABI_MPI_CHECK_INPLACE()
 # ------------------------------------
 #
 # Checks whether the MPI library provides MPI_INPLACE.
 #
-AC_DEFUN([_ABI_MPI_CHECK_MPI_INPLACE], [
+AC_DEFUN([_ABI_MPI_CHECK_INPLACE], [
   # Set default values
   abi_mpi_inplace="no"
-  abi_mpi_inplace_buggy="no"
 
   if test "${abi_mpi_fc_level}" -ge "2"; then
 
@@ -202,29 +201,58 @@ AC_DEFUN([_ABI_MPI_CHECK_MPI_INPLACE], [
         call mpi_finalize(ierr)
       ]])],
       [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
-    if test "${abi_mpi_inplace}" = "no"; then
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([],
-        [[
-          use mpi
-          integer :: comm,ierr,counts(3),displs(3),in_place(1)
-          real*8 :: xval(5)
-          call mpi_init(ierr)
-          in_place(1)=MPI_IN_PLACE
-          call mpi_allreduce(in_place,xval,5,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
-          call mpi_allgather(in_place,1,MPI_DOUBLE_PRECISION,xval,5,MPI_DOUBLE_PRECISION,comm,ierr)
-          call mpi_allgatherv(in_place,1,MPI_DOUBLE_PRECISION,xval,counts,displs,MPI_DOUBLE_PRECISION,comm,ierr)
-          call mpi_finalize(ierr)
-        ]])],
-        [abi_mpi_inplace="yes"], [abi_mpi_inplace="no"])
-      abi_mpi_inplace_buggy="${abi_mpi_inplace}" 
-    fi
     AC_LANG_POP([Fortran])
     AC_MSG_RESULT([${abi_mpi_inplace}])
 
     # Restore build environment
     ABI_ENV_RESTORE
   fi
-]) # _ABI_MPI_CHECK_MPI_INPLACE
+]) # _ABI_MPI_CHECK_INPLACE
+
+
+                    # ------------------------------------ #
+
+
+# _ABI_MPI_CHECK_BUGGY()
+# ------------------------------------
+#
+# Checks whether the MPI library has buggy interfaces for scalars.
+#
+AC_DEFUN([_ABI_MPI_CHECK_BUGGY], [
+  # Set default values
+  abi_mpi_buggy="no"
+
+  if test "${abi_mpi_fc_level}" -ge "2"; then
+
+    # Back-up build environment
+    ABI_ENV_BACKUP
+
+    # Prepare build environment
+    CPPFLAGS="${CPPFLAGS} ${abi_mpi_incs}"
+    LDFLAGS="${FC_LDFLAGS}"
+    LIBS="${FC_LIBS} ${abi_mpi_libs}"
+
+    AC_MSG_CHECKING([whether MPI has buggy interfaces for scalars])
+    AC_LANG_PUSH([Fortran])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+      [[
+        use mpi
+        integer :: comm,ierr,ival,isum
+        real*8 :: xval,xsum
+        call mpi_init(ierr)
+        call mpi_allreduce(ival,isum,1,MPI_INTEGER,MPI_SUM,comm,ierr)
+        call mpi_allreduce(xval,xsum,1,MPI_DOUBLE_PRECISION,MPI_SUM,comm,ierr)
+        call mpi_allgather(xval,1,MPI_DOUBLE_PRECISION,xsum,1,MPI_DOUBLE_PRECISION,comm,ierr)
+        call mpi_finalize(ierr)
+      ]])],
+      [abi_mpi_buggy="no"], [abi_mpi_buggy="yes"])
+    AC_LANG_POP([Fortran])
+    AC_MSG_RESULT([${abi_mpi_buggy}])
+
+    # Restore build environment
+    ABI_ENV_RESTORE
+  fi
+]) # _ABI_MPI_CHECK_BUGGY
 
 
                     # ------------------------------------ #
@@ -971,26 +999,39 @@ AC_DEFUN([ABI_MPI_DETECT], [
           ;;
       esac
 
+      # Test if MPI has buggy interfaces for scalars
+      if test "${abi_mpi_interfaces_bugfix_enable}" = "no" -o "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
+        _ABI_MPI_CHECK_BUGGY
+        if test "${abi_mpi_buggy}" = "yes" -a "${abi_mpi_interfaces_bugfix_enable}" = "no"; then
+          AC_MSG_ERROR([--enable-mpi-interfaces-bugfix option is deactivated but MPI seems to have buggy interfaces!])
+        fi
+        if test "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
+          abi_mpi_interfaces_bugfix_enable="${abi_mpi_buggy}"
+        fi
+      fi
+      if test "${abi_mpi_interfaces_bugfix_enable}" = "yes"; then
+        AC_DEFINE([HAVE_MPI_BUGGY_INTERFACES], 1,
+          [Define to 1 if your MPI has buggy interfaces for scalars.])
+      fi
+
       # Test the availability of MPI_IN_PLACE
       if test "${abi_mpi_inplace_enable}" = "yes" -o "${abi_mpi_inplace_enable}" = "auto"; then
-        _ABI_MPI_CHECK_MPI_INPLACE
-        if test "${abi_mpi_inplace}" = "no" -a "${abi_mpi_inplace_enable}" = "yes"; then
-          AC_MSG_ERROR([--enable-mpi-inplace option is activated but MPI_IN_PLACE is not available!])
+        if test "${abi_mpi_buggy}" = "no"; then
+          _ABI_MPI_CHECK_INPLACE
+          if test "${abi_mpi_inplace}" = "no" -a "${abi_mpi_inplace_enable}" = "yes"; then
+            AC_MSG_ERROR([--enable-mpi-inplace option is activated but MPI_IN_PLACE is not available!])
+          fi
+        else
+          AC_MSG_WARN([MPI_IN_PLACE is deactivated because MPI has buggy interfaces])
+          abi_mpi_inplace = "no"
         fi
         if test "${abi_mpi_inplace_enable}" = "auto"; then
           abi_mpi_inplace_enable="${abi_mpi_inplace}"
-        fi
-        if test "${abi_mpi_interfaces_bugfix_enable}" = "auto"; then
-          abi_mpi_interfaces_bugfix_enable="${abi_mpi_inplace_buggy}"
         fi
       fi
       if test "${abi_mpi_inplace_enable}" = "yes"; then
         AC_DEFINE([HAVE_MPI2_INPLACE], 1,
           [Define to 1 if you want MPI_IN_PLACE support.])
-      fi
-      if test "${abi_mpi_interfaces_bugfix_enable}" = "yes"; then
-        AC_DEFINE([HAVE_MPI_BUGGY_INTERFACES], 1,
-          [Define to 1 if you want to fix buggy MPI interfaces.])
       fi
 
       # Test the availability of problematic MPI constants
