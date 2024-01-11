@@ -1098,10 +1098,10 @@ include 'mpif.h'
 #  else
     INTEGER :: CTQMC_MPI_IN_PLACE(1)
 #  endif
+# else
+   INTEGER :: my_count
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: opertau_buf
 # endif
-#else
-  INTEGER :: my_count
-  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: opertau_buf
 #endif
 
   IF ( op%set .EQV. .FALSE. ) &
@@ -1464,10 +1464,10 @@ include 'mpif.h'
 #  else
     INTEGER :: CTQMC_MPI_IN_PLACE(1)
 #  endif
+# else
+   INTEGER :: my_count
+   COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
 # endif
-#else
-  INTEGER :: my_count
-  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
 #endif
 
   nflavors=op%nflavors

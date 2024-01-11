@@ -2997,9 +2997,9 @@ include 'mpif.h'
 #  else
     INTEGER :: CTQMC_MPI_IN_PLACE(1)
 #  endif
+# else
+   DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
 # endif
-#else
-  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: freqs_buf,buffer_out
 #endif
 
   IF ( .NOT. op%done ) &
