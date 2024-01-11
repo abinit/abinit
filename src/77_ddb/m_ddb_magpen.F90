@@ -91,10 +91,10 @@ contains
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: qphnrm(3),qphon(3,3)
- complex(dp), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
- complex(dp), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
- complex(dp), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
- complex(dp), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
+ complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
+ complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
+ complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
+ complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
 
 ! *********************************************************************
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -369,22 +369,23 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dp),intent(out) :: barmagsus(ndim,ndim)
- complex(dp),intent(out) :: invbarmagsus(ndim,ndim)
- complex(dp),intent(out) :: invhmat(ndim,ndim)
- complex(dp),intent(out) :: magsus(ndim,ndim)
- complex(dp),intent(out) :: invmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: invhmat(ndim,ndim)
+ complex(dpc),intent(out) :: magsus(ndim,ndim)
+ complex(dpc),intent(out) :: invmagsus(ndim,ndim)
 
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,info,ipert1,ipert2,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ real(dp) :: fac
  character(len=1000) :: msg
 !arrays
- complex(dp) :: idty(ndim,ndim)
+ complex(dpc) :: idty(ndim,ndim)
  integer(dp) :: indexat(ndim),indexdir(ndim)
  integer, allocatable :: ipiv(:)
- complex(dp),allocatable :: work(:),work1(:,:),work2(:,:)
+ complex(dpc),allocatable :: work(:),work1(:,:),work2(:,:)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -485,13 +486,15 @@ contains
    end do
    call wrtout([ab_out,std_out], '   ')
 
+   fac=2.534134544063**2*27.2114/four
+
    call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
    call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
    do irow=1, ndim
      do icol=1, ndim
        write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
      & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-     & real(invmagsus(irow,icol)), aimag(invmagsus(irow,icol))
+     & real(invmagsus(irow,icol))*fac, aimag(invmagsus(irow,icol))*fac
        call wrtout([ab_out,std_out], msg)
      end do
    end do
@@ -584,12 +587,12 @@ contains
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  integer,intent(in) :: mpatpol(2),mpdir(3)
- complex(dp),intent(out) :: barmmom(ndim,(natom+2)*3)
- complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
- complex(dp),intent(in) :: invhmat(ndim,ndim)
- complex(dp),intent(in) :: magsus(ndim,ndim)
- complex(dp),intent(out) :: mmom(ndim,(natom+2)*3)
- complex(dp),intent(out) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(out) :: barmmom(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: invhmat(ndim,ndim)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(out) :: mmom(ndim,(natom+2)*3)
+ complex(dpc),intent(out) :: zfield(ndim,(natom+2)*3)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,ipert1,ipert2,irow
@@ -599,7 +602,7 @@ contains
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dp) :: mmom_alt(ndim,(natom+2)*3)
+ complex(dpc) :: mmom_alt(ndim,(natom+2)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -645,7 +648,7 @@ contains
  mmom=-matmul(magsus,zfield)
  mmom_alt=matmul(invhmat,barmmom)
 
- fac=2.511494255019/two*27.2114/0.529177
+ fac=2.534134544063/two*27.2114/0.529177
 
  do icol=1, natom*3
    write(100,'(4es18.9)') real(zfield(:,icol))*fac
@@ -794,9 +797,9 @@ contains
  integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: barmagsus(ndim,ndim)
- complex(dp),intent(in) :: magsus(ndim,ndim)
- complex(dp),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 !Local variables -------------------------
 !scalars
  integer :: icol,idir1,idir2,ipert1,ipert2,irow
@@ -804,10 +807,10 @@ contains
  character(len=1000) :: msg
 !arrays
  character(len=1) :: cart(3)=(/'x','y','z'/)
- complex(dp) :: barifc(natom*3,natom*3)
- complex(dp) :: fmifc(natom*3,natom*3)
- complex(dp) :: srifc(natom*3,natom*3)
- complex(dp) :: ifc_zfield(ndim,natom*3)
+ complex(dpc) :: barifc(natom*3,natom*3)
+ complex(dpc) :: fmifc(natom*3,natom*3)
+ complex(dpc) :: srifc(natom*3,natom*3)
+ complex(dpc) :: ifc_zfield(ndim,natom*3)
 
 ! *********************************************************************
 
@@ -922,19 +925,19 @@ contains
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: barmagsus(ndim,ndim)
- complex(dp),intent(in) :: magsus(ndim,ndim)
- complex(dp),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,ipert1,ipert2
  character(len=1000) :: msg
 !arrays
- complex(dp) :: barepsilon(3,3), bardielsus(3,3)
- complex(dp) :: fmepsilon(3,3), fmdielsus(3,3)
- complex(dp) :: srepsilon(3,3), srdielsus(3,3)
- complex(dp) :: diel_zfield(ndim,3)
+ complex(dpc) :: barepsilon(3,3), bardielsus(3,3)
+ complex(dpc) :: fmepsilon(3,3), fmdielsus(3,3)
+ complex(dpc) :: srepsilon(3,3), srdielsus(3,3)
+ complex(dpc) :: diel_zfield(ndim,3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1054,20 +1057,20 @@ contains
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: barmagsus(ndim,ndim)
- complex(dp),intent(in) :: magsus(ndim,ndim)
- complex(dp),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 
 !Local variables -------------------------
 !scalars
  integer :: icol,idir1,idir2,ipert1,ipert2
  character(len=1000) :: msg
 !arrays
- complex(dp) :: barzeff(3,natom*3)
- complex(dp) :: fmzeff(3,natom*3)
- complex(dp) :: srzeff(3,natom*3)
- complex(dp) :: diel_zfield(ndim,3)
- complex(dp) :: ifc_zfield(ndim,natom*3)
+ complex(dpc) :: barzeff(3,natom*3)
+ complex(dpc) :: fmzeff(3,natom*3)
+ complex(dpc) :: srzeff(3,natom*3)
+ complex(dpc) :: diel_zfield(ndim,3)
+ complex(dpc) :: ifc_zfield(ndim,natom*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1187,9 +1190,9 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
- complex(dp),intent(out) :: bc_ss(ndim,ndim)
- complex(dp),intent(out) :: bc_barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: bc_ss(ndim,ndim)
+ complex(dpc),intent(out) :: bc_barmagsus(ndim,ndim)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,info,ipert1,ipert2,ipert3,irow,lwork
@@ -1197,10 +1200,10 @@ contains
  real(dp) :: fac
  character(len=1000) :: msg
 !arrays
- complex(dp) :: idty(ndim,ndim)
+ complex(dpc) :: idty(ndim,ndim)
  integer(dp) :: indexat(ndim),indexdir(ndim)
  integer, allocatable :: ipiv(:)
- complex(dp),allocatable :: work(:),work1(:,:),work2(:,:)
+ complex(dpc),allocatable :: work(:),work1(:,:),work2(:,:)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1243,7 +1246,7 @@ contains
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
  bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
 
- fac=2.511494255019**2/four !TMP
+ fac=2.534134544063**2/four !TMP
 
  call wrtout([ab_out,std_out], ' Berry curvature of the inverse spin susceptibility ')
  call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -1297,10 +1300,10 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: barmmom(ndim,(natom+2)*3)
- complex(dp),intent(in) :: bc_ss(ndim,ndim)
- complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
- complex(dp),intent(out) :: bc_sp(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: bc_ss(ndim,ndim)
+ complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: bc_sp(ndim,(natom+2)*3)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
@@ -1310,7 +1313,7 @@ contains
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dp) :: bc_barsp(ndim,(natom+2)*3)
+ complex(dpc) :: bc_barsp(ndim,(natom+2)*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1355,7 +1358,7 @@ contains
  !Calculate the Berry curvature of the induced Zeeman fields
  bc_sp= -matmul(bc_ss,barmmom) - matmul(invbarmagsus,bc_barsp)
 
- fac=2.511494255019/two/0.52917 !TMP
+ fac=2.534134544063/two/0.52917 !TMP
 
  do icol=1, natom*3
    write(101,'(4es18.9)') -aimag(bc_sp(:,icol))*fac
@@ -1425,10 +1428,10 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: barmagsus(ndim,ndim)
- complex(dp),intent(in) :: bc_barmagsus(ndim,ndim)
- complex(dp),intent(in) :: bc_sp(ndim,(natom+2)*3)
- complex(dp),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: bc_barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: bc_sp(ndim,(natom+2)*3)
+ complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 !Local variables -------------------------
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
@@ -1438,8 +1441,8 @@ contains
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dp) :: bc_barpp(natom*3,natom*3), bc_pp(natom*3,natom*3), term(natom*3,natom*3,3)
- complex(dp) :: ifc_bc_sp(ndim,natom*3), ifc_zfield(ndim,natom*3)
+ complex(dpc) :: bc_barpp(natom*3,natom*3), bc_pp(natom*3,natom*3), term(natom*3,natom*3,3)
+ complex(dpc) :: ifc_bc_sp(ndim,natom*3), ifc_zfield(ndim,natom*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1531,7 +1534,7 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
- complex(dp),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
 
  end subroutine berrycurv_tt
 !!***
