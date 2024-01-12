@@ -163,9 +163,11 @@ ABI_EXTERNAL_PARAMS = OrderedDict([
     ("KOKKOS", "True if ABINIT has been compiled using KOKKOS performance library (compilation for GPU accelerators)"), 
     ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
     ("NPROC", "Number of processors used for Abinit"),
+    ("NVTX", "True if ABINIT has been linked to the NVIDIA® Tools Extension SDK (NVTX)"),
     ("OPENMP", "True if ABINIT has been compiled using OPENMP multithreading (compilation for multicore processors)"),
     ("OPENMP_OFFLOAD", "True if ABINIT has been compiled using OPENMP_OFFLOAD (openMP v5+) (compilation for GPU accelerators)"), 
     ("PARALLEL", "True if the code is compiled with MPI"),
+    ("ROCTX", "True if ABINIT has been linked to the AMD ROCm Tools Extension SDK (ROCTX)"),
     ("SEQUENTIAL", "True if the code is compiled without MPI"),
 ])
 

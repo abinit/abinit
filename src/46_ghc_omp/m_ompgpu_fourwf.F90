@@ -56,6 +56,9 @@ integer :: npw=-1
 
 ! GPU ffts buffers
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+type(c_ptr),target,save :: fofr_amdref
+#endif
 
 #endif
 
@@ -81,6 +84,7 @@ end function ompgpu_fourwf_work_mem
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA
+! - AMD GPUs    : FC_LLVM + HIP
 ! An eventual Intel implementation would use the OneAPI LLVM compiler.
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
@@ -161,7 +165,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  !$OMP TARGET ENTER DATA MAP(alloc:fofgout) IF(transfer_fofgout)
  !$OMP TARGET ENTER DATA MAP(alloc:fofr)    IF(transfer_fofr)
 
+#ifdef HAVE_GPU_CUDA
+ !Work buffer allocated at each call to save memory in CUDA
  !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#endif
 
  if(option==3) then
    !$OMP TARGET UPDATE TO(fofr)
@@ -170,19 +177,49 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option/=3) then
    ! We launch async transfert of denpot
    !$OMP TARGET ENTER DATA MAP(alloc:denpot)
-   !$OMP TARGET UPDATE TO(denpot) NOWAIT DEPEND(OUT:denpot)
+   !FIXME This async transfer might be better handled through CUDA/HIP after all...
+   ! Issues randomly occurs when using Cray compiler, seems fine with NVHPC.
+#ifdef FC_CRAY
+   !$OMP TARGET UPDATE TO(denpot)
+#else
+   !$OMP TARGET UPDATE TO(denpot) NOWAIT
+#endif
    if(option == 1) then
-     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT DEPEND(OUT:weight_r,weight_i)
+#ifdef FC_CRAY
+     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i)
+#else
+     !$OMP TARGET ENTER DATA MAP(to:weight_r,weight_i) NOWAIT
+#endif
    endif
+
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
+   ! For some reason, fofr won't be processed normally when passed as argument
+   ! of FFT routine within TARGET DATA directives
+   !$OMP TARGET MAP(to:fofr) MAP(from:fofr_amdref)
+   fofr_amdref=c_loc(fofr)
+   !$OMP END TARGET
+#endif
 
    ! GPU_SPHERE_IN
 
    cfft_size = 2*n1*n2*n3*ndat
 
+#if defined HAVE_GPU_CUDA
    byte_count=sizeof(work_gpu)
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu)
    call gpu_memset(c_loc(work_gpu), 0, byte_count)
    !$OMP END TARGET DATA
+#elif defined HAVE_GPU_HIP
+   !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3)  MAP(to:work_gpu)
+   do i3=1,n3*ndat
+     do i2=1,n2
+       do i1=1,n1
+         work_gpu(:,i1,i2,i3) = 0
+       end do
+     end do
+   end do
+#endif
 
    ! During GPU calculation we do some pre-calculation on symetries
    if((istwf_k==2) .or. (istwf_k==4) .or. (istwf_k==6) .or. (istwf_k==8)) then
@@ -228,10 +265,14 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
          i1=kg_kin(1,ipw); if(i1<0)i1=i1+n1;
          i2=kg_kin(2,ipw); if(i2<0)i2=i2+n2;
          i3=kg_kin(3,ipw); if(i3<0)i3=i3+n3;
-#ifdef HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA
          i1inv = modulo(shift_inv1 - i1, n1) + 1
          i2inv = modulo(shift_inv2 - i2, n2) + 1
          i3inv = modulo(shift_inv3 - i3, n3) + 1
+#elif defined HAVE_GPU_HIP
+         i1inv = (shift_inv1-i1) - ( ((shift_inv1-i1)/n1) * n1 ) + 1
+         i2inv = (shift_inv2-i2) - ( ((shift_inv2-i2)/n2) * n2 ) + 1
+         i3inv = (shift_inv3-i3) - ( ((shift_inv3-i3)/n3) * n3 ) + 1
 #endif
          work_gpu(1, i1inv, i2inv, i3inv+n3*(idat-1)) =  fofgin(1, (ipw + npwin*(idat-1)))
          work_gpu(2, i1inv, i2inv, i3inv+n3*(idat-1)) = -fofgin(2, (ipw + npwin*(idat-1)))
@@ -240,9 +281,15 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    end if
 
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
+   call gpu_fft_exec_z2z(c_loc(work_gpu), fofr_amdref, FFT_INVERSE)
+   !$OMP END TARGET DATA
+#else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
    call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr), FFT_INVERSE)
    !$OMP END TARGET DATA
+#endif
    call gpu_fft_stream_synchronize()
  end if
 
@@ -259,8 +306,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    ! call density accumulation routine on gpu
    !!$OMP TARGET TEAMS LOOP &
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:fofr,denpot,weight_r,weight_i) &
-   !$OMP& DEPEND(in:denpot,weight_r,weight_i)
+   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:fofr,denpot,weight_r,weight_i)
    do i3=1, n3
      do i2=1, n2
        do i1=1, n1
@@ -278,11 +324,12 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2) then
    ! We finished denpot transfert
    !!$OMP TASKWAIT depend(in:denpot)
+   !$OMP TASKWAIT
 
    ! call gpu routine to  Apply local potential
    !!$OMP TARGET TEAMS LOOP &
    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:denpot,fofr) DEPEND(in:denpot)
+   !$OMP& PRIVATE(idat,i1,i2,i3) MAP(to:denpot,fofr)
    do idat = 1, ndat
      do i3=1, n3
        do i2=1, n2
@@ -298,9 +345,15 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option==2 .or. option==3) then
 
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
+   call gpu_fft_exec_z2z(fofr_amdref, c_loc(work_gpu), FFT_FORWARD)
+   !$OMP END TARGET DATA
+#else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
    call gpu_fft_exec_z2z(c_loc(fofr), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
+#endif
    call gpu_fft_stream_synchronize()
 
    one=1
@@ -326,17 +379,20 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  if(option/=3) then
    ! We launch async transfert of denpot
    !!$OMP TARGET UPDATE FROM(denpot)
-   !$OMP TARGET EXIT DATA MAP(release:denpot)
+   !$OMP TARGET EXIT DATA MAP(delete:denpot)
    if(option == 1) then
-     !$OMP TARGET EXIT DATA MAP(release:weight_r,weight_i)
+     !$OMP TARGET EXIT DATA MAP(delete:weight_r,weight_i)
    endif
  endif
 
- !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#ifdef HAVE_GPU_CUDA
+ !Work buffer allocated at each call to save memory in CUDA
+ !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
+#endif
 
- !$OMP TARGET EXIT DATA MAP(release:fofgin)  IF(transfer_fofgin)
- !$OMP TARGET EXIT DATA MAP(release:fofgout) IF(transfer_fofgout)
- !$OMP TARGET EXIT DATA MAP(release:fofr)    IF(transfer_fofr)
+ !$OMP TARGET EXIT DATA MAP(delete:fofgin)  IF(transfer_fofgin)
+ !$OMP TARGET EXIT DATA MAP(delete:fofgout) IF(transfer_fofgout)
+ !$OMP TARGET EXIT DATA MAP(delete:fofr)    IF(transfer_fofr)
 
 end subroutine ompgpu_fourwf
 !!***
@@ -380,7 +436,10 @@ subroutine alloc_ompgpu_fourwf(ngfft, ndat)
 
  ABI_MALLOC(work_gpu, (2,n1,n2,n3*ndat))
  !FIXME Smarter buffer management ?
- !!$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#ifdef HAVE_GPU_HIP
+ !Work buffer allocated once to save time in HIP (alloc costful)
+ !$OMP TARGET ENTER DATA MAP(alloc:work_gpu)
+#endif
 
 end subroutine alloc_ompgpu_fourwf
 
@@ -394,7 +453,9 @@ subroutine free_ompgpu_fourwf()
  call gpu_fft_plan_destroy()
 
  !FIXME Smarter buffer management ?
- !!$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#ifdef HAVE_GPU_HIP
+ !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+#endif
  ABI_FREE(work_gpu)
 
  fourwf_initialized = 0;
