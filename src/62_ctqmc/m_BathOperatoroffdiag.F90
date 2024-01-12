@@ -257,10 +257,20 @@ SUBROUTINE BathOperatoroffdiag_init(op, flavors, samples, beta, iTech,opt_nondia
   FREEIF(op%F)
   MALLOC(op%F,(1:op%sizeHybrid+1,1:flavors,1:flavors))
   DT_FREEIF(op%tails)
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  DT_MALLOC(op%tails, (1:op%flavors))
+#else
   DT_MALLOC(op%tails,(1:op%flavors))
+#endif
   op%tails=0
   DT_FREEIF(op%Fshift)
+#ifdef FC_LLVM
+  ! LLVM 16 doesn't recognize this macro here
+  DT_MALLOC(op%Fshift, (1:op%flavors+1))
+#else
   DT_MALLOC(op%Fshift,(1:op%flavors+1))
+#endif
   op%Fshift=0
   
   CALL Vector_init(op%R,100*op%flavors)
