@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -1389,11 +1388,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  iprcel
-   call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)   !  0 or superior to 21
-   ! CP modified
-   !if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=8).and.mod(dt%iprcel,10)>49 )then
+   call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)
    if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=9).and.mod(dt%iprcel,10)>49 )then
-   ! End CP modified
      write(msg,'(5a)')&
      'For spin-polarized metallic systems (occopt>3),',ch10,&
      'only RPA dielectric matrix can be evaluated) !',ch10,&
@@ -2390,7 +2386,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  occopt
    call chkint_eq(0,0,cond_string,cond_values,ierr,'occopt',dt%occopt,10,(/0,1,2,3,4,5,6,7,8,9/),iout)
-   ! End CP modified
 !  When prtdos==1 or 4, occopt must be between 3 and 8
    if(dt%prtdos==1.or.dt%prtdos==4)then
      cond_string(1)='prtdos' ; cond_values(1)=dt%prtdos
