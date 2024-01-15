@@ -3548,7 +3548,7 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
- real(dp), allocatable :: tmpval(:,:,:,:,:,:)
+ real(dp), allocatable :: tmpval(:,:,:)
 
 ! *********************************************************************
 
@@ -3578,9 +3578,8 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
    '   and impose the ASR on the effective charges ',ch10
    call wrtout([std_out, ab_out], msg)
 
-   ABI_MALLOC(tmpval,(2,3,ddb%mpert,3,ddb%mpert,ddb%nblok))
-   tmpval(1,:,:,:,:,iblok) = reshape(ddb%val(1,:,iblok), shape = (/3,ddb%mpert,3,ddb%mpert/))
-   tmpval(2,:,:,:,:,iblok) = reshape(ddb%val(2,:,iblok), shape = (/3,ddb%mpert,3,ddb%mpert/))
+   ABI_MALLOC(tmpval,(2,(3*ddb%mpert)**2,ddb%nblok))
+   tmpval(:,:,iblok) = ddb%val(:,1:(3*ddb%mpert)**2,iblok)
 
    ! Extrac Zeff before enforcing sum rule.
    call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
