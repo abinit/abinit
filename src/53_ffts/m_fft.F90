@@ -2374,7 +2374,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
      weight_ptr_i(:)=weight_i
    end if
    if(gpu_option_==ABI_GPU_LEGACY) then
-#if defined HAVE_GPU
+#if defined HAVE_GPU_CUDA
      call gpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
        kg_kin,kg_kout,mgfft,mpi_enreg,ndat,ngfft,npwin,npwout,n4,n5,n6,option,&
        paral_kgb,tim_fourwf,weight_ptr_r,weight_ptr_i) !,use_ndo,fofginb)
