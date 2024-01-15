@@ -25,6 +25,24 @@ elseif(CMAKE_Fortran_COMPILER_ID MATCHES "ARMClang")
       "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-fbacktrace;-finit-real=nan;-Wimplicit;-Wall;-Wextra>")
   endif()
 
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+
+  # debug flags
+  if (ABI_DEBUG_FLAVOR MATCHES "enhanced")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+    add_link_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+    add_link_options(
+      "$<$<AND:$<LINK_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-O0;-eD>")
+  elseif (ABI_DEBUG_FLAVOR MATCHES "paranoid")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
+  elseif (ABI_DEBUG_FLAVOR MATCHES "naughty")
+    add_compile_options(
+      "$<$<AND:$<COMPILE_LANGUAGE:Fortran>,$<CONFIG:Debug>>:-eD;-hbounds>")
+  endif()
+
 elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Clang")
 
   # debug flags
