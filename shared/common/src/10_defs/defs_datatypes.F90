@@ -271,7 +271,7 @@ module defs_datatypes
 
    real(dp), allocatable :: tphi_qspl(:,:,:)
     ! (mqgrid_ff, 2, num_tphi)
-    ! Form factors for thepseudo wavefunctions.
+    ! Form factors for the pseudo wavefunctions.
 
    integer,allocatable :: tphi_n(:), tphi_l(:)
     ! (num_tphi) arrays giving n, l

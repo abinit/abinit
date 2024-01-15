@@ -425,7 +425,14 @@ class AbinitProject(NotebookWriter):
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
 
-        import imp
+        def load_mod(filepath):
+            try:
+                import imp
+                return imp.load_source(filepath, filepath)
+            except ModuleNotFoundError:
+                from importlib.machinery import SourceFileLoader
+                return SourceFileLoader(filepath, filepath).load_module()
+
         name2path = OrderedDict()
         for d in self.dirpaths:
             if os.path.basename(d) == "98_main":
@@ -437,7 +444,7 @@ class AbinitProject(NotebookWriter):
             else:
                 # Get source files from abinit.src.
                 abinit_src = os.path.join(d, "abinit.src")
-                mod = imp.load_source(abinit_src, abinit_src)
+                mod = load_mod(abinit_src)
                 for basename in filter_fortran(mod.sources):
                     if basename in name2path:
                         raise RuntimeError("Found two Fortran files with same basename `%s` and other in dir `%s`\n"
