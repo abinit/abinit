@@ -89,14 +89,20 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Absoft")
 endif()
 
 # TODO
-if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Flang")
+if ((${CMAKE_Fortran_COMPILER_ID} STREQUAL "Flang") OR
+    (${CMAKE_Fortran_COMPILER_ID} STREQUAL "LLVMFlang"))
   # EXECUTE_PROCESS(COMMAND ${CMAKE_Fortran_COMPILER} --version 2>/dev/null | head -n 1
   #   OUTPUT_VARIABLE FC_VERSION)
   set(FC_AOCC 1)
+  set(FC_LLVM 1)
 endif()
 
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "ARMCC")
   set(FC_ARM 1)
+endif()
+
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Cray")
+  set(FC_CRAY 1)
 endif()
 
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")

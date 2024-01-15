@@ -1,4 +1,4 @@
-/* prt_utils_rec.cu */
+/* timing_hip.cpp */
 
 /*
  * Copyright (C) 2008-2022 ABINIT Group (MMancini)
@@ -10,12 +10,13 @@
  */
 
 #include "stdio.h"
+#include <hip/hip_runtime_api.h>
 
 /*=========================================================================*/
-/*_________________________TIMING IN CUDA ROUTINES_________________________*/
+/*_________________________TIMING IN HIP ROUTINES__________________________*/
 /*=========================================================================*/
 /* This file contains some basic utils from the time measuration in
- * cuda subroutines. A more particular version is contained in 
+ * hip subroutines. A more particular version is contained in
  * prt_utils_rec.cu (to put together)
 */
 
@@ -23,39 +24,35 @@
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /*~~~~~~~~~~~~~~~~~~~~~~~~ INTERFACE WITH FORTRAN ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 /*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
-extern "C" __host__
-void start_cuda_tm_(cudaEvent_t* start,cudaEvent_t* stop)
+extern "C"
+void start_cuda_tm_(hipEvent_t* start,hipEvent_t* stop)
 {
-   cudaEventCreate(start);
-   cudaEventCreate(stop);
-   cudaEventRecord(*start,0);
+   hipEventCreate(start);
+   hipEventCreate(stop);
+   hipEventRecord(*start,0);
    return;
 };
 
-extern "C" __host__
-void stop_cuda_tm_(cudaEvent_t* stop)
+extern "C"
+void stop_cuda_tm_(hipEvent_t* stop)
 {
-   cudaEventRecord(*stop,0);
-   cudaEventSynchronize(*stop);
+   hipEventRecord(*stop,0);
+   hipEventSynchronize(*stop);
    printf("stop %d\n",*stop);
    return;
 }
 
-extern "C" __host__
-void calc_cuda_time_(cudaEvent_t* stop,cudaEvent_t* start,float* time_ms)
+extern "C"
+void calc_cuda_time_(hipEvent_t* stop,hipEvent_t* start,float* time_ms)
 {
-#if defined HAVE_GPU_CUDA3
-   cudaThreadSynchronize();
-#else
-   cudaDeviceSynchronize();
-#endif   
+   hipDeviceSynchronize();
    *time_ms = 0.;
    stop_cuda_tm_(stop);
-   cudaEventElapsedTime(time_ms,*start,*stop);
+   hipEventElapsedTime(time_ms,*start,*stop);
    printf("stop %d\n",*start);
    printf("stop %d\n",*stop);
    printf("stop %f\n",time_ms);
-   cudaEventDestroy(*start);
-   cudaEventDestroy(*stop);
+   hipEventDestroy(*start);
+   hipEventDestroy(*stop);
    return ;
 }

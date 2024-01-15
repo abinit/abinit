@@ -161,6 +161,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA
+! - AMD GPUs    : FC_LLVM + HIP
 ! An eventual Intel implementation would use the OneAPI LLVM compiler.
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.

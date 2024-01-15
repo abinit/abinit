@@ -3496,6 +3496,9 @@ P           mkmem8          5
 - newocc                                    0.145   0.2         0.146   0.2            272                   0.99       0.99
 - nonlop(total)                             3.622   4.8         3.642   4.7          85344                   0.99       0.99
 
+ Additional information about diagonalization algorithm segments
+- lobpcg_RayleighRitz@hegv                  1.087   1.9         1.090   1.9          68448                   1.00       1.00
+
  timana : in multi dataset mode, the more detailed analysis is not done.
 
 ================================================================================

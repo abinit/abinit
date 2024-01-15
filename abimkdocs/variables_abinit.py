@@ -6242,12 +6242,16 @@ Variable(
     mnemonics="GPU: activate USE of NVTX tracing/profiling",
     added_in_version="9.7.2",
     text=r"""
-Only available if ABINIT executable has been compiled with a [[CUDA]] Nvidia compiler
-(`nvhpc`: `nvfortran` and/or `nvcc`).
-When equal to 1, this parameter activates the use of [NVTX](https://github.com/NVIDIA/NVTX)
- tracing/profiling ((NVIDIA Tools Extension Library).  
+Only available if ABINIT executable has been linked with the [[NVTX]] (Nvidia) or
+[[ROCTX]] (AMD) library.
+When [[gpu_use_nvtx]] = 1 on Nvidia GPU(s),
+the use of [NVTX](https://github.com/NVIDIA/NVTX)
+ tracing/profiling ((NVIDIA Tools eXtension Library) is activated.
  The trace can be used for instance with
  [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
+When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
+the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
+ tracing/profiling (ROCm Tools eXtension Library) is activated.  
 """,
 ),
 
