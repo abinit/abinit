@@ -3585,7 +3585,7 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
    call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
-   call chneu9(chneut,tmpval(:,:,:,:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
+   call chneu9(chneut,tmpval(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
 
    ! Extraction of the dielectric tensor and the effective charges
    call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
