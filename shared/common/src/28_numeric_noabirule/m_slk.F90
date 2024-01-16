@@ -3483,6 +3483,7 @@ subroutine compute_eigen2(comm,processor,cplex,nbli_global,nbco_global,matrix1,m
  call sca_matrix2%free()
  call sca_matrix3%free()
 
+
 #ifndef HAVE_LINALG_ELPA
  ABI_UNUSED(use_gpu_elpa)
 #endif

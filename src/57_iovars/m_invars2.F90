@@ -2454,7 +2454,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usexcnhat',tread,'INT')
  if(tread==1) dtset%usexcnhat_orig=intarr(1)
 
- ! gemm_nonlop (must read them before useylm)
+ ! gemm_nonlop (must read it before useylm)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
