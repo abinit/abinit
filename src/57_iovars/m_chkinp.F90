@@ -1114,7 +1114,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &       'Action: suppress ngfft in input file or change it.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
-#ifndef HAVE_GPU_CUDA
+#ifndef HAVE_GPU
      write(msg,'(6a)') ch10,&
 &     ' invars0: ERROR -',ch10,&
 &     '   Input variable gpu_option is on but abinit hasn''t been built with GPU mode enabled !',ch10,&
@@ -1122,16 +1122,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call wrtout(std_out,msg)
      ierr=ierr+1
 #endif
-#ifndef HAVE_GPU_CUDA_DP
-     write(msg,'(10a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variable gpu_option is on but abinit hasn''t been built',ch10,&
-&     '   with GPU mode in DOUBLE PRECISION enabled !',ch10,&
-&     '   Action: suppress input variable use_gpu_cuda',ch10,&
-&     '   or re-compile ABINIT with double precision GPU enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
+!#ifndef HAVE_GPU_CUDA_DP
+!     write(msg,'(10a)') ch10,&
+!&     ' invars0: ERROR -',ch10,&
+!&     '   Input variable gpu_option is on but abinit hasn''t been built',ch10,&
+!&     '   with GPU mode in DOUBLE PRECISION enabled !',ch10,&
+!&     '   Action: suppress input variable gpu_option',ch10,&
+!&     '   or re-compile ABINIT with double precision GPU enabled.'
+!     call wrtout(std_out,msg)
+!     ierr=ierr+1
+!#endif
    end if
 
    ! RT-TDDFT
