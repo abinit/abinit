@@ -6187,7 +6187,7 @@ when needed.
 Variable(
     abivarname="gpu_option",
     varset="paral",
-    vartype="integer",
+    vartype="integer or string",
     topics=['parallelism_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[OPENMP_OFFLOAD]]': 2, '[[KOKKOS]]': 3, '[[CUDA]]': 1, 'defaultval': 0}),
@@ -6199,15 +6199,15 @@ This option is only available if ABINIT executable has been compiled for the pur
 of being used with GPU accelerators. It allows to choose between the different
 GPU programming models available in ABINIT:  
 
-- [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
+- [[gpu_option]]= "GPU_DISABLED" or [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
 
-- [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
+- [[gpu_option]]= "GPU_LEGACY" or [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
   implementation, using the `nvcc` [[CUDA]] compiler. The old LOBPCG algorithm is automatically
   used to compute the eigenstates ([[wfoptalg]]=14). The external linear algebra library
   `MAGMA can also be linked to ABINIT to improve performances on large systems
   (see [[gpu_linalg_limit]]).
 
-- [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
+- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
   parts of the code on GPU. This implementation works on NVidia accelerators, if ABINIT has been
   compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
   libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
@@ -6218,7 +6218,7 @@ GPU programming models available in ABINIT:
   FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
   or [HIP](https://github.com/ROCm/HIP)).
 
-- [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
+- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
   parts of the code on GPU. This implementation -- at present -- is only compatible with
   NVidia accelerators. It required that ABINIT has been linked to the
   [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
