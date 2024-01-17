@@ -5571,7 +5571,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode).
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6. 10.
 If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]].
 
   * If [[getefmas]] == 0, no such use of previously computed output _EFMAS file is done.
@@ -8403,7 +8403,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode).
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6, 10.
 If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]] in another run.
 """,
 ),
