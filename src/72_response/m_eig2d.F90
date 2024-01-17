@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
