@@ -725,7 +725,7 @@ contains
 
          call fourwf(1,rhoaug,cwavef,dummy,wfraug,gbound,gbound,&
 &         istwf_k,kg_k,kg_k,mgfftdiel,mpi_enreg,1,ngfftdiel,npw_k,1,ndiel4,ndiel5,ndiel6,&
-&         0,tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&         0,tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
 !        write(std_out,'(a,i5)')' After Fourier proc ',me_loc
 

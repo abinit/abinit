@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_invars2
 !! NAME
 !!  m_invars2
@@ -810,6 +809,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
  end do
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'invol_blk_sliced',tread,'INT')
+ if(tread==1)dtset%invol_blk_sliced=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)
 
@@ -1175,16 +1177,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    end do
  end if
 
- ! CP added
  dtset%nh_qFD=zero
  dtset%ne_qFD=zero
  dtset%ivalence=0
- ! CP Ended
 
- ! CP modified
- !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
- ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    if(tnband==1) then
      nband1=intarr(1)
@@ -1224,21 +1221,21 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%nband(ikpt)=nband1
    end do
 
-   ! CP added
    if (occopt==9)then
-! Read the valence band index
+      !Read the valence band index
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ivalence',tread,'INT')
       if (tread==1) dtset%ivalence=intarr(1)
       call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nqfd',tread,'DPR')
       if (tread==1)then
         dtset%nqfd=dprarr(1)
         dtset%ne_qFD=dprarr(1)
-        dtset%nh_qFD=dprarr(1) ! CP: here we assume that number of excited electrons  = number of excited holes. Potentially can be
-! relaxed in the future if consistent changes with the cellcharge tag are made .
+        dtset%nh_qFD=dprarr(1)
+        ! Here we assume that number of excited electrons  = number of excited holes.
+        ! Potentially can be relaxed in the future if consistent changes with the
+        ! cellcharge tag are made.
       end if
    end if
-   ! End CP added
-
+ 
  else if (occopt==2) then
    ! Give nband explicitly for each k point and spin
    call intagm(dprarr,intarr,jdtset,nkpt*nsppol,nkpt*nsppol,string(1:lenstr),'nband',tnband,'INT')
@@ -2443,7 +2440,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usexcnhat',tread,'INT')
  if(tread==1) dtset%usexcnhat_orig=intarr(1)
 
- ! Read use_gemm_nonlop before useylm
+ ! gemm_nonlop (must read it before useylm)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
@@ -2455,7 +2452,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (usepaw==1) dtset%useylm=1
  if (usepaw==1 .and. dtset%usewvl==1) dtset%useylm=0
  if (dtset%efmas==1 .or. dtset%rf2_dkdk/=0 .or. dtset%rf2_dkde/=0) dtset%useylm=1
- if (dtset%use_gpu_cuda /= 0 .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
+ if (dtset%gpu_option /= ABI_GPU_DISABLED .and. dtset%optdriver /= RUNL_GWR) dtset%useylm=1
  if(dtset%tfkinfunc==2 .and. dtset%usewvl==0 ) then
    dtset%useylm=1
    dtset%userec=1
@@ -3801,10 +3798,7 @@ if (dtset%usekden==1) then
    dtset%nbandhf=intarr(1)
  else
    ! If the occupation numbers might change, must keep the maximum number of bands
-   ! CP modified
-   !if(occopt>=3 .and. occopt<=8)then
    if(occopt>=3 .and. occopt<=9)then
-   ! End CP modified
      dtset%nbandhf=maxval(dtset%nband(1:nkpt*nsppol))
    else if(occopt==0 .or. occopt==1 .or. occopt==2) then
      ! Eliminate all the bands that are never occupied

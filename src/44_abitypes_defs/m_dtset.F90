@@ -121,7 +121,6 @@ type, public :: dataset_type
 !D
  integer :: delayperm
  integer :: densfor_pred
- integer :: diago_apply_block_sliced = 1
  integer :: diismemory
  integer :: dipdip = 1
  integer :: dipquad = 1
@@ -231,7 +230,13 @@ type, public :: dataset_type
  integer :: getbscoup = 0
  integer :: gethaydock = 0
  integer :: goprecon
+
+ integer :: gpu_kokkos_nthrd
  integer :: gpu_linalg_limit
+ integer :: gpu_nl_distrib = 0
+ integer :: gpu_nl_splitsize = 1
+ integer :: gpu_option
+ integer :: gpu_use_nvtx
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
@@ -306,6 +311,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
+ integer :: invol_blk_sliced
  integer :: iomode
  integer :: ionmov
  integer :: iprcel
@@ -337,7 +343,7 @@ type, public :: dataset_type
  integer :: istatimg
  integer :: istatr
  integer :: istatshft
- integer :: ivalence ! CP added for occopt==9 purposes
+ integer :: ivalence
  integer :: ixc
  integer :: ixc_sigma
  integer :: ixcpositron
@@ -615,8 +621,6 @@ type, public :: dataset_type
  integer :: tl_nprccg
 !U
  integer :: ucrpa
- integer :: use_gpu_cuda
- integer :: use_nvtx
  integer :: usedmatpu
  integer :: usedmft
  integer :: useexexch
@@ -807,8 +811,8 @@ type, public :: dataset_type
  real(dp) :: mdwall
  real(dp) :: mep_mxstep
  real(dp) :: nelect
- real(dp) :: ne_qFD = zero ! CP added
- real(dp) :: nh_qFD = zero  ! CP added
+ real(dp) :: ne_qFD = zero
+ real(dp) :: nh_qFD = zero
  real(dp) :: noseinert
  real(dp) :: nqfd = zero
  real(dp) :: omegasimax = 50/Ha_eV
@@ -1116,25 +1120,17 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
 !(2) Optionally initialize occ with semiconductor occupancies
 !(even for a metal : at this stage, the eigenenergies are unknown)
 !Note that nband(1)=nband(2) in this section, as occopt=2 is avoided.
- ! CP modified
- !if(occopt==1 .or. (occopt>=3 .and. occopt<=8) )then
  if(occopt==1 .or. (occopt>=3 .and. occopt<=9) )then
- ! End CP modified
+
 !  Here, initialize a real(dp) variable giving the
 !  maximum occupation number per band
    maxocc=2.0_dp/real(dtset%nsppol*dtset%nspinor,dp)
 
 !  Determine the number of bands fully or partially occupied
-   ! CP modified
-   !nocc=int((dtset%nelect-1.0d-8)/maxocc) + 1
    nocc=int((dtset%nelect-dtset%nh_qFD-1.0d-8)/maxocc) + 1
-   !End CP modified
+
 !  Occupation number of the highest level
-   ! CP modified
-   !occlast=dtset%nelect-maxocc*(nocc-1)
    occlast=dtset%nelect-dtset%nh_qFD-maxocc*(nocc-1)
-   ! End CP modified
-   !write(std_out,*)' maxocc,nocc,occlast=',maxocc,nocc,occlast
 
 !  The number of allowed bands must be sufficiently large
    if( nocc<=dtset%nband(1)*dtset%nsppol .or. dtset%iscf==-2) then
@@ -1152,33 +1148,32 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        if (1<nocc) tmpocc(1:nocc-1)=maxocc
 !      Then, do it for highest occupied band
        if (1<=nocc) tmpocc(nocc)=occlast
-       ! CP added to treat the case occopt = 9
+
        if (occopt==9) then
-          if (nocc > dtset%ivalence*dtset%nsppol) then
-             write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
+         if (nocc > dtset%ivalence*dtset%nsppol) then
+           write(msg,'(a,i5,a,f17.8,a)') 'In occopt = 9 case, ivalence = ', dtset%ivalence, &
 &           ' is too small compared to the number of electrons in the valence bands, nelect-nh_qFD = ', &
-&           dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
-            ABI_ERROR(msg)
-          end if
+&          dtset%nelect-dtset%nh_qFD, '. Increase ivalence. '
+           ABI_ERROR(msg)
+         end if
 
-       if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=0.0_dp
-       ! now do it for excited electrons in the conduction bands > ivalence
-       nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
-       occlast= dtset%ne_qFD-maxocc*(nocc-1)
-       if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
-          write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
-          ABI_ERROR(msg)
-       end if
+         if (dtset%ivalence*dtset%nsppol > nocc) tmpocc(nocc+1:dtset%ivalence*dtset%nsppol)=zero
+         nocc   = (dtset%ne_qFD-1.0d-8)/maxocc + 1
+         occlast= dtset%ne_qFD-maxocc*(nocc-1)
+         if ( (nocc+dtset%ivalence*dtset%nsppol) > dtset%nband(1)*dtset%nsppol) then
+           write(msg,'(a)') 'Occopt = 9: Not enough band above ivalence. Increase nband or reduce ivalence'
+           ABI_ERROR(msg)
+         end if
 
-       if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
-       if(nocc >= 1) tmpocc(dtset%ivalence*dtset%nsppol+nocc)=occlast
-       if ((dtset%ivalence*dtset%nsppol + nocc) < dtset%nband(1)*dtset%nsppol) &
-&             tmpocc(dtset%ivalence*dtset%nsppol+nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+         if(nocc > 1)  tmpocc(dtset%ivalence*dtset%nsppol+1:dtset%ivalence*dtset%nsppol+nocc-1)=maxocc
+         if(nocc >= 1) tmpocc(dtset%ivalence*dtset%nsppol+nocc)=occlast
+         if ((dtset%ivalence*dtset%nsppol + nocc) < dtset%nband(1)*dtset%nsppol) &
+&          tmpocc(dtset%ivalence*dtset%nsppol+nocc+1:dtset%nband(1)*dtset%nsppol)=zero
        else
-!      Finally do it for eventual unoccupied bands
-         if ( nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=0.0_dp
+!        Finally do it for eventual unoccupied bands
+         if (nocc<dtset%nband(1)*dtset%nsppol ) tmpocc(nocc+1:dtset%nband(1)*dtset%nsppol)=zero
        end if
-       ! End CP added
+
 !      Now copy the tmpocc array in the occ array, taking into account the spin
        if(dtset%nsppol==1)then
          do ikpt=1,dtset%nkpt
@@ -1191,22 +1186,21 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
            do iband=1,dtset%nband(1)
              do isppol=1,dtset%nsppol
                dtset%occ_orig(iband+dtset%nband(1)*(ikpt-1+dtset%nkpt*(isppol-1)),:) =  &
-&               tmpocc(isppol+dtset%nsppol*(iband-1))
+&                tmpocc(isppol+dtset%nsppol*(iband-1))
              end do
            end do
          end do
        end if
        ABI_FREE(tmpocc)
 
-     ! Second, treat the case in which one imposes the spin magnetization (only possible for nspden==2)
-     ! Also treat antiferromagnetic case (nsppol==1, nspden==2), although spinmagntarget must be zero
+   ! Second, treat the case in which one imposes the spin magnetization (only possible for nspden==2)
+   ! Also treat antiferromagnetic case (nsppol==1, nspden==2), although spinmagntarget must be zero
      else if(abs(dtset%spinmagntarget+99.99_dp)>1.0d-10)then
        do isppol=1,dtset%nsppol
          sign_spin=real(3-2*isppol,dp)
          nelect_spin=half*(dtset%nelect*maxocc+sign_spin*dtset%spinmagntarget)
 
-         !write(std_out,*)' isppol,sign_spin,nelect_spin=',isppol,sign_spin,nelect_spin
-         ! Determines the last state, and its occupation
+         !Determines the last state, and its occupation
          if(abs(nint(nelect_spin)-nelect_spin)<tol10)then
            nocc=nint(nelect_spin/maxocc)
            occlast=maxocc
@@ -1214,7 +1208,6 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
            nocc=ceiling(nelect_spin/maxocc)
            occlast=nelect_spin-(real(nocc,dp)-one)*maxocc
          end if
-         !write(std_out,*)' dtset%nband(1),maxocc,occlast=',dtset%nband(1),maxocc,occlast
          if(dtset%nband(1)*nint(maxocc)<nocc)then
            write(msg, '(a,i0,a, a,2i0,a, a,es16.6,a, a,es16.6,6a)' )&
            'Initialization of occ, with nspden = ',dtset%nspden,ch10,&
@@ -1248,7 +1241,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        ABI_ERROR(msg)
      end if
 
-     ! Now print the values (only the first image, since they are all the same)
+   ! Now print the values (only the first image, since they are all the same)
      if(dtset%nsppol==1)then
        if (dtset%prtvol > 0) then
          write(msg, '(a,i0,a,a)' ) &
@@ -1261,7 +1254,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        end if
      else
        write(msg, '(a,i0,2a)' ) &
-        ' initocc_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
+       ' initocc_chkneu: initialized the occupation numbers for occopt= ',occopt,ch10,'    spin up   values:'
        call wrtout(std_out,msg)
        if (dtset%prtvol > 0) then
          do ii=0,(dtset%nband(1)-1)/12
@@ -1271,7 +1264,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
          call wrtout(std_out,'    spin down values:')
          do ii=0,(dtset%nband(1)-1)/12
            write(msg,'(12f6.2)') &
-             dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
+            dtset%occ_orig( 1+ii*12+dtset%nkpt*dtset%nband(1) : min(12+ii*12,dtset%nband(1))+dtset%nkpt*dtset%nband(1) ,1)
            call wrtout(std_out,msg)
          end do
        end if
@@ -1279,7 +1272,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
      end if
 
    else
-     ! Here, treat the case when the number of allowed bands is not large enough
+   ! Here, treat the case when the number of allowed bands is not large enough
      write(msg, '(a,i0,2a, es12.4, 6a)' )&
      'Initialization of occ variables with occopt: ',occopt,ch10,&
      'There are not enough bands to get charge balance right with nelect:', dtset%nelect, ch10, &
@@ -1436,7 +1429,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cprj_in_memory     = dtin%cprj_in_memory
  dtout%cprj_update_lvl    = dtin%cprj_update_lvl
  dtout%delayperm          = dtin%delayperm
- dtout%diago_apply_block_sliced = dtin%diago_apply_block_sliced
  dtout%diismemory         = dtin%diismemory
  dtout%dipquad            = dtin%dipquad
  dtout%dmatpuopt          = dtin%dmatpuopt
@@ -1588,16 +1580,16 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
- dtout%getddb_filepath        = dtin%getddb_filepath
- dtout%getden_filepath        = dtin%getden_filepath
- dtout%getdvdb_filepath       = dtin%getdvdb_filepath
- dtout%getpot_filepath        = dtin%getpot_filepath
- dtout%getsigeph_filepath     = dtin%getsigeph_filepath
- dtout%getgstore_filepath     = dtin%getgstore_filepath
- dtout%getscr_filepath        = dtin%getscr_filepath
- dtout%getwfk_filepath        = dtin%getwfk_filepath
- dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
- dtout%getwfq_filepath        = dtin%getwfq_filepath
+ dtout%getddb_filepath    = dtin%getddb_filepath
+ dtout%getden_filepath    = dtin%getden_filepath
+ dtout%getdvdb_filepath   = dtin%getdvdb_filepath
+ dtout%getpot_filepath    = dtin%getpot_filepath
+ dtout%getsigeph_filepath = dtin%getsigeph_filepath
+ dtout%getgstore_filepath = dtin%getgstore_filepath
+ dtout%getscr_filepath    = dtin%getscr_filepath
+ dtout%getwfk_filepath    = dtin%getwfk_filepath
+ dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
+ dtout%getwfq_filepath    = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -1610,7 +1602,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%get1den            = dtin%get1den
  dtout%get1wf             = dtin%get1wf
  dtout%goprecon           = dtin%goprecon
+
+ dtout%gpu_kokkos_nthrd   = dtin%gpu_kokkos_nthrd
  dtout%gpu_linalg_limit   = dtin%gpu_linalg_limit
+ dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
+ dtout%gpu_nl_splitsize   = dtin%gpu_nl_splitsize
+ dtout%gpu_option         = dtin%gpu_option
+ dtout%gpu_use_nvtx       = dtin%gpu_use_nvtx
 
  dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
@@ -1684,6 +1682,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
+ dtout%invol_blk_sliced   = dtin%invol_blk_sliced
  dtout%ionmov             = dtin%ionmov
  dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
@@ -1715,7 +1714,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%istatimg           = dtin%istatimg
  dtout%istatr             = dtin%istatr
  dtout%istatshft          = dtin%istatshft
- dtout%ivalence           = dtin%ivalence ! CP added for occopt == 9 purposes
+ dtout%ivalence           = dtin%ivalence
  dtout%ixc                = dtin%ixc
  dtout%ixc_sigma          = dtin%ixc_sigma
  dtout%ixcpositron        = dtin%ixcpositron
@@ -1979,9 +1978,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%tim1rev            = dtin%tim1rev
  dtout%timopt             = dtin%timopt
  dtout%use_gemm_nonlop    = dtin%use_gemm_nonlop
- dtout%use_gpu_cuda       = dtin%use_gpu_cuda
  dtout%useextfpmd         = dtin%useextfpmd
- dtout%use_nvtx           = dtin%use_nvtx
  dtout%use_yaml           = dtin%use_yaml   ! This variable activates the Yaml output for testing purposes
                                             ! It will be removed when Yaml output enters production.
  dtout%use_slk            = dtin%use_slk
@@ -2116,8 +2113,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mdwall             = dtin%mdwall
  dtout%mep_mxstep         = dtin%mep_mxstep
  dtout%nelect             = dtin%nelect
- dtout%ne_qFD             = dtin%ne_qFD ! CP added for occopt == 9 purposes
- dtout%nh_qFD             = dtin%nh_qFD ! CP added for occopt == 9 purposes
+ dtout%ne_qFD             = dtin%ne_qFD
+ dtout%nh_qFD             = dtin%nh_qFD
  dtout%nnos               = dtin%nnos
  dtout%noseinert          = dtin%noseinert
  dtout%nqfd               = dtin%nqfd
@@ -3301,7 +3298,7 @@ subroutine chkvars(string)
 !D
  list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
- list_vars=trim(list_vars)//' dfpt_sciss diago_apply_block_sliced diecut diegap dielam dielng diemac'
+ list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory'
  list_vars=trim(list_vars)//' dilatmx dipdip dipquad dipdip_prt dipdip_range'
  list_vars=trim(list_vars)//' dmatpawu dmatpuopt dmatudiag'
@@ -3360,7 +3357,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
- list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
+ list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
+ list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option gpu_use_nvtx'
+ list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
@@ -3380,15 +3379,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invol_blk_sliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
  list_vars=trim(list_vars)//' ird1wf iscf isecur istatimg istatr'
- list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot'
- list_vars=trim(list_vars)//' irdvdw ivalence' ! CP added ival for occopt 9 case
+ list_vars=trim(list_vars)//' istatshft istwfk ixc ixc_sigma ixcpositron ixcrot irdvdw ivalence'
 !J
  list_vars=trim(list_vars)//' jdtset jellslab jfielddir jpawu'
 !K
@@ -3430,7 +3428,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info nonlop_ylm_count noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'
- list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft' ! CP added nqfd for occopt 9
+ list_vars=trim(list_vars)//' np_slk nqpt nqptdm nqfd nscforder nshiftk nshiftq nqshft'
  list_vars=trim(list_vars)//' nspden nspinor nsppol nstep nsym'
  list_vars=trim(list_vars)//' ntime ntimimage ntypalch ntypat nucdipmom nucefg nucfc nwfshist nzchempot'
 !O
@@ -3521,7 +3519,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'
  list_vars=trim(list_vars)//' useria userib useric userid userie'
  list_vars=trim(list_vars)//' userra userrb userrc userrd userre'
- list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop use_gpu_cuda use_nvtx use_slk useextfpmd use_yaml'
+ list_vars=trim(list_vars)//' usewvl usexcnhat useylm use_gemm_nonlop'
+ list_vars=trim(list_vars)//' use_slk useextfpmd use_yaml'
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
