@@ -36,8 +36,12 @@ module m_abi_linalg
  use plasma, except_dp => dp, except_sp => sp
 #endif
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
+#endif
+
+#if defined HAVE_YAKL
+ use gator_mod, only: gator_allocate, gator_deallocate
 #endif
 
 #if defined HAVE_MPI1
@@ -111,6 +115,25 @@ module m_abi_linalg
  type(c_ptr) :: plasma_work
 #endif
 
+ integer, save, private     :: abi_linalg_gpu_mode = ABI_GPU_DISABLED
+
+#ifdef HAVE_GPU
+ integer,                       allocatable,save,private,target :: i_work(:)
+ real(kind=c_double),           allocatable,save,private,target :: r_work(:)
+ complex(kind=c_double_complex),allocatable,save,private,target :: c_work(:)
+ type(c_ptr),save,private :: gpu_work
+
+ !FIXME *_managed arrays are only used with YAKL, in place of previous ones
+ integer(kind=c_int32_t),        ABI_CONTIGUOUS pointer,save,private :: i_work_managed(:) => null()
+ real(kind=c_double),            ABI_CONTIGUOUS pointer,save,private :: r_work_managed(:) => null()
+ complex(kind=c_double_complex), ABI_CONTIGUOUS pointer,save,private :: c_work_managed(:) => null()
+
+ integer, save, private :: i_work_len = 0
+ integer, save, private :: r_work_len = 0
+ integer, save, private :: c_work_len = 0
+ integer(c_size_t), save, private :: gpu_work_len = 0
+#endif
+
 !----------------------------------------------------------------------
 !!***
 
@@ -128,6 +151,100 @@ module m_abi_linalg
     module procedure abi_zgemm_2d
     module procedure abi_d2zgemm
  end interface abi_xgemm
+
+ interface abi_gpu_xgemm
+    module procedure abi_gpu_xgemm_cptr
+    module procedure abi_gpu_xgemm_d
+    module procedure abi_gpu_xgemm_z
+    module procedure abi_gpu_xgemm_2d
+    module procedure abi_gpu_xgemm_2z
+ end interface abi_gpu_xgemm
+
+ interface abi_gpu_xgemm_strided
+    module procedure abi_gpu_xgemm_strided_cptr
+    module procedure abi_gpu_xgemm_strided_d
+    module procedure abi_gpu_xgemm_strided_z
+    module procedure abi_gpu_xgemm_strided_2d
+    module procedure abi_gpu_xgemm_strided_2z
+ end interface abi_gpu_xgemm_strided
+
+ interface abi_gpu_xsymm
+    module procedure abi_gpu_xsymm_cptr
+    module procedure abi_gpu_xsymm_d
+    module procedure abi_gpu_xsymm_z
+    module procedure abi_gpu_xsymm_2d
+    module procedure abi_gpu_xsymm_2z
+ end interface abi_gpu_xsymm
+
+ interface abi_gpu_zhemm
+    module procedure abi_gpu_zhemm_cptr
+    module procedure abi_gpu_zhemm_d
+    module procedure abi_gpu_zhemm_z
+    module procedure abi_gpu_zhemm_2d
+    module procedure abi_gpu_zhemm_2z
+ end interface abi_gpu_zhemm
+
+ interface abi_gpu_xscal
+    module procedure abi_gpu_xscal_cptr
+    module procedure abi_gpu_xscal_d
+    module procedure abi_gpu_xscal_z
+    module procedure abi_gpu_xscal_2d
+    module procedure abi_gpu_xscal_2z
+ end interface abi_gpu_xscal
+
+ interface abi_gpu_xaxpy
+    module procedure abi_gpu_xaxpy_cptr
+    module procedure abi_gpu_xaxpy_d
+    module procedure abi_gpu_xaxpy_z
+    module procedure abi_gpu_xaxpy_2d
+    module procedure abi_gpu_xaxpy_2z
+ end interface abi_gpu_xaxpy
+
+ interface abi_gpu_xheevd
+    module procedure abi_gpu_xheevd_cptr
+    module procedure abi_gpu_xheevd_d
+    module procedure abi_gpu_xheevd_z
+    module procedure abi_gpu_xheevd_2d
+    module procedure abi_gpu_xheevd_2z
+ end interface abi_gpu_xheevd
+
+ interface abi_gpu_xhegvd
+    module procedure abi_gpu_xhegvd_cptr
+    module procedure abi_gpu_xhegvd_d
+    module procedure abi_gpu_xhegvd_z
+    module procedure abi_gpu_xhegvd_2d
+    module procedure abi_gpu_xhegvd_2z
+ end interface abi_gpu_xhegvd
+
+ interface abi_gpu_xtrsm
+    module procedure abi_gpu_xtrsm_cptr
+    module procedure abi_gpu_xtrsm_d
+    module procedure abi_gpu_xtrsm_z
+    module procedure abi_gpu_xtrsm_2d
+    module procedure abi_gpu_xtrsm_2z
+ end interface abi_gpu_xtrsm
+
+ interface abi_gpu_xpotrf
+    module procedure abi_gpu_xpotrf_cptr
+    module procedure abi_gpu_xpotrf_d
+    module procedure abi_gpu_xpotrf_z
+    module procedure abi_gpu_xpotrf_2d
+    module procedure abi_gpu_xpotrf_2z
+ end interface abi_gpu_xpotrf
+
+ interface abi_gpu_xcopy
+    module procedure abi_gpu_xcopy_cptr
+    module procedure abi_gpu_xcopy_d
+    module procedure abi_gpu_xcopy_z
+    module procedure abi_gpu_xcopy_2d
+    module procedure abi_gpu_xcopy_2z
+ end interface abi_gpu_xcopy
+
+ interface abi_gpu_work_resize
+    module procedure abi_gpu_work_resizeI
+    module procedure abi_gpu_work_resizeR
+    module procedure abi_gpu_work_resizeC
+ end interface abi_gpu_work_resize
 
  public :: abi_zgemm
  public :: abi_zgemm_2d
@@ -209,19 +326,105 @@ module m_abi_linalg
  public :: ortho_reim
  !----------------------------------------------------------------------
 
-#ifndef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
+
+  interface
+
+    subroutine check_gpu_mem(str) bind(c, name="check_gpu_mem_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      character (KIND=c_char), intent(in)  :: str(*)
+    end subroutine check_gpu_mem
+
+    subroutine alloc_on_gpu(gpu_ptr,size_in_bytes) bind(c, name="alloc_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+      integer(kind=c_size_t),         intent(in)     :: size_in_bytes
+    end subroutine alloc_on_gpu
+
+    subroutine dealloc_on_gpu(gpu_ptr) bind(c, name="dealloc_on_gpu_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(inout)  :: gpu_ptr
+    end subroutine dealloc_on_gpu
+
+    subroutine copy_gpu_to_gpu(dest_gpu_ptr, src_gpu_ptr, size_in_bytes) bind(c, name="copy_gpu_to_gpu_cpp_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr)                                   :: dest_gpu_ptr
+      type(c_ptr)                                   :: src_gpu_ptr
+      integer(kind=c_size_t),        intent(in)    :: size_in_bytes
+    end subroutine copy_gpu_to_gpu
+
+    subroutine gpu_memset(gpu_ptr, val, size_in_bytes) bind(c, name="gpu_memset_cpp_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in) :: gpu_ptr
+      integer(kind=c_int32_t),        intent(in)    :: val
+      integer(kind=c_size_t),         intent(in)    :: size_in_bytes
+    end subroutine gpu_memset
+
+    ! logical(kind=c_bool) function gpu_allocated(gpu_ptr) bind(c, name="gpu_allocated_")
+    !   use, intrinsic :: iso_c_binding
+    !   implicit none
+    !   type(c_ptr),                    intent(in) :: gpu_ptr
+    ! end function gpu_allocated
+
+    subroutine gpu_allocated_impl(gpu_ptr, is_allocated) bind(c, name="gpu_allocated_impl_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)  :: gpu_ptr
+      logical(kind=c_bool),           intent(out) :: is_allocated
+    end subroutine gpu_allocated_impl
+
+    subroutine gpu_managed_ptr_status(gpu_ptr, str) bind(c, name="gpu_managed_ptr_status_")
+      use, intrinsic :: iso_c_binding
+      implicit none
+      type(c_ptr),                    intent(in)  :: gpu_ptr
+      character (KIND=c_char),        intent(in)  :: str(*)
+    end subroutine gpu_managed_ptr_status
+
+  end interface
+
+#else
  !dummy routines replace gpu helper routines
+ public :: gpu_device_synchronize
+ public :: check_gpu_mem
  public :: alloc_on_gpu
  public :: copy_from_gpu
  public :: copy_on_gpu
  public :: dealloc_on_gpu
+ public :: gpu_allocated_impl
+ public :: gpu_managed_ptr_status
  public :: gpu_linalg_init
  public :: gpu_linalg_shutdown
  public :: gpu_xgemm
  public :: gpu_xtrsm
+ public :: gpu_xaxpy
+ public :: gpu_xcopy
+ public :: gpu_xscal
+ public :: gpu_xsygvd
+ public :: gpu_xsygvd_bufferSize
 #endif
 
+ public :: copy_gpu_to_gpu
+ public :: gpu_memset
+ public :: gpu_allocated
+
  public :: gpu_xorthonormalize
+
+ public :: abi_gpu_xgemm
+ public :: abi_gpu_xgemm_strided
+ public :: abi_gpu_xsymm
+ public :: abi_gpu_zhemm
+ public :: abi_gpu_xscal
+ public :: abi_gpu_xaxpy
+ public :: abi_gpu_xcopy
+ public :: abi_gpu_xtrsm
+ public :: abi_gpu_xhegvd
+ public :: abi_gpu_xheevd
+ public :: abi_gpu_xpotrf
 
  logical,external :: LSAME
 
@@ -277,7 +480,7 @@ CONTAINS  !===========================================================
 !! optdriver= type of calculation (ground-state, response function, GW, ...)
 !! wfoptalg= wave functions optimization algorithm (CG, LOBPCG, CHEBFI, ...)
 !! paral_kgb= 1 if (k,g,b) parallelism is on
-!! use_gpu_cuda= 1 if Cuda (GPU) is on
+!! gpu_option = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !! use_slk= 1 if use of Scalapack is on
 !! np_slk= max. number of processes to be used in Scalapack calls
 !! comm_scalapack= global communicator to be used in case of Scalapack
@@ -286,13 +489,13 @@ CONTAINS  !===========================================================
 !!
 
  subroutine abi_linalg_init(max_eigen_pb_size,optdriver,wfoptalg,paral_kgb,&
-&                           use_gpu_cuda,use_slk,np_slk,comm_scalapack)
+&                           gpu_option,use_slk,np_slk,comm_scalapack)
 
 !Arguments ------------------------------------
  integer,intent(in) :: max_eigen_pb_size
  integer,intent(in) :: optdriver,wfoptalg,paral_kgb
  integer,intent(in) :: comm_scalapack,np_slk
- integer,intent(in) :: use_gpu_cuda,use_slk
+ integer,intent(in) :: gpu_option,use_slk
 
 !Local variables ------------------------------
  integer :: max_eigen_pb_size_eff=0
@@ -336,8 +539,8 @@ CONTAINS  !===========================================================
 
 !Set Lapack parameters
  max_eigen_pb_size_eff=max_eigen_pb_size
- if (wfoptalg==4.or.wfoptalg==14.or.use_gpu_cuda/=0) max_eigen_pb_size_eff=3*max_eigen_pb_size_eff
- lapack_full_storage=(wfoptalg==4.or.wfoptalg==14.or.use_gpu_cuda/=0)
+ if (wfoptalg==4.or.wfoptalg==14.or.gpu_option/=ABI_GPU_DISABLED) max_eigen_pb_size_eff=3*max_eigen_pb_size_eff
+ lapack_full_storage=(wfoptalg==4.or.wfoptalg==14.or.gpu_option/=ABI_GPU_DISABLED)
  lapack_packed_storage=.true.
  lapack_single_precision=.false.
  lapack_double_precision=.true.
@@ -410,9 +613,10 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
 !Cublas initialization
- call gpu_linalg_init()
+ if (gpu_option/=ABI_GPU_DISABLED) call gpu_linalg_init()
+ abi_linalg_gpu_mode = gpu_option !FIXME Add a check for this
 #endif
 
  if (need_work_space) call abi_linalg_work_allocate()
@@ -627,10 +831,10 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 !!
- subroutine abi_linalg_finalize()
+ subroutine abi_linalg_finalize(gpu_option)
 
 !Arguments ------------------------------------
-
+ integer, intent(in) :: gpu_option
 !Local variables ------------------------------
 #ifdef HAVE_LINALG_PLASMA
  integer :: info
@@ -687,8 +891,14 @@ CONTAINS  !===========================================================
 #endif
 #endif
 
-#ifdef HAVE_GPU_CUDA
- call gpu_linalg_shutdown()
+#ifdef HAVE_GPU
+ if (gpu_option/=ABI_GPU_DISABLED) then
+   call abi_gpu_work_finalize()
+   call gpu_linalg_shutdown()
+ end if
+ abi_linalg_gpu_mode = ABI_GPU_DISABLED
+#else
+ ABI_UNUSED(gpu_option)
 #endif
 
 !Memory freeing
@@ -983,6 +1193,23 @@ end function jobz_plasma
 !!***
 
 #endif
+
+!!
+!! this is just a wrapper arround gpu_allocated_cuda, because (strangely)
+!! I can't manage to bind a function (not a subroutine) through iso_c_binding
+!!
+function gpu_allocated(gpu_ptr) result(is_allocated)
+
+  use, intrinsic :: iso_c_binding
+  implicit none
+
+  !Arguments ------------------------------------
+  type(c_ptr),                    intent(in) :: gpu_ptr
+  logical(kind=c_bool)                       :: is_allocated
+
+  call gpu_allocated_impl(gpu_ptr, is_allocated)
+
+end function gpu_allocated
 
 ! Include files providing wrappers for some of the most commonly used BLAS & LAPACK routines
 

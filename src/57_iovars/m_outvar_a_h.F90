@@ -142,7 +142,8 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' ';if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%ga_n_rules==0)ga_n_rules=dtsets(1)%ga_n_rules
  ga_n_rules=dtsets(1)%ga_n_rules
@@ -1156,14 +1157,35 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(3,:)=dtsets(:)%goprecprm(3)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,3,narrm,ncid,ndtset_alloc,'goprecprm','DPR',0)
 
- intarr(1,:)=dtsets(:)%gpu_devices(1) ; intarr(2,:)=dtsets(:)%gpu_devices(2)
- intarr(3,:)=dtsets(:)%gpu_devices(3) ; intarr(4,:)=dtsets(:)%gpu_devices(4)
- intarr(5,:)=dtsets(:)%gpu_devices(5)
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,5,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0)
+ if (any(dtsets(:)%gpu_option/=ABI_GPU_DISABLED)) then
 
- intarr(1,:)=dtsets(:)%gpu_linalg_limit
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+   intarr(1,:)=dtsets(:)%gpu_devices(1) ; intarr(2,:)=dtsets(:)%gpu_devices(2)
+   intarr(3,:)=dtsets(:)%gpu_devices(3) ; intarr(4,:)=dtsets(:)%gpu_devices(4)
+   intarr(5,:)=dtsets(:)%gpu_devices(5)
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,5,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0)
 
+   intarr(1,:)=dtsets(:)%gpu_linalg_limit
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+
+   intarr(1,:)=dtsets(:)%gpu_nl_distrib
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_nl_distrib','INT',0)
+
+   intarr(1,:)=dtsets(:)%gpu_nl_splitsize
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_nl_splitsize','INT',0)
+
+   intarr(1,:)=dtsets(:)%gpu_option
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_option','INT',0,firstchar=firstchar_gpu)
+
+   intarr(1,:)=dtsets(:)%gpu_use_nvtx
+   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_use_nvtx','INT',0,firstchar=firstchar_gpu)
+
+   if (any(dtsets(:)%gpu_option/=ABI_GPU_KOKKOS)) then
+     intarr(1,:)=dtsets(:)%gpu_kokkos_nthrd
+     call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_kokkos_nthrd','INT',0,firstchar=firstchar_gpu)
+   end if
+   
+ end if
+ 
  !intarr(1,:)  =dtsets(:)%gstore_cplex
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
 

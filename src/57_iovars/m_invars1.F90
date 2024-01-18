@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -29,6 +28,7 @@ module m_invars1
  use m_atomdata
  use m_dtset
  use m_nctk
+ use m_xomp
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -40,7 +40,7 @@ module m_invars1
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU
  use m_gpu_toolbox
 #endif
 
@@ -68,6 +68,7 @@ contains
 !! needed for allocating some input arrays in abinit, and also useri
 !! and userr. The variable usewvl is also read here for later reading
 !! of input path for the atomic orbital file (if required).
+!! Also initialize as soon as possible GPU related parameters
 !!
 !! INPUTS
 !!  lenstr=actual length of string
@@ -107,8 +108,9 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
- integer :: treads, use_gpu_cuda
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
+ integer :: tread_pseudos,cnt,tread_geo,treads
+ integer :: idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath
@@ -550,63 +552,100 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      ABI_ERROR(msg)
    end if
-
-
  end do
 
- dtsets(:)%diago_apply_block_sliced=1
- do idtset=1,ndtset_alloc
-    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'diago_apply_block_sliced',tread,'INT')
-    if(tread==1)dtsets(idtset)%diago_apply_block_sliced=intarr(1)
- end do
-
-
-!GPU information
- use_gpu_cuda=0
- dtsets(:)%use_gpu_cuda=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
- call Get_ndevice(ii)
- if (ii>0) then
+ ! GPU related parameters
+ dtsets(:)%gpu_option=ABI_GPU_DISABLED
+ dtsets(:)%gpu_use_nvtx=0
+#if defined HAVE_GPU
+ call Get_ndevice(idev)
+ if (idev>0) then
    do i1=1,ndtset_alloc
-     dtsets(i1)%use_gpu_cuda=-1
+     dtsets(i1)%gpu_option=ABI_GPU_UNKNOWN
    end do
  end if
+#else
+ ABI_UNUSED(idev)
 #endif
- do idtset=1,ndtset_alloc
-   jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gpu_cuda',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_gpu_cuda=intarr(1)
-   if (dtsets(idtset)%use_gpu_cuda==1) use_gpu_cuda=1
-end do
 
- dtsets(:)%use_nvtx=0
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_NVTX_V3
+ gpu_option=ABI_GPU_DISABLED
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%use_nvtx=intarr(1)
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_option',tread,'INT')
+   if(tread==1)dtsets(idtset)%gpu_option=intarr(1)
+#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
+   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
+#endif
+   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
-#endif
 
- if (use_gpu_cuda==1) then
-#if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
-   if (ii<=0) then
+ if (gpu_option/=ABI_GPU_DISABLED) then
+#if defined HAVE_GPU
+   if (idev<=0) then
      write(msg,'(5a)')&
-&     'Input variables use_gpu_cuda is on',ch10,&
+&     'Input variable gpu_option is on (/=0),',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
-&     'Action: change the input variable use_gpu_cuda.'
+&     'Action: change the input variable gpu_option.'
      ABI_ERROR(msg)
+   end if
+   if(gpu_option==ABI_GPU_OPENMP) then
+#if !defined HAVE_OPENMP_OFFLOAD
+     write(msg,'(7a)')&
+&     'Input variable gpu_option is set to use OpenMP GPU backend but abinit hasn''t been built',ch10,&
+&     'with OpenMP GPU offloading enabled!',ch10,&
+&     'Action: change the input variable gpu_option',ch10,&
+&     '        or re-compile ABINIT with OpenMP GPU offloading enabled.'
+     ABI_ERROR(msg)
+#endif
+#if defined HAVE_OPENMP_OFFLOAD
+     if(xomp_get_num_devices() == 0) then
+       write(msg,'(13a)')&
+&       'Input variable gpu_option is set to use OpenMP GPU backend ',ch10,&
+&       'but no GPU is visible by OpenMP.',ch10,&
+&       'It usually happens when env variable OMP_TARGET_OFFLOAD is set to DISABLED (not default) ',ch10,&
+&       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
+&       'as to which CUDA version is supported.',ch10,&
+&       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
+&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+       ABI_ERROR(msg)
+     end if
+#endif
+   else if(gpu_option==ABI_GPU_KOKKOS) then
+#if !defined HAVE_KOKKOS || !defined HAVE_YAKL
+     write(msg,'(7a)')&
+&     'Input variable gpu_option is set to use Kokkos backend but abinit hasn''t been built',ch10,&
+&     'with Kokkos and/or YAKL dependencies enabled!',ch10,&
+&     'Action: change the input variable gpu_option',ch10,&
+&     '        or re-compile ABINIT with BOTH Kokkos and YAKL enabled.'
+     ABI_ERROR(msg)
+#endif
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
+&   'Input variable gpu_option is on but ABINIT hasn''t been built',ch10,&
 &   'with (double precision) gpu mode enabled !',ch10,&
-&   'Action: change the input variable use_gpu_cuda',ch10,&
+&   'Action: change the input variable gpu_option',ch10,&
 &   '        or re-compile ABINIT with double-precision Cuda enabled.'
    ABI_ERROR(msg)
 #endif
  end if
+
+!Set gpu_option default value
+!gpu_option=ABI_GPU_UNKNOWN means undetermined
+ do idtset=1,ndtset_alloc
+   if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
+#if defined HAVE_OPENMP_OFFLOAD
+     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+#elif defined HAVE_GPU_CUDA
+     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+#else
+     dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+#endif
+   end if
+ end do
 
  ABI_FREE(dprarr)
  ABI_FREE(intarr)
@@ -1902,10 +1941,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
- ! CP modified
- !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
- ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)
@@ -2077,6 +2113,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'constraint_kind',tread,'INT')
  if(tread==1) dtset%constraint_kind(1:dtset%ntypat)=intarr(1:dtset%ntypat)
 
+!Some special cases are not compatible with GPU implementation
+ if (dtset%optdriver/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! GPU only compatible with GS
+ if (dtset%tfkinfunc/=0) dtset%gpu_option=ABI_GPU_DISABLED  ! Recursion method has its own GPU impl
+ if (dtset%nspinor/=1)   dtset%gpu_option=ABI_GPU_DISABLED  ! nspinor=2 not yet GPU compatible
+
  ABI_FREE(nband)
  ABI_FREE(ratsph)
  ABI_FREE(intarr)
@@ -2175,15 +2216,6 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
 
    wvl_bigdft=.false.
    if(dtsets(idtset)%usewvl==1 .and. dtsets(idtset)%wvl_bigdft_comp==1) wvl_bigdft=.true.
-!  Special case of use_gpu_cuda (can be undertermined at this point)
-!  use_gpu_cuda=-1 means undetermined ; here impose its value due to some restrictions
-   if (dtsets(idtset)%use_gpu_cuda==-1) then
-     if (dtsets(idtset)%optdriver/=0.or. dtsets(idtset)%tfkinfunc/=0.or. dtsets(idtset)%nspinor/=1) then
-       dtsets(idtset)%use_gpu_cuda=0
-     else
-       dtsets(idtset)%use_gpu_cuda=1
-     end if
-  end if
 
 !  A
 !  Here we change the default value of iomode according to the configuration options.
@@ -2352,7 +2384,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
    dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
+   dtsets(idtset)%gpu_nl_distrib=0
+   dtsets(idtset)%gpu_nl_splitsize=1
    if (dtsets(idtset)%gw_customnfreqsp/=0) dtsets(idtset)%gw_freqsp(:) = zero
    if ( dtsets(idtset)%gw_nqlwl > 0 ) then
      dtsets(idtset)%gw_qlwl(:,:)=zero
@@ -2404,6 +2439,10 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
+   dtsets(idtset)%invol_blk_sliced=1
+   if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invol_blk_sliced=0
+   end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
    if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%densfor_pred=6 ! Recommended for band-FFT parallelism

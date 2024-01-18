@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -1063,7 +1062,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    call chkint_eq(0,0,cond_string,cond_values,ierr,'goprecon',dt%goprecon,4,[0,1,2,3],iout)
 
    ! gpu_devices
-   if (dt%use_gpu_cuda==1) then
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then
      if (all(gpu_devices(:)==-2)) then
        gpu_devices(:)=dt%gpu_devices(:)
      else if (any(dt%gpu_devices(:)/=gpu_devices(:))) then
@@ -1072,6 +1071,66 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
         'Action: change gpu_devices in input file.'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
+   end if
+
+!  gpu_kokkos_nthrd
+   call chkint_ge(0,0,cond_string,cond_values,ierr,'gpu_kokkos_nthrd',dt%gpu_kokkos_nthrd,1,iout)
+
+!  gpu_option
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'gpu_option',dt%gpu_option,4, &
+   &        (/ABI_GPU_DISABLED,ABI_GPU_LEGACY,ABI_GPU_OPENMP,ABI_GPU_KOKKOS/),iout)
+   if (dt%gpu_option/=ABI_GPU_DISABLED) then
+     if (dt%nspinor==2) then
+       write(msg,'(3a)')&
+&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
+&       'Action: impose gpu_option=0 in your input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+!    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
+!    write(msg,'(6a)') ch10,&
+!    &       ' chkinp : ERROR -',ch10,&
+!    &       '  When GPU is in use (gpu_option>0), wfoptalg must be 4 or 14 !',ch10,&
+!    &       '  Action: change wfoptalg in your input file.'
+!    call wrtout(std_out,msg)
+!    ierr=ierr+1
+!    end if
+     if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
+       write(msg,'(3a)')&
+        'Use of GPU is not allowed when useylm==0 !',ch10,&
+        'Action: impose uselym=1 in your input file.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     if (dt%tfkinfunc>0) then
+       write(msg,'(5a)')&
+&       'gpu_option/=0 (use of GPU) is not allowed when tfkinfunc>0 !',ch10,&
+&       'Action: suppress gpu_option from your input file',ch10,&
+&       '        (GPU will be used but with another mechanism)'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+     if (dt%ngfft(4)/=dt%ngfft(1).or.dt%ngfft(5)/=dt%ngfft(2).or.dt%ngfft(6)/=dt%ngfft(3)) then
+       write(msg,'(3a)')&
+&       'When GPU is in use (gpu_option/=0), ngfft(4:6) must be equal to ngfft(1:3) !',ch10,&
+&       'Action: suppress ngfft in input file or change it.'
+       ABI_ERROR_NOSTOP(msg, ierr)
+     end if
+#ifndef HAVE_GPU
+     write(msg,'(6a)') ch10,&
+&     ' invars0: ERROR -',ch10,&
+&     '   Input variable gpu_option is on but abinit hasn''t been built with GPU mode enabled !',ch10,&
+&     '   Action: suppress the input variable gpu_option or re-compile ABINIT with GPU enabled.'
+     call wrtout(std_out,msg)
+     ierr=ierr+1
+#endif
+!#ifndef HAVE_GPU_CUDA_DP
+!     write(msg,'(10a)') ch10,&
+!&     ' invars0: ERROR -',ch10,&
+!&     '   Input variable gpu_option is on but abinit hasn''t been built',ch10,&
+!&     '   with GPU mode in DOUBLE PRECISION enabled !',ch10,&
+!&     '   Action: suppress input variable gpu_option',ch10,&
+!&     '   or re-compile ABINIT with double precision GPU enabled.'
+!     call wrtout(std_out,msg)
+!     ierr=ierr+1
+!#endif
    end if
 
    ! RT-TDDFT
@@ -1329,11 +1388,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  iprcel
-   call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)   !  0 or superior to 21
-   ! CP modified
-   !if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=8).and.mod(dt%iprcel,10)>49 )then
+   call chkint(0,0,cond_string,cond_values,ierr,'iprcel',dt%iprcel,1,(/0/),1,21,iout)
    if(nsppol==2 .and. (dt%occopt>=3 .and. dt%occopt<=9).and.mod(dt%iprcel,10)>49 )then
-   ! End CP modified
      write(msg,'(5a)')&
      'For spin-polarized metallic systems (occopt>3),',ch10,&
      'only RPA dielectric matrix can be evaluated) !',ch10,&
@@ -2330,7 +2386,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  occopt
    call chkint_eq(0,0,cond_string,cond_values,ierr,'occopt',dt%occopt,10,(/0,1,2,3,4,5,6,7,8,9/),iout)
-   ! End CP modified
 !  When prtdos==1 or 4, occopt must be between 3 and 8
    if(dt%prtdos==1.or.dt%prtdos==4)then
      cond_string(1)='prtdos' ; cond_values(1)=dt%prtdos
@@ -3285,7 +3340,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      ! Check for calculations that are not implemented with RMM-DIIS
      ABI_CHECK(dt%usefock == 0, "RMM-DIIS with Hartree-Fock or Hybrid Functionals is not implemented")
      ABI_CHECK(dt%wfoptalg /= 1, "RMM-DIIS with Chebyshev is not supported.")
-     ABI_CHECK(dt%use_gpu_cuda == 0, "RMM-DIIS does not support GPUs.")
+     ABI_CHECK(dt%gpu_option == ABI_GPU_DISABLED, "RMM-DIIS does not support GPUs.")
      berryflag = any(dt%berryopt == [4, 14, 6, 16, 7, 17])
      ABI_CHECK(.not. berryflag, "RMM-DIIS with Electric field is not supported.")
    end if
@@ -3690,62 +3745,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      else
        call chkint_eq(1,1,cond_string,cond_values,ierr,'useylm',dt%useylm,1,(/0/),iout)
      end if
-   end if
-
-!  use_gpu_cuda
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_gpu_cuda',dt%use_gpu_cuda,2,(/0,1/),iout)
-   if (dt%use_gpu_cuda==1) then
-     if (dt%nspinor==2) then
-       write(msg,'(3a)')&
-&       'Use of GPU is not allowed when nspinor==2 !',ch10,&
-&       'Action: impose use_gpu_cuda=0 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-!    if (dt%optdriver==RUNL_GSTATE.and.mod(dt%wfoptalg,10)/=4) then
-!    write(msg,'(6a)') ch10,&
-!    &       ' chkinp : ERROR -',ch10,&
-!    &       '  When GPU is in use (use_gpu_cuda=1), wfoptalg must be 4 or 14 !',ch10,&
-!    &       '  Action: change wfoptalg in your input file.'
-!    call wrtout(std_out,msg)
-!    ierr=ierr+1
-!    end if
-     if (dt%useylm == 0 .and. dt%optdriver /= RUNL_GWR) then
-       write(msg,'(3a)')&
-        'Use of GPU is not allowed when useylm==0 !',ch10,&
-        'Action: impose uselym=1 in your input file.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-     if (dt%tfkinfunc>0) then
-       write(msg,'(5a)')&
-&       'use_gpu_cuda=1 is not allowed when tfkinfunc>0 !',ch10,&
-&       'Action: suppress use_gpu_cuda=0 from your input file',ch10,&
-&       '        (GPU will be used but with another mechanism)'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-     if (dt%ngfft(4)/=dt%ngfft(1).or.dt%ngfft(5)/=dt%ngfft(2).or.dt%ngfft(6)/=dt%ngfft(3)) then
-       write(msg,'(3a)')&
-&       'When GPU is in use (use_gpu_cuda=1), ngfft(4:6) must be equal to ngfft(1:3) !',ch10,&
-&       'Action: suppress ngfft in input file or change it.'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
-#ifndef HAVE_GPU_CUDA
-     write(msg,'(6a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built with gpu mode enabled !',ch10,&
-&     '   Action: change the input variable use_gpu_cuda or re-compile ABINIT with Cuda enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
-#ifndef HAVE_GPU_CUDA_DP
-     write(msg,'(10a)') ch10,&
-&     ' invars0: ERROR -',ch10,&
-&     '   Input variables use_gpu_cuda is on but abinit hasn''t been built',ch10,&
-&     '   with gpu mode in DOUBLE PRECISION enabled !',ch10,&
-&     '   Action: change the input variable use_gpu_cuda',ch10,&
-&     '   or re-compile ABINIT with double precision Cuda enabled.'
-     call wrtout(std_out,msg)
-     ierr=ierr+1
-#endif
    end if
 
 !  use_slk
