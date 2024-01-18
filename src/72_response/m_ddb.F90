@@ -3548,7 +3548,6 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
- real(dp), allocatable :: tmpval(:,:,:)
 
 ! *********************************************************************
 
@@ -3578,19 +3577,15 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
    '   and impose the ASR on the effective charges ',ch10
    call wrtout([std_out, ab_out], msg)
 
-   ABI_MALLOC(tmpval,(2,(3*ddb%mpert)**2,ddb%nblok))
-   tmpval(:,:,iblok) = ddb%val(:,1:(3*ddb%mpert)**2,iblok)
-
    ! Extrac Zeff before enforcing sum rule.
-   call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
 
    ! Impose the charge neutrality on the effective charges and eventually select some parts of the effective charges
-   call chneu9(chneut,tmpval(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
+   call chneu9(chneut,ddb%val(:,:,iblok),ddb%mpert,ddb%natom,ddb%ntypat,selectz,Crystal%typat,Crystal%zion)
 
    ! Extraction of the dielectric tensor and the effective charges
-   call dtech9(tmpval, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
+   call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
 
-   ABI_FREE(tmpval)
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw
