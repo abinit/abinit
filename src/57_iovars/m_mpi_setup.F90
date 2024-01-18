@@ -1034,6 +1034,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if ((vectsize*blocksize**2)>=dtsets(idtset)%gpu_linalg_limit) then
          if (.not.wfoptalg_read) then
            dtsets(idtset)%wfoptalg=14
+           dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
            if (.not.fftalg_read) then
              dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
              if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
