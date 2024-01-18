@@ -5163,8 +5163,13 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  integer,intent(out) :: win
 
 !Local variables-------------------
+ integer :: disp_unit
+#ifdef HAVE_MPI
+#if 0
  integer :: ierr, disp_unit
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
+#endif
+#endif
 !----------------------------------------------------------------------
 
  if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
@@ -5179,6 +5184,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  end select
 
 #ifdef HAVE_MPI
+#if 0
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5192,6 +5198,10 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+#else
+ ABI_UNUSED(count)
+ ABI_UNUSED(info)
+#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master
