@@ -2699,7 +2699,7 @@ include 'mpif.h'
     if(this%opt_histo .gt. 2) then
       this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
       open (unit=735,file='LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
-      write(735,*) '#Tau Total <ntot>'
+      write(735,*) '#Tau Total <ntot> '
       do n1=1,this%samples
         this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size)/float(this%samples))-(this%ntot(1)*this%ntot(1))
         !this%chicharge(2,n1)=(this%chicharge(2,n1)/float(this%size)/float(this%samples))-(this%ntot(2)*this%ntot(2))
