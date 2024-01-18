@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_bethe_salpeter
 !! NAME
 !!  m_bethe_salpeter
@@ -1443,7 +1442,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  BSp%mbpt_sciss = zero ! Shall we use the scissors operator to open the gap?
  if (ABS(Dtset%mbpt_sciss)>tol6) BSp%mbpt_sciss = Dtset%mbpt_sciss
 
-!now test input parameters from input and WFK file and assume some defaults
+! Now test input parameters from input and WFK file and assume some defaults
 !
 ! TODO Add the possibility of using a randomly shifted k-mesh with nsym>1.
 ! so that densities and potentials are correctly symmetrized but
@@ -1569,10 +1568,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
- ! CP modified
- !call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
  call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
- ! End CP modified
 
  ABI_FREE(occfact)
 
@@ -2143,12 +2139,12 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
  ABI_MALLOC(npwarr,(kmesh_dense%nibz))
  npwarr=BSP%npwwfn
 
- call ebands_init(bantot_dense,ks_ebands_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,& ! CP added
-&  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
-&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
-&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
-&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
+ call ebands_init(bantot_dense,ks_ebands_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
+  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
+  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
+  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
