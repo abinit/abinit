@@ -253,7 +253,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Set the treatment of the Acoustic Sum Rule (ASR) in phonon calculations in the ABINIT code.
-Same values as the corresponding ANADDB variable [[asr@anaddb]]. Please switch to this description. 
+Same values as the corresponding ANADDB variable [[asr@anaddb]]. Please switch to this description.
 
 Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
 Running different DFPT calculations from scratch just to change [[asr]] is indeed a waste of time as
@@ -1732,7 +1732,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges in the ABINIT code.
-Same values as the corresponding ANADDB variable [[chneut@anaddb]]. Please switch to this description. 
+Same values as the corresponding ANADDB variable [[chneut@anaddb]]. Please switch to this description.
 Note however the different default value in abinit (1) and anaddb (0).
 
 Using anaddb is indeed the recommended approach if you want to analyze the breaking of the sum rules.
@@ -2404,7 +2404,7 @@ For the time being,
     order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
     and uses the exchange-correlation kernel $K_{xc}=\frac{dV_{xc}}{d\rho}$ whose computation
     is time-consuming for GGA (or meta-GGA) functionals.
-    
+
     - By default (positive values of [[densfor_pred]]), even for GGA and meta-GGA,
     the local-density part of the exchange-correlation kernel is used, which gives a reasonable accuracy.
     Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of
@@ -4103,6 +4103,25 @@ If phonon frequencies are to be computed:
 ),
 
 Variable(
+    abivarname="eph_ahc_type",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Electron-PHonon: Allen-Heine-Cardona type",
+    added_in_version="before_v9",
+    text=r"""
+Only relevant for [[optdriver]]=7 and [[eph_task]]=4.
+If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to compute the
+zero-point renormalisation as well as temperature dependence.
+If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
+zero-point renormalisation as well as temperature dependence.
+Note: The use of [[eph_ahc_type]]=0 is not recommanded in IR-active materials.
+""",
+),
+
+Variable(
     abivarname="eph_extrael",
     varset="eph",
     vartype="real",
@@ -4561,15 +4580,15 @@ Variable(
     added_in_version="v9.9",
     text=r"""
 In a longwave calculation, the nonlocal form factors and their derivatives are
-by default computed for all k points and atom types at an initial step and then 
-specifically used for each type of perturbation. Depending on the calculation 
+by default computed for all k points and atom types at an initial step and then
+specifically used for each type of perturbation. Depending on the calculation
 parameters --in particular for dense k-point grids, large ecut and pseudopotentials
 with large l and n values-- such approach might lead to high virtual memory usage.
 
-With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated 
-on-the-fly for each type of perturbation and k point when they are required. 
-This option saves virtual memory but makes the computation of spatial-dispersion 
-tensors slower. 
+With [[ffnl_lw]] = 1 the form factors and derivatives are instead calculated
+on-the-fly for each type of perturbation and k point when they are required.
+This option saves virtual memory but makes the computation of spatial-dispersion
+tensors slower.
 """,
 ),
 
@@ -6069,7 +6088,7 @@ Variable(
     requires="[[gpu_option]] > 0 and [[CUDA]] (Nvidia GPU)",
     added_in_version="before_v9",
     text=r"""
-@legacy  
+@legacy
 This variable is intended to be used when several GPU devices are present on each node, assuming the
 same number of devices on all nodes.
 Allows to choose in which order the GPU devices are chosen and distributed
@@ -6125,14 +6144,14 @@ Variable(
     requires="[[gpu_option]] == 1 and [[CUDA]] (Nvidia GPU, old CUDA implementation)",
     added_in_version="before_v9",
     text=r"""
-@legacy  
+@legacy
 This variable is obsolete and is only intended to be used with the old 2013 cuda
-implementation of ABINIT on GPU ([[gpu_option]]=1).  
+implementation of ABINIT on GPU ([[gpu_option]]=1).
 In that case, the use of linear/matrix algebra on GPU is only efficient if the size
 of the involved matrices is large enough. The [[gpu_linalg_limit]] parameter
 defines the threshold above which linear (and matrix) algebra operations are
 done on the Graphics Processing Unit.
-The matrix size is evaluated as to: SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$  
+The matrix size is evaluated as to: SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$
 When SIZE>=[[gpu_linalg_limit]], [[wfoptalg]] parameter is automatically set
 to 14 which corresponds to the use of the legacy LOBPCG algorithm for the calculation of
 the eigenstates.
@@ -6151,11 +6170,11 @@ Variable(
     added_in_version="9.12",
     text=r"""
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
-in the non-local operator) are all stored on all GPU devices.  
+in the non-local operator) are all stored on all GPU devices.
 [[gpu_nl_distrib]] forces the distribution of these projections on several GPU devices. This
 uses less memory per GPU but requires communications beween GPU devices. These communication
 penalize the execution time.
-[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.  
+[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.
 In standard executions, the distribution is only needed on large use cases to address
 the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
 when needed.
@@ -6175,9 +6194,9 @@ Variable(
     text=r"""
 Only relevant when [[gpu_nl_distrib]] = 1.
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
-in the non-local operator) are all stored on all GPU devices.  
+in the non-local operator) are all stored on all GPU devices.
 [[gpu_nl_splitsize]] defines the number of blocks used to split these projections
-on several GPU devices.   
+on several GPU devices.
 In standard executions, the distribution is only needed on large use cases to address
 the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
 when needed.
@@ -6197,7 +6216,7 @@ Variable(
 Only relevant for Ground-State calculations ([[optdriver]] == 0).
 This option is only available if ABINIT executable has been compiled for the purpose
 of being used with GPU accelerators. It allows to choose between the different
-GPU programming models available in ABINIT:  
+GPU programming models available in ABINIT:
 
 - [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
 
@@ -6251,7 +6270,7 @@ the use of [NVTX](https://github.com/NVIDIA/NVTX)
  [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
 When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
 the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
- tracing/profiling (ROCm Tools eXtension Library) is activated.  
+ tracing/profiling (ROCm Tools eXtension Library) is activated.
 """,
 ),
 
@@ -7773,10 +7792,10 @@ Variable(
     added_in_version="9.7.2",
     defaultval=ValueWithConditions({'[[gpu_option]] > 0': '0', 'defaultval': 1}),
     text=r"""
-Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).  
+Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).
 In the Chebyshev-filtered subspace method (iterative diagonalization algorithm))
 one needs to apply the inverse of the overlap matrix. [[invol_blk_sliced]] allows one
-to choose between two variants, sliced (1) or non-sliced (0).  
+to choose between two variants, sliced (1) or non-sliced (0).
 Default value is different for an execution on GPU.
 """,
 ),
@@ -9916,7 +9935,7 @@ input as an array of values, one for each type, see [[ntypat]]. In calculations
 where the orbital magnetic moment is requested in the presence of a nuclear magnetic
 dipole moment (see [[orbmag]] and [[nucdipmom]]), the effect of this shielding
 will be included. If a PAW dataset is used where this quantity is included, then a non-zero
-value in [[lambsig]] will override the PAW value. 
+value in [[lambsig]] will override the PAW value.
 The value to be used here can be obtained from the PAW core wavefunctions and the
 Lamb formula [[cite:Abragam1961]].
 """,
@@ -10120,15 +10139,15 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="v9",
     text=r"""
-Used to run natural optical activity tensor calculation. 
+Used to run natural optical activity tensor calculation.
 
   * 0 --> No natural optical activity tensor is calculated.
   * 1 --> Natural optical activity tensor is calculated.
 
 This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, electric fields. The number of linear-response calculations 
-to be explicitly precomputed can be reduced via symmetry arguments  
+ddk, d2_dkdk, electric fields. The number of linear-response calculations
+to be explicitly precomputed can be reduced via symmetry arguments
 selecting the appropriate value of the [[prepalw]] variable.
 """,
 ),
@@ -10156,8 +10175,8 @@ phonons. See [[dipquad@anaddb]] and [[quadquad@anaddb]]).
 
 This **requires** the precalculation of the ground-state wave functions and
 density as well as response functions and densities to the following perturbations:
-ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations 
-to be explicitly precomputed can be reduced via symmetry arguments  
+ddk, d2_dkdk, atomic displacements and electric fields. The number of linear-response calculations
+to be explicitly precomputed can be reduced via symmetry arguments
 selecting the appropiate value of the [[prepalw]] variable.
 """,
 ),
@@ -12335,9 +12354,9 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This input variable has been superceded by [[np_spkpt]].
-For the time being, for backward compatibility with AbiPy, 
+For the time being, for backward compatibility with AbiPy,
 [[npkpt]] is still recognized, with the same meaning than [[np_spkpt]],
-despite the incorrect lack of mention of the spin parallelism in the name [[npkpt]]. 
+despite the incorrect lack of mention of the spin parallelism in the name [[npkpt]].
 Please, stop using [[npkpt]] as soon as possible.
 """,
 ),
@@ -13473,7 +13492,7 @@ Metallic occupation of levels, using different occupation schemes (see below).
 See the review of the different possibilities in [[cite:Santos2023]], that
 delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha,
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13484,7 +13503,7 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$.
 For usual calculations, at zero temperature, do not use [[occopt]]=3,
 but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
@@ -15376,30 +15395,30 @@ a linear response calculation. The standard approach in a linear response calcul
 This approach cannot be applied, presently (v9.x), if the first-order
 wavefunctions are to be used to compute spatial dispersion properties.
 During the linear response calculation, in order to prepare a longwave
-calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep 
+calculation, one should use [[prepalw]] /= 0 in order to force ABINIT to keep
 the full number of k-points in half the BZ (kptopt=2), or the full BZ (kptopt=3).
-Different options can then be used to set the reducible perturbations that 
+Different options can then be used to set the reducible perturbations that
 are enforced to be explicitly calculated:
 
   * 1 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which depend on strain. It is therefore the option
-          to choose if one intends to run subsequent longwave calculations with 
+          to choose if one intends to run subsequent longwave calculations with
           [[lw_flexo]] = 1, 2, or 4.
 
   * 2 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which combine electric field and atomic displacement
-          perturbations. It is therefore the option to choose if one intends to 
+          perturbations. It is therefore the option to choose if one intends to
           run subsequent longwave calculations with [[lw_qdrpl]] = 1.
 
   * 3 --> Activates the calculation of perturbations required to build spatial-
           dispersion tensors which combine electric field and atomic displacement
-          perturbations as well as two atomic displacements. It is therefore the 
-          option to choose if one intends to run subsequent longwave calculations 
+          perturbations as well as two atomic displacements. It is therefore the
+          option to choose if one intends to run subsequent longwave calculations
           with [[lw_flexo]] = 3.
 
   * 4 --> Activates the calculation of perturbations required to build spatial-
-          dispersion tensors which combine two electric field perturbations. 
-          It is therefore the option to choose if one intends to run subsequent 
+          dispersion tensors which combine two electric field perturbations.
+          It is therefore the option to choose if one intends to run subsequent
           longwave calculations with [[lw_natopt]] = 1.
 """,
 ),
@@ -15585,7 +15604,7 @@ Variable(
     mnemonics="PRinT the Derivative Data Base file",
     added_in_version="9.11.0",
     text=r"""
-If set to 1, ABINIT will produce a DDB file. 
+If set to 1, ABINIT will produce a DDB file.
 """,
 ),
 
@@ -17595,14 +17614,14 @@ If ALL directions are activated (default behavior) AND [[prepanl]] == 1, then th
 only the directions that will be used by the non-linear routine ([[optdriver]] == 5) using crystal symmetries.
 
 Since v9.x this variable also activates the computation of the response to a vector potential
-in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split 
+in the long-wavelength limit. At first order in the momentum, the perturbation and response can be split
 into symmetric plus antisymmetric parts, see Refs. [[cite:Royo2019]] and [[cite:Zabalo2022]].
-The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives 
-of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2, 
-gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total, 
+The symmetric part, activated with [[rf2_dkdk]] == 1, corresponds to the aforementioned second derivatives
+of wavefunctions with respect to wavevectors. The antisymmetric part, activated with [[rf2_dkdk]] == 2,
+gives the response to a uniform orbital magnetic field, as defined in Ref. [[cite:Essin2010]]. The total,
 symmetric plus antisymmetric, response is activated with [[rf2_dkdk]] == 3.
 
-The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the 
+The response function to a long-wavelength vector potential is a crucial ingredient to compute some of the
 spatial-dispersion quantities available in the longwave driver. In particular, those that involve the gradient of an
 electric field: the clamped-ion flexoelectric tensor, the first moment of the polarization
 response to an atomic displacement and the natural optical activity tensor.
@@ -17860,12 +17879,12 @@ Variable(
     mnemonics="Response Function with respect to STRainS with the energy REFerence at the average electrostatic potential",
     added_in_version="v9",
     text=r"""
-If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the 
-reference energy placed at the average electrostatic potential. The later is the reference adopted 
-in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order 
-energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files. 
+If equal to 1 and [[rfstrs]] /= 0 the strain response-function calculations are performed with the
+reference energy placed at the average electrostatic potential. The later is the reference adopted
+in the longwave driver. Since v9.x, [[rfstrs_ref]] = 1 is warned if [[prepalw]]/=0 because first-order
+energies are no longer recomputed by the longwave driver but read from the precalculated 1WF files.
 
-Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance, 
+Strain first-order energies calculated with [[rfstrs_ref]] = 1 are useful, for instance,
 in the calculation of absolute deformation potentials [[cite:Stengel2015]].
 """,
 ),
@@ -18559,7 +18578,7 @@ In this case, the Fedorov space group associated with [[spgroup]] is a subgroup
 of the magnetic space group number associated with [[spgroupma]], the latter
 has twice the number of operations than the former.
 
-Unlike Shubnikov type IV magnetic space groups, 
+Unlike Shubnikov type IV magnetic space groups,
 a Shubnikov type III magnetic space group does not contain a translation in real space
 followed by a spin flip. It might be defined by a covering Fedorov
 space group (set of all spatial symmetries, irrespective of their magnetic
@@ -18641,8 +18660,8 @@ Variable(
     mnemonics="SPIN-MAGNetization TARGET",
     added_in_version="before_v9",
     text=r"""
-This input variable is active only in the [[nsppol]] = 2 case. 
-It is an auxiliary input variable, that is used to define how the occupation numbers 
+This input variable is active only in the [[nsppol]] = 2 case.
+It is an auxiliary input variable, that is used to define how the occupation numbers
 are generated (see [[occ]] input variable).
 
 When [[occopt]] defines a metallic occupation ([[occopt]]=3 ... 8),
@@ -18650,27 +18669,27 @@ the Fermi energies for spin up and spin down
 are adjusted to deliver the target spin-magnetization [[spinmagntarget]],
 in Bohr magneton units (for an Hydrogen atom, it is 1).
 The difference in Fermi energies is equivalent to an exchange splitting.
-However, still in the metallic occupation case, if [[spinmagntarget]] is the "magic" (default) value -99.99, 
-the occupation numbers (and hence the spin-magnetization) are not 
+However, still in the metallic occupation case, if [[spinmagntarget]] is the "magic" (default) value -99.99,
+the occupation numbers (and hence the spin-magnetization) are not
 constrained, and are determined self-consistently, by having the same spin
 up and spin down Fermi energy.
 
 If [[occopt]] = 1 and [[nsppol]] = 2, the occupation numbers
-for spin up and spin down are initialized (and kept unchanged afterwards) to give the required 
+for spin up and spin down are initialized (and kept unchanged afterwards) to give the required
 spin-magnetization (occupation numbers are identical for all k-points with
 [[occopt]] = 1). The definition of [[spinmagntarget]] is actually requested in
 this case, except for the single isolated Hydrogen atom.
 Still in the [[occopt]] = 1 case, if [[spinmagntarget]] is the "magic" (default) value of -99.99,
-there is no spin-magnetization, except for an odd number of electrons, 
+there is no spin-magnetization, except for an odd number of electrons,
 where one more band is occupied spin up than spin down.
 
 If [[occopt]] = 0 or 2, the [[occ]] input variable is defined directly by the user,
 and does not change during the SCF procedure.
-[[spinmagntarget]] is not used. 
+[[spinmagntarget]] is not used.
 
 For the time being, in response-function calculations, only [[spinmagntarget]]=0.0 or the default
 value are allowed. Moreover, the occupation numbers for the ground-state and for the reponse-function
-calculations must be identical. Thus, ferromagnetic insulators must rely on 
+calculations must be identical. Thus, ferromagnetic insulators must rely on
 [[occopt]]=0 or 2, with explicit definition of the occupation numbers.
 
 !!! note
@@ -19592,7 +19611,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: 
+below) for any given band. The squared residual is:
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
@@ -21467,7 +21486,7 @@ Supra-variable controlling the underlying printing options of the prt-type varia
 It can be used as a simple string flagging the desired outputs as follows:
 
  * "default"   --> An empty string will produce only the log and abo files
- * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.  
+ * "none"      --> It will deactivate all printing options currently available. Only the log and abo file will be produced following a calculation.
  * "ddb"       --> Activates the printing of the DDB file. Refer to [[prtddb]] for further documentation.
  * "den_1"     --> Activates the printing of the density file under option 1 of the [[prtden]] variable.
  * "den_2"     --> Activates the printing of the density file under option 2 of the [[prtden]] variable.
@@ -21754,7 +21773,7 @@ the kinetic energy density (usually named tau) cannot be negative, or even too s
 [[xc_taupos]] is the smallest value that the kinetic energy density can assume
 at the time of the evaluation of a XC functional, in ABINIT.
 When then computed kinetic energy density drops below [[xc_taupos]] before
-attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].
 
 It has been observed that the SCF cycle using meta-GGA functionals can be quite
 hard to make converge, for systems for which there is some vacuum. In this
@@ -23973,7 +23992,7 @@ Variable(
     requires="[[usepaw]] == 1, [[usepawu]] == 1 or 4, and [[nspden]] == 4",
     added_in_version="9.8.2",
     text=r"""
-This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4), 
+This option is usefull only for tests and code comparisons. For magnetic computations ([[nspden]]==4),
 it defines how the magnetism is treated in the double counting term in the PAW+U formalism.
 Abinit versions before 9.8 correspond to [[optdcmagpawu]]=1, without magnetism in the DC term,
 while [[optdcmagpawu]]=3 takes into account magnetism in the DC term, that is currently the default.

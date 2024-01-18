@@ -1235,7 +1235,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         ! cellcharge tag are made.
       end if
    end if
- 
+
  else if (occopt==2) then
    ! Give nband explicitly for each k point and spin
    call intagm(dprarr,intarr,jdtset,nkpt*nsppol,nkpt*nsppol,string(1:lenstr),'nband',tnband,'INT')
@@ -1426,6 +1426,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! Units of eph_doping is e_charge / cm^3
    dtset%eph_extrael = - dprarr(1) * ucvol * (Bohr_meter * 100) ** 3
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ahc_type',tread,'INT')
+ if(tread==1) dtset%eph_ahc_type=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
@@ -1733,7 +1736,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    xc_is_tb09=.false.
    xc_need_kden=(ixc_here==31.or.ixc_here==34.or.ixc_here==35)
  end if
- ! Hybrids 
+ ! Hybrids
  if (dtset%usefock==1) then
    if(ixc_here==40.or.ixc_here==41.or.ixc_here==42) then
      dtset%hyb_mixing_sr=zero
@@ -1751,7 +1754,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
  end if
- ! Hybrids: auxilliary functional 
+ ! Hybrids: auxilliary functional
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
@@ -1836,7 +1839,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    !Only potential mixing available for response function
    dtset%iscf=dtset%iscf-10
  else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and.xc_is_tb09) then
-   !For the TB09 xc functional, the potential mixing seems to be better 
+   !For the TB09 xc functional, the potential mixing seems to be better
    dtset%iscf=dtset%iscf-10
    msg='Automatically switching to potential mixing (iscf<10); seems to be better for TB09 XC...'
    ABI_COMMENT(msg)
@@ -2820,7 +2823,7 @@ if (dtset%usekden==1) then
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
- 
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value
 ! Print variables
@@ -2859,15 +2862,15 @@ if (dtset%usekden==1) then
    !dtset%prtwant    = 1   ! TO BE CHECKED FOR CONSISTENCY
    dtset%prtwf      = 1
    dtset%prtxml     = 1
- else if(dtset%write_files=='none') then 
+ else if(dtset%write_files=='none') then
    dtset%ncout      = 0
    dtset%prtddb     = 0
    dtset%prtden     = 0
    dtset%prtdos     = 0
    dtset%prtebands  = 0
    dtset%prteig     = 0
-   dtset%prtelf     = 0 
-   dtset%prtevk     = 0   
+   dtset%prtelf     = 0
+   dtset%prtevk     = 0
    dtset%prtfsurf   = 0
    dtset%prtgden    = 0
    dtset%prtgeo     = 0
@@ -2896,7 +2899,7 @@ if (dtset%usekden==1) then
       dtset%prtddb = 1
    else
       dtset%prtddb = 0
-   end if       
+   end if
    if (INDEX(dtset%write_files,'den_1') .gt. 0) then
       dtset%prtden = 1
    else if (INDEX(dtset%write_files,'den_2') .gt. 0) then
@@ -2928,20 +2931,20 @@ if (dtset%usekden==1) then
       dtset%prtdos = 5
    else
       dtset%prtdos = 0
-   end if   
+   end if
    if ( (INDEX(dtset%write_files,'dosm_1') .gt. 0) .AND. (dtset%prtdos .eq. 3 ) )then
       dtset%prtdosm = 1
       dtset%prtdos  = 3
    else
       dtset%prtdosm = 0
-   end if         
+   end if
    if (INDEX(dtset%write_files,'ebands_1') .gt. 0) then
       dtset%prtebands = 1
    else if (INDEX(dtset%write_files,'ebands_2') .gt. 0) then
       dtset%prtebands = 2
    else
       dtset%prtebands = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'eig') .gt. 0) then
       dtset%prteig = 1
    else
@@ -2959,27 +2962,27 @@ if (dtset%usekden==1) then
       dtset%prtfsurf = 1
    else
       dtset%prtfsurf = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gden') .gt. 0) then
       dtset%prtgden = 1
    else
       dtset%prtgden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'geo') .gt. 0) then
       dtset%prtgeo = 1
    else
       dtset%prtgeo = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gkk') .gt. 0) then
       dtset%prtgkk = 1
    else
       dtset%prtgkk = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'gsr') .gt. 0) then
       dtset%prtgsr = 1
    else
       dtset%prtgsr = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'hist') .gt. 0) then
       dtset%prthist = 1
    else
@@ -2989,22 +2992,22 @@ if (dtset%usekden==1) then
       dtset%prtkbff = 1
    else
       dtset%prtkbff = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'kden') .gt. 0) then
       dtset%prtkden = 1
    else
       dtset%prtkden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'lden') .gt. 0) then
       dtset%prtlden = 1
    else
       dtset%prtlden = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'ncout') .gt. 0) then
       dtset%ncout = 1
    else
       dtset%ncout = 0
-   end if   
+   end if
    if (INDEX(dtset%write_files,'pot') .gt. 0) then
       dtset%prtpot = 1
    else
@@ -3033,27 +3036,27 @@ if (dtset%usekden==1) then
       dtset%prtvclmb = 2
    else
       dtset%prtvha = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vha') .gt. 0) then
       dtset%prtvha = 1
    else
       dtset%prtvha = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vhxc') .gt. 0) then
       dtset%prtvhxc = 1
    else
       dtset%prtvhxc = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vpsp') .gt. 0) then
       dtset%prtvpsp = 1
    else
       dtset%prtvpsp = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'vxc') .gt. 0) then
       dtset%prtvxc = 1
    else
       dtset%prtvxc = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'want_1') .gt. 0) then
       dtset%prtwant = 1
    else if (INDEX(dtset%write_files,'want_2') .gt. 0) then
@@ -3062,12 +3065,12 @@ if (dtset%usekden==1) then
       dtset%prtwant = 3
    else
       dtset%prtwant = 0
-   end if 
+   end if
    if (INDEX(dtset%write_files,'wf_1') .gt. 0) then
       dtset%prtwf = 1
       if (INDEX(dtset%write_files,'wf_full_1') .gt. 0) then
          dtset%prtwf_full = 1
-      end if   
+      end if
    else if (INDEX(dtset%write_files,'wf_2') .gt. 0) then
       dtset%prtwf = 2
    else if (INDEX(dtset%write_files,'wf_3') .gt. 0) then
@@ -3081,7 +3084,7 @@ if (dtset%usekden==1) then
       dtset%prtxml = 1
    else
       dtset%prtxml = 0
-   end if   
+   end if
  end if
 
  ! Wannier90 interface related variables
