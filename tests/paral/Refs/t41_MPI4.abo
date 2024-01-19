@@ -74,6 +74,7 @@ P           mkmem           1
             ngfft          27      30      30
           ngfftdg         100     100     100
              nkpt           1
+    nblock_lobpcg         100
          nloc_mem           1
 -          npband           2
 -           npfft           2
@@ -911,6 +912,7 @@ P           mkmem           1
             ngfft          27      30      30
           ngfftdg         100     100     100
              nkpt           1
+    nblock_lobpcg         100
          nloc_mem           1
 -          npband           2
 -           npfft           2
