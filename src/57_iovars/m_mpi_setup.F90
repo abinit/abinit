@@ -105,7 +105,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
  integer :: icol,irow,np
 #endif
  logical :: fftalg_read,ortalg_read,paral_kgb_read,wfoptalg_read,do_check
- logical :: bandpp_modified,nblock_modified
  real(dp) :: dilatmx,ecut,ecut_eff,ecutdg_eff,ucvol
  character(len=500) :: msg
 !arrays
@@ -189,8 +188,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !Nband might have different values for different kpoint, but not bandpp.
    !In this case, we just use the largest nband (mband_upper), and the input will probably fail
    !at the bandpp check later on
-   bandpp_modified=.false.
-   nblock_modified=.false.
    if(tread(8)==1) then
      dtsets(idtset)%bandpp=intarr(1)
      ! check if nblock_lobpcg is read from the input, if so error msg
@@ -203,7 +200,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
        if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
          dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
-         nblock_modified=.true.
        else
          write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
            'Change nband, npband or bandpp in the input.',ch10,&
@@ -214,7 +210,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    else if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
      if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
        dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
-       bandpp_modified=.true.
      else
        write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
          'Change nband, npband or nblock_lobpcg in the input.'
@@ -1039,8 +1034,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if ((vectsize*blocksize**2)>=dtsets(idtset)%gpu_linalg_limit) then
          if (.not.wfoptalg_read) then
            dtsets(idtset)%wfoptalg=14
-           if (bandpp_modified) dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
-           if (nblock_modified) dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+           if (tread(8)==1) then ! bandpp read, so set nblock_lobpcg
+             dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+           else ! bandpp set by nblock_lobpcg
+             dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+           end if
            if (.not.fftalg_read) then
              dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
              if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
