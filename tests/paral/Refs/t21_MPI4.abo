@@ -251,6 +251,7 @@ P           mkmem8          5
              nkpt6          1
              nkpt7          5
              nkpt8          5
+    nblock_lobpcg           6
 -          npband           2
 -           npfft           2
             nstep          20
@@ -2972,6 +2973,7 @@ P           mkmem8          5
              nkpt6          1
              nkpt7          5
              nkpt8          5
+    nblock_lobpcg           6
 -          npband           2
 -           npfft           2
             nstep          20

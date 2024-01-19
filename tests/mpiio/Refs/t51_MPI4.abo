@@ -235,6 +235,9 @@ P          mk1mem3         32
              nkpt1         10
              nkpt2        128
              nkpt3        128
+    nblock_lobpcg1          6
+    nblock_lobpcg2          1
+    nblock_lobpcg3          1
 -          npband1          2
 -          npband2          1
 -          npband3          1
@@ -1218,6 +1221,9 @@ P          mk1mem3         32
              nkpt1         10
              nkpt2        128
              nkpt3        128
+    nblock_lobpcg1          6
+    nblock_lobpcg2          1
+    nblock_lobpcg3          1
 -          npband1          2
 -          npband2          1
 -          npband3          1
