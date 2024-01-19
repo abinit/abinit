@@ -9823,7 +9823,7 @@ defines the k point grid. The other piece of information is contained in
 
 The values [[kptrlatt]](1:3,1), [[kptrlatt]](1:3,2), [[kptrlatt]](1:3,3) are the
 coordinates of three vectors in real space, expressed in the [[rprimd]]
-coordinate system (reduced coordinates). They defines a super-lattice in real
+coordinate system (reduced coordinates). They define a super-lattice in real
 space. The k point lattice is the reciprocal of this super-lattice, possibly shifted (see [[shiftk]]).
 
 If neither [[ngkpt]] nor [[kptrlatt]] are defined, ABINIT will automatically
@@ -17151,7 +17151,7 @@ defines the q point grid. The other piece of information is contained in
 
 The values [[qptrlatt]](1:3,1), [[qptrlatt]](1:3,2), [[qptrlatt]](1:3,3) are
 the coordinates of three vectors in real space, expressed in the [[rprimd]]
-coordinate system (reduced coordinates). They defines a super-lattice in real
+coordinate system (reduced coordinates). They define a super-lattice in real
 space. The k point lattice is the reciprocal of this super-lattice, possibly
 shifted (see [[shiftq]]).
 
