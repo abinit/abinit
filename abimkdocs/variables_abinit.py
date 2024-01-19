@@ -4110,7 +4110,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Electron-PHonon: Allen-Heine-Cardona type",
-    added_in_version="before_v9",
+    added_in_version="9.11.6",
     text=r"""
 Only relevant for [[optdriver]]=7 and [[eph_task]]=4.
 If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to compute the
