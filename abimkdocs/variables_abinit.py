@@ -4104,6 +4104,25 @@ If phonon frequencies are to be computed:
 ),
 
 Variable(
+    abivarname="eph_ahc_type",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Electron-PHonon: Allen-Heine-Cardona type",
+    added_in_version="9.11.6",
+    text=r"""
+Only relevant for [[optdriver]]=7 and [[eph_task]]=4.
+If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to compute the
+zero-point renormalisation as well as temperature dependence.
+If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
+zero-point renormalisation as well as temperature dependence.
+Note: The use of [[eph_ahc_type]]=0 is not recommanded in IR-active materials.
+""",
+),
+
+Variable(
     abivarname="eph_extrael",
     varset="eph",
     vartype="real",
