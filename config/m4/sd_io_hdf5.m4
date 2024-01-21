@@ -620,7 +620,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     unset tmp_hdf5_hl
 
     AC_MSG_CHECKING([for HDF5 extra dependencies])
-    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //'`
+    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //;s/m;dl;/ /'`
     # Proposed change to be more general : sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | egrep 'LDFLAGS: |Extra libraries: ' | sed -e 's/.*Extra libraries: //;s/.*LDFLAGS: //:'`
     if test "${sd_hdf5_libs_extra}" = ""; then
       AC_MSG_RESULT([none])
@@ -630,7 +630,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
 
     if test "${sd_mpi_ok}" = "yes"; then
       AC_MSG_CHECKING([whether HDF5 supports MPI])
-      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}'`
+      sd_hdf5_has_mpi=`${sd_hdf5_h5cc} -showconfig | grep 'Parallel HDF5:' | awk '{print [$]NF}' | sed 's/ON/yes/'`
       test "${sd_hdf5_has_mpi}" = "" && sd_hdf5_has_mpi="no"
       AC_MSG_RESULT([${sd_hdf5_has_mpi}])
     else
