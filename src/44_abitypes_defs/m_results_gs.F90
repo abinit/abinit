@@ -837,7 +837,10 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  ! Write lattice parameters
  if (present(cryst)) then
   call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
-  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  !abc = [(sqrt(sum(cryst%rprimd(:, ii)**2)), ii=1,3)]
+  abc(1) = norm2(cryst%rprimd(:, 1))
+  abc(2) = norm2(cryst%rprimd(:, 2))
+  abc(3) = norm2(cryst%rprimd(:, 3))
   call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
   call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
   call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
