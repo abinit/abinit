@@ -318,7 +318,7 @@ end subroutine Get_Mem_Dev
 #if defined HAVE_GPU
  device=-1
  call c_get_ndevice(nb_devices)
- nb_devices=min(nb_devices,5)
+ !nb_devices=min(nb_devices,5)
  if(nb_devices>0) then
    if(nb_devices==1) then
      device=0

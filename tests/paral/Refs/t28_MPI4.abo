@@ -105,6 +105,7 @@ P           mkmem2          8
           ngfftdg          27      27      27
              nkpt1          4
              nkpt2          8
+    nblock_lobpcg          16
 -          npband           2
 -        npspinor           2
            nspden1          1
@@ -1561,6 +1562,7 @@ P           mkmem2          8
           ngfftdg          27      27      27
              nkpt1          4
              nkpt2          8
+    nblock_lobpcg          16
 -          npband           2
 -        npspinor           2
            nspden1          1
