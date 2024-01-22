@@ -702,11 +702,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq, f_nk
  real(dp) :: gdw2, gdw2_stern, rtmp
+ real(dp),allocatable,target :: cgq(:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
- real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
+ real(dp),allocatable :: gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -725,6 +726,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+ integer :: me
+ real(dp),allocatable :: cgq_buf(:)
+ real(dp),pointer :: cgq_ptr(:)
+#endif
 
 !************************************************************************
 
@@ -1549,8 +1555,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
+#if defined HAVE_MPI2_INPLACE
            call MPI_IALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+#else
+           ABI_MALLOC(cgq_buf,(sendcount))
+           me=1+xmpi_comm_rank(sigma%bsum_comm%value)
+           cgq_buf(1:sendcount)=cgq_ptr(displs(me)+1:displs(me)+sendcount)
+           call c_f_pointer(c_loc(cgq),cgq_ptr,[2*npw_kq*nspinor*nband_me])
+           call MPI_IALLGATHERV(cgq_buf, sendcount, MPI_DOUBLE_PRECISION, cgq_ptr, recvcounts, displs, &
+                                MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+           ABI_FREE(cgq_buf)
+#endif
            call xmpi_requests_add(+1)
 #endif
 
@@ -2070,15 +2086,24 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      wqnu = sigma%ephwg%phfrq_ibz(iq_ibz_fine, nu)
                      nqnu = occ_be(wqnu, sigma%kTmesh(it), zero)
 
-                     cfact = cfact + &
-                            ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                             (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ) * weight
+                     if (dtset%eph_ahc_type == 1) then
+                        cfact = cfact + &
+                               ((nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                                (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta) ) * weight
+                     else
+                        cfact = cfact + ((two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)) * weight
+                     endif
                    enddo
                  else
-                   cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
-                            (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                   !DBSP
+                   if (dtset%eph_ahc_type == 1) then
+                      cfact =  (nqnu + f_mkq      ) / (eig0nk - eig0mkq + wqnu + sigma%ieta) + &
+                               (nqnu - f_mkq + one) / (eig0nk - eig0mkq - wqnu + sigma%ieta)
+                   else
+                      cfact =  (two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)
+                   endif
                  endif
-
+                 !
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
@@ -3541,7 +3566,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", "symdynmat", &
      "ph_intmeth", "eph_intmeth", "qint_method", "eph_transport", &
-     "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"])
+     "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"])
    NCF_CHECK(ncerr)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", &
@@ -3646,10 +3671,10 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
      "eph_task", "symsigma", "nbsum", "bsum_start", "bsum_stop", &
      "symdynmat", "ph_intmeth", "eph_intmeth", "qint_method", &
-     "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew"], &
+     "eph_transport", "imag_only", "symv1scf", "dvdb_add_lr", "mrta", "ibte_prep", "eph_prtscratew", "eph_ahc_type"], &
      [dtset%eph_task, self%symsigma, self%nbsum, self%bsum_start, self%bsum_stop, &
-     dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, &
-     dtset%eph_transport, ii, dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep, dtset%eph_prtscratew])
+     dtset%symdynmat, dtset%ph_intmeth, dtset%eph_intmeth, self%qint_method, dtset%eph_transport, ii, &
+     dtset%symv1scf, dtset%dvdb_add_lr, self%mrta, dtset%ibte_prep, dtset%eph_prtscratew, dtset%eph_ahc_type])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
      "eta", "wr_step", "eph_fsewin", "eph_fsmear", "eph_extrael", "eph_fermie", "ph_wstep", "ph_smear", "eph_phwinfact"], &

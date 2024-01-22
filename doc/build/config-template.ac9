@@ -1430,6 +1430,10 @@
 #
 #enable_zdot_bugfix="yes"
 
+# Activate workaround for buggy MPI interfaces (not having interfaces for scalars)
+#
+#enable_mpi_interfaces_bugfix="yes"
+
 # -------------------------------------------------------------------------- #
 # Maintainer options                                                         #
 # -------------------------------------------------------------------------- #

@@ -720,6 +720,11 @@ include 'mpif.h'
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: Domega
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: A_omega
 
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  DOUBLE PRECISION, ALLOCATABLE , DIMENSION(:) :: oper_buf
+#endif
+
   IF ( this%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyb_backFourier : Uninitialized GreenHyb structure")
   IF ( this%setW .EQV. .FALSE. ) &
@@ -787,9 +792,19 @@ include 'mpif.h'
   IF ( this%have_MPI .EQV. .TRUE. ) THEN
 ! rassembler les resultats
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_PRECISION, &
                       this%oper, counts, displs, &
                       MPI_DOUBLE_PRECISION, this%MY_COMM, residu)
+#else
+    my_count=tauBegin-tauEnd+1
+    MALLOC(oper_buf,(my_count))
+    oper_buf(1:my_count)=this%oper(tauBegin:tauEnd)
+    CALL MPI_ALLGATHERV(oper_buf, my_count, MPI_DOUBLE_PRECISION, &
+                      this%oper, counts, displs, &
+                      MPI_DOUBLE_PRECISION, this%MY_COMM, residu)
+    FREE(oper_buf)
+#endif
 #endif
     FREE(counts)
     FREE(displs)
@@ -869,6 +884,11 @@ include 'mpif.h'
   COMPLEX(KIND=8) :: iwtau
   COMPLEX(KIND=8), ALLOCATABLE, DIMENSION(:) :: Gwtmp  
   DOUBLE PRECISION, ALLOCATABLE, DIMENSION(:) :: omegatmp
+
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+  INTEGER :: my_count
+  COMPLEX(KIND=8), ALLOCATABLE , DIMENSION(:) :: Gwtmp_buf
+#endif
 
   IF ( this%set .EQV. .FALSE. ) &
     CALL ERROR("GreenHyb_forFourier : Uninitialized GreenHyb structure")
@@ -1069,9 +1089,19 @@ include 'mpif.h'
   FREE(X2)
   IF ( this%have_MPI .EQV. .TRUE. ) THEN
 #ifdef HAVE_MPI
-    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, &
+#if defined HAVE_MPI2_INPLACE
+    CALL MPI_ALLGATHERV(MPI_IN_PLACE, 0, MPI_DOUBLE_COMPLEX, &
                       Gwtmp  , counts, displs, &
                       MPI_DOUBLE_COMPLEX, this%MY_COMM, residu)
+#else
+    my_count=omegaBegin-omegaEnd+1
+    MALLOC(Gwtmp_buf,(my_count))
+    Gwtmp_buf(1:my_count)=Gwtmp(omegaBegin:omegaEnd)
+    CALL MPI_ALLGATHERV(Gwtmp_buf, my_count, MPI_DOUBLE_COMPLEX, &
+                      Gwtmp  , counts, displs, &
+                      MPI_DOUBLE_COMPLEX, this%MY_COMM, residu)
+    FREE(Gwtmp_buf)
+#endif
 #endif
     FREE(counts)
     FREE(displs)
