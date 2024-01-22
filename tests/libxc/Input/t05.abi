@@ -1,7 +1,7 @@
 # Bi atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 43
+ndtset 42
 
 # (S)LDAs X + different correlations
 #ixc  -1002 ! Not portable from libxc v3 to v4

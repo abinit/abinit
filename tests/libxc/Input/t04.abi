@@ -1,7 +1,7 @@
 # He atom : reference test (very quick) for all LibXC functionals. nstep=1, nline=1.
 # Not accurate, only portability check.
 
-ndtset 44
+ndtset 43
 
 # (S)LDAs X + different correlations
 ixc1  -1002
