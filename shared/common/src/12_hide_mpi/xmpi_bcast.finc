@@ -23,12 +23,19 @@ subroutine xmpi_bcast_intv(xval,master,comm,ier)
  integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: arr_xval(1)
+#endif
+
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_INTEGER,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_INTEGER,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -313,14 +320,20 @@ subroutine xmpi_bcast_dpv(xval,master,comm,ier)
  real(dp),intent(inout) :: xval
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
-!Local variables-------------------------------
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ real(dp) :: arr_xval(1)
+#endif
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_DOUBLE_PRECISION,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_DOUBLE_PRECISION,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -722,12 +735,19 @@ subroutine xmpi_bcast_spv(xval,master,comm,ier)
  integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
+!Local variables-------------------
+#if defined HAVE_MPI
+ real(sp) :: arr_xval(1)
+#endif
+
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_REAL,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_REAL,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -994,13 +1014,19 @@ subroutine xmpi_bcast_cplxv(xval,master,comm,ier)
  integer ,intent(out) :: ier
 
 !Local variables-------------------
+#if defined HAVE_MPI
+ complex(spc) :: arr_xval(1)
+#endif
+
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_COMPLEX,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_COMPLEX,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -1263,16 +1289,23 @@ end subroutine xmpi_bcast_cplx4d
 subroutine xmpi_bcast_dcv(xval,master,comm,ier)
 
 !Arguments-------------------------
- complex(dpc),intent(inout):: xval
+ complex(dpc),intent(inout) :: xval
  integer ,intent(in) :: comm,master
  integer ,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ complex(dpc) :: arr_xval(1)
+#endif
 
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_DOUBLE_COMPLEX,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_DOUBLE_COMPLEX,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 
@@ -1532,13 +1565,15 @@ end subroutine xmpi_bcast_dc4d
 subroutine xmpi_bcast_ch0d(xval, master, comm, ier)
 
 !Arguments-------------------------
- character(len=*),intent(inout) :: xval
+ character(len=*),intent(inout),target :: xval
  integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
 !Local variables-------------------------------
 #if defined HAVE_MPI
- integer :: nch,rank
+ integer :: nch(1),rank
+ character,pointer :: arr_xval(:)
+ type(c_ptr) :: cptr
 #endif
 
 !*************************************************************************
@@ -1547,10 +1582,11 @@ subroutine xmpi_bcast_ch0d(xval, master, comm, ier)
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
    call MPI_COMM_RANK(comm,rank,ier)
-   if (rank==master) nch=len_trim(xval)
+   if (rank==master) nch(1)=len_trim(xval)
    call MPI_BCAST(nch,1,MPI_INTEGER,master,comm,ier)
-   call MPI_BCAST(xval,nch,MPI_CHARACTER,master,comm,ier)
-   if (rank/=master) xval(nch+1:)=''
+   cptr=c_loc(xval) ; call c_f_pointer(cptr,arr_xval,[nch(1)])
+   call MPI_BCAST(arr_xval,nch(1),MPI_CHARACTER,master,comm,ier)
+   if (rank/=master) xval(nch(1)+1:)=''
  end if
 #endif
 
@@ -1630,12 +1666,19 @@ subroutine xmpi_bcast_log0d(xval,master,comm,ier)
  integer,intent(in) :: comm,master
  integer,intent(out) :: ier
 
+!Local variables-------------------
+#if defined HAVE_MPI
+ logical :: arr_xval(1)
+#endif
+
 ! *************************************************************************
 
  ier=0
 #if defined HAVE_MPI
  if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
-   call MPI_BCAST(xval,1,MPI_LOGICAL,master,comm,ier)
+   arr_xval(1)=xval
+   call MPI_BCAST(arr_xval,1,MPI_LOGICAL,master,comm,ier)
+   xval=arr_xval(1)
  end if
 #endif
 

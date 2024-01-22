@@ -175,7 +175,11 @@ inp_files = [
     "t198.abi",  # test treatment of inaccurate POSCAR file
     "t199.abi",  # test treatment of inaccurate POSCAR file
 
+    # new tolwfr usage
     "t200.abi",  # tolwfr with other tolerances
     "t201.abi",  # tolwfr with tolvrs + nbdbuf with lobpcg
     "t202.abi",  # tolwfr_diago with tolvrs and tolvrs+tolwfr with lobpcg
+
+    # nblock_lobpcg
+    "t205.abi",  # test nblock_lobpcg input
 ]
