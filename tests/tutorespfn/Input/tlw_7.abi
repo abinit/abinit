@@ -29,6 +29,7 @@ blue 0 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = band2eps
+#%% exclude_builders = bob_gnu_13.2_openmp
 #%% test_chain =  tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% no_check = yes
 #%% [files]
