@@ -676,7 +676,9 @@ if test "${abi_openmp_enable}" = "yes"; then
   AC_MSG_CHECKING([Fortran flags for OpenMP])
   AC_MSG_RESULT([${FCFLAGS_OPENMP}])
   ABI_OMP_CHECK_COLLAPSE
-  ABI_OMP_CHECK_GPU_OFFLOAD
+  if test "${abi_openmp_offload_enable}" = "yes"; then
+    ABI_OMP_CHECK_GPU_OFFLOAD
+  fi
   AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
 fi
 
