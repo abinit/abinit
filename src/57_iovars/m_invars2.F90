@@ -1241,7 +1241,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
         ! cellcharge tag are made.
       end if
    end if
- 
+
  else if (occopt==2) then
    ! Give nband explicitly for each k point and spin
    call intagm(dprarr,intarr,jdtset,nkpt*nsppol,nkpt*nsppol,string(1:lenstr),'nband',tnband,'INT')
@@ -1432,6 +1432,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! Units of eph_doping is e_charge / cm^3
    dtset%eph_extrael = - dprarr(1) * ucvol * (Bohr_meter * 100) ** 3
  end if
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_ahc_type',tread,'INT')
+ if(tread==1) dtset%eph_ahc_type=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fermie',tread,'ENE')
  if(tread==1) dtset%eph_fermie=dprarr(1)
@@ -1742,7 +1745,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    xc_is_tb09=.false.
    xc_need_kden=(ixc_here==31.or.ixc_here==34.or.ixc_here==35)
  end if
- ! Hybrids 
+ ! Hybrids
  if (dtset%usefock==1) then
    if(ixc_here==40.or.ixc_here==41.or.ixc_here==42) then
      dtset%hyb_mixing_sr=zero
@@ -1760,7 +1763,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%hyb_range_fock=dtset%hyb_range_dft
    end if
  end if
- ! Hybrids: auxilliary functional 
+ ! Hybrids: auxilliary functional
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_scal',tread,'DPR')
  if(tread==1) dtset%auxc_scal=dprarr(1)
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'auxc_ixc',tread,'INT')
@@ -1845,7 +1848,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    !Only potential mixing available for response function
    dtset%iscf=dtset%iscf-10
  else if (dtset%optdriver==RUNL_GSTATE.and.dtset%iscf>=10.and.xc_is_tb09) then
-   !For the TB09 xc functional, the potential mixing seems to be better 
+   !For the TB09 xc functional, the potential mixing seems to be better
    dtset%iscf=dtset%iscf-10
    msg='Automatically switching to potential mixing (iscf<10); seems to be better for TB09 XC...'
    ABI_COMMENT(msg)

@@ -3587,6 +3587,7 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
    ! Extraction of the dielectric tensor and the effective charges
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
+
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw

@@ -841,6 +841,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
    ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
+#if 0
    do ii=len(my_string), 1, -1
      ich = iachar(my_string(ii:ii))
      select case(ich)
@@ -852,6 +853,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
        exit
      end select
    end do
+#endif
 
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))

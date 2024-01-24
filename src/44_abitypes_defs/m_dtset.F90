@@ -174,11 +174,11 @@ type, public :: dataset_type
  integer :: efmas_n_dirs
  integer :: efmas_ntheta
  integer :: enunit
+ integer :: eph_ahc_type = 1
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
  integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
- real(dp) :: eph_phrange_w(2) = zero
 
  integer :: eph_prtscratew = 0
  integer :: eph_restart = 0
@@ -783,6 +783,7 @@ type, public :: dataset_type
  real(dp) :: eph_fsewin = 0.04_dp
  real(dp) :: eph_fsmear = 0.01_dp
  real(dp) :: eph_mustar = 0.1_dp
+ real(dp) :: eph_phrange_w(2) = zero
  real(dp) :: eph_phwinfact = 1.1_dp
  real(dp) :: eshift
  real(dp) :: esmear
@@ -1493,6 +1494,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dipdip             = dtin%dipdip
  dtout%chneut             = dtin%chneut
 
+ dtout%eph_ahc_type       = dtin%eph_ahc_type
  dtout%eph_mustar         = dtin%eph_mustar
  dtout%eph_intmeth        = dtin%eph_intmeth
  dtout%eph_tols_idelta    = dtin%eph_tols_idelta
@@ -3333,7 +3335,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type'
  ! XG20200321, please provide testing for eph_np_pqbks
  ! MG: Well, eph_np_pqbks cannot be tested with the present infrastructure because it's a MPI-related variable
  ! and all the tests in the paral and mpiio directory are done with a single input file
