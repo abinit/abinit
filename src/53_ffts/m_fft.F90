@@ -49,12 +49,13 @@ MODULE m_fft
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, ptabs_fourwf, initmpi_seq
  use m_distribfft,    only : distribfft_type, init_distribfft, destroy_distribfft
 
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_CUDA && defined HAVE_OPENMP_OFFLOAD
  ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
- !use m_manage_cuda
+ use m_manage_cuda
 #endif
- use, intrinsic :: iso_c_binding
  use m_ompgpu_fourwf
+
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -2254,7 +2255,7 @@ end function fftu_mpi_utests
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
 !! [use_ndo] = use non diagonal occupations.
-!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (see side effects)
