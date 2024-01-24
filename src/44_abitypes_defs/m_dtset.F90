@@ -415,6 +415,7 @@ type, public :: dataset_type
  integer :: nkptgw
  integer :: nkpthf
  integer :: nline
+ integer :: nblock_lobpcg
  integer :: nnsclo
  integer :: nnsclohf
  integer :: nomegasf = 100
@@ -1786,6 +1787,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%nonlinear_info     = dtin%nonlinear_info
  dtout%nonlop_ylm_count   = dtin%nonlop_ylm_count
  dtout%nline              = dtin%nline
+ dtout%nblock_lobpcg      = dtin%nblock_lobpcg
  dtout%nnsclo             = dtin%nnsclo
  dtout%nnsclohf           = dtin%nnsclohf
  dtout%nomegasf           = dtin%nomegasf
@@ -3431,7 +3433,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' nctime ndivk ndivsm ndtset neb_algo neb_spring'
  list_vars=trim(list_vars)//' nfreqim nfreqre nfreqsp ngfft ngfftdg'
  list_vars=trim(list_vars)//' ngkpt ngqpt nimage nkpath nkpt nkptgw nkpthf'
- list_vars=trim(list_vars)//' nline nloc_alg nloc_mem nnos nnsclo nnsclohf'
+ list_vars=trim(list_vars)//' nline nblock_lobpcg nloc_alg nloc_mem nnos nnsclo nnsclohf'
  list_vars=trim(list_vars)//' nobj nomegasf nomegasi nomegasrd nonlinear_info nonlop_ylm_count noseinert npband'
  list_vars=trim(list_vars)//' npfft nphf nph1l npimage np_spkpt npkpt nppert npsp npspinor'
  list_vars=trim(list_vars)//' npulayit npvel npwkss'

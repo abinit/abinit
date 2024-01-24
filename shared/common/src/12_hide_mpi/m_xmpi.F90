@@ -66,6 +66,7 @@ module m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
+
 #else
  ! Fake replacements for the sequential version. Values are taken from
  ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
@@ -834,6 +835,14 @@ subroutine xmpi_init()
      if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
      if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
    end if
+
+   ! If MPI interfaces are buggy, MPI_IN_PLACE is not allowed
+#if defined HAVE_MPI2_INPLACE && defined HAVE_MPI_BUGGY_INTERFACES
+   write(std_out, "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   write(ab_out , "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   call xmpi_abort(msg="Stopping here!")
+#endif
+
  end if
 
 end subroutine xmpi_init
@@ -3291,11 +3300,11 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 !Local variables-------------------------------
 !scalars
  integer :: bsize_frm,mpi_type_frm,myfh
- integer(kind=int16) :: delim_record2
- integer(kind=int32) :: delim_record4
- integer(kind=int64) :: delim_record8
+ integer(kind=int16) :: delim_record2(1)
+ integer(kind=int32) :: delim_record4(1)
+ integer(kind=int64) :: delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
- integer*16 :: delim_record16
+ integer*16 :: delim_record16(1)
 #endif
  character(len=500) :: msg
 !arrays
@@ -3315,18 +3324,18 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 
    if (bsize_frm==4) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3334,19 +3343,19 @@ subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  CASE (xmpio_collective)
 
    if (bsize_frm==4) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3441,23 +3450,23 @@ subroutine xmpio_write_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  CASE (xmpio_single)
    if (bsize_frm==4) then
      delim_record4 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record4 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record4],1,mpi_type_frm,statux,mpierr)
 
    else if (bsize_frm==8) then
      delim_record8 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record8 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record8],1,mpi_type_frm,statux,mpierr)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      delim_record16 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record16 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record16],1,mpi_type_frm,statux,mpierr)
 #endif
    else if (bsize_frm==2) then
      delim_record2 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record2, 1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record2 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record2], 1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record2],1,mpi_type_frm,statux,mpierr)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3465,22 +3474,22 @@ subroutine xmpio_write_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
  CASE (xmpio_collective)
    if (bsize_frm==4) then
      delim_record4 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record4 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record4],1,mpi_type_frm,statux,mpierr)
    else if (bsize_frm==8) then
      delim_record8 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record8 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record8],1,mpi_type_frm,statux,mpierr)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      delim_record16 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record16 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record16],1,mpi_type_frm,statux,mpierr)
 #endif
    else if (bsize_frm==2) then
      delim_record2 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record2 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record2],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record2],1,mpi_type_frm,statux,mpierr)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
