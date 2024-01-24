@@ -1669,7 +1669,7 @@ subroutine crystal_ncread(cryst, ncid)
 
 ! *************************************************************************
 
-   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid)) 
+   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions
@@ -1729,7 +1729,7 @@ subroutine crystal_ncread(cryst, ncid)
  ABI_ERROR("netcdf library not available")
 #endif
 
-end subroutine crystal_ncread       
+end subroutine crystal_ncread
 !!***
 
 !----------------------------------------------------------------------
