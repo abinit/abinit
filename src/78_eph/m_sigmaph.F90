@@ -690,11 +690,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: zpr_frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq, f_nk
  real(dp) :: gdw2, gdw2_stern, rtmp
+ real(dp),allocatable,target :: cgq(:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:), gaussw_qnu(:)
- real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
+ real(dp),allocatable :: gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
  logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
@@ -712,6 +713,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
+#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
+ integer :: me
+ real(dp),allocatable :: cgq_buf(:)
+ real(dp),pointer :: cgq_ptr(:)
+#endif
 
 !************************************************************************
 
@@ -1641,8 +1647,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            !call MPI_ALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
            !                    MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, ierr)
 
+#if defined HAVE_MPI2_INPLACE
            call MPI_IALLGATHERV(MPI_IN_PLACE, sendcount, MPI_DOUBLE_PRECISION, cgq, recvcounts, displs, &
                                 MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+#else
+           ABI_MALLOC(cgq_buf,(sendcount))
+           me=1+xmpi_comm_rank(sigma%bsum_comm%value)
+           cgq_buf(1:sendcount)=cgq_ptr(displs(me)+1:displs(me)+sendcount)
+           call c_f_pointer(c_loc(cgq),cgq_ptr,[2*npw_kq*nspinor*nband_me])
+           call MPI_IALLGATHERV(cgq_buf, sendcount, MPI_DOUBLE_PRECISION, cgq_ptr, recvcounts, displs, &
+                                MPI_DOUBLE_PRECISION, sigma%bsum_comm%value, cgq_request, ierr)
+           ABI_FREE(cgq_buf)
+#endif
            call xmpi_requests_add(+1)
 #endif
 

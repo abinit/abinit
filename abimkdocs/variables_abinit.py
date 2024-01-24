@@ -435,7 +435,8 @@ Variable(
     requires="[[paral_kgb]] == 1",
     added_in_version="before_v9",
     text=r"""
-Control the size of the block in the LOBPCG algorithm.
+Affect the size of a block in the LOBPCG algorithm.
+One should use [[nblock_lobpcg]] instead, which sets **bandpp** depending on [[nband]] and [[npband]].
 
 !!! important
 
@@ -2404,7 +2405,7 @@ For the time being,
     order formula $V_{residual}=\frac{dV}{d \rho} \rho_{residual}$
     and uses the exchange-correlation kernel $K_{xc}=\frac{dV_{xc}}{d\rho}$ whose computation
     is time-consuming for GGA (or meta-GGA) functionals.
-    
+
     - By default (positive values of [[densfor_pred]]), even for GGA and meta-GGA,
     the local-density part of the exchange-correlation kernel is used, which gives a reasonable accuracy.
     Using the full GGA exchange correlation kernel (so, including derivatives with respect to the gradient of
@@ -6087,7 +6088,7 @@ Variable(
     requires="[[gpu_option]] > 0 and [[CUDA]] (Nvidia GPU)",
     added_in_version="before_v9",
     text=r"""
-@legacy  
+@legacy
 This variable is intended to be used when several GPU devices are present on each node, assuming the
 same number of devices on all nodes.
 Allows to choose in which order the GPU devices are chosen and distributed
@@ -6143,14 +6144,14 @@ Variable(
     requires="[[gpu_option]] == 1 and [[CUDA]] (Nvidia GPU, old CUDA implementation)",
     added_in_version="before_v9",
     text=r"""
-@legacy  
+@legacy
 This variable is obsolete and is only intended to be used with the old 2013 cuda
-implementation of ABINIT on GPU ([[gpu_option]]=1).  
+implementation of ABINIT on GPU ([[gpu_option]]=1).
 In that case, the use of linear/matrix algebra on GPU is only efficient if the size
 of the involved matrices is large enough. The [[gpu_linalg_limit]] parameter
 defines the threshold above which linear (and matrix) algebra operations are
 done on the Graphics Processing Unit.
-The matrix size is evaluated as to: SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$  
+The matrix size is evaluated as to: SIZE=([[mpw]] $\times$ [[nspinor]] / [[npspinor]]) $\times$ ([[npband]] $\times$ [[bandpp]]) $^2$
 When SIZE>=[[gpu_linalg_limit]], [[wfoptalg]] parameter is automatically set
 to 14 which corresponds to the use of the legacy LOBPCG algorithm for the calculation of
 the eigenstates.
@@ -6169,11 +6170,11 @@ Variable(
     added_in_version="9.12",
     text=r"""
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
-in the non-local operator) are all stored on all GPU devices.  
+in the non-local operator) are all stored on all GPU devices.
 [[gpu_nl_distrib]] forces the distribution of these projections on several GPU devices. This
 uses less memory per GPU but requires communications beween GPU devices. These communication
 penalize the execution time.
-[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.  
+[[gpu_nl_splitsize]] defines the number of blocks used to split the projections.
 In standard executions, the distribution is only needed on large use cases to address
 the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
 when needed.
@@ -6193,9 +6194,9 @@ Variable(
     text=r"""
 Only relevant when [[gpu_nl_distrib]] = 1.
 When using GPU acceleration, the wave-function projections ($<\tilde{p}_i|\Psi_{nk}> (used
-in the non-local operator) are all stored on all GPU devices.  
+in the non-local operator) are all stored on all GPU devices.
 [[gpu_nl_splitsize]] defines the number of blocks used to split these projections
-on several GPU devices.   
+on several GPU devices.
 In standard executions, the distribution is only needed on large use cases to address
 the high memory needs. Therefore ABINIT uses the "distributed mode" automatically
 when needed.
@@ -6205,7 +6206,7 @@ when needed.
 Variable(
     abivarname="gpu_option",
     varset="paral",
-    vartype="integer",
+    vartype="integer or string",
     topics=['parallelism_useful'],
     dimensions="scalar",
     defaultval=ValueWithConditions({'[[OPENMP_OFFLOAD]]': 2, '[[KOKKOS]]': 3, '[[CUDA]]': 1, 'defaultval': 0}),
@@ -6215,17 +6216,17 @@ Variable(
 Only relevant for Ground-State calculations ([[optdriver]] == 0).
 This option is only available if ABINIT executable has been compiled for the purpose
 of being used with GPU accelerators. It allows to choose between the different
-GPU programming models available in ABINIT:  
+GPU programming models available in ABINIT:
 
-- [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
+- [[gpu_option]]= "GPU_DISABLED" or [[gpu_option]] = 0: no use of GPU (even if compiled for GPU).
 
-- [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
+- [[gpu_option]]= "GPU_LEGACY" or [[gpu_option]] = 1: use the "legacy" 2013 implementation of GPU. This is a partial [[CUDA]]
   implementation, using the `nvcc` [[CUDA]] compiler. The old LOBPCG algorithm is automatically
   used to compute the eigenstates ([[wfoptalg]]=14). The external linear algebra library
   `MAGMA can also be linked to ABINIT to improve performances on large systems
   (see [[gpu_linalg_limit]]).
 
-- [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
+- [[gpu_option]]= "GPU_OPENMP" or [[gpu_option]] = 2: use of the [[OPENMP_OFFLOAD]] programming model to execute time consuming
   parts of the code on GPU. This implementation works on NVidia accelerators, if ABINIT has been
   compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
   libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
@@ -6236,7 +6237,7 @@ GPU programming models available in ABINIT:
   FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
   or [HIP](https://github.com/ROCm/HIP)).
 
-- [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
+- [[gpu_option]]= "GPU_KOKKOS" or [[gpu_option]] = 3: use of the [[KOKKOS]]+[[CUDA]] programming model to execute time consuming
   parts of the code on GPU. This implementation -- at present -- is only compatible with
   NVidia accelerators. It required that ABINIT has been linked to the
   [Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
@@ -6269,7 +6270,7 @@ the use of [NVTX](https://github.com/NVIDIA/NVTX)
  [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
 When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
 the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
- tracing/profiling (ROCm Tools eXtension Library) is activated.  
+ tracing/profiling (ROCm Tools eXtension Library) is activated.
 """,
 ),
 
@@ -7791,10 +7792,10 @@ Variable(
     added_in_version="9.7.2",
     defaultval=ValueWithConditions({'[[gpu_option]] > 0': '0', 'defaultval': 1}),
     text=r"""
-Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).  
+Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).
 In the Chebyshev-filtered subspace method (iterative diagonalization algorithm))
 one needs to apply the inverse of the overlap matrix. [[invol_blk_sliced]] allows one
-to choose between two variants, sliced (1) or non-sliced (0).  
+to choose between two variants, sliced (1) or non-sliced (0).
 Default value is different for an execution on GPU.
 """,
 ),
@@ -11069,6 +11070,45 @@ allowed, nor are parallel computations.
 ),
 
 Variable(
+    abivarname="nblock_lobpcg",
+    varset="gstate",
+    vartype="integer",
+    topics=['SCFAlgorithms_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="Number of BLOCKs in the LOBPCG algorithm",
+    requires="[[wfoptalg]] = 4, 14, or 114",
+    added_in_version="v9.11.6",
+    text=r"""
+This variable controls the number of blocks in the LOBPCG algorithm.
+It has to be a divisor of [[nband]].
+Contrary to the simple conjugate gradient, which is a band-by-band algorithm, LOBPCG can work on blocks of wavefunctions.
+This is partly why LOBPCG is more robust and efficient, especially for systems with many atoms.
+The size of a block is [[nband]] / **nblock_lobpcg**.
+Blocks are treated sequentially, starting from the block of bands with the lowest eigenvalues up to the block of bands with the highest eigenvalues.
+
+With the default value, all bands are included in a single block (**nblock_lobpcg**=1), but it is very likely not the most efficient solution.
+To increase the number of blocks (which decreases the block size) can be interesting as:
+
+* it decreases the time spend in every LOBPCG call (a part of the work to be done on each block is proportional to (blocksize)^3).
+* it decreases the memory footprint, as the size of many work arrays is proportional to the block size.
+
+However, to increase the number of blocks has some drawbacks:
+
+* it decreases the algorithm robustness, so difficult systems may not converge. To use one block is the most robust choice.
+* it decreases the convergence rate, so either more steps (see [[nstep]]) are needed to converge, or more "lines" are needed (see [[nline]]).
+* when used in a parallel computation, it decreases the scalability, so less cores can be used efficiently.
+
+A first try could be **nblock_lobpcg**=4.
+If possible one can slightly adapt [[nband]] in order to be a multiple of **nblock_lobpcg**.
+
+When use with [[paral_kgb]]=1, the bands of a block are distributed among [[npband]] MPI processes.
+So [[npband]] has to be a divisor of [[nband]] / **nblock_lobpcg** and [[bandpp]] is internally set to [[nband]] / (**nblock_lobpcg** * [[npband]]).
+**nblock_lobpcg** and [[bandpp]] cannot be used simultaneously, one should prefer **nblock_lobpcg**.
+""",
+),
+
+Variable(
     abivarname="nc_xccc_gspace",
     varset="dev",
     vartype="integer",
@@ -13491,7 +13531,7 @@ Metallic occupation of levels, using different occupation schemes (see below).
 See the review of the different possibilities in [[cite:Santos2023]], that
 delivers a nice pedagogical explanation of these.
 The corresponding thermal broadening, or cold smearing, is defined by the
-input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha, 
+input variable [[tsmear]] (see below: the variable $x$ is the chemical potential minus the energy in Ha,
 divided by [[tsmear]]).
 Like for [[occopt]] = 1, the variable [[occ]] is not read.
 All k points have the same number of bands, [[nband]] is given as a single
@@ -13502,7 +13542,7 @@ can be obtained by using both [[tsmear]] and [[tphysel]].
 
     * [[occopt]] = 3:
 Fermi-Dirac smearing (finite-temperature metal). Smeared delta function:
-$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$. 
+$\tilde{\delta}(x)=(2\cosh(x/2))^{-2}=(\exp(x/2)+\exp(-x/2))^{-2}=(2\cosh(x)+2)^{-1}$.
 For usual calculations, at zero temperature, do not use [[occopt]]=3,
 but [[occopt]]=7. If you want to do a calculation at finite temperature, please also read the
 information about [[tphysel]].
@@ -19610,7 +19650,7 @@ Variable(
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
 it gives a convergence tolerance for the largest squared "residual" (defined
-below) for any given band. The squared residual is: 
+below) for any given band. The squared residual is:
 
 $$
 \langle \nk| (H - \enk)^2 |\nk \rangle, \,\text{with}\; \enk = \langle \nk|H|\nk \rangle
@@ -21795,7 +21835,7 @@ the kinetic energy density (usually named tau) cannot be negative, or even too s
 [[xc_taupos]] is the smallest value that the kinetic energy density can assume
 at the time of the evaluation of a XC functional, in ABINIT.
 When then computed kinetic energy density drops below [[xc_taupos]] before
-attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].  
+attacking the evaluation of the XC functional, then it will be replaced by [[xc_denpos]].
 
 It has been observed that the SCF cycle using meta-GGA functionals can be quite
 hard to make converge, for systems for which there is some vacuum. In this

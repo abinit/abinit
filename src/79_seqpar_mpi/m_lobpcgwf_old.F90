@@ -202,8 +202,9 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  optpcon=1;if (dtset%wfoptalg>10) optpcon=0
 
 !For communication
- blocksize=mpi_enreg%nproc_fft
- if(mpi_enreg%paral_kgb==1) blocksize=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ !blocksize=mpi_enreg%nproc_fft
+ !if(mpi_enreg%paral_kgb==1) blocksize=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ blocksize=nband_k/dtset%nblock_lobpcg
  !IF you want to compare with new lobpcg in sequential uncomment the following
  !line
  !blocksize=mpi_enreg%nproc_band*mpi_enreg%bandpp
