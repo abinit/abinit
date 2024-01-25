@@ -1,6 +1,26 @@
 #!/bin/bash
 
 # Init
+Fallbacks="bigdft atompaw wannier90 libpsml xmlf90 libxc hdf5 netcdf4 netcdf4_fortran"
+
+Disabled="--disable-bigdft --disable-atompaw --disable-wannier90 --disable-libpsml --disable-xmlf90 --disable-libxc --disable-hdf5 --disable-netcdf4 --disable-netcdf4_fortran"
+
+Optional_fbks="--disable-bigdft --disable-atompaw --disable-wannier90 --disable-libpsml --disable-xmlf90"
+
+if [ "echo $#" == "0" ]; then
+   Disabled=$Optional_fbks
+fi
+
+while [[ "$#" -gt 0 ]]; do
+   if [ ! "`echo -n $Fallbacks | grep -Fo ${1}`" ]; then
+       echo "Unknown parameter: $1";
+       exit 1
+   fi
+   Disabled=`echo $Disabled | sed "s/--disable-${1}//"`
+   shift
+done
+
+# Init
 fallbacks_prefix="@abinit_builddir@/fallbacks/install_fb/@abi_fc_vendor@/@abi_fc_version@"
 
 # Find and Unpack tarball
@@ -18,10 +38,7 @@ cd $source
   --with-linalg-libs="@sd_linalg_libs@" \
   --with-fc-vendor="@abi_fc_vendor@" \
   --with-fc-version="@abi_fc_version@" \
-  --disable-bigdft \
-  --disable-atompaw \
-  --disable-wannier90 \
-  --disable-libpsml --disable-xmlf90 \
+  `echo $Disabled` \
   LIBS_NETCDF4_FORTRAN="-ldl -lm -lz" \
   CC="@CC@" \
   CXX="@CXX@" \
