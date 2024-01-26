@@ -4180,6 +4180,24 @@ as well as temperature dependence.
 ),
 
 Variable(
+    abivarname="eph_frohl_ntheta",
+    varset="eph",
+    vartype="integer",
+    topics=['ElPhonInt_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Electron-PHonon: FROHLIich Number of THETA points",
+    added_in_version="9.8.0",
+    text=r"""
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the e-ph self-energy.
+This variable defines the angular mesh for the spherical integration of the Frohlich divergence
+in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
+
+Set it to zero to disable the correction for testing purposes.
+""",
+),
+
+Variable(
     abivarname="eph_fsewin",
     varset="eph",
     vartype="real",
@@ -6503,7 +6521,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.9.0",
     text=r"""
-Maximum number of self-consistent iterations in which G and/or W will be updated
+Maximum number of self-consistent iterations in which G and/or W are be updated
 until the quasi-particle energies are converged within [[gwr_tolqpe]].
 [[gwr_task]] defines the self-consistency type.
 """,
@@ -6635,9 +6653,9 @@ Variable(
 [[gw1rdm]] governs the calculation of the density matrix within the linearized GW approximation.
 It must be used with [[gwcalctyp]]=21.
 
-    * [[gw1rdm]] = 0: Do not update the density matrix.
-    * [[gw1rdm]] = 1: Compute the update of the density matrix for the k-point list specified with the keyword [[kptgw]].
-    * [[gw1rdm]] = 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
+* 0: Do not update the density matrix.
+* 1: Compute the update of the density matrix for the k-point list specified by [[kptgw]].
+* 2: Same as 1 but also compute the correction to the Fock operator and update total energies.
 """,
 ),
 
@@ -17295,7 +17313,7 @@ In most cases (see later for [[prtdos]] = 3), provides the radius of the spheres
 charge density or magnetization will be integrated.
 The integral within the sphere is obtained by a sum over real space FFT points
 inside the sphere, multiplied by a function that is one inside the sphere, except in a small boundary zone determined by [[ratsm]],
-where this fonction goes smoothly from 1 to 0.
+where this function goes smoothly from 1 to 0.
 In case of PAW, [[ratsph]] radius has to be greater or equal to PAW radius of
 considered atom type (which is read from the PAW dataset file; see **rc_sph** or **r_paw**).
 In case of constrained DFT, note that the sphere for different atoms are not allowed to overlap.
@@ -21317,6 +21335,29 @@ Typical value range is 0.00001-0.001.
 ),
 
 Variable(
+    abivarname="vloc_rcut",
+    varset="dev",
+    vartype="real",
+    topics=['Planewaves_expert'],
+    dimensions="scalar",
+    defaultval=6.0,
+    mnemonics="VLOCal Radial CUToff",
+    characteristics=['[[LENGTH]]'],
+    added_in_version="9.8.0",
+    text=r"""
+This variable defines the cutoff for the radial mesh used to compute `epsatm`
+(the alpha term in the total energy due to the pseudos) and the Bessel transform
+for the local part in the case of NC pseudos given in UPF2 format.
+
+This parameter can be used to cut off the numerical noise arising from the large-r tail when integrating V_loc(r) - Z_v/r.
+In QE, vloc_rcut is harcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
+in the second order derivatives of the vloc form factors.
+For this reason, the default value in Abinit is set to 6.0.
+""",
+),
+
+
+Variable(
     abivarname="vprtrb",
     varset="ffield",
     vartype="real",
@@ -23888,8 +23929,8 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the maximum number of FFTs performed in the unit cell/super cell.
-If not specified in the input, the code will automatically define these values to find a good compromise
-betweeen memory and performance.
+If not specified in the input, the code will automatically define these values in order
+to find a good compromise betweeen memory and performance.
 """,
 ),
 
@@ -23907,13 +23948,20 @@ Variable(
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 The choice is among:
 
-* HDIAG --> direct diagonalization of the KS Hamiltonian.
-* G0W0 -->  one-shot GW.
+* HDIAGO --> direct diagonalization of the KS Hamiltonian to produce [[nband]] eigenvectors
+* HDIAGO_FULL --> direct diagonalization of the KS Hamiltonian for maximum number of eigenvectors defined by [[ecut]]
+* G0W0 -->  one-shot GW
+* G0V -->
+* EGEW -->
+* EGW0 -->
+* G0EW -->
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
+* CC4S -->
+* CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
 
 !!! important
 
-    At the time of writing ( |today| ), PAW is not supported by the GWR code.
+    At the time of writing, PAW is not supported by the GWR code.
 """,
 ),
 
@@ -23929,10 +23977,6 @@ Variable(
     added_in_version="9.6.2",
     text=r"""
 This variable defines the number of imaginary-time points in the minimax mesh.
-
-!!! important
-
-    To avoid load imbalance the total number of MPI processes should be a divisor/multiple of [[gwr_ntau]] * [[nsppol]]
 """,
 ),
 
@@ -23947,7 +23991,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm to be used to compute the polarizability in the GWR code.
+This input variable selects the algorithm used to compute the polarizability in the GWR code.
 Possible values are
 
 * 0 --> Automatic selection.
@@ -23982,7 +24026,7 @@ Variable(
     requires="[[optdriver]] == 6",
     added_in_version="9.6.2",
     text=r"""
-This input variable selects the algorithm to be used to compute the self-energy in the GWR code.
+This input variable selects the algorithm used to compute the self-energy in the GWR code.
 Possible values are
 
 * 0 --> Automatic selection.
@@ -24020,6 +24064,26 @@ Variable(
 Energy window in Hartree for the empty states used in the computation of the head/wings of the polarizability.
 """,
 ),
+
+
+Variable(
+    abivarname="gwr_regterm",
+    varset="gw",
+    vartype="real",
+    topics=['GWR_expert'],
+    dimensions=[1],
+    defaultval=-1.0,
+    mnemonics="GWR REGularization TERM",
+    requires="[[optdriver]] == 6",
+    added_in_version="9.8.0",
+    text=r"""
+TODO: To be described.
+Negative value means automatic regularization.
+Zero to deactivate it.
+Positive to use specific value.
+""",
+),
+
 
 Variable(
     abivarname="optdcmagpawu",

@@ -605,6 +605,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_max_hwtene', tread, 'ENE')
  if (tread == 1) dtset%gwr_max_hwtene = dprarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gwr_regterm', tread, 'DPR')
+ if (tread == 1) dtset%gwr_regterm = dprarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gwr_task", tread, 'KEY', key_value=key_value)
  if (tread == 1) dtset%gwr_task = toupper(trim(key_value))
 
@@ -861,6 +864,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vis',tread,'DPR')
  if(tread==1) dtset%vis=dprarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'vloc_rcut',tread,'LEN')
+ if(tread==1) dtset%vloc_rcut=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ecutsm',tread,'ENE')
  if(tread==1) dtset%ecutsm=dprarr(1)
 
@@ -1078,9 +1084,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%zcut = dprarr(1)
 
  ! q-points for long wave-length limit.
- if (dtset%gw_nqlwl>0) then
+ if (dtset%gw_nqlwl > 0) then
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%gw_nqlwl,string(1:lenstr),'gw_qlwl',tread,'DPR')
-   if(tread==1) dtset%gw_qlwl(1:3,1:dtset%gw_nqlwl) = reshape(dprarr(1:3*dtset%gw_nqlwl),(/3,dtset%gw_nqlwl/))
+   if(tread==1) dtset%gw_qlwl(1:3,1:dtset%gw_nqlwl) = reshape(dprarr(1:3*dtset%gw_nqlwl), [3, dtset%gw_nqlwl])
  end if
 
  !@bethe_salpeter
@@ -1435,6 +1441,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_frohlichm',tread,'INT')
  if(tread==1) dtset%eph_frohlichm=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_frohl_ntheta',tread,'INT')
+ if(tread==1) dtset%eph_frohl_ntheta=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_fsmear',tread,'ENE')
  if(tread==1) dtset%eph_fsmear=dprarr(1)

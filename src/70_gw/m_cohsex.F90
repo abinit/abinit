@@ -576,8 +576,8 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
            ! Add on-site contribution, projectors are already in BZ !TODO Recheck this!
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
-           call paw_rho_tw_g(npwc,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-&            Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+           call paw_rho_tw_g(cryst,Pwij_qg, npwc,nspinor,nspinor,Gsph_c%gvec,&
+                             Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
          end if
 
          ! Multiply by the square root of the Coulomb term.
@@ -676,12 +676,12 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
                    i1=(2*jb-1); i2=(2*kb-1)
                  end if
                  spad=(nspinor-1)
-                 call paw_rho_tw_g(gwc_nfftot,Sigp%nsig_ab,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-&                  gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),Pwij_fft,wf1swf2_g)
+                 call paw_rho_tw_g(cryst,Pwij_fft,gwc_nfftot,Sigp%nsig_ab,nspinor,&
+                                   gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),wf1swf2_g)
                end if
 
                call calc_coh(nspinor,Sigp%nsig_ab,gwc_nfftot,gwc_ngfft,npwc,Gsph_c%gvec,wf1swf2_g,epsm1_qbz(:,:,1),&
-&                vc_sqrt_qbz,Vcp%i_sz,iq_ibz,(jb==kb),sigcohme)
+                             vc_sqrt_qbz,Vcp%i_sz,iq_ibz,(jb==kb),sigcohme)
 
                do io=1,nomega_sigc ! Should be 1
                  sigctmp(io,:) = sigctmp(io,:)+sigcohme(:)

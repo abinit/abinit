@@ -155,7 +155,7 @@ contains
 !!     | phkpxred(2,natom)=phase factors exp(2 pi k^prime.xred)
 !!     | sij(dimekb1,ntypat)=overlap matrix components (only if paw_opt=2, 3 or 4)
 !!     | ucvol=unit cell volume (bohr^3)
-!!     | gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!!     | gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!     | useylm=how the NL operator is to be applied: 1=using Ylm, 0=using Legendre polynomials
 !!  [iatom_only]=optional. If present (and >0), only projectors related to atom of index iatom_only
 !!          will be applied. (used fi to apply derivative of NL operator wrt an atomic displacement)
@@ -537,7 +537,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
  end if
  if(cpopt>=0 .and. .not. present(vectproj)) then
-   if (size(cprjin)/=hamk%natom*my_nspinor*ndat) then
+   if (size(cprjin)<hamk%natom*my_nspinor*ndat) then
      ABI_BUG('Incorrect size for cprjin!')
    end if
  end if
