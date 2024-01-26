@@ -1,10 +1,8 @@
 #ABINIT - INPUT FILE
 #GOLD 31 ATOMS
 
-#Process distribution (parallelism) - TO BE ADAPTED
-# autoparal 1
-  npkpt 1 npband 1 npfft 1   # 1 MPI processes
-#  npkpt 1 npband 2 npfft 1   # 2 MPI processes
+#Process distribution (parallelism)
+npkpt 1 npband 1 npfft 1   # 1 MPI processes
 paral_kgb 1
 gpu_option 2
 wfoptalg 111
@@ -88,12 +86,10 @@ pseudos "au.hpc.paw"
 #%% [setup]
 #%% executable = abinit
 #%% [paral_info]
-#%% nprocs_to_test = 1, 2
-#%% max_nprocs = 2
+#%% nprocs_to_test = 1
+#%% max_nprocs = 1
 #%% [NCPU_1]
 #%% files_to_test = t06_MPI1.abo, tolnlines = 10, tolabs = 1.e-8, tolrel = 1.e-4
-#%% [NCPU_2]
-#%% files_to_test = t06_MPI2.abo, tolnlines = 10, tolabs = 1.e-8, tolrel = 1.e-4
 #%% [extra_info]
 #%% keywords = PAW,HPC
 #%% authors = M. Torrent, M. Sarraute

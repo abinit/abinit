@@ -1,97 +1,67 @@
-#ABINIT - INPUT FILE
-#GOLD 31 ATOMS
+# ================================================================
+# Si in diamond structure - PAW
+# Cell optimisation
+#
+# Test for Abinit: use of a Graphics Processing Unit
+#
+# Test structure relaxation (multiples calls to gstate)
+# Low cut-off for test; few k-points
+# ================================================================
 
-#Process distribution (parallelism) - TO BE ADAPTED
-# autoparal 1
-  npkpt 1 npband 8 npfft 4   # 32 MPI processes
-paral_kgb 1
-gpu_option 0
+#Datasets (2 different PW cut-off)
+ ndtset 2
+ fftalg 401
+ getcell -1
 
-#Plane wave basis
-ecut 8.
-pawecutdg 10.
+#Structure Optimization
+ ionmov 2  ntime 4  tolmxf 1.0d-4
+ optcell 1  dilatmx 1.01
 
-#Self-consistent cycle parameters
-toldfe 1.d-15
-nstep 20
+#Unit cell
+ acell 3*10.40  rprim 0 .5 .5 .5  0 .5 .5 .5 0
+ natom 2  ntypat 1  typat 1 1
+ xred  3*0.00d0
+       3*0.25d0
+ znucl 14  nband 4
 
-#K-points and symetries
-nkpt 1
-kpt 3*0.
-kptopt 0
-istwfk *1
-nsym 0
-chksymbreak 0
+#K-points and symmmetries
+ kptopt 1 ngkpt 2 2 2
+ nsym 0  chksymbreak 0
+ occopt 1
 
-#Electronic configuration
-nband 192
-occopt 3
-tsmear 0.002 hartree
+#Self-consistent cycle
+ nstep 20  toldfe 1.0d-8
 
-#Activation/deactivation of I/O
-optforces 2
-optstress 1
-prtwf 0
-prtden 0
-prteig 0
-timopt 0
+#Plane-wave basis set
+ ecut1 3.0  ecut2 4.0
+ pawecutdg 10.
+ ecutsm 0.5
 
-#Simulation cell
-acell  3*15.34
-rprim 1. 0. 0. 0. 1. 0. 0. 0. 1.
-natom 31
-ntypat 1
-typat 31*1
-znucl 79.
-chkprim 0
+#Miscelaneous
+ prtwf 0  prtden 0  prteig 0
 
-#Atomic positions
-xred
-              2.50000000000000e-01   2.50000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   0.00000000000000e+00   2.50000000000000e-01
-              0.00000000000000e+00   2.50000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   0.00000000000000e+00   5.00000000000000e-01
-              2.50000000000000e-01   2.50000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   0.00000000000000e+00   7.50000000000000e-01
-              0.00000000000000e+00   2.50000000000000e-01   7.50000000000000e-01
-              0.00000000000000e+00   5.00000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   7.50000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   5.00000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   7.50000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   5.00000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   7.50000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   5.00000000000000e-01   7.50000000000000e-01
-              0.00000000000000e+00   7.50000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   0.00000000000000e+00   0.00000000000000e+00
-              7.50000000000000e-01   2.50000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   0.00000000000000e+00   2.50000000000000e-01
-              5.00000000000000e-01   2.50000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   0.00000000000000e+00   5.00000000000000e-01
-              7.50000000000000e-01   2.50000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   0.00000000000000e+00   7.50000000000000e-01
-              5.00000000000000e-01   2.50000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   5.00000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   7.50000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   5.00000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   7.50000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   5.00000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   7.50000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   5.00000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   7.50000000000000e-01   7.50000000000000e-01
+#The following parameter is present for testing purposes only;
+#It forces the use of linear algebra on the GPU.
+gpu_option 2
 
-pp_dirpath "$ABI_PSPDIR"
-pseudos "au.hpc.paw"
+wfoptalg 114
+bandpp 1
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "si_ps.736.pbe"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% [files]
+#%% files_to_test = t01.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
 #%% [paral_info]
-#%% nprocs_to_test = 32
-#%% max_nprocs = 32
-#%% [NCPU_32]
-#%% files_to_test = t01_MPI32.abo,  tolnlines = 10,   tolabs = 1.e-8,      tolrel = 1.e-4
+#%% max_nprocs = 1
 #%% [extra_info]
-#%% keywords = PAW,HPC
 #%% authors = M. Torrent, M. Sarraute
-#%% description = 31 gold atoms (one vacancy) - HPC test
+#%% keywords = PAW
+#%% description =
+#%%   Silicon - diamond structure - PAW - volume relaxation
+#%%   Test the use of GPU within Projector Augmented-Wave formalism.
+#%%   Test structure relaxation (multiple calls to gstate routine).
 #%%<END TEST_INFO>
