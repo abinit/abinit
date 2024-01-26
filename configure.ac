@@ -601,9 +601,18 @@ test "${XPPFLAGS}" = "" && \
 test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
   FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
 
-# Determine Fortran-C name mangling scheme
+# Determine Fortran link flags (FCLIBS)
 # This is needed after FCFLAGS has been set as some compilers have extra
 # libraries linked due to optimizations levels or OpenMP
+# This step would be performed inside AC_FC_WRAPPERS but it fails due to a mischievous
+# double-quote in FCLIBS when using Cray compiler, so we trim it out in that specific case.
+AC_FC_LIBRARY_LDFLAGS
+
+if test "${abi_fc_vendor}" = "cray"; then
+  FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
+fi
+
+# Determine Fortran-C name mangling scheme
 AC_FC_WRAPPERS
 
 # FIXME: temporary workaround for Macs
