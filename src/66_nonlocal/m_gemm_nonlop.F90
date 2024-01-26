@@ -42,8 +42,10 @@ module m_gemm_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm, only : opernlc_ylm
+ use m_opernla_gemm, only : opernla_gemm
+ use m_opernlb_gemm, only : opernlb_gemm
+ use m_opernld_ylm_allwf_cpu, only : opernld_ylm_allwf_cpu
  use m_pawcprj, only : pawcprj_type
- use m_geometry, only : strconv
  use m_kg, only : mkkpg
 
  implicit none
@@ -711,150 +713,6 @@ contains
 
 !----------------------------------------------------------------------
 
-!!****f* m_gemm_nonlop/gemm_nonlop_distributed_gemm_opernla
-!! NAME
-!! gemm_nonlop_distributed_gemm_opernla
-!!
-!! FUNCTION
-!! Distributed version of "opernla" GEMM called in gemm_nonlop.
-!!
-!! INPUTS
-!!
-!! SOURCE
- subroutine gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
- &                                               nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,beta,&
- &                                               projs_local,projs_recv,projs,vectin,projections)
-   integer,  intent(in)     :: rank,nprocs,npwin,ndat,nspinor
-   integer,  intent(in)     :: nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
-   real(dp), intent(in)     :: projs(:,:,:),vectin(*)
-   complex(dpc), intent(in) :: beta
-   real(dp), intent(inout)  :: projs_local(:,:,:),projs_recv(:,:,:)
-   real(dp), intent(out)    :: projections(:,:,:)
-
-   !Local variables
-   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
-
-! *************************************************************************
-
-   rank_next=modulo(rank + 1,nprocs)
-   rank_prev=rank - 1
-   if(rank_prev == -1) rank_prev = nprocs - 1
-   do iblock=1,nprocs
-
-     if(rank+iblock == nprocs) then
-       nprojs_cur_blk = nprojs_last_blk
-     else
-       nprojs_cur_blk = nprojs_blk
-     end if
-
-     if(iblock == 1) then
-       call DCOPY(cplex*npwin*nprojs_my_blk , projs,      1, projs_local, 1)
-     else
-       call DCOPY(cplex*npwin*nprojs_cur_blk, projs_recv, 1, projs_local, 1)
-     end if
-
-     if(iblock < nprocs) then
-       call xmpi_isend(projs_local,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call xmpi_irecv(projs_recv,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-     end if
-
-     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
-     iend = ibeg+nprojs_cur_blk-1
-     if(cplex==2) then
-       call abi_zgemm_2r('C', 'N', nprojs_cur_blk, ndat*nspinor, npwin, cone, &
-       &                projs_local, npwin,&
-       &                vectin, npwin, beta, projections(:,ibeg:iend,:), nprojs_cur_blk)
-     else
-       call DGEMM('T', 'N', nprojs_cur_blk, ndat*nspinor, npwin, one, &
-       &          projs_local, npwin, &
-       &          vectin, npwin, real(beta), projections(:,ibeg:iend,:), nprojs_cur_blk)
-     end if
-
-     if(iblock < nprocs) then
-       call xmpi_waitall(req,ierr)
-     end if
-
-   end do
- end subroutine gemm_nonlop_distributed_gemm_opernla
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop/gemm_nonlop_distributed_gemm_opernlb
-!! NAME
-!! gemm_nonlop_distributed_gemm_opernlb
-!!
-!! FUNCTION
-!! Distributed version of "opernlb" GEMM called in gemm_nonlop.
-!!
-!! INPUTS
-!!
-!! SOURCE
- subroutine gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
- &                                               nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,&
- &                                               projs_local,projs_recv,projs,projections,vectout)
-   integer,  intent(in)     :: rank,nprocs,npwout,ndat,nspinor
-   integer,  intent(in)     :: nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
-   real(dp), intent(in)     :: projs(:,:,:),projections(:,:,:)
-   real(dp), intent(inout)  :: projs_local(:,:,:),projs_recv(:,:,:)
-   real(dp), intent(out)    :: vectout(*)
-
-   !Local variables
-   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
-   complex(dpc) :: beta
-
-! *************************************************************************
-
-   rank_next=modulo(rank + 1,nprocs)
-   rank_prev=rank - 1
-   if(rank_prev == -1) rank_prev = nprocs - 1
-
-   beta = czero
-
-   do iblock=1,nprocs
-
-     if(rank+iblock == nprocs) then
-       nprojs_cur_blk = nprojs_last_blk
-     else
-       nprojs_cur_blk = nprojs_blk
-     end if
-
-     if(iblock == 1) then
-       call DCOPY(cplex*npwout*nprojs_my_blk, projs, 1, projs_local, 1)
-     else
-       call DCOPY(cplex*npwout*nprojs_cur_blk, projs_recv, 1, projs_local, 1)
-     end if
-
-     if(iblock < nprocs) then
-       call xmpi_isend(projs_local,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call xmpi_irecv(projs_recv,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-     end if
-
-     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
-     iend = ibeg+nprojs_cur_blk-1
-
-     if(cplex==2) then
-       call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs_cur_blk, cone, &
-       &                 projs_local, npwout, &
-       &                 projections(:,ibeg:iend,:), nprojs_cur_blk, beta, vectout, npwout)
-     else
-       call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs_cur_blk, one, &
-       &          projs_local, npwout, &
-       &          projections(:,ibeg:iend,:), nprojs_cur_blk, real(beta), vectout, npwout)
-     end if
-
-     beta = cone
-
-     if(iblock < nprocs) then
-       call xmpi_waitall(req,ierr)
-     end if
-
-   end do
- end subroutine gemm_nonlop_distributed_gemm_opernlb
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gemm_nonlop/gemm_nonlop
 !! NAME
 !! gemm_nonlop
@@ -908,15 +766,13 @@ contains
   integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
   integer :: projs_beg,projs_end
-  integer :: enlout_shift, force_shift, nnlout_test
+  integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
   logical :: local_vectproj
-  real(dp) :: esum
-  real(dp) :: work(6)
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
-  real(dp), allocatable :: enlk(:),sij_typ(:)
+  real(dp), allocatable :: sij_typ(:)
   real(dp),  ABI_CONTIGUOUS pointer :: projections(:,:,:)
   real(dp), allocatable :: s_projections(:,:,:), vnl_projections(:,:,:)
   real(dp), allocatable :: dprojections(:,:,:), temp_realvec(:)
@@ -1090,134 +946,20 @@ contains
     end if
   end if ! cpopt
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! opernla
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2 .or. choice==3 .or. choice==5.or.choice==51))) then
-    if(cplex == 2) then
-      if(.not. gemm_nonlop_is_distributed) then
-        if(cpopt<=1) then
-          call abi_zgemm_2r('C', 'N', nprojs, ndat*nspinor, npwin, cone, &
-          &    gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end), npwin,&
-          &    vectin, npwin, czero, projections, nprojs)
-        end if
 
-        if(ngrads>0 .and. cpopt<=3) then
-          call abi_zgemm_2r('C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                   gemm_nonlop_kpt(ikpt)%dprojs(:,:,projs_beg:projs_end), npwin,&
-                   vectin, npwin, czero, dprojections, ngrads*nprojs)
-        end if
-      else
-        if(cpopt<=1) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         nprojs_my_blk,cplex,czero,&
-          &                                         projs_local,projs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%projs,&
-          &                                         vectin,projections)
-        end if
-        if(ngrads>0 .and. cpopt<=3) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         ngrads*nprojs_my_blk,cplex,czero,&
-          &                                         dprojs_local,dprojs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%dprojs,&
-          &                                         vectin,dprojections)
-        end if
-      end if
+    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections,&
+    &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+    &       npwin,nspinor,signs,ndat,rank,&
+    &       cpopt,nprocs,&
+    &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+    &       vectin,gemm_nonlop_kpt(ikpt)%projs,gemm_nonlop_kpt(ikpt)%dprojs,&
+    &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
+    &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+    &       temp_realvec,&
+    &       projs_local,projs_recv,dprojs_local,dprojs_recv,&
+    &       gemm_nonlop_is_distributed)
 
-    else ! cplex==1
-
-      if (.not. allocated(temp_realvec)) then
-        ABI_ERROR("Please provide memory allocation for temp_realvec array")
-      end if
-
-      ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
-      temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
-        do idat=1, ndat*nspinor
-          temp_realvec(1+(idat-1)*npwin) = temp_realvec(1+(idat-1)*npwin)/2
-        end do
-      end if
-      if(.not. gemm_nonlop_is_distributed) then
-        if(cpopt<=1) then
-          call DGEMM('T', 'N', nprojs, ndat*nspinor, npwin, one, &
-          &          gemm_nonlop_kpt(ikpt)%projs_r, npwin, &
-          &          temp_realvec, npwin, zero, projections, nprojs)
-        end if
-        if(ngrads>0 .and. cpopt<=3) then
-          call DGEMM('T', 'N', ngrads*nprojs, ndat*nspinor, npwin, one, &
-          &          gemm_nonlop_kpt(ikpt)%dprojs_r, npwin, &
-          &          temp_realvec, npwin, zero, dprojections, ngrads*nprojs)
-        end if
-      else
-        if(cpopt<=1) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         nprojs_my_blk,cplex,czero,&
-          &                                         projs_local,projs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%projs_r,&
-          &                                         temp_realvec,projections)
-        end if
-        if(ngrads>0 .and. cpopt<=3) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         ngrads*nprojs_my_blk,cplex,czero,&
-          &                                         dprojs_local,dprojs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%dprojs_r,&
-          &                                         temp_realvec,dprojections)
-        end if
-      end if
-      temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
-        do idat=1, ndat*nspinor
-          temp_realvec(1+(idat-1)*npwin) = zero
-        end do
-      end if
-      if(.not. gemm_nonlop_is_distributed) then
-        if(cpopt<=1) then
-          call DGEMM('T', 'N', nprojs, ndat*nspinor, npwin, one, &
-          &          gemm_nonlop_kpt(ikpt)%projs_i, npwin, &
-          &          temp_realvec, npwin, one , projections, nprojs)
-        projections = projections * 2
-        end if
-        if(ngrads>0) then
-          call DGEMM('T', 'N', ngrads*nprojs, ndat*nspinor, npwin, one, &
-          &          gemm_nonlop_kpt(ikpt)%dprojs_i, npwin, &
-          &          temp_realvec, npwin, one , dprojections, ngrads*nprojs)
-          dprojections = dprojections * 2
-        end if
-      else
-        if(cpopt<=1) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         nprojs_my_blk,cplex,cone,&
-          &                                         projs_local,projs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%projs_i,&
-          &                                         temp_realvec,projections)
-          projections = projections * 2
-        end if
-        if(ngrads>0 .and. cpopt<=3) then
-          call gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         ngrads*nprojs_my_blk,cplex,cone,&
-          &                                         dprojs_local,dprojs_recv,&
-          &                                         gemm_nonlop_kpt(ikpt)%dprojs_i,&
-          &                                         temp_realvec,dprojections)
-          dprojections = dprojections * 2
-        end if
-      end if
-    end if ! cplex == 2
-    call xmpi_sum(projections,mpi_enreg%comm_fft,ierr)
-    if (choice>1) then
-      call xmpi_sum(dprojections,mpi_enreg%comm_fft,ierr)
-    end if
 
     if(cpopt >= 0) then
       if(.not. local_vectproj) then
@@ -1304,276 +1046,37 @@ contains
       s_projections = projections
     end if ! choice /= 7
 
-    ! opernlb (only choice=1)
+    ! opernlb
     if(signs==2) then
-      if(paw_opt == 3 .or. paw_opt == 4) then
-
-        ! Get svectout from s_projections
-        if(cplex == 2) then
-
-          if(.not. gemm_nonlop_is_distributed) then
-            if(choice==1) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    s_projections, nprojs, czero, svectout, npwout)
-            else if(choice==2) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs(:,:,projs_beg:projs_end), npwout, &
-              &    s_projections, nprojs, czero, svectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end), npwout, &
-              &    s_dprojections, nprojs, cone, svectout, npwout)
-            else if(choice==3) then
-              if(idir<=3) then
-                s_dprojections(:,:,:) = s_dprojections(:,:,:) - s_projections(:,:,:)
-              end if
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    s_dprojections, nprojs, czero, svectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cminusone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs, npwout, &
-              &    s_projections, nprojs, cone, svectout, npwout)
-            else if(choice==5) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    s_dprojections, nprojs, czero, svectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs, npwout, &
-              &    s_projections, nprojs, cone, svectout, npwout)
-            else if(choice==51) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    s_dprojections, nprojs, czero, svectout, npwout)
-            end if
-          else
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs,&
-            &                                         s_projections,svectout)
-          end if
-        else
-
-          if (.not. allocated(temp_realvec)) then
-            ABI_ERROR("Please provide memory allocation for temp_realvec array")
-          end if
-
-          if(.not. gemm_nonlop_is_distributed) then
-            call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
-            &          gemm_nonlop_kpt(ikpt)%projs_r, npwout, &
-            &          s_projections, nprojs, zero, temp_realvec, npwout)
-            svectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-            call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
-            &          gemm_nonlop_kpt(ikpt)%projs_i, npwout,&
-            &          s_projections, nprojs, zero, temp_realvec, npwout)
-            svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          else
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs_r,&
-            &                                         s_projections,temp_realvec)
-            svectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs_i,&
-            &                                         s_projections,temp_realvec)
-            svectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          end if
-
-        end if ! cplex = 2
-        if(choice /= 7 .and. choice /= 5 .and. choice/=51 .and. choice/=2 .and. choice/=3) svectout = svectout + vectin ! TODO understand this
-
-      end if  ! (paw_opt == 3 .or. paw_opt == 4)
-
-      if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
-        ! Get vectout from vnl_projections
-        if(cplex_fac == 2) then
-
-          if(.not. gemm_nonlop_is_distributed) then
-            if(choice==1) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    vnl_projections, nprojs, czero, vectout, npwout)
-            else if(choice==2) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs(:,:,projs_beg:projs_end), npwout, &
-              &    vnl_projections, nprojs, czero, vectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end), npwout, &
-              &    vnl_dprojections, nprojs, cone, vectout, npwout)
-            else if(choice==3) then
-              if(idir<=3) then
-                vnl_dprojections(:,:,:) = vnl_dprojections(:,:,:) - vnl_projections(:,:,:)
-              end if
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    vnl_dprojections, nprojs, czero, vectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cminusone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs, npwout, &
-              &    vnl_projections, nprojs, cone, vectout, npwout)
-            else if(choice==5) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    vnl_dprojections, nprojs, czero, vectout, npwout)
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%dprojs, npwout, &
-              &    vnl_projections, nprojs, cone, vectout, npwout)
-            else if(choice==51) then
-              call abi_zgemm_2r('N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    gemm_nonlop_kpt(ikpt)%projs, npwout, &
-              &    vnl_dprojections, nprojs, czero, vectout, npwout)
-            end if
-          else
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs,&
-            &                                         vnl_projections,vectout)
-          end if
-        else
-
-          if (.not. allocated(temp_realvec)) then
-            ABI_ERROR("Please provide memory allocation for temp_realvec array")
-          end if
-
-          if(.not. gemm_nonlop_is_distributed) then
-            call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
-            &          gemm_nonlop_kpt(ikpt)%projs_r, npwout, &
-            &          vnl_projections, nprojs, zero, temp_realvec, npwout)
-            vectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-            call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs, one, &
-            &          gemm_nonlop_kpt(ikpt)%projs_i, npwout, &
-            &          vnl_projections, nprojs, zero, temp_realvec, npwout)
-            vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          else
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs_r,&
-            &                                         vnl_projections,temp_realvec)
-            vectout(1,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-            call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         projs_local,projs_recv,&
-            &                                         gemm_nonlop_kpt(ikpt)%projs_i,&
-            &                                         vnl_projections,temp_realvec)
-            vectout(2,1:npwout*nspinor*ndat) = temp_realvec(1:npwout*nspinor*ndat)
-          end if
-
-        end if ! cplex_fac == 2
-
-      end if  ! (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)
-    end if ! opernlb
+      call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+      &       d2gxdt_dum_out,d2gxdt_dum_out,&
+      &       vnl_dprojections,s_dprojections,&
+      &       vnl_projections,s_projections,&
+      &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+      &       npwin,nspinor,signs,ndat,rank,&
+      &       cpopt,nprocs,paw_opt,&
+      &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+      &       vectin,vectout,svectout,&
+      &       gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end),&
+      &       gemm_nonlop_kpt(ikpt)%dprojs(:,:,projs_beg:projs_end),&
+      &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
+      &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+      &       temp_realvec,&
+      &       projs_local,projs_recv,dprojs_local,dprojs_recv,&
+      &       gemm_nonlop_is_distributed)
+    end if
 
     ! opernld
     if(signs==1) then
-      enlout=zero
-      if(choice==1.or.choice==3.or.choice==23) then
-        ABI_MALLOC(enlk,(ndat))
-        enlk=zero
-        do idat=1,ndat*nspinor
-          proj_shift=0
-          do itypat=1, ntypat
-            nlmn=count(indlmn(3,:,itypat)>0)
-            do ia=1,nattyp(itypat)
-              !Following loops are a [D][Z]DOT
-              esum=zero
-              do ilmn=1,nlmn
-                do ii=1,cplex
-                  esum=esum +vnl_projections(ii,proj_shift+ilmn,idat) &
-&                           *projections    (ii,proj_shift+ilmn,idat)
-                end do
-              end do
-              proj_shift=proj_shift+nlmn
-              enlk(idat) = enlk(idat) + esum
-            end do
-          end do
-        end do
-        if (choice==1) enlout(1:ndat)=enlk(1:ndat)
-      end if ! choice=1/3/23
-      if(choice==2.or.choice==3.or.choice==23) then
-        do idat=1,ndat*nspinor
-          proj_shift=0 ; grad_shift=0
-          enlout_shift=(idat-1)*nnlout
-          force_shift=merge(6,0,choice==23)
-          do itypat=1, ntypat
-            nlmn=count(indlmn(3,:,itypat)>0)
-            do ia=1,nattyp(itypat)
-              if (choice==3.or.choice==23) then
-                do igrad=1,6
-                  !Following loops are a [D][Z]DOT
-                  esum=zero
-                  do ilmn=1,nlmn
-                    do ii=1,cplex
-                      esum=esum +vnl_projections(ii,proj_shift+ilmn,idat) &
-&                               *dprojections   (ii,grad_shift+ilmn,idat)
-                    end do
-                  end do
-                  grad_shift=grad_shift+nlmn
-                  enlout(enlout_shift+igrad)=enlout(enlout_shift+igrad) + two*esum
-                end do
-              end if
-              if (choice==2.or.choice==23) then
-                do igrad=1,3
-                  !Following loops are a [D][Z]DOT
-                  esum=zero
-                  do ilmn=1,nlmn
-                    do ii=1,cplex
-                      esum=esum +vnl_projections(ii,proj_shift+ilmn,idat) &
-&                               *dprojections   (ii,grad_shift+ilmn,idat)
-                    end do
-                  end do
-                  grad_shift=grad_shift+nlmn
-                  enlout(enlout_shift+force_shift+igrad)= &
-&                               enlout(enlout_shift+force_shift+igrad) + two*esum
-                end do
-                force_shift=force_shift+3
-              end if
-              proj_shift=proj_shift+nlmn
-            end do
-          end do
-        end do
-      end if ! choice=2, 3 or 23
-
+      call opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
+      &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
+      &       enlout,projections,vnl_projections,s_projections,&
+      &       ndat,nd2gxdt,ndgxdt,&
+      &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
+      &       gprimd,nattyp,mpi_enreg)
     end if !opernld
 
   end if ! choice>0
-
-! Reduction in case of parallelism
-  if (signs==1.and.mpi_enreg%paral_spinor==1) then
-    if (size(enlout)>0) then
-      call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
-    end if
-    if (choice==3.or.choice==23) then
-      call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
-    end if
-  end if
-
-! Derivatives wrt strain
-!  - Convert from reduced to cartesian coordinates
-!  - Substract volume contribution
- if ((choice==3.or.choice==23).and.signs==1.and.paw_opt<=3) then
-   do idat=1,ndat
-     enlout_shift=(idat-1)*nnlout
-     call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
-     enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
-     enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
-   end do
- end if
 
 ! Release memory
   if(.not. local_vectproj) then
@@ -1597,9 +1100,6 @@ contains
   end if
   if (allocated(vnl_dprojections)) then
     ABI_FREE(vnl_dprojections)
-  end if
-  if (allocated(enlk)) then
-    ABI_FREE(enlk)
   end if
   if (allocated(temp_realvec)) then
     ABI_FREE(temp_realvec)

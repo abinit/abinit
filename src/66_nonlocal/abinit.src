@@ -35,14 +35,17 @@ sources = [
  "m_nonlop_ylm.F90",
  "m_opernl.F90",
  "m_vkbr.F90",
+ "m_opernla_gemm.F90",
  "m_opernla_ylm.F90",
  "m_opernla_ylm_mv.F90",
+ "m_opernlb_gemm.F90",
  "m_opernlb_ylm.F90",
  "m_opernlb_ylm_mv.F90",
  "m_opernlc_ylm.F90",
  "m_opernlc_ylm_allwf_cpu.F90",
  "m_opernlc_ylm_ompgpu.F90",
  "m_opernld_ylm.F90",
+ "m_opernld_ylm_allwf_cpu.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
