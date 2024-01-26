@@ -1,98 +1,58 @@
-#ABINIT - INPUT FILE
-#GOLD 31 ATOMS
+#Test chebfi
 
-#Process distribution (parallelism) - TO BE ADAPTED
-# autoparal 1
-  npkpt 1 npband 1 npfft 1   # 1 MPI processes
-paral_kgb 0
-gpu_option 2
-wfoptalg 114
+ ndtset 1
+ wfoptalg 111  npband 1 npfft 1
+ gpu_option 2
 
-#Plane wave basis
-ecut 8.
-pawecutdg 10.
+ np_spkpt 1
+ istwfk 1
 
-#Self-consistent cycle parameters
-toldfe 1.d-15
-nstep 20
+ ngfft 18 18 18
+ ngfftdg 36 36 36
 
-#K-points and symetries
-nkpt 1
-kpt 3*0.
-kptopt 0
-istwfk *1
-nsym 0
-chksymbreak 0
+ occopt 1
+ kptopt 0
+ nkpt 1 toldfe 1.0d-15
+ nsppol 2    spinmagntarget 0.0d0
+ ixc 1
 
-#Electronic configuration
-nband 192
-occopt 3
-tsmear 0.002 hartree
+ ecut 15. pawecutdg 50
+ diemac 12.0d0  enunit 2
+ nstep 20
+ acell 3*7.0
+ rprim 0.0 0.5 0.5
+       0.5 0.0 0.5
+       0.5 0.5 0.0
+ xred 0.0  0.0  0.0
+      0.22 0.22 0.22
+ chksymtnons 0
+ znucl 6
+ nband 12 occ 4*2 8*0
+ ntypat 1 typat 1 1  natom 2
 
-#Activation/deactivation of I/O
-optforces 2
-optstress 1
-prtwf 0
-prtden 0
-prteig 0
-timopt 0
+ paral_kgb 1
+ iomode 0    # Only for testing purposes 
+ use_gemm_nonlop 1 # test nonlop with BLAS
+ fftalg 402
 
-#Simulation cell
-acell  3*15.34
-rprim 1. 0. 0. 0. 1. 0. 0. 0. 1.
-natom 31
-ntypat 1
-typat 31*1
-znucl 79.
-chkprim 0
-
-#Atomic positions
-xred
-              2.50000000000000e-01   2.50000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   0.00000000000000e+00   2.50000000000000e-01
-              0.00000000000000e+00   2.50000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   0.00000000000000e+00   5.00000000000000e-01
-              2.50000000000000e-01   2.50000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   0.00000000000000e+00   7.50000000000000e-01
-              0.00000000000000e+00   2.50000000000000e-01   7.50000000000000e-01
-              0.00000000000000e+00   5.00000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   7.50000000000000e-01   0.00000000000000e+00
-              2.50000000000000e-01   5.00000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   7.50000000000000e-01   2.50000000000000e-01
-              0.00000000000000e+00   5.00000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   7.50000000000000e-01   5.00000000000000e-01
-              2.50000000000000e-01   5.00000000000000e-01   7.50000000000000e-01
-              0.00000000000000e+00   7.50000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   0.00000000000000e+00   0.00000000000000e+00
-              7.50000000000000e-01   2.50000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   0.00000000000000e+00   2.50000000000000e-01
-              5.00000000000000e-01   2.50000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   0.00000000000000e+00   5.00000000000000e-01
-              7.50000000000000e-01   2.50000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   0.00000000000000e+00   7.50000000000000e-01
-              5.00000000000000e-01   2.50000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   5.00000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   7.50000000000000e-01   0.00000000000000e+00
-              7.50000000000000e-01   5.00000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   7.50000000000000e-01   2.50000000000000e-01
-              5.00000000000000e-01   5.00000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   7.50000000000000e-01   5.00000000000000e-01
-              7.50000000000000e-01   5.00000000000000e-01   7.50000000000000e-01
-              5.00000000000000e-01   7.50000000000000e-01   7.50000000000000e-01
-
-pp_dirpath "$ABI_PSPDIR"
-pseudos "au.hpc.paw"
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "6c_lda.paw"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = ubu_intel_16.0_mpich
+#%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
 #%% [NCPU_1]
-#%% files_to_test = t03_MPI1.abo,  tolnlines = 10,   tolabs = 1.e-8,      tolrel = 1.e-4
+#%% files_to_test = t03_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
 #%% [extra_info]
-#%% keywords = PAW,HPC
-#%% authors = M. Torrent, M. Sarraute
-#%% description = 31 gold atoms (one vacancy) - HPC test
+#%% keywords = PAW
+#%% authors = A. Levitt
+#%% description = 
+#%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, with PAW.
+#%%    Also test gemm_nonlop
+#%% topics = parallelism
 #%%<END TEST_INFO>

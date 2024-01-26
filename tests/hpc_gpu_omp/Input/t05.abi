@@ -3,7 +3,7 @@
 
 #Process distribution (parallelism) - TO BE ADAPTED
 # autoparal 1
-  npkpt 1 npband 1 npfft 1   # 1 MPI processes
+  npkpt 1 npband 1 npfft 1 bandpp 48   # 1 MPI processes
 paral_kgb 0
 gpu_option 2
 wfoptalg 114
