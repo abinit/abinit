@@ -192,6 +192,12 @@ P           mkmem6         10
             ngfft5         24      24      24
             ngfft6         32      32      32
              nkpt          10
+    nblock_lobpcg1         12
+    nblock_lobpcg2         12
+    nblock_lobpcg3          3
+    nblock_lobpcg4          6
+    nblock_lobpcg5          1
+    nblock_lobpcg6         12
 -          npband1          1
 -          npband2          1
 -          npband3          4
@@ -1430,6 +1436,12 @@ P           mkmem6         10
             ngfft5         24      24      24
             ngfft6         32      32      32
              nkpt          10
+    nblock_lobpcg1         12
+    nblock_lobpcg2         12
+    nblock_lobpcg3          3
+    nblock_lobpcg4          6
+    nblock_lobpcg5          1
+    nblock_lobpcg6         12
 -          npband1          1
 -          npband2          1
 -          npband3          4

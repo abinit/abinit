@@ -810,6 +810,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%enunit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'enunit','INT',0)
 
+ intarr(1,:)=dtsets(:)%eph_ahc_type
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_ahc_type','INT',0)
+
  dprarr(1,:)=dtsets(:)%eph_ecutosc
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
 
@@ -824,6 +827,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%eph_frohlichm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_frohlichm','INT',0)
+
+ intarr(1,:)=dtsets(:)%eph_frohl_ntheta
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'eph_frohl_ntheta','INT',0)
 
  dprarr(1,:)=dtsets(:)%eph_fsewin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsewin','ENE',0)
@@ -1183,9 +1189,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
      intarr(1,:)=dtsets(:)%gpu_kokkos_nthrd
      call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_kokkos_nthrd','INT',0,firstchar=firstchar_gpu)
    end if
-   
+
  end if
- 
+
  !intarr(1,:)  =dtsets(:)%gstore_cplex
  !call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gstore_cplex','INT',0)
 
@@ -1203,6 +1209,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:) = dtsets(:)%gwr_max_hwtene
  call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_max_hwtene', 'ENE', 0)
+
+ dprarr(1,:) = dtsets(:)%gwr_regterm
+ call prttagm(dprarr, intarr, iout, jdtset_, 1, marr, narr, narrm, ncid, ndtset_alloc, 'gwr_regterm', 'DPR', 0)
 
  narr = size(dtsets(0)%gwr_np_kgts)
  do idtset=0,ndtset_alloc

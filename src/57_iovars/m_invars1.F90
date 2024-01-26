@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -110,11 +109,11 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !Local variables-------------------------------
 !scalars
  integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: tread_pseudos,cnt,tread_geo,treads
+ integer :: tread_pseudos,cnt,tread_geo,tread_gpu_option,treads
  integer :: idev,gpu_option
  real(dp) :: cpus
  character(len=500) :: msg
- character(len=fnlen) :: pp_dirpath
+ character(len=fnlen) :: pp_dirpath,gpu_option_string
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
  character(len=len(string)) :: geo_string
  type(geo_t) :: geo
@@ -572,12 +571,27 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  gpu_option=ABI_GPU_DISABLED
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_option',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_option=intarr(1)
+
+   gpu_option_string = "" ; intarr(1)=0
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
+&              key_value=gpu_option_string)
+   if (tread==1) then
+     if (len(trim(gpu_option_string))>0) then
+       call inupper(gpu_option_string)
+       if (trim(gpu_option_string)=="GPU_DISABLED") dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
+       if (trim(gpu_option_string)=="GPU_LEGACY")   dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+       if (trim(gpu_option_string)=="GPU_KOKKOS")   dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+       if (trim(gpu_option_string)=="GPU_OPENMP")   dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+     else
+       dtsets(idtset)%gpu_option=intarr(1)
+     end if
+   end if
+
 #if defined HAVE_GPU && defined HAVE_GPU_MARKERS
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
    if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
 #endif
+
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
 
@@ -608,7 +622,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 &       'or if there are inconsistencies between GPU driver and compiler ',ch10,&
 &       'as to which CUDA version is supported.',ch10,&
 &       'Action: check the value OMP_TARGET_OFFLOAD is not set to DISABLED,',ch10,&
-&       '        otherwise make sure CUDA version you use is supported by BOTH your driver and compiler.'
+&       '        otherwise make sure CUDA/HIP version you use is supported by BOTH your driver and compiler.'
        ABI_ERROR(msg)
      end if
 #endif
@@ -624,10 +638,10 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end if
 #else
    write(msg,'(7a)')&
-&   'Input variable gpu_option is on but ABINIT hasn''t been built',ch10,&
-&   'with (double precision) gpu mode enabled !',ch10,&
+&   'Input variable gpu_option is on',ch10,&
+&   'but ABINIT hasn''t been built with GPU mode enabled!',ch10,&
 &   'Action: change the input variable gpu_option',ch10,&
-&   '        or re-compile ABINIT with double-precision Cuda enabled.'
+&   '        or re-compile ABINIT with GPU enabled.'
    ABI_ERROR(msg)
 #endif
  end if
@@ -798,6 +812,7 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
  dtsets(0)%npfft=1
  dtsets(0)%npband=1
  dtsets(0)%bandpp=1
+ dtsets(0)%nblock_lobpcg=1
 
  symafm_(:,0)=1
  symrel_(:,:,:,0)=0
@@ -1031,6 +1046,7 @@ subroutine indefo1(dtset)
  dtset%natsph=0
  dtset%natsph_extra=0
  dtset%natvshift=0
+ dtset%nblock_lobpcg=1
  dtset%nconeq=0
  dtset%ndynimage=1
  dtset%ne_qFD=zero
@@ -1637,7 +1653,14 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'kptopt',tread,'INT')
  if(tread==1) dtset%kptopt=intarr(1)
 
+ ! In EPH we may want to change qptopt when generating the IBZ for phonons and DFPT potentials.
+ ! Typical example: we have a DDB/DDVB with q/-q and we want to reintroduce TR for testing purposes.
+ ! For this reason, the default value of qptopt is set to zero if RUNL_EPH.
+ ! EPH will use this value as sentinel to understand if qptopt should be set equal to kptopt
+ ! or if it should be taken from the input file.
+
  dtset%qptopt=1
+ if (dtset%optdriver == RUNL_EPH) dtset%qptopt = 0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'qptopt',tread,'INT')
  if(tread==1) dtset%qptopt=intarr(1)
 
@@ -1942,10 +1965,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end do
  end if
 
- ! CP modified
- !if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=8) ) then
  if (occopt==0 .or. occopt==1 .or. (occopt>=3 .and. occopt<=9) ) then
- ! End CP modified
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nband',tnband,'INT')
    ! Note: mband_upper is initialized, not nband
    if(tnband==1) mband_upper=intarr(1)

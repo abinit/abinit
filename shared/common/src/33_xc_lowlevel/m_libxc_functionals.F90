@@ -483,7 +483,9 @@ contains
 
 !Check libXC
  if (.not.libxc_functionals_check(stop_if_error=.true.)) return
- if (.not.libxc_constants_initialized) call libxc_functionals_constants_load()
+ if (.not.libxc_constants_initialized)then
+   call libxc_functionals_constants_load()
+ endif
 
  nspden_eff=min(nspden,2)
 
@@ -531,9 +533,10 @@ contains
 &      xc_func%family/=XC_FAMILY_GGA .and. &
 &      xc_func%family/=XC_FAMILY_MGGA.and. &
 &      xc_func%family/=XC_FAMILY_HYB_GGA) then
-     write(msg, '(a,i8,2a,i8,6a)' )&
+     write(msg, '(a,i8,2a,i8,a,i8,3a,i8,6a)' )&
 &      'Invalid IXC = ',ixc,ch10,&
-&      'The LibXC functional family ',xc_func%family,&
+&      'Current xc_func%id=',xc_func%id,', (ii=',ii,')',ch10,&
+&      'The associated LibXC functional family ',xc_func%family,&
 &      ' is currently unsupported by ABINIT',ch10,&
 &      '(-1 means the family is unknown to the LibXC itself)',ch10,&
 &      'Please consult the LibXC documentation',ch10

@@ -7,7 +7,7 @@ config.h.in~
 .tox
 .idea
 .cache
-.*.sw[op]
+*.sw[op]
 __pycache__
 .ipynb_checkpoints
 .version
@@ -346,3 +346,9 @@ mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
 doxygen.err
+
+# Pycharm
+.idea/
+
+# VSC
+.vscode/

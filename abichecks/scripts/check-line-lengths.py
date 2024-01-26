@@ -11,6 +11,12 @@ from abirules_tools import find_src_dirs
 re_srcfile = re.compile("\.([Ff]|[Ff]90|finc)$")
 len_limit = 132
 
+black_list = {
+"m_build_info.F90",
+#"minimax_omega.F90",
+#"minimax_tau.F90",
+}
+
 
 def main():
     retval = 0
@@ -18,7 +24,7 @@ def main():
         for root, dirs, files in os.walk(top):
             # Check line lengths in Fortran source files
             for item in files:
-                if re_srcfile.search(item) and item != "m_build_info.F90":
+                if re_srcfile.search(item) and item not in black_list:
                     lineno = 1
                     path = os.path.join(root, item)
                     with open(path, "rt") as fh:
