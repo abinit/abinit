@@ -2028,11 +2028,16 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
  real(dp) :: dkcartdk
+ real(dp) :: scale_grad=one, scale_laplacian
+ real(dp) :: gp2pi1,gp2pi2,gp2pi3,kpt_cart,kg_k_cart
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  !arrays
- real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:)
+ real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:,:),dlcwavef(:,:)
  real(dp),allocatable :: ghc1(:,:),ghc2(:,:),work(:,:,:,:)
 
+ scale_laplacian=one/(two_pi*two_pi)
+ ! scale_laplacian=zero
+ 
  if(present(gpu_option)) then
     gpu_option_=gpu_option
  else
@@ -2040,6 +2045,9 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  end if
   
  gh1c_mGGA(:,:)=zero
+ !JWZ debug
+ ! return
+ 
  if (nvloc/=1) return
 
  nspinortot=min(2,(1+mpi_enreg%paral_spinor)*my_nspinor)
@@ -2057,47 +2065,64 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
 
  if (nspinortot==1) then
 
-    ABI_MALLOC(ghc1,(2,npw_k*ndat))
-    ABI_MALLOC(ghc2,(2,npw_k*ndat))
-    ABI_MALLOC(dgcwavef,(2,npw_k*ndat))
+   ABI_MALLOC(ghc1,(2,npw_k*ndat))
 
-    ! From -1/2 (grad vxctau) \cdot (grad \psi) =
-    ! -1/2 (grad vxctau)\cdot(2\pi i (k + G)\psi), the
-    do ii=1,3
-      dgcwavef = zero
-      do idat=1,ndat
-        do ipw=1,npw_k
-          dgcwavef(1,ipw+(idat-1)*npw_k)= cwavein(2,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
-          dgcwavef(2,ipw+(idat-1)*npw_k)=-cwavein(1,ipw+(idat-1)*npw_k)*two_pi*gprimd(ii,idir)
-        end do
-      end do
-      call fourwf(1,vxctaulocal(:,:,:,:,1+ii),dgcwavef,ghc1,work,gbound_k,gbound_k,&
-        & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-        & tim_fourwf,weight,weight,gpu_option=gpu_option_)
-      gh1c_mGGA(:,:) = gh1c_mGGA(:,:) - half*ghc1
-    end do ! ii
-
-    ! From -1/2 vxctau (grad . grad \psi), the k derivative is
-    ! vxctau \times dkinpw_dir * \psi
-    do ipw=1,npw_k
-      if(kinpw1(ipw)<huge(zero)*1.d-11)then
-        ghc1(:,ipw)=dkinpw(ipw)*cwavein(:,ipw)
-      else
-        ghc1(:,ipw) = zero
-      end if
-    end do
-    call fourwf(1,vxctaulocal(:,:,:,:,1),ghc1,ghc2,work,gbound_k,gbound_k,&
-      & istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
-      & tim_fourwf,weight,weight,gpu_option=gpu_option_)
-
-    gh1c_mGGA = gh1c_mGGA + ghc2
-
-    ! JWZ debug
-    ! gh1c_mGGA = zero
-
-    ABI_FREE(ghc1)
-    ABI_FREE(ghc2)
-    ABI_FREE(dgcwavef)
+   ABI_MALLOC(dgcwavef,(2,npw_k*ndat,3))
+   ABI_MALLOC(dlcwavef,(2,npw_k*ndat))
+!!$OMP PARALLEL DO
+   do idat=1,ndat
+     do ipw=1,npw_k
+       dgcwavef(:,ipw+(idat-1)*npw_k,1:3)=zero
+       dlcwavef(:,ipw+(idat-1)*npw_k)=zero
+     end do
+   end do
+   do ii=1,3
+     gp2pi1=gprimd(ii,1)*two_pi
+     gp2pi2=gprimd(ii,2)*two_pi
+     gp2pi3=gprimd(ii,3)*two_pi
+     kpt_cart=gp2pi1*kpt(1)+gp2pi2*kpt(2)+gp2pi3*kpt(3)
+!    Multiplication by 2pi i (G+k)_idir for gradient
+!    Multiplication by -(2pi (G+k)_idir )**2 for Laplacian
+     dkcartdk = two_pi*gprimd(ii,idir)
+     do idat=1,ndat
+       do ipw=1,npw_k
+         kg_k_cart=gp2pi1*kg_k(1,ipw)+gp2pi2*kg_k(2,ipw)+gp2pi3*kg_k(3,ipw)+kpt_cart
+         dgcwavef(1,ipw+(idat-1)*npw_k,ii)= cwavein(2,ipw+(idat-1)*npw_k)*dkcartdk
+         dgcwavef(2,ipw+(idat-1)*npw_k,ii)=-cwavein(1,ipw+(idat-1)*npw_k)*dkcartdk
+         dlcwavef(1,ipw+(idat-1)*npw_k)=dlcwavef(1,ipw+(idat-1)*npw_k)-&
+           & cwavein(1,ipw+(idat-1)*npw_k)*two*kg_k_cart*dkcartdk
+         dlcwavef(2,ipw+(idat-1)*npw_k)=dlcwavef(2,ipw+(idat-1)*npw_k)-&
+           & cwavein(2,ipw+(idat-1)*npw_k)*two*kg_k_cart*dkcartdk
+       end do
+     end do
+   end do ! ii
+!  STEP2: Compute (vxctaulocal)*(Laplacian of cwavef) and add it to ghc
+   call fourwf(1,vxctaulocal(:,:,:,:,1),dlcwavef,ghc1,work,gbound_k,gbound_k,&
+&   istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+&   tim_fourwf,weight,weight,gpu_option=gpu_option)
+!!$OMP PARALLEL DO
+   do idat=1,ndat
+     do ipw=1,npw_k
+       gh1c_mGGA(:,ipw+(idat-1)*npw_k)=gh1c_mGGA(:,ipw+(idat-1)*npw_k)-&
+         & scale_laplacian*half*ghc1(:,ipw+(idat-1)*npw_k)
+     end do
+   end do
+!  STEP3: Compute sum of (grad components of vxctaulocal)*(grad components of cwavef)
+   do ii=1,3
+     call fourwf(1,vxctaulocal(:,:,:,:,1+ii),dgcwavef(:,:,ii),ghc1,work,gbound_k,gbound_k,&
+     istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+&     tim_fourwf,weight,weight,gpu_option=gpu_option)
+!!$OMP PARALLEL DO
+     do idat=1,ndat
+       do ipw=1,npw_k
+         gh1c_mGGA(:,ipw+(idat-1)*npw_k)=gh1c_mGGA(:,ipw+(idat-1)*npw_k)-&
+           & scale_grad*half*ghc1(:,ipw+(idat-1)*npw_k)
+       end do
+     end do
+   end do ! ii
+   ABI_FREE(dgcwavef)
+   ABI_FREE(dlcwavef)
+   ABI_FREE(ghc1)
 
  else ! nspinortot==2
 
