@@ -4117,8 +4117,8 @@ end subroutine fftmpi_u
 !!
 !! SOURCE
 
-subroutine zerosym(array,cplex,n1,n2,n3,&
-&                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
+subroutine zerosym(array,cplex,n1,n2,n3, &
+                   ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
 
 !Arguments ------------------------------------
@@ -4773,7 +4773,6 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  uplan%ngfft = ngfft
  uplan%mgfft = maxval(ngfft(1:3))
  uplan%nfft  = product(ngfft(1:3))
- !uplan%ldxyz = product(plan%embed)
  uplan%kg_k => kg_k
 
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
@@ -4835,8 +4834,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4893,8 +4891,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4951,8 +4948,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -5007,8 +5003,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")

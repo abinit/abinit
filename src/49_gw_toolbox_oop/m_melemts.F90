@@ -14,22 +14,15 @@
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !!
+!! TODO
+
 !! NOTES
 !!  * This module is supposed to be used only in the GW part to facilitate
-!!    further developments. The object might change in the future. Thus
-!!    contact Matteo Giantomassi if you wish to use this piece of code
-!!    for your developments. In particular we might decide to switch
-!!    to ragged arrays Mels(nkibz,nsppol*nspinor**2)%data
+!!    we might decide to use ragged arrays
 !!
-!!  * Routines tagged with "@type_name" are tightly connected to the definition of the data type.
-!!    Tightly connected means that the proper functioning of the implementation relies on the
-!!    assumption that the tagged procedure is consistent with the type declaration.
-!!    Every time a developer changes the structure "type_name" adding new entries, he/she has to make sure
-!!    that all the tightly connected routines are changed accordingly to accommodate the modification of the data type.
-!!    Typical examples of tightly connected routines are creation, destruction or reset methods.
+!!     Mels(nkcalc, nsppol*nspinor**2)%data
 !!
-!! TODO
-!!  This module can be moved to a higher level directory.
+!!    or replaced nkibz with nkcalc with reduce memory
 !!
 !! SOURCE
 
@@ -283,12 +276,6 @@ end subroutine melflags_copy
 !! FUNCTION
 !!  Free all dynamic memory of the database
 !!
-!! INPUTS
-!!  Mels<melements_t>=The database to be freed
-!!
-!! OUTPUT
-!!  See side effects
-!!
 !! SOURCE
 
 subroutine melements_free(Mels)
@@ -425,10 +412,6 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- !@melements_t
-
  ! Copy flags.
  call Mflags_in%copy(Mels%flags)
 
@@ -465,51 +448,40 @@ subroutine melements_init(Mels, Mflags_in, nsppol, nspden, nspinor, nkibz, kibz,
  Mels%bmin = bmin
  Mels%bmax = bmax
 
- b1 = Mels%bmin
- b2 = Mels%bmax
+ b1 = Mels%bmin; b2 = Mels%bmax
 
-! real arrays
- ABI_MALLOC(Mels%kibz,(3,nkibz))
+ ! real arrays
+ ABI_MALLOC(Mels%kibz, (3,nkibz))
  Mels%kibz = kibz
 
-! complex arrays
+ ! complex arrays
  if (Mels%flags%has_kinetic == 1) then
-   ABI_CALLOC(Mels%kinetic,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%kinetic, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_hbare == 1) then
-   ABI_CALLOC(Mels%hbare,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%hbare, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_sxcore == 1) then
-   ABI_CALLOC(Mels%sxcore,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%sxcore, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vhartree == 1) then
-   ABI_CALLOC(Mels%vhartree,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vhartree, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_lexexch == 1) then
-   ABI_CALLOC(Mels%vlexx,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vlexx, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vu == 1) then
-   ABI_CALLOC(Mels%vu,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vu, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxc == 1) then
-   ABI_CALLOC(Mels%vxc,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxc, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxcval == 1) then
-   ABI_CALLOC(Mels%vxcval,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxcval, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
  if (Mels%flags%has_vxcval_hybrid == 1) then
-   ABI_CALLOC(Mels%vxcval_hybrid,(b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
+   ABI_CALLOC(Mels%vxcval_hybrid, (b1:b2,b1:b2,nkibz,nsppol*nspinor**2))
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine melements_init
 !!***

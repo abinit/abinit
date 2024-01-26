@@ -237,12 +237,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  type(pawcprj_type),allocatable :: Cprj_kgw(:,:),Cprj_ksum(:,:)
  type(pawpwij_t),allocatable :: Pwij_qg(:),Pwij_fft(:)
  type(esymm_t),pointer :: QP_sym(:)
- integer :: ilwrk
+ integer :: ilwrk, neigmax
  integer :: neig(Er%nomega_i)
- integer :: neigmax
  real(gwp) :: epsm1_ev(Sigp%npwc)
- complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:)
- complex(gwpc),allocatable :: rhotw_epsm1_rhotw(:,:,:)
+ complex(gwpc),allocatable :: epsm1_sqrt_rhotw(:,:), rhotw_epsm1_rhotw(:,:,:)
 
 !************************************************************************
 
@@ -485,7 +483,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      q0=zero
      call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
      ABI_MALLOC(Pwij_fft,(Psps%ntypat))
-     call pawpwij_init(Pwij_fft,gwc_nfftot,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
+     call pawpwij_init(Pwij_fft,gwc_nfftot, [zero,zero,zero], gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
  end if ! usepaw==1
 
@@ -848,8 +846,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Add on-site contribution, projectors are already in BZ !TODO Recheck this!
            i2=jb; if (nspinor==2) i2=(2*jb-1)
            spad=(nspinor-1)
-           call paw_rho_tw_g(npwc,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-                             Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+           call paw_rho_tw_g(cryst,Pwij_qg,npwc,nspinor,nspinor,Gsph_c%gvec, &
+                             Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
 
            if (Dtset%pawcross==1) then ! Add paw cross term
              call paw_cross_rho_tw_g(nspinor,npwc,nfftf,rho_ngfft,1,use_padfftf,igfftfcg0,gboundf,&
@@ -1131,8 +1129,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
                    i1=(2*jb-1); i2=(2*kb-1)
                  end if
                  spad=(nspinor-1)
-                 call paw_rho_tw_g(gwc_nfftot,Sigp%nsig_ab,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-                   gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),Pwij_fft,wf1swf2_g)
+                 call paw_rho_tw_g(cryst, Pwij_fft,gwc_nfftot,Sigp%nsig_ab,nspinor, &
+                   gw_gfft,Cprj_kgw(:,i1:i1+spad),Cprj_kgw(:,i2:i2+spad),wf1swf2_g)
 
                  if (Dtset%pawcross==1) then ! Add paw cross term
                    call paw_cross_rho_tw_g(nspinor,npwc,nfftf,rho_ngfft,1,use_padfftf,igfftfcg0,gboundf,&

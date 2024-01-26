@@ -3,10 +3,10 @@
 !!  m_mkrho
 !!
 !! FUNCTION
-!!
+!!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT)
+!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,10 +32,10 @@ module m_mkrho
  use m_extfpmd
 
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, zerosym, fourwf, fourdp
- use m_hamiltonian,  only : gs_hamiltonian_type
  use m_bandfft_kpt,  only : bandfft_kpt_set_ikpt
  use m_paw_dmft,     only : paw_dmft_type
  use m_spacepar,     only : symrhg
@@ -44,7 +44,7 @@ module m_mkrho
  use m_mpinfo,       only : ptabs_fourdp, proc_distrb_cycle
  use m_pawtab,       only : pawtab_type
  use m_io_tools,     only : open_file
- use m_splines,      only : spline,splint
+ use m_splines,      only : spline, splint
  use m_sort,         only : sort_dp
  use m_prep_kgb,     only : prep_fourwf
  use m_wvl_rho,      only : wvl_mkrho
@@ -260,7 +260,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
    nbeta = 3
    ABI_MALLOC(taur_alphabeta,(dtset%nfft,dtset%nspden,3,3))
  case default
-   ABI_BUG('ioption argument value should be 0,1 or 2.')
+   ABI_BUG(sjoin('ioption argument value should be 0,1 or 2 while got:', itoa(ioption)))
  end select
 
 !Init me
@@ -1020,7 +1020,6 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
-!The decay lengths should be optimized element by element, and even pseudopotential by pseudopotential.
 !scalars
  integer,parameter :: im=2,re=1
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ispden
@@ -1032,61 +1031,53 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  character(len=500) :: message
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
- real(dp),allocatable :: length(:),spinat_indx(:,:),work(:)
- logical,allocatable :: use_gaussian(:)
+ real(dp) :: length(ntypat)
+ real(dp),allocatable :: work(:), spinat_indx(:,:)
+ logical :: use_gaussian(ntypat)
 
 ! *************************************************************************
 
- if(nspden==4)then
-   write(std_out,*)' initro : might work yet for nspden=4 (not checked)'
-   write(std_out,*)' spinat',spinat(1:3,1:natom)
-!  stop
+ if (nspden==4) then
+   ABI_COMMENT('initro: might work yet for nspden=4 (not checked)')
+   !write(std_out,*)' spinat',spinat(1:3,1:natom)
  end if
 
- n1=ngfft(1)
- n2=ngfft(2)
- n3=ngfft(3)
- me_fft=ngfft(11)
- nproc_fft=ngfft(10)
+ n1=ngfft(1); n2=ngfft(2); n3=ngfft(3); me_fft=ngfft(11); nproc_fft=ngfft(10)
+
  ABI_MALLOC(work,(nfft))
  ABI_MALLOC(spinat_indx,(3,natom))
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
 
-!Transfer the spinat array to an array in which the atoms have the proper order, type by type.
+ ! Transfer the spinat array to an array in which the atoms have the proper order, type by type.
  do ia=1,natom
    spinat_indx(:,atindx(ia))=spinat(:,ia)
  end do
 
-!Check whether the values of spinat are acceptable
- if(nspden==2)then
+ ! Check whether the values of spinat are acceptable
+ if (nspden==2)then
    ia1=1
    do itypat=1,ntypat
-!    ia1,ia2 sets range of loop over atoms:
+     !ia1,ia2 sets range of loop over atoms:
      ia2=ia1+nattyp(itypat)-1
      do ia=ia1,ia2
        if( sqrt(spinat_indx(1,ia)**2+spinat_indx(2,ia)**2+spinat_indx(3,ia)**2) &
-&       > abs(zion(itypat))*(1.0_dp + epsilon(0.0_dp)) ) then
-         write(message, '(a,a,a,a,i4,a,a,3es11.4,a,a,a,es11.4)' ) ch10,&
-&         ' initro : WARNING - ',ch10,&
-&         '  For type-ordered atom number ',ia,ch10,&
-&         '  input spinat=',spinat_indx(:,ia),'  is larger, in magnitude,',ch10,&
-&         '  than zion(ia)=',zion(itypat)
-         call wrtout(std_out,message,'COLL')
-         call wrtout(ab_out,message,'COLL')
+           > abs(zion(itypat))*(1.0_dp + epsilon(0.0_dp)) ) then
+         write(message, '(a,i0,a,a,3es11.4,a,a,a,es11.4)' )&
+         '  For type-ordered atom number ',ia,ch10,&
+         '  input spinat=',spinat_indx(:,ia),'  is larger, in magnitude,',ch10,&
+         '  than zion(ia)=',zion(itypat)
+         call wrtout([std_out, ab_out], message)
        end if
      end do
      ia1=ia2+1
    end do
  end if
 
-!Compute the decay length of each type of atom
- ABI_MALLOC(length,(ntypat))
- ABI_MALLOC(use_gaussian,(ntypat))
+ ! Compute the decay length of each type of atom depending on data available in pseudos.
  jtemp=0
  do itypat=1,ntypat
-
    use_gaussian(itypat)=.true.
    if (usepaw==0) use_gaussian(itypat) = .not. psps%nctab(itypat)%has_tvale
    if (usepaw==1) use_gaussian(itypat)=(pawtab(itypat)%has_tvale==0)
@@ -1095,14 +1086,13 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
    if (use_gaussian(itypat)) then
      length(itypat) = atom_length(densty(itypat,1),zion(itypat),znucl(itypat))
      write(message,'(a,i3,a,f12.4,a,a,a,f12.4,a,i3,a,es12.4,a)' )&
-&     ' initro: for itypat=',itypat,', take decay length=',length(itypat),',',ch10,&
-&     ' initro: indeed, coreel=',znucl(itypat)-zion(itypat),', nval=',int(zion(itypat)),' and densty=',densty(itypat,1),'.'
-     call wrtout(std_out,message,'COLL')
+      ' initro: for itypat=',itypat,', take decay length=',length(itypat),',',ch10,&
+      ' initro: indeed, coreel=',znucl(itypat)-zion(itypat),', nval=',int(zion(itypat)),' and densty=',densty(itypat,1),'.'
+     call wrtout(std_out,message)
    else
      write(message,"(a,i3,a)")' initro: for itypat=',itypat,", take pseudo charge density from pp file"
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,message)
    end if
-
  end do
 
  if (jtemp>0) then
@@ -1121,20 +1111,19 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
  if(nspden /= 4) then
 
    do ispden=nspden,1,-1
-!    This loop overs spins will actually be as follows :
-!    ispden=2 for spin up
-!    ispden=1 for total spin (also valid for non-spin-polarized calculations)
-!    The reverse ispden order is chosen, in order to end up with
-!    rhog containing the proper total density.
-
-     rhog(:,:)=zero
+     ! This loop overs spins will actually be as follows:
+     !  ispden=2 for spin up
+     !  ispden=1 for total spin (also valid for non-spin-polarized calculations)
+     !
+     ! The reverse ispden order is chosen, in order to end up with
+     ! rhog containing the proper total density.
+     rhog = zero
 
      ia1=1
      do itypat=1,ntypat
-
        if (use_gaussian(itypat)) alf2pi2=(two_pi*length(itypat))**2
 
-!      ia1,ia2 sets range of loop over atoms:
+       ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
        jtemp=0
@@ -1148,18 +1137,18 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
                ig1=i1-(i1/id1)*n1-1
                ii=ii+1
-!              gsquar=gsq_ini(ig1,ig2,ig3)
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
-&               dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
-&               dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
+                      dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
+                      dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
 
-!              Skip G**2 outside cutoff:
+               ! Skip G**2 outside cutoff:
                if (gsquar<=cutoff) then
 
-!                Assemble structure factor over all atoms of given type,
-!                also taking into account the spin-charge on each atom:
+                 ! Assemble structure factor over all atoms of given type,
+                 ! also taking into account the spin-charge on each atom:
+
                  sfr=zero;sfi=zero
-                 if(ispden==1)then
+                 if (ispden==1) then
                    do ia=ia1,ia2
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)
@@ -1171,17 +1160,17 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  else
                    fact0=half;if (.not.use_gaussian(itypat)) fact0=half/zion(itypat)
                    do ia=ia1,ia2
-!                    Here, take care only of the z component
+                     ! Here, take care only of the z component
                      fact=fact0*(zion(itypat)+spinat_indx(3,ia))
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)*fact
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)*fact
                    end do
                  end if
 
-!                Charge density integrating to one
+                 ! Charge density integrating to one
                  if (use_gaussian(itypat)) then
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
-!                  Multiply structure factor times rhoat (atomic density in reciprocal space)
+                   ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  else
@@ -1201,7 +1190,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    else
                      ABI_BUG('Initialization of density is non consistent.')
                    end if
-!                  Multiply structure factor times rhoat (atomic density in reciprocal space)
+                   ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                    rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                    rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                  end if
@@ -1210,32 +1199,33 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  jtemp=jtemp+1
                end if
 
-             end do ! End loop on i1
+             end do ! i1
            end if
-         end do ! End loop on i2
-       end do ! End loop on i3
+         end do ! i2
+       end do ! i3
        ia1=ia2+1
 
-     end do ! End loop on type of atoms
+     end do ! itypat
 
-!    Set contribution of unbalanced components to zero
+     ! Set contribution of unbalanced components to zero
      if (izero==1) then
        call zerosym(rhog,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      end if
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
-!    Note, we end with ispden=1, so that rhog contains the total density
+     ! Note, we end with ispden=1, so that rhog contains the total density
      call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
    end do ! End loop on spins
 
- else if(nspden==4) then
+ else if (nspden==4) then
+
    do ispden=nspden,1,-1
-!    This loop overs spins will actually be as follows :
-!    ispden=2,3,4 for mx,my,mz
-!    ispden=1 for total spin (also valid for non-spin-polarized calculations)
-!    The reverse ispden order is chosen, in order to end up with
-!    rhog containing the proper total density.
+     ! This loop overs spins will actually be as follows:
+     ! ispden=2,3,4 for mx,my,mz
+     ! ispden=1 for total spin (also valid for non-spin-polarized calculations)
+     ! The reverse ispden order is chosen, in order to end up with
+     ! rhog containing the proper total density.
 
      rhog(:,:)=zero
 
@@ -1244,7 +1234,7 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
        if (use_gaussian(itypat)) alf2pi2=(two_pi*length(itypat))**2
 
-!      ia1,ia2 sets range of loop over atoms:
+       ! ia1,ia2 sets range of loop over atoms:
        ia2=ia1+nattyp(itypat)-1
        ii=0
        jtemp=0
@@ -1257,16 +1247,15 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
 
                ig1=i1-(i1/id1)*n1-1
                ii=ii+1
-!              gsquar=gsq_ini(ig1,ig2,ig3)
                gsquar=dble(ig1*ig1)*gmet(1,1)+dble(ig2*ig2)*gmet(2,2)+&
-&               dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
-&               dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
+                      dble(ig3*ig3)*gmet(3,3)+dble(2*ig1*ig2)*gmet(1,2)+&
+                      dble(2*ig2*ig3)*gmet(2,3)+dble(2*ig3*ig1)*gmet(3,1)
 
-!              Skip G**2 outside cutoff:
+               ! Skip G**2 outside cutoff:
                if (gsquar<=cutoff) then
 
-!                Assemble structure factor over all atoms of given type,
-!                also taking into account the spin-charge on each atom:
+                 ! Assemble structure factor over all atoms of given type,
+                 ! also taking into account the spin-charge on each atom:
                  sfr=zero;sfi=zero
                  if(ispden==1)then
                    do ia=ia1,ia2
@@ -1280,14 +1269,14 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                  else
                    fact0=one;if (.not.use_gaussian(itypat)) fact0=one/zion(itypat)
                    do ia=ia1,ia2
-!                    Here, take care of the components of m
+                     ! Here, take care of the components of m
                      fact=fact0*spinat_indx(ispden-1,ia)
                      sfr=sfr+phre_ini(ig1,ig2,ig3,ia)*fact
                      sfi=sfi-phimag_ini(ig1,ig2,ig3,ia)*fact
                    end do
                  end if
 
-!                Charge density integrating to one
+                 ! Charge density integrating to one
                  if (use_gaussian(itypat)) then
                    rhoat=xnorm*exp(-gsquar*alf2pi2)
                  else
@@ -1309,40 +1298,37 @@ subroutine initro(atindx,densty,gmet,gsqcut,izero,mgfft,mpi_enreg,mqgrid,natom,n
                    end if
                  end if
 
-!                Multiply structure factor times rhoat (atomic density in reciprocal space)
+                 ! Multiply structure factor times rhoat (atomic density in reciprocal space)
                  rhog(re,ii)=rhog(re,ii)+sfr*rhoat
                  rhog(im,ii)=rhog(im,ii)+sfi*rhoat
                else
                  jtemp=jtemp+1
                end if
 
-             end do ! End loop on i1
+             end do ! i1
            end if
-         end do ! End loop on i2
-       end do ! End loop on i3
+         end do ! i2
+       end do ! i3
        ia1=ia2+1
-     end do ! End loop on type of atoms
+     end do ! itypat
 
-!    Set contribution of unbalanced components to zero
+     ! Set contribution of unbalanced components to zero
      if (izero==1) then
        call zerosym(rhog,2,n1,n2,n3,comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
      end if
      !write(std_out,*)"initro: ispden, ucvol * rhog(:2,1)",ispden, ucvol * rhog(:2,1)
 
-!    Note, we end with ispden=1, so that rhog contains the total density
+     ! Note, we end with ispden=1, so that rhog contains the total density
      call fourdp(1,rhog,work,1,mpi_enreg,nfft,1,ngfft,0)
      rhor(:,ispden)=work(:)
+   end do ! ispden
 
-   end do ! End loop on spins
-
-!  Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
-!    Add a small real to the magnetization
+   ! Non-collinear magnetism: avoid zero magnetization, because it produces numerical instabilities
+   ! Add a small real to the magnetization
    if (all(abs(spinat(:,:))<tol10)) rhor(:,4)=rhor(:,4)+tol14
 
  end if ! nspden==4
 
- ABI_FREE(length)
- ABI_FREE(use_gaussian)
  ABI_FREE(spinat_indx)
  ABI_FREE(work)
 
@@ -1425,8 +1411,6 @@ end subroutine initro
 !!                          (If optrhor==4, rhor is expected to be the ELF (elfr))
 !!  rhor(nfft,nspden)=electron density (electrons/bohr^3)
 !!
-!! OUTPUT
-!!
 !! NOTES
 !!  The tolerance tol12 aims at giving a machine-independent ordering.
 !!  (this trick is used in bonds.f, listkk.f, prtrhomxmn.f and rsiaf9.f)
@@ -1438,9 +1422,9 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout,nfft,nspden,option
+ type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in),optional :: optrhor
  real(dp),intent(in),optional :: ucvol
- type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rhor(nfft,nspden)
@@ -1471,8 +1455,7 @@ subroutine prtrhomxmn(iout,mpi_enreg,nfft,ngfft,nspden,option,rhor,optrhor,ucvol
  end if
 
  if(option/=1 .and. option/=2)then
-   write(message, '(a,i0)' )' Option must be 1 or 2, while it is ',option
-   ABI_BUG(message)
+   ABI_BUG(sjoin(' Option must be 1 or 2, while it is:', itoa(option)))
  end if
 
  if (mpi_enreg%nproc_wvl>1) then
@@ -2044,12 +2027,6 @@ end subroutine prtrhomxmn
 !!
 !! FUNCTION
 !!
-!! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !! natom : number of atoms in cell
 !! nfft=(effective) number of FFT grid points (for this processor) - fine grid
@@ -2060,10 +2037,6 @@ end subroutine prtrhomxmn
 !!
 !! OUTPUT
 !! rhor_atm(nfft,nspden) : full electron density on the (fine) grid
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -2137,10 +2110,8 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 !first check how many datapoints are in each file
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename, message, newunit=unt, status='old',action='read') /= 0) then
      write(std_out,*) 'ERROR in read_atomden: Could not open file: ',filename
      write(std_out,*) ' Current implementation requires this file to be present'
@@ -2165,10 +2136,8 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
  atomrgrid = zero ; density = zero
  do itypat=1,ntypat
    filename='';io_err=0;
-   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
-   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), &
-&   '_density_atom_type',itypat,'.dat'
+   if (itypat>0)  write(filename,'(a,a,i1,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
+   if (itypat>10) write(filename,'(a,a,i2,a)') trim(file_prefix), '_density_atom_type',itypat,'.dat'
    if (open_file(filename,message,newunit=unt,status='old',action='read') /= 0) then
      ABI_ERROR(message)
    end if
@@ -2212,20 +2181,10 @@ subroutine read_atomden(MPI_enreg,natom,nfft,ngfft,nspden,ntypat, &
 
  rhor_atm(:,1) = rho
 
- if (allocated(atomrgrid))  then
-   ABI_FREE(atomrgrid)
- end if
- if (allocated(density))  then
-   ABI_FREE(density)
- end if
- if (allocated(r_vec_grid))  then
-   ABI_FREE(r_vec_grid)
- end if
- if (allocated(rho))  then
-   ABI_FREE(rho)
- end if
-
- return
+ ABI_SFREE(atomrgrid)
+ ABI_SFREE(density)
+ ABI_SFREE(r_vec_grid)
+ ABI_SFREE(rho)
 
 end subroutine read_atomden
 !!***
@@ -2248,12 +2207,6 @@ end subroutine read_atomden
 !! rho^{atm}_{\alpha}(r-R_{\alpha}) on a grid.
 !!
 !! Units are atomic.
-!!
-!! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (SM,VR,FJ,MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~ABINIT/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !! calctype : type of calculation
@@ -2453,7 +2406,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    end do
    call sort_dp(n,dp_1d_dummy,new_index,tol14)
    do i=1,n
-!    write(std_out,*) i,' -> ',new_index(i)
+     !write(std_out,*) i,' -> ',new_index(i)
      equiv_atom_pos(1:3,n+1-i,itypat) = dp_2d_dummy(1:3,new_index(i))
      equiv_atom_dist(1:n,itypat) = dp_1d_dummy
    end do
@@ -2576,7 +2529,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
      grid_distances(1:n_grid_p) = dp_1d_dummy
      i_1d_dummy = grid_index(1:n_grid_p)
      do i=1,n_grid_p
-!      write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
+       !write(std_out,*) i_1d_dummy(i),' -> ',i_1d_dummy(new_index(i))
        grid_index(i) = i_1d_dummy(new_index(i))
      end do
      ABI_FREE(dp_1d_dummy)
@@ -2608,8 +2561,7 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    end do ! n equiv atoms
  end do ! type of atom
 
-!Collect all contributions to rho_temp if
-!we are running in parallel
+ ! Collect all contributions to rho_temp if we are running in parallel
  if (nprocs>1) then
    call xmpi_barrier(spaceComm)
    call xmpi_sum_master(rho_temp,master,spaceComm,ierr)
@@ -2628,19 +2580,10 @@ subroutine atomden(MPI_enreg,natom,ntypat,typat,ngrid,r_vec_grid,rho,a,b,c,atom_
    rho(:) = rho(:) + rho_temp(:,itypat)
  end do
 
-!deallocations
- if (allocated(rho_temp))  then
-   ABI_FREE(rho_temp)
- end if
- if (allocated(equiv_atom_pos))  then
-   ABI_FREE(equiv_atom_pos)
- end if
- if (allocated(equiv_atom_dist))  then
-   ABI_FREE(equiv_atom_dist)
- end if
-!if (allocated()) deallocate()
-
- return
+ ! deallocations
+ ABI_SFREE(rho_temp)
+ ABI_SFREE(equiv_atom_pos)
+ ABI_SFREE(equiv_atom_dist)
 
  end subroutine atomden
 !!***

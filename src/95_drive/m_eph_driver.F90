@@ -147,7 +147,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
- integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
+ integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj, qptopt
  integer :: ncid ! ,ncerr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
@@ -241,14 +241,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
-
  use_sigeph = (dtset%eph_task == 9)
 
  if (my_rank == master) then
    ! GA: Let ddb object handle the error at reading time
    !if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
-
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
@@ -381,7 +379,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call wrtout(ab_out,msg)
      end if
    end if
-
    if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
@@ -746,9 +743,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !else
    !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
    !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+   ! Customize input vars for this task.
+   !  dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
    !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
    !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   !  call gstore%free()
+   !  call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    !end if
    !call variational_polaron(gstore, dtset, dtfil)
    !call gstore%free()
@@ -760,14 +761,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
-     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
+     ! Customize input vars for this eph_task.
+     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+     call gstore%free()
+     call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
 
  case (15, -15)
@@ -788,7 +792,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
-   call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
+   qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   call test_phrotation(ifc, cryst, qptopt, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
