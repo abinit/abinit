@@ -1,1 +1,5 @@
+EXTRA_DIST += \
+  abi_common_kokkos.h \
+  xg_kokkos.h
+
 

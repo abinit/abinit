@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_vtorho
 !! NAME
 !!  m_vtorho
@@ -1754,22 +1753,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(iscf/=-1 .and. iscf/=-2)then
        call timab(993,1,tsec)
        energies%e_fermie = -huge(one)
-! CP addition for occopt 9 case
        if (dtset%occopt==9) then
           energies%e_fermih = -huge(one)
        end if
-! End CP addition
        bdtot_index=1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-           ! CP modified
-           !do iband=1,nband_k
-           !  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
-           !    energies%e_fermie=eigen(bdtot_index)
-           !  end if
-           !  bdtot_index=bdtot_index+1
-           !end do
            if (dtset%occopt/=9) then
               do iband=1,nband_k
                  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
@@ -1793,15 +1783,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                  bdtot_index=bdtot_index+1
               end do
            end if
-           ! End CP modified
          end do
        end do
        call xmpi_max(energies%e_fermie,spaceComm_distrb,ierr)
-       ! CP added in the case occopt = 9
        if (dtset%occopt == 9) then
           call xmpi_max(energies%e_fermih,spaceComm_distrb,ierr)
        end if
-       ! End CP added
        call timab(993,2,tsec)
      end if
 

@@ -64,6 +64,10 @@ MODULE m_matlu
  public :: fac_matlu
  public :: printplot_matlu
  public :: identity_matlu
+ public :: magmomforb_matlu
+ public :: magmomfspin_matlu
+ public :: magmomfzeeman_matlu
+ public :: chi_matlu
 !!***
 
 
@@ -2831,5 +2835,1000 @@ end subroutine add_matlu
  end subroutine identity_matlu
 !!***
 
-END MODULE m_matlu
 !!***
+!!****f* m_matlu/magmomforb_matlu
+!! NAME
+!! magmomforb_matlu
+!!
+!! FUNCTION
+!! return the product of occupation matrix of dimension [(2*ll+1)]**4 in the Ylm basis
+!! with the matrix of orbital angular momentum element for the x,y and z direction. 
+!! Option gives the direction of the magnetic moment x==1, y==2 and z==3. 
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2022 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis
+!! natom :: number of atoms
+!! option = 1 :: x axis
+!!	  = 2 :: y axis
+!!        = 3 :: z axis
+!! optptr > 2 :: print orbital angular matrix elements and resulting product
+!!   
+!! OUTPUT
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product 
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine magmomforb_matlu(matlu,mu,natom,option,optprt)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom,option,optprt
+ complex(dpc), allocatable, intent(out) :: mu
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,im,ispinor,isppol,ispinor2
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
+ character(len=500) :: message
+ real(dp) :: xj
+!arrays
+ complex(dpc),allocatable :: mat_out_c(:,:)
+! integer, allocatable :: ind_msml(:,:)
+ complex(dpc), allocatable :: temp_mat(:,:)
+ type(coeff2c_type), allocatable :: gathermatlu(:)
+ type(coeff2c_type), allocatable :: muorb(:)
+!************************************************************************
+
+ !=====================================
+ ! Allocate matrices 
+ !=====================================
+    
+ ABI_MALLOC(gathermatlu,(natom))
+ ABI_MALLOC(muorb,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+     gathermatlu(iatom)%value=czero
+     ABI_MALLOC(muorb(iatom)%value,(tndim,tndim))
+     muorb(iatom)%value=czero
+   end if
+ end do 
+
+ do iatom=1,natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu.ne.-1) then
+     ll=lpawu
+     lcor=lpawu
+     !=====================================
+     !build orbital angular momentum matrix along x axis
+     !=====================================
+     if(option==1) then
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(jc1 == 1) then
+               muorb(iatom)%value(jc1,jc1+1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5
+            endif
+            if(jc1 > 1 .and. jc1 < 2*(2*ll+1)) then
+               muorb(iatom)%value(jc1,jc1+1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5
+               muorb(iatom)%value(jc1,jc1-1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5
+            else if(jc1== 2*(2*ll+1)) then
+               muorb(iatom)%value(jc1,jc1-1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5
+            end if
+          end do
+        end do
+
+     !=====================================
+     !build orbital angular momentum matrix along y axis
+     !=====================================
+     else if(option==2) then
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(jc1 == 1) then
+               muorb(iatom)%value(jc1,jc1+1) = cmplx(zero,sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5,kind=dp)
+            endif
+            if(jc1 > 1 .and. jc1 < 2*(2*ll+1)) then
+               muorb(iatom)%value(jc1,jc1+1) = cmplx(zero,sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5,kind=dp)
+               muorb(iatom)%value(jc1,jc1-1) = cmplx(zero,-sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5,kind=dp)
+            else if(jc1 == 2*(2*ll+1)) then
+               muorb(iatom)%value(jc1,jc1-1) = cmplx(zero,-sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5,kind=dp)
+            end if
+          end do
+        end do
+
+     !=====================================
+     !build orbital angular momentum matrix along z axis
+     !=====================================
+     else if(option==3) then
+       jc1=0
+       do ms1=-1,1
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1 < tndim+1) then
+              muorb(iatom)%value(jc1,jc1) = ml1
+            endif
+          end do
+        end do
+     end if
+
+     if(optprt>2) then
+        write(message,'(a,i4)') "Orbital angular momentum matrix elements in |m_l,m_s> basis for axis=", option
+        call wrtout(std_out,message,"COLL")
+        do im=1,2*(ll*2+1)
+          write(message,'(6(1x,9(1x,f4.1,",",f4.1)))') (muorb(iatom)%value(im,jm),jm=1,2*(ll*2+1))
+          call wrtout(std_out,message,"COLL")
+        end do
+     end if
+
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Reshape input Ylm matlu in one 14x14 matrix 
+     !=====================================
+     
+ call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+
+!!printing for debug
+! write(std_out,*) "gathermatlu in magmomforb"
+! do im1=1,tndim
+!   write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!        (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+!   call wrtout(std_out,message,'COLL')
+! end do
+
+     !=====================================
+     ! Matrix product of Occ and muorb 
+     !=====================================
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(temp_mat,(tndim,tndim))
+
+     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muorb(iatom)%value,tndim,czero,temp_mat,tndim)
+     
+     gathermatlu(iatom)%value=temp_mat
+     ABI_FREE(temp_mat)
+
+     !=====================================
+     ! Trace of matrix product
+     !=====================================
+
+   mu=czero
+   do im1=1,tndim
+     do im2=1,tndim
+       if(im1==im2) then
+         mu = mu + gathermatlu(iatom)%value(im1,im2)
+       end if
+     end do
+   end do
+
+     !=====================================
+     ! Reshape product matrix into matlu format 
+     !=====================================
+
+     call gather_matlu(matlu(iatom),gathermatlu(iatom),iatom,option=-1,prtopt=1)
+
+     !=====================================
+     ! Print matlu
+     !=====================================
+
+     if(optprt>2) then
+       ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1)) 
+       do isppol=1,matlu(1)%nsppol
+         do ispinor=1,matlu(1)%nspinor
+           do ispinor2=1,matlu(1)%nspinor
+             mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
+
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Orbital angular momentum matrix, isppol=", isppol, ", ispinor=",&
+&            ispinor,", ispinor2=", ispinor2
+             call wrtout(std_out,message,'COLL')
+             do im1=1,ll*2+1
+               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
+               call wrtout(std_out,message,'COLL')
+             end do
+
+           end do ! ispinor2
+         end do ! ispinor
+       end do ! isppol
+       ABI_FREE(mat_out_c)
+     endif
+
+   end if !lpawu
+ end do !atom 
+
+     !=====================================
+     ! Deallocate gathermatlu 
+     !=====================================
+
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     ABI_FREE(gathermatlu(iatom)%value)
+     ABI_FREE(muorb(iatom)%value)
+   end if
+ end do
+ ABI_FREE(gathermatlu)
+ ABI_FREE(muorb)
+
+ end subroutine magmomforb_matlu
+
+!!***
+
+
+!!***
+!!****f* m_matlu/magmomfspin_matlu
+!! NAME
+!! magmomfspin_matlu
+!!
+!! FUNCTION
+!! return the product of occupation matrix of dimension [(2*ll+1)]**4 in the Ylm basis
+!! with the matrix of spin angular momentum element for the x,y and z direction. 
+!! Option gives the direction of the magnetic moment x==1, y==2 and z==3. 
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2022 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis
+!! natom :: number of atoms
+!! option = 1 :: x axis
+!!	  = 2 :: y axis
+!!        = 3 :: z axis
+!! optptr > 2 :: print spin angular matrix elements and resulting product
+!!   
+!! OUTPUT
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine magmomfspin_matlu(matlu,mu,natom,option,optprt)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom,option,optprt
+ complex(dpc), allocatable, intent(out) :: mu
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,im,ispinor,isppol,ispinor2
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
+ character(len=500) :: message
+ real(dp) :: xj
+!arrays
+ complex(dpc),allocatable :: mat_out_c(:,:)
+ integer, allocatable :: ind_msml(:,:)
+ complex(dpc), allocatable :: temp_mat(:,:)
+ type(coeff2c_type), allocatable :: gathermatlu(:)
+ type(coeff2c_type), allocatable :: muspin(:)
+!************************************************************************
+
+ !=====================================
+ ! Allocate matrices 
+ !=====================================
+    
+ ABI_MALLOC(gathermatlu,(natom))
+ ABI_MALLOC(muspin,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+     gathermatlu(iatom)%value=czero
+     ABI_MALLOC(muspin(iatom)%value,(tndim,tndim))
+     muspin(iatom)%value=czero
+   end if
+ end do 
+
+ do iatom=1,natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu.ne.-1) then
+     ll=lpawu
+     lcor=lpawu
+     ABI_MALLOC(ind_msml,(2,-ll:ll))
+     ind_msml=czero
+     !=====================================
+     !build spin angular momentum matrix along x axis
+     !=====================================
+     if(option==1) then
+       jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half 
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(xj < 0.0 ) then
+               muspin(iatom)%value(ind_msml(2,ml1),jc1) = 0.5
+            else if(xj > 0.0) then
+               muspin(iatom)%value(ind_msml(1,ml1),ind_msml(2,ml1)) = 0.5
+            end if
+          end do
+        end do
+
+     !=====================================
+     !build spin angular momentum matrix along y axis
+     !up spin is first
+     !=====================================
+     else if(option==2) then
+        jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half 
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(xj < 0.0 ) then
+               muspin(iatom)%value(ind_msml(2,ml1),jc1) = cmplx(zero,0.5,kind=dp)
+            else if(xj > 0.0) then
+               muspin(iatom)%value(ind_msml(1,ml1),ind_msml(2,ml1)) = cmplx(zero,-0.5,kind=dp)
+            end if
+          end do
+        end do
+
+     !=====================================
+     !build spin angular momentum matrix along z axis
+     !up spin is first
+     !=====================================
+     else if(option==3) then
+       jc1=0
+       do ms1=-1,1
+         xj=float(ms1)+half 
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1 < tndim+1) then
+              if(xj < 0.0 ) then
+                 muspin(iatom)%value(jc1,jc1) = -xj
+              else if(xj > 0.0) then
+                 muspin(iatom)%value(jc1,jc1) = -xj
+              end if
+            endif
+         end do
+       end do
+     end if
+
+     if(optprt>2) then
+        write(message,'(a,i4)') "Spin angular momentum matrix elements in |m_l,m_s> basis for axis", option
+        call wrtout(std_out,message,"COLL")
+        do im=1,2*(ll*2+1)
+          write(message,'(6(1x,9(1x,f4.1,",",f4.1)))') (muspin(iatom)%value(im,jm),jm=1,2*(ll*2+1))
+          call wrtout(std_out,message,"COLL")
+        end do
+     end if
+
+   ABI_FREE(ind_msml) 
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Reshape input Ylm matlu in one 14x14 matrix 
+     !=====================================
+     
+ call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+
+!!printing for debug
+!! write(std_out,*) "gathermatlu in magmomfspin"
+!! do im1=1,tndim
+!!   write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!!        (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+!!   call wrtout(std_out,message,'coll')
+!! end do
+
+     !=====================================
+     ! Matrix product of Occ and muspin 
+     !=====================================
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(temp_mat,(tndim,tndim))
+
+     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muspin(iatom)%value,tndim,czero,temp_mat,tndim)
+     
+     gathermatlu(iatom)%value=temp_mat
+     ABI_FREE(temp_mat)
+
+     !!printing for debug
+     !!write(std_out,*) "gathermatlu in magmomfspin after product"
+     !!do im1=1,tndim
+     !!   write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+     !!        (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+     !!   call wrtout(std_out,message,'coll')
+     !!end do
+
+     !=====================================
+     ! Trace of matrix product
+     !=====================================
+
+   mu=czero
+   do im1=1,tndim
+     do im2=1,tndim
+       if(im1==im2) then
+         mu = mu + gathermatlu(iatom)%value(im1,im2)
+       end if
+     end do
+   end do
+
+     !=====================================
+     ! Reshape product matrix into matlu format 
+     !=====================================
+
+    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+
+
+     !=====================================
+     ! Print matlu
+     !=====================================
+     if(optprt>2) then
+       ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+       do isppol=1,matlu(1)%nsppol
+         do ispinor=1,matlu(1)%nspinor
+           do ispinor2=1,matlu(1)%nspinor
+             mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
+
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Spin angular momentum matrix, isppol=", isppol, ", ispinor=", ispinor,&
+&             ", ispinor2=", ispinor2
+             call wrtout(std_out,message,'COLL')
+             do im1=1,ll*2+1
+               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
+               call wrtout(std_out,message,'COLL')
+             end do
+
+           end do ! im
+         end do ! ispinor
+       end do ! isppol
+       ABI_FREE(mat_out_c)
+     endif
+
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Deallocate gathermatlu 
+     !=====================================
+
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     ABI_FREE(gathermatlu(iatom)%value)
+     ABI_FREE(muspin(iatom)%value)
+   end if
+ end do
+ ABI_FREE(gathermatlu)
+ ABI_FREE(muspin)
+ 
+ end subroutine magmomfspin_matlu
+
+!!***
+
+
+!!***
+!!****f* m_matlu/magmomfzeeman_matlu
+!! NAME
+!! magmomfspin_matlu
+!!
+!! FUNCTION
+!! return the product of occupation matrix of dimension [(2*ll+1)]**4 in the Ylm basis
+!! with the matrix of Zeeman angular momentum element (L_u + 2*S_u) for the x,y and z direction. 
+!! Option gives the direction of the magnetic moment x==1, y==2 and z==3. 
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2022 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: input quantity in Ylm basis
+!! natom :: number of atoms
+!! option = 1 :: x axis 
+!!	  = 2 :: y axis 
+!!        = 3 :: z axis 
+!! optptr > 2 :: print Zeeman angular matrix elements and resulting product
+!!   
+!! OUTPUT
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: product
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine magmomfzeeman_matlu(matlu,mu,natom,option,optprt)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom,option,optprt
+ complex(dpc), allocatable, intent(out) :: mu
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,im,ispinor,isppol,ispinor2
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,im1,im2,tndim
+ character(len=500) :: message
+ real(dp) :: xj
+!arrays
+ complex(dpc),allocatable :: mat_out_c(:,:)
+ integer, allocatable :: ind_msml(:,:)
+ complex(dpc), allocatable :: temp_mat(:,:)
+ type(coeff2c_type), allocatable :: gathermatlu(:)
+ type(coeff2c_type), allocatable :: muzeeman(:)
+!************************************************************************
+
+ !=====================================
+ ! Allocate matrices 
+ !=====================================
+    
+ ABI_MALLOC(gathermatlu,(natom))
+ ABI_MALLOC(muzeeman,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+     gathermatlu(iatom)%value=czero
+     ABI_MALLOC(muzeeman(iatom)%value,(tndim,tndim))
+     muzeeman(iatom)%value=czero
+   end if
+ end do 
+
+ do iatom=1,natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu.ne.-1) then
+     ll=lpawu
+     lcor=lpawu
+     ABI_MALLOC(ind_msml,(2,-ll:ll))
+     ind_msml=czero
+     !=====================================
+     !build Zeeman angular momentum matrix along x axis
+     !=====================================
+     if(option==1) then
+       jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half 
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(xj < 0.0 ) then
+               muzeeman(iatom)%value(ind_msml(2,ml1),jc1) = 2*0.5
+            else if(xj > 0.0) then
+               muzeeman(iatom)%value(ind_msml(1,ml1),ind_msml(2,ml1)) = 2*0.5
+            end if
+            if(jc1 == 1) then
+               muzeeman(iatom)%value(jc1,jc1+1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5
+            endif
+            if(jc1 > 1 .and.jc1 < 2*(2*ll+1)) then
+               muzeeman(iatom)%value(jc1,jc1+1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5
+               muzeeman(iatom)%value(jc1,jc1-1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5
+            else if(jc1 == 2*(2*ll+1)) then
+               muzeeman(iatom)%value(jc1,jc1-1) = sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5
+            end if
+          end do
+        end do
+
+     !=====================================
+     !build Zeeman angular momentum matrix along y axis
+     !up spin is first
+     !=====================================
+     else if(option==2) then
+        jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1 =-1,1
+         xj=float(ms1)+half 
+         do ml1 = -ll,ll
+            jc1=jc1+1
+            if(xj < 0.0 ) then
+               muzeeman(iatom)%value(ind_msml(2,ml1),jc1) = 2*cmplx(zero,0.5,kind=dp)
+            else if(xj > 0.0) then
+               muzeeman(iatom)%value(ind_msml(1,ml1),ind_msml(2,ml1)) = 2*cmplx(zero,-0.5,kind=dp)
+            end if
+            if(jc1 == 1) then
+               muzeeman(iatom)%value(jc1,jc1+1) = cmplx(zero,sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5,kind=dp)
+            endif
+            if(jc1 > 1 .and. jc1 < 2*(2*ll+1)) then
+               muzeeman(iatom)%value(jc1,jc1+1) = cmplx(zero,sqrt(float((lcor*(lcor+1)) - ml1*(ml1 + 1)))*0.5,kind=dp)
+               muzeeman(iatom)%value(jc1,jc1-1) = cmplx(zero,-sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5,kind=dp)
+            else if(jc1== 2*(2*ll+1)) then
+               muzeeman(iatom)%value(jc1,jc1-1) = cmplx(zero,-sqrt(float((lcor*(lcor+1)) - ml1*(ml1 - 1)))*0.5,kind=dp) 
+            end if
+          end do
+        end do
+
+
+     !=====================================
+     !build Zeeman angular momentum matrix along z axis
+     !up spin is first
+     !=====================================
+     else if(option==3) then
+       jc1=0
+       do ms1=-1,1
+         xj=float(ms1)+half 
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1 < tndim+1) then
+              if(xj < 0.0 ) then
+                 muzeeman(iatom)%value(jc1,jc1) = ml1-2*xj
+              else if(xj > 0.0) then
+                 muzeeman(iatom)%value(jc1,jc1) = ml1-2*xj
+              end if
+            endif
+         end do
+       end do
+     end if
+
+
+     if(optprt>2) then
+        write(message,'(a,i4)') "Zeeman angular momentum matrix elements in |m_l,m_s> basis for axis", option
+        call wrtout(std_out,message,"COLL")
+        do im=1,2*(ll*2+1)
+          write(message,'(6(1x,9(1x,f4.1,",",f4.1)))') (muzeeman(iatom)%value(im,jm),jm=1,2*(ll*2+1))
+          call wrtout(std_out,message,"COLL")
+        end do
+     end if
+
+   ABI_FREE(ind_msml) 
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Reshape input Ylm matlu in one 14x14 matrix 
+     !=====================================
+    
+ !ABI_MALLOC(gathermatlu,(natom))
+ !do iatom=1,natom
+ !  if(matlu(iatom)%lpawu.ne.-1) then
+ !    tndim=2*(2*matlu(iatom)%lpawu+1)
+ !    ABI_MALLOC(gathermatlu(iatom)%value,(tndim,tndim))
+ !    gathermatlu(iatom)%value=czero
+ !  end if
+ !end do 
+     
+ call gather_matlu(matlu,gathermatlu,natom,option=1,prtopt=1)
+
+!!printing for debug
+!! write(std_out,*) "gathermatlu in magmomfspin"
+!! do im1=1,tndim
+!!   write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+!!        (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+!!   call wrtout(std_out,message,'coll')
+!! end do
+
+     !=====================================
+     ! Matrix product of Occ and muzeeman 
+     !=====================================
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(temp_mat,(tndim,tndim))
+
+     call zgemm('n','n',tndim,tndim,tndim,cone,gathermatlu(iatom)%value,tndim,muzeeman(iatom)%value,tndim,czero,temp_mat,tndim)
+     
+     gathermatlu(iatom)%value=temp_mat
+     ABI_FREE(temp_mat)
+
+     !!printing for debug
+     !!write(std_out,*) "gathermatlu in magmomfspin after product"
+     !!do im1=1,tndim
+     !!   write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+     !!        (gathermatlu(1)%value(im1,im2),im2=1,tndim)
+     !!   call wrtout(std_out,message,'coll')
+     !!end do
+
+     !=====================================
+     ! Trace of matrix product
+     !=====================================
+
+   mu=czero
+   do im1=1,tndim
+     do im2=1,tndim
+       if(im1==im2) then
+         mu = mu + gathermatlu(iatom)%value(im1,im2)
+       end if
+     end do
+   end do
+
+     !=====================================
+     ! Reshape product matrix into matlu format 
+     !=====================================
+
+    call gather_matlu(matlu,gathermatlu,natom,option=-1,prtopt=1)
+
+
+     !=====================================
+     ! Print matlu
+     !=====================================
+     if(optprt>2) then
+       ABI_MALLOC(mat_out_c,(2*ll+1,2*ll+1))
+       do isppol=1,matlu(1)%nsppol
+         do ispinor=1,matlu(1)%nspinor
+           do ispinor2=1,matlu(1)%nspinor
+             mat_out_c(:,:) = matlu(iatom)%mat(:,:,isppol,ispinor,ispinor2)
+
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"Zeeman angular momentum matrix, isppol=", isppol, ", ispinor=",&
+&            ispinor,", ispinor2=", ispinor2
+             call wrtout(std_out,message,'COLL')
+             do im1=1,ll*2+1
+               write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
+      &         (mat_out_c(im1,im2),im2=1,ll*2+1)
+               call wrtout(std_out,message,'COLL')
+             end do
+
+           end do ! im
+         end do ! ispinor
+       end do ! isppol
+       ABI_FREE(mat_out_c)
+     endif ! optprt
+
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Deallocate gathermatlu 
+     !=====================================
+
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     ABI_FREE(gathermatlu(iatom)%value)
+     ABI_FREE(muzeeman(iatom)%value)
+   end if
+ end do
+ ABI_FREE(gathermatlu)
+ ABI_FREE(muzeeman)
+ 
+ end subroutine magmomfzeeman_matlu
+
+!!***
+
+!!***
+!!****f* m_matlu/chi_matlu
+!! NAME
+!! chi_matlu
+!!
+!! FUNCTION
+!! return the matrix of dimension [(2*ll+1)]**4 in the Ylm basis
+!! with the matrix elements of the orbital (option=1), spin (option=2) and
+!! total (option=3) angular momentum for z direction. It is used by the 
+!! QMC for the correlation function of the magnetic moment
+!!
+!!
+!! COPYRIGHT
+!! Copyright (C) 2005-2022 ABINIT group (FGendron)
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! matlu1(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: 
+!! natom :: number of atoms
+!! option = 1 :: Orbital angular momentum along z axis
+!!	  = 2 :: 2*Spin angluar momentum alonf z axis
+!!        = 3 :: total angular momentum along z axis
+!! optptr > 2 :: print angular matrix elements 
+!!   
+!! OUTPUT
+!!  matlu(natom)%(nsppol,nspinor,nspinor,ndim,ndim) :: quantity in Ylm basis
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! SOURCE
+ subroutine chi_matlu(matlu,natom,option,optprt)
+ use defs_basis
+ use defs_wvltypes
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in) :: natom,option,optprt
+!arrays
+ type(matlu_type), intent(inout) :: matlu(natom)
+!Local variables-------------------------------
+!scalars
+ integer :: iatom,im
+ integer :: lpawu,ll,jm,ml1,jc1,ms1,lcor,tndim
+ character(len=500) :: message
+ real(dp) :: xj
+!arrays
+ integer, allocatable :: ind_msml(:,:)
+! type(coeff2c_type), allocatable :: gathermatlu(:)
+ type(coeff2c_type), allocatable :: muchi(:)
+!************************************************************************
+
+ !=====================================
+ ! Allocate matrices 
+ !=====================================
+    
+ ABI_MALLOC(muchi,(natom))
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     tndim=2*(2*matlu(iatom)%lpawu+1)
+     ABI_MALLOC(muchi(iatom)%value,(tndim,tndim))
+     muchi(iatom)%value=czero
+   end if
+ end do 
+
+ do iatom=1,natom
+   lpawu=matlu(iatom)%lpawu
+   if(lpawu.ne.-1) then
+     ll=lpawu
+     lcor=lpawu
+     ABI_MALLOC(ind_msml,(2,-ll:ll))
+     ind_msml=czero
+     !=====================================
+     !Orbital angular momentum matrix along z axis
+     !=====================================
+     if(option==1) then
+       jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1=-1,1
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1 <tndim+1) then
+                muchi(iatom)%value(jc1,jc1) = ml1
+            endif
+          end do
+        end do
+
+     !=====================================
+     !Spin angular momentum matrix along z axis
+     !up spin is first
+     !=====================================
+     else if(option==2) then
+        jc1=0
+       do ms1=1,2
+         do ml1=-ll,ll
+          jc1=jc1+1
+          ind_msml(ms1,ml1)=jc1
+         end do
+       end do
+
+       jc1=0
+       do ms1=-1,1
+         xj=float(ms1)+half 
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1<tndim+1) then
+                if(xj < 0.0 ) then
+                        muchi(iatom)%value(jc1,jc1) = -2*xj
+                else if(xj > 0.0) then
+                        muchi(iatom)%value(jc1,jc1) = -2*xj
+
+                end if
+             endif
+         end do
+       end do
+
+     !=====================================
+     !Total angular momentum matrix along z axis
+     !up spin is first
+     !=====================================
+     else if(option==3) then
+       jc1=0
+       do ms1=-1,1
+         xj=float(ms1)+half 
+         do ml1=-ll,ll
+            jc1=jc1+1
+            if(jc1<tndim+1) then
+                if(xj < 0.0 ) then
+                        muchi(iatom)%value(jc1,jc1) = ml1-2*xj
+                else if(xj > 0.0) then
+                        muchi(iatom)%value(jc1,jc1) = ml1-2*xj
+                end if
+            endif
+         end do
+       end do
+     end if
+
+     if(optprt>2) then
+        if(option==1) then
+          write(message,'(a)') "Orbital angular momentum matrix elements in |m_l,m_s> basis"
+        else if(option==2) then
+          write(message,'(a)') "Spin angular momentum matrix elements in |m_l,m_s> basis"
+        else if(option==3) then
+          write(message,'(a)') "Zeeman angular momentum matrix elements in |m_l,m_s> basis"
+        end if
+        call wrtout(std_out,message,"COLL")
+        do im=1,2*(ll*2+1)
+          write(message,'(6(1x,9(1x,f4.1,",",f4.1)))') (muchi(iatom)%value(im,jm),jm=1,2*(ll*2+1))
+          call wrtout(std_out,message,"COLL")
+        end do
+     end if
+
+   ABI_FREE(ind_msml) 
+
+     !=====================================
+     ! Reshape matrix into matlu format 
+     !=====================================
+
+    call gather_matlu(matlu,muchi(iatom),natom=1,option=-1,prtopt=1)
+
+
+   end if !lpawu
+ end do !atom
+
+     !=====================================
+     ! Deallocate gathermatlu 
+     !=====================================
+
+ do iatom=1,natom
+   if(matlu(iatom)%lpawu.ne.-1) then
+     ABI_FREE(muchi(iatom)%value)
+   end if
+ end do
+ ABI_FREE(muchi)
+ 
+ end subroutine chi_matlu
+
+!!***
+
+END MODULE m_matlu
+
