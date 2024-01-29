@@ -575,7 +575,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    gpu_option_string = "" ; intarr(1)=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
 &              key_value=gpu_option_string)
-   if (tread==1) then
+   if (tread_gpu_option==1) then
      if (len(trim(gpu_option_string))>0) then
        call inupper(gpu_option_string)
        if (trim(gpu_option_string)=="GPU_DISABLED") dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
