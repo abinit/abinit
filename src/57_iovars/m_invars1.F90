@@ -650,15 +650,18 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !gpu_option=ABI_GPU_UNKNOWN means undetermined
  do idtset=1,ndtset_alloc
    if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
-#if defined HAVE_OPENMP_OFFLOAD
-     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
-#elif defined HAVE_KOKKOS && defined HAVE_YAKL
-     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
-#elif defined HAVE_GPU_CUDA
-     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
-#else
+     !FIXME We may want to have GPU enabled by default if a GPU device is available.
+     !      Now, we use CPU to stay safe, as some code section aren't checked for GPU use yet.
+
+!#if defined HAVE_OPENMP_OFFLOAD
+!     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+!#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+!     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+!#elif defined HAVE_GPU_CUDA
+!     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+!#else
      dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
-#endif
+!#endif
    end if
  end do
 
