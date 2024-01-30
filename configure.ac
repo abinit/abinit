@@ -1146,7 +1146,7 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 
 # Check exit
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit
+      exit 2
 fi
 
 
