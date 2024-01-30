@@ -44,6 +44,7 @@
 #The following parameter is present for testing purposes only;
 #It forces the use of linear algebra on the GPU.
 gpu_linalg_limit 0
+gpu_option 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "si_ps.736.pbe"
