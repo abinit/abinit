@@ -975,6 +975,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call timab(561,2,tsec)
 
+   ! call pawdij_print_dij(paw_ij(1)%dijso,paw_ij(1)%cplex_dij,paw_ij(1)%qphase,&
+   !   & 1,my_natom,paw_ij(1)%nspden)
+
  end if
  
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE
