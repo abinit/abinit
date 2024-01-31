@@ -1575,7 +1575,7 @@ subroutine paw_ij_gather(paw_ij_in,paw_ij_gathered,master,comm_atom)
    cplxq_lmn2_size=paw_ij_in(ij)%qphase*lmn2_size
    cplxdijq_lmn2_size=cplxdij_lmn2_size*paw_ij_in(ij)%qphase
    ndij=paw_ij_in(ij)%ndij
-   buf_int_size=buf_int_size+24
+   buf_int_size=buf_int_size+25
    if (paw_ij_in(ij)%has_dij==2) then
      buf_dp_size=buf_dp_size +cplxdijq_lmn2_size*ndij
    end if
@@ -2758,7 +2758,7 @@ subroutine paw_ij_isendreceive_fillbuffer(paw_ij,atmtab_send,atm_indx_send,npaw_
    cplxq_lmn2_size=paw_ij1%qphase*lmn2_size
    cplxdijq_lmn2_size=cplxdij_lmn2_size*paw_ij1%qphase
    ndij=paw_ij1%ndij
-   buf_int_size=buf_int_size+24
+   buf_int_size=buf_int_size+25
    if (paw_ij1%has_dij==2) then
      buf_dp_size=buf_dp_size +cplxdijq_lmn2_size*ndij
    end if
