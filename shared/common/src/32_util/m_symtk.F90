@@ -42,7 +42,7 @@ module m_symtk
                                 ! TODO: This improved version should replace chkgrp.
  public :: chkorthsy            ! Check the orthogonality of the symmetry operations
  public :: chkprimit            ! Check whether the cell is primitive or not.
- public :: symrelrot            ! Transform symmetry matrices to new new coordinate system.
+ public :: symrelrot            ! Transform symmetry matrices to new coordinate system.
  public :: littlegroup_q        ! Determines the symmetry operations by which reciprocal vector q is preserved.
  public :: matpointsym          ! Symmetrizes a 3x3 input matrix using the point symmetry of the input atom
  public :: holocell             ! Examine whether the trial conventional cell described by cell_base
@@ -712,10 +712,11 @@ end subroutine chkorthsy
 !!
 !! OUTPUT
 !!  multi=multiplicity of the unit cell
+!!  translation(nsym)= (optional) set to 1 if the symetry operation is a pure translation
 !!
 !! SOURCE
 
-subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
+subroutine chkprimit(chkprim, multi, nsym, symafm, symrel, is_translation)
 
 !Arguments ------------------------------------
 !scalars
@@ -723,6 +724,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
  integer,intent(out) :: multi
 !arrays
  integer,intent(in) :: symafm(nsym),symrel(3,3,nsym)
+ integer,intent(out),optional :: is_translation(nsym)
 
 !Local variables-------------------------------
 !scalars
@@ -730,6 +732,10 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
  character(len=500) :: msg
 
 !**************************************************************************
+
+ if(present(is_translation))then
+   is_translation(:)=0
+ endif
 
 !Loop over each symmetry operation of the Bravais lattice
 !Find whether it is the identity, or a pure translation,
@@ -744,12 +750,15 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
 &   abs(symrel(3,1,isym))+abs(symrel(1,3,isym))+&
 &   abs(symafm(isym)-1) == 0 )then
      multi=multi+1
+     if(present(is_translation))then
+       is_translation(isym)=1
+     endif
    end if
  end do
 
 !Check whether the cell is primitive
  if(multi>1)then
-   if(chkprim/=0)then
+   if(chkprim>0)then
      write(msg,'(a,a,a,i0,a,a,a,a,a,a,a,a,a)')&
      'According to the symmetry finder, the unit cell is',ch10,&
      'NOT primitive. The multiplicity is ',multi,' .',ch10,&
@@ -758,7 +767,7 @@ subroutine chkprimit(chkprim, multi, nsym, symafm, symrel)
      'Action: either change your unit cell (rprim or angdeg),',ch10,&
      'or set chkprim to 0.'
      ABI_ERROR(msg)
-   else
+   else if(chkprim==0)then
      write(msg,'(3a,i0,a,a,a)')&
       'According to the symmetry finder, the unit cell is',ch10,&
       'not primitive, with multiplicity= ',multi,'.',ch10,&
@@ -788,16 +797,19 @@ end subroutine chkprimit
 !!
 !! SIDE EFFECTS
 !! Input/Output
+!! ierr= (at input) if present, will deal with error code outside of the routine. 
+!!       (at output) return 0 if no problem, 1 otherwise
 !! symrel(3,3,nsym)=symmetry operations in real space in terms
 !! of primitive translations rprimd at input and rprimd_new at output
 !!
 !! SOURCE
 
-subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym)
+subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym, ierr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nsym
+ integer,intent(inout),optional :: ierr
  real(dp),intent(in) :: tolsym
 !arrays
  integer,intent(inout) :: symrel(3,3,nsym)
@@ -805,13 +817,16 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym)
 
 !Local variables-------------------------------
 !scalars
- integer :: ii,isym,jj
+ integer :: ierr_,ii,isym,jj
  real(dp) :: val
  character(len=500) :: msg
 !arrays
+ integer :: symrel_tmp(3,3,nsym)
  real(dp) :: coord(3,3),coordinvt(3,3),matr1(3,3),matr2(3,3),rprimd_invt(3,3)
 
 !**************************************************************************
+
+ ierr_=0
 
 !Compute the coordinates of rprimd_new in the system defined by rprimd(:,:)
  call matr3inv(rprimd,rprimd_invt)
@@ -835,24 +850,41 @@ subroutine symrelrot(nsym, rprimd, rprimd_new, symrel, tolsym)
 &     coordinvt(3,:)*matr1(3,ii)
    end do
 
+!DEBUG
+!  write(std_out, '(a,10i4)')' symrelrot : isym, symrel=',isym,symrel(:,:,isym)
+!  write(std_out, '(a,9es16.6)')' transformed to ', matr2(:,:)
+!ENDDEBUG
+
 !  Check that the new symmetry matrices are made of integers, and store them
    do ii=1,3
      do jj=1,3
        val=matr2(ii,jj)
 !      Need to allow for ten times tolsym, in case of centered Bravais lattices (but do it for all lattices ...)
        if(abs(val-nint(val))>ten*tolsym)then
-         write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
-         'One of the components of symrel is non-integer within 10*tolsym,',ch10,&
-         '  for isym=',isym,ch10,&
-         '  symrel=',matr2(:,1),ch10,&
-         '         ',matr2(:,2),ch10,&
-         '         ',matr2(:,3)
-         ABI_ERROR_CLASS(msg, "TolSymError")
+         ierr_=1
+         if(.not.(present(ierr))) then
+           write(msg,'(2a,a,i3,a,a,3es14.6,a,a,3es14.6,a,a,3es14.6)')&
+            'One of the components of symrel is non-integer within 10*tolsym,',ch10,&
+            '  for isym=',isym,ch10,&
+            '  symrel=',matr2(:,1),ch10,&
+            '         ',matr2(:,2),ch10,&
+            '         ',matr2(:,3)
+           ABI_ERROR_CLASS(msg, "TolSymError")
+         endif
        end if
-       symrel(ii,jj,isym)=nint(val)
+       symrel_tmp(ii,jj,isym)=nint(val)
      end do
    end do
  end do ! isym
+
+ if(ierr_==0)then
+!  Upgrade symrel only if there is no error
+   symrel(:,:,:)=symrel_tmp(:,:,:)
+ endif
+
+ if(present(ierr))then
+   ierr=ierr_
+ endif
 
 end subroutine symrelrot
 !!***

@@ -13,7 +13,7 @@
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! TODO
-!!  1) Test carefully the case of degenerate tethraedron
+!!  1) Test carefully the case of degenerate tetrahedron
 !!  2) Change API so that we can pass the energy mesh instead of omega_min and omega_max
 !!  3) Add table ik_ibz --> tetra_list to avoid cycling inside big loop over ntetra
 !!  4) Add options to get only delta and/or theta ?
@@ -109,7 +109,7 @@ public :: destroy_tetra            ! Free memory.
 public :: tetra_write              ! Write text file (XML format) with tetra info.
 public :: tetralib_has_mpi         ! Return True if the library has been compiled with MPI support.
 public :: tetra_get_onewk          ! Calculate integration weights and their derivatives for a single k-point in the IBZ.
-public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but reveives arbitrary list of frequency points.
+public :: tetra_get_onewk_wvals    ! Similar to tetra_get_onewk_wvalsa but receives arbitrary list of frequency points.
 public :: tetra_get_onetetra_wvals ! Get weights for one tetrahedra with arbitrary list of frequency points
 !!***
 
