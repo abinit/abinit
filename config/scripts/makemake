@@ -542,7 +542,7 @@ if ( opts.run_source ):
   abisrc_cmdline = "./abisrc.py makemake > abisrc.stdout 2> abisrc.stderr"
   print_message(my_name, "---> running %s" % (abisrc_cmdline))
   abisrc_exitcode = os.system(abisrc_cmdline)
-
+   
   if abisrc_exitcode != 0:
     sys.stderr.write("""
        ****************************************************************
