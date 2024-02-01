@@ -852,8 +852,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        end do
      end if
 
-     ! Loop on trials to generate better point symmetries by reying on a primitive cell instead (possibly) of a non-primitive one,
-     do try_primitive=1,2
+     ! Loop on trials to generate better point symmetries by relying on a primitive cell instead (possibly) of a non-primitive one,
+     ! This loop has been disactivated, because it is not clear that one can generate a more complete set of point symmetries 
+     ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would 
+     ! be a large departure from the current implementation. Still, the detection of the existence of the primitive cell
+     ! and the corresponding Bravais lattice is activated.
+     do try_primitive=1,1
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
          nzchempot,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred,&
@@ -932,10 +936,28 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_FREE(translations)
          !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
          call symlatt(bravais_reduced,msym,nptsym,ptsymrel,rprimd_primitive,tolsym)
+         write(msg,'(2a,3(3es16.8,a),2(a,i4,a),3(a,3i4,a),a,i4)')&
+&          ' The cell is not primitive. One could obtain a primitive cell using the following primitive vectors (rprimd) :',ch10,&
+&          rprimd_primitive(1:3,1),ch10,&
+&          rprimd_primitive(1:3,2),ch10,&
+&          rprimd_primitive(1:3,3),ch10,&
+&          ' The Bravais lattice has iholohedry   =',bravais(1),ch10,&
+&          '                         center       =',bravais(2),ch10,&
+&          '                         bravais(3:5) =',bravais(3:5),ch10,&
+&          '                         bravais(6:8) =',bravais(6:8),ch10,&
+&          '                         bravais(9:11)=',bravais(9:11),ch10,&
+&          ' The number of point symmetries is nptsym=',nptsym           
+         ABI_COMMENT(msg)
+
          !Convert the point symmetries to the non-primitive reduced coordinates
          call symrelrot(nsym, rprimd_primitive, rprimd, ptsymrel, tolsym, ierr)
-         !Perhaps not all components of symrel are integers. This generates a return code, and precluded upgrading ptsymrel.
-         if(ierr/=0)exit
+         !Perhaps not all components of symrel are integers. This generates a return code, and precludes upgrading ptsymrel.
+         if(ierr/=0)then
+           write(msg,'(a)')&
+&           ' Not all components of symrel are integers in the primitive cell coordinate system.'
+           ABI_COMMENT(msg)
+           exit
+         endif
        else ! The cell is primitive
          exit
        endif
