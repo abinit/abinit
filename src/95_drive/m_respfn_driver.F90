@@ -214,7 +214,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,coretau_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
+ integer :: gscase,has_dijnd,has_dijsob1,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -681,6 +681,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call paw_ij_nullify(paw_ij)
    has_kxc=0;nkxc1=0;cplex=1
    has_dijnd=0; if(any(abs(dtset%nucdipmom)>tol8)) has_dijnd=1
+   has_dijsob1=0; if(dtset%pawspnorb /= 0) has_dijsob1=1
+   !has_dijsob1=0; if(dtset%pawspnorb>0 .and. dtset%orbmag /= 0) has_dijsob1=1
    has_diju=merge(0,1,dtset%usepawu==0)
    if (rfphon/=0.or.rfelfd==1.or.rfelfd==3.or.rfstrs/=0.or.rf2_dkde/=0) then
      has_kxc=1
@@ -691,7 +693,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
         &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
+&   has_dijso=1,has_dijsob1=has_dijsob1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -975,8 +978,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call timab(561,2,tsec)
 
-   ! call pawdij_print_dij(paw_ij(1)%dijso,paw_ij(1)%cplex_dij,paw_ij(1)%qphase,&
-   !   & 1,my_natom,paw_ij(1)%nspden)
+   call pawdij_print_dij(paw_ij(1)%dijsob1(1,:,:),paw_ij(1)%cplex_dij,paw_ij(1)%qphase,&
+     & 1,my_natom,paw_ij(1)%nspden)
 
  end if
  
