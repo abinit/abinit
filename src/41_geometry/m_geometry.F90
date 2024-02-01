@@ -2837,7 +2837,6 @@ subroutine reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, transla
  integer :: idir,itentative,itrans,replace
  character(len=500) :: msg
 !arrays
- real(dp) :: rprimd_new(3,3),rprimd_old(3,3)
  real(dp) :: trans_cart(3,ntranslat),trans_red(3,ntranslat)
 
 !**************************************************************************
