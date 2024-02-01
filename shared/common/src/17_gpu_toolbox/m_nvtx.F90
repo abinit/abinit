@@ -21,10 +21,6 @@
 #endif
 
 
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 module m_nvtx
   use, intrinsic :: iso_c_binding
   implicit none
@@ -64,6 +60,8 @@ module m_nvtx
      integer(C_INT):: messageType=1  ! NVTX_MESSAGE_TYPE_ASCII     = 1
      type(C_PTR):: message  ! ascii char
   end type nvtxEventAttributes
+
+#ifdef HAVE_GPU_MARKERS
 
   interface nvtxRangePush
      ! push range with custom label and standard color
@@ -140,6 +138,8 @@ contains
   subroutine nvtxEndRange
     call nvtxRangePop
   end subroutine nvtxEndRange
+
+#endif
 
 end module m_nvtx
 !!***

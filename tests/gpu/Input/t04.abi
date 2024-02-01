@@ -44,6 +44,7 @@
 #The following parameter is present for testing purposes only;
 #It forces the use of linear algebra on the GPU.
 gpu_linalg_limit 0
+gpu_option 1
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "si_ps.736.pbe"
@@ -51,6 +52,7 @@ gpu_linalg_limit 0
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.9_elpa
 #%% [files]
 #%% files_to_test =
 #%%   t04.abo, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00
