@@ -121,6 +121,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: shift
  integer                        :: spaceComm_distrb
  integer                        :: n4, n5, n6
+ integer                        :: signs, choice
  logical                        :: with_vxctau
  logical                        :: lcalc_properties
  type(energies_type)            :: energies
@@ -331,9 +332,10 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= tdks%first_step) then
             !Init the arrays
-            call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax, &
+            signs = 2; choice = 1
+            call make_gemm_nonlop(my_ikpt,signs,choice,ham_k%npw_fft_k,ham_k%lmnmax, &
                 ham_k%ntypat, ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, &
-                ham_k%ucvol,  ham_k%ffnl_k, &
+                ham_k%ucvol, ham_k%ffnl_k, &
                 ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k)
          end if
       end if

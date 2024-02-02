@@ -514,17 +514,17 @@ contains
 !!
 !! SOURCE
 
- subroutine make_gemm_nonlop_ompgpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert,compute_grad_strain,compute_grad_atom) ! Optional parameters
+ subroutine make_gemm_nonlop_ompgpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
+&                            idir_pert) ! Optional parameters
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
+  integer, intent(in) :: signs,choice
   integer, intent(in), optional :: idir_pert
-  logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
@@ -535,10 +535,9 @@ contains
 ! *************************************************************************
 
   call free_gemm_nonlop_kpt_ompgpu()
-  call make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert=idir_pert,&
-&                            compute_grad_strain=compute_grad_strain,compute_grad_atom=compute_grad_atom)
+  call make_gemm_nonlop(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+  &                     ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
+  &                     idir_pert=idir_pert)
   cplex=2;if (istwf_k>1) cplex=1
   call alloc_gemm_nonlop_kpt_ompgpu(ikpt,cplex)
 
@@ -1710,17 +1709,17 @@ contains
  end subroutine destroy_gemm_nonlop_ompgpu
 !!***
 
- subroutine make_gemm_nonlop_ompgpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert,compute_grad_strain,compute_grad_atom) ! Optional parameters
+ subroutine make_gemm_nonlop_ompgpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
+&                            idir_pert) ! Optional parameters
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
+  integer, intent(in) :: signs,choice
   integer, intent(in), optional :: idir_pert
-  logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
@@ -1729,7 +1728,6 @@ contains
 
   ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
   ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-  ABI_UNUSED((/compute_grad_strain,compute_grad_atom/))
   ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
 
  end subroutine make_gemm_nonlop_ompgpu
