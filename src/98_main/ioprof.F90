@@ -27,7 +27,6 @@
 program ioprof
 
  use defs_basis
- use m_build_info
  use m_errors
  use m_xmpi
  use m_wfk
@@ -35,6 +34,7 @@ program ioprof
  use m_hdr
  use netcdf
 
+ use m_build_info,     only : abinit_version
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit

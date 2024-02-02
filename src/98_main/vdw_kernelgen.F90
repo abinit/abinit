@@ -35,7 +35,6 @@ program vdw_kernelgen
 
  use defs_basis
  use defs_abitypes
- use m_build_info
  use m_errors
  use m_xc_vdw
  use m_mpinfo
@@ -46,8 +45,9 @@ program vdw_kernelgen
  use mpi
 #endif
 
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_io_tools,    only : flush_unit
+ use m_build_info,   only : abinit_version
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_io_tools,     only : flush_unit
 
  implicit none
 

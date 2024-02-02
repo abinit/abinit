@@ -30,7 +30,6 @@ program multibinit
 
   use defs_basis
   use defs_abitypes
-  use m_build_info
   use m_xmpi
   use m_xomp
   use m_abicore
@@ -42,6 +41,7 @@ program multibinit
   use m_effective_potential_file
   use m_abihist
 
+  use m_build_info, only : abinit_version
   use m_specialmsg, only : specialmsg_getcount
   use m_io_tools,   only : flush_unit, open_file
   use m_time,       only : asctime, timein

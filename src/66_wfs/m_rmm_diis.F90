@@ -1367,6 +1367,9 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
          ig = 1 + (iband - ib_start) * npwsp
          do ib=1,nband
            ig0 = 1 + npwsp * (ib - 1)
+#if defined FC_NVHPC
+if (ig<0) write(100,*) ig,ig0,h_ij(1,ib,iband),cg(1,ig0),ghc_bk(1,ig)
+#endif
            h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc_bk(1,ig)
          end do
        end if
