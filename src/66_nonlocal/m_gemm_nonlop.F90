@@ -319,59 +319,21 @@ contains
   if (nprojs>0) gemm_nonlop_kpt(ikpt)%nprojs = nprojs
   if (ngrads>0) gemm_nonlop_kpt(ikpt)%ngrads = ngrads
 
-  if(gemm_nonlop_is_distributed) then
-    rank = xmpi_comm_rank(xmpi_world); nprocs = xmpi_comm_size(xmpi_world)
-    is_last_rank = (rank==nprocs-1)
-    if(gemm_nonlop_block_comm/=xmpi_comm_null) call xmpi_comm_free(gemm_nonlop_block_comm)
-    if(gemm_nonlop_nblocks==1) gemm_nonlop_nblocks=nprocs
-    write(std_out,*) "Splitting on ", gemm_nonlop_nblocks
-    call xmpi_comm_split(xmpi_world, rank/(nprocs/gemm_nonlop_nblocks), rank, gemm_nonlop_block_comm, ierr)
-    if(ierr/=0) ABI_BUG("Bug split!")
-  end if
-  rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
-  is_last_rank = (rank==nprocs-1)
-
-  if(gemm_nonlop_is_distributed) then
-    nprojs_blk = nprojs / nprocs
-    nprojs_last_blk = nprojs_blk + modulo(nprojs,nprojs_blk)
-    gemm_nonlop_kpt(ikpt)%nprojs_blk = nprojs_blk
-    gemm_nonlop_kpt(ikpt)%nprojs_last_blk = nprojs_last_blk
-    if(is_last_rank) then
-      nprojs_my_blk = nprojs_last_blk
-    else
-      nprojs_my_blk = nprojs_blk
-    end if
-  else
-    nprojs_last_blk = nprojs
-    nprojs_my_blk = nprojs
-    nprojs_blk = nprojs
-  end if
-
-  if(gemm_nonlop_is_distributed .and. ngrads>0) then
-    !Temporary buffer to help distribute dprojs correctly (and easily)
-    if(istwf_k <= 1) then
-      ABI_MALLOC(dprojs_tmp, (2, npw, nprojs_my_blk*ngrads*2))
-    else
-      ABI_MALLOC(dprojs_r_tmp, (1, npw, nprojs_my_blk*ngrads*2))
-      ABI_MALLOC(dprojs_i_tmp, (1, npw, nprojs_my_blk*ngrads*2))
-    end if
-  end if
-
   if(istwf_k <= 1) then
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, nprojs_last_blk))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, nprojs))
     gemm_nonlop_kpt(ikpt)%projs = zero
     if(ngrads>0) then
-      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs_last_blk*ngrads))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ngrads))
       gemm_nonlop_kpt(ikpt)%dprojs = zero
     end if
   else
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, nprojs_last_blk))
-    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, nprojs_last_blk))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, nprojs))
+    ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, nprojs))
     gemm_nonlop_kpt(ikpt)%projs_r = zero
     gemm_nonlop_kpt(ikpt)%projs_i = zero
     if(ngrads>0) then
-      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs_last_blk*ngrads))
-      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs_last_blk*ngrads))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ngrads))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs*ngrads))
       gemm_nonlop_kpt(ikpt)%dprojs_r = zero
       gemm_nonlop_kpt(ikpt)%dprojs_i = zero
     end if
@@ -387,13 +349,6 @@ contains
     kpg => kpg_k
   end if
 
-  if(gemm_nonlop_is_distributed) then
-    ibeg = rank*nprojs_blk+1
-    iend = ibeg+nprojs_my_blk
-    shift_do = 0
-    lmn_grad_beg = -1
-  end if
-
   shift = 0 ; shift_grad = 0
   lmn_beg = 1
 
@@ -402,20 +357,6 @@ contains
     nlmn_o = nlmn
 
     do ia = 1, nattyp(itypat)
-
-      ! In distributed mode, loops are skipped until reach the section
-      ! of "ilmn" to be stored by local rank
-      if(gemm_nonlop_is_distributed) then
-        if(shift_do+nlmn < ibeg) then
-          shift_do = shift_do + nlmn
-          iaph3d = iaph3d + 1
-          cycle
-        end if
-
-        lmn_beg = max(1,ibeg-shift_do)
-        if(lmn_grad_beg==-1) lmn_grad_beg = (lmn_beg-1)*ngrads
-        if(shift_do+nlmn > iend) nlmn = iend - shift_do - 1
-      end if
 
       !! build atom_projs, from opernlb
       !! P = 4pi/sqrt(ucvol)* conj(diag(ph3d)) * ffnl * diag(parity), with parity = (-i)^l
@@ -468,18 +409,18 @@ contains
       do ilmn=1,nlmn_o
         temp = atom_projs(1, :, ilmn)
         atom_projs(1, :, ilmn) = atom_projs(1, :, ilmn) * ph3d_k(1, :, iaph3d) &
-&                              + atom_projs(2, :, ilmn) * ph3d_k(2, :, iaph3d)
+        &                      + atom_projs(2, :, ilmn) * ph3d_k(2, :, iaph3d)
         atom_projs(2, :, ilmn) = atom_projs(2, :, ilmn) * ph3d_k(1, :, iaph3d) &
-&                              - temp                   * ph3d_k(2, :, iaph3d)
+        &                      - temp                   * ph3d_k(2, :, iaph3d)
       end do
       if (ndprojs>0) then
         do ilmn=1,nlmn_o
           do idir=1,ndprojs
             temp = atom_dprojs(1, :, idir,ilmn)
             atom_dprojs(1, :, idir,ilmn) = atom_dprojs(1, :, idir,ilmn) * ph3d_k(1, :, iaph3d) &
-&                                        + atom_dprojs(2, :, idir,ilmn) * ph3d_k(2, :, iaph3d)
+            &                            + atom_dprojs(2, :, idir,ilmn) * ph3d_k(2, :, iaph3d)
             atom_dprojs(2, :, idir,ilmn) = atom_dprojs(2, :, idir,ilmn) * ph3d_k(1, :, iaph3d) &
-&                                        - temp                         * ph3d_k(2, :, iaph3d)
+            &                            - temp                         * ph3d_k(2, :, iaph3d)
           end do
         end do
       end if
@@ -495,211 +436,113 @@ contains
 
       !! Handling dprojs
 
-      ! In distributed case, we compute values for all nlmn*ngrads in dprojs_tmp.
-      ! dprojs will be filled by "cutting" relevant values out
       if(ngrads>0) then
-        if(gemm_nonlop_is_distributed) then
-          if(istwf_k <= 1) then
-            igrad=0
-            if(my_compute_grad_strain) then
-              do idir=1,6
-                idir1=alpha(idir);idir2=beta(idir)
-                do ilmn=1,nlmn_o
-                  do ipw=1,npw
-                    dprojs_tmp(1:2, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-            if(my_compute_grad_atom) then
-              do idir=1,3
-                do ilmn=1,nlmn_o
-                  do ipw=1,npw
-                    dprojs_tmp(1, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                    dprojs_tmp(2, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-
-          else ! istwf_k>1
-            igrad=0
-            if(my_compute_grad_strain) then
-              do idir=1,6
-                idir1=alpha(idir);idir2=beta(idir)
-                do ilmn=1,nlmn_o
-                  do ipw=1,npw
-                    dprojs_r_tmp(1, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
-
-                    dprojs_i_tmp(1, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-            if(my_compute_grad_atom) then
-              do idir=1,3
-                do ilmn=1,nlmn
-                  do ipw=1,npw
-                    dprojs_r_tmp(1, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                    dprojs_i_tmp(1, ipw, shift_grad+nlmn_o*igrad+ilmn) = &
-  &                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-          end if ! istwf_k
-
-        else ! non-distributed case
-
-          if(istwf_k <= 1) then
-            igrad=0
-            if(my_compute_grad_strain .and. .not. present(idir_pert)) then
-              do idir=1,6
-                idir1=alpha(idir);idir2=beta(idir)
-                do ilmn=lmn_beg,nlmn
-                  do ipw=1,npw
-                    gemm_nonlop_kpt(ikpt)%dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-            if(my_compute_grad_atom .and. .not. present(idir_pert)) then
-              do idir=1,3
-                do ilmn=lmn_beg,nlmn
-                  do ipw=1,npw
-                    gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                    gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-            if(my_compute_grad_atom .and. present(idir_pert)) then
-              !FIXME Ugly workaround so it works on many tasks
-              if(rank/=0) write(std_out,*) idir_pert_
+        if(istwf_k <= 1) then
+          igrad=0
+          if(my_compute_grad_strain .and. .not. present(idir_pert)) then
+            do idir=1,6
+              idir1=alpha(idir);idir2=beta(idir)
               do ilmn=lmn_beg,nlmn
                 do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
-                  gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-&                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
+                  gemm_nonlop_kpt(ikpt)%dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                  &     -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                  &     +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
                 end do
               end do
               igrad=igrad+1
-            end if
-            if(my_compute_grad_strain .and. present(idir_pert)) then
+            end do
+          end if
+          if(my_compute_grad_atom .and. .not. present(idir_pert)) then
+            do idir=1,3
               do ilmn=lmn_beg,nlmn
                 do ipw=1,npw
                   gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                -atom_dprojs(1, ipw, 1, ilmn)
+                  &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
                   gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                -atom_dprojs(2, ipw, 1, ilmn)
+                  &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
                 end do
               end do
               igrad=igrad+1
-            end if
-            if(compute_pert) then
+            end do
+          end if
+          if(my_compute_grad_atom .and. present(idir_pert)) then
+            !FIXME Ugly workaround so it works on many tasks
+            if(rank/=0) write(std_out,*) idir_pert_
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
+                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
+              end do
+            end do
+            igrad=igrad+1
+          end if
+          if(my_compute_grad_strain .and. present(idir_pert)) then
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -atom_dprojs(1, ipw, 1, ilmn)
+                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -atom_dprojs(2, ipw, 1, ilmn)
+              end do
+            end do
+            igrad=igrad+1
+          end if
+          if(compute_pert) then
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     +atom_dprojs(1, ipw, 1, ilmn)
+                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     +atom_dprojs(2, ipw, 1, ilmn)
+              end do
+            end do
+            igrad=igrad+1
+          end if
+
+        else ! istwf_k>1
+          igrad=0
+          if(my_compute_grad_strain) then
+            do idir=1,6
+              idir1=alpha(idir);idir2=beta(idir)
               do ilmn=lmn_beg,nlmn
                 do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                +atom_dprojs(1, ipw, 1, ilmn)
-                  gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                +atom_dprojs(2, ipw, 1, ilmn)
+                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                  &     -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                  &     +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
+
+                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                  &     -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                  &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
                 end do
               end do
               igrad=igrad+1
-            end if
-
-          else ! istwf_k>1
-            igrad=0
-            if(my_compute_grad_strain) then
-              do idir=1,6
-                idir1=alpha(idir);idir2=beta(idir)
-                do ilmn=lmn_beg,nlmn
-                  do ipw=1,npw
-                    gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
-
-                    gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-  &                        +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                  end do
+            end do
+          end if
+          if(my_compute_grad_atom) then
+            do idir=1,3
+              do ilmn=lmn_beg,nlmn
+                do ipw=1,npw
+                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                  &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                  &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
                 end do
-                igrad=igrad+1
               end do
-            end if
-            if(my_compute_grad_atom) then
-              do idir=1,3
-                do ilmn=lmn_beg,nlmn
-                  do ipw=1,npw
-                    gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                    gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-  &                  -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  end do
-                end do
-                igrad=igrad+1
-              end do
-            end if
-          end if ! istwf_k
-        end if ! gemm_nonlop_is_distributed
+              igrad=igrad+1
+            end do
+          end if
+        end if ! istwf_k
       end if ! ngrads
 
       iaph3d = iaph3d + 1
       shift_grad = shift_grad + ngrads*nlmn_o
+      shift = shift + nlmn
 
-      if(gemm_nonlop_is_distributed) then
-        shift = shift + nlmn - (lmn_beg-1)
-        shift_do = shift_do + nlmn
-        if(shift_do >= iend - 1) exit
-      else
-        shift = shift + nlmn
-      end if
     end do
-    if(gemm_nonlop_is_distributed .and. shift_do >= iend - 1) exit
   end do
 
-  ! Filling dprojs by extracting values from dprojs_tmp
-  if(gemm_nonlop_is_distributed .and. ngrads>0) then
-    shift_grad = lmn_grad_beg
-    if(istwf_k <= 1) then
-      gemm_nonlop_kpt(ikpt)%dprojs(1:2, 1:npw, 1:ngrads*nprojs_my_blk) = &
-      &      dprojs_tmp(1:2, 1:npw, shift_grad+1:shift_grad+ngrads*nprojs_my_blk)
-    else
-      gemm_nonlop_kpt(ikpt)%dprojs_r(1, 1:npw, 1:ngrads*nprojs_my_blk) = &
-      &      dprojs_r_tmp(1, 1:npw, shift_grad+1:shift_grad+ngrads*nprojs_my_blk)
-      gemm_nonlop_kpt(ikpt)%dprojs_i(1, 1:npw, 1:ngrads*nprojs_my_blk) = &
-      &      dprojs_i_tmp(1, 1:npw, shift_grad+1:shift_grad+ngrads*nprojs_my_blk)
-    end if
-  end if
-
-  if(gemm_nonlop_is_distributed .and. ngrads>0) then
-    if(istwf_k <= 1) then
-      ABI_FREE(dprojs_tmp)
-    else
-      ABI_FREE(dprojs_r_tmp)
-      ABI_FREE(dprojs_i_tmp)
-    end if
-  end if
   ABI_FREE(atom_projs)
   ABI_FREE(temp)
   if (allocated(atom_dprojs)) then
