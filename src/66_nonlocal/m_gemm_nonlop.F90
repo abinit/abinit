@@ -241,17 +241,16 @@ contains
 !! INPUTS
 !!
 !! SOURCE
- subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert,&
-&                            compute_grad_strain,compute_grad_atom) ! Optional parameters
+ subroutine make_gemm_nonlop(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
+&                            idir_pert) ! Optional parameters
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax, ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
-  logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
+  integer, intent(in) :: signs,choice
   integer, intent(in), optional :: idir_pert
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
@@ -261,47 +260,22 @@ contains
 
   integer :: nprojs,ndprojs,ngrads
 
-  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-  integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
-  integer :: il, ipw, idir, idir1, idir2, nkpg_local, ffnl_dir, dimffnl
-  logical :: parity,my_compute_grad_strain,my_compute_grad_atom,compute_pert
-  real(dp):: wt
-  real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
-  real(dp),pointer :: kpg(:,:)
-  integer :: rank, nprocs, ierr
+  integer :: rank, nprocs, ierr, itypat
   integer :: nprojs_blk, nprojs_last_blk, nprojs_my_blk
-  integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
   integer :: idir_beg,idir_end,idir_pert_
   logical :: is_last_rank
   real(dp),allocatable :: dprojs_tmp(:,:,:),dprojs_r_tmp(:,:,:),dprojs_i_tmp(:,:,:)
 
 ! *************************************************************************
 
-  my_compute_grad_strain=.false. ; if (present(compute_grad_strain)) my_compute_grad_strain=compute_grad_strain
-  my_compute_grad_atom=.false. ; if (present(compute_grad_atom)) my_compute_grad_atom=compute_grad_atom
   ABI_CHECK(size(ph3d_k)>0,'nloalg(2)<0 not compatible with use_gemm_nonlop=1!')
 !  ABI_CHECK((.not.my_compute_grad_strain).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
 !  ABI_CHECK((.not.my_compute_grad_atom).or.size(kpg_k)>0,"kpg_k should be allocated to compute gradients!")
   idir_pert_=0; if(present(idir_pert)) idir_pert_=idir_pert
-  compute_pert=.false.; if(present(idir_pert) .and. (.not. my_compute_grad_atom .and. .not. my_compute_grad_strain)) compute_pert=.true. !FIXME Need refacto
 
-  iaph3d = 1
-  wt=four_pi/sqrt(ucvol)
-  dimffnl = size(ffnl_k, dim=2)
-  ffnl_dir=1; if(dimffnl>2) ffnl_dir=idir_pert_
-
-  ABI_MALLOC(atom_projs, (2, npw, lmnmax))
-  if (my_compute_grad_strain .and. .not. present(idir_pert)) then
-    ndprojs = 3
-    ABI_MALLOC(atom_dprojs, (2, npw, ndprojs, lmnmax))
-  else if(compute_pert .or. my_compute_grad_strain) then
-    ndprojs = 1
-    ABI_MALLOC(atom_dprojs, (2, npw, ndprojs, lmnmax))
-  else
-    ndprojs = 0
+  if(present(idir_pert)) then
+    ABI_CHECK(signs==2,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
   end if
-
-  ABI_MALLOC(temp, (npw))
 
   call free_gemm_nonlop_ikpt(ikpt)
 
@@ -310,11 +284,12 @@ contains
   do itypat=1,ntypat
     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
   end do
-  if(present(idir_pert)) then
+  if(signs==2) then
     ngrads=ngrads+1
-  else
-    if (my_compute_grad_strain) ngrads=ngrads+6
-    if (my_compute_grad_atom) ngrads=ngrads+3
+  else ! signs==1
+    if (choice==3) ngrads=ngrads+6
+    if (choice==2) ngrads=ngrads+3
+    if (choice==23) ngrads=ngrads+9
   end if
   if (nprojs>0) gemm_nonlop_kpt(ikpt)%nprojs = nprojs
   if (ngrads>0) gemm_nonlop_kpt(ikpt)%ngrads = ngrads
@@ -339,9 +314,82 @@ contains
     end if
   end if
 
+  call prep_projectors(npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k,&
+  &                    ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k,&
+  &                    nprojs,ngrads,choice,signs,idir_pert_,&
+  &                    gemm_nonlop_kpt(ikpt)%projs,&
+  &                    gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
+  &                    gemm_nonlop_kpt(ikpt)%dprojs,&
+  &                    gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i)
+
+ end subroutine make_gemm_nonlop
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gemm_nonlop/prep_projectors
+!! NAME
+!! prep_projectors
+!!
+!! FUNCTION
+!! Prepare projectors array and derivatives for given choice
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine prep_projectors(npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k,&
+ &                          ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k,&
+ &                          nprojs,ngrads,choice,signs,idir_pert,&
+ &                          projs,projs_r,projs_i,&
+ &                          dprojs,dprojs_r,dprojs_i)
+
+  integer, intent(in) :: npw, lmnmax, ntypat
+  integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
+  integer, intent(in) :: nattyp(ntypat)
+  integer, intent(in) :: istwf_k
+  integer, intent(in) :: nprojs,ngrads,choice,signs,idir_pert
+  real(dp), intent(in) :: ucvol
+  real(dp), intent(in) :: ffnl_k(:,:,:,:)
+  real(dp), intent(in) :: ph3d_k(:,:,:)
+  real(dp), intent(in) :: kpt_k(:)
+  real(dp), intent(in), target :: kpg_k(:,:)
+  real(dp),intent(out) :: projs(2,npw,nprojs),dprojs(2,npw,nprojs*ngrads)
+  real(dp),intent(out) :: projs_r(1,npw,nprojs),dprojs_r(1,npw,nprojs*ngrads)
+  real(dp),intent(out) :: projs_i(1,npw,nprojs),dprojs_i(1,npw,nprojs*ngrads)
+
+  logical :: parity
+  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+  integer :: ndprojs
+  integer :: il, ipw, idir, idir1, idir2, nkpg_local, ffnl_dir, dimffnl
+  integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
+  integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
+  real(dp):: wt
+  real(dp),allocatable :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:)
+  real(dp),pointer :: kpg(:,:)
+
+
+  iaph3d = 1
+  wt=four_pi/sqrt(ucvol)
+  dimffnl = size(ffnl_k, dim=2)
+  ffnl_dir=1; if(dimffnl>2) ffnl_dir=idir_pert
+
+  ndprojs = 0
+  if (signs==1 .and. (choice==3 .or. choice==23)) then
+    ndprojs = 3
+  else if(signs==2 .and. (choice==5 .or. choice==51 .or. choice==3)) then
+    ndprojs = 1
+  end if
+
+  ABI_MALLOC(atom_projs, (2, npw, lmnmax))
+  if (ndprojs>0) then
+    ABI_MALLOC(atom_dprojs, (2, npw, ndprojs, lmnmax))
+  end if
+
+  ABI_MALLOC(temp, (npw))
+
   ! Compute (k+G) vectors if needed
   nkpg_local=0
-  if ((my_compute_grad_strain.or.my_compute_grad_atom).and.size(kpg_k)==0) then
+  if ((choice==2 .or. choice==3 .or. choice==23).and.size(kpg_k)==0) then
     nkpg_local=3
     ABI_MALLOC(kpg,(npw,nkpg_local))
     call mkkpg(kg_k,kpg,kpt_k,nkpg_local,npw)
@@ -369,17 +417,16 @@ contains
         atom_projs(1,ipw, 1:nlmn_o) = wt * ffnl_k(ipw, 1, 1:nlmn_o, itypat)
       end do
       if (ndprojs>0) atom_dprojs(:,:,:,:) = zero
-      if (my_compute_grad_strain .and. .not. present(idir_pert)) then
+      if (signs==1 .and. (choice==3 .or. choice==23)) then
         do ipw=1, npw
           atom_dprojs(1,ipw, 1:ndprojs, 1:nlmn_o) = wt * ffnl_k(ipw, 2:ndprojs+1, 1:nlmn_o, itypat)
         end do
       end if
-      if (compute_pert .or. (my_compute_grad_strain .and. present(idir_pert)) ) then
+      if (signs==2 .and. (choice==3 .or. choice==5 .or. choice==51)) then
         do ipw=1, npw
           atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl_k(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
         end do
       end if
-
 
       ! multiply by (-i)^l
       do ilmn=1,nlmn_o
@@ -425,116 +472,119 @@ contains
         end do
       end if
 
+
       !! atom_projs is built, copy to projs
 
       if(istwf_k <= 1) then
-        gemm_nonlop_kpt(ikpt)%projs(1:2, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(:, :, lmn_beg:nlmn)
+        projs(1:2, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(:, :, lmn_beg:nlmn)
       else ! istwf_k>1
-        gemm_nonlop_kpt(ikpt)%projs_r(1, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(1, :, lmn_beg:nlmn)
-        gemm_nonlop_kpt(ikpt)%projs_i(1, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(2, :, lmn_beg:nlmn)
+        projs_r(1, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(1, :, lmn_beg:nlmn)
+        projs_i(1, :, shift+1:shift+(nlmn-(lmn_beg-1))) = atom_projs(2, :, lmn_beg:nlmn)
       end if
 
       !! Handling dprojs
 
-      if(ngrads>0) then
+      igrad=0
+
+      if(signs==1 .and. (choice==3 .or. choice==23)) then
         if(istwf_k <= 1) then
-          igrad=0
-          if(my_compute_grad_strain .and. .not. present(idir_pert)) then
-            do idir=1,6
-              idir1=alpha(idir);idir2=beta(idir)
-              do ilmn=lmn_beg,nlmn
-                do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-                  &     +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                end do
-              end do
-              igrad=igrad+1
-            end do
-          end if
-          if(my_compute_grad_atom .and. .not. present(idir_pert)) then
-            do idir=1,3
-              do ilmn=lmn_beg,nlmn
-                do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                end do
-              end do
-              igrad=igrad+1
-            end do
-          end if
-          if(my_compute_grad_atom .and. present(idir_pert)) then
-            !FIXME Ugly workaround so it works on many tasks
-            if(rank/=0) write(std_out,*) idir_pert_
+          do idir=1,6
+            idir1=alpha(idir);idir2=beta(idir)
             do ilmn=lmn_beg,nlmn
               do ipw=1,npw
-                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
-                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir_pert_)*two_pi
+                dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                &     +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
             end do
             igrad=igrad+1
-          end if
-          if(my_compute_grad_strain .and. present(idir_pert)) then
-            do ilmn=lmn_beg,nlmn
-              do ipw=1,npw
-                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     -atom_dprojs(1, ipw, 1, ilmn)
-                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     -atom_dprojs(2, ipw, 1, ilmn)
-              end do
-            end do
-            igrad=igrad+1
-          end if
-          if(compute_pert) then
-            do ilmn=lmn_beg,nlmn
-              do ipw=1,npw
-                gemm_nonlop_kpt(ikpt)%dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     +atom_dprojs(1, ipw, 1, ilmn)
-                gemm_nonlop_kpt(ikpt)%dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     +atom_dprojs(2, ipw, 1, ilmn)
-              end do
-            end do
-            igrad=igrad+1
-          end if
-
+          end do
         else ! istwf_k>1
-          igrad=0
-          if(my_compute_grad_strain) then
-            do idir=1,6
-              idir1=alpha(idir);idir2=beta(idir)
-              do ilmn=lmn_beg,nlmn
-                do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-                  &     +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
+          do idir=1,6
+            idir1=alpha(idir);idir2=beta(idir)
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                &     +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
 
-                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-                  &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                end do
+                dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
-              igrad=igrad+1
             end do
-          end if
-          if(my_compute_grad_atom) then
-            do idir=1,3
-              do ilmn=lmn_beg,nlmn
-                do ipw=1,npw
-                  gemm_nonlop_kpt(ikpt)%dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                  gemm_nonlop_kpt(ikpt)%dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                  &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
-                end do
+            igrad=igrad+1
+          end do
+        end if
+      end if
+
+
+      if(signs==1 .and. (choice==2 .or. choice==23)) then
+        if(istwf_k <= 1) then
+          do idir=1,3
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
               end do
-              igrad=igrad+1
             end do
-          end if
-        end if ! istwf_k
-      end if ! ngrads
+            igrad=igrad+1
+          end do
+        else ! istwf_k>1
+          do idir=1,3
+            do ilmn=lmn_beg,nlmn
+              do ipw=1,npw
+                dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir)*two_pi
+                dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir)*two_pi
+              end do
+            end do
+            igrad=igrad+1
+          end do
+        end if
+      end if
+
+
+      if(signs==2 .and. (choice==2)) then
+        do ilmn=lmn_beg,nlmn
+          do ipw=1,npw
+            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     +atom_projs(2, ipw, ilmn)*kpg(ipw,idir_pert)*two_pi
+            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     -atom_projs(1, ipw, ilmn)*kpg(ipw,idir_pert)*two_pi
+          end do
+        end do
+        igrad=igrad+1
+      end if
+
+
+      if(signs==2 .and. (choice==3)) then
+        do ilmn=lmn_beg,nlmn
+          do ipw=1,npw
+            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     -atom_dprojs(1, ipw, 1, ilmn)
+            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     -atom_dprojs(2, ipw, 1, ilmn)
+          end do
+        end do
+        igrad=igrad+1
+      end if
+
+
+      if(signs==2 .and. (choice==5 .or. choice==51)) then
+        do ilmn=lmn_beg,nlmn
+          do ipw=1,npw
+            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     +atom_dprojs(1, ipw, 1, ilmn)
+            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            &     +atom_dprojs(2, ipw, 1, ilmn)
+          end do
+        end do
+        igrad=igrad+1
+      end if
 
       iaph3d = iaph3d + 1
       shift_grad = shift_grad + ngrads*nlmn_o
@@ -551,7 +601,7 @@ contains
   if (nkpg_local>0) then
     ABI_FREE(kpg)
   end if
- end subroutine make_gemm_nonlop
+ end subroutine prep_projectors
 !!***
 
 !----------------------------------------------------------------------
