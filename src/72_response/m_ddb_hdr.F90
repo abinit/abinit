@@ -4448,7 +4448,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
    do iblok=1,nblok
 
      read(unddb,*)
-     read(unddb, '(a32,12x,i8)' )blkname,nelmts
+     read(unddb, '(a32,12x,i12)' )blkname,nelmts
      if(blkname==' 2nd derivatives (non-stat.)  - ' .or.  blkname==' 2rd derivatives (non-stat.)  - ')then
        blktyp=BLKTYP_d2E_ns
      else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then

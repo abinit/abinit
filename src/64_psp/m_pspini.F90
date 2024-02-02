@@ -966,7 +966,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
                        psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d)
      else
        pspcod = 12
-       call upf2_to_abinit(ipsp, psps%filpsp(ipsp), znucl, zion, pspxc, lmax, lloc, mmax, &
+       call upf2_to_abinit(ipsp, psps%filpsp(ipsp), dtset%vloc_rcut, znucl, zion, pspxc, lmax, lloc, mmax, &
                            psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj, vlspl, xccc1d, nctab, maxrad)
 
        if (nc_debug) then

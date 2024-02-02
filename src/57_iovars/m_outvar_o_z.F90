@@ -152,7 +152,8 @@ contains
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' ';if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
  natom=dtsets(1)%natom
  nimage=dtsets(1)%nimage
@@ -1122,6 +1123,11 @@ contains
  dprarr(1,:)=dtsets(:)%tolwfr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr','DPR',0)
 
+ if ( any( abs(dtsets(:)%tolwfr-dtsets(:)%tolwfr_diago)>tiny(zero) ) ) then ! output tolwfr_diago only if different than tolwfr
+   dprarr(1,:)=dtsets(:)%tolwfr_diago
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tolwfr_diago','DPR',0)
+ end if
+
  dprarr(1,:)=dtsets(:)%tphysel
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'tphysel','ENE',0)
 
@@ -1245,9 +1251,6 @@ contains
  intarr(1,0:ndtset_alloc)=dtsets(0:ndtset_alloc)%useylm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'useylm','INT',0,firstchar=firstchar_gpu)
 
- intarr(1,:)=dtsets(:)%use_gpu_cuda
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gpu_cuda','INT',0,firstchar=firstchar_gpu)
-
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
 
@@ -1352,6 +1355,9 @@ contains
 
  dprarr(1,:)=dtsets(:)%vis
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vis','DPR',0)
+
+ dprarr(1,:)=dtsets(:)%vloc_rcut
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'vloc_rcut','LEN',0)
 
  dprarr(1,:)=dtsets(:)%vprtrb(1)
  dprarr(2,:)=dtsets(:)%vprtrb(2)
