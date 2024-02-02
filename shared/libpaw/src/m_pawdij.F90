@@ -2860,96 +2860,71 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
    LIBPAW_BUG(msg)
  end if
 
- dijsob1 = zero
-
 !------------------------------------------------------------------------
 !----------- Allocations and initializations
 !------------------------------------------------------------------------
 
-! !Eventually compute <Phi_i|1/r.dV/dr|Phi_j>*alpha2/2*Y_00 (for spin-orbit)
-!  LIBPAW_ALLOCATE(dv1dr,(mesh_size))
-!  LIBPAW_ALLOCATE(dijso_rad,(ij_size))
-!  LIBPAW_ALLOCATE(ff,(mesh_size))
-!  fact=one/sqrt(four_pi) ! Y_00
-!  if (pawxcdev/=0) then
-!    if (nspden==1) then
-!      ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
-!    else
-!      ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
-!    end if
-!  else
-!    ff(1:mesh_size)=zero
-!    if (nspden==1) then
-!      do ipts=1,angl_size
-!        ff(1:mesh_size)=ff(1:mesh_size) &
-! &          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-!      end do
-!    else
-!      do ipts=1,angl_size
-!        ff(1:mesh_size)=ff(1:mesh_size) &
-! &       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
-! &       *pawang%angwgth(ipts)
-!      end do
-!    end if
-!    ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
-!  end if
-!  ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
-!  call nderiv_gen(dv1dr,ff,pawrad)
-!  dv1dr(2:mesh_size)=HalfFineStruct2*(one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-! & *dv1dr(2:mesh_size)/pawrad%rad(2:mesh_size)
-!  call pawrad_deducer0(dv1dr,mesh_size,pawrad)
-!  do kln=1,ij_size
-!    ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
-!    call simp_gen(dijso_rad(kln),ff,pawrad)
-!  end do
-!  LIBPAW_DEALLOCATE(dv1dr)
-!  LIBPAW_DEALLOCATE(ff)
-!  dijso_rad(:)=spnorbscl*dijso_rad(:)
+!Eventually compute <Phi_i|r.dV/dr|Phi_j>*alpha2/4*Y_00 (for spin-orbit B1)
+ LIBPAW_ALLOCATE(dv1dr,(mesh_size))
+ LIBPAW_ALLOCATE(dijso_rad,(ij_size))
+ LIBPAW_ALLOCATE(ff,(mesh_size))
+ fact=one/sqrt(four_pi) ! Y_00
+ if (pawxcdev/=0) then
+   if (nspden==1) then
+     ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
+   else
+     ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
+   end if
+ else
+   ff(1:mesh_size)=zero
+   if (nspden==1) then
+     do ipts=1,angl_size
+       ff(1:mesh_size)=ff(1:mesh_size) &
+&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
+     end do
+   else
+     do ipts=1,angl_size
+       ff(1:mesh_size)=ff(1:mesh_size) &
+&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
+&       *pawang%angwgth(ipts)
+     end do
+   end if
+   ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
+ end if
+ ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
+ call nderiv_gen(dv1dr,ff,pawrad)
+ dv1dr(2:mesh_size)=half*HalfFineStruct2*&
+   & (one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
+   & *dv1dr(2:mesh_size)*pawrad%rad(2:mesh_size)
+ call pawrad_deducer0(dv1dr,mesh_size,pawrad)
+ do kln=1,ij_size
+   ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
+   call simp_gen(dijso_rad(kln),ff,pawrad)
+ end do
+ LIBPAW_DEALLOCATE(dv1dr)
+ LIBPAW_DEALLOCATE(ff)
+ dijso_rad(:)=spnorbscl*dijso_rad(:)
 
-! !------------------------------------------------------------------------
-! !----- Loop over density components
-! !------------------------------------------------------------------------
-!  do idij=1,nsploop
+!  ------------------------------------------------------------------------
+!  ----- Computation of Dij_so B1
+!  ------------------------------------------------------------------------
+ dijsob1(:,:,:) = zero
+ klmn1=1
+ do klmn=1,lmn2_size
+   klm=indklmn(1,klmn);kln=indklmn(2,klmn)
+   ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
+   if (ilm .NE. jlm) cycle
+   fact=half*dijso_rad(kln)
+   dijsob1(1,klmn1,3) = fact
+   dijsob1(1,klmn1,4) = fact
+   dijsob1(2,klmn1+1,3) = -fact
+   dijsob1(2,klmn1+1,4) =  fact
+   dijsob1(3,klmn1,1) =  fact
+   dijsob1(3,klmn1,2) = -fact
+   klmn1=klmn1+cplex_dij
+ end do
 
-! !  ------------------------------------------------------------------------
-! !  ----- Computation of Dij_so
-! !  ------------------------------------------------------------------------
-!    klmn1=1
-!    dijso(:,idij)=zero
-!    if (mod(idij,2)==1) then
-!      ispden=(1+idij)/2
-!      do klmn=1,lmn2_size
-!        if (indklmn(3,klmn)==0) then   ! il==jl
-!          klm=indklmn(1,klmn);kln=indklmn(2,klmn)
-!          ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
-!          fact=dijso_rad(kln);if (ilm>jlm) fact=-fact
-!          dijso(klmn1  ,idij)=fact*pawang%ls_ylm(1,klm,ispden)
-!          dijso(klmn1+1,idij)=fact*pawang%ls_ylm(2,klm,ispden)
-!        end if
-!        klmn1=klmn1+cplex_dij
-!      end do
-!    else if (idij==2) then
-!      do klmn=1,lmn2_size
-!        if (indklmn(3,klmn)==0) then   ! il==jl
-!          dijso(klmn1  ,2)=-dijso(klmn1  ,1)
-!          dijso(klmn1+1,2)=-dijso(klmn1+1,1)
-!        end if
-!        klmn1=klmn1+cplex_dij
-!      end do
-!    else if (idij==4) then
-!      do klmn=1,lmn2_size
-!        if (indklmn(3,klmn)==0) then   ! il==jl
-!          dijso(klmn1  ,4)=-dijso(klmn1  ,3)
-!          dijso(klmn1+1,4)= dijso(klmn1+1,3)
-!        end if
-!        klmn1=klmn1+cplex_dij
-!      end do
-!    end if
-
-! !  ----- End loop over idij
-!  end do
-
-!  LIBPAW_DEALLOCATE(dijso_rad)
+ LIBPAW_DEALLOCATE(dijso_rad)
 
 end subroutine pawdijsob1
 !!***
