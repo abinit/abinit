@@ -277,9 +277,8 @@ module m_gemm_nonlop_gpu
 !!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
 !!
 !! SOURCE
- subroutine make_gemm_nonlop_gpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                     ph3d_k,kpt_k,kg_k,kpg_k, &
-&                     compute_grad_strain,compute_grad_atom) ! Optional parameters
+ subroutine make_gemm_nonlop_gpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+&                     ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k)
 
    !Arguments ------------------------------------
    integer, intent(in) :: ikpt
@@ -287,7 +286,7 @@ module m_gemm_nonlop_gpu
    integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
    integer, intent(in) :: nattyp(ntypat)
    integer, intent(in) :: istwf_k
-   logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
+   integer, intent(in) :: signs,choice
    real(dp), intent(in) :: ucvol
    real(dp), intent(in) :: ffnl_k(:,:,:,:)
    real(dp), intent(in) :: ph3d_k(:,:,:)
@@ -301,11 +300,9 @@ module m_gemm_nonlop_gpu
 
    ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
    ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-   ABI_UNUSED((/compute_grad_strain,compute_grad_atom/))
 
-   call make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-          ph3d_k,kpt_k,kg_k,kpg_k, &
-          compute_grad_strain=compute_grad_strain,compute_grad_atom=compute_grad_atom)
+   call make_gemm_nonlop(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+          ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k)
 
    nprojs = 0
    do itypat=1,ntypat
@@ -938,16 +935,15 @@ module m_gemm_nonlop_gpu
   ABI_BUG("Unhandled configuration for CUDA immplementation")
  end subroutine destroy_gemm_nonlop_gpu
 
- subroutine make_gemm_nonlop_gpu(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k, &
-&                            ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            compute_grad_strain,compute_grad_atom) ! Optional parameters
+ subroutine make_gemm_nonlop_gpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
+&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k)
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
-  logical, intent(in), optional :: compute_grad_strain,compute_grad_atom
+  integer, intent(in) :: signs,choice
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
@@ -956,7 +952,6 @@ module m_gemm_nonlop_gpu
 
   ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
   ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-  ABI_UNUSED((/compute_grad_strain,compute_grad_atom/))
   ABI_BUG("Unhandled configuration for CUDA immplementation")
 
  end subroutine make_gemm_nonlop_gpu

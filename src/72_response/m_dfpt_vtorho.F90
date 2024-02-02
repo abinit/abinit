@@ -311,6 +311,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
  logical :: has_vectornd,has_vxctau,paral_atom,qne0
+ integer :: signs,choice
  real(dp) :: arg,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq,rf_hamk_dir2
@@ -654,28 +655,38 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      if (gemm_nonlop_use_gemm) then
        !set the global variable indicating to gemm_nonlop where to get its data from
        gemm_nonlop_ikpt_this_proc_being_treated = ikpt
+
        if (istep <= 1) then
+         signs = 2
+         choice = 1
+         if(ipert<=dtset%natom) then
+           choice = 2
+         else if(ipert<=dtset%natom+1) then
+           choice = 51
+         else if(ipert<=dtset%natom+2) then
+           choice = 5
+         else if(ipert==natom+3.or.ipert==natom+4) then
+           choice = 3
+         end if
          !Init the arrays
          if ( dtset%gpu_option == ABI_GPU_DISABLED) then
-           call make_gemm_nonlop(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
            &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
            &    gs_hamkq%ucvol, gs_hamkq%ffnl_k,&
            &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
-           &    idir_pert=idir,&
-           &    compute_grad_atom=(ipert<=dtset%natom), compute_grad_strain=(ipert==dtset%natom+2))
+           &    idir_pert=idir)
          else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-           call make_gemm_nonlop_gpu(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           call make_gemm_nonlop_gpu(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
            &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
            &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
            &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k)
          else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
            !call ompgpu_load_hamilt_buffers(gs_hamkq%kg_k,gs_hamkq%kg_kp)
-           call make_gemm_nonlop_ompgpu(ikpt,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+           call make_gemm_nonlop_ompgpu(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
            &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
            &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
            &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
-           &    idir_pert=idir,&
-           &    compute_grad_atom=(ipert<=dtset%natom), compute_grad_strain=(ipert==dtset%natom+2))
+           &    idir_pert=idir)
          end if
        end if
      end if ! gemm_nonlop_use_gemm
