@@ -931,7 +931,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
              translations(:,itranslat)=tnons(:,isym)
            endif
          enddo
-         ABI_FREE(is_translation)
          call reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
          ABI_FREE(translations)
          !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
@@ -961,6 +960,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        else ! The cell is primitive
          exit
        endif
+
+       ABI_FREE(is_translation)
 
      enddo ! try_primitive
 
