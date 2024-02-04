@@ -240,7 +240,7 @@ module m_ddb
      ! Set the bravais lattice.
 
     procedure :: set_typ => ddb_set_typ
-    ! Set the typ of block
+    ! Set the typ of one block
 
     procedure :: bcast => ddb_bcast
      ! Broadcast the object.
@@ -366,9 +366,6 @@ module m_ddb
     ! Index of the Gamma block in the DDB.
     ! Set to 0 if no block was found. Client code can use this flag to understand
     ! if ASR can be enforced.
-    ! MBC85: it should be possible to impose asr on both dynamicla matrix and
-    ! MBC. Might have to find a workaround, a single index is problematic as
-    ! we should need 2 indices
 
    integer :: asr
    ! Option for the application of the ASR (input variable).
@@ -406,7 +403,6 @@ module m_ddb
  ! TODO: We should use this constants instead of magic numbers!
  ! BTW: Using a different value for NOSTAT and STAT is a non-sense!
  ! They both are 2-th order derivatives of the total energy!
- ! MMig: We should rather use the constants defined in ddb_hdr instead of defining new ones
 
  ! Flags used to indentify the block type.
  !integer,private,parameter :: DDB_BLKTYPE_ETOT = 0         ! Total energy
@@ -488,19 +484,6 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
 
  ddb%qpt(:,:) = zero
  ddb%nrm(:,:) = one
- ! do iblok = 1,ddb%nblok
- !   if (with_d0E_) then
- !     ddb%typ(iblok) = BLKTYP_d0E_xx
- !   else if (with_d1E_) then
- !     ddb%typ(iblok) = BLKTYP_d1E_xx
- !   else if (with_d2E_) then
- !     ddb%typ(iblok) = BLKTYP_d2E_ns
- !   else if (with_d3E_) then
- !     ddb%typ(iblok) = BLKTYP_d3E_xx
- !   else if (with_d2eig_) then
- !     ddb%typ(iblok) = BLKTYP_d2eig_re
- !   end if
- ! end do
  if (with_d0E_) then
    ddb%typ(:) = BLKTYP_d0E_xx
  else if (with_d1E_) then
@@ -1220,7 +1203,7 @@ end subroutine ddb_set_brav
 !! ddb_set_typ
 !!
 !! FUNCTION
-!!  Set the blok typ
+!!  Set the blok typ for one block
 !!
 !! INPUTS
 !!  iblok: block index
@@ -2009,10 +1992,10 @@ end subroutine ddb_read_d2eig_txt
 !! At the end, the whole DDB is in central memory, contained in the array ddb%val(2,msize,ddb%nblok).
 !!
 !! The information on it is contained in the four arrays
-!!   ddb%flg(msize,ddb%nblok) : block flag for each element
-!!   ddb%qpt(9,ddb%nblok)  : block wavevector (unnormalized)
-!!   ddb%nrm(3,ddb%nblok)  : block wavevector normalization
-!!   ddb%typ(ddb%nblok)    : block type
+!!   ddb%flg(msize,ddb%nblok) : blok flag for each element
+!!   ddb%qpt(9,ddb%nblok)  : blok wavevector (unnormalized)
+!!   ddb%nrm(3,ddb%nblok)  : blok wavevector normalization
+!!   ddb%typ(ddb%nblok)    : blok type
 !!
 !! INPUTS
 !! unddb = unit number for DDB io
@@ -2035,9 +2018,9 @@ end subroutine ddb_read_d2eig_txt
 !! amu(ntypat)=mass of the atoms (atomic mass unit)
 !! ddb: ddb blok datatype
 !!   contents: ddb%flg(msize,nblok)= flag of existence for each element of the DDB
-!!             ddb%nrm(3,nblok)  : block wavevector normalization
-!!             ddb%qpt(9,nblok)  : block wavevector (unnormalized)
-!!             ddb%typ(nblok)    : block type
+!!             ddb%nrm(3,nblok)  : blok wavevector normalization
+!!             ddb%qpt(9,nblok)  : blok wavevector (unnormalized)
+!!             ddb%typ(nblok)    : blok type
 !!             ddb%val(2,msize,nblok)= value of each complex element of the DDB
 !!             ddb%nblok= number of bloks in the DDB
 !! gmet(3,3)=reciprocal space metric tensor in bohr**-2
@@ -4211,7 +4194,6 @@ end function ddb_get_asrq0
 !! 1) add the ionic part of the effective charges,
 !! 2) normalize the electronic dielectric tensor, and
 !!    add the vacuum polarisation
-!! TODO: add anti-symetrization for molecular Berry curvature (BLKTYP_d2E_mbc)
 !!
 !! INPUTS
 !!  crystal<type(crystal_t)>
@@ -6935,14 +6917,6 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
    end if
  end do ! iblok
 
- ! debug:
- do iqpt=1,nqpt
-   write(77,*) "For qpt in bz: ", spqpt(:,iqpt)
-   write(77,*) "Corresponding block:", qtest(iqpt,1)
-   write(77,*) "Corresponding symrel:", qtest(iqpt,2)
-   write(77,*) "Use of time reversal:", qtest(iqpt,3)
- end do
-
 ! Check if all the information relatives to the q points sampling are found in the DDB;
 ! if not => stop message
  nqmiss = 0
@@ -7050,7 +7024,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
 
    ! determine sign of complex conjugation
    ! If there is Time Reversal : D.M. <- Complex Conjugate D.M.
-   ! MBC: complex conjugate under time reversal
+   !                             MBC  <- Complex Conjugate MBC
    if (qtest(iqpt,3)==0) then
      sign1 = one
      sign2 = one
