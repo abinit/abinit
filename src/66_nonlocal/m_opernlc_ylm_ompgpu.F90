@@ -577,7 +577,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        end do
        end do
      else
-       ABI_BUG("ha")
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:dgxdtfac,enl,atindx1,dgxdt,sij,lambda) &
        !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
