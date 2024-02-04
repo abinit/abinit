@@ -1938,7 +1938,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (eivec == 4) then
      call sortph(eigvec,displ,strcat(prefix, "_B2EPS"),natom,phfrq)
-     ! modification of sortph to include ang mom ?
    end if
 
    ! Write the phonon frequencies
