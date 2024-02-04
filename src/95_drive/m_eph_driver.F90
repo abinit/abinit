@@ -767,7 +767,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil, ifc)
    call gstore%free()
 
  case (15, -15)
