@@ -946,7 +946,7 @@ contains
       &       vnl_dprojections,s_dprojections,&
       &       vnl_projections,s_projections,&
       &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
-      &       npwin,nspinor,signs,ndat,rank,&
+      &       npwout,nspinor,signs,ndat,rank,&
       &       cpopt,nprocs,paw_opt,&
       &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
       &       vectin,vectout,svectout,&
