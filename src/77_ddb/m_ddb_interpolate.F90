@@ -150,9 +150,6 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
  nsize = 3 * mpert * 3 * mpert
  nblok = nqpt_fine
 
- write(*,*) "mpert, msize, nsize, nblok"
- write(*,*) mpert, msize, nsize, nblok
-
  ddb_new%nblok = nblok
  call ddb_new%malloc(msize,nblok,natom,ntypat,mpert)
  ddb_new%flg = 0
