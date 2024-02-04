@@ -51,6 +51,9 @@ module m_gemm_nonlop_ompgpu
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm_ompgpu, only : opernlc_ylm_ompgpu
  use m_opernlc_ylm, only : opernlc_ylm
+ use m_opernla_gemm_ompgpu, only : opernla_gemm_ompgpu
+ use m_opernlb_gemm_ompgpu, only : opernlb_gemm_ompgpu
+ use m_opernld_ylm_allwf_ompgpu, only : opernld_ylm_allwf_ompgpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
@@ -544,217 +547,6 @@ contains
  end subroutine make_gemm_nonlop_ompgpu
 !!***
 
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop_ompgpu/gemm_nonlop_ompgpu_distributed_gemm_opernla
-!! NAME
-!! gemm_nonlop_ompgpu_distributed_gemm_opernla
-!!
-!! FUNCTION
-!! Distributed version of "opernla" GEMM called in gemm_nonlop.
-!!
-!! INPUTS
-!!
-!! SOURCE
- subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
- &                                               nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,beta,&
- &                                               projs_local,projs_recv,vectin,cprojs)
-   integer,  intent(in)     :: rank,nprocs,npwin,ndat,nspinor
-   integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
-   real(dp), intent(in)     :: vectin(*)
-   complex(dpc), intent(in) :: beta
-   real(dp), intent(inout), target  :: projs_local(cplex,npwin,nprojs_last_blk),projs_recv(cplex,npwin,nprojs_last_blk)
-   real(dp), intent(out)  :: cprojs(:,:,:)
-
-   !Local variables
-   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next,idat
-   real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
-   real(dp), ABI_CONTIGUOUS pointer :: recv_buf_f(:), work_buf_f(:)
-
-
-! *************************************************************************
-
-   rank_next=modulo(rank + 1,nprocs)
-   rank_prev=rank - 1
-   if(rank_prev == -1) rank_prev = nprocs - 1
-   do iblock=1,nprocs
-
-     if(rank+iblock == nprocs) then
-       nprojs_cur_blk = nprojs_last_blk
-     else
-       nprojs_cur_blk = nprojs_blk
-     end if
-
-     if(modulo(iblock,2)==1) then
-       work_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
-       recv_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
-     else
-       work_buf => projs_recv(1:cplex,1:npwin,1:nprojs_last_blk)
-       recv_buf => projs_local(1:cplex,1:npwin,1:nprojs_last_blk)
-     end if
-
-#ifndef HAVE_GPU_MPI
-
-       ! GPU-aware MPI not available : perform MPI comms on CPU
-       call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-       !$OMP TARGET UPDATE TO(work_buf)
-
-#else
-
-       ! GPU-aware MPI available : pass GPU buffers to MPI
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-       call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwin*nprojs_last_blk])
-       call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwin*nprojs_last_blk])
-       call MPI_ISEND(work_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-       &    rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call MPI_IRECV(recv_buf_f,cplex*npwin*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-       &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-       !$OMP END TARGET DATA
-
-#endif
-
-
-     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
-     iend = ibeg+nprojs_cur_blk-1
-     if(cplex == 2) then
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectin,cprojs)
-       call abi_gpu_xgemm(cplex, 'C','N', &
-               nprojs_cur_blk, ndat*nspinor, npwin, cone, &
-               c_loc(work_buf), npwin, &
-               c_loc(vectin), npwin, &
-               beta, &
-               c_loc(cprojs(1,ibeg,1)), nprojs)
-       !$OMP END TARGET DATA
-     else
-       call DGEMM('T', 'N', nprojs_cur_blk, ndat*nspinor, npwin, one, &
-       &          work_buf, npwin, &
-       &          vectin, npwin, real(beta), cprojs(:,ibeg:iend,:), nprojs_cur_blk)
-     end if
-
-     call xmpi_waitall(req,ierr)
-
-   end do
-
-   if(modulo(iblock,2)==1) then
-#ifndef HAVE_GPU_MPI
-       call DCOPY(cplex*npwin*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
-#else
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-       call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwin*nprojs_last_blk*dp)
-       !$OMP END TARGET DATA
-#endif
-   end if
- end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernla
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop_ompgpu/gemm_nonlop_ompgpu_distributed_gemm_opernlb
-!! NAME
-!! gemm_nonlop_ompgpu_distributed_gemm_opernlb
-!!
-!! FUNCTION
-!! Distributed version of "opernlb" GEMM called in gemm_nonlop.
-!!
-!! INPUTS
-!!
-!! SOURCE
- subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
- &                                               nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex,&
- &                                               projs_local,projs_recv,cprojs_s_vnl,vectout)
-   integer,  intent(in)     :: rank,nprocs,npwout,ndat,nspinor
-   integer,  intent(in)     :: nprojs,nprojs_blk,nprojs_last_blk,nprojs_my_blk,cplex
-   real(dp), intent(in)     :: cprojs_s_vnl(:,:,:)
-   real(dp), intent(inout), target  :: projs_local(cplex,npwout,nprojs_last_blk),projs_recv(cplex,npwout,nprojs_last_blk)
-   real(dp), intent(out)    :: vectout(*)
-
-   !Local variables
-   integer :: iblock,ibeg,iend,req(2),ierr,nprojs_cur_blk,rank_prev,rank_next
-   complex(dpc) :: beta
-   real(dp), ABI_CONTIGUOUS pointer :: recv_buf(:,:,:), work_buf(:,:,:)
-   real(dp), ABI_CONTIGUOUS pointer :: recv_buf_f(:), work_buf_f(:)
-
-! *************************************************************************
-
-   rank_next=modulo(rank + 1,nprocs)
-   rank_prev=rank - 1
-   if(rank_prev == -1) rank_prev = nprocs - 1
-
-   beta = czero
-
-   do iblock=1,nprocs
-
-     if(rank+iblock == nprocs) then
-       nprojs_cur_blk = nprojs_last_blk
-     else
-       nprojs_cur_blk = nprojs_blk
-     end if
-
-     if(modulo(iblock,2)==1) then
-       work_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
-       recv_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
-     else
-       work_buf => projs_recv(1:cplex,1:npwout,1:nprojs_last_blk)
-       recv_buf => projs_local(1:cplex,1:npwout,1:nprojs_last_blk)
-     end if
-
-#ifndef HAVE_GPU_MPI
-
-       ! GPU-aware MPI not available : perform MPI comms on CPU
-       call xmpi_isend(work_buf,rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call xmpi_irecv(recv_buf,rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-       !$OMP TARGET UPDATE TO(work_buf)
-
-#else
-
-       ! GPU-aware MPI available : pass GPU buffers to MPI
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-       call c_f_pointer(c_loc(work_buf), work_buf_f, [cplex*npwout*nprojs_last_blk])
-       call c_f_pointer(c_loc(recv_buf), recv_buf_f, [cplex*npwout*nprojs_last_blk])
-       call MPI_ISEND(work_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-       &    rank_prev,iblock,gemm_nonlop_block_comm,req(1),ierr)
-       call MPI_IRECV(recv_buf_f,cplex*npwout*nprojs_cur_blk,MPI_DOUBLE_PRECISION,&
-       &    rank_next,iblock,gemm_nonlop_block_comm,req(2),ierr)
-       !$OMP END TARGET DATA
-
-#endif
-
-     ibeg = 1 + modulo(rank+iblock-1,nprocs)*nprojs_blk
-     iend = ibeg+nprojs_cur_blk-1
-     if(cplex==2) then
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,vectout,cprojs_s_vnl)
-       call abi_gpu_xgemm(cplex, 'N','N', &
-               npwout, ndat*nspinor, nprojs_cur_blk, cone, &
-               c_loc(work_buf), npwout, &
-               c_loc(cprojs_s_vnl(1,ibeg,1)), nprojs, &
-               beta, &
-               c_loc(vectout), npwout)
-       !$OMP END TARGET DATA
-     else
-       call DGEMM('N', 'N', npwout, ndat*nspinor, nprojs_cur_blk, one, &
-       &          work_buf, npwout, &
-       &          cprojs_s_vnl(:,ibeg:iend,:), nprojs_cur_blk, real(beta), vectout, npwout)
-     end if
-
-     beta = cone
-
-     call xmpi_waitall(req,ierr)
-
-   end do
-
-   if(modulo(iblock,2)==1) then
-#ifndef HAVE_GPU_MPI
-       call DCOPY(cplex*npwout*nprojs_cur_blk, recv_buf, 1, work_buf, 1)
-#else
-       !$OMP TARGET DATA USE_DEVICE_PTR(work_buf,recv_buf)
-       call copy_gpu_to_gpu(c_loc(work_buf), c_loc(recv_buf), INT(cplex, c_size_t)*npwout*nprojs_last_blk*dp)
-       !$OMP END TARGET DATA
-#endif
-   end if
-
- end subroutine gemm_nonlop_ompgpu_distributed_gemm_opernlb
-!!***
 
 !----------------------------------------------------------------------
 
@@ -818,9 +610,8 @@ contains
   real(dp) :: work(6)
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
-  real(dp), allocatable :: enlk(:)
   real(dp), ABI_CONTIGUOUS pointer :: projections_ptr(:,:,:)
-  real(dp), allocatable :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
+  real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
   integer :: nprojs_my_blk, ipw, iproj, iblock, nprojs_blk
   integer :: rank, nprocs, req(2)
   logical :: is_last
@@ -830,6 +621,7 @@ contains
   character(len=500) :: msg
   integer(C_SIZE_T) :: byte_count
   real(dp), ABI_CONTIGUOUS pointer :: vectin_(:,:),vectout_(:,:),svectout_(:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
   integer :: ngrads_tmp
 
 ! *************************************************************************
@@ -900,6 +692,8 @@ contains
     dprojs_beg=atom_proj_shift*ngrads+1
     dprojs_end=dprojs_beg+nprojs*ngrads
   end if
+  projs_ => gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end)
+  dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
 
   ! Allocate and copy GPU buffers if user doesn't manage them
   transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
@@ -1046,11 +840,6 @@ contains
       end do
     end if
 #endif
-    if(choice==1.or.choice==3.or.choice==23) then
-      ABI_MALLOC(enlk,(ndat))
-      enlk=zero
-      !$OMP TARGET ENTER DATA MAP(to:enlk,nattyp)
-    end if
   end if
 
   if(nprojs == 0) then
@@ -1106,119 +895,19 @@ contains
     end if
   end if ! cpopt
 
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  ! opernla
-  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23))) then
-    ! opernla
-    if(cplex == 2) then
-      if(.not. gemm_nonlop_is_distributed) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs,vectin_)
-        call abi_gpu_xgemm(cplex, 'C', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                c_loc(current_ikpt_projs), npwin,&
-&                c_loc(vectin_), npwin, czero, c_loc(projections_ptr), nprojs)
-        !$OMP END TARGET DATA
-        if(ngrads>0 .and. cpopt<=3) then
-          !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs,vectin_)
-          call abi_gpu_xgemm(cplex, 'C', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                 c_loc(current_ikpt_dprojs), npwin,&
-                 c_loc(vectin_), npwin, czero, c_loc(dprojections), ngrads*nprojs)
-          !$OMP END TARGET DATA
-        end if
-      else
-        call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-        &                                         nprojs,&
-        &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-        &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-        &                                         nprojs_my_blk,cplex,czero,&
-        &                                         current_ikpt_projs,projs_recv,&
-        &                                         vectin,projections_ptr)
-        if(signs==1.and.ngrads>0) then
-          call gemm_nonlop_ompgpu_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
-          &                                         ngrads*nprojs,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-          &                                         ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-          &                                         ngrads*nprojs_my_blk,cplex,czero,&
-          &                                         current_ikpt_dprojs,dprojs_recv,&
-          &                                         vectin,dprojections)
-        end if
-      end if
-    else
-      ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-      !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:temp_realvec_r,vectin) PRIVATE(i)
-      do i=1, npwin*nspinor*ndat
-        temp_realvec_r(i) = vectin(1,i)
-      end do
-      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-        !!$OMP TARGET LOOP &
-        !$OMP& MAP(to:temp_realvec_r) PRIVATE(idat)
-        do idat=1, ndat*nspinor
-          temp_realvec_r(1+(idat-1)*npwin) = temp_realvec_r(1+(idat-1)*npwin)/2
-        end do
-      end if
-      !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs_r,temp_realvec_r)
-      call abi_gpu_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
-&                c_loc(current_ikpt_projs_r), npwin, &
-&                c_loc(temp_realvec_r), npwin, czero, c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
-      if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs_r,temp_realvec_r)
-        call abi_gpu_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-&                  c_loc(current_ikpt_dprojs_r), npwin, &
-&                  c_loc(temp_realvec_r), npwin, czero, c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
-      end if
 
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-      !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:temp_realvec_i,vectin) PRIVATE(i)
-      do i=1, npwin*nspinor*ndat
-        temp_realvec_i(i) = vectin(2,i)
-      end do
-      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-        !!$OMP TARGET LOOP &
-        !$OMP& MAP(to:temp_realvec_i) PRIVATE(idat)
-        do idat=1, ndat*nspinor
-          temp_realvec_i(1+(idat-1)*npwin) = zero
-        end do
-      end if
-
-      !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,current_ikpt_projs_i,temp_realvec_i)
-      call abi_gpu_xgemm(cplex, 'T', 'N', nprojs, ndat*nspinor, npwin, cone, &
-               c_loc(current_ikpt_projs_i), npwin, &
-               c_loc(temp_realvec_i), npwin, cone , c_loc(projections_ptr), nprojs)
-      !$OMP END TARGET DATA
-
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-      !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:projections_ptr) PRIVATE(i1,i2)
-      do i2=1, nspinor*ndat
-        do i1=1, nprojs
-          projections_ptr(1,i1,i2) = projections_ptr(1,i1,i2) * 2
-        end do
-      end do
-
-      if(signs==1.and.ngrads>0) then
-        !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,current_ikpt_dprojs_i,temp_realvec_i)
-        call abi_gpu_xgemm(cplex, 'T', 'N', ngrads*nprojs, ndat*nspinor, npwin, cone, &
-                  c_loc(current_ikpt_dprojs_i), npwin, &
-                  c_loc(temp_realvec_i), npwin, cone , c_loc(dprojections), ngrads*nprojs)
-        !$OMP END TARGET DATA
-
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-        !!$OMP TARGET LOOP &
-        !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
-        do i2=1, nspinor*ndat
-          do i1=1, ngrads*nprojs
-            dprojections(1,i1,i2) = dprojections(1,i1,i2) * 2
-          end do
-        end do
-      end if
-    end if
+    call opernla_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections_ptr,&
+    &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+    &       npwin,nspinor,signs,ndat,rank,&
+    &       cpopt,nprocs,&
+    &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+    &       vectin,gemm_nonlop_kpt(ikpt)%projs,gemm_nonlop_kpt(ikpt)%dprojs,&
+    &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
+    &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+    &       temp_realvec_r,&
+    &       projs_recv,dprojs_recv,&
+    &       gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
       ! store in cprjin
@@ -1261,12 +950,8 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      ndgxdt = 0
-      ndgxdtfac = 0
-      if(signs==2) then
-        ndgxdt = ngrads
-        ndgxdtfac = ngrads
-      end if
+      ndgxdt = ngrads
+      ndgxdtfac = ngrads
       nd2gxdt = 0
       nd2gxdtfac = 0
       optder = 0;if (ndgxdtfac>0) optder=1
@@ -1304,345 +989,37 @@ contains
       !$OMP END TARGET DATA
     end if
 
-    ! opernlb (only choice=1)
+    ! opernlb
     if(signs==2) then
-      if(paw_opt == 3 .or. paw_opt == 4) then
-        ! Get svectout from s_projections
-        if(cplex == 2) then
-          if(.not. gemm_nonlop_is_distributed) then
-            if(choice==1 .or. choice==7) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_projs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout,&
-              &    c_loc(s_projections), nprojs, czero, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==2) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_dprojs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_dprojs(:,:,projs_beg:projs_end)), npwout, &
-              &    c_loc(s_projections), nprojs, czero, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_dprojections,current_ikpt_projs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs(:,:,projs_beg:projs_end)), npwout, &
-              &    c_loc(s_dprojections), nprojs, cone, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==3) then
-              if(idir<=3) then
-                !$OMP TARGET MAP(to:s_dprojections,s_projections)
-                s_dprojections(:,:,:) = s_dprojections(:,:,:) - s_projections(:,:,:)
-                !$OMP END TARGET
-              end if
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_dprojections,current_ikpt_projs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(s_dprojections), nprojs, czero, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_dprojs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cminusone, &
-              &    c_loc(current_ikpt_dprojs), npwout, &
-              &    c_loc(s_projections), nprojs, cone, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==5) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_dprojections,current_ikpt_projs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(s_dprojections), nprojs, czero, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_dprojs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_dprojs), npwout, &
-              &    c_loc(s_projections), nprojs, cone, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==51) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(s_dprojections,current_ikpt_projs,svectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(s_dprojections), nprojs, czero, c_loc(svectout_), npwout)
-              !$OMP END TARGET DATA
-            end if
-          else
-            call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         nprojs,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         current_ikpt_projs,projs_recv,&
-            &                                         s_projections,svectout)
-          end if
-        else
-          !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_projs_r,temp_realvec_r)
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                    c_loc(current_ikpt_projs_r), npwout, &
-                    c_loc(s_projections), nprojs, czero, c_loc(temp_realvec_r), npwout)
-          !$OMP END TARGET DATA
-          !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,current_ikpt_projs_i,temp_realvec_i)
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                    c_loc(current_ikpt_projs_i), npwout,&
-                    c_loc(s_projections), nprojs, czero, c_loc(temp_realvec_i), npwout)
-          !$OMP END TARGET DATA
-
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-          !!$OMP TARGET LOOP &
-          !$OMP& MAP(to:temp_realvec_r,temp_realvec_i,svectout) PRIVATE(i)
-          do i=1, npwin*nspinor*ndat
-            svectout(1,i) = temp_realvec_r(i)
-            svectout(2,i) = temp_realvec_i(i)
-          end do
-        end if
-        if(choice /= 7 .and. choice /= 5 .and. choice/=51 .and. choice/=2 .and. choice/=3) then
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-          !!$OMP TARGET LOOP &
-          !$OMP& MAP(to:vectin,svectout) PRIVATE(i)
-          do i=1, npwin*nspinor*ndat
-            svectout(1,i) = svectout(1,i) + vectin(1,i)
-            svectout(2,i) = svectout(2,i) + vectin(2,i)
-          end do
-        end if
-      end if
-      if(paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4) then
-        ! Get vectout from vnl_projections
-        if(cplex_fac == 2) then
-          if(.not. gemm_nonlop_is_distributed) then
-            if(choice==1 .or. choice==7) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_projs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                      c_loc(current_ikpt_projs), npwout, &
-                      c_loc(vnl_projections), nprojs, czero, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==2) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_dprojs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_dprojs(:,:,projs_beg:projs_end)), npwout, &
-              &    c_loc(vnl_projections), nprojs, czero, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_dprojections,current_ikpt_projs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs(:,:,projs_beg:projs_end)), npwout, &
-              &    c_loc(vnl_dprojections), nprojs, cone, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==3) then
-              if(idir<=3) then
-                !$OMP TARGET MAP(to:vnl_dprojections,vnl_projections)
-                vnl_dprojections(:,:,:) = vnl_dprojections(:,:,:) - vnl_projections(:,:,:)
-                !$OMP END TARGET
-              end if
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_dprojections,current_ikpt_projs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(vnl_dprojections), nprojs, czero, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_dprojs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cminusone, &
-              &    c_loc(current_ikpt_dprojs), npwout, &
-              &    c_loc(vnl_projections), nprojs, cone, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==5) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_dprojections,current_ikpt_projs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(vnl_dprojections), nprojs, czero, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_dprojs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_dprojs), npwout, &
-              &    c_loc(vnl_projections), nprojs, cone, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-            else if(choice==51) then
-              !$OMP TARGET DATA USE_DEVICE_PTR(vnl_dprojections,current_ikpt_projs,vectout_)
-              call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-              &    c_loc(current_ikpt_projs), npwout, &
-              &    c_loc(vnl_dprojections), nprojs, czero, c_loc(vectout_), npwout)
-              !$OMP END TARGET DATA
-            end if
-          else
-            call gemm_nonlop_ompgpu_distributed_gemm_opernlb(rank,nprocs,npwout,ndat,nspinor,&
-            &                                         nprojs,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_blk,&
-            &                                         gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-            &                                         nprojs_my_blk,cplex,&
-            &                                         current_ikpt_projs,projs_recv,&
-            &                                         vnl_projections,vectout)
-          end if
-        else
-          !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_projs_r,temp_realvec_r)
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                  c_loc(current_ikpt_projs_r), npwout, &
-                  c_loc(vnl_projections), nprojs, czero, c_loc(temp_realvec_r), npwout)
-          !$OMP END TARGET DATA
-          !$OMP TARGET DATA USE_DEVICE_PTR(vnl_projections,current_ikpt_projs_i,temp_realvec_i)
-          call abi_gpu_xgemm(cplex, 'N', 'N', npwout, ndat*nspinor, nprojs, cone, &
-                  c_loc(current_ikpt_projs_i), npwout, &
-                  c_loc(vnl_projections), nprojs, czero, c_loc(temp_realvec_i), npwout)
-          !$OMP END TARGET DATA
-
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-          !!$OMP TARGET LOOP &
-          !$OMP& MAP(to:temp_realvec_r,temp_realvec_i,vectout) PRIVATE(i)
-          do i=1, npwin*nspinor*ndat
-            vectout(1,i) = temp_realvec_r(i)
-            vectout(2,i) = temp_realvec_i(i)
-          end do
-        end if
-      end if
+      call opernlb_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+      &       d2gxdt_dum_out,d2gxdt_dum_out,&
+      &       vnl_dprojections,s_dprojections,&
+      &       vnl_projections,s_projections,&
+      &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+      &       npwout,nspinor,signs,ndat,rank,&
+      &       cpopt,nprocs,paw_opt,&
+      &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+      &       vectin_,vectout_,svectout_,&
+      &       projs_,&
+      &       dprojs_,&
+      &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
+      &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+      &       temp_realvec_r,temp_realvec_i,&
+      &       projs_recv,dprojs_recv,&
+      &       gemm_nonlop_is_distributed)
     end if ! opernlb
 
     ! opernld
     if(signs==1) then
-#ifdef HAVE_GPU_HIP
-      !$OMP TARGET UPDATE FROM(vnl_projections,projections_ptr,dprojections)
-#endif
-      if(choice==1.or.choice==3.or.choice==23) then
-        shift=0
-        iatm=0
-        esum=zero
-        do itypat=1, ntypat
-          nlmn=count(indlmn(3,:,itypat)>0)
-          ibeg = shift+1
-          iend = shift+nattyp(itypat)*nlmn
-          nattyp_i = nattyp(itypat)
-#ifndef HAVE_GPU_HIP
-          !$OMP TARGET TEAMS DISTRIBUTE &
-          !$OMP& MAP(to:vnl_projections,projections_ptr,enlk) &
-          !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
-#endif
-          do idat=1,ndat*nspinor
-            esum=zero
-#ifndef HAVE_GPU_HIP
-            !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) &
-            !$OMP& PRIVATE(ia,ilmn,ii)
-#endif
-            do ia=1,nattyp_i
-              do ilmn=1,nlmn
-                do ii=1,cplex
-                  esum=esum +vnl_projections(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-&                           *projections_ptr    (ii,shift+(ia-1)*nlmn+ilmn,idat)
-                end do
-              end do
-            end do
-            enlk(idat) = enlk(idat) + esum
-          end do
-          shift = shift + nattyp(itypat)*nlmn
-          iatm = iatm+nattyp(itypat)
-        end do
-        if (choice==1) then
-#ifndef HAVE_GPU_HIP
-          !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat)
-#endif
-          do idat=1,ndat
-            enlout(idat)=enlk(idat)
-          end do
-        end if
-      end if ! choice=1/3/23
-      if(choice==2.or.choice==3.or.choice==23) then
-        grad_shift=merge(9,6,choice==23)
-        if (choice==3.or.choice==23) then
-          shift=0
-          iatm=0
-          do itypat=1, ntypat
-            nlmn=count(indlmn(3,:,itypat)>0)
-            ibeg = shift+1
-            iend = shift+nattyp(itypat)*nlmn
-            nattyp_i = nattyp(itypat)
-
-#ifndef HAVE_GPU_HIP
-            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-            !$OMP& MAP(to:vnl_projections,dprojections,enlout) &
-            !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
-#endif
-            do idat=1,ndat*nspinor
-              do igrad=1,6
-                esum=zero
-#ifndef HAVE_GPU_HIP
-                !$OMP PARALLEL DO COLLAPSE(3) REDUCTION(+:esum) &
-                !$OMP& PRIVATE(ia,ilmn,ii)
-#endif
-                do ia=1,nattyp_i
-                  !Following loops are a [D][Z]DOT
-                  do ilmn=1,nlmn
-                    do ii=1,cplex
-                      esum=esum +vnl_projections(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-&                               *dprojections   (ii,grad_shift*shift + (ia-1)*nlmn*grad_shift + (igrad-1)*nlmn +ilmn,idat)
-                    end do
-                  end do
-                end do
-                enlout((idat-1)*nnlout+igrad) = enlout((idat-1)*nnlout+igrad) + two*esum
-              end do
-            end do
-
-            shift = shift + nattyp(itypat)*nlmn
-            iatm = iatm+nattyp(itypat)
-          end do
-        end if
-
-        if (choice==2.or.choice==23) then
-          shift=0
-          iatm=0
-          force_shift=merge(6,0,choice==23)
-          do itypat=1, ntypat
-            nlmn=count(indlmn(3,:,itypat)>0)
-            nattyp_i = nattyp(itypat)
-
-#ifndef HAVE_GPU_HIP
-            !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-            !$OMP& MAP(to:vnl_projections,dprojections,enlout) &
-            !$OMP& FIRSTPRIVATE(idat,itypat,nlmn,esum)
-#endif
-            do idat=1,ndat*nspinor
-              do ia=1,nattyp_i
-                do igrad=1,3
-                  !Following loops are a [D][Z]DOT
-                  esum=zero
-#ifndef HAVE_GPU_HIP
-                  !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:esum) &
-                  !$OMP& PRIVATE(ilmn,ii)
-#endif
-                  do ilmn=1,nlmn
-                    do ii=1,cplex
-                      esum=esum +vnl_projections(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-&                               *dprojections(ii,grad_shift*shift+(ia-1)*nlmn*grad_shift+(igrad-1+force_shift)*nlmn +ilmn,idat)
-                    end do
-                  end do
-                  enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad)= &
-&                               enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad) + two*esum
-                end do
-              end do
-            end do
-
-            shift = shift + nattyp(itypat)*nlmn
-            iatm = iatm+nattyp(itypat)
-          end do
-        end if
-      end if ! choice=2, 3 or 23
-#ifndef HAVE_GPU_HIP
-      !$OMP TARGET UPDATE FROM(enlout,enlk)
-#endif
+      call opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
+      &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
+      &       enlout,projections_ptr,vnl_projections,s_projections,&
+      &       ndat,nd2gxdt,ndgxdt,&
+      &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
+      &       gprimd,nattyp,mpi_enreg)
     end if !opernld
 
   end if ! choice>0
-
-  !$OMP TASKWAIT
-! Reduction in case of parallelism
-  if (signs==1.and.mpi_enreg%paral_spinor==1) then
-    if (size(enlout)>0) then
-      call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
-    end if
-    if (choice==3.or.choice==23) then
-      call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
-    end if
-  end if
-
-! Derivatives wrt strain
-!  - Convert from reduced to cartesian coordinates
-!  - Substract volume contribution
- if ((choice==3.or.choice==23).and.signs==1.and.paw_opt<=3) then
-   do idat=1,ndat
-     enlout_shift=(idat-1)*nnlout
-     call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
-     enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
-     enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
-   end do
- end if
 
  ! Retrieve and release allocated buffers
  !$OMP TARGET EXIT DATA MAP(delete:vectin) IF(transfer_vectin)
@@ -1680,10 +1057,6 @@ contains
   if (allocated(vnl_dprojections)) then
     !$OMP TARGET EXIT DATA MAP(release:vnl_dprojections)
     ABI_FREE(vnl_dprojections)
-  end if
-  if (allocated(enlk)) then
-    !$OMP TARGET EXIT DATA MAP(delete:enlk,nattyp)
-    ABI_FREE(enlk)
   end if
 
  end subroutine gemm_nonlop_ompgpu
