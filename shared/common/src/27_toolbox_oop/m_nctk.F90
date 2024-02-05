@@ -385,7 +385,7 @@ end function nctk_idgroup
 
 function nctk_ncify(ipath) result(opath)
 
- character(len=fnlen),intent(in) :: ipath
+ character(len=*),intent(in) :: ipath
  character(len=fnlen) :: opath
 
 ! *********************************************************************
