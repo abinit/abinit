@@ -83,7 +83,9 @@ program testTransposer
   nband = 2000
   ncycle = 20
   if ( xmpi_comm_size(xmpi_world) > 1 ) then
-    if ( MOD(xmpi_comm_size(xmpi_world),8) == 0 ) then
+    if ( MOD(xmpi_comm_size(xmpi_world),10) == 0 ) then
+      nCpuRows = 2
+    else if ( MOD(xmpi_comm_size(xmpi_world),8) == 0 ) then
       nCpuRows = 4
     else if ( MOD(xmpi_comm_size(xmpi_world),6) == 0 ) then
       nCpuRows = 3
@@ -413,7 +415,7 @@ program testTransposer
         call xmpi_max(walltime,maxt,xmpi_world,ierr)
       end do
       call xmpi_max(cputime,maxt,xmpi_world,ierr)
-      write(std_out,"(a,f20.5)") " Mean time:  ", maxt/ncycle
+      write(std_out,"(a,f20.5)") "-Mean time:  ", maxt/ncycle
       errmax = (sum(abs(cg0-cg)))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
       write(std_out,"(a,f20.14)") " Difference: ",errmax
