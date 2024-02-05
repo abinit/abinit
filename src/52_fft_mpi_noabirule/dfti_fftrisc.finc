@@ -5,7 +5,7 @@
  integer :: ny,nz,nfft,ngbin,ngbout,nthreads,ldxy,ng2_pos,ng2_neg,pt,status
  integer :: lot,nlot,lotin,lotout,fftcache,cidx,sidx,xyplane,padx
  integer :: nxhalf1,nxhalfm,nyhalf1,cidx_inv,pidx,fidx,padz,padc
- integer :: igb_inv,iiy,ixmax,iz_inv
+ integer :: igb_inv,iiy,ixmax,iz_inv, G_TO_R, R_TO_G, iscale__, G_TO_R_SCALE, R_TO_G_SCALE
  real(dp) :: fraction,arg
  complex(MYKIND) :: vloc,phase
  character(len=500) :: msg
@@ -24,6 +24,16 @@
 #if defined HAVE_OPENMP && defined __GFORTRAN__ 
 #define DEV_USE_ABIMALLOC
 #endif
+
+ G_TO_R = +1; R_TO_G = -1
+ R_TO_G_SCALE = DFTI_FORWARD_SCALE; G_TO_R_SCALE = DFTI_BACKWARD_SCALE
+ if (present(abi_convention)) then
+   if (.not. abi_convention) then
+     G_TO_R = -1; R_TO_G = +1
+     R_TO_G_SCALE = DFTI_BACKWARD_SCALE; G_TO_R_SCALE = DFTI_FORWARD_SCALE
+   end if
+ end if
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
 
  if (istwf_k>2 .and. option==0) then
    write(msg,'(a,i0)')' option=0 is not allowed with istwf_k=',istwf_k
@@ -122,8 +132,9 @@ if (istwf_k==1) then
    status = DftiCommitDescriptor(bw_plan)
    DFTI_CHECK(status)
 
-   status =  DftiComputeBackward(bw_plan, cuboid)
-   DFTI_CHECK(status)
+   !status = DftiComputeBackward(bw_plan, cuboid)
+   !DFTI_CHECK(status)
+   DFTI_CHECK(compute_ip(bw_plan, G_TO_R, cuboid))
 
 #else
    ! Distribute 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz among the threads.
@@ -137,8 +148,9 @@ if (istwf_k==1) then
 !!$OMP PARALLEL DO PRIVATE(status) SCHEDULE(STATIC, lotin)
 !$OMP PARALLEL DO PRIVATE(status)
    do igb=1,ngbin
-     status = DftiComputeBackward(bw_plan, cuboid(igb:))
-     DFTI_CHECK(status)
+     !status = DftiComputeBackward(bw_plan, cuboid(igb:))
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_ip(bw_plan, G_TO_R, cuboid(igb:)))
    end do
 #endif
 
@@ -297,15 +309,20 @@ if (istwf_k==1) then
        end do
      end if
 
-     status = DftiComputeBackward(bw_plan_xg2pos, slice_a, slice_b)
-     DFTI_CHECK(status)
+     !status = DftiComputeBackward(bw_plan_xg2pos, slice_a, slice_b)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(bw_plan_xg2pos, G_TO_R, slice_a, slice_b))
 
      pt = 1 + (g2min_in+ny)*ldx
-     status = DftiComputeBackward(bw_plan_xg2neg, slice_a(pt:), slice_b(pt:))
-     DFTI_CHECK(status)
+     !status = DftiComputeBackward(bw_plan_xg2neg, slice_a(pt:), slice_b(pt:))
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(bw_plan_xg2neg, G_TO_R, slice_a(pt:), slice_b(pt:)))
+
+
      ! Got f(x,Gy,z). Now perform y transform
-     status = DftiComputeBackward(bw_plan_y, slice_b, slice_a)
-     DFTI_CHECK(status)
+     !status = DftiComputeBackward(bw_plan_y, slice_b, slice_a)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(bw_plan_y, G_TO_R, slice_b, slice_a))
    end if
    ! The wave function is now in real space, for the current z plane
 
@@ -392,16 +409,19 @@ end if
      ! Go back to G space.
      !
      ! 1) Perform y transform
-     status = DftiComputeForward(fw_plan_y, slice_a, slice_b)
-     DFTI_CHECK(status)
+     !status = DftiComputeForward(fw_plan_y, slice_a, slice_b)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(fw_plan_y, R_TO_G, slice_a, slice_b))
 
      ! Perform x transform, taking into account arrays of zeros
-     status = DftiComputeForward(fw_plan_xg2pos, slice_b, slice_a)
-     DFTI_CHECK(status)
+     !status = DftiComputeForward(fw_plan_xg2pos, slice_b, slice_a)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(fw_plan_xg2pos, R_TO_G, slice_b, slice_a))
 
      pt = 1 + (g2min_out+ny)*ldx
-     status = DftiComputeForward(fw_plan_xg2neg, slice_b(pt:), slice_a(pt:))
-     DFTI_CHECK(status)
+     !status = DftiComputeForward(fw_plan_xg2neg, slice_b(pt:), slice_a(pt:))
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_op(fw_plan_xg2neg, R_TO_G, slice_b(pt:), slice_a(pt:)))
 
      ! Copy the data from the current plane to cuboid
      do igb=1,ngbout
@@ -447,13 +467,14 @@ end if
    status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
    status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
-   status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+   status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
 
    status = DftiCommitDescriptor(fw_plan)
    DFTI_CHECK(status)
 
-   status = DftiComputeForward(fw_plan, cuboid)
-   DFTI_CHECK(status)
+   !status = DftiComputeForward(fw_plan, cuboid)
+   !DFTI_CHECK(status)
+   DFTI_CHECK(compute_ip(fw_plan, R_TO_G, cuboid))
 
 #else
    ! Distribute ngbout 1D transforms of f(x,y,Gz) along Gz among the threads.
@@ -462,7 +483,7 @@ end if
 
    status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
    status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nthreads)
-   status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+   status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
    DFTI_CHECK(status)
 
    status = DftiCommitDescriptor(fw_plan)
@@ -471,8 +492,9 @@ end if
 !!$OMP PARALLEL DO PRIVATE(status) SCHEDULE(STATIC, lotout)
 !$OMP PARALLEL DO PRIVATE(status)
    do igb=1,ngbout
-     status = DftiComputeForward(fw_plan, cuboid(igb:))
-     DFTI_CHECK(status)
+     !status = DftiComputeForward(fw_plan, cuboid(igb:))
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_ip(fw_plan, R_TO_G, cuboid(igb:)))
    end do
 #endif
 
@@ -639,8 +661,10 @@ else if (istwf_k>=2) then
      status = DftiCommitDescriptor(bw_plan)
      DFTI_CHECK(status)
 
-     status = DftiComputeBackward(bw_plan, cuboid)
-     DFTI_CHECK(status)
+     !status = DftiComputeBackward(bw_plan, cuboid)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_ip(bw_plan, G_TO_R, cuboid))
+
      status = DftiFreeDescriptor(bw_plan)
      DFTI_CHECK(status)
 
@@ -794,8 +818,9 @@ else if (istwf_k>=2) then
        !call sg_fftx(fftcache,mfac,mg,ldx,ldy,1,g2max_in+1,1,slice_a,slice_b,trig1,aft1,now1,bef1,one,ind1,ic1)
        !call fftw3_execute_dft(bw_plan_xg2pos, slice_a, slice_b)
 
-       status = DftiComputeBackward(bw_plan_xg2pos, slice_a, slice_b)
-       DFTI_CHECK(status)
+       !status = DftiComputeBackward(bw_plan_xg2pos, slice_a, slice_b)
+       !DFTI_CHECK(status)
+       DFTI_CHECK(compute_op(bw_plan_xg2pos, G_TO_R, slice_a, slice_b))
 
        ! Change the phase if $k_x \neq 0$
        if (istwf_k==3 .or. istwf_k==5 .or. istwf_k==7 .or. istwf_k==9) then
@@ -873,8 +898,9 @@ else if (istwf_k>=2) then
        !call sg_ffty(fftcache,mfac,mg,ldx,ldy,1,nxi,nxhalfm,1,1,slice_a,slice_b,trig2,aft2,now2,bef2,one,ind2,ic2)
        !call fftw3_execute_dft(bw_plan_y, slice_a, slice_b)
 
-       status = DftiComputeBackward(bw_plan_y, slice_a, slice_b)
-       DFTI_CHECK(status)
+       !status = DftiComputeBackward(bw_plan_y, slice_a, slice_b)
+       !DFTI_CHECK(status)
+       DFTI_CHECK(compute_op(bw_plan_y, G_TO_R, slice_a, slice_b))
 
        ! Change the phase if $k_y \neq 0$
        if (istwf_k>=6 .and. istwf_k<=9) then
@@ -988,8 +1014,9 @@ else if (istwf_k>=2) then
        !call sg_ffty(fftcache,mfac,mg,ldx,ldy,1,nxi,nxhalfm,1,1,slice_a,slice_b,trig5,aft5,now5,bef5,-one,ind5,ic5)
        !call fftw3_execute_dft(fw_plan_y, slice_a, slice_b)
 
-       status = DftiComputeForward(fw_plan_y, slice_a, slice_b)
-       DFTI_CHECK(status)
+       !status = DftiComputeForward(fw_plan_y, slice_a, slice_b)
+       !DFTI_CHECK(status)
+       DFTI_CHECK(compute_op(fw_plan_y, R_TO_G, slice_a, slice_b))
 
        ! Decompose symmetric and antisymmetric parts
        if (istwf_k>=2 .and. istwf_k<=5) then
@@ -1035,8 +1062,9 @@ else if (istwf_k>=2) then
        !call sg_fftx(fftcache,mfac,mg,2*nxhalfm,ldy,1,g2max_in+1,1,slice_c,slice_d,trig4,aft4,now4,bef4,-one,ind4,ic4)
        !call fftw3_execute_dft(fw_plan_xg2pos, slice_c, slice_d)
 
-       status = DftiComputeForward(fw_plan_xg2pos, slice_c, slice_d)
-       DFTI_CHECK(status)
+       !status = DftiComputeForward(fw_plan_xg2pos, slice_c, slice_d)
+       !DFTI_CHECK(status)
+       DFTI_CHECK(compute_op(fw_plan_xg2pos, R_TO_G, slice_c, slice_d))
 
        ! Copy the data from the current plane to cuboid.
        do igb=1,ngbout
@@ -1104,13 +1132,17 @@ else if (istwf_k>=2) then
      status = DftiSetValue(fw_plan, DFTI_INPUT_STRIDES,  (/0,mgb/))
      status = DftiSetValue(fw_plan, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(fw_plan, DFTI_NUMBER_OF_USER_THREADS, nt1)
-     status = DftiSetValue(fw_plan, DFTI_FORWARD_SCALE, one/DBLE(nfft)) ! normalization
+     if (iscale__ == 1) then
+        status = DftiSetValue(fw_plan, R_TO_G_SCALE, one/DBLE(nfft)) ! normalization
+     end if
                                                                                         
      status = DftiCommitDescriptor(fw_plan)
      DFTI_CHECK(status)
                                                                                         
-     status = DftiComputeForward(fw_plan, cuboid)
-     DFTI_CHECK(status)
+     !status = DftiComputeForward(fw_plan, cuboid)
+     !DFTI_CHECK(status)
+     DFTI_CHECK(compute_ip(fw_plan, R_TO_G, cuboid))
+
      status = DftiFreeDescriptor(fw_plan)
 
      !call fftw3_execute_dft(fw_plan, cuboid, cuboid)
@@ -1146,3 +1178,39 @@ end if ! End time-reversal symmetry
  if (option==2 .or. option==3) then
    ABI_FREE(indpw_kout)
  end if
+
+contains
+
+integer function compute_ip(desc, isign, io_data) result(istat)
+  type(DFTI_DESCRIPTOR),pointer :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(inout) :: io_data(*)
+
+  select case (isign)
+  case (-1)
+    istat = DftiComputeForward(desc, io_data)
+  case (+1)
+    istat = DftiComputeBackward(desc, io_data)
+  case default
+    !ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
+    istat = DFTI_INVALID_CONFIGURATION
+  end select
+end function compute_ip
+
+integer function compute_op(desc, isign, in_data, out_data) result(istat)
+  type(DFTI_DESCRIPTOR),pointer :: desc 
+  integer,intent(in) :: isign
+  complex(MYKIND),intent(in) :: in_data(*)
+  complex(MYKIND),intent(out) :: out_data(*)
+
+  select case (isign)
+  case (-1)
+    istat = DftiComputeForward(desc, in_data, out_data)
+  case (+1)
+    istat = DftiComputeBackward(desc, in_data, out_data)
+  case default
+    !ABI_ERROR(sjoin("Invalid isign:", itoa(isign)))
+    istat = DFTI_INVALID_CONFIGURATION
+  end select
+end function compute_op
+

@@ -356,6 +356,41 @@ AC_DEFUN([_ABI_FC_CHECK_PGI],[
 
 
  ##############################################################################
+# _ABI_FC_CHECK_NVHPC(COMPILER)
+# ---------------------------
+#
+# Checks whether the specified Fortran compiler is the NVIDIA HPC SDK
+# Fortran compiler.
+# If yes, tries to determine its version number and sets the abi_fc_vendor
+# and abi_fc_version variables accordingly.
+#
+AC_DEFUN([_ABI_FC_CHECK_NVHPC],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the NVIDIA HPC SDK Fortran compiler])
+  fc_info_string=`$1 -V 2>&1 | grep "^nvfortran"`
+  abi_result=`echo "${fc_info_string}"`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    fc_info_string=""
+    abi_fc_vendor="unknown"
+    abi_fc_version="unknown"
+  else
+    AC_DEFINE([FC_NVHPC],1,
+      [Define to 1 if you are using the NVIDIA HPC SDK Fortran compiler.])
+    abi_fc_vendor="nvhpc"
+    abi_fc_version=`echo "${abi_result}" | cut -f2 -d" "`
+    if test "${abi_fc_version}" = "${abi_result}"; then
+      abi_fc_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_FC_CHECK_NVHPC
+
+
+ ##############################################################################
 
 
 # _ABI_FC_CHECK_ASYNC()
@@ -1580,6 +1615,11 @@ AC_DEFUN([ABI_PROG_FC],[
 
   if test "${abi_fc_vendor}" = "unknown"; then
     _ABI_FC_CHECK_PGI(${FC})
+  fi
+  echo "${fc_info_string}" >>"${tmp_fc_info_file}"
+
+  if test "${abi_fc_vendor}" = "unknown"; then
+    _ABI_FC_CHECK_NVHPC(${FC})
   fi
   echo "${fc_info_string}" >>"${tmp_fc_info_file}"
 

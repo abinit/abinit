@@ -808,7 +808,7 @@ subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
  kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
-! TODO : should raise error here - the output rank will be all wrong for isppol 2!
+     ! TODO : should raise error here - the output rank will be all wrong for isppol 2!
      kpt_band_procs=distrb(ikpt,:,1)
      write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
      ABI_ERROR(msg)
@@ -825,39 +825,38 @@ end subroutine proc_distrb_kptband
 !!  proc_distrb_band
 !!
 !! FUNCTION
-!!  return vector of processor me indices for each band, within the band communicator
+!!  return `rank_band` array with the rank of the processor in comm_band treating `band`
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-subroutine proc_distrb_band(band_procs,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
+subroutine proc_distrb_band(rank_band,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nband, ikpt, isppol
  integer,intent(in) :: me_band,me_kpt,comm_band
  integer,allocatable,intent(in) :: distrib(:,:,:)
- integer,intent(out) :: band_procs(nband)
+ integer,intent(out) :: rank_band(nband)
 
  integer :: ierr, iband
-! character(len=500) :: msg
 
 ! *************************************************************************
 
- band_procs = 0
+ rank_band = 0
 
  if (allocated(distrib)) then
    do iband=1, nband
-! is this band k spin on current proc?
+     ! is this (k, band, spin) on current proc?
      if (distrib(ikpt,iband,isppol)/=me_kpt) cycle
-! if so save rank in band subcommunicator
-     band_procs(iband) = me_band+1
+     ! if so save rank in band subcommunicator
+     rank_band(iband) = me_band+1
    end do
-   call xmpi_sum(band_procs,comm_band,ierr)
+   call xmpi_sum(rank_band,comm_band,ierr)
  end if
 
- band_procs = band_procs-1
+ rank_band = rank_band-1
 
 end subroutine proc_distrb_band
 !!***
@@ -1226,18 +1225,18 @@ subroutine initmpi_grid(mpi_enreg)
     !Effective number of processors used for the grid
    nproc_eff=mpi_enreg%nproc_fft*mpi_enreg%nproc_band *mpi_enreg%nproc_spkpt*mpi_enreg%nproc_spinor
    if(nproc_eff/=nproc) then
-     write(msg,'(4a,5(a,i0))') &
+     write(msg,'(4a,5(a,i0,a))') &
       '  The number of band*FFT*spin*kpt*spinor processors, npband*npfft*np_spkpt*npspinor should be',ch10,&
       '  equal to the total number of processors, nproc.',ch10,&
-      '  However, npband   =',mpi_enreg%nproc_band,&
-      '           npfft    =',mpi_enreg%nproc_fft,&
-      '           np_spkpt =',mpi_enreg%nproc_spkpt,&
-      '           npspinor =',mpi_enreg%nproc_spinor,&
-      '       and nproc    =',nproc
+      '  However, npband   =',mpi_enreg%nproc_band, ch10, &
+      '           npfft    =',mpi_enreg%nproc_fft, ch10, &
+      '           np_spkpt =',mpi_enreg%nproc_spkpt, ch10, &
+      '           npspinor =',mpi_enreg%nproc_spinor, ch10, &
+      '           nproc    =',nproc,ch10
      ABI_WARNING(msg)
    end if
 
-   !Nothing to do if only 1 proc
+   ! Nothing to do if only 1 proc
    if (nproc_eff==1) return
 
    ! Initialize the communicator for Hartree-Fock to xmpi_comm_self
@@ -1421,9 +1420,9 @@ subroutine initmpi_grid(mpi_enreg)
 
 !* Write some data
    write(msg,'(a,2(1x,i0))') 'nphf and np_spkpt: ',mpi_enreg%nproc_hf, mpi_enreg%nproc_spkpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    write(msg,'(a,2(1x,i0))') 'me_hf, me_kpt: ',mpi_enreg%me_hf, mpi_enreg%me_kpt
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 #endif
 
@@ -2103,10 +2102,9 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
              if (.not.allocated(ranks)) then
                ABI_MALLOC(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
-! TODO MJV: still can not lift this restriction...
              else if (nrank/=size(ranks)) then
-               msg='Number of bands per proc should be the same for all k-points!'
-               ABI_BUG(msg)
+               ! TODO MJV: still can not lift this restriction...
+               ABI_BUG('Number of bands per proc should be the same for all k-points!')
              end if
            end if
          end if
@@ -2129,14 +2127,14 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
         ' This is inefficient (load unbalancing). Adjust nband to have a divisor <= nproc/nkpt/nsppol',ch10
        ABI_WARNING(msg)
      end if
-! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
+     ! NB: everyone in spacecomm has to call subcomm, even if it is a trivial call with self_comm for the subcomm
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
-!     mpi_enreg%me_band=mod(me, nrank)
+    ! mpi_enreg%me_band=mod(me, nrank)
 
-     write(msg,'(4(a,i6))') ' Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
-&     ' nband per processor= ', nb_per_proc, ' npband= ',nrank
-     call wrtout(std_out,msg,'COLL')
+     write(msg,'(4(a,i0))') 'P Present parallel dimensions: nkpt= ',nkpt,' nsppol ',nsppol,&
+      ' nband per processor= ', nb_per_proc, ' npband= ',nrank
+     call wrtout(std_out,msg)
 
      ABI_FREE(ranks)
    end if
@@ -2332,15 +2330,17 @@ subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 !  Check if nkpt and nproc_spkpt match
    if(nproc_spkpt>nkpt*nsppol) then
 !    Too many proc. with respect to nkpt
-     write(msg,'(a,i0,a,i0,a,i0,2a)')&
+     write(msg,'(a,i0,a,i0,a,i0,4a)')&
       'nproc_spkpt= ',nproc_spkpt,' >= nkpt= ',nkpt,'* nsppol= ',nsppol,ch10,&
-      'The number of processors is larger than nkpt*nsppol. This is a waste. (Ignore this warning if this is not a GS run)'
+      'The number of processors is larger than nkpt*nsppol. This is a WASTE.',ch10,&
+      ' Ignore this warning if this is not a GS run'
      ABI_WARNING(msg)
    else if (mod(nkpt*nsppol,nproc_spkpt) /= 0) then
 !    nkpt not a multiple of nproc_spkpt
-     write(msg,'(a,i0,a,i0,3a)')&
+     write(msg,'(a,i0,a,i0,5a)')&
       'nkpt*nsppol (', nkpt*nsppol, ') is not a multiple of nproc_spkpt (',nproc_spkpt, ')', ch10,&
-      'The k-point parallelisation is inefficient. (Ignore this warning if this is not a GS run)'
+      'The k-point parallelisation is INEFFICIENT. ',ch10,&
+      'Ignore this warning if this is not a GS run.'
      ABI_WARNING(msg)
    end if
  end if

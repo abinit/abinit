@@ -38,7 +38,9 @@ module m_setvtr
  use m_energies,          only : energies_type
  use m_electronpositron,  only : electronpositron_type, electronpositron_calctype, rhohxcpositron
  use libxc_functionals,   only : libxc_functionals_is_hybrid
+ use m_pawang,            only : pawang_type
  use m_pawrad,            only : pawrad_type
+ use m_pawrhoij,          only : pawrhoij_type
  use m_pawtab,            only : pawtab_type
  use m_jellium,           only : jellium
  use m_spacepar,          only : hartre
@@ -51,8 +53,9 @@ module m_setvtr
  use m_xchybrid,          only : xchybrid_ncpp_cc
  use m_mkcore,            only : mkcore, mkcore_alt
  use m_psolver,           only : psolver_rhohxc
- use m_wvl_psi,          only : wvl_psitohpsi
- use m_mkcore_wvl,       only : mkcore_wvl
+ use m_wvl_psi,           only : wvl_psitohpsi
+ use m_mkcore_wvl,        only : mkcore_wvl
+ use m_xc_tb09,           only : xc_tb09_update_c
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: denspot_set_history
@@ -111,7 +114,9 @@ contains
 !!  n1xccc=dimension of xccc1d; 0 if no XC core correction is used
 !!  n3xccc=dimension of the xccc3d array (0 or nfft).
 !!  optene=>0 if some additional energies have to be computed
+!!  pawang <type(pawang_type)> =paw angular mesh and related data
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
+!!  pawrhoij <type(pawrhoij_type)>= paw rhoij occupancies and related data (for the current atom)
 !!  pawtab(ntypat*dtset%usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  ph1d(2,3*(2*mgfft+1)*natom)=phase (structure factor) information.
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
@@ -126,10 +131,10 @@ contains
 !!   |      rhor(:,2:4) => {m_x,m_y,m_z}
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (bohr^3)
 !!  usexcnhat= -PAW only- 1 if nhat density has to be taken into account in Vxc
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
+!!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!
 !! OUTPUT
 !!  energies <type(energies_type)>=all part of total energy.
@@ -157,18 +162,18 @@ contains
 !!  vxcavg=mean of the vxc potential
 !!
 !! SIDE EFFECTS
-!!  [electronpositron <type(electronpositron_type)>]=quantities for the electron-positron annihilation (optional argument)
 !!  moved_atm_inside=1 if the atomic positions were moved inside the SCF loop.
 !!  vhartr(nfft)=Hartree potential (Hartree)
 !!  vpsp(nfft)=local psp (Hartree)
 !!  vtrial(nfft,nspden)= trial potential (Hartree)
 !!  vxc(nfft,nspden)= xc potential (Hartree)
+!!  [electronpositron <type(electronpositron_type)>]=quantities for the electron-positron annihilation (optional argument)
 !!  [vxc_hybcomp(nfft,nspden)= compensation xc potential (Hartree) in case of hybrids] Optional output
 !!       i.e. difference between the hybrid Vxc at fixed density and the auxiliary Vxc at fixed density
 !!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!    kinetic energy density (metaGGA cases) (optional output)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
-!!  [xccctau3d(n3xccc)]=3D core electron kinetic energy density for XC core correction, bohr^-3
+!!  [xcctau3d(n3xccc*usekden)]=3D core electron kinetic energy density for XC core correction, bohr^-3
 !!
 !! NOTES
 !!  In case of PAW calculations:
@@ -184,7 +189,7 @@ contains
 subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,&
 &  istep,kxc,mgfft,moved_atm_inside,moved_rhor,mpi_enreg,&
 &  nattyp,nfft,ngfft,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,ntypat,n1xccc,n3xccc,&
-&  optene,pawrad,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
+&  optene,pawang,pawrad,pawrhoij,pawtab,ph1d,psps,rhog,rhor,rmet,rprimd,strsxc,&
 &  ucvol,usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,wvl,xccc3d,xred,&
 &  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d,calc_ewald) ! optionals arguments
 
@@ -201,6 +206,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  type(dataset_type),intent(inout) :: dtset
  type(electronpositron_type),pointer,optional :: electronpositron
  type(energies_type),intent(inout) :: energies
+ type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_data), intent(inout) :: wvl
 !arrays
@@ -221,8 +227,9 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(out) :: grchempottn(3,dtset%natom)
  real(dp),intent(out) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc),strsxc(6)
- type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
+ type(pawrhoij_type),intent(in) :: pawrhoij(:)
  type(pawrad_type),intent(in) :: pawrad(ntypat*dtset%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(ntypat*dtset%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -280,7 +287,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (ipositron/=1) then
    lewald = .true.
    if (present(calc_ewald)) lewald=calc_ewald
-   if (lewald) then 
+   if (lewald) then
       if (dtset%icoulomb == 0 .or. (dtset%usewvl == 0 .and. dtset%icoulomb == 2)) then
 !       Periodic system, need to compute energy and forces due to replica and
 !       to correct the shift in potential calculation.
@@ -529,20 +536,32 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
 
    if (ipositron/=1) then
      if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
+
+!      >>>> Hartree potential
        if(option/=0 .and. option/=10)then
          call hartre(1,gsqcut,dtset%icutcoul,psps%usepaw,mpi_enreg,nfft,ngfft,&
                      &dtset%nkpt,dtset%rcut,rhog,rprimd,dtset%vcutgeo,vhartr)
        end if
+       
+!      >>>> Exchange-correlation potential
        call xcdata_init(xcdata,dtset=dtset)
        if(mod(dtset%fockoptmix,100)==11)then
          xcdatahyb=xcdata
 !        Setup the auxiliary xc functional information
          call xcdata_init(xcdata,dtset=dtset,auxc_ixc=0,ixc=dtset%auxc_ixc)
        end if
-!      Use the periodic solver to compute Hxc
-       nk3xc=1
 !      Not yet able to deal fully with the full XC kernel in case of GGA + spin
        option_eff=option;if (option==2.and.xcdata%xclevel==2.and.(nkxc==3-2*mod(xcdata%nspden,2))) option_eff=12
+       nk3xc=1
+
+!      If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+       if (dtset%xc_tb09_c>99._dp) then
+         call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom, &
+&          nfft,ngfft,nhat,psps%usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&          pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,psps%usepaw, &
+&          xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
+&          computation_type='all')
+       end if
 
        if (ipositron==0) then
 
@@ -551,7 +570,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
            call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &           nhat,psps%usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,&
 &           option_eff,rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
+&           taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d,grho1_over_rho1=rpnrm)
          else
 !          Only when is_hybrid_ncpp, and moreover, the xc functional is not the auxiliary xc functional, then call xchybrid_ncpp_cc
            call xchybrid_ncpp_cc(dtset,energies%e_xc,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&

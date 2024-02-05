@@ -24,7 +24,7 @@ module m_time
  use defs_basis
  use m_abicore
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #if defined HAVE_MPI2
  use mpi
 #endif
@@ -569,8 +569,9 @@ subroutine cwtime_report(tag, cpu, wall, gflops, pre_str, end_str, out_wall, com
  end if
  if (present(pre_str)) call wrtout(std_out, pre_str)
 
- call wrtout(std_out, sjoin(tag, "completed. cpu:", sec2str(cpu), ", wall:", sec2str(wall), avg_type), &
-     do_flush=.True.)
+ call wrtout(std_out, sjoin(tag, ", wall:", sec2str(wall), ", cpu:", sec2str(cpu), avg_type), do_flush=.True.)
+
+ !if (present(end_str)) call wrtout(std_out, " ...")
  if (present(end_str)) call wrtout(std_out, end_str)
  if (present(out_wall)) out_wall = wall
 
@@ -732,13 +733,17 @@ end function time_get_papiopt
 !!  Depending on value of "option" routine will:
 !!
 !!  (0) Zero all accumulators
-!!  (1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
-!!  (2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
-!!  (3) Start with new incremental time slice for accumulator n
+!!  (1 or -1) Start with new incremental time slice for accumulator n using explicit call to timein (or PAPI)
+!!  (2 or -2) Stop time slice; add time to accumulator n also increase by one the counter for this accumulator
+!!  (3) DEPRECATED Start with new incremental time slice for accumulator n
 !!        using stored values for cpu, wall, and PAPI infos ( ! do not use for stop )
 !!        Typically used immediately after a call to timab for another counter with option=2. This saves one call to timein.
 !!  (4) Report time slice for accumlator n (not full time accumlated)
 !!  (5) Option to suppress timing (nn should be 0) or reenable it (nn /=0)
+!!  For negative options : same action than positive values, except for -1 and -2, 
+!!    use stored values for cpu, wall, and PAPI infos ( ! do not use for stop ), instead of calling "timein".
+!!    Typically used immediately after a call to timab for another counter with option=2 or 1. This saves one call to timein.
+!!
 !!
 !!  If, on first entry, subroutine is not being initialized, it
 !!  will automatically initialize as well as rezero accumulator n.
@@ -811,7 +816,7 @@ subroutine timab(nn, option, tottim)
    end if
 #endif
 
-   select case (option)
+   select case (abs(option))
    case (0)
      ! Zero out all accumulators of time and init timers
      acctim(:,:)      = 0.0d0
@@ -824,7 +829,7 @@ subroutine timab(nn, option, tottim)
 
    case (1)
      ! Initialize timab for nn
-     call timein(cpu,wall)
+     if(option>0) call timein(cpu,wall)
      tzero(1,nn)=cpu
      tzero(2,nn)=wall
 #ifdef HAVE_PAPI
@@ -835,7 +840,7 @@ subroutine timab(nn, option, tottim)
 
    case (2)
      ! Accumulate time for nn (also keep the values of cpu, wall, proc_time, real_time, flops1)
-     call timein(cpu,wall)
+     if(option>0)call timein(cpu,wall)
      acctim(1,nn)=acctim(1,nn)+cpu -tzero(1,nn)
      acctim(2,nn)=acctim(2,nn)+wall-tzero(2,nn)
      ncount(nn)=ncount(nn)+1
@@ -846,6 +851,7 @@ subroutine timab(nn, option, tottim)
      papi_accflops(nn)=papi_accflops(nn)+ flops1- papi_flops(nn)
 #endif
 
+!Should be suppressed, equivalent to -1
    case (3)
      ! Use previously obtained values to initialize timab for nn
      ! Typically used immediately after a call to timab for another counter with option=2 . This saves one call to timein.

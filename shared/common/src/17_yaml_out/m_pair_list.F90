@@ -30,7 +30,7 @@
 
 module m_pair_list
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_type_pair_list
   use m_errors
 

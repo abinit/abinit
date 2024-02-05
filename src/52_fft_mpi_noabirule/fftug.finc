@@ -1,6 +1,7 @@
+block
 !Local variables-------------------------------
 !scalars
- integer,parameter :: me_g0=1,ndat1=1,option0=0,cplex0=0,npwout0=0
+ integer,parameter :: ndat1 = 1, option0 = 0, cplex0 = 0, npwout0 = 0
  integer :: ldxyz,gsp_pt,box_pt,nthreads,dat,ug_ptr,ur_ptr
  real(dp),parameter :: weight1_i=one, weight1_r=one
  logical :: use_fftrisc
@@ -11,42 +12,55 @@
 ! *************************************************************************
 
  ! FFT: ug -> ur 
- !
- nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
-
- use_fftrisc = (MOD(fftalg,10)==2 .and. ANY(istwf_k==(/1,2/)) )
+ use_fftrisc = mod(fftalg, 10) == 2 .and. any(istwf_k== [1, 2])
 
  if (use_fftrisc) then
-   !call wrtout(std_out,ABI_FUNC//" with use_fftrisc","COLL")
+   !call wrtout(std_out, "fft_ug: using_fftrisc")
    !
    ! Initialize ngfft
-   ngfft(1:8) = (/nx, ny, nz, ldx, ldy, ldz, fftalg, fftcache/)
+   ngfft(1:8) = [nx, ny, nz, ldx, ldy, ldz, fftalg, fftcache]
 
-   call C_F_pointer(C_loc(ug), real_ug, shape=[2, npw_k*ndat])
-   call C_F_pointer(C_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
+   call C_F_pointer(c_loc(ug), real_ug, shape=[2, npw_k*ndat])
+   call C_F_pointer(c_loc(ur), real_ur, shape=[2, ldx*ldy*ldz*ndat])
 
-   if (ndat==1) then
-     call FFT_PREF(fftrisc) (cplex0,denpot,real_ug,fofgout,real_ur,&
-&      gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r, weight1_i)
-   else
-!$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr)
+   if (fftcore_mixprec == 0) then
+     !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
      do dat=1,ndat
        ug_ptr = 1 + (dat-1)*npw_k
        ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+       call FFT_PREF(fftrisc) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:), &
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i, &
+         abi_convention=(isign__==+1), iscale=iscale__)
+     end do
+
+   else
+     ! Mixed precision FFT but only if we have the double precision API.
+     !$OMP PARALLEL DO PRIVATE(ug_ptr, ur_ptr) IF (ndat > 1)
+     do dat=1,ndat
+       ug_ptr = 1 + (dat-1)*npw_k
+       ur_ptr = 1 + (dat-1)*ldx*ldy*ldz
+#if FFT_PRECISION == FFT_DOUBLE
+       call FFT_PREF(fftrisc_mixprec) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i, &
+         abi_convention=(isign__==+1), iscale=iscale__)
+#elif FFT_PRECISION == FFT_SINGLE
        call FFT_PREF(fftrisc) (cplex0,denpot,real_ug(:,ug_ptr:),fofgout,real_ur(:,ur_ptr:),&
-&        gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i)
+         gbound,gbound,istwf_k,kg_k,kg_k,mgfft,ngfft,npw_k,npwout0,ldx,ldy,ldz,option0,weight1_r,weight1_i, &
+         abi_convention=(isign__==+1), iscale=iscale__)
+#else
+#error "Wrong FFT precision"
+#endif
      end do
    end if
 
  else
-   !
-   if (.not. SPAWN_THREADS_HERE(ndat,nthreads)) then
-    
-     ! Insert fg in fg_aug defined on the (augmented) FFT mesh
-     call TK_PREF(gsph2box) (nx,ny,nz,ldx,ldy,ldz,ndat,npw_k,istwf_k,kg_k,ug,ur)
+   nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
+   if (.not. SPAWN_THREADS_HERE(ndat, nthreads)) then
+     ! Insert ug in ur defined on the (augmented) FFT mesh
+     call TK_PREF(gsph2box) (nx, ny, nz, ldx, ldy, ldz, ndat, npw_k, istwf_k, kg_k, ug, ur)
      ! zero-padded FFT.
-     call FFT_PREF(fftpad) (ur,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,+1,gbound)
+     call FFT_PREF(fftpad) (ur, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign__, gbound, iscale=iscale__)
 
    else 
      ! Spawn OMP threads here.
@@ -56,11 +70,11 @@
      do dat=1,ndat
        gsp_pt = 1 + dist * npw_k * (dat-1)
        box_pt = 1 + dist * ldxyz * (dat-1)
-
-       call TK_PREF(gsph2box) (nx,ny,nz,ldx,ldy,ldz,ndat1,npw_k,istwf_k,kg_k,ug(gsp_pt:),ur(box_pt:))
-
-       call FFT_PREF(fftpad) (ur(box_pt:),nx,ny,nz,ldx,ldy,ldz,ndat1,mgfft,+1,gbound)
+       ! Insert ug in ur defined on the (augmented) FFT mesh
+       call TK_PREF(gsph2box) (nx, ny, nz, ldx, ldy, ldz, ndat1, npw_k, istwf_k, kg_k, ug(gsp_pt:), ur(box_pt:))
+       ! zero-padded FFT.
+       call FFT_PREF(fftpad) (ur(box_pt:), nx, ny, nz, ldx, ldy, ldz, ndat1, mgfft, isign__, gbound, iscale=iscale__)
      end do
    end if
-   !
  end if
+end block

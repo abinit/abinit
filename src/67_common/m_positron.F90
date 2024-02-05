@@ -2111,9 +2111,11 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 &       ncor,nphicor(itypat),pawrad(itypat),phicor(itypat)%value,&
 &       filename=filename)
 !      The following arrays are not used anymore
-       ABI_FREE(energycor)
-       ABI_FREE(lcor)
-       ABI_FREE(ncor)
+       if (nphicor(itypat)>0) then
+         ABI_FREE(energycor)
+         ABI_FREE(lcor)
+         ABI_FREE(ncor)
+       end if
      end do
    end if
    if (mpi_enreg%nproc_cell>1) then

@@ -28,7 +28,7 @@
 #include "abi_common.h"
 
 module m_lattice_harmonic_primitive_potential
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   !use m_dynamic_array, only: int_array_type, real_array_type, int2d_array_type
   use defs_basis
   use m_abicore

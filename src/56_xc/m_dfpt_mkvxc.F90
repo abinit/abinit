@@ -93,7 +93,7 @@ contains
 !!    if nspden>=2: kxc(:,1)= d2Exc/drho_up drho_up
 !!                  kxc(:,2)= d2Exc/drho_up drho_dn
 !!                  kxc(:,3)= d2Exc/drho_dn drho_dn
-!!   ===== if GGA
+!!   ===== if GGA (or mGGA)
 !!    if nspden==1:
 !!       kxc(:,1)= d2Exc/drho2
 !!       kxc(:,2)= 1/|grad(rho)| dExc/d|grad(rho)|
@@ -122,6 +122,7 @@ contains
 !!       kxc(:,17)=grady(rho_dn)
 !!       kxc(:,18)=gradz(rho_up)
 !!       kxc(:,19)=gradz(rho_dn)
+!!    Note about mGGA: 2nd derivatives involving Tau or Laplacian are not taken into account (yet)
 !!
 !! SOURCE
 

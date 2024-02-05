@@ -543,8 +543,8 @@ end subroutine psp1lo
 !! psp1nl
 !!
 !! FUNCTION
-!! Make Kleinman-Bylander form factors f_l(q) for each l from
-!! 0 to lmax; Vloc is assumed local potential.
+!! Make Kleinman-Bylander form factors f_l(q) for each l from 0 to lmax.
+!! Vloc is assumed local potential.
 !!
 !! INPUTS
 !!  dr(mmax)=inverse of grid spacing for radial grid

@@ -22,7 +22,9 @@ module m_cutoff_sphere
  private
 
  public ::  cutoff_sphere
+!!***
 
+CONTAINS  !========================================================================================
 !!***
 
 !!****f* m_cutoff/cutoff_sphere
@@ -30,43 +32,38 @@ module m_cutoff_sphere
 !! cutoff_sphere
 !!
 !! FUNCTION
-!!  Calculate the Fourier transform of the Coulomb interaction with a spherical cutoff:
+!!  Calculate the Fourier transform of the Coulomb interaction with a spherical cutoff in real-space.
+!!
 !!   $ v_{cut}(G)= \frac{4\pi}{|q+G|^2} [ 1-cos(|q+G|*R_cut) ] $  (1)
 !!
+!!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
+!!
 !! INPUTS
-!!  gmet(3,3)=Metric in reciprocal space.
-!!  gvec(3,ngvec)=G vectors in reduced coordinates.
-!!  rcut=Cutoff radius of the sphere.
+!!  qpt(3)=q-point where the cutoff Coulomb is required.
 !!  ngvec=Number of G vectors
-!!  nqpt=Number of q-points
-!!  qpt(3,nqpt)=q-points where the cutoff Coulomb is required.
+!!  gvec(3,ngvec)=G vectors in reduced coordinates.
+!!  gmet(3,3)=Metric in reciprocal space.
+!!  rcut=Cutoff radius of the sphere.
 !!
 !! OUTPUT
-!!  vc_cut(ngvec,nqpt)=Fourier components of the effective Coulomb interaction.
-!!
-!! NOTES
-!!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
+!!  vc_cut(ngvec)=Fourier components of the effective Coulomb interaction.
 !!
 !! SOURCE
 
-
-CONTAINS  !========================================================================================
-!!***
-
-subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
+subroutine cutoff_sphere(qpt, ngvec, gvec, gmet, rcut, vc_cut)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ngvec,nqpt
+ integer,intent(in) :: ngvec
  real(dp),intent(in) :: rcut
 !arrays
  integer,intent(in) :: gvec(3,ngvec)
- real(dp),intent(in) :: gmet(3,3),qpt(3,nqpt)
- real(dp),intent(out) :: vc_cut(ngvec,nqpt)
+ real(dp),intent(in) :: gmet(3,3),qpt(3)
+ real(dp),intent(out) :: vc_cut(ngvec)
 
 !Local variables-------------------------------
 !scalars
- integer :: ig,igs,iqpt
+ integer :: ig,igs
  real(dp) :: qpg
  logical :: ltest
 
@@ -89,19 +86,17 @@ subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
  ! then they don't need to worry about the G-> 0 limit.
  !
 
- ltest=ALL(gvec(:,1)==0)
+ ltest = ALL(gvec(:,1) == 0)
  !ABI_CHECK(ltest,'The first G vector should be Gamma')
 
- do iqpt=1,nqpt
-   igs=1
-   if (ltest .and. normv(qpt(:,iqpt),gmet,'G')<tol4) then ! For small q and G=0, use the limit q-->0.
-     vc_cut(1,iqpt)=two_pi*rcut**2
-     igs=2
-   end if
-   do ig=igs,ngvec
-     qpg=normv(qpt(:,iqpt)+gvec(:,ig),gmet,'G')
-     vc_cut(ig,iqpt)=four_pi*(one-COS(rcut*qpg))/qpg**2
-   end do
+ igs=1
+ if (ltest .and. normv(qpt, gmet, 'G') < tol4) then ! For small q and G=0, use the limit q-->0.
+   vc_cut(1)=two_pi*rcut**2
+   igs=2
+ end if
+ do ig=igs,ngvec
+   qpg = normv(qpt(:) + gvec(:,ig), gmet, 'G')
+   vc_cut(ig) = four_pi* (one-COS(rcut*qpg)) / qpg**2
  end do
 
 end subroutine cutoff_sphere

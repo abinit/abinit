@@ -250,7 +250,7 @@ contains
     character(len=fnlen), intent(in) :: fname
     integer :: ierr, ncid, varid
     integer :: nspin, ntime
-    character(len=118) :: msg
+    character(len=500) :: msg
     ! open file
 
 #if defined HAVE_NETCDF
@@ -276,9 +276,10 @@ contains
 
     ! read Spin and set as initial state
     ierr =nf90_inq_varid(ncid, "S", varid)
-    NCF_CHECK_MSG(ierr, "when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint,&
-      &  spin_init_rotate_axis and spin_init_orientation as needed).")
-    
+    msg="when reading S. Try using spin_init_state=3 option instead (specify spin_init_qpoint," // &
+      & " spin_init_rotate_axis and spin_init_orientation as needed)."
+    NCF_CHECK_MSG(ierr, msg)
+
     ierr = nf90_get_var(ncid=ncid, varid=varid, values=self%Stmp(:,:), start=(/1, 1, ntime/), count=(/3, nspin,1/))
     NCF_CHECK_MSG(ierr, "when reading S from spin hist file")
 
@@ -954,17 +955,22 @@ contains
           self%params%spin_temperature=T
        endif
        call self%set_temperature(temperature=T)
+
        if(iam_master) then
           call self%hist%set_params(spin_nctime=self%params%spin_nctime, &
                &     spin_temperature=T)
           call self%spin_ob%reset(self%params)
+       endif
           ! uncomment if then to use spin initializer at every temperature. otherwise use last temperature
-          if(i==1) then
-             call self%set_initial_state(mode=self%params%spin_init_state)
-          else
-             call self%hist%inc1()
-          endif
+       if(i==1) then
+          call self%set_initial_state(mode=self%params%spin_init_state)
+       else   
+          if(iam_master) then
+            call self%hist%inc1()
+           endif
+       endif
 
+       if(iam_master) then
           write(post_fname, "(I4.4)") i
           call self%prepare_ncfile( self%params, &
                & trim(ncfile_prefix)//'_T'//post_fname//'_spinhist.nc')

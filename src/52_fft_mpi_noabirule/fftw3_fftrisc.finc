@@ -1,3 +1,4 @@
+block
 !Local variables-------------------------------
 !scalars
  integer,parameter :: nt1=1
@@ -5,8 +6,8 @@
  integer :: ny,nz,nfft,ngbin,ngbout,nthreads,ldxy,ng2_pos,ng2_neg,pt
  integer :: lot,nlot,lotin,lotout,fftcache,cidx,sidx,xyplane,padx
  integer :: nxhalf1,nxhalfm,nyhalf1,cidx_inv,pidx,fidx,padz,padc
- integer :: igb_inv,iiy,ixmax,iz_inv
- integer(KIND_FFTW_PLAN) :: bw_plan,fw_plan 
+ integer :: igb_inv,iiy,ixmax,iz_inv,G_TO_R, R_TO_G, iscale__
+ integer(KIND_FFTW_PLAN) :: bw_plan,fw_plan
  integer(KIND_FFTW_PLAN) :: fw_plan_xg2pos,fw_plan_xg2neg,fw_plan_y
  integer(KIND_FFTW_PLAN) :: bw_plan_xg2pos,bw_plan_xg2neg,bw_plan_y
  real(dp) :: norm,fraction,arg
@@ -21,9 +22,18 @@
 ! *************************************************************************
 
 ! gcc does not like C-pointers in OMP clauses
-#if defined HAVE_OPENMP && defined __GFORTRAN__ 
+#if defined HAVE_OPENMP && defined __GFORTRAN__
 #define DEV_USE_ABIMALLOC
 #endif
+
+ G_TO_R = ABI_FFTW_BACKWARD  ! +1
+ R_TO_G = ABI_FFTW_FORWARD   ! -1
+ if (present(abi_convention)) then
+   if (.not. abi_convention) then
+     G_TO_R = ABI_FFTW_FORWARD; R_TO_G = ABI_FFTW_BACKWARD
+   end if
+ end if
+ iscale__ = 1; if (present(iscale)) iscale__ = iscale
 
  ! General k-point code
  if (istwf_k>2 .and. option==0) then
@@ -97,7 +107,7 @@ if (istwf_k==1) then
 
  if (option/=3) then
 
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
    do cidx=1,mgb*nz
      cuboid(cidx) = MYCZERO
    end do
@@ -105,7 +115,7 @@ if (istwf_k==1) then
    ! Insert fofgin into the work array
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
    do ig=1,npwin
-     igb =indpw_kin(4,ig) 
+     igb =indpw_kin(4,ig)
      iz  =indpw_kin(3,ig)
      cidx = igb + (iz-1)*mgb
      cuboid(cidx) = MYCMPLX(fofgin(1,ig),fofgin(2,ig))
@@ -113,17 +123,19 @@ if (istwf_k==1) then
 
 #ifndef HAVE_OPENMP
    ! ngbin 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
-   bw_plan  = fftw3_plan_many_dft(1, (/nz/), ngbin, &  
-&    cuboid, (/mgb, nz/), mgb, 1,                   &      
-&    cuboid, (/mgb, nz/), mgb, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+   bw_plan  = fftw3_plan_many_dft(1, (/nz/), ngbin, &
+    cuboid, (/mgb, nz/), mgb, 1,                   &
+    cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nthreads)
 
    call fftw3_execute_dft(bw_plan, cuboid, cuboid)
 
 #else
    ! 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
-   bw_plan  = fftw3_plan_many_dft(1, (/nz/), 1, &  
-&    cuboid, (/mgb, nz/), mgb, 1,               &      
-&    cuboid, (/mgb, nz/), mgb, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp critical
+   bw_plan  = fftw3_plan_many_dft(1, (/nz/), 1, &
+    cuboid, (/mgb, nz/), mgb, 1,               &
+    cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotin)
 !$OMP PARALLEL DO
@@ -132,8 +144,11 @@ if (istwf_k==1) then
    end do
 #endif
 
+  !$omp critical
   call fftw3_destroy_plan(bw_plan)
-   ! Now we have cuboid(Gx,Gy,z) in the cuboid enclosing the G-sphere
+  !$omp end critical
+
+  ! Now we have cuboid(Gx,Gy,z) in the cuboid enclosing the G-sphere
  end if
  !
  ! ================================
@@ -145,7 +160,7 @@ if (istwf_k==1) then
  g2min_in = gboundin(3,1)
  g2max_in = gboundin(4,1)
 
- g2min_out = gboundout(3,1) 
+ g2min_out = gboundout(3,1)
  g2max_out = gboundout(4,1)
 
 #ifdef DEV_USE_ABIMALLOC
@@ -157,37 +172,47 @@ if (istwf_k==1) then
 #endif
 
  ng2_pos = g2max_in + 1
+ !$omp critical
  bw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx
-&  slice_a, (/ldx, ldy/), 1, ldx,                         &  ! for Gy >= 0 
-&  slice_b, (/ldx, ldy/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+&  slice_a, (/ldx, ldy/), 1, ldx,                         &  ! for Gy >= 0
+&  slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+ !$omp end critical
 
  ng2_neg = -g2min_in
 
+ !$omp critical
  bw_plan_xg2neg = fftw3_plan_many_dft(1, (/nx/), ng2_neg, &   ! ng2_neg 1D transforms of f(Gx,Gy,z) along Gx
 &  slice_a, (/ldx, ldy/), 1, ldx,                         &   ! for Gy < 0
-&  slice_b, (/ldx, ldy/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+&  slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
 
  bw_plan_y = fftw3_plan_many_dft(1, (/ny/), nx, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
-&  slice_b, (/ldx, ldy/), ldx, 1,               &  
-&  slice_a, (/ldx, ldy/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+&  slice_b, (/ldx, ldy/), ldx, 1,               &
+&  slice_a, (/ldx, ldy/), ldx, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+ !$omp end critical
 
- if (option==2 .or. option==3)then  
+ if (option==2 .or. option==3)then
 
+   !$omp critical
    fw_plan_y = fftw3_plan_many_dft(1, (/ny/), nx, &  ! nx 1D transforms of f(x,y,Gz) along y.
-&    slice_a, (/ldx, ldy/), ldx, 1,               &   
-&    slice_b, (/ldx, ldy/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&    slice_a, (/ldx, ldy/), ldx, 1,               &
+&    slice_b, (/ldx, ldy/), ldx, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
    ng2_pos = g2max_out + 1
 
+   !$omp critical
    fw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
-&    slice_b, (/ldx, ldy/), 1, ldx,                         &  
-&    slice_a, (/ldx, ldy/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&    slice_b, (/ldx, ldy/), 1, ldx,                         &
+&    slice_a, (/ldx, ldy/), 1, ldx, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
    ng2_neg = -g2min_out
 
+   !$omp critical
    fw_plan_xg2neg = fftw3_plan_many_dft(1, (/nx/), ng2_neg, &  ! ng2_neg 1D transforms of f(x,y,Gz) along x.
-&    slice_b, (/ldx, ldy/), 1, ldx,                         &       
-&    slice_a, (/ldx, ldy/), 1, ldx, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&    slice_b, (/ldx, ldy/), 1, ldx,                         &
+&    slice_a, (/ldx, ldy/), 1, ldx, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
  end if
 
 #ifdef DEV_USE_ABIMALLOC
@@ -225,7 +250,7 @@ if (istwf_k==1) then
      !
      ! Copy the data in the current plane
      do igb=1,ngbin
-       ix=indpw_kin(1,igb) 
+       ix=indpw_kin(1,igb)
        iy=indpw_kin(2,igb)
        cidx = igb + (iz-1)*mgb
        sidx = ix + (iy-1)*ldx
@@ -325,7 +350,7 @@ end if
 #endif
    END SELECT
 
-   if (option==2 .or. option==3)then  
+   if (option==2 .or. option==3)then
      ! Have to go back to G space.
      !
      ! 1) Perform y transform
@@ -339,7 +364,7 @@ end if
 
      ! Copy the data from the current plane to cuboid
      do igb=1,ngbout
-       ix=indpw_kout(1,igb) 
+       ix=indpw_kout(1,igb)
        iy=indpw_kout(2,igb)
        sidx = ix + (iy-1)*ldx
        cidx = igb + (iz-1)*mgb
@@ -360,29 +385,35 @@ end if
 !$OMP END PARALLEL
 
 ! Free plans
+ !$omp critical
  call fftw3_destroy_plan(bw_plan_xg2pos)
  call fftw3_destroy_plan(bw_plan_xg2neg)
  call fftw3_destroy_plan(bw_plan_y)
+ !$omp end critical
 
- if (option==2 .or. option==3)then  
+ if (option==2 .or. option==3)then
+   !$omp critical
    call fftw3_destroy_plan(fw_plan_y)
    call fftw3_destroy_plan(fw_plan_xg2pos)
    call fftw3_destroy_plan(fw_plan_xg2neg)
+   !$omp end critical
  end if
 
  if (option==2 .or. option==3) then
    ! 1D FFTs on the z direction
 #ifndef HAVE_OPENMP
    fw_plan = fftw3_plan_many_dft(1, (/nz/), ngbout, & ! ngbout 1D transforms of f(x,y,Gz) along Gz.
-&    cuboid, (/mgb, nz, 1/), mgb, 1,                & 
-&    cuboid, (/mgb, nz, 1/), mgb, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+&    cuboid, (/mgb, nz, 1/), mgb, 1,                &
+&    cuboid, (/mgb, nz, 1/), mgb, 1, R_TO_G, ABI_FFTW_ESTIMATE, nthreads)
 
    call fftw3_execute_dft(fw_plan, cuboid, cuboid)
 
 #else
-   fw_plan = fftw3_plan_many_dft(1, (/nz/), 1,& 
-&    cuboid, (/mgb, nz, 1/), mgb, 1,          &  
-&    cuboid, (/mgb, nz, 1/), mgb, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+   !$omp critical
+   fw_plan = fftw3_plan_many_dft(1, (/nz/), 1,&
+&    cuboid, (/mgb, nz, 1/), mgb, 1,          &
+&    cuboid, (/mgb, nz, 1/), mgb, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
 ! TODO Use chunks, see lot
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotout)
@@ -392,13 +423,16 @@ end if
    end do
 #endif
 
+  !$omp critical
   call fftw3_destroy_plan(fw_plan)
+  !$omp end critical
 
    ! Transfer the data in the output array, after normalization
    norm=one/DBLE(nfft)
-!$OMP PARALLEL DO PRIVATE(igb,iz,cidx) 
+   if (iscale__ == 0) norm = one
+!$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
    do ig=1,npwout
-     igb = indpw_kout(4,ig) 
+     igb = indpw_kout(4,ig)
      iz  = indpw_kout(3,ig)
      cidx = igb + (iz-1)*mgb
      fofgout(1,ig) = REAL (cuboid(cidx))*norm
@@ -440,7 +474,7 @@ else
    if (option/=3) then
 
      ! Zero the components of cuboid
-!$OMP PARALLEL DO 
+!$OMP PARALLEL DO
      do cidx=1,mgb*nz
        cuboid(cidx) = MYCZERO
      end do
@@ -448,7 +482,7 @@ else
      ! Insert fofgin into the work array cuboid
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
      do ig=1,npwin
-       igb = indpw_kin(4,ig) 
+       igb = indpw_kin(4,ig)
        iz  = indpw_kin(3,ig)
        cidx = igb + (iz-1)*mgb
        cuboid(cidx) = MYCMPLX(fofgin(1,ig), fofgin(2,ig))
@@ -545,15 +579,17 @@ else
      !
      ! Perform ngbin in-place 1D FFTs on the z direction
      ! ngbin 1D in-place transforms of cuboid(Gx,Gy,Gz) along Gz.
-     bw_plan = fftw3_plan_many_dft(1, (/nz/), ngbin, &  
-&      cuboid, (/mgb, nz/), mgb, 1,                  &      
-&      cuboid, (/mgb, nz/), mgb, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nthreads)
+     bw_plan = fftw3_plan_many_dft(1, (/nz/), ngbin, &
+&      cuboid, (/mgb, nz/), mgb, 1,                  &
+&      cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nthreads)
 
      call fftw3_execute_dft(bw_plan, cuboid, cuboid)
 #else
-     bw_plan = fftw3_plan_many_dft(1, (/nz/), 1, &  
-&      cuboid, (/mgb, nz/), mgb, 1,                  &      
-&      cuboid, (/mgb, nz/), mgb, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+     !$omp critical
+     bw_plan = fftw3_plan_many_dft(1, (/nz/), 1, &
+&      cuboid, (/mgb, nz/), mgb, 1,                  &
+&      cuboid, (/mgb, nz/), mgb, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotin)
 !$OMP PARALLEL DO
@@ -562,11 +598,13 @@ else
      end do
 #endif
 
+     !$omp critical
      call fftw3_destroy_plan(bw_plan)
+     !$omp end critical
 
      ! Change the phase if $k_z \neq 0$
      if (istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9) then
-!$OMP PARALLEL DO PRIVATE(phase,padz,cidx) 
+!$OMP PARALLEL DO PRIVATE(phase,padz,cidx)
        do iz=1,nz
          phase = pha3(iz)
          padz  = (iz-1)*mgb
@@ -590,24 +628,28 @@ else
    g2max_in= gboundin(4,1)
    ng2_pos = g2max_in + 1
 
+   !$omp critical
    bw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos,  &  ! ng2_pos 1D transforms of f(Gx,Gy,z) along Gx
-&    slice_a, (/ldx, ldy/), 1, ldx,                          &  ! for Gy >= 0 
-&    slice_b, (/ldx, ldy/), 1, ldx, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+&    slice_a, (/ldx, ldy/), 1, ldx,                          &  ! for Gy >= 0
+&    slice_b, (/ldx, ldy/), 1, ldx, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
 
    ! TODO clarify this point. why nxhalfm?
    !bw_plan_y = dplan_many_dft(1, (/ny/), nxhalfm, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
    !bw_plan_y = dplan_many_dft(1, (/ny/), nx, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
    bw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,Gy,z) along Gy.
-&    slice_a, (/ldx, ldy/), ldx, 1,                    &  
-&    slice_b, (/ldx, ldy/), ldx, 1, ABI_FFTW_BACKWARD, ABI_FFTW_ESTIMATE, nt1)
+&    slice_a, (/ldx, ldy/), ldx, 1,                    &
+&    slice_b, (/ldx, ldy/), ldx, 1, G_TO_R, ABI_FFTW_ESTIMATE, nt1)
+   !$omp end critical
 
-   if (option==2 .or. option==3)then  
+   if (option==2 .or. option==3)then
+     !$omp critical
      ! TODO clarify this point. why nxhalfm?
      !fw_plan_y = dplan_many_dft(1, (/ny/), nxhalfm, &  ! nx 1D transforms of f(x,y,Gz) along y.
      !fw_plan_y = dplan_many_dft(1, (/ny/), nx, &    ! nx 1D transforms of f(x,y,Gz) along y.
      fw_plan_y = fftw3_plan_many_dft(1, (/ny/), nxhalf1, &  ! nx 1D transforms of f(x,y,Gz) along y.
-&      slice_a, (/ldx, ldy/), ldx, 1,                    &   
-&      slice_b, (/ldx, ldy/), ldx, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&      slice_a, (/ldx, ldy/), ldx, 1,                    &
+&      slice_b, (/ldx, ldy/), ldx, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 #ifdef DEV_USE_ABIMALLOC
      ABI_MALLOC(slice_c,(2*nxhalfm*ldy))
@@ -616,14 +658,16 @@ else
      call fftw3_alloc_complex(2*nxhalfm*ldy,cptr_sc,slice_c)
      call fftw3_alloc_complex(2*nxhalfm*ldy,cptr_sd,slice_d)
 #endif
-!  
+!
 !    Note that here gboundin must equal gboudnout
      ! TODO clarify this point. why nxhalfm?
      ng2_pos = g2max_in + 1
      !fw_plan_xg2pos = dplan_many_dft(1, (/2*nxhalfm/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
+     !$omp critical
      fw_plan_xg2pos = fftw3_plan_many_dft(1, (/nx/), ng2_pos, &  ! ng2_pos 1D transforms of f(x,y,Gz) along x.
-&      slice_c, (/  nxhalfm, ldy/), 1, 2*nxhalfm,        &  
-&      slice_d, (/2*nxhalfm, ldy/), 1, 2*nxhalfm, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&      slice_c, (/  nxhalfm, ldy/), 1, 2*nxhalfm,        &
+&      slice_d, (/2*nxhalfm, ldy/), 1, 2*nxhalfm, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
+     !$omp end critical
 
 #ifdef DEV_USE_ABIMALLOC
      ABI_FREE(slice_c)
@@ -722,8 +766,8 @@ else
            !
            padx = (iy-1)*ldx
            do ix=1,nxhalf1-1
-             sidx = ix     + padx 
-             cidx = 2*ix-1 + padx 
+             sidx = ix     + padx
+             cidx = 2*ix-1 + padx
 
              slice_a(sidx) = MYCMPLX( REAL(slice_b(cidx)) - AIMAG(slice_b(cidx+1)),&
 &                                    AIMAG(slice_b(cidx)) + REAL (slice_b(cidx+1)) )
@@ -734,8 +778,8 @@ else
            end do
            !
            if ((2*nxhalf1-2)/=nx) then
-             sidx = nxhalf1 + padx 
-             cidx = nx + padx 
+             sidx = nxhalf1 + padx
+             cidx = nx + padx
              slice_a(sidx) = slice_b(cidx)
 
              sidx = nxhalf1 + (ny+iiy-iy-1)*ldx
@@ -774,7 +818,7 @@ else
            padx = (iy-1)*ldx
            do ix=1,nxhalfm
              sidx = ix + padx
-             slice_b(sidx) = slice_b(sidx) * phase 
+             slice_b(sidx) = slice_b(sidx) * phase
            end do
          end do
        end if
@@ -813,7 +857,7 @@ else
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            denpot(2*ix-1,iy,iz) = denpot(2*ix-1,iy,iz) + weight_r* REAL(slice_b(sidx))**2
            denpot(2*ix  ,iy,iz) = denpot(2*ix  ,iy,iz) + weight_i*AIMAG(slice_b(sidx))**2
          end do
@@ -829,13 +873,13 @@ else
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            slice_a(sidx) = MYCMPLX( denpot(2*ix-1,iy,iz)* REAL(slice_b(sidx)), &
                                     denpot(2*ix  ,iy,iz)*AIMAG(slice_b(sidx)) )
          end do
          ! If nx odd, must add last data
          if ((2*nxhalf1-2)/=nx) then
-           sidx = nxhalf1 + padx 
+           sidx = nxhalf1 + padx
            slice_a(sidx) = MYCMPLX( denpot(nx,iy,iz)*REAL(slice_b(sidx)), zero)
          end if
        end do
@@ -847,7 +891,7 @@ else
        do iy=1,ny
          padx = (iy-1)*ldx
          do ix=1,nxhalf1-1
-           sidx = ix + padx 
+           sidx = ix + padx
            fidx = 2*ix-1 + padx + (iz-1)*ldx*ldy
            slice_b(sidx) = MYCMPLX( fofr(1,fidx), fofr(1,fidx+1) )
          end do
@@ -860,7 +904,7 @@ else
        end do
      end if
 
-     if (option==2 .or. option==3) then  
+     if (option==2 .or. option==3) then
        !
        ! Change the phase if $k_y \neq 0$
        if (istwf_k>=6 .and. istwf_k<=9) then
@@ -882,7 +926,7 @@ else
        ! Decompose symmetric and antisymmetric parts
        if (istwf_k>=2 .and. istwf_k<=5) then
          do ix=1,nxhalfm
-           pidx = 2*ix-1 
+           pidx = 2*ix-1
            slice_c(pidx)   = MYCMPLX(  REAL(slice_b(ix)), zero)
            slice_c(pidx+1) = MYCMPLX( AIMAG(slice_b(ix)), zero)
          end do
@@ -950,13 +994,17 @@ else
 #endif
 !$OMP END PARALLEL
 
+   !$omp critical
    call fftw3_destroy_plan(bw_plan_xg2pos)
    call fftw3_destroy_plan(bw_plan_y)
+   !$omp end critical
 
    if (option==2 .or. option==3) then
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan_y)
      call fftw3_destroy_plan(fw_plan_xg2pos)
+     !$omp end critical
 
      ! Change the phase if $k_z \neq 0$
      if (istwf_k==4 .or. istwf_k==5 .or. istwf_k==8 .or. istwf_k==9) then
@@ -974,14 +1022,14 @@ else
      ! 1D FFTs on the z direction
 #ifndef HAVE_OPENMP
      fw_plan = fftw3_plan_many_dft(1, (/nz/), ngbout, & ! ngbout 1D transforms of f(x,y,Gz) along Gz.
-&      cuboid, (/mgb, nz, 1/), mgb, 1,                & 
-&      cuboid, (/mgb, nz, 1/), mgb, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nthreads)
+&      cuboid, (/mgb, nz, 1/), mgb, 1,                &
+&      cuboid, (/mgb, nz, 1/), mgb, 1, R_TO_G, ABI_FFTW_ESTIMATE, nthreads)
 
      call fftw3_execute_dft(fw_plan, cuboid, cuboid)
 #else
      fw_plan = fftw3_plan_many_dft(1, (/nz/), 1, & ! ngbout 1D transforms of f(x,y,Gz) along Gz.
-&      cuboid, (/mgb, nz, 1/), mgb, 1,           & 
-&      cuboid, (/mgb, nz, 1/), mgb, 1, ABI_FFTW_FORWARD, ABI_FFTW_ESTIMATE, nt1)
+&      cuboid, (/mgb, nz, 1/), mgb, 1,           &
+&      cuboid, (/mgb, nz, 1/), mgb, 1, R_TO_G, ABI_FFTW_ESTIMATE, nt1)
 
 ! TODO Use chunks, see lot
 !!$OMP PARALLEL DO SCHEDULE(STATIC, lotout)
@@ -991,11 +1039,13 @@ else
      end do
 #endif
 
+     !$omp critical
      call fftw3_destroy_plan(fw_plan)
+     !$omp end critical
 
      ! Transfer the data in the output array, after normalization
      norm=one/DBLE(nfft)
-
+     if (iscale__ == 0) norm = one
 !$OMP PARALLEL DO PRIVATE(igb,iz,cidx)
      do ig=1,npwout
        igb  = indpw_kout(4,ig)
@@ -1025,3 +1075,5 @@ end if ! End time-reversal symmetry
  if (option==2 .or. option==3) then
    ABI_FREE(indpw_kout)
  end if
+
+end block

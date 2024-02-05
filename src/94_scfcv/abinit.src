@@ -20,6 +20,7 @@ ABI_SRC_DEP = 2     # The file depends on other files
 sources = [
  "m_afterscfloop.F90",
  "m_elpolariz.F90",
+ "m_gwr.F90",
  "m_scfcv_core.F90",
  "m_scfcv.F90",
  "m_outscfcv.F90",

@@ -46,7 +46,7 @@ module m_lobpcgwf
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
 
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  private
 

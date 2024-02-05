@@ -106,8 +106,6 @@ CONTAINS  !====================================================================
 
 subroutine open_haydock(filename, haydock_file)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: filename
@@ -145,8 +143,6 @@ end subroutine open_haydock
 !! SOURCE
 
 subroutine read_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -207,8 +203,6 @@ end subroutine read_dim_haydock
 
 subroutine write_dim_haydock(haydock_file)
 
- implicit none
-
 !Arguments ------------------------------------
  type(haydock_type),intent(in) :: haydock_file
 
@@ -238,8 +232,6 @@ end subroutine write_dim_haydock
 !! SOURCE
 
 subroutine skip_dim_haydock(haydock_file)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -280,8 +272,6 @@ end subroutine skip_dim_haydock
 !! SOURCE
 
 subroutine read_haydock(haydock_file, q, aa, bb, phi_n, phi_nm1, niter, factor)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -370,8 +360,6 @@ end subroutine read_haydock
 
 subroutine write_haydock(haydock_file, hsize, q, aa, bb, phi_n, phi_nm1, niter, factor)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: niter,hsize
@@ -416,8 +404,6 @@ end subroutine write_haydock
 
 subroutine close_haydock(haydock_file)
 
- implicit none
-
 !Arguments ------------------------------------
  type(haydock_type),intent(inout) :: haydock_file
 
@@ -425,13 +411,8 @@ subroutine close_haydock(haydock_file)
 
  close(haydock_file%unt)
 
- if(allocated(haydock_file%qpoints)) then
-   ABI_FREE(haydock_file%qpoints)
- end if
-
- if(allocated(haydock_file%niter)) then
-   ABI_FREE(haydock_file%niter)
- end if
+ ABI_SFREE(haydock_file%qpoints)
+ ABI_SFREE(haydock_file%niter)
 
 end subroutine close_haydock
 !!***

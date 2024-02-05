@@ -23,7 +23,13 @@ sources = [
  "m_pseudo_pwscf.F90",
  "m_pspheads.F90",
  "m_psxml2ab.F90",
- "m_read_upf_pwscf.F90"
+ "m_read_upf_pwscf.F90",
+ # modules taken from QE to support UPF2
+ "pseudo_types.F90",
+ "read_upf_new.F90",
+ "upf_kinds.F90",
+ "xmltools.F90",
+ "upf_utils.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.

@@ -2437,7 +2437,7 @@ subroutine ctqmc_calltriqs(paw_dmft,cryst_struc,hu,levels_ctqmc,gtmp_nd,gw_tmp_n
 #if defined HAVE_PYTHON_INVOCATION
  use INVOKE_PYTHON
 #endif
- use ISO_C_BINDING
+ use, intrinsic :: iso_c_binding
 
 !Arguments ------------------------------------
 !scalars

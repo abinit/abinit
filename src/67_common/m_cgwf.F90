@@ -1355,7 +1355,6 @@ end subroutine cgwf
 !! sinth = sin(thetam)
 !! thetam = optimal angle theta in line_minimization
 !!
-!!
 !! SIDE EFFECTS
 !! Input/Output
 !! dphase_aux1 = change in Zak phase accumulated during the loop over iline

@@ -1519,7 +1519,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 &     '      Damping parameters:    a1 = ', vdw_a1, ',    a2 = ', vdw_a2
      call wrtout(std_out,msg,'COLL')
    end if
-   write(msg,'(a,es12.5,3a,i8,2a,es12.5,1a)') &
+   write(msg,'(a,es12.5,3a,i14,2a,es12.5,1a)') &
 &   '      Cut-off radius   = ',rcut,' Bohr',ch10,&
 &   '      Number of pairs contributing = ',npairs,ch10,&
 &   '      DFT-D3 (no 3-body) energy contribution = ',e_vdw_dftd3-e_3bt,' Ha'

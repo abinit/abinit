@@ -503,11 +503,11 @@ end subroutine calc_vkb
 
 !!****f* m_vkbr/nc_ihr_comm
 !! NAME
-!!  nc_pwihr_comm
+!!  nc_ihr_comm
 !!
 !! FUNCTION
 !!  Calculate the matrix elements of the commutator i[H,r]
-!!  For norm conserving potentials the commutator i[Vnl,r] is included depending on inclvkb.
+!!  For NC pseudppotentials, the commutator i[Vnl,r] is included depending on inclvkb.
 !!
 !! INPUTS
 !!  vkbr<vkbr_t>
@@ -582,7 +582,7 @@ function nc_ihr_comm(vkbr,cryst,psps,npw,nspinor,istwfk,inclvkb,kpoint,ug1,ug2,g
      end do
    end do
  else
-   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0,G0) term is null.
+   ! Symmetrized expression: \sum_G  (k+G) 2i Im [ u_a^*(G) u_b(G) ]. (k0, G0) term is null.
    ABI_CHECK(nspinor == 1, "nspinor != 1")
    do ig=1,npw
      c_tmp = GWPC_CONJG(ug1(ig)) * ug2(ig)

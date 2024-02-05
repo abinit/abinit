@@ -33,13 +33,12 @@ program ioprof
  use m_wfk
  use m_abicore
  use m_hdr
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_specialmsg,     only : specialmsg_getcount, herald
  use m_fstrings,       only : lower, sjoin, itoa
  use m_io_tools,       only : delete_file, file_exists, iomode_from_fname, get_unit
+ use m_argparse,       only : get_arg !, get_arg_list, get_start_step_num
 
  implicit none
 
@@ -47,8 +46,9 @@ program ioprof
 !scalars
  integer,parameter :: master=0,MAX_NFILES=50
  integer :: comm,my_rank,nprocs,iomode,formeig,ierr,fform
- integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs
+ integer :: ii,io,check_iomode,method,feg,ount,nband2read,nargs, abimem_level
  logical :: verbose=.FALSE.
+ real(dp) :: abimem_limit_mb
  character(len=24) :: codename
  character(len=500) :: msg,command,arg
  character(len=fnlen) :: new_fname,wfk_source,wfk_dest,wfk_path
@@ -74,14 +74,16 @@ program ioprof
  call xmpi_init()
  comm = xmpi_world; my_rank = xmpi_comm_rank(comm); nprocs  = xmpi_comm_size(comm)
 
-!Initialize memory profiling if it is activated
-!if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
-!note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ! Initialize memory profiling if it is activated
+ ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
+ ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
- codename='ABIWFK'//REPEAT(' ',17)
+ codename='IOPROF'//REPEAT(' ',17)
  call herald(codename,abinit_version,std_out)
 
  !verbose = .TRUE.

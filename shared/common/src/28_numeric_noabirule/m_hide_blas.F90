@@ -178,7 +178,7 @@ interface xscal
     real(sp) :: sx(*)
   end subroutine sscal
   !
-  subroutine  dscal(n,da,dx,incx)
+  subroutine dscal(n,da,dx,incx)
     use defs_basis
     implicit none
     integer :: incx
@@ -187,7 +187,7 @@ interface xscal
     real(dp):: dx(*)
   end subroutine dscal
   !
-  subroutine  cscal(n,ca,cx,incx)
+  subroutine cscal(n,ca,cx,incx)
     use defs_basis
     implicit none
     integer :: incx
@@ -196,7 +196,7 @@ interface xscal
     complex(spc) :: cx(*)
   end subroutine cscal
   !
-  subroutine  zscal(n,za,zx,incx)
+  subroutine zscal(n,za,zx,incx)
     use defs_basis
     implicit none
     integer :: incx

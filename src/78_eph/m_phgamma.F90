@@ -43,11 +43,9 @@ module m_phgamma
  use m_ifc
  use m_ebands
  use m_fstab
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_wfk
  use m_ddb
  use m_ddk
@@ -664,7 +662,6 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
        lambda_tot = lambda_tot + lambda_ph(mu) * gams%wtq(iq_ibz)
      end do
 
-#ifdef HAVE_NETCDF
      ! Write data to netcdf file
      if (ncid /= nctk_noid) then
        if (spin == 1) then
@@ -674,7 +671,6 @@ subroutine phgamma_ncwrite(gams, cryst, ifc, ncid)
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phgamma_qibz'), gamma_ph, start=[1, iq_ibz, spin]))
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phlambda_qibz'), lambda_ph, start=[1, iq_ibz, spin]))
      end if
-#endif
 
      ! Output to the main output file
      if (gams%nsppol == 2) then
@@ -1473,9 +1469,7 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
  integer,parameter :: master = 0
  integer :: natom,ii,mu,iqpt,natom3,nsppol,ierr
  integer :: spin,unt,nqpt,nrpt,cnt,nproc,my_rank
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: omega_min,omega_max,wtmp,omega
  character(len=500) :: msg
  type(kpath_t) :: qpath
@@ -1585,7 +1579,6 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
 
    ! Write data to netcdf file
    if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
      ncerr = nctk_def_dims(ncid, [&
        nctkdim_t("natom3", 3*natom), nctkdim_t("nqpath", nqpt), nctkdim_t("number_of_spins", nsppol) &
      ], defmode=.True.)
@@ -1605,7 +1598,6 @@ subroutine phgamma_linwid(gams, cryst, ifc, ndivsm, nvert, qverts, basename, nci
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phdispl_cart_qpath"), all_displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phgamma_qpath"), all_gammaq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phlambda_qpath"), all_lambdaq))
-#endif
    end if
  end if ! master
 
@@ -1833,15 +1825,15 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
      ! Interpolate or evaluate gamma directly.
      if (do_qintp) then
        if (gams%prteliash == 3) then
-         call gams%interp(cryst, ifc, spin, qibz(:,iq_ibz), phfrq, gamma_ph, lambda_ph, displ_cart, gamma_ph_ee=gamma_ph_ee)
+         call gams%interp(cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee(:,:,:,spin))
        else
-         call gams%interp(cryst, ifc, spin, qibz(:,iq_ibz), phfrq, gamma_ph, lambda_ph, displ_cart)
+         call gams%interp(cryst,ifc,spin,qibz(:,iq_ibz),phfrq,gamma_ph,lambda_ph,displ_cart)
        end if
      else
        if (gams%prteliash == 3) then
-         call gams%eval_qibz(cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, lambda_ph, displ_cart, gamma_ph_ee=gamma_ph_ee)
+         call gams%eval_qibz(cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph,displ_cart,gamma_ph_ee=gamma_ph_ee(:,:,:,spin))
        else
-         call gams%eval_qibz(cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, lambda_ph, displ_cart)
+         call gams%eval_qibz(cryst,ifc,iq_ibz,spin,phfrq,gamma_ph,lambda_ph, displ_cart)
        end if
      end if
 
@@ -2097,7 +2089,7 @@ subroutine a2fw_init(a2f, gams, cryst, ifc, ph_intmeth, wstep, wminmax, smear, n
        call simpson_int(nomega, wstep, a2feew_w, a2feew_w_int)
        G0 = a2feew_w_int(nomega) * two_pi * a2f%n0(spin) / cryst%ucvol
        ! conversion factor for G0 to SI units =  Ha_J / Time_Sec / (Bohr_meter)**3 ~ 1.2163049915755545e+30
-       write(ount, "(2(e20.10,2x))") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
+       write(ount, "(2(e20.10,2x),i5)") temp_el, G0  * kb_HaK / Time_Sec / (Bohr_meter)**3, spin !* Ha_J???
      end do
    end do
    close(ount)
@@ -2299,10 +2291,8 @@ subroutine a2fw_write(a2f, basename, post, ncid)
 !Local variables -------------------------
 !scalars
  integer :: iw,spin,unt,ii,mu
-#ifdef HAVE_NETCDF
  integer :: ncerr
  character(len=500) :: dim1_name
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -2325,7 +2315,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  else
    write(unt,'(a)')"# Frequency, a2F_tot(w), lambda_tot(w)dw, a2F_spin1(w), lambda_spin1(w) ..."
    do iw=1,a2f%nomega
-     write(unt,*) a2f%omega(iw), &
+     write(unt,'(E20.10,3x,3(2E20.10, 2x))') a2f%omega(iw), &
                   sum(a2f%vals(iw,0,:)) , sum(a2f%lambdaw(iw,0,:)), &  ! TOT
                   a2f%vals(iw,0,1)      , a2f%lambdaw(iw,0,1),      &  ! UP
                   a2f%vals(iw,0,2)      , a2f%lambdaw(iw,0,2)          ! DOWN
@@ -2356,7 +2346,7 @@ subroutine a2fw_write(a2f, basename, post, ncid)
      write(unt,'(a,i0)')"# Phonon mode ",mu
      write(unt,'(a)')"# Frequency, a2F_tot(w), lambda_tot(w)dw, a2F_spin1(w), lambda_spin1(w) ..."
      do iw=1,a2f%nomega
-       write(unt,*) a2f%omega(iw), &
+       write(unt,'(E20.10,3x,3(2E20.10, 2x))') a2f%omega(iw), &
                     sum(a2f%vals(iw,mu,:)), sum(a2f%lambdaw(iw,mu,:)), &  ! TOT
                     a2f%vals(iw,mu,1)     , a2f%lambdaw(iw,mu,1),      &  ! UP
                     a2f%vals(iw,mu,2)     , a2f%lambdaw(iw,mu,2)          ! DOWN
@@ -2367,7 +2357,6 @@ subroutine a2fw_write(a2f, basename, post, ncid)
  close(unt)
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions.
    dim1_name = strcat("a2f_nomega", post)
    ncerr = nctk_def_dims(ncid, [ &
@@ -2387,7 +2376,6 @@ subroutine a2fw_write(a2f, basename, post, ncid)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_mesh", post)), a2f%omega))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_values", post)), a2f%vals))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2f_lambdaw", post)), a2f%lambdaw))
-#endif
  end if
 
 contains
@@ -2926,10 +2914,8 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
 !Local variables -------------------------
 !scalars
  integer :: iw,spin,unt,ii,mu,idir, jdir
-#ifdef HAVE_NETCDF
  integer :: ncerr
  character(len=500) :: dim1_name
-#endif
  character(len=500) :: msg
  character(len=fnlen) :: path
 
@@ -3020,7 +3006,6 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
  close(unt)
 
  if (ncid /= nctk_noid) then
-#ifdef HAVE_NETCDF
    ! Define dimensions.
    dim1_name = strcat("a2ftr_nomega", post)
    ncerr = nctk_def_dims(ncid, [ &
@@ -3040,7 +3025,6 @@ subroutine a2fw_tr_write(a2f_tr, basename, post, ncid)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_mesh", post)), a2f_tr%omega))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_values", post)), a2f_tr%vals_tr))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, strcat("a2ftr_lambdaw", post)), a2f_tr%lambdaw_tr))
-#endif
  end if
 
 contains
@@ -3133,9 +3117,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,kq_count,nkpg,nkpg1,edos_intmeth
  integer :: jene, iene, comm_rpt, nesting, my_npert, imyp, imyq
-#ifdef HAVE_NETCDF
  integer :: ncerr
-#endif
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_k, wall_k, gflops_k, cpu_all, wall_all, gflops_all
  real(dp) :: edos_step, edos_broad, sigma, ecut, eshift, eig0nk
  logical :: gen_eigenpb, need_velocities, isirr_k, isirr_kq
@@ -3386,7 +3368,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
  path = strcat(dtfil%filnam_ds(4), "_A2F.nc")
  ncid = nctk_noid
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
 
    write(std_out, "(/,a)")" === MPI parallelism ==="
@@ -3467,7 +3448,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  !  NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
  !  NCF_CHECK(nctk_set_datamode(self%ncid))
  !end if
-#endif
  call edos%free()
 
  ! Open the DVDB file
@@ -3721,11 +3701,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  ABI_FREE(bks_mask)
 
  ! Write v_nk to disk.
-!#ifdef HAVE_NETCDF
 ! if (my_rank == master) then
 !   NCF_CHECK(nf90_put_var(sigma%ncid, nctk_idname(sigma%ncid, "vcar_ibz"), vcar_ibz))
 ! end if
-!#endif
 
  if (dtset%eph_transport > 0) then
    ABI_MALLOC(tgamvv_in, (2, 9, natom3, natom3))
@@ -3787,6 +3765,8 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
 
    ! Get phonon frequencies and eigenvectors for this q-point.
    call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+   wminmax(1) = min(wminmax(1), phfrq(1))
+   wminmax(2) = max(wminmax(2), phfrq(3*cryst%natom))
 
    ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
    ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
@@ -4234,7 +4214,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  end if
  if (dtset%prteliash == 3) call xmpi_sum(gams%vals_ee, qs_comm%value, ierr)
 
-#ifdef HAVE_NETCDF
  ! Close the netcdf file then master reopens it
  !if (ncwrite_comm%value /= xmpi_comm_null) then
  !  NCF_CHECK(nf90_close(ncid))
@@ -4246,7 +4225,6 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  !  NCF_CHECK(nctk_open_modify(ncid, path, xmpi_comm_self))
  !  NCF_CHECK(nctk_set_datamode(ncid))
  !end if
-#endif
 
  ! Deallocate MPI communicators.
  call pert_comm%free()
@@ -4322,11 +4300,9 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    !call a2fw_tr%free()
  end if
 
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nf90_close(ncid))
  end if
-#endif
 
  call gams%free()
 

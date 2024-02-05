@@ -37,6 +37,7 @@
 #  include "xc_config.h"
 #else
 #  define FLOAT double
+#  define XC(func) xc_ ## func
 #endif
 
 /* ===============================================================
@@ -128,7 +129,7 @@ void xc_get_kind_constants(int *xc_cst_exchange,
  * ===============================================================
  */
 /*void xc_get_hybrid_constants(int *xc_cst_hyb_none,
-                               int *xc_cst_hyb_fock, 
+                               int *xc_cst_hyb_fock,
                                int *xc_cst_hyb_pt2,
                                int *xc_cst_hyb_erf_sr,
                                int *xc_cst_hyb_yukawa_sr,
@@ -284,15 +285,16 @@ char const *xc_get_info_refs(XC(func_type) *xc_func, const int *number)
 #endif
 
 /* ===============================================================
- * Wrapper to xc_func_set_ext_params for backward compatibility
+ * Wrapper to xc_func_set_ext_params
  *    Allows to change the parameters of a XC functional
+ * For backward compatibility
  * ===============================================================
  */
 void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_params)
 #if ( XC_MAJOR_VERSION > 4 )
 /* ==== libXC v5.0 and later ==== */
  {if (n_ext_params == xc_func->info->ext_params.n)
-   {XC(func_set_ext_params)(xc_func, ext_params);}
+   {xc_func_set_ext_params(xc_func, ext_params);}
 #elif ( XC_MAJOR_VERSION > 3 )
 /* ==== libXC v4.0 ==== */
  {if (xc_func->info->number == XC_HYB_GGA_XC_PBEH && n_ext_params == 1)
@@ -333,6 +335,45 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
  }
 
 /* ===============================================================
+ * Wrappers to:
+ *  xc_func_get_ext_params_name: get name of a functional parameter
+ *  xc_func_get_ext_params_description: get description of a parameter
+ *  xc_func_set_ext_params_name: set a functional parameter by name
+ * For backward compatibility
+ * These accessors where not provided before libXC v5
+ * ===============================================================
+ */
+char const *xc_func_get_params_name(XC(func_type) *xc_func, const int *number)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+ {if (*number>=0&&*number<xc_func->info->ext_params.n)
+   {return xc_func_info_get_ext_params_name(xc_func->info,*number);}
+  else {return NULL;}}
+#else
+/* ==== Before libXC v5.0, was not available ==== */
+ {return NULL;}
+#endif
+
+char const *xc_func_get_params_description(XC(func_type) *xc_func, int *number)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+ {if (*number>=0&&*number<xc_func->info->ext_params.n)
+   {return xc_func_info_get_ext_params_description(xc_func->info,*number);}
+  else {return NULL;}}
+#else
+/* ==== Before libXC v5.0, was not available ==== */
+ {return NULL;}
+#endif
+
+int xc_func_set_params_name(XC(func_type) *xc_func, const char *name, double *par)
+#if ( XC_MAJOR_VERSION > 4 )
+/* ==== libXC v5.0 and later ==== */
+  {xc_func_set_ext_params_name(xc_func, name, *par);return 0;}
+#else
+  {return -1;}
+#endif
+
+/* ===============================================================
  * Wrapper to xc_func_set_dens_threshold
  *    and xc_func_set_sigma_threshold for backward compatibility
  *    Allows to change the zero-density (zero-gradient) threshold
@@ -343,7 +384,7 @@ void xc_func_set_params(XC(func_type) *xc_func, double *ext_params, int n_ext_pa
 void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshold)
 #if ( XC_MAJOR_VERSION > 3 )
 /* ==== libXC v4.0 and later ==== */
-   {XC(func_set_dens_threshold)(xc_func, *dens_threshold);}
+   {xc_func_set_dens_threshold(xc_func, *dens_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting density threshold not available for libXC<4.0!\n");}
 #endif
@@ -351,7 +392,7 @@ void xc_func_set_density_threshold(XC(func_type) *xc_func, double *dens_threshol
 void xc_func_set_grad_sig_threshold(XC(func_type) *xc_func, double *sigma_threshold)
 #if ( XC_MAJOR_VERSION > 4 )
 /* ==== libXC v5.0 and later ==== */
-   {XC(func_set_sigma_threshold)(xc_func, *sigma_threshold);}
+   {xc_func_set_sigma_threshold(xc_func, *sigma_threshold);}
 #else
    {fprintf(stderr, "WARNING: setting sigma threshold not available for libXC<4.0!\n");}
 #endif

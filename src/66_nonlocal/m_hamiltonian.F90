@@ -55,7 +55,7 @@ module m_hamiltonian
 #endif
 
 #if defined HAVE_FC_ISO_C_BINDING
- use iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_f_pointer,c_int32_t
 #endif
 
  implicit none

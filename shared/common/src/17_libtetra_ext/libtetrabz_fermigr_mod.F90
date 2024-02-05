@@ -39,7 +39,7 @@ CONTAINS
 !
 SUBROUTINE libtetrabz_fermigr(ltetra,bvec,nb,nge,eig1,eig2,ngw,wght,ne,e0,comm) 
   !
-  USE ISO_C_BINDING
+  use, intrinsic :: iso_c_binding
   USE libtetrabz_common, ONLY : libtetrabz_initialize, libtetrabz_interpol_indx, libtetrabz_mpisum_dv
   IMPLICIT NONE
   !

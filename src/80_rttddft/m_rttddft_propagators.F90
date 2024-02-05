@@ -24,7 +24,7 @@ module m_rttddft_propagators
  use defs_basis
  use defs_abitypes,         only: MPI_type
  use defs_datatypes,        only: pseudopotential_type
- 
+
  use m_bandfft_kpt,         only: bandfft_kpt, bandfft_kpt_type, &
                                 & bandfft_kpt_set_ikpt,          &
                                 & prep_bandfft_tabs
@@ -55,7 +55,7 @@ module m_rttddft_propagators
  public :: rttddft_propagator_emr
 !!***
 
-contains 
+contains
 !!***
 
 !!****f* m_rttddft/rttddft_propagator_er
@@ -64,7 +64,7 @@ contains
 !!  rttddft_propagator_er
 !!
 !! FUNCTION
-!!  Main subroutine to propagate the KS orbitals using 
+!!  Main subroutine to propagate the KS orbitals using
 !!  the Exponential Rule (ER) propagator.
 !!
 !! INPUTS
@@ -74,14 +74,14 @@ contains
 !!  mpi_enreg <MPI_type> = MPI-parallelisation information
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!  tdks <type(tdks_type)> = the tdks object to initialize
-!!  calc_properties <logical> = logical governing the computation of 
+!!  calc_properties <logical> = logical governing the computation of
 !!                              some properties (energies, occupations, eigenvalues..)
 !!
 !! NOTES
-!!  Other propagators such as the Exponential Midpoint Rule (EMR) 
-!!  should usually be prefered over this one since the ER propagator 
-!!  alone violates time reversal symmetry. Using this propagator with 
-!!  the exponential approximated by Taylor expansion of order 1 leads 
+!!  Other propagators such as the Exponential Midpoint Rule (EMR)
+!!  should usually be prefered over this one since the ER propagator
+!!  alone violates time reversal symmetry. Using this propagator with
+!!  the exponential approximated by Taylor expansion of order 1 leads
 !!  to the famous Euler method which is fast and simple but unstable
 !!  and thus insufficient for RT-TDDFT.
 !!
@@ -99,7 +99,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),    target, intent(inout) :: tdks
- 
+
  !Local variables-------------------------------
  !scalars
  integer                        :: bdtot_index
@@ -135,14 +135,14 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  real(dp), allocatable          :: kpg_k(:,:)
  real(dp)                       :: kpoint(3)
  real(dp), allocatable          :: kinpw(:)
- real(dp), pointer              :: occ(:) => null() 
+ real(dp), pointer              :: occ(:) => null()
  real(dp), pointer              :: occ0(:) => null()
  real(dp), allocatable          :: ph3d(:,:,:)
  real(dp), allocatable          :: vlocal(:,:,:,:)
  real(dp), allocatable          :: vxctaulocal(:,:,:,:,:)
  real(dp), allocatable          :: ylm_k(:,:)
  logical                        :: lproperties(4)
- 
+
 ! ***********************************************************************
 
  !Init MPI
@@ -158,7 +158,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  !  lproperties(4) = occupations
  lproperties(:) = .false.
  lcalc_properties = .false.
- if (present(calc_properties)) then 
+ if (present(calc_properties)) then
    lcalc_properties = calc_properties
    if (lcalc_properties) then
       !compute energy contributions
@@ -169,15 +169,15 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
       energies%e_corepsp=tdks%energies%e_corepsp
       energies%e_ewald=tdks%energies%e_ewald
       !including NL part in NC case?
-      if (dtset%usepaw == 0) then 
+      if (dtset%usepaw == 0) then
          lproperties(2) = .true.
       else
          ABI_MALLOC(enl,(0))
       end if
       !other properties
       ! eigenvalues
-      if (dtset%prteig /= 0 .or. dtset%prtdos /= 0) then 
-         if (mod(istep-1,dtset%td_prtstr) == 0) then 
+      if (dtset%prteig /= 0 .or. dtset%prtdos /= 0) then
+         if (mod(istep-1,dtset%td_prtstr) == 0) then
             lproperties(3) = .true.
             tdks%eigen(:) = zero
          end if
@@ -333,25 +333,25 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
             !Init the arrays
             call make_gemm_nonlop(my_ikpt,ham_k%npw_fft_k,ham_k%lmnmax,ham_k%ntypat,     &
                                & ham_k%indlmn, ham_k%nattyp, ham_k%istwf_k, ham_k%ucvol, &
-                               & ham_k%ffnl_k,ham_k%ph3d_k)
+                               & ham_k%ffnl_k, ham_k%ph3d_k, ham_k%kpt_k, ham_k%kg_k, ham_k%kpg_k)
          end if
       end if
 
       !** Compute the exp[(S^{-1})H]*cg using Taylor expansion to approximate the exponential
       cg => tdks%cg(:,icg+1:icg+nband_k*npw_k*my_nspinor)
       ! Compute properties "on-the-fly" if required
-      if (lcalc_properties) then 
+      if (lcalc_properties) then
          cg0 => tdks%cg0(:,icg+1:icg+nband_k*npw_k*my_nspinor)
          occ => tdks%occ(bdtot_index+1:bdtot_index+nband_k)
          occ0 => tdks%occ0(bdtot_index+1:bdtot_index+nband_k)
-         if (dtset%paral_kgb /= 1) then 
+         if (dtset%paral_kgb /= 1) then
             shift = bdtot_index
          else
-            me_bandfft = xmpi_comm_rank(mpi_enreg%comm_band) 
+            me_bandfft = xmpi_comm_rank(mpi_enreg%comm_band)
             shift = bdtot_index+me_bandfft*mpi_enreg%bandpp
          end if
          ! kinetic energy
-         if (lproperties(1)) then 
+         if (lproperties(1)) then
             call rttddft_calc_kin(energies%e_kinetic,cg,dtset,ham_k,nband_k,npw_k,my_nspinor, &
                                 & occ0,dtset%wtk(ikpt),mpi_enreg,my_bandfft_kpt)
          end if
@@ -373,7 +373,7 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
 
          !Propagate cg and compute the requested properties
          call rttddft_exp_taylor(cg,dtset,ham_k,mpi_enreg,nband_k,npw_k,my_nspinor,enl=enl,eig=eig)
-         
+
          !Finish computing NL PSP part for NC PSP
          if (lproperties(2)) then
             do iband = 1, mpi_enreg%bandpp
@@ -429,7 +429,7 @@ end subroutine rttddft_propagator_er
 !!  rttddft_propagator_emr
 !!
 !! FUNCTION
-!!  Main subroutine to propagate the KS orbitals using 
+!!  Main subroutine to propagate the KS orbitals using
 !!  the Exponential Midpoint Rule (EMR) propagator
 !!
 !! INPUTS
@@ -443,7 +443,7 @@ end subroutine rttddft_propagator_er
 !! OUTPUT
 !!
 !! NOTES
-!!  This propagator is time reversible 
+!!  This propagator is time reversible
 !!  (if H(t+dt/2) and the exponential are computed exactly).
 !!
 !! SOURCE
@@ -459,7 +459,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(pseudopotential_type), intent(inout) :: psps
  type(tdks_type),            intent(inout) :: tdks
- 
+
  !Local variables-------------------------------
  integer :: me
  !scalars
@@ -471,7 +471,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  real(dp)           :: cg(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
  real(dp)           :: diff(SIZE(tdks%cg(:,1)),SIZE(tdks%cg(1,:)))
  real(dp)           :: max_diff(2)
- 
+
 ! ***********************************************************************
 
  cg(:,:) = tdks%cg(:,:) !Psi(t)
@@ -489,7 +489,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  tdks%cg(:,:) = cg(:,:)
  ! .. and evolve psi(t) using the EMR propagator with the estimated density at t+dt/2
  call rttddft_propagator_er(dtset,ham_k,istep,mpi_enreg,psps,tdks)
- 
+
  ! check convergence
  diff = abs(diff-tdks%cg)
  me = xmpi_comm_rank(mpi_enreg%comm_world)
@@ -497,8 +497,8 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
  call xmpi_max(maxval(diff(2,:)),max_diff(2),mpi_enreg%comm_world,ierr)
  lconv = (max_diff(1) < dtset%td_scthr .and. max_diff(2) < dtset%td_scthr)
  ics = 0
- if (mpi_enreg%me == 0) then 
-   write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), & 
+ if (mpi_enreg%me == 0) then
+   write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), &
                                           & dtset%td_scthr, lconv, ch10
    if (do_write_log) call wrtout(std_out,msg)
  end if
@@ -521,8 +521,8 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
       call xmpi_max(maxval(diff(1,:)),max_diff(1),mpi_enreg%comm_world,ierr)
       call xmpi_max(maxval(diff(2,:)),max_diff(2),mpi_enreg%comm_world,ierr)
       lconv = (max_diff(1) < dtset%td_scthr .and. max_diff(2) < dtset%td_scthr)
-      if (mpi_enreg%me == 0) then 
-         write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), & 
+      if (mpi_enreg%me == 0) then
+         write(msg,'(a,a,i3,a,3(es8.2,1x),l1,a)') ch10, 'SC Step', ics, ' - ', max_diff(1), max_diff(2), &
                                                 & dtset%td_scthr, lconv, ch10
          if (do_write_log) call wrtout(std_out,msg)
       end if
@@ -539,7 +539,7 @@ subroutine rttddft_propagator_emr(dtset, ham_k, istep, mpi_enreg, psps, tdks)
    call wrtout(ab_out,msg)
    if (do_write_log) call wrtout(std_out,msg)
  end if
- 
+
 end subroutine rttddft_propagator_emr
 !!***
 

@@ -9,23 +9,25 @@ and Mossbauer Fermi contact interaction with the ABINIT package.
 
 ## Introduction
 
-Because the PAW formalism provides a robust way to reconstruct the all-electron 
-wavefunctions in the valence space, it is suitable for computing
-expectation values of observables localized even very close to the nuclei.
-Obtaining equivalent accuracy within the norm-conserving pseudopotential
-framework would require very small atomic radii for the pseudization
-procedure, and concomitantly high planewave cutoff energies and lengthy
-calculations. There remains the question of whether even all-electron accuracy
-in the valence space is sufficient for accurate representation of observables
-close to the nuclei, where conventional wisdom would suggest that deep core
-polarizations might be quite significant for properties such as the electric
-field gradient or Fermi contact interaction. Such concerns turn out to be
-unwarranted, however, as our experience and others have shown that the PAW
-formalism together with a typical chemical valence/core separation are
-sufficient for accurate description of nuclear point properties such as the
-electric field gradient [[cite:Petrilli1998]], [[cite:Profeta2003]],
-[[cite:Zwanziger2008]], Fermi contact interaction [[cite:Zwanziger2009]] and
-magnetic chemical shielding [[cite:Pickard2001]].
+Because the PAW formalism provides a robust way to reconstruct the
+all-electron wavefunctions in the valence space, it is suitable for
+computing expectation values of observables localized even very close
+to the nuclei.  Obtaining equivalent accuracy within the
+norm-conserving pseudopotential framework would require very small
+atomic radii for the pseudization procedure, and concomitantly high
+planewave cutoff energies and lengthy calculations. There remains the
+question of whether even all-electron accuracy in the valence space is
+sufficient for accurate representation of observables close to the
+nuclei, where conventional wisdom would suggest that deep core
+polarizations might be quite significant for properties such as the
+electric field gradient or Fermi contact interaction. Such concerns
+turn out to be unwarranted, however, as our experience and others have
+shown that the PAW formalism together with a typical chemical
+valence/core separation are sufficient for accurate description of
+nuclear point properties such as the electric field gradient
+[[cite:Petrilli1998]], [[cite:Profeta2003]], [[cite:Zwanziger2008]],
+Fermi contact interaction [[cite:Zwanziger2009]] and magnetic chemical
+shielding [[cite:Pickard2001]].
 
 Both the electric field gradient and Fermi contact interaction are ground-
 state observables, and their computation adds negligible time to a normal
@@ -85,7 +87,7 @@ and source respectively. Because of the linearity of this formula in the
 density at the absorber (sample) nucleus, the only unknown (Δ〈r2〉) can be
 obtained by comparing the calculated values in several standards to experiment
 and then the computations can be used to interpret the measurements of new
-materials. In [[cite:Zwanziger2009]] it is showed how to perform such studies
+materials. In [[cite:Zwanziger2009]] it is shown how to perform such studies
 on a variety of compounds.
 
 
