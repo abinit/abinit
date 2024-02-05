@@ -4,7 +4,7 @@
 !!  xmpi_land_log0d
 !!
 !! FUNCTION
-!!  Logical OR accross the nodes.
+!!  Logical AND accross the nodes.
 !!  Combines value from all processes and distribute the result back to all processes.
 !!  Target: logical scalar 
 !!

@@ -401,30 +401,40 @@ specified and read correctly.
 
 At present, this applies to three types of
 variables: those that have the dimension of an energy, those that have a
-dimension of length, and those that have a dimension of magnetic field. The
-first class of variables have the characteristics **ENERGY**, and can be
-specified in atomic units (Hartree), or electron-volts (eV), or milli electron-volts (meV)
-or Rydbergs (Ry), or even Kelvin (K). 
+dimension of length, those that have a dimension of magnetic field, those that have a dimension  of time. i
+
+The first class of variables have the characteristics **ENERGY**, and can be
+specified in atomic units (Ha or Hartree), or electron-volts (eV), or milli electron-volts (meV)
+or Rydbergs (Ry or Rydberg), or Kelvin (K or Kelvin), the latter being a temperature converted to energy thanks to Boltzmann constant.. 
 
 The second class of variables have the characteristics **LENGTH**,
-and can be specified in atomic units (Bohr), nm (nanometer) and angstrom. 
+and can be specified in atomic units (Bohr), nm (nanometer) and Angstrom (Angstr). 
+
 The third class of
 variables have the characteristics **MAGNETIC FIELD**, and can be
-specified in atomic units and Tesla. The abinit parser recognize a dimension
-if it is specified after the list of numbers following the input variable
-keyword, in the input file. The specification can be upper or lower case, or a
+specified in atomic units and Tesla. 
+
+The fourth class of
+variables have the characteristics **TIME**, and can be
+specified in atomic units and seconds.
+
+The abinit parser recognize a dimension if it is specified after the list of numbers following the input variable
+keyword, in the input file. 
+
+The specification can be upper or lower case, or a
 mix thereof. Here is the list of recognized chains of characters:
 
   * Ry or Rydberg or Rydbergs --> Rydberg (for energies) 
   * eV --> electron-volts (for energies) 
-  * K  --> Kelvin (for energies) 
-  * Angstr --> Angstrom (for lengths) 
+  * meV --> millielectron-volts (for energies) 
+  * K or Kelvin --> Kelvin (for energies) 
+  * Ang or Angstr or Anstrom --> Angstrom (for lengths) 
   * nm --> nanometer (for lengths) 
   * T or Tesla --> Tesla (for magnetic fields) 
   * S or Sec or Second --> second (for time) 
 
-Other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not recognized, 
-but make the parser choose (by default) atomic units, which is the correct behaviour. Example:
+Some other character chains, like "au" (for atomic units) or "Hartree", or "Bohr" are not really treated, 
+as the parser choose (by default) atomic units, which is the correct behaviour. Example:
     
         acell 8 8 8 angstrom
         ecut 8 Ry

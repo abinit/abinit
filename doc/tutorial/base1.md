@@ -645,7 +645,7 @@ There are some subtleties in the calculation of an isolated atom.
 For Hydrogen, we are lucky that the ground state is spherical (1s orbital),
 and that the highest occupied level and lowest unoccupied level, although
 degenerate, have a different spin. We will define by hand the occupation of
-each spin, see the input variables [[occopt]] (to be set to 2), and [[occ]].
+each spin, see the input variables [[occopt]] (to be set to 0), and [[occ]].
 Finally, in order to make numerical errors cancel, it is important to compute
 the above-mentioned difference in the same box, for the same energy cut-off, and even
 for a location in the box that is similar to the molecule case (although the
@@ -661,7 +661,7 @@ while *tbase1_5.abo* is an example of output file.
 
 The run lasts a few seconds.
 
-You should read the output file, and note the tiny differences related with
+You should read the output file, and note several differences related with
 the spin-polarisation:
 
 The electronic eigenvalues are now given for both spin up and spin down cases:
@@ -718,7 +718,7 @@ The total energy is
 
     etotal     -4.7393103688E-01
 
-while the total energy of the H$_2$ molecule is (see test 13):
+while the total energy of the H$_2$ molecule is (see tbase1_3.abo):
 
     etotal     -1.1182883138E+00
 

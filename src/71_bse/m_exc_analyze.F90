@@ -31,7 +31,7 @@ module m_exc_analyze
  use defs_datatypes,      only : pseudopotential_type, ebands_t
  use m_io_tools,          only : open_file
  use m_numeric_tools,     only : iseven, wrap2_zero_one
- use m_bz_mesh,           only : kmesh_t, get_BZ_item
+ use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_wfd,               only : wfdgw_t
  use m_bse_io,            only : exc_read_eigen

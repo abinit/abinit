@@ -226,6 +226,9 @@ module defs_datatypes
    ! Number of points in the reciprocal space grid on which
    ! the radial functions are specified (same grid as the one used for the local part).
 
+   ! TODO
+   !integer :: mqgrid_ff = 0
+
    logical :: has_tvale = .False.
     ! True if the norm-conserving pseudopotential provides the atomic pseudized valence density.
     ! If alchemy, has_tvale is True only if all the mixed pseudos
@@ -260,6 +263,25 @@ module defs_datatypes
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
 
+   integer :: num_tphi = 0
+   ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
+
+   logical :: has_jtot = .False.
+   ! True if tpsi are given in terms of j (relativistic pseudo with SOC)
+
+   real(dp), allocatable :: tphi_qspl(:,:,:)
+    ! (mqgrid_ff, 2, num_tphi)
+    ! Form factors for thepseudo wavefunctions.
+
+   integer,allocatable :: tphi_n(:), tphi_l(:)
+    ! (num_tphi) arrays giving n, l
+
+   real(dp),allocatable :: tphi_jtot(:)
+    ! (num_tphi) array with jtot.
+
+   real(dp),allocatable :: tphi_occ(:)
+    ! (num_tphi) array with atomic occupancies taken from pseudo.
+
  end type nctab_t
 !!***
 
@@ -272,8 +294,7 @@ module defs_datatypes
 !! FUNCTION
 !! This structured datatype contains all the information about one
 !! norm-conserving pseudopotential, including the description of the local
-!! and non-local parts, the different projectors, the non-linear core
-!! correction ...
+!! and non-local parts, the different projectors, the non-linear core correction ...
 !!
 !! SOURCE
 
@@ -285,11 +306,9 @@ module defs_datatypes
 ! Integer scalars
   integer :: dimekb
    ! Dimension of Ekb
-   ! ->Norm conserving : Max. number of Kleinman-Bylander energies
-   !                     for each atom type
+   ! ->Norm conserving : Max. number of Kleinman-Bylander energies for each atom type
    !                     dimekb=lnmax (lnmax: see this file)
-   ! ->PAW : Max. number of Dij coefficients connecting projectors
-   !                     for each atom type
+   ! ->PAW : Max. number of Dij coefficients connecting projectors for each atom type
    !                     dimekb=lmnmax*(lmnmax+1)/2 (lmnmax: see this file)
 
   integer :: lmnmax
@@ -309,14 +328,13 @@ module defs_datatypes
 
   integer :: mpsang
    ! Highest angular momentum of non-local projectors over all type of psps.
-   ! shifted by 1 : for all local psps, mpsang=0; for largest s, mpsang=1,
+   ! shifted by 1: for all local psps, mpsang=0; for largest s, mpsang=1,
    ! for largest p, mpsang=2; for largest d, mpsang=3; for largest f, mpsang=4
    ! This gives also the number of non-local "channels"
 
   integer :: mpspso
    ! mpspso is set to 1 if none of the psps is used with a spin-orbit part (that
-   !  is, if the user input variable so_psp is not equal
-   !  to 1 in at least one case
+   !  is, if the user input variable so_psp is not equal to 1 in at least one case
    ! otherwise, it is set to 2
 
   integer :: mpssoang
@@ -415,15 +433,14 @@ module defs_datatypes
 
   real(dp), allocatable :: ekb(:,:)
    ! ekb(dimekb,ntypat*(1-usepaw))
-   !  ->NORM-CONSERVING PSPS ONLY:
+   ! NORM-CONSERVING PSPS ONLY:
    !    (Real) Kleinman-Bylander energies (hartree)
    !           for number of basis functions (l,n) (lnmax)
    !           and number of atom types (ntypat)
-   ! NOTE (MT) : ekb (norm-conserving) is now diagonal (one dimension
-   !             lnmax); it would be easy to give it a second
-   !             (symmetric) dimension by putting
-   !             dimekb=lnmax*(lnmax+1)/2
-   !             in the place of dimekb=lmnmax.
+   ! NOTE (MT):
+   !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
+   !   it would be easy to give it a second (symmetric) dimension by putting
+   !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
 
   real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)
@@ -502,7 +519,8 @@ module defs_datatypes
 
    type(nctab_t),allocatable :: nctab(:)
    ! nctab(ntypat)
-   ! Tables storing data for NC pseudopotentials.
+   ! Tables storing additional data for NC pseudopotentials that are not always avaiable if every psp format.
+   ! We try to mimim pawtab as much as possible so that we can reuse PAW routines in the NC context.
 
    integer :: nc_xccc_gspace = 0
    ! NC pseudos only. Set to 1 if the non-linear core correction should
@@ -618,4 +636,3 @@ module defs_datatypes
 
 end module defs_datatypes
 !!***
-

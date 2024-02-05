@@ -132,7 +132,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  integer :: size_cprj,size_wf,shift_band1,shift_band2,shift_cprj_band1,shift_cprj_dir1,shift_proc
  integer :: shift_dir1_lambda,shift_dir2_lambda,shift_dir1,shift_dir1_loc,shift_dir2,shift_jband_lambda
  logical :: has_cprj_jband,has_dudkprj
- real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final,factor
+ real(dp) :: doti,dotr,dot2i,dot2r,invocc,tol_final
+ real(dp) :: factor,factor_in
+ logical :: symmetric,antisymmetric,total
  character(len=500) :: msg
 !arrays
  integer :: file_index(2)
@@ -149,6 +151,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 ! *********************************************************************
 
+ 
  DBG_ENTER("COLL")
 
  call timab(514,1,tsec)
@@ -186,6 +189,22 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    rf2%idirs(1)=idir1
    rf2%idirs(2)=idir2
  end if
+
+!Choose dkdk option
+ symmetric = .false.
+ antisymmetric = .false.
+ total = .false.
+
+ ! even if rf2_dkdk is 5 (nonesense),
+ ! as long as rf2_dkdk /= 0, symmetric = .true.
+ if (dtset%rf2_dkdk==2) then
+   antisymmetric = .true.
+ else if (dtset%rf2_dkdk==3) then
+   total = .true.
+ else
+   symmetric = .true.
+ endif
+
 
 ! **************************************************************************************************
 ! Get info from ddk files
@@ -355,8 +374,9 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
    ABI_MALLOC(cprj_jband,(natom,0))
  end if
 
- factor=one
- if(ipert==natom+10 .and. idir<=3) factor=two ! in order to not compute same terms twice
+ ! define dkdk factor
+ factor = one
+ if(ipert==natom+10 .and. idir<=3 .and. symmetric) factor=two ! in order to not compute same terms twice
 
  do kdir1=1,rf2%ndir
 !  First iteration (kdir1=1) :
@@ -382,6 +402,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      if (kdir1==1) rf_hamk_idir => rf_hamkq
      if (kdir1==2) rf_hamk_idir => rf_hamk_dir2
    end if
+
+   ! define zero factor instead of exiting the loop: we need to compute dsusdu
+   if (antisymmetric .and. rf2%ndir==1) factor = zero
+   if (total .and. rf2%ndir==2 .and. kdir1==2) factor = zero
+
+   ! define factor for antisymmetric dkdk case
+   if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) factor = -one
+
+   ! define factor_in for accumulate_bands
+   factor_in = factor
+   if ((gs_hamkq%usepaw==1 .or. ipert/=natom+10) .and. rf2%ndir==1) factor_in = two
 
 !  Load projected WF according to ipert1 and idir1
    cprj_j => cprj_empty ; cprj_dudk => cprj_empty
@@ -436,7 +467,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,1,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave,factor_in)
          end if
        end do
 
@@ -479,7 +510,7 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_dudk => dudk(:,1+shift_band2+shift_dir2:size_wf+shift_band2+shift_dir2)
            call rf2_accumulate_bands(rf2,2,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_dudk,h_cwave,s_cwave)
+           jband,debug_mode,cwave_dudk,h_cwave,s_cwave,factor_in)
          end if
        end do
 
@@ -543,8 +574,13 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
  ABI_MALLOC_OR_DIE(rf2%RHS_Stern,(2,nband_k*size_wf), ierr)
  rf2%RHS_Stern(:,:)=zero
 
+ ! Define prefactor for the H^{(2)} term
+ factor = one
+ if (total) factor = half
+
 !Computation of terms containing H^(2)
  if (ipert/=natom+11 .or. gs_hamkq%usepaw==1) then ! Otherwise H^(2) = 0
+   if (.not. antisymmetric) then  ! check antisymmetric dkdk
 
 !Load projected WF according to ipert and idir
    cprj_j => cprj_empty
@@ -620,18 +656,23 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            end if
            call rf2_getidirs(idir,idir1,idir2)
            call rf2_accumulate_bands(rf2,3,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,factor)
          end if
        end do
 
 !      Add d^2H/(dk_dir1 dk_dir2)|u^(0)> to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(2)-eps^(0) S^(2)
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/one,zero/),h_cwave,rhs_j)
+       call cg_zaxpy(size_wf,(/factor,zero/),h_cwave,rhs_j)
 
      end if ! empty band test
    end do ! jband
+   endif ! check antisymmetric dkdk
  end if ! H^(2) exists
+
+ ! define dkdk factor
+ factor = one
+ if(ipert==natom+10 .and. idir<=3 .and. symmetric) factor=two ! in order to not compute same terms twice
 
 !Computation of terms containing H^(1)
  do kdir1=1,rf2%ndir
@@ -660,6 +701,17 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
      if (kdir1==1) rf_hamk_idir => rf_hamk_dir2 ! dir2
      if (kdir1==2) rf_hamk_idir => rf_hamkq ! dir1
    end if
+
+   ! determine when we need to compute terms according to dkdk option
+   if (antisymmetric .and. rf2%ndir==1) exit
+   if (total .and. rf2%ndir==2 .and. kdir1==2) cycle
+
+   ! define factor for antisymmetric dkdk case
+   if (rf2%ndir==2 .and. kdir1==2 .and. antisymmetric) factor = -one
+
+   ! define factor_in for accumulate_bands
+   factor_in = factor
+   if ((gs_hamkq%usepaw==1 .or. ipert/=natom+10) .and. rf2%ndir==1) factor_in = two
 
 !  Load projected WF according to ipert2 and idir2
    cprj_j => cprj_empty ;  ; cprj_dudk => cprj_empty
@@ -712,14 +764,14 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
            shift_band2=(iband-1)*size_wf
            cwave_i => cg(:,1+shift_band2+icg:size_wf+shift_band2+icg)
            call rf2_accumulate_bands(rf2,4,gs_hamkq,mpi_enreg,iband,idir1,idir2,ipert1,ipert2,&
-           jband,debug_mode,cwave_i,h_cwave,s_cwave)
+           jband,debug_mode,cwave_i,h_cwave,s_cwave,factor_in)
          end if
        end do
 
 !      Add dH/dpert2 | du/dpert1 > to RHS_Stern :
        if (gs_hamkq%usepaw==1) h_cwave(:,:)=h_cwave(:,:)-eig0_k(jband)*s_cwave(:,:) ! if PAW : we add H^(1)-eps^(0) S^(1)
        rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-       call cg_zaxpy(size_wf,(/factor*one,zero/),h_cwave,rhs_j)
+       call cg_zaxpy(size_wf,(/factor,zero/),h_cwave,rhs_j)
 
 !      Compute : -factor * sum_iband ( dLambda/dpert1_{iband,jband} * dsusdu_{iband} )
        do iband=1,nband_k
@@ -735,7 +787,8 @@ subroutine rf2_init(cg,cprj,rf2,dtset,dtfil,eig0_k,eig1_k,ffnl1,ffnl1_test,gs_ha
 
 !          Compute Lambda_{iband,jband} * dsusdu_{iband} and add it to RHS_Stern
            rhs_j => rf2%RHS_Stern(:,1+shift_band1:size_wf+shift_band1)
-           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1),-factor*lambda_ij(2)/),cwave_i,rhs_j) !do not forget the minus sign!
+           call cg_zaxpy(size_wf,(/-factor*lambda_ij(1), &
+                                 & -factor*lambda_ij(2)/),cwave_i,rhs_j) !do not forget the minus sign!
 
          end if ! empty iband test
        end do ! iband

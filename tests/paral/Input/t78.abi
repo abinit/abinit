@@ -1,0 +1,125 @@
+# GWR calculations for crystalline alpha-quartz. Test g/tau parallelism
+# Dataset 1: ground state calculation to get the density
+# Dataset 2: Direct diagonalization to produce the WFK file with empty states.
+# Dataset 3: one-shot G0W0 calculation in real-space and imaginary-time.
+
+ndtset 3
+timopt 1
+#ndtset 1; jdtset 3
+#nsym 1 kptopt 3
+
+#ecut      12 # 35
+ecut      8 # 35
+
+####################
+# Dataset 1: SCF run
+####################
+nband1      32       # number of (occ and empty) bands to be computed
+tolvrs1     1.0d-8
+# Parallel settings for dataset 1. NB: These variables are not used in the GWR code.
+paral_kgb1 1
+npband1 2
+np_spkpt1  4
+
+###########################################
+# Dataset 2: Direct diago with empty states
+###########################################
+optdriver2  6        # Activate GWR code
+gwr_task2 "HDIAGO"   # Direct diagonalization
+getden2    1
+nband2     100       # Number of (occ + empty) bands
+
+################################
+# Dataset 3: G0W0 with GWR code
+################################
+optdriver3  6        # Activate GWR code
+gwr_task3 "G0W0"     # One-shot calculation
+
+prtvol3 1            # Write additional stuff to abo file for  testing purposes.
+                     # DO NOT USE this option for production runs!
+prtsuscep3 1         # Write TCHI file.
+
+getden3 1
+getwfk3 2
+gwr_ntau3   6         # Number of imaginary-time points
+gwr_sigma_algo3  1    # Use supercell for Sigma 
+#gwr_sigma_algo3  2   # Use convolutions for Sigma
+                      # (this is faster but there are small diffs wrt supercell version to be investigated)
+gwr_np_kgts 1 2 2 1   # k/G/tau/spin parallelism
+
+gwr_boxcutmin3  1.0  # This should be subject to convergence studies
+#mixprec3    1
+
+nband3      80       # Bands to be used in the screening calculation
+ecuteps3    4        # Cut-off energy of the planewave set to represent the dielectric matrix.
+ecutsigx3   12       # Dimension of the G sum in Sigma_x.
+                     # ecutsigx = ecut is usually a wise choice
+                     # (the dimension in Sigma_c is controlled by ecuteps)
+
+nkptgw3  2
+kptgw3   0.0  0.0  0.0
+         0.5  0.0  0.0
+bdgw3    24  25
+         24  25
+
+# Spectral function (very coarse grid to reduce txt file size)
+nfreqsp3 50
+freqspmax3 5 eV
+
+#################### COMMON PART #########################
+
+nstep    20
+diemac   4.0
+
+# Definition of the k-point grid
+occopt 1            # Semiconductor
+ngkpt   2 2 2
+nshiftk 1
+shiftk  0.0 0.0 0.0 # Gamma-centered (IMPORTANT)
+
+# Definition of the atom types
+npsp   2
+znucl  14  8
+ntypat 2
+
+# Definition of the atoms
+natom 9
+typat 3*1  6*2
+
+# Experimental parameters (Wyckoff pag 312)
+# u(Si)= 0.465
+# x= 0.415 ; y= 0.272 ; z= 0.120
+acell   2*4.91304  5.40463  Angstrom
+
+xred   0.465   0.000   0.000              #Si
+       0.000   0.465   2/3                #Si
+      -0.465  -0.465   1/3                #Si
+       0.415   0.272   0.120              #O
+      -0.143  -0.415   0.4533333333333333 #O
+      -0.272   0.143   0.7866666666666666 #O
+       0.143  -0.272  -0.120              #O
+       0.272   0.415   0.5466666666666666 #O
+      -0.415  -0.143   0.2133333333333333 #O
+
+rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
+        5.0000000000e-01  8.6602540378e-01  0.0000000000e+00
+        0.0000000000e+00  0.0000000000e+00  1.0000000000e+00
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "Si-GGA.psp8, O-GGA.psp8"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% [paral_info]
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = t78_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% [extra_info]
+#%% authors =  M. Giantomassi
+#%% keywords = GWR, NC
+#%% description =
+#%%   GWR calculations for crystalline alpha-quartz.Test g/tau parallelism.
+#%%<END TEST_INFO>

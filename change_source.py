@@ -58,25 +58,29 @@ def replace_string(s):
     """
     old2new = {
          # Malloc/free macros
-         "ABI_ALLOCATE(": "ABI_MALLOC(",
-         "ABI_DEALLOCATE(": "ABI_FREE(",
-         "ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
-         "ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
-         "ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
-         "ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
-         "ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
+         #"ABI_ALLOCATE(": "ABI_MALLOC(",
+         #"ABI_DEALLOCATE(": "ABI_FREE(",
+         #"ABI_DATATYPE_ALLOCATE(": "ABI_MALLOC(",
+         #"ABI_DATATYPE_DEALLOCATE(": "ABI_FREE(",
+         #"ABI_STAT_ALLOCATE(": "ABI_STAT_MALLOC(",
+         #"ABI_DATATYPE_ALLOCATE_SCALAR(": "ABI_MALLOC_TYPE_SCALAR(",
+         #"ABI_DATATYPE_DEALLOCATE_SCALAR(": "ABI_FREE(",
          # Logging macros
-         "MSG_COMMENT(": "ABI_COMMENT(",
-         "MSG_WARNING(": "ABI_WARNING(",
-         "MSG_COMMENT_UNIT(": "ABI_COMMENT_UNIT(",
-         "MSG_WARNING_UNIT(": "ABI_WARNING_UNIT(",
-         "MSG_ERROR(": "ABI_ERROR(",
-         "MSG_ERROR_CLASS(": "ABI_ERROR_CLASS(",
-         "MSG_BUG(": "ABI_BUG(",
-         "MSG_STOP(": "ABI_STOP(",
-         "MSG_ERROR_NODUMP(": "ABI_ERROR_NODUMP(",
-         "MSG_ERROR_NOSTOP(": "ABI_ERROR_NOSTOP(",
-         "MSG_WARNING_IF(": "ABI_WARNING_IF(",
+         #"MSG_COMMENT(": "ABI_COMMENT(",
+         #"MSG_WARNING(": "ABI_WARNING(",
+         #"MSG_COMMENT_UNIT(": "ABI_COMMENT_UNIT(",
+         #"MSG_WARNING_UNIT(": "ABI_WARNING_UNIT(",
+         #"MSG_ERROR(": "ABI_ERROR(",
+         #"MSG_ERROR_CLASS(": "ABI_ERROR_CLASS(",
+         #"MSG_BUG(": "ABI_BUG(",
+         #"MSG_STOP(": "ABI_STOP(",
+         #"MSG_ERROR_NODUMP(": "ABI_ERROR_NODUMP(",
+         #"MSG_ERROR_NOSTOP(": "ABI_ERROR_NOSTOP(",
+         #"MSG_WARNING_IF(": "ABI_WARNING_IF(",
+         "use iso_c_binding": "use, intrinsic :: iso_c_binding",
+         "USE ISO_C_BINDING": "use, intrinsic :: iso_c_binding",
+         "USE iso_c_binding": "use, intrinsic :: iso_c_binding",
+         "use ISO_C_BINDING": "use, intrinsic :: iso_c_binding",
     }
 
     #old2new = {
@@ -117,17 +121,22 @@ def main():
     #for path in all_files():
     #for path in source_paths_from_abinit_src():
     #for path in all_source_files(types=("fortran", "c", "h")):
-    top = None
+    top_list = []
     if len(sys.argv) > 1:
-        top = sys.argv[1]
-        print("Replacing strings in files inside directory:", top)
+        top_list.append(sys.argv[1])
+        print("Replacing strings in files inside directory:", sys.argv[1])
+    else:
+        top_list = ["src", "shared"]
 
-    for path in all_source_files(top=top, types=("fortran", "h", "c")):
-        print("Replacing strings in:", path)
-        with open(path, "rt") as fh:
-            s = replace_string(fh.read())
-        with open(path, "wt") as fh:
-            fh.write(s)
+    for top in top_list:
+        for path in all_source_files(top=top, types=("fortran", "h", "c")):
+            print("Replacing strings in:", path)
+            with open(path, "rt") as fh:
+                old_s = fh.read()
+                s = replace_string(old_s)
+            if s != old_s:
+                with open(path, "wt") as fh:
+                    fh.write(s)
 
     return 0
 

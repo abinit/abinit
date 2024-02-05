@@ -105,7 +105,7 @@ end subroutine no_mpiotk
 !! SOURCE
 
 subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
-&  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
+  my_basead,my_subsizes,my_starts,my_ncalls,ncalls,comm,ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -134,7 +134,7 @@ subroutine setup_fsuba_dp2D(sizes,subsizes,starts,chunk_bsize,&
  ! MPI-IO crashes if we try to read data > 2Gb in a single call.
  ny2read = subsizes(2)
  ny_chunk = ny2read
- if ((2*subs_x*ny2read*xmpi_bsize_dp) > chunk_bsize) then
+ if ((two*subs_x*ny2read*xmpi_bsize_dp) > chunk_bsize) then
    ny_chunk = chunk_bsize / (2*subs_x*xmpi_bsize_dp)
    !if (ny_chunk == 0) ny_chunk = 50
  end if
@@ -337,6 +337,7 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  subsizes(2)
 !!  starts(2)
 !!  bufsz = dimension of buffer (takes into accout both real and imaginary part)
+!!  buffer(bufsz)
 !!  chunk_bsize =
 !!  sc_mode= MPI-IO option
 !!    xmpio_single     ==> for reading by current proc.
@@ -344,7 +345,6 @@ end subroutine mpiotk_read_fsuba_dp2D
 !!  comm = MPI communicator
 !!
 !! OUTPUTS
-!!  buffer(bufsz)
 !!  ierr=status error. A non zero value indicates that chunk_bsize is smaller that the fortran record
 !!    and therefore bufsz has not been written.
 !!
@@ -535,7 +535,7 @@ subroutine mpiotk_read_fsuba_dpc3D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  ! MPI-IO crashes if we try to read data > 2Gb in a single call.
  nz2read = subsizes(3)
  nz_chunk = nz2read
- if ( (subs_xy*nz2read*xmpi_bsize_dpc) > chunk_bsize) then
+ if ( (one*subs_xy*nz2read*xmpi_bsize_dpc) > chunk_bsize) then
    nz_chunk = chunk_bsize / (subs_xy*xmpi_bsize_dpc)
    !if (nz_chunk == 0) nz_chunk = 50
  end if
@@ -729,7 +729,7 @@ subroutine mpiotk_read_fsuba_dpc4D(fh,offset,sizes,subsizes,starts,bufsz,cbuffer
  ! MPI-IO crashes if we try to read data > 2Gb in a single call.
  na2read = subsizes(4)
  na_chunk = na2read
- if ( (subs_xyz*na2read*xmpi_bsize_dpc) > chunk_bsize) then
+ if ( (one*subs_xyz*na2read*xmpi_bsize_dpc) > chunk_bsize) then
    na_chunk = chunk_bsize / (subs_xyz*xmpi_bsize_dpc)
  end if
 

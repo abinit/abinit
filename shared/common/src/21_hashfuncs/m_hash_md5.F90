@@ -21,7 +21,7 @@
 
 module m_hash_md5
 
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use m_abicore
 
   implicit none

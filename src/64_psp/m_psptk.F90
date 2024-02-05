@@ -609,8 +609,8 @@ end subroutine psp5lo
 !! psp5nl
 !!
 !! FUNCTION
-!! Make Kleinman-Bylander form factors f_l(q) for each l from
-!! 0 to lmax; Vloc is assumed local potential.
+!! Make Kleinman-Bylander form factors f_l(q) for each l from 0 to lmax.
+!! Vloc is assumed local potential.
 !!
 !! INPUTS
 !!  al=grid spacing in exponent for radial grid
@@ -623,8 +623,7 @@ end subroutine psp5lo
 !!  rad(mmax)=radial grid values
 !!  vloc(mmax)=local pseudopotential on radial grid
 !!  vpspll(mmax,3)=nonlocal pseudopotentials for each l on radial grid
-!!  wfll(mmax,3)=reference state wavefunctions on radial grid
-!!                mmax and mqgrid
+!!  wfll(mmax,3)=reference state wavefunctions on radial grid mmax and mqgrid
 !!
 !! OUTPUT
 !!  ekb(mpsang)=Kleinman-Bylander energy,
@@ -653,8 +652,8 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: lmax,mmax,mpsang,mqgrid
  real(dp),intent(in) :: al
+ integer,intent(in) :: lmax,mmax,mpsang,mqgrid
 !arrays
  real(dp),intent(in) :: qgrid(mqgrid),rad(mmax),vloc(mmax),vpspll(mmax,mpsang)
  real(dp),intent(in) :: wfll(mmax,mpsang)
@@ -747,7 +746,7 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
 !    ENDDEBUG
 
 !    If dvms is not 0 for any given angular momentum l,
-!    compute Xavier Gonze s definition of the Kleinman-Bylander
+!    compute Xavier Gonze's definition of the Kleinman-Bylander
 !    energy E_KB = dvms/eta.  In this case also renormalize
 !    the projection operator to u_KB(r)=$u_l(r)*dV(r)/\sqrt{dvms}$.
 !    This means dvwf gets multiplied by the normalization factor
@@ -1083,33 +1082,28 @@ subroutine psp5nl(al,ekb,ffspl,lmax,mmax,mpsang,mqgrid,qgrid,rad,vloc,vpspll,wfl
  ABI_FREE(work3)
  ABI_FREE(work4)
 
- contains
+contains
 
-   function  bes0_psp5(arg)
+function  bes0_psp5(arg)
+ real(dp) :: bes0_psp5,arg
+ bes0_psp5=sin(arg)/arg
+end function bes0_psp5
 
-   real(dp) :: bes0_psp5,arg
-   bes0_psp5=sin(arg)/arg
- end function bes0_psp5
+function bes1_psp5(arg)
+  real(dp) :: bes1_psp5,arg
+  bes1_psp5=(sin(arg)-arg*cos(arg))/arg**2
+end function bes1_psp5
 
-   function bes1_psp5(arg)
+function bes2_psp5(arg)
+  real(dp) :: bes2_psp5,arg
+  bes2_psp5=( (3.0d0-arg**2)*sin(arg)- 3.0d0*arg*cos(arg))/arg**3
+end function bes2_psp5
 
-   real(dp) :: bes1_psp5,arg
-   bes1_psp5=(sin(arg)-arg*cos(arg))/arg**2
- end function bes1_psp5
-
-   function bes2_psp5(arg)
-
-   real(dp) :: bes2_psp5,arg
-   bes2_psp5=( (3.0d0-arg**2)*sin(arg)-&
-&   3.0d0*arg*cos(arg) )      /arg**3
- end function bes2_psp5
-
-   function bes3_psp5(arg)
-
-   real(dp) :: bes3_psp5, arg
-   bes3_psp5=(15.d0*sin(arg)-15.d0*arg*cos(arg) &
-&   -6.d0*arg**2*sin(arg)+arg**3*cos(arg) )/arg**4
- end function bes3_psp5
+function bes3_psp5(arg)
+  real(dp) :: bes3_psp5, arg
+  bes3_psp5=(15.d0*sin(arg)-15.d0*arg*cos(arg) &
+              -6.d0*arg**2*sin(arg)+arg**3*cos(arg) )/arg**4
+end function bes3_psp5
 
 end subroutine psp5nl
 !!***
@@ -1146,7 +1140,7 @@ end subroutine psp5nl
 !!
 !! SOURCE
 
-subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
+subroutine psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, q2vq, rad, vloc, yp1, ypn, zion)
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1159,8 +1153,7 @@ subroutine psp8lo(amesh,epsatm,mmax,mqgrid,qgrid,q2vq,rad,vloc,yp1,ypn,zion)
 
 !Local variables-------------------------------
 !Following parameter controls accuracy of Fourier transform based on qmax
-!and represents the minimun number of integration points in one period.
-!scalars
+!and represents the minimun number of integration points in one period scalars
  integer,parameter :: NPT_IN_2PI=200
  integer :: ider,iq,ir,irmu,irn,mesh_mult,mmax_new
  real(dp) :: amesh_new,arg,fp1,fpn,qmesh,result,ztor1
@@ -1270,30 +1263,23 @@ end subroutine psp8lo
 !!
 !! FUNCTION
 !! Make Kleinman-Bylander/Bloechl form factors f_ln(q) for each
-!!  projector n for each angular momentum l excepting an l corresponding
-!!  to the local potential.
-!! Note that an arbitrary local potential can be used, so all l from
-!!  0 to lmax may be represented.
+!!  projector n for each angular momentum l excepting an l corresponding to the local potential.
+!! Note that an arbitrary local potential can be used, so all l from 0 to lmax may be represented.
 !!
 !! INPUTS
 !!  amesh=grid spacing for uniform (linear) radial grid
-!!  indlmn(6,i)= array giving l,m,n,lm,ln,s for i=ln  (if useylm=0)
-!!                                           or i=lmn (if useylm=1)
-!!  lmax=maximum ang momentum for which nonlocal form factor is desired.
-!!    lmax <= 2 allowed.
+!!  indlmn(6,lmnmax)= array giving l,m,n,lm,ln,s for i=ln  (if useylm=0)
+!!                                                or i=lmn (if useylm=1)
+!!  lmax=maximum ang momentum for which nonlocal form factor is desired. lmax <= 2 allowed.
 !!  lmnmax=if useylm=1, max number of (l,m,n) comp. over all type of psps
 !!        =if useylm=0, max number of (l,n)   comp. over all type of psps
 !!  lnmax=max. number of (l,n) components over all type of psps
 !!  mmax=number of radial grid points for atomic grid
 !!  mqgrid=number of grid points for q grid
-!!  pspso=spin-orbit characteristics, govern the content of ffspl and ekb
-!!   if =0 : this input requires NO spin-orbit characteristics of the psp
-!!   if =2 : this input requires HGH or psp8 characteristics of the psp
-!!   if =3 : this input requires HFN characteristics of the psp
 !!  qgrid(mqgrid)=values at which form factors are returned
 !!  rad(mmax)=radial grid values
-!!  vpspll(mmax,lnmax)=nonlocal projectors for each (l,n) on linear
-!!   radial grid.  Here, these are the  product of the reference
+!!  vpspll(mmax,lnmax)=nonlocal projectors for each (l,n) on linear radial grid.
+!!   Here, these are the  product of the reference
 !!   wave functions and (v(l,n)-vloc), calculated in the psp generation
 !!   program and normalized so that integral(0,rc(l)) vpsll^2 dr = 1,
 !!   which leads to the the usual convention for the energies ekb(l,n)
@@ -1316,7 +1302,7 @@ end subroutine psp8lo
 !!
 !! SOURCE
 
-subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vpspll)
+subroutine psp8nl(amesh, ffspl, indlmn, lmax, lmnmax, lnmax, mmax, mqgrid, qgrid, rad, vpspll)
 
 !Arguments----------------------------------------------------------
 !scalars
@@ -1333,18 +1319,17 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
 !scalars
  integer,parameter :: NPT_IN_2PI=200
  integer :: iln,iln0,ilmn,iq,ir,irmu,irn,ll,mesh_mult,mmax_new,mvpspll
- real(dp) :: amesh_new,arg,c1,c2,c3,c4,dri,qmesh,result,tv,xp,xpm1,xpm2,xpp1
- real(dp) :: yp1,ypn
+ real(dp) :: amesh_new,arg,c1,c2,c3,c4,dri,qmesh,result,tv,xp,xpm1,xpm2,xpp1,yp1,ypn
 !arrays
  real(dp) :: sb_out(4)
  real(dp),allocatable :: rad_new(:),vpspll_new(:,:),work(:,:),work2(:)
 
 ! *************************************************************************
 
-!Find r mesh spacing necessary for accurate integration at qmax
+ ! Find r mesh spacing necessary for accurate integration at qmax
  amesh_new=2.d0*pi/(NPT_IN_2PI*qgrid(mqgrid))
 
-!Choose submultiple of input mesh
+ ! Choose submultiple of input mesh
  mesh_mult=int(amesh/amesh_new) + 1
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
@@ -1352,10 +1337,10 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
  ABI_MALLOC(rad_new,(mmax_new))
  ABI_MALLOC(vpspll_new,(mmax_new,lnmax))
 
- if(mesh_mult==1) then
+ if (mesh_mult == 1) then
    rad_new(:)=rad(:)
  else
-!  Set up new radial mesh
+   ! Set up new radial mesh
    irn=1
    do ir=1,mmax-1
      do irmu=0,mesh_mult-1
@@ -1366,18 +1351,18 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
    rad_new(mmax_new)=rad(mmax)
  end if
 
-!Interpolate projectors onto new grid if called for
-!Cubic polynomial interpolation is used which is consistent
-!with the original interpolation of these functions from
-!a log grid to the input linear grid.
+ ! Interpolate projectors onto new grid if called for
+ ! Cubic polynomial interpolation is used which is consistent
+ ! with the original interpolation of these functions from
+ ! a log grid to the input linear grid.
  dri = one/amesh
  do irn=1,mmax_new
-!  index to find bracketing input mesh points
+   ! index to find bracketing input mesh points
    if(mesh_mult>1) then
      ir = irn/mesh_mult + 1
      ir = max(ir,2)
      ir = min(ir,mmax-2)
-!    interpolation coefficients
+     ! interpolation coefficients
      xp = dri * (rad_new(irn) - rad(ir))
      xpp1 = xp + one
      xpm1 = xp - one
@@ -1386,8 +1371,8 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
      c2 = xpp1 * xpm1 * xpm2 * half
      c3 = - xp * xpp1 * xpm2 * half
      c4 = xp * xpp1 * xpm1 * sixth
-!    Now do the interpolation on all projectors for this grid point
 
+     ! Now do the interpolation on all projectors for this grid point
      iln0=0
      do ilmn=1,lmnmax
        iln=indlmn(5,ilmn)
@@ -1407,7 +1392,7 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
      end do
 
    else
-!    With no mesh multiplication, just copy projectors
+     ! With no mesh multiplication, just copy projectors
      ir=irn
      iln0=0
      do ilmn=1,lmnmax
@@ -1425,16 +1410,16 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
      end do
 
    end if
- end do !irn
+ end do ! irn
 
- ABI_MALLOC(work,(mvpspll,lnmax))
+ ABI_MALLOC(work, (mvpspll,lnmax))
 
-!Loop over q values
+ ! Loop over q values
  do iq=1,mqgrid
    arg=2.d0*pi*qgrid(iq)
 
-!  Set up integrands
-   do  ir=1,mvpspll
+   ! Set up integrands
+   do ir=1,mvpspll
      call sbf8(lmax+1,arg*rad_new(ir),sb_out)
      iln0=0
      do ilmn=1,lmnmax
@@ -1447,7 +1432,7 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
      end do
    end do !ir
 
-!  Do integral from zero to rad_new(mvpspll)
+   ! Do integral from zero to rad_new(mvpspll)
    iln0=0
    do ilmn=1,lmnmax
      iln=indlmn(5,ilmn)
@@ -1457,11 +1442,9 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
        ffspl(iq,1,iln)=result
      end if
    end do
+ end do ! iq mesh
 
-!  End loop over q mesh
- end do !iq
-
-!Fit splines for form factors
+ ! Fit splines for form factors
  ABI_MALLOC(work2,(mqgrid))
  qmesh=qgrid(2)-qgrid(1)
 
@@ -1470,7 +1453,7 @@ subroutine psp8nl(amesh,ffspl,indlmn,lmax,lmnmax,lnmax,mmax,mqgrid,qgrid,rad,vps
    iln=indlmn(5,ilmn)
    if (iln>iln0) then
      iln0=iln
-!    Compute derivatives of form factors at ends of interval
+     ! Compute derivatives of form factors at ends of interval
      yp1=(-50.d0*ffspl(1,1,iln)+96.d0*ffspl(2,1,iln)-72.d0*ffspl(3,1,iln)&
 &     +32.d0*ffspl(4,1,iln)- 6.d0*ffspl(5,1,iln))/(24.d0*qmesh)
      ypn=(6.d0*ffspl(mqgrid-4,1,iln)-32.d0*ffspl(mqgrid-3,1,iln)&
@@ -1495,7 +1478,7 @@ end subroutine psp8nl
 !!
 !! FUNCTION
 !! subroutine to spline the core charge and get derivatives
-!!   extracted from previous version of psp6cc_drh
+!! extracted from previous version of psp6cc_drh
 !! input on log grid, and splined to regular grid between 0 and rchrg
 !!
 !! INPUTS
@@ -1506,7 +1489,6 @@ end subroutine psp8nl
 !!  ff=core charge at points in rad
 !!  ff1=first derivative of ff on log grid
 !!  ff2=second derivative of ff on log grid
-!!
 !!
 !! OUTPUT
 !!  xccc1d(n1xccc,6)= 1D core charge function and its five first derivatives
@@ -1535,63 +1517,60 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  real(dp),allocatable :: gg3(:),gg4(:),work(:),xx(:)
 
 ! *************************************************************************
- ABI_MALLOC(ff3,(mmax))
- ABI_MALLOC(ff4,(mmax))
- ABI_MALLOC(gg,(n1xccc))
- ABI_MALLOC(gg1,(n1xccc))
- ABI_MALLOC(gg2,(n1xccc))
- ABI_MALLOC(gg3,(n1xccc))
- ABI_MALLOC(gg4,(n1xccc))
- ABI_MALLOC(work,(mmax))
- ABI_MALLOC(xx,(n1xccc))
 
  !write(std_out,*) 'cc_derivatives : enter'
 
-!calculate third derivative ff3 on logarithmic grid
+ ABI_MALLOC(ff3, (mmax))
+ ABI_MALLOC(ff4, (mmax))
+ ABI_MALLOC(gg, (n1xccc))
+ ABI_MALLOC(gg1, (n1xccc))
+ ABI_MALLOC(gg2, (n1xccc))
+ ABI_MALLOC(gg3, (n1xccc))
+ ABI_MALLOC(gg4, (n1xccc))
+ ABI_MALLOC(work, (mmax))
+ ABI_MALLOC(xx, (n1xccc))
+
+ ! calculate third derivative ff3 on logarithmic grid
  der1=ff2(1)
  dern=ff2(mmax)
  call spline(rad,ff1,mmax,der1,dern,ff3)
 
-!calculate fourth derivative ff4 on logarithmic grid
+ ! calculate fourth derivative ff4 on logarithmic grid
  der1=0.d0
  dern=0.d0
  call spline(rad,ff2,mmax,der1,dern,ff4)
 
-!generate uniform mesh xx in the box cut by rchrg:
-
+ ! generate uniform mesh xx in the box cut by rchrg:
  do i1xccc=1,n1xccc
    xx(i1xccc)=(i1xccc-1)* rchrg/dble(n1xccc-1)
  end do
-!
-!now interpolate core charge and derivatives on the uniform grid
-!
-!core charge, input=ff,  output=gg
+
+ !now interpolate core charge and derivatives on the uniform grid
+ !core charge, input=ff,  output=gg
  call splint(mmax,rad,ff,ff2,n1xccc,xx,gg)
 
-!first derivative input=ff1, output=gg1
+ ! first derivative input=ff1, output=gg1
  call splint(mmax,rad,ff1,ff3,n1xccc,xx,gg1)
 
-!normalize gg1
-!gg1(:)=gg1(:)*rchrg
+ !normalize gg1
+ !gg1(:)=gg1(:)*rchrg
 
-!second derivative input=ff2, output=gg2
+ ! second derivative input=ff2, output=gg2
  call splint(mmax,rad,ff2,ff4,n1xccc,xx,gg2)
 
-!normalize gg2
-!gg2(:)=gg2(:)*rchrg**2
+ !normalize gg2
+ !gg2(:)=gg2(:)*rchrg**2
 
-!reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
+ ! reallocate work otherwise the calls to spline crash (n1xccc /= mmax)
  ABI_FREE(work)
- ABI_MALLOC(work,(n1xccc))
+ ABI_MALLOC(work, (n1xccc))
 
-!recalculate 3rd derivative consistent with spline fit to first derivative
-!on linear grid
+!recalculate 3rd derivative consistent with spline fit to first derivative on linear grid
  der1=gg2(1)
  dern=gg2(n1xccc)
  call spline(xx,gg1,n1xccc,der1,dern,gg3)
 
-!calculate 4th derivative consistent with spline fit to second derivative
-!on linear grid
+!calculate 4th derivative consistent with spline fit to second derivative on linear grid
  der1=0.0d0
  dern=0.0d0
  call spline(xx,gg2,n1xccc,der1,dern,gg4)
@@ -1629,10 +1608,7 @@ subroutine cc_derivatives(rad,ff,ff1,ff2,mmax,n1xccc,rchrg,xccc1d)
  xccc1d(:,3)=gg2(:)*rchrg**2
  xccc1d(:,4)=gg3(:)*rchrg**3
  xccc1d(:,5)=gg4(:)*rchrg**4
-!***drh test
 !write(std_out,'(a,2i6)') 'drh:psp6cc_drh - mmax,n1xccc',mmax,n1xccc
-!***end drh test
-
 
 !DEBUG
 !note: the normalization condition is the following:

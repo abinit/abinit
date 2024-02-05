@@ -30,7 +30,7 @@
 #define HAVE_NETCDF 1
 
 module m_lwf_primitive_potential
-  use iso_c_binding
+  use, intrinsic :: iso_c_binding
   use defs_basis
   use m_abicore
   use m_errors

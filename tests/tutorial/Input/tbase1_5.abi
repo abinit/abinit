@@ -5,7 +5,7 @@
 
 #Variables specific to this test
 nsppol 2          # Allow a spin-polarized calculation
-occopt 2          # Allow occupation numbers to be set by hand
+occopt 0          # Allow occupation numbers to be set by hand
 nband  1 1        # Number of bands for spin up and spin down
 occ    1.0  0.0   # Occupation numbers for spin up state and spin down state.
                   # The spin up state is occupied, not the spin down state.

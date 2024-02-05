@@ -1574,7 +1574,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            !if Meta GGA add 1/2*[<nabla_phi_i|vxctau1|nabla_phi_j>
-           !                    -<nabla_tphi_i|vxcttau|nabla_tphi_j>]
+           !                    -<nabla_tphi_i|vxcttau1|nabla_tphi_j>]
            if (usekden==1) then
              do jln=1,basis_size
                j0ln=jln*(jln-1)/2
@@ -2401,7 +2401,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ integer :: idir,ij_size,il,ilmn,im,imesh,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ real(dp) :: rr
  complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
@@ -2437,8 +2438,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
  LIBPAW_ALLOCATE(ff,(mesh_size))
  do kln=1,ij_size
-   ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
-&    pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+   do imesh = 2, mesh_size
+     rr = pawrad%rad(imesh)
+     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+   end do !imesh
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
@@ -4129,7 +4132,7 @@ end subroutine pawdijfr
 !Option for interaction energy in case of non-collinear magnetism:
 !           1: E_int=-J/4.N.(N-2)                   (better)
 !           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1)) (Nup and Ndn are ill-defined)
- integer,parameter :: option_interaction=1
+! integer,parameter :: option_interaction=3
 
  integer :: iplex,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden_eff
  real(dp) :: mnorm,mx,my,mz,n_sig,n_msig,n_tot,VUKStemp,n_sigs,n_msigs
@@ -4150,7 +4153,7 @@ end subroutine pawdijfr
    msg = "usepawu<0 not allowed!"
    LIBPAW_BUG(msg)
  end if
- if(option_interaction==3.and.pawtab%usepawu>=10) then
+ if(ndij==4.and.pawtab%option_interaction_pawu==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
    LIBPAW_ERROR(msg)
  end if
@@ -4260,17 +4263,22 @@ end subroutine pawdijfr
        if(pawtab%usepawu==1.or.pawtab%usepawu==4) then ! not activated if usepawu=10 !!
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
-         if (ndij/=4.or.option_interaction==2) then
+         if (ndij/=4.or.pawtab%option_interaction_pawu==2) then
            if(pawtab%usepawu/=4) then
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
            else
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
            endif
-         else if (ndij==4.and.option_interaction==1) then
+         else if (ndij==4.and.(pawtab%usepawu==4.or.pawtab%option_interaction_pawu==1)) then
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
-         else if (ndij==4.and.option_interaction==3) then
+         else if (ndij==4.and.pawtab%option_interaction_pawu==3) then
 !          Here vdc^{alpha,beta}=\vect{m}.\vect{sigma}^{\beta,\alpha}
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
+           if (ispden==1) then
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mz
+           else
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-half*pawtab%jpawu*mz
+           end if
          end if
 
 !        Around mean field
@@ -4324,12 +4332,12 @@ end subroutine pawdijfr
            end do
          end do
        end do
-       if((pawtab%usepawu==1.or.pawtab%usepawu==4).and.option_interaction==3) then ! not activated if usepawu=10 !!
-         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*mx
+       if(pawtab%usepawu==1.and.pawtab%option_interaction_pawu==3) then ! not activated if usepawu=10 !!
+         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mx
          if(ispden==3) then
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)-half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)-half*pawtab%jpawu*my
          else
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)+half*pawtab%jpawu*my
          end if
        end if
      end do

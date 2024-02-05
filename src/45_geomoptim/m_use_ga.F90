@@ -671,41 +671,6 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 
 END FUNCTION checkatomicdist
 
-SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
-
-  implicit none
-
-!Arguments ------------------------------------
-!scalars
-  integer,intent(in) :: msym,natom
-  integer,intent(in)  :: typat(natom)
-  integer,intent(out) :: ptgroupma,spgroup
-! Arrays
-  real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
-
-!Local variables ---------------------------------------
-!scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion 
-  integer :: chkprim,nsym
-! Arrays
-  integer :: bravais(11),ptsymrel(3,3,msym)
-  integer :: symafm(msym),symrel(3,3,msym)
-  real(dp) :: efield(3),gprimd(3,3),spinat(3,natom)
-  real(dp) :: tnons(3,msym)
-  real(dp) :: genafm(3)
-
-! given the acel, rprim and coor
-! this suroutine find the symmetry group
-
-  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
-
-  call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
-
-  call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
-
-END SUBROUTINE checksymmetrygroup
-
 DOUBLE PRECISION FUNCTION gaussian_random(idum,sigma)
 
   implicit none

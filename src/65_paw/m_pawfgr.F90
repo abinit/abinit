@@ -89,7 +89,7 @@ MODULE m_pawfgr
 
 !Integer arrays
 
-  ! MGTODO: Replace with allocatable
+  ! MG TODO: Replace with allocatable
   integer, pointer :: coatofin(:)
    ! coatofin(nfftc)
    ! Index of the points of the coarse grid on the fine grid
@@ -158,8 +158,6 @@ CONTAINS
 subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngfftf,&
 &                      gsqcutc_eff,gsqcutf_eff,gmet,k0) ! optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: nfftf,mgfftf
@@ -182,11 +180,9 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
  DBG_ENTER("COLL")
 
  !@Pawfgr_type
-
  if ((present(gsqcutc_eff).or.present(gsqcutf_eff)).and.&
-&    ((.not.present(gmet)).or.(.not.present(k0)))) then
-   msg='To compute gsqcut[c,f]_eff, both k0 and gmet must be present as argument !'
-   ABI_BUG(msg)
+    ((.not.present(gmet)).or.(.not.present(k0)))) then
+   ABI_BUG('To compute gsqcut[c,f]_eff, both k0 and gmet must be present as argument !')
  end if
 
  ngfftc(:)=Dtset%ngfft(:)
@@ -205,24 +201,24 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
  CASE (1)
   ! == PAW calculation ===
   if (any(Dtset%ngfftdg(1:3)/=Dtset%ngfft(1:3)) .and. Dtset%usewvl==0) then
-! if (Dtset%pawecutdg>=1.0000001_dp*Dtset%ecut .and. Dtset%usewvl==0) then
-   ! * Use fine FFT grid generated according to pawecutdg.
-   nfftf=Dtset%nfftdg ; mgfftf=Dtset%mgfftdg ; ngfftf(:)=Dtset%ngfftdg(:)
-   nfftc_tot =ngfftc(1)*ngfftc(2)*ngfftc(3)
-   nfftf_tot =ngfftf(1)*ngfftf(2)*ngfftf(3)
-   Pawfgr%usefinegrid=1
-   ABI_MALLOC(Pawfgr%coatofin,(nfftc_tot))
-   ABI_MALLOC(Pawfgr%fintocoa,(nfftf_tot))
-   call indgrid(Pawfgr%coatofin,Pawfgr%fintocoa,nfftc_tot,nfftf_tot,ngfftc,ngfftf)
+    ! Use fine FFT grid generated according to pawecutdg.
+    nfftf=Dtset%nfftdg ; mgfftf=Dtset%mgfftdg ; ngfftf(:)=Dtset%ngfftdg(:)
+    nfftc_tot =ngfftc(1)*ngfftc(2)*ngfftc(3)
+    nfftf_tot =ngfftf(1)*ngfftf(2)*ngfftf(3)
+    Pawfgr%usefinegrid=1
+    ABI_MALLOC(Pawfgr%coatofin,(nfftc_tot))
+    ABI_MALLOC(Pawfgr%fintocoa,(nfftf_tot))
+    call indgrid(Pawfgr%coatofin,Pawfgr%fintocoa,nfftc_tot,nfftf_tot,ngfftc,ngfftf)
+
   else
-   ! * Do not use fine FFT mesh. Simple transfer that can be done in parallel with only local info.
-   nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
-   Pawfgr%usefinegrid=0
-   ABI_MALLOC(Pawfgr%coatofin,(Dtset%nfft))
-   ABI_MALLOC(Pawfgr%fintocoa,(Dtset%nfft))
-   do ii=1,Dtset%nfft
-    Pawfgr%coatofin(ii)=ii ; Pawfgr%fintocoa(ii)=ii
-   end do
+    ! Do not use fine FFT mesh. Simple transfer that can be done in parallel with only local info.
+    nfftf=Dtset%nfft ; mgfftf=Dtset%mgfft ; ngfftf(:)=Dtset%ngfft(:)
+    Pawfgr%usefinegrid=0
+    ABI_MALLOC(Pawfgr%coatofin,(Dtset%nfft))
+    ABI_MALLOC(Pawfgr%fintocoa,(Dtset%nfft))
+    do ii=1,Dtset%nfft
+      Pawfgr%coatofin(ii)=ii ; Pawfgr%fintocoa(ii)=ii
+    end do
   end if
   ecutdg_eff=Dtset%pawecutdg*Dtset%dilatmx**2
   ecut_eff  =Dtset%ecut*Dtset%dilatmx**2
@@ -232,36 +228,35 @@ subroutine pawfgr_init(Pawfgr,Dtset,mgfftf,nfftf,ecut_eff,ecutdg_eff,ngfftc,ngff
   ABI_BUG(msg)
  END SELECT
 
-! == Store useful dimensions in Pawfgr ===
+! Store useful dimensions in Pawfgr
  Pawfgr%nfftc=Dtset%nfft ; Pawfgr%mgfftc=Dtset%mgfft ; Pawfgr%ngfftc(:)=Dtset%ngfft(:)
  Pawfgr%nfft=nfftf       ; Pawfgr%mgfft=mgfftf       ; Pawfgr%ngfft (:)=ngfftf(:)
 
- !
- ! === Get boxcut for given gmet, ngfft, and ecut (center at k0) ===
- !     boxcut=ratio of basis sphere diameter to fft box side
+ ! Get boxcut for given gmet, ngfft, and ecut (center at k0) ===
+ ! boxcut=ratio of basis sphere diameter to fft box side
  boxcut=-one
  if (Dtset%usepaw==1) then
    if (present(gsqcutc_eff)) then
      write(msg,'(2a)')ch10,' Coarse grid specifications (used for wave-functions):'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      call getcut(boxcutc,ecut_eff,gmet,gsqcutc_eff,Dtset%iboxcut,std_out,k0,ngfftc)
    end if
    if (present(gsqcutf_eff)) then
      write(msg,'(2a)')ch10,' Fine grid specifications (used for densities):'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
      call getcut(boxcut,ecutdg_eff,gmet,gsqcutf_eff,Dtset%iboxcut,std_out,k0,ngfftf)
    end if
  else if (present(gsqcutc_eff)) then
    call getcut(boxcut,ecut_eff,gmet,gsqcutc_eff,Dtset%iboxcut,std_out,k0,ngfftc)
    gsqcutf_eff=gsqcutc_eff
  end if
- !
- ! === Check that boxcut>=2 if intxc=1; otherwise intxc must be set=0 ===
+
+ ! Check that boxcut>=2 if intxc=1; otherwise intxc must be set=0.
  if (boxcut>=zero .and. boxcut<two .and. Dtset%intxc==1) then
    write(msg,'(a,es12.4,5a)')&
-&   ' boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
-&   ' Need larger ngfft to use intxc=1.',ch10,&
-&   ' Action : you could increase ngfft, or decrease ecut, or put intxc=0.'
+   ' boxcut=',boxcut,' is < 2.0  => intxc must be 0;',ch10,&
+   ' Need larger ngfft to use intxc=1.',ch10,&
+   ' Action: you could increase ngfft, or decrease ecut, or put intxc=0.'
    ABI_ERROR(msg)
  end if
 
@@ -285,8 +280,6 @@ end subroutine pawfgr_init
 !! SOURCE
 
 subroutine pawfgr_destroy(Pawfgr)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -330,8 +323,6 @@ end subroutine pawfgr_destroy
 
 subroutine pawfgr_nullify(Pawfgr)
 
- implicit none
-
 !Arguments ------------------------------------
 !arrays
  type(Pawfgr_type),intent(inout) :: Pawfgr
@@ -360,13 +351,6 @@ end subroutine pawfgr_nullify
 !! FUNCTION
 !! Calculate the correspondance between the coarse grid and the fine grid
 !!
-!! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (FJ, MT)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
-!!
 !! INPUTS
 !! nfftc=total number of FFt grid=n1*n2*n3 for the coarse grid
 !! nfftf=total number of FFt grid=n1*n2*n3 for the fine grid
@@ -385,8 +369,6 @@ end subroutine pawfgr_nullify
 
 subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfftc,nfftf
@@ -403,7 +385,6 @@ subroutine indgrid(coatofin,fintocoa,nfftc,nfftf,ngfftc,ngfftf)
  character(len=500) :: msg
 
 ! *************************************************************************
-!
 
  DBG_ENTER("COLL")
 

@@ -88,7 +88,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  use m_wfutils
  use m_xmpi
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_dtset
 
  use defs_abitypes, only : mpi_type

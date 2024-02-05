@@ -16,6 +16,11 @@
   tolvrs2  1.0d-10
    nstep2  18
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
+
 #Common data
 
  ecut 22

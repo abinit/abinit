@@ -22,6 +22,12 @@
 !!
 !! SOURCE
 
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
  module m_dummy_tests
 
  implicit none
@@ -42,27 +48,13 @@
 !! FUNCTION
 !!  Dummy subroutine, to test unused arguments
 !!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (XG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
 !! INPUTS
 !!  unused_arg = unused argument
 !!
-!! OUTPUT
-
 !! SIDE EFFECTS
 !!  used_arg = used argument
 !!
 !! SOURCE
-
-#if defined HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "abi_common.h"
 
  subroutine test_unused_arg(used_arg,unused_arg)
 
@@ -86,12 +78,6 @@
 !!
 !! FUNCTION
 !!  Dummy subroutine, to detect when the calling subroutine attributes to one variable results from two different arguments
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (XG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  used_arg = used argument
@@ -128,12 +114,6 @@
 !!
 !! FUNCTION
 !!  Dummy subroutine
-!!
-!! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (XG)
-!!  This file is distributed under the terms of the
-!!  GNU General Public License, see ~abinit/COPYING
-!!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  used_arg = used argument

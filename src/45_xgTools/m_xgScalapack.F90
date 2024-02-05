@@ -102,6 +102,9 @@ module m_xgScalapack
 #ifdef HAVE_LINALG_MKL_THREADS
     integer :: mkl_get_max_threads
 #endif
+#ifdef HAVE_LINALG_OPENBLAS_THREADS
+    integer :: openblas_get_num_threads
+#endif
     integer :: nthread
 #ifdef HAVE_LINALG_SCALAPACK
     integer :: maxProc
@@ -126,6 +129,8 @@ module m_xgScalapack
     nthread = 1
 #ifdef HAVE_LINALG_MKL_THREADS
     nthread =  mkl_get_max_threads()
+#elif HAVE_LINALG_OPENBLAS_THREADS
+    nthread =  openblas_get_num_threads()
 #else
     nthread = xomp_get_num_threads(open_parallel=.true.)
     if ( nthread == 0 ) nthread = 1
@@ -196,7 +201,7 @@ module m_xgScalapack
     end if
 
     if ( xgScalapack%comms(M__SLK) /= xmpi_comm_null ) then
-      call build_grid_scalapack(xgScalapack%grid, xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
+      call xgScalapack%grid%init(xgScalapack%size(M__SLK), xgScalapack%comms(M__SLK))
       call BLACS_GridInfo(xgScalapack%grid%ictxt, &
         xgScalapack%grid%dims(M__ROW), xgScalapack%grid%dims(M__COL),&
         xgScalapack%coords(M__ROW), xgScalapack%coords(M__COL))
@@ -258,7 +263,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_heev(xgScalapack,matrixA,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: eigenvalues
@@ -331,7 +336,7 @@ module m_xgScalapack
   !This is for testing purpose.
   !May not be optimal since I do not control old implementation but at least gives a reference.
   subroutine xgScalapack_hegv(xgScalapack,matrixA,matrixB,eigenvalues)
-    use iso_c_binding
+    use, intrinsic :: iso_c_binding
     type(xgScalapack_t), intent(inout) :: xgScalapack
     type(xgBlock_t)    , intent(inout) :: matrixA
     type(xgBlock_t)    , intent(inout) :: matrixB

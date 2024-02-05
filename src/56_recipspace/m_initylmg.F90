@@ -29,14 +29,15 @@ module m_initylmg
 
  use defs_abitypes,  only : MPI_type
  use m_paw_sphharm,  only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
- use m_mpinfo,       only : proc_distrb_cycle
+ use m_mpinfo,       only : proc_distrb_cycle, destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
  private
 !!***
 
- public :: initylmg
+ public :: initylmg       ! Calculate real spherical harmonics Ylm (and gradients) for several k-points
+ public :: initylmg_k     ! Simplified interface to compute Ylm for a single k-point.
 !!***
 
 contains
@@ -90,8 +91,8 @@ contains
 !!
 !! SOURCE
 
-subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
-&  nband,nkpt,npwarr,nsppol,optder,rprimd,ylm,ylm_gr)
+subroutine initylmg(gprimd, kg, kptns, mkmem, mpi_enreg, mpsang, mpw, &
+                    nband, nkpt, npwarr, nsppol, optder, rprimd, ylm, ylm_gr)
 
 !Arguments ------------------------------------
 !scalars
@@ -393,6 +394,50 @@ subroutine initylmg(gprimd,kg,kptns,mkmem,mpi_enreg,mpsang,mpw,&
  end if
 
 end subroutine initylmg
+!!***
+
+!!****f* ABINIT/initylmg_k
+!! NAME
+!! initylmg_k
+!!
+!! FUNCTION
+!! Simplified interface to compute Ylm for a single k-point.
+!! See initylmg for the the meaning of the input variables.
+!!
+!! SOURCE
+
+subroutine initylmg_k(npw, mpsang, optder, rprimd, gprimd, kpt, kg, ylm, ylm_gr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mpsang, npw, optder
+!arrays
+ real(dp),intent(in) :: kpt(3)
+ integer,intent(in) :: kg(3,npw)
+ real(dp),intent(in) :: gprimd(3,3), rprimd(3,3)
+ real(dp),intent(out) :: ylm(npw, mpsang*mpsang)
+ real(dp),intent(out) :: ylm_gr(npw, 3+6*(optder/2), mpsang*mpsang)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: nkpt_1 = 1, nsppol_1 = 1
+ integer :: npwarr__(nkpt_1), nband__(nkpt_1 * nsppol_1)
+ real(dp) :: kptns__(3,nkpt_1)
+ type(MPI_type) :: seq_mpi_enreg
+
+!*****************************************************************
+
+ call initmpi_seq(seq_mpi_enreg)
+ npwarr__(1) = npw
+ kptns__(:,1) = kpt
+ nband__ = 1 ! Not used in sequential
+
+ call initylmg(gprimd, kg, kptns__, nkpt_1, seq_mpi_enreg, mpsang, npw, &
+               nband__, nkpt_1, npwarr__, nsppol_1, optder, rprimd, ylm, ylm_gr)
+
+ call destroy_mpi_enreg(seq_mpi_enreg)
+
+end subroutine initylmg_k
 !!***
 
 end module m_initylmg

@@ -88,8 +88,8 @@ subroutine ewald(eew,gmet,grewtn,gsqcut,icutcoul,natom,ngfft,nkpt,ntypat,rcut,rm
  real(dp) :: fraca1,fraca2,fraca3,fracb1,fracb2,fracb3,gsq,gsum,phi,phr,r1
  real(dp) :: minexparg
  real(dp) :: r1a1d,r2,r2a2d,r3,r3a3d,recip,reta,rmagn,rsq,sumg,summi,summr,sumr
- real(dp) :: t1,term ,zcut
- !character(len=500) :: message
+ real(dp) :: t1,term ,zcut !, gcart_para, gcart_perp
+ !character(len=500) :: msg
 !arrays
  real(dp),allocatable :: gcutoff(:)
 
@@ -144,6 +144,7 @@ if(icutcoul.eq.1) then
  !ABI_MALLOC(gcutoff,(ngfft(1)*ngfft(2)*ngfft(3)))
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
 
+!if (icutcoul.eq.3) then
 !Sum over G space, done shell after shell until all
 !contributions are too small.
  ng=0
@@ -245,6 +246,7 @@ if(icutcoul.eq.1) then
    if (newg==0) exit
 
  end do !  End the loop on ng (new shells). Note that there is one exit from this loop.
+!endif
 
  sumg=gsum/(two_pi*ucvol)
 

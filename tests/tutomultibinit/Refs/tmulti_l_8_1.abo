@@ -3,7 +3,7 @@
  a software platform designed for the construction and use of second-principles models
                    for lattice, spin and electron degrees of freedom.
 
-.Version 9.8.1 of MULTIBINIT 
+.Version 9.11.0 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_nag7.1 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -32,15 +32,15 @@
 
 
 
-.Starting date : Wed 14 Dec 2022.
-- ( at 22h08 )
+.Starting date : Tue 13 Jun 2023.
+- ( at 10h47 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/ABINIT/alps_nag_7.1_openmpi/xuhe_mbfix98/tests/tutomultibinit/Input/tmulti_l_6_DDB
+-/home/buildbot/ABINIT/alps_nag_7.1_openmpi/antonius_ddbio/tests/tutomultibinit/Input/tmulti_l_6_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -82,13 +82,23 @@ dipdip_range         6         6         6
 
  Read the DDB information of the reference system and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.8411196  0.0000000  0.0000000  G(1)=  0.1275328  0.0000000  0.0000000
  R(2)=  0.0000000  7.8411196  0.0000000  G(2)=  0.0000000  0.1275328  0.0000000
  R(3)=  0.0000000  0.0000000  7.8411196  G(3)=  0.0000000  0.0000000  0.1275328
  Unit cell volume ucvol=  4.8209678E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Ba
+    2)    0.5000000  0.5000000  0.5000000  Hf
+    3)    0.5000000  0.0000000  0.5000000   O
+    4)    0.0000000  0.5000000  0.5000000   O
+    5)    0.5000000  0.5000000  0.0000000   O
+
+ DDB file with 12 blocks has been read.
 
 ================================================================================
 
@@ -119,7 +129,7 @@ dipdip_range         6         6         6
        3               3       -0.000507        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.753751E+00    0.000000E+00    0.000000E+00
@@ -307,8 +317,8 @@ dipdip_range         6         6         6
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/ABINIT/alps_nag_7.1_openmpi/xuhe_mbfix98/tests/tutomultibinit/Input/tmulti_l_8_1.xml
--Reading the file /home/buildbot/ABINIT/alps_nag_7.1_openmpi/xuhe_mbfix98/tests/tutomultibinit/Input/tmulti_l_8_1.xml with LibXML library
+-Opening the file /home/buildbot/ABINIT/alps_nag_7.1_openmpi/antonius_ddbio/tests/tutomultibinit/Input/tmulti_l_8_1.xml
+-Reading the file /home/buildbot/ABINIT/alps_nag_7.1_openmpi/antonius_ddbio/tests/tutomultibinit/Input/tmulti_l_8_1.xml with LibXML library
 
 ================================================================================
 
@@ -224325,10 +224335,10 @@ dipdip_range         6         6         6
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        415.7  wall=        416.6
+- Proc.   0 individual time (sec): cpu=        409.1  wall=        410.1
 
 ================================================================================
 
-+Total cpu time    415.733  and wall time    416.594 sec
++Total cpu time    409.123  and wall time    410.136 sec
 
  multibinit : the run completed succesfully.

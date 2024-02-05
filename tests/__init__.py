@@ -151,6 +151,7 @@ _tsuite_dirs = [
     # "cpu",      This directory is disabled
     "etsf_io",
     "fast",
+    "gwr",
     "psml",
     "gpu",
     "libxc",
@@ -929,7 +930,7 @@ KNOWN_KEYWORDS = {
     "mrgddb": "Test mrgddb code",
     'mrgdv': "Test mrgdv code",
     "optic": "Test optic code",
-    "ujdet": "Test ujdet code",
+    "lruj": "Test lruj code",
     "aim": "Test aim code",
     "conducti": "Test conducti code",
     "fftprof": "Test fftprof code and low-level FFT routines",

@@ -502,7 +502,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
+ integer :: b0,b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
  integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
@@ -763,11 +763,12 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
- b1=0
+ b0=0
  do
-   b1=b1+1
-   b1 = index(string(b1:lenstr), '$')
+   b0=b0+1
+   b1 = index(string(b0:lenstr), '$')
    if(b1==0 .or. b1>=lenstr)exit
+   b1 = b0 + b1 - 1
    !Identify delimiter, either a '"', or a "'", or a blank, or a /
    b2=index(string(b1+1:lenstr),'"')
    b3=index(string(b1+1:lenstr),"'")
@@ -1027,7 +1028,7 @@ end subroutine incomprs
 !!   'DPR'=>real(dp) (no special treatment)
 !!   'LEN'=>real(dp) (expect a "length", identify bohr, au, nm or angstrom,
 !!       and return in au -atomic units=bohr- )
-!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg)
+!!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
 !!
@@ -1502,15 +1503,15 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        itoken2=index(string,trial_cs(1:trial_cslen))
        if(itoken2/=0)then
          if(trial_jdtset==0)then
-           write(msg, '(a,a,a,a,a,a,a)' )&
+           write(msg, '(7a)' )&
            'There is an occurence of the keyword "',trim(token),'" appended with 0 in the input file.',ch10,&
            'This is forbidden.',ch10,&
            'Action: remove this occurence.'
          else
-           write(msg, '(a,a,a,a,a,i1,a,a,a,a,a)' )&
+           write(msg, '(5a,i0,5a)' )&
            'In the input file, there is an occurence of the ',ch10,&
            'keyword "',trim(token),'", appended with the digit "',trial_jdtset,'".',ch10,&
-           'This is forbidden when ndtset==0 .',ch10,&
+           'This is forbidden when ndtset = =0 .',ch10,&
            'Action: remove this occurence, or change ndtset.'
          end if
          ABI_ERROR(msg)
@@ -1538,16 +1539,16 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'a series has been defined in the input file.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'a series has been defined in the input file.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
      write(msg, '(9a)' )&
-     'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
-     'the number of data requested is larger than 1.',ch10,&
-     'This is forbidden.',ch10,'Action: check your input file.'
+       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+       'the number of data requested is larger than 1.',ch10,&
+       'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
  end if
@@ -2084,10 +2085,14 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
        else if(typevarphys=='ENE' .and. b2>=3)then
          if(string(b1+1:b1+3)=='RY ')then
            factor=half
+         else if(string(b1+1:b1+3)=='RYD')then
+           factor=half
          else if(string(b1+1:b1+3)=='EV ')then
            factor=one/Ha_eV
          else if(string(b1+1:b1+4)=='MEV ')then
            factor=one/Ha_meV
+         else if(string(b1+1:b1+7)=='Kelvin ')then
+            factor=kb_HaK
          end if
        else if(typevarphys=='ENE' .and. b2>=2)then
          if(string(b1+1:b1+2)=='K ') factor=kb_HaK

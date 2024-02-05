@@ -8,7 +8,7 @@ Frequency dependent linear optical dielectric function and second order nonlinea
 
 This file explains the i/o parameters needed for the calculation of the
 frequency-dependent linear optical dielectric function and second-order
-nonlinear optical susceptibility, in the RPA approximation (sum-over-states
+nonlinear optical susceptibility, in the independet particle approximation (IPA, that is, sum-over-states
 using independent electronic states) thanks to the Optic utility of the Abinit package.
 The user is advised to be familiar with the main [[help:abinit]] before reading the present file.
 

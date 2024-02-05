@@ -46,8 +46,8 @@ MODULE m_hashtable_strval
   use defs_basis
   use m_errors
   use m_abicore
-  use iso_c_binding
-  !use iso_c_binding, only: c_double, c_int64_t
+  use, intrinsic :: iso_c_binding
+  !use, intrinsic :: iso_c_binding, only: c_double, c_int64_t
   !USE, INTRINSIC :: IEEE_ARITHMETIC
 
   !use, intrinsic :: ieee_arithmetic, only: IEEE_Value, IEEE_QUIET_NAN
@@ -64,6 +64,16 @@ MODULE m_hashtable_strval
   !real(c_double), parameter :: NAN = TRANSFER(9218868437227405313_c_int64_t, 1._c_double)
   ! NOTE: this is not NAN really. The correct one is the last line. But NAG compiler does not think it is a valid floating number.
   ! real(c_double), parameter :: NAN = TRANSFER(921886843722740531_c_int64_t, 1._c_double)
+
+  ! NB: We have to use SIZEOF_INT CPP macro giving the size of `int', as computed by sizeof.
+  !     to declare the length of char buffers as in:
+  !
+  !  character(len=SIZEOF_INT * n) :: tmp
+  !
+  ! as cray-intel ftn and NAG do not support declaratations like:
+  !
+  !character(len=c_sizeof(key)) :: tmp
+
 
   TYPE sllist
      TYPE(sllist), POINTER :: child => NULL()
@@ -102,6 +112,7 @@ MODULE m_hashtable_strval
   END TYPE hash_table_t
 
   PUBLIC :: hash_table_t
+
 
 CONTAINS
 
@@ -384,7 +395,8 @@ CONTAINS
     integer :: n
     integer, intent(in) :: key(n)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_intn
 
@@ -393,7 +405,8 @@ CONTAINS
     integer, intent(in) :: n
     integer, intent(in) :: key(n)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     val = self%get(transfer(key, tmp))
   end function get_intn
 
@@ -402,7 +415,8 @@ CONTAINS
     integer, intent(in) :: n
     integer, intent(in) :: key(n)
     logical :: val
-    character(len=c_sizeof(key)) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
+    character(len=SIZEOF_INT * n) :: tmp
     val = self%has_key(transfer(key, tmp))
   end function has_key_intn
 
@@ -412,7 +426,8 @@ CONTAINS
     class(hash_table_t), intent(inout) :: self
     integer, intent(in) :: key(3)
     real(dp) :: val
-    character(len=c_sizeof(key)) :: tmp
+    character(len=SIZEOF_INT * 3) :: tmp
+    !character(len=c_sizeof(key)) :: tmp
     call self%put(transfer(key, tmp), val)
   end subroutine put_int3
 

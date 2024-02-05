@@ -77,6 +77,7 @@ end subroutine xmpi_min_intv
 !!      mpi_allreduce
 !!
 !! SOURCE
+
 subroutine xmpi_min_dpv(xval,xmin,comm,ier)
 
 !Arguments-------------------------
@@ -110,14 +111,13 @@ end subroutine xmpi_min_dpv
 
 !----------------------------------------------------------------------
 
-!!****f* ABINIT/xmpi_min_dp
+!!****f* ABINIT/xmpi_min_int1d
 !! NAME
-!!  xmpi_min_dp
+!!  xmpi_min_int1d
 !!
 !! FUNCTION
-!!  Combines values from all processes and distribute
-!!  the result back to all processes.
-!!  Target: scalar double precisions, inplace.
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: 1d int array, in-place version
 !!
 !! INPUTS
 !!  comm= MPI communicator
@@ -130,7 +130,53 @@ end subroutine xmpi_min_dpv
 !!
 !! SOURCE
 
-subroutine xmpi_min_dp(xval,comm,ier)
+subroutine xmpi_min_int1d(xval, comm, ier)
+
+!Arguments-------------------------
+ integer,intent(inout) :: xval(:)
+ integer,intent(in) :: comm
+ integer,intent(out) :: ier
+
+!Local variables-------------------
+#if defined HAVE_MPI
+ integer :: arr_xmin(size(xval))
+#endif
+
+! *************************************************************************
+
+ ier=0
+#if defined HAVE_MPI
+ if (comm /= MPI_COMM_SELF .and. comm /= MPI_COMM_NULL) then
+   call MPI_ALLREDUCE(xval, arr_xmin, size(xval), MPI_INTEGER, MPI_MIN, comm, ier)
+   xval = arr_xmin
+ end if
+#endif
+
+end subroutine xmpi_min_int1d
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/xmpi_min_dp
+!! NAME
+!!  xmpi_min_dp
+!!
+!! FUNCTION
+!!  Combines values from all processes and distribute the result back to all processes.
+!!  Target: scalar double precisions, in-place version
+!!
+!! INPUTS
+!!  comm= MPI communicator
+!!
+!! OUTPUT
+!!  ier= exit status, a non-zero value meaning there is an error
+!!
+!! SIDE EFFECTS
+!!  xval= buffer array
+!!
+!! SOURCE
+
+subroutine xmpi_min_dp(xval, comm, ier)
 
 !Arguments-------------------------
  real(dp),intent(inout) :: xval
@@ -139,7 +185,7 @@ subroutine xmpi_min_dp(xval,comm,ier)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- real(dp) :: arr_xval(1),arr_xmin(1)
+ real(dp) :: arr_xval(1), arr_xmin(1)
 #endif
 
 ! *************************************************************************

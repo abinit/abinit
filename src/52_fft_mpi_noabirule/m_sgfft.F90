@@ -27,6 +27,7 @@ MODULE m_sgfft
  use m_errors
  use m_fftcore
 
+ use m_fstrings,    only : sjoin, itoa
  use defs_fftdata,  only : mg
 
  implicit none
@@ -87,8 +88,6 @@ CONTAINS  !====================================================================
 !! SOURCE
 
 subroutine sg_fft_cc(fftcache,n1,n2,n3,nd1,nd2,nd3,ndat,isign,arr,ftarr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -155,8 +154,6 @@ end subroutine sg_fft_cc
 
 subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftcache,n1,n2,n3,nd1,nd2,nd3
@@ -191,6 +188,12 @@ subroutine fft_cc_one_nothreadsafe(fftcache,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris)
  call sg_ctrig(n1,trig,aft,bef,now,ris,ic,ind,mfac,mg)
  call sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,&
 & arr,ftarr,trig,aft,now,bef,ris,ind,ic)
+
+ ! This to handle 1d FFTs
+ if (n2 == 1 .and. n3 == 1) then
+   !print *, "Returning as n2, n3:", n2, n3
+   return
+ end if
 
 !transform along y direction
  if (n2/=n1)then
@@ -256,8 +259,6 @@ end subroutine fft_cc_one_nothreadsafe
 !! SOURCE
 
 subroutine sg_fft_rc(cplex,fofg,fofr,isign,nfft,ngfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -590,8 +591,6 @@ end subroutine sg_fft_rc
 
 subroutine sg_fftpad(fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,gbound,isign,arr,ftarr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: fftcache,mgfft,n1,n2,n3,nd1,nd2,nd3,ndat,isign
@@ -650,8 +649,6 @@ end subroutine sg_fftpad
 !! SOURCE
 
 subroutine fftpad_one_nothreadsafe(fftcache,mgfft,nd1,nd2,nd3,n1,n2,n3,arr,ftarr,ris,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -845,8 +842,6 @@ end subroutine fftpad_one_nothreadsafe
 
 subroutine sg_fftpx(fftcache,mfac,mg,mgfft,nd1,nd2,nd3,n2,n3,&
 &    z,zbr,trig,aft,now,bef,ris,ind,ic,gbound)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -1584,8 +1579,6 @@ end subroutine sg_fftpx
 subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
 & trig,aft,now,bef,ris,ind,ic)
 
- implicit none
-
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
 !those in subroutine ctrig.
@@ -1607,6 +1600,8 @@ subroutine sg_fftx(fftcache,mfac,mg,nd1,nd2,nd3,n2,n3,z,zbr,&
  real(dp) :: factor,r,r1,r2,r25,r3,r34,r4,r5,s,sin2,s1,s2,s25,s3,s34,s4,s5
 
 ! *************************************************************************
+
+ !print *, "now", now(1:ic)
 
 !Do x transforms in blocks of size "lot" which is set by how
 !many x transform arrays (of size nd1 each) fit into the nominal
@@ -2293,8 +2288,6 @@ end subroutine sg_fftx
 subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
 &          z,zbr,trig,aft,now,bef,ris,ind,ic)
 
- implicit none
-
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
 !those in subroutine ctrig.
@@ -2913,8 +2906,10 @@ subroutine sg_ffty(fftcache,mfac,mg,nd1,nd2,nd3,n1i,n1,n3i,n3,&
      end do
 
    else
-!    All radices done
-     ABI_BUG('Called with factors other than 2, 3, and 5')
+     ! All radices done
+     !if (now(ic) /= 1) then
+     ABI_BUG(sjoin("Called with factors other than 2, 3, and 5. now(ic) = ", itoa(now(ic))))
+     !end if
    end if
  end do
 !$OMP END PARALLEL DO
@@ -2962,8 +2957,6 @@ end subroutine sg_ffty
 !! SOURCE
 
 subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,ic)
-
- implicit none
 
 !Arguments ------------------------------------
 !Dimensions of aft, now, bef, ind, and trig should agree with
@@ -3659,7 +3652,9 @@ subroutine sg_fftz(mfac,mg,nd1,nd2,nd3,n1,n2i,n2,z,zbr,trig,aft,now,bef,ris,ind,
    end do ! ia
 
  else !  All radices treated
-   ABI_BUG('called with factors other than 2, 3, and 5')
+   !if (now(ic) /= 1) then
+   ABI_BUG(sjoin("Called with factors other than 2, 3, and 5. now(ic) = ", itoa(now(ic))))
+   !end if
  end if
 
 end subroutine sg_fftz
@@ -3703,8 +3698,6 @@ end subroutine sg_fftz
 !! SOURCE
 
 subroutine sg_ctrig(n,trig,aft,bef,now,ris,ic,ind,mfac,mg)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3858,8 +3851,6 @@ end subroutine sg_ctrig
 subroutine sg_fftrisc(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,n4,n5,n6,option,weight_r, weight_i)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,istwf_k,mgfft,n4,n5,n6,ndat,npwin,npwout,option
@@ -3995,8 +3986,6 @@ end subroutine sg_fftrisc
 
 subroutine fftrisc_one_nothreadsafe(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 & kg_kin,kg_kout,mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_i)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -4916,8 +4905,6 @@ subroutine sg_fftrisc_2(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,&
 & istwf_k,kg_kin,kg_kout,&
 & mgfft,ngfft,npwin,npwout,n4,n5,n6,option,weight_r,weight_2,&
 & luse_ndo,fofgin_p) ! optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -5936,8 +5923,6 @@ end subroutine sg_fftrisc_2
 !! SOURCE
 
 subroutine sg_poisson(fftcache,cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

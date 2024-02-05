@@ -1,6 +1,6 @@
 
-.Version 9.3.2 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 10 Dec 2020.
-- ( at 18h19 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/TestBot_MPI1/v4_t87/t87.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t87/t87.abi
 - output file    -> t87.abo
 - root for input  files -> t87i
 - root for output files -> t87o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -34,11 +33,10 @@
 -    mband =          35        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       3.148 Mbytes of memory.
+P This job should need less than                       3.317 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -51,11 +49,10 @@ _ WF disk file :      0.856 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.346 Mbytes of memory.
+P This job should need less than                       2.515 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -68,11 +65,10 @@ _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.530 Mbytes of memory.
+P This job should need less than                       2.699 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -85,11 +81,10 @@ _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.530 Mbytes of memory.
+P This job should need less than                       2.699 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -102,7 +97,7 @@ _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 -    mband =          12        mffmem =           1         mkmem =           8
        mpw =         200          nfft =        5832          nkpt =           8
 ================================================================================
-P This job should need less than                       2.530 Mbytes of memory.
+P This job should need less than                       2.699 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.295 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -467,8 +462,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/bruneval_bugfix_inclvkb/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -878,8 +873,8 @@ meta: {optdriver: 4, gwcalctyp: 25, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/bruneval/devel/abinit-develop/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1540,7 +1535,7 @@ data: !SigmaeeData |
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   0.353  -0.000) for band index:  8
-.  kptgw no:  2; Maximum DeltaE = (   0.252  -0.000) for band index:  5
+.  kptgw no:  2; Maximum DeltaE = (   0.252   0.000) for band index:  5
 .  kptgw no:  3; Maximum DeltaE = (   0.269  -0.000) for band index:  5
 .  kptgw no:  4; Maximum DeltaE = (   0.224   0.000) for band index:  5
 .  kptgw no:  5; Maximum DeltaE = (   0.190   0.000) for band index:  5
@@ -1884,11 +1879,11 @@ data: !SigmaeeData |
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
 .  kptgw no:  1; Maximum DeltaE = (   0.107  -0.000) for band index:  8
-.  kptgw no:  2; Maximum DeltaE = (   0.077  -0.000) for band index:  5
+.  kptgw no:  2; Maximum DeltaE = (   0.077   0.000) for band index:  5
 .  kptgw no:  3; Maximum DeltaE = (   0.081   0.000) for band index:  5
 .  kptgw no:  4; Maximum DeltaE = (   0.071  -0.000) for band index:  5
 .  kptgw no:  5; Maximum DeltaE = (   0.058  -0.000) for band index:  5
-.  kptgw no:  6; Maximum DeltaE = (   0.060   0.000) for band index:  5
+.  kptgw no:  6; Maximum DeltaE = (   0.060  -0.000) for band index:  5
 .  kptgw no:  7; Maximum DeltaE = (   0.060   0.000) for band index:  6
 .  kptgw no:  8; Maximum DeltaE = (   0.053   0.000) for band index:  8
 
@@ -2224,55 +2219,15 @@ P           mkmem           8
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         10.3        0.17      0.003
-- Total wall clock time (s,m,h):         10.3        0.17      0.003
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           10.3, wall_time =           10.3
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  5.316  51.6      5.335  51.6              3      -1.00        1.00       1.00
-- fourwf%(pot)                   2.649  25.7      2.654  25.7           8752      -1.00        1.00       1.00
-- invars2                        0.357   3.5      0.358   3.5              5      -1.00        1.00       1.00
-- projbd                         0.320   3.1      0.320   3.1          13024      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.200   1.9      0.204   2.0             -1      -1.00        0.98       0.98
-- pspini                         0.178   1.7      0.178   1.7              5      -1.00        1.00       1.00
-- nonlop(apply)                  0.159   1.5      0.162   1.6           8752      -1.00        0.98       0.98
-- timing timab                   0.107   1.0      0.108   1.0             10      -1.00        0.99       0.99
-- abinit(2)                      0.100   1.0      0.100   1.0              1      -1.00        1.00       1.00
-- ewald                          0.100   1.0      0.100   1.0              8      -1.00        1.00       1.00
-- getghc-other                   0.090   0.9      0.088   0.9             -1      -1.00        1.02       1.02
-- others (118)                   0.128   1.2      0.130   1.3             -1      -1.00        0.99       0.99
--<END_TIMER>
--
-- subtotal                       9.705  94.2      9.737  94.2                                  1.00       1.00
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          10.3, wall_time =          10.3
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- sigma/=fourdp                  5.316  51.6      5.335  51.6              3      -1.00        1.00       1.00
-- fourwf%(pot)                   2.649  25.7      2.654  25.7           8752      -1.00        1.00       1.00
-- invars2                        0.357   3.5      0.358   3.5              5      -1.00        1.00       1.00
-- projbd                         0.320   3.1      0.320   3.1          13024      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.200   1.9      0.204   2.0             -1      -1.00        0.98       0.98
-- pspini                         0.178   1.7      0.178   1.7              5      -1.00        1.00       1.00
-- nonlop(apply)                  0.159   1.5      0.162   1.6           8752      -1.00        0.98       0.98
-- timing timab                   0.107   1.0      0.108   1.0             10      -1.00        0.99       0.99
-- abinit(2)                      0.100   1.0      0.100   1.0              1      -1.00        1.00       1.00
-- ewald                          0.100   1.0      0.100   1.0              8      -1.00        1.00       1.00
-- getghc-other                   0.090   0.9      0.088   0.9             -1      -1.00        1.02       1.02
-- others (118)                   0.128   1.2      0.130   1.3             -1      -1.00        0.99       0.99
--<END_TIMER>
+- Timing analysis has been suppressed with timopt=0
 
-- subtotal                       9.705  94.2      9.737  94.2                                  1.00       1.00
+
 
 ================================================================================
 
@@ -2361,10 +2316,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.3  wall=         10.3
+- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.3  wall=         10.3
+.Delivered   4 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.6  wall=          8.7

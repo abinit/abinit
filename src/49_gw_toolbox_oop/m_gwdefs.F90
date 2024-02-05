@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_gwdefs
+module m_gwdefs
 
  use defs_basis
  use m_abicore
@@ -55,15 +55,15 @@ MODULE m_gwdefs
  ! non-interacting Green function G0. Above this value, a small purely imaginary
  ! complex shift is added to the denominator during the evaluation of chi0.
 
- real(gwp),public,parameter :: one_gw =1._gwp
- real(gwp),public,parameter :: zero_gw=0._gwp
+ real(gwp),public,parameter :: one_gw  = 1._gwp
+ real(gwp),public,parameter :: zero_gw = 0._gwp
 
- complex(gwpc),public,parameter :: czero_gw=(0._gwp,0._gwp)
- complex(gwpc),public,parameter :: cone_gw =(1._gwp,0._gwp)
- complex(gwpc),public,parameter :: j_gw    =(0._gwp,1._gwp)
+ complex(gwpc),public,parameter :: czero_gw = (0._gwp,0._gwp)
+ complex(gwpc),public,parameter :: cone_gw  = (1._gwp,0._gwp)
+ complex(gwpc),public,parameter :: j_gw     = (0._gwp,1._gwp)
 
 !arrays
- real(dp),public,parameter :: GW_Q0_DEFAULT(3) = (/0.00001_dp, 0.00002_dp, 0.00003_dp/)
+ real(dp),public,parameter :: GW_Q0_DEFAULT(3) = [0.00001_dp, 0.00002_dp, 0.00003_dp]
 
 ! Weights and nodes for Gauss-Kronrod integration rules
 ! Gauss 7 Kronrod 15
@@ -253,28 +253,28 @@ MODULE m_gwdefs
   ! For each reduced direction gives the max G0 component to account for umklapp processes
 
   real(dp),allocatable :: qcalc(:,:)
-  ! qcalc(3,nqcalc)
+  ! (3,nqcalc)
   ! q-points that are explicitely calculated (subset of qibz).
 
   real(dp),allocatable :: qibz(:,:)
-  ! qibz(3,nqibz)
+  ! (3,nqibz)
   ! q-points in the IBZ.
 
   real(dp),allocatable :: qlwl(:,:)
-  ! qlwl(3,nqlwl)
+  ! (3,nqlwl)
   ! q-points used for the long-wavelength limit.
 
   real(dp),allocatable :: omegasf(:)
-  ! omegasf(nomegasf)
+  ! (nomegasf)
   ! real frequencies used to calculate the imaginary part of chi0.
 
   complex(dpc),allocatable :: omega(:)
-  ! omega(nomegasf)
+  ! (nomegasf)
   ! real and imaginary frequencies in chi0,epsilon and epsilonm1.
 
+ contains
+   procedure :: free => em1params_free
  end type em1params_t
-
- public :: em1params_free
 !!***
 
  type,public :: sigij_col_t
@@ -354,39 +354,39 @@ MODULE m_gwdefs
   real(dp) :: zcut                       ! Value of $\delta$ used to avoid the divergences (see related input variable)
 
   integer,allocatable :: kptgw2bz(:)
-  ! kptgw2bz(nkptgw)
+  ! (nkptgw)
   ! For each k-point where GW corrections are calculated, the corresponding index in the BZ.
 
   integer,allocatable :: minbnd(:,:), maxbnd(:,:)
-  ! minbnd(nkptgw,nsppol), maxbnd(nkptgw,nsppol)
+  ! (nkptgw, nsppol)
   ! For each k-point at which GW corrections are calculated, the min and Max band index considered
   ! (see also input variable dtset%bdgw).
 
   real(dp),allocatable :: kptgw(:,:)
-  ! kptgw(3,nkptgw)
+  ! (3, nkptgw)
   ! k-points for the GW corrections in reduced coordinates.
 
   !TODO should be removed, everything should be in Sr%
 
   complex(dpc),allocatable :: omegasi(:)
-  ! omegasi(nomegasi)
+  ! (nomegasi)
   ! Frequencies along the imaginary axis used for the analytical continuation.
 
   complex(dpc),allocatable :: omega_r(:)
-  ! omega_r(nomegasr)
+  ! (nomegasr)
   ! Frequencies used to evaluate the spectral function.
 
   type(sigijtab_t),allocatable :: Sigcij_tab(:,:)
-  ! Sigcij_tab(nkptgw,nsppol)%col(kb)%bidx(ii)  gived the index of the left wavefunction.
+  ! (nkptgw, nsppol)%col(kb)%bidx(ii) gives the index of the left wavefunction.
   ! in the <i,kgw,s|\Sigma_c|j,kgw,s> matrix elements that has to be calculated in cisgme.
   ! in the case of self-consistent GW on wavefunctions.
 
   type(sigijtab_t),allocatable :: Sigxij_tab(:,:)
   ! Save as Sigcij_tab but for the Hermitian \Sigma_x where only the upper triangle is needed.
 
+  contains
+    procedure :: free => sigparams_free
  end type sigparams_t
-
- public :: sigparams_free
 !!***
 
 CONTAINS  !==============================================================================
@@ -410,8 +410,7 @@ CONTAINS  !=====================================================================
 subroutine em1params_free(Ep)
 
 !Arguments ------------------------------------
-!scalars
- type(em1params_t),intent(inout) :: Ep
+ class(em1params_t),intent(inout) :: Ep
 
 ! *************************************************************************
 
@@ -488,8 +487,7 @@ end subroutine sigijtab_free
 subroutine sigparams_free(Sigp)
 
 !Arguments ------------------------------------
-!scalars
- type(sigparams_t),intent(inout) :: Sigp
+ class(sigparams_t),intent(inout) :: Sigp
 
 ! *************************************************************************
 
@@ -505,7 +503,6 @@ subroutine sigparams_free(Sigp)
  ABI_SFREE(Sigp%omegasi)
  ABI_SFREE(Sigp%omega_r)
 
-!types
  if (allocated(Sigp%Sigcij_tab)) then
    call sigijtab_free(Sigp%Sigcij_tab)
    ABI_FREE(Sigp%Sigcij_tab)
@@ -582,8 +579,7 @@ end function sigma_type_from_key
 pure logical function sigma_is_herm(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -614,8 +610,7 @@ end function sigma_is_herm
 pure logical function sigma_needs_w(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -645,8 +640,7 @@ end function sigma_needs_w
 pure logical function sigma_needs_ppm(Sigp)
 
 !Arguments ------------------------------
-!scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
 
 !Local variables ------------------------------
  integer :: mod10
@@ -654,9 +648,9 @@ pure logical function sigma_needs_ppm(Sigp)
 !************************************************************************
 
  mod10=MOD(Sigp%gwcalctyp,10)
- sigma_needs_ppm = ( ANY(mod10 == (/SIG_GW_PPM, SIG_QPGW_PPM/)) .or. &
-&                   Sigp%gwcomp==1                                   &
-&                  )
+ sigma_needs_ppm = (ANY(mod10 == (/SIG_GW_PPM, SIG_QPGW_PPM/)) .or.  &
+                    Sigp%gwcomp==1                                   &
+                   )
 
 end function sigma_needs_ppm
 !!***
@@ -676,7 +670,7 @@ end function sigma_needs_ppm
 !!
 !! SOURCE
 
-function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
+function g0g0w(omega, numerator, delta_ene, zcut, TOL_W0, opt_poles)
 
 !Arguments ------------------------------------
 !scalars
@@ -692,20 +686,24 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
 
 !************************************************************************
 
- if (delta_ene**2>tol14) then
-   sgn=SIGN(1.0_dp,delta_ene)
-   !
-   if (opt_poles == 2) then ! Resonant and anti-resonant contributions.
-     if (DABS(REAL(omega))>TOL_W0) then
-       g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)&
-&              -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
+ if (delta_ene**2 > tol14) then
+   sgn = SIGN(1.0_dp,delta_ene)
+
+   if (opt_poles == 2) then
+     ! Resonant and anti-resonant contributions.
+     if (DABS(REAL(omega)) > TOL_W0) then
+       ! omega on the real axis
+       g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut) &
+               -numerator / (omega - delta_ene + j_dpc*sgn*zcut)
      else
-       g0g0w =  numerator / (omega + delta_ene)&
-&              -numerator / (omega - delta_ene)
+       ! omega on the imag axis (g0g0w is purely real)
+       g0g0w =  numerator / (omega + delta_ene) &
+               -numerator / (omega - delta_ene)
      end if
 
-   else if (opt_poles == 1) then ! Only resonant contribution is included.
-     if (DABS(REAL(omega))>TOL_W0) then
+   else if (opt_poles == 1) then
+     ! Only resonant contribution is included.
+     if (DABS(REAL(omega)) > TOL_W0) then
        g0g0w =  numerator / (omega + delta_ene - j_dpc*sgn*zcut)
      else
        g0g0w =  numerator / (omega + delta_ene)
@@ -716,12 +714,13 @@ function g0g0w(omega,numerator,delta_ene,zcut,TOL_W0,opt_poles)
      ABI_ERROR(msg)
    end if ! opt_poles
 
- else ! delta_ene**2<tol14
+ else
+   ! delta_ene**2 < tol14
    g0g0w = czero
  end if
 
 end function g0g0w
 !!***
 
-END MODULE m_gwdefs
+end module m_gwdefs
 !!***

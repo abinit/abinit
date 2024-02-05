@@ -492,7 +492,7 @@ end subroutine elpa_func_set_matrix
 !!  qq(local_nrows,local_ncols)=Eigenvectors of aa
 !!                     Distribution is like in Scalapack.
 !!                     Must be always dimensioned to the full size (corresponding to (na,na))
-!!                      even if only a part of the eigenvalues is needed.
+!!                     even if only a part of the eigenvalues is needed.
 !!
 !! SIDE EFFECTS
 !!  aa(local_nrows,local_ncols)=Distributed matrix for which eigenvalues are to be computed.

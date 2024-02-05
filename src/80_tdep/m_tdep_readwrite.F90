@@ -221,7 +221,7 @@ contains
   Invar%tolmotif=5.d-2
   Invar%tolinbox=5.d-2
   Invar%tolmatch=5.d-2
-  Invar%dosdeltae=4.5d-6
+  Invar%dosdeltae=0.2_dp/Ha_cmm1
   Invar%debug=.false.
   Invar%loto=.false.
   Invar%netcdf=.false.

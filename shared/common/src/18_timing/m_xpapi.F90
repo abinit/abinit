@@ -22,7 +22,7 @@ MODULE m_xpapi
 
  use defs_basis
  use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 
  implicit none
 

@@ -253,15 +253,19 @@ subroutine ddb_interpolate(ifc, crystal, inp, ddb, ddb_hdr, asrq0, prefix, comm)
 
  if (my_rank == master) then
 
+   ! GA: TODO choice of txt vs. nc should be set by user
    ddb_out_filename = strcat(prefix, "_DDB")
 
    call ddb_new%write_txt(ddb_hdr, ddb_out_filename)
 
+   ddb_out_nc_filename = strcat(prefix, "_DDB.nc")
+   call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename)
+
    ! Write one separate nc file for each q-point
-   do jblok=1,nblok
-     write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
-     call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename, jblok)
-   end do
+   !do jblok=1,nblok
+   !  write(ddb_out_nc_filename,'(2a,i5.5,a)') trim(prefix),'_qpt_',jblok,'_DDB.nc'
+   !  call ddb_new%write_nc(ddb_hdr, ddb_out_nc_filename, jblok)
+   !end do
 
  end if
 

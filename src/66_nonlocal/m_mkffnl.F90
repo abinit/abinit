@@ -221,7 +221,7 @@ end subroutine mkffnl_objs
 !!
 !!  1) l may be 0, 1, 2, or 3 in this version.
 !!
-!!  2) Norm-conserving psps : only FFNL for which ekb is not zero are calculated.
+!!  2) Norm-conserving psps: only FFNL for which ekb is not zero are calculated.
 !!
 !!  3) Each expression above approaches a constant as $|k+G| \rightarrow 0 $.
 !!     In the cases where $|k+G|$ is in the denominator, there is always a
@@ -236,9 +236,9 @@ end subroutine mkffnl_objs
 !! SOURCE
 
 subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, indlmn, &
-                   kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
-                   qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
-                   comm, request) ! optional
+                  kg, kpg, kpt, lmnmax, lnmax, mpsang, mqgrid, nkpg, npw, ntypat, pspso, &
+                  qgrid, rmet, usepaw, useylm, ylm, ylm_gr, &
+                  comm, request) ! optional
 
 !Arguments ------------------------------------
 !scalars
@@ -272,8 +272,8 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
  real(dp) :: rprimd(3,3),tsec(2)
  real(dp),allocatable :: dffnl_cart(:,:),dffnl_red(:,:),dffnl_tmp(:)
  real(dp),allocatable :: d2ffnl_cart(:,:),d2ffnl_red(:,:),d2ffnl_tmp(:)
- real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:),wk_ffnl1(:)
- real(dp),allocatable :: wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
+ real(dp),allocatable :: kpgc(:,:),kpgn(:,:),kpgnorm(:),kpgnorm_inv(:)
+ real(dp),allocatable :: wk_ffnl1(:),wk_ffnl2(:),wk_ffnl3(:),wk_ffspl(:,:)
 
 ! *************************************************************************
 
@@ -460,10 +460,13 @@ subroutine mkffnl(dimekb, dimffnl, ekb, ffnl, ffspl, gmet, gprimd, ider, idir, i
          ! -------------------------------
          ! MG: This part is an hotspot of in the EPH code due to the large number of k-points used
          ! To improve memory locality, I tried to:
+         !
          !      1) call a new version of splfit that operates on wk_ffspl with shape: (2,mqgrid)
          !      2) pass a sorted kpgnorm array and then rearrange the output spline
+         !
          ! but I didn't manage to make it significantly faster.
-         ! For the time being, we rely on MPI-parallelsism via the optional MPI communicator.
+         ! For the time being, we rely on MPI-parallelism via the optional MPI communicator.
+
          if (iln > iln0) then
            wk_ffspl(:,:)=ffspl(:,:,iln,itypat)
            ider_tmp = min(ider, 1)

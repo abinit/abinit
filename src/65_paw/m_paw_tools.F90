@@ -29,7 +29,7 @@ MODULE m_paw_tools
 
  use m_paral_atom,       only : get_my_atmtab, free_my_atmtab
  use m_electronpositron, only : electronpositron_type,electronpositron_calctype,EP_POSITRON
- use m_pawang,           only : pawang_type, mat_slm2ylm, mat_mlms2jmj
+ use m_pawang,           only : pawang_type
  use m_pawtab,           only : pawtab_type
  use m_paw_ij,           only : paw_ij_type, paw_ij_free, paw_ij_nullify, paw_ij_gather
  use m_pawdij,           only : pawdij_print_dij

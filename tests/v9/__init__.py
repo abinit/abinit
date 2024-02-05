@@ -27,22 +27,9 @@ inp_files = [
     "t12.abi",  # optic
     "t13.abi",  # GGA-PBE NC BCC Iron ferromagnetic
     "t14.abi",  # GGA-PBE PAW BCC Iron ferromagnetic
-    "t15.abi",  # check slight misalignment of rprim, with large tolsym
-    "t16.abi",  # check slightly incorrect xred, with large tolsym
-    # check slightly incorrect rprim and xred, yielding correction to tnons, although stil not tolerated.
-    "t17.abi",
-    # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
-    "t18.abi",
+
     "t19.abi",  # disable all checks thanks to expert_user
-    "t20.abi",  # test treatment of inaccurate POSCAR file
-    "t21.abi",  # test treatment of inaccurate POSCAR file
     "t22.abi",  # test different cellcharge for different images, algo pSIC
-    "t23.abi",  # test treatment of inaccurate POSCAR file
-    "t24.abi",  # test treatment of inaccurate POSCAR file
-    "t25.abi",  # test treatment of inaccurate POSCAR file
-    "t26.abi",  # test treatment of inaccurate POSCAR file
-    "t27.abi",  # test treatment of inaccurate POSCAR file
-    "t28.abi",  # test treatment of inaccurate POSCAR file
     "t29.abi",  # RMM-DIIS eigsolver for NC.
     "t30.abi",  # RMM-DIIS eigsolver for PAW.
     # GW/BSE
@@ -58,7 +45,7 @@ inp_files = [
     "t41.abi",
     "t42.abi",
     "t43.abi",
-    "t44.abi",  # test orbital magnetism with DDK wavefunctions
+    "t44.abi",  # test orbital magnetism with DDK wavefunctions on Ne atom
     "t46.abi",  # longwave GGA
     "t47.abi",  # metallic iron GGA-PBE PAW nsppol=2
     "t48.abi",  # optic
@@ -82,7 +69,6 @@ inp_files = [
     "t65.abi",
     "t66.abi",
     "t67.abi",
-    "t70.abi",  # Longwave : test quadrupole calculation with all negative KB energies As PSP
 
     # More ground state
     "t71.abi",  # test cprj_update_lvl and nloc_alg options, istwfk=1
@@ -109,17 +95,16 @@ inp_files = [
     "t86.abi",  # Spin lattice coupling, Only Oiju term activated.
     "t87.abi",  # Spin lattice coupling, Oiju and Tijuv.
 
+    # test usepawu options with nspinor=2,nspden=4 and different pawxcdev
+    "t88.abi", # LDA
+    "t89.abi", # GGA
+
     # GS Coulomb cut-off
     "t90.abi",  # checkG Coulomb cut-off, large tolerance a.t.m.
     "t91.abi",  # occopt 9 tests on Si
     "t92.abi",  # check extended fpmd routines with low number of bands
     "t93.abi",  # energy, forces for PAW non-collinear, with usexcnhat=0
     "t94.abi",  # energy, stress for PAW non-collinear, with usexcnhat=0
-    "t95.abi",  # test treatment of inaccurate POSCAR file
-    "t96.abi",  # test treatment of inaccurate POSCAR file
-    "t97.abi",  # test treatment of inaccurate POSCAR file
-    "t98.abi",  # test treatment of inaccurate POSCAR file
-    "t99.abi",  # test treatment of inaccurate POSCAR file
 
     # Optics with spin-orbit coupling
     "t100.abi", # Optical conductivity with spin-orbit coupling - ABINIT step
@@ -129,12 +114,64 @@ inp_files = [
     # Optcell test
     "t104.abi", # Testing optcell 6 to relax 3rd vector not orthogonal to 1st and 2nd vectors
 
+    # PAW+U and lruj/ujdet utilities
+    "t105.abi", # Preliminary step for tests 106-109; generate WFK and DEN
+    "t106.abi", # Hubbard U (macro_uj=1) test of ujdet subroutines
+    "t107.abi", # Hund's J (macro_uj=4); preliminary step for t109
+    "t108.abi", # Test of irdden and prtdosm input keywords
+    "t109.abi", # Test of lruj post-processing w/ four LRUJ.nc files from t107
+
     # Lattice Wannier function
     # scdm-k method for lattice wannier function in anaddb (disentangle option 2)
     "t110.abi",
     # projWF method for lattice wannier function in anaddb (disentangle option 2)
     "t111.abi",
+    
+    # local orbital magnetic moments calculation.
+    "t112.abi", # test prt_lorbmag   printing local orbital magnetic moments in atomic spheres
 
     # GS PAW Hybrid functionals
     "t120.abi",  # test PBE0 and related functionals with PAW
+
+    # UPF2 format for norm-conserving pseudopotentials
+    "t130.abi",  # UPF2
+    "t131.abi",  # UPF2 with SOC
+    "t132.abi",  # Forces using Beigi 2D cut-off
+
+    # more DFPT
+    "t140.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid
+    "t141.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nspinor 2
+    "t142.abi",  # test orbital magnetism with DDK wavefunctions on AlP solid with nsppol 2
+    "t143.abi",  # test orbital magnetism with DDK wavefunctions and metallic sodium
+    "t145.abi",  # test quadrupole calculation with all negative KB energies As PSP
+    "t146.abi",  # test antisymmetric vector potential response and quadrupoles of HF molecule
+    "t147.abi",  # test total vector potential response and quadrupoles of HF molecule
+    "t148.abi",  # test flexoelectric tensor calculation with ffnl_lw=1
+
+    # write_files behaviour
+    "t150.abi",  # test the behaviour of supravariable write_files
+
+    # DDB file conversion
+    "t160.abi",  # convert DDB from text to netcdf
+    "t161.abi",  # convert DDB from netcdf to text
+
+    # Symmetry recognition and possible corrections, including inaccurate POSCAR files
+    "t180.abi",  # test treatment of inaccurate POSCAR file
+    "t181.abi",  # test treatment of inaccurate POSCAR file
+    "t183.abi",  # test treatment of inaccurate POSCAR file
+    "t184.abi",  # test treatment of inaccurate POSCAR file
+    "t185.abi",  # test treatment of inaccurate POSCAR file
+    "t186.abi",  # test treatment of inaccurate POSCAR file
+    "t187.abi",  # test treatment of inaccurate POSCAR file
+    "t188.abi",  # test treatment of inaccurate POSCAR file
+    "t189.abi",  # test post treatment of an increase of symmetry due to geometry optimization
+    "t190.abi",  # check slight misalignment of rprim, with large tolsym
+    "t191.abi",  # check slightly incorrect xred, with large tolsym
+    "t192.abi",  # check slightly incorrect rprim and xred, yielding correction to tnons, although still not tolerated.
+    "t193.abi",  # check slightly incorrect rprim and xred, yielding correction to tnons, tolerated.
+    "t195.abi",  # test treatment of inaccurate POSCAR file
+    "t196.abi",  # test treatment of inaccurate POSCAR file
+    "t197.abi",  # test treatment of inaccurate POSCAR file
+    "t198.abi",  # test treatment of inaccurate POSCAR file
+    "t199.abi",  # test treatment of inaccurate POSCAR file
 ]

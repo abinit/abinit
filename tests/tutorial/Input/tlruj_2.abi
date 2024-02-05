@@ -1,0 +1,102 @@
+#################################################################
+## Automatic tutorial for ABINIT:                              ##
+## Linear Response Hubbard U and Hund's J (LRUJ)               ##
+## post-processing utility for the determination of            ##
+## said parameters in situ and ab initio                       ##
+##    Initialization of WFK files                              ##
+##                                                             ##
+## Antiferro. II NiO, 4 atom | Hubbard U on Ni 3d | LMac 2022  ##
+#################################################################
+
+#Run Parameters
+nstep 30                             #Higher than normal because of magnetic state
+tolvrs 10d-10
+ecut 10
+pawecutdg 20
+chkprim 0                            #Will complain otherwise with AFII magnetic state
+occopt 0
+nband 26                             #24 occupied + 2 unoccupied
+occ  24*1.0 2*0.0 24*1.0 2*0.0
+
+#Structural Parameters
+natom 4                              #NOTE: Converge U(J) wrt supercell size!
+ntypat 3                             #Specify perturbed Ni atom as a separate species
+typat 1 2 3 3                        #to that of the other Ni atom.
+znucl 28 28 8                        #First two are Ni atoms, last two are O
+acell 3*7.8800
+xred  0.0000000000 0.0000000000 0.0000000000
+      0.5000000000 0.5000000000 0.5000000000
+      0.2500000000 0.2500000000 0.2500000000
+      0.7500000000 0.7500000000 0.7500000000
+
+rprim 0.5000000000 0.5000000000 1.0000000000
+      1.0000000000 0.5000000000 0.5000000000
+      0.5000000000 1.0000000000 0.5000000000
+
+#Spin Parameters
+nsppol 2
+nspden 2
+nspinor 1
+spinat 0 0 3                         #Set high to enforce convergence to high magnetic state.
+       0 0 -3                        #Otherwise, it may collapse to non-magnetic state.
+       0 0 0
+       0 0 0
+
+#Kpoint Grid
+kptopt 1                             #Monkhorst-Pack Mesh
+chksymbreak 0                        #Don't check for symmetry breaking.
+ngkpt 4 4 4
+
+#DFT+U
+usepawu 1                            #Alert Abinit to use of DFT+U.
+lpawu 2 2 1                          #Subspaces of interest: Ni 3d, O 2p
+upawu 0.0 0.0 0.0 eV                 #Raw (non-corrected) XC functional required to establish U(J).
+jpawu 0.0 0.0 0.0 eV
+
+#Linear Response
+ndtset 5                             #Six perturbations => Seven LR data points
+pawujat 1                            #Label of perturbed atom
+pawujv1 -0.15 eV                     #List of perturbation strengths
+pawujv2 -0.10 eV
+pawujv3 -0.05 eV
+pawujv4  0.05 eV
+pawujv5  0.10 eV
+macro_uj 1                           #Turn on linear response functionality for Hund's J
+dmatpuopt 3                          #PAW projector for density matrix
+
+#Printing Info
+outdata_prefix = "tlruj_2.o"
+prtwf 0                              #Don't print WFK
+prteig 0                             #Don't print eigenvalues
+prtden 0                             #Don't print density
+prtgsr 0                             #Don't print GSR
+prtebands 0                          #Don't print ebands
+
+#Input File Information
+irdwfk 0
+getwfk_filepath "./tlruj_1.o_WFK"    #Specify name and location of WFK file
+pp_dirpath "$ABI_PSPDIR/Pseudodojo_paw_pbe_standard"
+pseudos "Ni.xml,Ni.xml,O.xml"        #Use same pseudopotential for both Ni atoms.
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = tlruj_1.abi,tlruj_2.abi,tlruj_3.abi
+#%% [files]
+#%% files_to_test =
+#%%   tlruj_2.abo, tolnlines = 100, tolabs = 1.000e-04, tolrel = 0.02, fld_options =  -medium
+#%% output_file = "tlruj_2.abo"
+#%% [paral_info]
+#%% max_nprocs = 20
+#%% [extra_info]
+#%% authors = L. MacEnulty
+#%% keywords = PAW, DFTU,LRUJ,UJDET,linear,response,Hund's J
+#%% description =
+#%%   AFII NiO 4-atom cell | LRUJ utility | LMac 2022
+#%%   Linear Response Hubbard U and Hund's J (LRUJ)
+#%%   post-processing utility for the determination of
+#%%   said parameters in situ and ab initio
+#%%<END TEST_INFO>

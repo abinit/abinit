@@ -1,18 +1,18 @@
 #ifdef HAVE_DFTI
- integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads
+ integer :: kk,ii,jj,sidx,cnt,dat,line,zplane,status,nthreads, iscale__
  character(len=500) :: msg
  type(zpad_t) :: zpad
  type(DFTI_DESCRIPTOR),pointer :: Desc1,Desc2,Desc3
-!arrays
+
+ iscale__ = merge(1, 0, isign == -1); if (present(iscale)) iscale__ = iscale
 
  nthreads = xomp_get_num_threads(open_parallel=.TRUE.)
 
- call zpad_init(zpad,nx,ny,nz,ldx,ldy,ldz,mgfft,gbound)
+ call zpad_init(zpad, nx, ny, nz, ldx, ldy, ldz, mgfft, gbound)
 
- SELECT CASE (isign)
+ select case (isign)
 
- CASE (+1) ! G --> R
-   !
+ case (+1) ! G --> R
    ! 1) Transform along x.
    !    1D transform of f(Gx,Gy,Gz) along Gx for each Gx-line intersecting the G-sphere
 
@@ -85,6 +85,11 @@
      status = DftiSetValue(Desc3, DFTI_INPUT_DISTANCE,  1)
      status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
 
+     ! Normalize the transform.
+     if (iscale__ /= 0) then
+       status = DftiSetValue(Desc3, DFTI_BACKWARD_SCALE, one/(nx*ny*nz))
+     end if
+
      status = DftiCommitDescriptor(Desc3)
      DFTI_CHECK(status)
 
@@ -108,6 +113,11 @@
      status = DftiSetValue(Desc3, DFTI_INPUT_STRIDES,  (/0,ldx*ldy/))
      status = DftiSetValue(Desc3, DFTI_NUMBER_OF_USER_THREADS, nthreads)
      !status = DftiSetValue(Desc2, DFTI_THREAD_LIMIT, 1)
+
+     ! Normalize the transform.
+     if (iscale__ /= 0) then
+       status = DftiSetValue(Desc3, DFTI_BACKWARD_SCALE, one/(nx*ny*nz))
+     end if
                                                                              
      status = DftiCommitDescriptor(Desc3)
      DFTI_CHECK(status)
@@ -123,7 +133,7 @@
      DFTI_CHECK(status)
    end if
  
- CASE (-1) ! R --> G. Inverse of the algoritm used for G --> R
+ case (-1) ! R --> G. Inverse of the algoritm used for G --> R
    !
    ! 1) Transform along z. Note We have to visit the entire augmented x-y plane!
    if (ndat==1 .or. nthreads==1 .or. MOD(ndat,nthreads)/=0) then
@@ -211,7 +221,9 @@
    status = DftiSetValue(Desc1, DFTI_NUMBER_OF_USER_THREADS, nthreads)
 
    ! Normalize the transform.
-   status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/(nx*ny*nz))
+   if (iscale__ /= 0) then
+     status = DftiSetValue(Desc1, DFTI_FORWARD_SCALE, one/(nx*ny*nz))
+   end if
 
    status = DftiCommitDescriptor(Desc1)
    DFTI_CHECK(status)
@@ -230,9 +242,9 @@
    status = DftiFreeDescriptor(Desc1)
    DFTI_CHECK(status)
 
- CASE DEFAULT 
+ case default
    ABI_BUG("Wrong isign")
- END SELECT
+ end select
 
  call zpad_free(zpad)
 

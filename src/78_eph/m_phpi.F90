@@ -26,7 +26,7 @@ module m_phpi
  use m_errors
  use m_ifc
  use m_ebands
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf

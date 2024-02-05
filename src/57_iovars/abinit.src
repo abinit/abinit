@@ -31,6 +31,7 @@ sources = [
  "m_outvar_o_z.F90",
  "m_outxml.F90",
  "m_out_acknowl.F90",
+ "m_out_spg_anal.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
