@@ -311,15 +311,15 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  ! mpert = maximum number of perturbations (atom displacements + electric field + ...)
  ! msize = maximum size of one block of the ddb e.g. 3*mpert * 3*mpert.
  nblock = gstore%nqibz
- mpert = natom+MPERT_MAX ! in principle we only need natom, but some portions of anaddb
+ mpert = natom+6 ! in principle we only need natom, but some portions of anaddb
                          ! require at least natom+6
  msize = 3*mpert * 3*mpert
  call wrtout(units, "- Initialize berry_ddb:")
  call berry_ddb%init(dtset, nblock, mpert=mpert, with_d2E=.true.)
 
  ! Set the values for the 2nd order derivatives
- ABI_MALLOC(blkflg, (3, mpert, 3, mpert))
- ABI_MALLOC(tmp_mat, (2, 3, mpert, 3, mpert))
+ ABI_CALLOC(blkflg, (3, mpert, 3, mpert))
+ ABI_CALLOC(tmp_mat, (2, 3, mpert, 3, mpert))
  blkflg(:3,:natom,:3,:natom) = 1 ! all values have been computed
  do iq_ibz=1,gstore%nqibz
    tmp_mat(1,:3,:natom,:3,:natom) = reshape(real(gmat(:,:,iq_ibz)), (/3,natom,3,natom/))
