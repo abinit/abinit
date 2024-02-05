@@ -1535,7 +1535,7 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  integer,intent(in)        :: ratopt
  integer,intent(in)        :: option
  integer,intent(in)        :: cplex
- real(dp),optional,intent(in)   :: zeemfac 
+ real(dp),optional,intent(in) :: zeemfac 
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
  real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
@@ -1601,7 +1601,6 @@ subroutine calcdenmagsph(mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,r
  if(present(zeemfac))then
    zeemfac_=zeemfac
  end if
-
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
