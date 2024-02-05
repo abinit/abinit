@@ -190,7 +190,7 @@ contains
     call invars10(inp,lenstr,natom,string)
     call postfix_fnames(input_path, filnam, inp)
 
-    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 100
+    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 1000
 
     if (iam_master) then
         if(need_new_multibinit) then
