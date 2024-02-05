@@ -1298,7 +1298,7 @@ contains
 #endif
 #endif
 
-    call timab(tim_gemm,1,tsec)
+    call timab(tim_gemm_blas,1,tsec)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
@@ -1307,7 +1307,6 @@ contains
       l_gpu_option = gpu_option
     end if
 
-    call timab(tim_gemm_blas,1,tsec)
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
     end if

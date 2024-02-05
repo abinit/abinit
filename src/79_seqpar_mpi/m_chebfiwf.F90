@@ -414,11 +414,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
- call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr,dtset%ecut, &
+ call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
 &                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
 &                 nline, space,1,l_gs_hamk%istwf_k, &
 &                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw,&
-&                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,
+&                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
 &                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 

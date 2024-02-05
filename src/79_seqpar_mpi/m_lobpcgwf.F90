@@ -246,7 +246,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  call lobpcg_init(lobpcg,nband,l_icplx*l_npw*l_nspinor,blockdim,dtset%tolwfr,nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
-   gs_hamk%gpu_option))
+   gs_hamk%gpu_option)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
