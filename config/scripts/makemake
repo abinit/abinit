@@ -442,6 +442,7 @@ if ( lt_ret == 0 ):
   lt_version = lt_version.split("\n")[0]
   lt_version = re.sub(".*\(GNU libtool\) ", "", lt_version)
   lt_version = re.sub(" .*", "", lt_version)
+  lt_version = re.sub("-.*", "", lt_version)
   lt_version = translate_version(my_name, lt_version)
 else:
   lt_version = 0
