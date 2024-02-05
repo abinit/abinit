@@ -1318,7 +1318,7 @@ ABI_NVTX_END_RANGE()
    end where
  end do
 
-  if (dtset%prepalw/=0) then
+ if (dtset%prepalw/=0) then
    ABI_MALLOC(rfpert_lw,(3,natom+8,3,natom+8,3,natom+8))
    rfpert_lw=0
    if (dtset%prepalw==1) then
