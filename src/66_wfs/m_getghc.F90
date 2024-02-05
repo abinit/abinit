@@ -391,6 +391,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ! TO DO: implement the following for nproc_fft>1
    double_rfft_trick = istwf_k_==2.and.modulo(ndat,2)==0.and.k1_eq_k2
    double_rfft_trick = double_rfft_trick.and.mpi_enreg%nproc_fft==1.and.(.not.have_to_reequilibrate)
+   double_rfft_trick = double_rfft_trick.and.mpi_enreg%paral_kgb==1
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    if (double_rfft_trick) then
      istwf_k_ = 1
