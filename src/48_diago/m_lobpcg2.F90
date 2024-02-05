@@ -401,13 +401,14 @@ module m_lobpcg2
     character(len=500) :: msg
 
     interface
-      subroutine getAX_BX(X,AX,BX,transposer)
+      !subroutine getAX_BX(X,AX,BX,transposer)
+      subroutine getAX_BX(X,AX,BX)
         use m_xg, only : xgBlock_t
-        use m_xgTransposer !, only: xgTransposer_t
+      !  use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
-        type(xgTransposer_t), intent(inout) :: transposer
+      !  type(xgTransposer_t), intent(inout) :: transposer
       end subroutine getAX_BX
     end interface
     interface
@@ -516,7 +517,8 @@ module m_lobpcg2
       end if
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows,lobpcg%xgTransposerX)
+      !call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows,lobpcg%xgTransposerX)
+      call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_LINALG)
@@ -593,7 +595,8 @@ module m_lobpcg2
         end if
         ! Apply A and B on W
         call timab(tim_ax_bx,1,tsec)
-        call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows,lobpcg%xgTransposerX)
+        !call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows,lobpcg%xgTransposerX)
+        call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows)
         call timab(tim_ax_bx,2,tsec)
         if (lobpcg%paral_kgb == 1) then
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_LINALG)
@@ -726,7 +729,8 @@ module m_lobpcg2
         lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
       end if
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,lobpcg%xgTransposerAllX0)
+      !call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,lobpcg%xgTransposerAllX0)
+      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
