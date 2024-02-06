@@ -37,8 +37,6 @@ module m_dfpt_scfcv
  use m_dtfil
  use m_hamiltonian
  use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -527,19 +525,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  gemm_nonlop_use_gemm = .false.
 
  ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%gpu_option == ABI_GPU_OPENMP) then
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop_ompgpu(dtset%nkpt)
- else if(dtset%use_gemm_nonlop == 1) then
-   gemm_nonlop_use_gemm = .true.
-   ! CUDA & Kokkos case (same routine used)
-   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-     call init_gemm_nonlop(dtset%nkpt)
-     call init_gemm_nonlop_gpu(dtset%nkpt)
-   ! CPU case
-   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
-     call init_gemm_nonlop(dtset%nkpt)
-   end if
+   call init_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
  end if
 
  gemm_nonlop_is_distributed = .false.
@@ -1293,15 +1281,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 
  ! Cleaning GEMM nonlop data
- if(gemm_nonlop_use_gemm .or.dtset%use_gemm_nonlop == 1 .or. dtset%gpu_option == ABI_GPU_OPENMP) then
-   if(dtset%gpu_option == ABI_GPU_OPENMP) then
-     call destroy_gemm_nonlop_ompgpu()
-   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
-     call destroy_gemm_nonlop_gpu(dtset%nkpt)
-     call destroy_gemm_nonlop(dtset%nkpt)
-   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
-     call destroy_gemm_nonlop(dtset%nkpt)
-   end if
+ if(gemm_nonlop_use_gemm) then
+   call destroy_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
    gemm_nonlop_use_gemm = .false.
  end if
 
