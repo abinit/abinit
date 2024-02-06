@@ -366,8 +366,8 @@ subroutine tdks_free(tdks,dtset,mpi_enreg,psps)
    if (psps%usepaw ==1) then
       call destroy_invovl(dtset%nkpt,dtset%gpu_option)
    end if
-   if(tdks%gemm_nonlop_use_gemm) then
-      call destroy_gemm_nonlop(dtset%nkpt)
+   if(tdks%gemm_nonlop_use_gemm .and. dtset%gpu_option==ABI_GPU_DISABLED) then
+      call destroy_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
    end if
 
    !Call type destructors
@@ -541,23 +541,14 @@ subroutine first_setup(codvsn,dtfil,dtset,ecut_eff,mpi_enreg,pawrad,pawtab,psps,
                       & mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,tdks%npwarr,   &
                       & dtset%nsppol)
 
- !** Use efficient BLAS calls for computing the non local potential
- if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
+ !** Use efficient BLAS calls for computing the non local potential (No GPU yet)
+ if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option==ABI_GPU_DISABLED) then
    ! set global variable
    tdks%gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
+   call init_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
  else
    tdks%gemm_nonlop_use_gemm = .false.
  end if
-
- !** TODO: uncomment when gemm_nonlop can be used on GPU
- ! if(dtset%use_gemm_nonlop == 1 .and. dtset%gpu_option/=ABI_GPU_DISABLED) then
- !   ! set global variable
- !   tdks%gemm_nonlop_use_gemm_gpu = .true.
- !   !call init_gemm_nonlop_gpu(dtset%nkpt)
- ! else
- !   tdks%gemm_nonlop_use_gemm_gpu = .false.
- ! end if
 
  !** Setup the Ylm for each k point
  if (psps%useylm==1) then
