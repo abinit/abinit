@@ -67,11 +67,7 @@ module m_gemm_nonlop_ompgpu
 
  private
 
- ! Use these routines in order: first call init, then call make_gemm_nonlop for each k point,
  ! then call gemm_nonlop to do the actual computation, and call destroy when done. See gstate and vtorho.
- public :: init_gemm_nonlop_ompgpu
- public :: destroy_gemm_nonlop_ompgpu
- public :: make_gemm_nonlop_ompgpu
  public :: gemm_nonlop_ompgpu
 
  ! Those routines are here to assess memory requirements
@@ -82,27 +78,10 @@ module m_gemm_nonlop_ompgpu
 !----------------------------------------------------------------------
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !(nkpt)
- real(dp), pointer :: current_ikpt_projs(:, :, :)
- ! (2, npw, nprojs)
- real(dp), pointer :: current_ikpt_projs_r(:, :, :)
- ! (1, npw, nprojs)
- real(dp), pointer :: current_ikpt_projs_i(:, :, :)
- ! (1, npw, nprojs)
- real(dp), pointer :: current_ikpt_dprojs(:, :, :)
- ! (2, npw, nprojs*ngrads)
- real(dp), pointer :: current_ikpt_dprojs_r(:, :, :)
- ! (1, npw, nprojs*ngrads)
- real(dp), pointer :: current_ikpt_dprojs_i(:, :, :)
- ! (1, npw, nprojs*ngrads)
- type(gemm_nonlop_type), pointer :: gpu_nonlop_current_ikpt
- integer, save :: current_ikpt_in_gpu=-1
  integer, save :: gpu_initialised=0
- integer, save :: mod__cplex=0
- integer, save :: mod__nkpt=0
  integer, save :: mod__ndat=0
  integer, save :: mod__nprojs=0
- real(dp), save, allocatable, target :: projections(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:), dprojections(:,:,:)
+ real(dp), save, allocatable, target :: projections_(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:), dprojections(:,:,:)
  real(dp), save, allocatable :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp), save, allocatable :: sij_typ(:,:)
 
@@ -136,7 +115,7 @@ contains
 
    req_mem = req_mem + dp * lmnmax * (lmnmax+1)/2 * ntypat  ! sij_typ
 
-   req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! projections
+   req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! projections_
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! s_projections
    req_mem = req_mem + dp * cplex * int(nprojs, c_size_t) * int(ndat, c_size_t)  ! vnl_projections
 
@@ -201,53 +180,7 @@ contains
  subroutine refresh_gemm_nonlop_kpt_ompgpu(ikpt)
   integer,intent(in) :: ikpt
 
-  if(mod__cplex == 2) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
-    end if
-  else if(mod__cplex == 1) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
-    end if
-  end if
-
-  gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
-  current_ikpt_projs   => gemm_nonlop_kpt(ikpt)%projs
-  current_ikpt_projs_r => gemm_nonlop_kpt(ikpt)%projs_r
-  current_ikpt_projs_i => gemm_nonlop_kpt(ikpt)%projs_i
-  if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-    current_ikpt_dprojs   => gemm_nonlop_kpt(ikpt)%dprojs
-    current_ikpt_dprojs_r => gemm_nonlop_kpt(ikpt)%dprojs_r
-    current_ikpt_dprojs_i => gemm_nonlop_kpt(ikpt)%dprojs_i
-  end if
-
-  if(mod__cplex == 2) then
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs)
-    end if
-  else if(mod__cplex == 1) then
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_i)
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_r)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_i)
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_r)
-    end if
-  end if
-  current_ikpt_in_gpu=ikpt
-
- end subroutine refresh_gemm_nonlop_kpt_ompgpu
-
- subroutine alloc_gemm_nonlop_kpt_ompgpu(ikpt, cplex)
-
-  integer,intent(in) :: ikpt, cplex
-
   character(len=500) :: msg
-
 
 ! *************************************************************************
 
@@ -258,41 +191,43 @@ contains
   if(gemm_nonlop_kpt(ikpt)%nprojs == -1) then
     msg="Was asked to work on a K-point index for which arrays aren't built.\n" // &
 &    "Requested K-point index was %d.\n" // &
-&    "Please make sure that make_gemm_nonlop_ompgpu is called for this K-point before reaching this routine."
+&    "Please make sure that make_gemm_nonlop is called for this K-point before reaching this routine."
     ABI_ERROR(msg)
   end if
-  if(current_ikpt_in_gpu /= ikpt) then
-    call free_gemm_nonlop_kpt_ompgpu ! FIXME : Dealloc because projs arrays sizes may varry among K-Points ?
-  end if
-  gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
-  current_ikpt_projs   => gemm_nonlop_kpt(ikpt)%projs
-  current_ikpt_projs_r => gemm_nonlop_kpt(ikpt)%projs_r
-  current_ikpt_projs_i => gemm_nonlop_kpt(ikpt)%projs_i
-  if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-    current_ikpt_dprojs   => gemm_nonlop_kpt(ikpt)%dprojs
-    current_ikpt_dprojs_r => gemm_nonlop_kpt(ikpt)%dprojs_r
-    current_ikpt_dprojs_i => gemm_nonlop_kpt(ikpt)%dprojs_i
-  end if
 
-  if(cplex == 2) then
+  call free_gemm_nonlop_kpt_ompgpu
+
+  gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
+  if(allocated(gpu_nonlop_current_ikpt%projs)) then
+    current_ikpt_projs   => gpu_nonlop_current_ikpt%projs
     !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs)
-    end if
-  else if(cplex == 1) then
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_i)
+    nullify(current_ikpt_projs_r)
+    nullify(current_ikpt_projs_i)
+  else
+    current_ikpt_projs_r => gpu_nonlop_current_ikpt%projs_r
+    current_ikpt_projs_i => gpu_nonlop_current_ikpt%projs_i
     !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_r)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
+    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_i)
+    nullify(current_ikpt_projs)
+  end if
+  if(gpu_nonlop_current_ikpt%ngrads /= -1) then
+    if(allocated(gpu_nonlop_current_ikpt%dprojs)) then
+      current_ikpt_dprojs   => gpu_nonlop_current_ikpt%dprojs
+      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs)
+      nullify(current_ikpt_dprojs_r)
+      nullify(current_ikpt_dprojs_i)
+    else
+      current_ikpt_dprojs_r => gpu_nonlop_current_ikpt%dprojs_r
+      current_ikpt_dprojs_i => gpu_nonlop_current_ikpt%dprojs_i
       !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_i)
       !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_r)
+      nullify(current_ikpt_dprojs)
     end if
   end if
 
-  mod__cplex = cplex
   current_ikpt_in_gpu=ikpt
 
- end subroutine alloc_gemm_nonlop_kpt_ompgpu
-!!***
+ end subroutine refresh_gemm_nonlop_kpt_ompgpu
 
 !----------------------------------------------------------------------
 
@@ -300,19 +235,25 @@ contains
 
   if(current_ikpt_in_gpu == -1) return
 
-  if(mod__cplex == 2) then
+  if(associated(current_ikpt_projs)) then
     !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
-    end if
+    nullify(current_ikpt_projs)
   end if
-  if(mod__cplex == 1) then
+  if(associated(current_ikpt_projs_r)) then
     !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
     !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
-    if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
-      !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
-    end if
+    nullify(current_ikpt_projs_r)
+    nullify(current_ikpt_projs_i)
+  end if
+  if(associated(current_ikpt_dprojs)) then
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
+    nullify(current_ikpt_dprojs)
+  end if
+  if(associated(current_ikpt_dprojs_i)) then
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
+    nullify(current_ikpt_dprojs_r)
+    nullify(current_ikpt_dprojs_i)
   end if
 
   current_ikpt_in_gpu=-1
@@ -341,14 +282,14 @@ contains
   ABI_MALLOC(sij_typ,(lmnmax*(lmnmax+1)/2,ntypat))
   !$OMP TARGET ENTER DATA MAP(alloc:sij_typ)
 
-  ABI_MALLOC(projections,(cplex, nprojs, ndat))
+  ABI_MALLOC(projections_,(cplex, nprojs, ndat))
   ABI_MALLOC(s_projections,(cplex, nprojs, ndat))
   ABI_MALLOC(vnl_projections,(cplex_fac, nprojs, ndat))
 
   !FIXME Smarter buffer management
 #ifdef HAVE_GPU_HIP
   !Work buffer allocated once to save time in HIP (alloc costful)
-  !$OMP TARGET ENTER DATA MAP(alloc:projections,s_projections,vnl_projections)
+  !$OMP TARGET ENTER DATA MAP(alloc:projections_,s_projections,vnl_projections)
 #endif
 
   gpu_initialised=1
@@ -374,11 +315,11 @@ contains
 
   !FIXME Smarter buffer management
 #ifdef HAVE_GPU_HIP
-  !$OMP TARGET EXIT DATA MAP(delete:projections,s_projections,vnl_projections)
+  !$OMP TARGET EXIT DATA MAP(delete:projections_,s_projections,vnl_projections)
 #endif
 
-  if(allocated(projections)) then
-    ABI_FREE(projections)
+  if(allocated(projections_)) then
+    ABI_FREE(projections_)
     ABI_FREE(s_projections)
     ABI_FREE(vnl_projections)
   end if
@@ -387,37 +328,6 @@ contains
   gpu_initialised=0
 
  end subroutine free_work_buffers
-
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop_ompgpu/init_gemm_nonlop_ompgpu
-!! NAME
-!! init_gemm_nonlop_ompgpu
-!!
-!! FUNCTION
-!! Initalization of the gemm_nonlop_kpt array
-!!
-!! INPUTS
-!! nkpt= number of k-points
-!!
-!! SOURCE
- subroutine init_gemm_nonlop_ompgpu(nkpt)
-
-  integer,intent(in) :: nkpt
-  integer :: ikpt
-
-! *************************************************************************
-
-  ! TODO only allocate the number of kpt treated by this proc
-  ABI_MALLOC(gemm_nonlop_kpt, (nkpt))
-  do ikpt=1,nkpt
-    gemm_nonlop_kpt(ikpt)%nprojs = -1
-    gemm_nonlop_kpt(ikpt)%ngrads = -1
-  end do
-  mod__nkpt=nkpt
-
- end subroutine init_gemm_nonlop_ompgpu
-!!***
 
 !----------------------------------------------------------------------
 
@@ -439,114 +349,10 @@ contains
 
 ! *************************************************************************
 
-  if(mod__nkpt==0) then
-    msg="GPU nonlop arrays aren't initialized. Redundant call"
-    ABI_ERROR(msg)
-  end if
-
   call free_work_buffers()
-  call free_gemm_nonlop_kpt_ompgpu()
-  ! TODO add cycling if kpt parallelism
-  do ikpt = 1,mod__nkpt
-    call free_gemm_nonlop_ompgpu_ikpt(ikpt)
-  end do
-
-  ABI_FREE(gemm_nonlop_kpt)
-  mod__nkpt=0
 
  end subroutine destroy_gemm_nonlop_ompgpu
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop/free_gemm_nonlop_ompgpu_ikpt
-!! NAME
-!! free_destroy_gemm_nonlop_ompgpuikpt
-!!
-!! FUNCTION
-!! Release memory for one kpt value of the gemm_nonlop_kpt array
-!!
-!! INPUTS
-!! ikpt= index of gemm_nonlop_kptto be released
-!!
-!! SOURCE
- subroutine free_gemm_nonlop_ompgpu_ikpt(ikpt)
-
-  integer,intent(in) :: ikpt
-
-! *************************************************************************
-
- if(gemm_nonlop_kpt(ikpt)%nprojs /= -1) then
-   if (allocated(gemm_nonlop_kpt(ikpt)%projs)) then
-     ABI_FREE(gemm_nonlop_kpt(ikpt)%projs)
-   end if
-   if (allocated(gemm_nonlop_kpt(ikpt)%projs_r)) then
-     ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_r)
-   end if
-   if (allocated(gemm_nonlop_kpt(ikpt)%projs_i)) then
-   ABI_FREE(gemm_nonlop_kpt(ikpt)%projs_i)
-   end if
-   gemm_nonlop_kpt(ikpt)%nprojs = -1
-   if(gemm_nonlop_kpt(ikpt)%ngrads /= -1) then
-     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs)) then
-       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
-     end if
-     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) then
-       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
-     end if
-     if (allocated(gemm_nonlop_kpt(ikpt)%dprojs_i)) then
-       ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
-     end if
-     gemm_nonlop_kpt(ikpt)%ngrads = -1
-   end if
- end if
-
- end subroutine free_gemm_nonlop_ompgpu_ikpt
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gemm_nonlop_ompgpu/make_gemm_nonlop_ompgpu
-!! NAME
-!! make_gemm_nonlop_ompgpu
-!!
-!! FUNCTION
-!! Build the gemm_nonlop array
-!!
-!! INPUTS
-!!
-!! SOURCE
-
- subroutine make_gemm_nonlop_ompgpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
-&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert) ! Optional parameters
-
-  integer, intent(in) :: ikpt
-  integer, intent(in) :: npw, lmnmax,ntypat
-  integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
-  integer, intent(in) :: nattyp(ntypat)
-  integer, intent(in) :: istwf_k
-  integer, intent(in) :: signs,choice
-  integer, intent(in), optional :: idir_pert
-  real(dp), intent(in) :: ucvol
-  real(dp), intent(in) :: ffnl_k(:,:,:,:)
-  real(dp), intent(in) :: ph3d_k(:,:,:)
-  real(dp), intent(in) :: kpt_k(:)
-  real(dp), intent(in), target :: kpg_k(:,:)
-
-  integer :: cplex
-! *************************************************************************
-
-  call free_gemm_nonlop_kpt_ompgpu()
-  call make_gemm_nonlop(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
-  &                     ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
-  &                     idir_pert=idir_pert)
-  cplex=2;if (istwf_k>1) cplex=1
-  call alloc_gemm_nonlop_kpt_ompgpu(ikpt,cplex)
-
- end subroutine make_gemm_nonlop_ompgpu
-!!***
-
 
 !----------------------------------------------------------------------
 
@@ -597,32 +403,31 @@ contains
   real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
-
   ! locals
   complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, i1, i2, i, ikpt
-  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift, nattyp_i
+  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
+  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
   integer :: projs_beg,projs_end,dprojs_beg,dprojs_end
-  integer :: enlout_shift, force_shift, nnlout_test
+  integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
-  real(dp) :: esum,esumk(9)
-  real(dp) :: work(6)
+  logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
-  real(dp), ABI_CONTIGUOUS pointer :: projections_ptr(:,:,:)
+
+  real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
-  integer :: nprojs_my_blk, ipw, iproj, iblock, nprojs_blk
-  integer :: rank, nprocs, req(2)
+  integer :: ipw, iproj, iblock, nprojs_blk, i1, i2, i
+  integer :: nprojs_my_blk
+  integer :: rank, nprocs
   logical :: is_last
-  real(dp), allocatable :: projs_recv(:,:,:), dprojs_recv(:,:,:)
-  logical :: local_vectproj
-  logical :: transfer_vectin,transfer_vectout,transfer_svectout
-  character(len=500) :: msg
-  integer(C_SIZE_T) :: byte_count
-  real(dp), ABI_CONTIGUOUS pointer :: vectin_(:,:),vectout_(:,:),svectout_(:,:)
+  real(dp), allocatable :: projs_recv(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
   integer :: ngrads_tmp
+
+  logical :: transfer_vectin,transfer_vectout,transfer_svectout
+  integer(C_SIZE_T) :: byte_count
+  real(dp), ABI_CONTIGUOUS pointer :: vectin_(:,:),vectout_(:,:),svectout_(:,:)
 
 ! *************************************************************************
 
@@ -635,6 +440,9 @@ contains
   ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,gpu_option/))
 
   ! Check supported options
+  if (.not.gemm_nonlop_use_gemm) then
+    ABI_BUG('computation not prepared for gemm_nonlop use!')
+  end if
   if ( (choice>3.and.choice/=7.and.choice/=5.and.choice/=51.and.signs==2) .or. &
 &      (choice>3.and.choice/=7.and.choice/=23.and.signs==1) .or. &
 &      (useylm/=1) ) then
@@ -657,6 +465,9 @@ contains
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
+  ngrads = gemm_nonlop_kpt(ikpt)%ngrads
+  nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
+
   ! The number of projectors used for computation may vary among
   ! nonlop calls, from computing on all atoms to a select one for
   ! some perturbations.
@@ -665,9 +476,14 @@ contains
   do itypat=1,ntypat
     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
   end do
-
-  ngrads = gemm_nonlop_kpt(ikpt)%ngrads
-  nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
+  projs_beg=1; projs_end=nprojs;
+  dprojs_beg=1; dprojs_end=nprojs*ngrads;
+  if((choice==2 .and. signs==2) .or. ((choice==2 .or. choice==3 .or. choice==23) .and. signs==1)) then
+    projs_beg=atom_proj_shift+1
+    projs_end=projs_beg+nprojs-1
+    dprojs_beg=atom_proj_shift*ngrads+1
+    dprojs_end=dprojs_beg+nprojs*ngrads-1
+  end if
 
   if(gemm_nonlop_is_distributed) then
     rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
@@ -683,17 +499,6 @@ contains
   else if(signs==2) then
     ABI_CHECK(ngrads==1.or.(choice==1.or.choice==0.or.choice==7) ,"Bad allocation in gemm_nonlop !")
   end if
-
-  projs_beg=1; projs_end=nprojs;
-  dprojs_beg=1; dprojs_end=nprojs*ngrads;
-  if((choice==2 .and. signs==2) .or. ((choice==2 .or. choice==3 .or. choice==23) .and. signs==1)) then
-    projs_beg=atom_proj_shift+1
-    projs_end=projs_beg+nprojs
-    dprojs_beg=atom_proj_shift*ngrads+1
-    dprojs_end=dprojs_beg+nprojs*ngrads
-  end if
-  projs_ => gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end)
-  dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
 
   ! Allocate and copy GPU buffers if user doesn't manage them
   transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
@@ -720,6 +525,7 @@ contains
     call alloc_work_buffers(cplex, cplex_fac,&
 &        nspinor*ndat, nprojs, ntypat, lmnmax, MAX(npwin,npwout))
   end if
+
   if(paw_opt>=2 .and. choice > 0 .and. choice /= 7) then
     if (cplex_enl==1) then
       do itypat=1, ntypat
@@ -738,62 +544,43 @@ contains
     end if
   end if
   !$OMP TARGET UPDATE TO(sij_typ)
-  if(current_ikpt_in_gpu /= gemm_nonlop_ikpt_this_proc_being_treated) then
-    call refresh_gemm_nonlop_kpt_ompgpu(gemm_nonlop_ikpt_this_proc_being_treated)
+
+  if(current_ikpt_in_gpu /= ikpt) then
+    call refresh_gemm_nonlop_kpt_ompgpu(ikpt)
   end if
 
-   ! If vectproj is provided, use it for further calculations, use static array otherwise
-   projections_ptr => projections
-   local_vectproj=.false.
-   if(PRESENT(vectproj)) then
-     if(size(vectproj)>1) local_vectproj=.true.
-   end if
-   if (local_vectproj) projections_ptr => vectproj
+  projs_ => current_ikpt_projs(:,:,projs_beg:projs_end)
+  dprojs_ => current_ikpt_dprojs(:,:,dprojs_beg:dprojs_end)
+
+  ! If vectproj is provided, use it for further calculations, use static array otherwise
+  projections => projections_
+  local_vectproj=.false.
+  if(PRESENT(vectproj)) then
+    if(size(vectproj)>1) local_vectproj=.true.
+  end if
+  if (local_vectproj) projections => vectproj
 
 #ifdef HAVE_GPU_CUDA
   !Work buffers allocated at each call to save memory in CUDA
   !$OMP TARGET ENTER DATA MAP(alloc:s_projections,vnl_projections)
   if(.not. local_vectproj) then
-    !$OMP TARGET ENTER DATA MAP(alloc:projections_ptr)
+    !$OMP TARGET ENTER DATA MAP(alloc:projections_)
   end if
 #endif
 
   if(gemm_nonlop_is_distributed) then
-    ABI_MALLOC(projs_recv,   (cplex, npwin, gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
+    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ngrads,1)*gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
     !$OMP TARGET ENTER DATA MAP(alloc:projs_recv)
-    if (signs==1.and.ngrads>0) then
-      ABI_MALLOC(dprojs_recv,   (cplex, npwin, ngrads*gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
-      !$OMP TARGET ENTER DATA MAP(alloc:dprojs_recv)
-    end if
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
-#if defined HAVE_GPU_CUDA
-  byte_count=sizeof(projections_ptr)
-  !$OMP TARGET DATA USE_DEVICE_PTR(projections_ptr,s_projections,vnl_projections)
-  if(cpopt < 2) call gpu_memset(c_loc(projections_ptr),     0, byte_count)
-  call gpu_memset(c_loc(s_projections),   0, byte_count)
-  call gpu_memset(c_loc(vnl_projections), 0, byte_count)
-  !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
   if(cpopt < 2) then
-    !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-    !$OMP& MAP(to:projections_ptr) PRIVATE(i1,i2)
-    do i2=1, nspinor*ndat
-      do i1=1, nprojs
-        projections_ptr(:,i1,i2) = zero
-      end do
-    end do
+    projections=zero
+    !$OMP TARGET UPDATE TO(projections)
+    !call gpu_set_to_zero(projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
   end if
-  !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-  !$OMP& MAP(to:s_projections,vnl_projections) PRIVATE(i1,i2)
-  do i2=1, nspinor*ndat
-    do i1=1, nprojs
-      s_projections(:,i1,i2) = zero
-      vnl_projections(:,i1,i2) = zero
-    end do
-  end do
-#endif
+  call gpu_set_to_zero(s_projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
+  call gpu_set_to_zero(vnl_projections, int(cplex_fac,c_size_t)*nprojs*ndat*nspinor)
 
   if (ngrads>0) then
     ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
@@ -804,42 +591,19 @@ contains
       ABI_MALLOC(vnl_dprojections,(cplex_fac, ngrads*nprojs,nspinor*ndat))
       !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
     end if
-#if defined HAVE_GPU_CUDA
-    byte_count=sizeof(dprojections)
-    !$OMP TARGET DATA USE_DEVICE_PTR(dprojections,vnl_dprojections,s_dprojections)
-    if(cpopt < 4) call gpu_memset(c_loc(dprojections), 0, byte_count)
-    if(allocated(vnl_dprojections))  call gpu_memset(c_loc(vnl_dprojections), 0, byte_count)
-    if(allocated(s_dprojections))    call gpu_memset(c_loc(s_dprojections), 0, byte_count)
-    !$OMP END TARGET DATA
-#elif defined HAVE_GPU_HIP
     if(cpopt < 4) then
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-      !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
-      do i2=1, nspinor*ndat
-        do i1=1, nprojs*ngrads
-          dprojections(:,i1,i2) = zero
-        end do
-      end do
+      call gpu_set_to_zero(dprojections, int(cplex,c_size_t)*ngrads*nprojs*ndat*nspinor)
+    end if
+    if(allocated(s_dprojections)) then
+      s_dprojections=zero
+      !$OMP TARGET UPDATE TO(s_dprojections)
+      !call gpu_set_to_zero(s_dprojections,   int(cplex,c_size_t)*ngrads*nprojs*ndat*nspinor)
     end if
     if(allocated(vnl_dprojections)) then
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-      !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
-      do i2=1, nspinor*ndat
-        do i1=1, nprojs*ngrads
-          dprojections(:,i1,i2) = zero
-        end do
-      end do
+      vnl_dprojections=zero
+      !$OMP TARGET UPDATE TO(vnl_dprojections)
+      !call gpu_set_to_zero(vnl_dprojections, int(cplex_fac,c_size_t)*ngrads*nprojs*ndat*nspinor)
     end if
-    if(allocated(vnl_dprojections)) then
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-      !$OMP& MAP(to:dprojections) PRIVATE(i1,i2)
-      do i2=1, nspinor*ndat
-        do i1=1, nprojs*ngrads
-          dprojections(:,i1,i2) = zero
-        end do
-      end do
-    end if
-#endif
   end if
 
   if(nprojs == 0) then
@@ -864,18 +628,16 @@ contains
   if(cpopt >= 2) then
     ! retrieve from cprjin
     if(.not. local_vectproj .and. cpopt/=3) then
-      !TODO This use-case is extremely painful for GEMM OpenGPU nonlop performance
-      !ABI_WARNING("Inefficient call of OpenGPU nonlop. Was vectproj provided with OpenMP mapping?")
       !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
       do idat=1, ndat*nspinor
         shift = 0
         do iatom = 1, natom
           nlmn = cprjin(iatom, idat)%nlmn
-          projections_ptr(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
+          projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
           shift = shift + nlmn
         end do
       end do
-      !$OMP TARGET UPDATE TO(projections_ptr)
+      !$OMP TARGET UPDATE TO(projections)
     end if
     if(cpopt==4.and.allocated(dprojections)) then
       ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (1)")
@@ -884,10 +646,12 @@ contains
         shift = 0
         do iatom = 1, natom
           nlmn  = cprjin(iatom, idat)%nlmn
-          do igrad=1,ngrads
-            dprojections(1:cplex, shift+1:shift+nlmn, idat) = &
-&                   cprjin(iatom, idat)%dcp(1:cplex,igrad,1:ilmn)
-            shift = shift + nlmn
+          do ilmn=1,nlmn
+            do igrad=1,ngrads
+              dprojections(1:cplex, shift + igrad, idat) = &
+                cprjin(iatom, idat)%dcp(1:cplex,igrad,ilmn)
+            end do
+            shift = shift + ngrads
           end do
         end do
       end do
@@ -895,9 +659,9 @@ contains
     end if
   end if ! cpopt
 
-  if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23))) then
+  if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
-    call opernla_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections_ptr,&
+    call opernla_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections,&
     &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
@@ -906,25 +670,24 @@ contains
     &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
     &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
     &       temp_realvec_r,&
-    &       projs_recv,dprojs_recv,&
+    &       projs_recv,&
     &       gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
       ! store in cprjin
       if(.not. local_vectproj .and. cpopt/=3) then
-        !TODO This use-case is extremely painful for GEMM OpenGPU nonlop performance
-        !$OMP TARGET UPDATE FROM(projections_ptr)
+        !$OMP TARGET UPDATE FROM(projections)
         !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
         do idat=1, ndat*nspinor
           shift = 0
           do iatom = 1, natom
             nlmn = cprjin(iatom, idat)%nlmn
-            cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections_ptr(1:cplex, shift+1:shift+nlmn, idat)
+            cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
             shift = shift + nlmn
           end do
         end do
       end if
-      if(cpopt==3) then
+      if(cpopt==1 .or. cpopt==3) then
         ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (2)")
         !$OMP TARGET UPDATE FROM(dprojections)
         !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,igrad,nlmn)
@@ -932,18 +695,18 @@ contains
           shift = 0
           do iatom = 1, natom
             nlmn = cprjin(iatom, idat)%nlmn
-            do igrad=1,ngrads
-              cprjin(iatom, idat)%dcp(1:cplex,igrad,1:nlmn) = &
-  &              dprojections(1:cplex, shift+1:shift+nlmn, idat)
-              shift = shift + nlmn
+            do ilmn=1,nlmn
+              do igrad=1,ngrads
+                cprjin(iatom, idat)%dcp(1:cplex,igrad,ilmn) = &
+                &                   dprojections(1:cplex, shift + igrad, idat)
+              end do
+              shift = shift + ngrads
             end do
           end do
         end do
       end if
-    end if
-  end if
-
-
+    end if ! cpopt >= 0
+  end if ! cpopt >= 2
 
   if(choice > 0) then
 
@@ -954,7 +717,7 @@ contains
       ndgxdtfac = ngrads
       nd2gxdt = 0
       nd2gxdtfac = 0
-      optder = 0;if (ndgxdtfac>0) optder=1
+      optder = 0;if (ndgxdtfac>0 .and. signs == 2) optder=1
       cplex_dgxdt(:) = 1;
       if(ndgxdt > 0) then
        if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
@@ -972,7 +735,7 @@ contains
   &         vnl_dprojections,&
   &         s_dprojections,&
   &         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
-  &         projections_ptr,&
+  &         projections,&
   &         vnl_projections,&
   &         s_projections,&
   &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
@@ -982,9 +745,9 @@ contains
         iatm = iatm+nattyp(itypat)
       end do
     else
-      !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections_ptr)
+      !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections)
       call copy_gpu_to_gpu(c_loc(s_projections), &
-           &               c_loc(projections_ptr), &
+           &               c_loc(projections), &
            &               INT(cplex, c_size_t) * nprojs * nspinor * ndat * dp)
       !$OMP END TARGET DATA
     end if
@@ -1005,15 +768,15 @@ contains
       &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
       &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
       &       temp_realvec_r,temp_realvec_i,&
-      &       projs_recv,dprojs_recv,&
+      &       projs_recv,&
       &       gemm_nonlop_is_distributed)
-    end if ! opernlb
+    end if
 
     ! opernld
     if(signs==1) then
       call opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
       &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
-      &       enlout,projections_ptr,vnl_projections,s_projections,&
+      &       enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
       &       gprimd,nattyp,mpi_enreg)
@@ -1021,16 +784,16 @@ contains
 
   end if ! choice>0
 
- ! Retrieve and release allocated buffers
- !$OMP TARGET EXIT DATA MAP(delete:vectin) IF(transfer_vectin)
- !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
- !$OMP TARGET EXIT DATA MAP(from:svectout)  IF(transfer_svectout)
+  ! Retrieve and release allocated buffers
+  !$OMP TARGET EXIT DATA MAP(delete:vectin) IF(transfer_vectin)
+  !$OMP TARGET EXIT DATA MAP(from:vectout)   IF(transfer_vectout)
+  !$OMP TARGET EXIT DATA MAP(from:svectout)  IF(transfer_svectout)
 
 #ifdef HAVE_GPU_CUDA
- !$OMP TARGET EXIT DATA MAP(delete:s_projections,vnl_projections)
- if(.not. local_vectproj) then
-   !$OMP TARGET EXIT DATA MAP(delete:projections_ptr)
- end if
+  !$OMP TARGET EXIT DATA MAP(delete:s_projections,vnl_projections)
+  if(.not. local_vectproj) then
+    !$OMP TARGET EXIT DATA MAP(delete:projections_)
+  end if
 #endif
 
 ! Release memory
@@ -1040,10 +803,6 @@ contains
   if(gemm_nonlop_is_distributed) then
     !$OMP TARGET EXIT DATA MAP(delete:projs_recv)
     ABI_FREE(projs_recv)
-    if (signs==1.and.ngrads>0) then
-      !$OMP TARGET EXIT DATA MAP(delete:dprojs_recv)
-      ABI_FREE(dprojs_recv)
-    end if
   end if
   !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn,enl)
   if (allocated(dprojections)) then
@@ -1060,7 +819,6 @@ contains
   end if
 
  end subroutine gemm_nonlop_ompgpu
-
 !***
 
 
@@ -1068,43 +826,6 @@ contains
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!! stubs for compiling with OpenMP GPU offload disabled.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
- subroutine init_gemm_nonlop_ompgpu(nkpt)
-  integer,intent(in) :: nkpt
-
-  ABI_UNUSED((/nkpt/))
-  ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
- end subroutine init_gemm_nonlop_ompgpu
-!!***
-
- subroutine destroy_gemm_nonlop_ompgpu()
-  ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
- end subroutine destroy_gemm_nonlop_ompgpu
-!!***
-
- subroutine make_gemm_nonlop_ompgpu(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
-&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
-&                            idir_pert) ! Optional parameters
-
-  integer, intent(in) :: ikpt
-  integer, intent(in) :: npw, lmnmax,ntypat
-  integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
-  integer, intent(in) :: nattyp(ntypat)
-  integer, intent(in) :: istwf_k
-  integer, intent(in) :: signs,choice
-  integer, intent(in), optional :: idir_pert
-  real(dp), intent(in) :: ucvol
-  real(dp), intent(in) :: ffnl_k(:,:,:,:)
-  real(dp), intent(in) :: ph3d_k(:,:,:)
-  real(dp), intent(in) :: kpt_k(:)
-  real(dp), intent(in), target :: kpg_k(:,:)
-
-  ABI_UNUSED((/ikpt,npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k/))
-  ABI_UNUSED((/ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k/))
-  ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")
-
- end subroutine make_gemm_nonlop_ompgpu
-!!***
 
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&

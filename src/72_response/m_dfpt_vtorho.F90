@@ -32,8 +32,6 @@ module m_dfpt_vtorho
  use m_wfk
  use m_cgtools
  use m_gemm_nonlop
- use m_gemm_nonlop_gpu
- use m_gemm_nonlop_ompgpu
  use m_dtset
  use m_dtfil
  use m_ompgpu_utils
@@ -669,25 +667,11 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            choice = 3
          end if
          !Init the arrays
-         if ( dtset%gpu_option == ABI_GPU_DISABLED) then
-           call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
-           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
-           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k,&
-           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
-           &    idir_pert=idir)
-         else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
-           call make_gemm_nonlop_gpu(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
-           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
-           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
-           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k)
-         else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
-           !call ompgpu_load_hamilt_buffers(gs_hamkq%kg_k,gs_hamkq%kg_kp)
-           call make_gemm_nonlop_ompgpu(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
-           &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
-           &    gs_hamkq%ucvol, gs_hamkq%ffnl_k, &
-           &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
-           &    idir_pert=idir)
-         end if
+         call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
+         &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
+         &    gs_hamkq%ucvol, gs_hamkq%ffnl_k,&
+         &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
+         &    idir_pert=idir, gpu_option=dtset%gpu_option)
        end if
      end if ! gemm_nonlop_use_gemm
 
