@@ -45,7 +45,7 @@ MODULE m_ddb_hdr
  public :: ioddb8_in        ! Temporary
  public :: psddb8           ! Temporary
 
- integer,public,parameter :: DDB_VERSION=20230401
+ integer,public,parameter :: DDB_VERSION=20240201
  ! DDB Version number.
  ! 6 digit integer giving date, in form yymmdd for month=mm(1-12),
  !  day=dd(1-31), and year=yy(90-99 for 1990 to 1999,00-89 for 2000 to 2089),
@@ -1446,7 +1446,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Set routine version number here:
 !scalars
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio9_new=20240201,cvrsio9=20230401
  integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
@@ -1471,7 +1472,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  read (unddb, '(20x,i10)' )ddbvrs
 
  !write(std_out,'(a,i10)')' ddbvrs=',ddbvrs
- if(ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
+ if(ddbvrs/=cvrsio9_new .and. ddbvrs/=cvrsio9 .and. ddbvrs/=vrsio8 & 
+& .and. ddbvrs/=vrsio8_old .and. ddbvrs/=vrsio8_old_old)then
    write(message, '(a,i10,2a,4(a,i10),a)' )&
     'The input DDB version number=',ddbvrs,' does not agree',ch10,&
     'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old,' .'
@@ -1479,7 +1481,7 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
  end if
 
 !Convert older version to 8 digit format
- if (ddbvrs /= cvrsio9) then
+ if (ddbvrs /= cvrsio9 .and. ddbvrs /= cvrsio9_new) then
    ndig= int(log10(real(ddbvrs))) + 1
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
@@ -2112,7 +2114,8 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 !scalars
 !Set routine version number here:
  integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: cvrsio9_new=20240201,cvrsio9=20230401
  integer :: bantot,basis_size0,blktyp,ddbvrs,iband,iblok,iekb,ii,ikpt,iline,im,ios,iproj
  integer :: itypat,itypat0,jekb,lmn_size0,mproj,mpsang,nekb,ndig,nelmts
  integer :: occopt,pspso0,nsym
@@ -2140,7 +2143,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  read (unddb,*)
  read (unddb, '(20x,i10)' )ddbvrs
 
- if (all(ddbvrs/= [cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
+ if (all(ddbvrs/= [cvrsio9_new, cvrsio9, vrsio8, vrsio8_old, vrsio8_old_old]) )then
    write(message, '(a,i10,2a,4(a,i10))' )&
 &   'The input DDB version number=',ddbvrs,' does not agree',ch10,&
 &   'with the allowed code DDB version numbers,',cvrsio9,', ',vrsio8,', ',vrsio8_old,' and ',vrsio8_old_old
@@ -2148,7 +2151,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
  end if
 
 !Convert older version to 8 digit format
- if (ddbvrs /= cvrsio9) then
+ if (ddbvrs /= cvrsio9 .and. ddbvrs /= cvrsio9_new) then
    ndig= int(log10(real(ddbvrs))) + 1
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
@@ -2542,8 +2545,14 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
      if(blktyp==1.or.blktyp==2)then
 !      Read the phonon wavevector
        read(unddb,*)
+!      Read the perturbation frequency
+       read(unddb,*)
      else if(blktyp==3.or.blktyp==33)then
 !      Read the perturbation wavevectors
+       read(unddb,*)
+       read(unddb,*)
+       read(unddb,*)
+!      Read the perturbation frequency
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)

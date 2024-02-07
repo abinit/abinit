@@ -753,6 +753,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
    call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
 
+   call ddb%set_omega(iblok=1, omega=dtset%rfomega)
+   call ddb%set_qpt(iblok=1, qpt=dtset%qptn(1:3))
    call ddb%set_d3matr(d3etot, blkflg, iblok=1, lw=.true.)
 
    call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
