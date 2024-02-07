@@ -2808,10 +2808,15 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,idij,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: angl_size,bdir,gint
+ integer :: idij,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mesh_size,nsploop
+ real(dp), parameter :: c1=sqrt(four_pi/five)
+ real(dp), parameter :: c2=one/sqrt(three)
+ real(dp), parameter :: c3=sqrt(four_pi)
  real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact
+ real(dp) :: fact,s00,s2m2,s2m1,s20,s21,s22
+ real(dp) :: sxx,syy,szz,szx,syx,szy
  character(len=500) :: msg
 !arrays
  integer, pointer :: indklmn(:,:)
@@ -2903,7 +2908,7 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
  end do
  LIBPAW_DEALLOCATE(dv1dr)
  LIBPAW_DEALLOCATE(ff)
- dijso_rad(:)=spnorbscl*dijso_rad(:)
+ !dijso_rad(:)=spnorbscl*dijso_rad(:)
 
 !  ------------------------------------------------------------------------
 !  ----- Computation of Dij_so B1
@@ -2912,15 +2917,46 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
  klmn1=1
  do klmn=1,lmn2_size
    klm=indklmn(1,klmn);kln=indklmn(2,klmn)
-   ilm=indklmn(5,klmn);jlm=indklmn(6,klmn)
-   if (ilm .NE. jlm) cycle
-   fact=half*dijso_rad(kln)
-   dijsob1(1,klmn1,3) = fact
-   dijsob1(1,klmn1,4) = fact
-   dijsob1(2,klmn1+1,3) = -fact
-   dijsob1(2,klmn1+1,4) =  fact
-   dijsob1(3,klmn1,1) =  fact
-   dijsob1(3,klmn1,2) = -fact
+   s00=zero;s2m2=zero;s2m1=zero;s20=zero;s21=zero;s22=zero
+   gint = pawang%gntselect(1,klm);if (gint .NE. 0) s00 =pawang%realgnt(gint)
+   gint = pawang%gntselect(5,klm);if (gint .NE. 0) s2m2=pawang%realgnt(gint)
+   gint = pawang%gntselect(6,klm);if (gint .NE. 0) s2m1=pawang%realgnt(gint)
+   gint = pawang%gntselect(7,klm);if (gint .NE. 0) s20 =pawang%realgnt(gint)
+   gint = pawang%gntselect(8,klm);if (gint .NE. 0) s21 =pawang%realgnt(gint)
+   gint = pawang%gntselect(9,klm);if (gint .NE. 0) s22 =pawang%realgnt(gint)
+   ! (1-x2/r2)
+   sxx=half*dijso_rad(kln)*(c3*s00-(c1*c2*s22+(c3*s00-c1*s20)/three))
+   ! (1-y2/r2)
+   syy=half*dijso_rad(kln)*(c3*s00-((c3*s00-c1*s20)/three - c1*c2*s22))
+   ! (1-z2/r2)
+   szz=half*dijso_rad(kln)*(c3*s00-(two*c1*s20+c3*s00)/three)
+   ! yx/r2
+   syx=half*dijso_rad(kln)*c1*c2*s2m2
+   ! zx/r2
+   szx=half*dijso_rad(kln)*c1*c2*s21
+   ! zy/r2
+   szy=half*dijso_rad(kln)*c1*c2*s2m1
+   ! bx: sxx - syx - szx
+   dijsob1(1,klmn1,3)=dijsob1(1,klmn1,3)+sxx
+   dijsob1(1,klmn1,4)=dijsob1(1,klmn1,4)+sxx
+   dijsob1(1,klmn1+1,3)=dijsob1(1,klmn1+1,3)+syx
+   dijsob1(1,klmn1+1,4)=dijsob1(1,klmn1+1,4)-syx
+   dijsob1(1,klmn1,1)=dijsob1(1,klmn1,1)-szx
+   dijsob1(1,klmn1,2)=dijsob1(1,klmn1,2)+szx
+   ! by: syy - syx - szy
+   dijsob1(2,klmn1,3)=dijsob1(2,klmn1,3)-syx
+   dijsob1(2,klmn1,4)=dijsob1(2,klmn1,4)-syx
+   dijsob1(2,klmn1+1,3)=dijsob1(2,klmn1+1,3)-syy
+   dijsob1(2,klmn1+1,4)=dijsob1(2,klmn1+1,4)+syy
+   dijsob1(2,klmn1,1)=dijsob1(2,klmn1,1)-szy
+   dijsob1(2,klmn1,2)=dijsob1(2,klmn1,2)+szy
+   ! bz: szz - szy - szx
+   dijsob1(3,klmn1,3)=dijsob1(3,klmn1,3)-szx
+   dijsob1(3,klmn1,4)=dijsob1(3,klmn1,4)-szx
+   dijsob1(3,klmn1+1,3)=dijsob1(3,klmn1+1,3)+szy
+   dijsob1(3,klmn1+1,4)=dijsob1(3,klmn1+1,4)-szy
+   dijsob1(3,klmn1,1)=dijsob1(3,klmn1,1)+szz
+   dijsob1(3,klmn1,2)=dijsob1(3,klmn1,2)-szz
    klmn1=klmn1+cplex_dij
  end do
 
