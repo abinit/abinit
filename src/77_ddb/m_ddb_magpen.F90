@@ -73,7 +73,8 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,magpen,mpatpol,mpdir,mpert,mpopt,natom,ntypat,prtvol,rftyp,ucvol,timdisp)
+ subroutine ddb_magpen(ddb,ddb_lw,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+& ntypat,prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
@@ -82,6 +83,7 @@ contains
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
@@ -192,7 +194,7 @@ contains
 
    if (iblok /= 0 .or. jblok /=0) then
      call magmom(barmmom,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -209,7 +211,7 @@ contains
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
    if (iblok /= 0 ) then
      call mp_ifc(barmagsus,ddb%val,iblok,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtvol,zfield)
+   & natom,nblok,ndim,prtvol,qphon,xred,zfield)
    end if
 
    !Born effective charges block
@@ -299,7 +301,7 @@ contains
 
      if (iblok /= 0 .or. jblok /=0) then
        call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw%val,iblok,invbarmagsus,jblok, &
-     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
      end if
 
      !Berry curvature of other second-order quantites
@@ -312,7 +314,7 @@ contains
    & rffreq=rffreq)
      if (iblok /= 0 ) then
        call berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,ddb_lw%val,iblok, &
-     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
+     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
      end if
    end do 
 
@@ -471,6 +473,12 @@ contains
  ABI_FREE(work1)
  ABI_FREE(work2)
 
+ fac=2.714943600699**2*27.2114/four
+ open(10,file='k_ss.txt')
+   do irow=1, ndim
+     write(10,*) invmagsus(irow,1:ndim)*fac
+   end do 
+ close(10)
 
  !Write results in output
  if (magpen > zero) then
@@ -486,7 +494,6 @@ contains
    end do
    call wrtout([ab_out,std_out], '   ')
 
-   fac=2.534134544063**2*27.2114/four
 
    call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
    call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -494,7 +501,7 @@ contains
      do icol=1, ndim
        write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
      & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-     & real(invmagsus(irow,icol))*fac, aimag(invmagsus(irow,icol))*fac
+     & real(invmagsus(irow,icol)), aimag(invmagsus(irow,icol))
        call wrtout([ab_out,std_out], msg)
      end do
    end do
@@ -578,7 +585,7 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,blkval,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
@@ -586,6 +593,7 @@ contains
  real(dp),intent(in) :: magpen
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+2)*3)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
@@ -648,11 +656,17 @@ contains
  mmom=-matmul(magsus,zfield)
  mmom_alt=matmul(invhmat,barmmom)
 
- fac=2.534134544063/two*27.2114/0.529177
+ fac=2.714943600699/two*27.2114/0.529177
 
- do icol=1, natom*3
-   write(100,'(4es18.9)') real(zfield(:,icol))*fac
+ open(10,file='k_ps.txt')
+ do iat1= 1, natom
+   do idir1= 1, 3
+     icol= (iat1-1)*3 + idir1
+     write(10,*) conjg(zfield(1:ndim,icol)*fac* &
+   & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
+   end do
  end do 
+ close(10)
 
 !Write the results
  if (magpen > zero) then
@@ -663,7 +677,7 @@ contains
        do icol=1, natom*3
          write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
        & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-       & real(zfield(irow,icol))*fac, aimag(zfield(irow,icol))*fac
+       & real(zfield(irow,icol)), aimag(zfield(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
      end do
@@ -790,13 +804,14 @@ contains
 !! SOURCE
 
  subroutine mp_ifc(barmagsus,blkval,iblok,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtvol,zfield)
+& natom,nblok,ndim,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
  complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
@@ -809,6 +824,7 @@ contains
  character(len=1) :: cart(3)=(/'x','y','z'/)
  complex(dpc) :: barifc(natom*3,natom*3)
  complex(dpc) :: fmifc(natom*3,natom*3)
+ complex(dpc) :: fmifc_sf(natom*3,natom*3)
  complex(dpc) :: srifc(natom*3,natom*3)
  complex(dpc) :: ifc_zfield(ndim,natom*3)
 
@@ -840,10 +856,25 @@ contains
    srifc= fmifc - srifc
  end if
 
- fac=27.2114/(0.52917)**2
- do irow=1,natom*3
-   write(200,'(24es18.9)') real(fmifc(irow,:))*fac
+ do ipert2= 1, natom
+   do idir2= 1, 3
+     icol=( ipert2-1)*3 + idir2
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         fmifc_sf(irow,icol)=fmifc(irow,icol)* &
+       & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,ipert2)-xred(:,ipert1)))
+       end do
+     end do
+   end do
  end do 
+ 
+ fac=27.2114/(0.52917)**2
+ open(10,file='k_pp.txt')
+ do irow=1,natom*3
+    write(10,*) fmifc_sf(irow,1:natom*3)*fac
+ end do 
+ close(10)
  
  !Write the results
  call wrtout([ab_out,std_out], ' Frozen-magnetic interatomic force constants')
@@ -1198,6 +1229,7 @@ contains
  integer :: iat1,iat2,icol,idir1,idir2,idir3,info,ipert1,ipert2,ipert3,irow,lwork
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
  real(dp) :: fac
+ complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
  complex(dpc) :: idty(ndim,ndim)
@@ -1246,7 +1278,13 @@ contains
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
  bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
 
- fac=2.534134544063**2/four !TMP
+ fac=2.714943600699**2/four !TMP
+ open(10,file='g_ss.txt')
+   do irow=1, ndim
+     write(10,*) -ione*bc_ss(irow,1:ndim)*fac
+   end do 
+ close(10)
+
 
  call wrtout([ab_out,std_out], ' Berry curvature of the inverse spin susceptibility ')
  call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
@@ -1254,7 +1292,7 @@ contains
    do icol=1, ndim
      write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
    & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-   & real(bc_ss(irow,icol))*fac, aimag(bc_ss(irow,icol))*fac
+   & real(bc_ss(irow,icol)), aimag(bc_ss(irow,icol))
      call wrtout([ab_out,std_out], msg)
    end do
  end do
@@ -1292,7 +1330,7 @@ contains
 !! SOURCE
 
  subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,blkval,iblok,invbarmagsus,&
-& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
@@ -1300,6 +1338,7 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
  complex(dpc),intent(in) :: bc_ss(ndim,ndim)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
@@ -1308,12 +1347,14 @@ contains
 !scalars
  integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
- real(dp) :: fac
+ real(dp) :: fac,re,im
+ complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
  complex(dpc) :: bc_barsp(ndim,(natom+2)*3)
+ complex(dpc) :: bc_ps((natom+2)*3,ndim)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
 ! *********************************************************************
@@ -1358,11 +1399,22 @@ contains
  !Calculate the Berry curvature of the induced Zeeman fields
  bc_sp= -matmul(bc_ss,barmmom) - matmul(invbarmagsus,bc_barsp)
 
- fac=2.534134544063/two/0.52917 !TMP
-
- do icol=1, natom*3
-   write(101,'(4es18.9)') -aimag(bc_sp(:,icol))*fac
+ do irow=1,ndim
+   do iat1= 1, natom
+     do idir1= 1, 3
+       icol= (iat1-1)*3 + idir1
+       bc_ps(icol,irow)=conjg(bc_sp(irow,icol)*exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
+     end do
+   end do
  end do 
+
+ fac=2.714943600699/two/0.52917 !TMP
+ open(10,file='g_ps.txt')
+ do irow=1,natom*3
+   write(10,*) (0.d0,-1.d0)*bc_ps(irow,1:ndim)*fac
+ end do 
+ close(10)
+
  if (iblok /= 0) then
    call wrtout([ab_out,std_out], ' Berry curvature of the Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
    call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
@@ -1370,7 +1422,7 @@ contains
      do icol=1, natom*3
        write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
      & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-     & real(bc_sp(irow,icol))*fac, aimag(bc_sp(irow,icol))*fac
+     & real(bc_sp(irow,icol)), aimag(bc_sp(irow,icol))
        call wrtout([ab_out,std_out], msg)
      end do
    end do
@@ -1420,7 +1472,7 @@ contains
 !! SOURCE
 
  subroutine berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,blkval,iblok,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
@@ -1428,6 +1480,7 @@ contains
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: bc_barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: bc_sp(ndim,(natom+2)*3)
@@ -1437,11 +1490,13 @@ contains
  integer :: iat1,iat2,icol,idir1,idir2,idir3,ipert1,ipert2,ipert3,irow
  integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
  real(dp) :: fac
+ complex(dpc), parameter :: ione=(0.d0,1.d0)
  character(len=1000) :: msg
 !arrays
  integer(dp) :: indexat1(ndim),indexdir1(ndim)
  integer(dp) :: indexat2((natom+2)*3),indexdir2((natom+2)*3)
- complex(dpc) :: bc_barpp(natom*3,natom*3), bc_pp(natom*3,natom*3), term(natom*3,natom*3,3)
+ complex(dpc) :: bc_barpp(natom*3,natom*3), bc_pp(natom*3,natom*3) 
+ complex(dpc) :: bc_pp_sf(natom*3,natom*3), term(natom*3,natom*3,3)
  complex(dpc) :: ifc_bc_sp(ndim,natom*3), ifc_zfield(ndim,natom*3)
  character(len=1) :: cart(3)=(/'x','y','z'/)
 
@@ -1473,11 +1528,25 @@ contains
 
  bc_pp(:,:)= bc_barpp(:,:) + term(:,:,1) + term(:,:,2) + term(:,:,3)
 
+ do ipert2= 1, natom
+   do idir2= 1, 3
+     icol=( ipert2-1)*3 + idir2
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         bc_pp_sf(irow,icol)=bc_pp(irow,icol)* &
+       & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,ipert2)-xred(:,ipert1)))
+       end do
+     end do
+   end do
+ end do 
 
  fac=one/(0.52917)**2
+ open(10,file='g_pp.txt')
  do irow=1,natom*3
-   write(201,'(24es18.9)') aimag(bc_pp(irow,:))*fac
+   write(10,*) -ione*bc_pp_sf(irow,:)*fac
  end do 
+ close(10)
 
  !Write the results
  call wrtout([ab_out,std_out], ' Berry curvature of interatomic force constants (at constrained magnetic moments)')
