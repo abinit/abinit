@@ -1508,6 +1508,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call ddb%init(dtset, nblok=1, mpert=mpert, msize=(3*mpert*3*mpert))
 
 ! Set the values for the 2nd order derivatives
+   call ddb%set_omega(iblok=1, omega=dtset%rfomega)
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
    call ddb%set_d2matr(d2matr, blkflg, iblok=1)
 

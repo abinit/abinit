@@ -3100,7 +3100,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    !end if
 
 !  prt1mag
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'prt1mag',dt%prt1mag,2,(/0,1/),iout)
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'prt1mag',dt%prt1mag,3,(/0,1,2/),iout)
 
 !  prtstm
    call chkint_le(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,1,iout)

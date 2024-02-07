@@ -1129,16 +1129,16 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     rprimd,dtset%typat,ucvol,psps%usepaw,usexcnhat,dtset%vcutgeo,vhartr1,vpsp1,nvresid1,res2,vtrial1,vxc,vxc1,xccc3d1,dtset%ixcrot,xred)
    end if
 
-!TMP
-!   if (ipert/=dtset%natom+1.and.dtset%prt1mag==1) then
-!     prtopt=1
-!     call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!   & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
-!   & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
-!   & qphon=qphon)
-!     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
-!   & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
-!   end if
+   if (ipert/=dtset%natom+1.and.dtset%prt1mag==2) then
+     prtopt=1
+     zeemfac=half
+     call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+   & dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+   & dtset%ratopt,prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag,&
+   & qphon=qphon,zeemfac=zeemfac)
+     call prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,&
+   & ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+   end if
 
 !  ######################################################################
 !  In case of potential mixing , compute the total 2nd-order energy,
