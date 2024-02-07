@@ -51,8 +51,8 @@ module m_gemm_nonlop_ompgpu
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm_ompgpu, only : opernlc_ylm_ompgpu
  use m_opernlc_ylm, only : opernlc_ylm
- use m_opernla_gemm_ompgpu, only : opernla_gemm_ompgpu
- use m_opernlb_gemm_ompgpu, only : opernlb_gemm_ompgpu
+ use m_opernla_gemm, only : opernla_gemm
+ use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf_ompgpu, only : opernld_ylm_allwf_ompgpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
@@ -661,17 +661,17 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
-    call opernla_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections,&
+    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections,&
     &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-    &       vectin,gemm_nonlop_kpt(ikpt)%projs,gemm_nonlop_kpt(ikpt)%dprojs,&
+    &       vectin,projs_,dprojs_,&
     &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
     &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
     &       temp_realvec_r,&
-    &       projs_recv,&
-    &       gemm_nonlop_is_distributed)
+    &       projs_recv,projs_recv,&
+    &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
       ! store in cprjin
@@ -754,11 +754,11 @@ contains
 
     ! opernlb
     if(signs==2) then
-      call opernlb_gemm_ompgpu(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
+      call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,&
       &       vnl_projections,s_projections,&
-      &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+      &       idir,istwf_k,mpi_enreg,nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
       &       npwout,nspinor,signs,ndat,rank,&
       &       cpopt,nprocs,paw_opt,&
       &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
@@ -768,8 +768,8 @@ contains
       &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
       &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
       &       temp_realvec_r,temp_realvec_i,&
-      &       projs_recv,&
-      &       gemm_nonlop_is_distributed)
+      &       projs_recv,projs_recv,&
+      &       gpu_option,gemm_nonlop_is_distributed)
     end if
 
     ! opernld
