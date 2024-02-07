@@ -321,6 +321,8 @@ contains
 
  subroutine free_ompgpu_current_ikpt()
 
+#ifdef HAVE_OPENMP_OFFLOAD
+
   if(current_ikpt_in_gpu == -1) return
 
   if(associated(current_ikpt_projs)) then
@@ -345,7 +347,7 @@ contains
   end if
 
   current_ikpt_in_gpu=-1
-
+#endif
  end subroutine free_ompgpu_current_ikpt
 
 !----------------------------------------------------------------------
@@ -489,6 +491,7 @@ contains
 
 #endif
   else if(gpu_option_ == ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
     call free_ompgpu_current_ikpt()
     gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
     if(allocated(gpu_nonlop_current_ikpt%projs)) then
@@ -519,6 +522,7 @@ contains
     end if
 
     current_ikpt_in_gpu=ikpt
+#endif
   end if
   gemm_nonlop_choice=choice
 
@@ -1100,7 +1104,7 @@ contains
     &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
     &       temp_realvec,&
     &       projs_local,projs_recv,&
-    &       gemm_nonlop_is_distributed)
+    &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
       ! store in cprjin
@@ -1194,7 +1198,7 @@ contains
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,&
       &       vnl_projections,s_projections,&
-      &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
+      &       idir,istwf_k,mpi_enreg,nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
       &       npwout,nspinor,signs,ndat,rank,&
       &       cpopt,nprocs,paw_opt,&
       &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
@@ -1203,9 +1207,9 @@ contains
       &       dprojs_,&
       &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
       &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
-      &       temp_realvec,&
+      &       temp_realvec,temp_realvec,&
       &       projs_local,projs_recv,&
-      &       gemm_nonlop_is_distributed)
+      &       gpu_option,gemm_nonlop_is_distributed)
     end if
 
     ! opernld
