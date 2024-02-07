@@ -713,7 +713,7 @@ end subroutine orbmag
 !! OUTPUT
 !!  if nl1_option = 1, orbmag contribution of <L_R> is returned
 !!  if nl1_option = 2, orbmag contribution of <A0.An> is returned
-!!    m1_k(2,nband_k,3)=Orb mag contribution
+!!  m1_k(2,nband_k,3)=Orb mag contribution
 !!
 !! SIDE EFFECTS
 !!
@@ -1528,21 +1528,24 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
       do ilmn = 1, pawtab(itypat)%lmn_size
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
+          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(bcp(iatom,isp)%dcp(1,bdir,ilmn),bcp(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(kcp(iatom,isp)%dcp(1,gdir,jlmn),kcp(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + CONJG(dcpi)*dcpj*dij
-          if (ndij .GT. 2) then
+          if (ndij == 4) then
             if (isp == 1) then
               dij = aij(iatom,klmn,3) ! up-down
-              if (ilmn .GT. jlmn) dij = CONJG(dij)
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
               dcpi = CMPLX(bcp(iatom,1)%dcp(1,bdir,ilmn),bcp(iatom,1)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(kcp(iatom,2)%dcp(1,gdir,jlmn),kcp(iatom,2)%dcp(2,gdir,jlmn))
             else
               dij = aij(iatom,klmn,4) ! down-up
-              if (ilmn .GT. jlmn) dij = CONJG(dij)
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
               dcpi = CMPLX(bcp(iatom,2)%dcp(1,bdir,ilmn),bcp(iatom,2)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(kcp(iatom,1)%dcp(1,gdir,jlmn),kcp(iatom,1)%dcp(2,gdir,jlmn))
             end if
@@ -1624,13 +1627,30 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
       do ilmn = 1, pawtab(itypat)%lmn_size
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
+          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
+          dij = aij(iatom,klmn,isp)
           cpi =  CMPLX(bcp(iatom,isp)%cp(1,ilmn),bcp(iatom,isp)%cp(2,ilmn))
           cpj =  CMPLX(kcp(iatom,isp)%cp(1,jlmn),kcp(iatom,isp)%cp(2,jlmn))
-          dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
           tt = tt + CONJG(cpi)*dij*cpj
+          if (ndij == 4) then
+            if (isp == 1) then
+              dij = aij(iatom,klmn,3) ! up-down
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
+              cpi = CMPLX(bcp(iatom,1)%cp(1,ilmn),bcp(iatom,1)%cp(2,ilmn))
+              cpj = CMPLX(kcp(iatom,2)%cp(1,jlmn),kcp(iatom,2)%cp(2,jlmn))
+            else
+              dij = aij(iatom,klmn,4) ! down-up
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
+              cpi = CMPLX(bcp(iatom,2)%cp(1,ilmn),bcp(iatom,2)%cp(2,ilmn))
+              cpj = CMPLX(kcp(iatom,1)%cp(1,jlmn),kcp(iatom,1)%cp(2,jlmn))
+            end if
+            tt = tt + CONJG(cpi)*cpj*dij
+          end if
         end do !jlmn
       end do !ilmn
     end do ! isp
