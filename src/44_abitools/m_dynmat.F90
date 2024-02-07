@@ -5198,7 +5198,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,timdisp,qphon)
 !Now, take into account the permutation of (i1pert,i1dir)
 !and (i2pert,i2dir)
 
- if (.not.(timdisp==1.and.sqrt(sum(qphon**2))>tol8)) then
+! if (.not.(timdisp==1.and.sqrt(sum(qphon**2))>tol8)) then
    do i1pert = 1, mpert
      do i2pert = 1, mpert
        do i3pert = 1, mpert
@@ -5223,7 +5223,7 @@ subroutine sylwtens(indsym,mpert,natom,nsym,rfpert,symrec,symrel,timdisp,qphon)
        end do
      end do
    end do
- end if
+! end if
 
  rfpert(:,:,:,:,:,:) = pertsy(:,:,:,:,:,:)
 

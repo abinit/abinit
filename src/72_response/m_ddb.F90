@@ -111,6 +111,7 @@ module m_ddb
   real(dp) :: gprim(3,3)
   real(dp) :: acell(3)
 
+
   ! Many of these variables should become private so that one can refactor the ddb_t implementation
   integer,allocatable :: flg(:,:)
   ! flg(msize,nblok)
@@ -130,6 +131,11 @@ module m_ddb
   real(dp),allocatable :: amu(:)
   ! amu(ntypat)
   ! Mass of the atoms (atomic mass unit)
+
+  real(dp),allocatable :: omega(:,:)
+  ! omega(3,nblok)
+  ! Frequency of the perturbations
+  ! Three possible frequencies can be specified for 3rd order derivatives.
 
   real(dp),allocatable :: qpt(:,:)
   ! qpt(9,nblok)
@@ -168,6 +174,9 @@ module m_ddb
 
     procedure :: copy => ddb_copy
      ! Copy the object.
+
+    procedure :: set_omega => ddb_set_omega
+     ! Set the frequency
 
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
@@ -365,6 +374,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, msize)
 
  call matr3inv(ddb%rprim, ddb%gprim)
 
+ ddb%omega(:,:) = zero
  ddb%qpt(:,:) = zero
  ddb%nrm(:,:) = one
  ddb%typ(:) = one
@@ -398,6 +408,7 @@ subroutine ddb_free(ddb)
  ! real
  ABI_SFREE(ddb%amu)
  ABI_SFREE(ddb%qpt)
+ ABI_SFREE(ddb%omega)
  ABI_SFREE(ddb%nrm)
  ABI_SFREE(ddb%kpt)
  ABI_SFREE(ddb%val)
@@ -444,6 +455,7 @@ subroutine ddb_copy(iddb, oddb)
  call alloc_copy(iddb%typ, oddb%typ)
  call alloc_copy(iddb%amu, oddb%amu)
  call alloc_copy(iddb%nrm, oddb%nrm)
+ call alloc_copy(iddb%omega, oddb%omega)
  call alloc_copy(iddb%qpt, oddb%qpt)
  call alloc_copy(iddb%val, oddb%val)
 
@@ -500,6 +512,7 @@ subroutine ddb_malloc(ddb, msize, nblok, natom, ntypat, mpert, nkpt, nband)
  ! real
  ABI_MALLOC(ddb%amu, (ntypat))
  ABI_MALLOC(ddb%nrm, (3, nblok))
+ ABI_MALLOC(ddb%omega, (3, nblok))
  ABI_MALLOC(ddb%qpt, (9, nblok))
  ABI_MALLOC(ddb%val, (2, msize, nblok))
  ddb%val = huge(one)
@@ -550,6 +563,44 @@ subroutine ddb_set_qpt(ddb, iblok, qpt, qpt2, qpt3)
  if (present(qpt3)) ddb%qpt(7:9,iblok) = qpt3(1:3)
 
 end subroutine ddb_set_qpt
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_ddb/ddb_set_omega
+!! NAME
+!! ddb_set_omega
+!!
+!! FUNCTION
+!!  Set the q-point wavevector for a certain block.
+!!  In case of 3rd order derivatives, three q-points need to be specified
+!!  with the constrain q1 + q2 + q3 = 0.
+!!
+!! INPUTS
+!!  iblok=index of the block being set.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine ddb_set_omega(ddb, iblok, omega, omega2, omega3)
+
+!Arguments ------------------------------------
+!array
+ class(ddb_type),intent(inout) :: ddb
+ real(dp), intent(in) :: omega
+ real(dp), intent(in),optional :: omega2
+ real(dp), intent(in),optional :: omega3
+!scalars
+ integer,intent(in) :: iblok
+
+! ************************************************************************
+
+ ddb%omega(1,iblok) = omega
+ if (present(omega2)) ddb%omega(2,iblok) = omega2
+ if (present(omega3)) ddb%omega(3,iblok) = omega3
+
+end subroutine ddb_set_omega
 !!***
 
 !----------------------------------------------------------------------
@@ -887,6 +938,7 @@ subroutine ddb_bcast(ddb, master, comm)
  call xmpi_bcast(ddb%typ, master, comm, ierr)
  call xmpi_bcast(ddb%amu, master, comm, ierr)
  call xmpi_bcast(ddb%nrm, master, comm, ierr)
+ call xmpi_bcast(ddb%omega, master, comm, ierr)
  call xmpi_bcast(ddb%qpt, master, comm, ierr)
  call xmpi_bcast(ddb%val, master, comm, ierr)
 
@@ -1285,12 +1337,13 @@ end subroutine gamma9
 !! SOURCE
 
 subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
-                          blkval2,kpt) !optional
+                          blkval2,kpt,ddb_version) !optional
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mband,mpert,msize,nkpt,nunit
- integer, intent(in) :: iblok
+ integer,intent(in) :: iblok
+ integer,intent(in),optional :: ddb_version 
  !logical, intent(in), optional :: eig2d
  class(ddb_type),intent(inout) :: ddb
 !arrays
@@ -1299,6 +1352,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
 !Local variables -------------------------
 !scalars
+ integer, parameter :: cvrsio9_new=20240201
  integer :: band,iband,idir1,idir2,idir3,ii,ikpt,index,ipert1,ipert2,ipert3,nelmts
  logical :: eig2d_
  real(dp) :: ai,ar
@@ -1363,6 +1417,11 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ! Read the phonon wavevector
    read(nunit, '(4x,3es16.8,f6.1)' )(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
+   ! Read the perturbation frequency
+   if (ddb_version>=cvrsio9_new) then
+     read(nunit, '(10x,1es16.8)' ) ddb%omega(1,iblok)
+   end if
+
    ! Read every element
    do ii=1,nelmts
      read(nunit,*)idir1,ipert1,idir2,ipert2,ar,ai
@@ -1388,6 +1447,13 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    read(nunit,'(4x,3es16.8,f6.1)')(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
+
+   ! Read the perturbation frequency
+   if (ddb_version>=cvrsio9_new) then
+     read(nunit, '(10x,1es16.8)' ) ddb%omega(1,iblok)
+     read(nunit, '(10x,1es16.8)' ) ddb%omega(2,iblok)
+     read(nunit, '(10x,1es16.8)' ) ddb%omega(3,iblok)
+   end if
 
    ! Read every element
    do ii=1,nelmts
@@ -1652,6 +1718,7 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
  integer :: iblok,isym
  integer :: nsize,timrev
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
+ integer :: ddb_version
  real(dp),parameter :: tolsym8=tol8
  character(len=500) :: msg
 !arrays
@@ -1677,6 +1744,7 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
  nsym = ddb_hdr%nsym
  acell = ddb_hdr%acell
  rprim = ddb_hdr%rprim
+ ddb_version = ddb_hdr%ddb_version
 
  amu(:) = ddb_hdr%amu(1:ntypat)
  typat(:) = ddb_hdr%typat(1:natom)
@@ -1718,7 +1786,8 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
  call wrtout(std_out,msg)
 
  do iblok=1,ddb%nblok
-   call ddb%read_block(iblok,mband,mpert,msize,nkpt,ddbun)
+   call ddb%read_block(iblok,mband,mpert,msize,nkpt,ddbun,&
+ & ddb_version=ddb_version)
 
    if (raw_ == 1) cycle
 
@@ -3528,6 +3597,9 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    ! Write the phonon wavevector
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
 
+   ! Write the perturbation frequency
+   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+
    ! Write the matrix elements
    if(choice==2)then
      ii=0
@@ -3554,6 +3626,11 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=4,6),ddb%nrm(2,iblok)
    write(nunit, '(a,3es16.8,f6.1)' )'    ',(ddb%qpt(ii,iblok),ii=7,9),ddb%nrm(3,iblok)
+
+   ! Write the perturbation frequency
+   write(nunit, '(a,1es16.8)' )' frequency',ddb%omega(1,iblok)
+   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(2,iblok)
+   write(nunit, '(a,1es16.8)' )'          ',ddb%omega(3,iblok)
 
    ! Write the matrix elements
    if(choice==2)then
@@ -4416,6 +4493,9 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
      end do
      do ii=1,3
        ddb%nrm(ii,iblok) = ddb2%nrm(ii,iblok2)
+     end do
+     do ii=1,3
+       ddb%omega(ii,iblok) = ddb2%omega(ii,iblok2)
      end do
      do ii=1,msize
        if(ddb2%flg(ii,iblok2) == 1)then
