@@ -226,6 +226,7 @@ module m_xg
   public :: xgBlock_reshape
   public :: xgBlock_reshape_spinor
   public :: xgBlock_print
+  public :: xgBlock_getId
   public :: xgBlock_copy_from_gpu
   public :: xgBlock_copy_to_gpu
   public :: xg_finalize
@@ -4697,7 +4698,8 @@ contains
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
-      fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
+      !fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
+      fstring = '(1x,'//trim(adjustl(ccols))//'f24.14)'
       do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
@@ -4709,12 +4711,48 @@ contains
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
-      fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
+      !fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
+      fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'f24.14))'
       do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecC(i,j), j = 1, xgBlock%cols) /)
       end do
     end select
   end subroutine xgBlock_print
+  !!***
+
+  !!****f* m_xg/xgBlock_getid
+  !!
+  !! NAME
+  !! xgBlock_getid
+
+  function xgBlock_getid(xgBlock,do_mpi_sum) result (id)
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    logical, intent(in),optional :: do_mpi_sum
+
+    real(dp) :: id
+    integer :: ierr
+    logical :: do_mpi_sum_
+
+    select case(xgBlock%space)
+      case (SPACE_R)
+        id = sum(abs(xgBlock%vecR(:,:)))
+      case (SPACE_CR)
+        !if (xgBlock%me_g0<0) then
+        !  ABI_ERROR("xgBlock me_g0 is not initialized")
+        !end if
+        id = 2*sum(abs(xgBlock%vecR(:,:)))
+        !if (xgBlock%me_g0==1) then
+        !  id = id - sum(abs(xgBlock%vecR(1,:)))
+        !end if
+      case (SPACE_C)
+        id = sum(abs(dble(xgBlock%vecC(:,:))))+sum(abs(dimag(xgBlock%vecC(:,:))))
+    end select
+    do_mpi_sum_=.true.
+    if (present(do_mpi_sum)) do_mpi_sum_=do_mpi_sum
+    if (do_mpi_sum_) call xmpi_sum(id,xgBlock%spacedim_comm,ierr)
+
+  end function xgBlock_getid
   !!***
 
   !!****f* m_xg/xg_finalize
