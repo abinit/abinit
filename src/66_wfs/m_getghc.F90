@@ -388,14 +388,19 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
    ndat_                 = ndat
    istwf_k_              = gs_ham%istwf_k
-   ! TO DO: implement the following for nproc_fft>1
    double_rfft_trick = istwf_k_==2.and.modulo(ndat,2)==0.and.k1_eq_k2
-   double_rfft_trick = double_rfft_trick.and.mpi_enreg%nproc_fft==1.and.(.not.have_to_reequilibrate)
+   double_rfft_trick = double_rfft_trick.and.(.not.have_to_reequilibrate)
    double_rfft_trick = double_rfft_trick.and.mpi_enreg%paral_kgb==1
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
+   ! For npfft>1, we don't use the trick but MPI-FFT does not handle istwf_k==2,
+   ! so we have to use istwf_k=1 locally and build cwavef_fft in a similar way
    if (double_rfft_trick) then
      istwf_k_ = 1
-     ndat_    = ndat / 2
+     if (mpi_enreg%nproc_fft==1) then
+       ndat_ = ndat / 2
+     else
+       ndat_ = ndat
+     end if
      kg_k_fft => bandfft_kpt(ikpt_this_proc)%kg_k_gather_sym(:,:)
      npw_fft=2*npw_k1
      if (mpi_enreg%me_g0_fft==1) npw_fft=npw_fft-1 ! Do not include G=(0,0,0) twice
@@ -1072,8 +1077,6 @@ end subroutine getghc
 !!
 !! SOURCE
 !!
-!! TODO To implement npfft>1
-
 subroutine cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
 
 !Arguments ------------------------------------
@@ -1087,10 +1090,6 @@ subroutine cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
 !scalars
  integer :: idat,i0,ib1,ib2,npw_fft
 
- if (mpi_enreg%nproc_fft>1) then
-   ABI_BUG('double rfft trick not implemented yet with npfft>1')
- end if
-
  npw_fft=2*npw_k
  i0=1
  if (mpi_enreg%me_g0_fft==1) then! Do not include G=(0,0,0) twice
@@ -1098,27 +1097,45 @@ subroutine cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
    i0=2
  end if
 
- if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
-   ABI_BUG('wrong size for cwavef')
+ if (mpi_enreg%nproc_fft==1) then
+   if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
+     ABI_BUG('wrong size for cwavef')
+   end if
+ else
+   if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*ndat) then
+     ABI_BUG('wrong size for cwavef')
+   end if
  end if
  if (size(cwavef_fft,1)/=2.or.size(cwavef_fft,2)/=npw_fft*ndat) then
    ABI_BUG('wrong size for cwavef_fft')
  end if
 
- do idat=1,ndat
-   ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
-   ib2=(idat-1)*2*npw_k ! band shift for cwavef
-   ! E(G) = C(G) + i D(G)
-   cwavef_fft(1,1+ib1:npw_k+ib1) = cwavef(1,1+ib2      :  npw_k+ib2) &
-                                  -cwavef(2,1+npw_k+ib2:2*npw_k+ib2)
-   cwavef_fft(2,1+ib1:npw_k+ib1) = cwavef(2,1+ib2      :  npw_k+ib2) &
-                                  +cwavef(1,1+npw_k+ib2:2*npw_k+ib2)
-   ! E(-G) = C(G)^* + i D(G)^* (G/=0)
-   cwavef_fft(1,1+npw_k+ib1:npw_fft+ib1) = cwavef(1,i0      +ib2:  npw_k+ib2) &
-                                          +cwavef(2,i0+npw_k+ib2:2*npw_k+ib2)
-   cwavef_fft(2,1+npw_k+ib1:npw_fft+ib1) =-cwavef(2,i0      +ib2:  npw_k+ib2) &
-                                          +cwavef(1,i0+npw_k+ib2:2*npw_k+ib2)
- end do
+ if (mpi_enreg%nproc_fft==1) then
+   do idat=1,ndat
+     ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+     ib2=(idat-1)*2*npw_k ! band shift for cwavef
+     ! E(G) = C(G) + i D(G)
+     cwavef_fft(1,1+ib1:npw_k+ib1) = cwavef(1,1+ib2      :  npw_k+ib2) &
+                                    -cwavef(2,1+npw_k+ib2:2*npw_k+ib2)
+     cwavef_fft(2,1+ib1:npw_k+ib1) = cwavef(2,1+ib2      :  npw_k+ib2) &
+                                    +cwavef(1,1+npw_k+ib2:2*npw_k+ib2)
+     ! E(-G) = C(G)^* + i D(G)^* (G/=0)
+     cwavef_fft(1,1+npw_k+ib1:npw_fft+ib1) = cwavef(1,i0      +ib2:  npw_k+ib2) &
+                                            +cwavef(2,i0+npw_k+ib2:2*npw_k+ib2)
+     cwavef_fft(2,1+npw_k+ib1:npw_fft+ib1) =-cwavef(2,i0      +ib2:  npw_k+ib2) &
+                                            +cwavef(1,i0+npw_k+ib2:2*npw_k+ib2)
+   end do
+ else
+   do idat=1,ndat
+     ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+     ib2=(idat-1)*npw_k ! band shift for cwavef
+     ! E(G) = C(G)
+     cwavef_fft(:,1+ib1:npw_k+ib1) = cwavef(:,1+ib2      :  npw_k+ib2)
+     ! E(-G) = C(G)^*
+     cwavef_fft(1,1+npw_k+ib1:npw_fft+ib1) =  cwavef(1,i0+ib2:npw_k+ib2)
+     cwavef_fft(2,1+npw_k+ib1:npw_fft+ib1) = -cwavef(2,i0+ib2:npw_k+ib2)
+   end do
+ end if
 
 end subroutine cwavef_double_rfft_trick_pack
 !!***
@@ -1159,8 +1176,6 @@ end subroutine cwavef_double_rfft_trick_pack
 !!
 !! SOURCE
 !!
-!! TODO To implement npfft>1
-
 subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k)
 
 !Arguments ------------------------------------
@@ -1174,10 +1189,6 @@ subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_
 !scalars
  integer :: idat,i0,ib1,ib2,npw_fft
 
- if (mpi_enreg%nproc_fft>1) then
-   ABI_BUG('double rfft trick not implemented yet with npfft>1')
- end if
-
  npw_fft=2*npw_k
  i0=1
  if (mpi_enreg%me_g0_fft==1) then! Do not include G=(0,0,0) twice
@@ -1185,39 +1196,61 @@ subroutine cwavef_double_rfft_trick_unpack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_
    i0=2
  end if
 
- if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
-   ABI_BUG('wrong size for cwavef')
+ if (mpi_enreg%nproc_fft==1) then
+   if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*2*ndat) then
+     ABI_BUG('wrong size for cwavef')
+   end if
+ else
+   if (size(cwavef,1)/=2.or.size(cwavef,2)/=npw_k*ndat) then
+     ABI_BUG('wrong size for cwavef')
+   end if
  end if
  if (size(cwavef_fft,1)/=2.or.size(cwavef_fft,2)/=npw_fft*ndat) then
    ABI_BUG('wrong size for cwavef_fft')
  end if
 
- do idat=1,ndat
-   ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
-   ib2=(idat-1)*2*npw_k ! band shift for cwavef
-   ! C(G) = ( E(G) + E(-G)^* ) / 2 (factor 1/2 will be applied later)
-   cwavef(1,i0+ib2:npw_k+ib2) = cwavef_fft(1,i0       +ib1:npw_k +ib1) & !+Re(E( G))
-                               +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
-   cwavef(2,i0+ib2:npw_k+ib2) = cwavef_fft(2,i0       +ib1:npw_k +ib1) & !+Im(E( G))
-                               -cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !-Im(E(-G))
-   ! D(G) = ( iE(-G)^* - iE(G) ) / 2 (factor 1/2 will be applied later)
-   cwavef(1,i0+npw_k+ib2:2*npw_k+ib2) = cwavef_fft(2,i0       +ib1:npw_k +ib1) & !+Im(E( G))
-                                       +cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !+Im(E(-G))
-   cwavef(2,i0+npw_k+ib2:2*npw_k+ib2) =-cwavef_fft(1,i0       +ib1:npw_k +ib1) & !-Re(E( G))
-                                       +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
-   if (mpi_enreg%me_g0_fft==1) then
-     ! Compute C(G=0) and D(G=0) and multiply by 2 as we apply 1/2 to the whole array shortly afterwards
-     ! C(G=0) = Re(E(G=0))
-     cwavef(1,1+ib2) = two*cwavef_fft(1,1+ib1)
-     cwavef(2,1+ib2) = zero
-     ! D(G=0) = Im(E(G=0))
-     cwavef(1,1+npw_k+ib2) = two*cwavef_fft(2,1+ib1)
-     cwavef(2,1+npw_k+ib2) = zero
-   end if
+ if (mpi_enreg%nproc_fft==1) then
 
- end do
+   do idat=1,ndat
+     ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+     ib2=(idat-1)*2*npw_k ! band shift for cwavef
+     ! C(G) = ( E(G) + E(-G)^* ) / 2 (factor 1/2 will be applied later)
+     cwavef(1,i0+ib2:npw_k+ib2) = cwavef_fft(1,i0      +ib1:npw_k  +ib1) & !+Re(E( G))
+                                 +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
+     cwavef(2,i0+ib2:npw_k+ib2) = cwavef_fft(2,i0      +ib1:npw_k  +ib1) & !+Im(E( G))
+                                 -cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !-Im(E(-G))
+     ! D(G) = ( iE(-G)^* - iE(G) ) / 2 (factor 1/2 will be applied later)
+     cwavef(1,i0+npw_k+ib2:2*npw_k+ib2) = cwavef_fft(2,i0      +ib1:npw_k  +ib1) & !+Im(E( G))
+                                         +cwavef_fft(2,1 +npw_k+ib1:npw_fft+ib1)   !+Im(E(-G))
+     cwavef(2,i0+npw_k+ib2:2*npw_k+ib2) =-cwavef_fft(1,i0      +ib1:npw_k  +ib1) & !-Re(E( G))
+                                         +cwavef_fft(1,1 +npw_k+ib1:npw_fft+ib1)   !+Re(E(-G))
+     if (mpi_enreg%me_g0_fft==1) then
+       ! Compute C(G=0) and D(G=0) and multiply by 2 as we apply 1/2 to the whole array shortly afterwards
+       ! C(G=0) = Re(E(G=0))
+       cwavef(1,1+ib2) = two*cwavef_fft(1,1+ib1)
+       cwavef(2,1+ib2) = zero
+       ! D(G=0) = Im(E(G=0))
+       cwavef(1,1+npw_k+ib2) = two*cwavef_fft(2,1+ib1)
+       cwavef(2,1+npw_k+ib2) = zero
+     end if
 
- cwavef(:,:) = half*cwavef(:,:)
+   end do
+
+   cwavef(:,:) = half*cwavef(:,:)
+
+ else
+
+   do idat=1,ndat
+     ib1=(idat-1)*npw_fft  ! band shift for cwavef_fft
+     ib2=(idat-1)*npw_k ! band shift for cwavef
+     ! C(G) = E(G)
+     cwavef(:,1+ib2:npw_k+ib2) = cwavef_fft(:,1+ib1:npw_k+ib1)
+     if (i0==2) then
+       cwavef(2,1+ib2) = zero ! This is important, otherwise it is numerically unstable...
+     end if
+   end do
+
+ end if
 
 end subroutine cwavef_double_rfft_trick_unpack
 !!***
@@ -1485,7 +1518,7 @@ end subroutine getghc_nucdip
 !! npw_k=number of planewaves in basis for given k point.
 !! nvloc=number of spin components of vxctaulocal
 !! n4,n5,n6=for dimensionning of vxctaulocal
-!! gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU) 
+!! gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !! vxctaulocal(n4,n5,n6,nvloc,4)= local potential corresponding to the derivative of XC energy with respect to
 !!  kinetic energy density, in real space, on the augmented fft grid.
 !!  This array contains also the gradient of vxctaulocal (gvxctaulocal) in vxctaulocal(:,:,:,:,2:4).

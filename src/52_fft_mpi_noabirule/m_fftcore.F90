@@ -1004,7 +1004,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
            end if
          endif
        else
-         write(msg, '(a,i12,5a)' ) &
+         write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
           'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &         '   for the symmetry number ',isym,ch10,&
