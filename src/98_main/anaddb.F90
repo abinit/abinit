@@ -248,7 +248,8 @@ program anaddb
  ! magnetic penalty are converted to physically relevant ones here. 
  if (abs(inp%magpen) > tol8) then
    call ddb_magpen(ddb, ddb_lw, inp%magpen, inp%mpatpol, inp%mpdir, mpert, & 
- & inp%mpopt, natom, ntypat, inp%prtvol, 1,Crystal%ucvol, inp%timdisp)
+ & inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp,    &
+ & Crystal%xred)
  end if
 
  ! Acoustic Sum Rule
