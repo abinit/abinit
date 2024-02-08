@@ -412,7 +412,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, resid(ib_start), me_g0, comm_bsf)
    else
      call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
+                          eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
    end if
 
    ! Band locking.
