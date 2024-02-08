@@ -356,6 +356,7 @@ P           mkmem9          1
              nkpt7          5
              nkpt8          5
              nkpt9          1
+    nblock_lobpcg           6
 -          npband           2
 -           npfft           2
 -          np_slk          10
@@ -4615,6 +4616,7 @@ P           mkmem9          1
              nkpt7          5
              nkpt8          5
              nkpt9          1
+    nblock_lobpcg           6
 -          npband           2
 -           npfft           2
 -          np_slk          10
