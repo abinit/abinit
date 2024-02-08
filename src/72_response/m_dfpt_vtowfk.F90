@@ -234,7 +234,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  integer :: iband,idir0,ierr,igs,igscq,ii,dim_dcwf,inonsc
  integer :: iband_me,nband_me !, unit_me
  integer :: iorder_cprj,iorder_cprj1,ipw,iscf_mod,ispinor,me,mgscq,nkpt_max
- integer :: option,opt_gvnlx1,quit,test_ddk
+ integer :: option,opt_gvnlx1,quit,test_ddk,ndat
  integer :: tocceig,usedcwavef,ptr,shift_band
  real(dp) :: aa,ai,ar,eig0nk,resid,residk,scprod,energy_factor
  character(len=500) :: message
@@ -308,7 +308,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
    ABI_NVTX_START_RANGE(NVTX_GETGSC)
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
-&   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+&   mgscq,mpi_enreg,dtset%bandpp,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
    ABI_NVTX_END_RANGE()
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
@@ -346,6 +346,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
+ ndat=1;if (mpi_enreg%paral_kgb==1) ndat=mpi_enreg%bandpp
  call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
