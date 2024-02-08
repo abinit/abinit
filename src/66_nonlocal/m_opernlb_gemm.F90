@@ -559,12 +559,10 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
        svectout = svectout + vectin ! TODO understand this
      else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-       !$OMP& MAP(to:vectin,svectout) PRIVATE(i)
-       do i=1, npw*nspinor*ndat
-         svectout(1,i) = svectout(1,i) + vectin(1,i)
-         svectout(2,i) = svectout(2,i) + vectin(2,i)
-       end do
+       !$OMP TARGET DATA USE_DEVICE_PTR(vectin,svectout)
+       call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, &
+       &    c_loc(vectin), 1, c_loc(svectout), 1)
+       !$OMP END TARGET DATA
 #endif
      end if
    end if
