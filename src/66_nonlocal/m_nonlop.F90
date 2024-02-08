@@ -24,6 +24,7 @@ module m_nonlop
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_xomp
  use m_cgtools
  use m_gemm_nonlop
  use m_gemm_nonlop_gpu
@@ -36,6 +37,8 @@ module m_nonlop
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy
  use m_nonlop_pl,   only : nonlop_pl
  use m_nonlop_ylm,  only : nonlop_ylm
+
+ use, intrinsic :: iso_c_binding, only: c_loc
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -737,6 +740,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    end if
 
  else
+
+   if(xomp_target_is_present(c_loc(vectin))) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE FROM(vectin,vectout,svectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+
    !$omp parallel do default(shared), &
    !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
    !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
@@ -793,7 +803,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &       ntypat_,only_SO_,phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,hamk%ucvol,&
 &       vectin(:,b0:e0),vectout(:,b1:e1))
 !    Spherical Harmonics version
-     else if (hamk%gpu_option==ABI_GPU_DISABLED) then
+     else if (hamk%gpu_option==ABI_GPU_DISABLED .or. hamk%gpu_option==ABI_GPU_OPENMP) then
        if (present(cprjin_left).and.present(enlout_im)) then
          call nonlop_ylm(atindx1_,choice,cpopt,cprjin_(:,b3:e3),dimenl1,dimenl2_,dimekbq,&
 &         dimffnlin,dimffnlout,enl_,enlout(b4:e4),ffnlin_,ffnlout_,hamk%gprimd,idir,&
@@ -825,6 +835,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    end do
    !$omp end parallel do
+
+   if(xomp_target_is_present(c_loc(vectin))) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(vectin,vectout,svectout) IF(hamk%gpu_option==ABI_GPU_OPENMP)
+#endif
+   end if
+
  end if
 
 !Release temporary storage
