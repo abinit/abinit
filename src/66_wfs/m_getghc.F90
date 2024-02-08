@@ -43,6 +43,10 @@ module m_getghc
  use m_fft,         only : fourwf
  use m_getghc_ompgpu,  only : getghc_ompgpu
 
+#ifdef HAVE_FFTW3_THREADS
+ use m_fftw3,       only : fftw3_spawn_threads_here, fftw3_use_lib_threads 
+#endif
+
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -1792,12 +1796,8 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
  integer :: lastband
  integer :: spacedim, spacedim_prj
 #ifdef HAVE_OPENMP
- logical :: is_nested
-#ifdef HAVE_FFTW3_THREADS
- logical ::  fftw3_use_lib_threads_sav
+ logical :: is_nested,fftw3_use_lib_threads_sav
 #endif
-#endif
-
  integer :: select_k_default
 
  ! *************************************************************************
@@ -1810,7 +1810,8 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 
  ! Disabling multithreading for GPU variants (getghc_ompgpu is not thread-safe for now)
  !$omp parallel default (none) &
- !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt,firstprj,lastprj,is_nested,usegvnlxc), &
+ !$omp& private(ithread,nthreads,chunk,firstband,lastband,residuchunk,firstelt,lastelt), &
+ !$omp& private(firstprj,lastprj,is_nested,usegvnlxc,fftw3_use_lib_threads_sav), &
  !$omp& shared(cwavef,ghc,gsc, gvnlxc,spacedim,spacedim_prj,ndat,kg_fft_k,kg_fft_kp,gs_ham,cwaveprj,mpi_enreg), &
  !$omp& shared(gemm_nonlop_use_gemm), &
  !$omp& firstprivate(cpopt,lambda,prtvol,sij_opt,tim_getghc,type_calc,select_k_default) &
