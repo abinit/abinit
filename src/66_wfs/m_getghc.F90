@@ -1844,7 +1844,6 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
    firstband = ithread*chunk+1
    lastband = (ithread+1)*chunk
  else
-   fftw3_use_lib_threads_sav=.false.
    firstband = (nthreads-residuchunk)*chunk + ( ithread -(nthreads-residuchunk) )*(chunk+1) +1
    lastband = firstband+chunk
  end if
