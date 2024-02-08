@@ -55,7 +55,7 @@ program mrgdv
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
- integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18)
+ integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt
  character(len=fnlen),allocatable :: v1files(:)
 
 ! *************************************************************************
@@ -187,7 +187,9 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
      call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg("qptopt", qptopt, msg, default=1) == 0, msg)
      write(std_out,"(a)")sjoin(" Downsampling q-mesh with ngqpt:", ltoa(ngqpt))
+     write(std_out,"(a)")sjoin("                         qptopt:", itoa(qptopt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
      dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
@@ -195,7 +197,7 @@ program mrgdv
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      if (prtvol > 0) call dvdb%print(prtvol=prtvol)
      call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
-     call dvdb%qdownsample(dump_file, ngqpt, comm)
+     call dvdb%qdownsample(dump_file, qptopt, ngqpt, comm)
      call dvdb%free()
 
    !case ("convert")

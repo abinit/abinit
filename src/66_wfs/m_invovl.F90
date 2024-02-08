@@ -33,6 +33,7 @@ MODULE m_invovl
  use m_xmpi
  use m_xomp
  use m_abicore
+ use m_abi_linalg
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
@@ -1415,11 +1416,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  !$OMP TARGET PARALLEL DO PRIVATE(iproj) MAP(to:cwavef,sm1cwavef)
-  do iproj=1, ndat*nspinor*npw
-    sm1cwavef(1,iproj) = cwavef(1,iproj) + sm1cwavef(1,iproj)
-    sm1cwavef(2,iproj) = cwavef(2,iproj) + sm1cwavef(2,iproj)
-  end do
+  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1)
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)

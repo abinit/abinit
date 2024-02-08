@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 19 Feb 2023.
-- ( at 18h18 )
+.Starting date : Tue 25 Apr 2023.
+- ( at 07h23 )
   
 - input  file    -> /Users/gmatteo/git_repos/abinit_gwr/_build/tests/Test_suite/paral_t79_MPI8/t79.abi
 - output file    -> t79_MPI8.abo
@@ -624,15 +624,9 @@ meta: {optdriver: 6, }
    CBM:     0.456 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
  Direct gap:         4.425 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
-
- ==== FFT mesh for Green's function ====
-  FFT mesh divisions ........................    10   10   10
-  Augmented FFT divisions ...................    10   10   10
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 - FFT uc_batch_size: 2
 - FFT sc_batch_size: 2
- ==== Info on the GWR object ====
+ ==== Info on the gwr_t object ====
 
 --- !GWR_params
 iteration_state: {dtset: 3, }
@@ -651,6 +645,7 @@ gw_icutcoul: 6
 green_mpw: 259
 tchi_mpw: 92
 g_ngfft: [10, 10, 10, 10, 10, 10, ]
+gwr_boxcutmin:   1.00000000E+00
 P gwr_np_kgts: [2, 2, 2, 1, ]
 P np_kibz: [1, 1, 1, 1, 2, 1, 1, 1, ]
 P np_qibz: [1, 1, 1, 1, 2, 1, 1, 1, ]
@@ -675,12 +670,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Using KS orbitals and KS energies...
 
 
- ==== FFT mesh for chi0 head/wings computation ====
-  FFT mesh divisions ........................    18   18   18
-  Augmented FFT divisions ...................    19   19   18
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
-
  Head of the irreducible polarizability for q --> 0
  q0_len: 1.000000E-03 (Bohr^-1)
    iomega (eV)         [100]         [010]         [001]             x             y             z
@@ -695,12 +684,6 @@ Minimax imaginary tau/omega mesh: !Tabular | # tau, weight(tau), omega, weight(o
  Computing diagonal matrix elements of Sigma_x
  Using KS orbitals and KS energies...
 
-
- ==== FFT mesh for Sigma_x ====
-  FFT mesh divisions ........................    18   18   18
-  Augmented FFT divisions ...................    19   19   18
-  FFT algorithm .............................   312
-  FFT cache size ............................    16
 
 
  Building Green's functions from KS orbitals and KS energies...
@@ -930,6 +913,22 @@ data: !Tabular |
         4   -3.969  -13.891  -18.012    3.285    0.810   -0.676   -0.676   -4.645    2.000
         5    0.456  -11.185   -6.711   -3.786    0.846    0.582    0.582    1.038    0.000
 ...
+
+
+ === Kohn-Sham gaps and band edges from IBZ mesh ===
+ Indirect band gap semiconductor
+ Fundamental gap:     0.913 (eV)
+   VBM:    -0.456 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     0.456 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         4.425 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+
+
+ === QP gaps and band edges taking into account Sigma_nk corrections for 2 k-points ===
+ Indirect band gap semiconductor
+ Fundamental gap:     1.660 (eV)
+   VBM:    -0.622 (eV) at k: [ 0.0000E+00,  0.0000E+00,  0.0000E+00]
+   CBM:     1.038 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
+ Direct gap:         5.683 (eV) at k: [ 5.0000E-01,  5.0000E-01,  0.0000E+00]
 
 
 == END DATASET(S) ==============================================================

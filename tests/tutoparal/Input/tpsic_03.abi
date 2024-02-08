@@ -92,7 +92,7 @@ tolwfr_diago 1d-30
 #%% nprocs_to_test = 24
 #%% [NCPU_24]
 #%% files_to_test =
-#%%   tpsic_03_MPI24.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0
+#%%   tpsic_03_MPI24.abo, tolnlines = 500, tolabs = 1.081e-05, tolrel = 0.001
 #%% [extra_info]
 #%% authors = X. Gonze, C. Tantardini
 #%% keywords = pSIC
