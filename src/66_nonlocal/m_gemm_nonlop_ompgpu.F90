@@ -247,7 +247,7 @@ contains
 ! *************************************************************************
 
   if(current_ikpt_in_gpu == ikpt) then
-    msg="GPU nonlop arrays are already initialized for K-Point %d. Redundant call"
+    msg="GPU nonlop arrays are already initialized for K-Point. Redundant call"
     ABI_ERROR(msg)
   end if
   if(gemm_nonlop_kpt(ikpt)%nprojs == -1) then
