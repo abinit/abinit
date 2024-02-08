@@ -177,6 +177,7 @@ type, public :: dataset_type
  integer :: eph_ahc_type = 1
  integer :: eph_intmeth = 2
  integer :: eph_frohlichm = 0
+ integer :: eph_frohl_ntheta = 0
  integer :: eph_phrange(2) = 0
 
  integer :: eph_prtscratew = 0
@@ -293,6 +294,7 @@ type, public :: dataset_type
  integer :: gwr_rpa_ncut = 5
  real(dp) :: gwr_boxcutmin = one
  real(dp) :: gwr_max_hwtene = -one
+ real(dp) :: gwr_regterm = -one
  character(len=fnlen) :: gwr_task = "None"
 !H
  integer :: hmcsst
@@ -890,6 +892,7 @@ type, public :: dataset_type
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
+ real(dp) :: vloc_rcut = 6.0_dp
  real(dp) :: wfmix
  real(dp) :: wtq
  real(dp) :: wvl_hgrid
@@ -1500,6 +1503,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%eph_extrael        = dtin%eph_extrael
  dtout%eph_fermie         = dtin%eph_fermie
  dtout%eph_frohlichm      = dtin%eph_frohlichm
+ dtout%eph_frohl_ntheta   = dtin%eph_frohl_ntheta
  dtout%eph_fsmear         = dtin%eph_fsmear
  dtout%eph_fsewin         = dtin%eph_fsewin
  dtout%eph_ecutosc        = dtin%eph_ecutosc
@@ -1663,6 +1667,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gwr_rpa_ncut         = dtin%gwr_rpa_ncut
  dtout%gwr_boxcutmin        = dtin%gwr_boxcutmin
  dtout%gwr_max_hwtene       = dtin%gwr_max_hwtene
+ dtout%gwr_regterm          = dtin%gwr_regterm
  dtout%gwr_task             = dtin%gwr_task
  dtout%gwr_tolqpe           = dtin%gwr_tolqpe
  dtout%gwr_nstep            = dtin%gwr_nstep
@@ -2172,6 +2177,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%vdw_tol            = dtin%vdw_tol
  dtout%vdw_tol_3bt        = dtin%vdw_tol_3bt
  dtout%vis                = dtin%vis
+ dtout%vloc_rcut          = dtin%vloc_rcut
  dtout%wfmix              = dtin%wfmix
  dtout%wfk_task           = dtin%wfk_task
  dtout%wtq                = dtin%wtq
@@ -3327,6 +3333,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_bands efmas_calc_dirs efmas_deg efmas_deg_tol'
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
+ list_vars=trim(list_vars)//' eph_frohl_ntheta'
  list_vars=trim(list_vars)//' eph_doping eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
  list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_ahc_type'
  ! XG20200321, please provide testing for eph_np_pqbks
@@ -3375,7 +3382,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gwls_list_proj_freq gwls_nseeds gwls_n_proj_freq gwls_recycle'
  list_vars=trim(list_vars)//' gwls_first_seed gwls_model_parameter gwls_npt_gauss_quad'
  list_vars=trim(list_vars)//' gwls_diel_model gwls_print_debug gwls_band_index gwls_exchange gwls_correlation'
- list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_np_kgts gwr_nstep gwr_ntau'
+ list_vars=trim(list_vars)//' gwr_boxcutmin gwr_chi_algo gwr_max_hwtene gwr_regterm gwr_np_kgts gwr_nstep gwr_ntau'
  list_vars=trim(list_vars)//' gwr_rpa_ncut gwr_sigma_algo gwr_task gwr_tolqpe gwr_ucsc_batch'
 !H
  list_vars=trim(list_vars)//' hmcsst hmctt hyb_mixing hyb_mixing_sr hyb_range_dft hyb_range_fock'
@@ -3538,7 +3545,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' vdw_df_qratio vdw_df_rcut vdw_df_rsoft'
  list_vars=trim(list_vars)//' vdw_df_threshold vdw_df_tolerance'
  list_vars=trim(list_vars)//' vdw_df_tweaks vdw_df_zab'
- list_vars=trim(list_vars)//' vel vel_cell vis vprtrb'
+ list_vars=trim(list_vars)//' vel vel_cell vis vloc_rcut vprtrb'
 !W
  list_vars=trim(list_vars)//' wfinit wfmix wfoptalg wtatcon wtk wtq'
  list_vars=trim(list_vars)//' wvl_bigdft_comp wvl_crmult wvl_frmult wvl_hgrid wvl_ngauss wvl_nprccg'

@@ -1184,11 +1184,16 @@ subroutine psp8lo(amesh, epsatm, mmax, mqgrid, qgrid, q2vq, rad, vloc, yp1, ypn,
 
 !Choose submultiple of input mesh
  mesh_mult=int(amesh/amesh_new) + 1
+ !mesh_mult = 1  ! DEBUG
  mmax_new=mesh_mult*(mmax-1)+1
  amesh_new=amesh/dble(mesh_mult)
 
  ABI_MALLOC(rad_new,(mmax_new))
  ABI_MALLOC(rvlpz_new,(mmax_new))
+
+ !print *, "in psp8lo with mesh_mult:", mesh_mult
+ !print *, "in psp8lo with mmax_new:", mmax_new
+ !print *, "in psp8lo with amesh_new:", amesh_new
 
  if(mesh_mult==1) then
    rad_new(:)=rad(:)
