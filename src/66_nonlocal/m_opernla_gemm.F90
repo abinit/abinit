@@ -562,13 +562,11 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
        if(gpu_option == ABI_GPU_DISABLED) then
          gx = gx * 2
        else if(gpu_option == ABI_GPU_OPENMP) then
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-         !$OMP& MAP(to:gx) PRIVATE(i1,i2)
-         do i2=1, nspinor*ndat
-           do i1=1, nprojs
-             gx(1,i1,i2) = gx(1,i1,i2) * 2
-           end do
-         end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET DATA USE_DEVICE_PTR(gx)
+         call abi_gpu_xscal(cplex, nprojs*nspinor*ndat, ctwo, c_loc(gx), 1)
+         !$OMP END TARGET DATA
+#endif
        end if
 
      end if
@@ -581,13 +579,11 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
        if(gpu_option == ABI_GPU_DISABLED) then
          dgxdt = dgxdt * 2
        else if(gpu_option == ABI_GPU_OPENMP) then
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-         !$OMP& MAP(to:dgxdt) PRIVATE(i1,i2)
-         do i2=1, nspinor*ndat
-           do i1=1, ndgxdt*nprojs
-             dgxdt(1,i1,i2) = dgxdt(1,i1,i2) * 2
-           end do
-         end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET DATA USE_DEVICE_PTR(dgxdt)
+         call abi_gpu_xscal(cplex, ndgxdt*nprojs*nspinor*ndat, ctwo, c_loc(dgxdt), 1)
+         !$OMP END TARGET DATA
+#endif
        end if
      end if
    else ! use_distrib
