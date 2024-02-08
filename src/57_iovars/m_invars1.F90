@@ -575,7 +575,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    gpu_option_string = "" ; intarr(1)=0
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),"gpu_option",tread_gpu_option,'INT_OR_KEY',&
 &              key_value=gpu_option_string)
-   if (tread==1) then
+   if (tread_gpu_option==1) then
      if (len(trim(gpu_option_string))>0) then
        call inupper(gpu_option_string)
        if (trim(gpu_option_string)=="GPU_DISABLED") dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
@@ -650,15 +650,18 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 !gpu_option=ABI_GPU_UNKNOWN means undetermined
  do idtset=1,ndtset_alloc
    if (dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
-#if defined HAVE_OPENMP_OFFLOAD
-     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
-#elif defined HAVE_KOKKOS && defined HAVE_YAKL
-     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
-#elif defined HAVE_GPU_CUDA
-     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
-#else
+     !FIXME We may want to have GPU enabled by default if a GPU device is available.
+     !      Now, we use CPU to stay safe, as some code section aren't checked for GPU use yet.
+
+!#if defined HAVE_OPENMP_OFFLOAD
+!     dtsets(idtset)%gpu_option=ABI_GPU_OPENMP
+!#elif defined HAVE_KOKKOS && defined HAVE_YAKL
+!     dtsets(idtset)%gpu_option=ABI_GPU_KOKKOS
+!#elif defined HAVE_GPU_CUDA
+!     dtsets(idtset)%gpu_option=ABI_GPU_LEGACY
+!#else
      dtsets(idtset)%gpu_option=ABI_GPU_DISABLED
-#endif
+!#endif
    end if
  end do
 

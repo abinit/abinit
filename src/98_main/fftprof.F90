@@ -510,8 +510,10 @@ program fftprof
  call destroy_mpi_enreg(MPI_enreg)
 
 #if defined HAVE_GPU_CUDA
- call gpu_linalg_shutdown()
- call unsetdevice_cuda(init_gpu_flavor)
+ if (init_gpu_flavor /= ABI_GPU_DISABLED) then
+   call gpu_linalg_shutdown()
+   call unsetdevice_cuda(init_gpu_flavor)
+ end if
 #endif
 
  call flush_unit(std_out)

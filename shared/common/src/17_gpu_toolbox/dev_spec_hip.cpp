@@ -481,13 +481,13 @@ extern "C" void gpu_managed_ptr_status_(void **gpu_ptr, const char* str)
 
   CHECK_HIP_ERROR(hipPointerGetAttributes(&attributes, *gpu_ptr));
 
-  if(attributes.memoryType == hipMemoryTypeUnified)
+  if(attributes.type == hipMemoryTypeUnified)
   {
     printf("[%s] ptr %p is unified memory, host addr=%p, device addr=%p\n", str, *gpu_ptr,
            attributes.hostPointer,
            attributes.devicePointer);
     fflush(stdout);
-  } else if(attributes.memoryType == hipMemoryTypeDevice) {
+  } else if(attributes.type == hipMemoryTypeDevice) {
     printf("[%s] ptr %p is a device ptr.\n", str, *gpu_ptr);
     fflush(stdout);
   } else {
