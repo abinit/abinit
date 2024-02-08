@@ -48,7 +48,6 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
- use m_frohlichmodel,   only : frohlichmodel,polaronmass
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -70,6 +69,7 @@ module m_eph_driver
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
  use m_berry_curvature,  only : berry_curvature
  use m_cumulant,        only : cumulant_driver
+ use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
 
  implicit none
 
@@ -166,6 +166,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(mpi_type) :: mpi_enreg
  type(phdos_t) :: phdos
  type(gstore_t) :: gstore
+ type(frohlich_t) :: frohlich
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
  real(dp),parameter :: k0(3)=zero
@@ -697,7 +698,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
    if (my_rank == master) then
-     call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (7)
@@ -715,7 +716,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    if (my_rank == master) then
-     call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
+       efmasval, ifc)
    end if
 
  case (11)
