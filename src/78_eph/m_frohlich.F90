@@ -276,7 +276,8 @@ subroutine frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
 
 !Local variables-------------------------------
 !scalar
- integer :: nu, ikpt, ideg, ndeg, iband
+ integer :: nu, ikpt, ideg, ndeg
+! integer :: iband
  integer :: iqdir
 !arrays
  real(dp) :: kpt(3)
@@ -866,6 +867,7 @@ subroutine frohlich_calc_polaronmass(self)
    ABI_FREE(lutt_eigenvec)
    ABI_FREE(lutt_eigenval)
    ABI_FREE(phfreq)
+   ABI_FREE(investar)
    ABI_FREE(intsum)
    ABI_FREE(zpr)
    ABI_FREE(lk_h)
@@ -1245,13 +1247,13 @@ subroutine frohlich_init_ph(self, cryst, efmas_ntheta, ifc)
 !scalars
  integer :: ntheta, nphi, nqdir
  integer :: iphi, itheta, iqdir, nu
- integer :: ikpt, ideg, iband, jband
- integer :: ndeg
+! integer :: ikpt, ideg, iband, jband
+! integer :: ndeg
  real(dp) :: weight
  real(dp) :: weight_phi, phi_radians
  real(dp) :: costheta, sintheta, cosphi, sinphi
 !arrays
- real(dp) :: kpt(3)
+! real(dp) :: kpt(3)
  real(dp), allocatable :: gq_points_theta(:), gq_weights_theta(:)
  real(dp), allocatable :: gq_points_cosphi(:), gq_points_sinphi(:)
 
