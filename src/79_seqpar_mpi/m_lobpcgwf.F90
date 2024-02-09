@@ -347,22 +347,6 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 end subroutine lobpcgwf2
 
-!!****f* m_lobpcgwf/getghc_gsc1
-!! NAME
-!! getghc_gsc1
-!!
-!! FUNCTION
-!! This routine computes H|C> and possibly S|C> for a given wave function C.
-!!  It acts as a driver for getghc, taken into account parallelism, multithreading, etc.
-!!
-!! SIDE EFFECTS
-!!  X  <type(xgBlock_t)>= memory block containing |C>
-!!  AX <type(xgBlock_t)>= memory block containing H|C>
-!!  BX <type(xgBlock_t)>= memory block containing S|C>
-!!  transposer <type(xgTransposer_t)>= data used for array transpositions
-!!
-!! SOURCE
-
 subroutine getghc_gsc1(X,AX,BX,transposer)
 
  implicit none
@@ -509,7 +493,6 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  if ( .not. l_paw ) call xgBlock_copy(X,BX,gpu_option=l_gs_hamk%gpu_option)
 
 end subroutine getghc_gsc1
-!!***
 
  subroutine precond(W,gpu_option)
    use m_xg, only : xg_t, xgBlock_colwiseMul
