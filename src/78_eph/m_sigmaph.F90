@@ -2506,10 +2506,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do ib_k=1,nbcalc_ks
                band_ks = ib_k + bstart_ks - 1
                eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-               ! Handle n == m and degenerate states.
-               ! SP: one cannot cycle here because the Sternheimer contribution needs to be comptued
-               ediff = eig0nk - eig0mk; if (abs(ediff) < EPHTK_WTOL) cycle
-
+               !
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
                gdw2 = zero
@@ -2521,12 +2518,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      + gkq0_atm(1, ib_k, ibsum, ip2) * gkq0_atm(1, ib_k, ibsum, ip1) &
                      + gkq0_atm(2, ib_k, ibsum, ip2) * gkq0_atm(2, ib_k, ibsum, ip1) &
                    )
-
+                   !
                    gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
                  end do
                end do
                gdw2 = gdw2 / (four * two * wqnu)
-
+               !
                if (dtset%eph_stern /= 0 .and. ibsum == bsum_stop) then
                  ! Compute DW term for m > nband
                  cfact = zero
