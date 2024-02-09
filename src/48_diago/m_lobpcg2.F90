@@ -712,9 +712,9 @@ module m_lobpcg2
         call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
           STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
-          lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
+          lobpcg%AllAX0%self,lobpcg%AllAX0ColsRows,STATE_LINALG)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
-          lobpcg%BX,lobpcg%BXColsRows,STATE_LINALG)
+          lobpcg%AllBX0%self,lobpcg%AllBX0ColsRows,STATE_LINALG)
       else
         call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , 1, spacedim, lobpcg%neigenpairs)
         call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
@@ -726,7 +726,7 @@ module m_lobpcg2
         lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
       end if
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,lobpcg%xgTransposerAllX0)
+      call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows,lobpcg%xgTransposerAllX0)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
