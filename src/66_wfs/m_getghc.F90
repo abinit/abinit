@@ -389,8 +389,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    ndat_                 = ndat
    istwf_k_              = gs_ham%istwf_k
    double_rfft_trick = istwf_k_==2.and.modulo(ndat,2)==0.and.k1_eq_k2
-   double_rfft_trick = double_rfft_trick.and.(.not.have_to_reequilibrate)
-   double_rfft_trick = double_rfft_trick.and.mpi_enreg%paral_kgb==1
+   double_rfft_trick = double_rfft_trick.and.(.not.have_to_reequilibrate).and.mpi_enreg%paral_kgb==1
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    ! For npfft>1, we don't use the trick but MPI-FFT does not handle istwf_k==2,
    ! so we have to use istwf_k=1 locally and build cwavef_fft in a similar way

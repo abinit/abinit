@@ -373,6 +373,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 ! *********************************************************************
 
  call xgBlock_getSize(X,spacedim,blockdim)
+ call xgBlock_check(X,AX)
+ call xgBlock_check(X,BX)
 
  spacedim = spacedim/l_icplx
 
