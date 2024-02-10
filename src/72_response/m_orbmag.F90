@@ -258,7 +258,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
  !arrays
  integer,allocatable :: atindx(:),atindx1(:),dimlmn(:),gntselect(:,:),kg_k(:,:),nattyp(:)
- real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rhodum(1),rmet(3,3)
+ real(dp) :: gmet(3,3),gprimd(3,3),kpoint(3),omlamb(2,3),rmet(3,3)
  real(dp),allocatable :: buffer1(:),buffer2(:)
  real(dp),allocatable :: b1_k(:,:,:),b2_k(:,:,:)
  real(dp),allocatable :: cg_k(:,:),cg1_k(:,:,:),cwavef(:,:)

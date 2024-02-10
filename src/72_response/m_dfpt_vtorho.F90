@@ -294,7 +294,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: iband,nlines_done,ibdkpt,ibg,ibg1,ibgq,icg,icg1,icgq,ierr
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
- integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nddir,nkpg,nkpg1
+ integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
  integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
@@ -305,7 +305,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !arrays
  integer,allocatable :: kg1_k(:,:),kg_k(:,:)
  integer, pointer :: my_atmtab(:)
- real(dp) :: kpoint(3),kpq(3),rhodum(1)
+ real(dp) :: kpoint(3),kpq(3)
  real(dp) :: tsec(2)
  real(dp),allocatable :: buffer1(:)
  real(dp),allocatable :: ddkinpw(:),dkinpw(:),dkinpw2(:)

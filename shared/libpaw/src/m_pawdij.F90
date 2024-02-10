@@ -2808,8 +2808,8 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
  type(pawtab_type),target,intent(in) :: pawtab
 !Local variables ---------------------------------------
 !scalars
- integer :: angl_size,bdir,gint
- integer :: idij,ij_size,ilm,ipts,ispden,jlm,klm,klmn,klmn1,kln
+ integer :: angl_size,gint
+ integer :: ij_size,ipts,klm,klmn,klmn1,kln
  integer :: lm_size,lmn2_size,mesh_size,nsploop
  real(dp), parameter :: c1=sqrt(four_pi/five)
  real(dp), parameter :: c2=one/sqrt(three)
@@ -2908,7 +2908,7 @@ subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
  end do
  LIBPAW_DEALLOCATE(dv1dr)
  LIBPAW_DEALLOCATE(ff)
- !dijso_rad(:)=spnorbscl*dijso_rad(:)
+ dijso_rad(:)=spnorbscl*dijso_rad(:)
 
 !  ------------------------------------------------------------------------
 !  ----- Computation of Dij_so B1

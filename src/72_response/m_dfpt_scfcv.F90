@@ -388,7 +388,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !scalars
  integer,parameter :: level=12,response=1
  integer :: afford,bantot_rbz,choice,cplex_rhoij,dbl_nnsclo
- integer :: has_dijfr,has_diju,has_vxctau,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
+ integer :: has_dijfr,has_diju,iatom,ider,idir_dum,idir_paw1,ierr,errid,denpot
  integer :: iprcel,iscf10_mod,iscf_mod,ispden,ispmix
  integer :: istep,istep_fock_outer,istep_mix,itypat,izero,me,mgfftdiel,mvdum !lmn2_size,
  integer :: nfftdiel,nfftmix,nfftotf,nhat1grdim,npawmix,npwdiel,nspden_rhoij,nstep,nzlmopt
@@ -1023,7 +1023,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
      optene = 1 ! use double counting scheme
      call dfpt_etot(dtset%berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,&
 &     efrloc,efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
+&     end0,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,exc1,ipert,dtset%natom,optene)
      call timab(152,1,tsec)
      choice=2
      call scprqt(choice,cpus,deltae,diffor,dtset,eigen0,&
@@ -1090,7 +1090,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !&       efrloc,efrnl,efrx1,efrx2,ehart1_mq,ek0_mq,ek1_mq,eii,elast_mq,eloc0_mq,elpsp1_mq,&
 !&       enl0_mq,enl1_mq,epaw1_mq,etotal_mq,evar_mq,evdw,exc1_mq,elmag1_mq,ipert,dtset%natom,optene)
 !     end if
-&     end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,exc1,ipert,dtset%natom,optene)
+&     end0,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,exc1,ipert,dtset%natom,optene)
 
      call timab(152,1,tsec)
      choice=2
@@ -1603,15 +1603,15 @@ end subroutine dfpt_scfcv
 
 subroutine dfpt_etot(berryopt,deltae,eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,&
 &                efrnl,efrx1,efrx2,ehart1,ek0,ek1,eii,elast,eloc0,elpsp1,&
-&                end0,end1,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,evxctau1,&
+&                end0,enl0,enl1,epaw1,etotal,evar,evdw,evxctau0,&
 &                exc1,ipert,natom,optene)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ipert,natom,optene
  real(dp),intent(in) :: eberry,edocc,eeig0,eew,efrhar,efrkin,efrloc,efrnl,efrx1
- real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,end1,enl0,enl1,epaw1
- real(dp),intent(in) :: evdw,evxctau0,evxctau1,exc1
+ real(dp),intent(in) :: efrx2,ehart1,eii,ek0,ek1,eloc0,elpsp1,end0,enl0,enl1,epaw1
+ real(dp),intent(in) :: evdw,evxctau0,exc1
  real(dp),intent(inout) :: elast
  real(dp),intent(out) :: deltae,etotal,evar
 
