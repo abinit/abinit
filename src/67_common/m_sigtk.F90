@@ -37,6 +37,7 @@ module m_sigtk
  use m_dtset
  use m_krank
 
+ use m_build_info,   only : abinit_version
  use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
@@ -580,7 +581,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  type(gaps_t) :: gaps, fine_gaps
  type(wvl_internal_type) :: dummy_wvl
  type(hdr_type) :: fine_hdr
- character(len=8) :: codvsn
 !arrays
  integer :: fine_kptrlatt(3,3), band_block(2), unts(2)
  integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
@@ -670,8 +670,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end if
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
- codvsn = ABINIT_VERSION
- call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
+ call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, abinit_version, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &

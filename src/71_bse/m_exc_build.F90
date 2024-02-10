@@ -741,8 +741,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  dim_rtwg,rhxtwg_cpc)
 
                if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                 call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
+                 call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec, Cp_ckp,Cp_ck,rhxtwg_cpc)
                end if
              end if
 
@@ -863,8 +862,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                      dim_rtwg,rhxtwg_vpv)
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                     call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-                       Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
+                     call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec,Cp_vkp,Cp_vk,rhxtwg_vpv)
                    end if
                  end if
 
@@ -2384,8 +2382,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
          if (Wfd%usepaw==1) then
            ! Add PAW onsite contribution.
-           call paw_rho_tw_g(npweps,dim_rtwg1,Wfd%nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-             Cp1,Cp2,Pwij_q0,rhotwg1)
+           call paw_rho_tw_g(cryst,Pwij_q0,npweps,dim_rtwg1,Wfd%nspinor,Gsph_x%gvec,Cp1,Cp2,rhotwg1)
          end if
 
          ! If q=0 treat Exchange and Coulomb-term independently

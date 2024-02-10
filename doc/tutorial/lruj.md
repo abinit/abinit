@@ -109,7 +109,7 @@ purposes, the primary differences between the two are outlined in the table belo
 
 |   | <code>ujdet</code>            | <code>lruj</code>                                |
 | - | ----------------------------- | ------------------------------------------------ |
-| 1 | Embedded in Abinit core routine + Post-processing extension | Post-processor                                   |
+| 1 | Embedded in Abinit core routine | Post-processor                                   |
 | 2 | Two-point linear regression                                 | 3+ point polynomial (variable degree) regression |
 | 3 | $\chi$ and $\chi_0$ responses treated as matrices; interatomic response monitored; matrices augmented by total system charge | $\chi$ and $\chi_0$ responses treated as scalars               |
 | 4 | Supercell extrapolation scheme                              | RMS Error analysis                               |

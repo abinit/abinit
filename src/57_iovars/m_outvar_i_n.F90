@@ -150,7 +150,8 @@ subroutine outvar_i_n (dtsets,iout,&
    nimagem(idtset)=dtsets(idtset)%nimage
  end do
 
- firstchar_gpu=' '; if (maxval(dtsets(1:ndtset_alloc)%use_gpu_cuda)>0) firstchar_gpu='-'
+ firstchar_gpu=' '
+ if (maxval(dtsets(1:ndtset_alloc)%gpu_option)/=ABI_GPU_DISABLED) firstchar_gpu='-'
 
 !if(multivals%natom==0)natom=dtsets(1)%natom
  natom=dtsets(1)%natom
@@ -357,6 +358,10 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
+
+ intarr(1,:)=dtsets(:)%invol_blk_sliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invol_blk_sliced',&
+&             'INT',0,firstchar=firstchar_gpu)
 
  intarr(1,:)=dtsets(:)%ionmov
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ionmov','INT',0)
@@ -981,6 +986,9 @@ subroutine outvar_i_n (dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%nline
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nline','INT',0)
+
+ intarr(1,:)=dtsets(:)%nblock_lobpcg
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nblock_lobpcg','INT',0)
 
  intarr(1,:)=dtsets(:)%nloalg(1)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'nloc_alg','INT',0)
