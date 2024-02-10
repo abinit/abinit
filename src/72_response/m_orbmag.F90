@@ -2136,8 +2136,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
-   write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_trace(1,adir,imsob1),adir=1,3)
-   call wrtout(ab_out,message,'COLL')
+   if (dtset%pawspnorb /= 0) then
+     write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_trace(1,adir,imsob1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+   end if
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
@@ -2179,8 +2181,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
-       write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imsob1),adir=1,3)
-       call wrtout(ab_out,message,'COLL')
+       if (dtset%pawspnorb /= 0) then
+         write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imsob1),adir=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end if
        write(message,'(a)')ch10
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
