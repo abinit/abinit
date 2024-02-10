@@ -694,13 +694,15 @@ end subroutine bound
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
-!! [unit] = Output Unit number (DEFAULT std_out)
+!! [ngfftc(1:18)]= -optional- value of ngfft for the "coarse" grid
+!! [unit] = -optional-  output unit number (DEFAULT std_out)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!
 !! SOURCE
 
 subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
                 nproc_fft, nsym,paral_fft, symrel, tnons, &
-                ngfftc, use_gpu_cuda, unit) ! optional
+                ngfftc, unit, gpu_option) ! optional
 
  use defs_fftdata,  only : mg
 
@@ -708,7 +710,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
 !scalars
  integer,intent(in) :: chksymtnons,me_fft,nproc_fft,nsym,paral_fft
  integer,intent(out) :: mgfft,nfft
- integer,optional,intent(in) :: unit,use_gpu_cuda
+ integer,optional,intent(in) :: unit,gpu_option
  real(dp),intent(in) :: boxcutmin,ecut
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
@@ -1193,8 +1195,8 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(6)=ngfft(3)
  end if
 
- if (present(use_gpu_cuda)) then
-   if (use_gpu_cuda==1) then
+ if (present(gpu_option)) then
+   if (gpu_option/=ABI_GPU_DISABLED) then
      ngfft(4)=ngfft(1)
      ngfft(5)=ngfft(2)
      ngfft(6)=ngfft(3)

@@ -47,7 +47,13 @@ The command *mpirun* might possibly be replaced by *mpiexec* depending on your s
   The workload for the different images has been distributed. This parallelization level can be combined 
   with the parallelism described above, leading to speed-up beyond 5000. 
 
-* For ground-state calculations, GPUs can be used. The implementation is based on CUDA+MAGMA. 
+* For ground-state calculations, GPUs can be used. There are two available GPU programming models:
+  openMP offload (openMP v5+) compatible with Nvidia and AMD accelerators, Kokkos+cuda
+  compatible with Nvidia accelerators. See [[gpu_option]] keyword.  
+  Obvioulsy, to benefit from GPU acceleration, ABINIT has to be compiled in a specific way,
+  using a GPU compatible compiler (`nvhpc`, `aocc`, `gcc`), activating the relevant compilation
+  options and linking to specific libraries (`cuda toolkit`, `ROCm`, ...).  
+  This implementation is still EXPERIMENTAL (january 2024).
 
 * For ground-state calculations, the wavelet part of ABINIT (BigDFT) is also very 
   well parallelized: MPI band parallelism, combined with GPUs. 

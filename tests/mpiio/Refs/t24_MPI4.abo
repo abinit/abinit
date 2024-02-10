@@ -103,6 +103,7 @@ P           mkmem          15
             ngfft          18      18      18
           ngfftdg          36      36      36
              nkpt          30
+    nblock_lobpcg          12
 -           npfft           2
 -        np_spkpt           2
             nstep           5
@@ -935,6 +936,7 @@ P           mkmem          15
             ngfft          18      18      18
           ngfftdg          36      36      36
              nkpt          30
+    nblock_lobpcg          12
 -           npfft           2
 -        np_spkpt           2
             nstep           5

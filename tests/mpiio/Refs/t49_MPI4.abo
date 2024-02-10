@@ -91,6 +91,7 @@ P           mkmem           1
            ndtset           2
             ngfft          16      16      16
              nkpt           1
+    nblock_lobpcg           4
 -          npband           2
 -           npfft           2
             nstep           4
@@ -503,6 +504,7 @@ P           mkmem           1
            ndtset           2
             ngfft          16      16      16
              nkpt           1
+    nblock_lobpcg           4
 -          npband           2
 -           npfft           2
             nstep           4
@@ -884,6 +886,9 @@ P           mkmem           1
 - mklocl(2)                      0.001   0.0      0.001   0.0              8                   0.98       0.98
 - newocc                         0.024   0.9      0.024   0.9             36                   1.00       1.00
 - nonlop(total)                  0.030   1.2      0.030   1.2           1168                   1.00       1.00
+
+ Additional information about diagonalization algorithm segments
+- lobpcg_RayleighRitz@hegv                  0.013   0.5         0.013   0.5           1008                   1.00       1.00
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 

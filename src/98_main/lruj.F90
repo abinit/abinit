@@ -41,7 +41,6 @@ program lruj
  use defs_basis
  use m_xmpi
  use m_abicore
- use m_build_info
  use m_errors
  use m_argparse
  use m_crystal
@@ -49,6 +48,7 @@ program lruj
  use m_nctk
  use m_yaml
 
+ use m_build_info,    only : abinit_version
  use m_fstrings,      only : itoa, sjoin, ltoa
  use m_specialmsg,    only : specialmsg_getcount, herald
  use m_numeric_tools, only : polynomial_regression

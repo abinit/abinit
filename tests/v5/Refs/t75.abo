@@ -68,6 +68,7 @@ P           mkmem           1
             ngfft          12      12      12
              nkpt           1
             nline           5
+    nblock_lobpcg          20
             nstep          20
              nsym           1
             ntime           2
@@ -508,6 +509,7 @@ P           mkmem           1
             ngfft          12      12      12
              nkpt           1
             nline           5
+    nblock_lobpcg          20
             nstep          20
              nsym           1
             ntime           2
