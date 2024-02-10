@@ -16,10 +16,10 @@ nucdipmom
 # Lamb shielding on Al site
 lambsig 0.0D0 766.76D-6
 
-# bands and spinors, no spin orbit
+# bands and spinors
 nband 8
 nspinor 2
-pawspnorb 0
+pawspnorb 1
 
 ndtset 2
 
