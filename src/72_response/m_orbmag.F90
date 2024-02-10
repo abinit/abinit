@@ -81,9 +81,9 @@ module m_orbmag
   ! these parameters name the various output terms                                             
   integer,parameter :: ibcc=1,ibvv1=2,ibvv2=3
   integer,parameter :: imcc=4,imvv1=5,imvv2=6
-  integer,parameter :: imnl=7,imlr=8,imbm=9
-  integer,parameter :: iomlmb=10
-  integer,parameter :: nterms=10
+  integer,parameter :: imnl=7,imlr=8,imbm=9,imsob1=10
+  integer,parameter :: iomlmb=11
+  integer,parameter :: nterms=11
 
   ! these parameters are constants used repeatedly
 
@@ -103,6 +103,7 @@ module m_orbmag
     integer :: has_qij=0
     integer :: has_LR=0
     integer :: has_BM=0
+    integer :: has_SOB1=0
 
     ! sum of \Delta A_ij
     ! typically will be just paw_ij
@@ -123,6 +124,11 @@ module m_orbmag
     ! BM(natom,lmn2max,ndij,3)
     complex(dpc),allocatable :: BM(:,:,:,:)
 
+    ! onsite SO B1
+    ! <phi|SO rxA|phi> - <tphi|SO rxA}|tphi>
+    ! SOB1(natom,lmn2max,ndij,3)
+    complex(dpc),allocatable :: SOB1(:,:,:,:)
+
   end type dterm_type
 
   ! Bound methods:
@@ -138,6 +144,7 @@ module m_orbmag
   private :: dterm_qij
   private :: dterm_LR
   private :: dterm_BM
+  private :: dterm_SOB1
   private :: tt_me
   private :: txt_me
   private :: local_fermie
@@ -515,7 +522,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
       & ikpt,isppol,m1_k,m1_mu_k,m2_k,m2_mu_k,mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,&
       & npw_k,occ_k,pcg1_k,ucvol)
 
-     ! ZTG Eq. 46 term 2
+     ! ZTG23 Eq. 46 term 2
      orbmag_terms(:,:,isppol,:,ibvv1) = orbmag_terms(:,:,isppol,:,ibvv1) + b1_k(:,:,:)
      orbmag_terms(:,:,isppol,:,ibvv2) = orbmag_terms(:,:,isppol,:,ibvv2) + b2_k(:,:,:)
 
@@ -543,6 +550,14 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
      call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
        & nband_k,nl1_option,occ_k,pawtab,ucvol)
      orbmag_terms(:,:,isppol,:,imbm) = orbmag_terms(:,:,isppol,:,imbm) + m1_k
+
+     ! SOB1
+     if (dterm%has_SOB1 == 2) then
+       nl1_option = 3 ! SOB1
+       call orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk,mkmem_rbz,&
+         & nband_k,nl1_option,occ_k,pawtab,ucvol)
+       orbmag_terms(:,:,isppol,:,imsob1) = orbmag_terms(:,:,isppol,:,imsob1) + m1_k
+     end if
 
      ABI_FREE(b1_k)
      ABI_FREE(b2_k)
@@ -610,6 +625,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  !
  do iterm = 1, nterms
    if ((iterm.EQ.iomlmb)) cycle
+   if ((iterm.EQ.imsob1)) cycle
    do isppol = 1, dtset%nsppol
      do nn = 1, nband_k
        do icmplx = 1, 2
@@ -713,7 +729,7 @@ end subroutine orbmag
 !! OUTPUT
 !!  if nl1_option = 1, orbmag contribution of <L_R> is returned
 !!  if nl1_option = 2, orbmag contribution of <A0.An> is returned
-!!    m1_k(2,nband_k,3)=Orb mag contribution
+!!  m1_k(2,nband_k,3)=Orb mag contribution
 !!
 !! SIDE EFFECTS
 !!
@@ -769,6 +785,8 @@ subroutine orbmag_nl1_k(atindx,cprj_k,dimlmn,dterm,dtset,ikpt,isppol,m1_k,mcprjk
        call tt_me(dterm%LR(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case(2)
        call tt_me(dterm%BM(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
+     case(3)
+       call tt_me(dterm%SOB1(:,:,:,adir),atindx,cwaveprj,dtset,cwaveprj,dterm%lmn2max,dterm%ndij,pawtab,tt)
      case default
        tt = czero
      end select
@@ -1528,21 +1546,24 @@ subroutine txt_me(aij,atindx,bcp,bdir,dtset,gdir,kcp,lmn2max,ndij,pawtab,txt)
       do ilmn = 1, pawtab(itypat)%lmn_size
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn = MATPACK(ilmn,jlmn)
+          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
           dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           dcpi = CMPLX(bcp(iatom,isp)%dcp(1,bdir,ilmn),bcp(iatom,isp)%dcp(2,bdir,ilmn))
           dcpj = CMPLX(kcp(iatom,isp)%dcp(1,gdir,jlmn),kcp(iatom,isp)%dcp(2,gdir,jlmn))
           txt = txt + CONJG(dcpi)*dcpj*dij
-          if (ndij .GT. 2) then
+          if (ndij == 4) then
             if (isp == 1) then
               dij = aij(iatom,klmn,3) ! up-down
-              if (ilmn .GT. jlmn) dij = CONJG(dij)
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
               dcpi = CMPLX(bcp(iatom,1)%dcp(1,bdir,ilmn),bcp(iatom,1)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(kcp(iatom,2)%dcp(1,gdir,jlmn),kcp(iatom,2)%dcp(2,gdir,jlmn))
             else
               dij = aij(iatom,klmn,4) ! down-up
-              if (ilmn .GT. jlmn) dij = CONJG(dij)
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
               dcpi = CMPLX(bcp(iatom,2)%dcp(1,bdir,ilmn),bcp(iatom,2)%dcp(2,bdir,ilmn))
               dcpj = CMPLX(kcp(iatom,1)%dcp(1,gdir,jlmn),kcp(iatom,1)%dcp(2,gdir,jlmn))
             end if
@@ -1624,13 +1645,30 @@ subroutine tt_me(aij,atindx,bcp,dtset,kcp,lmn2max,ndij,pawtab,tt)
       do ilmn = 1, pawtab(itypat)%lmn_size
         do jlmn = 1, pawtab(itypat)%lmn_size
           klmn=MATPACK(ilmn,jlmn)
+          ! in ndij = 4 case, isp 1 delivers up-up, isp 2 delivers down-down
+          dij = aij(iatom,klmn,isp)
           cpi =  CMPLX(bcp(iatom,isp)%cp(1,ilmn),bcp(iatom,isp)%cp(2,ilmn))
           cpj =  CMPLX(kcp(iatom,isp)%cp(1,jlmn),kcp(iatom,isp)%cp(2,jlmn))
-          dij = aij(iatom,klmn,isp)
           ! see note at top of file near definition of MATPACK macro
           if (ilmn .GT. jlmn) dij = CONJG(dij)
           ! note use of CONJG(cpi), because cpi is from the bra side cprj
           tt = tt + CONJG(cpi)*dij*cpj
+          if (ndij == 4) then
+            if (isp == 1) then
+              dij = aij(iatom,klmn,3) ! up-down
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,4))
+              cpi = CMPLX(bcp(iatom,1)%cp(1,ilmn),bcp(iatom,1)%cp(2,ilmn))
+              cpj = CMPLX(kcp(iatom,2)%cp(1,jlmn),kcp(iatom,2)%cp(2,jlmn))
+            else
+              dij = aij(iatom,klmn,4) ! down-up
+              ! D^ss'_ij=D^s's_ji^*
+              if (ilmn .GT. jlmn) dij = CONJG(aij(iatom,klmn,3))
+              cpi = CMPLX(bcp(iatom,2)%cp(1,ilmn),bcp(iatom,2)%cp(2,ilmn))
+              cpj = CMPLX(kcp(iatom,1)%cp(1,jlmn),kcp(iatom,1)%cp(2,jlmn))
+            end if
+            tt = tt + CONJG(cpi)*cpj*dij
+          end if
         end do !jlmn
       end do !ilmn
     end do ! isp
@@ -2098,6 +2136,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_trace(1,adir,imbm),adir=1,3)
    call wrtout(ab_out,message,'COLL')
+   if (dtset%pawspnorb /= 0) then
+     write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_trace(1,adir,imsob1),adir=1,3)
+     call wrtout(ab_out,message,'COLL')
+   end if
    write(message,'(a,3es16.8)') '    Lamb terms : ',(orbmag_trace(1,adir,iomlmb),adir=1,3)
    call wrtout(ab_out,message,'COLL')
    write(message,'(a)')' Chern vector, term-by-term breakdown : '
@@ -2139,6 +2181,10 @@ subroutine orbmag_output(dtset,orbmag_terms,orbmag_trace)
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' <A0.An> terms : ',(orbmag_terms(1,iband,isppol,adir,imbm),adir=1,3)
        call wrtout(ab_out,message,'COLL')
+       if (dtset%pawspnorb /= 0) then
+         write(message,'(a,3es16.8)') ' <SO B1> terms : ',(orbmag_terms(1,iband,isppol,adir,imsob1),adir=1,3)
+         call wrtout(ab_out,message,'COLL')
+       end if
        write(message,'(a)')ch10
        call wrtout(ab_out,message,'COLL')
        write(message,'(a,3es16.8)') ' Chern vector : ',(berry_bb(1,iband,adir),adir=1,3)
@@ -2225,6 +2271,11 @@ subroutine dterm_free(dterm)
   end if
   dterm%has_BM=0
 
+  if(allocated(dterm%SOB1)) then
+    ABI_FREE(dterm%SOB1)
+  end if
+  dterm%has_SOB1=0
+
 end subroutine dterm_free
 !!***
 
@@ -2308,6 +2359,12 @@ subroutine dterm_alloc(dterm,lmnmax,lmn2max,natom,ndij)
   ABI_MALLOC(dterm%BM,(natom,lmn2max,ndij,3))
   dterm%has_BM=1
 
+  if(allocated(dterm%SOB1)) then
+    ABI_FREE(dterm%SOB1)
+  end if
+  ABI_MALLOC(dterm%SOB1,(natom,lmn2max,ndij,3))
+  dterm%has_SOB1=1
+
 end subroutine dterm_alloc
 !!***
 
@@ -2385,6 +2442,83 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
   dterm%has_aij = 2
 
 end subroutine dterm_aij
+
+!!***
+!!****f* ABINIT/dterm_SOB1
+!! NAME
+!! dterm_SOB1
+!!
+!! FUNCTION
+!! transfer paw_ij%dijsob1 to dterm%SOB1 in more convenient format
+!!
+!! COPYRIGHT
+!! Copyright (C) 2003-2021 ABINIT  group
+!! This file is distributed under the terms of the
+!! GNU General Public License, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
+!!
+!! INPUTS
+!!  atindx(natom)=index table for atoms (see gstate.f)
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  paw_ij(dtset%natom) <type(paw_ij_type)>=paw arrays given on (i,j) channels for the GS
+!!  pawtab(dtset%ntypat) <type(pawtab_type)>=paw tabulated starting data
+!!
+!! OUTPUT
+!!
+!! SIDE EFFECTS
+!! dterm <type(dterm_type)> data related to onsite interactions
+!!
+!! TODO
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      m_orbmag
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine dterm_SOB1(atindx,dterm,dtset,paw_ij,pawtab)
+
+  !Arguments ------------------------------------
+  !scalars
+  type(dterm_type),intent(inout) :: dterm
+  type(dataset_type),intent(in) :: dtset
+
+  !arrays
+  integer,intent(in) :: atindx(dtset%natom)
+  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
+  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+
+  !Local variables -------------------------
+  !scalars
+  integer :: iat,iatom,idij,idir,itypat,klmn
+  !arrays
+!--------------------------------------------------------------------
+
+  dterm%SOB1 = czero
+
+  if (paw_ij(1)%has_dijsob1 /= 2) return
+  
+  do iat=1,dtset%natom
+    iatom=atindx(iat)
+    itypat=dtset%typat(iat)
+    do klmn=1,pawtab(itypat)%lmn2_size
+      do idij = 1, dterm%ndij
+        do idir = 1, 3
+          dterm%SOB1(iatom,klmn,idij,idir) = &
+            & CMPLX(paw_ij(iatom)%dijsob1(idir,2*klmn-1,idij),&
+            &       paw_ij(iatom)%dijsob1(idir,2*klmn,idij))
+        end do ! idir
+      end do ! idij
+    end do ! klmn
+  end do ! iat
+
+  dterm%has_SOB1 = 2
+
+end subroutine dterm_SOB1
 !!***
 
 !!****f* ABINIT/make_d
@@ -2469,6 +2603,11 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_ij,pawrad,pawtab,psps)
 
  ! transfers paw_ij to dterm%aij because it's convenient
  call dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
+
+ ! transfers paw_ij%dijsob1 to dterm%SOB1 if available
+ if (paw_ij(1)%has_dijsob1 == 2) then
+   call dterm_SOB1(atindx,dterm,dtset,paw_ij,pawtab)
+ end if
 
  ABI_FREE(realgnt)
  ABI_FREE(gntselect)
