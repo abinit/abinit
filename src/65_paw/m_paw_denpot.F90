@@ -34,7 +34,7 @@ MODULE m_paw_denpot
  use m_paw_ij,           only : paw_ij_type
  use m_pawfgrtab,        only : pawfgrtab_type
  use m_pawrhoij,         only : pawrhoij_type
- use m_pawdij,           only : pawdijhartree,pawdiju_euijkl,pawdijnd,pawdijso,pawxpot,pawdijfock,symdij,symdij_all
+ use m_pawdij,           only : pawdijhartree,pawdiju_euijkl,pawdijnd,pawdijso,pawdijsob1,pawxpot,pawdijfock,symdij,symdij_all
  use m_pawxc,            only : pawxc,pawxc_dfpt,pawxcm,pawxcm_dfpt,pawxcpositron,pawxcmpositron, &
 &                               pawxc_get_usekden,pawxc_is_tb09
  use m_paw_finegrid,     only : pawgylm
@@ -135,6 +135,7 @@ CONTAINS  !=====================================================================
 !!    paw_an(my_natom)%vh1(cplex*mesh_size,1,1)=Hartree total potential calculated from "on-site" density
 !!  ==== if pawspnorb>0
 !!    paw_ij(my_natom)%dijso(qphase*cplex_dij*lmn2_size,nspden)=spin-orbit contribution to dij
+!!    paw_ij(my_natom)%dijsob1(3,qphase*cplex_dij*lmn2_size,nspden)=spin-orbit contribution first order in B for orbmag
 !!
 !! NOTES
 !!  Response function calculations:
@@ -892,6 +893,21 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
 !    Compute spin-orbit contribution to on-site energy
      if (option/=1.and.cplex_rhoij==2) then
        call pawaccenergy(espnorb,pawrhoij(iatom),paw_ij(iatom)%dijso,cplex_dij,qphase,ndij,pawtab(itypat))
+     end if
+
+   end if
+
+!  ========= Compute spin-orbit energy contribution  ========
+!  ========= first order in B1, for orbmag           ========   
+!  ==========================================================
+
+   if (pawspnorb>0.and.ipert==0.and.ipositron/=1) then
+
+!    Compute spin-orbit contribution first order in B
+     if (cplex_rhoij==2) then
+       call pawdijsob1(paw_ij(iatom)%dijsob1,cplex_dij,cplex,ndij,nspden,pawang,pawrad(itypat),pawtab(itypat), &
+&                    pawxcdev,spnorbscl,paw_an(iatom)%vh1,paw_an(iatom)%vxc1)
+       paw_ij(iatom)%has_dijsob1=2
      end if
 
    end if
