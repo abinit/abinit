@@ -781,7 +781,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    ABI_MALLOC(gh1c_mGGA,(2,npw*my_nspinor))
    ! this is hard coded for ndat = 1
    call getgh1c_mGGA(cwave,dkinpw,gs_hamkq%gbound_k,gh1c_mGGA,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
-        & gs_hamkq%kg_k,kinpw1,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+        & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,my_nspinor,gs_hamkq%n4,gs_hamkq%n5,&
         & gs_hamkq%n6,1,gs_hamkq%ngfft,npw,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,&
         & gs_hamkq%gpu_option)
    do ispinor=1,my_nspinor
@@ -2006,8 +2006,7 @@ end subroutine getgh1ndc
 !! SOURCE
 
 subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg_k,&
-     & kinpw1,kpt,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,&
-     & ngfft,npw_k,nvloc,vxctaulocal,gpu_option)
+     & kinpw1,mgfft,mpi_enreg,my_nspinor,n4,n5,n6,ndat,ngfft,npw_k,nvloc,vxctaulocal,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
@@ -2016,7 +2015,7 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: gbound_k(2*mgfft+4),kg_k(3,npw_k),ngfft(18)
- real(dp),intent(in) :: gprimd(3,3),kpt(3)
+ real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(inout) :: cwavein(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: gh1c_mGGA(2,npw_k*my_nspinor*ndat)
  real(dp),intent(inout) :: vxctaulocal(n4,n5,n6,nvloc,4)
@@ -2027,7 +2026,6 @@ subroutine getgh1c_mGGA(cwavein,dkinpw,gbound_k,gh1c_mGGA,gprimd,idir,istwf_k,kg
  integer :: idat,ii,ipw,nspinortot,shift,gpu_option_
  integer,parameter :: tim_fourwf=1
  real(dp) :: weight=one
- real(dp) :: dkcartdk
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  !arrays
  real(dp),allocatable :: cwavein1(:,:),cwavein2(:,:),dgcwavef(:,:)
