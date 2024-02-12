@@ -54,7 +54,6 @@ MODULE m_pawdij
  public :: pawdijhat        ! Dij^hat (compensation charge contribution)
  public :: pawdijnd         ! Dij nuclear dipole
  public :: pawdijso         ! Dij spin-orbit
- public :: pawdijsob1       ! Dij spin-orbit first order in B, for orbmag
  public :: pawdiju          ! Dij DFT+U
  public :: pawdiju_euijkl   ! Dij DFT+U, using pawrhoij instead of occupancies
  public :: pawdijexxc       ! Dij local exact-exchange
@@ -207,7 +206,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical :: dijhatfr_available,dijhatfr_need,dijhatfr_prereq
  logical :: dijnd_available,dijnd_need,dijnd_prereq
  logical :: dijso_available,dijso_need,dijso_prereq
- logical :: dijsob1_available,dijsob1_need,dijsob1_prereq
  logical :: dijxc_available,dijxc_need,dijxc_prereq
  logical :: dijxchat_available,dijxchat_need,dijxchat_prereq
  logical :: dijxcval_available,dijxcval_need,dijxcval_prereq
@@ -221,7 +219,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical,allocatable :: lmselect(:)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
- real(dp),allocatable :: dijnd(:,:),dijso(:,:),dijsob1(:,:,:)
+ real(dp),allocatable :: dijnd(:,:),dijso(:,:)
  real(dp),allocatable :: dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
  real(dp),pointer :: v_dijhat(:,:),vpawu(:,:,:,:),vpawx(:,:,:)
 
@@ -298,7 +296,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      if (paw_ij(iatom)%has_dijxc==1) paw_ij(iatom)%dijxc=zero
      if (paw_ij(iatom)%has_dijhat==1) paw_ij(iatom)%dijhat=zero
      if (paw_ij(iatom)%has_dijso==1) paw_ij(iatom)%dijso=zero
-     if (paw_ij(iatom)%has_dijsob1==1) paw_ij(iatom)%dijsob1=zero
      if (paw_ij(iatom)%has_dijU==1) paw_ij(iatom)%dijU=zero
      if (paw_ij(iatom)%has_dijexxc==1) paw_ij(iatom)%dijexxc=zero
      if (paw_ij(iatom)%has_dijxc_hat==1) paw_ij(iatom)%dijxc_hat=zero
@@ -394,12 +391,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    dijso_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
    dijso_prereq=(paw_ij(iatom)%has_dijso==2.or.&
 &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
-!  DijSOb1: not available for RF, positron; only for spin-orbit ; VHartree and Vxc needed
-!  while this term is first-order in B, it is used only the orbmag code and computed with GS data
-!  it thus computes like the Dij SO term
-   dijsob1_available=(pawspnorb>0.and.ipert<=0.and.ipositron/=1)
-   dijsob1_prereq=(paw_ij(iatom)%has_dijsob1==2.or.&
-     &               (paw_an(iatom)%has_vhartree>0.and.paw_an(iatom)%has_vxc>0))
 !  DijU: not available for positron; only for DFT+U
    dijU_available=(pawtab(itypat)%usepawu/=0.and.ipositron/=1)
    dijU_prereq=(paw_ij(iatom)%has_dijU==2.or.paw_ij(iatom)%has_pawu_occ>0.or. &
@@ -419,7 +410,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    dij_need=.false.;dij0_need=.false.;dijexxc_need=.false.;dijfock_need=.false.
    dijhartree_need=.false.;dijhat_need=.false.;dijhatfr_need=.false.;
-   dijso_need=.false.;dijsob1_need=.false.;dijU_need=.false.;dijxc_need=.false.
+   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.
    dijxchat_need=.false.;dijxcval_need=.false.; dijnd_need=.false.
 
    if (dij_available) then
@@ -518,18 +509,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      paw_ij(iatom)%dijso=zero
    end if
 
-   if (dijsob1_available) then
-     if (paw_ij(iatom)%has_dijsob1==1) then
-       dijsob1_need=.true.;paw_ij(iatom)%dijsob1(:,:,:)=zero
-     else if (paw_ij(iatom)%has_dijsob1==0.and.need_to_print) then
-       LIBPAW_ALLOCATE(paw_ij(iatom)%dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
-       dijsob1_need=.true.;paw_ij(iatom)%dijsob1(:,:,:)=zero
-       paw_ij(iatom)%has_dijsob1=-1
-     end if
-   else if (paw_ij(iatom)%has_dijsob1==1) then
-     paw_ij(iatom)%dijsob1=zero
-   end if
-
    if (dijU_available) then
      if (paw_ij(iatom)%has_dijU==1) then
        dijU_need=.true.;paw_ij(iatom)%dijU(:,:)=zero
@@ -615,10 +594,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    end if
    if (dijso_need.and.(.not.dijso_prereq)) then
      msg='DijSO prerequisites missing!'
-     LIBPAW_BUG(msg)
-   end if
-   if (dijsob1_need.and.(.not.dijsob1_prereq)) then
-     msg='DijSO B1 prerequisites missing!'
      LIBPAW_BUG(msg)
    end if
    if (dijU_need.and.(.not.dijU_prereq)) then
@@ -860,25 +835,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    end if
 
 !  ------------------------------------------------------------------------
-!  ----------- Compute Dij spin-orbit first order in B (never added to dij)
-!  ----------- may be used in orbmag code ---------------------------------
-!  ------------------------------------------------------------------------
-
-   if (dijsob1_need .and. dijsob1_available) then
-
-!    ===== Need to compute DijSO b1
-     if (paw_ij(iatom)%has_dijsob1/=2) then
-       LIBPAW_ALLOCATE(dijsob1,(3,cplex_dij*qphase*lmn2_size,ndij))
-       call pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
-&                    pawang,pawrad(itypat),pawtab(itypat),pawxcdev,spnorbscl,&
-&                    paw_an(iatom)%vh1,paw_an(iatom)%vxc1)
-       if (dijsob1_need) paw_ij(iatom)%dijsob1(:,:,:)=dijsob1(:,:,:)
-       LIBPAW_DEALLOCATE(dijsob1)
-     end if
-
-   end if
-
-!  ------------------------------------------------------------------------
 !  ----------- Add Dij_{DFT+U} to Dij
 !  ------------------------------------------------------------------------
 
@@ -1031,7 +987,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    if (dijhat_need.and.paw_ij(iatom)%has_dijhat>=1) paw_ij(iatom)%has_dijhat=2
    if (dijnd_need.and.paw_ij(iatom)%has_dijnd>=1) paw_ij(iatom)%has_dijnd=2
    if (dijso_need.and.paw_ij(iatom)%has_dijso>=1) paw_ij(iatom)%has_dijso=2
-   if (dijsob1_need.and.paw_ij(iatom)%has_dijsob1>=1) paw_ij(iatom)%has_dijsob1=2
    if (dijU_need.and.paw_ij(iatom)%has_dijU>=1) paw_ij(iatom)%has_dijU=2
    if (dijexxc_need.and.paw_ij(iatom)%has_dijexxc>=1) paw_ij(iatom)%has_dijexxc=2
    if (dijxchat_need.and.paw_ij(iatom)%has_dijxc_hat>=1) paw_ij(iatom)%has_dijxc_hat=2
@@ -1085,10 +1040,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
    if (paw_ij(iatom)%has_dijso==-1) then
      LIBPAW_DEALLOCATE(paw_ij(iatom)%dijso)
      paw_ij(iatom)%has_dijso=0
-   end if
-   if (paw_ij(iatom)%has_dijsob1==-1) then
-     LIBPAW_DEALLOCATE(paw_ij(iatom)%dijsob1)
-     paw_ij(iatom)%has_dijsob1=0
    end if
    if (paw_ij(iatom)%has_dijU==-1) then
      LIBPAW_DEALLOCATE(paw_ij(iatom)%dijU)
@@ -2748,221 +2699,6 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
 
 end subroutine pawdijso
 
-!!***
-!!****f* m_pawdij/pawdijsob1
-!! NAME
-!! pawdijsob1
-!!
-!! FUNCTION
-!! Compute the spin-orbit contribution to the PAW
-!! pseudopotential strength Dij to first order in B
-!! for use in orbmag code
-!! (for one atom only)
-!!
-!! INPUTS
-!!  cplex_dij=2 if dij is COMPLEX (as in the spin-orbit case), 1 if dij is REAL
-!!  qphase=2 if dij contains a exp(-i.q.r) phase (as in the q<>0 RF case), 1 if not
-!!  ndij= number of spin components for Dij^SO
-!!  nspden=number of spin density components
-!!  paw_an <type(paw_an_type)>=paw arrays given on angular mesh, for current atom
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
-!!  pawrad <type(pawrad_type)>=paw radial mesh and related data, for current atom
-!!  pawtab <type(pawtab_type)>=paw tabulated starting data, for current atom
-!!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-!!  vh1(qphase*mesh_size,v_size,nspden)=all-electron on-site Hartree potential for current atom
-!!                     only spherical moment is used
-!!  vxc1(qphase*mesh_size,v_size,nspden)=all-electron on-site XC potential for current atom
-!!                                given on a (r,theta,phi) grid (v_size=angl_size)
-!!                                or on (l,m) spherical moments (v_size=lm_size)
-!!
-!! OUTPUT
-!!  dijsob1(3,cplex_dij*qphase*lmn2_size,ndij)= spin-orbit Dij terms to order B1, in Bfield direc idir
-!!    Dij^SO is complex, so cplex_dij=2 must be 2:
-!!      dij(2*i-1,:) contains the real part
-!!      dij(2*i,:) contains the imaginary part
-!!    Dij^SO is represented with 4 components:
-!!      dijsob1(:,:,1) contains Dij_SO^up-up
-!!      dijsob1(:,:,2) contains Dij_SO^dn-dn
-!!      dijsob1(:,:,3) contains Dij_SO^up-dn
-!!      dijsob1(:,:,4) contains Dij_SO^dn-up
-!!    When a exp(-i.q.r) phase is included (qphase=2):
-!!      dij(1:cplex_dij*lmn2_size,:)
-!!          contains the real part of the phase, i.e. D_ij*cos(q.r)
-!!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
-!!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! SOURCE
-
-subroutine pawdijsob1(dijsob1,cplex_dij,qphase,ndij,nspden,&
-&                   pawang,pawrad,pawtab,pawxcdev,spnorbscl,vh1,vxc1)
-
-!Arguments ---------------------------------------------
-!scalars
- integer,intent(in) :: cplex_dij,ndij,nspden,pawxcdev,qphase
- real(dp), intent(in) :: spnorbscl
- type(pawang_type),intent(in) :: pawang
-!arrays
- real(dp),intent(out) :: dijsob1(:,:,:)
- real(dp),intent(in) :: vh1(:,:,:),vxc1(:,:,:)
- type(pawrad_type),intent(in) :: pawrad
- type(pawtab_type),target,intent(in) :: pawtab
-!Local variables ---------------------------------------
-!scalars
- integer :: angl_size,gint
- integer :: ij_size,ipts,klm,klmn,klmn1,kln
- integer :: lm_size,lmn2_size,mesh_size,nsploop
- real(dp), parameter :: c1=sqrt(four_pi/five)
- real(dp), parameter :: c2=one/sqrt(three)
- real(dp), parameter :: c3=sqrt(four_pi)
- real(dp), parameter :: HalfFineStruct2=half/InvFineStruct**2
- real(dp) :: fact,s00,s2m2,s2m1,s20,s21,s22
- real(dp) :: sxx,syy,szz,szx,syx,szy
- character(len=500) :: msg
-!arrays
- integer, pointer :: indklmn(:,:)
- real(dp),allocatable :: dijso_rad(:),dv1dr(:),ff(:)
-
-! *************************************************************************
-
-!Useful data
- lm_size=pawtab%lcut_size**2
- lmn2_size=pawtab%lmn2_size
- ij_size=pawtab%ij_size
- angl_size=pawang%angl_size
- mesh_size=pawtab%mesh_size
- indklmn => pawtab%indklmn
- nsploop=4
-
-!Check data consistency
- if (qphase/=1) then
-   msg='qphase=2 not yet available in pawdijso!'
-   LIBPAW_BUG(msg)
- end if
- if (cplex_dij/=2) then
-   msg='cplex_dij must be 2 for spin-orbit coupling!'
-   LIBPAW_BUG(msg)
- end if
- if (ndij/=4) then
-   msg='ndij must be 4 for spin-orbit coupling!'
-   LIBPAW_BUG(msg)
- end if
- ! if (pawang%use_ls_ylm==0) then
- !   msg='pawang%use_ls_ylm should be /=0!'
- !   LIBPAW_BUG(msg)
- ! end if
- if (size(dijsob1,2)/=cplex_dij*qphase*lmn2_size.or.size(dijsob1,3)/=ndij) then
-   msg='invalid sizes for DijSO B1!'
-   LIBPAW_BUG(msg)
- end if
- if (size(vh1,1)/=qphase*mesh_size.or.size(vh1,2)<1.or.size(vh1,3)<1) then
-   msg='invalid sizes for vh1!'
-   LIBPAW_BUG(msg)
- end if
- if (size(vxc1,1)/=qphase*mesh_size.or.size(vxc1,3)/=nspden.or.&
-&   (size(vxc1,2)/=angl_size.and.pawxcdev==0).or.&
-&   (size(vxc1,2)/=lm_size.and.pawxcdev/=0)) then
-   msg='invalid sizes for vxc1!'
-   LIBPAW_BUG(msg)
- end if
-
-!------------------------------------------------------------------------
-!----------- Allocations and initializations
-!------------------------------------------------------------------------
-
-!Eventually compute <Phi_i|r.dV/dr|Phi_j>*alpha2/4*Y_00 (for spin-orbit B1)
- LIBPAW_ALLOCATE(dv1dr,(mesh_size))
- LIBPAW_ALLOCATE(dijso_rad,(ij_size))
- LIBPAW_ALLOCATE(ff,(mesh_size))
- fact=one/sqrt(four_pi) ! Y_00
- if (pawxcdev/=0) then
-   if (nspden==1) then
-     ff(1:mesh_size)=vxc1(1:mesh_size,1,1)
-   else
-     ff(1:mesh_size)=half*(vxc1(1:mesh_size,1,1)+vxc1(1:mesh_size,1,2))
-   end if
- else
-   ff(1:mesh_size)=zero
-   if (nspden==1) then
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&          +vxc1(1:mesh_size,ipts,1)*pawang%angwgth(ipts)
-     end do
-   else
-     do ipts=1,angl_size
-       ff(1:mesh_size)=ff(1:mesh_size) &
-&       +half*(vxc1(1:mesh_size,ipts,1)+vxc1(1:mesh_size,ipts,2)) &
-&       *pawang%angwgth(ipts)
-     end do
-   end if
-   ff(1:mesh_size)=sqrt(four_pi)*ff(1:mesh_size)
- end if
- ff(1:mesh_size)=fact*(ff(1:mesh_size)+vh1(1:mesh_size,1,1))
- call nderiv_gen(dv1dr,ff,pawrad)
- dv1dr(2:mesh_size)=half*HalfFineStruct2*&
-   & (one/(one-ff(2:mesh_size)*half/InvFineStruct**2)**2) &
-   & *dv1dr(2:mesh_size)*pawrad%rad(2:mesh_size)
- call pawrad_deducer0(dv1dr,mesh_size,pawrad)
- do kln=1,ij_size
-   ff(1:mesh_size)= dv1dr(1:mesh_size)*pawtab%phiphj(1:mesh_size,kln)
-   call simp_gen(dijso_rad(kln),ff,pawrad)
- end do
- LIBPAW_DEALLOCATE(dv1dr)
- LIBPAW_DEALLOCATE(ff)
- dijso_rad(:)=spnorbscl*dijso_rad(:)
-
-!  ------------------------------------------------------------------------
-!  ----- Computation of Dij_so B1
-!  ------------------------------------------------------------------------
- dijsob1(:,:,:) = zero
- klmn1=1
- do klmn=1,lmn2_size
-   klm=indklmn(1,klmn);kln=indklmn(2,klmn)
-   s00=zero;s2m2=zero;s2m1=zero;s20=zero;s21=zero;s22=zero
-   gint = pawang%gntselect(1,klm);if (gint .NE. 0) s00 =pawang%realgnt(gint)
-   gint = pawang%gntselect(5,klm);if (gint .NE. 0) s2m2=pawang%realgnt(gint)
-   gint = pawang%gntselect(6,klm);if (gint .NE. 0) s2m1=pawang%realgnt(gint)
-   gint = pawang%gntselect(7,klm);if (gint .NE. 0) s20 =pawang%realgnt(gint)
-   gint = pawang%gntselect(8,klm);if (gint .NE. 0) s21 =pawang%realgnt(gint)
-   gint = pawang%gntselect(9,klm);if (gint .NE. 0) s22 =pawang%realgnt(gint)
-   ! (1-x2/r2)
-   sxx=half*dijso_rad(kln)*(c3*s00-(c1*c2*s22+(c3*s00-c1*s20)/three))
-   ! (1-y2/r2)
-   syy=half*dijso_rad(kln)*(c3*s00-((c3*s00-c1*s20)/three - c1*c2*s22))
-   ! (1-z2/r2)
-   szz=half*dijso_rad(kln)*(c3*s00-(two*c1*s20+c3*s00)/three)
-   ! yx/r2
-   syx=half*dijso_rad(kln)*c1*c2*s2m2
-   ! zx/r2
-   szx=half*dijso_rad(kln)*c1*c2*s21
-   ! zy/r2
-   szy=half*dijso_rad(kln)*c1*c2*s2m1
-   ! bx: sxx - syx - szx
-   dijsob1(1,klmn1,3)=dijsob1(1,klmn1,3)+sxx
-   dijsob1(1,klmn1,4)=dijsob1(1,klmn1,4)+sxx
-   dijsob1(1,klmn1+1,3)=dijsob1(1,klmn1+1,3)+syx
-   dijsob1(1,klmn1+1,4)=dijsob1(1,klmn1+1,4)-syx
-   dijsob1(1,klmn1,1)=dijsob1(1,klmn1,1)-szx
-   dijsob1(1,klmn1,2)=dijsob1(1,klmn1,2)+szx
-   ! by: syy - syx - szy
-   dijsob1(2,klmn1,3)=dijsob1(2,klmn1,3)-syx
-   dijsob1(2,klmn1,4)=dijsob1(2,klmn1,4)-syx
-   dijsob1(2,klmn1+1,3)=dijsob1(2,klmn1+1,3)-syy
-   dijsob1(2,klmn1+1,4)=dijsob1(2,klmn1+1,4)+syy
-   dijsob1(2,klmn1,1)=dijsob1(2,klmn1,1)-szy
-   dijsob1(2,klmn1,2)=dijsob1(2,klmn1,2)+szy
-   ! bz: szz - szy - szx
-   dijsob1(3,klmn1,3)=dijsob1(3,klmn1,3)-szx
-   dijsob1(3,klmn1,4)=dijsob1(3,klmn1,4)-szx
-   dijsob1(3,klmn1+1,3)=dijsob1(3,klmn1+1,3)+szy
-   dijsob1(3,klmn1+1,4)=dijsob1(3,klmn1+1,4)-szy
-   dijsob1(3,klmn1,1)=dijsob1(3,klmn1,1)+szz
-   dijsob1(3,klmn1,2)=dijsob1(3,klmn1,2)-szz
-   klmn1=klmn1+cplex_dij
- end do
-
- LIBPAW_DEALLOCATE(dijso_rad)
-
-end subroutine pawdijsob1
 !!***
 
 !----------------------------------------------------------------------
