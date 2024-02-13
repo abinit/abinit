@@ -2508,7 +2508,7 @@ subroutine dterm_SOB1(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,q
 
   !Local variables -------------------------
   !scalars
-  integer :: angl_size,gint,iat,iatom,idij,idir,igf,ij_size,imesh,ipts,itypat
+  integer :: angl_size,gint,iat,iatom,idij,idir,igf,ij_size,ipts,itypat
   integer :: klmn,klmn1,klm,kln,lmn2_size,mesh_size,ndij
   real(dp), parameter :: c1=sqrt(four_pi/five)
   real(dp), parameter :: c2=one/sqrt(three)
