@@ -49,6 +49,9 @@ kptgw
 bdgw
   1 8
   1 8
+bdgw8
+  1 4
+  1 4
 
 # q-path for phonon band structure.
 ph_ndivsm 20
