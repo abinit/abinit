@@ -972,7 +972,7 @@ subroutine paw_ij_print(Paw_ij,unit,pawprtvol,pawspnorb,mode_paral,enunit,ipert,
 !Local variables-------------------------------
  character(len=7),parameter :: dspin(6)=(/"up     ","down   ","up-up  ","dwn-dwn","up-dwn ","dwn-up "/)
 !scalars
- integer :: cplex_dij,iatom,iatom_tot,idij,idij_sym,idir,lmn2_size,lmn_size,my_comm_atom,my_natom,nspden !klmn,
+ integer :: cplex_dij,iatom,iatom_tot,idij,idij_sym,lmn2_size,lmn_size,my_comm_atom,my_natom,nspden !klmn,
  integer :: nsploop,nsppol,my_unt,ndij,qphase,tmp_cplex_dij,my_ipert,my_enunit,my_prtvol,size_paw_ij
  logical :: my_atmtab_allocated,paral_atom
  character(len=4) :: my_mode
