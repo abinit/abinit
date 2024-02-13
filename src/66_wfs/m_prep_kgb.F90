@@ -112,7 +112,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  logical, intent(in),optional :: already_transposed
  real(dp),intent(in) :: lambda
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  real(dp),intent(in) :: cwavef(:,:)
  real(dp),intent(inout) :: gvnlxc (:,:),gwavef(:,:),swavef(:,:)
@@ -123,7 +123,7 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
  integer,parameter :: tim_getghc=6
  integer :: bandpp,bandpp_sym,idatarecv0,ier,ikpt_this_proc,iscalc,mcg,my_nspinor
  integer :: nbval,ndatarecv,ndatarecv_tot,ndatasend_sym,nproc_band,nproc_fft
- integer :: old_me_g0,spaceComm
+ integer :: spaceComm
  logical :: flag_inv_sym, do_transpose, local_gvnlxc
  !character(len=500) :: msg
 !arrays
@@ -306,15 +306,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call DCOPY(2*ndatarecv*my_nspinor*bandpp, cwavef, 1, cwavef_alltoall2, 1)
  end if
 
- if(gs_hamk%istwf_k==2) then
-   old_me_g0=mpi_enreg%me_g0
-   if (mpi_enreg%me_fft==0) then
-     mpi_enreg%me_g0=1
-   else
-     mpi_enreg%me_g0=0
-   end if
- end if
-
 !====================================================================
  if ((.not.(flag_inv_sym)) .and. (bandpp==1)) then
    if (do_transpose .and. mpi_enreg%paral_spinor==0.and.my_nspinor==2)then
@@ -476,12 +467,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    gs_hamk%istwf_k=2
    !!write(std_out,*)"Setting iswfk_k to 2"
 
-   old_me_g0=mpi_enreg%me_g0
-   if (mpi_enreg%me_fft==0) then
-     mpi_enreg%me_g0=1
-   else
-     mpi_enreg%me_g0=0
-   end if
    call timab(633,2,tsec)
 
    call timab(638,3,tsec)
@@ -490,7 +475,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
    call timab(638,2,tsec)
 
    call timab(634,3,tsec)
-   mpi_enreg%me_g0=old_me_g0
 
    gs_hamk%istwf_k=1
 
@@ -508,8 +492,6 @@ subroutine prep_getghc(cwavef, gs_hamk, gvnlxc, gwavef, swavef, lambda, blocksiz
 
  end if
 !====================================================================
-
- if (gs_hamk%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
  if(do_transpose) then
 
@@ -660,17 +642,17 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  logical,optional,intent(in)            :: already_transposed
  integer,optional,intent(in)            :: gpu_option
  real(dp),        intent(in)            :: lambdablock(blocksize)
- real(dp),        intent(out),   target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
- real(dp),        intent(inout), target :: cwavef(:,:)
+ real(dp),        intent(out)           :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
+ real(dp),        intent(inout)         :: cwavef(:,:)
  real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
- type(mpi_type),intent(inout)           :: mpi_enreg
+ type(mpi_type),intent(in)              :: mpi_enreg
  type(pawcprj_type),intent(inout)       :: cwaveprj(:,:)
 
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,ier,ikpt_this_proc,my_nspinor,ndatarecv,nproc_band,npw,nspinortot
- integer :: old_me_g0,spaceComm=0,tim_nonlop
+ integer :: spaceComm=0,tim_nonlop
  logical :: do_transpose
  integer :: l_gpu_option
  !character(len=500) :: msg
@@ -851,15 +833,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
     end if
  end if
 
- if(hamk%istwf_k==2) then
-   old_me_g0=mpi_enreg%me_g0
-   if (mpi_enreg%me_fft==0) then
-     mpi_enreg%me_g0=1
-   else
-     mpi_enreg%me_g0=0
-   end if
- end if
-
 !=====================================================================
  if (bandpp==1) then
 
@@ -972,7 +945,6 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
        call DCOPY(2*ndatarecv*my_nspinor*bandpp, gsc_alltoall2, 1, gsc, 1)
     end if
  end if
- if (hamk%istwf_k==2) mpi_enreg%me_g0=old_me_g0
 
  if (nnlout>0) then
    call xmpi_allgather(enlout,nnlout*bandpp,enlout_block,spaceComm,ier)
@@ -1068,7 +1040,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  integer,intent(in),optional :: gpu_option
  real(dp),intent(in) :: ucvol,wtk
  type(bandfft_kpt_type),optional,target,intent(in) :: bandfft_kpt_tab
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: occ_k(nband_k)
@@ -1080,7 +1052,7 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
 !scalars
  integer :: bandpp,bandpp_sym,ier,iibandpp,ikpt_this_proc,ind_occ,ind_occ1,ind_occ2,ipw
  integer :: istwf_k_,jjbandpp,me_fft,nd3,nproc_band,nproc_fft,npw_fft
- integer :: old_me_g0=0,spaceComm=0,tim_fourwf,gpu_option_
+ integer :: spaceComm=0,tim_fourwf,gpu_option_
  integer,pointer :: idatarecv0,ndatarecv,ndatarecv_tot,ndatasend_sym
  logical :: flag_inv_sym,have_to_reequilibrate
  real(dp) :: weight,weight1,weight2
@@ -1219,12 +1191,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
         & recvcountsloc,rdisplsloc,spaceComm,ier)
  end if
  call timab(547,2,tsec)
-
-!If me_fft==0, I have the G=0 vector, but keep for the record the old value
- if (me_fft==0) then
-   old_me_g0=mpi_enreg%me_g0
-   mpi_enreg%me_g0=1
- end if
 
  tim_fourwf=16
 
@@ -1561,7 +1527,6 @@ subroutine prep_fourwf(rhoaug,blocksize,cwavef,wfraug,iblock,istwf_k,mgfft,&
  end if
 
 !====================================================================
- if (me_fft==0) mpi_enreg%me_g0=old_me_g0
  if(have_to_reequilibrate) then
    ABI_FREE(buff_wf)
    ABI_FREE(cwavef_fft)
