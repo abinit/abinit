@@ -2455,6 +2455,7 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
 end subroutine dterm_aij
 
 !!***
+
 !!****f* ABINIT/dterm_SOB1
 !! NAME
 !! dterm_SOB1
@@ -2857,7 +2858,7 @@ subroutine local_fermie(dtset,eigen0,fermie,mpi_enreg,occ)
 
 end subroutine local_fermie
 
-! !!***
+!!***
 
 ! !!****f* ABINIT/make_dijsob1
 ! !! NAME
