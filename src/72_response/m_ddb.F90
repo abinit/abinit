@@ -1801,8 +1801,10 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      ! Examine the symmetries of the q wavevector
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)
 
-!TMP: Deactivate TRS (MR)
-     timrev=0
+     ! Deactuvate TRS for finite-omega calculations
+     if (any(ddb%omega(:,iblok) > tol8)) then
+       timrev=0
+     end if
 
      nsize=3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,1,1))
