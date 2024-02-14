@@ -473,7 +473,8 @@ contains
  ABI_FREE(work1)
  ABI_FREE(work2)
 
- fac=2.714943600699**2*27.2114/four
+! fac=2.714943600699**2*27.2114/four
+ fac=27.2114/four
  open(10,file='k_ss.txt')
    do irow=1, ndim
      write(10,*) invmagsus(irow,1:ndim)*fac
@@ -656,7 +657,8 @@ contains
  mmom=-matmul(magsus,zfield)
  mmom_alt=matmul(invhmat,barmmom)
 
- fac=2.714943600699/two*27.2114/0.529177
+! fac=2.714943600699/two*27.2114/0.529177
+ fac=27.2114/0.529177/two
 
  open(10,file='k_ps.txt')
  do iat1= 1, natom
@@ -1278,7 +1280,8 @@ contains
 !Calculate the Berry-curvature of the inverse magnetic susceptibility
  bc_ss=-matmul(invbarmagsus,matmul(bc_barmagsus,invbarmagsus)) 
 
- fac=2.714943600699**2/four !TMP
+! fac=2.714943600699**2/four !TMP
+ fac=one/four !TMP
  open(10,file='g_ss.txt')
    do irow=1, ndim
      write(10,*) -ione*bc_ss(irow,1:ndim)*fac
@@ -1408,7 +1411,8 @@ contains
    end do
  end do 
 
- fac=2.714943600699/two/0.52917 !TMP
+! fac=2.714943600699/two/0.52917 !TMP
+ fac=one/two/0.52917 !TMP
  open(10,file='g_ps.txt')
  do irow=1,natom*3
    write(10,*) (0.d0,-1.d0)*bc_ps(irow,1:ndim)*fac
