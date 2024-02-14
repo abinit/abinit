@@ -3848,10 +3848,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! Chebyshev
    if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
-     if(dt%nspinor > 1 .and. dt%wfoptalg == 111) then
-       msg='Nspinor > 1 not yet compatible with wfoptalg 1'
-       ABI_ERROR_NOSTOP(msg, ierr)
-     end if
+!LTEST
+!     if(dt%nspinor > 1 .and. dt%wfoptalg == 111) then
+!       msg='Nspinor > 1 not yet compatible with wfoptalg 1'
+!       ABI_ERROR_NOSTOP(msg, ierr)
+!     end if
+!LTEST
      if(dt%usefock > 0) then
        ABI_ERROR_NOSTOP('Fock not yet compatible with wfoptalg 1 (use Fock-level parallelism)', ierr)
      end if
