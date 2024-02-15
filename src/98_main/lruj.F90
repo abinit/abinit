@@ -21,7 +21,8 @@
 !!  For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  -d <n> = Command line argument: highest degree of intended polynomial fits
+!!  Executed as ./lruj *LRUJ.nc FILE1 FILE2 FILE3 ... [--d 5] [--help] [--version]
+!!  --d <n> = Command line argument: highest degree of intended polynomial fits
 !!  *DS*_LRUJ.nc files = gives data from perturbative Abinit calculations
 !!
 !! OUTPUT
@@ -116,9 +117,6 @@ program lruj
 
 !##########################################################################################################
 !######################################  Read command line options  #######################################
-
- !Syntax: ./lruj  FILE1 FILE2 FILE3 ... [-d 5]
- !i.e. list of netcdf files come first, followed by options
 
  !Count arguments and number of files (= #perturbations)
  nargs = command_argument_count()
@@ -379,13 +377,13 @@ program lruj
  do degree=1,mdegree
    ABI_MALLOC(chi0coeffs,(degree+1))
    ABI_MALLOC(chicoeffs,(degree+1))
-   call polynomial_regression(ndata,perts,occs0,degree,chi0coeffs,chi0err(degree))
-   call polynomial_regression(ndata,perts,occs,degree,chicoeffs,chierr(degree))
+   call polynomial_regression(degree,ndata,perts,occs0,chi0coeffs,chi0err(degree))
+   call polynomial_regression(degree,ndata,perts,occs,chicoeffs,chierr(degree))
    chi0(degree)=chi0coeffs(2)/diem         !The derivative of all polynomial regressions
    chi(degree)=chicoeffs(2)                !at pert=0.0 is just the second coefficient.
    chi0err(degree)=chi0err(degree)/diem    !Chi0 error divided by diem also.
    hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))
-   hubparerr(degree)=sqrt(chi0err(degree)/chi0(degree)**2+chierr(degree)/chi(degree)**2)
+   hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree))**2+(chierr(degree)/chi(degree))**2)
    ABI_FREE(chi0coeffs)
    ABI_FREE(chicoeffs)
  end do

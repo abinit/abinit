@@ -6282,32 +6282,30 @@ end subroutine bool2index
 !!  fit as a scalar (RMSerr).
 !!
 !! INPUTS
-!!  npoints = number of data points
-!!  xvals(npoints) = x-values of those data points
-!!  yvals(npoints) = y-values of those data points
 !!  degree = order of the polynomial
+!!  npts = number of data points
+!!  xvals(npts) = x-values of those data points
+!!  yvals(npts) = y-values of those data points
 !!
 !! OUTPUT
 !!  coeffs(degree+1) = coefficients of the polynomial regression
 !!  RMSerr = unbiased RMS error on the fit
-!!            RMSerr=\sqrt{\frac{1}{npoints-1}*
-!!                      \sum_i^npoints{(fitval-yvals(i))**2}}
+!!            RMSerr=\sqrt{\frac{1}{npts-1}*
+!!                      \sum_i^npts{(fitval-yvals(i))**2}}
 !!
 !! SOURCE
-!!  Polynomial regression algorithm from Rosetta Code under Creative Commons
-!!  and GNU Free Documentation License.
-!!  Link: https://rosettacode.org/wiki/Polynomial_regression#Fortranf
-!!  Some variables changed to simplify.
+!!
 
-subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
+
+subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
 
 !Arguments ------------------------------------
 
 !scalars
- integer                     :: npoints,degree
+ integer                     :: degree,npts
  real(dp),intent(out)        :: RMSerr
 !arrays
- real(dp),intent(in)         :: xvals(1:npoints),yvals(1:npoints)
+ real(dp),intent(in)         :: xvals(1:npts),yvals(1:npts)
  real(dp),intent(out)        :: coeffs(degree+1)
 
 !Local variables-------------------------------
@@ -6315,51 +6313,50 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
  integer                     :: ncoeffs,icoeff,ipoint,info
  real(dp)                    :: residual,fitval
 !arrays
- integer,allocatable         :: ipiv(:)
- real(dp),allocatable        :: work(:)
- real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
-!characters
- !character(len=500)          :: message
+ integer,allocatable         :: tmp(:)
+ real(dp),allocatable        :: tmptwo(:)
+ real(dp),allocatable        :: A(:,:),ATA(:,:)
 
 !####################################################################
 !#####################  Get Polynomial Fit  #########################
 
   ncoeffs=degree+1
 
-  ABI_MALLOC(ipiv,(ncoeffs))
-  ABI_MALLOC(work,(ncoeffs))
-  ABI_MALLOC(A,(size(xvals),ncoeffs))
-  ABI_MALLOC(AT,(ncoeffs,size(xvals)))
+  ABI_MALLOC(tmp,(ncoeffs))
+  ABI_MALLOC(tmptwo,(ncoeffs))
+  ABI_MALLOC(A,(npts,ncoeffs))
   ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
 
-  !Prepare the matrix A
-  do icoeff=0,ncoeffs-1
-    do ipoint=1,size(xvals)
-       if (icoeff==0.and.xvals(ipoint)==0.0) then
-          A(ipoint,icoeff+1) = 1.0
+  !Construct a polynomial for all input xvalues
+  do icoeff=1,ncoeffs
+    do ipoint=1,npts
+       if (icoeff==1.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff) = 1.0
        else
-          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+          A(ipoint,icoeff) = xvals(ipoint)**(icoeff-1)
        end if
     end do
   end do
 
-  AT  = transpose(A)
-  ATA = matmul(AT,A)
+  !Get matrix product of transpose of A and A
+  ATA = matmul(transpose(A),A)
 
-  !Call LAPACK subroutines DGETRF and DGETRI
-  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
+  !Compute LU factorization of ATA
+  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,tmp,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
 
-  call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
+  !Compute inverse of the LU factorized version of ATA
+  call DGETRI(ncoeffs,ATA,ncoeffs,tmp,tmptwo,ncoeffs,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
 
-  coeffs = matmul(matmul(ATA,AT),yvals)
+  !Harvest polynomial coefficients
+  coeffs = matmul(matmul(ATA,transpose(A)),yvals)
 
 !####################################################################
 !##############  RMS error on the polynomial fit  ###################
 
   residual=0.0d0
-  do ipoint=1,npoints
+  do ipoint=1,npts
     fitval=0.0d0
     do icoeff=1,ncoeffs
       if (icoeff==1.and.xvals(ipoint)==0.0) then
@@ -6370,17 +6367,15 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
     end do
     residual=residual+(fitval-yvals(ipoint))**2
   end do
-  RMSerr=sqrt(residual/(real(npoints-1,8)))
-
+  RMSerr=sqrt(residual/(real(npts-1,8)))
 
 !####################################################################
 !########################  Deallocations  ###########################
 
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
   ABI_FREE(A)
-  ABI_FREE(AT)
   ABI_FREE(ATA)
+  ABI_FREE(tmp)
+  ABI_FREE(tmptwo)
 
 end subroutine polynomial_regression
 !!***
