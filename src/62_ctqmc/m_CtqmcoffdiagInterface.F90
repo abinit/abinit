@@ -23,6 +23,7 @@
 #include "defs.h"
 MODULE m_CtqmcoffdiagInterface
 USE m_Ctqmcoffdiag
+use defs_basis
 
 IMPLICIT NONE
 
@@ -257,7 +258,7 @@ END SUBROUTINE CtqmcoffdiagInterface_setOpts
 !! SOURCE
 
 SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,opt_sym,opt_levels,hybri_limit,Magmom_orb,&
-&Magmom_spin,Magmom_tot,Iatom) 
+&Magmom_spin,Magmom_tot,Iatom,fname) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcoffdiagInterface), INTENT(INOUT) :: op
@@ -276,6 +277,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:),OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN ) :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
 !local variables--------------------------------
 !  INTEGER :: iflavor1,iflavor2
 
@@ -328,7 +330,7 @@ SUBROUTINE CtqmcoffdiagInterface_run(op,G0omega, Gtau, Gw, D,E,Noise,matU,Docc,o
  ! write(6,*) "op%Hybrid%stats",op%Hybrid%stats
  ! write(6,*) "opt_gMove",op%opt_gMove
 
-  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom)
+  CALL Ctqmcoffdiag_getResult(op%Hybrid,Iatom,fname)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmcoffdiag_symmetrizeGreen(op%Hybrid,opt_sym)
