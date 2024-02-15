@@ -792,17 +792,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  
  names(1091)='listkk                          '; basic(1091) = 1
 
- names(1100)='nonlop_ylm                      '
- names(1101)='nlo_ylm%opernla                 '
- names(1102)='nlo_ylm%opernla_mv              '
- names(1103)='nlo_ylm%opernlb                 '
- names(1104)='nlo_ylm%opernlb_mv              '
- names(1105)='nlo_ylm%opernlc                 '
- names(1106)='nlo_ylm%opernld                 '
- names(1107)='nlo_ylm%opernld(l)              '
- names(1108)='nlo_ylm%opernld(l+im)           '
- names(1119)='nlo_ylm(other)                  '
-
  names(1150)='outscfcv                        '
  names(1151)='outscfcv(preparation)           '
  names(1152)='outscfcv(mlwfovlp)              '
@@ -1012,15 +1001,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
- names(1653) = 'lobpcg_run                     '
+! names(1653) = 'lobpcg_run                     '
  names(1654) = 'lobpcg_getAX_BX                '
  names(1655) = 'lobpcg_orthoWrtPrev            '
- names(1656) = 'lobpcg_Bortho                  '
- names(1657) = 'lobpcg_RayleighRitz            '
+! names(1656) = 'lobpcg_Bortho                  '
+! names(1657) = 'lobpcg_RayleighRitz            '
  names(1658) = 'lobpcg_maxResidu               '
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
- names(1661) = 'lobpcg_RayleighRitz@hegv       '
+! names(1661) = 'lobpcg_RayleighRitz@hegv       '
 
  ! xg_t
  names(1662) = 'xgTransposer_transpose@ColsRows'
@@ -1031,9 +1020,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1667) = 'xgTransposer_init              '
  names(1668) = 'xgTransposer_free              '
  names(1669) = 'xgTransposer_transpose         '
- names(1670) = 'xgBlock_potrf                  '
+ names(1670) = 'xgBlock_gemm(blas)             '
  names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_gemm(blas)             '
+ names(1672) = 'xgBlock_potrf                  '
  names(1673) = 'xgBlock_set                    '
  names(1674) = 'xgBlock_get                    '
  names(1675) = 'xgBlock_heev                   '
@@ -1126,7 +1115,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1750) = 'chebfiwf2                     '; basic(1750) = 1
  names(1751) = 'chebfi2_init                  '
  names(1752) = 'chebfi2_free                  '
- names(1753) = 'chebfi2_run                   '
+! names(1753) = 'chebfi2_run                   '
  names(1754) = 'chebfi2_getAX_BX              '
  names(1755) = 'chebfi2_invovl                '
  names(1756) = 'chebfi2_residu                '
@@ -1419,9 +1408,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
-   case(45)
-!      Estimate the complement of nonlop_ylm
-     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+!   case(45)
+!!      Estimate the complement of nonlop_ylm
+!     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
    case(46)
 !      Sum the calls of getcprj
      tslots(:4)=(/1290,1293,1294,1295/)
@@ -1824,15 +1813,15 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(75)
          list(:20)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1661,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
+         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
-       case(80)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
+!       case(80)
+!         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
          list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(82)
@@ -1840,7 +1829,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
+         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

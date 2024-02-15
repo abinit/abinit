@@ -74,7 +74,7 @@ module m_chebfi2
 
  integer, parameter :: tim_init         = 1751
  integer, parameter :: tim_free         = 1752
- integer, parameter :: tim_run          = 1753
+! integer, parameter :: tim_run          = 1753
  integer, parameter :: tim_getAX_BX     = 1754
  integer, parameter :: tim_invovl       = 1755
  integer, parameter :: tim_residu       = 1756
@@ -547,7 +547,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
 ! *********************************************************************
 
- call timab(tim_run,1,tsec)
+! call timab(tim_run,1,tsec)
 
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
@@ -761,7 +761,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 !   mpi_enreg%comm_band = comm_band_save
  end if
 
- call timab(tim_run,2,tsec)
+! call timab(tim_run,2,tsec)
 
 end subroutine chebfi_run
 !!***

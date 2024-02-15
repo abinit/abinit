@@ -58,15 +58,15 @@ module m_lobpcg2
 
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
-  integer, parameter :: tim_run      = 1653
+!  integer, parameter :: tim_run      = 1653
   integer, parameter :: tim_getAX_BX = 1654
   integer, parameter :: tim_ortho    = 1655
-  integer, parameter :: tim_Bortho   = 1656
-  integer, parameter :: tim_RR       = 1657
+!  integer, parameter :: tim_Bortho   = 1656
+!  integer, parameter :: tim_RR       = 1657
   integer, parameter :: tim_maxres   = 1658
   integer, parameter :: tim_ax_bx    = 1659
   integer, parameter :: tim_pcond    = 1660
-  integer, parameter :: tim_hegv     = 1661
+!  integer, parameter :: tim_hegv     = 1661
 
   integer, parameter :: tim_Bortho_X    = 1641
   integer, parameter :: tim_Bortho_XW   = 1642
@@ -418,7 +418,7 @@ module m_lobpcg2
       end subroutine pcond
     end interface
 
-    call timab(tim_run,1,tsec)
+!    call timab(tim_run,1,tsec)
 
     lobpcg%prtvol = prtvol
 
@@ -757,7 +757,7 @@ module m_lobpcg2
       call xgTransposer_free(lobpcg%xgTransposerBW)
     end if
 
-    call timab(tim_run,2,tsec)
+!    call timab(tim_run,2,tsec)
 
   end subroutine lobpcg_run
 
@@ -839,7 +839,7 @@ module m_lobpcg2
     type(xgBlock_t) :: AX
     double precision :: tsec(2)
 
-    call timab(tim_Bortho,1,tsec)
+!    call timab(tim_Bortho,1,tsec)
     call timab(timer,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
 
@@ -910,7 +910,7 @@ module m_lobpcg2
     call xg_free(buffer)
 
     ABI_NVTX_END_RANGE()
-    call timab(tim_Bortho,2,tsec)
+    !call timab(tim_Bortho,2,tsec)
     call timab(timer,2,tsec)
 
   end subroutine lobpcg_Borthonormalize
@@ -953,7 +953,7 @@ module m_lobpcg2
     integer :: openblas_get_num_threads
 #endif
 
-    call timab(tim_RR, 1, tsec)
+!    call timab(tim_RR, 1, tsec)
     call timab(timer , 1, tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RR)
 
@@ -1094,7 +1094,7 @@ module m_lobpcg2
     !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
     !---end
 
-    call timab(tim_hegv,1,tsec)
+!    call timab(tim_hegv,1,tsec)
     tsec(2) = abi_wtime()
     if ( var == VAR_X ) then
       ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
@@ -1160,7 +1160,7 @@ module m_lobpcg2
 !      eigenSolverCount(eigenSolver) = eigenSolverCount(eigenSolver)+1
 !    end if
     if ( lobpcg%prtvol == 4 ) write(std_out,*) tsec(2)
-    call timab(tim_hegv,2,tsec)
+!    call timab(tim_hegv,2,tsec)
     ABI_NVTX_END_RANGE()
 
     if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
@@ -1225,7 +1225,7 @@ module m_lobpcg2
     call xg_free(subB)
 
     ABI_NVTX_END_RANGE()
-    call timab(tim_RR, 2, tsec)
+!    call timab(tim_RR, 2, tsec)
     call timab(timer , 2, tsec)
 
   end subroutine lobpcg_rayleighRitz
