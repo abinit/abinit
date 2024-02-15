@@ -219,7 +219,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical,allocatable :: lmselect(:)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
- real(dp),allocatable :: dijnd(:,:),dijso(:,:),dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
+ real(dp),allocatable :: dijnd(:,:),dijso(:,:)
+ real(dp),allocatable :: dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
  real(dp),pointer :: v_dijhat(:,:),vpawu(:,:,:,:),vpawx(:,:,:)
 
 ! *************************************************************************
@@ -409,8 +410,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    dij_need=.false.;dij0_need=.false.;dijexxc_need=.false.;dijfock_need=.false.
    dijhartree_need=.false.;dijhat_need=.false.;dijhatfr_need=.false.;
-   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.;dijxchat_need=.false.
-   dijxcval_need=.false.; dijnd_need=.false.
+   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.
+   dijxchat_need=.false.;dijxcval_need=.false.; dijnd_need=.false.
 
    if (dij_available) then
      if (paw_ij(iatom)%has_dij==1) then
@@ -1141,6 +1142,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
        klmn=pawrhoij%rhoijselect(irhoij)
 
        ro=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn)
+       !print *, "debug: irhoij, ro, pawtab%eijkl(klmn,klmn)",  irhoij, ro, pawtab%eijkl(klmn,klmn)
 
        !Diagonal k=l
        dijhartree(iq0_dij+klmn)=dijhartree(iq0_dij+klmn)+ro*pawtab%eijkl(klmn,klmn)
@@ -2696,6 +2698,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(dijso_rad)
 
 end subroutine pawdijso
+
 !!***
 
 !----------------------------------------------------------------------

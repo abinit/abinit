@@ -1718,11 +1718,11 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
 !scalars
  integer :: bsize_frm,mpi_type_frm
 #ifdef HAVE_MPI_IO
- integer :: ierr,isk,nqlwl
+ integer :: ierr,isk
  !character(len=500) :: msg
 !arrays
  integer(kind=MPI_OFFSET_KIND) :: fmarker,positloc
- integer :: statux(MPI_STATUS_SIZE)
+ integer :: nqlwl(1),statux(MPI_STATUS_SIZE)
 #endif
 
 ! *************************************************************************
@@ -1744,13 +1744,13 @@ subroutine hscr_mpio_skip(mpio_fh, fform, offset)
    ! read nqlwl from the 2d record.
    positloc  = offset + bsize_frm + 9*xmpi_bsize_int
    call MPI_FILE_READ_AT(mpio_fh,positloc,nqlwl,1,MPI_INTEGER,statux,ierr)
-   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl)))
+   call wrtout(std_out, sjoin("nqlwl = ",itoa(nqlwl(1))))
 
    do isk=1,5
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end do
 
-   if (nqlwl>0) then  ! skip qlwl
+   if (nqlwl(1)>0) then  ! skip qlwl
      call xmpio_read_frm(mpio_fh,offset,xmpio_single,fmarker,ierr)
    end if
 

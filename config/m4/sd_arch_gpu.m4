@@ -24,6 +24,7 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_enable=""
   sd_gpu_init="unknown"
   sd_gpu_ok="unknown"
+  sd_gpu_prefix=""
 
   # Set adjustable parameters
   sd_gpu_options="$1"
@@ -71,6 +72,7 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_enable="${withval}"
         sd_gpu_init="yon"
       else
+        sd_gpu_prefix="${withval}"
         sd_gpu_enable="yes"
         sd_gpu_init="dir"
       fi],
@@ -197,6 +199,7 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_SUBST(sd_gpu_options)
   AC_SUBST(sd_gpu_enable_def)
   AC_SUBST(sd_gpu_policy)
+  AC_SUBST(sd_gpu_prefix)
   AC_SUBST(sd_gpu_status)
   AC_SUBST(sd_gpu_enable)
   AC_SUBST(sd_gpu_init)

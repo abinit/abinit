@@ -214,7 +214,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,coretau_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
+ integer :: gscase,has_dijnd,has_diju,has_vhartree,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -230,7 +230,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
- real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm ! CP added fermih
+ real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
  real(dp) :: ucvol,vxcavg
  character(len=500) :: message
  type(ebands_t) :: bstruct
@@ -434,7 +434,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
+
 !If parallelism over atom, hdr is distributed
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
@@ -685,12 +686,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_kxc=1
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
+   has_vhartree=0
+   if(dtset%orbmag>0 .AND. dtset%pawspnorb > 0) has_vhartree=1
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxctau=dtset%usekden,&
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=dtset%usekden,&
         &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
