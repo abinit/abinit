@@ -70,10 +70,9 @@ module m_xg
   integer, parameter, public :: COLS2ROWS =  1
   integer, parameter, public :: ROWS2COLS = -1
 
-  integer, parameter :: tim_potrf      = 1670
+  integer, parameter :: tim_gemm_blas  = 1670
   integer, parameter :: tim_trsm       = 1671
-  integer, parameter :: tim_gemm_blas  = 1672
-  integer, parameter :: tim_gemm_mpi   = 1688
+  integer, parameter :: tim_potrf      = 1672
   integer, parameter :: tim_set        = 1673
   integer, parameter :: tim_get        = 1674
   integer, parameter :: tim_heev       = 1675
@@ -89,6 +88,7 @@ module m_xg
   integer, parameter :: tim_copy       = 1685
   integer, parameter :: tim_cshift     = 1686
   integer, parameter :: tim_pack       = 1687
+  integer, parameter :: tim_gemm_mpi   = 1688
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
