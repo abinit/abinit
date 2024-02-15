@@ -2506,9 +2506,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do ib_k=1,nbcalc_ks
                band_ks = ib_k + bstart_ks - 1
                eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-               ! Handle n == m and degenerate states.
-               ediff = eig0nk - eig0mk; if (abs(ediff) < EPHTK_WTOL) cycle
-
+               !
                ! Compute DW term following XG paper. Check prefactor.
                ! gkq0_atm(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
                gdw2 = zero
@@ -2520,12 +2518,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                      + gkq0_atm(1, ib_k, ibsum, ip2) * gkq0_atm(1, ib_k, ibsum, ip1) &
                      + gkq0_atm(2, ib_k, ibsum, ip2) * gkq0_atm(2, ib_k, ibsum, ip1) &
                    )
-
+                   !
                    gdw2 = gdw2 + real(tpp_red(ip1,ip2) * cfact)
                  end do
                end do
                gdw2 = gdw2 / (four * two * wqnu)
-
+               !
                if (dtset%eph_stern /= 0 .and. ibsum == bsum_stop) then
                  ! Compute DW term for m > nband
                  cfact = zero
@@ -2538,31 +2536,25 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                  ! TODO: Test symmetrization, real quantity? add support for the different Eliashberg functions with Stern
                  gdw2_stern = real(cfact) / (four * wqnu)
                end if
-
+               !
+               ! Handle n == m and degenerate states.
+               ediff = eig0nk - eig0mk ! SP: one cannot cycle here because the Sternheimer contribution needs to be computed
+               !
                ! Optionally, accumulate DW contribution to Eliashberg functions.
                if (dtset%prteliash /= 0) then
-                  sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) - gdw2 / ediff
-                 !if (dtset%eph_stern /= 0 .and. ibsum == bsum_stop) then
-                 !  sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) - gdw2_stern
-                 !end if
+                 if (abs(ediff) > EPHTK_WTOL) then
+                   sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) = sigma%gf_nnuq(ib_k, nu, iq_ibz_k, 3) - gdw2 / ediff
+                 end if
                end if
-
-               !if (dtset%prteliash == 3) then
-               !  delta_e_minus_emkq = gaussian(sigma%a2f_emesh - eig0mk, dtset%tsmear)
-               !  dwargs = sigma%phmesh - phfrq(nu)
-               !  dtw_weights(:, 1) = gaussian(dwargs, dtset%ph_smear)
-               !  do ie=1,sigma%a2f_ne
-               !    sigma%a2few(:, ie, ib_k, 2) = sigma%a2few(:, ie, ib_k, 2) + &
-               !         delta_e_minus_emkq(ie) * dtw_weights(:, 1) * gdw2 / (enk - e) * sigma%wtq_k(iq_ibz_k)
-               !  end do
-               !if (dtset%eph_stern /= 0 .and. ibsum == bsum_stop) then
-               !end if
-               !end if
-
+               !
                ! Accumulate DW for each T, add it to Sigma(e0) and Sigma(w) as well
                ! - (2 n_{q\nu} + 1) * gdw2 / (e_nk - e_mk)
-               do it=1,sigma%ntemp
-                 cfact = - weight_q * gdw2 * (two * nqnu_tlist(it) + one)  / ediff
+               do it = 1, sigma%ntemp
+                 if (abs(ediff) > EPHTK_WTOL) then
+                   cfact = - weight_q * gdw2 * (two * nqnu_tlist(it) + one)  / ediff
+                 else
+                   cfact = zero
+                 endif
                  if (dtset%eph_stern /= 0 .and. ibsum == bsum_stop) then
                    ! Add contribution due to the Sternheimer. ediff is absorbed in Sternheimer.
                    cfact = cfact - weight_q * gdw2_stern * (two * nqnu_tlist(it) + one)
