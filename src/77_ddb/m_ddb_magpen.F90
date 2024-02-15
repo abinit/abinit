@@ -38,6 +38,9 @@ module m_ddb_magpen
  implicit none
 
  public :: ddb_magpen       ! Convert the derivatives calculated with the magnetic penalty into the physically relevant ones.
+ public :: ddb_omega_interpol ! Perform an interpolation of the he derivatives calculated with the magnetic
+                              ! penalty and later on convert them into the physically relevant ones at each value of interpolated omega.
+
 
  private
 
@@ -135,18 +138,21 @@ contains
      rfmagn(1:2)= 2
    end if
 
+   write(msg, '(1a,(80a),2a,3f16.8,2a,f16.8,a)' ) ch10,('-',ii=1,80),ch10, &
+   ' q point  ', qphon(:,1),ch10,&
+   ' frequency', ddb%omega(1,kblok), ch10
+   call wrtout([std_out, ab_out], msg)
+
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
 
    ! Calculate and write the spin-susceptibility matrices
    if (iblok /= 0) then
      if (magpen<zero) then
-       write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
-       ' Spin susceptibility (Uniform Zeeman) ',ch10
+       write(msg, '(2a)' ) ' Spin susceptibility (Uniform Zeeman) ',ch10
        call wrtout([std_out, ab_out], msg)
      else if (magpen>zero) then
-       write(msg, '(2a,(80a),4a)' ) ch10,('-',ii=1,80),ch10,ch10,&
-       ' Spin susceptibility (Local Zeeman) ',ch10
+       write(msg, '(2a)' ) ' Spin susceptibility (Local Zeeman) ',ch10
        call wrtout([std_out, ab_out], msg)
      end if
 
@@ -267,6 +273,16 @@ contains
      else if (magpen>zero) then
        rfmagn(1:2)= 2
      end if
+
+     write(msg, '(a,(80a),a,3(a,3f16.8,a),3(a,f16.8,a))' ) ch10,('-',ii=1,80),ch10, &
+     ' q point 1  ', qphon(:,1),ch10,&
+     ' q point 2  ', qphon(:,2),ch10,&  
+     ' q point 3  ', qphon(:,3),ch10,&  
+     ' frequency 1', ddb%omega(1,kblok), ch10,&
+     ' frequency 2', ddb%omega(2,kblok), ch10,&
+     ' frequency 3', ddb%omega(3,kblok), ch10
+     call wrtout([std_out, ab_out], msg)
+
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
 
@@ -1573,43 +1589,79 @@ contains
 
  end subroutine berrycurv_pp
 
-!!****f* m_ddb_magpen/berrycurv_tt
+!!****f* m_ddb_omega_interpol/ddb_omega_interpol
 !! NAME
-!! berrycurv_tt
+!! ddb_omega_interpol
 !!
 !! FUNCTION
-!! Calculate the Berry curvature of the spin-spin Hessian
+!! Interpolate over frequency the secon-order derivatives calculated with 
+!! the magnetic penalty and latter on convert them into physically relevant 
+!! quantities.
 !!
 !! INPUTS
-!! blkval(2,3*mpert*3*mpert*3*mpert,nblok)=  Third-order derivative matrices
-!!  In our case, the nblok is restricted to iblok
-!! iblok= index of the current block
-!! invbarmagsus(ndim,ndim)= Inverse of the penalized spin-sussceptibility tensor
+!! ddb (INOUT) = ddb block datastructure
+!! magpen = amplitude (in Ha) of the applied magnetic penalty 
 !! mpatpol(2) = Atoms on which the magnetic penalty has been applied
 !! mpdir(3) = Directions along which the spin-degrees of freedom have been stiffened 
-!! mpert =maximum number of ipert
+!! mpert = maximum number of ipert
+!! mpopt = 1 calculate the frozen-magnetic second-order quantities
+!!         2 calculate the spin-relaxed second-order quantities 
 !! natom= number of atoms in unit cell
-!! nblok= number of blocks in the DDB
-!! nmdir= number of directions along which the magnetic penalty was applied
-!! ndim= dimension of the square susceptibilities 
-!! prtvol= control the volume of information written on output
+!! ntypat= number of atom types
+!! ucvol= unit cell volume
 !!
 !! OUTPUT
+!! ddb= ddb%val updated with the corrected second-order derivatives
 !!
 !! SOURCE
 
- subroutine berrycurv_tt(blkval,iblok,invbarmagsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+ subroutine ddb_omega_interpol(ddb,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+& nomega,ntypat,omegamax,omegamin,prtvol,rftyp,ucvol,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: mpert,mpopt,natom,nomega,ntypat,prtvol,rftyp
+ real(dp),intent(in) :: magpen,omegamax,omegamin,ucvol
 !arrays
+ type(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
- complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
+ real(dp),intent(in) :: xred(3,natom)
 
- end subroutine berrycurv_tt
+!Local variables -------------------------
+!scalars
+ integer :: iblok,ii,ipert1,ipert2,iw,jblok,kblok,lblok,nblok,nsize,ndim 
+ integer :: nmat,nmdir,nwcalc
+ real(dp) :: omega,omegastp
+ character(len=500) :: msg
+!arrays
+ real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp), allocatable :: omegacalc(:)
+ complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
+ complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
+ complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
+ complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
+
+! *********************************************************************
+
+ write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
+ ' Omega interpolation of magnetic penalty quantities section ',ch10
+ call wrtout([std_out, ab_out], msg)
+
+!Identify the calculated omegas
+ nwcalc=ddb%nblok
+ ABI_MALLOC(omegacalc,(nwcalc))
+ omegacalc(:)=ddb%omega(1,:)
+
+!Define the omega discretization
+ omegastp=(omegamax-omegamin)/(nomega-1) 
+
+!Loop over the frequency
+ do iw=1,nomega
+   omega=omegamin+omegastp*(iw-1)
+
+ end do
+
+ end subroutine ddb_omega_interpol
 !!***
 
 end module m_ddb_magpen
