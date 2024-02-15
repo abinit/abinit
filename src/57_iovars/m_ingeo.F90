@@ -857,7 +857,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would 
      ! be a large departure from the current implementation. Still, the detection of the existence of the primitive cell
      ! and the corresponding Bravais lattice is activated.
-     ABI_MALLOC(is_translation,(nsym))
      do try_primitive=1,1
 
        call symfind(dtset%berryopt,field_xred,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
@@ -919,6 +918,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        end if
 
        chkprim_fake=-1 
+       ABI_MALLOC(is_translation,(nsym))
        call chkprimit(chkprim_fake, multi, nsym, symafm, symrel, is_translation) 
 
        if(multi/=1)then ! The cell is not primitive, get the point symmetries from a primitive cell.
@@ -931,6 +931,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
              translations(:,itranslat)=tnons(:,isym)
            endif
          enddo
+         ABI_FREE(is_translation)
          call reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
          ABI_FREE(translations)
          !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
@@ -958,11 +959,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            exit
          endif
        else ! The cell is primitive
+         ABI_FREE(is_translation)
          exit
        endif
 
      enddo ! try_primitive
-     ABI_FREE(is_translation)
 
    end if
 
