@@ -23,6 +23,7 @@
 #include "defs.h"
 MODULE m_CtqmcInterface
 USE m_Ctqmc
+use defs_basis
 
 IMPLICIT NONE
 
@@ -262,7 +263,8 @@ END SUBROUTINE CtqmcInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels,Magmom_orb,Magmom_spin,Magmom_tot,Iatom) 
+SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels,Magmom_orb,Magmom_spin,Magmom_tot,Iatom, &
+&fname) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -279,7 +281,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_spin
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_tot
   INTEGER, INTENT(IN )  :: Iatom
-
+  character(len=fnlen), INTENT(INOUT) :: fname
   CALL Ctqmc_reset(this%Hybrid)
 
 !  ifstream = 42
@@ -309,7 +311,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
                            opt_spectra=this%opt_spectra, &
                            opt_gMove=this%opt_gMove)
 
-  CALL Ctqmc_getResult(this%Hybrid,Iatom)
+  CALL Ctqmc_getResult(this%Hybrid,Iatom,fname)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmc_symmetrizeGreen(this%Hybrid,opt_sym)
