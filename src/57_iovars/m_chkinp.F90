@@ -215,7 +215,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  autoparal
    call chkint_eq(0,0,cond_string,cond_values,ierr,'autoparal',dt%autoparal,5,(/0,1,2,3,4/),iout)
-   if(dt%autoparal/=0.and..not.(dt%optdriver==RUNL_GSTATE .or. dt%optdriver==RUNL_GWLS) then
+   if(dt%autoparal/=0.and..not.(dt%optdriver==RUNL_GSTATE .or. dt%optdriver==RUNL_GWLS)) then
        cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
        call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
    end if
