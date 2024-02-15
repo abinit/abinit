@@ -250,6 +250,10 @@ program anaddb
    call ddb_magpen(ddb, ddb_lw, inp%magpen, inp%mpatpol, inp%mpdir, mpert, & 
  & inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp,    &
  & Crystal%xred)
+   if (inp%omegaflag==1) then
+     call ddb_omega_interpol(ddb,inp%magpen,inp%mpatpol,inp%mpdir,mpert,inp%mpopt,natom, &
+   & inp%nomega,ntypat,inp%omegamax,inp%omegamin,inp%prtvol,1,Crystal%ucvol,Crystal%xred)
+   end if
  end if
 
  ! Acoustic Sum Rule
