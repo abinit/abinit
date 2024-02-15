@@ -551,7 +551,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
          ABI_MALLOC(ghc_vxctau,(2,npw1_k*nspinor))
          ! ndat hard-coded as 1
          call getgh1c_mGGA(cwave1,rf_hamkq%dkinpw_k,gs_hamkq%gbound_k,ghc_vxctau,gs_hamkq%gprimd,idir,gs_hamkq%istwf_k,&
-              & gs_hamkq%kg_k,kinpw1,gs_hamkq%kpt_k,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
+              & gs_hamkq%kg_k,kinpw1,gs_hamkq%mgfft,mpi_enreg,nspinor,gs_hamkq%n4,gs_hamkq%n5,&
               & gs_hamkq%n6,1,gs_hamkq%ngfft,npw_k,gs_hamkq%nvloc,rf_hamkq%vxctaulocal,gs_hamkq%gpu_option)
 !        There is an additional factor of 4 with respect to the bare matrix element
          evxctau1_k(iband)=two*energy_factor*(DOT_PRODUCT(cwave0(1,1:npw_k*nspinor),ghc_vxctau(1,1:npw_k*nspinor))+&

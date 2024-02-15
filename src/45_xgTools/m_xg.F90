@@ -39,7 +39,7 @@ module m_xg
   use m_abicore
   use defs_basis
   use m_time, only : timab
-  use m_xmpi, only : xmpi_sum
+  use m_xmpi
   use m_xomp
   use m_abi_linalg
 
@@ -1286,10 +1286,16 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-#if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+#if defined HAVE_OPENMP_OFFLOAD
+#if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:)
+#endif
+#if !defined HAVE_MPI2_INPLACE
+    complex(kind=c_double_complex), ABI_CONTIGUOUS pointer :: vecC_buf(:,:)
+    real(kind=c_double), ABI_CONTIGUOUS pointer :: vecR_buf(:,:)
+#endif
 #endif
 
     call timab(tim_gemm,1,tsec)
@@ -1361,18 +1367,44 @@ contains
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+# ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
+# else
+          ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
+          !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+          call MPI_ALLREDUCE(xgBlockW%vecR, vecR_buf,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+          !$OMP END TARGET DATA
+          !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
+          ABI_FREE(vecR_buf)
+# endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+# ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
+# else
+          ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
+          !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+          call MPI_ALLREDUCE(xgBlockW__vecR, vecR_buf,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+          !$OMP END TARGET DATA
+          !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
+          ABI_FREE(vecR_buf)
+# endif
 #endif
 #endif
 
@@ -1431,18 +1463,44 @@ contains
           ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+# ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
+# else
+          ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
+          !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+          call MPI_ALLREDUCE(xgBlockW%vecC, vecC_buf,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          xgBlockW%vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+          !$OMP END TARGET DATA
+          !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
+          ABI_FREE(vecC_buf)
+# endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+# ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
+          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
+# else
+          ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
+          !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+          call MPI_ALLREDUCE(xgBlockW__vecC, vecC_buf,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%spacedim_comm,K)
+          xgBlockW__vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+          !$OMP END TARGET DATA
+          !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
+          ABI_FREE(vecC_buf)
+# endif
 #endif
 #endif
 
