@@ -105,7 +105,10 @@ _ WF disk file :      0.086 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
-        autoparal           1
+        autoparal1          1
+        autoparal2          1
+        autoparal3          0
+        autoparal4          0
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
 -          fftalg         312
@@ -1275,7 +1278,10 @@ tolerances: {tolwfr: 1.00E-16, }
  -outvars: echo values of variables after computation  --------
             acell      1.0600000000E+01  1.0600000000E+01  1.0600000000E+01 Bohr
               amu      6.97200000E+01  7.49216000E+01
-        autoparal           1
+        autoparal1          1
+        autoparal2          1
+        autoparal3          0
+        autoparal4          0
            diemac      6.00000000E+00
              ecut      2.00000000E+00 Hartree
            etotal1    -8.3602806603E+00
