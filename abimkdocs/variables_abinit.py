@@ -4169,7 +4169,7 @@ Variable(
     mnemonics="Electron-PHonon: FROHLICH Model",
     added_in_version="before_v9",
     text=r"""
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6, 10.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
@@ -5609,7 +5609,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode).
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6. 10.
 If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]].
 
   * If [[getefmas]] == 0, no such use of previously computed output _EFMAS file is done.
@@ -8441,7 +8441,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Eventually used when [[ndtset]] > 0 (multi-dataset mode).
-Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
+Only relevant for [[optdriver]]=7 and [[eph_task]]=6, 10.
 If set to 1, take the data from a _EFMAS file as input. The latter must have been produced using [[prtefmas]] in another run.
 """,
 ),
@@ -9861,7 +9861,7 @@ defines the k point grid. The other piece of information is contained in
 
 The values [[kptrlatt]](1:3,1), [[kptrlatt]](1:3,2), [[kptrlatt]](1:3,3) are the
 coordinates of three vectors in real space, expressed in the [[rprimd]]
-coordinate system (reduced coordinates). They defines a super-lattice in real
+coordinate system (reduced coordinates). They define a super-lattice in real
 space. The k point lattice is the reciprocal of this super-lattice, possibly shifted (see [[shiftk]]).
 
 If neither [[ngkpt]] nor [[kptrlatt]] are defined, ABINIT will automatically
@@ -12799,7 +12799,7 @@ allowed x, y and z magnetization (useful only with [[nspinor]] = 2 and
 [[nsppol]] = 1, either because there is spin-orbit without time-reversal
 symmetry - and thus spontaneous magnetization, or with spin-orbit, if one
 allows for spontaneous non-collinear magnetism). Available for
-response functions [[cite:Ricci2019]]. Not yest available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
+response functions [[cite:Ricci2019]]. Not yet available for mGGA. Also note that, with [[nspden]] = 4, time-reversal symmetry
 is not taken into account (at present; this has to be checked) and thus
 [[kptopt]] has to be different from 1 or 2.
 
@@ -17228,7 +17228,7 @@ defines the q point grid. The other piece of information is contained in
 
 The values [[qptrlatt]](1:3,1), [[qptrlatt]](1:3,2), [[qptrlatt]](1:3,3) are
 the coordinates of three vectors in real space, expressed in the [[rprimd]]
-coordinate system (reduced coordinates). They defines a super-lattice in real
+coordinate system (reduced coordinates). They define a super-lattice in real
 space. The k point lattice is the reciprocal of this super-lattice, possibly
 shifted (see [[shiftq]]).
 
