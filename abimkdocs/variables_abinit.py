@@ -13573,7 +13573,7 @@ Variable(
 
 !!! note
 
-    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1).
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1) (or GW Lanczos-Sternheimer [[optdriver]]=66, but this is very rare).
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
     not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
     to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.

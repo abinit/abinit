@@ -156,7 +156,12 @@ _ WF disk file :      1.205 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -          iomode6          0
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-        autoparal           1
+        autoparal1          1
+        autoparal2          0
+        autoparal3          0
+        autoparal4          0
+        autoparal5          0
+        autoparal6          0
            bandpp1          4
            bandpp2          1
            bandpp3          1
@@ -2697,7 +2702,12 @@ tolerances: {tolvrs: 1.00E-08, }
 -          iomode6          0
             acell      1.0610000000E+01  1.0610000000E+01  1.0610000000E+01 Bohr
               amu      2.69815390E+01  7.49215900E+01
-        autoparal           1
+        autoparal1          1
+        autoparal2          1
+        autoparal3          0
+        autoparal4          0
+        autoparal5          0
+        autoparal6          0
            bandpp1          4
            bandpp2          1
            bandpp3          1
