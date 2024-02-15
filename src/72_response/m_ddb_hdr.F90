@@ -2546,16 +2546,20 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 !      Read the phonon wavevector
        read(unddb,*)
 !      Read the perturbation frequency
-       read(unddb,*)
+       if (ddbvrs >= cvrsio9_new) then
+         read(unddb,*)
+       end if
      else if(blktyp==3.or.blktyp==33)then
 !      Read the perturbation wavevectors
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
 !      Read the perturbation frequency
-       read(unddb,*)
-       read(unddb,*)
-       read(unddb,*)
+       if (ddbvrs >= cvrsio9_new) then
+         read(unddb,*)
+         read(unddb,*)
+         read(unddb,*)
+       end if
        mblktyp=blktyp
      else if(blktyp==5)then
        read(unddb,*)
