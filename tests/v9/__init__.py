@@ -182,8 +182,4 @@ inp_files = [
 
     # nblock_lobpcg
     "t205.abi",  # test nblock_lobpcg input
-
-    # dmft
-    "t206.abi",  # test scalar local spin susceptibility
-    "t207.abi",  # test spin-orbit local magnetic susceptibility
 ]

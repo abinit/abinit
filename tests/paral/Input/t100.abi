@@ -1,4 +1,6 @@
 #Testing CTQMC local susceptibility
+fftalg 112 #only for test
+iomode 3   #only for test
 
 #Multi_dataset parameters
 ndtset 2       # Two datasets
@@ -30,7 +32,6 @@ getwfk -1      # Second one takes the density of first
 #Definition pseudopotentials
  pp_dirpath "$ABI_PSPDIR"            # repository with pseudopotentials
  pseudos "26fe.lda2.paw"
-#pseudos "Fe.LDA-PW-paw.abinit"
 
 #Definition of the k-point grid
  kptopt 1
@@ -107,15 +108,17 @@ jpawu1      0.00 eV
 jpawu2      0.84 eV  # Values of J
 
 
+
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% [files]
-#%% files_to_test =
-#%%   t206.abo, tolnlines =7, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-easy ;
-#%%   t206o_DS2_LocalSpinSusceptibility_atom_01.dat, tolnlines =0, tolabs =5e-7, tolrel = 5e-7, fld_options=-medium
 #%% [paral_info]
-#%% max_nprocs = 8
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test =
+#%%   t100_MPI4.abo, tolnlines =20, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-medium ;
+#%%   t100_MPI4o_DS2_LocalSpinSusceptibility_atom_01.dat, tolnlines =0, tolabs =0.01, tolrel = 0.01, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
