@@ -46,7 +46,7 @@ It takes about 1-2 minutes to be completed on a PC 2.8 GHz.
 In order to do interatomic force constant (IFC) calculations, and to compute
 associated phonon band structure and thermodynamical properties, you should
 first have some theoretical background.
-Let us assume that you have read the litterature relative to the [first tutorial on DFPT](/tutorial/rf1).
+Let us assume that you have read the literature relative to the [first tutorial on DFPT](/tutorial/rf1).
 You might find additional material, related to the present section, in
 [[cite:Gonze1997a]] -especially section IX-, [[cite:Lee1995]] and [[cite:Baroni2001]].
 If you haven't read parts of these references, we strongly advise you take the time to read them now.
@@ -225,7 +225,7 @@ Now, you should issue:
 
     anaddb < trf2_4.files > trf2_4.log
 
-It will last only a few seconds.
+It will last only a few seconds. 
 
 The file *trf2_4.abo* contains the list of interatomic force constants, as well as some analysis.
 
@@ -281,10 +281,13 @@ Now, you should issue:
 
     anaddb < trf2_5.files > trf2_5.log
 
-It will last only a few seconds.
+It will last only a few seconds.  Note that an alternative to the method used here,
+of inputting the desired q vectors explicitly using [[anaddb:nph1l]] and [[anaddb:qph1l]], is
+to input them in terms of q-path segments using [[anaddb:nqpath]] and [[anaddb:qpath]], in much
+the same way that band structure paths are described in the [3rd basic tutorial](/tutorial/base3).
 
 The file *trf2_5.abo* contains the list of eigenvalues, for all the needed
-q-wavevectors. You can iopen it, and have a look at the different sections of
+q-wavevectors. You can open it, and have a look at the different sections of
 the file. Note that the interatomic force constants are computed (they are
 needed for the Fourier interpolation), but not printed.
 
@@ -301,7 +304,7 @@ You can copy the files *trf2_6.abi* and *trf2_6.files* to the *Work_rf2* directo
 {% dialog tests/tutorespfn/Input/trf2_6.files tests/tutorespfn/Input/trf2_6.abi %}
 
 The file *trf2_6.abo.eps* has been produced. It is an .eps file (eps stand for
-Encapsulated PostScript). You can use the program ghostview to vizualize it.
+Encapsulated PostScript). You can use the program ghostview to visualize it.
 The command to issue will depend on the way you have configured your machine,
 but the following might perhaps do the work:
 
@@ -476,4 +479,4 @@ An example is presented in [[test:v5_22]]
 !!! important
 
     Do not forget that we are working in the harmonic approximation; beyond some
-    temperature, anharmonic effects will have a sizeable contributions.
+    temperature, anharmonic effects will have a sizable contributions.
