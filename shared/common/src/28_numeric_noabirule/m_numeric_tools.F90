@@ -173,8 +173,6 @@ MODULE m_numeric_tools
    module procedure cdp2rdp_3D
    module procedure cdp2rdp_4D
    module procedure cdp2rdp_5D
-   module procedure cdp2rdp_6D
-   !module procedure cdp2rdp_7D
  end interface c2r
 
  interface isinteger
@@ -737,6 +735,12 @@ end function get_trace_cdp
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
 !! SOURCE
 
 function get_diag_int(mat) result(diag)
@@ -768,6 +772,12 @@ end function get_diag_int
 !! FUNCTION
 !!  Return the diagonal of a square matrix as a vector
 !!
+!! INPUTS
+!!  matrix(:,:)
+!!
+!! OUTPUT
+!!  diag(:)=the diagonal
+!!
 !! SOURCE
 
 function get_diag_rdp(mat) result(diag)
@@ -797,7 +807,10 @@ end function get_diag_rdp
 !!  get_diag_cdp
 !!
 !! FUNCTION
-!!  Return the diagonal of a square matrix as a vector
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1202,6 +1215,12 @@ end function cdp2rdp_0D
 !! FUNCTION
 !!  Create a real array containing real and imaginary part starting from a complex array
 !!
+!! INPUTS
+!!  cc(:)=the input complex array
+!!
+!! OUTPUT
+!!  rr(2,:)=the real array
+!!
 !! SOURCE
 
 pure function cdp2rdp_1D(cc) result(rr)
@@ -1226,7 +1245,10 @@ end function cdp2rdp_1D
 !!  cdp2rdp_2D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1251,7 +1273,10 @@ end function cdp2rdp_2D
 !!  cdp2rdp_3D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1277,7 +1302,10 @@ end function cdp2rdp_3D
 !!  cdp2rdp_4D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1302,7 +1330,10 @@ end function cdp2rdp_4D
 !!  cdp2rdp_5D
 !!
 !! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
+!!
+!! INPUTS
+!!
+!! OUTPUT
 !!
 !! SOURCE
 
@@ -1320,57 +1351,6 @@ pure function cdp2rdp_5D(cc) result(rr)
 
 end function cdp2rdp_5D
 !!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_numeric_tools/cdp2rdp_6D
-!! NAME
-!!  cdp2rdp_6D
-!!
-!! FUNCTION
-!!  Create a real array containing real and imaginary part starting from a complex array!!
-!!
-!! SOURCE
-
-pure function cdp2rdp_6D(cc) result(rr)
-
-!Arguments ------------------------------------
-!scalars
- complex(dpc),intent(in) :: cc(:,:,:,:,:,:)
- real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6))
-
-! *********************************************************************
-
- rr(1,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:))
- rr(2,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:))
-
-end function cdp2rdp_6D
-!!***
-
-!!!!8D arrays are not allowed in Fortran standard!
-!!!****f* m_numeric_tools/cdp2rdp_7D
-!!! NAME
-!!!  cdp2rdp_7D
-!!!
-!!! FUNCTION
-!!!  Create a real array containing real and imaginary part starting from a complex array!!
-!!!
-!!! SOURCE
-!
-!pure function cdp2rdp_7D(cc) result(rr)
-!
-!!Arguments ------------------------------------
-!!scalars
-! complex(dpc),intent(in) :: cc(:,:,:,:,:,:,:)
-! real(dp) :: rr(2,SIZE(cc,1),SIZE(cc,2),SIZE(cc,3),SIZE(cc,4),SIZE(cc,5),SIZE(cc,6),SIZE(cc,7))
-!
-!! *********************************************************************
-!
-! rr(1,:,:,:,:,:,:,:)=REAL (cc(:,:,:,:,:,:,:))
-! rr(2,:,:,:,:,:,:,:)=AIMAG(cc(:,:,:,:,:,:,:))
-!
-!end function cdp2rdp_7D
-!!!***
 
 !----------------------------------------------------------------------
 
@@ -3242,7 +3222,9 @@ subroutine hermitianize_spc(mat,uplo)
  complex(spc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
+!scalars
  integer :: nn,ii,jj
+!arrays
  complex(spc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3250,8 +3232,7 @@ subroutine hermitianize_spc(mat,uplo)
 
  select case (uplo(1:1))
 
- case ("A","a")
-   ! Full matrix has been calculated.
+ case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3263,8 +3244,7 @@ subroutine hermitianize_spc(mat,uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u")
-   ! Only the upper triangle is used.
+ case ("U","u") ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3275,8 +3255,7 @@ subroutine hermitianize_spc(mat,uplo)
      end do
    end do
 
- case ("L","l")
-  ! Only the lower triangle is used.
+ case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -3318,7 +3297,7 @@ end subroutine hermitianize_spc
 !!
 !! SOURCE
 
-subroutine hermitianize_dpc(mat, uplo)
+subroutine hermitianize_dpc(mat,uplo)
 
 !Arguments ------------------------------------
 !scalars
@@ -3327,7 +3306,9 @@ subroutine hermitianize_dpc(mat, uplo)
  complex(dpc),intent(inout) :: mat(:,:)
 
 !Local variables-------------------------------
+!scalars
  integer :: nn,ii,jj
+!arrays
  complex(dpc),allocatable :: tmp(:)
 ! *************************************************************************
 
@@ -3335,8 +3316,7 @@ subroutine hermitianize_dpc(mat, uplo)
 
  select case (uplo(1:1))
 
- case ("A","a")
-   ! Full matrix has been calculated.
+ case ("A","a") ! Full matrix has been calculated.
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
@@ -3347,8 +3327,7 @@ subroutine hermitianize_dpc(mat, uplo)
    end do
    ABI_FREE(tmp)
 
- case ("U","u")
-  ! Only the upper triangle is used.
+ case ("U","u") ! Only the upper triangle is used.
    do jj=1,nn
      do ii=1,jj
        if (ii/=jj) then
@@ -3359,8 +3338,7 @@ subroutine hermitianize_dpc(mat, uplo)
      end do
    end do
 
- case ("L","l")
-  ! Only the lower triangle is used.
+ case ("L","l") ! Only the lower triangle is used.
   do jj=1,nn
     do ii=1,jj
       if (ii/=jj) then
@@ -5506,7 +5484,7 @@ end subroutine smooth
 !!
 !! SOURCE
 
-subroutine nderiv(hh, yy, zz, ndim, norder)
+subroutine nderiv(hh,yy,zz,ndim,norder)
 
 !Arguments ---------------------------------------------
 !scalars
@@ -6304,32 +6282,30 @@ end subroutine bool2index
 !!  fit as a scalar (RMSerr).
 !!
 !! INPUTS
-!!  npoints = number of data points
-!!  xvals(npoints) = x-values of those data points
-!!  yvals(npoints) = y-values of those data points
 !!  degree = order of the polynomial
+!!  npts = number of data points
+!!  xvals(npts) = x-values of those data points
+!!  yvals(npts) = y-values of those data points
 !!
 !! OUTPUT
 !!  coeffs(degree+1) = coefficients of the polynomial regression
 !!  RMSerr = unbiased RMS error on the fit
-!!            RMSerr=\sqrt{\frac{1}{npoints-1}*
-!!                      \sum_i^npoints{(fitval-yvals(i))**2}}
+!!            RMSerr=\sqrt{\frac{1}{npts-1}*
+!!                      \sum_i^npts{(fitval-yvals(i))**2}}
 !!
 !! SOURCE
-!!  Polynomial regression algorithm from Rosetta Code under Creative Commons
-!!  and GNU Free Documentation License.
-!!  Link: https://rosettacode.org/wiki/Polynomial_regression#Fortranf
-!!  Some variables changed to simplify.
+!!
 
-subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
+
+subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
 
 !Arguments ------------------------------------
 
 !scalars
- integer                     :: npoints,degree
+ integer                     :: degree,npts
  real(dp),intent(out)        :: RMSerr
 !arrays
- real(dp),intent(in)         :: xvals(1:npoints),yvals(1:npoints)
+ real(dp),intent(in)         :: xvals(1:npts),yvals(1:npts)
  real(dp),intent(out)        :: coeffs(degree+1)
 
 !Local variables-------------------------------
@@ -6337,51 +6313,50 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
  integer                     :: ncoeffs,icoeff,ipoint,info
  real(dp)                    :: residual,fitval
 !arrays
- integer,allocatable         :: ipiv(:)
- real(dp),allocatable        :: work(:)
- real(dp),allocatable        :: A(:,:),AT(:,:),ATA(:,:)
-!characters
- !character(len=500)          :: message
+ integer,allocatable         :: tmp(:)
+ real(dp),allocatable        :: tmptwo(:)
+ real(dp),allocatable        :: A(:,:),ATA(:,:)
 
 !####################################################################
 !#####################  Get Polynomial Fit  #########################
 
   ncoeffs=degree+1
 
-  ABI_MALLOC(ipiv,(ncoeffs))
-  ABI_MALLOC(work,(ncoeffs))
-  ABI_MALLOC(A,(size(xvals),ncoeffs))
-  ABI_MALLOC(AT,(ncoeffs,size(xvals)))
+  ABI_MALLOC(tmp,(ncoeffs))
+  ABI_MALLOC(tmptwo,(ncoeffs))
+  ABI_MALLOC(A,(npts,ncoeffs))
   ABI_MALLOC(ATA,(ncoeffs,ncoeffs))
 
-  !Prepare the matrix A
-  do icoeff=0,ncoeffs-1
-    do ipoint=1,size(xvals)
-       if (icoeff==0.and.xvals(ipoint)==0.0) then
-          A(ipoint,icoeff+1) = 1.0
+  !Construct a polynomial for all input xvalues
+  do icoeff=1,ncoeffs
+    do ipoint=1,npts
+       if (icoeff==1.and.xvals(ipoint)==0.0) then
+          A(ipoint,icoeff) = 1.0
        else
-          A(ipoint,icoeff+1) = xvals(ipoint)**icoeff
+          A(ipoint,icoeff) = xvals(ipoint)**(icoeff-1)
        end if
     end do
   end do
 
-  AT  = transpose(A)
-  ATA = matmul(AT,A)
+  !Get matrix product of transpose of A and A
+  ATA = matmul(transpose(A),A)
 
-  !Call LAPACK subroutines DGETRF and DGETRI
-  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,ipiv,info)
+  !Compute LU factorization of ATA
+  call DGETRF(ncoeffs,ncoeffs,ATA,ncoeffs,tmp,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRF in polynomial regression returned:', itoa(info)))
 
-  call DGETRI(ncoeffs,ATA,ncoeffs,ipiv,work,ncoeffs,info)
+  !Compute inverse of the LU factorized version of ATA
+  call DGETRI(ncoeffs,ATA,ncoeffs,tmp,tmptwo,ncoeffs,info)
   ABI_CHECK(info == 0, sjoin('LAPACK DGETRI in polynomial regression returned:', itoa(info)))
 
-  coeffs = matmul(matmul(ATA,AT),yvals)
+  !Harvest polynomial coefficients
+  coeffs = matmul(matmul(ATA,transpose(A)),yvals)
 
 !####################################################################
 !##############  RMS error on the polynomial fit  ###################
 
   residual=0.0d0
-  do ipoint=1,npoints
+  do ipoint=1,npts
     fitval=0.0d0
     do icoeff=1,ncoeffs
       if (icoeff==1.and.xvals(ipoint)==0.0) then
@@ -6392,17 +6367,15 @@ subroutine polynomial_regression(npoints,xvals,yvals,degree,coeffs,RMSerr)
     end do
     residual=residual+(fitval-yvals(ipoint))**2
   end do
-  RMSerr=sqrt(residual/(real(npoints-1,8)))
-
+  RMSerr=sqrt(residual/(real(npts-1,8)))
 
 !####################################################################
 !########################  Deallocations  ###########################
 
-  ABI_FREE(ipiv)
-  ABI_FREE(work)
   ABI_FREE(A)
-  ABI_FREE(AT)
   ABI_FREE(ATA)
+  ABI_FREE(tmp)
+  ABI_FREE(tmptwo)
 
 end subroutine polynomial_regression
 !!***
