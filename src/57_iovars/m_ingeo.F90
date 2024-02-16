@@ -884,12 +884,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
      ! and the corresponding Bravais lattice is activated.
      do try_primitive=1,1
 
-     invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
-     call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
-       pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
-       chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invar_z=invar_z)
-
-       end if
+       invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
+       call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
+         pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
+         chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invar_z=invar_z)
 
        chkprim_fake=-1 
        ABI_MALLOC(is_translation,(nsym))
