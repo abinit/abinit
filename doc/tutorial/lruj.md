@@ -387,12 +387,13 @@ immediately after the perturbation is applied but before the Hamiltonian is upda
      --------------- -----------------------------
         alpha [eV]     Unscreened      Screened
      --------------- -----------------------------
-       0.0000000000   8.6380190174   8.6380190174
-      -0.1500000676   8.6964896369   8.6520721437
-      -0.1000000451   8.6747136520   8.6474273205
-      -0.0500000225   8.6560255526   8.6427483480
-       0.0500000225   8.6192448590   8.6332170576
-       0.1000000451   8.5980174277   8.6283157193
+      -0.1500000676   8.6964981921   8.6520721998
+      -0.1000000451   8.6747201574   8.6474287212
+      -0.0500000225   8.6560314462   8.6427490201
+       0.0000000000   8.6380182458   8.6380182458
+       0.0500000225   8.6192514478   8.6332174978
+       0.1000000451   8.5980252003   8.6283148749
+
 
 The last table gives the values for $\chi_0$, $\chi$, the Hubbard U, and their RMS errors in units of
 eV, for all polynomial regressions up to degree 3 (cubic). 
@@ -401,9 +402,9 @@ eV, for all polynomial regressions up to degree 3 (cubic).
                                                              ---------------------------------------
      Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
     --------------------------------------------------------|---------------------------------------
-     Linear:        -0.8593951    -0.0949384     9.3695387  |    0.0023935    0.0000876    0.1138301
-     Quadratic:     -0.8574915    -0.0955721     9.2971081  |    0.0023794    0.0000131    0.0683615
-     Cubic:         -0.8007716    -0.0952592     9.2488751  |    0.0001546    0.0000009    0.0184229
+     Linear:        -0.8594082    -0.0949434     9.3689968  |    0.0023925    0.0000878    0.0029335
+     Quadratic:     -0.8574665    -0.0955791     9.2963113  |    0.0023777    0.0000129    0.0027762
+     Cubic:         -0.8007858    -0.0952726     9.2474280  |    0.0001546    0.0000015    0.0001937
 
 One has the option of calculating higher order polynomials, up to degree $n–2$ for *n* points. This 
 is done by appending the degree option <code>--d</code> followed by an integer to the command line. 
@@ -418,10 +419,10 @@ to get the following output:
                                                              ---------------------------------------
      Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
     --------------------------------------------------------|---------------------------------------
-     Linear:        -0.8593951    -0.0949384     9.3695387  |    0.0023935    0.0000876    0.1138301
-     Quadratic:     -0.8574915    -0.0955721     9.2971081  |    0.0023794    0.0000131    0.0683615
-     Cubic:         -0.8007716    -0.0952592     9.2488751  |    0.0001546    0.0000009    0.0184229
-     Degree 4       -0.8049660    -0.0952316     9.2584253  |    0.0000747    0.0000000    0.0109654
+     Linear:        -0.8594082    -0.0949434     9.3689968  |    0.0023925    0.0000878    0.0029335
+     Quadratic:     -0.8574665    -0.0955791     9.2963113  |    0.0023777    0.0000129    0.0027762
+     Cubic:         -0.8007858    -0.0952726     9.2474280  |    0.0001546    0.0000015    0.0001937
+     Degree 4 :     -0.8049062    -0.0952279     9.2587427  |    0.0000790    0.0000003    0.0000981
 
 !!! note
 
@@ -439,7 +440,7 @@ utility) to visualize the fits. The following graph visualizes our data in Mathe
 ![lrujPolyU](lruj_assets/LRUJ_U_polynomials.png)
 
 Based on this information, one could argue the quadratic fit is sufficient. Thus, we get a
-first-principles Hubbard U value of 9.30 ± 0.07 eV for the Ni *3d* subspace in a four-atom cell
+first-principles Hubbard U value of 9.296 ± 0.003 eV for the Ni *3d* subspace in a four-atom cell
 of AF2 NiO. This is much larger than values for NiO reported in the literature values, which can be
 attributed to the poor [[ecut]] and [[ngkpt]] sampling needed to speed up this tutorial. Furthermore,
 this indicates that these parameters must be converged with respect to supercell size in order to 
@@ -453,11 +454,9 @@ are necessary and why polynomials of higher order are needed to perform an accur
 ![lrujPolyJ](lruj_assets/LRUJ_J_polynomials.png)
 
 Here, we see that the quadratic fit, at minimum, sufficiently fits the data, yielding a Hund’s J value 
-of 0.499 ± 0.032 eV for the Ni 3d subspace in a four-atom cell NiO. Keep in mind, however, that these 
+of 0.4994 ± 0.0004 eV for the Ni 3d subspace in a four-atom cell NiO. Keep in mind, however, that these 
 parameters MUST be converged with respect to supercell size in order to isolate the perturbed subspace 
 from its periodic images.
-
-
 
 
 
