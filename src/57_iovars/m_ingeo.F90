@@ -909,7 +909,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
          call reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
          ABI_FREE(translations)
          !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
-         call symlatt(bravais_reduced,msym,nptsym,ptsymrel,rprimd_primitive,tolsym)
+         call symlatt(bravais_reduced,dev_null,msym,nptsym,ptsymrel,rprimd_primitive,tolsym)
          write(msg,'(2a,3(3es16.8,a),2(a,i4,a),3(a,3i4,a),a,i4)')&
 &          ' The cell is not primitive. One could obtain a primitive cell using the following primitive vectors (rprimd) :',ch10,&
 &          rprimd_primitive(1:3,1),ch10,&
