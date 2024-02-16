@@ -34,6 +34,10 @@ module m_xg_ortho_RR
   use m_xg
   use m_xgScalapack
 
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
+
   implicit none
 
   private
