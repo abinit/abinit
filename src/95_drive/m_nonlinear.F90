@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_nonlinear
 !! NAME
 !!  m_nonlinear
@@ -180,7 +179,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  logical :: is_dfpt=.true.,nmxc
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp) :: boxcut,compch_fft,compch_sph,ecore,ecut_eff,ecutdg_eff,ecutf
- real(dp) :: eei,epaw,epawdc,enxc,etot,fermie,fermih ! CP added fermih
+ real(dp) :: eei,epaw,epawdc,enxc,etot,fermie,fermih
  real(dp) :: gsqcut,gsqcut_eff,gsqcutc_eff
  real(dp) :: rdum,residm,ucvol,vxcavg
  character(len=500) :: message
@@ -530,16 +529,12 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
+
 !If parallelism over atom, hdr is distributed
- ! CP modified
- !call hdr%update(bantot,etot,fermie,&
- !  residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
- !  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)

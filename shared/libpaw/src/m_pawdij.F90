@@ -1141,6 +1141,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
        klmn=pawrhoij%rhoijselect(irhoij)
 
        ro=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn)
+       !print *, "debug: irhoij, ro, pawtab%eijkl(klmn,klmn)",  irhoij, ro, pawtab%eijkl(klmn,klmn)
 
        !Diagonal k=l
        dijhartree(iq0_dij+klmn)=dijhartree(iq0_dij+klmn)+ro*pawtab%eijkl(klmn,klmn)

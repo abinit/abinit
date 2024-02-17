@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_vtorho
 !! NAME
 !!  m_vtorho
@@ -103,7 +102,7 @@ module m_vtorho
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -633,7 +632,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      ABI_MALLOC(cprj_local,(dtset%natom,mcprj_local))
      call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
-     cprj=> cprj_local
+     cprj => null()
+     cprj => cprj_local
    end if
  end if
 
@@ -1025,6 +1025,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                  gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
                  compute_grad_atom=(optforces>0))
            else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+             if(mpi_enreg%paral_kgb==0) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+             else if(gs_hamk%istwf_k==1) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+             else if(gs_hamk%istwf_k==2) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+             else
+               ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+             end if
              call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
                  gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
                  gs_hamk%ucvol, gs_hamk%ffnl_k, &
@@ -1749,22 +1758,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(iscf/=-1 .and. iscf/=-2)then
        call timab(993,1,tsec)
        energies%e_fermie = -huge(one)
-! CP addition for occopt 9 case
        if (dtset%occopt==9) then
           energies%e_fermih = -huge(one)
        end if
-! End CP addition
        bdtot_index=1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-           ! CP modified
-           !do iband=1,nband_k
-           !  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
-           !    energies%e_fermie=eigen(bdtot_index)
-           !  end if
-           !  bdtot_index=bdtot_index+1
-           !end do
            if (dtset%occopt/=9) then
               do iband=1,nband_k
                  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
@@ -1788,15 +1788,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                  bdtot_index=bdtot_index+1
               end do
            end if
-           ! End CP modified
          end do
        end do
        call xmpi_max(energies%e_fermie,spaceComm_distrb,ierr)
-       ! CP added in the case occopt = 9
        if (dtset%occopt == 9) then
           call xmpi_max(energies%e_fermih,spaceComm_distrb,ierr)
        end if
-       ! End CP added
        call timab(993,2,tsec)
      end if
 

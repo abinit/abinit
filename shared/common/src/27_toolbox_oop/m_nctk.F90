@@ -515,12 +515,12 @@ end subroutine nctk_fort_or_ncfile
 
 integer function nctk_try_fort_or_ncfile(filename, errmsg, unit) result(ierr)
 
+!Arguments ------------------------------------
  character(len=*),intent(inout) :: filename
  character(len=*),intent(out) :: errmsg
  integer,optional,intent(in) :: unit
 
 !Local variables-------------------------------
-!scalars
  integer :: unt
 
 ! *********************************************************************
@@ -581,6 +581,9 @@ subroutine nctk_test_mpiio(print_warning)
  nctk_has_mpiio = .False.
  my_print_warning=.true. ; if (present(print_warning)) my_print_warning=print_warning
 
+!FIXME nf90create fails when using NVHPC
+! This might be due to my environment, maybe not, need to investigate this...
+!!#ifndef FC_NVHPC
 #ifdef HAVE_NETCDF_MPI
  if (xmpi_comm_rank(xmpi_world) == master) then
    ! Try to open a file with hdf5.
@@ -616,6 +619,7 @@ subroutine nctk_test_mpiio(print_warning)
    ABI_WARNING(msg)
  end if
 #endif
+!!#endif
 
 #ifdef HAVE_NETCDF_DEFAULT
  if (.not. nctk_has_mpiio) then
@@ -787,7 +791,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len, cmode
+ integer :: input_len, cmode !, ii, ich
  character(len=strlen) :: my_string
 
 ! *********************************************************************
@@ -834,10 +838,25 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
      my_string = "jdtset " // trim(itoa(DTSET_IDX)) // "  " // trim(INPUT_STRING)
    end if
 
+   ! Since INPUT_STRING contains many control characters at the end (likely because it's a global var)
+   ! and we want to save space on disk, we cannot use trim_len and we have to find the last alphanum char in my_string.
    input_len = len_trim(my_string)
+#if 0
+   do ii=len(my_string), 1, -1
+     ich = iachar(my_string(ii:ii))
+     select case(ich)
+     case(0:32)  ! space, tab, or control character
+       !write(std_out, *)"space/tab/control at: ",ii, "iachar: ",iachar(my_string(ii:ii)), "char:", my_string(ii:ii)
+       cycle
+     case default
+       input_len = ii !; write(std_out, *)"Exiting at ii: ",ii, "with: ",my_string(ii:ii)
+       exit
+     end select
+   end do
+#endif
+
    NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
-   !print *, trim(INPUT_STRING)
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))

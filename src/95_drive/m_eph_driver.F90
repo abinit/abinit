@@ -48,7 +48,6 @@ module m_eph_driver
  use m_time,            only : cwtime, cwtime_report
  use m_fstrings,        only : strcat, sjoin, ftoa, itoa
  use m_fftcore,         only : print_ngfft
- use m_frohlichmodel,   only : frohlichmodel,polaronmass
  use m_rta,             only : rta_driver, ibte_driver
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -70,6 +69,7 @@ module m_eph_driver
  use m_migdal_eliashberg, only : migdal_eliashberg_iso !, migdal_eliashberg_aniso
  use m_berry_curvature,  only : berry_curvature
  use m_cumulant,        only : cumulant_driver
+ use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
 
  implicit none
 
@@ -147,7 +147,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
  integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
- integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
+ integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj, qptopt
  integer :: ncid ! ,ncerr
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
@@ -166,6 +166,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(mpi_type) :: mpi_enreg
  type(phdos_t) :: phdos
  type(gstore_t) :: gstore
+ type(frohlich_t) :: frohlich
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
  real(dp),parameter :: k0(3)=zero
@@ -241,14 +242,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  end if
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
-
  use_sigeph = (dtset%eph_task == 9)
 
  if (my_rank == master) then
    ! GA: Let ddb object handle the error at reading time
    !if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
-
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
@@ -381,7 +380,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
        call wrtout(ab_out,msg)
      end if
    end if
-
    if (use_wfk) call ebands_write(ebands, dtset%prtebands, dtfil%filnam_ds(4))
  end if
 
@@ -697,7 +695,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (6)
    ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
    if (my_rank == master) then
-     call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (7)
@@ -715,7 +713,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    if (my_rank == master) then
-     call polaronmass(cryst, dtset, efmasdeg, efmasval, ifc)
+     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
+       efmasval, ifc)
    end if
 
  case (11)
@@ -746,9 +745,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !else
    !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
    !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+   ! Customize input vars for this task.
+   !  dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
    !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
    !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+   !  call gstore%free()
+   !  call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    !end if
    !call variational_polaron(gstore, dtset, dtfil)
    !call gstore%free()
@@ -760,14 +763,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
-     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
+     ! Customize input vars for this eph_task.
+     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+     call gstore%free()
+     call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
-   call berry_curvature(gstore, dtset, dtfil, ifc, dielt, zeff, qdrp_cart)
+   call berry_curvature(gstore, dtset, dtfil)
    call gstore%free()
 
  case (15, -15)
@@ -788,7 +794,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ABI_WARNING("eph_task in [16, -16] (test_phrotation) does not support nprocs > 1. Running in sequential.")
    end if
 
-   call test_phrotation(ifc, cryst, dtset%ph_ngqpt, comm)
+   qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+   call test_phrotation(ifc, cryst, qptopt, dtset%ph_ngqpt, comm)
 
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then

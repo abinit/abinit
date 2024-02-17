@@ -521,7 +521,7 @@ subroutine print_kinds(unit)
 
  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
- write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e16.8e3,/),a,e16.8e3)')&
    ' REAL:      Data type name: REAL(DP) ',&
    '            Kind value: ',KIND(0.0_dp),&
    '            Precision:  ',PRECISION(0.0_dp),&
@@ -578,7 +578,7 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
