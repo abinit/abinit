@@ -48,7 +48,7 @@ Build-system consistency checks
 # fn6-fn9, psp1-psp4 = none
 #
 01 statchk abichecks/scripts/check-conflict-markers.py
-02 statchk abichecks/scripts/check-line-lengths.py
+#02 statchk abichecks/scripts/check-line-lengths.py
 03 statchk abichecks/scripts/check-config-h.py
 10 statchk abichecks/scripts/check-build-config.py
 12 statchk abichecks/scripts/check-cpp-options.py

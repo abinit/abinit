@@ -7,7 +7,7 @@ config.h.in~
 .tox
 .idea
 .cache
-.*.sw[op]
+*.sw[op]
 __pycache__
 .ipynb_checkpoints
 .version
@@ -66,6 +66,10 @@ topology.so
 *.[ao]
 *.stderr
 *.stdout
+*.cmod
+*.stb
+*.ilm
+*.cmdx
 buildbot.ac
 CMakeFiles
 CMakeCache.txt
@@ -217,8 +221,11 @@ mkdocs_plugins/dist
 /shared/common/src/14_hidewrite/m_cppopts_dumper.F90
 /shared/common/src/14_hidewrite/m_optim_dumper.F90
 /shared/common/src/18_timing/.deps
+/shared/common/src/*/*.lst
+/shared/libpaw/src/*.lst
 /src/.abilint
 /src/*/*~
+/src/*/*.lst
 /src/abilint.log
 /src/abirules.log
 /src/error_make_abiauty
@@ -339,3 +346,9 @@ mac-1P0-225.ac
 doc/topics/ConstrainedDFT.md
 doxygen_docs
 doxygen.err
+
+# Pycharm
+.idea/
+
+# VSC
+.vscode/

@@ -50,6 +50,7 @@
 
 #Parallelization variables
  wfoptalg 4
+ bandpp 1 # old default value
  fftalg 401
  densfor_pred 0
  intxc 0

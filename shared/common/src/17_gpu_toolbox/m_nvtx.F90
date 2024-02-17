@@ -20,8 +20,8 @@
 #include "config.h"
 #endif
 
-module m_nvtx
 
+module m_nvtx
   use, intrinsic :: iso_c_binding
   implicit none
 
@@ -61,33 +61,41 @@ module m_nvtx
      type(C_PTR):: message  ! ascii char
   end type nvtxEventAttributes
 
+#ifdef HAVE_GPU_MARKERS
+
   interface nvtxRangePush
      ! push range with custom label and standard color
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePushA(name) bind(C, name='nvtxRangePushA')
+#elif defined HAVE_GPU_HIP
+     subroutine nvtxRangePushA(name) bind(C, name='roctxRangePushA')
+#endif
        use, intrinsic :: iso_c_binding
        character(kind=C_CHAR) :: name(256)
      end subroutine nvtxRangePushA
-
+#ifdef HAVE_GPU_CUDA
      ! push range with custom label and custom color
      subroutine nvtxRangePushEx(event) bind(C, name='nvtxRangePushEx')
        use, intrinsic :: iso_c_binding
        import:: nvtxEventAttributes
        type(nvtxEventAttributes):: event
      end subroutine nvtxRangePushEx
-
+#endif
   end interface nvtxRangePush
 
   interface nvtxRangePop
+#if defined HAVE_GPU_CUDA
      subroutine nvtxRangePop() bind(C, name='nvtxRangePop')
+#elif defined HAVE_GPU_HIP
+     subroutine nvtxRangePop() bind(C, name='roctxRangePop')
+#endif
      end subroutine nvtxRangePop
   end interface nvtxRangePop
 
   interface
-
     ! start profiling
     subroutine nvtxProfilerStart() bind(C, name='cudaProfilerStart')
     end subroutine nvtxProfilerStart
-
     ! stop profiling
     subroutine nvtxProfilerStop() bind(C, name='cudaProfilerStop')
     end subroutine nvtxProfilerStop
@@ -113,7 +121,7 @@ contains
        tempName(i) = trimmed_name(i:i)
     enddo
 
-
+#if defined HAVE_GPU_CUDA
     if ( .not. present(id)) then
        call nvtxRangePush(tempName)
     else
@@ -121,11 +129,17 @@ contains
        event%message=c_loc(tempName)
        call nvtxRangePushEx(event)
     end if
+#elif defined HAVE_GPU_HIP
+    call nvtxRangePush(tempName)
+#endif
+
   end subroutine nvtxStartRange
 
   subroutine nvtxEndRange
     call nvtxRangePop
   end subroutine nvtxEndRange
+
+#endif
 
 end module m_nvtx
 !!***

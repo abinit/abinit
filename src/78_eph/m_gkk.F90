@@ -120,7 +120,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c=1,berryopt0=0, useylmgr1=0,master=0
+ integer,parameter :: tim_getgh1c=1, berryopt0=0, useylmgr1=0, master=0, qptopt1 = 1
  integer :: my_rank,nproc,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
@@ -305,7 +305,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  if (dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -631,7 +631,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0
+ integer,parameter :: master = 0, qptopt1 = 1
  integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
  logical :: with_lr_model
 #ifdef HAVE_NETCDF
@@ -727,7 +727,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  else if (dtset%eph_task == +16) then
    call wrtout([std_out, ab_out], " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
-    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))

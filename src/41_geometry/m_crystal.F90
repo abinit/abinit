@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_crystal
+module m_crystal
 
  use defs_basis
  use m_errors
@@ -94,6 +94,9 @@ MODULE m_crystal
   ! 2 => take advantage of time-reversal symmetry.
 
   real(dp) :: ucvol
+  ! Real space unit cell volume.
+
+  !real(dp) :: bzvol
   ! Real space unit cell volume.
 
   logical :: use_antiferro
@@ -976,7 +979,7 @@ subroutine crystal_print(Cryst, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
- integer,optional,intent(in) :: unit,prtvol
+ integer,optional,intent(in) :: unit, prtvol
  character(len=*),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
  class(crystal_t),intent(in) :: Cryst
@@ -1666,7 +1669,7 @@ subroutine crystal_ncread(cryst, ncid)
 
 ! *************************************************************************
 
-   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid)) 
+   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions
@@ -1726,7 +1729,7 @@ subroutine crystal_ncread(cryst, ncid)
  ABI_ERROR("netcdf library not available")
 #endif
 
-end subroutine crystal_ncread       
+end subroutine crystal_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -2201,5 +2204,5 @@ subroutine get_redcart_qdirs(cryst, nq, qdirs, qlen)
 end subroutine get_redcart_qdirs
 !!***
 
-END MODULE m_crystal
+end module m_crystal
 !!***

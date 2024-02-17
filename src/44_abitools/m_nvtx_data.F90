@@ -20,7 +20,7 @@
 
 module m_nvtx_data
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
   use m_nvtx, only : nvtxStartRange, nvtxEndRange, nvtxProfilerStart, nvtxProfilerStop
 #endif
 
@@ -247,7 +247,7 @@ contains
 
   end subroutine nvtx_init
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   subroutine abi_nvtx_start_range(id)

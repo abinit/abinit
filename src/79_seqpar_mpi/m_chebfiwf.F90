@@ -63,8 +63,12 @@ module m_chebfiwf
  use m_gpu_toolbox
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
+#endif
+
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
 #endif
 
 #if defined(HAVE_YAKL)
@@ -245,7 +249,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
- type(mpi_type),target,intent(inout) :: mpi_enreg
+ type(mpi_type),target,intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),target,intent(out) :: resid(nband)
@@ -270,11 +274,10 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Stupid things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- real(dp) :: gsc_dummy(0,0)
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+ real(dp) :: gsc_dummy(1,1)
+ type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- ! other
  integer(kind=c_size_t) :: l_pcon_size_bytes
 #endif
 
@@ -412,17 +415,17 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
-&                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
-&                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
-&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
-&                 l_gs_hamk%gpu_option, &
-&                 gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
+&                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
+&                 nline, space,1,l_gs_hamk%istwf_k, &
+&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw,&
+&                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+&                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,nspinor)
 
 !Free preconditionning since not needed anymore
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then
@@ -441,7 +444,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    !if ( size(l_gvnlxc) < 2*nband*l_npw*l_nspinor ) then
    !if ( size(l_gvnlxc) /= 0 ) then
    !  ABI_FREE(l_gvnlxc)
+#ifdef FC_CRAY
+   ABI_MALLOC(l_gvnlxc,(1,1))
+#else
    ABI_MALLOC(l_gvnlxc,(0,0))
+#endif
    !end if
 
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NONLOP)
@@ -456,7 +463,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  call chebfi_free(chebfi)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE FROM(cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,eig,resid) IF(gs_hamk%gpu_option==ABI_GPU_OPENMP)
 #endif
 !################    SORRY IT'S ALREADY FINISHED : )  #################
 !######################################################################
@@ -511,7 +519,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  type(xgTransposer_t), optional, intent(inout) :: transposer
  integer         :: blockdim
  integer         :: spacedim
- type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 
 !Local variables-------------------------------
 !scalars
@@ -521,7 +529,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
  real(dp), pointer :: gsc(:,:)
- real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp)          :: l_gvnlxc(1,1)
 
 ! *********************************************************************
 
@@ -567,19 +575,13 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
  !end if
 
- ABI_MALLOC(l_gvnlxc,(0,0))
-
  call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
    l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
- ABI_FREE(l_gvnlxc)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
- !if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
-   call gpu_device_synchronize()
- !end if
+ call gpu_device_synchronize()
 #endif
-
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
@@ -766,7 +768,6 @@ subroutine getBm1X(X,Bm1X,transposer)
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
-     call pawcprj_alloc(cwaveprj_next,0,(/0/))
    else
      ABI_MALLOC(cwaveprj_next, (l_gs_hamk%natom,l_nspinor*blockdim))
      call pawcprj_alloc(cwaveprj_next,0,l_gs_hamk%dimcprj)
@@ -842,12 +843,11 @@ subroutine getBm1X(X,Bm1X,transposer)
      end if
    end if
  end if
+
  if (l_paw) then
-   if (l_useria /= 121212) then
-     call pawcprj_free(cwaveprj_next)
-     ABI_FREE(cwaveprj_next)
-   end if
+   ABI_FREE(cwaveprj_next)
  end if
+
  ABI_NVTX_END_RANGE()
 
 end subroutine getBm1X

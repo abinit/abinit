@@ -61,7 +61,27 @@ if(ABINIT_ENABLE_MPI_IO_DEFAULT)
   set(HAVE_MPI_IO_DEFAULT 1)
 endif()
 
-option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: no)" OFF)
+option(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" AUTO)
+if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX STREQUAL "AUTO")
+  try_compile(MPI_NOT_BUGGY ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
+    LINK_LIBRARIES MPI::MPI_Fortran)
+    if(NOT MPI_NOT_BUGGY)
+      ABINIT_ENABLE_MPI_INTERFACES_BUGFIX = "yes"
+    endif()
+endif()
+if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
+  set(HAVE_MPI_BUGGY_INTERFACES 1)
+endif()
+
+option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: auto)" AUTO)
+if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
+  if(NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
+    try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
+      LINK_LIBRARIES MPI::MPI_Fortran)
+  else()
+    ABINIT_ENABLE_MPI_INPLACE = "no"
+  endif()
+endif()
 if(ABINIT_ENABLE_MPI_INPLACE)
   set(HAVE_MPI2_INPLACE 1)
 endif()
@@ -124,16 +144,49 @@ if(ABINIT_ENABLE_GPU_CUDA)
   # check nvtx library is available
   if (TARGET CUDA::nvToolsExt)
     set(HAVE_GPU_CUDA10 1)
-    set(HAVE_GPU_NVTX_V3 1)
+    set(HAVE_GPU_MARKERS 1)
   endif()
 
 endif()
 
-if (ABINIT_ENABLE_GPU_CUDA)
+option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_HIP)
+
+  find_package(HIP)
+  find_package(hipfft)
+  find_package(rocfft)
+  find_package(rocblas)
+  find_package(hipblas)
+  find_package(hipsolver)
+
+  set(HAVE_GPU_HIP 1)
+
+  set(HAVE_GPU 1)
+  set(HAVE_GPU_SERIAL 1)
+
+  # ROCTX: ROC tracer library similar in use to NVTX for CUDA
+  find_library(ROCTX
+    NAMES libroctx64.so
+    HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+    REQUIRED)
+
+  # check roctx library is available
+  if (EXISTS ${ROCTX})
+    set(HAVE_GPU_MARKERS 1)
+  endif()
+  add_compile_definitions("__HIP_PLATFORM_AMD__")
+
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)
   set(DO_BUILD_17_GPU_TOOLBOX TRUE)
-  set(DO_BUILD_46_MANAGE_CUDA TRUE)
 else()
   set(DO_BUILD_17_GPU_TOOLBOX FALSE)
+endif()
+
+if (ABINIT_ENABLE_GPU_CUDA)
+  set(DO_BUILD_46_MANAGE_CUDA TRUE)
+else()
   set(DO_BUILD_46_MANAGE_CUDA FALSE)
 endif()
 

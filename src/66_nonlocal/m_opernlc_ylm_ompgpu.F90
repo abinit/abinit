@@ -161,6 +161,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
 !Tested usecases :
 ! - Nvidia GPUs : FC_NVHPC + CUDA
+! - AMD GPUs    : FC_LLVM + HIP
 ! An eventual Intel implementation would use the OneAPI LLVM compiler.
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
@@ -227,7 +228,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
 !  === Diagonal term(s) (up-up, down-down)
 
-    !$OMP TASKWAIT
 !  1-Enl is real
    if (cplex_enl==1) then
      if (paw_opt==2) then
@@ -268,12 +268,11 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        end do
        end do
 
-       !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
      else
        !$OMP TARGET TEAMS DISTRIBUTE &
        !$OMP& PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:enl,atindx1,gx,gxfac) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn) nowait
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -305,9 +304,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          end do
        end do
        end do
-       !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
      endif
-    !$OMP TASKWAIT
 
 
 !    2-Enl is complex  ===== D^ss'_ij=D^s's_ji^*
@@ -381,7 +378,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
            end do
          end do
          end do
-         !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
        else
          !$OMP TARGET TEAMS DISTRIBUTE &
          !$OMP& PARALLEL DO COLLAPSE(3) &
@@ -446,7 +442,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
            end do
          end do
          end do
-         !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
        end if
 
      else ! -------------> SPINORIAL CASE
@@ -515,7 +510,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          end do
        end do
        end do
-       !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
      end if !nspinortot
    end if !complex_enl
 
@@ -579,7 +573,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        end do
      end do
      end do
-     !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
 
 !    --- Parallelization over spinors ---
    else if (nspinortot==2.and.nspinor/=nspinortot) then
@@ -631,7 +624,6 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        end do !jlmn
      end do !iat
      end do !idat
-     !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
      call xmpi_sum(gxfac_offdiag,mpi_enreg%comm_spinor,ierr)
      !$OMP TARGET UPDATE FROM(gxfac_)
      !gxfac_(:,:,:,1)=gxfac_(:,:,:,1)+gxfac_offdiag(:,:,:,ispinor_index)
@@ -643,12 +635,11 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
 !Accumulate gxfac related to overlap (Sij) (PAW)
 !------------------------------------------- ------------------------
- !$OMP TASKWAIT
  if (paw_opt==3.or.paw_opt==4) then ! Use Sij, overlap contribution
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PARALLEL DO COLLAPSE(4) &
    !$OMP& MAP(to:sij,gx,gxfac_sij) &
-   !$OMP PRIVATE(idat, ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,ijlmn) nowait
+   !$OMP PRIVATE(idat, ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,ijlmn)
    do idat=1,ndat
    do ispinor=1,nspinor
      do ia=1,nincat
@@ -677,9 +668,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      end do
    end do
    end do
-   !$OMP END TARGET TEAMS DISTRIBUTE PARALLEL DO
  end if
- !$OMP TASKWAIT
 
 #else
 

@@ -82,6 +82,7 @@ P           mkmem           1
           ngfftdg          80      80      80
            nimage           3
              nkpt           2
+    nblock_lobpcg          16
 -          npband           2
 -         npimage           3
 -        np_spkpt           4
@@ -6271,6 +6272,7 @@ P           mkmem           1
           ngfftdg          80      80      80
            nimage           3
              nkpt           2
+    nblock_lobpcg          16
 -          npband           2
 -         npimage           3
 -        np_spkpt           4
