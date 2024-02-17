@@ -178,9 +178,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  type(geo_t) :: geo
 !arrays
  integer :: bravais_reduced(11)
- integer,allocatable :: indsym(:,:,:),intarr(:)
+ integer,allocatable :: intarr(:)
  integer,allocatable :: is_translation(:)
- integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:)
+ integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
  real(dp),allocatable :: mass_psp(:)
