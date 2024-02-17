@@ -28,11 +28,16 @@ module m_ingeo
  use m_sort
  use m_dtset
 
- use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, &
+ use m_symtk,      only : mati3inv, chkorthsy, symrelrot, mati3det, chkprimit, &
 &                         symmetrize_rprimd, symmetrize_tnons,symmetrize_xred, symatm
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
+<<<<<<< HEAD
  use m_symfind,    only : symfind, symfind_expert, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
+=======
+ use m_symfind,    only : symfind, symanal, symlatt
+ use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric, reduce2primitive
+>>>>>>> release-9.10
  use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string, get_acell_rprim
 
  implicit none
@@ -165,23 +170,42 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
  character(len=*), parameter :: format01110 ="(1x,a6,1x,(t9,8i8) )"
  character(len=*), parameter :: format01160 ="(1x,a6,1x,1p,(t9,3g18.10)) "
 !scalars
+<<<<<<< HEAD
  integer :: bckbrvltt,brvltt,chkprim,expert_user,fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
  integer :: invar_z,ipsp,irreducible,isym,itypat,jsym,marr,mismatch_fft_tnons,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
  integer :: spgroupma,tgenafm,tnatrd,tread,tscalecart,tspgroupma, tread_geo
  integer :: txcart,txred,txrandom
+=======
+ integer, save :: print_comment_tolsym=1
+ integer :: bckbrvltt,brvltt,chkprim,chkprim_fake,expert_user
+ integer :: fixed_mismatch,i1,i2,i3,iatom,iatom_supercell,idir,ierr,iexit,ii
+ integer :: ipsp,irreducible,isym,itranslat,itypat,jsym,marr,mismatch_fft_tnons,multi,multiplicity,natom_uc,natfix,natrd
+ integer :: nobj,noncoll,nptsym,nsym_now,ntranslat,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
+ integer :: spgroupma,tgenafm,tnatrd,tread,try_primitive,tscalecart,tspgroupma, tread_geo
+ integer :: txcart,txred,txrandom,use_inversion
+>>>>>>> release-9.10
  real(dp) :: amu_default,ucvol,sumalch
  character(len=1000) :: msg
  character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
  type(geo_t) :: geo
 !arrays
+<<<<<<< HEAD
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:)
  integer,allocatable :: intarr(:)
  real(dp) :: angdeg(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
  real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),scalecart(3)
+=======
+ integer :: bravais_reduced(11)
+ integer,allocatable :: indsym(:,:,:),intarr(:)
+ integer,allocatable :: is_translation(:)
+ integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:)
+ real(dp) :: angdeg(3), field_xred(3),gmet(3,3),gprimd(3,3),rmet(3,3),rcm(3)
+ real(dp) :: rprimd(3,3),rprimd_read(3,3),rprimd_new(3,3),rprimd_primitive(3,3),scalecart(3)
+>>>>>>> release-9.10
  real(dp),allocatable :: mass_psp(:)
- real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:)
+ real(dp),allocatable :: tnons_cart(:,:),tnons_new(:,:),translations(:,:)
  real(dp),allocatable :: xcart(:,:),xcart_read(:,:),xred_read(:,:),dprarr(:)
 
 ! *************************************************************************
@@ -833,19 +857,122 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
          '(either natrd, or natom, or spgroup, or nsym)'
        ABI_ERROR(msg)
      endif
+<<<<<<< HEAD
 
      if (multiplicity==1) typat(:)=typat_read(:)
 
      ! Find the symmetry operations: nsym, symafm, symrel and tnons.
      ! Use nptsym and ptsymrel, as determined by symlatt
      ! Will possibly correct xred and tnons.
+=======
+     if (multiplicity==1) typat(:)=typat_read(:)
+
+     ! Find the symmetry operations: nsym, symafm, symrel and tnons.
+     ! Use nptsym and ptsymrel, as determined by symlatt
+
+     noncoll=0; if (nspden == 4) noncoll=1
+
+     use_inversion=1
+     if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
+       ABI_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
+       use_inversion=0
+     end if
+
+     ! Get field in reduced coordinates (reduced e/d field)
+
+     field_xred(:)=zero
+     if (dtset%berryopt ==4) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%efield(:),gprimd(:,ii))
+       end do
+     else if (dtset%berryopt == 6 ) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%dfield(:),gprimd(:,ii))
+         field_xred(ii)=field_xred(ii)+ dot_product(dtset%efield(:),gprimd(:,ii)) ! note: symmetry broken by D and E
+       end do
+     else if (dtset%berryopt == 14) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+       end do
+     else if (dtset%berryopt == 16) then
+       do ii=1,3
+         field_xred(ii)=dtset%red_dfield(ii)+dtset%red_efield(ii)  ! symmetry broken by reduced d and e
+       end do
+     else if (dtset%berryopt == 17) then
+       do ii=1,3
+         field_xred(ii)=dot_product(dtset%red_efieldbar(:),gmet(:,ii))
+         if(dtset%jfielddir(ii)==2) field_xred(ii)=dtset%red_dfield(ii)
+       end do
+     end if
+
+     ! Loop on trials to generate better point symmetries by relying on a primitive cell instead (possibly) of a non-primitive one,
+     ! This loop has been disactivated, because it is not clear that one can generate a more complete set of point symmetries 
+     ! WITH INTEGER components of symrel from a primitive cell. One should allow non-integer components, but this would 
+     ! be a large departure from the current implementation. Still, the detection of the existence of the primitive cell
+     ! and the corresponding Bravais lattice is activated.
+     do try_primitive=1,1
+>>>>>>> release-9.10
 
      invar_z=0 ; if(jellslab/=0 .or. nzchempot/=0)invar_z=2
      call symfind_expert(gprimd,msym,natom,nptsym,nspden,nsym,&
        pawspnorb,dtset%prtvol,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,dtset%usepaw,xred,&
        chrgat=chrgat,nucdipmom=nucdipmom,invardir_red=dtset%field_red,invar_z=invar_z)
 
+<<<<<<< HEAD
    end if ! spgroup==0 and nsym==0
+=======
+       end if
+
+       chkprim_fake=-1 
+       ABI_MALLOC(is_translation,(nsym))
+       call chkprimit(chkprim_fake, multi, nsym, symafm, symrel, is_translation) 
+
+       if(multi/=1)then ! The cell is not primitive, get the point symmetries from a primitive cell.
+         ntranslat=multi
+         ABI_MALLOC(translations,(3,ntranslat))
+         itranslat=0
+         do isym=1,nsym 
+           if(is_translation(isym)==1)then
+             itranslat=itranslat+1
+             translations(:,itranslat)=tnons(:,isym)
+           endif
+         enddo
+         ABI_FREE(is_translation)
+         call reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
+         ABI_FREE(translations)
+         !Find the Bravais lattice of the primitive cell, and the point symmetries (however, in the primitive basis)
+         call symlatt(bravais_reduced,msym,nptsym,ptsymrel,rprimd_primitive,tolsym)
+         write(msg,'(2a,3(3es16.8,a),2(a,i4,a),3(a,3i4,a),a,i4)')&
+&          ' The cell is not primitive. One could obtain a primitive cell using the following primitive vectors (rprimd) :',ch10,&
+&          rprimd_primitive(1:3,1),ch10,&
+&          rprimd_primitive(1:3,2),ch10,&
+&          rprimd_primitive(1:3,3),ch10,&
+&          ' The Bravais lattice has iholohedry   =',bravais(1),ch10,&
+&          '                         center       =',bravais(2),ch10,&
+&          '                         bravais(3:5) =',bravais(3:5),ch10,&
+&          '                         bravais(6:8) =',bravais(6:8),ch10,&
+&          '                         bravais(9:11)=',bravais(9:11),ch10,&
+&          ' The number of point symmetries is nptsym=',nptsym           
+         ABI_COMMENT(msg)
+
+         !Convert the point symmetries to the non-primitive reduced coordinates
+         call symrelrot(nsym, rprimd_primitive, rprimd, ptsymrel, tolsym, ierr)
+         !Perhaps not all components of symrel are integers. This generates a return code, and precludes upgrading ptsymrel.
+         if(ierr/=0)then
+           write(msg,'(a)')&
+&           ' Not all components of symrel are integers in the primitive cell coordinate system.'
+           ABI_COMMENT(msg)
+           exit
+         endif
+       else ! The cell is primitive
+         ABI_FREE(is_translation)
+         exit
+       endif
+
+     enddo ! try_primitive
+
+   end if
+>>>>>>> release-9.10
 
    ! Finalize the computation of coordinates: produce xcart
    call xred2xcart(natom,rprimd,xcart,xred)
