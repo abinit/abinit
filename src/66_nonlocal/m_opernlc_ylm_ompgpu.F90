@@ -233,7 +233,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      if (paw_opt==2) then
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:gxfac,enl,atindx1,gx,sij,lambda) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn)
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -272,7 +272,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        !$OMP TARGET TEAMS DISTRIBUTE &
        !$OMP& PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:enl,atindx1,gx,gxfac) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn)
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -317,7 +317,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          !$OMP& PARALLEL DO COLLAPSE(3) &
          !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
          !$OMP& IS_DEVICE_PTR(sij) &
-         !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
+         !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,i0lmn,ijlmn,gxi)
          do idat=1,ndat
          do ia=1,nincat
            do jlmn=1,nlmn
@@ -383,7 +383,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          !$OMP& PARALLEL DO COLLAPSE(3) &
          !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
          !$OMP& IS_DEVICE_PTR(sij) &
-         !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
+         !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,i0lmn,ijlmn,gxi)
          do idat=1,ndat
          do ia=1,nincat
            do jlmn=1,nlmn
@@ -453,7 +453,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
        !$OMP& IS_DEVICE_PTR(sij) &
        !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl), &
-       !$OMP& PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,gxi)
+       !$OMP& PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,ijlmn,i0lmn,gxi)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -523,7 +523,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      !$OMP& PARALLEL DO COLLAPSE(4) &
      !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
      !$OMP& PRIVATE(idat,ispinor,jspinor,ia,index_enl), &
-     !$OMP& PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxi,gxj,ilmn,ijlmn)
+     !$OMP& PRIVATE(jlmn,j0lmn,jjlmn,enl_,gxi,gxj,ilmn,i0lmn,ijlmn)
      do idat=1,ndat
      do ispinor=1,nspinortot
        do ia=1,nincat
@@ -592,7 +592,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      !$OMP TARGET TEAMS DISTRIBUTE &
      !$OMP& PARALLEL DO COLLAPSE(4) &
      !$OMP& MAP(to:gx,gxi,atindx1,enl_ptr) &
-     !$OMP PRIVATE(idat,ia,index_enl,jlmn,j0lmn,ilmn,i0lmn,ijlmn,enl_,jilmn,gxi)
+     !$OMP PRIVATE(idat,ia,index_enl,jlmn,j0lmn,ilmn,i0lmn,i0lmn,ijlmn,enl_,jilmn,gxi)
      do idat=1,ndat
      do ia=1,nincat
        do jlmn=1,nlmn
@@ -639,7 +639,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PARALLEL DO COLLAPSE(4) &
    !$OMP& MAP(to:sij,gx,gxfac_sij) &
-   !$OMP PRIVATE(idat, ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,ijlmn)
+   !$OMP PRIVATE(idat, ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn)
    do idat=1,ndat
    do ispinor=1,nspinor
      do ia=1,nincat
