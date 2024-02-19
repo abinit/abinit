@@ -823,7 +823,8 @@ number of DDB files is defined by [[anaddb:gruns_nddbs]] (possible values are:
 3,5,7,9) The DDB files correspond to phonon calculations performed at
 different volumes (usually ± 1% of the equilibrium volume). The DDB files must
 be ordered according to the volume of the unit cell (the DDB with smallest
-volume comes first) and the volume increment must be constant. The code
+volume comes first) and the volume increment must be constant to a precision of
+better than 1 part in $10^4$. The code
 computes the derivative of the dynamical matrix wrt the volume using central finite difference.
 """,
     ),
