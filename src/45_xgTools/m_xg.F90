@@ -375,16 +375,12 @@ contains
           ABI_FREE_MANAGED(xg%vecR)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
-        size_bytes = rows*cols*dp
-        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
         xg%trans = 't'
       case (SPACE_C)
         if ( associated(xg%vecC) ) then
           ABI_FREE_MANAGED(xg%vecC)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
-        size_bytes = rows*cols*dpc
-        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -405,16 +401,10 @@ contains
         xg%trans = 't'
 #if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
-        !FIXME To be wrapped
-        size_bytes = sizeof(xg%vecR)
-        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecR)
-        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
-        !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xg%vecR(:,:) = zero
         xg__vecR => xg%vecR
-        !$OMP TARGET ENTER DATA MAP(to:xg__vecR)
+        !$OMP TARGET ENTER DATA MAP(alloc:xg__vecR)
 #endif
 
       case (SPACE_C)
@@ -426,16 +416,10 @@ contains
         xg%trans = 'c'
 #if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
-        !FIXME To be wrapped
-        size_bytes = sizeof(xg%vecC)
-        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecC)
-        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
-        !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xg%vecC(:,:) = zero
         xg__vecC => xg%vecC
-        !$OMP TARGET ENTER DATA MAP(to:xg__vecC)
+        !$OMP TARGET ENTER DATA MAP(alloc:xg__vecC)
 #endif
 
       case default
@@ -447,20 +431,16 @@ contains
 
       select case (space)
       case (SPACE_R,SPACE_CR)
-!FIXME Settle this
         if ( associated(xg%vecR) ) then
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-        xg%vecR(:,:) = zero
         xg%trans = 't'
       case (SPACE_C)
-!FIXME Settle this
         if ( associated(xg%vecC) ) then
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-        xg%vecC(:,:) = zero
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -476,6 +456,7 @@ contains
     if ( present(comm) ) xg%spacedim_comm = comm
 
     call xg_setBlock(xg,xg%self,1,rows,cols)
+    call xgBlock_zero(xg%self,gpu_option=gpu_option)
 
   end subroutine xg_init
   !!***

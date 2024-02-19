@@ -907,7 +907,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      if(prtvol/=-level)then
        do idat=1,ndat
          if (k1_eq_k2) then
-           !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+           !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
            do ispinor=1,my_nspinor
              do ig=1,npw_k2
                igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
@@ -926,7 +926,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do ! ispinor
 
          else
-           !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2)
+           !$OMP PARALLEL DO PRIVATE(igspinor) COLLAPSE(2) IF(gemm_nonlop_use_gemm)
            do ispinor=1,my_nspinor
              do ig=1,npw_k2
                igspinor=ig+npw_k2*(ispinor-1)+npw_k2*my_nspinor*(idat-1)
