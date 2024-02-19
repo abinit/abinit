@@ -18,6 +18,7 @@ The present release ABINITv9.10.3 is for production
 
 For ABINITv9.10.5, list closed on 2024 02 19
 after installation and successful tests for the standard set of platforms,
+except the newly installed bots BO7, EOE, SCD,
 as mentioned on
 https://bbportal.abinit.org/#/status
 and
