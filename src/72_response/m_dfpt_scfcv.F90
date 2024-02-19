@@ -723,7 +723,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  eta=dtset%rfeta
  if (.not.kramers_deg) then
    omega_mq=-dtset%rfomega
-   eta_mq=-dtset%rfeta
+   eta_mq=dtset%rfeta
    qphon_mq(:)=-qphon(:)
  end if
 
@@ -870,7 +870,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1,&
+&       eta=eta,omega=omega)
        if (.not.kramers_deg) then
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
 &         doccde_rbz,docckde_mq,dtfil,dtset,eigen_mq,eigen0,eigen1_mq,fe1fixed_mq,gmet,gprimd,idir,&
@@ -879,7 +880,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq)
+&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
+&         eta=eta,omega=omega) !is OK, no _mq is needed here
        end if
 
      end if
@@ -3734,7 +3736,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1 &
+& eta,omega) !Optional
 
 !Arguments -------------------------------
 !scalars
@@ -3744,6 +3747,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,intent(in) :: prtvol,usecprj,useylmgr1
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: fe1fixed
+ real(dp),intent(in),optional :: eta,omega
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -3795,7 +3799,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: optfr,qphase_rhoij,spaceworld
  integer :: nband_me
  logical :: paral_atom,qne0
- real(dp) :: arg,fe1norm,invfe1norm,wtk_k
+ real(dp) :: arg,eta_,fe1norm,invfe1norm,omega_,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
@@ -3828,6 +3832,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  if (cplex/=1) then
    ABI_BUG('wrong cplex/=1 argument !')
  end if
+
+!Treat optional arguments
+ eta_=zero; if (present(eta)) eta_=eta
+ omega_=zero; if (present(omega)) omega_=omega
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
@@ -3972,10 +3980,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      doccde_kq(:)=docckqde(1+bdtot_index:nband_k+bdtot_index)
 
 !    For each pair of active bands (m,n), generates the ratios
-!    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
+!    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n)+omega+i*eta)
 !    and decide to which band to attribute it.
-     call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,&
-&     dtset%occopt,occ_k,occ_kq,rocceig)
+     call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,eta_,nband_k,&
+&     dtset%occopt,occ_k,occ_kq,omega_,rocceig)
 
 !    Get plane-wave coeffs and related data at k
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
