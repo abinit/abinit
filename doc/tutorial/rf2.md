@@ -113,6 +113,15 @@ The following k point set is obtained:
 
 It is, as promised, the same as the q point set in the *trf2_1.abi file*.
 
+Alternatively, the q point set may be generated automatically in the input file,
+using [[qptopt]], [[ngqpt]], [[nshiftq]], and [[shiftq]], quite analogously to what can
+be done with the k point grid. This approach is conveniently combined with [[ndtset]] and
+[[iqpt]] to step automatically through the generated q points.
+
+In any case, never forget to use [[nqpt]] 1, whenever [[qpt]] is being input, either
+directly or implicitly. If [[nqpt]] is absent in the input file, it defaults to zero
+which leads to [[qpt]] being ignored.
+
 Now, it might be worth to examine in some detail one of the Derivative
 Database that has been created by the trf2_1 run.
 We suppose that the file *trf2_1o_DS3_DDB* has already been created.
