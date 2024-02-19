@@ -5175,7 +5175,13 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
   call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
  end select
 
+ ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
+ ! else the gcc with mpicc complains with
+ ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
+ ! See https://github.com/pmodels/mpich/issues/2659
+
 #ifdef HAVE_MPI
+#if 0
  my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
  call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
                               !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
@@ -5189,6 +5195,10 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
 
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+#else
+ ABI_UNUSED(count)
+ ABI_UNUSED(info)
+#endif
 #endif
 
 end subroutine xcomm_allocate_shared_master
