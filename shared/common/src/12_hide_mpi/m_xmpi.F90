@@ -5160,8 +5160,13 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  integer,intent(out) :: win
 
 !Local variables-------------------
- integer :: ierr, disp_unit
+ integer :: disp_unit
+#ifdef HAVE_MPI
+#if 0
+ integer :: ierr
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
+#endif
+#endif
 !----------------------------------------------------------------------
 
  if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
