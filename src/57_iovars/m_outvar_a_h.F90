@@ -1165,10 +1165,10 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  if (any(dtsets(:)%gpu_option/=ABI_GPU_DISABLED)) then
 
-   intarr(1,:)=dtsets(:)%gpu_devices(1) ; intarr(2,:)=dtsets(:)%gpu_devices(2)
-   intarr(3,:)=dtsets(:)%gpu_devices(3) ; intarr(4,:)=dtsets(:)%gpu_devices(4)
-   intarr(5,:)=dtsets(:)%gpu_devices(5)
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,5,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0)
+   do ii=1,20
+     intarr(ii,:)=dtsets(:)%gpu_devices(ii)
+   end do
+   call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'gpu_devices','INT',0)
 
    intarr(1,:)=dtsets(:)%gpu_linalg_limit
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)

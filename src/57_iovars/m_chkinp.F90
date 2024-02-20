@@ -103,7 +103,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  type(dataset_type) :: dt
 !arrays
  integer :: cond_values(4),nprojmax(0:3)
- integer :: gpu_devices(5)=(/-2,-2,-2,-2,-2/)
+ integer :: gpu_devices(20)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
