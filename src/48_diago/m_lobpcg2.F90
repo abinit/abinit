@@ -11,6 +11,7 @@
 module m_lobpcg2
 
   use m_xg
+  use m_xgTransposer
   use m_xgScalapack
   use defs_basis
   use m_abicore
@@ -67,6 +68,15 @@ module m_lobpcg2
   integer, parameter :: tim_pcond    = 1660
   integer, parameter :: tim_hegv     = 1661
 
+  integer, parameter :: tim_Bortho_X    = 1641
+  integer, parameter :: tim_Bortho_XW   = 1642
+  integer, parameter :: tim_Bortho_XWP  = 1643
+  integer, parameter :: tim_Bortho_Xall = 1644
+  integer, parameter :: tim_RR_X        = 1645
+  integer, parameter :: tim_RR_XW       = 1646
+  integer, parameter :: tim_RR_XWP      = 1647
+  integer, parameter :: tim_RR_Xall     = 1648
+
 #ifdef HAVE_OPENMP
   integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
 #else
@@ -83,6 +93,9 @@ module m_lobpcg2
     integer :: blockdim                      ! Number of vectors in one block
     integer :: nline                         ! Number of line to perform
     integer :: spacecom                      ! Communicator for MPI
+    integer :: paral_kgb                     ! paral_kgb formalism or not
+    integer :: comm_rows                     ! communicator for rows
+    integer :: comm_cols                     ! communicator for cols
     integer :: gpu_option                    ! Which GPU version is used (0=none)
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
@@ -107,6 +120,22 @@ module m_lobpcg2
     type(xg_t) :: AXWP
     type(xg_t) :: BXWP
 
+    type(xgBlock_t) :: XColsRows
+    type(xgBlock_t) :: AXColsRows
+    type(xgBlock_t) :: BXColsRows
+
+    type(xgTransposer_t) :: xgTransposerX
+    type(xgTransposer_t) :: xgTransposerAX
+    type(xgTransposer_t) :: xgTransposerBX
+
+    type(xgBlock_t) :: WColsRows
+    type(xgBlock_t) :: AWColsRows
+    type(xgBlock_t) :: BWColsRows
+
+    type(xgTransposer_t) :: xgTransposerW
+    type(xgTransposer_t) :: xgTransposerAW
+    type(xgTransposer_t) :: xgTransposerBW
+
     type(xgBlock_t) :: X ! Shift to apply to start reading the X values
     type(xgBlock_t) :: W ! Shift to apply to start reading the W values
     type(xgBlock_t) :: P ! Shift to apply to start reading the P values
@@ -129,6 +158,14 @@ module m_lobpcg2
     type(xg_t) :: AllAX0
     type(xgBlock_t) :: BX0
 
+    type(xgBlock_t) :: AllX0ColsRows
+    type(xgBlock_t) :: AllAX0ColsRows
+    type(xgBlock_t) :: AllBX0ColsRows
+
+    type(xgTransposer_t) :: xgTransposerAllX0
+    type(xgTransposer_t) :: xgTransposerAllAX0
+    type(xgTransposer_t) :: xgTransposerAllBX0
+
     ! Variable for work for lapack
   end type lobpcg_t
 
@@ -141,7 +178,8 @@ module m_lobpcg2
   contains
 
 
-  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, space, spacecom, gpu_option)
+  subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
+&      space, spacecom, paral_kgb, comm_rows, comm_cols, gpu_option)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -149,8 +187,10 @@ module m_lobpcg2
     integer         , intent(in   ) :: blockdim
     double precision, intent(in   ) :: tolerance
     integer         , intent(in   ) :: nline
+    integer         , intent(in   ) :: comm_rows,comm_cols
     integer         , intent(in   ) :: space
     integer         , intent(in   ) :: spacecom
+    integer         , intent(in   ) :: paral_kgb
     integer         , intent(in   ) :: gpu_option
     double precision :: tsec(2)
     double precision :: advice
@@ -177,6 +217,9 @@ module m_lobpcg2
     lobpcg%nline       = nline
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
+    lobpcg%paral_kgb   = paral_kgb
+    lobpcg%comm_rows  = comm_rows
+    lobpcg%comm_cols  = comm_cols
     lobpcg%gpu_option = gpu_option
 
     nthread = 1
@@ -324,7 +367,7 @@ module m_lobpcg2
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, occ, residu, prtvol, isppol, ikpt, inonsc, istep, nbdbuf)
+  subroutine lobpcg_run(lobpcg, X0, getAX_BX, pcond, eigen, occ, residu, prtvol, nspinor, isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: X0   ! Full initial vectors
@@ -332,6 +375,7 @@ module m_lobpcg2
     type(xgBlock_t), intent(inout) :: occ
     type(xgBlock_t), intent(inout) :: residu
     integer        , intent(in   ) :: prtvol
+    integer        , intent(in   ) :: nspinor
     integer        , intent(in   ) :: isppol,ikpt,inonsc,istep,nbdbuf
 
     type(xg_t) :: eigenvalues3N   ! eigen values for Rayleight-Ritz
@@ -339,11 +383,12 @@ module m_lobpcg2
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvalues2N   ! eigen values for Rayleight-Ritz
     integer :: blockdim, blockdim3, blockdim2
+!    integer :: comm_fft_save,comm_band_save
     integer :: spacedim
     integer :: iblock, nblock
     integer :: iline, nline
     integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
-    integer :: RR_var
+    integer :: RR_var,RR_tim
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
     type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
@@ -356,11 +401,13 @@ module m_lobpcg2
     character(len=500) :: msg
 
     interface
-      subroutine getAX_BX(X,AX,BX)
+      subroutine getAX_BX(X,AX,BX,transposer)
         use m_xg, only : xgBlock_t
+        use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
+        type(xgTransposer_t), intent(inout) :: transposer
       end subroutine getAX_BX
     end interface
     interface
@@ -418,6 +465,32 @@ module m_lobpcg2
 
     call xg_init(residu_eff,SPACE_R,blockdim,1)
 
+    if ( lobpcg%paral_kgb == 1 ) then
+      call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
+        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+      !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
+      !  lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_GATHER)
+
+      call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
+        lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
+      call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&
+        lobpcg%BX,lobpcg%BXColsRows,STATE_LINALG)
+
+      call xgTransposer_copyConstructor(lobpcg%xgTransposerW,lobpcg%xgTransposerX,&
+        lobpcg%W,lobpcg%WColsRows,STATE_LINALG)
+      call xgTransposer_copyConstructor(lobpcg%xgTransposerAW,lobpcg%xgTransposerX,&
+        lobpcg%AW,lobpcg%AWColsRows,STATE_LINALG)
+      call xgTransposer_copyConstructor(lobpcg%xgTransposerBW,lobpcg%xgTransposerX,&
+        lobpcg%BW,lobpcg%BWColsRows,STATE_LINALG)
+    else
+      call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BX, lobpcg%BXColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%W, lobpcg%WColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, 1, spacedim, blockdim)
+      call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, 1, spacedim, blockdim)
+    end if
+
     !! Start big loop over blocks
     do iblock = 1, nblock
       ABI_NVTX_START_RANGE(NVTX_LOBPCG2_BLOCK)
@@ -434,16 +507,28 @@ module m_lobpcg2
         call lobpcg_orthoXwrtBlocks(lobpcg,lobpcg%X,iblock)
       end if
 
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_COLSROWS)
+        !call xgTransposer_transpose(lobpcg%xgTransposerAX,STATE_COLSROWS)
+        !call xgTransposer_transpose(lobpcg%xgTransposerBX,STATE_COLSROWS)
+        lobpcg%xgTransposerAX%state=STATE_COLSROWS
+        lobpcg%xgTransposerBX%state=STATE_COLSROWS
+      end if
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(lobpcg%X,lobpcg%AX,lobpcg%BX)
+      call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows,lobpcg%xgTransposerX)
       call timab(tim_ax_bx,2,tsec)
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerAX,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerBX,STATE_LINALG)
+      end if
 
       ! B-orthonormalize X, BX and AX
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr) ! true to rotate AX as well
+      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_X) ! true to rotate AX as well
 
       ! Do first RR on X to get the first eigen values
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr)
+      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr,tim_RR_X)
 
       compute_residu = .true.
 
@@ -499,10 +584,22 @@ module m_lobpcg2
           call lobpcg_orthoXwrtBlocks(lobpcg,lobpcg%W,iblock)
         end if
 
+        if (lobpcg%paral_kgb == 1) then
+          call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_COLSROWS)
+          !call xgTransposer_transpose(lobpcg%xgTransposerAW,STATE_COLSROWS)
+          !call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_COLSROWS)
+          lobpcg%xgTransposerAW%state=STATE_COLSROWS
+          lobpcg%xgTransposerBW%state=STATE_COLSROWS
+        end if
         ! Apply A and B on W
         call timab(tim_ax_bx,1,tsec)
-        call getAX_BX(lobpcg%W,lobpcg%AW,lobpcg%BW)
+        call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows,lobpcg%xgTransposerX)
         call timab(tim_ax_bx,2,tsec)
+        if (lobpcg%paral_kgb == 1) then
+          call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_LINALG)
+          call xgTransposer_transpose(lobpcg%xgTransposerAW,STATE_LINALG)
+          call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_LINALG)
+        end if
 
         ! B-orthonormalize W, BW
         !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
@@ -513,8 +610,9 @@ module m_lobpcg2
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
-          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
           RR_var = VAR_XW
+          RR_tim = tim_RR_XW
           call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
           call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
           call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
@@ -524,14 +622,16 @@ module m_lobpcg2
           end if
         else
           ! B-orthonormalize P, BP
-          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr) ! Do rotate AWP
+          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr,tim_Bortho_XWP) ! Do rotate AWP
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
             RR_var = VAR_XWP
+            RR_tim = tim_RR_XWP
             RR_eig = eigenvalues3N%self
           else
-            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
+            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
             RR_var = VAR_XW
+            RR_tim = tim_RR_XW
             RR_eig = eigenvalues2N
             call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
             call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
@@ -541,7 +641,7 @@ module m_lobpcg2
           !RR_eig = eigenvalues3N%self
         end if
         !RR_eig = eigenvalues3N%self
-        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,2*dlamch('E'))
+        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,2*dlamch('E'))
         if ( ierr /= 0 ) then
           ABI_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
           exit
@@ -608,9 +708,34 @@ module m_lobpcg2
 
     if ( ierr /= 0 ) then
       ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
+      if ( lobpcg%paral_kgb == 1 ) then
+        call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
+          STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+        call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
+          lobpcg%AllAX0%self,lobpcg%AllAX0ColsRows,STATE_LINALG)
+        call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
+          lobpcg%AllBX0%self,lobpcg%AllBX0ColsRows,STATE_LINALG)
+      else
+        call xgBlock_setBlock(lobpcg%AllX0      , lobpcg%AllX0ColsRows , 1, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllAX0%self, lobpcg%AllAX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
+        call xgBlock_setBlock(lobpcg%AllBX0%self, lobpcg%AllBX0ColsRows, 1, spacedim, lobpcg%neigenpairs)
+      end if
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_COLSROWS)
+        lobpcg%xgTransposerAllAX0%state=STATE_COLSROWS
+        lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
+      end if
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self)
+      call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows,lobpcg%xgTransposerAllX0)
       call timab(tim_ax_bx,2,tsec)
+      if (lobpcg%paral_kgb == 1) then
+        call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerAllAX0,STATE_LINALG)
+        call xgTransposer_transpose(lobpcg%xgTransposerAllBX0,STATE_LINALG)
+      end if
+      call xgTransposer_free(lobpcg%xgTransposerAllX0)
+      call xgTransposer_free(lobpcg%xgTransposerAllAX0)
+      call xgTransposer_free(lobpcg%xgTransposerAllBX0)
       nblock = 1 ! Avoid the next RR
     end if
 
@@ -619,8 +744,17 @@ module m_lobpcg2
       lobpcg%AX = lobpcg%AllAX0%self
       lobpcg%BX = lobpcg%AllBX0%self
       lobpcg%blockdim = blockdim*nblock
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr) ! Do rotate AX
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,2*dlamch('E'))
+      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_Xall) ! Do rotate AX
+      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,tim_RR_Xall,2*dlamch('E'))
+    end if
+
+    if ( lobpcg%paral_kgb == 1 ) then
+      call xgTransposer_free(lobpcg%xgTransposerX)
+      call xgTransposer_free(lobpcg%xgTransposerAX)
+      call xgTransposer_free(lobpcg%xgTransposerBX)
+      call xgTransposer_free(lobpcg%xgTransposerW)
+      call xgTransposer_free(lobpcg%xgTransposerAW)
+      call xgTransposer_free(lobpcg%xgTransposerBW)
     end if
 
     call timab(tim_run,2,tsec)
@@ -692,10 +826,11 @@ module m_lobpcg2
   end subroutine lobpcg_orthoXwrtBlocks
 
 
-  subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info)
+  subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info,timer)
 
     type(lobpcg_t), intent(inout) :: lobpcg
     integer       , intent(in   ) :: var
+    integer       , intent(in   ) :: timer
     logical       , intent(in   ) :: BorthoA
     integer       , intent(  out) :: info
     type(xg_t) :: buffer
@@ -705,6 +840,7 @@ module m_lobpcg2
     double precision :: tsec(2)
 
     call timab(tim_Bortho,1,tsec)
+    call timab(timer,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
 
     select case (var)
@@ -775,15 +911,17 @@ module m_lobpcg2
 
     ABI_NVTX_END_RANGE()
     call timab(tim_Bortho,2,tsec)
+    call timab(timer,2,tsec)
 
   end subroutine lobpcg_Borthonormalize
 
 
-  subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,tolerance)
+  subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,timer,tolerance)
 
     use m_time
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: var
+    integer        , intent(in   ) :: timer
     type(xgBlock_t), intent(inout) :: eigenvalues
     integer        , intent(  out) :: info
     double precision, optional, intent(in) :: tolerance
@@ -816,6 +954,7 @@ module m_lobpcg2
 #endif
 
     call timab(tim_RR, 1, tsec)
+    call timab(timer , 1, tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RR)
 
     blockdim = lobpcg%blockdim
@@ -1087,6 +1226,7 @@ module m_lobpcg2
 
     ABI_NVTX_END_RANGE()
     call timab(tim_RR, 2, tsec)
+    call timab(timer , 2, tsec)
 
   end subroutine lobpcg_rayleighRitz
 
