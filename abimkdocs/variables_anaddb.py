@@ -840,7 +840,10 @@ computes the derivative of the dynamical matrix wrt the volume using central fin
         added_in_version="before_v9",
         text=r"""
 This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
-used for the calculation of the Gruneisen parameters.
+used for the calculation of the Gruneisen parameters. Note that computation of
+the Grunheisen parameters is currently incompatible with many other features of
+ANADDB, and so should be computed in a separate run from calculation of other
+possible responses.
 """,
     ),
 
