@@ -692,7 +692,7 @@ type, public :: dataset_type
  integer :: kptrlatt_orig(3,3)=0
  integer :: qptrlatt(3,3)
  integer :: ga_rules(30)
- integer :: gpu_devices(5)
+ integer :: gpu_devices(20)
  integer :: ngfft(18)
  integer :: ngfftdg(18)
  integer :: nloalg(3)
