@@ -280,7 +280,7 @@ end subroutine Get_Mem_Dev
 !! Detect and activate a GPU device from current CPU core
 !!
 !! INPUTS
-!!  gpu_devices(20)= list of GPU devices to choose on one node (in case of multiple devices);
+!!  gpu_devices(12)= list of GPU devices to choose on one node (in case of multiple devices);
 !!                   if set to 20*-1, will choose the devices by order of performances.
 !!
 !! SIDE EFFECTS
@@ -299,7 +299,7 @@ end subroutine Get_Mem_Dev
 !scalars
  integer,intent(inout) :: gpu_option
 !arrays
- integer, intent(in) :: gpu_devices_node(20)
+ integer, intent(in) :: gpu_devices_node(12)
 !Local variables ------------------------------
 !scalars
  integer :: device,ii,jj,me,nb_devices,nproc

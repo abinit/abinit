@@ -71,8 +71,8 @@ _ WF disk file :      1.181 Mbytes ; DEN or POT disk file :      0.065 Mbytes.
                          0.00000    0.00000    0.00000    0.00000    0.00000
              ecut      8.00000000E+00 Hartree
 -          fftalg         512
-      gpu_devices        0    3    1    2   -1   -1   -1   -1   -1   -1
-                        -1   -1   -1   -1   -1   -1   -1   -1   -1   -1
+-     gpu_devices        0    3    1    2   -1   -1   -1   -1   -1   -1
+-                       -1   -1
  gpu_linalg_limit           0
 -      gpu_option           1
            istwfk        0    0    0    0    0    0    0    0    0    1
@@ -714,8 +714,8 @@ total_energy_dc_eV  : -1.00809015839633E+04
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
                       -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         512
-      gpu_devices        0    3    1    2   -1   -1   -1   -1   -1   -1
-                        -1   -1   -1   -1   -1   -1   -1   -1   -1   -1
+-     gpu_devices        0    3    1    2   -1   -1   -1   -1   -1   -1
+-                       -1   -1
  gpu_linalg_limit           0
 -      gpu_option           1
            istwfk        0    0    0    0    0    0    0    0    0    1
