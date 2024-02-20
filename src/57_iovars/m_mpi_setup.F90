@@ -135,7 +135,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    prtvol = dtsets(idtset)%prtvol
 
 !  Read parallel input parameters
-   marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
+   marr=max(12,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
    ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
