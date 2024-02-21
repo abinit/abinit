@@ -3941,7 +3941,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            eshift = eig0nk - dtset%dfpt_sciss
 
            call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,ib_k), &
-                        grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
+                        grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, (/eshift/), mpi_enreg, 1, optlocal, &
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
 

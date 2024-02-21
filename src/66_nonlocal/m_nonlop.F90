@@ -674,7 +674,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    ABI_MALLOC(ffnlout_,(npwout,dimffnlout,hamk%lmnmax,1))
    ffnlin_(:,:,:,1)=ffnlin(:,:,:,itypat)
    ffnlout_(:,:,:,1)=ffnlout(:,:,:,itypat)
-   ABI_MALLOC(cprjin_,(1,my_nspinor*((cpopt+5)/5)))
+   ABI_MALLOC(cprjin_,(1,my_nspinor*ndat*((cpopt+5)/5)))
    if (cpopt>=0) then
      nlmn_atm(1)=cprjin(iatm,1)%nlmn
      ncpgr_atm=cprjin(iatm,1)%ncpgr
