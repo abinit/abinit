@@ -34,6 +34,7 @@ module m_ddb_magpen
  use m_errors
  use m_ddb
  use m_fstrings,        only : itoa, sjoin
+ use m_macroave,        only : POLINT
 
  implicit none
 
@@ -90,7 +91,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,nsize,ndim 
+ integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,ndim 
  integer :: nmat,nmdir
  character(len=500) :: msg
 !arrays
@@ -1629,13 +1630,13 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,ipert1,ipert2,iw,jblok,kblok,lblok,nblok,nsize,ndim 
+ integer :: iblok,ii,ipert1,ipert2,iw,jblok,kblok,lblok,nblok,ndim 
  integer :: nmat,nmdir,nwcalc
  real(dp) :: omega,omegastp
  character(len=500) :: msg
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: omegacalc(:)
+ real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:),omegacalc(:)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
@@ -1655,11 +1656,27 @@ contains
 !Define the omega discretization
  omegastp=(omegamax-omegamin)/(nomega-1) 
 
+ ABI_MALLOC(dint_barddb,(2,ddb%msize))
+ ABI_MALLOC(int_barddb,(2,ddb%msize))
 !Loop over the frequency
  do iw=1,nomega
    omega=omegamin+omegastp*(iw-1)
 
+   do ii=1,ddb%msize
+     if (all(ddb%flg(ii,:)==1)) then
+       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega,int_barddb(1,ii),dint_barddb(1,ii)) 
+       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega,int_barddb(2,ii),dint_barddb(2,ii)) 
+     else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
+       write(msg,'(a,a,a)')&
+       'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
+     & ' The interpolation has been stopped.' 
+       ABI_ERROR(msg)
+     end if
+   end do 
+
  end do
+ ABI_FREE(dint_barddb)
+ ABI_FREE(int_barddb)
 
  end subroutine ddb_omega_interpol
 !!***

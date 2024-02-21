@@ -24,7 +24,7 @@ module m_macroave
 
 ! private
 
- public
+ public :: POLINT
 !!***
 
 contains
