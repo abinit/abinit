@@ -143,7 +143,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer :: aslot,bslot,cslot,flag_count,flag_write,ierr,ii,ikpt,ipart
  integer :: ilist,isort,islot,isppol,itim,itimab,ltimab,maxii,me
  integer :: npart,nlist,nothers,nproc,nthreads,return_ncount
- integer(i8b) :: npwmean,npwnbdmean
+ integer(i8b) :: nbdmean,npwmean,npwnbdmean
  integer :: spaceworld,temp_list,totcount,tslot,utimab,ount
  real(dp) :: cpunm,lflops,other_cpu,other_wal,percent_limit,subcpu,subwal,timab_cpu,timab_wall,wallnm
  character(len=500) :: msg
@@ -168,19 +168,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  call timab(49,1,tsec)
 
 !The means are computed as integers, for later compatibility
- npwmean=0; npwnbdmean=0
+ nbdmean=0; npwmean=0; npwnbdmean=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
      npwmean=npwmean+npwtot(ikpt)
      npwnbdmean=npwnbdmean+npwtot(ikpt)*nband(ikpt+(isppol-1)*nkpt)
+     nbdmean=nbdmean+nband(ikpt+(isppol-1)*nkpt)
    end do
  end do
 
  ! initialize ftime, valgrind complains on line 832 = sum up of all Gflops
  ftimes=zero
 
- npwmean=dble(npwmean)/dble(nkpt*nsppol)
- npwnbdmean=dble(npwnbdmean)/dble(nkpt*nsppol)
+ npwmean=int(dble(npwmean)/dble(nkpt*nsppol))
+ npwnbdmean=int(dble(npwnbdmean)/dble(nkpt*nsppol))
+ nbdmean=int(dble(nbdmean)/dble(nkpt*nsppol))
 
 !List of timed subroutines, eventual initialisation of the number of data, and declaration of a slot as being "basic"
 !Channels 1 to 299 are for optdriver=0 (GS), 1 (RF) and 2 (Suscep), at random
@@ -1009,7 +1011,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1658) = 'lobpcg_maxResidu               '
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
-! names(1661) = 'lobpcg_RayleighRitz@hegv       '
+ names(1661) = 'RayleighRitz@hegv              '; ndata(1661) = nbdmean*nbdmean 
 
  ! xg_t
  names(1662) = 'xgTransposer_transpose@ColsRows'
@@ -1811,7 +1813,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(74)
          list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-         list(:20)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1661,1)/)     ; msg='lobpcgwf2 core engine '
+         list(:20)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
          list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case(77)
