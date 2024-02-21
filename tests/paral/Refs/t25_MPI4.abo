@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.6.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h48 )
+.Starting date : Mon 19 Feb 2024.
+- ( at 10h37 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI4/paral_t25_MPI4/t25.in
-- output file    -> t25_MPI4.out
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_chebfi/tests/TestBot_MPI4/paral_t25_MPI4/t25.abi
+- output file    -> t25_MPI4.abo
 - root for input  files -> t25_MPI4i
 - root for output files -> t25_MPI4o
-
 
  Symmetries : space group R-3 m (#166); Bravais hR (rhombohedral)
 ================================================================================
@@ -37,7 +36,7 @@ Pmy_natom=         1
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        36    nfftf =     46656
 ================================================================================
-P This job should need less than                      14.840 Mbytes of memory.
+P This job should need less than                      14.843 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.026 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
 ================================================================================
@@ -167,8 +166,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 1, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_chebfi/tests/Psps_for_tests/6c_lda.paw
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_chebfi/tests/Psps_for_tests/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -204,8 +203,8 @@ tolerances: {toldfe: 1.00E-10, }
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -10.529009169654    -1.053E+01 2.991E-06 9.508E+01
- ETOT  2  -10.429282908300     9.973E-02 6.504E-08 9.390E+00
- ETOT  3  -10.417982468021     1.130E-02 7.996E-09 1.491E-01
+ ETOT  2  -10.429282908308     9.973E-02 6.504E-08 9.390E+00
+ ETOT  3  -10.417982468024     1.130E-02 7.996E-09 1.491E-01
  ETOT  4  -10.417942118393     4.035E-05 6.243E-10 2.432E-03
  ETOT  5  -10.417943508407    -1.390E-06 5.448E-12 2.648E-05
 
@@ -252,18 +251,18 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.11202     0.715320     0.715320      1.430639    -0.000000
-    2   1.11202     0.720654     0.720654      1.441309    -0.000000
+    1   1.11202     0.715320     0.715320      1.430639     0.000000
+    2   1.11202     0.720654     0.720654      1.441309     0.000000
  ---------------------------------------------------------------------
-  Sum:              1.435974     1.435974      2.871948    -0.000000
- Total magnetization (from the atomic spheres):            -0.000000
- Total magnetization (exact up - dn):                      -0.000000
+  Sum:              1.435974     1.435974      2.871948     0.000000
+ Total magnetization (from the atomic spheres):             0.000000
+ Total magnetization (exact up - dn):                       0.000000
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =      0.475497232999948
- Compensation charge over fine fft grid    =      0.475548216296144
+ Compensation charge over spherical meshes =      0.475497233051025
+ Compensation charge over fine fft grid    =      0.475548216286417
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -391,21 +390,21 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
  rms dE/dt=  1.6484E+00; max dE/dt=  1.6484E+00; dE/dt below (all hartree)
-    1       1.648421604399      1.648421604399      1.648421604399
-    2      -1.648421604399     -1.648421604399     -1.648421604399
+    1       1.648421604439      1.648421604439      1.648421604439
+    2      -1.648421604439     -1.648421604439     -1.648421604439
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.81493290122860     0.81493290122860     0.81493290122860
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.23548880062838    -0.23548880062838    -0.23548880062838
-    2      0.23548880062838     0.23548880062838     0.23548880062838
+    1     -0.23548880063410    -0.23548880063410    -0.23548880063410
+    2      0.23548880063410     0.23548880063410     0.23548880063410
  frms,max,avg= 2.3548880E-01 2.3548880E-01   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -12.10931998697357   -12.10931998697357   -12.10931998697357
-    2     12.10931998697357    12.10931998697357    12.10931998697357
+    1    -12.10931998726775   -12.10931998726774   -12.10931998726774
+    2     12.10931998726775    12.10931998726774    12.10931998726774
  frms,max,avg= 1.2109320E+01 1.2109320E+01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  7.000000000000  7.000000000000  7.000000000000 bohr
               =  3.704240460130  3.704240460130  3.704240460130 angstroms
@@ -432,28 +431,28 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.71248748041742E+00
-hartree             :  1.52270566924395E+00
-xc                  : -3.90585024136891E+00
+kinetic             :  8.71248748033885E+00
+hartree             :  1.52270566934270E+00
+xc                  : -3.90585024140391E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
-local_psp           : -6.85232874153209E+00
-spherical_terms     :  1.79560229865356E+00
-total_energy        : -1.04187364980123E+01
-total_energy_eV     : -2.83508238183606E+02
+local_psp           : -6.85232874181526E+00
+spherical_terms     :  1.79560229873430E+00
+total_energy        : -1.04187364982296E+01
+total_energy_eV     : -2.83508238189517E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.77721060299011E+00
+band_energy         :  1.77721060321981E+00
 Ewald energy        : -1.22408856604630E+01
 psp_core            :  5.49532697036699E-01
-xc_dc               : -6.32064312560900E-01
-spherical_terms     :  1.28263164590021E-01
+xc_dc               : -6.32064312650543E-01
+spherical_terms     :  1.28263164450031E-01
 total_energy_dc     : -1.04179435084070E+01
-total_energy_dc_eV  : -2.83486659839059E+02
+total_energy_dc_eV  : -2.83486659839057E+02
 ...
 
 
@@ -510,8 +509,8 @@ P           mkmem           1
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
           spgroup         166
    spinmagntarget      0.00000000E+00
-           strten     -8.1808367590E-03 -8.1808367590E-03 -8.1808367590E-03
-                      -1.7449075409E-03 -1.7449075409E-03 -1.7449075409E-03
+           strten     -8.1808367608E-03 -8.1808367608E-03 -8.1808367608E-03
+                      -1.7449075411E-03 -1.7449075411E-03 -1.7449075411E-03
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
                        0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
@@ -624,10 +623,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.7
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.7
++Overall time at end (sec) : cpu=          2.4  wall=          2.4
