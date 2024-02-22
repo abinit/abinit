@@ -3,7 +3,7 @@
 {% block libs %}
     {{ super() }}
 
-    <!-- 
+    <!--
     IMPORTANT: Don't use boostrap in particular boostrap.css since it comes into conflict with mkdocs-material theme.
     Prefer low-level tools based on Jquery or JS library such as Tippyjs to get the work done.
     -->
@@ -49,15 +49,15 @@
     </script>
 
     <!-- MathJax support
-    <script type="text/javascript" async 
+    <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
-    </script> 
+    </script>
     -->
 
     <!-- This version is compatible with plotly. -->
-    <script type="text/javascript" async 
+    <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_SVG">
-    </script> 
+    </script>
 
     <!-- Configure MathJax to produce automatic equation numbers http://docs.mathjax.org/en/latest/tex.html -->
     <script type="text/x-mathjax-config">
@@ -98,6 +98,7 @@
                 RR: "{\\bf R}",
                 tt: "{\\bf t}",
                 GG: "{\\bf G}",
+                bg: "{\\bf g}",
                 kk: "{\\bf k}",
                 qq: "{\\bf q}",
                 kq: "{\\kk + \\qq}",
@@ -128,6 +129,8 @@
                 Go: "{G_0}",
                 Wo: "{W_0}",
                 Ueff: "{U_{\\text{eff}}}",
+                Gove: "{\\overline{G}}",
+                Gund: "{\\underline{G}}",
                 // Greek symbols + tilde version
                 ee: "{\\epsilon}",
                 tee: "{\\tilde{\\epsilon}}",
@@ -157,18 +160,18 @@
 
     {% if page.meta and page.meta.plotly %}
         <!-- Plotly support -->
-        <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script> 
+        <script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     {% endif %}
 
     {% if page.meta and page.meta.light_gallery %}
         <!-- lightgallery support. See https://github.com/sachinchoolur/lightGallery-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css" 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/css/lightgallery.min.css"
             integrity="sha256-6hdzBLI5YrM1ltRrsPdV0y2CsqGgLYCeNlLFFQoh7MY=" crossorigin="anonymous" />
 
         <!-- A jQuery plugin that adds cross-browser mouse wheel support. (Optional) -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js"></script>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/js/lightgallery-all.min.js" 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/1.6.0/js/lightgallery-all.min.js"
             integrity="sha256-n9ZE2vNe6Iv4S6dUXnzuvvt2yLWOZPJqD787TC7S4W4=" crossorigin="anonymous"></script>
     {% endif %}
 
@@ -180,7 +183,7 @@
 {% block content %}
 {{ super() }}
 
-<!-- 
+<!--
 Add dropdown button with toolbar (based on https://bootsnipp.com/snippets/featured/inbox-by-gmail)
 and return to Top button (based on https://codepen.io/rdallaire/pen/apoyx)
 -->
@@ -200,16 +203,16 @@ and return to Top button (based on https://codepen.io/rdallaire/pen/apoyx)
         <ul class="dropdown-menu dropdown-menu-right" role="menu">
         {% set icons = [
           "fa-info-circle",
-          "fa-terminal", 
-          "fa-book", 
-          "fa-graduation-cap", 
-          "fa-file-text-o", 
-          "fa-question", 
-          "fa-user-circle-o", 
+          "fa-terminal",
+          "fa-book",
+          "fa-graduation-cap",
+          "fa-file-text-o",
+          "fa-question",
+          "fa-user-circle-o",
           ] %}
         {% for nav_item in nav | reverse %}
           <li>
-            <a href="{{ (nav_item.children | first).canonical_url }}" 
+            <a href="{{ (nav_item.children | first).canonical_url }}"
                data-toggle="popover" data-tippy-content="{{ nav_item.title }}">
                <i class="fa {{ icons[loop.index0] }}"></i>
             </a>

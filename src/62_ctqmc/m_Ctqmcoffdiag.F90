@@ -3413,8 +3413,8 @@ include 'mpif.h'
     op%runtime=arr(1)
     CALL MPI_ALLREDUCE([op%Greens%signvaluemeas], arr, 1, MPI_DOUBLE_PRECISION, MPI_SUM, op%MY_COMM, ierr)
     signvaluemeassum=arr(1)
-    IF ( op%opt_histo .GT. 0 ) THEN
 #if defined HAVE_MPI2_INPLACE
+    IF ( op%opt_histo .GT. 0 ) THEN
       CALL MPI_ALLREDUCE(MPI_IN_PLACE,op%occup_histo_time, flavors+1, MPI_DOUBLE_PRECISION, MPI_SUM, &
              op%MY_COMM, ierr)
       CALL MPI_ALLREDUCE(MPI_IN_PLACE, op%occupconfig, 2**flavors, MPI_DOUBLE_PRECISION, MPI_SUM, &

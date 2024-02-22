@@ -54,13 +54,12 @@ contains
 !!***
 
 !!****f* m_kg/getcut
-!!
 !! NAME
 !! getcut
 !!
 !! FUNCTION
-!! For input kpt, fft box dim ngfft(1:3), recip space metric gmet,
-!! and kinetic energy cutoff ecut (hartree), COMPUTES:
+!! For input kpt, fft box dim ngfft(1:3), recip space metric gmet, and kinetic energy cutoff ecut, COMPUTES:
+!!
 !! if iboxcut==0:
 !!   gsqcut: cut-off on G^2 for "large sphere" of radius double that
 !!            of the basis sphere corresponding to ecut
@@ -68,8 +67,7 @@ contains
 !!                 boxcut >=2 for no aliasing.
 !!                 boxcut < 1 is wrong and halts subroutine.
 !! if iboxcut==1:
-!!   gsqcut: cut-off on G^2 for "large sphere"
-!!            containing the whole fft box
+!!   gsqcut: cut-off on G^2 for "large sphere" containing the whole fft box
 !!   boxcut: no meaning (zero)
 !!
 !! INPUTS
@@ -95,7 +93,7 @@ contains
 !!
 !! SOURCE
 
-subroutine getcut(boxcut,ecut,gmet,gsqcut,iboxcut,iout,kpt,ngfft)
+subroutine getcut(boxcut, ecut, gmet, gsqcut, iboxcut, iout, kpt, ngfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -660,7 +658,7 @@ subroutine ph1d3d(iatom, jatom, kg_k, matblk, natom, npw_k, n1, n2, n3, phkxred,
    end do
 
    ! Compute tri-dimensional phase factor
-!$OMP PARALLEL DO PRIVATE(ig,ph1r,ph1i,ph2r,ph2i,ph3r,ph3i,ph12r,ph12i)
+!$OMP PARALLEL DO PRIVATE(ig,ph1r,ph1i,ph2r,ph2i,ph3r,ph3i,ph12r,ph12i,kg1,kg2,kg3)
    do ig=1,npw_k
      kg1=kg_k(1,ig)
      kg2=kg_k(2,ig)+shift2

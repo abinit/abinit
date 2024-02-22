@@ -51,10 +51,11 @@ MODULE m_fft
 
 #if defined HAVE_GPU_CUDA
  ! MG: Had to comment this line to avoid "Ambiguous reference to c_ptr on buda2 with CUDA
- !use m_manage_cuda
+ use m_manage_cuda
 #endif
- use, intrinsic :: iso_c_binding
  use m_ompgpu_fourwf
+
+ use, intrinsic :: iso_c_binding
 
  implicit none
 
@@ -2254,7 +2255,7 @@ end function fftu_mpi_utests
 !!                 (intent(in) but the routine sphere can modify it for another iflag)
 !!                 (for non diagonal occupation)
 !! [use_ndo] = use non diagonal occupations.
-!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2339,7 +2340,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
- comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0_fft
  paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then
@@ -4116,8 +4117,8 @@ end subroutine fftmpi_u
 !!
 !! SOURCE
 
-subroutine zerosym(array,cplex,n1,n2,n3,&
-&                  ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
+subroutine zerosym(array,cplex,n1,n2,n3, &
+                   ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
 
 !Arguments ------------------------------------
@@ -4772,7 +4773,6 @@ subroutine uplan_init(uplan, npw, nspinor, batch_size, ngfft, istwfk, kg_k, kind
  uplan%ngfft = ngfft
  uplan%mgfft = maxval(ngfft(1:3))
  uplan%nfft  = product(ngfft(1:3))
- !uplan%ldxyz = product(plan%embed)
  uplan%kg_k => kg_k
 
  ABI_MALLOC(uplan%gbound, (2 * uplan%mgfft + 8, 2))
@@ -4834,8 +4834,7 @@ subroutine uplan_execute_gr_spc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4892,8 +4891,7 @@ subroutine uplan_execute_gr_dpc(uplan, ndat, ug, ur, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -4950,8 +4948,7 @@ subroutine uplan_execute_rg_spc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 
 ! *************************************************************************
 
@@ -5006,8 +5003,7 @@ subroutine uplan_execute_rg_dpc(uplan, ndat, ur, ug, isign, iscale)
  integer,optional,intent(in) :: isign, iscale
 
 !Local variables-------------------------------
- integer :: isign__, iscale__
- integer :: nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
+ integer :: isign__, iscale__, nx, ny, nz, ldx, ldy, ldz, fftalg, fftalga, fftalgc, fftcache
 ! *************************************************************************
 
  ABI_CHECK_ILEQ(ndat, uplan%batch_size, "ndat > batch_size!")

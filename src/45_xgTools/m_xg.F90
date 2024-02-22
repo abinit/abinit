@@ -70,24 +70,25 @@ module m_xg
   integer, parameter, public :: COLS2ROWS =  1
   integer, parameter, public :: ROWS2COLS = -1
 
-  integer, parameter :: tim_potrf = 1670
-  integer, parameter :: tim_trsm  = 1671
-  integer, parameter :: tim_gemm  = 1672
-  integer, parameter :: tim_set   = 1673
-  integer, parameter :: tim_get   = 1674
-  integer, parameter :: tim_heev  = 1675
-  integer, parameter :: tim_heevd = 1676
-  integer, parameter :: tim_hpev  = 1677
-  integer, parameter :: tim_hpevd = 1678
-  integer, parameter :: tim_hegv  = 1679
-  integer, parameter :: tim_hegvx = 1680
-  integer, parameter :: tim_hegvd = 1681
-  integer, parameter :: tim_hpgv  = 1682
-  integer, parameter :: tim_hpgvx = 1683
-  integer, parameter :: tim_hpgvd = 1684
-  integer, parameter :: tim_copy  = 1685
-  integer, parameter :: tim_cshift= 1686
-  integer, parameter :: tim_pack  = 1687
+  integer, parameter :: tim_potrf      = 1670
+  integer, parameter :: tim_trsm       = 1671
+  integer, parameter :: tim_gemm_blas  = 1672
+  integer, parameter :: tim_gemm_mpi   = 1688
+  integer, parameter :: tim_set        = 1673
+  integer, parameter :: tim_get        = 1674
+  integer, parameter :: tim_heev       = 1675
+  integer, parameter :: tim_heevd      = 1676
+  integer, parameter :: tim_hpev       = 1677
+  integer, parameter :: tim_hpevd      = 1678
+  integer, parameter :: tim_hegv       = 1679
+  integer, parameter :: tim_hegvx      = 1680
+  integer, parameter :: tim_hegvd      = 1681
+  integer, parameter :: tim_hpgv       = 1682
+  integer, parameter :: tim_hpgvx      = 1683
+  integer, parameter :: tim_hpgvd      = 1684
+  integer, parameter :: tim_copy       = 1685
+  integer, parameter :: tim_cshift     = 1686
+  integer, parameter :: tim_pack       = 1687
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -225,6 +226,7 @@ module m_xg
   public :: xgBlock_reshape
   public :: xgBlock_reshape_spinor
   public :: xgBlock_print
+  public :: xgBlock_getId
   public :: xgBlock_copy_from_gpu
   public :: xgBlock_copy_to_gpu
   public :: xg_finalize
@@ -373,16 +375,12 @@ contains
           ABI_FREE_MANAGED(xg%vecR)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecR,(/rows,cols/), (/1,1/))
-        size_bytes = rows*cols*dp
-        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
         xg%trans = 't'
       case (SPACE_C)
         if ( associated(xg%vecC) ) then
           ABI_FREE_MANAGED(xg%vecC)
         end if
         ABI_MALLOC_MANAGED_BOUNDS(xg%vecC,(/rows,cols/), (/1,1/))
-        size_bytes = rows*cols*dpc
-        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -403,16 +401,10 @@ contains
         xg%trans = 't'
 #if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecR)
-        !FIXME To be wrapped
-        size_bytes = sizeof(xg%vecR)
-        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecR)
-        call gpu_memset(c_loc(xg%vecR), izero, size_bytes)
-        !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xg%vecR(:,:) = zero
         xg__vecR => xg%vecR
-        !$OMP TARGET ENTER DATA MAP(to:xg__vecR)
+        !$OMP TARGET ENTER DATA MAP(alloc:xg__vecR)
 #endif
 
       case (SPACE_C)
@@ -424,16 +416,10 @@ contains
         xg%trans = 'c'
 #if defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         !$OMP TARGET ENTER DATA MAP(alloc:xg%vecC)
-        !FIXME To be wrapped
-        size_bytes = sizeof(xg%vecC)
-        !$OMP TARGET DATA USE_DEVICE_PTR(xg%vecC)
-        call gpu_memset(c_loc(xg%vecC), izero, size_bytes)
-        !$OMP END TARGET DATA
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
-        xg%vecC(:,:) = zero
         xg__vecC => xg%vecC
-        !$OMP TARGET ENTER DATA MAP(to:xg__vecC)
+        !$OMP TARGET ENTER DATA MAP(alloc:xg__vecC)
 #endif
 
       case default
@@ -445,20 +431,16 @@ contains
 
       select case (space)
       case (SPACE_R,SPACE_CR)
-!FIXME Settle this
         if ( associated(xg%vecR) ) then
           ABI_FREE(xg%vecR)
         end if
         ABI_MALLOC(xg%vecR,(1:rows,1:cols))
-        xg%vecR(:,:) = zero
         xg%trans = 't'
       case (SPACE_C)
-!FIXME Settle this
         if ( associated(xg%vecC) ) then
           ABI_FREE(xg%vecC)
         end if
         ABI_MALLOC(xg%vecC,(1:rows,1:cols))
-        xg%vecC(:,:) = zero
         xg%trans = 'c'
       case default
         ABI_ERROR("Invalid space")
@@ -474,6 +456,7 @@ contains
     if ( present(comm) ) xg%spacedim_comm = comm
 
     call xg_setBlock(xg,xg%self,1,rows,cols)
+    call xgBlock_zero(xg%self,gpu_option=gpu_option)
 
   end subroutine xg_init
   !!***
@@ -673,7 +656,6 @@ contains
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
       call c_f_pointer(cptr,xgBlock%vecR,(/ rows, cols /))
-
       xgBlock%trans = 't'
     case ( SPACE_C )
       if ( fullsize/2 < cols*rows .or. mod(fullsize/2,rows) /= 0) then
@@ -1298,7 +1280,7 @@ contains
 #endif
 #endif
 
-    call timab(tim_gemm,1,tsec)
+    call timab(tim_gemm_blas,1,tsec)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
@@ -1354,7 +1336,9 @@ contains
           xgBlockW%vecR, xgBlockW%LDim)
       end if
 
+        call timab(tim_gemm_blas,2,tsec)
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
+        call timab(tim_gemm_mpi,1,tsec)
         if (l_gpu_option==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
@@ -1415,6 +1399,7 @@ contains
           call xgBlock_copy_to_gpu(xgBlockW)
 #endif
         end if
+        call timab(tim_gemm_mpi,2,tsec)
       end if
 
     case(SPACE_C)
@@ -1450,7 +1435,9 @@ contains
           xgBlockW%vecC, xgBlockW%LDim)
       end if
 
+      call timab(tim_gemm_blas,2,tsec)
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
+        call timab(tim_gemm_mpi,1,tsec)
         if (l_gpu_option==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
@@ -1512,11 +1499,11 @@ contains
 #endif
 
         end if
+        call timab(tim_gemm_mpi,2,tsec)
       end if
 
     end select
 
-    call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmR
   !!***
@@ -1541,7 +1528,7 @@ contains
     double precision :: tsec(2)
     integer          :: l_gpu_option
 
-    call timab(tim_gemm,1,tsec)
+    call timab(tim_gemm_blas,1,tsec)
 
     ! if optional parameter is present, use it
     ! else use default value, i.e. don't use GPU
@@ -1578,7 +1565,9 @@ contains
         beta, &
         xgBlockW%vecC, xgBlockW%LDim)
     end if
+    call timab(tim_gemm_blas,2,tsec)
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
+      call timab(tim_gemm_mpi,1,tsec)
       if (l_gpu_option==ABI_GPU_KOKKOS) then
         ! CPU waits for GPU to finish before doing MPI communications
         call gpu_device_synchronize()
@@ -1594,9 +1583,8 @@ contains
         !FIXME Again, this could be avoided using GPU-direct
         call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
       end if
+      call timab(tim_gemm_mpi,2,tsec)
     end if
-
-    call timab(tim_gemm,2,tsec)
 
   end subroutine xgBlock_gemmC
   !!***
@@ -4691,7 +4679,8 @@ contains
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
-      fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
+      !fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
+      fstring = '(1x,'//trim(adjustl(ccols))//'f24.14)'
       do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
@@ -4703,12 +4692,48 @@ contains
       end if
 #endif
       write(ccols,'(i4)') xgBlock%cols
-      fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
+      !fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
+      fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'f24.14))'
       do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecC(i,j), j = 1, xgBlock%cols) /)
       end do
     end select
   end subroutine xgBlock_print
+  !!***
+
+  !!****f* m_xg/xgBlock_getid
+  !!
+  !! NAME
+  !! xgBlock_getid
+
+  function xgBlock_getid(xgBlock,do_mpi_sum) result (id)
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    logical, intent(in),optional :: do_mpi_sum
+
+    real(dp) :: id
+    integer :: ierr
+    logical :: do_mpi_sum_
+
+    select case(xgBlock%space)
+      case (SPACE_R)
+        id = sum(abs(xgBlock%vecR(:,:)))
+      case (SPACE_CR)
+        !if (xgBlock%me_g0<0) then
+        !  ABI_ERROR("xgBlock me_g0 is not initialized")
+        !end if
+        id = 2*sum(abs(xgBlock%vecR(:,:)))
+        !if (xgBlock%me_g0==1) then
+        !  id = id - sum(abs(xgBlock%vecR(1,:)))
+        !end if
+      case (SPACE_C)
+        id = sum(abs(dble(xgBlock%vecC(:,:))))+sum(abs(dimag(xgBlock%vecC(:,:))))
+    end select
+    do_mpi_sum_=.true.
+    if (present(do_mpi_sum)) do_mpi_sum_=do_mpi_sum
+    if (do_mpi_sum_) call xmpi_sum(id,xgBlock%spacedim_comm,ierr)
+
+  end function xgBlock_getid
   !!***
 
   !!****f* m_xg/xg_finalize

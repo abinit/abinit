@@ -731,6 +731,18 @@ interface xmpi_lor
 end interface xmpi_lor
 !!!***
 
+! This to bypass missing interface for MPI_WIN_ALLOCATE etc
+! See https://github.com/pmodels/mpich/issues/2659
+!INTERFACE MPI_WIN_ALLOCATE_SHARED
+!SUBROUTINE MPI_WIN_ALLOCATE_SHARED_CPTR(SIZE, DISP_UNIT, INFO, COMM, &
+!BASEPTR, WIN, IERROR)
+!USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+!INTEGER :: DISP_UNIT, INFO, COMM, WIN, IERROR
+!INTEGER(KIND=XMPI_ADDRESS_KIND) :: SIZE
+!TYPE(C_PTR) :: BASEPTR
+!END SUBROUTINE
+!END INTERFACE MPI_WIN_ALLOCATE_SHARED
+
 
 !----------------------------------------------------------------------
 
@@ -789,13 +801,13 @@ subroutine xmpi_init()
 
  if (lflag) xmpi_tag_ub = attribute_val
 
- ! Define type values.
- call MPI_TYPE_SIZE(MPI_CHARACTER,xmpi_bsize_ch,mpierr)
- call MPI_TYPE_SIZE(MPI_INTEGER,xmpi_bsize_int,mpierr)
- call MPI_TYPE_SIZE(MPI_REAL,xmpi_bsize_sp,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION,xmpi_bsize_dp,mpierr)
- call MPI_TYPE_SIZE(MPI_COMPLEX,xmpi_bsize_spc,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX,xmpi_bsize_dpc,mpierr)
+!  Define type values.
+ call MPI_TYPE_SIZE(MPI_CHARACTER, xmpi_bsize_ch, mpierr)
+ call MPI_TYPE_SIZE(MPI_INTEGER, xmpi_bsize_int, mpierr)
+ call MPI_TYPE_SIZE(MPI_REAL, xmpi_bsize_sp, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION, xmpi_bsize_dp, mpierr)
+ call MPI_TYPE_SIZE(MPI_COMPLEX, xmpi_bsize_spc, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, xmpi_bsize_dpc, mpierr)
 
  ! Find the byte size of Fortran record marker used in MPI-IO routines.
  if (xmpio_bsize_frm == 0) then
@@ -5191,6 +5203,11 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  case default
   call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
  end select
+
+ ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
+ ! else the gcc with mpicc complains with
+ ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
+ ! See https://github.com/pmodels/mpich/issues/2659
 
 #ifdef HAVE_MPI
 #if 0

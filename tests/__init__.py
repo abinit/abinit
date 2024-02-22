@@ -157,6 +157,8 @@ _tsuite_dirs = [
     "mpiio",
     "paral",
     # "hpc",
+    "hpc_gpu_omp",
+    "gpu_omp",
     # "physics",
     "seq",
     "tutoatdep",

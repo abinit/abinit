@@ -559,6 +559,7 @@ AC_DEFUN([ABI_GPU_INIT],[
   abi_gpu_usable="no"
   abi_gpu_fcflags=""
   abi_gpu_ldflags=""
+  abi_gpu_prefix="${sd_gpu_prefix}"
   abi_gpu_flavor="${sd_gpu_flavor}"
   abi_gpu_incs="${GPU_CPPFLAGS}"
   abi_gpu_libs="${GPU_LIBS}"
