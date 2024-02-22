@@ -21,6 +21,7 @@ nav:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
+    - Abitk: guide/abitk.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
     - aTDEP: guide/atdep.md
