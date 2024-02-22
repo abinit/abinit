@@ -63,7 +63,9 @@ module m_xg_ortho_RR
        .false.,.false.,&
        .true. ,.true., .false.  /)
 
-  integer, parameter :: tim_hegv     = 1661
+  integer, parameter :: tim_RR_diago  = 1795
+  integer, parameter :: tim_RR_gemm_1 = 1796
+  integer, parameter :: tim_RR_gemm_2 = 1797
 
   public :: xg_Borthonormalize
   public :: xg_RayleighRitz
@@ -88,7 +90,6 @@ module m_xg_ortho_RR
 
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
 
-!    call timab(tim_Bortho,1,tsec)
     call timab(timer,1,tsec)
 
     call xgBlock_check(X,BX)
@@ -124,7 +125,6 @@ module m_xg_ortho_RR
     call xg_free(buffer)
 
     ABI_NVTX_END_RANGE()
-!    call timab(tim_Bortho,2,tsec)
     call timab(timer,2,tsec)
 
   end subroutine xg_Borthonormalize
@@ -167,7 +167,6 @@ module m_xg_ortho_RR
     integer :: subdim
     integer :: spacecom
     integer :: eigenSolver
-    !integer :: neigen
     double precision :: abstol
 #ifdef HAVE_LINALG_SCALAPACK
     logical :: use_slk
@@ -187,7 +186,6 @@ module m_xg_ortho_RR
 #endif
     logical :: solve_ax_bx_
 
-!    call timab(tim_RR, 1, tsec)
     call timab(timer , 1, tsec)
 
     solve_ax_bx_ = .false.
@@ -199,14 +197,7 @@ module m_xg_ortho_RR
     call xgBlock_check(X,AX)
     call xgBlock_check(X,BX)
     if (.not.solve_ax_bx_) then
-!      eigenSolver = EIGENEV
       eigenSolver = EIGENEVD
-!      if(gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
-!#ifdef HAVE_LINALG_MKL_THREADS
-!      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
-!#elif HAVE_LINALG_OPENBLAS_THREADS
-!      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
-!#endif
     else
       eigenSolver = EIGENVD
     end if
@@ -218,15 +209,7 @@ module m_xg_ortho_RR
 
     if (present(XW)) then
       var = VAR_XW
-!      eigenSolver = EIGENVX
       eigenSolver = EIGENVD
-!      if(gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENVD
-!#ifdef HAVE_LINALG_MKL_THREADS
-!      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
-!#elif HAVE_LINALG_OPENBLAS_THREADS
-!      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
-!#endif
-      !TODO Do checks on other optional arguments
       call xgBlock_check(X,AW)
       call xgBlock_check(X,BW)
       call xgBlock_check(X,P)
@@ -274,6 +257,8 @@ module m_xg_ortho_RR
     ! |  *  |  WAW  | WAP |  |  *  |   I   | WBP |
     ! |  *  |   *   | PAP |  |  *  |   *   |  I  |
 
+    call timab(tim_RR_gemm_1,1,tsec)
+
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
     call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,gpu_option=gpu_option)
 
@@ -304,6 +289,8 @@ module m_xg_ortho_RR
 
     end if
 
+    call timab(tim_RR_gemm_1,2,tsec)
+
     if ( EIGPACK(eigenSolver) ) then
       call xgBlock_pack(subA%self,subA%self,'u')
       if ( solve_ax_bx_ .or. var /= VAR_X ) then
@@ -311,15 +298,7 @@ module m_xg_ortho_RR
       end if
     end if
 
-    !FIXME Avoid those transfers
-    ! Compute X*AX subspace matrix
-    !call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
-
-    ! Compute X*BX subspace matrix
-    !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
-    !---end
-
-    call timab(tim_hegv,1,tsec)
+    call timab(tim_RR_diago,1,tsec)
     tsec(2) = abi_wtime()
     if ( .not.solve_ax_bx_ .and. var == VAR_X ) then
       ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
@@ -380,18 +359,17 @@ module m_xg_ortho_RR
       call xgScalapack_free(scalapack)
     end if
     tsec(2) = abi_wtime() - tsec(2)
-!    if ( var /= VAR_XW ) then
-!      eigenSolverTime(eigenSolver) = (eigenSolverTime(eigenSolver)*eigenSolverCount(eigenSolver) + tsec(2))/(eigenSolverCount(eigenSolver)+1)
-!      eigenSolverCount(eigenSolver) = eigenSolverCount(eigenSolver)+1
-!    end if
     if ( prtvol == 4 ) write(std_out,*) tsec(2)
-    call timab(tim_hegv,2,tsec)
+
+    call timab(tim_RR_diago,2,tsec)
     ABI_NVTX_END_RANGE()
 
     if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
       call xg_free(subA)
     end if
     call xg_free(subB)
+
+    call timab(tim_RR_gemm_2,1,tsec)
 
     !FIXME Avoid those transfers
     if ( info == 0 ) then
@@ -439,6 +417,8 @@ module m_xg_ortho_RR
       end if
     end if
 
+    call timab(tim_RR_gemm_2,2,tsec)
+
     ! Doing free on an already free object does not doe anything
     call xg_free(vec)
     call xg_free(subA)
@@ -451,7 +431,6 @@ module m_xg_ortho_RR
 #endif
 
     ABI_NVTX_END_RANGE()
-!    call timab(tim_RR, 2, tsec)
     call timab(timer , 2, tsec)
 
   end subroutine xg_RayleighRitz

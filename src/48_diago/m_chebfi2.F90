@@ -80,17 +80,13 @@ module m_chebfi2
  integer, parameter :: tim_invovl       = 1755
  integer, parameter :: tim_residu       = 1756
  integer, parameter :: tim_RR           = 1757
- integer, parameter :: tim_pcond        = 1758
+! integer, parameter :: tim_pcond        = 1758
  integer, parameter :: tim_RR_q         = 1759
  integer, parameter :: tim_next_p       = 1760
  integer, parameter :: tim_swap         = 1761
  integer, parameter :: tim_amp_f        = 1762
  integer, parameter :: tim_alltoall     = 1763
- integer, parameter :: tim_RR_hegv      = 1764
- integer, parameter :: tim_RR_scale     = 1765
- integer, parameter :: tim_RR_XNP_reset = 1766
- integer, parameter :: tim_RR_gemm_1    = 1767
- integer, parameter :: tim_RR_gemm_2    = 1768
+ integer, parameter :: tim_ortho        = 1764
  integer, parameter :: tim_X_NP_init    = 1769
  integer, parameter :: tim_AX_BX_init   = 1770
 
@@ -743,14 +739,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self,gpu_option=chebfi%gpu_option)
  end if
 
- call timab(tim_pcond,1,tsec)
+! call timab(tim_pcond,1,tsec)
  call pcond(chebfi%AX%self,gpu_option=chebfi%gpu_option)
- call timab(tim_pcond,2,tsec)
+! call timab(tim_pcond,2,tsec)
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu, gpu_option=chebfi%gpu_option)
  call timab(tim_residu, 2, tsec)
 
- call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,tim_RR_XNP_reset,chebfi%gpu_option)
+ call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,tim_ortho,chebfi%gpu_option)
 
  call xgBlock_copy(chebfi%X,X0,1, 1, chebfi%gpu_option)
 
