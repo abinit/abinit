@@ -182,7 +182,7 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
 
 !******************************************************************
 
