@@ -444,6 +444,12 @@ module m_xg_ortho_RR
     call xg_free(subA)
     call xg_free(subB)
 
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
+      call gpu_device_synchronize()
+    end if
+#endif
+
     ABI_NVTX_END_RANGE()
 !    call timab(tim_RR, 2, tsec)
     call timab(timer , 2, tsec)
