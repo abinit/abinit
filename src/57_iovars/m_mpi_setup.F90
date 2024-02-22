@@ -135,7 +135,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    prtvol = dtsets(idtset)%prtvol
 
 !  Read parallel input parameters
-   marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
+   marr=max(12,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
    ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
@@ -240,8 +240,8 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)
    mpi_enregs(idtset)%pw_unbal_thresh=dtsets(idtset)%pw_unbal_thresh
 
-   call intagm(dprarr,intarr,jdtset,marr,5,string(1:lenstr),'gpu_devices',tread0,'INT')
-   if(tread0==1) dtsets(idtset)%gpu_devices(1:5)=intarr(1:5)
+   call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
    if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
