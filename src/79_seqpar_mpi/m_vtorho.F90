@@ -632,7 +632,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      ABI_MALLOC(cprj_local,(dtset%natom,mcprj_local))
      call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
-     cprj=> cprj_local
+     cprj => null()
+     cprj => cprj_local
    end if
  end if
 

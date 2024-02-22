@@ -192,6 +192,8 @@ module m_ddb
     procedure :: copy => ddb_copy
      ! Copy the object.
 
+    !procedure :: get_qptopt => ddb_get_qptopt
+
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
 

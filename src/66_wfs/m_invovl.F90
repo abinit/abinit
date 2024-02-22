@@ -33,6 +33,7 @@ MODULE m_invovl
  use m_xmpi
  use m_xomp
  use m_abicore
+ use m_abi_linalg
 
  use defs_abitypes, only : mpi_type
  use m_time,        only : timab
@@ -1289,9 +1290,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   integer, intent(in) :: npw, ndat
   integer, intent(in) :: nspinor
   integer, intent(in) :: block_sliced
-  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
+  real(dp), intent(inout), target :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
-  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
+  real(dp), intent(inout), target :: sm1cwavef(2, npw*nspinor*ndat)
   type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
   logical :: transfer_omp_args
 
@@ -1415,11 +1416,7 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
     ABI_FREE(cwaveprj_in)
   end if
 
-  !$OMP TARGET PARALLEL DO PRIVATE(iproj) MAP(to:cwavef,sm1cwavef)
-  do iproj=1, ndat*nspinor*npw
-    sm1cwavef(1,iproj) = cwavef(1,iproj) + sm1cwavef(1,iproj)
-    sm1cwavef(2,iproj) = cwavef(2,iproj) + sm1cwavef(2,iproj)
-  end do
+  call abi_gpu_xaxpy(1, 2*npw*nspinor*ndat, cone, cwavef, 1, sm1cwavef, 1)
 
   if(transfer_omp_args) then
     !$OMP TARGET UPDATE FROM(sm1cwavef,cwavef)
@@ -1476,11 +1473,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
-#ifdef HAVE_GPU_HIP
- !$OMP TARGET MAP(to:sm1proj,PtPsm1proj) MAP(from:sm1proj_amdcopy,PtPsm1proj_amdcopy)
- sm1proj_amdcopy = c_loc(sm1proj)
- PtPsm1proj_amdcopy = c_loc(PtPsm1proj)
- !$OMP END TARGET
+#if defined HAVE_GPU_HIP  && defined FC_LLVM
+ !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
+ sm1proj_amdref => sm1proj
+ PtPsm1proj_amdref => PtPsm1proj
 #endif
 
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
@@ -1523,17 +1519,19 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                invovl%gram_projs, nprojs,&
-                sm1proj, nlmntot_this_proc, czero, &
-                PtPsm1proj, nprojs)
-#elif defined HAVE_GPU_HIP
+                c_loc(current_gram_projs), nprojs,&
+                c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj_amdref), nprojs)
+   !$OMP END TARGET DATA
+#else
    !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
-                sm1proj_amdcopy, nlmntot_this_proc, czero, &
-                PtPsm1proj_amdcopy, nprojs)
+                c_loc(sm1proj), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj), nprojs)
    !$OMP END TARGET DATA
 #endif
 
