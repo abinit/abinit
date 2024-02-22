@@ -9,7 +9,7 @@
 
 # === GPU parameters
 gpu_option 1            ! Select GPU legacy 2013 Cuda version
-gpu_devices 0 3 1 2 -1  ! Select GPU cards one the node
+gpu_devices 0 3 1 2 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1  ! Select GPU cards one the node
 gpu_linalg_limit 0      ! Force linear algebra on GPU (for testing purpose)
 
 # === Structure and cell

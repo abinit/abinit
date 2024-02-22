@@ -6101,8 +6101,8 @@ Variable(
     varset="paral",
     vartype="integer",
     topics=['parallelism_expert'],
-    dimensions=[5],
-    defaultval=[-1, -1, -1, -1, -1],
+    dimensions=[12],
+    defaultval=12*(-1),
     mnemonics="GPU: choice of DEVICES on one node",
     requires="[[gpu_option]] > 0 and [[CUDA]] (Nvidia GPU)",
     added_in_version="before_v9",
@@ -6116,19 +6116,19 @@ the GPU devices are chosen by order of performance (FLOPS, memory).
 
 Examples:
 
-  * 2 GPU devices per node, 4 MPI processes per node, **gpu_device** =[-1,-1,-1,-1,-1] (default):
+  * 2 GPU devices per node, 4 MPI processes per node, **gpu_device** = *-1 (default):
 MPI processes 0 and 2 use the best GPU card, MPI processes 1 and 3 use the
 slowest GPU card.
 
-  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[1,0,2,-1,-1]:
+  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[1,0,2,-1,-1, . . .]:
 MPI processes 0 and 3 use GPU card 1, MPI processes 1 and 4 use GPU card 0,
 MPI process 2 uses GPU card 2.
 
-  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[0,1,-1,-1,-1]:
+  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[0,1,-1,-1, . . .]:
 MPI processes 0, 2 and 4 use GPU card 0, MPI processes 1 and 3 use GPU card 1;
 the 3rd GPU card is not used.
 
-GPU card are numbered starting from 0; to get the GPU devices list, type
+GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia): 
 "nvidia-smi" or "lspci | grep -i nvidia".
 """,
 ),
