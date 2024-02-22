@@ -402,15 +402,15 @@ module m_xg_ortho_RR
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
-      call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self)
+      call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self,gpu_option=gpu_option)
       call xgBlock_copy(subB%self,X,gpu_option=gpu_option)
 
       !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(AX%normal,Cwp%normal,1.0d0,AX,Cwp,0.d0,subB%self)
+      call xgBlock_gemm(AX%normal,Cwp%normal,1.0d0,AX,Cwp,0.d0,subB%self,gpu_option=gpu_option)
       call xgBlock_copy(subB%self,AX,gpu_option=gpu_option)
 
       !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(BX%normal,Cwp%normal,1.0d0,BX,Cwp,0.d0,subB%self)
+      call xgBlock_gemm(BX%normal,Cwp%normal,1.0d0,BX,Cwp,0.d0,subB%self,gpu_option=gpu_option)
       call xgBlock_copy(subB%self,BX,gpu_option=gpu_option)
 
       if ( var /= VAR_X ) then
@@ -419,15 +419,15 @@ module m_xg_ortho_RR
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
         call xgBlock_copy(subB%self,P,gpu_option=gpu_option)
 
         !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
         call xgBlock_copy(subB%self,AP,gpu_option=gpu_option)
 
         !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
         call xgBlock_copy(subB%self,BP,gpu_option=gpu_option)
 
         !/* Maybe faster solution
