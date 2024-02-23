@@ -155,7 +155,7 @@ a four-atom unit cell of AF2-ordered NiO using the lruj post-processing utility.
 can be carried out in three steps:
 
 1. Run a ground state Abinit calculation for NiO to generate <code>WFK</code> files.
-2. Run a series of perturbative Abinit calculations to generate _LRUJ.nc files.
+2. Run a series of perturbative Abinit calculations to generate <code>*_LRUJ.nc</code> files.
 3. Execute the lruj prost-processing utility.
 
 
@@ -350,8 +350,8 @@ These values of U are computed using the extrapolation procedure proposed in
 [[cite:Cococcioni2005]]. In this work, it is shown that using a two atom supercell for 
 the DFT calculation and an extrapolation procedure can yield an estimation 
 of the value of U. More precise values can be and often are obtained by running linear
-response DFT calculations on larger and larger supercells. This procedure succeeds in
-isolating the perturbed subspace from its periodic images.
+response DFT calculations on larger and larger supercells. Doing so have the added benefit 
+of isolating the perturbed subspace from its periodic images.
 
 The column <code>nat</code> indicates how many atoms were involved in the extrapolated supercell, 
 and <code>r_max</code> indicates the maximum distance of the perturbed atom from its periodic 
