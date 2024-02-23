@@ -66,7 +66,7 @@ if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX STREQUAL "AUTO")
   try_compile(MPI_NOT_BUGGY ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
     LINK_LIBRARIES MPI::MPI_Fortran)
     if(NOT MPI_NOT_BUGGY)
-      ABINIT_ENABLE_MPI_INTERFACES_BUGFIX = "yes"
+      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX,ON)
     endif()
 endif()
 if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
@@ -79,7 +79,7 @@ if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
     try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
       LINK_LIBRARIES MPI::MPI_Fortran)
   else()
-    ABINIT_ENABLE_MPI_INPLACE = "no"
+    set(ABINIT_ENABLE_MPI_INPLACE,OFF)
   endif()
 endif()
 if(ABINIT_ENABLE_MPI_INPLACE)
