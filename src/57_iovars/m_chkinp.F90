@@ -103,7 +103,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  type(dataset_type) :: dt
 !arrays
  integer :: cond_values(4),nprojmax(0:3)
- integer :: gpu_devices(5)=(/-2,-2,-2,-2,-2/)
+ integer :: gpu_devices(12)=(/-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2,-2/)
  integer,allocatable :: ierr_dtset(:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
  real(dp),allocatable :: frac(:,:),tnons_new(:,:),xred(:,:)
@@ -216,6 +216,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  autoparal
    call chkint_eq(0,0,cond_string,cond_values,ierr,'autoparal',dt%autoparal,5,(/0,1,2,3,4/),iout)
+!  This test should be reenabled in ABINITv10, provided expert_user is not 1
+!  if(dt%autoparal/=0.and.dt%optdriver/=RUNL_GSTATE) then
+!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
+!  end if
 
 !  auxc_scal
    call chkdpr(0,0,cond_string,cond_values,ierr,'auxc_scal',dt%auxc_scal,1,0.0_dp,iout)
@@ -2717,6 +2722,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%paral_kgb==1.and.dt%usefock>0) then
      ABI_ERROR_NOSTOP('Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!', ierr)
    end if
+!  This test should be reenabled in ABINITv10, provided expert_user is not 1
+!  if(dt%paral_kgb/=0.and..not.(dt%optdriver==RUNL_GSTATE .or. dt%optdriver==RUNL_GWLS)) then
+!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+!  end if
 
 !  paral_rf
    if (response==0 .and. dt%paral_rf/=0) then
