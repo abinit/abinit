@@ -92,7 +92,7 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,ndim 
- integer :: nmat,nmdir
+ integer :: nmat,nmdir,prtopt
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
@@ -107,6 +107,7 @@ contains
  ' Linear-response magnetic penalty section ',ch10
  call wrtout([std_out, ab_out], msg)
 
+ prtopt=1
  if (magpen<zero) then
    nmat= 1
  else if (magpen>zero) then
@@ -158,7 +159,7 @@ contains
      end if
 
      call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
 
    end if
 
@@ -379,11 +380,11 @@ contains
 !! SOURCE
 
  subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
  real(dp),intent(in) :: magpen
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
@@ -490,80 +491,83 @@ contains
  ABI_FREE(work1)
  ABI_FREE(work2)
 
-! fac=2.714943600699**2*27.2114/four
- fac=27.2114/four
- open(10,file='k_ss.txt')
-   do irow=1, ndim
-     write(10,*) invmagsus(irow,1:ndim)*fac
-   end do 
- close(10)
-
- !Write results in output
- if (magpen > zero) then
-   call wrtout([ab_out,std_out], ' Local spin susceptibility ')
-   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-   do irow=1, ndim
-     do icol=1, ndim
-       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-     & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-     & real(magsus(irow,icol)), aimag(magsus(irow,icol))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
-
-
-   call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
-   call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-   do irow=1, ndim
-     do icol=1, ndim
-       write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-     & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-     & real(invmagsus(irow,icol)), aimag(invmagsus(irow,icol))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
-
-   if (prtvol > 1) then
-     call wrtout([ab_out,std_out], ' Penalized local spin susceptibility ')
+ if (prtopt==1) then
+  ! fac=2.714943600699**2*27.2114/four
+   fac=27.2114/four
+   open(10,file='k_ss.txt')
+     do irow=1, ndim
+       write(10,*) invmagsus(irow,1:ndim)*fac
+     end do 
+   close(10)
+  
+   !Write results in output
+   if (magpen > zero) then
+     call wrtout([ab_out,std_out], ' Local spin susceptibility ')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do irow=1, ndim
        do icol=1, ndim
          write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
        & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-       & real(barmagsus(irow,icol)), aimag(barmagsus(irow,icol))
+       & real(magsus(irow,icol)), aimag(magsus(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
   
-     call wrtout([ab_out,std_out], ' Inverse of penalized local spin susceptibility ')
+  
+     call wrtout([ab_out,std_out], ' Inverse of local spin susceptibility ')
      call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
      do irow=1, ndim
        do icol=1, ndim
          write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
        & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-       & real(invbarmagsus(irow,icol)), aimag(invbarmagsus(irow,icol))
+       & real(invmagsus(irow,icol)), aimag(invmagsus(irow,icol))
          call wrtout([ab_out,std_out], msg)
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
-
-     call wrtout([ab_out,std_out], ' Inverse of H matrix (I-\alpha \barchi)^{-1} ')
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do irow=1, ndim
-       do icol=1, ndim
-         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-       & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
-       & real(invhmat(irow,icol)), aimag(invhmat(irow,icol))
-         call wrtout([ab_out,std_out], msg)
+  
+     if (prtvol > 1) then
+       call wrtout([ab_out,std_out], ' Penalized local spin susceptibility ')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, ndim
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+         & real(barmagsus(irow,icol)), aimag(barmagsus(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
        end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
+       call wrtout([ab_out,std_out], '   ')
+    
+       call wrtout([ab_out,std_out], ' Inverse of penalized local spin susceptibility ')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, ndim
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+         & real(invbarmagsus(irow,icol)), aimag(invbarmagsus(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+  
+       call wrtout([ab_out,std_out], ' Inverse of H matrix (I-\alpha \barchi)^{-1} ')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, ndim
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat(irow), cart(indexdir(irow)), indexat(icol), cart(indexdir(icol)), &
+         & real(invhmat(irow,icol)), aimag(invhmat(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+     end if
+  
+   end if !magpen>zero
 
- end if
+ end if !prtopt
  
  end subroutine spinsus
 !!***
@@ -1631,14 +1635,14 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: iblok,ii,ipert1,ipert2,iw,jblok,kblok,lblok,nblok,ndim 
- integer :: nmat,nmdir,nwcalc
+ integer :: nmat,nmdir,nwcalc,prtopt
  real(dp) :: omega,omegastp
  character(len=500) :: msg
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:),omegacalc(:)
- complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
- complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
+ real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omegacalc(:)
+ complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
+ complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
 
@@ -1656,16 +1660,30 @@ contains
 !Define the omega discretization
  omegastp=(omegamax-omegamin)/(nomega-1) 
 
+ prtopt=0
+ if (magpen<zero) then
+   nmat= 1
+ else if (magpen>zero) then
+   nmat= mpatpol(2) - mpatpol(1) + 1
+ end if
+ nmdir=sum(mpdir(:))
+ ndim=nmat*nmdir
+ ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
+ ABI_MALLOC(magsus,(ndim,ndim,nomega))
+ ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
+ ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
+ ABI_MALLOC(invhmat,(ndim,ndim,nomega))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
- ABI_MALLOC(int_barddb,(2,ddb%msize))
+ ABI_MALLOC(int_barddb,(2,ddb%msize,1))
+
 !Loop over the frequency
  do iw=1,nomega
    omega=omegamin+omegastp*(iw-1)
 
    do ii=1,ddb%msize
      if (all(ddb%flg(ii,:)==1)) then
-       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega,int_barddb(1,ii),dint_barddb(1,ii)) 
-       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega,int_barddb(2,ii),dint_barddb(2,ii)) 
+       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega,int_barddb(1,ii,1),dint_barddb(1,ii)) 
+       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega,int_barddb(2,ii,1),dint_barddb(2,ii)) 
      else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
        write(msg,'(a,a,a)')&
        'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
@@ -1674,9 +1692,21 @@ contains
      end if
    end do 
 
+   !Calculate the spin susceptibilities
+   call spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
+ & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol)
+
+!   write(100,'(5es16.8)') omega, real(magsus(1,:,iw))
+!   write(101,'(5es16.8)') omega, aimag(magsus(1,:,iw))
+
  end do
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
+ ABI_FREE(barmagsus)
+ ABI_FREE(magsus)
+ ABI_FREE(invbarmagsus)
+ ABI_FREE(invmagsus)
+ ABI_FREE(invhmat)
 
  end subroutine ddb_omega_interpol
 !!***
