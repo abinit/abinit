@@ -815,6 +815,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  end if
 
  if (l_paw) then
+   call pawcprj_free(cwaveprj_next)
    ABI_FREE(cwaveprj_next)
  end if
 
