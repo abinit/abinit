@@ -1,11 +1,11 @@
-!!****m* ABINIT/m_xgTools
+!!****m* ABINIT/m_xg_ortho_RR
 !! NAME
-!!  m_xgTools
+!!  m_xg_ortho_RR
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2023-2023 ABINIT group (L. Baguet)
+!!  Copyright (C) 2024-2024 ABINIT group (L. Baguet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -178,12 +178,6 @@ module m_xg_ortho_RR
     type(xgBlock_t) :: Cwp
     type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
-#ifdef HAVE_LINALG_MKL_THREADS
-    integer :: mkl_get_max_threads
-#endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-    integer :: openblas_get_num_threads
-#endif
     logical :: solve_ax_bx_
 
     call timab(timer , 1, tsec)

@@ -387,7 +387,7 @@ contains
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk, tsec(2)
+ real(dp) :: enlk!, tsec(2)
  logical :: check,testnl,no_opernla_mv,no_opernlb_mv
  character(len=500) :: message
 !arrays
