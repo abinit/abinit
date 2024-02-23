@@ -262,7 +262,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
  integer :: ipw,space,blockdim,nline,total_spacedim,ierr
- real(dp) :: cputime,walltime,localmem
+ real(dp) :: localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu

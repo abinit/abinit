@@ -37,7 +37,6 @@ module m_chebfi2
  use m_xg
  use m_xgTransposer
  use m_xg_ortho_RR
- use m_xgScalapack
 
  use m_xmpi
  use m_xomp
@@ -59,19 +58,6 @@ module m_chebfi2
 
 !Several (private) parameters
 !-------------------------------------------------
-
- integer, parameter :: EIGENV = 1
- integer, parameter :: EIGENVD = 2
- integer, parameter :: EIGENSLK = 3
- integer, parameter :: DEBUG_ROWS = 5
- integer, parameter :: DEBUG_COLUMNS = 5
-
-!Type of eigen solver to use
-#ifdef HAVE_OPENMP
- integer, save :: eigenSolver = EIGENVD
-#else
- integer, save :: eigenSolver = EIGENV
-#endif
 
  integer, parameter :: tim_init         = 1751
  integer, parameter :: tim_free         = 1752
@@ -530,7 +516,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  real(dp) :: mineig, mineig_global
  real(dp) :: lambda_minus
  real(dp) :: lambda_plus
- real(dp) :: maximum
  real(dp) :: one_over_r
  real(dp) :: two_over_r
  real(dp) :: center

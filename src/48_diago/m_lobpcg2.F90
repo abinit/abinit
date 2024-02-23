@@ -12,7 +12,6 @@ module m_lobpcg2
 
   use m_xg
   use m_xgTransposer
-  use m_xgScalapack
   use m_xg_ortho_RR
   use defs_basis
   use m_abicore
@@ -40,23 +39,6 @@ module m_lobpcg2
   integer, parameter :: VAR_WP  = 1011
   integer, parameter :: VAR_XWP = 1100
 
-  integer, parameter :: EIGENVX = 1
-  integer, parameter :: EIGENVD = 2
-  integer, parameter :: EIGENV = 3
-  integer, parameter :: EIGENPVX = 4
-  integer, parameter :: EIGENPVD = 5
-  integer, parameter :: EIGENPV = 6
-  integer, parameter :: EIGENEVD = 7
-  integer, parameter :: EIGENEV = 8
-  integer, parameter :: EIGENPEVD = 9
-  integer, parameter :: EIGENPEV = 10
-  integer, parameter :: EIGENSLK = 11
-  logical, parameter :: EIGPACK(11) = &
-    (/ .false.,.false.,.false., &
-       .true. ,.true. ,.true. ,&
-       .false.,.false.,&
-       .true. ,.true., .false.  /)
-
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
 !  integer, parameter :: tim_run      = 1653
@@ -77,14 +59,6 @@ module m_lobpcg2
   integer, parameter :: tim_RR_XW       = 1646
   integer, parameter :: tim_RR_XWP      = 1647
   integer, parameter :: tim_RR_Xall     = 1648
-
-#ifdef HAVE_OPENMP
-  integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
-#else
-  integer, save :: eigenSolver = EIGENVX     ! Type of eigen solver to use
-#endif
-  !double precision, save :: eigenSolverTime(10) = tiny(0.d0)      ! Store time for each solver
-  !double precision, save :: eigenSolverCount(10) = 0      ! Store time for each solver
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -388,10 +362,8 @@ module m_lobpcg2
     integer :: iblock, nblock
     integer :: iline, nline
     integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
-    integer :: RR_var,RR_tim
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
-    type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
     double precision :: maxResidu, minResidu
     double precision :: dlamch,tolerance
     integer :: ierr = 0
