@@ -494,7 +494,7 @@ module m_lobpcg2
       end if
 
       ! B-orthonormalize X, BX and AX
-      call xg_Borthonormalize(lobpcg%X,lobpcg%BX,ierr,tim_Bortho_X,lobpcg%gpu_option,AX=lobpcg%AX) ! true to rotate AX as well
+      call xg_Borthonormalize(lobpcg%X,lobpcg%BX,ierr,tim_Bortho_X,lobpcg%gpu_option,AX=lobpcg%AX)
 
       ! Do first RR on X to get the first eigen values
       call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvaluesN,ierr,lobpcg%prtvol,tim_RR_X,lobpcg%gpu_option)
@@ -613,7 +613,7 @@ module m_lobpcg2
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
            & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
             if ( ierr /= 0 ) then
-              ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
+              ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
               exit
             end if
           end if
