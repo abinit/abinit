@@ -18,8 +18,8 @@ Gamma point, the combination of the atomic displacements and electric field
 type perturbations opens also the access to Born effective charges, electronic
 (for frequencies lower than the electronic band gap) dielectric constants, and
 then, to infra-red reflectivity of materials (in the infinite lifetime
-approximation). See [[cite:Gonze1997a]] for the presentation of the theory
-with DFPT.
+approximation). See [[cite:Gonze1997a]] and [[cite:Baroni2001]] for the presentation of the theory
+of DFPT, and [[cite:Gonze2024]] for the specificities for metals.
 
 In ABINIT, with one dataset for a fixed wavevector (see [[topic:q-points]]),
 one can compute all such second-order derivatives. ABINIT will already perform

@@ -81,7 +81,7 @@ paral_rf2 0
 paral_rf3 0 
 paral_rf 1
 paral_kgb1 1 
-autoparal 1  paral_kgb 0
+autoparal1 1  paral_kgb 0
 nppert 2 
 #Definition of the atoms
     natom   2
