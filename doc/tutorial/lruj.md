@@ -22,7 +22,7 @@ and [DFT+U](/tutorial/dftu) tutorials to familiarize yourself with the manifesta
 PAW atomic datasets within Abinit. Also consider checking out this video introducing
 the PAW formalism in an Abinit context. 
 
-<iframe width="1384" height="629" src="https://www.youtube.com/watch?v=5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="1384" height="629" src="https://www.youtube.com/embed/5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 This tutorial should take less than 30 minutes. We begin with a brief description of the 
 linear response method and an important explanation of recent renovations to the linear 
@@ -121,7 +121,7 @@ The ujdet utility uses only two points: the unperturbed case—in which the pert
 is zero and the subspace occupations are those of the ground state—and one perturbed case, in 
 which the potential perturbation is equal to the value of [[pawujv]]. Note that the ujdet procedure 
 differs slightly from its implementations in Abinit versions prior to 9.6.2, in which it conducted 
-two perturbations: one of strength [[pawujv]] and the other of strength -[[pawujv]]. Due to a bug in the 
+two perturbations: one of strength [[pawujv]] and the other of strength $-1.0*$[[pawujv]]. Due to a bug in the 
 program, the second perturbation administered provided erroneous unscreened response occupations. 
 To fix this, we exchanged the data point from the second perturbation for one from the unperturbed 
 case, whose occupations are calculated anyway from the ground state wavefunctions read into Abinit.
@@ -136,7 +136,7 @@ Another crucial difference between the two utilities is item (3) in the above ta
 utility treats the response functions as matrices, whereas the lruj utility treats them as scalars. 
 Ideologically, this means that the ujdet Hubbard parameters are, to some degree, informed by 
 the Hubbard interactions on and between the other atomic subspaces of the system as well as the 
-total charge bath. The protocol is expanded upon in Cococcioni’s thesis [[cite:Cococcioni2002]].
+total charge bath. The protocol is expanded upon in reference [[cite:Cococcioni2002]].
 
 By contrast, the lruj utility provides the scalar Hubbard parameters, informed only by the change 
 in occupancy on the perturbed subspace. This parameter is functionally sufficient for SIE corrective 
@@ -246,7 +246,7 @@ conduct a ground state calculation remain unmodified. Launch the Abinit run to p
 
     abinit tlruj_1.abi > tlruj_1.log
 
-The run should take about a minute to run, but times vary depending on your hardware. This 
+This should take about a minute to run, but times vary depending on your hardware. This 
 concludes Step 1.
 
 
@@ -329,10 +329,11 @@ You will find all information related to the calculation of the U parameter betw
 
 Here, ujdet lists out the perturbation strengths and their corresponding unscreened and
 screened occupations. (When calculating the Hund's J, <code>Occupations</code> will be replaced by
-<code>Magnetizations.</code>) From here, the scalar response functions $\chi$ and $\chi_0$ are 
-printed out, followed by the scalar definition of U in units of eV. By scalar, we mean that the
-response functions are treated as scalars, and thus the U printed here is informed only
-by the occupational responses on the perturbed atom.
+<code>Magnetizations</code>, and <code>alpha</code> will be replaced by <code>beta</code>.) From 
+here, the scalar response functions $\chi$ and $\chi_0$ are printed out, followed by the scalar 
+definition of U in units of eV. By scalar, we mean that the response functions are treated as 
+scalars, and thus the U printed here is informed only by the occupational responses on the 
+perturbed atom.
 
 The lines starting with URES, by contrast, report the U as a function of its inverted
 (and charge bath augmented) response matrices:
