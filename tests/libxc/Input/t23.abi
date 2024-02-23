@@ -16,7 +16,7 @@ prtden      1
 prtkden     1
 
 #---- SCF cycle control
-tolvrs      1.0d-15
+tolvrs      2.0d-15
 nstep       20
 diemac      12.0
 
