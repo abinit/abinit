@@ -1127,7 +1127,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1761) = 'chebfi2_swap                  '
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
- names(1764) = 'chebfi2_ortho                 '
  names(1769) = 'chebfi2_X_NP@init             '
  names(1770) = 'chebfi2_AX_BX@init            '
 
@@ -1813,7 +1812,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(75)
          list(:19)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:13)=(/1750,1751,1752,1754,1755,1756,1757,1759,1760,1761,1762,1763,1764/) ; msg='chebfiwf2 core engine '
+         list(:12)=(/1750,1751,1752,1754,1755,1756,1757,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
