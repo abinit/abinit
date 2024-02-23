@@ -98,10 +98,12 @@ contains
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: qphnrm(3),qphon(3,3)
+ complex(dpc) :: epsilon(3,3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
+ complex(dpc), allocatable :: ifcmat(:,:)
 
 ! *********************************************************************
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -124,6 +126,7 @@ contains
  ABI_MALLOC(barmmom,(ndim,(natom+2)*3))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
+ ABI_MALLOC(ifcmat,(3*natom,3*natom))
 
  nblok=ddb%nblok
  do kblok=1,nblok
@@ -203,7 +206,7 @@ contains
 
    if (iblok /= 0 .or. jblok /=0) then
      call magmom(barmmom,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -219,8 +222,8 @@ contains
    rfphon(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
    if (iblok /= 0 ) then
-     call mp_ifc(barmagsus,ddb%val,iblok,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtvol,qphon,xred,zfield)
+     call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,magsus,mpert,mpopt,&
+   & natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
    end if
 
    !Born effective charges block
@@ -243,8 +246,8 @@ contains
      call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
    end if
    if (lblok /= 0 ) then
-     call mp_diel(barmagsus,ddb%val,lblok,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtvol,ucvol,zfield)
+     call mp_diel(barmagsus,ddb%val,epsilon,lblok,magsus,mpert,mpopt,&
+   & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield)
    end if
 
  end do
@@ -347,6 +350,7 @@ contains
  ABI_FREE(invmagsus)
  ABI_FREE(mmom)
  ABI_FREE(zfield)
+ ABI_FREE(ifcmat)
 
  end subroutine ddb_magpen
 !!***
@@ -608,11 +612,11 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,blkval,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
  real(dp),intent(in) :: magpen
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -679,122 +683,124 @@ contains
  mmom=-matmul(magsus,zfield)
  mmom_alt=matmul(invhmat,barmmom)
 
-! fac=2.714943600699/two*27.2114/0.529177
- fac=27.2114/0.529177/two
-
- open(10,file='k_ps.txt')
- do iat1= 1, natom
-   do idir1= 1, 3
-     icol= (iat1-1)*3 + idir1
-     write(10,*) conjg(zfield(1:ndim,icol)*fac* &
-   & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
-   end do
- end do 
- close(10)
-
-!Write the results
- if (magpen > zero) then
-   if (iblok /= 0) then
-     call wrtout([ab_out,std_out], ' Local Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do irow=1, ndim
-       do icol=1, natom*3
-         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-       & real(zfield(irow,icol)), aimag(zfield(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
+ if (prtopt==1) then
+  ! fac=2.714943600699/two*27.2114/0.529177
+   fac=27.2114/0.529177/two
+  
+   open(10,file='k_ps.txt')
+   do iat1= 1, natom
+     do idir1= 1, 3
+       icol= (iat1-1)*3 + idir1
+       write(10,*) conjg(zfield(1:ndim,icol)*fac* &
+     & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
      end do
-     call wrtout([ab_out,std_out], '   ')
-
-     call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced Zeeman fields)')
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do irow=1, ndim
-       do icol=1, natom*3
-         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-       & real(mmom(irow,icol)), aimag(mmom(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-
-     call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced penalized moments)')
-     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
-     do irow=1, ndim
-       do icol=1, natom*3
-         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-       & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
-   if (jblok /= 0) then
-     call wrtout([ab_out,std_out], ' Local Zeeman fields induced by electric field (at constrained magnetic moments)')
-     call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
-     do irow=1, ndim
-       do icol=(natom+1)*3+1, (natom+2)*3
-         write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
-       & real(zfield(irow,icol)), aimag(zfield(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-     call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced Zeeman fields)')
-     call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
-     do irow=1, ndim
-       do icol=(natom+1)*3+1, (natom+2)*3
-         write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
-       & real(mmom(irow,icol)), aimag(mmom(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-     call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced penalized moments)')
-     call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
-     do irow=1, ndim
-       do icol=(natom+1)*3+1, (natom+2)*3
-         write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
-       & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
-       & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end if
-   if (prtvol > 1) then
+   end do 
+   close(10)
+  
+  !Write the results
+   if (magpen > zero) then
      if (iblok /= 0) then
-       call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by atomic displacements ')
+       call wrtout([ab_out,std_out], ' Local Zeeman fields induced by atomic displacements (at constrained magnetic moments)')
        call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
        do irow=1, ndim
          do icol=1, natom*3
            write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
          & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
-         & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+         & real(zfield(irow,icol)), aimag(zfield(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+  
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced Zeeman fields)')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, natom*3
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+         & real(mmom(irow,icol)), aimag(mmom(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+  
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by atomic displacements (from induced penalized moments)')
+       call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+       do irow=1, ndim
+         do icol=1, natom*3
+           write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+         & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
            call wrtout([ab_out,std_out], msg)
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
      if (jblok /= 0) then
-       call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by electric field ')
+       call wrtout([ab_out,std_out], ' Local Zeeman fields induced by electric field (at constrained magnetic moments)')
        call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
        do irow=1, ndim
          do icol=(natom+1)*3+1, (natom+2)*3
            write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
          & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
-         & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+         & real(zfield(irow,icol)), aimag(zfield(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced Zeeman fields)')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+1)*3+1, (natom+2)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(mmom(irow,icol)), aimag(mmom(irow,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+       call wrtout([ab_out,std_out], ' Local magnetic moments induced by electric field (from induced penalized moments)')
+       call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+       do irow=1, ndim
+         do icol=(natom+1)*3+1, (natom+2)*3
+           write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+         & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+         & real(mmom_alt(irow,icol)), aimag(mmom_alt(irow,icol))
            call wrtout([ab_out,std_out], msg)
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
      end if
+     if (prtvol > 1) then
+       if (iblok /= 0) then
+         call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by atomic displacements ')
+         call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+         do irow=1, ndim
+           do icol=1, natom*3
+             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)' ) &
+           & indexat1(irow), cart(indexdir1(irow)), indexat2(icol), cart(indexdir2(icol)), &
+           & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+             call wrtout([ab_out,std_out], msg)
+           end do
+         end do
+         call wrtout([ab_out,std_out], '   ')
+       end if
+       if (jblok /= 0) then
+         call wrtout([ab_out,std_out], ' Penalized local magnetic moments induced by electric field ')
+         call wrtout([ab_out,std_out], '  atom1  dir  efld.dir         Real              Imag')
+         do irow=1, ndim
+           do icol=(natom+1)*3+1, (natom+2)*3
+             write(msg,'(i4,4x,a2,4x,a2,6x,2es18.9)' ) &
+           & indexat1(irow), cart(indexdir1(irow)), cart(indexdir2(icol)), &
+           & real(barmmom(irow,icol)), aimag(barmmom(irow,icol))
+             call wrtout([ab_out,std_out], msg)
+           end do
+         end do
+         call wrtout([ab_out,std_out], '   ')
+       end if
+     end if
    end if
- end if
+ end if 
   
  end subroutine magmom
 !!***
@@ -822,23 +828,23 @@ contains
 !! prtvol= control the volume of information written on output
 !!
 !! OUTPUT
-!!  directions of the penalty induced by atomic displacements and/or electric fields.
-!! zfield(ndim,(natom+2)*3)= Zeeman fields at constrained magnetic moments.
+!! ifcmat(3*natom,3*natom)= IFC matrix calculated at the level of mpopt.
 !!
 !! SOURCE
 
- subroutine mp_ifc(barmagsus,blkval,iblok,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtvol,qphon,xred,zfield)
+ subroutine mp_ifc(barmagsus,blkval,iblok,ifcmat,magsus,mpert,mpopt,&
+& natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtvol
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
  complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
+ complex(dpc),intent(out) :: ifcmat(3*natom,3*natom)
 !Local variables -------------------------
 !scalars
  integer :: icol,idir1,idir2,ipert1,ipert2,irow
@@ -874,12 +880,17 @@ contains
  fmifc= matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,ifc_zfield))
  fmifc= barifc + fmifc
 
+ ifcmat= fmifc
+
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
    srifc= matmul(transpose(conjg(ifc_zfield)),matmul(magsus,ifc_zfield))
    srifc= fmifc - srifc
+
+   ifcmat= srifc
  end if
 
+ !Adopt the same phase convention as for the local Zeeman perturbation
  do ipert2= 1, natom
    do idir2= 1, 3
      icol=( ipert2-1)*3 + idir2
@@ -893,34 +904,16 @@ contains
    end do
  end do 
  
- fac=27.2114/(0.52917)**2
- open(10,file='k_pp.txt')
- do irow=1,natom*3
-    write(10,*) fmifc_sf(irow,1:natom*3)*fac
- end do 
- close(10)
- 
- !Write the results
- call wrtout([ab_out,std_out], ' Frozen-magnetic interatomic force constants')
- call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
- do ipert1= 1, natom
-   do idir1= 1, 3
-     irow=( ipert1-1)*3 + idir1
-     do ipert2= 1, natom
-       do idir2= 1, 3
-         icol=( ipert2-1)*3 + idir2
-         write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
-       & ipert1, cart(idir1), ipert2, cart(idir2), &
-       & real(fmifc(irow,icol)), aimag(fmifc(irow,icol))
-         call wrtout([ab_out,std_out], msg)
-       end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end do
- end do 
-
- if (mpopt==2) then
-   call wrtout([ab_out,std_out], ' Spin-relaxed interatomic force constants')
+ if (prtopt==1) then
+   fac=27.2114/(0.52917)**2
+   open(10,file='k_pp.txt')
+   do irow=1,natom*3
+      write(10,*) fmifc_sf(irow,1:natom*3)*fac
+   end do 
+   close(10)
+   
+   !Write the results
+   call wrtout([ab_out,std_out], ' Frozen-magnetic interatomic force constants')
    call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
    do ipert1= 1, natom
      do idir1= 1, 3
@@ -930,13 +923,33 @@ contains
            icol=( ipert2-1)*3 + idir2
            write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
          & ipert1, cart(idir1), ipert2, cart(idir2), &
-         & real(srifc(irow,icol)), aimag(srifc(irow,icol))
+         & real(fmifc(irow,icol)), aimag(fmifc(irow,icol))
            call wrtout([ab_out,std_out], msg)
          end do
        end do
        call wrtout([ab_out,std_out], '   ')
      end do
    end do 
+  
+   if (mpopt==2) then
+     call wrtout([ab_out,std_out], ' Spin-relaxed interatomic force constants')
+     call wrtout([ab_out,std_out], '  atom1  dir  atom2  dir        Real              Imag')
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         do ipert2= 1, natom
+           do idir2= 1, 3
+             icol=( ipert2-1)*3 + idir2
+             write(msg,'(2(i4,4x,a2,2x),2x,2es18.9)') &
+           & ipert1, cart(idir1), ipert2, cart(idir2), &
+           & real(srifc(irow,icol)), aimag(srifc(irow,icol))
+             call wrtout([ab_out,std_out], msg)
+           end do
+         end do
+         call wrtout([ab_out,std_out], '   ')
+       end do
+     end do 
+   end if
  end if
 
  end subroutine mp_ifc
@@ -966,21 +979,22 @@ contains
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
-!!  directions of the penalty induced by atomic displacements and/or electric fields.
-!! zfield(ndim,(natom+2)*3)= Zeeman fields at constrained magnetic moments.
+!!  
+!! epsilon(3,3)= Complex dielectric tensor calculated at the level of mpopt.
 !!
 !! SOURCE
 
- subroutine mp_diel(barmagsus,blkval,iblok,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtvol,ucvol,zfield)
+ subroutine mp_diel(barmagsus,blkval,epsilon,iblok,magsus,mpert,mpopt,&
+& natom,nblok,ndim,prtopt,prtvol,ucvol,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtvol
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: epsilon(3,3)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
  complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 
@@ -1023,6 +1037,8 @@ contains
  fmepsilon(2,2)= one + fmepsilon(2,2)
  fmepsilon(3,3)= one + fmepsilon(3,3)
 
+ epsilon=fmepsilon
+
 !Calculate the spin-relaxed flavor
  if (mpopt==2) then
    srdielsus= matmul(transpose(conjg(diel_zfield)),matmul(magsus,diel_zfield))
@@ -1031,44 +1047,48 @@ contains
    srepsilon(1,1)= one + srepsilon(1,1)
    srepsilon(2,2)= one + srepsilon(2,2)
    srepsilon(3,3)= one + srepsilon(3,3)
+
+   epsilon=srepsilon
  end if
 
- !Write the results
- call wrtout([ab_out,std_out], ' Frozen-magnetic dielectric tensor (clamped ion)')
- call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
- do idir1= 1, 3
-   do idir2= 1, 3
-     write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-   & real(fmepsilon(idir1,idir2)), aimag(fmepsilon(idir1,idir2))
-     call wrtout([ab_out,std_out], msg)
-   end do
- end do
- call wrtout([ab_out,std_out], '   ')
-
- if (mpopt==2) then
-   call wrtout([ab_out,std_out], ' Spin-relaxed dielectric tensor (clamped ion)')
-   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-   do idir1= 1, 3
-     do idir2= 1, 3
-       write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
-     & real(srepsilon(idir1,idir2)), aimag(srepsilon(idir1,idir2))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
- end if
- 
- if (prtvol > 1) then
-   call wrtout([ab_out,std_out], ' Penalized dielectric tensor (clamped ion)')
+ if (prtopt==1) then
+   !Write the results
+   call wrtout([ab_out,std_out], ' Frozen-magnetic dielectric tensor (clamped ion)')
    call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
    do idir1= 1, 3
      do idir2= 1, 3
        write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-     & real(barepsilon(idir1,idir2)), aimag(barepsilon(idir1,idir2))
+     & real(fmepsilon(idir1,idir2)), aimag(fmepsilon(idir1,idir2))
        call wrtout([ab_out,std_out], msg)
      end do
    end do
    call wrtout([ab_out,std_out], '   ')
+  
+   if (mpopt==2) then
+     call wrtout([ab_out,std_out], ' Spin-relaxed dielectric tensor (clamped ion)')
+     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+     do idir1= 1, 3
+       do idir2= 1, 3
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & real(srepsilon(idir1,idir2)), aimag(srepsilon(idir1,idir2))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
+   
+   if (prtvol > 1) then
+     call wrtout([ab_out,std_out], ' Penalized dielectric tensor (clamped ion)')
+     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+     do idir1= 1, 3
+       do idir2= 1, 3
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
+       & real(barepsilon(idir1,idir2)), aimag(barepsilon(idir1,idir2))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
  end if
 
  end subroutine mp_diel
@@ -1621,8 +1641,8 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_omega_interpol(ddb,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& nomega,ntypat,omegamax,omegamin,prtvol,rftyp,ucvol,xred)
+ subroutine ddb_omega_interpol(amu,ddb,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+& nomega,ntypat,omegamax,omegamin,prtvol,rftyp,typat,ucvol,xred)
 
 !Arguments -------------------------------
 !scalars
@@ -1631,23 +1651,25 @@ contains
  character(len=*),intent(in) :: outfilename_radix
 !arrays
  type(ddb_type),intent(inout) :: ddb
- integer,intent(in) :: mpatpol(2),mpdir(3)
+ integer,intent(in) :: mpatpol(2),mpdir(3),typat(natom)
+ real(dp),intent(in) :: amu(ntypat)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: i,iblok,ii,ipert1,ipert2,iw,j,jblok,kblok,lblok,nblok,ndim 
+ integer :: diel_unit,i,iblok,ii,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,prtopt,spin_unit
  real(dp) :: omegastp
- character(len=500) :: msg,pfmt
- character(len=fnlen) :: spin_filename
+ character(len=5000) :: msg,pfmt
+ character(len=fnlen) :: diel_filename,spin_filename,mmom_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
- complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
+ complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
+ complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
 
 ! *********************************************************************
 
@@ -1677,6 +1699,11 @@ contains
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(invhmat,(ndim,ndim,nomega))
+ ABI_MALLOC(barmmom,(ndim,(natom+2)*3,nomega))
+ ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
+ ABI_MALLOC(zfield,(ndim,(natom+2)*3,nomega))
+ ABI_MALLOC(epsilon,(3,3,nomega))
+ ABI_MALLOC(ifcmat,(3*natom,3*natom,nomega))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
 
@@ -1700,8 +1727,19 @@ contains
    call spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
  & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol)
 
-!   write(100,'(5es16.8)') omega, real(magsus(1,:,iw))
-!   write(101,'(5es16.8)') omega, aimag(magsus(1,:,iw))
+   !Calculate the magnetic moments
+   call magmom(barmmom(:,:,iw),int_barddb,invbarmagsus(:,:,iw),invhmat(:,:,iw),1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),&
+ & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
+
+   !Calculate the dielectric susceptibility
+   call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
+ & natom,1,ndim,prtopt,prtvol,ucvol,zfield(:,:,iw))
+
+   !Calculate the interatomic force constants
+   call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
+ & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
+
+   !Calculate the phonon Green's function and spectral function
 
  end do
 
@@ -1715,7 +1753,7 @@ contains
  write(spin_unit,*) '#'
  write(spin_unit,*) '#  Spin susceptibilities calculated and interpolated by ANADDB'
  write(spin_unit,*) '#'
- write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim**3
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim**2
 
  write(spin_unit,*) '#  Real part of local spin susceptibility tensor (at. units)'
  write(msg,'(a,a)') ch10,&
@@ -1723,7 +1761,7 @@ contains
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((real(magsus(i,j,iw)),i=1,ndim),j=1,ndim)
+ &  omega(iw), ((real(magsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -1734,7 +1772,7 @@ contains
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(magsus(i,j,iw)),i=1,ndim),j=1,ndim)
+ &  omega(iw), ((aimag(magsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -1745,7 +1783,7 @@ contains
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((real(invbarmagsus(i,j,iw)),i=1,ndim),j=1,ndim)
+ &  omega(iw), ((real(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -1756,11 +1794,90 @@ contains
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),i=1,ndim),j=1,ndim)
+ &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
  close (spin_unit)
+
+!Magnetic moments
+ mmom_filename=trim(outfilename_radix)//"_MAGMOM"
+ if (open_file(mmom_filename, msg, newunit=mmom_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(mmom_unit,*) '#'
+ write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
+ write(mmom_unit,*) '#'
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*natom*3
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of magnetic moments induced by atomic displacements (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m^{mat_1,1}_{at_1,1}     m^{mat_1,1}_{at1,2}     ...     m^{mat_1,1}_{at2,1}',&
+&           '      ...     m^{mat_1,2}_{at1,1}     ...     m^{mat_2,1}_{at1,1}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(mmom(i,j,iw)),j=1,3*natom),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of magnetic moments induced by atomic displacements (at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m^{mat_1,1}_{at_1,1}     m^{mat_1,1}_{at1,2}     ...     m^{mat_1,1}_{at2,1}',&
+&           '      ...     m^{mat_1,2}_{at1,1}     ...     m^{mat_2,1}_{at1,1}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(mmom(i,j,iw)),j=1,3*natom),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ close(mmom_unit)
+
+!Dielectric susceptibility
+ diel_filename=trim(outfilename_radix)//"_DIELSUS"
+ if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(diel_unit,*) '#'
+ if (mpopt==1) then
+   write(diel_unit,*) '#  Frozen-magnetic dielectric tensor calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(diel_unit,*) '#  Spin-relaxed dielectric tensor calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+ 
+ write(diel_unit,*) '#'
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+
+ write(diel_unit,*) '#  Real part of dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+ call wrtout(spin_unit,msg,'COLL')
+
+ write(diel_unit,*) ' '
+ write(diel_unit,*) '#  Imaginary part of dielectric tensor'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     eps_11     eps_12     ...     eps_21     eps_22     ...'
+ call wrtout(diel_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(epsilon(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(diel_unit,msg,'COLL')
+ end do
+ call wrtout(spin_unit,msg,'COLL')
 
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
@@ -1769,6 +1886,11 @@ contains
  ABI_FREE(invbarmagsus)
  ABI_FREE(invmagsus)
  ABI_FREE(invhmat)
+ ABI_FREE(barmmom)
+ ABI_FREE(mmom)
+ ABI_FREE(zfield)
+ ABI_FREE(epsilon)
+ ABI_FREE(ifcmat)
 
  end subroutine ddb_omega_interpol
 !!***
