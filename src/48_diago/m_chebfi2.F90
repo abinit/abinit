@@ -746,8 +746,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu, gpu_option=chebfi%gpu_option)
  call timab(tim_residu, 2, tsec)
 
- call xg_Borthonormalize(chebfi%X,chebfi%BX%self,ierr,tim_ortho,chebfi%gpu_option)
-
  call xgBlock_copy(chebfi%X,X0,1, 1, chebfi%gpu_option)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
