@@ -313,10 +313,10 @@ distribution if not specified in input file.
 
 !!! note
 
-    Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1).
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
-    not automatically set by [[autoparal]]. Please consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
-    to run beyond-GS calculations with MPI.
+    not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
+    to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
 Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
 all the different levels of parallelization. ABINIT can also determine optimal
@@ -13897,6 +13897,14 @@ Variable(
     mnemonics="activate PARALelization over K-point, G-vectors and Bands",
     added_in_version="before_v9",
     text=r"""
+
+!!! note
+
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1) (or GW Lanczos-Sternheimer [[optdriver]]=66, but this is very rare).
+    Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
+    not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
+    to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
+
 **If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
@@ -13912,7 +13920,7 @@ Require compilation option --enable-mpi="yes".
 components is activated (see [[np_spkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
-spin) The different communications almost occur along one dimension only.
+spin). The different communications almost occur along one dimension only.
 Require compilation option --enable-mpi="yes".
 
 HOWTO fix the number of processors along one level of parallelisation:
