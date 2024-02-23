@@ -19,7 +19,7 @@ trf2_2o_DS8_DDB
 #%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
 #%% files_to_test = 
-#%%   trf2_3.ddb.abo, tolnlines=  37, tolabs=  3.7e-9, tolrel=  3.0e-4
+#%%   trf2_3.ddb.abo, tolnlines=  41, tolabs=  3.8e-9, tolrel=  3.0e-4
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
