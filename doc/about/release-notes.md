@@ -14,7 +14,7 @@ TO BE CHANGED
 
 The list of contributors includes:
 J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, D.D. O'Regan, S. Rostami,
+L. MacEnulty, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -52,7 +52,7 @@ are relative to modifications/improvements of ABINIT v9.10 with respect to v9.8.
 
 The list of contributors includes:
 J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
+L. MacEnulty, M. Mignolet, D.D. O'Regan, S. Rostami,
 M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
@@ -153,7 +153,7 @@ See also the input variables [[pawujv]]. The tutorial and corresponding tests "u
 The tests v5_38, v5_39, v5_40, v6_41 have been suppressed, and replaced by [[test:v9_105]], 
 [[test:v9_106]], [[test:v9_107]], [[test:v9_108]], [[test:v9_109]]. This is also documented in [[topic:CalcUJ]].
 
-By Lorien Mac Enulty with help from David D. O'Regan (MR905, 912).
+By Lorien MacEnulty with help from David D. O'Regan (MR905, 912).
 
 **B.4** Cumulant method for spectral function
 
