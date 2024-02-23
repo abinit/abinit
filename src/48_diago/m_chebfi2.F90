@@ -72,7 +72,6 @@ module m_chebfi2
  integer, parameter :: tim_swap         = 1761
  integer, parameter :: tim_amp_f        = 1762
  integer, parameter :: tim_alltoall     = 1763
- integer, parameter :: tim_ortho        = 1764
  integer, parameter :: tim_X_NP_init    = 1769
  integer, parameter :: tim_AX_BX_init   = 1770
 
