@@ -35,6 +35,7 @@ module m_ddb_magpen
  use m_ddb
  use m_fstrings,        only : itoa, sjoin
  use m_macroave,        only : POLINT
+ use m_io_tools,        only : open_file
 
  implicit none
 
@@ -1620,13 +1621,14 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_omega_interpol(ddb,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+ subroutine ddb_omega_interpol(ddb,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & nomega,ntypat,omegamax,omegamin,prtvol,rftyp,ucvol,xred)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: mpert,mpopt,natom,nomega,ntypat,prtvol,rftyp
  real(dp),intent(in) :: magpen,omegamax,omegamin,ucvol
+ character(len=*),intent(in) :: outfilename_radix
 !arrays
  type(ddb_type),intent(inout) :: ddb
  integer,intent(in) :: mpatpol(2),mpdir(3)
@@ -1634,13 +1636,14 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: iblok,ii,ipert1,ipert2,iw,jblok,kblok,lblok,nblok,ndim 
- integer :: nmat,nmdir,nwcalc,prtopt
- real(dp) :: omega,omegastp
- character(len=500) :: msg
+ integer :: i,iblok,ii,ipert1,ipert2,iw,j,jblok,kblok,lblok,nblok,ndim 
+ integer :: nmat,nmdir,nwcalc,prtopt,spin_unit
+ real(dp) :: omegastp
+ character(len=500) :: msg,pfmt
+ character(len=fnlen) :: spin_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
- real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omegacalc(:)
+ real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
@@ -1668,6 +1671,7 @@ contains
  end if
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
+ ABI_MALLOC(omega,(nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
@@ -1678,12 +1682,12 @@ contains
 
 !Loop over the frequency
  do iw=1,nomega
-   omega=omegamin+omegastp*(iw-1)
+   omega(iw)=omegamin+omegastp*(iw-1)
 
    do ii=1,ddb%msize
      if (all(ddb%flg(ii,:)==1)) then
-       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega,int_barddb(1,ii,1),dint_barddb(1,ii)) 
-       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega,int_barddb(2,ii,1),dint_barddb(2,ii)) 
+       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega(iw),int_barddb(1,ii,1),dint_barddb(1,ii)) 
+       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega(iw),int_barddb(2,ii,1),dint_barddb(2,ii)) 
      else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
        write(msg,'(a,a,a)')&
        'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
@@ -1700,6 +1704,64 @@ contains
 !   write(101,'(5es16.8)') omega, aimag(magsus(1,:,iw))
 
  end do
+
+!!!  Print results of interpolation
+!Spin susceptibilities
+ spin_filename=trim(outfilename_radix)//"_SPINSUS"
+ if (open_file(spin_filename, msg, newunit=spin_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(spin_unit,*) '#'
+ write(spin_unit,*) '#  Spin susceptibilities calculated and interpolated by ANADDB'
+ write(spin_unit,*) '#'
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim**3
+
+ write(spin_unit,*) '#  Real part of local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(magsus(i,j,iw)),i=1,ndim),j=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(magsus(i,j,iw)),i=1,ndim),j=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Real part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X^{-1}_11     X^{-1}_12     ...     X^{-1}_21     X^{-1}_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(invbarmagsus(i,j,iw)),i=1,ndim),j=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X^{-1}_11     X^{-1}_12     ...     X^{-1}_21     X^{-1}_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),i=1,ndim),j=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ close (spin_unit)
+
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
  ABI_FREE(barmagsus)

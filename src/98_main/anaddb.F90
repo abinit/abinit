@@ -252,7 +252,7 @@ program anaddb
  & Crystal%xred)
 
    if (inp%omegaflag==1) then
-     call ddb_omega_interpol(ddb,inp%magpen,inp%mpatpol,inp%mpdir,mpert,inp%mpopt,natom, &
+     call ddb_omega_interpol(ddb,filnam(8),inp%magpen,inp%mpatpol,inp%mpdir,mpert,inp%mpopt,natom, &
    & inp%nomega,ntypat,inp%omegamax,inp%omegamin,inp%prtvol,1,Crystal%ucvol,Crystal%xred)
    end if
  end if
