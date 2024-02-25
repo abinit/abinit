@@ -163,6 +163,41 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
 ]) # _ABI_CXX_CHECK_INTEL
 
 
+
+# _ABI_CXX_CHECK_CRAY(COMPILER)
+# -----------------------------
+#
+# Checks whether the specified C compiler is the CRAY Clang++ compiler.
+# If yes, tries to determine its version number and sets the abi_cxx_vendor
+# and abi_cxx_version variables accordingly.
+#
+AC_DEFUN([_ABI_CXX_CHECK_CRAY],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the CRAY Clang++ C++ compiler])
+  cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cxx_info_string}" | grep 'Cray clang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cxx_info_string=""
+    abi_cxx_vendor="unknown"
+    abi_cxx_version="unknown"
+  else
+    AC_DEFINE([CXX_CRAY],1,
+      [Define to 1 if you are using the CRAY Clang++ C++ compiler.])
+    abi_cxx_vendor="cray"
+    abi_cxx_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cxx_version}" = "${abi_result}"; then
+      abi_cxx_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CXX_CHECK_CRAY
+
+
+
 # _ABI_CXX_CHECK_LLVM(COMPILER)
 # -----------------------------
 #
@@ -305,6 +340,9 @@ AC_DEFUN([ABI_PROG_CXX],[
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_INTEL(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_CRAY(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_LLVM(${CXX})

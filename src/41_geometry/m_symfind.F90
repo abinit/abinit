@@ -1259,6 +1259,25 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        'iholohedry=',iholohedry
        ABI_BUG(msg)
      end if
+!    Try to increase tolsym to find the Bravais lattice. 
+     maxsym=max(192,msym)
+     ABI_MALLOC(ptsymrel,(3,3,maxsym))
+!DEBUG
+!    write(6,*)' symbrav : will call symlatt, 3*tolsym=',3*tolsym
+!ENDDEBUG
+     call symlatt(bravais,std_out,maxsym,nptsym,ptsymrel,rprimdtry,3*tolsym)
+     ABI_FREE(ptsymrel)
+     if(bravais(1)==iholohedry)then
+!      Succeeded  
+       exit
+     else
+       write(msg, '(3a,3i3,2a,i3,2a,i3)' )&
+       'Could not succeed to determine the bravais lattice, even after considering a larger tolsym',ch10,&
+       'problem,iaxis,invariant=',problem,iaxis,invariant,ch10,&
+       'bravais(1)=',bravais(1),ch10,&
+       'iholohedry=',iholohedry
+       ABI_BUG(msg)
+     end if
    end if
 
    if(problem==1)then  ! One is left with the problem=1 case, basically iholohedry is lower than bravais(1)
@@ -1334,7 +1353,7 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
        axis_trial(:)=hexa_axes(:,jaxis)
      end if
 !    DEBUG
-!    write(std_out,*)' symbrav : try jaxis=',jaxis
+!    write(std_out,*)' symbrav : ixaxis, trial jaxis=',iaxis,jaxis
 !    write(std_out,*)' axis_trial=',axis_trial
 !    ENDDEBUG
      invariant=1
@@ -1345,8 +1364,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      end do
      if(invariant==1)then
        iaxis=jaxis
-!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',iaxis
+!DEBUG
+!      write(msg, '(2a,i3)' )ch10,' symbrav : found invariant axis, jaxis=',jaxis
 !      call wrtout(std_out,msg)
+!ENDDEBUG
        exit
      end if
    end do
@@ -1370,6 +1391,12 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
 &   axis_red(2)*rprimdnow(:,2)+ &
 &   axis_red(3)*rprimdnow(:,3)
    norm=sum(axis_cart(:)**2)
+!DEBUG
+!  write(6,*)' axis_trial =',axis_trial
+!  write(6,*)' axis_red =',axis_red
+!  write(6,*)' axis_cart =',axis_cart 
+!  write(6,*)' rprimdnow=',rprimdnow
+!ENDDEBUG
 !  Expand by a uniform, quite arbitrary, dilatation, along the invariant axis
 !  Note : make these dilatation different, according to ideform
 !  XG 20151221  : Still, the interplay between the size of the deformation and the tolsym is not easy to address.
@@ -1381,6 +1408,10 @@ subroutine symbrav(bravais,msym,nsym,ptgroup,rprimd,symrel,tolsym,axis)
      scprod=axis_cart(1)*rprimdnow(1,ii)+axis_cart(2)*rprimdnow(2,ii)+axis_cart(3)*rprimdnow(3,ii)
      rprimdtry(:,ii)=rprimdnow(:,ii)+ideform*(max(tol3,six*tolsym)-tol6)*scprod/norm*axis_cart(:)
    end do
+
+!DEBUG
+!  write(6,*)' rprimdtry=',rprimdtry
+!ENDDEBUG
 
  end do ! ideform
 
@@ -1489,7 +1520,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
- real(dp) :: axes(3,3),rprimdconv(3,3),trialt(3),vect(3,3)
+ real(dp) :: axes(3,3),rprimdconv(3,3),vect(3,3)
  real(dp),allocatable :: shift(:,:),tnonsconv(:,:)
 
 !**************************************************************************
@@ -1527,6 +1558,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  symrelconv(:,:,1:nsym)=symrel(:,:,1:nsym)
 !Note that the number of symmetry operations is still nsym
  call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
+
  call xred2xcart(nsym,rprimdconv,tnonsconv,tnons)
 !Gives the associated translation, with components in the
 !interval ]-0.5,0.5] .
@@ -1590,8 +1622,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
      '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
      '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
-     '  tnonsconv(:,isym)=',tnonsconv(:,isym),ch10,&
-     '  trialt(:)=',trialt(:)
+     '  tnonsconv(:,isym)=',tnonsconv(:,isym)
      call wrtout(std_out,msg)
      write(msg, '(a,i4,2a)' )&
        'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'
@@ -1918,7 +1949,7 @@ subroutine symlatt(bravais,iout,msym,nptsym,ptsymrel,rprimd,tolsym)
 !**************************************************************************
 
 !DEBUG
-!write(std_out,'(a)') ' m_symfind%symlatt : enter '
+!write(std_out,'(a,es14.6)') ' m_symfind%symlatt : enter, tolsym= ',tolsym
 !call flush(std_out)
 !ENDDEBUG
 

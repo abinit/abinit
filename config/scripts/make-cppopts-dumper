@@ -29,7 +29,7 @@ if ( not os.path.exists("configure.ac") or
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Init template
-cppopts_dumper_module = """\
+cppopts_dumper_module = r"""
 !{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cppopts_dumper
 !! NAME
@@ -144,7 +144,7 @@ chk_verbose = opts.verbose
 my_name = os.path.basename(sys.argv[0])
 
 # Init regular expressions
-re_m4file  = re.compile("\.m4$")
+re_m4file  = re.compile(r"\.m4$")
 re_acdef  = re.compile("AC_DEFINE\\(")
 
 # Init CPP options

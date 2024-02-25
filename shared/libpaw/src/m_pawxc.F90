@@ -2996,7 +2996,7 @@ end subroutine pawxc_dfpt
  real(dp) :: coeff,grho_tot,grho_up,fact
  character(len=500) :: msg
 !arrays
- real(dp) :: d2vxc(0,0)
+ real(dp) :: d2vxc(1,1)
  real(dp),allocatable :: dff(:),dnexcdn(:,:),dvxcdgr(:,:),dvxci(:,:)
  real(dp),allocatable :: grho2(:,:),grho_updn(:,:)
 
