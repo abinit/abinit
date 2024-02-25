@@ -13095,15 +13095,15 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUClear site Electric Field Gradient",
-    requires="[[usepaw]] == 1, [[quadmom]]",
+    requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
 If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
-Using this option requires [[quadmom]] to be set as well.
 Values will be written to the main output file (search for Electric Field Gradient).
-If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
-If nucefg=2, the full electric field gradient tensors in atomic units are also given,
+If nucefg=1, the electric field gradient in both atomic units and SI units is given,
 showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If nucefg=2, the quadrupole couplings to the nuclear electric quadrupole moments are reported as well,
+and are based on the input values of [[quadmom]].
 If nucefg=3, then in addition to the nucefg=2 output, the EFGs are computed using an ionic point charge model.
 This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of nucefg=3 requires that the variable [[ptcharge]] be set as well.
@@ -17255,15 +17255,14 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
-    requires="[[usepaw]] == 1 and [[nucefg]]>=1",
+    requires="[[usepaw]] == 1 and [[nucefg]]>1",
     added_in_version="before_v9",
     text=r"""
   * Array of quadrupole moments, in barns, of the nuclei. These values are used
   in conjunction with the electric field gradients computed with [[nucefg]] to
   calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that
   the electric field gradient at a nuclear site is independent of the nuclear
-  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0,
-  and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0.
 """,
 ),
 
