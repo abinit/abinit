@@ -26,6 +26,7 @@ sources = [
  "m_fock_getghc.F90",
  "m_getchc.F90",
  "m_getghc.F90",
+ "m_getghc_ompgpu.F90",
  "m_getgh1c.F90",
  "m_getgh2c.F90",
  "m_prep_kgb.F90",

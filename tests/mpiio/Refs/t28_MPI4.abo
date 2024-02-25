@@ -102,6 +102,7 @@ P           mkmem2          4
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt           4
+    nblock_lobpcg          50
 -           npfft           2
 -        np_spkpt1          2
 -        np_spkpt2          1
@@ -1581,6 +1582,7 @@ P           mkmem2          4
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt           4
+    nblock_lobpcg          50
 -           npfft           2
 -        np_spkpt1          2
 -        np_spkpt2          1

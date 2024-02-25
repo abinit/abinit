@@ -3718,7 +3718,12 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
 
  ! Recalculate FFT tables.
  ! Calculate the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Rk.
+#ifdef FC_LLVM
+ ! LLVM 16 doesn't recognize this macro here
+ ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym) )
+#else
  ABI_REMALLOC(Wfd%irottb, (Wfd%nfftot,Cryst%nsym))
+#endif
  call rotate_FFT_mesh(Cryst%nsym,Cryst%symrel,Cryst%tnons,Wfd%ngfft,Wfd%irottb,iscompatibleFFT)
 
  if (.not. iscompatibleFFT) then
@@ -4216,7 +4221,7 @@ end subroutine wfd_sym_ug_kg
 !!
 !! SOURCE
 
-subroutine wfdgw_write_wfk(Wfd,Hdr,ebands,wfk_fname,wfknocheck)
+subroutine wfdgw_write_wfk(Wfd, Hdr, ebands, wfk_fname, wfknocheck)
 
 !Arguments ------------------------------------
 !scalars
@@ -5090,6 +5095,7 @@ end subroutine wfdgw_plot_ur
 !!
 !! FUNCTION
 !!  Compute the non-local potential using the Wfd information.
+!!
 !! INPUTS
 !! cryst<crystal_t>= data type gathering info on symmetries and unit cell
 !! psps<pseudopotential_type>=variables related to pseudopotentials
@@ -5429,6 +5435,7 @@ end subroutine wfdgw_get_nl_me
 !! Calculate the charge density on the fine FFT grid in real space.
 !!
 !! INPUTS
+!!  Wfd<wfd_t)=datatype gathering info on the wavefunctions.
 !!  ngfftf(18)=array containing all the information for the "fine" FFT.
 !!  Cryst<crystal_t> Info on the crystalline structure
 !!  optcalc=option for calculation. If =0 (default value) perform calculation
@@ -5436,8 +5443,6 @@ end subroutine wfdgw_get_nl_me
 !!    In both cases, the result is returned in rhor.
 !!  Psps<type(pseudopotential_type)>=variables related to pseudopotentials
 !!  nfftf=Total number of points on the fine FFT grid (for this processor)
-!!  Kmesh<kmesh_t>= Info on the k-sampling:
-!!  Wfd<wfd_t)=datatype gathering info on the wavefunctions.
 !! [optcalc]=Optional option used to calculate the kinetic energy density. Defaults to 0.
 !!
 !! OUTPUT
@@ -5459,7 +5464,7 @@ end subroutine wfdgw_get_nl_me
 !!
 !! SOURCE
 
-subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
+subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
                       optcalc) ! optional arguments
 
 !Arguments ------------------------------------
@@ -5467,10 +5472,9 @@ subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
  integer,intent(in) :: nfftf
  integer,intent(in),optional :: optcalc
  type(ebands_t),intent(in) :: ebands
- type(kmesh_t),intent(in) :: Kmesh
- type(crystal_t),intent(in) :: Cryst
- type(Pseudopotential_type),intent(in) :: Psps
- class(wfdgw_t),intent(inout) :: Wfd
+ type(crystal_t),intent(in) :: cryst
+ type(Pseudopotential_type),intent(in) :: psps
+ class(wfdgw_t),intent(inout) :: wfd
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(out) :: rhor(nfftf, Wfd%nspden)
@@ -5530,7 +5534,7 @@ subroutine wfdgw_mkrho(Wfd, Cryst, Psps, Kmesh, ebands, ngfftf, nfftf, rhor, &
      do ik=1,Wfd%nkibz
        do ib_iter=1,iter_len(Iter_bks,ik,is)
          ib = iter_yield(Iter_bks,ib_iter,ik,is)
-         bks_weight = ebands%occ(ib,ik,is) * Kmesh%wt(ik) / Cryst%ucvol
+         bks_weight = ebands%occ(ib,ik,is) * ebands%wtk(ik) / Cryst%ucvol
 
          call wfd%get_ur(ib,ik,is,wfr)
 
@@ -5807,7 +5811,7 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 !scalars
  integer :: cplex,cplex_rhoij,qphase,iatom,band,ik_ibz
  integer :: spin,natinc,nband_k,option,lmn2_size,nspden
- logical :: usetimerev
+ logical :: use_timerev,use_zeromag
  real(dp) :: occup,wtk_k
  character(len=500) :: msg
 !arrays
@@ -5837,7 +5841,9 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
    pawrhoij(iatom)%rhoij_=zero
  end do
 
- option=1; usetimerev=(kptopt>0.and.kptopt<3)
+ option=1
+ use_timerev=(kptopt>0.and.kptopt<3)
+ use_zeromag=.false. ; if (Wfd%natom>0) use_zeromag=(pawrhoij(1)%nspden==4.and.Wfd%nspden==1)
 
  ! Distribute (b,k,s).
  where (ABS(Bst%occ)>tol8)
@@ -5869,7 +5875,7 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
           ! Accumulate contribution from (occupied) current band
           !if (locc_test) then
            call pawaccrhoij(Cryst%atindx,cplex,cwaveprj,cwaveprj ,0,spin,Wfd%natom,Wfd%natom,&
-&            Wfd%nspinor,occup,option,pawrhoij,usetimerev,wtk_k)
+&            Wfd%nspinor,occup,option,pawrhoij,use_timerev,use_zeromag,wtk_k)
           !end if
        end if
      end do !band

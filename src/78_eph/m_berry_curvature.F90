@@ -262,7 +262,7 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  gmat = j_dpc * gmat / gstore%nkbz
  if (nsppol == 1 .and. dtset%nspinor == 1) gmat = two * gmat
  call xmpi_sum(gmat, comm, ierr)
- call massmult_and_breaksym_cplx(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, gmat, herm_opt=0)
+ call massmult_and_breaksym_cplx(cryst%natom, cryst%ntypat, cryst%typat, gstore%ifc%amu, gmat, herm_opt=0)
  call cwtime_report(" berry_curvature:", cpu_all, wall_all, gflops_all)
 
  if (my_rank == master) then
