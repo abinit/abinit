@@ -1666,12 +1666,13 @@ contains
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
- real(dp), allocatable :: phonspec(:)
+ real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:),phonspec(:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
+ complex(dpc), allocatable :: modemm(:,:,:)
 
 ! *********************************************************************
 
@@ -1696,7 +1697,10 @@ contains
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
  ABI_MALLOC(omega,(nomega))
+ ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
+ ABI_MALLOC(eigvec,(2,3,natom,3,natom))
+ ABI_MALLOC(modemm,(3,3*natom,nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
@@ -1743,7 +1747,10 @@ contains
  & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
 
    !Calculate the phonon Green's function and spectral function
-   call phonon_green(amu,ifcmat(:,:,iw),natom,ntypat,omega(iw),phonspec(iw),typat)
+   call phonon_green(amu,eigvec,ifcmat(:,:,iw),natom,ntypat,omega(iw),phfrq(:,iw),phonspec(iw),typat)
+
+   !Calculate the mode-resolved magnetic moments
+   call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),natom,ndim,ntypat,typat)
 
  end do
 
@@ -1908,6 +1915,33 @@ contains
 
  close(phon_unit)
 
+!Phonon frequencies
+ phon_filename=trim(outfilename_radix)//"_PHFRQ"
+ if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(phon_unit,*) '#'
+ if (mpopt==1) then
+   write(phon_unit,*) '#  Frozen-magnetic phonon frequencies calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(phon_unit,*) '#  Spin-relaxed phonon frequencies calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) natom*3
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw    eval(1)     eval(2) ...'
+ call wrtout(phon_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) omega(iw), phfrq(:,iw)
+    call wrtout(phon_unit,msg,'COLL')
+ end do
+ 
+ close(phon_unit)
+
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
  ABI_FREE(barmagsus)
@@ -1921,7 +1955,10 @@ contains
  ABI_FREE(epsilon)
  ABI_FREE(ifcmat)
  ABI_FREE(omega)
+ ABI_FREE(phfrq)
  ABI_FREE(phonspec)
+ ABI_FREE(eigvec)
+ ABI_FREE(modemm)
 
  end subroutine ddb_omega_interpol
 !!***
@@ -1950,6 +1987,9 @@ contains
 !!
 !! OUTPUT
 !!  phonspec= phonon spectral function at the input omega
+!!  phfrq= phonon frequencies calculated with the IFCs at the input omega
+!!  phfrq= phonon eigenvectors calculated with the IFCs at the input omega
+!!  
 !!
 !! SIDE EFFECTS
 !!
@@ -1968,7 +2008,7 @@ contains
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
+subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
 
  use defs_basis
  use m_errors
@@ -1984,16 +2024,20 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
 !arrays
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
+ real(dp),intent(out) :: eigvec(2*3*natom*3*natom)
+ real(dp),intent(out) :: phfrq(3*natom)
  complex(dpc), intent(in) :: ifc(3*natom,3*natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: iat1,iat2,idir1,idir2,icol,info,irow,lwork,ndim
+ integer :: iat1,iat2,idir1,idir2,icol,ier,imode,info,irow,lwork,ndim
  complex(dpc) :: eta
 !arrays
  integer, allocatable :: ipiv(:)
  real(dp), allocatable :: massfac(:,:)
- complex(dpc), allocatable :: dynmat(:,:)
+ real(dp), allocatable :: matrx(:,:),zhpev1(:,:),zhpev2(:)
+ real(dp), allocatable :: eigval(:)
+ complex(dpc), allocatable :: dynmat(:,:),w2dynmat(:,:)
  complex(dpc),allocatable :: work(:),work1(:,:)
 !character(len=500) :: msg                   
 
@@ -2012,7 +2056,9 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
 !Build the ((w+eta)**2 - D(w)) matrix 
  ndim=3*natom
  ABI_MALLOC(dynmat,(ndim,ndim))
+ ABI_MALLOC(w2dynmat,(ndim,ndim))
  eta=(0.0_dp,0.000001_dp)
+ w2dynmat=(0.0_dp,0.0_dp)
  do iat2= 1, natom
    do idir2= 1, 3
      icol= (iat2-1)*3 + idir2
@@ -2021,7 +2067,7 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
          irow= (iat1-1)*3 + idir1
          dynmat(irow,icol)=massfac(iat1,iat2)*ifc(irow,icol)
          if (irow==icol) then
-           dynmat(irow,icol)= (omega+eta)**2 - dynmat(irow,icol)
+           w2dynmat(irow,icol)= (omega+eta)**2 - dynmat(irow,icol)
          end if
        end do
      end do
@@ -2030,7 +2076,7 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
 
 !Invert to obtain the phonon Green's function
  ABI_MALLOC(work1,(ndim,ndim))
- work1=dynmat
+ work1=w2dynmat
 
  ABI_MALLOC(ipiv,(ndim))
  call zgetrf( ndim, ndim, work1, ndim, ipiv, info )
@@ -2052,6 +2098,36 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
  end do
  phonspec= -two*omega/pi * phonspec
 
+!Diagonalize the Dynamical matrix
+ ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
+ ABI_MALLOC(eigval,(ndim))
+ do icol= 1, ndim
+   do irow= 1, icol
+     matrx(1,irow + (icol-1)*icol/2)=real(dynmat(irow,icol))
+     matrx(2,irow + (icol-1)*icol/2)=aimag(dynmat(irow,icol))
+   end do
+ end do 
+
+ ABI_MALLOC(zhpev1,(2,2*3*natom-1))
+ ABI_MALLOC(zhpev2,(3*3*natom-2))
+
+ call ZHPEV ('V','U',3*natom,matrx,eigval,eigvec,3*natom,zhpev1,zhpev2,ier)
+ ABI_CHECK(ier == 0, sjoin('zhpev returned:', itoa(ier)))
+
+ ABI_FREE(matrx)
+ ABI_FREE(zhpev1)
+ ABI_FREE(zhpev2)
+
+ ! Get the phonon frequencies (negative by convention, if the eigenvalue of the dynamical matrix is negative)
+ do imode=1,3*natom
+   if(eigval(imode)>=1.0d-16)then
+     phfrq(imode)=sqrt(eigval(imode))
+   else if(eigval(imode)>=-1.0d-16)then
+     phfrq(imode)=zero
+   else
+     phfrq(imode)=-sqrt(-eigval(imode))
+   end if
+ end do
 
 
  ABI_FREE(ipiv)
@@ -2064,5 +2140,91 @@ subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
 end subroutine phonon_green
 !!***
 
+!!****f* ABINIT/mode_mmom
+!! NAME
+!!  mode_mmom
+!!
+!! FUNCTION
+!!  Projects the magnetic moments on the eigenmodes of the dynamical 
+!!  matrix calculated at each value of omega
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  amu(ntypat)= atomic masses
+!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
+!!  mmom(ndim,(natom+2)*3)= first-order magnetic moments
+!!  natom= number of atoms in the cell
+!!  ndim= dimension of the penalized degrees of freedom
+!!  ntypat= number of atom types in the cell
+!!  typat(natom)= array with the type of atoms in the cell
+!!
+!! OUTPUT
+!!  modemm(3,3*natom)= mode-resolved magnetic moments
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: natom,ndim,ntypat 
+!arrays
+ integer, intent(in) :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
+ real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
+ complex(dpc), intent(in) :: mmom(ndim,(natom+2)*3)
+ complex(dpc), intent(out) :: modemm(3,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iat1,iat2,idir1,idir2,icol,imode,irow
+ real(dp) :: mcell
+!arrays
+ real(dp), allocatable :: mass(:)
+!character(len=500) :: msg                   
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Define the mass factors
+ mcell=zero
+ do iat1= 1, natom
+   mass(iat1)= amu(typat(iat1))
+   mcell= mcell + amu(typat(iat1))
+ end do
+ mass(:)=sqrt(mcell/mass(:))
+
+
+ DBG_EXIT("COLL")
+
+end subroutine mode_mmom
+!!***
 end module m_ddb_magpen
 !!***
