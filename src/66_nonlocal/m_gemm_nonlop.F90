@@ -395,6 +395,8 @@ contains
   idir_pert_=0; if(present(idir_pert)) idir_pert_=idir_pert
   gpu_option_=ABI_GPU_DISABLED; if(present(gpu_option)) gpu_option_=gpu_option
 
+  ABI_CHECK(allocated(gemm_nonlop_kpt),"init_gemm_nonlop wasn't called prior make_gemm_nonlop !")
+
   if(choice>1) then
     ABI_CHECK(signs==2.or. choice==2 .or. choice==3 .or. choice==23,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
     ABI_CHECK(gpu_option_/=ABI_GPU_LEGACY,'CUDA GEMM nonlop not compatible with respfn workloads.')
@@ -557,9 +559,9 @@ contains
   real(dp), intent(in) :: ph3d_k(:,:,:)
   real(dp), intent(in) :: kpt_k(:)
   real(dp), intent(in), target :: kpg_k(:,:)
-  real(dp),intent(out) :: projs(2,npw,nprojs),dprojs(2,npw,nprojs*ngrads)
-  real(dp),intent(out) :: projs_r(1,npw,nprojs),dprojs_r(1,npw,nprojs*ngrads)
-  real(dp),intent(out) :: projs_i(1,npw,nprojs),dprojs_i(1,npw,nprojs*ngrads)
+  real(dp),intent(out) :: projs(:,:,:),dprojs(:,:,:)
+  real(dp),intent(out) :: projs_r(:,:,:),dprojs_r(:,:,:)
+  real(dp),intent(out) :: projs_i(:,:,:),dprojs_i(:,:,:)
 
   logical :: parity
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -929,6 +931,8 @@ contains
   real(dp), allocatable :: projs_local(:,:,:)
   real(dp), allocatable :: projs_recv(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
   integer :: ngrads_tmp
 
 ! *************************************************************************
@@ -982,13 +986,19 @@ contains
   dprojs_beg=1; dprojs_end=nprojs*ngrads;
   if((choice==2 .and. signs==2) .or. ((choice==2 .or. choice==3 .or. choice==23) .and. signs==1)) then
     projs_beg=atom_proj_shift+1
-    projs_end=projs_beg+nprojs
+    projs_end=projs_beg+nprojs-1
     dprojs_beg=atom_proj_shift*ngrads+1
-    dprojs_end=dprojs_beg+nprojs*ngrads
+    dprojs_end=dprojs_beg+nprojs*ngrads-1
   end if
-  projs_ => gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end)
-  dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
-
+  if(istwf_k == 1) then
+    projs_  => gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end)
+    dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
+  else
+    projs_r_  => gemm_nonlop_kpt(ikpt)%projs_r(:,:,projs_beg:projs_end)
+    projs_i_  => gemm_nonlop_kpt(ikpt)%projs_i(:,:,projs_beg:projs_end)
+    dprojs_r_ => gemm_nonlop_kpt(ikpt)%dprojs_r(:,:,dprojs_beg:dprojs_end)
+    dprojs_i_ => gemm_nonlop_kpt(ikpt)%dprojs_i(:,:,dprojs_beg:dprojs_end)
+  end if
 
   if(gemm_nonlop_is_distributed) then
     rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
@@ -1099,9 +1109,9 @@ contains
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-    &       vectin,gemm_nonlop_kpt(ikpt)%projs,gemm_nonlop_kpt(ikpt)%dprojs,&
-    &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
-    &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+    &       vectin,projs_,dprojs_,&
+    &       projs_r_,projs_i_,&
+    &       dprojs_r_,dprojs_i_,&
     &       temp_realvec,&
     &       projs_local,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
@@ -1205,8 +1215,8 @@ contains
       &       vectin,vectout,svectout,&
       &       projs_,&
       &       dprojs_,&
-      &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
-      &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+      &       projs_r_,projs_i_,&
+      &       dprojs_r_,dprojs_i_,&
       &       temp_realvec,temp_realvec,&
       &       projs_local,projs_recv,&
       &       gpu_option,gemm_nonlop_is_distributed)
