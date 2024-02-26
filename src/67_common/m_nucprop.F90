@@ -123,7 +123,7 @@ contains
 
     !Local variables-------------------------------
     !scalars
-    integer :: INFO,LDA,LWORK,N,iatom,my_comm_atom
+    integer :: ii,INFO,LDA,LWORK,N,iatom,my_comm_atom
     logical :: my_atmtab_allocated,paral_atom
     real(dp),parameter :: efg_si = 9.7173624292E21 ! convert EFG in au to SI units V/m2
     real(dp) :: cq,eta,vxx,vyy,vzz
@@ -206,6 +206,7 @@ contains
        if (abs(cq) > tol8) then
          eta = abs(vxx-vyy)/abs(vzz)
        else
+         cq = zero
          eta = zero ! if Cq is small then eta is meaningless
        end if
 
@@ -216,7 +217,11 @@ contains
            & '   Cq (MHz) : ',cq,'   eta : ',eta
          call wrtout(ab_out,message,'COLL')
        end if
-       
+      
+       ! for printing and test portability, it's better to simply set very small eigvals to zero 
+       do ii=1,3 
+         if (abs(eigval(ii))<tol8) eigval(ii)=zero
+       end do 
        write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
             &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
        call wrtout(ab_out,message,'COLL')
