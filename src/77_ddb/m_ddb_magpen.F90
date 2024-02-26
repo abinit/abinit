@@ -1658,13 +1658,15 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: diel_unit,i,iblok,ii,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
- integer :: nmat,nmdir,nwcalc,prtopt,spin_unit
+ integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename
+ character(len=fnlen) :: phon_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
+ real(dp), allocatable :: phonspec(:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
@@ -1694,6 +1696,7 @@ contains
  nmdir=sum(mpdir(:))
  ndim=nmat*nmdir
  ABI_MALLOC(omega,(nomega))
+ ABI_MALLOC(phonspec,(nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
@@ -1740,6 +1743,7 @@ contains
  & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
 
    !Calculate the phonon Green's function and spectral function
+   call phonon_green(amu,ifcmat(:,:,iw),natom,ntypat,omega(iw),phonspec(iw),typat)
 
  end do
 
@@ -1865,7 +1869,6 @@ contains
  &  omega(iw), ((real(epsilon(i,j,iw)),j=1,3),i=1,3)
     call wrtout(diel_unit,msg,'COLL')
  end do
- call wrtout(spin_unit,msg,'COLL')
 
  write(diel_unit,*) ' '
  write(diel_unit,*) '#  Imaginary part of dielectric tensor'
@@ -1877,7 +1880,33 @@ contains
  &  omega(iw), ((aimag(epsilon(i,j,iw)),j=1,3),i=1,3)
     call wrtout(diel_unit,msg,'COLL')
  end do
- call wrtout(spin_unit,msg,'COLL')
+
+ close(diel_unit)
+
+!Phonon spectral function
+ phon_filename=trim(outfilename_radix)//"_SPECTRAL_PHONON"
+ if (open_file(phon_filename, msg, newunit=phon_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(phon_unit,*) '#'
+ if (mpopt==1) then
+   write(phon_unit,*) '#  Frozen-magnetic phonon spectral function calculated and interpolated by ANADDB'
+ else if (mpopt==2) then
+   write(phon_unit,*) '#  Spin-relaxed phonon spectral function calculated and interpolated by ANADDB'
+ else
+   write(msg,'(a)') 'ddb_omega_interpol: variable mpopt just can be 1 or 2'
+   ABI_ERROR(msg)
+ end if
+ 
+ write(msg,'(a,a)') ch10, ' # At  hw'
+ call wrtout(phon_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,*) omega(iw), phonspec(iw)
+   call wrtout(phon_unit,msg,'COLL')
+ end do
+
+ close(phon_unit)
 
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
@@ -1891,8 +1920,148 @@ contains
  ABI_FREE(zfield)
  ABI_FREE(epsilon)
  ABI_FREE(ifcmat)
+ ABI_FREE(omega)
+ ABI_FREE(phonspec)
 
  end subroutine ddb_omega_interpol
+!!***
+
+!!****f* ABINIT/phonon_green
+!! NAME
+!!  phonon_green
+!!
+!! FUNCTION
+!!  Computes the phonon Green's function and spectral function at 
+!!  a given value of frequency and imaginary damping
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  amu(ntypat)= atomic masses
+!!  ifc(3*natom,3*natom)= Interatomic-force constants calculated at a given omega
+!!  natom= number of atoms in the cell
+!!  ntypat= number of atom types in the cell
+!!  omega= frequency at which the IFCs have been calculated
+!!  typat(natom)= array with the type of atoms in the cell
+!!
+!! OUTPUT
+!!  phonspec= phonon spectral function at the input omega
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine phonon_green(amu,ifc,natom,ntypat,omega,phonspec,typat)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: natom,ntypat 
+ real(dp), intent(in) :: omega
+ real(dp), intent(out) :: phonspec
+!arrays
+ integer, intent(in) :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
+ complex(dpc), intent(in) :: ifc(3*natom,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iat1,iat2,idir1,idir2,icol,info,irow,lwork,ndim
+ complex(dpc) :: eta
+!arrays
+ integer, allocatable :: ipiv(:)
+ real(dp), allocatable :: massfac(:,:)
+ complex(dpc), allocatable :: dynmat(:,:)
+ complex(dpc),allocatable :: work(:),work1(:,:)
+!character(len=500) :: msg                   
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Build an array with the mass factors
+ ABI_MALLOC(massfac,(natom,natom))
+ do iat2= 1, natom
+   do iat1= 1, natom
+     massfac(iat1,iat2)=one/sqrt(amu(typat(iat1))*amu(typat(iat2)))
+   end do
+ end do
+
+!Build the ((w+eta)**2 - D(w)) matrix 
+ ndim=3*natom
+ ABI_MALLOC(dynmat,(ndim,ndim))
+ eta=(0.0_dp,0.000001_dp)
+ do iat2= 1, natom
+   do idir2= 1, 3
+     icol= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         irow= (iat1-1)*3 + idir1
+         dynmat(irow,icol)=massfac(iat1,iat2)*ifc(irow,icol)
+         if (irow==icol) then
+           dynmat(irow,icol)= (omega+eta)**2 - dynmat(irow,icol)
+         end if
+       end do
+     end do
+   end do
+ end do
+
+!Invert to obtain the phonon Green's function
+ ABI_MALLOC(work1,(ndim,ndim))
+ work1=dynmat
+
+ ABI_MALLOC(ipiv,(ndim))
+ call zgetrf( ndim, ndim, work1, ndim, ipiv, info )
+ ABI_CHECK(info == 0, sjoin('zgetrf returned:', itoa(info)))
+
+ ABI_MALLOC(work,(2))
+ call zgetri( ndim, work1, ndim, ipiv, work, -1, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+ lwork=int(work(1))
+
+ ABI_REMALLOC(work,(lwork))
+ call zgetri( ndim, work1, ndim, ipiv, work, lwork, info )
+ ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+
+!Finally extract the spectral function from the trace
+ phonspec= zero
+ do irow= 1, ndim
+   phonspec= phonspec + aimag(work1(irow,irow))
+ end do
+ phonspec= -two*omega/pi * phonspec
+
+
+
+ ABI_FREE(ipiv)
+ ABI_FREE(work1)
+ ABI_FREE(massfac)
+ ABI_FREE(dynmat)
+
+ DBG_EXIT("COLL")
+
+end subroutine phonon_green
 !!***
 
 end module m_ddb_magpen
