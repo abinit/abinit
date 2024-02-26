@@ -700,6 +700,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        hamk%useylm /= 0 .and.&
 &        (cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
 &        (choice==1 .or. choice==2  .or. choice==3 .or. choice==5 .or. choice==51)))
+     if(istwf_k>1 .and. choice>1) use_gemm_nonlop=.false.
    end if
    if(signs==1) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
