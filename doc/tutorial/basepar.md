@@ -28,6 +28,10 @@ that rationalizes the fact that, beyond some number of processors, the
 inherently sequential parts will dominate parallel parts, and give a
 limitation to the maximal speedup that can be achieved.
 
+This tutorial describes only basic possibilities of parallel computing with ABINIT.
+After reading this basic tutorial, you will likely benefit to read other tutorials related
+to parallelism in ABINIT. This will be explained later.
+
 ## Generalities
 
 With the broad availability of multi-core processors, everybody now has a
