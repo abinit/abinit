@@ -95,6 +95,7 @@ contains
  integer :: iblok,ii,ipert1,ipert2,jblok,kblok,lblok,nblok,ndim 
  integer :: nmat,nmdir,prtopt
  character(len=500) :: msg
+ logical :: qeq0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -134,6 +135,7 @@ contains
    ! Look for the spin-susceptibility block in the DDB
    qphon=zero
    qphon(:,1)=ddb%qpt(1:3,kblok)
+   qeq0=(sqrt(sum(qphon(:,1)**2))<tol8)
    qphnrm(:)=ddb%nrm(1,kblok)
    rfphon(1:2)=0
    rfelfd(1:2)=0
@@ -189,7 +191,7 @@ contains
    ! Then electric field
    ! Look for the induced magnetic moments block in the DDB
    jblok=0
-   if (qphnrm(1)<tol8) then
+   if (qeq0) then
      rfphon(2)=0
      rfelfd(2)=2
      rfstrs(1:2)=0
@@ -199,6 +201,8 @@ contains
      else if (magpen>zero) then
        rfmagn(1)= 2
      end if
+
+     WRITE(*,*) "ENTRA"
 
      call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
    & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
@@ -228,7 +232,7 @@ contains
 
    !Born effective charges block
    jblok=0
-   if (qphnrm(1)<tol8) then
+   if (qeq0) then
      rfphon(1:2)=1
      rfelfd(1:2)=2
      call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
@@ -240,7 +244,7 @@ contains
 
    !Dielectric susceptibility block
    lblok=0
-   if (qphnrm(1)<tol8) then
+   if (qeq0) then
      rfphon(:)=0
      rfelfd(1:2)=2
      call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
@@ -313,7 +317,7 @@ contains
 
      ! Then electric field
      jblok=0
-     if (qphnrm(1)<tol8) then
+     if (qeq0) then
        rfphon(2)=0
        rfelfd(2)=2
 
@@ -1657,7 +1661,7 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: diel_unit,i,iblok,ii,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
+ integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
@@ -1700,7 +1704,7 @@ contains
  ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
- ABI_MALLOC(modemm,(3,3*natom,nomega))
+ ABI_MALLOC(modemm,(ndim,3*natom,nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
@@ -1820,29 +1824,53 @@ contains
  write(mmom_unit,*) '#'
  write(mmom_unit,*) '#  Magnetic moments calculated and interpolated by ANADDB'
  write(mmom_unit,*) '#'
- write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*natom*3
 
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ do imode= 1, 3*natom
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Real part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+   write(mmom_unit,*) ' '
+   write(mmom_unit,'(a,i3)') '#  Imaginary part of magnetic moments (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+   call wrtout(mmom_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modemm(i,imode,iw)),i=1,ndim)
+     call wrtout(mmom_unit,msg,'COLL')
+   end do
+ end do
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of magnetic moments induced by atomic displacements (at. units)'
+ write(mmom_unit,*) '#  Real part of magnetic moments induced by electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m^{mat_1,1}_{at_1,1}     m^{mat_1,1}_{at1,2}     ...     m^{mat_1,1}_{at2,1}',&
-&           '      ...     m^{mat_1,2}_{at1,1}     ...     m^{mat_2,1}_{at1,1}     ...'
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((real(mmom(i,j,iw)),j=1,3*natom),i=1,ndim)
+ &  omega(iw), ((real(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of magnetic moments induced by atomic displacements (at. units)'
+ write(mmom_unit,*) '#  Imaginary part of magnetic moments induced by electric field (at. units)'
  write(msg,'(a,a,a)') ch10,&
-&           ' # At  hw     m^{mat_1,1}_{at_1,1}     m^{mat_1,1}_{at1,2}     ...     m^{mat_1,1}_{at2,1}',&
-&           '      ...     m^{mat_1,2}_{at1,1}     ...     m^{mat_2,1}_{at1,1}     ...'
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(mmom(i,j,iw)),j=1,3*natom),i=1,ndim)
+ &  omega(iw), ((aimag(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -2057,17 +2085,17 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  ndim=3*natom
  ABI_MALLOC(dynmat,(ndim,ndim))
  ABI_MALLOC(w2dynmat,(ndim,ndim))
- eta=(0.0_dp,0.000001_dp)
- w2dynmat=(0.0_dp,0.0_dp)
+ eta=(0.0_dp,0.00001_dp)
  do iat2= 1, natom
    do idir2= 1, 3
      icol= (iat2-1)*3 + idir2
      do iat1= 1, natom
        do idir1= 1, 3
          irow= (iat1-1)*3 + idir1
-         dynmat(irow,icol)=massfac(iat1,iat2)*ifc(irow,icol)
+         dynmat(irow,icol)= massfac(iat1,iat2)*ifc(irow,icol)
+         w2dynmat(irow,icol)= -one*dynmat(irow,icol)
          if (irow==icol) then
-           w2dynmat(irow,icol)= (omega+eta)**2 - dynmat(irow,icol)
+           w2dynmat(irow,icol)= (omega+eta)**2 + w2dynmat(irow,icol)
          end if
        end do
      end do
@@ -2090,6 +2118,7 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  ABI_REMALLOC(work,(lwork))
  call zgetri( ndim, work1, ndim, ipiv, work, lwork, info )
  ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
+
 
 !Finally extract the spectral function from the trace
  phonspec= zero
@@ -2199,11 +2228,11 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
  complex(dpc), intent(in) :: mmom(ndim,(natom+2)*3)
- complex(dpc), intent(out) :: modemm(3,3*natom)
+ complex(dpc), intent(out) :: modemm(ndim,3*natom)
 
 !Local variables-------------------------------
 !scalars
- integer :: iat1,iat2,idir1,idir2,icol,imode,irow
+ integer :: iat1,iat2,idir1,idir2,icol,im,imode,irow
  real(dp) :: mcell
 !arrays
  real(dp), allocatable :: mass(:)
@@ -2214,6 +2243,7 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  DBG_ENTER("COLL")
 
 !Define the mass factors
+ ABI_MALLOC(mass,(natom))
  mcell=zero
  do iat1= 1, natom
    mass(iat1)= amu(typat(iat1))
@@ -2221,6 +2251,24 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  end do
  mass(:)=sqrt(mcell/mass(:))
 
+!Compute the mode-resolved moments
+ modemm(:,:)=(zero,zero)
+ do im= 1, ndim
+   do iat2= 1, natom
+     do idir2= 1, 3
+       imode= (iat2-1)*3 + idir2
+       do iat1= 1, natom
+         do idir1= 1, 3
+           irow= (iat1-1)*3 + idir1
+           modemm(im,imode)= modemm(im,imode) +  mass(iat1)*mmom(im,irow)* &
+         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ ABI_FREE(mass)
 
  DBG_EXIT("COLL")
 
