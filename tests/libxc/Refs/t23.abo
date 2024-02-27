@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 23 Feb 2024.
-- ( at 11h08 )
+.Starting date : Mon 26 Feb 2024.
+- ( at 21h48 )
   
 - input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__gonze/tests/TestBot_MPI1/libxc_t23-t24/t23.abi
 - output file    -> t23.abo
@@ -73,7 +73,7 @@ P           mkmem           3
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt           3
-            nstep          20
+            nstep          18
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
@@ -134,7 +134,7 @@ P           mkmem           3
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolvrs      2.00000000E-15
+           tolvrs      1.00000000E-15
             typat      1  1
           usekden           1
            useylm           1
@@ -219,8 +219,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.375     182.245
 
 --- !BeginCycle
 iteration_state: {dtset: 1, }
-solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 2.00E-15, }
+solver: {iscf: 7, nstep: 18, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-15, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
@@ -242,10 +242,6 @@ tolerances: {tolvrs: 2.00E-15, }
  ETOT 16  -5.1789728431338     2.966E-08 3.534E-17 1.093E-11
  ETOT 17  -5.1789728491561    -6.022E-09 2.200E-18 1.696E-12
  ETOT 18  -5.1789728485594     5.967E-10 7.823E-20 1.141E-13
- ETOT 19  -5.1789728486191    -5.975E-11 1.110E-21 1.148E-14
- ETOT 20  -5.1789728487569    -1.378E-10 8.254E-22 1.147E-15
-
- At SCF step   20       vres2   =  1.15E-15 < tolvrs=  2.00E-15 =>converged.
 
 Result for kinetic energy density :
 
@@ -255,6 +251,11 @@ Result for kinetic energy density :
 )     Minimum=    1.4403E-03  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    3.2801E+00
 --------------------------------------------------------------------------------
+
+ scprqt:  WARNING -
+  nstep=   18 was not enough SCF cycles to converge;
+  potential residual=  1.141E-13 exceeds tolvrs=  1.000E-15
+
 
 --- !ResultsGS
 iteration_state: {dtset: 1, }
@@ -266,7 +267,7 @@ lattice_vectors:
 lattice_lengths: [   7.25492,    7.25492,    7.25492, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7001139E+02
-convergence: {deltae: -1.378E-10, res2:  1.147E-15, residm:  8.254E-22, diffor:  0.000E+00, }
+convergence: {deltae:  5.967E-10, res2:  1.141E-13, residm:  7.823E-20, diffor:  0.000E+00, }
 etotal    :  -5.17897285E+00
 entropy   :   0.00000000E+00
 fermie    :   1.79594876E-01
@@ -288,8 +289,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.214723418768734
- Compensation charge over fine fft grid    =     -0.214723907101923
+ Compensation charge over spherical meshes =     -0.214723419178113
+ Compensation charge over fine fft grid    =     -0.214723907511307
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -351,7 +352,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   16.870E-23; max=  82.538E-23
+ Mean square residual over all n,k,spin=   15.714E-21; max=  78.233E-21
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -375,28 +376,28 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.28012790189424E+00
-hartree             :  7.05452713997027E-01
-xc                  : -6.26083382643262E-01
+kinetic             :  3.28012790204111E+00
+hartree             :  7.05452714107793E-01
+xc                  : -6.26083382676996E-01
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  2.80406532694243E-01
-local_psp           : -2.48265108457910E+00
-spherical_terms     :  2.06423925606601E+00
-total_energy        : -5.17897284875693E+00
-total_energy_eV     : -1.40927018188043E+02
+local_psp           : -2.48265108515979E+00
+spherical_terms     :  2.06423925662033E+00
+total_energy        : -5.17897284855940E+00
+total_energy_eV     : -1.40927018182668E+02
 ...
 
 
 --- !EnergyTermsDC
 iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.09120171533833E-01
+band_energy         :  1.09120169194689E-01
 Ewald energy        : -8.40046478618609E+00
 psp_core            :  2.80406532694243E-01
-xc_dc               :  2.13406291698542E+00
-spherical_terms     :  6.97902316316426E-01
-total_energy_dc     : -5.17897284865617E+00
-total_energy_dc_eV  : -1.40927018185301E+02
+xc_dc               :  2.13406291700169E+00
+spherical_terms     :  6.97902316330190E-01
+total_energy_dc     : -5.17897285096528E+00
+total_energy_dc_eV  : -1.40927018248135E+02
 ...
 
 
@@ -409,7 +410,7 @@ total_energy_dc_eV  : -1.40927018185301E+02
            diemac      1.20000000E+01
              ecut      6.00000000E+00 Hartree
            enunit           1
-           etotal     -5.1789728488E+00
+           etotal     -5.1789728486E+00
             fcart      9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
                        9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
@@ -427,7 +428,7 @@ P           mkmem           3
             ngfft          16      16      16
           ngfftdg          24      24      24
              nkpt           3
-            nstep          20
+            nstep          18
              nsym          48
            ntypat           1
               occ      2.000000  2.000000  2.000000  2.000000  0.000000
@@ -490,7 +491,7 @@ P           mkmem           3
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
-           tolvrs      2.00000000E-15
+           tolvrs      1.00000000E-15
             typat      1  1
           usekden           1
            useylm           1
@@ -588,10 +589,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         41.9  wall=         42.1
+- Proc.   0 individual time (sec): cpu=         38.0  wall=         38.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  64 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         41.9  wall=         42.1
+.Delivered  59 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         38.0  wall=         38.1
