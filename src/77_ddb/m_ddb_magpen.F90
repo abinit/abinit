@@ -104,7 +104,7 @@ contains
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: ifcmat(:,:)
+ complex(dpc), allocatable :: ifcmat(:,:),zeff(:,:)
 
 ! *********************************************************************
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
@@ -128,6 +128,7 @@ contains
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
+ ABI_MALLOC(zeff,(3,3*natom))
 
  nblok=ddb%nblok
  do kblok=1,nblok
@@ -239,7 +240,7 @@ contains
    end if
    if (jblok /= 0 ) then
      call mp_zeff(barmagsus,ddb%val,jblok,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtvol,ucvol,zfield)
+   & natom,nblok,ndim,prtopt,prtvol,ucvol,zeff,zfield)
    end if
 
    !Dielectric susceptibility block
@@ -355,6 +356,7 @@ contains
  ABI_FREE(mmom)
  ABI_FREE(zfield)
  ABI_FREE(ifcmat)
+ ABI_FREE(zeff)
 
  end subroutine ddb_magpen
 !!***
@@ -1122,22 +1124,22 @@ contains
 !! ucvol= unit cell volume
 !!
 !! OUTPUT
-!!  directions of the penalty induced by atomic displacements and/or electric fields.
-!! zfield(ndim,(natom+2)*3)= Zeeman fields at constrained magnetic moments.
+!! zeff(3,natom*3)= Born effective charges calculated at the level of mpopt
 !!
 !! SOURCE
 
  subroutine mp_zeff(barmagsus,blkval,iblok,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtvol,ucvol,zfield)
+& natom,nblok,ndim,prtopt,prtvol,ucvol,zeff,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtvol
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
+ complex(dpc),intent(out) :: zeff(3,natom*3)
  complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
 
 !Local variables -------------------------
@@ -1175,29 +1177,19 @@ contains
  fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
  fmzeff= barzeff + fmzeff
 
+ zeff= fmzeff
+
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
    srzeff= matmul(transpose(conjg(diel_zfield)),matmul(magsus,ifc_zfield))
    srzeff= fmzeff - srzeff
+ 
+   zeff= srzeff
  end if
 
- !Write the results
- call wrtout([ab_out,std_out], ' Frozen-magnetic Born effective charges')
- call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
- do idir1= 1, 3
-   do ipert2= 1, natom
-     do idir2= 1, 3
-       icol=( ipert2-1)*3 + idir2
-       write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
-     & cart(idir1), ipert2, cart(idir2), &
-     & real(fmzeff(idir1,icol)), aimag(fmzeff(idir1,icol))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
- end do 
- if (mpopt==2) then
-   call wrtout([ab_out,std_out], ' Spin-relaxed Born effective charges')
+ if (prtopt==1) then
+   !Write the results
+   call wrtout([ab_out,std_out], ' Frozen-magnetic Born effective charges')
    call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
    do idir1= 1, 3
      do ipert2= 1, natom
@@ -1205,29 +1197,45 @@ contains
          icol=( ipert2-1)*3 + idir2
          write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
        & cart(idir1), ipert2, cart(idir2), &
-       & real(srzeff(idir1,icol)), aimag(srzeff(idir1,icol))
+       & real(fmzeff(idir1,icol)), aimag(fmzeff(idir1,icol))
          call wrtout([ab_out,std_out], msg)
        end do
      end do
      call wrtout([ab_out,std_out], '   ')
    end do 
- end if
-
- if (prtvol > 1) then
-   call wrtout([ab_out,std_out], ' Penalized Born effective charges')
-   call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
-   do idir1= 1, 3
-     do ipert2= 1, natom
-       do idir2= 1, 3
-         icol=( ipert2-1)*3 + idir2
-         write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
-       & cart(idir1), ipert2, cart(idir2), &
-       & real(barzeff(idir1,icol)), aimag(barzeff(idir1,icol))
-         call wrtout([ab_out,std_out], msg)
+   if (mpopt==2) then
+     call wrtout([ab_out,std_out], ' Spin-relaxed Born effective charges')
+     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
+     do idir1= 1, 3
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           icol=( ipert2-1)*3 + idir2
+           write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
+         & cart(idir1), ipert2, cart(idir2), &
+         & real(srzeff(idir1,icol)), aimag(srzeff(idir1,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
        end do
-     end do
-     call wrtout([ab_out,std_out], '   ')
-   end do 
+       call wrtout([ab_out,std_out], '   ')
+     end do 
+   end if
+  
+   if (prtvol > 1) then
+     call wrtout([ab_out,std_out], ' Penalized Born effective charges')
+     call wrtout([ab_out,std_out], ' efld.dir   atom   dir        Real              Imag')
+     do idir1= 1, 3
+       do ipert2= 1, natom
+         do idir2= 1, 3
+           icol=( ipert2-1)*3 + idir2
+           write(msg,'(3x,a2,7x,i3,4x,a2,2x,2es18.9)') &
+         & cart(idir1), ipert2, cart(idir2), &
+         & real(barzeff(idir1,icol)), aimag(barzeff(idir1,icol))
+           call wrtout([ab_out,std_out], msg)
+         end do
+       end do
+       call wrtout([ab_out,std_out], '   ')
+     end do 
+   end if
  end if
 
  end subroutine mp_zeff
@@ -1662,11 +1670,11 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
- integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit
+ integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename
- character(len=fnlen) :: phon_filename
+ character(len=fnlen) :: phon_filename,zeff_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
@@ -1676,7 +1684,7 @@ contains
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
- complex(dpc), allocatable :: modemm(:,:,:)
+ complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
 
 ! *********************************************************************
 
@@ -1705,6 +1713,8 @@ contains
  ABI_MALLOC(phonspec,(nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
+ ABI_MALLOC(zeff,(3,3*natom,nomega))
+ ABI_MALLOC(modezeff,(3,3*natom,nomega))
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
@@ -1755,6 +1765,13 @@ contains
 
    !Calculate the mode-resolved magnetic moments
    call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),natom,ndim,ntypat,typat)
+
+   !Calculate the Born effective charges
+   call mp_zeff(barmagsus(:,:,iw),int_barddb,1,magsus(:,:,iw),mpert,mpopt,&
+ & natom,1,ndim,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield(:,:,iw))
+
+   !Calculate the mode-resolved Born effective charges
+   call mode_zeff(amu,eigvec,natom,ntypat,typat,zeff(:,:,iw),modezeff(:,:,iw))
 
  end do
 
@@ -1970,6 +1987,42 @@ contains
  
  close(phon_unit)
 
+!Born effective charges
+ zeff_filename=trim(outfilename_radix)//"_ZEFF"
+ if (open_file(zeff_filename, msg, newunit=zeff_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(zeff_unit,*) '#'
+ write(zeff_unit,*) '#  Born effective charges calculated and interpolated by ANADDB'
+ write(zeff_unit,*) '#'
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' ) 3 
+ do imode= 1, 3*natom
+   write(zeff_unit,*) ' '
+   write(zeff_unit,'(a,i3)') '#  Real part of Born charge (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
+   call wrtout(zeff_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (real(modezeff(i,imode,iw)),i=1,3)
+     call wrtout(zeff_unit,msg,'COLL')
+   end do
+   write(zeff_unit,*) ' '
+   write(zeff_unit,'(a,i3)') '#  Imaginary part of Born charge (at. units) induced by phonon mode:', imode
+   write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x_{n}     Z^y_{n}     Z^z_{n}'
+   call wrtout(zeff_unit,msg,'COLL')
+   do iw=1,nomega
+     write(msg,pfmt) &
+   & omega(iw), (aimag(modezeff(i,imode,iw)),i=1,3)
+     call wrtout(zeff_unit,msg,'COLL')
+   end do
+ end do
+
+ close(zeff_unit)
+
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
  ABI_FREE(barmagsus)
@@ -1987,6 +2040,8 @@ contains
  ABI_FREE(phonspec)
  ABI_FREE(eigvec)
  ABI_FREE(modemm)
+ ABI_FREE(zeff)
+ ABI_FREE(modezeff)
 
  end subroutine ddb_omega_interpol
 !!***
@@ -2193,7 +2248,7 @@ end subroutine phonon_green
 !!  typat(natom)= array with the type of atoms in the cell
 !!
 !! OUTPUT
-!!  modemm(3,3*natom)= mode-resolved magnetic moments
+!!  modemm(ndim,3*natom)= mode-resolved magnetic moments
 !!
 !! SIDE EFFECTS
 !!
@@ -2274,5 +2329,112 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
 
 end subroutine mode_mmom
 !!***
+
+!!****f* ABINIT/mode_zeff
+!! NAME
+!!  mode_zeff
+!!
+!! FUNCTION
+!!  Projects the Born effective charges on the eigenmodes of the dynamical 
+!!  matrix calculated at each value of omega
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  amu(ntypat)= atomic masses
+!!  eigvec(2,3,natom,3,natom)= dynamical matrix eigenvectors
+!!  zeff(ndim,(natom+2)*3)= first-order magnetic moments
+!!  natom= number of atoms in the cell
+!!  ntypat= number of atom types in the cell
+!!  typat(natom)= array with the type of atoms in the cell
+!!  zeff(3,3*natom)= atomic Born effective charges at a given omega
+!!
+!! OUTPUT
+!!  modezeff(3,3*natom)= mode-resolved magnetic moments
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+
+subroutine mode_zeff(amu,eigvec,natom,ntypat,typat,zeff,modezeff)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: natom,ntypat 
+!arrays
+ integer, intent(in) :: typat(natom)
+ real(dp), intent(in) :: amu(ntypat)
+ real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
+ complex(dpc), intent(in) :: zeff(3,natom*3)
+ complex(dpc), intent(out) :: modezeff(3,3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: iat1,iat2,idir1,idir2,icol,im,imode,irow
+ real(dp) :: mcell
+!arrays
+ real(dp), allocatable :: mass(:)
+!character(len=500) :: msg                   
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+
+!Define the mass factors
+ ABI_MALLOC(mass,(natom))
+ mcell=zero
+ do iat1= 1, natom
+   mass(iat1)= amu(typat(iat1))
+   mcell= mcell + amu(typat(iat1))
+ end do
+ mass(:)=sqrt(mcell/mass(:))
+
+!Compute the mode-resolved Born charges
+ modezeff(:,:)=(zero,zero)
+ do im= 1, 3
+   do iat2= 1, natom
+     do idir2= 1, 3
+       imode= (iat2-1)*3 + idir2
+       do iat1= 1, natom
+         do idir1= 1, 3
+           irow= (iat1-1)*3 + idir1
+           modezeff(im,imode)= modezeff(im,imode) +  mass(iat1)*zeff(im,irow)* &
+         & cmplx(eigvec(1,idir1,iat1,idir2,iat2),eigvec(2,idir1,iat1,idir2,iat2),16)
+         end do
+       end do
+     end do
+   end do
+ end do
+
+ ABI_FREE(mass)
+
+ DBG_EXIT("COLL")
+
+end subroutine mode_zeff
+!!***
+
 end module m_ddb_magpen
 !!***
