@@ -4715,6 +4715,9 @@ contains
     integer :: ierr
     logical :: do_mpi_sum_
 
+    if (xgBlock%gpu_option/=0) then
+      call xgBlock_copy_from_gpu(xgBlock)
+    end if
     select case(xgBlock%space)
       case (SPACE_R)
         id = sum(abs(xgBlock%vecR(:,:)))
