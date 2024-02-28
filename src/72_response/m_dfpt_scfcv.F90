@@ -1552,7 +1552,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if (ipert/=dtset%natom+1.and.dtset%prt1mag==1) then
+ if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
    zeemfac=half
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
@@ -3736,7 +3736,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1 &
+& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1, &
 & eta,omega) !Optional
 
 !Arguments -------------------------------
@@ -3982,8 +3982,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 !    For each pair of active bands (m,n), generates the ratios
 !    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n)+omega+i*eta)
 !    and decide to which band to attribute it.
-     call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,eta_,nband_k,&
-&     dtset%occopt,occ_k,occ_kq,omega_,rocceig)
+     call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,&
+&     dtset%occopt,occ_k,occ_kq,rocceig)
 
 !    Get plane-wave coeffs and related data at k
      kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
