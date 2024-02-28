@@ -88,7 +88,7 @@ module m_xg_ortho_RR
     type(xg_t) :: buffer
     double precision :: tsec(2)
 
-    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
+    ABI_NVTX_START_RANGE(NVTX_B_ORTHO)
 
     call timab(timer,1,tsec)
 
@@ -252,6 +252,7 @@ module m_xg_ortho_RR
     ! |  *  |   *   | PAP |  |  *  |   *   |  I  |
 
     call timab(tim_RR_gemm_1,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
 
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
     call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,gpu_option=gpu_option)
@@ -284,6 +285,7 @@ module m_xg_ortho_RR
     end if
 
     call timab(tim_RR_gemm_1,2,tsec)
+    ABI_NVTX_END_RANGE()
 
     if ( EIGPACK(eigenSolver) ) then
       call xgBlock_pack(subA%self,subA%self,'u')
@@ -364,6 +366,7 @@ module m_xg_ortho_RR
     call xg_free(subB)
 
     call timab(tim_RR_gemm_2,1,tsec)
+    ABI_NVTX_START_RANGE(NVTX_RR_GEMM_2)
 
     !FIXME Avoid those transfers
     if ( info == 0 ) then
