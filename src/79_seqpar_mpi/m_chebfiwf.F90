@@ -514,7 +514,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !Scale back cg
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,inv_sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
@@ -555,8 +555,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X ,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
-   call xgBlock_scale(AX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X ,sqrt2,1)
+   call xgBlock_scale(AX,sqrt2,1)
 
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -594,7 +594,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
      end if
    end if
    if(l_paw) then
-     call xgBlock_scale(BX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(BX,sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -621,7 +621,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if ! l_paw
  end if ! l_istwf==2
 
- if ( .not. l_paw ) call xgBlock_copy(X,BX,gpu_option=l_gs_hamk%gpu_option)
+ if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
 end subroutine getghc_gsc1
 !!***
@@ -676,7 +676,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
  !scale back cg
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,inv_sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0 ) then
@@ -704,7 +704,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(Bm1X,inv_sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -754,7 +754,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST1)
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
@@ -784,7 +784,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(Bm1X,sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -840,31 +840,23 @@ end subroutine getBm1X
 !!
 !! SOURCE
 
-subroutine precond1(W, gpu_option)
+subroutine precond1(W)
 
  implicit none
 
  ! Arguments ------------------------------------
  type(xgBlock_t), intent(inout)           :: W
- integer        , intent(in   ), optional :: gpu_option
 
 
  ! Local variables-------------------------------
  ! scalars
  integer :: ispinor
- integer :: l_gpu_option = ABI_GPU_DISABLED
 
  ! *********************************************************************
 
- ! if optional parameter is present, use it
- ! else use default value, i.e. don't use GPU
- if (present(gpu_option)) then
-   l_gpu_option = gpu_option
- end if
-
  ! Precondition resid_vec
  do ispinor = 1,l_nspinor
-   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1), l_gpu_option)
+   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1))
  end do
 
 end subroutine precond1
