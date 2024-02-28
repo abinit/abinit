@@ -81,8 +81,8 @@ module m_nvtx_data
   integer, parameter :: NVTX_INIT_INWFFIL2 = 47
   integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48
   integer, parameter :: NVTX_RR_HEGV = 49
-  integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
-  integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
+  integer, parameter :: NVTX_RR_GEMM_1 = 50
+  integer, parameter :: NVTX_RR_GEMM_2 = 51
   integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
   integer, parameter :: NVTX_CHEBFI2_TRANSPOSE = 53
   integer, parameter :: NVTX_CHEBFI2_GET_BM1X = 54
@@ -91,7 +91,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_LOBPCG2_ORTHO_X_WRT = 57
   integer, parameter :: NVTX_LOBPCG2_RESIDUE = 58
   integer, parameter :: NVTX_LOBPCG2_RR = 59
-  integer, parameter :: NVTX_LOBPCG2_B_ORTHO = 60
+  integer, parameter :: NVTX_B_ORTHO = 60
   integer, parameter :: NVTX_LOBPCG2_GET_AX_BX = 61
   integer, parameter :: NVTX_RR_HEEV = 62
   integer, parameter :: NVTX_FORSTRNPS = 63
