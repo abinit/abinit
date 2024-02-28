@@ -456,7 +456,7 @@ contains
     if ( present(comm) ) xg%spacedim_comm = comm
 
     call xg_setBlock(xg,xg%self,1,rows,cols)
-    call xgBlock_zero(xg%self,gpu_option=gpu_option)
+    call xgBlock_zero(xg%self,gpu_option=l_gpu_option)
 
   end subroutine xg_init
   !!***
@@ -743,7 +743,7 @@ contains
     case ( SPACE_R,SPACE_CR )
       byte_count = ldim*blockdim*dp
     case ( SPACE_C )
-      byte_count = ldim*blockdim*dpc
+      byte_count = ldim*blockdim*2*dpc ! Note the factor 2, needed here!
     end select
 
     ! now we can call the memory prefetch
@@ -1295,8 +1295,23 @@ contains
 
     if ( transa == 'n' ) then
       K = xgBlockA%cols
+      if ( xgBlockA%rows /= xgBlockW%rows ) then
+        ABI_ERROR("rows(A)/=rows(W)")
+      end if
     else
       K = xgBlockA%rows
+      if ( xgBlockA%cols /= xgBlockW%rows ) then
+        ABI_ERROR("rows(A)/=rows(W)")
+      end if
+    end if
+    if ( transb == 'n' ) then
+      if ( xgBlockB%cols /= xgBlockW%cols ) then
+        ABI_ERROR("cols(B)/=cols(W)")
+      end if
+    else
+      if ( xgBlockB%rows /= xgBlockW%cols ) then
+        ABI_ERROR("rows(B)/=cols(W)")
+      end if
     end if
 
     calpha = dcmplx(alpha,0.d0)
@@ -4373,7 +4388,7 @@ contains
         byte_count = xgBlock%ldim * xgBlock%cols * dp
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
       case (SPACE_C)
-        byte_count = xgBlock%ldim * xgBlock%cols * dpc
+        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
       end select
 #endif
@@ -4389,7 +4404,7 @@ contains
         call gpu_memset(c_loc(xgBlock%vecR), 0, byte_count)
         !$OMP END TARGET DATA
       case (SPACE_C)
-        byte_count = xgBlock%ldim * xgBlock%cols * dpc
+        byte_count = xgBlock%ldim * xgBlock%cols * 2 * dpc ! Note the factor 2, needed here!
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
         call gpu_memset(c_loc(xgBlock%vecC), 0, byte_count)
         !$OMP END TARGET DATA
@@ -4715,7 +4730,7 @@ contains
     integer :: ierr
     logical :: do_mpi_sum_
 
-    if (xgBlock%gpu_option/=0) then
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
       call xgBlock_copy_from_gpu(xgBlock)
     end if
     select case(xgBlock%space)
