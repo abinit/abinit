@@ -100,10 +100,10 @@ module m_xg_ortho_RR
     call xg_init(buffer,space(X),cols(X),cols(X),comm(X),gpu_option=gpu_option)
 
     ! Compute X^TBX
-    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self,gpu_option=gpu_option)
+    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self)
 
     ! Compute Cholesky decomposition (Upper part)
-    call xgBlock_potrf(buffer%self,'u',info,gpu_option=gpu_option)
+    call xgBlock_potrf(buffer%self,'u',info)
 
     if ( info /= 0 ) then
       ABI_COMMENT("Cholesky decomposition did not work. Orthonormalization not done")
@@ -112,14 +112,14 @@ module m_xg_ortho_RR
     end if
 
     ! Solve YU=X
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X,gpu_option=gpu_option)
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
 
     ! Solve BYU=BX
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX,gpu_option=gpu_option)
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
 
     if (present(AX)) then
       ! Solve AYU=AX
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX,gpu_option=gpu_option)
+      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
     end if
 
     call xg_free(buffer)
@@ -255,32 +255,32 @@ module m_xg_ortho_RR
     ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
 
     call xg_setBlock(subA,subsub,1,blockdim,blockdim)
-    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,gpu_option=gpu_option)
+    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub)
 
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
       call xg_setBlock(subB,subsub,1,blockdim,blockdim)
-      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub,gpu_option=gpu_option)
+      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
     endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(XW%trans,AW%normal,1.0d0,XW,AW,0.d0,subsub,gpu_option=gpu_option)
+      call xgBlock_gemm(XW%trans,AW%normal,1.0d0,XW,AW,0.d0,subsub)
 
       ! subB
       call xg_setBlock(subB,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(XW%trans,BW%normal,1.0d0,XW,BW,0.d0,subsub,gpu_option=gpu_option)
+      call xgBlock_gemm(XW%trans,BW%normal,1.0d0,XW,BW,0.d0,subsub)
 
     end if
 
     if ( var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(XWP%trans,AP%normal,1.0d0,XWP,AP,0.d0,subsub,gpu_option=gpu_option)
+      call xgBlock_gemm(XWP%trans,AP%normal,1.0d0,XWP,AP,0.d0,subsub)
 
       ! subB
       call xg_setBlock(subB,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(XWP%trans,BP%normal,1.0d0,XWP,BP,0.d0,subsub,gpu_option=gpu_option)
+      call xgBlock_gemm(XWP%trans,BP%normal,1.0d0,XWP,BP,0.d0,subsub)
 
     end if
 
@@ -302,7 +302,7 @@ module m_xg_ortho_RR
       select case (eigenSolver)
       case (EIGENEVD)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heevd"
-        call xgBlock_heevd('v','u',subA%self,eigenvalues,info,gpu_option=gpu_option)
+        call xgBlock_heevd('v','u',subA%self,eigenvalues,info) ! work with GPU
       case (EIGENEV)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heev"
         call xgBlock_heev('v','u',subA%self,eigenvalues,info)
@@ -314,7 +314,7 @@ module m_xg_ortho_RR
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
-        call xgScalapack_heev(scalapack,subA%self,eigenvalues,gpu_option=gpu_option)
+        call xgScalapack_heev(scalapack,subA%self,eigenvalues) ! work with GPU
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEEV")
@@ -329,7 +329,7 @@ module m_xg_ortho_RR
           eigenvalues,vec%self,info)
       case (EIGENVD)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
-        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info,gpu_option=gpu_option)
+        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info) ! work with GPU
       case (EIGENV)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegv"
         call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info)
@@ -345,7 +345,7 @@ module m_xg_ortho_RR
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
-        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues,gpu_option=gpu_option)
+        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues) ! work with GPU
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEGV")
@@ -377,16 +377,16 @@ module m_xg_ortho_RR
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
-      call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-      call xgBlock_copy(subB%self,X,gpu_option=gpu_option)
+      call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self)
+      call xgBlock_copy(subB%self,X)
 
       !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(AX%normal,Cwp%normal,1.0d0,AX,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-      call xgBlock_copy(subB%self,AX,gpu_option=gpu_option)
+      call xgBlock_gemm(AX%normal,Cwp%normal,1.0d0,AX,Cwp,0.d0,subB%self)
+      call xgBlock_copy(subB%self,AX)
 
       !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(BX%normal,Cwp%normal,1.0d0,BX,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-      call xgBlock_copy(subB%self,BX,gpu_option=gpu_option)
+      call xgBlock_gemm(BX%normal,Cwp%normal,1.0d0,BX,Cwp,0.d0,subB%self)
+      call xgBlock_copy(subB%self,BX)
 
       if ( var /= VAR_X ) then
         ! Cost to pay to avoid temporary array in xgemm
@@ -396,23 +396,23 @@ module m_xg_ortho_RR
         call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-        call xgBlock_copy(subB%self,P,gpu_option=gpu_option)
+        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
+        call xgBlock_copy(subB%self,P)
 
         !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-        call xgBlock_copy(subB%self,AP,gpu_option=gpu_option)
+        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self)
+        call xgBlock_copy(subB%self,AP)
 
         !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self,gpu_option=gpu_option)
-        call xgBlock_copy(subB%self,BP,gpu_option=gpu_option)
+        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self)
+        call xgBlock_copy(subB%self,BP)
 
         !/* Maybe faster solution
         ! * Sum previous contribution plus P direction
         ! */
-        call xgBlock_add(X,P,gpu_option=gpu_option)
-        call xgBlock_add(AX,AP,gpu_option=gpu_option)
-        call xgBlock_add(BX,BP,gpu_option=gpu_option)
+        call xgBlock_add(X,P)
+        call xgBlock_add(AX,AP)
+        call xgBlock_add(BX,BP)
       end if
     end if
 

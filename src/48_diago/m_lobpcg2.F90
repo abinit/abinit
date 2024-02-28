@@ -383,10 +383,9 @@ module m_lobpcg2
       end subroutine getAX_BX
     end interface
     interface
-      subroutine pcond(W,gpu_option)
+      subroutine pcond(W)
         use m_xg, only : xgBlock_t
         type(xgBlock_t), intent(inout) :: W
-        integer, intent(in) :: gpu_option
       end subroutine pcond
     end interface
 
@@ -437,7 +436,7 @@ module m_lobpcg2
 
     lobpcg%AllX0 = X0
 
-    call xg_init(residu_eff,SPACE_R,blockdim,1)
+    call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=lobpcg%gpu_option)
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
@@ -516,12 +515,12 @@ module m_lobpcg2
 
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
-        call pcond(lobpcg%W,lobpcg%gpu_option)
+        call pcond(lobpcg%W)
         call timab(tim_pcond,2,tsec)
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
 
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
@@ -574,9 +573,9 @@ module m_lobpcg2
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
           call xg_Borthonormalize(lobpcg%XW,lobpcg%BXW,ierr,tim_Bortho_XW,lobpcg%gpu_option,AX=lobpcg%AXW) ! Do rotate AW
-          call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
-          call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
-          call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
+          call xgBlock_zero(lobpcg%P)
+          call xgBlock_zero(lobpcg%AP)
+          call xgBlock_zero(lobpcg%BP)
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
@@ -605,9 +604,9 @@ module m_lobpcg2
             if ( ierr /= 0 ) then
               ABI_COMMENT("B-orthonormalization (XW) did not work.")
             end if
-            call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
-            call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
-            call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
+            call xgBlock_zero(lobpcg%P)
+            call xgBlock_zero(lobpcg%AP)
+            call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
             call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
            & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
@@ -626,9 +625,9 @@ module m_lobpcg2
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
         ! Apply preconditioner
-        call pcond(lobpcg%W,lobpcg%gpu_option)
+        call pcond(lobpcg%W)
         ! Recompute residu norm here !
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
           call xgBlock_copy(residuBlock,residu_eff%self)
@@ -658,7 +657,7 @@ module m_lobpcg2
 
       ! Save eigenvalues
       call xgBlock_setBlock(eigen,eigenBlock,iblock,blockdim,1)
-      call xgBlock_copy(eigenvaluesN,eigenBlock,gpu_option=lobpcg%gpu_option)
+      call xgBlock_copy(eigenvaluesN,eigenBlock)
 
       ! Save new X in X0
       call lobpcg_setX0(lobpcg,iblock)
@@ -744,7 +743,7 @@ module m_lobpcg2
 
     !lobpcg%XWP(:,X+1:X+blockdim) = lobpcg%X0(:,(iblock-1)*blockdim+1:iblock*blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X0,lobpcg%X, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%X0,lobpcg%X)
 
   end subroutine lobpcg_getX0
 
@@ -780,13 +779,11 @@ module m_lobpcg2
     call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self,&
-        gpu_option=lobpcg%gpu_option)
+    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self)
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
-    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,&
-        var,gpu_option=lobpcg%gpu_option)
+    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
 
     call xg_free(buffer)
 
@@ -804,7 +801,7 @@ module m_lobpcg2
     call timab(tim_maxres,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RESIDUE)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX, gpu_option=lobpcg%gpu_option)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
     ABI_NVTX_END_RANGE()
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
@@ -823,7 +820,7 @@ module m_lobpcg2
 
     !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,Xtmp,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X,Xtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%X,Xtmp)
   end subroutine lobpcg_setX0
 
 
@@ -838,11 +835,11 @@ module m_lobpcg2
 
     ! BX
     call xg_setBlock(lobpcg%AllBX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%BX,CXtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%BX,CXtmp)
 
     ! AX
     call xg_setBlock(lobpcg%AllAX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%AX,CXtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%AX,CXtmp)
   end subroutine lobpcg_transferAX_BX
 
 

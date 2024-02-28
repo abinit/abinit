@@ -183,6 +183,7 @@ module m_xg
   public :: xgBlock_getSize
 
   public :: xgBlock_check
+  public :: xgBlock_check_gpu_option
 
   public :: xgBlock_potrf
   public :: xgBlock_trsm
@@ -427,7 +428,7 @@ contains
       end select
 #endif
 
-    else
+    else if ( gpu_option==ABI_GPU_DISABLED ) then
 
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -445,6 +446,9 @@ contains
       case default
         ABI_ERROR("Invalid space")
       end select
+
+    else
+        ABI_ERROR("Invalid gpu_option")
     end if
 
     xg%space = space
@@ -456,7 +460,7 @@ contains
     if ( present(comm) ) xg%spacedim_comm = comm
 
     call xg_setBlock(xg,xg%self,1,rows,cols)
-    call xgBlock_zero(xg%self,gpu_option=l_gpu_option)
+    call xgBlock_zero(xg%self)
 
   end subroutine xg_init
   !!***
@@ -1073,17 +1077,15 @@ contains
   !! NAME
   !! xgBlock_copy
 
-  subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2, gpu_option)
+  subroutine xgBlock_copy(xgBlockA, xgBlockB, inc1, inc2)
 
     type(xgBlock_t),   intent(inout) :: xgBlockA
     type(xgBlock_t),   intent(inout) :: xgBlockB
     integer, optional, intent(in   ) :: inc1
     integer, optional, intent(in   ) :: inc2
-    integer, optional, intent(in   ) :: gpu_option
 
     integer :: incx
     integer :: incy
-    integer :: l_gpu_option
 
     integer :: size1
     integer :: size2
@@ -1097,12 +1099,11 @@ contains
 #endif
 
     call timab(tim_copy,1,tsec)
+
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
 
     if ( xgBlockA%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -1115,7 +1116,7 @@ contains
     size2 = xgBlockB%LDim*xgBlockB%cols/incy ; if ( size2 * incy < xgBlockB%LDim*xgBlockB%cols ) size2 = size2+1
     size = min(size1,size2)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -1251,7 +1252,7 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, gpu_option)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
     character,        intent(in   )           :: transa
     character,        intent(in   )           :: transb
@@ -1260,13 +1261,11 @@ contains
     type(xgBlock_t),  intent(in   )           :: xgBlockB
     double precision, intent(in   )           :: beta
     type(xgBlock_t),  intent(inout)           :: xgBlockW
-    integer        ,  intent(in   ), optional :: gpu_option
 
     complex(kind=8)  :: calpha
     complex(kind=8)  :: cbeta
     integer          :: K
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD
 #if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -1282,12 +1281,8 @@ contains
 
     call timab(tim_gemm_blas,1,tsec)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -1320,7 +1315,7 @@ contains
     select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
-      if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+      if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
@@ -1354,12 +1349,12 @@ contains
         call timab(tim_gemm_blas,2,tsec)
       if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
         call timab(tim_gemm_mpi,1,tsec)
-        if (l_gpu_option==ABI_GPU_KOKKOS) then
+        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
         end if
 
-        if (l_gpu_option/=ABI_GPU_OPENMP) then
+        if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
           call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
         else
 #ifdef HAVE_GPU_MPI
@@ -1419,7 +1414,7 @@ contains
 
     case(SPACE_C)
 
-      if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+      if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
@@ -1453,12 +1448,12 @@ contains
       call timab(tim_gemm_blas,2,tsec)
       if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
         call timab(tim_gemm_mpi,1,tsec)
-        if (l_gpu_option==ABI_GPU_KOKKOS) then
+        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
           ! CPU waits for GPU to finish before doing MPI communications
           call gpu_device_synchronize()
         end if
 
-        if (l_gpu_option/=ABI_GPU_OPENMP) then
+        if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
           call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
         else
 #ifdef HAVE_GPU_MPI
@@ -1528,7 +1523,7 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, gpu_option)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
 
     character,       intent(in   )           :: transa
     character,       intent(in   )           :: transb
@@ -1537,20 +1532,14 @@ contains
     type(xgBlock_t), intent(in   )           :: xgBlockB
     complex(kind=8), intent(in   )           :: beta
     type(xgBlock_t), intent(inout)           :: xgBlockW
-    integer        , intent(in   ), optional :: gpu_option
 
     integer          :: K
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
     call timab(tim_gemm_blas,1,tsec)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
       ABI_ERROR("Not same space")
@@ -1565,7 +1554,7 @@ contains
       K = xgBlockA%rows
     end if
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
       call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
         xgBlockA%vecC, xgBlockA%LDim, &
@@ -1583,17 +1572,17 @@ contains
     call timab(tim_gemm_blas,2,tsec)
     if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
       call timab(tim_gemm_mpi,1,tsec)
-      if (l_gpu_option==ABI_GPU_KOKKOS) then
+      if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
         ! CPU waits for GPU to finish before doing MPI communications
         call gpu_device_synchronize()
-      else if (l_gpu_option==ABI_GPU_OPENMP) then
+      else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
         !FIXME We should avoid that copy using GPU Direct on systems that allow it.
         call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
       end if
 
       call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
 
-      if (l_gpu_option==ABI_GPU_OPENMP) then
+      if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
         !Putting data back on GPU
         !FIXME Again, this could be avoided using GPU-direct
         call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
@@ -1609,14 +1598,12 @@ contains
   !! NAME
   !! xgBlock_potrf
 
-  subroutine xgBlock_potrf(xgBlock,uplo,info,gpu_option)
+  subroutine xgBlock_potrf(xgBlock,uplo,info)
 
     type(xgBlock_t), intent(inout) :: xgBlock
     character      , intent(in   ) :: uplo
     integer        , intent(  out) :: info
-    integer, intent(in), optional :: gpu_option
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
@@ -1625,18 +1612,11 @@ contains
 
     call timab(tim_potrf,1,tsec)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
     if ( xgBlock%rows /= xgBlock%cols ) then
       ABI_ERROR("Matrix should be a square matrixx")
     endif
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock%space)
       case (SPACE_R,SPACE_CR)
@@ -1659,7 +1639,7 @@ contains
         !$OMP END TARGET DATA
       end select
 #endif
-      if(l_gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+      if(xgBlock%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
     else
       select case(xgBlock%space)
@@ -1736,7 +1716,7 @@ contains
   !! NAME
   !! xgBlock_heevd
 
-  subroutine xgBlock_heevd(jobz, uplo, xgBlockA, xgBlockW, info, gpu_option)
+  subroutine xgBlock_heevd(jobz, uplo, xgBlockA, xgBlockW, info)
 
     character       , intent(in   ) :: jobz
     character       , intent(in   ) :: uplo
@@ -1744,8 +1724,6 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
     double precision :: tsec(2)
-    integer         , intent(in   ), optional :: gpu_option
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:)
@@ -1754,18 +1732,13 @@ contains
 
     call timab(tim_heevd,1,tsec)
 
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
+
     if ( xgBlockW%space /= SPACE_R ) then
       ABI_ERROR("Block3 must be real")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
 
@@ -1842,7 +1815,7 @@ contains
       end select
 #endif
 
-      if(l_gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+      if(xgBlockA%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
     else
 
@@ -2162,7 +2135,7 @@ contains
   !! NAME
   !! xgBlock_hegvd
 
-  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info, gpu_option)
+  subroutine xgBlock_hegvd(itype, jobz, uplo, xgBlockA, xgBlockB, xgBlockW, info)
 
     integer         , intent(in   ) :: itype
     character       , intent(in   ) :: jobz
@@ -2171,10 +2144,8 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlockB
     type(xgBlock_t) , intent(inout) :: xgBlockW
     integer         , intent(  out) :: info
-    integer         , intent(in   ), optional :: gpu_option
 
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
@@ -2190,14 +2161,10 @@ contains
       ABI_ERROR("Block3 must be real")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 
       select case(xgBlockA%space)
 
@@ -2296,7 +2263,7 @@ contains
 
       end select
 
-      if(l_gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
+      if(xgBlockA%gpu_option==ABI_GPU_KOKKOS) call gpu_device_synchronize()
 
     else
 
@@ -2556,7 +2523,7 @@ contains
   !! NAME
   !! xgBlock_trsmR
 
-  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha,xgBlockA,xgBlockB,gpu_option)
+  subroutine xgBlock_trsmR(side,uplo,transa,diag,alpha,xgBlockA,xgBlockB)
 
     character       , intent(in   ) :: side
     character       , intent(in   ) :: uplo
@@ -2565,10 +2532,8 @@ contains
     double precision, intent(in   ) :: alpha
     type(xgBlock_t) , intent(inout) :: xgBlockA
     type(xgBlock_t) , intent(inout) :: xgBlockB
-    integer         , intent(in   ), optional :: gpu_option
     complex(kind=8) :: calpha
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
@@ -2580,16 +2545,11 @@ contains
       ABI_ERROR("Not same space")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
     calpha = dcmplx(alpha,0.d0)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
@@ -2642,7 +2602,7 @@ contains
   !! NAME
   !! xgBlock_trsmC
 
-  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB,gpu_option)
+  subroutine xgBlock_trsmC(side,uplo,transa,diag,alpha, xgBlockA,xgBlockB)
 
     character      , intent(in   ) :: side
     character      , intent(in   ) :: uplo
@@ -2651,9 +2611,7 @@ contains
     complex(kind=8), intent(in   ) :: alpha
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
-    integer        , intent(in   ), optional :: gpu_option
     double precision :: tsec(2)
-    integer          :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
@@ -2665,14 +2623,9 @@ contains
       ABI_ERROR("Not same space")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
-    if (l_gpu_option == ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option == ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
         alpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
@@ -2701,16 +2654,14 @@ contains
   !! NAME
   !! xgBlock_colwiseCymax
 
-  subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB, xgBlockW, gpu_option)
+  subroutine xgBlock_colwiseCymax(xgBlockA, da, xgBlockB, xgBlockW)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlockB
     type(xgBlock_t), intent(in   ) :: xgBlockW
-    integer        , intent(in   ), optional :: gpu_option
 
     integer :: iblock
-    integer          :: l_gpu_option
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: rows,cols,jblock
@@ -2731,14 +2682,10 @@ contains
       ABI_ERROR("Must have same cols for caxmy")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU && defined HAVE_KOKKOS
 
@@ -2753,7 +2700,7 @@ contains
 
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -2899,16 +2846,14 @@ contains
   !! NAME
   !! xgBlock_colwiseMulR
 
-  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift, gpu_option)
+  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
 
     type(xgBlock_t) , intent(inout)           :: xgBlock
     double precision, intent(in   ), target   :: vec(:)
     integer,          intent(in   )           :: shift
-    integer,          intent(in   ), optional :: gpu_option
 
     integer :: rows
     integer :: iblock,irow
-    integer :: l_gpu_option
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: min_rows,cols
@@ -2919,14 +2864,7 @@ contains
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -2943,7 +2881,7 @@ contains
 
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3000,16 +2938,14 @@ contains
   !! NAME
   !! xgBlock_colwiseMulC
 
-  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift, gpu_option)
+  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
 
     type(xgBlock_t), intent(inout)           :: xgBlock
     complex(kind=8), intent(in   ), target   :: vec(:)
     integer,         intent(in   )           :: shift
-    integer,         intent(in   ), optional :: gpu_option
 
     integer :: rows
     integer :: iblock,irow
-    integer :: l_gpu_option
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols,min_rows
@@ -3019,14 +2955,7 @@ contains
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3041,7 +2970,7 @@ contains
 
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3087,14 +3016,12 @@ contains
   !! NAME
   !! xgBlock_saxpyR
 
-  subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2, gpu_option)
+  subroutine xgBlock_saxpyR(xgBlock1, da, xgBlock2)
 
     type(xgBlock_t),  intent(inout) :: xgBlock1
     double precision, intent(in   ) :: da
     type(xgBlock_t),  intent(in   ) :: xgBlock2
-    integer        ,  intent(in   ), optional :: gpu_option
 
-    integer      :: l_gpu_option
     complex(dpc) :: da_cplx
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
@@ -3113,14 +3040,9 @@ contains
       ABI_ERROR("Must have same cols for saxpy")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock1%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlock1%space)
       case (SPACE_R,SPACE_CR)
@@ -3164,14 +3086,11 @@ contains
   !! NAME
   !! xgBlock_saxpyC
 
-  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2, gpu_option)
+  subroutine xgBlock_saxpyC(xgBlock1, da, xgBlock2)
 
     type(xgBlock_t), intent(inout) :: xgBlock1
     double complex,  intent(in   ) :: da
     type(xgBlock_t), intent(in   ) :: xgBlock2
-    integer        , intent(in   ), optional :: gpu_option
-
-    integer      :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
@@ -3190,14 +3109,9 @@ contains
       ABI_ERROR("Not correct space")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlock1,xgBlock2)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlock1%gpu_option==ABI_GPU_KOKKOS .or. xgBlock2%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       call abi_gpu_xaxpy(2, xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
 #elif defined HAVE_OPENMP_OFFLOAD
@@ -3221,14 +3135,12 @@ contains
   !! NAME
   !! xgBlock_add
 
-  subroutine xgBlock_add(xgBlockA, xgBlockB, gpu_option)
+  subroutine xgBlock_add(xgBlockA, xgBlockB)
 
     type(xgBlock_t), intent(inout) :: xgBlockA
     type(xgBlock_t), intent(inout) :: xgBlockB
-    integer, intent(in), optional :: gpu_option
     integer :: col
     integer :: row
-    integer :: l_gpu_option
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: rows,cols
@@ -3246,14 +3158,9 @@ contains
       ABI_ERROR("Must have same cols for add")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
-    if (l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       cols=xgBlockB%cols
       rows=xgBlockB%rows
@@ -3333,7 +3240,7 @@ contains
   !! NAME
   !! xgBlock_colwiseNorm2
 
-  subroutine xgBlock_colwiseNorm2(xgBlock, dot, max_val, max_elt, min_val, min_elt, gpu_option)
+  subroutine xgBlock_colwiseNorm2(xgBlock, dot, max_val, max_elt, min_val, min_elt)
 
     type(xgBlock_t) , intent(in   ) :: xgBlock
     type(xgBlock_t) , intent(inout) :: dot
@@ -3341,11 +3248,9 @@ contains
     integer         , intent(  out), optional :: max_elt
     double precision, intent(  out), optional :: min_val
     integer         , intent(  out), optional :: min_elt
-    integer         , intent(in   ), optional :: gpu_option
 
     integer :: icol, ierr
     double precision,external :: ddot
-    integer      :: l_gpu_option
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: cols,rows
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
@@ -3361,14 +3266,7 @@ contains
       ABI_ERROR("error space")
     end if
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3403,7 +3301,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3506,7 +3404,7 @@ contains
         min_elt = minloc(dot%vecR(1:xgBlock%cols,1),dim=1)
       end if
 
-    end if ! if l_gpu_option==ABI_GPU_KOKKOS
+    end if ! if gpu_option==ABI_GPU_KOKKOS
 
   end subroutine xgBlock_colwiseNorm2
   !!***
@@ -3516,7 +3414,7 @@ contains
   !! NAME
   !! xgBlock_colwiseDotProduct
 
-  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt,gpu_option)
+  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
 
     type(xgBlock_t)  , intent(in   ) :: xgBlockA
     type(xgBlock_t)  , intent(in   ) :: xgBlockB
@@ -3525,11 +3423,9 @@ contains
     integer          , intent(  out), optional :: max_elt
     double precision , intent(  out), optional :: min_val
     integer          , intent(  out), optional :: min_elt
-    integer          , intent(in   ), optional :: gpu_option
     integer :: icol
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
-    integer :: l_gpu_option
 
 #if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined(FC_NVHPC) || defined(FC_CRAY)
     integer :: rows,cols,ii
@@ -3538,14 +3434,9 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
 #endif
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3594,7 +3485,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       rows = xgBlockA%rows; cols = xgBlockA%cols
@@ -3762,7 +3653,7 @@ contains
   !! xgBlock_colwiseDivision
 
   subroutine xgBlock_colwiseDivision(xgBlockA, xgBlockB, divResult, &
-    & max_val, max_elt, min_val, min_elt, gpu_option)
+    & max_val, max_elt, min_val, min_elt)
 
     type(xgBlock_t) ,      intent(in   )           :: xgBlockA
     type(xgBlock_t) ,      intent(in   )           :: xgBlockB
@@ -3771,10 +3662,8 @@ contains
     integer, dimension(2), intent(inout), optional, target :: max_elt
     double precision,      intent(inout), optional :: min_val
     integer, dimension(2), intent(inout), optional, target :: min_elt
-    integer,               intent(in   ), optional :: gpu_option
 
     integer :: irow
-    integer :: l_gpu_option
 
 #if defined HAVE_GPU
     ! TODO: evaluate if total_size should be a 64 bit integer, i.e.
@@ -3787,14 +3676,9 @@ contains
 #endif
 #endif
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
+    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
@@ -3846,7 +3730,7 @@ contains
       ! input parameter file
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
@@ -3974,15 +3858,13 @@ contains
   !! NAME
   !! xgBlock_scaleR
 
-  subroutine xgBlock_scaleR(xgBlock, val, inc, gpu_option)
+  subroutine xgBlock_scaleR(xgBlock, val, inc)
 
     type(xgBlock_t) , intent(inout)           :: xgBlock
     double precision, intent(in   )           :: val
     integer         , intent(in   )           :: inc
-    integer         , intent(in   ), optional :: gpu_option
 
     integer      :: i
-    integer      :: l_gpu_option = ABI_GPU_DISABLED
     complex(dpc) :: valc
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -3992,14 +3874,7 @@ contains
 
     valc = dcmplx(val,0.0_dp)
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -4093,24 +3968,15 @@ contains
   !! NAME
   !! xgBlock_scaleC
 
-  subroutine xgBlock_scaleC(xgBlock, val, inc, gpu_option)
+  subroutine xgBlock_scaleC(xgBlock, val, inc)
 
     type(xgBlock_t), intent(inout)           :: xgBlock
     complex(kind=8), intent(in   )           :: val
     integer        , intent(in   )           :: inc
-    integer        , intent(in   ), optional :: gpu_option
 
     integer :: i
-    integer :: l_gpu_option
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
@@ -4128,7 +3994,7 @@ contains
       end if
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined(HAVE_GPU) && defined(HAVE_OPENMP_OFFLOAD)
       if ( xgBlock%ldim .eq. xgBlock%rows ) then
@@ -4220,6 +4086,23 @@ contains
     end if
 
   end subroutine xgBlock_check
+  !!***
+
+  !!****f* m_xg/xgBlock_check_gpu_option
+  !!
+  !! NAME
+  !! xgBlock_check_gpu_option
+
+  subroutine xgBlock_check_gpu_option(X, Y)
+
+    type(xgBlock_t) , intent(in) :: X
+    type(xgBlock_t) , intent(in) :: Y
+
+    if (X%gpu_option/=Y%gpu_option) then
+      ABI_ERROR('X%gpu_option /= Y%gpu_option')
+    end if
+
+  end subroutine xgBlock_check_gpu_option
   !!***
 
   !!****f* m_xg/xgBlock_copy_to_gpu
@@ -4356,13 +4239,11 @@ contains
   !! NAME
   !! xgBlock_zero
 
-  subroutine xgBlock_zero(xgBlock, gpu_option)
+  subroutine xgBlock_zero(xgBlock)
 
     type(xgBlock_t), intent(inout) :: xgBlock
-    integer        , intent(in   ), optional :: gpu_option
 
     integer :: i
-    integer :: l_gpu_option
 #if defined HAVE_GPU
     integer(C_SIZE_T) :: byte_count
 #endif
@@ -4373,14 +4254,7 @@ contains
     integer :: rows,cols,iblock,jblock
 #endif
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
-    if (l_gpu_option==ABI_GPU_KOKKOS) then
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU && defined HAVE_KOKKOS
       select case(xgBlock%space)
@@ -4393,7 +4267,7 @@ contains
       end select
 #endif
 
-    else if (l_gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
 
 #if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -4662,15 +4536,13 @@ contains
   !! NAME
   !! xgBlock_print
 
-  subroutine xgBlock_print(xgBlock,outunit, gpu_option)
+  subroutine xgBlock_print(xgBlock,outunit)
 
     type(xgBlock_t), intent(in) :: xgBlock
     integer, intent(in) :: outunit
-    integer,optional :: gpu_option
     integer :: i, j
     character(len=4) :: ccols
     character(len=50) :: fstring
-    integer :: l_gpu_option
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     complex(dpc), pointer :: xgBlock__vecC(:,:)
@@ -4678,17 +4550,10 @@ contains
     integer :: rows, cols
 #endif
 
-    ! if optional parameter is present, use it
-    ! else use default value, i.e. don't use GPU
-    l_gpu_option = ABI_GPU_DISABLED
-    if (present(gpu_option)) then
-      l_gpu_option = gpu_option
-    end if
-
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if (l_gpu_option==ABI_GPU_OPENMP) then
+      if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
         xgBlock__vecR => xgBlock%vecR
         !$OMP TARGET UPDATE FROM(xgBlock__vecR)
       end if
@@ -4701,7 +4566,7 @@ contains
       end do
     case (SPACE_C)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-      if (l_gpu_option==ABI_GPU_OPENMP) then
+      if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
         xgBlock__vecC => xgBlock%vecC
         !$OMP TARGET UPDATE FROM(xgBlock__vecC)
       end if

@@ -208,7 +208,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
  if ( l_istwf == 2 ) then ! Real only
    ! Scale cg
-   call xgBlock_scale(xgx0,sqrt2,1,gpu_option=gs_hamk%gpu_option)
+   call xgBlock_scale(xgx0,sqrt2,1)
    ! This is possible since the memory in cg and xgx0 is the same
    ! Don't know yet how to deal with this with xgBlock
    if(l_mpi_enreg%me_g0 == 1) then
@@ -260,7 +260,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  ! Scale back
  if(l_istwf == 2) then
-   call xgBlock_scale(xgx0,inv_sqrt2,1,gpu_option=gs_hamk%gpu_option)
+   call xgBlock_scale(xgx0,inv_sqrt2,1)
    if(l_mpi_enreg%me_g0 == 1) then
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -385,7 +385,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !Scale back cg
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,inv_sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
@@ -426,8 +426,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X ,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
-   call xgBlock_scale(AX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X ,sqrt2,1)
+   call xgBlock_scale(AX,sqrt2,1)
 
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -465,7 +465,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
      end if
    end if
    if(l_paw) then
-     call xgBlock_scale(BX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(BX,sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -492,21 +492,20 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if ! l_paw
  end if ! l_istwf==2
 
- if ( .not. l_paw ) call xgBlock_copy(X,BX,gpu_option=l_gs_hamk%gpu_option)
+ if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
 end subroutine getghc_gsc1
 
- subroutine precond(W,gpu_option)
+ subroutine precond(W)
    use m_xg, only : xg_t, xgBlock_colwiseMul
    type(xgBlock_t), intent(inout) :: W
-   integer,intent(in) :: gpu_option
    integer :: ispinor
    !integer :: cplx
 
    ! precondition resid_vec
    do ispinor = 1,l_nspinor
      !do cplx = 1, l_icplx
-     call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1),gpu_option=gpu_option)
+     call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1))
       !end do
    end do
 

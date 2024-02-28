@@ -496,10 +496,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    end subroutine getBm1X
  end interface
  interface
-   subroutine pcond(W, gpu_option)
+   subroutine pcond(W)
      use m_xg, only : xgBlock_t
      type(xgBlock_t), intent(inout)           :: W
-     integer        , intent(in   ), optional :: gpu_option
    end subroutine pcond
  end interface
 
@@ -718,19 +717,19 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  call timab(tim_residu, 1, tsec)
  if (chebfi%paw) then
-   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self,gpu_option=chebfi%gpu_option)
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
  else
-   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self,gpu_option=chebfi%gpu_option)
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
  end if
 
 ! call timab(tim_pcond,1,tsec)
- call pcond(chebfi%AX%self,gpu_option=chebfi%gpu_option)
+ call pcond(chebfi%AX%self)
 ! call timab(tim_pcond,2,tsec)
 
- call xgBlock_colwiseNorm2(chebfi%AX%self, residu, gpu_option=chebfi%gpu_option)
+ call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
- call xgBlock_copy(chebfi%X,X0,1, 1, chebfi%gpu_option)
+ call xgBlock_copy(chebfi%X,X0)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
@@ -803,16 +802,13 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
    call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, &
-   & gpu_option=chebfi%gpu_option)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self)
 
 !PAW
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, &
-   & gpu_option=chebfi%gpu_option)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self)
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
-   & maxeig, maxeig_pos, mineig, mineig_pos, &
-   & gpu_option=chebfi%gpu_option)
+   & maxeig, maxeig_pos, mineig, mineig_pos)
 
  call xg_free(Results1)
  call xg_free(Results2)
@@ -876,24 +872,24 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
-   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1, chebfi%gpu_option)
+   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next)
  end if
 
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
- call xgBlock_scale(chebfi%xXColsRows, center, 1, chebfi%gpu_option) !scale by center
+ call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
- call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows, chebfi%gpu_option)
+ call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1, chebfi%gpu_option) !counter scale by 1/center
+ call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by 1/center
 
  if (iline == 0) then
-   call xgBlock_scale(chebfi%X_next, one_over_r, 1, chebfi%gpu_option)
+   call xgBlock_scale(chebfi%X_next, one_over_r, 1)
  else
-   call xgBlock_scale(chebfi%X_next, two_over_r, 1, chebfi%gpu_option)
+   call xgBlock_scale(chebfi%X_next, two_over_r, 1)
 
-   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev, chebfi%gpu_option)
+   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
  end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -1007,12 +1003,12 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
     call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
     call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
 
-    call xgBlock_scale(X_part, 1/ampfactor, 1, chebfi%gpu_option)
-    call xgBlock_scale(AX_part, 1/ampfactor, 1, chebfi%gpu_option)
+    call xgBlock_scale(X_part, 1/ampfactor, 1)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1)
 
     if(chebfi%paw) then
       call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-      call xgBlock_scale(BX_part, 1/ampfactor, 1, chebfi%gpu_option)
+      call xgBlock_scale(BX_part, 1/ampfactor, 1)
     end if
   end do
 
