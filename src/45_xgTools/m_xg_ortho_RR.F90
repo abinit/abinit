@@ -370,7 +370,7 @@ module m_xg_ortho_RR
 
     !FIXME Avoid those transfers
     if ( info == 0 ) then
-      call xg_init(subB,Xspace,spacedim,blockdim,gpu_option=gpu_option)
+      call xg_init(subB,Xspace,spacedim,blockdim,comm=comm(X),gpu_option=gpu_option)
 
       !/* Easy basic solution */
       !/* Compute first part of X here */
