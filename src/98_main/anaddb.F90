@@ -67,8 +67,8 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
- use m_ddb_flexo
- use m_ddb_magpen
+ use m_ddb_flexo,      only : ddb_flexo
+ use m_ddb_magpen,     only : ddb_magpen,ddb_omega_interpol
  use m_lwf,            only : run_lattice_wannier
 
  implicit none
@@ -250,6 +250,11 @@ program anaddb
    call ddb_magpen(ddb, ddb_lw, inp%magpen, inp%mpatpol, inp%mpdir, mpert, & 
  & inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp,    &
  & Crystal%xred)
+
+   if (inp%omegaflag==1) then
+     call ddb_omega_interpol(Crystal%amu,ddb,filnam(8),inp%magpen,inp%mpatpol,inp%mpdir,mpert,inp%mpopt,natom, &
+   & inp%nomega,ntypat,inp%omegamax,inp%omegamin,inp%prtvol,1,Crystal%typat,Crystal%ucvol,Crystal%xred)
+   end if
  end if
 
  ! Acoustic Sum Rule

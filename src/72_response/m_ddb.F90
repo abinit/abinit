@@ -1801,8 +1801,10 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      ! Examine the symmetries of the q wavevector
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)
 
-!TMP: Deactivate TRS (MR)
-     timrev=0
+     ! Deactuvate TRS for finite-omega calculations
+     if (any(ddb%omega(:,iblok) > tol8)) then
+       timrev=0
+     end if
 
      nsize=3*mpert*3*mpert
      ABI_MALLOC(tmpflg,(3,mpert,3,mpert,1,1))
@@ -4298,16 +4300,17 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 !Local variables -------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ii, iddb, ddbun, ddbun2
+ integer,parameter :: cvrsio9_new=20240201
+ integer :: ii, iddb, ddbun, ddbun2, ddbvsn
  integer :: dimekb, matom, mband, mblok, mkpt
  integer :: msize, mtypat, lmnmax, usepaw, mblktyp, msym, mpert
  integer :: nblok, iblok, iblok1, iblok2
- integer :: tmerge, nq
+ integer :: tmerge, nq, nw
  integer :: comm
  logical :: eig2d
  integer,parameter :: prtvol=0, brav=1
- real(dp),parameter :: qtol=2.0d-8
- real(dp) :: diff
+ real(dp),parameter :: qtol=2.0d-8, wtol=2.0d-8
+ real(dp) :: diff,sdiff
  character(len=500) :: msg
  type(ddb_type) :: ddb, ddb2
  type(ddb_hdr_type) :: ddb_hdr, ddb_hdr2
@@ -4400,6 +4403,7 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    call ddb_hdr2%open_read(filenames(iddb), ddbun, comm, &
                           matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
                           msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+   ddbvsn=ddb_hdr2%ddb_version
    close(ddbun)
 
    ! If PAW, we need to call %compare for its side effects.
@@ -4467,6 +4471,17 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
              diff = ddb%qpt(3+3*(ii-1),iblok1)/ddb%nrm(ii,iblok1) - ddb2%qpt(3+3*(ii-1),iblok2)/ddb2%nrm(ii,iblok2)
              if (abs(diff) > qtol) tmerge=0
            end do ! ii
+         end if
+
+         ! Compare the frequencies
+         if(ddbvsn >= cvrsio9_new)then
+           nw=nq
+           if(nw/=0)then
+             do ii=1,nw
+               sdiff=ddb%omega(ii,iblok1)-ddb2%omega(ii,iblok2)
+               if (abs(sdiff) > wtol) tmerge=0
+             end do
+           end if
          end if
        end if
 
