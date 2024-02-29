@@ -255,8 +255,10 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
      ABI_BUG(msg)
    end if
    if (ipert>0.and.paw_an(1)%has_vxctau==1.and.usekden==1) then
-     msg='computation of vxctau not compatible with RF (ipert>0)!'
-     ABI_BUG(msg)
+      if (ipert .NE. natom+1) then
+        msg='computation of vxctau not compatible with RF (ipert>0)!'
+        ABI_BUG(msg)
+     end if
    end if
    if (ipert>0.and.paw_an(1)%has_vhartree==1) then
      msg='computation of vhartree not compatible with RF (ipert>0)!'
