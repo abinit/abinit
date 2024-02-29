@@ -122,7 +122,6 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
  complex(dpc), allocatable :: muorb
  complex(dpc), allocatable :: muspin
  complex(dpc), allocatable :: muzeem
- character(len=fnlen) :: fname
 ! arrays
  real(dp), allocatable :: docc(:,:)
  real(dp), allocatable, target :: gtmp(:,:), levels_ctqmc(:) !modif
