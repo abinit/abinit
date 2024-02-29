@@ -3677,6 +3677,7 @@ contains
 #endif
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,divResult)
 
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
