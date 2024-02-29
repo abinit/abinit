@@ -1099,7 +1099,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  type(hscr_t) :: Hscr
 !arrays
  integer :: ng0sh_opt(3),val_idx(Dtset%nsppol)
- integer,allocatable :: npwarr(:),val_indeces(:,:),nlmn_atm(:)
+ integer,allocatable :: npwarr(:),val_indices(:,:),nlmn_atm(:)
  real(dp) :: qpt_bz(3),minmax_tene(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
@@ -1544,19 +1544,19 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  call ebands_report_gap(ks_ebands,header=" KS band structure",unit=std_out,mode_paral="COLL")
 
- ABI_MALLOC(val_indeces,(ks_ebands%nkpt,ks_ebands%nsppol))
- val_indeces = ebands_get_valence_idx(ks_ebands)
+ ABI_MALLOC(val_indices,(ks_ebands%nkpt,ks_ebands%nsppol))
+ val_indices = ebands_get_valence_idx(ks_ebands)
 
  do spin=1,ks_ebands%nsppol
-   val_idx(spin) = val_indeces(1,spin)
+   val_idx(spin) = val_indices(1,spin)
    write(msg,'(a,i2,a,i0)')" For spin : ",spin," val_idx ",val_idx(spin)
    call wrtout(std_out,msg)
-   if ( ANY(val_indeces(1,spin) /= val_indeces(:,spin)) ) then
+   if ( ANY(val_indices(1,spin) /= val_indeces(:,spin)) ) then
      ABI_ERROR("BSE code does not support metals")
    end if
  end do
 
- ABI_FREE(val_indeces)
+ ABI_FREE(val_indices)
  !
  ! === Create the BSE header ===
  call hdr_init(ks_ebands,codvsn,Dtset,Hdr_bse,Pawtab,pertcase0,Psps,wvl)
@@ -1625,7 +1625,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  ! TODO generalize the code to account for this unlikely case.
  !if (Dtset%nsppol==2) then
- !  ABI_CHECK(BSp%homo == val_idx(2),"Different valence indeces for spin up and down")
+ !  ABI_CHECK(BSp%homo == val_idx(2),"Different valence indices for spin up and down")
  !end if
 
  !BSp%lumo = BSp%homo + 1
