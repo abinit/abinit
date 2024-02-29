@@ -1551,7 +1551,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    val_idx(spin) = val_indices(1,spin)
    write(msg,'(a,i2,a,i0)')" For spin : ",spin," val_idx ",val_idx(spin)
    call wrtout(std_out,msg)
-   if ( ANY(val_indices(1,spin) /= val_indeces(:,spin)) ) then
+   if ( ANY(val_indices(1,spin) /= val_indices(:,spin)) ) then
      ABI_ERROR("BSE code does not support metals")
    end if
  end do
