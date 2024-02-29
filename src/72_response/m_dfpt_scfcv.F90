@@ -407,7 +407,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: eta_mq,etotal_mq,evar_mq,omega_mq,zeemfac
+ real(dp) :: etotal_mq,evar_mq,omega_mq,zeemfac
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -723,7 +723,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  eta=dtset%rfeta
  if (.not.kramers_deg) then
    omega_mq=-dtset%rfomega
-   eta_mq=dtset%rfeta
    qphon_mq(:)=-qphon(:)
  end if
 
@@ -1003,7 +1002,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
-&     eta=eta_mq,omega=omega_mq) !optional arguments for finite-w calculation
+&     eta=eta,omega=omega_mq) !optional arguments for finite-w calculation
 
      do ifft=1,nfftf
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
