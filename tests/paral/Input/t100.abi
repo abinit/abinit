@@ -113,12 +113,11 @@ jpawu2      0.84 eV  # Values of J
 #%% [setup]
 #%% executable = abinit
 #%% [paral_info]
-#%% nprocs_to_test = 4
-#%% max_nprocs = 4
-#%% [NCPU_4]
+#%% nprocs_to_test = 10
+#%% max_nprocs = 10
+#%% [NCPU_10]
 #%% files_to_test =
-#%%   t100_MPI4.abo, tolnlines =20, tolabs =1.1e-4 , tolrel = 0.0001198, fld_options=-medium ;
-#%%   t100_MPI4o_DS2_LocalSpinSusceptibility_atom_01.dat, tolnlines =0, tolabs =0.01, tolrel = 0.01, fld_options=-medium
+#%%   t100_MPI10o_DS2_LocalSpinSusceptibility_atom_01.dat, tolnlines =0, tolabs =0.01, tolrel = 0.01, fld_options=-medium
 #%% [extra_info]
 #%% authors = F. Gendron
 #%% keywords = DMFT, CTQMC
