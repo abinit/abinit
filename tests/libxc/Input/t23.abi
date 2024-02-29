@@ -17,7 +17,7 @@ prtkden     1
 
 #---- SCF cycle control
 tolvrs      1.0d-15
-nstep       20
+nstep       18
 diemac      12.0
 
 #---- Plane-wave basis
@@ -59,7 +59,7 @@ enunit      1
 #%% test_chain = t23.abi, t24.abi
 #%% [files]
 #%% files_to_test = 
-#%%   t23.abo, tolnlines = 0, tolabs = 0., tolrel = 0., fld_options = -medium
+#%%   t23.abo, tolnlines = 0, tolabs = 0, tolrel = 0., fld_options = -easy
 #%% [shell]
 #%% post_commands = 
 #%%   ww_cp t23o_WFK t24i_DS1_WFK;

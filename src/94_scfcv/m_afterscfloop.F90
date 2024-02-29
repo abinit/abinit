@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_afterscfloop
 !! NAME
 !!  m_afterscfloop
@@ -495,8 +494,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        mband_cprj=mcprj/(dtset%nspinor*dtset%mkmem*dtset%nsppol)
        paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
        call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&       dtset%nsppol,occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
        ABI_FREE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
        call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
@@ -937,14 +936,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !print a warning to the output file (non-dummy arguments: dtset%nstep,
 !residm, diffor - infos from tollist have been saved inside )
  choice=3
- ! CP modified
- !call scprqt(choice,cpus,deltae,diffor,dtset,&
-!& eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
-!& 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
-!& moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
-!& dtset%nstep,occ,optres,prtfor,prtxml,quit,&
-!& res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-!& electronpositron=electronpositron, fock=fock)
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,&
 & dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
@@ -953,7 +944,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
 & electronpositron=electronpositron, fock=fock)
- ! End CP modified
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then
@@ -991,23 +981,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Update the content of the header (evolving variables)
  bantot=hdr%bantot
  if (dtset%positron==0) then
-   ! CP modified
-   !call hdr%update(bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  else
-   ! CP modified
-   !call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,electronpositron%e0,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  end if
 
 #ifdef HAVE_LOTF

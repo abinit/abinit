@@ -307,8 +307,10 @@ end subroutine find_maxmin_proc
 #if defined HAVE_GPU_CUDA
  else
    if(rset%tp==4)then
-     ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
-     ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     if(.not. allocated(rset%GPU%par%displs)) then
+       ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
+       ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     end if
    endif
    recpar => rset%GPU%par
 #endif

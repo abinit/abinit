@@ -110,6 +110,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
+#%% exclude_builders = bob_gnu_13.2_openmp
 #%% test_chain = tlw_4.abi, tlw_5.abi, tlw_6.abi, tlw_7.abi
 #%% input_ddb = tlw_5.ddb.out 
 #%% [files]

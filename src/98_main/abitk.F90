@@ -30,7 +30,6 @@ program abitk
 
  use defs_basis
  use m_abicore
- use m_build_info
  use m_xmpi
  use m_errors
  use m_hdr
@@ -43,6 +42,7 @@ program abitk
  use m_nctk
 
  use defs_datatypes,   only : ebands_t
+ use m_build_info,     only : abinit_version
  use m_fstrings,       only : sjoin, strcat, basename, itoa
  use m_io_tools,       only : open_file, enforce_fortran_io
  use m_specialmsg,     only : herald

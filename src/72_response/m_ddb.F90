@@ -192,6 +192,8 @@ module m_ddb
     procedure :: copy => ddb_copy
      ! Copy the object.
 
+    !procedure :: get_qptopt => ddb_get_qptopt
+
     procedure :: set_qpt => ddb_set_qpt
      ! Set the wavevector
 
@@ -1661,7 +1663,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
  ! Read the block type and number of elements
  read(nunit,*)
- read(nunit, '(a32,12x,i8)' )name,nelmts
+ read(nunit, '(a32,12x,i12)' )name,nelmts
 
  ! TODO: Replace with STRING_d2E, etc.
  ! GA: Note that older versions used the expression '2rd' instead of '2nd'
@@ -1732,7 +1734,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(6i4,2d22.14)')idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
+     read(nunit,*)idir1,ipert1,idir2,ipert2,idir3,ipert3,ar,ai
      index=idir1+                     &
        3*((ipert1-1)+mpert*((idir2-1)+ &
        3*((ipert2-1)+mpert*((idir3-1)+3*(ipert3-1)))))
@@ -1773,7 +1775,7 @@ subroutine ddb_read_block_txt(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
 
    ! Read every element
    do ii=1,nelmts
-     read(nunit,'(2i4,2d22.14)')idir1,ipert1,ar,ai
+     read(nunit,*)idir1,ipert1,ar,ai
      index=idir1 + 3*(ipert1 - 1)
      ddb%flg(index,iblok)=1
      ddb%val(1,index,iblok)=ar
@@ -1879,7 +1881,7 @@ subroutine ddb_read_d2eig(ddb, ddb_hdr, iblok_store, iblok_read, comm)
       ! Read the next block and store it
       call ddb%read_d2eig_txt(ddb_hdr%unddb, iblok_store)
 
-    else 
+    else
       write(msg, '(3a)' )&
       ! File has not beed open by ddb_hdr
       'Attempting to read from unopen file DDB.',ch10,&
@@ -2866,7 +2868,7 @@ subroutine ddb_merge_blocks(ddb1, ddb2, iblok1, iblok2)
   do ii=1,3
     ddb1%nrm(ii,iblok1) = ddb2%nrm(ii,iblok2)
   end do
-  
+
   if (is_type_d0E(blktyp)) then
      ! --------------
      ! Copy d0E block
@@ -3585,6 +3587,7 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
    ! Extraction of the dielectric tensor and the effective charges
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
+
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw
@@ -3840,7 +3843,7 @@ end function ddb_get_dchidet
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3902,7 +3905,7 @@ end function ddb_get_pel
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -3977,7 +3980,7 @@ end function ddb_get_gred
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
 !!  relaxat
-!!    0 => without relaxation of the atoms 
+!!    0 => without relaxation of the atoms
 !!    1 => with relaxation of the atoms
 !!  relaxstr
 !!    0 => without relaxed lattice constants
@@ -4163,7 +4166,7 @@ end function ddb_get_asrq0
 !!  iblock=the block index on which to act
 !!
 !! SIDE EFFECTS
-!!  ddb<type(ddb_type)>= 
+!!  ddb<type(ddb_type)>=
 !!
 !! OUTPUT
 !!
@@ -4586,19 +4589,19 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
  ! Write the block type and number of elements
  write(nunit,*)' '
  if (ddb%typ(iblok) == BLKTYP_d0E_xx) then
-   write(nunit, '(a,i8)' )' Total energy                 - # elements :',nelmts
+   write(nunit, '(a,i12)' )' Total energy                 - # elements :',nelmts
  else if (ddb%typ(iblok)==BLKTYP_d2E_ns) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (non-stat.)  - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d2E_st) then
-   write(nunit, '(a,i8)' )' 2nd derivatives (stationary) - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd derivatives (stationary) - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_xx) then
-   write(nunit, '(a,i8)' )' 3rd derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d1E_xx) then
-   write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == BLKTYP_d2eig_re) then
-   write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
  else if(ddb%typ(iblok)==BLKTYP_d3E_lw) then
-   write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
+   write(nunit, '(a,i12)' )' 3rd derivatives (long wave)  - # elements :',nelmts
  end if
 
  ! Write the 2nd derivative block
@@ -4645,7 +4648,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
                do idir1=1,3
                  ii=ii+1
                  if(ddb%flg(ii,iblok)==1)then
-                   write(nunit, '(6i4,2d22.14)' )&
+                   write(nunit, '(6i6,2d22.14)' )&
                     idir1,ipert1,idir2,ipert2,idir3,ipert3,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
                  end if
                end do
@@ -4669,7 +4672,7 @@ subroutine ddb_write_block_txt(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
        do idir1 = 1, 3
          ii = ii + 1
          if (ddb%flg(ii,iblok) == 1) then
-           write(nunit,'(2i4,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
+           write(nunit,'(2i6,2d22.14)')idir1,ipert1,ddb%val(1,ii,iblok),ddb%val(2,ii,iblok)
          end if
        end do
      end do
@@ -4846,7 +4849,7 @@ subroutine ddb_write_d2eig(ddb, ddb_hdr, iblok, comm)
 
     call ddb%write_d2eig_txt(ddb_hdr%unddb, iblok)
 
-  else 
+  else
     write(msg, '(3a)' )&
     ! File has not been opened by ddb_hdr
     'Attempting to write into unopen DDB file.',ch10,&
@@ -5233,7 +5236,7 @@ end subroutine ddb_write_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 0th order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5283,7 +5286,7 @@ end subroutine ddb_read_d0E_nc
 !!
 !! FUNCTION
 !!  Read a DDB block containing 1st order derivatives of energy.
-!!  
+!!
 !!
 !! INPUTS
 !!  ncid=netcdf identifier of a file open in reading mode.
@@ -5457,7 +5460,7 @@ subroutine ddb_read_d3E_nc(ddb, ncid, iblok, iblok_d3E)
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_values'), matrix_d3E, start=[1,1,1,1,1,1,1,iblok_d3E]))
  NCF_CHECK(nf90_get_var(ncid_d3E, nctk_idname(ncid_d3E, 'matrix_mask'), flg_d3E, start=[1,1,1,1,1,1,iblok_d3E]))
 
- 
+
  blktyp = ddb%typ(iblok) ! Save block type so it doesnt get overwritten.
 
  call ddb%set_d3matr(iblok, matrix_d3E, flg_d3E)
@@ -5835,7 +5838,7 @@ end subroutine ddb_get_d2eig
 !!
 !! OUTPUT
 !!
-!! NOTE   
+!! NOTE
 !!  Does not handle spin index. Also, sometimes, d2eig is available with flat index
 !! SOURCE
 
@@ -5890,8 +5893,8 @@ end subroutine ddb_set_d2eig
 !!  iblok=index of the block we are setting.
 !!  d2eig=the second-order derivative of eigenvalues.
 !!  flg=flag to indicate presence of a given element.
-!!  blktyp=block type 
-!!   5->real part 
+!!  blktyp=block type
+!!   5->real part
 !!   6->imaginary part (broadening)
 !!
 !! OUTPUT
@@ -6036,7 +6039,12 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%spinat, (3,dtset%natom))
  dtset%spinat(:,:) = ddb_hdr%spinat(1:3,1:ddb_hdr%matom)
 
+#ifdef FC_LLVM
+ ! LLVM 16 doesn't recognize this macro here
+ ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage) )
+#else
  ABI_REMALLOC(dtset%xred_orig, (3,dtset%natom,mxnimage))
+#endif
  dtset%xred_orig(:,:,1) = ddb_hdr%xred(1:3,1:ddb_hdr%matom)
 
  ABI_REMALLOC(dtset%ziontypat, (dtset%ntypat))
@@ -6051,7 +6059,7 @@ subroutine ddb_to_dtset(comm, dtset, filename, psps)
  ABI_REMALLOC(dtset%symafm,(dtset%nsym))
  dtset%symafm(:) = ddb_hdr%symafm(1:ddb_hdr%msym)
 
- ABI_REMALLOC(dtset%symrel, (3,3,dtset%nsym))
+ ABI_REMALLOC(dtset%symrel, (3,3,dtset%nsym) )
  dtset%symrel(:,:,:) = ddb_hdr%symrel(1:3,1:3,1:ddb_hdr%msym)
 
  ABI_REMALLOC(dtset%tnons,(3,dtset%nsym))
@@ -6556,7 +6564,7 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
  d3cart(1,:,:,:,:,:,:) = reshape(blkval(1,:),shape = (/3,mpert,3,mpert,3,mpert/))
  d3cart(2,:,:,:,:,:,:) = reshape(blkval(2,:),shape = (/3,mpert,3,mpert,3,mpert/))
 
-!Define a factor to apply if DDB file has been created with the old version of 
+!Define a factor to apply if DDB file has been created with the old version of
 !the longwave driver.
  if (ddb_version <= cvrsio8) then
    fac=-two
