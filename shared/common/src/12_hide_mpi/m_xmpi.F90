@@ -2556,13 +2556,13 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! FUNCTION
 !!  Fill table defining the distribution of the tasks according to the number of processors involved in the
-!!  calculation. For each set of indeces, the table contains the rank of the node in the MPI communicator.
+!!  calculation. For each set of indices, the table contains the rank of the node in the MPI communicator.
 !!
 !! INPUTS
 !!  nprocs=The number of processors performing the calculation in parallel.
 !!
 !! OUTPUT
-!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indeces.
+!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indices.
 !!  Tasks are distributed across the nodes in column-major order.
 !!
 !! SOURCE
@@ -4700,7 +4700,7 @@ subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my
        ii_hpk = row_glob
        jj_hpk = col_glob
        ijp_glob = row_glob + col_glob*(col_glob-1)/2  ! Index for packed form
-     else ! Exchange the indeces as (jj,ii) will be read.
+     else ! Exchange the indices as (jj,ii) will be read.
        ii_hpk = col_glob
        jj_hpk = row_glob
        ijp_glob = col_glob + row_glob*(row_glob-1)/2  ! Index for packed form
@@ -4863,7 +4863,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
        ii_hpk = row_glob - row_shift
        jj_hpk = col_glob - col_shift
-       if (jj_hpk<ii_hpk) then ! Exchange the indeces so that the symmetric is read.
+       if (jj_hpk<ii_hpk) then ! Exchange the indices so that the symmetric is read.
          swap   = jj_hpk
          jj_hpk = ii_hpk
          ii_hpk = swap
@@ -4888,7 +4888,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
        ii = row_glob - row_shift
        jj = col_glob - col_shift
 
-       if (uplo==2) then ! Exchange the indeces since the symmetric element will be read.
+       if (uplo==2) then ! Exchange the indices since the symmetric element will be read.
          swap=jj
          jj  =ii
          ii  =swap
