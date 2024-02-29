@@ -1106,6 +1106,7 @@ contains
     integer :: size2
     integer :: size
     double precision :: tsec(2)
+    integer :: l_gpu_option
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
@@ -1115,7 +1116,17 @@ contains
 
     call timab(tim_copy,1,tsec)
 
-    call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    if (xgBlockA%gpu_option==xgBLockB%gpu_option) then
+      l_gpu_option = xgBlockA%gpu_option
+    else if (xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBLockB%gpu_option==ABI_GPU_OPENMP) then
+      l_gpu_option = ABI_GPU_DISABLED
+      call xgBlock_copy_from_gpu(xgBlockB)
+    else if (xgBlockB%gpu_option==ABI_GPU_DISABLED.and.xgBLockA%gpu_option==ABI_GPU_OPENMP) then
+      l_gpu_option = ABI_GPU_DISABLED
+      call xgBlock_copy_from_gpu(xgBlockA)
+    else
+      ABI_ERROR('When xgA%gpu_option/=xgB%gpu_option, gpu_option can be only ABI_GPU_OPENMP or ABI_GPU_DISABLED')
+    end if
 
     incx = 1; if ( present(inc1) ) incx = inc1
     incy = 1; if ( present(inc2) ) incy = inc2
@@ -1131,7 +1142,7 @@ contains
     size2 = xgBlockB%LDim*xgBlockB%cols/incy ; if ( size2 * incy < xgBlockB%LDim*xgBlockB%cols ) size2 = size2+1
     size = min(size1,size2)
 
-    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+    if (l_gpu_option==ABI_GPU_KOKKOS .or. l_gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
