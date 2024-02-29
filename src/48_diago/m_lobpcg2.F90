@@ -436,7 +436,7 @@ module m_lobpcg2
 
     lobpcg%AllX0 = X0
 
-    call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=lobpcg%gpu_option)
+    call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=ABI_GPU_DISABLED)
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
@@ -523,8 +523,8 @@ module m_lobpcg2
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
 
-        if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
+          ! There is a transfer from GPU to CPU in this copy
           call xgBlock_copy(residuBlock,residu_eff%self)
           iband_min = 1 + blockdim*(iblock-1)
           iband_max = blockdim*iblock
