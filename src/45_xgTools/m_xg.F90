@@ -159,6 +159,7 @@ module m_xg
   public :: cols
   public :: rows
   public :: comm
+  public :: gpu_option
   public :: xgBlock_setComm
   private :: getClocR
   private :: getClocC
@@ -455,7 +456,7 @@ contains
     xg%normal = 'n'
     xg%cols = cols
     xg%rows = rows
-    xg%spacedim_comm = -1
+    xg%spacedim_comm = xmpi_comm_null
     xg%gpu_option = l_gpu_option
     if ( present(comm) ) xg%spacedim_comm = comm
 
@@ -641,7 +642,7 @@ contains
   !! NAME
   !! xgBlock_map
 
-  subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm)
+  subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm,gpu_option)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
     double precision, target, intent(inout) :: array(:,:)
@@ -649,6 +650,7 @@ contains
     integer   , intent(in   ) :: rows
     integer   , intent(in   ) :: cols
     integer   , optional, intent(in) :: comm
+    integer   , optional, intent(in) :: gpu_option
     integer :: fullsize
     type(c_ptr) :: cptr
 
@@ -679,6 +681,7 @@ contains
     if ( present(comm) ) xgBlock%spacedim_comm = comm
     xgBlock%gpu_option = ABI_GPU_DISABLED
     if ( xomp_target_is_present(c_loc(array)) ) xgBlock%gpu_option = ABI_GPU_OPENMP
+    if ( present(gpu_option) ) xgBlock%gpu_option = gpu_option
 
   end subroutine xgBlock_map
   !!***
@@ -1028,6 +1031,18 @@ contains
     integer :: comm
     comm = xgBlock%spacedim_comm
   end function comm
+  !!***
+
+  !!****f* m_xg/gpu_option
+  !!
+  !! NAME
+  !! gpu_option
+
+  function gpu_option(xgBlock)
+    type(xgBlock_t), intent(in) :: xgBlock
+    integer :: gpu_option
+    gpu_option = xgBlock%gpu_option
+  end function gpu_option
   !!***
 
   !!****f* m_xg/setComm
@@ -2684,6 +2699,7 @@ contains
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
+    call xgBlock_check_gpu_option(xgBlockA,da)
 
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
@@ -3435,6 +3451,7 @@ contains
 #endif
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
+    call xgBlock_check_gpu_option(xgBlockA,dot)
 
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 

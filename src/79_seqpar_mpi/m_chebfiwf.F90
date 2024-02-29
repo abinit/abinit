@@ -366,7 +366,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 #endif
 
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SQRT2)
  if ( l_istwf == 2 ) then ! Real only
@@ -388,11 +388,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Trick with C is to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
  call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 !Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 
 ! ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*l_nband_filter))
  call timab(tim_chebfiwf2,2,tsec)

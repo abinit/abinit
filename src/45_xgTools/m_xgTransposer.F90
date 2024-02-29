@@ -532,7 +532,8 @@ module m_xgTransposer
         end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
           xgTransposer%perPair*xgTransposer%nrowsColsRows,&
-          xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm)
+          xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm,&
+          gpu_option=xgTransposer%gpu_option)
       end if
     case (STATE_COLSROWS)
       ABI_ERROR("Not yet implemented")

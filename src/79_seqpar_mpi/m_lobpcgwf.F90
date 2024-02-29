@@ -205,7 +205,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  ! Local variables for lobpcg
  !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
  if ( l_istwf == 2 ) then ! Real only
    ! Scale cg
    call xgBlock_scale(xgx0,sqrt2,1)
@@ -228,19 +228,19 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
  call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(occ)
  call c_f_pointer(cptr,occ_ptr,(/ nband,1 /))
- call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
