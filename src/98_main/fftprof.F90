@@ -109,7 +109,7 @@ program fftprof
 !arrays
  integer :: ut_ngfft(18)
 #ifdef HAVE_GPU_CUDA
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
 #endif
  real(dp),parameter :: gamma_point(3) = zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)

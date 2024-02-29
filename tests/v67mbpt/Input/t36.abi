@@ -22,13 +22,13 @@ ngkpt   3 3 3
 nshiftk 1
 shiftk  0. 0. 0.
 istwfk  *1
-autoparal 1
 
 # scf
 occopt1 1
 toldfe1 1.0d-10
 nband1  8
 getwfk1 0
+autoparal1 1
 
 # nscf
 iscf2   -2
@@ -37,6 +37,7 @@ nband2   16
 tolwfr2  1.0d-12
 nstep2   30
 getwfk2  0
+autoparal2 1
 
 # QSGW loop
 getwfk     2
