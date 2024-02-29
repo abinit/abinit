@@ -1,9 +1,15 @@
 # GPU support in Abinit
 
-  IMPORTANT: GPU support is currently highly *EXPERIMENTAL* and should
-             be used by experienced developers only. If you encounter
-             any problem, please report it to Yann Pouillon before doing
-             anything else.
+  IMPORTANT: THIS PAGE IS OBSOLETE !  
+  Since  January 2024, a new GPU implementation of ABINIT is available.  
+  This page describes an old implementation that is no longer relevant.   
+  A new manual describing the installation of ABINIT on GPU is currently
+  under writing. Meanwhile, you can look at the description of the [[gpu_option]] variable.
+  
+  GPU support is currently highly *EXPERIMENTAL* and should
+  be used by experienced developers only. If you encounter
+  any problem, please report it to the developers before doing
+  anything else.
 
 ## GPU-related parameters
 

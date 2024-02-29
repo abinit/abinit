@@ -31,7 +31,7 @@ if ( not os.path.exists("configure.ac") or
  sys.exit(1)
 
 # Init
-re_cf = re.compile("\.cf$")
+re_cf = re.compile(r"\.cf$")
 re_garbage = re.compile("#")
 
 # What time is it?

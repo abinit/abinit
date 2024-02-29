@@ -30,11 +30,11 @@
 module m_multibinit_main2
   use defs_basis
   use defs_abitypes
-  use m_build_info
   use m_xmpi
   use m_xomp
   use m_abicore
   use m_errors
+  use m_build_info,         only: abinit_version, build_target
   use m_multibinit_manager, only: mb_manager_t
   
   implicit none

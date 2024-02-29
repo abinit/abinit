@@ -135,7 +135,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    prtvol = dtsets(idtset)%prtvol
 
 !  Read parallel input parameters
-   marr=max(5,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
+   marr=max(12,dtsets(idtset)%npsp,dtsets(idtset)%nimage)
    ABI_MALLOC(intarr,(marr))
    ABI_MALLOC(dprarr,(marr))
    nkpt  =dtsets(idtset)%nkpt
@@ -185,7 +185,47 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread(7)==1) dtsets(idtset)%npband=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bandpp',tread(8),'INT')
-   if(tread(8)==1) dtsets(idtset)%bandpp=intarr(1)
+   !Nband might have different values for different kpoint, but not bandpp.
+   !In this case, we just use the largest nband (mband_upper), and the input will probably fail
+   !at the bandpp check later on
+   if(tread(8)==1) then
+     dtsets(idtset)%bandpp=intarr(1)
+     ! check if nblock_lobpcg is read from the input, if so error msg
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nblock_lobpcg',tread0,'INT')
+     if (tread0==1) then
+       write(msg,'(3a)') 'Both bandpp and nblock_lobpcg are defined for the same dataset, this is confusing.',ch10,&
+         'Change the input to keep only nblock_lobpcg (preferably) or bandpp.'
+       ABI_ERROR(msg)
+     end if
+     if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+       if (mod(mband_upper,dtsets(idtset)%bandpp*dtsets(idtset)%npband)==0) then
+         dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+       else
+         write(msg,'(5a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of npband*bandpp.',ch10,&
+           'Change nband, npband or bandpp in the input.',ch10,&
+           'A simpler solution is to use nblock_lobpcg instead of bandpp.'
+         ABI_ERROR(msg)
+       end if
+     end if
+   else if (dtsets(idtset)%wfoptalg==114.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==4) then !if LOBPCG
+     if (mod(mband_upper,dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)==0) then
+       dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+     else
+       write(msg,'(3a)') 'mband_upper( =max_{kpt}(nband) ) should be a mutltiple of nblock_lobpcg*npband.',ch10,&
+         'Change nband, npband or nblock_lobpcg in the input.'
+       ABI_ERROR(msg)
+     end if
+   end if
+
+   ! Warning when using different number of bands for different kpoints (occopt=2)
+   if ( dtsets(idtset)%occopt==2 .and. dtsets(idtset)%nkpt>1 .and. &
+     & ((dtsets(idtset)%bandpp > 1) .or. (dtsets(idtset)%npband > 1)) ) then
+     write(msg, '(4a)' ) &
+       'When working with blocks of bands (bandpp>1 or npband>1),'&
+      &' the number of bands should be the same for every kpoints.',ch10,&
+      &' The run will most probably fail on a other check. If it does not fail, ignore this message.'
+     ABI_WARNING(msg)
+   end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_slk',tread(9),'INT')
    if(tread(9)==1) dtsets(idtset)%use_slk=intarr(1)
@@ -200,12 +240,20 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    if(tread0==1) dtsets(idtset)%pw_unbal_thresh=dprarr(1)
    mpi_enregs(idtset)%pw_unbal_thresh=dtsets(idtset)%pw_unbal_thresh
 
-   call intagm(dprarr,intarr,jdtset,marr,5,string(1:lenstr),'gpu_devices',tread0,'INT')
-   if(tread0==1) dtsets(idtset)%gpu_devices(1:5)=intarr(1:5)
+   call intagm(dprarr,intarr,jdtset,marr,12,string(1:lenstr),'gpu_devices',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_devices(1:12)=intarr(1:12)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_kokkos_nthrd',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_kokkos_nthrd=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_linalg_limit',tread(11),'INT')
    if(tread(11)==1) dtsets(idtset)%gpu_linalg_limit=intarr(1)
 
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nl_distrib',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_nl_distrib=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_nl_splitsize',tread0,'INT')
+   if(tread0==1) dtsets(idtset)%gpu_nl_splitsize=intarr(1)
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nphf',tread0,'INT')
    if(tread0==1) dtsets(idtset)%nphf=intarr(1)
@@ -370,11 +418,12 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    --IF CUDA AND RECURSION:ONLY BAND PARALLELISATION
    if(dtsets(idtset)%tfkinfunc==2 .and. nproc/=1)then
      dtsets(idtset)%npband = dtsets(idtset)%npband*dtsets(idtset)%np_spkpt*dtsets(idtset)%npspinor*dtsets(idtset)%npfft
+     dtsets(idtset)%bandpp=1
      dtsets(idtset)%np_spkpt = 1
      dtsets(idtset)%npfft = 1
      dtsets(idtset)%npspinor = 1
      write(msg, '(5a,i6,a)' )&
-     'If HAVE_GPU_CUDA and recursion are used ',ch10,&
+     'If the recursion scheme is used (tfkinfunc==2),',ch10,&
      'only the band parallelisation is active, we set:',ch10,&
      'npfft= 1, np_spkpt= 1, npband=',dtsets(idtset)%npband,' .'
      ABI_WARNING(msg)
@@ -491,9 +540,15 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
    !When using chebfi, the number of blocks is equal to the number of processors
    if((dtsets(idtset)%wfoptalg == 1) .or. (dtsets(idtset)%wfoptalg == 111)) then
      !Nband might have different values for different kpoint, but not bandpp.
-     !In this case, we just use the largest nband, and the input will probably fail
+     !In this case, we just use the largest nband (mband_upper), and the input will probably fail
      !at the bandpp check later on
      dtsets(idtset)%bandpp = mband_upper / dtsets(idtset)%npband
+     if(tread(8)==1) then
+       write(msg, '(a,i8,3a)' ) &
+       'bandpp has been internally set to ',dtsets(idtset)%bandpp,'.',ch10,&
+       'Indeed, there is no need to specify bandpp in the input when using chebfi (wfoptalg=1,111).'
+       ABI_COMMENT(msg)
+     end if
    end if
 
    !Check parallelization in case of RTTDDFT
@@ -771,9 +826,9 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if (mpi_enregs(idtset)%nproc_cell>0) then
          if(mpi_enregs(idtset)%paral_kgb == 1) then
 
-           if((dtsets(idtset)%use_gpu_cuda==1).and.(mpi_enregs(idtset)%nproc_fft/=1))then
+           if((dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED).and.(mpi_enregs(idtset)%nproc_fft/=1))then
              write(msg,'(3a,i0)') &
-             'When use_gpu_cuda is on, the number of FFT processors, npfft, must be 1',ch10,&
+             'When the use of GPU is on, the number of FFT processors, npfft, must be 1',ch10,&
              'However, npfft=',mpi_enregs(idtset)%nproc_fft
              ABI_ERROR(msg)
            end if
@@ -884,7 +939,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
    call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,ecut_eff,gmet,kpt,me_fft,mgfft,nfft,&
 &   ngfft,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
-&   use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
+&   gpu_option=dtsets(idtset)%gpu_option)
 
    dtsets(idtset)%ngfft(:)=ngfft(:)
    dtsets(idtset)%mgfft=mgfft
@@ -941,7 +996,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      call getng(dtsets(idtset)%bxctmindg,dtsets(idtset)%chksymtnons,&
 &     ecutdg_eff,gmet,kpt,me_fft,mgfftdg,&
 &     nfftdg,ngfftdg,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,ngfftc,&
-&     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
+&     gpu_option=dtsets(idtset)%gpu_option)
 
      dtsets(idtset)%ngfftdg(:)=ngfftdg(:)
      dtsets(idtset)%mgfftdg=mgfftdg
@@ -970,7 +1025,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
 !  In case of the use of a GPU (Cuda), some defaults can change
 !  according to a threshold on matrix sizes
-   if (dtsets(idtset)%use_gpu_cuda==1.or.dtsets(idtset)%use_gpu_cuda==-1) then
+   if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.or.dtsets(idtset)%gpu_option==ABI_GPU_UNKNOWN) then
      if (optdriver==RUNL_GSTATE.or.optdriver==RUNL_GWLS) then
        vectsize=dtsets(idtset)%mpw*dtsets(idtset)%nspinor/dtsets(idtset)%npspinor
        if (all(dtsets(idtset)%istwfk(:)==2)) vectsize=2*vectsize
@@ -979,6 +1034,11 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        if ((vectsize*blocksize**2)>=dtsets(idtset)%gpu_linalg_limit) then
          if (.not.wfoptalg_read) then
            dtsets(idtset)%wfoptalg=14
+           if (tread(8)==1) then ! bandpp read, so set nblock_lobpcg
+             dtsets(idtset)%nblock_lobpcg=mband_upper/(dtsets(idtset)%bandpp*dtsets(idtset)%npband)
+           else ! bandpp set by nblock_lobpcg
+             dtsets(idtset)%bandpp=mband_upper/(dtsets(idtset)%nblock_lobpcg*dtsets(idtset)%npband)
+           end if
            if (.not.fftalg_read) then
              dtsets(idtset)%ngfft(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
              if (usepaw==1) dtsets(idtset)%ngfftdg(7) = fftalg_for_npfft(dtsets(idtset)%npfft)
@@ -1274,7 +1334,7 @@ end subroutine mpi_setup
    end if
    npf_max=min(npf_max,ngmin(2))
    ! Deactivate MPI FFT parallelism for GPU
-   if (dtset%use_gpu_cuda==1) then
+   if (dtset%gpu_option/=ABI_GPU_DISABLED) then
      npf_min=1;npf_max=1
    end if
    !Deactivate MPI FFT parallelism for GPU
@@ -1343,7 +1403,11 @@ end subroutine mpi_setup
    end if
 
 !  >> banddp level
-   bpp_min=max(1,dtset%bandpp)
+   if (tread(8)==1) then
+     bpp_min = dtset%bandpp
+   else
+     bpp_min = 1
+   end if
    bpp_max=mband
    if (wf_algo_global==ALGO_LOBPCG_OLD) bpp_max=max(4,nint(mband/10.)) ! reasonable bandpp max
    if (tread(8)==1) bpp_max=dtset%bandpp
@@ -1853,7 +1917,7 @@ end subroutine mpi_setup
      ii=isort(jj)
      npf=my_distp(4,ii);npb=my_distp(5,ii);bpp=my_distp(6,ii)
      if ((npb*npf*bpp>1).and.(npf*npb<=mpi_enreg%nproc)) then
-       use_linalg_gpu=dtset%use_gpu_cuda
+       use_linalg_gpu=dtset%gpu_option
        call compute_kgb_indicator(acc_kgb,bpp,xmpi_world,mband,mpw,npb,npf,np_slk,use_linalg_gpu)
        if (autoparal/=2) then
          my_distp(9,ii)=np_slk
@@ -1862,7 +1926,7 @@ end subroutine mpi_setup
 !        No use of GPU: htgspw_01.outuge value ~2  *vectsize*blocksize**2 tested
 !        Use of GPU:    tiny value ~0.5*vectsize*blocksize**2 tested
          my_distp(10,ii)=2*dtset%mpw*(npb*bpp)**2/npf
-         if (use_linalg_gpu==1) my_distp(10,ii)=my_distp(10,ii)/4
+         if (use_linalg_gpu/=ABI_GPU_DISABLED) my_distp(10,ii)=my_distp(10,ii)/4
        end if
        if (abs(acc_k)<=tol12) acc_k=acc_kgb ! Ref value : the first one computed
 !      * Weight (corrected by 10% of the computed ratio)
@@ -1909,6 +1973,9 @@ end subroutine mpi_setup
    dtset%npfft    = my_distp(4,icount)
    dtset%npband   = my_distp(5,icount)
    dtset%bandpp   = my_distp(6,icount)
+   if (dtset%wfoptalg==114.or.dtset%wfoptalg==14.or.dtset%wfoptalg==4) then !if LOBPCG
+     dtset%nblock_lobpcg = mband / (dtset%npband*dtset%bandpp)
+   end if
    if (tread(1)==0)  dtset%paral_kgb= merge(0,1,my_algo(icount)==ALGO_CG)
 !  The following lines are mandatory : the DFT+DMFT must use ALL the
 !  available procs specified by the user. So nproc1=nproc.
@@ -1992,7 +2059,7 @@ end subroutine finddistrproc
 !!  mband=maximum number of plane waves
 !!  npband=number of processor 'band'
 !!  npfft = number of processor 'fft'
-!!  uselinalggpu=indicate if we also test the gpu linear algebra
+!!  use_linalg_gpu=indicate if we also test the gpu linear algebra (compatible only with the legacy 2013 GPU code)
 !!
 !! OUTPUT
 !!  acc_kgb = indicator of performance
@@ -2006,14 +2073,14 @@ end subroutine finddistrproc
 !!
 !! SOURCE
 
-subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,npslk,uselinalggpu)
+subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,npslk,use_linalg_gpu)
 
  use m_abi_linalg
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bandpp,glb_comm,mband,mpw,npband,npfft
- integer,intent(inout) :: npslk,uselinalggpu
+ integer,intent(inout) :: npslk,use_linalg_gpu
  real(dp),intent(inout) :: acc_kgb
 
 !Local variables-------------------------------
@@ -2089,7 +2156,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !  Loop over np_slk values
    islk1=1
 #ifdef HAVE_LINALG_MAGMA
-   islk1=1-uselinalggpu
+   if (use_linalg_gpu==ABI_GPU_LEGACY) islk1=0
 #endif
    do islk=islk1,np_slk_max
 
@@ -2148,7 +2215,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !      Call to abi_xhegv
        time_xeigen=time_xeigen-abi_wtime()
        call abi_xhegv(1,'v','u',bigorder,grama,bigorder,gramb,bigorder,eigen,&
-&       x_cplx=2,use_slk=use_slk,use_gpu=use_lapack_gpu)
+&       x_cplx=2,use_slk=use_slk,use_gpu_magma=use_lapack_gpu)
        time_xeigen=time_xeigen+abi_wtime()
 
      end do ! iter
@@ -2156,7 +2223,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !    Finalize linalg parameters for this np_slk value
 !    For the last np_slk value, everything is finalized
 !    For the previous np_slk values, only Scalapack parameters are updated
-     call abi_linalg_finalize()
+     call abi_linalg_finalize(use_lapack_gpu)
 
      time_xortho= time_xortho*mband/blocksize
      time_xeigen= time_xeigen*mband/blocksize
@@ -2178,7 +2245,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !  Final values to be sent to others process
    acc_kgb=min_ortho+four*min_eigen
    npslk=max(np_slk_best,1)
-   uselinalggpu=keep_gpu
+   use_linalg_gpu=keep_gpu
 
    ABI_FREE(blockvectorx)
    ABI_FREE(blockvectorbx)
@@ -2196,7 +2263,7 @@ subroutine compute_kgb_indicator(acc_kgb,bandpp,glb_comm,mband,mpw,npband,npfft,
 !Broadcast of results to be sure every process has them
  call xmpi_bcast(acc_kgb,0,glb_comm,ierr)
  call xmpi_bcast(npslk,0,glb_comm,ierr)
- call xmpi_bcast(uselinalggpu,0,glb_comm,ierr)
+ call xmpi_bcast(use_linalg_gpu,0,glb_comm,ierr)
 
 #ifndef DEBUG_MODE
  ABI_UNUSED(msg)

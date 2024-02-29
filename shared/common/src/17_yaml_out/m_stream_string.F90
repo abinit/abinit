@@ -89,7 +89,7 @@ subroutine stream_flush_unit(stream, unit, newline, firstchar)
     new_s = prep_char(s, firstchar)
     write(unit, "(a)")trim(new_s)
   else
-#ifdef FC_NVHPC
+#if defined FC_NVHPC || defined FC_LLVM
     write(unit, "(a)") s
 #else
     write(unit, "(a)") trim(s)

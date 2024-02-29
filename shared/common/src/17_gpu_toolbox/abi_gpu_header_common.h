@@ -15,7 +15,8 @@
 extern "C" {
 #endif
 
-  void abi_cabort();
+    void abi_cabort();
+    void check_gpu_mem_(const char* str);
 
 #ifdef __cplusplus
 }

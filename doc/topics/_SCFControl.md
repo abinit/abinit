@@ -21,9 +21,11 @@ tolerance on some measure of the convergence. The user must choose among
   * [[tolwfr]] is interesting for non-self-consistent calculations.
   * For molecular dynamics (which rely on the accuracy of forces), one might prefer [[tolrff]].
 
+Note that [[tolwfr]] (which controls the precision of wavefunctions), can be coupled with the other tolerances (which control the precision of physical quantities and/or the SCF loop).
+
 Some input variables relate to the solution of the Schrodinger equation.
 However, usually the related iterative techniques are well-tuned, so that
-these input variables ([[nline]] and [[tolrde]]) are usually used only by
+these input variables ([[nline]], [[tolrde]] or [[tolwfr_diago]]) are usually used only by
 experts. However, in cases where the convergence is difficult, it might be
 interesting to test improving them, as well as modifying [[nnsclo]].
 

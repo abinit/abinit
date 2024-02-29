@@ -24,6 +24,7 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_enable=""
   sd_gpu_init="unknown"
   sd_gpu_ok="unknown"
+  sd_gpu_prefix=""
 
   # Set adjustable parameters
   sd_gpu_options="$1"
@@ -71,13 +72,14 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_enable="${withval}"
         sd_gpu_init="yon"
       else
+        sd_gpu_prefix="${withval}"
         sd_gpu_enable="yes"
         sd_gpu_init="dir"
       fi],
     [ sd_gpu_enable="${sd_gpu_enable_def}"; sd_gpu_init="def"])
 
   # Declare flavor option
-  sd_gpu_flavors_supported="cuda-double cuda-single"
+  sd_gpu_flavors_supported="cuda-double cuda-single hip-double"
   AC_ARG_WITH([gpu-flavor],
     [AS_HELP_STRING(
       [--with-gpu-flavor],
@@ -167,16 +169,6 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_fcflags="${sd_gpu_fcflags_def}"
         sd_gpu_ldflags="${sd_gpu_ldflags_def}"
         sd_gpu_libs="${sd_gpu_libs_def}"
-        test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
-        test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
-        if test "${sd_gpu_enable_cxx}" = "yes"; then
-          test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
-        fi
-        if test "${sd_gpu_enable_fc}" = "yes"; then
-          test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
-        fi
-        test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
-        test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
         ;;
 
       *)
@@ -184,6 +176,17 @@ AC_DEFUN([SD_GPU_INIT], [
         ;;
 
     esac
+
+    test ! -z "${GPU_CPPFLAGS}" && sd_gpu_cppflags="${GPU_CPPFLAGS}"
+    test ! -z "${GPU_CFLAGS}" && sd_gpu_cflags="${GPU_CFLAGS}"
+    if test "${sd_gpu_enable_cxx}" = "yes"; then
+      test ! -z "${GPU_CXXFLAGS}" && sd_gpu_cxxflags="${GPU_CXXFLAGS}"
+    fi
+    if test "${sd_gpu_enable_fc}" = "yes"; then
+      test ! -z "${GPU_FCFLAGS}" && sd_gpu_fcflags="${GPU_FCFLAGS}"
+    fi
+    test ! -z "${GPU_LDFLAGS}" && sd_gpu_ldflags="${GPU_LDFLAGS}"
+    test ! -z "${GPU_LIBS}" && sd_gpu_libs="${GPU_LIBS}"
 
   fi
 
@@ -196,6 +199,7 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_SUBST(sd_gpu_options)
   AC_SUBST(sd_gpu_enable_def)
   AC_SUBST(sd_gpu_policy)
+  AC_SUBST(sd_gpu_prefix)
   AC_SUBST(sd_gpu_status)
   AC_SUBST(sd_gpu_enable)
   AC_SUBST(sd_gpu_init)
