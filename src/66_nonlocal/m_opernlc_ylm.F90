@@ -1352,7 +1352,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
         end do
       end do
     end do
+    !$OMP SINGLE
     ABI_FREE(gxfac_)
+    !$OMP END SINGLE
     if (optder>=1) then
 !$OMP DO COLLAPSE(4)
       do ispinor=1,nspinor
@@ -1365,7 +1367,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
           end do
         end do
       end do
+      !$OMP SINGLE
       ABI_FREE(dgxdtfac_)
+      !$OMP END SINGLE
     end if
     if (optder>=2) then
 !$OMP DO COLLAPSE(4)
@@ -1379,7 +1383,9 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
           end do
         end do
       end do
+      !$OMP SINGLE
       ABI_FREE(d2gxdtfac_)
+      !$OMP END SINGLE
     end if
 !$OMP END PARALLEL
   end if
