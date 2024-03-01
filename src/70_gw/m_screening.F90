@@ -2693,7 +2693,7 @@ end subroutine lebedev_laikov_int
 !!
 !! INPUTS
 !!  cart_vers(3)=Cartesian components of the versor
-!!  int_pars(1:2)=(l,m) indeces in Ylm. l>=0 and  m \in [-l,l]
+!!  int_pars(1:2)=(l,m) indices in Ylm. l>=0 and  m \in [-l,l]
 !!  cplx_pars(1:9)=Tensor T in Cartesian coordinates.
 !!  real_pars=Not used.
 !!
@@ -2749,7 +2749,7 @@ end function ylmstar_over_qTq
 !!
 !! INPUTS
 !!  cart_vers(3)=Cartesian components of the versor
-!!  int_pars(1:2)=(l,m) indeces in Ylm. l>=0 and  m \in [-l,l]
+!!  int_pars(1:2)=(l,m) indices in Ylm. l>=0 and  m \in [-l,l]
 !!  cplx_pars(1:9)=Tensor T in Cartesian coordinates.
 !!  real_pars(1:9)=The Cartesian vectors defining the small box centered around gamma point
 !!    when referred to this vectors the points in the box are given by {(x,y,z) | x,y,z \in [-1,1]}.
