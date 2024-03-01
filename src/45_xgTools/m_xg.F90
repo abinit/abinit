@@ -429,7 +429,7 @@ contains
       end select
 #endif
 
-    else if ( gpu_option==ABI_GPU_DISABLED ) then
+    else if ( l_gpu_option==ABI_GPU_DISABLED ) then
 
       select case (space)
       case (SPACE_R,SPACE_CR)
