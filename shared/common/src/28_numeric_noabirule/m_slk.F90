@@ -5804,7 +5804,7 @@ end subroutine slk_read
 !! INPUTS
 !!  Slk_mat<matrix_scalapack>=Structured datatype defining the scaLAPACK matrix.
 !!  mask_of_glob(row_glob,col_glob,size_glob) is an integer function that accepts in input
-!!     the global indeces of the matrix size_glob(1:2) are the global dimensions.
+!!     the global indices of the matrix size_glob(1:2) are the global dimensions.
 !!     Return 0 if (row_glob,col_glob) should not be read.
 !!  offset_of_glob(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm,bsize_frm)
 !!  nsblocks=Number of sub-blocks (will be passed to offset_of_glob)
