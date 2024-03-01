@@ -32,7 +32,7 @@ xc_taupos2  1.d-8  # Filtering KE density; high value for testing purpose
 
 
 #---- SCF cycle control
-tolvrs      2.0d-15
+tolvrs      1.0d-12
 nstep       20
 diemac      12.0
 
