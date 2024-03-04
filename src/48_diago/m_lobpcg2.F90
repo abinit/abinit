@@ -1,3 +1,19 @@
+!!****f* ABINIT/m_lobpcg2
+!! NAME
+!! m_lobpcg2
+!!
+!! FUNCTION
+!! This module contains the types and routines used to apply the
+!! LOBPCG method (second version introduced by J. Bieder), using the xg_tools.
+!!
+!! COPYRIGHT
+!! Copyright (C) 2015-2024 ABINIT group (J. Bieder, L. Baguet)
+!! This file is distributed under the terms of the
+!! gnu general public license, see ~abinit/COPYING
+!! or http://www.gnu.org/copyleft/gpl.txt .
+!! for the initials of contributors, see ~abinit/doc/developers/contributors.txt .
+!!
+!! SOURCE
 
 #if defined HAVE_CONFIG_H
 #include "config.h"
@@ -879,3 +895,4 @@ module m_lobpcg2
   end subroutine lobpcg_free
 
 end module m_lobpcg2
+!!***
