@@ -457,7 +457,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
  logical,intent(in),optional :: with_d0E, with_d1E, with_d2E, with_d3E, with_d2eig
 
 !Local variables -------------------------------
- integer :: msize_, ii, ikpt, iblok
+ integer :: msize_, ii, ikpt
  logical :: with_d0E_, with_d1E_, with_d2E_, with_d3E_, with_d2eig_
 
 ! ************************************************************************

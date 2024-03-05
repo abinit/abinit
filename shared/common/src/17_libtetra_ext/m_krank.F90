@@ -580,12 +580,13 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
  ABI_MALLOC_IFNOT(self%rank2ikpt_, (self%min_rank:self%max_rank))
  self%rank2ikpt_ = -1 !; self%rank2symtime_ = -1
 
+ do ikpt1=1,self%npoints
 
- do itimrev=0,timrev
-   do isym=1,nsym
-     ! Do not use magnetic symmetries.
-     if (symafm(isym) == -1) cycle
-     do ikpt1=1,self%npoints
+   do itimrev=0,timrev
+     do isym=1,nsym
+       ! Do not use magnetic symmetries.
+       if (symafm(isym) == -1) cycle
+
        kpt1a = (1 - 2*itimrev) * matmul(my_symmat(:, :, isym), self%kpts(:, ikpt1))
        irank = self%get_rank(kpt1a)
        if (self%rank2ikpt_(irank) == -1) then
@@ -594,6 +595,7 @@ subroutine krank_get_mapping(self, nkpt2, kptns2, dksqmax, gmet, indkk, nsym, sy
        end if
      end do
    end do
+
  end do
 
  dksqmax = zero
