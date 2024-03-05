@@ -322,8 +322,8 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  ABI_CALLOC(tmp_mat, (2, 3, mpert, 3, mpert))
  blkflg(:3,:natom,:3,:natom) = 1 ! all values have been computed
  do iq_ibz=1,gstore%nqibz
-   tmp_mat(1,:3,:natom,:3,:natom) = reshape(real(gmat(:,:,iq_ibz)), (/3,natom,3,natom/))
-   tmp_mat(2,:3,:natom,:3,:natom) = reshape(imag(gmat(:,:,iq_ibz)), (/3,natom,3,natom/))
+   tmp_mat(1,:3,:natom,:3,:natom) = reshape( real(gmat(:,:,iq_ibz)), (/3,natom,3,natom/))
+   tmp_mat(2,:3,:natom,:3,:natom) = reshape(aimag(gmat(:,:,iq_ibz)), (/3,natom,3,natom/))
    qphon = gstore%qibz(:,iq_ibz)
    call berry_ddb%set_qpt(iq_ibz, qphon)
    call berry_ddb%set_typ(iq_ibz, BLKTYP_d2E_mbc)
