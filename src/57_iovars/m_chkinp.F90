@@ -2528,12 +2528,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
    end if
-   !Linear Response function only for LDA/GGA
-   allowed=((xc_is_lda.or.xc_is_gga.or.dt%ixc==0).and.dt%ixc/=50)
-   if(.not.allowed)then
-     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
-   end if
+   ! !Linear Response function only for LDA/GGA
+   ! allowed=((xc_is_lda.or.xc_is_gga.or.dt%ixc==0).and.dt%ixc/=50)
+   ! if(.not.allowed)then
+   !   cond_string(1)='ixc' ; cond_values(1)=dt%ixc
+   !   call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
+   ! end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
    !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
@@ -3163,11 +3163,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
 !  prtkden
-   call chkint_ge(0,0,cond_string,cond_values,ierr,'prtkden',dt%prtkden,0,iout)
-   if(optdriver/=RUNL_GSTATE)then
-     cond_string(1)='optdriver' ; cond_values(1)=optdriver
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-   end if
+   ! call chkint_ge(0,0,cond_string,cond_values,ierr,'prtkden',dt%prtkden,0,iout)
+   ! if(optdriver/=RUNL_GSTATE)then
+   !   cond_string(1)='optdriver' ; cond_values(1)=optdriver
+   !   call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
+   !end if
    !if(usepaw/=0)then
    !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
    !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
@@ -3858,8 +3858,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! Chebyshev
    if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
-     if(dt%nspinor > 1 .and. dt%wfoptalg == 111) then
-       msg='Nspinor > 1 not yet compatible with wfoptalg 1'
+     if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
+       msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%usefock > 0) then
@@ -3883,7 +3883,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  slk_rankpp
    call chkint_ge(0,0,cond_string,cond_values,ierr,'slk_rankpp',dt%slk_rankpp,0,iout)
-
 
 !  wtk
 !  Check that no k point weight is < 0:

@@ -81,8 +81,8 @@ MODULE m_ebands
  public :: ebands_get_bands_from_erange   ! Return the indices of the mix and max band within an energy window.
  public :: ebands_vcbm_range_from_gaps ! Find band and energy range for states close to the CBM/VBM given input energies.
  public :: ebands_apply_scissors   ! Apply scissors operator (no k-dependency)
- public :: ebands_get_occupied     ! Returns band indeces after wich occupations are less than an input value.
- public :: ebands_enclose_degbands ! Adjust band indeces such that all degenerate states are treated.
+ public :: ebands_get_occupied     ! Returns band indices after wich occupations are less than an input value.
+ public :: ebands_enclose_degbands ! Adjust band indices such that all degenerate states are treated.
  public :: ebands_get_bands_e0     ! Find min/max band indices crossing energy e0
  public :: ebands_get_erange       ! Compute the minimum and maximum energy enclosing a list of states.
  public :: ebands_nelect_per_spin  ! Returns number of electrons per spin channel
@@ -1858,7 +1858,7 @@ end function ebands_get_occupied
 !!
 !! SIDE EFFECTS
 !!  ibmin,ibmax=
-!!    Input: initial guess for the indeces
+!!    Input: initial guess for the indices
 !!    Output: All the denerate states are between ibmin and ibmax
 !!
 !! SOURCE
