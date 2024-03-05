@@ -915,7 +915,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
  integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
- integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2, ierr, min_my_nband
+ integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g2, ig2, ierr, min_my_nband
  integer :: idat, ndat, batch_size, h_size !, mene_found
  real(dp),parameter :: lambda0 = zero
  real(dp) :: cpu, wall, gflops, mem_mb
@@ -1131,7 +1131,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
 
    ! Get <:|H|beta,G''> and <:|S_{PAW}|beta,G''>
-   !call c_f_pointer(c_loc(bras), bras2d_ptr, shape=[2, npwsp * batch_size)]
    call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
                              dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
@@ -1167,7 +1166,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if
 
  end do ! il_g2
- call cwtime_report(" build_hg1g2", cpu, wall, gflops)
+ call cwtime_report(" build_ks_hg1g2", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
  ABI_FREE(bras)
@@ -1179,11 +1178,20 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
+ ! =================
+ ! Add fock operator
+ ! =================
+ !if (dtset%usefock == 1) then
+ !  ABI_CHECK(dtset%usepaw == 0, "FOCK WITH PAW NOT CODED!")
+ !  do ig2=1, npwps, batch_size
+ !    !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras, ghc, bras_are_g=.True.)
+ !  end do
+ !end if
+
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
  !===========================================
  ABI_MALLOC(eig_ene, (h_size))
-
  !print *, "ghg_trace:", ghg_mat%get_trace()
 
  ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
