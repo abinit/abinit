@@ -3397,7 +3397,8 @@ subroutine chkvars(string)
 !L
  list_vars=trim(list_vars)//' lambsig'
  list_vars=trim(list_vars)//' latt_anharm_pot_fname latt_ddb_fnames latt_friction latt_harm_pot_fname'
- list_vars=trim(list_vars)//' latt_init_hist_fname latt_friction latt_lwf_anharmonic latt_pot_fname latt_taut'
+ list_vars=trim(list_vars)//' latt_init_hist_fname latt_friction latt_lwf_anharmonic latt_mapping_fname'
+ list_vars=trim(list_vars)//' latt_pot_fname latt_taut'
  list_vars=trim(list_vars)//' latt_temperature latt_temperature_end'
  list_vars=trim(list_vars)//' latt_temperature_nstep latt_temperature_start'
  list_vars=trim(list_vars)//' latt_test_set_fname'

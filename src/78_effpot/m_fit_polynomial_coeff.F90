@@ -534,7 +534,7 @@ contains
     !if the number of atoms in reference supercell into effpot is not correct,
     !wrt to the number of atom in the hist, we set map the hist and set the good supercell
     if (size(hist%xred,2) /= eff_pot%supercell%natom) then
-      call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
+      call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose, hist_for_map=hist)
     end if
     !Set the cut off
     cutoff = zero
@@ -2047,7 +2047,7 @@ real(dp), allocatable :: weights(:)
 !wrt to the number of atom in the hist, we set map the hist and set the good
 !supercell
  if (size(hist%xred,2) /= eff_pot%supercell%natom) then
-   call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose)
+   call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=need_verbose, hist_for_map=hist)
  end if
 
 !Initialisation of constants
@@ -2227,7 +2227,7 @@ subroutine fit_polynomial_coeff_getCoeffBound(eff_pot,coeffs_out,hist,ncoeff_bou
  end if
 
 !Map the hist in order to be consistent with the supercell into reference_effective_potential
- call effective_potential_file_mapHistToRef(eff_pot,hist,comm)
+ call effective_potential_file_mapHistToRef(eff_pot,hist,comm, hist_for_map=hist)
 
 !Initialisation of optional arguments
  need_verbose = .TRUE.

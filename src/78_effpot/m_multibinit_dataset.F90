@@ -328,6 +328,7 @@ module m_multibinit_dataset
   character(len=fnlen) :: latt_harm_pot_fname
   character(len=fnlen) :: latt_anharm_pot_fname
   character(len=fnlen) :: latt_training_set_fname
+  character(len=fnlen) :: latt_mapping_fname
   character(len=fnlen) :: latt_test_set_fname
   character(len=fnlen) :: latt_ddb_fnames(12)
 
@@ -505,6 +506,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%latt_anharm_pot_fname=""
  multibinit_dtset%latt_training_set_fname=""
  multibinit_dtset%latt_test_set_fname=""
+ multibinit_dtset%latt_mapping_fname=""
  multibinit_dtset%latt_ddb_fnames(12)=""
 
 
@@ -1597,6 +1599,11 @@ multibinit_dtset%lwf_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_test_set_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_test_set_fname)
  if(.not. tread==1) multibinit_dtset%latt_test_set_fname=""
+
+ multibinit_dtset%latt_mapping_fname=""
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_mapping_fname',tread,'KEY',&
+      & key_value=multibinit_dtset%latt_mapping_fname)
+ if(.not. tread==1) multibinit_dtset%latt_mapping_fname=""
 
 
  multibinit_dtset%latt_ddb_fnames=""

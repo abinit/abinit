@@ -91,7 +91,7 @@ contains
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential, read_effective_potential
-    type(abihist) :: hist, hist_tes
+    type(abihist) :: hist, hist_tes, hist_map
 
     !type(spin_model_t) :: spin_model
     character(len=strlen) :: string, raw_string
@@ -324,6 +324,11 @@ elec_eval = .FALSE.
           call wrtout(ab_out,message,'COLL')
           if(filnam(5)/=''.and.filnam(5)/='no')then
              call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
+             if(trim(inp%latt_mapping_fname)/="") then
+                call effective_potential_file_readMDfile(inp%latt_mapping_fname,hist_map,option=inp%ts_option)
+             else
+                call effective_potential_file_readMDfile(filnam(5),hist_map,option=inp%ts_option)
+             endif
              if (hist%mxhist == 0)then
                 write(message, '(5a)' )&
 &           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -356,8 +361,11 @@ elec_eval = .FALSE.
      end if
        !  MPI BROADCAST the history of the MD
        call abihist_bcast(hist,master,comm)
+       call abihist_bcast(hist_map,master,comm)
        !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-       call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
+       call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm, hist_for_map=hist_map)
+       call abihist_free(hist_map)
+
     end if
 
     !TEST_AM
@@ -572,7 +580,7 @@ elec_eval = .FALSE.
 !  MPI BROADCAST the history of the MD
      call abihist_bcast(hist_tes,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
+     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm, hist_for_map=hist_tes)
      !  Initialize if to print anharmonic contribution to energy or not
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.
