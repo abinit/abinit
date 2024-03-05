@@ -79,10 +79,10 @@ module m_nvtx_data
   integer, parameter :: NVTX_CHEBFI2_INIT = 45
   integer, parameter :: NVTX_INIT_INWFFIL = 46
   integer, parameter :: NVTX_INIT_INWFFIL2 = 47
-  integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48
+  integer, parameter :: NVTX_CHEBFI2_RR_SCALE = 48 ! not used anymore
   integer, parameter :: NVTX_RR_HEGV = 49
-  integer, parameter :: NVTX_CHEBFI2_RR_XNP = 50
-  integer, parameter :: NVTX_CHEBFI2_RR_GEMM = 51
+  integer, parameter :: NVTX_RR_GEMM_1 = 50
+  integer, parameter :: NVTX_RR_GEMM_2 = 51
   integer, parameter :: NVTX_INVOVL_INNER_GEMM = 52
   integer, parameter :: NVTX_CHEBFI2_TRANSPOSE = 53
   integer, parameter :: NVTX_CHEBFI2_GET_BM1X = 54
@@ -91,7 +91,7 @@ module m_nvtx_data
   integer, parameter :: NVTX_LOBPCG2_ORTHO_X_WRT = 57
   integer, parameter :: NVTX_LOBPCG2_RESIDUE = 58
   integer, parameter :: NVTX_LOBPCG2_RR = 59
-  integer, parameter :: NVTX_LOBPCG2_B_ORTHO = 60
+  integer, parameter :: NVTX_B_ORTHO = 60
   integer, parameter :: NVTX_LOBPCG2_GET_AX_BX = 61
   integer, parameter :: NVTX_RR_HEEV = 62
   integer, parameter :: NVTX_FORSTRNPS = 63
@@ -159,10 +159,10 @@ contains
          & "CHEBFI2_INIT", &
          & "INIT_INWFFIL", &
          & "INIT_INWFFIL2", &
-         & "CHEBFI2_RR_SCALE", &
+         & "RR_SCALE", &
          & "RR_HEGV", &
-         & "CHEBFI2_RR_XNP", &
-         & "CHEBFI2_RR_GEMM", &
+         & "RR_XNP", &
+         & "RR_GEMM", &
          & "INVOVL_INNER_GEMM", &
          & "TRANSPOSE", &
          & "GET_BM1X", &
@@ -171,7 +171,7 @@ contains
          & "LOBPCG2_ORTHO_X_WRT", &
          & "LOBPCG2_RESIDUE", &
          & "LOBPCG2_RR", &
-         & "LOBPCG2_B_ORTHO", &
+         & "B_ORTHO", &
          & "GET_AX_BX", &
          & "RR_HEEV", &
          & "FORSTRNPS", &
@@ -228,8 +228,8 @@ contains
     nvtx_ids(47)= NVTX_INIT_INWFFIL2
     nvtx_ids(48)= NVTX_CHEBFI2_RR_SCALE
     nvtx_ids(49)= NVTX_RR_HEGV
-    nvtx_ids(50)= NVTX_CHEBFI2_RR_XNP
-    nvtx_ids(51)= NVTX_CHEBFI2_RR_GEMM
+    nvtx_ids(50)= NVTX_RR_GEMM_1
+    nvtx_ids(51)= NVTX_RR_GEMM_2
     nvtx_ids(52)= NVTX_INVOVL_INNER_GEMM
     nvtx_ids(53)= NVTX_CHEBFI2_TRANSPOSE
     nvtx_ids(54)= NVTX_CHEBFI2_GET_BM1X
@@ -238,7 +238,7 @@ contains
     nvtx_ids(57)= NVTX_LOBPCG2_ORTHO_X_WRT
     nvtx_ids(58)= NVTX_LOBPCG2_RESIDUE
     nvtx_ids(59)= NVTX_LOBPCG2_RR
-    nvtx_ids(60)= NVTX_LOBPCG2_B_ORTHO
+    nvtx_ids(60)= NVTX_B_ORTHO
     nvtx_ids(61)= NVTX_LOBPCG2_GET_AX_BX
     nvtx_ids(62)= NVTX_RR_HEEV
     nvtx_ids(63)= NVTX_FORSTRNPS

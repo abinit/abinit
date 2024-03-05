@@ -36,7 +36,7 @@ module m_chebfi2
  use m_cgtools
  use m_xg
  use m_xgTransposer
- use m_xgScalapack
+ use m_xg_ortho_RR
 
  use m_xmpi
  use m_xomp
@@ -59,37 +59,19 @@ module m_chebfi2
 !Several (private) parameters
 !-------------------------------------------------
 
- integer, parameter :: EIGENV = 1
- integer, parameter :: EIGENVD = 2
- integer, parameter :: EIGENSLK = 3
- integer, parameter :: DEBUG_ROWS = 5
- integer, parameter :: DEBUG_COLUMNS = 5
-
-!Type of eigen solver to use
-#ifdef HAVE_OPENMP
- integer, save :: eigenSolver = EIGENVD
-#else
- integer, save :: eigenSolver = EIGENV
-#endif
-
  integer, parameter :: tim_init         = 1751
  integer, parameter :: tim_free         = 1752
- integer, parameter :: tim_run          = 1753
+! integer, parameter :: tim_run          = 1753
  integer, parameter :: tim_getAX_BX     = 1754
  integer, parameter :: tim_invovl       = 1755
  integer, parameter :: tim_residu       = 1756
  integer, parameter :: tim_RR           = 1757
- integer, parameter :: tim_pcond        = 1758
+! integer, parameter :: tim_pcond        = 1758
  integer, parameter :: tim_RR_q         = 1759
  integer, parameter :: tim_next_p       = 1760
  integer, parameter :: tim_swap         = 1761
  integer, parameter :: tim_amp_f        = 1762
  integer, parameter :: tim_alltoall     = 1763
- integer, parameter :: tim_RR_hegv      = 1764
- integer, parameter :: tim_RR_scale     = 1765
- integer, parameter :: tim_RR_XNP_reset = 1766
- integer, parameter :: tim_RR_gemm_1    = 1767
- integer, parameter :: tim_RR_gemm_2    = 1768
  integer, parameter :: tim_X_NP_init    = 1769
  integer, parameter :: tim_AX_BX_init   = 1770
 
@@ -514,10 +496,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    end subroutine getBm1X
  end interface
  interface
-   subroutine pcond(W, gpu_option)
+   subroutine pcond(W)
      use m_xg, only : xgBlock_t
      type(xgBlock_t), intent(inout)           :: W
-     integer        , intent(in   ), optional :: gpu_option
    end subroutine pcond
  end interface
 
@@ -527,13 +508,12 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  integer :: neigenpairs
  integer :: nline,nline_max
  integer :: iline, iband, ierr
-! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of ABinit, to be saved
+! integer :: comm_fft_save,comm_band_save !FFT and BAND MPI communicators from rest of Abinit, to be saved
  real(dp) :: tolerance
  real(dp) :: maxeig, maxeig_global
  real(dp) :: mineig, mineig_global
  real(dp) :: lambda_minus
  real(dp) :: lambda_plus
- real(dp) :: maximum
  real(dp) :: one_over_r
  real(dp) :: two_over_r
  real(dp) :: center
@@ -547,7 +527,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
 ! *********************************************************************
 
- call timab(tim_run,1,tsec)
+! call timab(tim_run,1,tsec)
 
  spacedim = chebfi%spacedim
  neigenpairs = chebfi%neigenpairs
@@ -583,11 +563,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
    call xgTransposer_copyConstructor(chebfi%xgTransposerAX,chebfi%xgTransposerX,chebfi%AX%self,chebfi%xAXColsRows,STATE_LINALG)
    call xgTransposer_copyConstructor(chebfi%xgTransposerBX,chebfi%xgTransposerX,chebfi%BX%self,chebfi%xBXColsRows,STATE_LINALG)
-
-   ! only used if GPU is enabled
-   chebfi%xgTransposerX%gpu_option  = chebfi%gpu_option
-   chebfi%xgTransposerAX%gpu_option = chebfi%gpu_option
-   chebfi%xgTransposerBX%gpu_option = chebfi%gpu_option
 
    chebfi%xgTransposerX%gpu_kokkos_nthrd  = chebfi%gpu_kokkos_nthrd
    chebfi%xgTransposerAX%gpu_kokkos_nthrd = chebfi%gpu_kokkos_nthrd
@@ -708,6 +683,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call chebfi_ampfactor(chebfi, eig, lambda_minus, lambda_plus, nline_bands)
  call timab(tim_amp_f,2,tsec)
 
+ call xg_free(DivResults)
+ ABI_FREE(nline_bands)
+
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
@@ -720,7 +698,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
      call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
      call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, 1, spacedim, neigenpairs)
-  end if
+   end if
  else
    call xgBlock_setBlock(chebfi%xXColsRows,  chebfi%X,       1, spacedim, neigenpairs)
    call xgBlock_setBlock(chebfi%xAXColsRows, chebfi%AX%self, 1, spacedim, neigenpairs)
@@ -729,39 +707,41 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ABI_NVTX_END_RANGE()
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
- call timab(tim_RR, 1, tsec)
- call chebfi_rayleighRitz(chebfi, nline)
- call timab(tim_RR, 2, tsec)
+ call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,solve_ax_bx=.true.)
  ABI_NVTX_END_RANGE()
 
  call timab(tim_residu, 1, tsec)
- maximum =  chebfi_computeResidue(chebfi, residu, pcond)
+ if (chebfi%paw) then
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%BX%self,chebfi%AX%self)
+ else
+   call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
+ end if
+
+! call timab(tim_pcond,1,tsec)
+ call pcond(chebfi%AX%self)
+! call timab(tim_pcond,2,tsec)
+
+ call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
- ABI_FREE(nline_bands)
+ call xgBlock_copy(chebfi%X,X0)
 
- if (xmpi_comm_size(chebfi%spacecom) > 1) then
-   call xgBlock_copy(chebfi%X_swap,chebfi%X, 1, 1, chebfi%gpu_option)    !copy cannot be avoided :(
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
      call gpu_device_synchronize()
    end if
 #endif
- end if
-
- call xg_free(DivResults)
 
  if (chebfi%paral_kgb == 1) then
    call xgTransposer_free(chebfi%xgTransposerX)
    call xgTransposer_free(chebfi%xgTransposerAX)
    call xgTransposer_free(chebfi%xgTransposerBX)
-
-!   !Reset communicators to original ABinit values for rest of ABinit
+!   !Reset communicators to original Abinit values for rest of ABinit
 !   mpi_enreg%comm_fft = comm_fft_save
 !   mpi_enreg%comm_band = comm_band_save
  end if
 
- call timab(tim_run,2,tsec)
+! call timab(tim_run,2,tsec)
 
 end subroutine chebfi_run
 !!***
@@ -817,16 +797,13 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
    call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self, &
-   & gpu_option=chebfi%gpu_option)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self)
 
 !PAW
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self, &
-   & gpu_option=chebfi%gpu_option)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self)
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
-   & maxeig, maxeig_pos, mineig, mineig_pos, &
-   & gpu_option=chebfi%gpu_option)
+   & maxeig, maxeig_pos, mineig, mineig_pos)
 
  call xg_free(Results1)
  call xg_free(Results2)
@@ -890,24 +867,24 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
-   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next, 1, 1, chebfi%gpu_option)
+   call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next)
  end if
 
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
- call xgBlock_scale(chebfi%xXColsRows, center, 1, chebfi%gpu_option) !scale by center
+ call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by center
 
  !(B-1 * A * Psi^i-1 - c * Psi^i-1)
- call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows, chebfi%gpu_option)
+ call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%xXColsRows)
 
  !Psi^i-1  = 1/c * Psi^i-1
- call xgBlock_scale(chebfi%xXColsRows, 1/center, 1, chebfi%gpu_option) !counter scale by 1/center
+ call xgBlock_scale(chebfi%xXColsRows, 1/center, 1) !counter scale by 1/center
 
  if (iline == 0) then
-   call xgBlock_scale(chebfi%X_next, one_over_r, 1, chebfi%gpu_option)
+   call xgBlock_scale(chebfi%X_next, one_over_r, 1)
  else
-   call xgBlock_scale(chebfi%X_next, two_over_r, 1, chebfi%gpu_option)
+   call xgBlock_scale(chebfi%X_next, two_over_r, 1)
 
-   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev, chebfi%gpu_option)
+   call xgBlock_saxpy(chebfi%X_next, dble(-1.0), chebfi%X_prev)
  end if
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
@@ -957,269 +934,6 @@ subroutine chebfi_swapInnerBuffers(chebfi,spacedim,neigenpairs)
   call xgBlock_setBlock(chebfi%X_swap,     chebfi%X_next,     1, spacedim, neigenpairs) !X_next = X_swap
 
 end subroutine chebfi_swapInnerBuffers
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfi2/chebfi_rayleighRitz
-!! NAME
-!! chebfi_rayleighRitz
-!!
-!! FUNCTION
-!! Apply Rayleigh-Ritz procedure
-!!
-!! INPUTS
-!!  nline= order of Chebyshev polynom
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! SOURCE
-
-subroutine chebfi_rayleighRitz(chebfi,nline)
-
-  implicit none
-
-  ! Arguments ------------------------------------
-  integer        , intent(in   ) :: nline
-  type(chebfi_t) , intent(inout) :: chebfi
-  ! Local variables-------------------------------
-  ! scalars
-  integer :: eigenProblem
-  integer :: info
-  integer :: me_g0
-  integer :: neigenpairs
-  integer :: space
-  integer :: spacedim
-  integer :: remainder
-#ifdef HAVE_LINALG_SCALAPACK
-  logical :: use_slk
-#endif
-  type(xgScalapack_t) :: scalapack
-  type(xg_t) :: A_und_X !H_UND_PSI
-  type(xg_t) :: B_und_X !S_UND_PSI
-  type(xgBlock_t) :: X_first_row
-  type(xgBlock_t) :: AX_first_row
-  type(xgBlock_t) :: BX_first_row
-  ! arrays
-  real(dp) :: tsec(2)
-
-  ! *********************************************************************
-
-  space        = chebfi%space
-  eigenProblem = chebfi%eigenProblem
-  me_g0        = chebfi%me_g0
-
-  spacedim     = chebfi%spacedim
-  neigenpairs  = chebfi%neigenpairs   !remains whole nband domain since it is after transpose
-
-#ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,chebfi%spacecom,spacedim,0,(chebfi%gpu_option/=ABI_GPU_DISABLED),use_slk)
-    if ( use_slk) then
-      eigenSolver = EIGENSLK
-    end if
-#endif
-
-  call xg_init(A_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option)
-  call xg_init(B_und_X,space,neigenpairs,neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option)
-
-  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_SCALE)
-  call timab(tim_RR_gemm_1,1,tsec)
-  call xgBlock_gemm(chebfi%AX%self%trans, chebfi%X%normal, 1.0d0, chebfi%AX%self, chebfi%X, 0.d0, A_und_X%self, &
-    &               gpu_option=chebfi%gpu_option)
-
-  if (chebfi%paw) then
-    call xgBlock_gemm(chebfi%BX%self%trans, chebfi%X%normal, 1.0d0, chebfi%BX%self, chebfi%X, 0.d0, B_und_X%self, &
-      &               gpu_option=chebfi%gpu_option)
-  else
-    call xgBlock_gemm(chebfi%X%trans, chebfi%X%normal, 1.0d0, chebfi%X, chebfi%X, 0.d0, B_und_X%self, &
-       &              gpu_option=chebfi%gpu_option)
-  end if
-  call timab(tim_RR_gemm_1,2,tsec)
-
-  call timab(tim_RR_scale,1,tsec)
-  if(chebfi%istwf_k == 2) then
-    call xgBlock_scale(chebfi%X, 1/sqrt2, 1,gpu_option=chebfi%gpu_option)
-    if (me_g0 == 1)  then
-      call xgBlock_setBlock(chebfi%X, X_first_row, 1, 2, neigenpairs) !has to be 2 rows in SPACE_CR
-      call xgBlock_scale(X_first_row, sqrt2, 1,gpu_option=chebfi%gpu_option)
-    end if
-    call xgBlock_scale(chebfi%AX%self, 1/sqrt2, 1,gpu_option=chebfi%gpu_option)
-    if (me_g0 == 1)  then
-      call xgBlock_setBlock(chebfi%AX%self, AX_first_row, 1, 2, neigenpairs)
-      call xgBlock_scale(AX_first_row, sqrt2, 1,gpu_option=chebfi%gpu_option)
-    end if
-    if (chebfi%paw) then
-      call xgBlock_scale(chebfi%BX%self, 1/sqrt2, 1,gpu_option=chebfi%gpu_option)
-      if (me_g0 == 1)  then
-        call xgBlock_setBlock(chebfi%BX%self, BX_first_row, 1, 2, neigenpairs)
-        call xgBlock_scale(BX_first_row, sqrt2, 1,gpu_option=chebfi%gpu_option)
-      end if
-    end if
-  end if
-  call timab(tim_RR_scale,2,tsec)
-  ABI_NVTX_END_RANGE()
-
-  ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
-  call timab(tim_RR_hegv,1,tsec)
-  select case (eigenSolver)
-  case (EIGENVD)
-    call xgBlock_hegvd(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info, &
-      &              gpu_option=1*chebfi%gpu_option)
-  case (EIGENV)
-    call xgBlock_hegv(eigenProblem, 'v','u', A_und_X%self, B_und_X%self, chebfi%eigenvalues, info)
-  case (EIGENSLK)
-    call xgScalapack_hegv(scalapack,A_und_X%self,B_und_X%self,chebfi%eigenvalues,gpu_option=chebfi%gpu_option)
-    info = 0 ! No error code returned for the moment
-  case default
-    ABI_ERROR("Error for Eigen Solver HEGV")
-  end select
-  call timab(tim_RR_hegv,2,tsec)
-  ABI_NVTX_END_RANGE()
-
-  remainder = mod(nline, 3) !3 buffer swap, keep the info which one contains X_data at the end of loop
-  if ( eigenSolver == EIGENSLK ) then
-    call xgScalapack_free(scalapack)
-  end if
-
-  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_XNP)
-  call timab(tim_RR_XNP_reset,1,tsec)
-  !resize X_NP from colrwos to linalg since it will be used in RR
-  if (chebfi%paral_kgb == 1 .and. xmpi_comm_size(chebfi%spacecom) > 1) then
-    call xg_free(chebfi%X_NP)
-
-    call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom, gpu_option=chebfi%gpu_option)
-
-    call xg_setBlock(chebfi%X_NP, chebfi%X_next,             1,spacedim,neigenpairs)
-    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, neigenpairs+1,spacedim,neigenpairs)
-    call xgBlock_zero(chebfi%X_NP%self, chebfi%gpu_option)
-  end if
-  call timab(tim_RR_XNP_reset,2,tsec)
-  ABI_NVTX_END_RANGE()
-
-  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR_GEMM)
-  call timab(tim_RR_gemm_2,1,tsec)
-  if (remainder == 1) then
-    call xgBlock_setBlock(chebfi%X_next, chebfi%AX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X,      chebfi%BX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%X_swap,  1, spacedim, neigenpairs)
-
-    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, gpu_option=chebfi%gpu_option)
-
-  else if (remainder == 2) then
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X,      chebfi%BX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X_next, chebfi%X_swap,  1, spacedim, neigenpairs)
-
-    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      chebfi%X, A_und_X%self, 0.d0, chebfi%X_swap, gpu_option=chebfi%gpu_option)
-
-  else if (remainder == 0) then
-    call xgBlock_setBlock(chebfi%X_prev, chebfi%AX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X_next, chebfi%BX_swap, 1, spacedim, neigenpairs)
-    call xgBlock_setBlock(chebfi%X, chebfi%X_swap, 1, spacedim, neigenpairs)
-    call xgBlock_gemm(chebfi%X%normal, A_und_X%self%normal, 1.0d0, &
-      &               chebfi%X, A_und_X%self, 0.d0, chebfi%X_next, &
-      &               gpu_option=chebfi%gpu_option)
-    call xgBlock_copy(chebfi%X_next,chebfi%X_swap, 1, 1, gpu_option=chebfi%gpu_option)    !copy cannot be avoided :(
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
-      call gpu_device_synchronize()
-    end if
-#endif
-
-  end if
-
-  call xgBlock_gemm(chebfi%AX%self%normal, A_und_X%self%normal, 1.0d0, &
-    &               chebfi%AX%self, A_und_X%self, 0.d0, chebfi%AX_swap, &
-    &               gpu_option=chebfi%gpu_option)
-
-  if (chebfi%paw) then
-    call xgBlock_gemm(chebfi%BX%self%normal, A_und_X%self%normal, 1.0d0, &
-      &               chebfi%BX%self, A_und_X%self, 0.d0, chebfi%BX_swap, &
-      &               gpu_option=chebfi%gpu_option)
-  end if
-
-  call timab(tim_RR_gemm_2,2,tsec)
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-  if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
-    call gpu_device_synchronize()
-  end if
-#endif
-  ABI_NVTX_END_RANGE()
-
-  call xg_free(A_und_X)
-  call xg_free(B_und_X)
-
-end subroutine chebfi_rayleighRitz
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_chebfi2/chebfi_computeResidue
-!! NAME
-!! chebfi_computeResidue
-!!
-!! FUNCTION
-!! Compute vector of residuals (AX-e.BX), including predconditionning
-!!
-!! INPUTS
-!!  pcond= pointer to the function used to apply the preconditioning
-!!
-!! OUTPUT
-!!
-!! SIDE EFFECTS
-!!  residu<type(xgBlock_t)>= vector of residuals
-!!  chebfi <type(chebfi_t)>=all data used to apply Chebyshev Filtering algorithm
-!!
-!! SOURCE
-
-real(dp) function chebfi_computeResidue(chebfi, residu, pcond)
-
-  implicit none
-
-  ! Arguments ------------------------------------
-  type(chebfi_t)  , intent(inout) :: chebfi
-  type(xgBlock_t) , intent(inout) :: residu
-  interface
-    subroutine pcond(W, gpu_option)
-      use m_xg, only : xgBlock_t
-      type(xgBlock_t), intent(inout)           :: W
-      integer        , intent(in   ), optional :: gpu_option
-    end subroutine pcond
-  end interface
-
-  ! Local variables-------------------------------
-  ! scalars
-  integer  :: eigResiduMax,eigResiduMin
-  real(dp) :: maxResidu,minResidu
-  !arrays
-  real(dp) :: tsec(2)
-
-  ! *********************************************************************
-
-  if (chebfi%paw) then
-    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%BX_swap, chebfi%AX_swap, chebfi%gpu_option)
-  else
-    call xgBlock_colwiseCymax(chebfi%AX_swap, chebfi%eigenvalues, chebfi%X_swap,  chebfi%AX_swap, chebfi%gpu_option)
-  end if
-
-  ! pcond call
-  call timab(tim_pcond,1,tsec)
-  call pcond(chebfi%AX_swap, chebfi%gpu_option)
-  call timab(tim_pcond,2,tsec)
-
-  call xgBlock_colwiseNorm2(chebfi%AX_swap, residu, max_val=maxResidu, max_elt=eigResiduMax,&
-    min_val=minResidu, min_elt=eigResiduMin, gpu_option=chebfi%gpu_option)
-
-  chebfi_computeResidue = maxResidu
-
-end function chebfi_computeResidue
 !!***
 
 !----------------------------------------------------------------------
@@ -1284,12 +998,12 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
     call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
     call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
 
-    call xgBlock_scale(X_part, 1/ampfactor, 1, chebfi%gpu_option)
-    call xgBlock_scale(AX_part, 1/ampfactor, 1, chebfi%gpu_option)
+    call xgBlock_scale(X_part, 1/ampfactor, 1)
+    call xgBlock_scale(AX_part, 1/ampfactor, 1)
 
     if(chebfi%paw) then
       call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-      call xgBlock_scale(BX_part, 1/ampfactor, 1, chebfi%gpu_option)
+      call xgBlock_scale(BX_part, 1/ampfactor, 1)
     end if
   end do
 
