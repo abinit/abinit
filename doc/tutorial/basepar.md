@@ -192,7 +192,7 @@ cd Work_paral
 cp ../tbasepar_1.abi .
 ```
 
-{% dialog tests/tutoparal/Input/tbasepar_1.abi %}
+{% dialog tests/tutorial/Input/tbasepar_1.abi %}
 
 You can start immediately a sequential run with
 
@@ -341,7 +341,7 @@ parallelism with as few as two processors: the k-point parallelism has
 precedence over the spin parallelism, so that with 2 processors, one ought
 to have only one k-point to see the spin parallelism.
 
-{% dialog tests/tutoparal/Input/tbasepar_2.abi %}
+{% dialog tests/tutorial/Input/tbasepar_2.abi %}
 
 If needed, modify the input file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
@@ -351,7 +351,7 @@ at the output and log files in the sequential and parallel cases. They are quite
 Actually, apart the mention of two processors and the speedup, there is no other
 manifestation of the parallelism.
 
-{% dialog tests/tutoparal/Refs/tbasepar_2.abo %}
+{% dialog tests/tutorial/Refs/tbasepar_2.abo %}
 
 If you have more than 2 processors at hand, you might increase the value of
 [[ngkpt]], so that more than one k-point is available, and see that the
