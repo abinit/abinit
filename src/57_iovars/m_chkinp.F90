@@ -3858,8 +3858,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! Chebyshev
    if(dt%wfoptalg == 1 .or. dt%wfoptalg == 111) then
-     if(dt%nspinor > 1 .and. dt%wfoptalg == 111) then
-       msg='Nspinor > 1 not yet compatible with wfoptalg 1'
+     if(dt%nspinor > 1 .and. dt%wfoptalg == 1) then
+       msg='Nspinor > 1 not yet compatible with wfoptalg 1. Use chebfi V2 instead (wfoptalg=111).'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
      if(dt%usefock > 0) then
@@ -3883,7 +3883,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 !  slk_rankpp
    call chkint_ge(0,0,cond_string,cond_values,ierr,'slk_rankpp',dt%slk_rankpp,0,iout)
-
 
 !  wtk
 !  Check that no k point weight is < 0:
