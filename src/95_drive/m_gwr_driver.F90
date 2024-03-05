@@ -1212,7 +1212,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! Gamma only --> we don't need to rotate wavefunctions in the BZ
  if (k_is_gamma) enforce_sym = 0
 
-
  call sort_gvecs(npw_k, kpt, cryst%gmet, ugb%kg_k, sorted_kg_k)
 
  npwvec = npw_k; gvec_max => sorted_kg_k
