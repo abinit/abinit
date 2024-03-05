@@ -3979,7 +3979,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      doccde_kq(:)=docckqde(1+bdtot_index:nband_k+bdtot_index)
 
 !    For each pair of active bands (m,n), generates the ratios
-!    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n)+omega+i*eta)
+!    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
 !    and decide to which band to attribute it.
      call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,&
 &     dtset%occopt,occ_k,occ_kq,rocceig)
