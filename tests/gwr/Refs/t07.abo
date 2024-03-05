@@ -345,8 +345,8 @@ meta: {optdriver: 6, }
 )     Maximum=    2.2576E+00  at reduced coord.    0.0000    0.0000    0.0000
 )     Minimum=    1.1446E-03  at reduced coord.    0.2500    0.2500    0.2500
    Integrated=    1.0000E+01
- setmesh: FFT mesh size selected  =    20x   20x   15
-          total number of points  =         6000
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
 
  Computing oscilator matrix elements for CC4S.
 
@@ -363,15 +363,15 @@ meta: {optdriver: 6, }
  Writing Coulomb vertex for testing purposes with ng: 4
 
  For band1: 1 , band2: 1
-  0.00000E+00  0.00000E+00  2.22623E+01 -4.12984E-16  6.94798E+00 -2.56130E-16  6.94798E+00  2.56130E-16
+  0.00000E+00  0.00000E+00  3.83207E-01 -1.55398E-17  3.83207E-01  1.55398E-17  3.83207E-01  4.29390E-18
  For band1: 1 , band2: 2
-  0.00000E+00  0.00000E+00  2.73160E+00 -2.03188E-15  7.98311E-01 -1.30404E-15  7.98311E-01 -1.08209E-15
+  0.00000E+00  0.00000E+00  4.70198E-02 -4.11631E-17  4.70198E-02 -1.05289E-16  4.70198E-02 -1.05057E-16
  For band1: 1 , band2: 3
- -0.00000E+00  0.00000E+00 -5.88605E-01  1.51908E-08 -7.45242E-02  1.92333E-09  7.45242E-02 -1.92333E-09
+  0.00000E+00  0.00000E+00 -1.01300E-02 -2.46621E-09  1.01300E-02  2.46621E-09 -1.44570E-03 -1.59709E-09
  For band1: 1 , band2: 4
-  0.00000E+00  0.00000E+00 -7.84017E-01 -2.12028E-07 -9.92657E-02 -2.68453E-08  9.92657E-02  2.68453E-08
+  0.00000E+00  0.00000E+00 -1.34919E-02  8.56489E-09  1.34919E-02 -8.56489E-09  4.33851E-02 -8.16724E-09
  For band1: 1 , band2: 5
-  0.00000E+00  0.00000E+00 -2.32501E+00 -1.07013E-07 -2.94374E-01 -1.35491E-08  2.94374E-01  1.35491E-08
+  0.00000E+00  0.00000E+00 -4.00227E-02  2.47075E-09  4.00227E-02 -2.47075E-09  1.45216E-03 -6.30571E-09
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor
