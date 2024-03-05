@@ -972,6 +972,7 @@ end subroutine ddb_bcast
 !!      (1=> non-stationary block),
 !!      (2=> stationary block),
 !!      (3=> third order derivative).
+!! omega(3)= frequency of the perturbation
 !! qphon(3,3)=wavevectors for the three possible phonons
 !!  (note : only one should be used in case of second derivative of total energy,
 !!  because we know that the second is the opposite of this value)
@@ -999,7 +1000,7 @@ end subroutine ddb_bcast
 !! SOURCE
 
 subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, & 
-& mpatpol,mpdir,rffreq,rfmagn,rfqvec)
+& mpatpol,mpdir,omega,rffreq,rfmagn,rfqvec)
 
 !Arguments -------------------------------
 !scalars
@@ -1011,16 +1012,18 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
  integer,optional,intent(in) :: mpatpol(2),mpdir(3)
  integer,optional,intent(in) :: rfmagn(4),rffreq(4),rfqvec(4)
+ real(dp),optional,intent(in) :: omega(3)
 
 !Local variables -------------------------
 !scalars
+ integer, parameter :: cvrsio9_new=20240201
  integer :: blkgam,ider,idir,idir1,idir2,idir3,ii,index,ipert,ipert1,ipert2
  integer :: ipert3,nder,ok,mpert,natom,ndir3
  character(len=500) :: msg
 !arrays
  integer :: gamma(3)
  integer,allocatable :: worki(:,:)
- real(dp) :: qpt(3)
+ real(dp) :: omega_(3),qpt(3)
  integer :: mpatpol_(2),mpdir_(3)
  integer :: rfmagn_(4),rffreq_(4),rfqvec_(4)
 
@@ -1049,6 +1052,7 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
  rffreq_(:)=0; if (present(rffreq)) rffreq_(:)=rffreq(:)
  mpatpol_(:)=0; if (present(mpatpol)) mpatpol_(:)=mpatpol(:)
  mpdir_(:)=0; if (present(mpdir)) mpdir_(:)=mpdir(:)
+ omega_(:)=0; if (present(omega)) omega_(:)=omega(:)
 
  ! In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
@@ -1152,6 +1156,19 @@ subroutine ddb_get_block(ddb, iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rfty
      end if  ! nder
 
    end if ! ok
+
+   ! Check the frequency
+!   if( ok==1 .and. ddb_version>=cvrsio9_new )then
+!TODO: This might fail if previous DDB files are read
+   if( ok==1 )then
+     if (nder == 2) then
+       if( abs( ddb%omega(1,iblok) - omega_(1) )>DDB_QTOL ) ok=0
+     else if (nder == 3) then
+       do ider=1,3
+         if( abs( ddb%omega(ider,iblok) - omega_(ider) )>DDB_QTOL ) ok=0
+       end do
+     end if
+   end if !ok
 
    ! Check if there is enough information in this blok
    if( ok==1 )then
@@ -1802,7 +1819,7 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      call littlegroup_q(nsym,qpt,symq,symrec,symafm,timrev,prtvol=0)
 
      ! Deactuvate TRS for finite-omega calculations
-     if (any(ddb%omega(:,iblok) > tol8)) then
+     if (any(abs(ddb%omega(:,iblok)) > tol8)) then
        timrev=0
      end if
 
@@ -4872,6 +4889,7 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
      ddb%typ(cnt)     = ddb_lw%typ(ii)
      ddb%nrm(:,cnt)   = ddb_lw%nrm(:,ii)
      ddb%qpt(:,cnt)   = ddb_lw%qpt(:,ii)
+     ddb%omega(:,cnt) = ddb_lw%omega(:,ii)
    end if
  end do
 

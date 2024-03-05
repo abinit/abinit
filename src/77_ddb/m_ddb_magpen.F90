@@ -98,7 +98,7 @@ contains
  logical :: qeq0
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
- real(dp) :: qphnrm(3),qphon(3,3)
+ real(dp) :: omega(3),qphnrm(3),qphon(3,3)
  complex(dpc) :: epsilon(3,3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
@@ -134,10 +134,12 @@ contains
  do kblok=1,nblok
 
    ! Look for the spin-susceptibility block in the DDB
+   omega=zero
    qphon=zero
    qphon(:,1)=ddb%qpt(1:3,kblok)
    qeq0=(sqrt(sum(qphon(:,1)**2))<tol8)
    qphnrm(:)=ddb%nrm(1,kblok)
+   omega(1)=ddb%omega(1,kblok)
    rfphon(1:2)=0
    rfelfd(1:2)=0
    rfstrs(1:2)=0
@@ -153,7 +155,7 @@ contains
    call wrtout([std_out, ab_out], msg)
 
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-  & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
+  & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
 
    ! Calculate and write the spin-susceptibility matrices
    if (iblok /= 0) then
@@ -187,7 +189,7 @@ contains
    end if
 
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-  & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
+  & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
 
    ! Then electric field
    ! Look for the induced magnetic moments block in the DDB
@@ -203,10 +205,8 @@ contains
        rfmagn(1)= 2
      end if
 
-     WRITE(*,*) "ENTRA"
-
      call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, &
-   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn)
+   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn)
    end if
 
    if (iblok /= 0 .or. jblok /=0) then
@@ -225,7 +225,7 @@ contains
    
    !IFCs block
    rfphon(1:2)=1
-   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (iblok /= 0 ) then
      call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
@@ -236,7 +236,7 @@ contains
    if (qeq0) then
      rfphon(1:2)=1
      rfelfd(1:2)=2
-     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+     call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    end if
    if (jblok /= 0 ) then
      call mp_zeff(barmagsus,ddb%val,jblok,magsus,mpert,mpopt,&
@@ -248,7 +248,7 @@ contains
    if (qeq0) then
      rfphon(:)=0
      rfelfd(1:2)=2
-     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp)
+     call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    end if
    if (lblok /= 0 ) then
      call mp_diel(barmagsus,ddb%val,epsilon,lblok,magsus,mpert,mpopt,&
@@ -274,6 +274,7 @@ contains
      qphon=zero
      qphon(:,1)=ddb_lw%qpt(1:3,kblok)
      qphnrm(:)=ddb_lw%nrm(1,kblok)
+     omega(:)=ddb_lw%omega(:,kblok)
      rfphon(1:3)=0
      rfelfd(1:3)=0
      rfstrs(1:3)=0
@@ -289,13 +290,13 @@ contains
      ' q point 1  ', qphon(:,1),ch10,&
      ' q point 2  ', qphon(:,2),ch10,&  
      ' q point 3  ', qphon(:,3),ch10,&  
-     ' frequency 1', ddb%omega(1,kblok), ch10,&
-     ' frequency 2', ddb%omega(2,kblok), ch10,&
-     ' frequency 3', ddb%omega(3,kblok), ch10
+     ' frequency 1', ddb_lw%omega(1,kblok), ch10,&
+     ' frequency 2', ddb_lw%omega(2,kblok), ch10,&
+     ' frequency 3', ddb_lw%omega(3,kblok), ch10
      call wrtout([std_out, ab_out], msg)
 
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
 
      if (iblok /= 0) then
        call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
@@ -314,7 +315,7 @@ contains
      end if
 
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-   & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+   & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
 
      ! Then electric field
      jblok=0
@@ -323,7 +324,7 @@ contains
        rfelfd(2)=2
 
        call ddb_lw%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-     & mpatpol=mpatpol,mpdir=mpdir,rfmagn=rfmagn,rffreq=rffreq)
+     & mpatpol=mpatpol,mpdir=mpdir,omega=omega,rfmagn=rfmagn,rffreq=rffreq)
      end if
 
      if (iblok /= 0 .or. jblok /=0) then
@@ -338,7 +339,7 @@ contains
      rfelfd(:)=0
      rfmagn(:)=0
      call ddb_lw%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, 33, &
-   & rffreq=rffreq)
+   & omega=omega,rffreq=rffreq)
      if (iblok /= 0 ) then
        call berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,ddb_lw%val,iblok, &
      & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
