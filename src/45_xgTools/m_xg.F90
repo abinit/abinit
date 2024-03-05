@@ -1293,7 +1293,7 @@ contains
   !! NAME
   !! xgBlock_gemmR
 
-  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
+  subroutine xgBlock_gemmR(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
 
     character,        intent(in   )           :: transa
     character,        intent(in   )           :: transb
@@ -1302,11 +1302,13 @@ contains
     type(xgBlock_t),  intent(in   )           :: xgBlockB
     double precision, intent(in   )           :: beta
     type(xgBlock_t),  intent(inout)           :: xgBlockW
+    integer,optional, intent(in)              :: comm
 
-    complex(kind=8)  :: calpha
-    complex(kind=8)  :: cbeta
-    integer          :: K
-    double precision :: tsec(2)
+    complex(kind=8)   :: calpha
+    complex(kind=8)   :: cbeta
+    character(kind=1) :: transa_,transb_
+    integer           :: K
+    double precision  :: tsec(2)
 
 #if defined HAVE_OPENMP_OFFLOAD
 #if !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
@@ -1329,6 +1331,13 @@ contains
       ABI_ERROR("Not same space")
     end if
 
+    if (transa /= 'n' .and. transa /= 't') then
+      ABI_ERROR("transa should be 'n' or 't'")
+    end if
+    if (transb /= 'n' .and. transb /= 't') then
+      ABI_ERROR("transb should be 'n' or 't'")
+    end if
+
     if ( transa == 'n' ) then
       K = xgBlockA%cols
       if ( xgBlockA%rows /= xgBlockW%rows ) then
@@ -1337,7 +1346,7 @@ contains
     else
       K = xgBlockA%rows
       if ( xgBlockA%cols /= xgBlockW%rows ) then
-        ABI_ERROR("rows(A)/=rows(W)")
+        ABI_ERROR("cols(A)/=rows(W)")
       end if
     end if
     if ( transb == 'n' ) then
@@ -1356,6 +1365,7 @@ contains
     select case(xgBlockA%space)
 
     case (SPACE_R,SPACE_CR)
+      ! CALL GEMM
       if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
         call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
@@ -1386,78 +1396,89 @@ contains
           beta, &
           xgBlockW%vecR, xgBlockW%LDim)
       end if
+      ! END CALL GEMM
+      call timab(tim_gemm_blas,2,tsec)
 
-        call timab(tim_gemm_blas,2,tsec)
-      if ( transa == xgBlockA%trans .and. (beta) < 1d-10) then
-        call timab(tim_gemm_mpi,1,tsec)
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
-          ! CPU waits for GPU to finish before doing MPI communications
-          call gpu_device_synchronize()
-        end if
+      ! MPI SUM
+      if ( present(comm) ) then
+        if (xmpi_comm_size(comm)>1) then
+          call timab(tim_gemm_mpi,1,tsec)
+          if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+            ! CPU waits for GPU to finish before doing MPI communications
+            call gpu_device_synchronize()
+          end if
 
-        if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
-          call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
-        else
+          if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
+            call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+          else
 #ifdef HAVE_GPU_MPI
-          ! If GPU-aware MPI is available, perform reduction on GPU buffers
+            ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          !$OMP END TARGET DATA
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
+            call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecR,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            !$OMP END TARGET DATA
 # else
-          ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
-          !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
-          call MPI_ALLREDUCE(xgBlockW%vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
-          !$OMP END TARGET DATA
-          !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
-          ABI_FREE(vecR_buf)
+            ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
+            !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+            call MPI_ALLREDUCE(xgBlockW%vecR, vecR_buf,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+            !$OMP END TARGET DATA
+            !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
+            ABI_FREE(vecR_buf)
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
-          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          !$OMP END TARGET DATA
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
+            call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            !$OMP END TARGET DATA
 # else
-          ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
-          !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
-          call MPI_ALLREDUCE(xgBlockW__vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
-          !$OMP END TARGET DATA
-          !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
-          ABI_FREE(vecR_buf)
+            ABI_MALLOC(vecR_buf,(xgBlockW%rows,xgBlockW%cols))
+            !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+            call MPI_ALLREDUCE(xgBlockW__vecR, vecR_buf,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+            !$OMP END TARGET DATA
+            !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
+            ABI_FREE(vecR_buf)
 # endif
 #endif
 #endif
 
 #else
-          ! With "regular" MPI, perform reduction by passing CPU buffers
-          call xgBlock_copy_from_gpu(xgBlockW)
-          call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
-          call xgBlock_copy_to_gpu(xgBlockW)
+            ! With "regular" MPI, perform reduction by passing CPU buffers
+            call xgBlock_copy_from_gpu(xgBlockW)
+            call xmpi_sum(xgBlockW%vecR,xgBlockW%spacedim_comm,K)
+            call xgBlock_copy_to_gpu(xgBlockW)
 #endif
+          end if
+          call timab(tim_gemm_mpi,2,tsec)
         end if
-        call timab(tim_gemm_mpi,2,tsec)
       end if
+      ! END MPI SUM
 
     case(SPACE_C)
 
+      transa_=transa
+      if (transa=='t') transa_ = 'c'
+      transb_=transb
+      if (transb=='t') transb_ = 'c'
+
+      ! CALL GEMM
       if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-        call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecC, xgBlockA%LDim, &
           xgBlockB%vecC, xgBlockB%LDim, &
@@ -1469,7 +1490,7 @@ contains
         xgBlockB__vecC => xgBlockB%vecC
         xgBlockW__vecC => xgBlockW%vecC
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecC,xgBlockB__vecC,xgBlockW__vecC)
-        call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           c_loc(xgBlockA__vecC), xgBlockA%LDim, &
           c_loc(xgBlockB__vecC), xgBlockB%LDim, &
@@ -1478,80 +1499,84 @@ contains
         !$OMP END TARGET DATA
 #endif
       else
-        call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+        call zgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
           calpha, &
           xgBlockA%vecC, xgBlockA%LDim, &
           xgBlockB%vecC, xgBlockB%LDim, &
           cbeta, &
           xgBlockW%vecC, xgBlockW%LDim)
       end if
-
+      ! END CALL GEMM
       call timab(tim_gemm_blas,2,tsec)
-      if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockW%trans .and. abs(beta) < 1d-10 ) then
-        call timab(tim_gemm_mpi,1,tsec)
-        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
-          ! CPU waits for GPU to finish before doing MPI communications
-          call gpu_device_synchronize()
-        end if
-
-        if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
-          call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
-        else
+      ! MPI SUM
+      if ( present(comm) ) then
+        if ( xmpi_comm_size(comm)>1 ) then
+          call timab(tim_gemm_mpi,1,tsec)
+          if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+            ! CPU waits for GPU to finish before doing MPI communications
+            call gpu_device_synchronize()
+          end if
+  
+          if (xgBlockA%gpu_option/=ABI_GPU_OPENMP) then
+            call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+          else
 #ifdef HAVE_GPU_MPI
-          ! If GPU-aware MPI is available, perform reduction on GPU buffers
+            ! If GPU-aware MPI is available, perform reduction on GPU buffers
 #if defined HAVE_OPENMP_OFFLOAD
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          !$OMP END TARGET DATA
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
+            call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            !$OMP END TARGET DATA
 # else
-          ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
-          !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
-          call MPI_ALLREDUCE(xgBlockW%vecC, vecC_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          xgBlockW%vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
-          !$OMP END TARGET DATA
-          !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
-          ABI_FREE(vecC_buf)
+            ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
+            !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+            call MPI_ALLREDUCE(xgBlockW%vecC, vecC_buf,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            xgBlockW%vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+            !$OMP END TARGET DATA
+            !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
+            ABI_FREE(vecC_buf)
 # endif
 #else
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          !$OMP END TARGET DATA
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
+            call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            !$OMP END TARGET DATA
 # else
-          ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
-          !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
-          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
-          call MPI_ALLREDUCE(xgBlockW__vecC, vecC_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
-          &    xgBlockW%spacedim_comm,K)
-          xgBlockW__vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
-          !$OMP END TARGET DATA
-          !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
-          ABI_FREE(vecC_buf)
-# endif
+            ABI_MALLOC(vecC_buf,(xgBlockW%rows,xgBlockW%cols))
+            !$OMP TARGET ENTER DATA MAP(alloc:vecC_buf)
+            !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
+            call MPI_ALLREDUCE(xgBlockW__vecC, vecC_buf,&
+            &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+            &    xgBlockW%spacedim_comm,K)
+            xgBlockW__vecC(1:xgBlockW%cols,1:xgBlockW%rows)=vecC_buf(1:xgBlockW%cols,1:xgBlockW%rows)
+            !$OMP END TARGET DATA
+            !$OMP TARGET EXIT DATA MAP(delete:vecC_buf)
+            ABI_FREE(vecC_buf)
+# endif  
 #endif
 #endif
 
 #else
-          ! With "regular" MPI, perform reduction by passing CPU buffers
-          call xgBlock_copy_from_gpu(xgBlockW)
-          call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
-          call xgBlock_copy_to_gpu(xgBlockW)
+            ! With "regular" MPI, perform reduction by passing CPU buffers
+            call xgBlock_copy_from_gpu(xgBlockW)
+            call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+            call xgBlock_copy_to_gpu(xgBlockW)
 #endif
 
+          end if
+          call timab(tim_gemm_mpi,2,tsec)
         end if
-        call timab(tim_gemm_mpi,2,tsec)
       end if
+      ! END MPI SUM
 
     end select
 
@@ -1564,29 +1589,38 @@ contains
   !! NAME
   !! xgBlock_gemmC
 
-  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW)
+  subroutine xgBlock_gemmC(transa, transb, alpha, xgBlockA, xgBlockB, beta, xgBlockW, comm)
 
-    character,       intent(in   )           :: transa
-    character,       intent(in   )           :: transb
-    complex(kind=8), intent(in   )           :: alpha
-    type(xgBlock_t), intent(in   )           :: xgBlockA
-    type(xgBlock_t), intent(in   )           :: xgBlockB
-    complex(kind=8), intent(in   )           :: beta
-    type(xgBlock_t), intent(inout)           :: xgBlockW
+    character,       intent(in   ) :: transa
+    character,       intent(in   ) :: transb
+    complex(kind=8), intent(in   ) :: alpha
+    type(xgBlock_t), intent(in   ) :: xgBlockA
+    type(xgBlock_t), intent(in   ) :: xgBlockB
+    complex(kind=8), intent(in   ) :: beta
+    type(xgBlock_t), intent(inout) :: xgBlockW
+    integer,optional,intent(in)    :: comm
 
     integer          :: K
     double precision :: tsec(2)
+    character(kind=1) :: transa_,transb_
 
     call timab(tim_gemm_blas,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
 
-    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockB%space ) then
+    if ( xgBlockA%space /= xgBlockB%space .or. xgBlockB%space /= xgBlockW%space ) then
       ABI_ERROR("Not same space")
     end if
     if ( xgBlockA%space /= SPACE_C ) then
       ABI_ERROR("Not correct space")
+    end if
+
+    if (transa /= 'n' .and. transa /= 't') then
+      ABI_ERROR("transa should be 'n' or 't'")
+    end if
+    if (transb /= 'n' .and. transb /= 't') then
+      ABI_ERROR("transb should be 'n' or 't'")
     end if
 
     if ( transa == 'n' ) then
@@ -1595,41 +1629,52 @@ contains
       K = xgBlockA%rows
     end if
 
+    transa_=transa
+    if (transa=='t') transa_ = 'c'
+    transb_=transb
+    if (transb=='t') transb_ = 'c'
+
+    ! CALL GEMM
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-      call abi_gpu_xgemm(2, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+      call abi_gpu_xgemm(2, transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
         xgBlockA%vecC, xgBlockA%LDim, &
         xgBlockB%vecC, xgBlockB%LDim, &
         beta, &
         xgBlockW%vecC, xgBlockW%LDim)
     else
-      call zgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+      call zgemm(transa_, transb_, xgBlockW%rows, xgBlockW%cols, K, &
         alpha, &
         xgBlockA%vecC, xgBlockA%LDim, &
         xgBlockB%vecC, xgBlockB%LDim, &
         beta, &
         xgBlockW%vecC, xgBlockW%LDim)
     end if
+    ! END CALL GEMM
     call timab(tim_gemm_blas,2,tsec)
-    if ( xgBlockW%spacedim_comm/= -1 .and. transa == xgBlockA%trans .and. abs(beta) < 1.d-10 ) then
-      call timab(tim_gemm_mpi,1,tsec)
-      if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
-        ! CPU waits for GPU to finish before doing MPI communications
-        call gpu_device_synchronize()
-      else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-        !FIXME We should avoid that copy using GPU Direct on systems that allow it.
-        call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
-      end if
+    ! MPI SUM
+    if (present(comm)) then
+      if (xmpi_comm_size(comm)>1) then
+        call timab(tim_gemm_mpi,1,tsec)
+        if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+          ! CPU waits for GPU to finish before doing MPI communications
+          call gpu_device_synchronize()
+        else if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+          !FIXME We should avoid that copy using GPU Direct on systems that allow it.
+          call xgBlock_copy_from_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+        end if
 
-      call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
+        call xmpi_sum(xgBlockW%vecC,xgBlockW%spacedim_comm,K)
 
-      if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-        !Putting data back on GPU
-        !FIXME Again, this could be avoided using GPU-direct
-        call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+        if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+          !Putting data back on GPU
+          !FIXME Again, this could be avoided using GPU-direct
+          call xgBlock_copy_to_gpu(xgBlockW) !FIXME To remove, collective should happen inplace
+        end if
+        call timab(tim_gemm_mpi,2,tsec)
       end if
-      call timab(tim_gemm_mpi,2,tsec)
     end if
+    ! END MPI SUM
 
   end subroutine xgBlock_gemmC
   !!***

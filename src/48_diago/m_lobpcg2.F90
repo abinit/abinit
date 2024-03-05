@@ -795,11 +795,11 @@ module m_lobpcg2
     call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self)
+    call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,lobpcg%spacecom)
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
-    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
+    call xgBlock_gemm('n','n',-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
 
     call xg_free(buffer)
 

@@ -100,7 +100,7 @@ module m_xg_ortho_RR
     call xg_init(buffer,space(X),cols(X),cols(X),comm(X),gpu_option=gpu_option)
 
     ! Compute X^TBX
-    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self)
+    call xgBlock_gemm('t','n',1.d0,X,BX,0.d0,buffer%self,comm=comm(X))
 
     ! Compute Cholesky decomposition (Upper part)
     call xgBlock_potrf(buffer%self,'u',info)
@@ -255,32 +255,32 @@ module m_xg_ortho_RR
     ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
 
     call xg_setBlock(subA,subsub,blockdim,blockdim)
-    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub)
+    call xgBlock_gemm('t','n',1.0d0,X,AX,0.d0,subsub,comm=spacecom)
 
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
       call xg_setBlock(subB,subsub,blockdim,blockdim)
-      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub)
+      call xgBlock_gemm('t','n',1.0d0,X,BX,0.d0,subsub,comm=spacecom)
     endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,2*blockdim,blockdim,fcol=blockdim+1)
-      call xgBlock_gemm(XW%trans,AW%normal,1.0d0,XW,AW,0.d0,subsub)
+      call xgBlock_gemm('t','n',1.0d0,XW,AW,0.d0,subsub,comm=spacecom)
 
       ! subB
       call xg_setBlock(subB,subsub,2*blockdim,blockdim,fcol=blockdim+1)
-      call xgBlock_gemm(XW%trans,BW%normal,1.0d0,XW,BW,0.d0,subsub)
+      call xgBlock_gemm('t','n',1.0d0,XW,BW,0.d0,subsub,comm=spacecom)
 
     end if
 
     if ( var == VAR_XWP ) then
       ! subA
       call xg_setBlock(subA,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
-      call xgBlock_gemm(XWP%trans,AP%normal,1.0d0,XWP,AP,0.d0,subsub)
+      call xgBlock_gemm('t','n',1.0d0,XWP,AP,0.d0,subsub,comm=spacecom)
 
       ! subB
       call xg_setBlock(subB,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
-      call xgBlock_gemm(XWP%trans,BP%normal,1.0d0,XWP,BP,0.d0,subsub)
+      call xgBlock_gemm('t','n',1.0d0,XWP,BP,0.d0,subsub,comm=spacecom)
 
     end if
 
@@ -377,15 +377,15 @@ module m_xg_ortho_RR
       ! Use subB as buffer
       !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
       call xgBlock_setBlock(vec%self,Cwp,blockdim,blockdim)
-      call xgBlock_gemm(X%normal,Cwp%normal,1.0d0,X,Cwp,0.d0,subB%self)
+      call xgBlock_gemm('n','n',1.0d0,X,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,X)
 
       !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(AX%normal,Cwp%normal,1.0d0,AX,Cwp,0.d0,subB%self)
+      call xgBlock_gemm('n','n',1.0d0,AX,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,AX)
 
       !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(BX%normal,Cwp%normal,1.0d0,BX,Cwp,0.d0,subB%self)
+      call xgBlock_gemm('n','n',1.0d0,BX,Cwp,0.d0,subB%self)
       call xgBlock_copy(subB%self,BX)
 
       if ( var /= VAR_X ) then
@@ -396,15 +396,15 @@ module m_xg_ortho_RR
         call xgBlock_setBlock(vec%self,Cwp,subdim-blockdim,blockdim)
 
         !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm('n','n',1.0d0,WP,Cwp,0.d0,subB%self)
         call xgBlock_copy(subB%self,P)
 
         !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm('n','n',1.0d0,AWP,Cwp,0.d0,subB%self)
         call xgBlock_copy(subB%self,AP)
 
         !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self)
+        call xgBlock_gemm('n','n',1.0d0,BWP,Cwp,0.d0,subB%self)
         call xgBlock_copy(subB%self,BP)
 
         !/* Maybe faster solution
