@@ -192,6 +192,8 @@ cd Work_paral
 cp ../tbasepar_1.abi .
 ```
 
+{% dialog tests/tutoparal/Input/tbasepar_1.abi %}
+
 You can start immediately a sequential run with
 
     abinit tbasepar_1.abi >& log 2> err &
@@ -270,7 +272,11 @@ mpirun -np 2 -machinefile cluster ../../src/main/abinit tbasepar_1.abi >& tbasep
 ```
 
 Now, examine the corresponding output file. If you have kept the output from
-the sequential job, you can make a diff between the two files. You will notice
+the sequential job, you can make a diff between the two files. 
+
+{% dialog tests/tutorial/Refs/tbasepar_1.abo %}
+
+You will notice
 that the numerical results are quite identical. You will also see that 182
 k-points have been kept in the memory in the sequential case (keyword `mkmem`), while 91
 k-points have been kept in the memory (per processor !) in the parallel case.
@@ -334,6 +340,9 @@ This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
 precedence over the spin parallelism, so that with 2 processors, one ought
 to have only one k-point to see the spin parallelism.
+
+{% dialog tests/tutoparal/Input/tbasepar_2.abi %}
+
 If needed, modify the input file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
 
@@ -341,6 +350,8 @@ While the jobs are running, read the input. Then look closely
 at the output and log files in the sequential and parallel cases. They are quite similar. 
 Actually, apart the mention of two processors and the speedup, there is no other
 manifestation of the parallelism.
+
+{% dialog tests/tutoparal/Refs/tbasepar_2.abo %}
 
 If you have more than 2 processors at hand, you might increase the value of
 [[ngkpt]], so that more than one k-point is available, and see that the
