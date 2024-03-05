@@ -21,6 +21,7 @@ nav:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
+    - Abitk: guide/abitk.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
     - aTDEP: guide/atdep.md
@@ -101,6 +102,7 @@ nav:
     - topics/MagMom.md
     - topics/MolecularDynamics.md
     - topics/multidtset.md
+    - topics/NMR.md
     - topics/nonlinear.md
     - topics/Optic.md
     - topics/Output.md
