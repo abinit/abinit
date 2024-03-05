@@ -6880,7 +6880,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
        ! Comparison between the q points and their symmetric points
        ! and the set of q points which samples the entire Brillouin zone
        do iqpt=1,nqpt
-         if (qtest(iqpt,1) /= 0) cycle
+         ! if (qtest(iqpt,1) /= 0) cycle
 
          if (mod(abs(spqpt(1,iqpt)-qsym(1))+tol,1._dp)<2*tol)then
            if (mod(abs(spqpt(2,iqpt)-qsym(2))+tol,1._dp)<2*tol)then
@@ -6899,7 +6899,7 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
            end if
          end if
 
-         if (qtest(iqpt,1) /= 0) cycle
+         ! if (qtest(iqpt,1) /= 0) cycle
 
          if (mod(abs(spqpt(1,iqpt)-qsym(4))+tol,1._dp)<2*tol)then
            if (mod(abs(spqpt(2,iqpt)-qsym(5))+tol,1._dp)<2*tol)then
