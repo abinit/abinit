@@ -65,8 +65,8 @@ module m_gwr_driver
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_pwaves_lmn,  only : paw_pwaves_lmn_t, paw_pwaves_lmn_init, paw_pwaves_lmn_free
  use m_pawpwij,         only : pawpwff_t, pawpwff_init, pawpwff_free, paw_rho_tw_g
- use m_kg,              only : getph !, getcut
- use m_wfd,             only : test_charge
+ use m_kg,              only : getph
+ use m_wfd,             only : wfd_init, wfd_t, test_charge
  use m_pspini,          only : pspini
  use m_paw_correlations,only : pawpuxinit
  use m_paw_dmft,        only : paw_dmft_type
@@ -177,6 +177,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(mpi_type) :: mpi_enreg_seq
  type(gwr_t) :: gwr
  type(wfk_t) :: owfk
+ type(wfd_t) :: hyb_wfd
 !arrays
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij
@@ -683,11 +684,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
-   !if (dtset%usefock == 1) then
-   !  ! Initialize data_type fock for the calculation. See also m_scfcv_core.
-   !  ABI_CHECK(dtset%usepaw == 0, "FOCK with PAW not coded")
-   !  !call fock_from_wfk(fock, dtset, cryst, pawang, pawfgr, pawtab)
-   !end if
+   if (dtset%usefock == 1) then
+     call get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
+     !call hyb_wfd%free()
+   end if
 
    if (write_wfk) then
      ! Master writes header and Fortran record markers
@@ -701,6 +701,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      call xmpi_barrier(comm)
    end if
 
+  ! Build H_k(g,g') for each k-point and spint and diagonalize the Hamiltoniana with Scalapack
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
@@ -752,6 +753,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      end do ! ik_ibz
    end do ! spin
 
+   call hyb_wfd%free()
    call wrtout(std_out, " Direct diago completed by this MPI pool. Other pools might take more time if k != 0")
 
    call xmpi_sum_master(diago_info, master, comm, ierr)
@@ -942,6 +944,119 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 end subroutine gwr_driver
 !!***
 
+! Read the WFK file compute with HYBRID functionql
+subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),intent(in) :: cryst
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(wfd_t),intent(out) :: hyb_wfd
+ integer,intent(in) :: comm
+ integer,intent(in) :: ngfftc(18)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: nprocs, my_rank, ierr, b1, b2
+ integer :: mband, nkibz, nsppol, spin, ik_ibz, ikcalc
+ !real(dp) :: cpu, wall, gflops
+ character(len=5000) :: msg
+ type(ebands_t) :: hyb_ebands
+ type(hdr_type) :: wfk_hdr
+ type(crystal_t) :: wfk_cryst
+ character(len=fnlen) :: wfk_path
+ integer :: units(2)
+ integer,allocatable :: tmp_kstab(:,:,:), nband(:,:), wfd_istwfk(:)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+
+!************************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ units(:) = [std_out, ab_out]
+
+ wfk_path = dtfil%fnamewffk
+ if (my_rank == master) then
+   if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+      ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
+   end if
+   call wrtout(units, sjoin("- Reading HYBRID states from WFK file:", wfk_path))
+ end if
+
+ ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+ call xmpi_bcast(wfk_path, master, comm, ierr)
+
+ ! Construct crystal and hyb_ebands from the GS WFK file.
+ hyb_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+ call wfk_hdr%vs_dtset(dtset)
+
+ wfk_cryst = wfk_hdr%get_crystal()
+ if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
+   ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
+ end if
+ !call wfk_cryst%print(header="crystal structure from WFK file")
+ call wfk_cryst%free()
+ ! TODO: Add more consistency checks e.g. nkibz,...
+ !cryst = wfk_hdr%get_crystal()
+ !call cryst%print(header="crystal structure from WFK file")
+
+
+ nkibz = hyb_ebands%nkpt; nsppol = hyb_ebands%nsppol
+
+#if 0
+ ! Don't take mband from hyb_ebands but compute it from gwr%bstop_ks
+ mband = maxval(gwr%bstop_ks) !; mband = hyb_ebands%mband
+
+ ! Initialize the wave function descriptor.
+ ! Only wavefunctions for the symmetrical imagine of the k wavevectors
+ ! treated by this MPI rank are stored.
+ ABI_MALLOC(nband, (nkibz, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
+ nband = mband; bks_mask = .False.; keep_ur = .False.
+
+ !ABI_ICALLOC(tmp_kstab, (2, nkibz, nsppol))
+ do spin=1,nsppol
+   do ik_ibz=1,nkibz
+     !ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
+     tmp_kstab(:, ik_ibz, spin) = [b1, b2]
+     bks_mask(b1:b2, ik_ibz, spin) = .True.
+     end associate
+   end do
+ end do
+#endif
+
+ ! Impose istwfk = 1 for all k-points.
+ ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
+
+ ABI_MALLOC(wfd_istwfk, (nkibz))
+ wfd_istwfk = 1
+
+ call wfd_init(hyb_wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb_ebands%kptns, ngfftc, &
+               dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
+
+
+ call hyb_wfd%print(header="Wavefunctions for GWR calculation")
+
+ ABI_FREE(nband)
+ ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
+ ABI_FREE(bks_mask)
+
+ call ebands_free(hyb_ebands)
+ call wfk_hdr%free()
+
+ ! Read KS wavefunctions.
+ call hyb_wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+
+
+end subroutine get_hyb_wfd
+!!***
+
 !!****f* m_gwr_driver/cc4s_write_eigens
 !! NAME
 !!  cc4s_write_eigens
@@ -1029,6 +1144,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  use m_fft,           only : uplan_t ! fft_ug, fft_ur,
  use m_vcoul,         only : vcgen_t
  use m_pstat,         only : pstat_t
+ use m_sort,          only : sort_gvecs
  use m_pawpwij,       only : pawpwij_t, pawpwij_init, pawpwij_free
 
 !Arguments ------------------------------------
@@ -1058,7 +1174,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  !type(pstat_t) :: pstat
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
- integer,allocatable,target :: m_gvec(:,:)
+ integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
  complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
@@ -1079,9 +1195,11 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
  ! m_gvec is the g-sphere for the oscillators M computed from ecuteps (half-sphere if wavefunctions have TR).
+ ! Setmesh assumes g-vectors sorted by norma so use kin_sorted = True and sort ug%kg_k
  kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
+ !print *, "ugb%istwf_k:", ugb%istwf_k
  m_istwfk = 1; if (ugb%istwf_k == 2) m_istwfk = 2
- call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.False.)
+ call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.True.)
 
  ! Setup FFT mesh
  u_ngfft = dtset%ngfft
@@ -1094,11 +1212,16 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! Gamma only --> we don't need to rotate wavefunctions in the BZ
  if (k_is_gamma) enforce_sym = 0
 
- npwvec = npw_k; gvec_max => ugb%kg_k
+
+ call sort_gvecs(npw_k, kpt, cryst%gmet, ugb%kg_k, sorted_kg_k)
+
+ npwvec = npw_k; gvec_max => sorted_kg_k
  if (m_npw > npw_k) then
    npwvec = m_npw; gvec_max => m_gvec
  end if
  call setmesh(cryst%gmet, gvec_max, u_ngfft, npwvec, m_npw, npw_k, u_nfft, method, mG0, cryst, enforce_sym, unit=std_out)
+ ABI_FREE(sorted_kg_k)
+
  u_mgfft = maxval(u_ngfft(1:3))
  qpt = zero
 

@@ -6128,7 +6128,7 @@ MPI process 2 uses GPU card 2.
 MPI processes 0, 2 and 4 use GPU card 0, MPI processes 1 and 3 use GPU card 1;
 the 3rd GPU card is not used.
 
-GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia): 
+GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia):
 "nvidia-smi" or "lspci | grep -i nvidia".
 """,
 ),
@@ -19670,6 +19670,7 @@ Variable(
     vartype="real",
     topics=['SCFControl_basic'],
     dimensions="scalar",
+    mnemonics="TOLerance on the Wavefunction Residuals",
     defaultval=0.0,
     added_in_version="before_v9",
     text=r"""

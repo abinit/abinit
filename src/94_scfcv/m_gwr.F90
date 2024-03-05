@@ -2093,8 +2093,8 @@ subroutine gwr_load_kcalc_wfd(gwr, wfk_path, tmp_kstab)
  wfd_istwfk = 1
 
  call wfd_init(wfd, gwr%cryst, gwr%pawtab, gwr%psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
-   dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
-   dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm%value)
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ks_ebands%kptns, gwr%g_ngfft, &
+               dtset%nloalg, dtset%prtvol, dtset%pawprtvol, gwr%comm%value)
 
  call wfd%print(header="Wavefunctions for GWR calculation")
 
