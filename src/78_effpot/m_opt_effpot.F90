@@ -134,7 +134,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   !if the number of atoms in reference supercell into effpot is not correct,
   !wrt to the number of atom in the hist, we set map the hist and set the good supercell
   if (natom_sc /= eff_pot%supercell%natom) then
-    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE.)
+    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE., hist_for_map=hist)
   end if
 
   !we get the size of the supercell in the hist file
@@ -444,7 +444,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !if the number of atoms in reference supercell into effpot is not correct,
   !wrt to the number of atom in the hist, we set map the hist and set the good supercell
   if (natom_sc /= eff_pot%supercell%natom) then
-    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE.)
+    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE., hist_for_map=hist)
   end if
 
   !Check if input of order is correct

@@ -3373,7 +3373,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size, hist_for_map)
 
 !Arguments ------------------------------------
 !scalars
@@ -3382,6 +3382,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
+ type(abihist),intent(in) :: hist_for_map
  integer,optional,allocatable,intent(inout) :: iatfix(:,:)
  integer,optional,intent(in) :: sc_size(3)
 !Local variables-------------------------------
@@ -3411,7 +3412,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
 
 ! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
- rprimd_hist(:,:) = hist%rprimd(:,:,1)
+ rprimd_hist(:,:) = hist_for_map%rprimd(:,:,1)
 
  if(present(sc_size))then
     ncell(:) = sc_size
@@ -3507,7 +3508,7 @@ do ia=1,natom_hist !Loop over all reference atoms
    shift = 0
    do ib=1,natom_hist !Loop over all atoms of distorted structure
       !Calculate list of reduced distance between reference atom ia and all others
-      list_reddist(:,ib) = hist%xred(:,ib,1) - xred_ref(:,ia)
+      list_reddist(:,ib) = hist_for_map%xred(:,ib,1) - xred_ref(:,ia)
       !If the distorted atom is further away than half the unit cell shift it.
       if(list_reddist(1,ib) > 0.5)then
          list_reddist(1,ib) = 1 -  list_reddist(1,ib)
@@ -3584,7 +3585,6 @@ end do  ! ia
    end if
 
 ! Allocate hist datatype
-print *, "natom_hist", natom_hist
 block
 type(abihist) :: hist_tmp
    call abihist_init(hist_tmp,natom_hist,nstep_hist,.false.,.false.)
