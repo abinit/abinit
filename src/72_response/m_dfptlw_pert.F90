@@ -79,7 +79,7 @@ contains
 !!   - 1st-order WFs DDK and 2nd-order WF D2_DKDK (d2_dkdk_f)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2021 ABINIT group (MR)
+!! Copyright (C) 2018-2022 ABINIT group (MR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
