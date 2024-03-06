@@ -1607,7 +1607,7 @@ Variable(
     abivarname="chkparal",
     varset="gstate",
     vartype="integer",
-    topics=['parallelism_useful']
+    topics=['parallelism_useful'],
     dimensions="scalar",
     defaultval=1,
     mnemonics="CHecK whether the PARALelism is adequate",
