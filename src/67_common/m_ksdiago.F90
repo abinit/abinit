@@ -58,7 +58,6 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
- !use m_fock,              only : fock_type
 
  implicit none
 
@@ -861,11 +860,12 @@ end subroutine init_ddiago_ctl
 !!
 !! FUNCTION
 !!  This routine performs the direct diagonalization of the Kohn-Sham Hamiltonian
-!!  for a given k-point and spin using Scalapack/ELPA
+!!  for a given k-point and spin using Scalapack/ELPA.
 !!
 !! INPUTS
+!!  spin: spin index.
 !!  kpoint(3)
-!!  prtvol=Integer Flags  defining verbosity level
+!!  prtvol=Verbosity level
 !!  mgfftc=maximum size of 1D FFTs (coarse mesh).
 !!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
 !!         (nfftf=nfft for norm-conserving potential runs)
@@ -898,7 +898,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer,intent(inout) :: nband_k
  type(crystal_t),intent(in) :: cryst
  type(pseudopotential_type),intent(in) :: psps
- !type(fock_type),intent(in) :: fock
  type(pawfgr_type),intent(in) :: pawfgr
 !arrays
  integer,intent(in) :: ngfftc(18)
@@ -945,8 +944,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
 
  ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
- ! Check that fock is present if want to use fock option
- !usefock = (dtset%usefock==1 .and. associated(fock))
 
  !====================
  !=== Check input ====
@@ -1179,14 +1176,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_FREE(cwaveprj)
 
  ! =================
- ! Add fock operator
+ ! Add Fock operator
  ! =================
- !if (dtset%usefock == 1) then
- !  ABI_CHECK(dtset%usepaw == 0, "FOCK WITH PAW NOT CODED!")
- !  do ig2=1, npwps, batch_size
- !    !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras, ghc, bras_are_g=.True.)
- !  end do
- !end if
+ if (dtset%usefock == 1) then
+   ABI_CHECK(dtset%usepaw == 0, "FOCK WITH PAW NOT CODED!")
+   !do ig2=1, npwps, batch_size
+   !  !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras, ghc, bras_are_g=.True.)
+   !end do
+ end if
 
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
@@ -1194,7 +1191,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_MALLOC(eig_ene, (h_size))
  !print *, "ghg_trace:", ghg_mat%get_trace()
 
- ! Change size block and, if possible, use 2D rectangular grid of processors for diagonalization
+ ! Change size block. Use 2D rectangular grid of processors for diagonalization, if possible.
  call proc_4diag%init(comm)
  call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag, free=.True.)
  if (psps%usepaw == 1) call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag, free=.True.)
@@ -1241,11 +1238,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (dtset%prtvol > 0 .and. my_rank == master) then
    ! Write eigenvalues.
    frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
-   write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin)
-   call wrtout(std_out, msg)
+   write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
 
-   write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,nband_k))
-   call wrtout(std_out, msg)
+   write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,nband_k)); call wrtout(std_out, msg)
    if (nband_k > 9 ) then
      do jj=10,nband_k,9
        write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k)); call wrtout(std_out, msg)
