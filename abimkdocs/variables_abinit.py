@@ -13921,7 +13921,7 @@ Compatible with ground-state calculations and response function calculations.
 
 This parallelization concerns only a small part of the whole calculation in the sequential case.
 When using parallelism, it might be that this small part becomes predominant if [[paral_atom]] is not activated.
-""
+"""
 ),
 
 Variable(
