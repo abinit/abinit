@@ -7,7 +7,7 @@
 !! used to define fft grids within Abinit
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2023 ABINIT group (LG, PMA)
+!! Copyright (C) 2000-2024 ABINIT group (LG, PMA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
