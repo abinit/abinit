@@ -169,7 +169,7 @@ module m_lobpcg2
 
 
   subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
-&      space, spacecom, paral_kgb, comm_rows, comm_cols, gpu_option)
+&      space, spacecom, paral_kgb, me_g0, comm_rows, comm_cols, gpu_option)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -181,6 +181,7 @@ module m_lobpcg2
     integer         , intent(in   ) :: space
     integer         , intent(in   ) :: spacecom
     integer         , intent(in   ) :: paral_kgb
+    integer         , intent(in   ) :: me_g0
     integer         , intent(in   ) :: gpu_option
     double precision :: tsec(2)
     double precision :: advice
@@ -248,15 +249,16 @@ module m_lobpcg2
 !      end if
 !    end if
 
-    call lobpcg_allocateAll(lobpcg,space)
+    call lobpcg_allocateAll(lobpcg,space,me_g0)
     call timab(tim_init,2,tsec)
   end subroutine lobpcg_init
 
 
-  subroutine lobpcg_allocateAll(lobpcg,space)
+  subroutine lobpcg_allocateAll(lobpcg,space,me_g0)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: space
+    integer         , intent(in   ) :: me_g0
     integer :: spacedim
     integer :: blockdim
 
@@ -266,21 +268,21 @@ module m_lobpcg2
     call lobpcg_free(lobpcg) ! Make sure everything is not allocated and
     ! pointer point to null()
 
-    call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
+    call xg_init(lobpcg%XWP,space,spacedim,3*blockdim,lobpcg%spacecom,me_g0=me_g0,gpu_option=lobpcg%gpu_option)
     call xg_setBlock(lobpcg%XWP,lobpcg%X,spacedim,blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%W,spacedim,blockdim,fcol=blockdim+1)
     call xg_setBlock(lobpcg%XWP,lobpcg%P,spacedim,blockdim,fcol=2*blockdim+1)
     call xg_setBlock(lobpcg%XWP,lobpcg%XW,spacedim,2*blockdim)
     call xg_setBlock(lobpcg%XWP,lobpcg%WP,spacedim,2*blockdim,fcol=blockdim+1)
 
-    call xg_init(lobpcg%AXWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
+    call xg_init(lobpcg%AXWP,space,spacedim,3*blockdim,lobpcg%spacecom,me_g0=me_g0,gpu_option=lobpcg%gpu_option)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AX,spacedim,blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AW,spacedim,blockdim,fcol=blockdim+1)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AP,spacedim,blockdim,fcol=2*blockdim+1)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AXW,spacedim,2*blockdim)
     call xg_setBlock(lobpcg%AXWP,lobpcg%AWP,spacedim,2*blockdim,fcol=blockdim+1)
 
-    call xg_init(lobpcg%BXWP,space,spacedim,3*blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
+    call xg_init(lobpcg%BXWP,space,spacedim,3*blockdim,lobpcg%spacecom,me_g0=me_g0,gpu_option=lobpcg%gpu_option)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BX,spacedim,blockdim)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BW,spacedim,blockdim,fcol=blockdim+1)
     call xg_setBlock(lobpcg%BXWP,lobpcg%BP,spacedim,blockdim,fcol=2*blockdim+1)
@@ -288,8 +290,8 @@ module m_lobpcg2
     call xg_setBlock(lobpcg%BXWP,lobpcg%BWP,spacedim,2*blockdim,fcol=blockdim+1)
 
     if ( lobpcg%nblock /= 1 ) then
-      call xg_init(lobpcg%AllBX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-      call xg_init(lobpcg%AllAX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
+      call xg_init(lobpcg%AllBX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom,me_g0=me_g0,gpu_option=lobpcg%gpu_option)
+      call xg_init(lobpcg%AllAX0,space,spacedim,lobpcg%neigenpairs,lobpcg%spacecom,me_g0=me_g0,gpu_option=lobpcg%gpu_option)
     else
       lobpcg%AllBX0%self = lobpcg%BX
       lobpcg%AllAX0%self = lobpcg%AX
@@ -781,7 +783,7 @@ module m_lobpcg2
     integer :: previousBlock
     integer :: blockdim
     integer :: spacedim
-    !integer :: shift
+    integer :: space_buf
     type(xg_t) :: buffer
     double precision :: tsec(2)
 
@@ -792,7 +794,11 @@ module m_lobpcg2
     spacedim = lobpcg%spacedim
     previousBlock = (iblock-1)*lobpcg%blockdim
 
-    call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
+    space_buf = space(var)
+    if (space(var)==SPACE_CR) then
+      space_buf = SPACE_R
+    end if
+    call xg_init(buffer,space_buf,previousBlock,blockdim,lobpcg%spacecom,gpu_option=lobpcg%gpu_option)
 
     ! buffer = BX0^T*X
     call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,lobpcg%spacecom)
