@@ -1238,6 +1238,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
  call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
  sqrt_vc(1) = zero
+ !sqrt_vc(1) = sqrt(vcgen%i_sz)
  call vcgen%free()
 
  if (my_rank == master) then
