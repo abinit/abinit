@@ -277,7 +277,7 @@ end subroutine exc_skip_bshdr_mpio
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  hsize=Size of the Hamiltonian.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  [Bsp]<excparam>=Structure storing the parameters of the run. If present the
 !!    routine will perform additional consistency checks to make sure that
 !!    the content of the file is consistent with the present run.
@@ -1076,7 +1076,7 @@ function offset_in_file(row_glob,col_glob,size_glob,nsblocks,sub_block,bsize_elm
    jj = col_glob
    if (ii>size_glob(1)/2) ii = ii - size_glob(1)/2 ! Wrap the index.
    if (jj>size_glob(2)/2) jj = jj - size_glob(2)/2
-   if (jj<ii) then ! Exchange the indeces since the symmetric element is read.
+   if (jj<ii) then ! Exchange the indices since the symmetric element is read.
      swap = jj
      jj   = ii
      ii   = swap
@@ -1223,7 +1223,7 @@ end subroutine exc_read_rblock_fio
 !!  Bsp<excparam>=Structure storing the parameters of the run.
 !!  eig_fname=The name of the file storing the excitonic eigenvectors.
 !!  nvec=Number of excitonic states to analyze.
-!!  vec_idx(nvec)=List with the indeces of the excitonic states sorted in ascending order.
+!!  vec_idx(nvec)=List with the indices of the excitonic states sorted in ascending order.
 !!  out_fname=The name of the file where the results are written.
 !!
 !! OUTPUT

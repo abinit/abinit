@@ -859,7 +859,7 @@ end subroutine cohsex_me
 !! epsm1q_o(npwc,npwc)= contains $\tilde epsilon^{-1}(q,w=0) - \delta_{G Gp}$ for
 !!  the particular q-point considered in the sum
 !! wfg2_jk(nsig_ab*nfftot)= Fourier Transform of $\u_{jb k}^*(r) u_{kb k}$
-!!  jb,kb=left and righ band indeces definining the left and right states where the
+!!  jb,kb=left and righ band indices definining the left and right states where the
 !!  partial contribution to the matrix element of $\Sigma_{COH}$ is evaluated
 !!
 !! OUTPUT
