@@ -1614,18 +1614,25 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
-There are several checks of the non-detrimental effect of input variables with respect to each others.
-The case of irrelevance is to be treated differently, whether the user is knowledgeable enough -or not- of the action in ABINIT.
+It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy 
+of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
 Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
-when they are booked for a run that cannot use them. For example, the user might blame ABINIT for being slow while the user has simply not activated parallelism. However, if the user correctly understand the parallelism,
-it might be more convenient to live with irrelevant variables. This is especially the case for high-throughput calculations
+when they are booked for a run that cannot use these. 
+Accordingly, the user might blame ABINIT for being slow while the user has simply not activated 
+the relevant parallelism, or activated an irrelevant parallelism. 
+
+However, if the user correctly understand the parallelism,
+it might be more convenient to leave in the input file irrelevant variables. This is especially the case for high-throughput calculations
 driven by workflows developed for earlier versions of ABINIT.
 
-The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism.
-The following relevances and adequacies are checked at present:
+The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism,
+thus hopefully preventing some users to loose computing power.
+
+The following relevances and adequacies are checked at present if [[chkparal]]=1 :
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
-the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW); 
-the input variable [[gwpara]] is relevant only for [[optdriver]]=3 or 4 (screening or GW self-energy calculations), and is expected to be non-zero in these cases (the default value 2, is fine in all the other cases).
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW). 
+
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
 """,
 ),
 
@@ -13910,8 +13917,11 @@ Variable(
 Relevant only for PAW calculations.
 This keyword controls the parallel distribution of memory over atomic sites.
 Calculations are also distributed using the "kpt-band" communicator.
-Compatible with ground-state calculations and response function calculations
-""",
+Compatible with ground-state calculations and response function calculations.
+
+This parallelization concerns only a small part of the whole calculation in the sequential case.
+When using parallelism, it might be that this small part becomes predominant if [[paral_atom]] is not activated.
+""
 ),
 
 Variable(

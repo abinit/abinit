@@ -1236,11 +1236,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
-   if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
-       cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-       cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
-       call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
-   end if
+!  if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
+!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!      cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
+!      call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
+!  end if
 
    ! gwrpacorr
    if(dt%gwrpacorr>0) then
