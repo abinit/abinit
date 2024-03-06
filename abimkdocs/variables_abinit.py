@@ -1604,6 +1604,32 @@ In all cases, the check is performed at most every 2 seconds of CPU time.
 ),
 
 Variable(
+    abivarname="chkparal",
+    varset="gstate",
+    vartype="integer",
+    topics=['parallelism_useful']
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK whether the PARALelism is adequate",
+    added_in_version="before_v9",
+    text=r"""
+Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
+There are several checks of the non-detrimental effect of input variables with respect to each others.
+The case of irrelevance is to be treated differently, whether the user is knowledgeable enough -or not- of the action in ABINIT.
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+when they are booked for a run that cannot use them. For example, the user might blame ABINIT for being slow while the user has simply not activated parallelism. However, if the user correctly understand the parallelism,
+it might be more convenient to live with irrelevant variables. This is especially the case for high-throughput calculations
+driven by workflows developed for earlier versions of ABINIT.
+
+The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism.
+The following relevances are checked at present:
+the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW); 
+the input variable [[gwpara]] is relevant only for [[optdriver]]=3 or 4 (screening or GW self-energy calculations).
+""",
+),
+
+Variable(
     abivarname="chkprim",
     varset="gstate",
     vartype="integer",
@@ -4469,7 +4495,8 @@ Variable(
     mnemonics="EXPERTise of the USER",
     added_in_version="9.2.2",
     text=r"""
-If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
+If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]],
+[[chkparal]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero)
 although it is still possible to activate particular tests by specifying input variables directly in the input file.
 In the future, the level three will always be the maximum allowed value, with all checks set to zero,
