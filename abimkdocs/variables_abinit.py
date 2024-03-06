@@ -1622,10 +1622,10 @@ it might be more convenient to live with irrelevant variables. This is especiall
 driven by workflows developed for earlier versions of ABINIT.
 
 The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism.
-The following relevances are checked at present:
+The following relevances and adequacies are checked at present:
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
 the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW); 
-the input variable [[gwpara]] is relevant only for [[optdriver]]=3 or 4 (screening or GW self-energy calculations).
+the input variable [[gwpara]] is relevant only for [[optdriver]]=3 or 4 (screening or GW self-energy calculations), and is expected to be non-zero in these cases (the default value 2, is fine in all the other cases).
 """,
 ),
 
