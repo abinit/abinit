@@ -1115,7 +1115,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_MALLOC(sqrt_vc, (m_npw))
  my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
  call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
- sqrt_vc(1) = zero
+ ! Override the G=0 component with the correct value set by gw_icutcoulomb method
+ sqrt_vc(1) = sqrt(vcgen%i_sz)
  call vcgen%free()
 
  if (my_rank == master) then
@@ -1353,14 +1354,25 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          end do
        end if
 
+       if (my_rank == 0) then
+         do idat2=1,n2dat
+           band2 = band2_start + idat2 - 1
+           write(std_out,*) "I want to believe"
+           write(std_out,*) "u_nfft", u_nfft
+           write(std_out,*) "bz_vol", bz_vol
+           write(std_out,*) "cryst%ucvol", cryst%ucvol
+           write(std_out,*) "sqrt_vc", sqrt_vc(1:5)
+           write(std_out,*) band1, band2, ug12_batch(1:5,idat2)
+         end do
+      end if
+
        do idat2=1,n2dat
          !if (band1 == band2_start + idat2 -1)  then
          !  write(std_out,*) " ug12_batch(g=0,band1,band2), band", ug12_batch(1,idat2), band1, band2_start + idat2 -1
          !end if
          ! Multiply by sqrt(vc(g))
-         ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) * sqrt(cryst%ucvol) ! * sqrt(bz_vol) ! * FIXME
-         ! MG: This renormalization seems to be needed to make CC4S converge (work done by Alejandro)
-         ug12_batch(:,idat2) = ug12_batch(:,idat2) / sqrt(one * u_nfft)
+         ! This renormalization is needed to make CC4S converge (work done by AlejandroG, FabienB, MatteoG)
+         ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) / sqrt(cryst%ucvol) 
        end do
        !write(std_out,*)" max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
 
