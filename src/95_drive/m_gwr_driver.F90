@@ -1472,18 +1472,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          end do
        end if
 
-       if (my_rank == 0) then
-         do idat2=1,n2dat
-           band2 = band2_start + idat2 - 1
-           write(std_out,*) "I want to believe"
-           write(std_out,*) "u_nfft", u_nfft
-           write(std_out,*) "bz_vol", bz_vol
-           write(std_out,*) "cryst%ucvol", cryst%ucvol
-           write(std_out,*) "sqrt_vc", sqrt_vc(1:5)
-           write(std_out,*) band1, band2, ug12_batch(1:5,idat2)
-         end do
-      end if
-
        do idat2=1,n2dat
          !if (band1 == band2_start + idat2 -1)  then
          !  write(std_out,*) " ug12_batch(g=0,band1,band2), band", ug12_batch(1,idat2), band1, band2_start + idat2 -1
