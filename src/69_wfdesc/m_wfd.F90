@@ -280,7 +280,7 @@ module m_wfd
   integer :: nspden             ! Number of independent spin-density components
   integer :: nspinor            ! Number of spinor components
   integer :: nsppol             ! Number of independent spin polarizations
-  integer :: ntypat
+  integer :: ntypat             ! Number of type of atoms.
   integer :: paral_kgb          ! Option for kgb parallelism
   integer :: usepaw             ! 1 if PAW is used, 0 otherwise.
   integer :: prtvol             ! Verbosity level.
@@ -290,7 +290,6 @@ module m_wfd
   integer :: master             ! The rank of master node in comm.
   integer :: my_rank            ! The rank of my processor inside the MPI communicator comm.
   integer :: nproc              ! The number of processors in MPI comm.
-
   integer :: my_nspins          ! Number of spins treated by this MPI proc
 
   integer,allocatable :: my_nkspin(:)
@@ -5906,45 +5905,6 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 end subroutine wfdgw_pawrhoij
 !!***
-
-!!  !!****f* m_wfd/wfd_add_fock_to_ghg
-!!  !! NAME
-!!  !! wfd_add_fock_to_ghg
-!!  !!
-!!  !! FUNCTION
-!!  !!
-!!  !! INPUTS
-!!  !!
-!!  !! SIDE EFFECTS
-!!  !!
-!!  !! SOURCE
-!!
-!!  subroutine wfd_add_fock_to_ghg(wfd, spin, dtset, ebands, ghg_mat)
-!!
-!!  !Arguments ---------------------------------------------
-!!  !scalars
-!!   class(wfd_t),intent(inout) :: wfd
-!!   integer,intent(in) :: spin
-!!   type(ebands_t),intent(in) :: ebands
-!!   type(dataset_type),intent(in) :: dtset
-!!   type(matrix_scalapack) :: ghg_mat
-!!
-!!  !Local variables ---------------------------------------
-!!  !scalars
-!!   !integer :: ik_ibz, ik_bz, band_sum
-!!   !character(len=500) :: msg
-!!  !arrays
-!!
-!!  !************************************************************************
-!!
-!!   do ik_bz=1,nkbz
-!!     !ik_ibz = ??
-!!     do band_sum=1,wfd%nband(ik_ibz, spin)
-!!     end do ! band_sum
-!!   end do ! ik_bz
-!!
-!!  end subroutine wfd_add_fock_to_ghg
-!!  !!***
 
 end module m_wfd
 !!***

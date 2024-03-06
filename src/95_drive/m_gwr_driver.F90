@@ -685,8 +685,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    diago_info = zero
 
    if (dtset%usefock == 1) then
+     ! Build hyb_wfd descriptors with hybrid orbitals from WFK file.
      call get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
-     !call hyb_wfd%free()
    end if
 
    if (write_wfk) then
@@ -955,8 +955,7 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(wfd_t),intent(out) :: hyb_wfd
- integer,intent(in) :: comm
- integer,intent(in) :: ngfftc(18)
+ integer,intent(in) :: ngfftc(18), comm
 
 !Local variables ------------------------------
 !scalars
@@ -981,9 +980,9 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  wfk_path = dtfil%fnamewffk
  if (my_rank == master) then
    if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
-      ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
+     ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
    end if
-   call wrtout(units, sjoin("- Reading HYBRID states from WFK file:", wfk_path))
+   call wrtout(units, sjoin("- Reading HYBRID orbitals from WFK file:", wfk_path))
  end if
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -1002,7 +1001,6 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  ! TODO: Add more consistency checks e.g. nkibz,...
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
-
 
  nkibz = hyb_ebands%nkpt; nsppol = hyb_ebands%nsppol
 
@@ -1031,7 +1029,6 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
 
  ! Impose istwfk = 1 for all k-points.
  ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
-
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
@@ -1039,8 +1036,7 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb_ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
-
- call hyb_wfd%print(header="Wavefunctions for GWR calculation")
+ call hyb_wfd%print(header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -1050,9 +1046,8 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  call ebands_free(hyb_ebands)
  call wfk_hdr%free()
 
- ! Read KS wavefunctions.
+ ! Read wavefunctions.
  call hyb_wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
-
 
 end subroutine get_hyb_wfd
 !!***

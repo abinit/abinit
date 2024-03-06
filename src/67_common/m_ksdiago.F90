@@ -69,7 +69,8 @@ module m_ksdiago
 !!  ugb_t
 !!
 !! FUNCTION
-!!  Stores the wavefunctions for given (k-point, spin) in a PBLAS matrix distributed over bands (columns)
+!!  This object stores the wavefunctions for given (k-point, spin) in a
+!!  PBLAS matrix distributed over bands (columns)
 !!
 !! SOURCE
 
@@ -89,8 +90,6 @@ module m_ksdiago
 
    integer :: nband_k = - 1
    ! Total number of bands (global)
-
-   !integer :: usepaw
 
    integer :: my_bstart = -1, my_bstop = - 1, my_nband = - 1
    ! 1) Initial band
@@ -116,12 +115,12 @@ module m_ksdiago
 
    real(dp), contiguous, pointer :: cg_k(:,:,:)
    ! (2, npwsp * my_nband)
-   ! pointer to mat%buffer_cplx
+   ! NB: This is pointer to mat%buffer_cplx
 
    type(pawcprj_type),allocatable :: cprj_k(:,:)
    ! (natom, nspinor * my_nband))
    ! PAW projections ordered according to natom and NOT according to typat.
-   ! Note my_nband
+   ! NOTE my_nband
 
  contains
 
@@ -931,7 +930,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
  real(dp),target,allocatable :: bras(:,:)
- !real(dp),contiguous,pointer :: bras2d_ptr(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -953,8 +951,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end if
 
  if (istwf_k == 2) then
-   !ABI_ERROR("istwfk == 2 with direct diago is still under development")
-   ABI_WARNING("istwfk == 2 with direct diago is still under development")
+   ABI_ERROR("istwfk == 2 with direct diago is still under development")
+   !ABI_WARNING("istwfk == 2 with direct diago is still under development")
  end if
 
  if (dtset%ixc < 0) then
@@ -974,6 +972,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (nsppol == 1) stag = ['          ','          ']
  if (nsppol == 2) stag = ['SPIN UP:  ','SPIN DOWN:']
 
+ ! Get g-vectors from kpt and ecut.
  call get_kg(kpoint, istwf_k, ecut, cryst%gmet, npw_k, ugb%kg_k)
  npwsp = npw_k * nspinor
 
@@ -1051,8 +1050,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_MALLOC(ffnl, (npw_k, dimffnl, psps%lmnmax, psps%ntypat))
 
  call mkffnl(psps%dimekb, dimffnl, psps%ekb, ffnl, psps%ffspl, cryst%gmet, cryst%gprimd, ider, idir, psps%indlmn, &
-   ugb%kg_k, kpg_k, kpoint, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, &
-   psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
+             ugb%kg_k, kpg_k, kpoint, psps%lmnmax, psps%lnmax, psps%mpsang, psps%mqgrid_ff, nkpg, npw_k, &
+             psps%ntypat, psps%pspso, psps%qgrid_ff, cryst%rmet, psps%usepaw, psps%useylm, ylm_k, ylmgr_dum)
 
  ABI_FREE(ylm_k)
 
@@ -1131,10 +1130,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call multithreaded_getghc(cpopt, bras, cwaveprj, ghc, gsc, gs_hamk, gvnlxc, lambda0, mpi_enreg_seq, ndat, &
                              dtset%prtvol, sij_opt, tim_getghc, type_calc)
 
-   ! Now fill my local buffer of ghg/gsg
+   ! Now fill my local buffer of ghg/gsg.
    if (istwf_k == 1) then
+     ! Complex wavefunctions.
      do idat=0,ndat-1
-       ! Complex wavefunctions.
        igs = 1 + idat * npwsp; ige = igs + npwsp - 1
        ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
      end do
@@ -1146,8 +1145,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      end if
 
    else
+     ! Real wavefunctions.
      do idat=0,ndat-1
-       ! Real wavefunctions.
        igs = 1 + idat*npwsp; ige = igs + npwsp - 1
        !if (igsp2_start == 1 .or. igsp2_start == npwsp + 1 .and. idat == 0) then
        !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
@@ -1160,10 +1159,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        !gsg_mat%buffer_real(...)
        !gsg_mat%buffer_real(...)
      end if
-   end if
-
+   end if ! istwf_k
  end do ! il_g2
- call cwtime_report(" build_ks_hg1g2", cpu, wall, gflops)
+
+ call cwtime_report(" build H^KS_g1g2", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
  ABI_FREE(bras)
@@ -1175,15 +1174,99 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (psps%usepaw == 1 .and. cpopt == 0) call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
 
- ! =================
- ! Add Fock operator
- ! =================
+ ! ==================================
+ ! Compute Fock operator F^k_{g1,g2}
+ ! ==================================
  if (dtset%usefock == 1) then
-   ABI_CHECK(dtset%usepaw == 0, "FOCK WITH PAW NOT CODED!")
-   !do ig2=1, npwps, batch_size
-   !  !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras, ghc, bras_are_g=.True.)
-   !end do
- end if
+   ABI_CHECK(dtset%usepaw == 0, "FOCK DIRECT DIAGO WITH PAW IS NOT CODED!")
+   call cwtime(cpu, wall, gflops, "start")
+
+   do ig2=1, npwsp, batch_size
+     ndat = blocked_loop(ig2, npwsp, batch_size)
+
+     !bras = zero
+     !if (istwf_k == 1) then
+     !  do idat=0,ndat-1
+     !    bras(1, igsp2_start + idat * npwsp + idat) = one
+     !  end do
+     !else
+     !  ! only istwf_k == 2 is coded here. NB: there's a check at the beginning of this routine.
+     !  do idat=0,ndat-1
+     !    if (igsp2_start + idat <= npwsp) then
+     !      ! Cosine term
+     !      bras(1, igsp2_start + idat*npwsp + idat) = half
+     !      if (igsp2_start == 1) bras(1, igsp2_start + idat*npwsp + idat) = one
+     !    else
+     !      ! Sine term
+     !      !ig = igsp2_start - npwsp + 1
+     !      ig = igsp2_start - npwsp + 1 + 1  ! This should be OK
+     !      bras(2, ig + idat*npwsp + idat) = half
+     !    end if
+     !  end do
+     !end if
+
+#if 0
+     !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras_box, ghc)
+     do ik_bz=1,nkbz
+       !ik_ibz
+       ! ==========================
+       ! Sum over (occupied) bands
+       ! ==========================
+       do band_sum=1, wfd%nband(ik_ibz, spin)
+         ! Parallelism over bands.
+         !f_bsum = ebands%occ%(band_sum, ik_ibz, spin)
+         !if (abs(f_bsum) <= TOL) cycle
+         call wfd%get_ur(band_sum, ik_ibz, spin, ur)
+         do idat=1,ndat
+           bras_box(:,idat) = bras_box(:,idat) * ur(:)
+         end do
+         ! 1) inplace FFT: r --> g.
+         ! 2) multiply by v(q,g)
+         ! 3) FFT g --> r and multiply by u^*(r)
+         do idat=1,ndat
+           bras_box(:,idat) =  bras_box(:,idat) * conjg(ur(:))
+         end do
+       end do ! band_sum
+     end do ! iq_bz
+#endif
+
+     ! Sum partial contributions in r-space followed by r --> g-sphere FFT.
+     !call xmpi_sum(bras_box, comm, ierr)
+     !ABI_MALLOC(ghg_dat, (2, npwsp, ndat))
+     !ABI_FREE(ghg_dat)
+
+     ! Now fill my local buffer of ghg/gsg.
+     !if (istwf_k == 1) then
+     !  !Complex wavefunctions.
+     !  do idat=0,ndat-1
+     !    igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+     !    ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
+     !  end do
+     !  if (psps%usepaw == 1) then
+     !    do idat=0,ndat-1
+     !      igs = 1 + idat * npwsp; ige = igs + npwsp - 1
+     !      gsg_mat%buffer_cplx(:, il_g2+idat) = cmplx(gsc(1,igs:ige), gsc(2,igs:ige), kind=dp)
+     !    end do
+     !  end if
+     !else
+     !  ! Real wavefunctions.
+     !  do idat=0,ndat-1
+     !    igs = 1 + idat*npwsp; ige = igs + npwsp - 1
+     !    !if (igsp2_start == 1 .or. igsp2_start == npwsp + 1 .and. idat == 0) then
+     !    !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
+     !    !end if
+     !    ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
+     !    ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
+     !  end do
+     !  if (psps%usepaw == 1) then
+     !    NOT_IMPLEMENTED_ERROR()
+     !    !gsg_mat%buffer_real(...)
+     !    !gsg_mat%buffer_real(...)
+     !  end if
+     !end if ! istwf_k
+   end do ! ig2
+   call cwtime_report(" build Fock_g1g2", cpu, wall, gflops)
+ end if ! usefock
 
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
