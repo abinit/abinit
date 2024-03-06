@@ -1,7 +1,7 @@
 /* dev_spec.cpp*/
 
 /*
- * Copyright (C) 2008-2022 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2023 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.
