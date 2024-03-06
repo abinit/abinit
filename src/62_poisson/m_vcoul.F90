@@ -1811,6 +1811,7 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
    else if (vcgen%mode == "AUX_GB") then
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
+     ! TODO:
      ABI_ERROR("AUX_GB not implemented in vcgen_init")
      !call get_kg(kk_bz, istwfk1, ecut, cryst%gmet, npw_, gvec_)
      !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec_)

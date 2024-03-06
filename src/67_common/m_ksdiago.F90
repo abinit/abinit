@@ -1199,6 +1199,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag, free=.True.)
  if (psps%usepaw == 1) call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag, free=.True.)
 
+ !call ghg_mat%copy(ghg_4diag); call ghg_mat%free()
+
  ! NB: global H shape is (h_size, h_size) even for partial diago.
  ! then one extracts the (hsize, nband_k) sub-matrix before returning.
  call ghg_4diag%copy(eigvec)
