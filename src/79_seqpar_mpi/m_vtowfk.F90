@@ -441,12 +441,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    if(dtset%optdriver/=RUNL_GWLS) then
 
      if(wfopta10==4.or.wfopta10==1) then
-       if (istwf_k/=1.and.istwf_k/=2) then !no way to use lobpcg
-         write(msg,'(3a)')&
-          'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
-          'Action: put istwfk to 1 or remove k points with half integer coordinates.'
-         ABI_ERROR(msg)
-       end if
+       !LTEST
+       !if (istwf_k/=1.and.istwf_k/=2) then !no way to use lobpcg
+       !  write(msg,'(3a)')&
+       !   'Only istwfk=1 or 2 are allowed with wfoptalg=4/14 !',ch10,&
+       !   'Action: put istwfk to 1 or remove k points with half integer coordinates.'
+       !  ABI_ERROR(msg)
+       !end if
+       !LTEST
 
        if (dtset%gpu_option==ABI_GPU_KOKKOS) then
          ! Kokkos GPU branch is not OpenMP thread-safe, setting OpenMP num threads to 1

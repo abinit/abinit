@@ -125,7 +125,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  type(pawcprj_type) :: cprj_dum(1,1)
- integer :: iband, shift
+ integer :: iband, shift, me_g0
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: l_gvnlxc(:,:)
 
@@ -156,7 +156,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  blockdim=nband/dtset%nblock_lobpcg !=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
 
 !Depends on istwfk
- if ( l_istwf == 2 ) then ! Real only
+ if ( l_istwf > 1 ) then ! Real only
    ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
    ! and im*im so that a vector of complex is consider as a long vector of real
    ! therefore the number of data is (2*npw*nspinor)*nband
@@ -164,7 +164,6 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    ! get the array data into the xgBlock
    space = SPACE_CR
    l_icplx = 2
-
  else ! complex
    space = SPACE_C
    l_icplx = 1
@@ -204,25 +203,32 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 #endif
 
  ! Local variables for lobpcg
- !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
- if ( l_istwf == 2 ) then ! Real only
-   ! Scale cg
-   call xgBlock_scale(xgx0,sqrt2,1)
-   ! This is possible since the memory in cg and xgx0 is the same
-   ! Don't know yet how to deal with this with xgBlock
-   if(l_mpi_enreg%me_g0 == 1) then
-     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET MAP(to:cg)
-       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
-       !$OMP END TARGET
-#endif
-     else
-       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
-     end if
+ me_g0 = -1
+ if (space==SPACE_CR) then
+   me_g0 = 0
+   if (l_mpi_enreg%me_g0==1 .and. l_istwf==2) then
+     me_g0 = 1
    end if
  end if
+ call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
+   & gpu_option=dtset%gpu_option)
+! if ( l_istwf == 2 ) then ! Real only
+!   ! Scale cg
+!   call xgBlock_scale(xgx0,sqrt2,1)
+!   ! This is possible since the memory in cg and xgx0 is the same
+!   ! Don't know yet how to deal with this with xgBlock
+!   if(l_mpi_enreg%me_g0 == 1) then
+!     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET MAP(to:cg)
+!       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+!       !$OMP END TARGET
+!#endif
+!     else
+!       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+!     end if
+!   end if
+! end if
 
  !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
@@ -245,7 +251,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
  call lobpcg_init(lobpcg,nband,l_icplx*l_npw*l_nspinor,blockdim,dtset%tolwfr,nline,&
-   space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+   space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,me_g0,&
    gs_hamk%gpu_option)
 
 !###########################################################################
@@ -259,20 +265,20 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ABI_FREE(l_pcon)
 
  ! Scale back
- if(l_istwf == 2) then
-   call xgBlock_scale(xgx0,inv_sqrt2,1)
-   if(l_mpi_enreg%me_g0 == 1) then
-     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET MAP(to:cg)
-       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
-       !$OMP END TARGET
-#endif
-     else
-       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
-     end if
-   end if
- end if
+! if(l_istwf == 2) then
+!   call xgBlock_scale(xgx0,inv_sqrt2,1)
+!   if(l_mpi_enreg%me_g0 == 1) then
+!     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       !$OMP TARGET MAP(to:cg)
+!       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+!       !$OMP END TARGET
+!#endif
+!     else
+!       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+!     end if
+!   end if
+! end if
 
  ! Compute enlout (nonlocal energy for each band if necessary) This is the best
  ! quick and dirty trick to compute this part in NC. gvnlxc cannot be part of
@@ -383,33 +389,33 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  call xgBlock_reverseMap(BX,gsc,rows=l_icplx,cols=spacedim*blockdim)
 
  !Scale back cg
- if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
- if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1)
-   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-     if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) then
-         !$OMP TARGET MAP(cg)
-         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
-         !$OMP END TARGET
-       end if
-     else
-       if (cpuRow == 0) then
-         !$OMP TARGET MAP(cg)
-         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
-         !$OMP END TARGET
-       end if
-     end if
-#endif
-   else
-     if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
-     else
-       if (cpuRow == 0) cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
-     end if
-   end if
- end if
+! if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
+! if(l_istwf == 2) then
+!   call xgBlock_scale(X,inv_sqrt2,1)
+!   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!     if (l_paral_kgb == 0) then
+!       if(l_mpi_enreg%me_g0 == 1) then
+!         !$OMP TARGET MAP(cg)
+!         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+!         !$OMP END TARGET
+!       end if
+!     else
+!       if (cpuRow == 0) then
+!         !$OMP TARGET MAP(cg)
+!         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
+!         !$OMP END TARGET
+!       end if
+!     end if
+!#endif
+!   else
+!     if (l_paral_kgb == 0) then
+!       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+!     else
+!       if (cpuRow == 0) cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
+!     end if
+!   end if
+! end if
 
  !if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
  !  ABI_FREE(l_gvnlxc)
@@ -425,72 +431,72 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 #endif
 
  !Scale cg, ghc, gsc
- if ( l_istwf == 2 ) then
-   call xgBlock_scale(X ,sqrt2,1)
-   call xgBlock_scale(AX,sqrt2,1)
-
-   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-     if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) then
-         !$OMP TARGET MAP(cg)
-         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-         !$OMP END TARGET
-         !$OMP TARGET MAP(ghc)
-         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-         !$OMP END TARGET
-       endif
-     else
-       if (cpuRow == 0) then
-         !$OMP TARGET MAP(cg)
-         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-         !$OMP END TARGET
-         !$OMP TARGET MAP(ghc)
-         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-         !$OMP END TARGET
-       end if
-     end if
-#endif
-   else
-     if (l_paral_kgb == 0) then
-       if(l_mpi_enreg%me_g0 == 1) then
-         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-       endif
-     else
-       if (cpuRow == 0) then
-         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-       end if
-     end if
-   end if
-   if(l_paw) then
-     call xgBlock_scale(BX,sqrt2,1)
-     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       if (l_paral_kgb == 0) then
-         if(l_mpi_enreg%me_g0 == 1) then
-           !$OMP TARGET MAP(gsc)
-           gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-           !$OMP END TARGET
-         end if
-       else
-         if (cpuRow == 0) then
-           !$OMP TARGET MAP(gsc)
-           gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-           !$OMP END TARGET
-         end if
-       end if
-#endif
-     else
-       if (l_paral_kgb == 0) then
-         if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-       else
-         if (cpuRow == 0) gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
-       end if
-     end if
-   end if ! l_paw
- end if ! l_istwf==2
+! if ( l_istwf == 2 ) then
+!   call xgBlock_scale(X ,sqrt2,1)
+!   call xgBlock_scale(AX,sqrt2,1)
+!
+!   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!     if (l_paral_kgb == 0) then
+!       if(l_mpi_enreg%me_g0 == 1) then
+!         !$OMP TARGET MAP(cg)
+!         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!         !$OMP END TARGET
+!         !$OMP TARGET MAP(ghc)
+!         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!         !$OMP END TARGET
+!       endif
+!     else
+!       if (cpuRow == 0) then
+!         !$OMP TARGET MAP(cg)
+!         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!         !$OMP END TARGET
+!         !$OMP TARGET MAP(ghc)
+!         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!         !$OMP END TARGET
+!       end if
+!     end if
+!#endif
+!   else
+!     if (l_paral_kgb == 0) then
+!       if(l_mpi_enreg%me_g0 == 1) then
+!         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!       endif
+!     else
+!       if (cpuRow == 0) then
+!         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!       end if
+!     end if
+!   end if
+!   if(l_paw) then
+!     call xgBlock_scale(BX,sqrt2,1)
+!     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+!#ifdef HAVE_OPENMP_OFFLOAD
+!       if (l_paral_kgb == 0) then
+!         if(l_mpi_enreg%me_g0 == 1) then
+!           !$OMP TARGET MAP(gsc)
+!           gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!           !$OMP END TARGET
+!         end if
+!       else
+!         if (cpuRow == 0) then
+!           !$OMP TARGET MAP(gsc)
+!           gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!           !$OMP END TARGET
+!         end if
+!       end if
+!#endif
+!     else
+!       if (l_paral_kgb == 0) then
+!         if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+!       else
+!         if (cpuRow == 0) gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+!       end if
+!     end if
+!   end if ! l_paw
+! end if ! l_istwf==2
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
@@ -505,7 +511,8 @@ end subroutine getghc_gsc1
    ! precondition resid_vec
    do ispinor = 1,l_nspinor
      !do cplx = 1, l_icplx
-     call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1))
+     !call xgBlock_colwiseMul(W,l_pcon,l_icplx*l_npw*(ispinor-1))
+     call xgBlock_colwiseMul(W,l_pcon,l_npw*(ispinor-1))
       !end do
    end do
 

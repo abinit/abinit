@@ -345,7 +345,7 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
          call sphereboundary(gbound,istwf_k,kg_k_gather_all,mgfft,npw_tot)
        end if
 
-     else if (istwf_k==2) then
+     else !if (istwf_k==2) then
 
 !      ============================================================================
 !      In this case, we have to add the opposite values in the kg_k_gather tab
@@ -515,9 +515,11 @@ subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,
        end if
 
 !      Only calculations with istwfk=1 or 2
-     else
-       write(message, '(a,i0,a)' )' the value istwfk=',istwf_k,' is not allowed in case of bandfft parallelization!'
-       ABI_BUG(message)
+!LTEST
+!     else
+!       write(message, '(a,i0,a)' )' the value istwfk=',istwf_k,' is not allowed in case of bandfft parallelization!'
+!       ABI_BUG(message)
+!LTEST
      end if
      ABI_FREE(kg_k_gather_all)
      ABI_FREE(npw_per_proc)
