@@ -106,7 +106,7 @@ contains
  sym(:,:,47) = RESHAPE( (/0, 0, 1, 0, -1, 0, -1, 0, 0/) ,(/3,3/) )
  sym(:,:,48) = RESHAPE( (/0, 0, -1, 0, -1, 0, 1, 0, 0/) ,(/3,3/) )
 
-! Number of classes and corresponding indeces
+! Number of classes and corresponding indices
  nclass = 10
  ABI_MALLOC(class_ids, (2,nclass))
  class_ids(1,1) = 1
