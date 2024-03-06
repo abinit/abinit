@@ -3658,7 +3658,7 @@ END SUBROUTINE Ctqmc_destroy
 !!  set the Magnetic moment matrix for susceptibility
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2022 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

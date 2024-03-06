@@ -2407,7 +2407,7 @@ END SUBROUTINE ImpurityOperator_occup_histo_time
 !!  Set directly the Magnetic moment this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2021 ABINIT group (F. Gendron)
+!!  Copyright (C) 2013-2022 ABINIT group (F. Gendron)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
