@@ -85,7 +85,8 @@ module m_xg_ortho_RR
     type(xgBlock_t), intent(inout) :: BX
     type(xgBlock_t), intent(inout),optional :: AX
     integer       , intent(  out) :: info
-    type(xg_t) :: buffer
+    integer :: space_buf
+    type(xg_t) :: buffer,X_tmp
     double precision :: tsec(2)
 
     ABI_NVTX_START_RANGE(NVTX_B_ORTHO)
@@ -97,7 +98,12 @@ module m_xg_ortho_RR
       call xgBlock_check(X,AX)
     end if
 
-    call xg_init(buffer,space(X),cols(X),cols(X),comm(X),gpu_option=gpu_option)
+    if (space(X)/=SPACE_CR) then
+      space_buf = SPACE(X)
+    else
+      space_buf = SPACE_R
+    end if
+    call xg_init(buffer,space_buf,cols(X),cols(X),comm(X),gpu_option=gpu_option)
 
     ! Compute X^TBX
     call xgBlock_gemm('t','n',1.d0,X,BX,0.d0,buffer%self,comm=comm(X))
@@ -111,15 +117,33 @@ module m_xg_ortho_RR
       return
     end if
 
-    ! Solve YU=X
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
+    if (space(X)/=SPACE_CR) then
+      ! Solve YU=X
+      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
+  
+      ! Solve BYU=BX
+      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
+  
+      if (present(AX)) then
+        ! Solve AYU=AX
+        call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
+      end if
+    else ! space(X)==SPACE_CR
+      call xgBlock_invert_tri('u','n',buffer%self)
+      call xgBlock_zerotri(buffer%self,'u')
+      call xg_init(X_tmp,space(X),rows(X),cols(X),me_g0=me_g0(X))
 
-    ! Solve BYU=BX
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
+      call xgBlock_gemm('n','n',1.d0,X,buffer%self,0.d0,X_tmp%self)
+      call xgBlock_copy(X_tmp%self,X)
 
-    if (present(AX)) then
-      ! Solve AYU=AX
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
+      call xgBlock_gemm('n','n',1.d0,BX,buffer%self,0.d0,X_tmp%self)
+      call xgBlock_copy(X_tmp%self,BX)
+
+      if (present(AX)) then
+        call xgBlock_gemm('n','n',1.d0,AX,buffer%self,0.d0,X_tmp%self)
+        call xgBlock_copy(X_tmp%self,AX)
+      end if
+      call xg_free(X_tmp)
     end if
 
     call xg_free(buffer)
@@ -163,7 +187,7 @@ module m_xg_ortho_RR
     integer :: var
     integer :: spacedim
     integer :: blockdim
-    integer :: Xspace
+    integer :: space_buf
     integer :: subdim
     integer :: spacecom
     integer :: eigenSolver
@@ -197,7 +221,10 @@ module m_xg_ortho_RR
     end if
     spacedim = rows(X)
     blockdim = cols(X)
-    Xspace   = space(X)
+    space_buf = space(X)
+    if (space(X) == space_CR) then
+      space_buf = space_R
+    end if
     spacecom = comm(X)
     subdim   = blockdim
 
@@ -232,15 +259,15 @@ module m_xg_ortho_RR
 
     abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
 
-    call xg_init(subA,Xspace,subdim,subdim,spacecom,gpu_option=gpu_option)
+    call xg_init(subA,space_buf,subdim,subdim,spacecom,gpu_option=gpu_option)
     if ( solve_ax_bx_ .or. var /= VAR_X ) then
-      call xg_init(subB,Xspace,subdim,subdim,spacecom,gpu_option=gpu_option)
+      call xg_init(subB,space_buf,subdim,subdim,spacecom,gpu_option=gpu_option)
     end if
 
     if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
-      call xg_init(vec,Xspace,subdim,blockdim,gpu_option=gpu_option)
+      call xg_init(vec,space_buf,subdim,blockdim,gpu_option=gpu_option)
     else if ( EIGPACK(eigenSolver) ) then
-      call xg_init(vec,Xspace,subdim,subdim,gpu_option=gpu_option)
+      call xg_init(vec,space_buf,subdim,subdim,gpu_option=gpu_option)
     else
       call xg_setBlock(subA,vec%self,subdim,blockdim)
     endif
@@ -370,7 +397,7 @@ module m_xg_ortho_RR
 
     !FIXME Avoid those transfers
     if ( info == 0 ) then
-      call xg_init(subB,Xspace,spacedim,blockdim,comm=comm(X),gpu_option=gpu_option)
+      call xg_init(subB,space(X),spacedim,blockdim,comm=comm(X),me_g0=me_g0(X),gpu_option=gpu_option)
 
       !/* Easy basic solution */
       !/* Compute first part of X here */
