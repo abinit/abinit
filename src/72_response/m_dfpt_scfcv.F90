@@ -407,7 +407,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: res2_mq,fe1fixed_mq,elast_mq
  real(dp) :: eberry_mq,edocc_mq,eeig0_mq,ehart01_mq,ehart1_mq,ek0_mq,ek1_mq,eloc0_mq,elpsp1_mq
  real(dp) :: end0_mq,end1_mq,enl0_mq,enl1_mq,eovl1_mq,epaw1_mq,exc1_mq,fermie1_mq,deltae_mq,elmag1_mq
- real(dp) :: eta_mq,etotal_mq,evar_mq,omega_mq,zeemfac
+ real(dp) :: etotal_mq,evar_mq,omega_mq,zeemfac
  character(len=500) :: msg
  character(len=500),parameter :: MY_NAME="dfpt_scfcv"
  character(len=fnlen) :: fi1o
@@ -723,7 +723,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  eta=dtset%rfeta
  if (.not.kramers_deg) then
    omega_mq=-dtset%rfomega
-   eta_mq=-dtset%rfeta
    qphon_mq(:)=-qphon(:)
  end if
 
@@ -870,7 +869,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+&       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1,&
+&       eta=eta,omega=omega)
        if (.not.kramers_deg) then
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
 &         doccde_rbz,docckde_mq,dtfil,dtset,eigen_mq,eigen0,eigen1_mq,fe1fixed_mq,gmet,gprimd,idir,&
@@ -879,7 +879,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 &         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq)
+&         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
+&         eta=eta,omega=omega) !is OK, no _mq is needed here
        end if
 
      end if
@@ -1001,7 +1002,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
 &     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vectornd,vtrial,vtrial1_mq,with_vectornd,wtk_rbz,xred,ylm,ylm1_mq,ylmgr1_mq,&
-&     eta=eta_mq,omega=omega_mq) !optional arguments for finite-w calculation
+&     eta=eta,omega=omega_mq) !optional arguments for finite-w calculation
 
      do ifft=1,nfftf
        rhor1(2*ifft-1,:) = half*(rhor1_pq(2*ifft-1,:)+rhor1_mq(2*ifft-1,:))
@@ -1550,7 +1551,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !- core charge is excluded from the charge density;
 !- the potential is the INPUT vtrial.
 
- if (ipert/=dtset%natom+1.and.dtset%prt1mag==1) then
+ if (ipert/=dtset%natom+1.and.dtset%prt1mag/=0) then
    prtopt=1
    zeemfac=half
    call calcdenmagsph(mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
@@ -3734,7 +3735,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
 & phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
-& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
+& ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1, &
+& eta,omega) !Optional
 
 !Arguments -------------------------------
 !scalars
@@ -3744,6 +3746,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer,intent(in) :: prtvol,usecprj,useylmgr1
  real(dp),intent(in) :: ucvol
  real(dp),intent(out) :: fe1fixed
+ real(dp),intent(in),optional :: eta,omega
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -3795,7 +3798,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: optfr,qphase_rhoij,spaceworld
  integer :: nband_me
  logical :: paral_atom,qne0
- real(dp) :: arg,fe1norm,invfe1norm,wtk_k
+ real(dp) :: arg,eta_,fe1norm,invfe1norm,omega_,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
@@ -3828,6 +3831,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  if (cplex/=1) then
    ABI_BUG('wrong cplex/=1 argument !')
  end if
+
+!Treat optional arguments
+ eta_=zero; if (present(eta)) eta_=eta
+ omega_=zero; if (present(omega)) omega_=omega
 
 !Keep track of total time spent in this routine
  call timab(121,1,tsec)
