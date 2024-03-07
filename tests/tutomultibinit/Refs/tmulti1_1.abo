@@ -6,7 +6,7 @@
 .Version 9.11.0 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_darwin21.4.0_gnu10.3 computer) 
 
-.Copyright (C) 1998-2023 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
