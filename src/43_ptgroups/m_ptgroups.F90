@@ -1033,7 +1033,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
 
  if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
 &    kk>Irrep1%dim .or. ll>Irrep1%dim) then
-   ABI_WARNING("Wrong indeces")
+   ABI_WARNING("Wrong indices")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
  end if

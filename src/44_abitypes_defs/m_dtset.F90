@@ -111,6 +111,7 @@ type, public :: dataset_type
  integer :: chkdilatmx
  integer :: chkexit
  integer :: chneut = 1
+ integer :: chkparal
  integer :: chkprim
  integer :: chksymbreak
  integer :: chksymtnons
@@ -692,7 +693,7 @@ type, public :: dataset_type
  integer :: kptrlatt_orig(3,3)=0
  integer :: qptrlatt(3,3)
  integer :: ga_rules(30)
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
  integer :: ngfft(18)
  integer :: ngfftdg(18)
  integer :: nloalg(3)
@@ -1427,6 +1428,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cd_full_grid       = dtin%cd_full_grid
  dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
+ dtout%chkparal           = dtin%chkparal
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
@@ -3302,7 +3304,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_update_lvl cpus cpum cpuh'
 !D
