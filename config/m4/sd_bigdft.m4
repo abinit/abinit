@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2023 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # Wavelet BigDFT library (BigDFT)
