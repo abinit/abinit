@@ -930,6 +930,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
  real(dp),target,allocatable :: bras(:,:)
+ !complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:.:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1081,7 +1082,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call wrtout(std_out, sjoin(" Local memory for scalapack matrices:", ftoa(mem_mb, fmt="(f8.1)"), ' [Mb] <<< MEM'))
 
  ! Define batch size for the application of the Hamiltonian
- ! This is useful if OpenMP is activated thus we use multiple of omp_nt.
+ ! This is useful if OpenMP is activated thus we use multiples of omp_nt.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1      ! FIXME
@@ -1181,90 +1182,96 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_CHECK(dtset%usepaw == 0, "FOCK DIRECT DIAGO WITH PAW IS NOT CODED!")
    call cwtime(cpu, wall, gflops, "start")
 
+#if 0
+   ! TODO: MC technique does not seem to work as expected, even in the legacy code.
+   !vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
+   !call vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
+   !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+
+   complex(gwpc),allocatable :: vc_sqrt(npw_k)
+   call vcgen%get_vc_sqrt(qpt, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm)
+   !call vcgen%free()
+
+   call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+
+   !type(uplan_t) :: uplan_k
+   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
+
+   ABI_MALLOC(cbras_box, (nfftc*nspinor, batch_size))
+   ABI_MALLOC(cbras_g, (npw_k*nspinor, batch_size))
+
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
+     ! Fill cbras_box with e^{ig.r}
+     do idat=1,ndat
+       call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
+     end do
 
-     !bras = zero
-     !if (istwf_k == 1) then
-     !  do idat=0,ndat-1
-     !    bras(1, igsp2_start + idat * npwsp + idat) = one
-     !  end do
-     !else
-     !  ! only istwf_k == 2 is coded here. NB: there's a check at the beginning of this routine.
-     !  do idat=0,ndat-1
-     !    if (igsp2_start + idat <= npwsp) then
-     !      ! Cosine term
-     !      bras(1, igsp2_start + idat*npwsp + idat) = half
-     !      if (igsp2_start == 1) bras(1, igsp2_start + idat*npwsp + idat) = one
-     !    else
-     !      ! Sine term
-     !      !ig = igsp2_start - npwsp + 1
-     !      ig = igsp2_start - npwsp + 1 + 1  ! This should be OK
-     !      bras(2, ig + idat*npwsp + idat) = half
-     !    end if
-     !  end do
-     !end if
-
-#if 0
-     !call fock_getghc(spin, hyb_wfd, ndat, dtset%prtvol, bras_box, ghc)
+     !call fock_getghc(dtset, spin, vcgen, hyb_wfd, hyb_ebands, ndat, cbras_box, ghc)
      do ik_bz=1,nkbz
-       !ik_ibz
+       !ik_ibz = ik_bz
+       ! Parallelism over k-points.
+       !if (.not. wfd%ihave_ug(0, ik_ibz, spin)) cycle
+
        ! ==========================
        ! Sum over (occupied) bands
        ! ==========================
        do band_sum=1, wfd%nband(ik_ibz, spin)
-         ! Parallelism over bands.
-         !f_bsum = ebands%occ%(band_sum, ik_ibz, spin)
-         !if (abs(f_bsum) <= TOL) cycle
+         ! MPI parallelism over bands.
+         if (.not. wfd%ihave_ug(band_sum, ik_ibz, spin)) cycle
+
+         f_bsum = ebands%occ(band_sum, ik_ibz, spin) * fact_spin; if (abs(f_bsum) <= tol_empty) cycle
+
          call wfd%get_ur(band_sum, ik_ibz, spin, ur)
          do idat=1,ndat
-           bras_box(:,idat) = bras_box(:,idat) * ur(:)
+           cbras_box(:,idat) = f_bsum * cbras_box(:,idat) * ur(:)
          end do
-         ! 1) inplace FFT: r --> g.
-         ! 2) multiply by v(q,g)
-         ! 3) FFT g --> r and multiply by u^*(r)
+
+         ! 1) FFT: r --> g_sphere.
+         call uplan_k%execute_rg(ndat, cbras_box, cbras_g)
+
+         ! 2) multiply results by v(q,g).
          do idat=1,ndat
-           bras_box(:,idat) =  bras_box(:,idat) * conjg(ur(:))
+           cbras_g(:,idat) = cbras_g(:,idat) * vc_sqrt(:)
+         end do
+
+         ! 3) FFT g_sphere --> r and multiply by u^*(r).
+         call uplan_k%execute_gr(ndat, cbras_g, cbras_box)
+         do idat=1,ndat
+           cbras_box(:,idat) = cbras_box(:,idat) * conjg(ur)
          end do
        end do ! band_sum
      end do ! iq_bz
-#endif
 
-     ! Sum partial contributions in r-space followed by r --> g-sphere FFT.
-     !call xmpi_sum(bras_box, comm, ierr)
-     !ABI_MALLOC(ghg_dat, (2, npwsp, ndat))
-     !ABI_FREE(ghg_dat)
+     ! Sum partial contributions in r-space, followed by FFT r --> g_sphere.
+     call xmpi_sum(cbras_box, comm_spin, ierr)
+     call uplan_k%execute_rg(ndat, cbras_box, cbras_g)
+     cbras_g = -cbras_g ! * alpha_hyb
 
-     ! Now fill my local buffer of ghg/gsg.
-     !if (istwf_k == 1) then
-     !  !Complex wavefunctions.
-     !  do idat=0,ndat-1
-     !    igs = 1 + idat * npwsp; ige = igs + npwsp - 1
-     !    ghg_mat%buffer_cplx(:, il_g2+idat) = cmplx(ghc(1, igs:ige), ghc(2, igs:ige), kind=dp)
-     !  end do
-     !  if (psps%usepaw == 1) then
-     !    do idat=0,ndat-1
-     !      igs = 1 + idat * npwsp; ige = igs + npwsp - 1
-     !      gsg_mat%buffer_cplx(:, il_g2+idat) = cmplx(gsc(1,igs:ige), gsc(2,igs:ige), kind=dp)
-     !    end do
-     !  end if
-     !else
-     !  ! Real wavefunctions.
-     !  do idat=0,ndat-1
-     !    igs = 1 + idat*npwsp; ige = igs + npwsp - 1
-     !    !if (igsp2_start == 1 .or. igsp2_start == npwsp + 1 .and. idat == 0) then
-     !    !  ghc(:, igs:ige) = tol3 !; print *, ghc(:, igs:ige)
-     !    !end if
-     !    ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
-     !    ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
-     !  end do
-     !  if (psps%usepaw == 1) then
-     !    NOT_IMPLEMENTED_ERROR()
-     !    !gsg_mat%buffer_real(...)
-     !    !gsg_mat%buffer_real(...)
-     !  end if
-     !end if ! istwf_k
+     ! Now fill my local buffer of ghg.
+     do idat=1,ndat
+       do ig1=1,npwsp
+         ! From global to local indices
+         call ghg_mat%glob2loc(ig1, ig2+idat-1, il_g1, il_g2, haveit)
+         if (.not. haveit) cycle
+
+         if (istwf_k == 1) then
+           ! Complex wavefunctions.
+           ghg_mat%buffer_cplx(il_g1, il_g2) = cbras_g(ig1,idat)
+         else
+          ! Real wavefunctions.
+          !ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
+          !ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
+         end if ! istwf_k
+       end do ! ig1
+     end do ! idat
+
    end do ! ig2
+
+   call uplan_k%free()
+   ABI_FREE(cbras_box)
+   ABI_FREE(cbras_g)
+#endif
    call cwtime_report(" build Fock_g1g2", cpu, wall, gflops)
  end if ! usefock
 
@@ -1322,7 +1329,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ! Write eigenvalues.
    frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
    write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
-
    write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,nband_k)); call wrtout(std_out, msg)
    if (nband_k > 9 ) then
      do jj=10,nband_k,9
@@ -1345,6 +1351,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ABI_MALLOC(eig_k, (nband_k))
  eig_k(:) = eig_ene(1:nband_k)
 
+ ! =================
+ ! Build ugb object
+ ! =================
  ugb%istwf_k = istwf_k
  ugb%nspinor = nspinor
  ugb%npw_k = npw_k
@@ -1415,6 +1424,7 @@ subroutine ugb_free(ugb)
 
 !Arguments ------------------------------------
  class(ugb_t),intent(inout) :: ugb
+
 ! *************************************************************************
 
  call ugb%mat%free()
