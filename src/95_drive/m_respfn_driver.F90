@@ -347,7 +347,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Define the set of admitted perturbations
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
- if (dtset%rfmagn==2.or.dtset%prt1mag==1) mpert=2*dtset%natom+11
+ if (dtset%rfmagn==2.or.dtset%prt1mag/=0) mpert=2*dtset%natom+11
 
 !Initialize the list of perturbations rfpert
  ABI_MALLOC(rfpert,(mpert))
