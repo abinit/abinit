@@ -210,7 +210,7 @@ subroutine herald(code_name,code_version,iout)
 
 !The technique used hereafter is the only one that we have found to obtain
 !perfect transferability across platforms and OS.
- write(iout, '(/,a,a,a,a,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),' '
+ write(iout, '(/,a,a,a,a,a,a,a,i4,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),', released ',month_names(mm_rel),' ',year_rel,'.'
 #if defined HAVE_MPI
  write(iout, '(a,a,a,/)' ) '.(MPI version, prepared for a ',build_target,' computer) '
 #else
