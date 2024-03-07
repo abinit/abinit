@@ -1398,12 +1398,22 @@ has_vectornd = (with_vectornd .EQ. 1)
 &             eig_k(iband:iband+ndat-1),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,&
 &             use_gpu=dtset%gpu_option)
            if (sij_opt==1.and.optnl==1) then
-             !$OMP TARGET UPDATE FROM(gs1,gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-             do idat=1,ndat
-               gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor) = &
-&                 gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)-eig_k(iband+idat-1) * gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
-             end do
-             !$OMP TARGET UPDATE TO(gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             if(dtset%gpu_option==ABI_GPU_DISABLED) then
+               do idat=1,ndat
+                 gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor) = &
+  &                 gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)-eig_k(iband+idat-1) * gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
+               end do
+             else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idat) MAP(to:gs1,gh1,eig_k)
+#endif
+               do idat=1,ndat*nspinor
+                 do ipw=1,npw1_k
+                   gh1(:,(idat-1)*npw1_k*nspinor + ipw) = &
+&                      gh1(:,(idat-1)*npw1_k*nspinor + ipw) - eig_k(iband+idat-1) * gs1(:,(idat-1)*npw1_k*nspinor + ipw)
+                 end do
+               end do
+             end if
            end if
 
            ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
@@ -1753,20 +1763,28 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Build the matrix element <u0_k_i|H^(j1)-Eps_k_i.S^(j1)|u^(j2)_k,q_i>
 !          and add contribution to DDB
            if (ipert1/=dtset%natom+1) then
-             !$OMP TARGET UPDATE FROM(gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             do_scprod=0
+             do idat=1,ndat
+               if (abs(occ_k(iband+idat-1))>tol8) do_scprod=1
+             end do !idat
+             if(do_scprod==1) then
+               call dotprod_g_batch_full(vdotr,vdoti,istwf_k,npw1_k*nspinor,ndat,2,&
+&                   gh1,&
+&                   cwavef,&
+&                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+#ifdef HAVE_OPENMP_OFFLOAD
+               !$OMP TARGET UPDATE FROM(vdotr,vdoti) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+             end if
              do idat=1,ndat
                if (abs(occ_k(iband+idat-1))>tol8) then
-                 call dotprod_g(dotr,doti,istwf_k,npw1_k*nspinor,2,&
-  &                   gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-  &                   cwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-  &                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
   !              Case ipert1=natom+2 (electric field):
   !              gh1 contains H^(j1)|u0_k_i> (VHxc constant) which corresponds
   !              to i.d/dk in Eq. (38) of Gonze, PRB 55, 10355 (1997) [[cite:Gonze1997a]].
   !              * if ipert==natom+2, we apply directly Eq. (38)
   !              * if ipert/=natom+2, Born effective charges are minus D2E
-                 d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*dotr
-                 d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*doti
+                 d2nl_k(1,idir1)=d2nl_k(1,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*vdotr(idat)
+                 d2nl_k(2,idir1)=d2nl_k(2,idir1)+wtk_k*occ_k(iband+idat-1)*two*elfd_fact*vdoti(idat)
                end if
              end do !idat
 
@@ -1849,19 +1867,21 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 !!!!!!!!!!!!!!!!! 11) Final getdc1
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
-           !$OMP TARGET UPDATE FROM(gs1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
            if (has_drho) then
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET UPDATE FROM(gs1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 !            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor))
              ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor))
-               do idat=1,ndat
+             do idat=1,ndat
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
   ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
                call getdc1(iband+idat-1,band_procs,bands_treated_now_ndat(:,idat),cgq,cprjq,dcwavef,dcwaveprj,&
 &                 ibgq,icgq,istwf_k,mcgq,&
 &                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
-&                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=ABI_GPU_DISABLED)
+&                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=dtset%gpu_option)
 
                if (abs(occ_k(iband+idat-1))>tol8) then
   !              Accumulate 1st-order density due to delta_u^(j1)
