@@ -902,34 +902,22 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !if (.false.)then
 !ENDDEBUG
 !  Remember that npw=npw1 for ddk perturbation
-   do ispinor=1,my_nspinor*ndat
-     if(use_gpu_/=ABI_GPU_OPENMP) then
-       !$OMP PARALLEL DO PRIVATE(ipw,ipws) SHARED(cwave,ispinor,gvnlx1_,dkinpw,kinpw1,npw,my_nspinor)
-       do ipw=1,npw
-         ipws=ipw+npw*(ispinor-1)
-         if(kinpw1(ipw)<huge(zero)*1.d-11)then
-           gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+dkinpw(ipw)*cwave(1,ipws)
-           gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+dkinpw(ipw)*cwave(2,ipws)
-         else
-           gvnlx1_(1,ipws)=zero
-           gvnlx1_(2,ipws)=zero
-         end if
-       end do
-     else
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET PARALLEL DO PRIVATE(ipw,ipws) MAP(to:cwave,gvnlx1_,dkinpw,kinpw1)
-       do ipw=1,npw
-         ipws=ipw+npw*(ispinor-1)
-         if(kinpw1(ipw)<huge(zero)*1.d-11)then
-           gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+dkinpw(ipw)*cwave(1,ipws)
-           gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+dkinpw(ipw)*cwave(2,ipws)
-         else
-           gvnlx1_(1,ipws)=zero
-           gvnlx1_(2,ipws)=zero
-         end if
-       end do
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(ipws) MAP(to:cwave,gvnlx1_,dkinpw,kinpw1) &
+   !$OMP&  IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
 #endif
-     end if
+   do ispinor=1,my_nspinor*ndat
+     !$OMP PARALLEL DO PRIVATE(ipw,ipws)
+     do ipw=1,npw
+       ipws=ipw+npw*(ispinor-1)
+       if(kinpw1(ipw)<huge(zero)*1.d-11)then
+         gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+dkinpw(ipw)*cwave(1,ipws)
+         gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+dkinpw(ipw)*cwave(2,ipws)
+       else
+         gvnlx1_(1,ipws)=zero
+         gvnlx1_(2,ipws)=zero
+       end if
+     end do
    end do
  end if
 
@@ -992,59 +980,40 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
 !Add non-local+kinetic to local part
  if (optnl>=1.or.has_kin) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(ipws) MAP(to:gh1c,gvnlx1_,kinpw1) &
+   !$OMP&  IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    do ispinor=1,my_nspinor*ndat
      ipws=(ispinor-1)*npw1
-     if(use_gpu_/=ABI_GPU_OPENMP) then
-       !$OMP PARALLEL DO PRIVATE(ipw) SHARED(gh1c,gvnlx1_,kinpw1,ipws,npw1)
-       do ipw=1+ipws,npw1+ipws
-         if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
-           gh1c(1,ipw)=gh1c(1,ipw)+gvnlx1_(1,ipw)
-           gh1c(2,ipw)=gh1c(2,ipw)+gvnlx1_(2,ipw)
-         else
-           gh1c(1,ipw)=zero
-           gh1c(2,ipw)=zero
-         end if
-       end do
-     else
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:gh1c,gvnlx1_,kinpw1)
-       do ipw=1+ipws,npw1+ipws
-         if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
-           gh1c(1,ipw)=gh1c(1,ipw)+gvnlx1_(1,ipw)
-           gh1c(2,ipw)=gh1c(2,ipw)+gvnlx1_(2,ipw)
-         else
-           gh1c(1,ipw)=zero
-           gh1c(2,ipw)=zero
-         end if
-       end do
-#endif
-     end if
+     !$OMP PARALLEL DO PRIVATE(ipw)
+     do ipw=1+ipws,npw1+ipws
+       if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
+         gh1c(1,ipw)=gh1c(1,ipw)+gvnlx1_(1,ipw)
+         gh1c(2,ipw)=gh1c(2,ipw)+gvnlx1_(2,ipw)
+       else
+         gh1c(1,ipw)=zero
+         gh1c(2,ipw)=zero
+       end if
+     end do
    end do
  end if
 
 !PAW: add non-local part due to first order change of VHxc
  if (usevnl2) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET TEAMS DISTRIBUTE PRIVATE(ipws) MAP(to:gh1c,gvnl2,kinpw1) &
+   !$OMP&  IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
    do ispinor=1,my_nspinor*ndat
      ipws=(ispinor-1)*npw1
-     if(use_gpu_/=ABI_GPU_OPENMP) then
-       !$OMP PARALLEL DO PRIVATE(ipw) SHARED(gh1c,gvnl2,kinpw1,ipws,npw1)
-       do ipw=1+ipws,npw1+ipws
-         if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
-           gh1c(1,ipw)=gh1c(1,ipw)+gvnl2(1,ipw)
-           gh1c(2,ipw)=gh1c(2,ipw)+gvnl2(2,ipw)
-         end if
-       end do
-     else
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:gh1c,gvnl2,kinpw1)
-       do ipw=1+ipws,npw1+ipws
-         if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
-           gh1c(1,ipw)=gh1c(1,ipw)+gvnl2(1,ipw)
-           gh1c(2,ipw)=gh1c(2,ipw)+gvnl2(2,ipw)
-         end if
-       end do
-#endif
-     end if
+     !$OMP PARALLEL DO PRIVATE(ipw)
+     do ipw=1+ipws,npw1+ipws
+       if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
+         gh1c(1,ipw)=gh1c(1,ipw)+gvnl2(1,ipw)
+         gh1c(2,ipw)=gh1c(2,ipw)+gvnl2(2,ipw)
+       end if
+     end do
    end do
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(release:gvnl2) IF(use_gpu_==ABI_GPU_OPENMP)
