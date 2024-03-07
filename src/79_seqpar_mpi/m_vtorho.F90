@@ -1084,7 +1084,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+! Note: Should we keep nvhpc-23.1 in eos?
+#ifndef FC_NVHPC
        call timab(985,1,tsec)
+#endif
 
 #if defined HAVE_GPU_CUDA
        if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
@@ -1163,7 +1168,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if ( dtset%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+#ifndef FC_NVHPC
        call timab(985,2,tsec)
+#endif
 
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
