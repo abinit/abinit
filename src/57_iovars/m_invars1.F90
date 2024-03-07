@@ -2291,6 +2291,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
+   dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
    dtsets(idtset)%chneut=1      
