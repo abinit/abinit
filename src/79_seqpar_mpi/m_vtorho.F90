@@ -391,7 +391,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
- real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
+ real(dp),allocatable :: cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
@@ -779,15 +779,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
-        do idir = 1, 3
-          ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
-          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-          ABI_FREE(cgrvtrial)
-        end do
-        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
+       call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-
+    
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -1088,7 +1084,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+! Note: Should we keep nvhpc-23.1 in eos?
+#ifndef FC_NVHPC
        call timab(985,1,tsec)
+#endif
 
 #if defined HAVE_GPU_CUDA
        if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
@@ -1167,7 +1168,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if ( dtset%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+#ifndef FC_NVHPC
        call timab(985,2,tsec)
+#endif
 
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
