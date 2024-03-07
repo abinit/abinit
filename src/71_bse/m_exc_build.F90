@@ -681,7 +681,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
 
          ! =======================================
-         ! === Loop over the four band indeces ===
+         ! === Loop over the four band indices ===
          ! =======================================
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
@@ -810,14 +810,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  if (is_resonant) then
                    itp = BSp%vcks2t(ivp,icp,ikp_bz,spin2)
-                 else ! have to exchange band indeces
+                 else ! have to exchange band indices
                    itp = BSp%vcks2t(icp,ivp,ikp_bz,spin2)
                  end if
 
                  if (itp==0) CYCLE ! ir-uv-cutoff
 
                  ! FIXME Temporary work around, when ikp_bz == ik it might happen that itp<it
-                 ! should rewrite the loops using contracted k-dependent indeces for bands
+                 ! should rewrite the loops using contracted k-dependent indices for bands
                  if (itp<it) CYCLE
 
                  ir = it + itp*(itp-1)/2

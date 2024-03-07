@@ -232,6 +232,7 @@ ABI_TOPICS = [
     "MolecularDynamics",
     "Macroave",
     "multidtset",
+    "NMR",
     "nonlinear",
     "Optic",
     "Output",

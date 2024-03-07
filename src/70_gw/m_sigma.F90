@@ -67,7 +67,7 @@ MODULE m_sigma
 
  type,public :: sigma_t
 
-  integer :: b1gw, b2gw     ! min and Max gw band indeces over spin and k-points (used to dimension arrays)
+  integer :: b1gw, b2gw     ! min and Max gw band indices over spin and k-points (used to dimension arrays)
   integer :: gwcalctyp      ! Flag defining the calculation type.
   integer :: nkptgw         ! No. of points calculated
   integer :: nkibz          ! No. of irreducible k-points.
