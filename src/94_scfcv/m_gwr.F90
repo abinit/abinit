@@ -7429,6 +7429,8 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    ABI_BUG(sjoin('Wrong nsppol:', itoa(nsppol)))
  end select
 
+ !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
  ! =========================================
@@ -7516,8 +7518,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
      ksum = gwr%kbz(:, ik_bz)
 
      ! Find the symmetrical image of ksum in the IBZ
-     !call kmesh%get_BZ_item(ik_bz, ksum, ik_ibz, isym_ki, iik, ph_mkt)
-
      ! FIXME: Be careful with the symmetry conventions here and the interplay between umklapp in q and FFT
      ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
      trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
@@ -7554,12 +7554,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
      ABI_MALLOC(gbound_x, (2*u_mgfft + 8, 2))
      call sphereboundary(gbound_x, istwfk1, gvec_x, u_mgfft, npwx)
-
-     ! Tables for the FFT of the oscillators.
-     !  a) FFT index of G-G0.
-     !  b) x_gbound table for the zero-padded FFT performed in rhotwg.
-     !ABI_MALLOC(x_gbound, (2*u_mgfft+8, 2))
-     !call Gsph_x%fft_tabs(g0, u_mgfft, u_ngfft, use_padfft, x_gbound, igfftxg0)
 
      ABI_MALLOC(rhotwg_ki, (npwx * nspinor, bmin:bmax))
      ABI_MALLOC(rhotwg, (npwx * nspinor))
@@ -7604,8 +7598,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
        ! Skip empty states. MRM: allow negative occ numbers.
        if (abs(qp_occ(band_sum, ik_ibz, spin)) < tol_empty) CYCLE
 
-       !call wfd%get_ur(band_sum, ik_ibz, spin, ur_ibz)
-
        ! Compute ur_ksum(r) from the symmetrical image.
        ! I should rotate the g-vectors outside the loop and rotate ug here
        ! but at present I cannot use cgtk_rotate due to the symrel^T convention.
@@ -7615,7 +7607,6 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
          ug_ksum(:) = ugb_kibz%buffer_cplx(:, il_b)
        else
          ! Reconstruct u_kq(G) from the IBZ image.
-         !call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
 
          ! FIXME: This is wrong if spc
          call c_f_pointer(c_loc(ug_ksum), cg2_ptr, shape=[2, npw_k * nspinor])
@@ -7632,8 +7623,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
                           npw_k, kg_k, desc_ki%istwfk, istwf_k, cg1_ibz, cg2_ptr, work_ngfft, work)
        end if
 
-       call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, &
-                   ug_ksum, ur_ksum)
+       call fft_ug(npw_k, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwf_k, kg_k, gbound_ksum, ug_ksum, ur_ksum)
 
        if (any(g0 /= 0)) ur_ksum = ur_ksum * conjg(eig0r)
 
@@ -7642,8 +7632,7 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
 
          ! FIXME: nspinor 2 is wrong as we have a 2x2 matrix
          ur_prod(:) = conjg(ur_ksum(:)) * ur_bdgw(:,jb)
-         call fft_ur(npwx, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_x, gbound_x, &
-                     ur_prod, rhotwg_ki(:,jb))
+         call fft_ur(npwx, u_nfft, nspinor, ndat1, u_mgfft, u_ngfft, istwfk1, gvec_x, gbound_x, ur_prod, rhotwg_ki(:,jb))
 
          ! Multiply by the square root of the Coulomb term
          ! In 3-D systems, the factor sqrt(4pi) is included

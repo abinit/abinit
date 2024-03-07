@@ -534,7 +534,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
            !   * If nspinor == 2, we evaluate <band_sum,up|jb,up> and <band_sum,dwn|jb,dwn>,
            !     and impose orthonormalization since npwwfn might be < npwvec.
            !   * Note the use of i_sz_resid and not i_sz, to account for the possibility
-           !     to have generalized KS basis set from hybrid
+           !     to have generalized KS basis set from hybrid.
 
            if (nspinor == 1) then
              rhotwg_ki(1, jb) = czero_gw

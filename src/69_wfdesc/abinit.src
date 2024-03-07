@@ -21,7 +21,7 @@ sources = [
  "m_wfd_optic.F90",
  "m_io_kss.F90",
  "m_oscillators.F90",
- "m_wfd.F90",
+ #"m_wfd.F90",
 ]
 # IMPORTANT : please use the alphabetic order in the previous list. Do NOT add the new routine names at the end of the list.
 # This is important to avoid numerous conflicts at merge time. Thank you very much. Xavier.
