@@ -51,6 +51,7 @@ module m_gwr_driver
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
+ use m_kpts,            only : kpts_ibz_from_kptrlatt
  use m_energies,        only : energies_type, energies_init
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -77,14 +78,13 @@ module m_gwr_driver
  use m_paw_denpot,      only : pawdenpot
  use m_paw_init,        only : pawinit, paw_gencond
  use m_pawcprj,         only : pawcprj_type, pawcprj_free, pawcprj_alloc ! , paw_overlap
- use m_ksdiago,         only : ugb_t
- !use m_fock,            only : fock_type, fock_init, fock_destroy, fock_ACE_destroy, fock_common_destroy, &
- !                              fock_BZ_destroy, fock_update_exc, fock_updatecwaveocc
+ use m_ksdiago,         only : ugb_t, hyb_t
  use m_mkrho,           only : prtrhomxmn
  use m_melemts,         only : melflags_t
  use m_setvtr,          only : setvtr
  use m_vhxc_me,         only : calc_vhxc_me
  use m_gwr,             only : gwr_t
+ use m_vcoul,           only : vcgen_t
  !use m_ephtk,          only : ephtk_update_ebands
 
  implicit none
@@ -177,7 +177,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(mpi_type) :: mpi_enreg_seq
  type(gwr_t) :: gwr
  type(wfk_t) :: owfk
- type(wfd_t) :: hyb_wfd
+ type(vcgen_t) :: vcgen
 !arrays
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij
@@ -191,14 +191,13 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: compch_fft, compch_sph !,r_s,rhoav,alpha
  !real(dp) :: drude_plsmf !,my_plsmf,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: gsqcutc_eff, gsqcutf_eff, gsqcut_shp
- real(dp) :: vxcavg !,vxcavg_qp ucvol,
- real(dp) :: gw_gsq !, gsqcut, gwc_gsq, gwx_gsq,
+ real(dp) :: vxcavg, gw_gsq
  type(energies_type) :: KS_energies
  type(melflags_t) :: KS_mflags
  type(paw_dmft_type) :: Paw_dmft
  type(ugb_t) :: ugb
+ type(hyb_t) :: hyb
  type(xmpi_pool2d_t) :: diago_pool
- !type(fock_type),pointer :: fock => null()
 !arrays
  integer :: ngfftc(18),ngfftf(18),units(2)
  integer,allocatable :: nq_spl(:), l_size_atm(:)
@@ -212,10 +211,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp),allocatable :: vpsp(:), xccc3d(:), dijexc_core(:,:,:) !, dij_hf(:,:,:)
  real(dp),allocatable :: eig_k(:), occ_k(:)
  real(dp),contiguous,pointer :: cg_k_ptr(:,:)
- type(Paw_an_type),allocatable :: KS_paw_an(:)
- type(Paw_ij_type),allocatable :: KS_paw_ij(:)
- type(Pawfgrtab_type),allocatable :: Pawfgrtab(:)
- type(Pawrhoij_type),allocatable :: KS_Pawrhoij(:)
+ type(paw_an_type),allocatable :: KS_paw_an(:)
+ type(paw_ij_type),allocatable :: KS_paw_ij(:)
+ type(pawfgrtab_type),allocatable :: Pawfgrtab(:)
+ type(pawrhoij_type),allocatable :: KS_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  !type(pawcprj_type),allocatable :: cprj_k(:,:)
 
@@ -243,8 +242,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call cwtime(cpu, wall, gflops, "start")
 
 ! write(msg,'(7a)')&
-! ' SIGMA: Calculation of the GW corrections ',ch10,ch10,&
-! ' Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
+! ' GWR: Calculation of the GW corrections with GWR code ',ch10,ch10,&
+! ' Based on a program developed by R.W. Godby, V. Olevano, G. Onida, and L. Reining.',ch10,&
 ! ' Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.'
 ! call wrtout(units, msg)
 !
@@ -685,8 +684,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    diago_info = zero
 
    if (dtset%usefock == 1) then
-     ! Build hyb_wfd descriptors with hybrid orbitals from WFK file.
-     call get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
+     ! Build hyb with hybrid orbitals from WFK file.
+     call hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
    end if
 
    if (write_wfk) then
@@ -709,7 +708,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
        nband_k = nband_iks(ik_ibz, spin)
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
-                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, diago_pool%comm%value)
+                           dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
 
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(1, ik_ibz, spin) = diago_wall
@@ -753,7 +752,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      end do ! ik_ibz
    end do ! spin
 
-   call hyb_wfd%free()
    call wrtout(std_out, " Direct diago completed by this MPI pool. Other pools might take more time if k != 0")
 
    call xmpi_sum_master(diago_info, master, comm, ierr)
@@ -787,7 +785,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
-   call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free()
+   call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free(); call hyb%free()
 
    ! Deallocate exact exchange data at the end of the calculation
    !if (dtset%usefock == 1) then
@@ -945,31 +943,33 @@ end subroutine gwr_driver
 !!***
 
 ! Read the WFK file compute with HYBRID functionql
-subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
+subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
+
+ use m_krank
 
 !Arguments ------------------------------------
 !scalars
+ type(hyb_t),intent(out) :: hyb
  type(crystal_t),intent(in) :: cryst
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
- type(wfd_t),intent(out) :: hyb_wfd
  integer,intent(in) :: ngfftc(18), comm
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: nprocs, my_rank, ierr, b1, b2
- integer :: mband, nkibz, nsppol, spin, ik_ibz, ikcalc
+ integer :: nprocs, my_rank, ierr, b1, b2, mband, nkibz, nsppol, spin, ik_ibz, ikcalc, ebands_timrev
  !real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
- type(ebands_t) :: hyb_ebands
  type(hdr_type) :: wfk_hdr
  type(crystal_t) :: wfk_cryst
+ type(krank_t) :: qrank, krank_ibz
  character(len=fnlen) :: wfk_path
  integer :: units(2)
- integer,allocatable :: tmp_kstab(:,:,:), nband(:,:), wfd_istwfk(:)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:)
+ real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 !************************************************************************
@@ -988,8 +988,8 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
  call xmpi_bcast(wfk_path, master, comm, ierr)
 
- ! Construct crystal and hyb_ebands from the GS WFK file.
- hyb_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+ ! Construct crystal and hyb%ebands from the GS WFK file.
+ hyb%ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
 
  wfk_cryst = wfk_hdr%get_crystal()
@@ -1002,11 +1002,11 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  !cryst = wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
- nkibz = hyb_ebands%nkpt; nsppol = hyb_ebands%nsppol
+ nkibz = hyb%ebands%nkpt; nsppol = hyb%ebands%nsppol
 
 #if 0
- ! Don't take mband from hyb_ebands but compute it from gwr%bstop_ks
- mband = maxval(gwr%bstop_ks) !; mband = hyb_ebands%mband
+ ! Don't take mband from hyb%ebands but compute it from gwr%bstop_ks
+ mband = maxval(gwr%bstop_ks) !; mband = hyb%ebands%mband
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k wavevectors
@@ -1016,13 +1016,12 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
- !ABI_ICALLOC(tmp_kstab, (2, nkibz, nsppol))
  do spin=1,nsppol
    do ik_ibz=1,nkibz
      !ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
-     tmp_kstab(:, ik_ibz, spin) = [b1, b2]
+     !tmp_kstab(:, ik_ibz, spin) = [b1, b2]
      bks_mask(b1:b2, ik_ibz, spin) = .True.
-     end associate
+     !end associate
    end do
  end do
 #endif
@@ -1032,29 +1031,96 @@ subroutine get_hyb_wfd(cryst, dtfil, dtset, psps, pawtab, ngfftc, hyb_wfd, comm)
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
- call wfd_init(hyb_wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
-               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb_ebands%kptns, ngfftc, &
+ call wfd_init(hyb%wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
- call hyb_wfd%print(header="Wavefunctions for Hybrid WKF file")
+ call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
  ABI_FREE(wfd_istwfk)
  ABI_FREE(bks_mask)
 
- call ebands_free(hyb_ebands)
  call wfk_hdr%free()
 
  ! Read wavefunctions.
- call hyb_wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+ call hyb%wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+
+ ! This piece of code is taken from m_gwr.
+
+ ! =======================
+ ! Setup k-mesh and q-mesh
+ ! =======================
+ ! Get full kBZ associated to hyb%ebands
+ call kpts_ibz_from_kptrlatt(cryst, hyb%ebands%kptrlatt, hyb%ebands%kptopt, hyb%ebands%nshiftk, hyb%ebands%shiftk, &
+                             hyb%nkibz, hyb%kibz, wtk, hyb%nkbz, hyb%kbz) !, bz2ibz=bz2ibz)
+                             !new_kptrlatt=gwr%kptrlatt, new_shiftk=gwr%kshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+ ABI_FREE(wtk)
+
+ ! In principle kibz should be equal to hyb%ebands%kptns.
+ ABI_CHECK_IEQ(hyb%nkibz, hyb%ebands%nkpt, "nkibz != hyb%ebands%nkpt")
+ ABI_CHECK(all(abs(hyb%ebands%kptns - kibz) < tol12), "hyb%ebands%kibz != kibz")
+
+#if 0
+ ! Note symrec convention.
+ ebands_timrev = kpts_timrev_from_kptopt(hyb%ebands%kptopt)
+ krank_ibz = krank_from_kptrlatt(hyb%nkibz, kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
+
+ ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
+ if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+
+ ! Order kbz by stars and rearrange entries in kbz2ibz table.
+ call kpts_pack_in_stars(hyb%nkbz, hyb%kbz, hyb%kbz2ibz)
+
+ if (my_rank == master) then
+   call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", hyb%kbz, kibz, hyb%kbz2ibz, dtset%prtvol)
+ end if
+
+ ! Table with symrel conventions for the symmetrization of the wfs.
+ ABI_MALLOC(hyb%kbz2ibz_symrel, (6, hyb%nkbz))
+ if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz_symrel) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+
+ ! Setup qIBZ, weights and BZ.
+ ! Always use q --> -q symmetry even in systems without inversion
+ ! TODO: Might add input variable to rescale the q-mesh.
+ my_nshiftq = 1; my_shiftq = zero; qptrlatt = hyb%ebands%kptrlatt
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+                             hyb%nqibz, hyb%qibz, hyb%wtq, hyb%nqbz, hyb%qbz)
+                             !new_kptrlatt=hyb%qptrlatt, new_shiftk=hyb%qshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+
+ ABI_CHECK(all(abs(hyb%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
+ hyb%ngqpt = get_diag(qptrlatt)
+
+ ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
+ ABI_MALLOC(hyb%qbz2ibz, (6, hyb%nqbz))
+
+ qrank = krank_from_kptrlatt(hyb%nqibz, hyb%qibz, qptrlatt, compute_invrank=.False.)
+
+ if (kpts_map("symrec", qtimrev1, cryst, qrank, hyb%nqbz, hyb%qbz, hyb%qbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map qBZ to IBZ!")
+ end if
+ call qrank%free()
+
+ ! Order qbz by stars and rearrange entries in qbz2ibz table.
+ call kpts_pack_in_stars(hyb%nqbz, hyb%qbz, hyb%qbz2ibz)
+ if (my_rank == master) then
+   call kpts_map_print(units, " Mapping qBZ --> qIBZ", "symrec", hyb%qbz, hyb%qibz, hyb%qbz2ibz, dtset%prtvol)
+ end if
+#endif
 
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
  !vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
- !call vcgen%init(cryst, ks_ebands%kptrlatt, gwr%nkbz, gwr%nqibz, gwr%nqbz, gwr%qbz, &
- !                dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, gwr%comm%value)
+ call hyb%vcgen%init(cryst, hyb%ebands%kptrlatt, hyb%nkbz, hyb%nqibz, hyb%nqbz, hyb%qbz, &
+                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecut, comm)
 
-end subroutine get_hyb_wfd
+end subroutine hyb_from_wfk_file
 !!***
 
 !!****f* m_gwr_driver/cc4s_write_eigens
@@ -1428,7 +1494,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    if (psps%usepaw == 1) call ugb%collect_cprj(nspinor, n1dat, band1_start, cprj1)
 
    ! FFT: ug1_batch --> ur1_batch
-   !call fft_ug(ugb%npw_k, u_nfft, nspinor, n1dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, ug1_batch, ur1_batch)
    call uplan_1%execute_gr(n1dat, ug1_batch(:,1), ur1_batch(:,1))
    if (ugb%istwf_k /= 2) ur1_batch = conjg(ur1_batch)  ! Not needed if k == Gamma as ur1 is real.
    ABI_FREE(ug1_batch)
@@ -1439,9 +1504,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      my_ib2st = band2_start - ugb%my_bstart + 1
 
      ! FFT: ugb%mat --> ur2_batch for n2dat states.
-     !call fft_ug(ugb%npw_k, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, ugb%istwf_k, ugb%kg_k, gbound_k, &
-     !            ugb%mat%buffer_cplx(:,my_ib2st), ur2_batch(:,1))
-
      call uplan_2%execute_gr(n2dat, ugb%mat%buffer_cplx(:,my_ib2st), ur2_batch(:,1))
 
      ! For each row of the submatrix, build n2dat products (band1, idat2) in r-space, then r --> g.
@@ -1452,8 +1514,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          ur12_batch(:,idat2) = ur1_batch(:,idat1) * ur2_batch(:,idat2)
        end do
        call uplan_m%execute_rg(n2dat, ur12_batch(:,1), ug12_batch(:,1))
-
-       !call fft_ur(m_npw, u_nfft, nspinor, n2dat, u_mgfft, u_ngfft, m_istwfk, m_gvec, m_gbound, ur12_batch, ug12_batch)
 
        if (psps%usepaw == 1) then
          ! Add PAW on-site contributions

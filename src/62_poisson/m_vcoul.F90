@@ -1211,8 +1211,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  integer,parameter :: ncell=3
  integer :: nseed, i1,i2,i3,imc
  real(dp) :: lmin,vlength, ucvol_sc
- real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
- real(dp) :: qtmp(3),qmin(3),qmin_cart(3)
+ real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3), qtmp(3),qmin(3),qmin_cart(3)
  integer, allocatable :: seed(:)
 
 ! *************************************************************************
@@ -1321,7 +1320,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
  ig0 = -1
  do ig=1,ng
    if (all(gvec(:, ig) == 0)) then
-      ig0 = ig; exit
+     ig0 = ig; exit
    end if
  end do
  ABI_CHECK(ig0 /= -1, "Cannot find G=0 in gvec!")
@@ -1329,8 +1328,8 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
  vcoul = zero
 
  select case (trim(mode))
- case('MINIBZ')
 
+ case('MINIBZ')
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1355,7 +1354,6 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
    end if
 
  case('MINIBZ-ERFC')
-
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1383,7 +1381,6 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
    end if
 
  case('MINIBZ-ERF')
-
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1941,7 +1938,6 @@ subroutine vcgen_free(vcgen)
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(inout) :: vcgen
-
 ! *************************************************************************
 
  call vcgen%mc%free()
