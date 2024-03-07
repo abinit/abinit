@@ -630,7 +630,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
          do ii=1,3
            abc = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
          end do
-         sigma = max(maxval(abc, fs%min_smear))
+         sigma = max(maxval(abc), fs%min_smear))
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
        wtk(ib1, ib2) = (g1 * g2) / fs%nktot
