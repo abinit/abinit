@@ -36,6 +36,8 @@ module m_ddb_magpen
  use m_fstrings,        only : itoa, sjoin
  use m_macroave,        only : POLINT
  use m_io_tools,        only : open_file
+ use m_cgtools,         only : fxphas_seq
+ use m_dynmat,          only : pheigvec_normalize
 
  implicit none
 
@@ -1671,21 +1673,22 @@ contains
 !Local variables -------------------------
 !scalars
  integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
- integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit
+ integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename
- character(len=fnlen) :: phon_filename,zeff_filename
+ character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
- real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:),phonspec(:)
+ real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:),phonspec(:),mode_phonspec(:,:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
+ complex(dpc), allocatable :: zeffspec(:,:)
 
 ! *********************************************************************
 
@@ -1712,6 +1715,8 @@ contains
  ABI_MALLOC(omega,(nomega))
  ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
+ ABI_MALLOC(mode_phonspec,(3*natom,nomega))
+ ABI_MALLOC(zeffspec,(3,nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
  ABI_MALLOC(zeff,(3,3*natom,nomega))
@@ -1762,7 +1767,7 @@ contains
  & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
 
    !Calculate the phonon Green's function and spectral function
-   call phonon_green(amu,eigvec,ifcmat(:,:,iw),natom,ntypat,omega(iw),phfrq(:,iw),phonspec(iw),typat)
+   call phonon_green(amu,eigvec,ifcmat(:,:,iw),mode_phonspec(:,iw),natom,ntypat,omega(iw),phfrq(:,iw),phonspec(iw),typat)
 
    !Calculate the mode-resolved magnetic moments
    call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),natom,ndim,ntypat,typat)
@@ -1772,7 +1777,7 @@ contains
  & natom,1,ndim,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield(:,:,iw))
 
    !Calculate the mode-resolved Born effective charges
-   call mode_zeff(amu,eigvec,natom,ntypat,typat,zeff(:,:,iw),modezeff(:,:,iw))
+   call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,typat,zeff(:,:,iw),zeffspec(:,iw))
 
  end do
 
@@ -1789,45 +1794,53 @@ contains
  write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' )  ndim**2
 
  write(spin_unit,*) '#  Real part of local spin susceptibility tensor (at. units)'
+! write(spin_unit,*) '#  Real part of penalized local spin susceptibility tensor (at. units)'
  write(msg,'(a,a)') ch10,&
 &           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
  &  omega(iw), ((real(magsus(i,j,iw)),j=1,ndim),i=1,ndim)
+! &  omega(iw), ((real(barmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
  write(spin_unit,*) ' '
  write(spin_unit,*) '#  Imaginary part of local spin susceptibility tensor (at. units)'
+! write(spin_unit,*) '#  Imaginary part of penalized local spin susceptibility tensor (at. units)'
  write(msg,'(a,a)') ch10,&
 &           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
  &  omega(iw), ((aimag(magsus(i,j,iw)),j=1,ndim),i=1,ndim)
+! &  omega(iw), ((aimag(barmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
  write(spin_unit,*) ' '
- write(spin_unit,*) '#  Real part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+! write(spin_unit,*) '#  Real part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+ write(spin_unit,*) '#  Real part of the inverse of the local spin susceptibility tensor (at. units)'
  write(msg,'(a,a)') ch10,&
 &           ' # At  hw     X^{-1}_11     X^{-1}_12     ...     X^{-1}_21     X^{-1}_22     ...'
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((real(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
+! &  omega(iw), ((real(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
+ &  omega(iw), ((real(invmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
  write(spin_unit,*) ' '
- write(spin_unit,*) '#  Imaginary part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+! write(spin_unit,*) '#  Imaginary part of the inverse of the penalized local spin susceptibility tensor (at. units)'
+ write(spin_unit,*) '#  Imaginary part of the inverse of the local spin susceptibility tensor (at. units)'
  write(msg,'(a,a)') ch10,&
 &           ' # At  hw     X^{-1}_11     X^{-1}_12     ...     X^{-1}_21     X^{-1}_22     ...'
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
+! &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
+ &  omega(iw), ((aimag(invmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -2024,6 +2037,34 @@ contains
 
  close(zeff_unit)
 
+ zeffspec_filename=trim(outfilename_radix)//"_ZEFFSPEC"
+ if (open_file(zeffspec_filename, msg, newunit=zeffspec_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+ write(zeffspec_unit,*) ' '
+ write(zeffspec_unit,'(a)') '#  Real part of Born charges spectral function:'
+ write(zeffspec_unit,*) ' '
+ write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x     Z^y     Z^z'
+ call wrtout(zeffspec_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,'(4es15.7)') omega(iw), real(zeffspec(:,iw))
+   call wrtout(zeffspec_unit,msg,'COLL')
+ end do
+
+ write(zeffspec_unit,*) ' '
+ write(zeffspec_unit,'(a)') '#  Imaginary part of Born charges spectral function:'
+ write(zeffspec_unit,*) ' '
+ write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     Z^x     Z^y     Z^z'
+ call wrtout(zeffspec_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,'(4es15.7)') omega(iw), aimag(zeffspec(:,iw))
+   call wrtout(zeffspec_unit,msg,'COLL')
+ end do
+
+ close(zeffspec_unit)
+
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
  ABI_FREE(barmagsus)
@@ -2039,6 +2080,8 @@ contains
  ABI_FREE(omega)
  ABI_FREE(phfrq)
  ABI_FREE(phonspec)
+ ABI_FREE(zeffspec)
+ ABI_FREE(mode_phonspec)
  ABI_FREE(eigvec)
  ABI_FREE(modemm)
  ABI_FREE(zeff)
@@ -2092,7 +2135,7 @@ contains
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
+subroutine phonon_green(amu,eigvec,ifc,mode_phonspec,natom,ntypat,omega,phfrq,phonspec,typat)
 
  use defs_basis
  use m_errors
@@ -2110,6 +2153,7 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  real(dp), intent(in) :: amu(ntypat)
  real(dp),intent(out) :: eigvec(2*3*natom*3*natom)
  real(dp),intent(out) :: phfrq(3*natom)
+ real(dp), intent(out) :: mode_phonspec(3*natom)
  complex(dpc), intent(in) :: ifc(3*natom,3*natom)
 
 !Local variables-------------------------------
@@ -2118,6 +2162,7 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  complex(dpc) :: eta
 !arrays
  integer, allocatable :: ipiv(:)
+ real(dp) :: dum(2,0) 
  real(dp), allocatable :: massfac(:,:)
  real(dp), allocatable :: matrx(:,:),zhpev1(:,:),zhpev2(:)
  real(dp), allocatable :: eigval(:)
@@ -2133,7 +2178,7 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  ABI_MALLOC(massfac,(natom,natom))
  do iat2= 1, natom
    do iat1= 1, natom
-     massfac(iat1,iat2)=one/sqrt(amu(typat(iat1))*amu(typat(iat2)))
+     massfac(iat1,iat2)=one/sqrt(amu(typat(iat1))*amu(typat(iat2)))/amu_emass
    end do
  end do
 
@@ -2141,7 +2186,7 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
  ndim=3*natom
  ABI_MALLOC(dynmat,(ndim,ndim))
  ABI_MALLOC(w2dynmat,(ndim,ndim))
- eta=(0.0_dp,0.00001_dp)
+ eta=(0.0_dp,0.000001_dp)
  do iat2= 1, natom
    do idir2= 1, 3
      icol= (iat2-1)*3 + idir2
@@ -2177,11 +2222,10 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
 
 
 !Finally extract the spectral function from the trace
- phonspec= zero
  do irow= 1, ndim
-   phonspec= phonspec + aimag(work1(irow,irow))
+   mode_phonspec(irow)= -two*omega/pi * aimag(work1(irow,irow))
  end do
- phonspec= -two*omega/pi * phonspec
+ phonspec= sum(mode_phonspec(:))
 
 !Diagonalize the Dynamical matrix
  ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
@@ -2214,6 +2258,11 @@ subroutine phonon_green(amu,eigvec,ifc,natom,ntypat,omega,phfrq,phonspec,typat)
    end if
  end do
 
+ ! Fix the phase of the eigenvectors
+ call fxphas_seq(eigvec,dum, 0, 0, 1, 3*natom*3*natom, 0, 3*natom, 3*natom, 0)
+
+ ! Normalise the eigenvectors
+ call pheigvec_normalize(natom, eigvec)
 
  ABI_FREE(ipiv)
  ABI_FREE(work1)
@@ -2374,7 +2423,7 @@ end subroutine mode_mmom
 #include "abi_common.h"
 
 
-subroutine mode_zeff(amu,eigvec,natom,ntypat,typat,zeff,modezeff)
+subroutine mode_zeff(amu,eigvec,mode_phonspec,modezeff,natom,ntypat,typat,zeff,zeffspec)
 
  use defs_basis
  use m_errors
@@ -2389,8 +2438,10 @@ subroutine mode_zeff(amu,eigvec,natom,ntypat,typat,zeff,modezeff)
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
+ real(dp), intent(in) :: mode_phonspec(3*natom)
  complex(dpc), intent(in) :: zeff(3,natom*3)
  complex(dpc), intent(out) :: modezeff(3,3*natom)
+ complex(dpc), intent(out) :: zeffspec(3)
 
 !Local variables-------------------------------
 !scalars
@@ -2398,6 +2449,7 @@ subroutine mode_zeff(amu,eigvec,natom,ntypat,typat,zeff,modezeff)
  real(dp) :: mcell
 !arrays
  real(dp), allocatable :: mass(:)
+ complex(dpc), allocatable :: mode_zeffspec(:,:)
 !character(len=500) :: msg                   
 
 ! *************************************************************************
@@ -2431,6 +2483,17 @@ subroutine mode_zeff(amu,eigvec,natom,ntypat,typat,zeff,modezeff)
  end do
 
  ABI_FREE(mass)
+
+!Compute the Born charges weighted by the phonon spectral function
+ ABI_MALLOC(mode_zeffspec,(3,3*natom))
+ do irow= 1, 3*natom
+   mode_zeffspec(:,irow)= modezeff(:,irow)*mode_phonspec(irow)
+ end do
+ zeffspec(1)=sum(mode_zeffspec(1,:))
+ zeffspec(2)=sum(mode_zeffspec(2,:))
+ zeffspec(3)=sum(mode_zeffspec(3,:))
+
+ ABI_FREE(mode_zeffspec)
 
  DBG_EXIT("COLL")
 
