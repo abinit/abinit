@@ -280,7 +280,7 @@ subroutine pawuj_det(dtpawuj,ndtpawuj,dtset,dtfil,ures,comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter           :: natmax=2,nwfchr=6
- integer                     :: ii,jj,nat_org,jdtset,nspden,macro_uj,marr
+ integer                     :: ii,jj,nat_org,natom,jdtset,nspden,macro_uj,marr
  integer                     :: im1,ndtuj,nsh_org, nsh_sc,nat_sc,maxnat
  integer                     :: pawujat,pawprtvol,pawujoption
  integer                     :: dmatpuopt,invopt,ipert
@@ -329,6 +329,7 @@ call wrtout(std_out,message,'COLL')
 
  nspden=dtpawuj(jdtset)%nspden
  nat_org=dtpawuj(jdtset)%nat
+ natom=dtset%natom
  write(message,'(a,i3)')'natom,nat_org',nat_org
  call wrtout(std_out,message,'COLL')
 ! ABI_CHECK(nat_org == 1, "MG: I'm not sure we access data with the right index if nat_org > 1")
@@ -587,8 +588,9 @@ call wrtout(std_out,message,'COLL')
    NCF_CHECK(cryst%ncwrite(ncid))
    call cryst%free()
 
-   ! Define dimensions.
+   !Define dimensions.
    ncerr = nctk_def_dims(ncid, [ &
+     nctkdim_t("natom", natom), &
      nctkdim_t("nnat", nat_org), &
      nctkdim_t("ndtpawuj", ndtpawuj), &
      nctkdim_t("nspden", dtset%nspden), &

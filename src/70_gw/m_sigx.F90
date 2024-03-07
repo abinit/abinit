@@ -586,7 +586,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
                gwpc_sigxme2 = xdot_tmp * theta_mu_minus_esum2
 
                ! Accumulate and symmetrize Sigma_x matrix elements.
-               ! -wtqm comes from time-reversal (exchange of band indeces)
+               ! -wtqm comes from time-reversal (exchange of band indices)
                is_idx = spin; if (nspinor == 2) is_idx = iab
                sigxme_tmp(jb, kb, is_idx) = sigxme_tmp(jb, kb, is_idx) + &
                   (wtqp + wtqm) * DBLE(gwpc_sigxme) + (wtqp - wtqm) * j_gw * AIMAG(gwpc_sigxme)

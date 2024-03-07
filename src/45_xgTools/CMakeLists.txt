@@ -3,6 +3,7 @@
 #
 set(45_xgTools_SRC
   m_xg.F90
+  m_xg_ortho_RR.F90
   m_xgScalapack.F90
   m_xgTransposer.F90
   )

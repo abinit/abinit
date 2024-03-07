@@ -1528,7 +1528,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
      found=.FALSE.
 
      do ikbz=1,nkbz ! Loop on the set of BZ points found above.
-       if (isequalk(kref,kbz(:,ikbz))) then ! Swap indeces.
+       if (isequalk(kref,kbz(:,ikbz))) then ! Swap indices.
          kbz_swp   = kbz(:,ikref)
          ikibz_swp = ktab (ikref)
          isym_swp  = ktabo(ikref)
