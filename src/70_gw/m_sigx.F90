@@ -232,6 +232,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
  ! MRM allow lower occ numbers
  ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
+ !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
  select case (nsppol)
  case (1)
    fact_spin = half; tol_empty = tol_empty_in          ! below this value the state is assumed empty

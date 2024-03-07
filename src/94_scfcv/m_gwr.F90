@@ -125,10 +125,10 @@
 
 module m_gwr
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
- !use mpi
  use m_xmpi
  use m_xomp
  use m_hdr
@@ -138,7 +138,6 @@ module m_gwr
  use m_dtfil
  use m_yaml
  use m_sigtk
- use, intrinsic :: iso_c_binding
  use m_hide_blas
 
  use defs_datatypes,  only : pseudopotential_type, ebands_t
@@ -181,9 +180,7 @@ module m_gwr
  use m_chi0tk,        only : chi0_bbp_mask, accumulate_head_wings_imagw, symmetrize_afm_chi0
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
-!#ifdef __HAVE_GREENX
  use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
-!#endif
 
  implicit none
 
@@ -1170,7 +1167,6 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
  end if
  gwr%ntau = dtset%gwr_ntau
 
-!#ifdef __HAVE_GREENX
  regterm = dtset%gwr_regterm
  if (regterm > -tol16) then
      call wrtout(std_out, sjoin("Computing minimax grid with user-provided regterm:", ftoa(regterm)))
@@ -1926,7 +1922,6 @@ subroutine gwr_free(gwr)
  ABI_SFREE(gwr%itreat_ikibz)
  ABI_SFREE(gwr%np_qibz)
  ABI_SFREE(gwr%itreat_iqibz)
-!#ifdef __HAVE_GREENX
  ABI_SFREE_NOCOUNT(gwr%tau_mesh)
  ABI_SFREE_NOCOUNT(gwr%tau_wgs)
  ABI_SFREE_NOCOUNT(gwr%iw_mesh)
@@ -1934,7 +1929,6 @@ subroutine gwr_free(gwr)
  ABI_SFREE_NOCOUNT(gwr%cosft_tw)
  ABI_SFREE_NOCOUNT(gwr%cosft_wt)
  ABI_SFREE_NOCOUNT(gwr%sinft_wt)
-!#endif
  ABI_SFREE(gwr%kcalc)
  ABI_SFREE(gwr%bstart_ks)
  ABI_SFREE(gwr%bstop_ks)
