@@ -1672,11 +1672,11 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,nblok,ndim 
+ integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
- character(len=fnlen) :: diel_filename,spin_filename,mmom_filename
+ character(len=fnlen) :: diel_filename,spin_filename,mmom_filename,mmspec_filename
  character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
@@ -1688,7 +1688,7 @@ contains
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
  complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
- complex(dpc), allocatable :: zeffspec(:,:)
+ complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:)
 
 ! *********************************************************************
 
@@ -1717,6 +1717,7 @@ contains
  ABI_MALLOC(phonspec,(nomega))
  ABI_MALLOC(mode_phonspec,(3*natom,nomega))
  ABI_MALLOC(zeffspec,(3,nomega))
+ ABI_MALLOC(mmomspec,(ndim,nomega))
  ABI_MALLOC(eigvec,(2,3,natom,3,natom))
  ABI_MALLOC(modemm,(ndim,3*natom,nomega))
  ABI_MALLOC(zeff,(3,3*natom,nomega))
@@ -1770,7 +1771,7 @@ contains
    call phonon_green(amu,eigvec,ifcmat(:,:,iw),mode_phonspec(:,iw),natom,ntypat,omega(iw),phfrq(:,iw),phonspec(iw),typat)
 
    !Calculate the mode-resolved magnetic moments
-   call mode_mmom(amu,eigvec,mmom(:,:,iw),modemm(:,:,iw),natom,ndim,ntypat,typat)
+   call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
    !Calculate the Born effective charges
    call mp_zeff(barmagsus(:,:,iw),int_barddb,1,magsus(:,:,iw),mpert,mpopt,&
@@ -1907,6 +1908,37 @@ contains
 
  close(mmom_unit)
 
+ mmspec_filename=trim(outfilename_radix)//"_SPECTRAL_MAGMOM"
+ if (open_file(mmspec_filename, msg, newunit=mmspec_unit) /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ write(mmspec_unit,*) ' '
+ write(mmspec_unit,'(a)') '#  Real part of magnetic moments spectral function:'
+ write(mmspec_unit,*) ' '
+ write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+ call wrtout(mmspec_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), real(mmomspec(:,iw))
+   call wrtout(mmspec_unit,msg,'COLL')
+ end do
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+ write(mmspec_unit,*) ' '
+ write(mmspec_unit,'(a)') '#  Imaginary part of magnetic moments spectral function:'
+ write(mmspec_unit,*) ' '
+ write(msg,'(a,a)') ch10,&
+ &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+ call wrtout(mmspec_unit,msg,'COLL')
+ do iw=1,nomega
+   write(msg,pfmt) omega(iw), aimag(mmomspec(:,iw))
+   call wrtout(mmspec_unit,msg,'COLL')
+ end do
+
+ close(mmspec_unit)
+
 !Dielectric susceptibility
  diel_filename=trim(outfilename_radix)//"_DIELSUS"
  if (open_file(diel_filename, msg, newunit=diel_unit) /= 0) then
@@ -2037,7 +2069,7 @@ contains
 
  close(zeff_unit)
 
- zeffspec_filename=trim(outfilename_radix)//"_ZEFFSPEC"
+ zeffspec_filename=trim(outfilename_radix)//"_SPECTRAL_ZEFF"
  if (open_file(zeffspec_filename, msg, newunit=zeffspec_unit) /= 0) then
    ABI_ERROR(msg)
  end if
@@ -2081,6 +2113,7 @@ contains
  ABI_FREE(phfrq)
  ABI_FREE(phonspec)
  ABI_FREE(zeffspec)
+ ABI_FREE(mmomspec)
  ABI_FREE(mode_phonspec)
  ABI_FREE(eigvec)
  ABI_FREE(modemm)
@@ -2317,7 +2350,7 @@ end subroutine phonon_green
 #include "abi_common.h"
 
 
-subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
+subroutine mode_mmom(amu,eigvec,mmom,mmomspec,modemm,mode_phonspec,natom,ndim,ntypat,typat)
 
  use defs_basis
  use m_errors
@@ -2332,8 +2365,10 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  integer, intent(in) :: typat(natom)
  real(dp), intent(in) :: amu(ntypat)
  real(dp), intent(in) :: eigvec(2,3,natom,3,natom)
+ real(dp), intent(in) :: mode_phonspec(3*natom)
  complex(dpc), intent(in) :: mmom(ndim,(natom+2)*3)
  complex(dpc), intent(out) :: modemm(ndim,3*natom)
+ complex(dpc), intent(out) :: mmomspec(ndim)
 
 !Local variables-------------------------------
 !scalars
@@ -2341,6 +2376,7 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  real(dp) :: mcell
 !arrays
  real(dp), allocatable :: mass(:)
+ complex(dpc), allocatable :: mode_mmomspec(:,:)
 !character(len=500) :: msg                   
 
 ! *************************************************************************
@@ -2374,6 +2410,17 @@ subroutine mode_mmom(amu,eigvec,mmom,modemm,natom,ndim,ntypat,typat)
  end do
 
  ABI_FREE(mass)
+
+!Compute the magnetic moments weighted by the phonon spectral function
+ ABI_MALLOC(mode_mmomspec,(ndim,3*natom))
+ do irow= 1, 3*natom
+   mode_mmomspec(:,irow)= modemm(:,irow)*mode_phonspec(irow)
+ end do
+ do im= 1, ndim
+   mmomspec(im)=sum(mode_mmomspec(im,:))
+ end do 
+ ABI_FREE(mode_mmomspec)
+ 
 
  DBG_EXIT("COLL")
 
