@@ -216,11 +216,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  autoparal
    call chkint_eq(0,0,cond_string,cond_values,ierr,'autoparal',dt%autoparal,5,(/0,1,2,3,4/),iout)
-!  This test should be reenabled in ABINITv10, provided expert_user is not 1
-!  if(dt%autoparal/=0.and.dt%optdriver/=RUNL_GSTATE) then
-!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-!      call chkint_eq(1,1,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
-!  end if
+   if(dt%chkparal/=0.and.(dt%autoparal/=0.and.dt%optdriver/=RUNL_GSTATE)) then
+       cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+       cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'autoparal',dt%autoparal,1,(/0/),iout)
+   end if
 
 !  auxc_scal
    call chkdpr(0,0,cond_string,cond_values,ierr,'auxc_scal',dt%auxc_scal,1,0.0_dp,iout)
@@ -421,6 +421,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  chkdilatmx
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chkdilatmx',dt%chkdilatmx,2,(/0,1/),iout)
+
+!  chkparal
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'chkparal',dt%chkparal,2,(/0,1/),iout)
 
 !  chksymbreak
    call chkint_eq(0,0,cond_string,cond_values,ierr,'chksymbreak',dt%chksymbreak,2,(/0,1/),iout)
@@ -1230,7 +1233,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwmem',dt%gwmem,4,[0,1,10,11],iout)
+
+   ! gwpara
    call chkint_eq(0,0,cond_string,cond_values,ierr,'gwpara',dt%gwpara,3,[0,1,2],iout)
+!  if(dt%chkparal/=0.and.(dt%gwpara==0.and.(dt%optdriver==RUNL_SCREENING.and.dt%optdriver==RUNL_SIGMA))) then
+!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+!      cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
+!      call chkint_eq(2,2,cond_string,cond_values,ierr,'gwpara',dt%gwpara,1,(/0/),iout)
+!  end if
 
    ! gwrpacorr
    if(dt%gwrpacorr>0) then
@@ -2722,11 +2732,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%paral_kgb==1.and.dt%usefock>0) then
      ABI_ERROR_NOSTOP('Hartree-Fock or Hybrid Functionals are not compatible with bands/FFT parallelism!', ierr)
    end if
-!  This test should be reenabled in ABINITv10, provided expert_user is not 1
-!  if(dt%paral_kgb/=0.and..not.(dt%optdriver==RUNL_GSTATE .or. dt%optdriver==RUNL_GWLS)) then
-!      cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
-!      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
-!  end if
+   if(dt%chkparal/=0.and.(dt%paral_kgb/=0.and.(dt%optdriver/=RUNL_GSTATE .and. dt%optdriver/=RUNL_GWLS))) then
+       cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+       cond_string(2)='chkparal' ; cond_values(2)=dt%chkparal
+       call chkint_eq(2,2,cond_string,cond_values,ierr,'paral_kgb',dt%paral_kgb,1,(/0/),iout)
+   end if
 
 !  paral_rf
    if (response==0 .and. dt%paral_rf/=0) then

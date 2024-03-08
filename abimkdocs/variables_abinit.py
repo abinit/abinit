@@ -1604,6 +1604,39 @@ In all cases, the check is performed at most every 2 seconds of CPU time.
 ),
 
 Variable(
+    abivarname="chkparal",
+    varset="gstate",
+    vartype="integer",
+    topics=['parallelism_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK whether the PARALelism is adequate",
+    added_in_version="before_v9",
+    text=r"""
+Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
+It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy 
+of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+when they are booked for a run that cannot use these. 
+Accordingly, the user might blame ABINIT for being slow while the user has simply not activated 
+the relevant parallelism, or activated an irrelevant parallelism. 
+
+However, if the user correctly understand the parallelism,
+it might be more convenient to leave in the input file irrelevant variables. This is especially the case for high-throughput calculations
+driven by workflows developed for earlier versions of ABINIT.
+
+The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism,
+thus hopefully preventing some users to loose computing power.
+
+The following relevances and adequacies are checked at present if [[chkparal]]=1 :
+the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW). 
+
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
+""",
+),
+
+Variable(
     abivarname="chkprim",
     varset="gstate",
     vartype="integer",
@@ -4469,7 +4502,8 @@ Variable(
     mnemonics="EXPERTise of the USER",
     added_in_version="9.2.2",
     text=r"""
-If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
+If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]],
+[[chkparal]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero)
 although it is still possible to activate particular tests by specifying input variables directly in the input file.
 In the future, the level three will always be the maximum allowed value, with all checks set to zero,
@@ -13883,8 +13917,11 @@ Variable(
 Relevant only for PAW calculations.
 This keyword controls the parallel distribution of memory over atomic sites.
 Calculations are also distributed using the "kpt-band" communicator.
-Compatible with ground-state calculations and response function calculations
-""",
+Compatible with ground-state calculations and response function calculations.
+
+This parallelization concerns only a small part of the whole calculation in the sequential case.
+When using parallelism, it might be that this small part becomes predominant if [[paral_atom]] is not activated.
+"""
 ),
 
 Variable(

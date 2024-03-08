@@ -182,7 +182,7 @@ nav:
     - Polarization & finite field : tutorial/polarization.md
     - DFPT1: tutorial/rf1.md
     - DFPT2: tutorial/rf2.md
-    - parallelism: tutorial/basepar.md
+    - Parallelism: tutorial/basepar.md
     - ABINIT postprocessors:
         - aTDEP1: tutorial/atdep1.md
         #- aTDEP2: tutorial/atdep2.md
@@ -347,7 +347,7 @@ extra_css:
 extra_javascript:
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2020-2021 The Abinit Group
+copyright: Copyright &copy; 2020-2024 The Abinit Group
 
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 
