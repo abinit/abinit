@@ -1053,7 +1053,8 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb
  character(len=500) :: msg
  character(len=fnlen) :: filepath, cvx_filepath
- logical :: k_is_gamma,  debug_this
+ logical :: k_is_gamma
+ logical,parameter :: trust_no_one = .False.
  type(uplan_t) :: uplan_1, uplan_2, uplan_m
  type(vcgen_t) :: vcgen
  !type(pstat_t) :: pstat
@@ -1072,7 +1073,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  comm = ugb%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
- debug_this = .False.
 
  if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
@@ -1159,18 +1159,16 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        two_pi*cryst%gprimd(1,3), two_pi*cryst%gprimd(2,3), two_pi*cryst%gprimd(3,3)
      close(unt)
 
-     ! Write g-vectors
+     ! Write g-vectors (cart coords)
      filepath = trim(dtfil%filnam_ds(4))//'_GridVectors.elements'
      if (open_file(filepath, msg, newunit=unt, access="stream", form="formatted", status="replace", action="write") /= 0) then
        ABI_ERROR(msg)
      end if
 
      !TODO: k-points to be implemented.
-     ! MG-TODO: I believe these are cart coords
      do ig=1,m_npw
        gcart = two_pi * matmul(cryst%gprimd, m_gvec(:,ig))
        do ii=1,3
-         !write(unt,*) two_pi*GVEC_FULL(ii,ig,KQ)
          write(unt, *) gcart(ii)
        end do
      end do
@@ -1196,7 +1194,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      write(unt,'(a)')    'elements:'
      write(unt,'(a)')    '  type: IeeeBinaryFile'
      write(unt,'(a)')    'unit: 1.0   # Atomic units'
-     !write(unt,'(a)')    'unit: 0.1917011272153577       # = sqrt(Eh/eV)'
      write(unt,'(a)')    'metaData:'
      if (m_istwfk == 2) then
        write(unt,'(a)')    '  halfGrid: 1'
@@ -1245,7 +1242,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_ERROR("CC4S interface requires MPI-IO!")
 #endif
 
- if (debug_this .and. my_rank == 0) then
+ if (trust_no_one .and. my_rank == 0) then
    if (open_file("test_mg", msg, newunit=test_unt, form="formatted", status="replace", action="write") /= 0) then
      ABI_ERROR(msg)
    end if
@@ -1255,8 +1252,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! Increasing this value improves efficiency (less communication) at the price of more memory.
  !call pstat%from_pid(); call pstat%print([std_out], reload=.True.)
 
- batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k)
- !batch1_size = 1; batch2_size = 1
+ batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k) !; batch1_size = 1; batch2_size = 1
  call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
 
  mem_mb = (two * u_nfft * nspinor * batch1_size + &
@@ -1365,7 +1361,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)
 
-       if (my_rank == 0 .and. debug_this) then
+       if (my_rank == 0 .and. trust_no_one) then
          do idat2=1,n2dat
            band2 = band2_start + idat2 - 1
            write(test_unt,*)band1, band2, ug12_batch(1:M_,idat2)
@@ -1412,7 +1408,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! DEBUG SECTION
  ! =============
 #ifdef HAVE_MPI_IO
- if (my_rank == 0 .and. debug_this) then
+ if (my_rank == 0 .and. trust_no_one) then
    close(test_unt)
    if (open_file("test_mg", msg, newunit=test_unt, form="formatted", status="old", action="read") /= 0) then
      ABI_ERROR(msg)
@@ -1446,6 +1442,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  end if
 #endif
 
+ ! Free memory
  call uplan_1%free(); call uplan_2%free(); call uplan_m%free()
 
  ABI_FREE(m_gvec)

@@ -67,6 +67,7 @@ module m_ksdiago
  use m_getghc,            only : getghc, multithreaded_getghc
  use m_wfd,               only : wfd_t, wfd_init
  use m_vcoul,             only : vcgen_t
+ use m_occ,               only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -118,6 +119,8 @@ module m_ksdiago
    ! Local buffer: (2, npwsp * my_nband)
    ! Global matrix: (npwsp, nband_k)
 
+
+
    integer, allocatable :: kg_k(:,:)
    ! (3, npw_k)
    ! G-vectors in reduced coordinates.
@@ -164,6 +167,9 @@ module m_ksdiago
    integer :: nkibz = -1, nkbz = -1
    integer :: nqibz = -1, nqbz = -1
 
+   integer :: mg0(3) = [2, 2, 2]
+   ! Max shifts to account for umklapps.
+
    type(wfd_t) :: wfd
    type(vcgen_t) :: vcgen
    type(ebands_t) :: ebands
@@ -176,6 +182,9 @@ module m_ksdiago
 
    integer,allocatable :: kbz2ibz_symrel(:,:)
     ! kbz2ibz_symrel(6, nkbz))
+
+   integer,allocatable :: qbz2ibz(:,:)
+    ! qbz2ibz(6, nqbz))
 
  contains
 
@@ -962,11 +971,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
  integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
- integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum, ik_bz, ik_ibz, nkbz
+ integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum, nkbz
  integer :: idat, ndat, batch_size, h_size !, mene_found
+ integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
+ integer :: iq_ibz, iq_bz, isym_q, trev_q, g0_q(3)
  real(dp),parameter :: lambda0 = zero
- real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin
- logical :: do_full_diago, haveit
+ real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty
+ logical :: do_full_diago, haveit, isirr_k, isirr_q, q_is_gamma
  character(len=80) :: frmt1,frmt2
  character(len=10) :: stag(2)
  character(len=500) :: msg
@@ -976,9 +987,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(processor_scalapack) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
 !arrays
- real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), qpt(3), q0(3)
+ real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), q0(3), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3)
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:)
+ real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vc(:)
  real(dp),target,allocatable :: bras(:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1232,25 +1243,27 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
    call cwtime(cpu, wall, gflops, "start")
 
-   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
-
    ABI_MALLOC(vc_sqrt, (npw_k))
+   ABI_MALLOC(vc, (npw_k))
    ABI_MALLOC(cbras_box, (nfftc*nspinor, batch_size))
    ABI_MALLOC(cbras_g, (npw_k*nspinor, batch_size))
    ABI_MALLOC(ur, (nfftc*nspinor))
 
-   !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+   ! Set tolerance used to decide if a band is empty
+   tol_empty_in = 0.01_dp
+   call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+
+   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
 
    !do ik_bz=1,nkbz
-   !  !qpt =
-   !  !q0 =
-   !  call hyb%vcgen%get_vc_sqrt(qpt, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm)
+   !  !q0 = ??
+   !  call hyb%vcgen%get_vc_sqrt(qbz, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm, vc=vc)
    !end do
 
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
 
-     ! Fill cbras_box with e^{ig.r}
+     ! Fill cbras_box with e^{ig2.r}
      do idat=1,ndat
        call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
      end do
@@ -1258,41 +1271,39 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! ==============================
      ! ==== Sum over k in the BZ ====
      ! ==============================
-
-     !call fock_getghc(dtset, spin, vcgen, hyb%wfd, hyb%ebands, ndat, cbras_box, ghc)
      do ik_bz=1,nkbz
-       !ik_bz = gwr%my_kbz_inds(my_ikf)
-       !ksum = gwr%kbz(:, ik_bz)
+       ksum = hyb%kbz(:, ik_bz)
 
        ! Find the symmetrical image of ksum in the IBZ
        ! FIXME: Be careful with the symmetry conventions here and the interplay between umklapp in q and FFT
-       !ik_ibz = gwr%kbz2ibz_symrel(1, ik_bz); isym_k = gwr%kbz2ibz_symrel(2, ik_bz)
-       !trev_k = gwr%kbz2ibz_symrel(6, ik_bz); g0_k = gwr%kbz2ibz_symrel(3:5, ik_bz)
-       !isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       !kk_ibz = gwr%kibz(:, ik_ibz)
+       ik_ibz = hyb%kbz2ibz_symrel(1, ik_bz); isym_k = hyb%kbz2ibz_symrel(2, ik_bz)
+       trev_k = hyb%kbz2ibz_symrel(6, ik_bz); g0_k = hyb%kbz2ibz_symrel(3:5, ik_bz)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       kk_ibz = hyb%kibz(:, ik_ibz)
 
        ! Identify q and G0 where q + G0 = k_GW - ksum
-       !kgw_m_ksum = kgw - ksum
-       !call findqg0(iq_bz, g0, kgw_m_ksum, gwr%nqbz, gwr%qbz, gwr%mG0)
-       !ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
+       kgw_m_ksum = kpoint - ksum
+       call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
+       ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
 
-       !qq_bz = gwr%qbz(:, iq_bz)
-       !iq_ibz = gwr%qbz2ibz(1, iq_bz); isym_q = gwr%qbz2ibz(2, iq_bz)
-       !trev_q = gwr%qbz2ibz(6, iq_bz); g0_q = gwr%qbz2ibz(3:5, iq_bz)
-       !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+       qq_bz = hyb%qbz(:, iq_bz)
+       iq_ibz = hyb%qbz2ibz(1, iq_bz); isym_q = hyb%qbz2ibz(2, iq_bz)
+       trev_q = hyb%qbz2ibz(6, iq_bz); g0_q = hyb%qbz2ibz(3:5, iq_bz)
+       isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
 
        !! Find the corresponding irreducible q-point.
        !! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
        !!call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
        !q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
-       !call get_kg(qq_bz, istwfk1, dtset%ecutsigx, cryst%gmet, npwx, gvec_x)
 
        ! Parallelism over k-points.
        !if (.not. hyb%wfd%ihave_ug(0, ik_ibz, spin)) cycle
-       !q_is_gamma = normv(qbz, cryst%gmet, "G") < GW_TOLQ0
-       !qpt =
        !q0 =
-       !call vcgen%get_vc_sqrt(qpt, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm)
+       !call vcgen%get_vc_sqrt(qbz, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm, vc=vc)
+       ! Treat analytically the case q --> 0:
+       !if (q_is_gamma) then
+       !vc(1, idat) = vcge%i_sz
+       !end if
 
        ! ==========================
        ! Sum over (occupied) bands
@@ -1300,7 +1311,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        do band_sum=1, hyb%wfd%nband(ik_ibz, spin)
          ! MPI parallelism over bands.
          if (.not. hyb%wfd%ihave_ug(band_sum, ik_ibz, spin)) cycle
-         f_bsum = hyb%ebands%occ(band_sum, ik_ibz, spin) * fact_spin !; if (abs(f_bsum) <= tol_empty) cycle
+         f_bsum = hyb%ebands%occ(band_sum, ik_ibz, spin) * fact_spin; if (abs(f_bsum) <= tol_empty) cycle
 
          call hyb%wfd%get_ur(band_sum, ik_ibz, spin, ur)
          do idat=1,ndat
@@ -1312,11 +1323,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
          ! 2) Multiply results by v(q,g).
          do idat=1,ndat
-           cbras_g(:,idat) = cbras_g(:,idat) * vc_sqrt(:)
+           cbras_g(:,idat) = cbras_g(:,idat) * vc(:)
          end do
-
          !if (ik_bz == jk_bz) then
-           ! Treat analytically the case q --> 0:
          !end if
 
          ! 3) FFT g_sphere --> r and multiply by u(r).
@@ -1330,14 +1339,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! Sum partial contributions in r-space, followed by FFT r --> g_sphere.
      !call xmpi_sum(cbras_box, hyb%wfd%comm_spin, ierr)
      call uplan_k%execute_rg(ndat, cbras_box(:,1), cbras_g(:,1))
-     cbras_g = -cbras_g ! * alpha_hyb
+     cbras_g = -cbras_g ! * alpha_hyb / nkbz
 
-     ! Now fill my local buffer of ghg.
+     ! Now fill my local buffer of ghg_mat.
      do idat=1,ndat
        do ig1=1,npwsp
          ! From global to local indices
          call ghg_mat%glob2loc(ig1, ig2+idat-1, il_g1, il_g2, haveit); if (.not. haveit) cycle
-
          if (istwf_k == 1) then
            ! Complex wavefunctions.
            ghg_mat%buffer_cplx(il_g1, il_g2) = cbras_g(ig1,idat)
@@ -1352,11 +1360,11 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end do ! ig2
 
    ABI_FREE(vc_sqrt)
+   ABI_FREE(vc)
    ABI_FREE(cbras_box)
    ABI_FREE(cbras_g)
    ABI_FREE(ur)
    call uplan_k%free()
-
    call cwtime_report(" build Fock_g1g2", cpu, wall, gflops)
  end if ! usefock
 
@@ -1822,6 +1830,7 @@ subroutine hyb_free(hyb)
  ABI_SFREE(hyb%wtq)
  ABI_SFREE(hyb%kbz2ibz)
  ABI_SFREE(hyb%kbz2ibz_symrel)
+ ABI_SFREE(hyb%qbz2ibz)
 
  ! Free datatypes
  call hyb%wfd%free()

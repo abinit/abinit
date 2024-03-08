@@ -181,6 +181,7 @@ module m_gwr
  use m_sigx,          only : sigx_symmetrize
  use m_dyson_solver,  only : sigma_pade_t
  use minimax_grids,   only : gx_minimax_grid !, gx_get_error_message
+ use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -7414,22 +7415,9 @@ subroutine gwr_build_sigxme(gwr, compute_qp)
    qp_eig => gwr%qp_ebands%eig; qp_occ => gwr%qp_ebands%occ
  end if
 
- ! MRM allow lower occ numbers
- ! Normalization of theta_mu_minus_esum. If nsppol==2, qp_occ $\in [0,1]$
- tol_empty_in = 0.01                            ! Initialize the tolerance used to decide if a band is empty (passed to m_sigx.F90)
- select case (nsppol)
- case (1)
-   fact_spin = half; tol_empty = tol_empty_in          ! below this value the state is assumed empty
-   if (nspinor == 2) then
-     fact_spin = one; tol_empty = half * tol_empty_in  ! below this value the state is assumed empty
-   end if
- case (2)
-   fact_spin = one; tol_empty = half * tol_empty_in  ! to be consistent and obtain similar results if a metallic
- case default                                        ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG(sjoin('Wrong nsppol:', itoa(nsppol)))
- end select
-
- !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+ ! Set tolerance used to decide if a band is empty
+ tol_empty_in = 0.01
+ call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
  ! =========================================
  ! Find FFT mesh and max number of g-vectors
