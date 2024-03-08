@@ -330,7 +330,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
  ! TODO: FFT meshes for DEN/POT should be initialized from the DEN file instead of the dtset.
  ! Interpolating the DEN indeed breaks degeneracies in the vxc matrix elements.
-
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
@@ -683,10 +682,10 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
-   if (dtset%usefock == 1) then
-     ! Build hyb with hybrid orbitals from WFK file.
+   ! Build hyb descriptor with hybrid orbitals from WFK file.
+   !if (dtset%usefock == 1) then
      call hyb%from_wfk_file(cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
-   end if
+   !end if
 
    if (write_wfk) then
      ! Master writes header and Fortran record markers
@@ -786,15 +785,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
    call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free(); call hyb%free()
-
-   ! Deallocate exact exchange data at the end of the calculation
-   !if (dtset%usefock == 1) then
-   !  if (fock%fock_common%use_ACE/=0) call fock_ACE_destroy(fock%fockACE)
-   !  !call fock_common_destroy(fock%fock_common)
-   !  call fock_BZ_destroy(fock%fock_BZ)
-   !  call fock_destroy(fock)
-   !  nullify(fock)
-   !end if
 
  else
    ! ====================================================

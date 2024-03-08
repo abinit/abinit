@@ -38,13 +38,14 @@ module m_ksdiago
 
  use defs_datatypes,      only : pseudopotential_type, ebands_t
  use defs_abitypes,       only : MPI_type
+ use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
  use m_io_tools,          only : iomode_from_fname ! file_exists, open_file, get_unit,
  use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
- use m_geometry,          only : metric
+ use m_geometry,          only : metric, normv
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
  use m_slk,               only : matrix_scalapack, processor_scalapack, block_dist_1d, &
                                  compute_eigen_problem, compute_generalized_eigen_problem
@@ -52,7 +53,7 @@ module m_ksdiago
  use m_crystal,           only : crystal_t
  use m_fftcore,           only : kpgsph, get_kg
  use m_fft_mesh,          only : calc_ceigr
- use m_fft,               only : fftpac, uplan_t
+ use m_fft,               only : fftpac, uplan_t, fftbox_plan3_t
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
  use m_mpinfo,            only : destroy_mpi_enreg, initmpi_seq
@@ -986,10 +987,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(matrix_scalapack) :: ghg_mat, gsg_mat, ghg_4diag, gsg_4diag, eigvec
  type(processor_scalapack) :: proc_1d, proc_4diag
  type(uplan_t) :: uplan_k
+ type(fftbox_plan3_t) :: box_plan
 !arrays
- real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), q0(3), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3)
+ integer,allocatable :: gfft(:,:)
+ real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), q0(3), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3)
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
- real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vc(:)
+ real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
  complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
@@ -1003,7 +1006,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Check that usekden is not 0 if want to use vxctau
  !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
 
- ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
+ !ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
 
  !====================
  !=== Check input ====
@@ -1239,12 +1242,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! ==================================
  ! Compute Fock operator F^k_{g1,g2}
  ! ==================================
- if (dtset%usefock == 1) then
+ !if (dtset%usefock == 1) then
    ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
    call cwtime(cpu, wall, gflops, "start")
 
    ABI_MALLOC(vc_sqrt, (npw_k))
-   ABI_MALLOC(vc, (npw_k))
+   ABI_MALLOC(vcg_qbz, (npw_k, hyb%nqbz))
    ABI_MALLOC(cbras_box, (nfftc*nspinor, batch_size))
    ABI_MALLOC(cbras_g, (npw_k*nspinor, batch_size))
    ABI_MALLOC(ur, (nfftc*nspinor))
@@ -1255,10 +1258,28 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
    call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
 
-   !do ik_bz=1,nkbz
-   !  !q0 = ??
-   !  call hyb%vcgen%get_vc_sqrt(qbz, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm, vc=vc)
-   !end do
+   !ABI_MALLOC(gfft, (3, nfftc))
+   !call get_gfft(ngfftc, kpt, cryst%gmet, gsq_max, gfft)
+   !ABI_FREE(gfft)
+
+   ! TODO
+   ! Build plan for dense FFTs.
+   !call box_plan%from_ngfft(ngfftc, nspinor*batch_size, gwr%dtset%gpu_option)
+   !call box_plan%free()
+   !call box_plan%execute(gt_scbox(:,1,1), -1)
+
+   ! Precompute the Coulomb term here to avoid tons of calls inside the loop over ig2.
+   my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
+   do ik_bz=1,nkbz
+     ksum = hyb%kbz(:, ik_bz)
+     kgw_m_ksum = kpoint - ksum
+     call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
+     ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
+     qq_bz = hyb%qbz(:, iq_bz)
+     q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
+     call hyb%vcgen%get_vc_sqrt(hyb%qbz, npw_k, ugb%kg_k, my_gw_qlwl, cryst, vc_sqrt, comm, vc=vcg_qbz(:,iq_bz))
+     if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
+   end do
 
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
@@ -1273,6 +1294,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! ==============================
      do ik_bz=1,nkbz
        ksum = hyb%kbz(:, ik_bz)
+       ! Parallelism over k-points.
+       !if (.not. hyb%wfd%ihave_ug(0, ik_ibz, spin)) cycle
 
        ! Find the symmetrical image of ksum in the IBZ
        ! FIXME: Be careful with the symmetry conventions here and the interplay between umklapp in q and FFT
@@ -1282,28 +1305,19 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
        kk_ibz = hyb%kibz(:, ik_ibz)
 
        ! Identify q and G0 where q + G0 = k_GW - ksum
-       kgw_m_ksum = kpoint - ksum
-       call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
-       ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
+       !kgw_m_ksum = kpoint - ksum
+       !call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
+       !ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
 
-       qq_bz = hyb%qbz(:, iq_bz)
-       iq_ibz = hyb%qbz2ibz(1, iq_bz); isym_q = hyb%qbz2ibz(2, iq_bz)
-       trev_q = hyb%qbz2ibz(6, iq_bz); g0_q = hyb%qbz2ibz(3:5, iq_bz)
-       isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
+       !qq_bz = hyb%qbz(:, iq_bz)
+       !iq_ibz = hyb%qbz2ibz(1, iq_bz); isym_q = hyb%qbz2ibz(2, iq_bz)
+       !trev_q = hyb%qbz2ibz(6, iq_bz); g0_q = hyb%qbz2ibz(3:5, iq_bz)
+       !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
 
        !! Find the corresponding irreducible q-point.
        !! NB: non-zero umklapp G_o is not allowed. There's a check in setup_sigma
        !!call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
        !q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
-
-       ! Parallelism over k-points.
-       !if (.not. hyb%wfd%ihave_ug(0, ik_ibz, spin)) cycle
-       !q0 =
-       !call vcgen%get_vc_sqrt(qbz, npw_k, ugb%kg_k, q0, cryst, vc_sqrt, comm, vc=vc)
-       ! Treat analytically the case q --> 0:
-       !if (q_is_gamma) then
-       !vc(1, idat) = vcge%i_sz
-       !end if
 
        ! ==========================
        ! Sum over (occupied) bands
@@ -1320,14 +1334,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
          ! 1) FFT: r --> g_sphere.
          call uplan_k%execute_rg(ndat, cbras_box(:,1), cbras_g(:,1))
-
          ! 2) Multiply results by v(q,g).
          do idat=1,ndat
-           cbras_g(:,idat) = cbras_g(:,idat) * vc(:)
+           cbras_g(:,idat) = cbras_g(:,idat) * vcg_qbz(:, iq_bz)
          end do
-         !if (ik_bz == jk_bz) then
-         !end if
-
          ! 3) FFT g_sphere --> r and multiply by u(r).
          call uplan_k%execute_gr(ndat, cbras_g(:,1), cbras_box(:,1))
          do idat=1,ndat
@@ -1351,6 +1361,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
            ghg_mat%buffer_cplx(il_g1, il_g2) = cbras_g(ig1,idat)
          else
           ! Real wavefunctions.
+          NOT_IMPLEMENTED_ERROR()
           !ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
           !ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
          end if ! istwf_k
@@ -1360,13 +1371,13 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end do ! ig2
 
    ABI_FREE(vc_sqrt)
-   ABI_FREE(vc)
+   ABI_FREE(vcg_qbz)
    ABI_FREE(cbras_box)
    ABI_FREE(cbras_g)
    ABI_FREE(ur)
    call uplan_k%free()
    call cwtime_report(" build Fock_g1g2", cpu, wall, gflops)
- end if ! usefock
+ !end if ! usefock
 
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
@@ -1634,6 +1645,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
 
  use m_krank
  use m_kpts
+ use m_bz_mesh, only : findnq, findq
 
 !Arguments ------------------------------------
  class(hyb_t),intent(out) :: hyb
@@ -1654,7 +1666,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  character(len=fnlen) :: wfk_path
  integer :: units(2)
  integer,allocatable :: nband(:,:), wfd_istwfk(:)
- real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
+ real(dp),allocatable :: wtk(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 !************************************************************************
@@ -1667,7 +1679,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
    if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
      ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
    end if
-   call wrtout(units, sjoin("- Reading HYBRID orbitals from WFK file:", wfk_path))
+   call wrtout(units, sjoin("- Reading HYBRID orbitals from WFK file:", wfk_path), pre_newlines=2)
  end if
 
  ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
@@ -1743,11 +1755,11 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
 
  ! In principle kibz should be equal to hyb%ebands%kptns.
  ABI_CHECK_IEQ(hyb%nkibz, hyb%ebands%nkpt, "nkibz != hyb%ebands%nkpt")
- ABI_CHECK(all(abs(hyb%ebands%kptns - kibz) < tol12), "hyb%ebands%kibz != kibz")
+ ABI_CHECK(all(abs(hyb%ebands%kptns - hyb%kibz) < tol12), "hyb%ebands%kibz != hyb%kibz")
 
  ! Note symrec convention.
  ebands_timrev = kpts_timrev_from_kptopt(hyb%ebands%kptopt)
- krank_ibz = krank_from_kptrlatt(hyb%nkibz, kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
+ krank_ibz = krank_from_kptrlatt(hyb%nkibz, hyb%kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
 
  ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
  if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
@@ -1758,7 +1770,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  call kpts_pack_in_stars(hyb%nkbz, hyb%kbz, hyb%kbz2ibz)
 
  if (my_rank == master) then
-   call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", hyb%kbz, kibz, hyb%kbz2ibz, dtset%prtvol)
+   call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", hyb%kbz, hyb%kibz, hyb%kbz2ibz, dtset%prtvol)
  end if
 
  ! Table with symrel conventions for the symmetrization of the wfs.
@@ -1766,20 +1778,22 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz_symrel) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
+ call krank_ibz%free()
 
-#if 0
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry even in systems without inversion
  ! TODO: Might add input variable to rescale the q-mesh.
- my_nshiftq = 1; my_shiftq = zero; qptrlatt = hyb%ebands%kptrlatt
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
-                             hyb%nqibz, hyb%qibz, hyb%wtq, hyb%nqbz, hyb%qbz)
-                             !new_kptrlatt=hyb%qptrlatt, new_shiftk=hyb%qshift,
-                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+
+ ! Find the number of q-points such that q = k1-k2.
+ call findnq(hyb%nkbz, hyb%kbz, cryst%nsym, cryst%symrec, cryst%symafm, hyb%nqibz, cryst%timrev)
+
+ ! Find the coordinates of the q-points in the IBZ.
+ ABI_MALLOC(hyb%qibz, (3, hyb%nqibz))
+ call findq(hyb%nkbz, hyb%kbz, cryst%nsym, cryst%symrec, cryst%symafm, cryst%gprimd, hyb%nqibz, hyb%qibz, cryst%timrev)
 
  ABI_CHECK(all(abs(hyb%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
- hyb%ngqpt = get_diag(qptrlatt)
 
+#if 0
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(hyb%qbz2ibz, (6, hyb%nqbz))
 

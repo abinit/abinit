@@ -35,7 +35,7 @@ module m_sigc
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
- use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
+ use m_fft_mesh,      only : get_gfft, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
@@ -481,7 +481,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    if (Sigp%gwcomp==1) then
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
-     call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
+     call get_gfft(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
      ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,gwc_nfftot, [zero,zero,zero], gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if

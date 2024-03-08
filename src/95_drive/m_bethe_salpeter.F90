@@ -48,7 +48,7 @@ module m_bethe_salpeter
  use m_hide_lapack,     only : matrginv
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
- use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
+ use m_fft_mesh,        only : rotate_FFT_mesh, get_gfft, setmesh
  use m_fft,             only : fourdp
  use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
@@ -404,7 +404,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
    ABI_MALLOC(gfft_osc,(3,nfftot_osc))
-   call get_gftt(ngfft_osc,k0,gmet,gsq_osc,gfft_osc)
+   call get_gfft(ngfft_osc,k0,gmet,gsq_osc,gfft_osc)
    ABI_FREE(gfft_osc)
 
    ! Set up q grids, make qmax 20% larger than largest expected:

@@ -50,7 +50,7 @@ module m_sigma_driver
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
- use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
@@ -483,7 +483,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! We use the FFT mesh for sigma_c since COHSEX and the extrapolar method require oscillator
    ! strengths on the FFT mesh.
    ABI_MALLOC(tmp_gfft,(3, gwc_nfftot))
-   call get_gftt(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
+   call get_gfft(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
    ABI_FREE(tmp_gfft)
 
    ! Set up q-grid, make qmax 20% larger than largest expected.
