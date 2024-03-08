@@ -76,12 +76,13 @@
 #Definition of the atom types
    ntypat   2
     znucl   13 33
-paral_rf1 0 
-paral_rf2 0 
-paral_rf3 0 
+
+#Parallelism is activated "generously", without caring about the dataset (not recommended).
+expert_user 3
 paral_rf 1
-paral_kgb1 1 
-autoparal1 1  paral_kgb 0
+paral_kgb 1 
+autoparal 1  
+
 nppert 2 
 #Definition of the atoms
     natom   2

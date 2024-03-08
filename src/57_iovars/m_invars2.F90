@@ -1266,6 +1266,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%expert_user > 0) then
    ! Set all flags to zero although we still allow users to activate particular tests via explicit values.
    dtset%chkdilatmx=0
+   dtset%chkparal=0
    dtset%chkprim=0
    dtset%chksymbreak=0
    dtset%chksymtnons=0
@@ -1273,6 +1274,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
  if(tread==1) dtset%chkdilatmx=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkparal',tread,'INT')
+ if(tread==1) dtset%chkparal=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
  if(tread==1) dtset%chkprim=intarr(1)
