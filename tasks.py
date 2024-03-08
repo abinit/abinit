@@ -56,6 +56,8 @@ ALL_BINARIES = [
     "lruj",
 ]
 
+import platform
+SYSTEM = platform.system()
 
 @contextmanager
 def cd(path):
@@ -112,6 +114,11 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
+        #if SYSTEM == "Darwin":
+        #    for binary in ALL_BINARIES:
+        #        cmd = f"codesign -s src/98_main/{binary}"
+        #        cprint("Executing: %s" % cmd, "yellow")
+        #        ctx.run(cmd, pty=True)
 
 @task
 def clean(ctx):

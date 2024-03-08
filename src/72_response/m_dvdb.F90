@@ -58,7 +58,7 @@ module m_dvdb
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ioarr,         only : read_rhor
  use m_fftcore,       only : ngfft_seq
- use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
+ use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gfft, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
  use m_crystal,       only : crystal_t
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map, kpts_timrev_from_kptopt
@@ -5713,7 +5713,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
  ! Get list of G-vectors in FFT mesh.
  ABI_MALLOC(gfft, (3, nfft))
- call get_gftt(ngfft, [zero, zero, zero], dvdb%cryst%gmet, gsq_max, gfft)
+ call get_gfft(ngfft, [zero, zero, zero], dvdb%cryst%gmet, gsq_max, gfft)
  ABI_MALLOC(workg, (2, nfft))
 
  ! Select G-vectors in small sphere (ratio of gsq_max)
@@ -5723,7 +5723,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    end if
    ngsmall = 0
    do ig=1,nfft
-     ! Don't include (2pi)**2 to be consistent with get_gftt
+     ! Don't include (2pi)**2 to be consistent with get_gfft
      g2 = dot_product(gfft(:,ig), matmul(dvdb%cryst%gmet, gfft(:, ig)))
      if (g2 <= gsq_max * 0.01_dp) ngsmall = ngsmall + 1
      if (ii == 2) ig2ifft(ngsmall) = ig
@@ -6340,7 +6340,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
  ! Get the set of G vectors
  ! TODO: May use zero-padded FFT with small G-sphere
- call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
+ call get_gfft(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero

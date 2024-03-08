@@ -2026,7 +2026,6 @@ end subroutine findnq
 !!
 !! SOURCE
 
-
 subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
 
 !Arguments ------------------------------------
@@ -2052,8 +2051,8 @@ subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
  ! Compute reciprocal space metrics
  do ii=1,3
    gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
-&             gprimd(2,ii)*gprimd(2,:)+&
-&             gprimd(3,ii)*gprimd(3,:)
+              gprimd(2,ii)*gprimd(2,:)+&
+              gprimd(3,ii)*gprimd(3,:)
  end do
  !
  ! === Loop over k-points in BZ, form k-k1 and translate in first BZ ===

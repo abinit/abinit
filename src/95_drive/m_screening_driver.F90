@@ -60,7 +60,7 @@ module m_screening_driver
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_t
  use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
- use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
+ use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
@@ -413,7 +413,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
    ABI_MALLOC(gw_gfft,(3,nfftgw_tot))
-   call get_gftt(ngfft_gw,(/zero,zero,zero/),gmet,gw_gsq,gw_gfft)
+   call get_gfft(ngfft_gw,(/zero,zero,zero/),gmet,gw_gsq,gw_gfft)
    ABI_FREE(gw_gfft)
 
    ! Set up q grids, make qmax 20% larger than largest expected:
