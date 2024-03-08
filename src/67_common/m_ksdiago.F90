@@ -31,11 +31,16 @@ module m_ksdiago
  use m_distribfft
  use libxc_functionals
  use m_ebands
+ use m_nctk
+ use m_dtfil
+ use m_hdr
+ use m_wfk
 
  use defs_datatypes,      only : pseudopotential_type, ebands_t
  use defs_abitypes,       only : MPI_type
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
+ use m_io_tools,          only : iomode_from_fname ! file_exists, open_file, get_unit,
  use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
@@ -60,7 +65,7 @@ module m_ksdiago
  use m_initylmg,          only : initylmg
  use m_mkffnl,            only : mkffnl
  use m_getghc,            only : getghc, multithreaded_getghc
- use m_wfd,               only : wfd_t
+ use m_wfd,               only : wfd_t, wfd_init
  use m_vcoul,             only : vcgen_t
 
  implicit none
@@ -165,15 +170,16 @@ module m_ksdiago
 
    real(dp),allocatable :: kibz(:,:), kbz(:,:)
    real(dp),allocatable :: qibz(:,:), qbz(:,:), wtq(:)
-   !integer,allocatable :: kbz2ibz(:,:)
-    ! kbz2ibz(6, gwr%nkbz))
+
+   integer,allocatable :: kbz2ibz(:,:)
+    ! kbz2ibz(6, nkbz))
 
    integer,allocatable :: kbz2ibz_symrel(:,:)
     ! kbz2ibz_symrel(6, nkbz))
 
  contains
 
-   !procedure :: from_wfk_file  => hyb_from_wfk_file
+   procedure :: from_wfk_file  => hyb_from_wfk_file
     ! Build object from WFK file
 
    !procedure :: print => hyb_print
@@ -1607,6 +1613,192 @@ end subroutine ugb_collect_cprj
 
 !----------------------------------------------------------------------
 
+!!****f* m_gwr/hyb_from_wfk_file
+!! NAME
+!!  hyb_from_wfk_file
+!!
+!! FUNCTION
+!!  Read the WFK file compute with HYBRID functionql
+!!
+!! SOURCE
+
+subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
+
+ use m_krank
+ use m_kpts
+
+!Arguments ------------------------------------
+ class(hyb_t),intent(out) :: hyb
+ type(crystal_t),intent(in) :: cryst
+ type(datafiles_type),intent(in) :: dtfil
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ integer,intent(in) :: ngfftc(18), comm
+
+!Local variables ------------------------------
+ integer,parameter :: master = 0
+ integer :: nprocs, my_rank, ierr, b1, b2, mband, nkibz, nsppol, spin, ik_ibz, ikcalc, ebands_timrev
+ character(len=5000) :: msg
+ type(hdr_type) :: wfk_hdr
+ type(crystal_t) :: wfk_cryst
+ type(krank_t) :: qrank, krank_ibz
+ character(len=fnlen) :: wfk_path
+ integer :: units(2)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:)
+ real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+
+!************************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ units(:) = [std_out, ab_out]
+
+ wfk_path = dtfil%fnamewffk
+ if (my_rank == master) then
+   if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+     ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
+   end if
+   call wrtout(units, sjoin("- Reading HYBRID orbitals from WFK file:", wfk_path))
+ end if
+
+ ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+ call xmpi_bcast(wfk_path, master, comm, ierr)
+
+ ! Construct crystal and hyb%ebands from the GS WFK file.
+ hyb%ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+ call wfk_hdr%vs_dtset(dtset)
+
+ wfk_cryst = wfk_hdr%get_crystal()
+ if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
+   ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
+ end if
+ !call wfk_cryst%print(header="crystal structure from WFK file")
+ call wfk_cryst%free()
+ ! TODO: Add more consistency checks e.g. nkibz,...
+ !cryst = wfk_hdr%get_crystal()
+ !call cryst%print(header="crystal structure from WFK file")
+
+ nkibz = hyb%ebands%nkpt; nsppol = hyb%ebands%nsppol
+
+ ! Don't take mband from hyb%ebands but compute it from gwr%bstop_ks
+ !mband = maxval(gwr%bstop_ks)
+ mband = hyb%ebands%mband
+
+ ! Initialize the wave function descriptor.
+ ! Only wavefunctions for the symmetrical imagine of the k wavevectors
+ ! treated by this MPI rank are stored.
+ ABI_MALLOC(nband, (nkibz, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
+ nband = mband; bks_mask = .False.; keep_ur = .False.
+
+ do spin=1,nsppol
+   do ik_ibz=1,nkibz
+     bks_mask(:, ik_ibz, spin) = .True.
+     !bks_mask(b1:b2, ik_ibz, spin) = .True.
+   end do
+ end do
+
+ ! Impose istwfk = 1 for all k-points.
+ ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkibz))
+ wfd_istwfk = 1
+
+ call wfd_init(hyb%wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
+               dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
+
+ call hyb%wfd%print(header="Wavefunctions for Hybrid WKF file")
+
+ ABI_FREE(nband)
+ ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
+ ABI_FREE(bks_mask)
+
+ call wfk_hdr%free()
+
+ ! Read wavefunctions.
+ call hyb%wfd%read_wfk(wfk_path, iomode_from_fname(wfk_path))
+
+ ! This piece of code is taken from m_gwr.
+
+ ! =======================
+ ! Setup k-mesh and q-mesh
+ ! =======================
+ ! Get full kBZ associated to hyb%ebands
+ call kpts_ibz_from_kptrlatt(cryst, hyb%ebands%kptrlatt, hyb%ebands%kptopt, hyb%ebands%nshiftk, hyb%ebands%shiftk, &
+                             hyb%nkibz, hyb%kibz, wtk, hyb%nkbz, hyb%kbz) !, bz2ibz=bz2ibz)
+                             !new_kptrlatt=gwr%kptrlatt, new_shiftk=gwr%kshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+ ABI_FREE(wtk)
+
+ ! In principle kibz should be equal to hyb%ebands%kptns.
+ ABI_CHECK_IEQ(hyb%nkibz, hyb%ebands%nkpt, "nkibz != hyb%ebands%nkpt")
+ ABI_CHECK(all(abs(hyb%ebands%kptns - kibz) < tol12), "hyb%ebands%kibz != kibz")
+
+ ! Note symrec convention.
+ ebands_timrev = kpts_timrev_from_kptopt(hyb%ebands%kptopt)
+ krank_ibz = krank_from_kptrlatt(hyb%nkibz, kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
+
+ ABI_MALLOC(hyb%kbz2ibz, (6, hyb%nkbz))
+ if (kpts_map("symrec", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+
+ ! Order kbz by stars and rearrange entries in kbz2ibz table.
+ call kpts_pack_in_stars(hyb%nkbz, hyb%kbz, hyb%kbz2ibz)
+
+ if (my_rank == master) then
+   call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", hyb%kbz, kibz, hyb%kbz2ibz, dtset%prtvol)
+ end if
+
+ ! Table with symrel conventions for the symmetrization of the wfs.
+ ABI_MALLOC(hyb%kbz2ibz_symrel, (6, hyb%nkbz))
+ if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, hyb%nkbz, hyb%kbz, hyb%kbz2ibz_symrel) /= 0) then
+   ABI_ERROR("Cannot map kBZ to IBZ!")
+ end if
+
+#if 0
+ ! Setup qIBZ, weights and BZ.
+ ! Always use q --> -q symmetry even in systems without inversion
+ ! TODO: Might add input variable to rescale the q-mesh.
+ my_nshiftq = 1; my_shiftq = zero; qptrlatt = hyb%ebands%kptrlatt
+ call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt1, my_nshiftq, my_shiftq, &
+                             hyb%nqibz, hyb%qibz, hyb%wtq, hyb%nqbz, hyb%qbz)
+                             !new_kptrlatt=hyb%qptrlatt, new_shiftk=hyb%qshift,
+                             !bz2ibz=new%ind_qbz2ibz)  # FIXME
+
+ ABI_CHECK(all(abs(hyb%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
+ hyb%ngqpt = get_diag(qptrlatt)
+
+ ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
+ ABI_MALLOC(hyb%qbz2ibz, (6, hyb%nqbz))
+
+ qrank = krank_from_kptrlatt(hyb%nqibz, hyb%qibz, qptrlatt, compute_invrank=.False.)
+
+ if (kpts_map("symrec", qtimrev1, cryst, qrank, hyb%nqbz, hyb%qbz, hyb%qbz2ibz) /= 0) then
+   ABI_ERROR("Cannot map qBZ to IBZ!")
+ end if
+ call qrank%free()
+
+ ! Order qbz by stars and rearrange entries in qbz2ibz table.
+ call kpts_pack_in_stars(hyb%nqbz, hyb%qbz, hyb%qbz2ibz)
+ if (my_rank == master) then
+   call kpts_map_print(units, " Mapping qBZ --> qIBZ", "symrec", hyb%qbz, hyb%qibz, hyb%qbz2ibz, dtset%prtvol)
+ end if
+#endif
+
+ ! TODO: MC technique does not seem to work as expected, even in the legacy code.
+ !vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
+ call hyb%vcgen%init(cryst, hyb%ebands%kptrlatt, hyb%nkbz, hyb%nqibz, hyb%nqbz, hyb%qbz, &
+                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecut, comm)
+
+end subroutine hyb_from_wfk_file
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_gwr/hyb_free
 !! NAME
 !!  hyb_free
@@ -1628,6 +1820,7 @@ subroutine hyb_free(hyb)
  ABI_SFREE(hyb%qibz)
  ABI_SFREE(hyb%qbz)
  ABI_SFREE(hyb%wtq)
+ ABI_SFREE(hyb%kbz2ibz)
  ABI_SFREE(hyb%kbz2ibz_symrel)
 
  ! Free datatypes
