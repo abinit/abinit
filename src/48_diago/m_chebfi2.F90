@@ -92,10 +92,11 @@ module m_chebfi2
    integer :: bandpp
    integer :: comm_cols
    integer :: comm_rows
+   integer :: me_g0
+   integer :: me_g0_fft
 
    logical :: paw
    integer :: eigenProblem   !1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
-   integer :: istwf_k
 
    ! when GPU is enabled, currently OpenMP is not fully supported, abinit is launched
    ! with OMP_NUM_THREADS=1, but we may locally increase the number of OpenMP threads
@@ -104,7 +105,6 @@ module m_chebfi2
    ! dtset%gpu_kokkos_nthrd
    integer :: gpu_option
    integer :: gpu_kokkos_nthrd = 1 ! only used if gpu is enabled, number of OpenMP threads used
-   integer :: me_g0
 
    !ARRAYS
    type(xgBlock_t) :: X
@@ -153,7 +153,6 @@ module m_chebfi2
 !! INPUTS
 !!  bandpp= number of 'bands' handled by a processor
 !!  eigenProblem= type of eigenpb: 1 (A*x = (lambda)*B*x), 2 (A*B*x = (lambda)*x), 3 (B*A*x = (lambda)*x)
-!!  istwf_k= parameter that describes the storage of wfs
 !!  me_g0= 1 if this processors treats G=0, 0 otherwise
 !!  neigenpairs= number of requested eigenvectors/eigenvalues
 !!  nline= Chebyshev polynomial level (.i.e. number of H applications)
@@ -175,7 +174,7 @@ module m_chebfi2
 !! SOURCE
 
 subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,bandpp, &
-                       nline,space,eigenProblem,istwf_k,spacecom,me_g0,paw,comm_rows,comm_cols,&
+                       nline,space,eigenProblem,spacecom,me_g0,me_g0_fft,paw,comm_rows,comm_cols,&
                        gpu_option,gpu_kokkos_nthrd)
 
  implicit none
@@ -183,8 +182,8 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  ! Arguments ------------------------------------
  integer       , intent(in   ) :: bandpp
  integer       , intent(in   ) :: eigenProblem
- integer       , intent(in   ) :: istwf_k
  integer       , intent(in   ) :: me_g0
+ integer       , intent(in   ) :: me_g0_fft
  integer       , intent(in   ) :: neigenpairs
  integer       , intent(in   ) :: nline
  integer       , intent(in   ) :: comm_cols
@@ -219,8 +218,8 @@ subroutine chebfi_init(chebfi,neigenpairs,spacedim,tolerance,ecut,paral_kgb,band
  chebfi%nline       = nline
  chebfi%spacecom    = spacecom
  chebfi%eigenProblem = eigenProblem
- chebfi%istwf_k      = istwf_k
  chebfi%me_g0        = me_g0
+ chebfi%me_g0_fft    = me_g0_fft
  chebfi%paw          = paw
  chebfi%gpu_option = gpu_option
 
@@ -282,14 +281,15 @@ subroutine chebfi_allocateAll(chebfi)
  call timab(tim_X_NP_init,1,tsec)
  if (chebfi%paral_kgb == 0) then
    chebfi%total_spacedim = spacedim
-   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option) !regular arrays
+   call xg_init(chebfi%X_NP,space,spacedim,2*neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option) !regular arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next,spacedim, neigenpairs)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev,spacedim, neigenpairs, fcol=neigenpairs+1)
  else
    total_spacedim = spacedim
    call xmpi_sum(total_spacedim,chebfi%spacecom,ierr)
    chebfi%total_spacedim = total_spacedim
-   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,gpu_option=chebfi%gpu_option) !transposed arrays
+   call xg_init(chebfi%X_NP,space,total_spacedim,2*chebfi%bandpp,chebfi%spacecom,me_g0=chebfi%me_g0_fft,&
+     & gpu_option=chebfi%gpu_option) !transposed arrays
    call xg_setBlock(chebfi%X_NP, chebfi%X_next, total_spacedim, chebfi%bandpp)
    call xg_setBlock(chebfi%X_NP, chebfi%X_prev, total_spacedim, chebfi%bandpp, fcol=chebfi%bandpp+1)
  end if
@@ -297,8 +297,8 @@ subroutine chebfi_allocateAll(chebfi)
 
  call timab(tim_AX_BX_init,1,tsec)
  !transposer will handle these arrays automatically
- call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option)
- call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,gpu_option=chebfi%gpu_option)
+ call xg_init(chebfi%AX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
+ call xg_init(chebfi%BX,space,spacedim,neigenpairs,chebfi%spacecom,me_g0=chebfi%me_g0,gpu_option=chebfi%gpu_option)
  call timab(tim_AX_BX_init,2,tsec)
 
 end subroutine chebfi_allocateAll
@@ -477,22 +477,18 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  type(xgBlock_t), intent(inout) :: eigen
  type(xgBlock_t), intent(inout) :: residu
  interface
-   subroutine getAX_BX(X,AX,BX,transposer)
+   subroutine getAX_BX(X,AX,BX)
      use m_xg, only : xgBlock_t
-     use m_xgTransposer !, only: xgTransposer_t
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: AX
      type(xgBlock_t), intent(inout) :: BX
-     type(xgTransposer_t), optional, intent(inout) :: transposer
    end subroutine getAX_BX
  end interface
  interface
-   subroutine getBm1X(X,Bm1X,transposer)
+   subroutine getBm1X(X,Bm1X)
      use m_xg, only : xgBlock_t
-     use m_xgTransposer !, only: xgTransposer_t
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: Bm1X
-     type(xgTransposer_t), optional, intent(inout) :: transposer
    end subroutine getBm1X
  end interface
  interface
@@ -505,6 +501,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 !Local variables-------------------------------
 !scalars
  integer :: spacedim
+ integer :: space_res
  integer :: neigenpairs
  integer :: nline,nline_max
  integer :: iline, iband, ierr
@@ -534,12 +531,20 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  nline = chebfi%nline
  chebfi%eigenvalues = eigen
 
+ if (chebfi%space==SPACE_C) then
+   space_res = SPACE_C
+ else if (chebfi%space==SPACE_CR) then
+   space_res = SPACE_R
+ else
+   ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+ end if
+
  if (chebfi%paral_kgb == 0) then
    ABI_MALLOC(nline_bands,(neigenpairs))
-   call xg_init(DivResults, chebfi%space, neigenpairs, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(DivResults, space_res, neigenpairs, 1, gpu_option=chebfi%gpu_option)
  else
    ABI_MALLOC(nline_bands,(chebfi%bandpp))
-   call xg_init(DivResults, chebfi%space, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(DivResults, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
  tolerance = chebfi%tolerance
@@ -550,7 +555,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  if (chebfi%paral_kgb == 1) then
 
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
-     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,gpu_option=chebfi%gpu_option)
+     STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
 
 !   !save existing ABinit communicators
 !   comm_fft_save = mpi_enreg%comm_fft
@@ -583,7 +588,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  call timab(tim_getAX_BX,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
- call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
+ call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
  ABI_NVTX_END_RANGE()
  call timab(tim_getAX_BX,2,tsec)
 
@@ -668,7 +673,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    !A * Psi
    call timab(tim_getAX_BX,1,tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
-   call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows,chebfi%xgTransposerX)
+   call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
    ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
 
@@ -784,17 +789,25 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 !arrays
  integer :: maxeig_pos(2)
  integer :: mineig_pos(2)
+ integer :: space_res
 
 ! *********************************************************************
 
-!Doesnt work with npfft (ncols=1 in the formula below) ???
-
- if (chebfi%paral_kgb == 0) then
-   call xg_init(Results1, chebfi%space, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
-   call xg_init(Results2, chebfi%space, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
+ if (chebfi%space==SPACE_C) then
+   space_res = SPACE_C
+ else if (chebfi%space==SPACE_CR) then
+   space_res = SPACE_R
  else
-   call xg_init(Results1, chebfi%space, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
-   call xg_init(Results2, chebfi%space, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   ABI_ERROR('space(X) should be SPACE_C or SPACE_CR')
+ end if
+
+!Doesnt work with npfft (ncols=1 in the formula below) ???
+ if (chebfi%paral_kgb == 0) then
+   call xg_init(Results1, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(Results2, space_res, chebfi%neigenpairs, 1, gpu_option=chebfi%gpu_option)
+ else
+   call xg_init(Results1, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
+   call xg_init(Results2, space_res, chebfi%bandpp, 1, gpu_option=chebfi%gpu_option)
  end if
 
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self)
@@ -846,12 +859,10 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  real(dp)       , intent(in) :: two_over_r
  type(chebfi_t) , intent(inout) :: chebfi
  interface
-   subroutine getBm1X(X,Bm1X,transposer)
+   subroutine getBm1X(X,Bm1X)
      use m_xg, only : xgBlock_t
-     use m_xgTransposer !, only: xgTransposer_t
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: Bm1X
-     type(xgTransposer_t), optional, intent(inout) :: transposer
    end subroutine getBm1X
  end interface
 
@@ -863,7 +874,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_BM1X)
-   call getBm1X(chebfi%xAXColsRows, chebfi%X_next, chebfi%xgTransposerX)
+   call getBm1X(chebfi%xAXColsRows, chebfi%X_next)
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else

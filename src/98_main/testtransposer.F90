@@ -165,14 +165,14 @@ program testTransposer
 
     write(std_out,*) " Complex all2all"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex gatherv"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -181,28 +181,28 @@ program testTransposer
 
     write(std_out,*) " Real all2all"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Real gatherv"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex all2all (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Complex gatherv (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -211,14 +211,14 @@ program testTransposer
 
     write(std_out,*) " Real all2all (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
     write(std_out,*) " Real gatherv (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
-      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
@@ -272,7 +272,7 @@ program testTransposer
     write(std_out,*) "Transposer constructor : nspinor =",nspinor
 
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nspinor,&
-      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows,0)
     call xgTransposer_copyConstructor(xgTransposerGh,xgTransposer,xghLinalg,xghColsRows,STATE_LINALG)
     call xgTransposer_copyConstructor(xgTransposerGhc,xgTransposer,xghcLinalg,xghcColsRows,STATE_LINALG)
 
