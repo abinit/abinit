@@ -87,6 +87,8 @@ module m_lobpcg2
     integer :: paral_kgb                     ! paral_kgb formalism or not
     integer :: comm_rows                     ! communicator for rows
     integer :: comm_cols                     ! communicator for cols
+    integer :: me_g0                         ! =1 if the processor have G=0 (linalg representation)
+    integer :: me_g0_fft                     ! =1 if the processor have G=0 (fft_representation)
     integer :: gpu_option                    ! Which GPU version is used (0=none)
     double precision :: tolerance            ! Tolerance on the residu to stop the minimization
     integer :: prtvol
@@ -169,7 +171,7 @@ module m_lobpcg2
 
 
   subroutine lobpcg_init(lobpcg, neigenpairs, spacedim, blockdim, tolerance, nline, &
-&      space, spacecom, paral_kgb, me_g0, comm_rows, comm_cols, gpu_option)
+&      space, spacecom, paral_kgb, comm_rows, comm_cols, me_g0, me_g0_fft, gpu_option)
 
     type(lobpcg_t)  , intent(inout) :: lobpcg
     integer         , intent(in   ) :: neigenpairs
@@ -182,19 +184,9 @@ module m_lobpcg2
     integer         , intent(in   ) :: spacecom
     integer         , intent(in   ) :: paral_kgb
     integer         , intent(in   ) :: me_g0
+    integer         , intent(in   ) :: me_g0_fft
     integer         , intent(in   ) :: gpu_option
     double precision :: tsec(2)
-    double precision :: advice
-    double precision :: advice_target
-    !character(len=255) :: linalg_threads
-    !integer :: ierr
-    integer :: iadvice, nthread
-#ifdef HAVE_LINALG_MKL_THREADS
-    integer :: mkl_get_max_threads
-#endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-    integer :: openblas_get_num_threads
-#endif
 
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs = neigenpairs
@@ -209,48 +201,15 @@ module m_lobpcg2
     lobpcg%spacecom    = spacecom
     lobpcg%nblock      = neigenpairs / blockdim
     lobpcg%paral_kgb   = paral_kgb
-    lobpcg%comm_rows  = comm_rows
-    lobpcg%comm_cols  = comm_cols
-    lobpcg%gpu_option = gpu_option
-
-    nthread = 1
-#ifdef HAVE_LINALG_MKL_THREADS
-    nthread =  mkl_get_max_threads()
-#elif HAVE_LINALG_OPENBLAS_THREADS
-    nthread =  openblas_get_num_threads()
-#else
-!#elif defined HAVE_FC_GETENV
-    !call getenv("OMP_NUM_THREADS",linalg_threads)
-    nthread = xomp_get_num_threads(open_parallel=.true.)
-    !read(linalg_threads,'(i5)',iostat=ierr) nthread
-    !if ( ierr /= 0 ) nthread = 1
-    if ( nthread == 0 ) nthread = 1
-#endif
-
-    advice_target = 2.5d6*dble(nthread)
-    advice = advice_target/dble(spacedim) ! assume npband*npfft = cst and we adjust bandpp obtain the correct blocksize
-    iadvice = 1+int(dble(neigenpairs)/advice) ! get the int so that advice is a divisor or neigenpairs
-    do while (iadvice >= 1)
-      if ( mod(neigenpairs,iadvice) == 0 ) then
-        exit
-      end if
-      iadvice = iadvice - 1
-    end do
-
-!    if ( abs(dble(spacedim * blockdim)/advice_target-1.d0) > 0.5 ) then
-!      if ( neigenpairs /= blockdim*iadvice ) then
-!        write(std_out,'(1x,A,i5)') "You should try to get npband*bandpp=", neigenpairs/iadvice
-!        write(std_out,'(1x,A,i8)',advance="no") "For information matrix size is ", spacedim*blockdim
-!        if ( nthread > 1 ) then
-!          write(std_out,'(1x,A,i3,1x,A)') "and linalg will use", nthread, "threads"
-!        else
-!          write(std_out,*)
-!        end if
-!      end if
-!    end if
+    lobpcg%comm_rows   = comm_rows
+    lobpcg%comm_cols   = comm_cols
+    lobpcg%me_g0       = me_g0
+    lobpcg%me_g0_fft   = me_g0_fft
+    lobpcg%gpu_option  = gpu_option
 
     call lobpcg_allocateAll(lobpcg,space,me_g0)
     call timab(tim_init,2,tsec)
+
   end subroutine lobpcg_init
 
 
@@ -391,13 +350,11 @@ module m_lobpcg2
     character(len=500) :: msg
 
     interface
-      subroutine getAX_BX(X,AX,BX,transposer)
+      subroutine getAX_BX(X,AX,BX)
         use m_xg, only : xgBlock_t
-        use m_xgTransposer !, only: xgTransposer_t
         type(xgBlock_t), intent(inout) :: X
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
-        type(xgTransposer_t), intent(inout) :: transposer
       end subroutine getAX_BX
     end interface
     interface
@@ -440,7 +397,7 @@ module m_lobpcg2
     endif
 
     if (isppol==1.and.ikpt==1.and.inonsc==1.and.istep==1) then
-      write(msg,'(a,es16.6)') 'lobpcg%tolerance(tolwfr_diago)=',lobpcg%tolerance
+      write(msg,'(a,es16.6)') ' lobpcg%tolerance(tolwfr_diago)=',lobpcg%tolerance
       call wrtout(std_out,msg,'COLL')
     end if
 
@@ -458,7 +415,8 @@ module m_lobpcg2
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
+        gpu_option=lobpcg%gpu_option)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&
@@ -502,7 +460,7 @@ module m_lobpcg2
       end if
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows,lobpcg%xgTransposerX)
+      call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_LINALG)
@@ -577,7 +535,7 @@ module m_lobpcg2
         end if
         ! Apply A and B on W
         call timab(tim_ax_bx,1,tsec)
-        call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows,lobpcg%xgTransposerX)
+        call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows)
         call timab(tim_ax_bx,2,tsec)
         if (lobpcg%paral_kgb == 1) then
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_LINALG)
@@ -699,7 +657,8 @@ module m_lobpcg2
       ABI_COMMENT("Some errors happened, so H|Psi> and S|Psi> are computed before leaving")
       if ( lobpcg%paral_kgb == 1 ) then
         call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
-          STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
+          STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
+          gpu_option=lobpcg%gpu_option)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllAX0,lobpcg%xgTransposerAllX0,&
           lobpcg%AllAX0%self,lobpcg%AllAX0ColsRows,STATE_LINALG)
         call xgTransposer_copyConstructor(lobpcg%xgTransposerAllBX0,lobpcg%xgTransposerAllX0,&
@@ -715,7 +674,7 @@ module m_lobpcg2
         lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
       end if
       call timab(tim_ax_bx,1,tsec)
-      call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows,lobpcg%xgTransposerAllX0)
+      call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
@@ -798,10 +757,10 @@ module m_lobpcg2
     if (space(var)==SPACE_CR) then
       space_buf = SPACE_R
     end if
-    call xg_init(buffer,space_buf,previousBlock,blockdim,lobpcg%spacecom,gpu_option=lobpcg%gpu_option)
+    call xg_init(buffer,space_buf,previousBlock,blockdim,comm=lobpcg%spacecom,gpu_option=lobpcg%gpu_option)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,lobpcg%spacecom)
+    call xgBlock_gemm('t','n',1.0d0,lobpcg%BX0,var,0.d0,buffer%self,comm=lobpcg%spacecom)
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
@@ -827,7 +786,6 @@ module m_lobpcg2
     ABI_NVTX_END_RANGE()
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
-
 
   subroutine lobpcg_setX0(lobpcg,iblock)
 
@@ -863,31 +821,6 @@ module m_lobpcg2
     call xg_setBlock(lobpcg%AllAX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)
     call xgBlock_copy(lobpcg%AX,CXtmp)
   end subroutine lobpcg_transferAX_BX
-
-
-  subroutine lobpcg_allowNested(lobpcg)
-
-    type(lobpcg_t), intent(inout) :: lobpcg
-
-!#ifdef HAVE_OPENMP
-!    lobpcg%is_nested = omp_get_nested()
-!    call omp_set_nested(.true.)
-!#else
-    lobpcg%is_nested = .false.
-!#endif
-  end subroutine lobpcg_allowNested
-
-  subroutine lobpcg_restoreNested(lobpcg)
-
-    type(lobpcg_t), intent(inout) :: lobpcg
-
-!#ifdef HAVE_OPENMP
-!    call omp_set_nested(lobpcg%is_nested)
-!#else
-    lobpcg%is_nested = .false.
-!#endif
-  end subroutine lobpcg_restoreNested
-
 
   subroutine lobpcg_free(lobpcg)
 

@@ -378,7 +378,8 @@ contains
       l_gpu_option = gpu_option
     end if
 
-    fact = 1 ; if (xg%space==SPACE_CR) fact = 2
+    fact = 1 ; if (space==SPACE_CR) fact = 2
+
     if (l_gpu_option==ABI_GPU_KOKKOS) then
 #if defined HAVE_GPU && defined HAVE_YAKL
       select case (space)
@@ -957,6 +958,7 @@ contains
     xgBlock%trans = xg%trans
     xgBlock%normal = xg%normal
     xgBlock%spacedim_comm= xg%spacedim_comm
+    xgBlock%me_g0 = xg%me_g0
     xgBlock%gpu_option = xg%gpu_option
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
@@ -1004,6 +1006,7 @@ contains
     xgBlockB%trans = xgBlockA%trans
     xgBlockB%normal = xgBlockA%normal
     xgBlockB%spacedim_comm= xgBlockA%spacedim_comm
+    xgBlockB%me_g0 = xgBlockA%me_g0
     xgBlockB%gpu_option= xgBlockA%gpu_option
 
     fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
@@ -2792,7 +2795,7 @@ contains
     type(xgBlock_t), intent(in   ) :: xgBlockB
     type(xgBlock_t), intent(in   ) :: xgBlockW
 
-    integer :: iblock
+    integer :: iblock,fact
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     integer :: rows,cols,jblock
@@ -2817,14 +2820,16 @@ contains
     call xgBlock_check_gpu_option(xgBlockA,xgBlockW)
     call xgBlock_check_gpu_option(xgBlockA,da)
 
+    fact = 1 ; if (xgBlockA%space==SPACE_CR) fact = 2
+
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined HAVE_GPU && defined HAVE_KOKKOS
 
       select case(xgBlockA%space)
-      case (SPACE_R)
+      case (SPACE_R,SPACE_CR)
         call compute_colwiseCymax_scalar(c_loc(xgBlockA%vecR), c_loc(da%vecR), c_loc(xgBlockB%vecR), &
-          &                              c_loc(xgBlockW%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
+          &                              c_loc(xgBlockW%vecR), fact*xgBlockA%rows, xgBlockA%cols, fact*xgBlockA%ldim)
       case (SPACE_C)
         call compute_colwiseCymax_cplx  (c_loc(xgBlockA%vecC), c_loc(da%vecR), c_loc(xgBlockB%vecC), &
           &                              c_loc(xgBlockW%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
@@ -2840,7 +2845,7 @@ contains
 
       rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
-      case (SPACE_R)
+      case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         xgBlockW__vecR => xgBlockW%vecR
@@ -2848,7 +2853,7 @@ contains
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
         !$OMP& MAP(to:xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR,da__vecR)
         do iblock = 1, cols
-          do jblock = 1, rows
+          do jblock = 1, fact*rows
             xgBlockA__vecR(jblock,iblock) = - da__vecR(iblock,1) * xgBlockB__vecR(jblock,iblock) &
                 + xgBlockW__vecR(jblock,iblock)
           end do
@@ -2866,8 +2871,6 @@ contains
                 + xgBlockW__vecC(jblock,iblock)
           end do
         end do
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 
 #endif
@@ -2875,7 +2878,7 @@ contains
     else
 
       select case(xgBlockA%space)
-      case (SPACE_R)
+      case (SPACE_R,SPACE_CR)
         !$omp parallel do shared(da,xgBlockB,xgBlockW,xgBlockA), &
         !$omp& schedule(static)
         do iblock = 1, xgBlockA%cols
@@ -2889,8 +2892,6 @@ contains
           xgBlockA%vecC(:,iblock) = - da%vecR(iblock,1) * xgBlockB%vecC(:,iblock) + xgBlockW%vecC(:,iblock)
         end do
         !$omp end parallel do
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 
     end if
@@ -3198,7 +3199,7 @@ contains
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
-    min_rows=min(fact*xgBlock%rows,shift+fact*rows)
+    min_rows=fact*min(xgBlock%rows,shift+rows)
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
