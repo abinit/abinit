@@ -51,7 +51,7 @@ module m_gwr_driver
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
- use m_kpts,            only : kpts_ibz_from_kptrlatt
+
  use m_energies,        only : energies_type, energies_init
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -946,9 +946,9 @@ end subroutine gwr_driver
 subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
 
  use m_krank
+ use m_kpts
 
 !Arguments ------------------------------------
-!scalars
  type(hyb_t),intent(out) :: hyb
  type(crystal_t),intent(in) :: cryst
  type(datafiles_type),intent(in) :: dtfil
@@ -958,10 +958,8 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  integer,intent(in) :: ngfftc(18), comm
 
 !Local variables ------------------------------
-!scalars
  integer,parameter :: master = 0
  integer :: nprocs, my_rank, ierr, b1, b2, mband, nkibz, nsppol, spin, ik_ibz, ikcalc, ebands_timrev
- !real(dp) :: cpu, wall, gflops
  character(len=5000) :: msg
  type(hdr_type) :: wfk_hdr
  type(crystal_t) :: wfk_cryst
@@ -1004,9 +1002,9 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
 
  nkibz = hyb%ebands%nkpt; nsppol = hyb%ebands%nsppol
 
-#if 0
  ! Don't take mband from hyb%ebands but compute it from gwr%bstop_ks
- mband = maxval(gwr%bstop_ks) !; mband = hyb%ebands%mband
+ !mband = maxval(gwr%bstop_ks)
+ mband = hyb%ebands%mband
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k wavevectors
@@ -1018,13 +1016,10 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
 
  do spin=1,nsppol
    do ik_ibz=1,nkibz
-     !ik_ibz = gwr%kcalc2ibz(ikcalc, 1)
-     !tmp_kstab(:, ik_ibz, spin) = [b1, b2]
-     bks_mask(b1:b2, ik_ibz, spin) = .True.
-     !end associate
+     bks_mask(:, ik_ibz, spin) = .True.
+     !bks_mask(b1:b2, ik_ibz, spin) = .True.
    end do
  end do
-#endif
 
  ! Impose istwfk = 1 for all k-points.
  ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
@@ -1063,7 +1058,6 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  ABI_CHECK_IEQ(hyb%nkibz, hyb%ebands%nkpt, "nkibz != hyb%ebands%nkpt")
  ABI_CHECK(all(abs(hyb%ebands%kptns - kibz) < tol12), "hyb%ebands%kibz != kibz")
 
-#if 0
  ! Note symrec convention.
  ebands_timrev = kpts_timrev_from_kptopt(hyb%ebands%kptopt)
  krank_ibz = krank_from_kptrlatt(hyb%nkibz, kibz, hyb%ebands%kptrlatt, compute_invrank=.False.)
@@ -1086,6 +1080,7 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
 
+#if 0
  ! Setup qIBZ, weights and BZ.
  ! Always use q --> -q symmetry even in systems without inversion
  ! TODO: Might add input variable to rescale the q-mesh.
@@ -1205,9 +1200,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  use m_numeric_tools, only : blocked_loop
  use m_gwdefs,        only : GW_Q0_DEFAULT
- use m_fftcore,       only : sphereboundary !, getng
+ use m_fftcore,       only : sphereboundary
  use m_fft_mesh,      only : setmesh
- use m_fft,           only : uplan_t ! fft_ug, fft_ur,
+ use m_fft,           only : uplan_t
  use m_vcoul,         only : vcgen_t
  use m_pstat,         only : pstat_t
  use m_sort,          only : sort_gvecs
@@ -1231,7 +1226,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer :: band1, band1_start, batch1_size, n1dat, idat1, m_istwfk, iatom, dim_rtwg
  integer :: band2, band2_start, batch2_size, n2dat, idat2, units(2), ii, unt, nqibz_, nqbz_, nkbz_, test_unt, M_
  integer(XMPI_OFFSET_KIND) :: offset
- real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb, bz_vol
+ real(dp) :: cpu, wall, gflops, qpt(3), qbz_(3,1), gcart(3), kpt(3), max_abs_err, abs_err, my_gw_qlwl(3), mem_mb
  character(len=500) :: msg
  character(len=fnlen) :: filepath, cvx_filepath
  logical :: k_is_gamma,  debug_this
@@ -1253,15 +1248,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  comm = ugb%comm; nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  units = [std_out, ab_out]
  npw_k = ugb%npw_k; nspinor = ugb%nspinor
- bz_vol = two_pi**3 / cryst%ucvol
-
- debug_this = merge(.False., .True., nproc > 1)
  debug_this = .False.
 
  if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
  ! m_gvec is the g-sphere for the oscillators M computed from ecuteps (half-sphere if wavefunctions have TR).
- ! Setmesh assumes g-vectors sorted by norma so use kin_sorted = True and sort ug%kg_k
+ ! Setmesh assumes g-vectors sorted by norm so use kin_sorted = True and sort ug%kg_k below.
  kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
  !print *, "ugb%istwf_k:", ugb%istwf_k
  m_istwfk = 1; if (ugb%istwf_k == 2) m_istwfk = 2
@@ -1303,9 +1295,9 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_MALLOC(sqrt_vc, (m_npw))
  my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
  call vcgen%get_vc_sqrt(qpt, m_npw, m_gvec, my_gw_qlwl, cryst, sqrt_vc, comm)
- !sqrt_vc(1) = zero
  ! Override the G=0 component with the correct value set by gw_icutcoulomb method
  sqrt_vc(1) = sqrt(vcgen%i_sz)
+ !sqrt_vc(1) = zero
  call vcgen%free()
 
  if (my_rank == master) then
@@ -1404,7 +1396,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
      write(unt,'(a)')    'elements:'
      write(unt,'(a)')    '  type: TextFile'
      write(unt,'(a)')    'unit: 1.0     # Atomic units '
-     !rite(unt,'(a)')    'unit: 0.2479966649373453       # =(Eh/eV*Bohr^3/Angstrom^3)'
      close(unt)
 
      filepath = trim(dtfil%filnam_ds(4))//'_CoulombPotential.elements'
@@ -1416,10 +1407,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        write(unt,*)real(sqrt_vc(ig) * conjg(sqrt_vc(ig)), kind=dp)
        !write(unt,*)real(sqrt_vc(ig)**2)
      end do
-     !KQ=1 !k-points to be implemented
-     !DO NG=1,NGVECTOR
-     !  write(unt,*) REAL(POTFAK_FULL(NG,KQ)*CONJG(POTFAK_FULL(NG,KQ)),kind=q)
-     !ENDDO
      close(unt)
    end if ! ik_ibz == 1 .and. spin == 1
  end if ! my_rank == master

@@ -175,6 +175,7 @@ module m_ksdiago
 
    !procedure :: from_wfk_file  => hyb_from_wfk_file
     ! Build object from WFK file
+
    !procedure :: print => hyb_print
     ! Print info on object.
 
@@ -729,7 +730,6 @@ subroutine ksdiago(Diago_ctl, nband_k, nfftc, mgfftc, ngfftc, natom, &
 
  call destroy_mpi_enreg(mpi_enreg_seq)
  call gs_hamk%free()
-
  call xmpi_barrier(comm)
 
 end subroutine ksdiago

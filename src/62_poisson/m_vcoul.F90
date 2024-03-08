@@ -1895,7 +1895,6 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB", "ERF", "ERFC")
    ! Compute |q+G| with special treatment of (q=0, g=0).
    do ig=1,npw
-     !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
        vcoul(ig) = normv(q0 + gvec(:,ig), cryst%gmet, "G")
        !print *, "q_is_gamma with ", q0, "and vcoul:", vcoul(ig); stop
@@ -1905,7 +1904,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
    end do
 
    if (vcgen%mode == "ERF") then
-     vcoul(:)  = four_pi/(vcoul(:)**2) *  EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 )
+     vcoul(:) = four_pi/(vcoul(:)**2) *  EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 )
    else if (vcgen%mode == "ERFC") then
      vcoul(:) = four_pi/(vcoul(:)**2) * ( one - EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 ) )
    else
