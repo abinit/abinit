@@ -1846,7 +1846,8 @@ end subroutine vcgen_init
 !!
 !! SOURCE
 
-subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
+subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
+                             vc) ! optional
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(in) :: vcgen
@@ -1854,11 +1855,12 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  integer,intent(in) :: npw, gvec(3,npw), comm
  type(crystal_t),intent(in) :: cryst
  complex(gwpc),intent(out) :: vc_sqrt(npw)
+ real(dp),optional,intent(out) :: vc(npw)
 
 !Local variables-------------------------------
  integer :: ig, ig0
  real(dp) :: rcut2
- logical :: q_is_gamma
+ logical :: q_is_gamma, do_sqrt__
  real(dp),allocatable :: vcoul(:)
 
 ! *************************************************************************
@@ -1916,7 +1918,9 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  end select
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
- vc_sqrt = SQRT(CMPLX(vcoul, zero))
+ vc_sqrt = sqrt(cmplx(vcoul, zero))
+
+ if (present(vc)) vc = vcoul
  ABI_FREE(vcoul)
 
 end subroutine vcgen_get_vc_sqrt

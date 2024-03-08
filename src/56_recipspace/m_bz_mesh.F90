@@ -190,7 +190,6 @@ module m_bz_mesh
 
  public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shift.
  public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
-
  public :: isamek                ! Check whether two points are equal within an umklapp G0.
  public :: isequalk              ! Check whether two points are equal within an umklapp G0 (does not report G0)
  public :: findqg0               ! Identify q + G0 = k1-k2.
@@ -1628,12 +1627,9 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
    kbigfold(:,ikf) = FLOOR(kfold(:,ikf)+tol7)
    ksmallfold(:,ikf) = kfold(:,ikf)-kbigfold(:,ikf)
 
-   if (ABS(ksmallfold(1,ikf)) > tol7) &
-&     smallestlen = MIN(smallestlen, ABS(ksmallfold(1,ikf)))
-   if (ABS(ksmallfold(2,ikf)) > tol7) &
-&     smallestlen = MIN(smallestlen, ABS(ksmallfold(2,ikf)))
-   if (ABS(ksmallfold(3,ikf)) > tol7) &
-&     smallestlen = MIN(smallestlen, ABS(ksmallfold(3,ikf)))
+   if (ABS(ksmallfold(1,ikf)) > tol7) smallestlen = MIN(smallestlen, ABS(ksmallfold(1,ikf)))
+   if (ABS(ksmallfold(2,ikf)) > tol7) smallestlen = MIN(smallestlen, ABS(ksmallfold(2,ikf)))
+   if (ABS(ksmallfold(3,ikf)) > tol7) smallestlen = MIN(smallestlen, ABS(ksmallfold(3,ikf)))
 
  end do
 
@@ -1689,9 +1685,9 @@ subroutine get_ng0sh(nk1,kbz1,nk2,kbz2,nkfold,kfold,tolq0,opt_ng0)
 
      if (.not. found) then
        write(msg,'(a,2(2a,i4,3es16.8),a)')&
-&        'Not able to found umklapp G0 vector such as k1-k2 = kf+G0',ch10,&
-&        'point1 = ',i1,kbz1(:,i1),ch10,&
-&        'point2 = ',i2,kbz2(:,i2),ch10
+        'Not able to found umklapp G0 vector such as k1-k2 = kf+G0',ch10,&
+        'point1 = ',i1,kbz1(:,i1),ch10,&
+        'point2 = ',i2,kbz2(:,i2),ch10
        ABI_ERROR(msg)
      else
        ! We have found one k, extracting the max g0
@@ -1900,15 +1896,14 @@ subroutine find_qmesh(Qmesh,Cryst,Kmesh)
 
 ! *************************************************************************
 
- !@kmesh_t
- ! * Find the number of q-points such that q = k1-k2.
- call findnq(Kmesh%nbz,Kmesh%bz,Cryst%nsym,Cryst%symrec,Cryst%symafm,nqibz,Cryst%timrev)
- !
- ! * Find the coordinates of the q-points in the IBZ.
- ABI_MALLOC(qibz,(3,nqibz))
- call findq(Kmesh%nbz,Kmesh%bz,Cryst%nsym,Cryst%symrec,Cryst%symafm,Cryst%gprimd,nqibz,qibz,Cryst%timrev)
- !
- ! * Create the Qmesh object starting from the IBZ.
+ ! Find the number of q-points such that q = k1-k2.
+ call findnq(Kmesh%nbz, Kmesh%bz, Cryst%nsym, Cryst%symrec, Cryst%symafm, nqibz, Cryst%timrev)
+
+ ! Find the coordinates of the q-points in the IBZ.
+ ABI_MALLOC(qibz, (3,nqibz))
+ call findq(Kmesh%nbz ,Kmesh%bz, Cryst%nsym, Cryst%symrec, Cryst%symafm, Cryst%gprimd, nqibz, qibz, Cryst%timrev)
+
+ ! Create the Qmesh object starting from the IBZ.
  kptopt = Kmesh%kptopt
  call kmesh_init(Qmesh,Cryst,nqibz,qibz,kptopt)
 
@@ -1940,7 +1935,7 @@ end subroutine find_qmesh
 !!
 !! SOURCE
 
-subroutine findnq(nkbz,kbz,nsym,symrec,symafm,nqibz,timrev)
+subroutine findnq(nkbz, kbz, nsym, symrec, symafm, nqibz, timrev)
 
 !Arguments ------------------------------------
 !scalars
@@ -2032,7 +2027,7 @@ end subroutine findnq
 !! SOURCE
 
 
-subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
+subroutine findq(nkbz, kbz, nsym, symrec, symafm, gprimd, nqibz, qibz, timrev)
 
 !Arguments ------------------------------------
 !scalars
@@ -2040,7 +2035,7 @@ subroutine findq(nkbz,kbz,nsym,symrec,symafm,gprimd,nqibz,qibz,timrev)
 !arrays
  integer,intent(in) :: symrec(3,3,nsym),symafm(nsym)
  real(dp),intent(in) :: gprimd(3,3),kbz(3,nkbz)
- real(dp),intent(inout) :: qibz(3,nqibz) !vz_i num m_numeric_tools
+ real(dp),intent(inout) :: qibz(3,nqibz)
 
 !Local variables ------------------------------
 !scalars
