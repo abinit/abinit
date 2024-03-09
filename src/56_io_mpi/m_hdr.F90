@@ -4723,7 +4723,7 @@ subroutine hdr_vs_dtset(hdr, dtset)
  call compare_int('pawcpxocc', hdr%pawcpxocc, dtset%pawcpxocc, ierr)
  call compare_int('nshiftk_orig', hdr%nshiftk_orig, dtset%nshiftk_orig, ierr)
  call compare_int('nshiftk', hdr%nshiftk, dtset%nshiftk, ierr)
- call compare_int("ixc", hdr%ixc, dtset%ixc, ierr)
+ !call compare_int("ixc", hdr%ixc, dtset%ixc, ierr)
 
  ! The number of fatal errors must be zero.
  if (ierr /= 0) then

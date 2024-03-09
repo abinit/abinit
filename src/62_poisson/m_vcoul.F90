@@ -1860,7 +1860,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
 !Local variables-------------------------------
  integer :: ig, ig0
  real(dp) :: rcut2
- logical :: q_is_gamma, do_sqrt__
+ logical :: q_is_gamma
  real(dp),allocatable :: vcoul(:)
 
 ! *************************************************************************
