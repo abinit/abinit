@@ -422,9 +422,6 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- !@kmesh_t
  ! === Initial tests on input arguments ===
  ltest=(Cryst%timrev==1.or.Cryst%timrev==2)
  ABI_CHECK(ltest, sjoin('Wrong value for timrev= ', itoa(Cryst%timrev)))
@@ -438,8 +435,7 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  nsym   = Cryst%nsym
  timrev = Cryst%timrev
 
- !
- ! === Find BZ from IBZ and fill tables ===
+ ! Find BZ from IBZ and fill tables ===
  nkbzX=nkibz*nsym*timrev ! Maximum possible number
  ABI_MALLOC(kbz,(3,nkbzX))
  ABI_MALLOC(wtk,(nkibz))
@@ -536,8 +532,6 @@ subroutine kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,wrap_1zone,ref_bz,break_symm
  ABI_FREE(ktab)
  ABI_FREE(ktabi)
  ABI_FREE(ktabo)
-
- DBG_EXIT("COLL")
 
 end subroutine kmesh_init
 !!***
@@ -1412,7 +1406,7 @@ end subroutine make_mesh
 !!
 !! SOURCE
 
-subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz)
+subroutine identk(kibz, nkibz, nkbzmx, nsym, timrev, symrec, symafm, kbz, ktab, ktabi, ktabo, nkbz, wtk, ref_bz)
 
 !Arguments ------------------------------------
 !scalars

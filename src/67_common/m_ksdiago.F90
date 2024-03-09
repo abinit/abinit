@@ -49,10 +49,11 @@ module m_ksdiago
  use m_hide_lapack,       only : xhegv_cplex, xheev_cplex, xheevx_cplex, xhegvx_cplex
  use m_slk,               only : matrix_scalapack, processor_scalapack, block_dist_1d, &
                                  compute_eigen_problem, compute_generalized_eigen_problem
+ use m_bz_mesh,           only : findnq, findq, findqg0, identk
  use m_kg,                only : mkkin, mkkpg
  use m_crystal,           only : crystal_t
  use m_fftcore,           only : kpgsph, get_kg
- use m_fft_mesh,          only : calc_ceigr
+ use m_fft_mesh,          only : calc_ceigr, get_gfft
  use m_fft,               only : fftpac, uplan_t, fftbox_plan3_t
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
@@ -972,12 +973,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: cprj_choice,cpopt,dimffnl,ib,ider,idir,npw_k,nfftc,mgfftc, igs, ige, omp_nt
  integer :: jj,n1,n2,n3,n4,n5,n6,nkpg,nproc,my_rank,optder
  integer :: type_calc,sij_opt,igsp2_start,ig, my_ib,ibs1
- integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum, nkbz
+ integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum
  integer :: idat, ndat, batch_size, h_size !, mene_found
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
  integer :: iq_ibz, iq_bz, isym_q, trev_q, g0_q(3)
  real(dp),parameter :: lambda0 = zero
- real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty
+ real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol
  logical :: do_full_diago, haveit, isirr_k, isirr_q, q_is_gamma
  character(len=80) :: frmt1,frmt2
  character(len=10) :: stag(2)
@@ -994,7 +995,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
- complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:)
+ complex(gwpc),allocatable :: cbras_box(:,:), cbras_g(:,:), vc_sqrt(:), ur(:), rfg_box(:,:)
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
 
 ! *********************************************************************
@@ -1149,7 +1150,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! This is useful if OpenMP is activated thus we use multiples of omp_nt.
  omp_nt = xomp_get_num_threads(open_parallel=.True.)
  batch_size = 8 * omp_nt
- if (istwf_k == 2) batch_size = 1      ! FIXME
+ if (istwf_k == 2) batch_size = 1  ! FIXME
  !batch_size = 1
  call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
 
@@ -1242,44 +1243,47 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! ==================================
  ! Compute Fock operator F^k_{g1,g2}
  ! ==================================
- !if (dtset%usefock == 1) then
-   ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
+ if (dtset%usefock == 1) then
    call cwtime(cpu, wall, gflops, "start")
+   ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
+   inv_sqrt_ucvol = one/sqrt(cryst%ucvol)
 
-   ABI_MALLOC(vc_sqrt, (npw_k))
-   ABI_MALLOC(vcg_qbz, (npw_k, hyb%nqbz))
-   ABI_MALLOC(cbras_box, (nfftc*nspinor, batch_size))
-   ABI_MALLOC(cbras_g, (npw_k*nspinor, batch_size))
+   call hyb%wfd%change_ngfft(cryst, psps, ngfftc)
+
    ABI_MALLOC(ur, (nfftc*nspinor))
+   ABI_MALLOC(cbras_g, (npw_k*nspinor, batch_size))
+   ABI_MALLOC(cbras_box, (nfftc*nspinor, batch_size))
+   ABI_MALLOC(rfg_box, (nfftc*nspinor, batch_size))
+   ABI_MALLOC(vc_sqrt, (nfftc))
+   ABI_MALLOC(vcg_qbz, (nfftc, hyb%nqbz))
 
    ! Set tolerance used to decide if a band is empty
    tol_empty_in = 0.01_dp
    call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
-   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
-
-   !ABI_MALLOC(gfft, (3, nfftc))
-   !call get_gfft(ngfftc, kpt, cryst%gmet, gsq_max, gfft)
-   !ABI_FREE(gfft)
-
-   ! TODO
-   ! Build plan for dense FFTs.
-   !call box_plan%from_ngfft(ngfftc, nspinor*batch_size, gwr%dtset%gpu_option)
-   !call box_plan%free()
-   !call box_plan%execute(gt_scbox(:,1,1), -1)
-
    ! Precompute the Coulomb term here to avoid tons of calls inside the loop over ig2.
+   ! Get g-vectors in the FFT box for vcoul.
+   ABI_MALLOC(gfft, (3, nfftc))
+   call get_gfft(ngfftc, kpoint, cryst%gmet, gsq_max, gfft)
+
    my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
-   do ik_bz=1,nkbz
+   do ik_bz=1,hyb%nkbz
      ksum = hyb%kbz(:, ik_bz)
      kgw_m_ksum = kpoint - ksum
+     !print *, "kpoint", kpoint, "ksum:", ksum
      call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
      ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
      qq_bz = hyb%qbz(:, iq_bz)
      q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
-     call hyb%vcgen%get_vc_sqrt(hyb%qbz, npw_k, ugb%kg_k, my_gw_qlwl, cryst, vc_sqrt, comm, vc=vcg_qbz(:,iq_bz))
+     call hyb%vcgen%get_vc_sqrt(qq_bz, nfftc, gfft, my_gw_qlwl, cryst, vc_sqrt, comm, vc=vcg_qbz(:,iq_bz))
      if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
+     !if (q_is_gamma) vcg_qbz(1,iq_bz) = zero
+     vcg_qbz(:,iq_bz) = vcg_qbz(:,iq_bz) * inv_sqrt_ucvol ! ** 2
    end do
+
+   ! Build plans for (dense, g-sphere) FFTs.
+   call box_plan%from_ngfft(ngfftc, nspinor*batch_size, dtset%gpu_option)
+   call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
 
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
@@ -1287,12 +1291,15 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! Fill cbras_box with e^{ig2.r}
      do idat=1,ndat
        call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
+       cbras_box(:,idat) = cbras_box(:,idat) * inv_sqrt_ucvol
+       !print *, "idat, cbras_box", cbras_box(1:4, idat)
      end do
 
      ! ==============================
      ! ==== Sum over k in the BZ ====
      ! ==============================
-     do ik_bz=1,nkbz
+     rfg_box = zero
+     do ik_bz=1,hyb%nkbz
        ksum = hyb%kbz(:, ik_bz)
        ! Parallelism over k-points.
        !if (.not. hyb%wfd%ihave_ug(0, ik_ibz, spin)) cycle
@@ -1327,57 +1334,60 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
          if (.not. hyb%wfd%ihave_ug(band_sum, ik_ibz, spin)) cycle
          f_bsum = hyb%ebands%occ(band_sum, ik_ibz, spin) * fact_spin; if (abs(f_bsum) <= tol_empty) cycle
 
+         !print *, "band_sum, ik_ibz, spin", band_sum, ik_ibz, spin
          call hyb%wfd%get_ur(band_sum, ik_ibz, spin, ur)
          do idat=1,ndat
            cbras_box(:,idat) = f_bsum * cbras_box(:,idat) * conjg(ur(:))
+           !print *, "band_sum, idat, cbras_box", cbras_box(1:4, idat)
          end do
 
-         ! 1) FFT: r --> g_sphere.
-         call uplan_k%execute_rg(ndat, cbras_box(:,1), cbras_g(:,1))
-         ! 2) Multiply results by v(q,g).
+         ! FFT r --> g and multiply by v(g,q) on the FFT box.
+         call box_plan%execute(cbras_box(:,1), -1, ndat=ndat)
          do idat=1,ndat
-           cbras_g(:,idat) = cbras_g(:,idat) * vcg_qbz(:, iq_bz)
+           cbras_box(:,idat) = cbras_box(:,idat) * vcg_qbz(:, iq_bz)
+           !print *, "idat, cbras_box", cbras_box(1:4, idat)
          end do
-         ! 3) FFT g_sphere --> r and multiply by u(r).
-         call uplan_k%execute_gr(ndat, cbras_g(:,1), cbras_box(:,1))
+         ! FFT g --> r, multiply by u(r) and accumulate in rfg_box
+         call box_plan%execute(cbras_box(:,1), +1, ndat=ndat)
          do idat=1,ndat
-           cbras_box(:,idat) = cbras_box(:,idat) * ur
+           rfg_box(:,idat) = rfg_box(:,idat) + cbras_box(:,idat) * ur
          end do
        end do ! band_sum
      end do ! ik_bz
 
-     ! Sum partial contributions in r-space, followed by FFT r --> g_sphere.
-     !call xmpi_sum(cbras_box, hyb%wfd%comm_spin, ierr)
-     call uplan_k%execute_rg(ndat, cbras_box(:,1), cbras_g(:,1))
-     cbras_g = -cbras_g ! * alpha_hyb / nkbz
+     ! FFT r --> g_sphere and MPI sum partial contributions.
+     call uplan_k%execute_rg(ndat, rfg_box(:,1), cbras_g(:,1))
+     call xmpi_sum(cbras_g, hyb%wfd%comm_spin(spin), ierr)
+     cbras_g = -cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
 
-     ! Now fill my local buffer of ghg_mat.
+     ! Update my local buffer of ghg_mat.
      do idat=1,ndat
        do ig1=1,npwsp
          ! From global to local indices
          call ghg_mat%glob2loc(ig1, ig2+idat-1, il_g1, il_g2, haveit); if (.not. haveit) cycle
+         !print *, "ig1, idat, cbras_g", ig1, idat, cbras_g(ig1, idat)
          if (istwf_k == 1) then
            ! Complex wavefunctions.
-           ghg_mat%buffer_cplx(il_g1, il_g2) = cbras_g(ig1,idat)
+           ghg_mat%buffer_cplx(il_g1, il_g2) = ghg_mat%buffer_cplx(il_g1, il_g2) + cbras_g(ig1,idat)
          else
           ! Real wavefunctions.
           NOT_IMPLEMENTED_ERROR()
-          !ghg_mat%buffer_real(1:npwsp,  il_g2+idat) =  ghc(1, igs:ige)     ! CC or CS
-          !ghg_mat%buffer_real(npwsp+1:, il_g2+idat) = -ghc(2, igs+1:ige)   ! SC or SS. Note igs+1
          end if ! istwf_k
        end do ! ig1
      end do ! idat
 
    end do ! ig2
 
+   ABI_FREE(gfft)
    ABI_FREE(vc_sqrt)
    ABI_FREE(vcg_qbz)
    ABI_FREE(cbras_box)
+   ABI_FREE(rfg_box)
    ABI_FREE(cbras_g)
    ABI_FREE(ur)
-   call uplan_k%free()
+   call uplan_k%free(); call box_plan%free()
    call cwtime_report(" build Fock_g1g2", cpu, wall, gflops)
- !end if ! usefock
+ end if ! usefock
 
  !===========================================
  !=== Diagonalization of <G|H|G''> matrix ===
@@ -1389,7 +1399,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call proc_4diag%init(comm)
  call ghg_mat%change_size_blocs(ghg_4diag, processor=proc_4diag, free=.True.)
  if (psps%usepaw == 1) call gsg_mat%change_size_blocs(gsg_4diag, processor=proc_4diag, free=.True.)
-
  !call ghg_mat%copy(ghg_4diag); call ghg_mat%free()
 
  ! NB: global H shape is (h_size, h_size) even for partial diago.
@@ -1429,14 +1438,16 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    call cwtime_report(" partial_diago", cpu, wall, gflops)
  end if
 
- if (dtset%prtvol > 0 .and. my_rank == master) then
+ if (my_rank == master) then
    ! Write eigenvalues.
    frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
-   write(msg,'(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
-   write(msg,frmt1)(eig_ene(ib)*Ha_eV,ib=1,MIN(9,nband_k)); call wrtout(std_out, msg)
-   if (nband_k > 9 ) then
+   write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
+   write(msg, frmt1)(eig_ene(ib)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
+   ! HYB DEBUG
+   !write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
+   if (nband_k > 9 .and. dtset%prtvol > 0) then
      do jj=10,nband_k,9
-       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,MIN(jj+8,nband_k)); call wrtout(std_out, msg)
+       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,min(jj+8,nband_k)); call wrtout(std_out, msg)
      end do
    end if
  end if
@@ -1509,6 +1520,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  call gs_hamk%free()
 
  call timab(1919, 2, tsec)
+
+ !ABI_ERROR("ugb_from_diago OK")
 
 end subroutine ugb_from_diago
 !!***
@@ -1641,11 +1654,10 @@ end subroutine ugb_collect_cprj
 !!
 !! SOURCE
 
-subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
+subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, diago_pool, comm)
 
  use m_krank
  use m_kpts
- use m_bz_mesh, only : findnq, findq
 
 !Arguments ------------------------------------
  class(hyb_t),intent(out) :: hyb
@@ -1654,19 +1666,22 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  type(dataset_type),intent(in) :: dtset
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(xmpi_pool2d_t),intent(in) :: diago_pool
  integer,intent(in) :: ngfftc(18), comm
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
  integer :: nprocs, my_rank, ierr, b1, b2, mband, nkibz, nsppol, spin, ik_ibz, ikcalc, ebands_timrev
+ real(dp) :: vc_ecut
  character(len=5000) :: msg
  type(hdr_type) :: wfk_hdr
  type(crystal_t) :: wfk_cryst
  type(krank_t) :: qrank, krank_ibz
  character(len=fnlen) :: wfk_path
  integer :: units(2)
- integer,allocatable :: nband(:,:), wfd_istwfk(:)
- real(dp),allocatable :: wtk(:)
+ integer :: nqbzX
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), qtab(:), qtabi(:), qtabo(:)
+ real(dp),allocatable :: qbz(:,:), wtk(:), wtq(:)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
 
 !************************************************************************
@@ -1700,9 +1715,6 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  !call cryst%print(header="crystal structure from WFK file")
 
  nkibz = hyb%ebands%nkpt; nsppol = hyb%ebands%nsppol
-
- ! Don't take mband from hyb%ebands but compute it from gwr%bstop_ks
- !mband = maxval(gwr%bstop_ks)
  mband = hyb%ebands%mband
 
  ! Initialize the wave function descriptor.
@@ -1713,17 +1725,24 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
+ ! Set tolerance used to decide if a band is empty
+ !tol_empty_in = 0.01_dp
+ !call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
+
+ !do hyb_ik_ibz=1,nkibz
  do spin=1,nsppol
+   if (all(.not. diago_pool%treats(:, spin))) cycle ! MPI distribution of collinear spins.
    do ik_ibz=1,nkibz
      bks_mask(:, ik_ibz, spin) = .True.
      !bks_mask(b1:b2, ik_ibz, spin) = .True.
    end do
  end do
+ !end do
 
  ! Impose istwfk = 1 for all k-points.
  ! wfd_read_wfk will handle a possible conversion if the WFK contains istwfk /= 1.
  ABI_MALLOC(wfd_istwfk, (nkibz))
- wfd_istwfk = 1
+ wfd_istwfk = 1 !; wfd_istwfk = wfk_hdr%istwf_k
 
  call wfd_init(hyb%wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, dtset%nsppol, bks_mask, &
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, hyb%ebands%kptns, ngfftc, &
@@ -1790,31 +1809,45 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, com
  ! Find the coordinates of the q-points in the IBZ.
  ABI_MALLOC(hyb%qibz, (3, hyb%nqibz))
  call findq(hyb%nkbz, hyb%kbz, cryst%nsym, cryst%symrec, cryst%symafm, cryst%gprimd, hyb%nqibz, hyb%qibz, cryst%timrev)
-
  ABI_CHECK(all(abs(hyb%qibz(:,1)) < tol16), "First qpoint in qibz should be Gamma!")
 
-#if 0
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
- ABI_MALLOC(hyb%qbz2ibz, (6, hyb%nqbz))
+ !ABI_MALLOC(hyb%qbz2ibz, (6, hyb%nqbz))
+ !qrank = krank_from_kptrlatt(hyb%nqibz, hyb%qibz, qptrlatt, compute_invrank=.False.)
 
- qrank = krank_from_kptrlatt(hyb%nqibz, hyb%qibz, qptrlatt, compute_invrank=.False.)
-
- if (kpts_map("symrec", qtimrev1, cryst, qrank, hyb%nqbz, hyb%qbz, hyb%qbz2ibz) /= 0) then
-   ABI_ERROR("Cannot map qBZ to IBZ!")
- end if
- call qrank%free()
+ !if (kpts_map("symrec", qtimrev1, cryst, qrank, hyb%nqbz, hyb%qbz, hyb%qbz2ibz) /= 0) then
+ !  ABI_ERROR("Cannot map qBZ to IBZ!")
+ !end if
+ !call qrank%free()
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
- call kpts_pack_in_stars(hyb%nqbz, hyb%qbz, hyb%qbz2ibz)
- if (my_rank == master) then
-   call kpts_map_print(units, " Mapping qBZ --> qIBZ", "symrec", hyb%qbz, hyb%qibz, hyb%qbz2ibz, dtset%prtvol)
- end if
-#endif
+ !call kpts_pack_in_stars(hyb%nqbz, hyb%qbz, hyb%qbz2ibz)
+ !if (my_rank == master) then
+ !  call kpts_map_print(units, " Mapping qBZ --> qIBZ", "symrec", hyb%qbz, hyb%qibz, hyb%qbz2ibz, dtset%prtvol)
+ !end if
+
+ nqbzX = hyb%nqibz*cryst%nsym*cryst%timrev ! Maximum possible number
+ ABI_MALLOC(qbz, (3, nqbzX))
+ ABI_MALLOC(wtq, (hyb%nqibz))
+ ABI_MALLOC(qtab, (nqbzX))
+ ABI_MALLOC(qtabi, (nqbzX))
+ ABI_MALLOC(qtabo, (nqbzX))
+
+ call identk(hyb%qibz, hyb%nqibz, nqbzX, cryst%nsym, cryst%timrev, cryst%symrec, cryst%symafm, qbz, qtab, qtabi, qtabo, hyb%nqbz, wtq)
+
+ ABI_MALLOC(hyb%qbz, (3, hyb%nqibz))
+ hyb%qbz = qbz(:,1:hyb%nqibz)
+
+ ABI_FREE(qbz)
+ ABI_FREE(wtq)
+ ABI_FREE(qtab)
+ ABI_FREE(qtabi)
+ ABI_FREE(qtabo)
 
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
- !vc_ecut = max(dtset%ecutsigx, dtset%ecuteps)
+ vc_ecut = dtset%ecut ! * four
  call hyb%vcgen%init(cryst, hyb%ebands%kptrlatt, hyb%nkbz, hyb%nqibz, hyb%nqbz, hyb%qbz, &
-                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecut, comm)
+                     dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, vc_ecut, comm)
 
 end subroutine hyb_from_wfk_file
 !!***

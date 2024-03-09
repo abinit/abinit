@@ -49,7 +49,7 @@ MODULE m_fft_mesh
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
- public :: get_gfft            ! Calculate the G"s in the FFT box from ngfft
+ public :: get_gfft            ! Calculate the G-vectors in the FFT box from ngfft.
  public :: calc_ceigr          ! e^{iG.r} on the FFT mesh (complex valued).
  public :: calc_eigr           ! e^{iG.r} on the FFT mesh (version for real array with RE,IM).
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
