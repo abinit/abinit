@@ -305,13 +305,13 @@ end subroutine gw_icutcoul_to_mode
 !!
 !! SOURCE
 
-subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, ecut, ng, nqlwl, qlwl, comm)
+subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, vc_ecut, ng, nqlwl, qlwl, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(vcoul_t),intent(out) :: vcp
  integer,intent(in) :: ng,nqlwl, gw_icutcoul, comm
- real(dp),intent(in) :: rcut, ecut
+ real(dp),intent(in) :: rcut, vc_ecut
  type(kmesh_t),target,intent(in) :: Kmesh, Qmesh
  type(gsphere_t),target,intent(in) :: Gsph
  type(crystal_t),intent(in) :: Cryst
@@ -499,7 +499,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    else if (vcp%mode == "AUX_GB") then
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
-     vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec)
+     vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec)
 
    else
      ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcp%mode))
@@ -1664,12 +1664,12 @@ end function carrier_isz
 !!
 !! SOURCE
 
-real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(i_sz)
+real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec) result(i_sz)
 
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: nqbz, ng
- real(dp), intent(in) :: qbz(3, nqbz), ecut
+ real(dp), intent(in) :: qbz(3, nqbz), vc_ecut
  integer,intent(in) :: gvec(3,ng)
 
 !Local variables-------------------------------
@@ -1679,7 +1679,7 @@ real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(
 !************************************************************************
 
  ! the choice of alfa (the width of the gaussian) is somehow empirical
- alfa = 150.0 / ecut
+ alfa = 150.0 / vc_ecut
 
  bz_geometry_factor=zero
  do iq_bz=1,nqbz
@@ -1708,13 +1708,13 @@ end function gygi_baldereschi_isz
 !!
 !! SOURCE
 
-subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, ecut, comm)
+subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, vc_ecut, comm)
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(out) :: vcgen
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: kptrlatt(3,3), nkbz, nqibz, nqbz, gw_icutcoul
- real(dp),intent(in) :: qbz(3,nqbz), rcut, ecut, vcutgeo(3)
+ real(dp),intent(in) :: qbz(3,nqbz), rcut, vc_ecut, vcutgeo(3)
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
@@ -1727,7 +1727,7 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
 ! *************************************************************************
 
- ABI_UNUSED([ecut])
+ ABI_UNUSED([vc_ecut])
 
  ! Save dimension and other useful quantities in Vcp
  vcgen%rcut      = rcut                 ! Cutoff radius for cylinder.
@@ -1810,8 +1810,8 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
      ! TODO:
      ABI_ERROR("AUX_GB not implemented in vcgen_init")
-     !call get_kg(kk_bz, istwfk1, ecut, cryst%gmet, npw_, gvec_)
-     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec_)
+     !call get_kg(kk_bz, istwfk1, vc_ecut, cryst%gmet, npw_, gvec_)
+     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec_)
      !ABI_FREE(gvec_)
 
    else

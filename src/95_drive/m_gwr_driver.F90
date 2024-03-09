@@ -51,7 +51,6 @@ module m_gwr_driver
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
  use m_ioarr,           only : read_rhor
-
  use m_energies,        only : energies_type, energies_init
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_pawang,          only : pawang_type
@@ -496,8 +495,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
                   Cryst%ucvol,dtset%usewvl,Cryst%xred)
 
    ! === Evaluate onsite energies, potentials, densities ===
-   !  * Initialize variables/arrays related to the PAW spheres.
-   !  * Initialize also lmselect (index of non-zero LM-moments of densities).
+   ! Initialize variables/arrays related to the PAW spheres.
+   ! Initialize also lmselect (index of non-zero LM-moments of densities).
    ABI_MALLOC(KS_paw_ij, (Cryst%natom))
    has_dijso = Dtset%pawspnorb; has_dijU = merge(0, 1, Dtset%usepawu == 0)
 
@@ -665,7 +664,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    cc4s_task = string_in(dtset%gwr_task, "CC4S, CC4S_FULL")
    if (cc4s_task) then
      ABI_CHECK_IEQ(dtset%nkpt, 1, "CC4S interface does not support more than one k-point.")
-     !ABI_CHECK(dtset%nkpt == 1 .and. all(abs(dtset%kptns(:,1)) < tol12), "CC4S requires Gamma-only sampling")
    end if
 
    ! Build header with new npwarr and nband.
@@ -677,18 +675,18 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   ! Build pools to distribute (kpt, spin). Try to get rectangular grids in each pool to improve efficiency in slk diago.
+   ! Build MPI pools to distribute (kpt, spin). Try to get rectangular grids in each pool to improve efficiency in slk diago.
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
    ! Build hyb descriptor with hybrid orbitals from WFK file.
-   !if (dtset%usefock == 1) then
-     call hyb%from_wfk_file(cryst, dtfil, dtset, psps, pawtab, ngfftc, comm)
-   !end if
+   if (dtset%usefock == 1) then
+     call hyb%from_wfk_file(cryst, dtfil, dtset, psps, pawtab, ngfftc, diago_pool, comm)
+   end if
 
    if (write_wfk) then
-     ! Master writes header and Fortran record markers
+     ! Master writes the Abinit header and the Fortran record markers
      out_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) out_path = nctk_ncify(out_path)
      iomode__ = iomode_from_fname(out_path)
      call wrtout(std_out, sjoin(" Writing wavefunctions to file:", out_path))
@@ -699,17 +697,17 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      call xmpi_barrier(comm)
    end if
 
-  ! Build H_k(g,g') for each k-point and spint and diagonalize the Hamiltoniana with Scalapack
+   ! Build H_k(g,g') for each k-point and spin and diagonalize the Hamiltonian with Scalapack/ELPA.
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
-       call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
 
        nband_k = nband_iks(ik_ibz, spin)
+       call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
-
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
+
        if (diago_pool%comm%me == 0) diago_info(1, ik_ibz, spin) = diago_wall
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
 
@@ -727,8 +725,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
            call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
            ! Reopen file inside io_comm.
-           call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, &
-                                write_hdr=.False., write_frm=.False.)
+           call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
 
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
            sc_mode = xmpio_collective
@@ -744,6 +741,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
        call cwtime(diago_cpu, diago_wall, diago_gflops, "stop")
        if (diago_pool%comm%me == 0) diago_info(2:3, ik_ibz, spin) = [diago_wall, dble(diago_pool%comm%nproc)]
 
+       ! Compute and write matrix elements required by CC4S
        if (cc4s_task) call cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, owfk_ebands, psps, pawtab, paw_pwff, ugb)
 
        ABI_FREE(eig_k)
@@ -765,7 +763,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
      end do
    end if
 
-   ! Collect eigenvalues for the different k-points/spins
+   ! Collect eigenvalues for the different k-points/spins.
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (diago_pool%treats(ik_ibz, spin) .and. diago_pool%comm%me /= 0) owfk_ebands%eig(:, ik_ibz, spin) = zero
@@ -884,7 +882,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    case ("EGEW", "EGW0", "G0EW")
      call gwr%run_energy_scf()
    case default
-     ABI_ERROR(sjoin("Invalid gwr_task:", dtset%gwr_task))
+     ABI_ERROR(sjoin("Invalid value for gwr_task:", dtset%gwr_task))
    end select
  end if
 
@@ -902,11 +900,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call pawrhoij_free(ks_pawrhoij)
    ABI_FREE(ks_pawrhoij)
    call pawfgrtab_free(pawfgrtab)
-   !ABI_FREE(pawfgrtab)
    call paw_ij_free(ks_paw_ij)
    ABI_FREE(ks_paw_ij)
    call paw_an_free(ks_paw_an)
-   !ABI_FREE(ks_paw_an)
    call pawpwff_free(Paw_pwff)
  end if
 
@@ -921,7 +917,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
  ABI_FREE(ks_vxc)
- ! PAW
+ ! PAW stuff
  ABI_SFREE(paw_pwff)
  ABI_SFREE(pawfgrtab)
  ABI_SFREE(ks_paw_an)

@@ -192,7 +192,7 @@ module m_xmpi
 !! xmpi_pool2d_t
 !!
 !! FUNCTION
-!!  Pool of MPI processors operating a 2D problem of shape (n1, n2).
+!!  Pool of MPI processors operating on a 2D problem of shape (n1, n2).
 !!  Each item in the (n1, n2) matrix is assigned to a single pool.
 !!  Note that differerent pools do not necessarily have the same number of procs,
 !!  thus a pool is more flexibile than a Cartesian grid although inter-pool communication becomes more complex.
@@ -205,7 +205,7 @@ module m_xmpi
    ! Dimensions of the 2d problem
 
    type(xcomm_t) :: comm
-   ! MPI communicator
+   ! MPI communicator.
 
    logical,allocatable :: treats(:,:)
    ! (n1, n2)
@@ -5291,18 +5291,18 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
    end do i2_loop
  end if
 
-!DEBUG
-! where (pool%treats)
-!   check = 1
-! else where
-!   check = 0
-! end where
-! call xmpi_sum(check, input_comm, mpierr)
-! if (any(check == 0)) then
-!   write(std_out, *) check
-!   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
-! end if
-!END_DEBUG
+ !DEBUG
+ ! where (pool%treats)
+ !   check = 1
+ ! else where
+ !   check = 0
+ ! end where
+ ! call xmpi_sum(check, input_comm, mpierr)
+ ! if (any(check == 0)) then
+ !   write(std_out, *) check
+ !   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
+ ! end if
+ !END_DEBUG
 
  call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)
  pool%comm = xcomm_from_mpi_int(new_comm)
@@ -5331,6 +5331,7 @@ contains
 logical function is_rectangular_grid(nproc, grid_dims) result (ans)
  integer,intent(in) :: nproc
  integer,intent(out) :: grid_dims(2)
+
 !----------------------------------------------------------------------
  integer :: i
  ! Search for a rectangular grid of processors

@@ -23,6 +23,7 @@
 
 module m_wfd
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -32,7 +33,6 @@ module m_wfd
  use m_wfk
  use m_hdr
  use m_distribfft
- use, intrinsic :: iso_c_binding
  use m_cgtools
 
  use defs_datatypes,   only : pseudopotential_type, ebands_t
@@ -315,6 +315,10 @@ module m_wfd
 
   integer :: nloalg(3)
    ! Governs the choice of the algorithm for nonlocal operator. See doc.
+
+  integer,allocatable :: comm_spin(: )
+   ! (nsppol)
+   ! MPI communicator for collinear spin.
 
   integer,allocatable :: irottb(:,:)
    ! (nfftot, nsym)
@@ -839,39 +843,33 @@ end subroutine copy_kdata_1D
 !! SOURCE
 
 subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_mask,&
-&  nspden,nspinor,ecut,ecutsm,dilatmx,istwfk,kibz,ngfft,nloalg,prtvol,pawprtvol,comm,&
-&  use_fnl_dir0der0) ! optional
+                    nspden,nspinor,ecut,ecutsm,dilatmx,istwfk,kibz,ngfft,nloalg,prtvol,pawprtvol,comm,&
+                    use_fnl_dir0der0) ! optional
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,comm,prtvol,pawprtvol
- integer,intent(in) :: nkibz,nsppol,nspden,nspinor
+ integer,intent(in) :: mband,comm,prtvol,pawprtvol,nkibz,nsppol,nspden,nspinor
  real(dp),intent(in) :: ecut,ecutsm,dilatmx
  type(crystal_t),intent(in) :: Cryst
  type(pseudopotential_type),intent(in) :: Psps
  class(wfd_t),intent(inout) :: Wfd
 !array
- integer,intent(in) :: ngfft(18),istwfk(nkibz),nband(nkibz,nsppol)
- integer,intent(in) :: nloalg(3)
+ integer,intent(in) :: ngfft(18),istwfk(nkibz),nband(nkibz,nsppol),nloalg(3)
  real(dp),intent(in) :: kibz(3,nkibz)
- logical,intent(in) :: bks_mask(mband,nkibz,nsppol)
- logical,intent(in) :: keep_ur(mband,nkibz,nsppol)
+ logical,intent(in) :: bks_mask(mband,nkibz,nsppol), keep_ur(mband,nkibz,nsppol)
  logical,intent(in),optional :: use_fnl_dir0der0
  type(Pawtab_type),intent(in) :: Pawtab(Cryst%ntypat*Psps%usepaw)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: nfft0=0,mpw0=0,ikg0=0
- integer :: ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat
- integer :: cnt_b, cnt_k, cnt_s, ierr
- real(dp) :: ug_size,ur_size,cprj_size, bks_size
- real(dp) :: cpu, wall, gflops
+ integer :: ik_ibz,spin,band,mpw,exchn2n3d,istwf_k,npw_k,iatom,itypat,iat,cnt_b, cnt_k, cnt_s, ierr, color
+ real(dp) :: ug_size,ur_size,cprj_size, bks_size,cpu, wall, gflops
  logical :: iscompatibleFFT
  character(len=500) :: msg
 !arrays
  integer :: dum_kg(3,0)
  real(dp) :: kpoint(3)
- !integer :: my_band_list(Wfd%mband)
 
 !************************************************************************
 
@@ -943,7 +941,6 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  Wfd%mgfft  = MAXVAL (Wfd%ngfft(1:3))
  Wfd%nfftot = PRODUCT(Wfd%ngfft(1:3))
  Wfd%nfft   = Wfd%nfftot ! At present no FFT parallelism.
-
  Wfd%ecut = ecut
 
  ! Precalculate the FFT index of $ R^{-1} (r-\tau) $ used to symmetrize u_Rk.
@@ -1024,7 +1021,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
    end if
  end do
 
- ! Allocate bands in packed format and use bks2wfd to go from global (b,k,s) index to local index.
+ ! Allocate bands in packed form and use bks2wfd to go from global (b,k,s) index to local index.
  ABI_ICALLOC(wfd%bks2wfd, (3, wfd%mband, wfd%nkibz, wfd%nsppol))
  cnt_s = 0
  do spin=1,wfd%nsppol
@@ -1048,7 +1045,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
      end do
    end do
  end do
- !
+
  ! ===================================================
  ! ==== Precalculate nonlocal form factors for PAW ====
  ! ===================================================
@@ -1085,6 +1082,13 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
     ! Update the kbs table storing the distribution of the ug.
     call wfd%update_bkstab(show=-std_out)
  end select
+
+ ! Build MPI communicator for collinear spin
+ ABI_MALLOC(wfd%comm_spin, (nsppol))
+ do spin=1,nsppol
+   color = merge(0, 1, any(bks_mask(:,:,spin)))
+   call xmpi_comm_split(comm, color, wfd%my_rank, wfd%comm_spin(spin), ierr)
+ end do
 
  call cwtime_report(" wfd_init", cpu, wall, gflops)
 
@@ -1159,6 +1163,11 @@ subroutine wfd_free(Wfd)
  end if
 
  call destroy_mpi_enreg(Wfd%MPI_enreg)
+
+ do is=1,wfd%nsppol
+   call xmpi_comm_free(wfd%comm_spin(is))
+ end do
+ ABI_SFREE(wfd%comm_spin)
 
 end subroutine wfd_free
 !!***
@@ -3698,8 +3707,7 @@ subroutine wfd_change_ngfft(Wfd, Cryst, Psps, new_ngfft)
  if (all(Wfd%ngfft(1:3) == new_ngfft(1:3)) ) RETURN ! Nothing to do.
 
  if (Wfd%prtvol > 0) then
-   call wrtout(std_out,  &
-     sjoin(" Changing FFT mesh for wavefunctions: ",ltoa(Wfd%ngfft(1:3)), " ==> ", ltoa(new_ngfft(1:3))))
+   call wrtout(std_out, sjoin(" Changing FFT mesh for wavefunctions: ",ltoa(Wfd%ngfft(1:3)), " ==> ", ltoa(new_ngfft(1:3))))
  end if
 
  ! Change FFT dimensions.

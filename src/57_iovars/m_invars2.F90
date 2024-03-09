@@ -1737,7 +1737,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (ixc_here<0) then
    call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc,xc_tb09_c=dtset%xc_tb09_c)
  end if
- call get_xclevel(ixc_here,dtset%xclevel,dtset%usefock)
+ call get_xclevel(ixc_here, dtset%xclevel, usefock=dtset%usefock)
  xc_has_kxc=has_kxc(ixc_here,xc_funcs=xcfunc)
  ! Meta-GGA
  if (ixc_here<0) then
