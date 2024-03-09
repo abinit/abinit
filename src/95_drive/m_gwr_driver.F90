@@ -176,7 +176,6 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  type(mpi_type) :: mpi_enreg_seq
  type(gwr_t) :: gwr
  type(wfk_t) :: owfk
- type(vcgen_t) :: vcgen
 !arrays
  real(dp), parameter :: k0(3) = zero
  integer :: cplex, cplex_dij, cplex_rhoij

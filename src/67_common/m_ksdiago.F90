@@ -976,7 +976,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: npwsp, col_bsize, nsppol, nspinor, nspden, loc2_size, il_g1, il_g2, ig1, ig2, ierr, min_my_nband, band_sum
  integer :: idat, ndat, batch_size, h_size !, mene_found
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
- integer :: iq_ibz, iq_bz, isym_q, trev_q, g0_q(3)
+ integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz,
  real(dp),parameter :: lambda0 = zero
  real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol
  logical :: do_full_diago, haveit, isirr_k, isirr_q, q_is_gamma
@@ -1273,12 +1273,12 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      !print *, "kpoint", kpoint, "ksum:", ksum
      call findqg0(iq_bz, g0, kgw_m_ksum, hyb%nqbz, hyb%qbz, hyb%mG0)
      ABI_CHECK(all(g0 == 0), sjoin("g0 = ", ltoa(g0)))
-     qq_bz = hyb%qbz(:, iq_bz)
+     qq_bz = hyb%qbz(:,iq_bz)
      q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
      call hyb%vcgen%get_vc_sqrt(qq_bz, nfftc, gfft, my_gw_qlwl, cryst, vc_sqrt, comm, vc=vcg_qbz(:,iq_bz))
      if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
      !if (q_is_gamma) vcg_qbz(1,iq_bz) = zero
-     vcg_qbz(:,iq_bz) = vcg_qbz(:,iq_bz) * inv_sqrt_ucvol ! ** 2
+     vcg_qbz(2:,iq_bz) = vcg_qbz(2:,iq_bz) * (inv_sqrt_ucvol**2)
    end do
 
    ! Build plans for (dense, g-sphere) FFTs.
@@ -1292,7 +1292,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      do idat=1,ndat
        call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
        cbras_box(:,idat) = cbras_box(:,idat) * inv_sqrt_ucvol
-       !print *, "idat, cbras_box", cbras_box(1:4, idat)
      end do
 
      ! ==============================
@@ -1336,16 +1335,15 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
          !print *, "band_sum, ik_ibz, spin", band_sum, ik_ibz, spin
          call hyb%wfd%get_ur(band_sum, ik_ibz, spin, ur)
+         ur = ur * inv_sqrt_ucvol
          do idat=1,ndat
            cbras_box(:,idat) = f_bsum * cbras_box(:,idat) * conjg(ur(:))
-           !print *, "band_sum, idat, cbras_box", cbras_box(1:4, idat)
          end do
 
          ! FFT r --> g and multiply by v(g,q) on the FFT box.
          call box_plan%execute(cbras_box(:,1), -1, ndat=ndat)
          do idat=1,ndat
            cbras_box(:,idat) = cbras_box(:,idat) * vcg_qbz(:, iq_bz)
-           !print *, "idat, cbras_box", cbras_box(1:4, idat)
          end do
          ! FFT g --> r, multiply by u(r) and accumulate in rfg_box
          call box_plan%execute(cbras_box(:,1), +1, ndat=ndat)
@@ -1444,7 +1442,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
    write(msg, frmt1)(eig_ene(ib)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
    ! HYB DEBUG
-   !write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
+   write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
    if (nband_k > 9 .and. dtset%prtvol > 0) then
      do jj=10,nband_k,9
        write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,min(jj+8,nband_k)); call wrtout(std_out, msg)
@@ -1521,7 +1519,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call timab(1919, 2, tsec)
 
- !ABI_ERROR("ugb_from_diago OK")
+ ABI_ERROR("ugb_from_diago OK")
 
 end subroutine ugb_from_diago
 !!***
@@ -1671,12 +1669,12 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: nprocs, my_rank, ierr, b1, b2, mband, nkibz, nsppol, spin, ik_ibz, ikcalc, ebands_timrev
+ integer :: nprocs, my_rank, ierr, mband, nkibz, nsppol, spin, ik_ibz, ebands_timrev ! b1, b2,
  real(dp) :: vc_ecut
  character(len=5000) :: msg
  type(hdr_type) :: wfk_hdr
  type(crystal_t) :: wfk_cryst
- type(krank_t) :: qrank, krank_ibz
+ type(krank_t) :: krank_ibz ! qrank,
  character(len=fnlen) :: wfk_path
  integer :: units(2)
  integer :: nqbzX
@@ -1703,6 +1701,8 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  ! Construct crystal and hyb%ebands from the GS WFK file.
  hyb%ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
+
+ ABI_CHECK_IEQ(dtset%ixc, wfk_hdr%ixc, "dtset%ixc /= wfk_hdr%ixc")
 
  wfk_cryst = wfk_hdr%get_crystal()
  if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
