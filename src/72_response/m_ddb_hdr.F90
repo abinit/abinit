@@ -170,7 +170,6 @@ MODULE m_ddb_hdr
                             ! 3 = 3rd derivatives
                             ! 4 = 1st derivatives
                             ! 5 = 2nd eigenvalue derivatives
-                            ! modification for mol. Berry curvature ?
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
