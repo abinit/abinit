@@ -638,8 +638,8 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
        atom_projs(1,1,:) = atom_projs(1,1,:) / sqrt2
        atom_projs(2,1,:) = zero
      end if
-     if(ham%istwf_k == 2) then
-       atom_projs(:,:,:) = atom_projs(:,:,:)*sqrt2
+     if(ham%istwf_k > 1) then
+       atom_projs(:,:,:) = atom_projs(:,:,:) * sqrt2
      end if
 
 
@@ -1263,7 +1263,7 @@ end subroutine apply_block
    do itypat=1,ham%ntypat
      nprojs = nprojs + count(ham%indlmn(3,:,itypat)>0)*ham%nattyp(itypat)
    end do
-   cplx = 2; if(ham%istwf_k == 2) cplx = 1
+   cplx = 2; if(ham%istwf_k > 1) cplx = 1
 
    req_mem = 0
    req_mem = req_mem + dp * cplx * int(nprojs, c_size_t) * int(nprojs, c_size_t)                       ! gram_projs
