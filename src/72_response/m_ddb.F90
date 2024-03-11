@@ -479,7 +479,7 @@ subroutine ddb_init(ddb, dtset, nblok, mpert, &
  ddb%occopt = dtset%occopt
  ddb%prtvol = dtset%prtvol
 
- ddb%rprim(:,:) = dtset%rprim_orig(1:3,1:3,1) ! wouldn't this be problematic if we use multidataset with different rprims ?
+ ddb%rprim(:,:) = dtset%rprim_orig(1:3,1:3,1)
  ddb%acell(:) = dtset%acell_orig(1:3,1)
 
  call matr3inv(ddb%rprim, ddb%gprim)
@@ -6796,7 +6796,8 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! NOTES
 !!   Time-reversal symmetry is always assumed
-!!   The time-reversal is correctly used for the MBC: G(-k)=G^*(k)
+!!   The time-reversal is correctly used for the MBC (Molecular Berry
+!!   curvature): G(-k)=G^*(k)
 !!
 !! SOURCE
 
@@ -6880,7 +6881,6 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
        ! Comparison between the q points and their symmetric points
        ! and the set of q points which samples the entire Brillouin zone
        do iqpt=1,nqpt
-         ! if (qtest(iqpt,1) /= 0) cycle
 
          if (mod(abs(spqpt(1,iqpt)-qsym(1))+tol,1._dp)<2*tol)then
            if (mod(abs(spqpt(2,iqpt)-qsym(2))+tol,1._dp)<2*tol)then
@@ -6898,8 +6898,6 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
              end if
            end if
          end if
-
-         ! if (qtest(iqpt,1) /= 0) cycle
 
          if (mod(abs(spqpt(1,iqpt)-qsym(4))+tol,1._dp)<2*tol)then
            if (mod(abs(spqpt(2,iqpt)-qsym(5))+tol,1._dp)<2*tol)then

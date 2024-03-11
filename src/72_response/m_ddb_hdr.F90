@@ -160,7 +160,8 @@ MODULE m_ddb_hdr
 
    ! GA: FIXME mblktyp doesnt make sense.
    ! Instead, we should have logical variables has_d2eig, has_d3E, etc.
-   ! MMig; I agree mblktyp does not make sense and its not even always treated properly throughout the code
+   ! MMig; I agree mblktyp does not make much sense and its not even always
+   ! treated properly throughout the code
    ! The logical variables seems like a good idea to me
    integer :: mblktyp       ! Max block type
                             ! 0 = Total energy
@@ -4452,8 +4453,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
 !Now, the type of each blok, in turn
 ! GA: Certain types of block are not expected to mix (3 and 5)
- mblktyp=1 ! MMig: I dont think mblktyp is being treated consistently with its definition here
-           ! (there is no difference being made between 2nd der. stat. and non stat. for example)
+ mblktyp=1
  if(nblok>=1)then
    do iblok=1,nblok
 
