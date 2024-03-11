@@ -495,6 +495,8 @@ subroutine getghc_gsc1(X,AX,BX)
 
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GETGHC)
+
  call xgBlock_getSize(X,spacedim,blockdim)
  call xgBlock_check(X,AX)
  call xgBlock_check(X,BX)
@@ -512,6 +514,8 @@ subroutine getghc_gsc1(X,AX,BX)
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
+ ABI_NVTX_END_RANGE()
+
 end subroutine getghc_gsc1
 !!***
 
@@ -528,7 +532,6 @@ end subroutine getghc_gsc1
 !! SIDE EFFECTS
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  Bm1X <type(xgBlock_t)>= memory block containing S^-1|C>
-!!  transposer <type(xgTransposer_t)>= data used for array transpositions
 !!
 !! SOURCE
 

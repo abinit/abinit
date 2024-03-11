@@ -678,10 +678,10 @@ contains
     type(c_ptr) :: cptr
 
     fullsize = size(array)
-    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+    fact = 1 ; if (space==SPACE_CR) fact = 2
     select case (space)
     case ( SPACE_R,SPACE_CR )
-      if ( fullsize < cols*rows .or. mod(fullsize,rows) /= 0) then
+      if ( fullsize < fact*cols*rows .or. mod(fullsize,fact*rows) /= 0) then
         ABI_ERROR("Bad size for real array")
       end if
       cptr = getClocR(size(array,dim=1),size(array,dim=2),array)
@@ -695,6 +695,8 @@ contains
       call c_f_pointer(cptr,xgBlock%vecC,(/ rows, cols /))
 
       xgBlock%trans = 'c'
+    case default
+      ABI_ERROR('Bad space in xgBlock_map')
     end select
 
     xgBlock%space = space
@@ -753,7 +755,7 @@ contains
         write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
         ABI_ERROR("Bad reverseMapping")
       end if
-      cptr = getClocR(xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
+      cptr = getClocR(fact*xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
       call c_f_pointer(cptr,array,(/ fact*rows_, cols_ /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
@@ -5066,20 +5068,18 @@ contains
 
     type(xgBlock_t), intent(in) :: xgBlock
     integer, intent(in) :: outunit
-    integer :: i, j, fact
+    integer :: i, j
     character(len=4) :: ccols
     character(len=50) :: fstring
-
-    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+    real(dp), allocatable :: vecR_tmp(:)
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     complex(dpc), pointer :: xgBlock__vecC(:,:)
     real(dp), pointer :: xgBlock__vecR(:,:)
-    integer :: rows, cols
 #endif
 
     select case(xgBlock%space)
-    case (SPACE_R,SPACE_CR)
+    case (SPACE_R)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
         xgBlock__vecR => xgBlock%vecR
@@ -5089,9 +5089,28 @@ contains
       write(ccols,'(i4)') xgBlock%cols
       !fstring = '(1x,'//trim(adjustl(ccols))//'ES22.14)'
       fstring = '(1x,'//trim(adjustl(ccols))//'f24.14)'
-      do i = 1, fact*xgBlock%rows
+      do i = 1, xgBlock%rows
         write(outunit,fstring) (/ (xgBlock%vecR(i,j), j = 1, xgBlock%cols) /)
       end do
+    case (SPACE_CR)
+#if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
+      if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET UPDATE FROM(xgBlock__vecR)
+      end if
+#endif
+      ABI_MALLOC(vecR_tmp,(2*xgBlock%cols))
+      write(ccols,'(i4)') 2*xgBlock%cols
+      !fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'ES22.14))'
+      fstring = '(1x,2(1x,'//trim(adjustl(ccols))//'f24.14))'
+      do i = 1, xgBlock%rows
+        do j = 1, xgBlock%cols
+           vecR_tmp(2*j-1) = xgBlock%vecR(2*i-1,j)
+           vecR_tmp(2*j  ) = xgBlock%vecR(2*i  ,j)
+        end do
+        write(outunit,fstring) (/ (vecR_tmp(j), j = 1, 2*xgBlock%cols) /)
+      end do
+      ABI_FREE(vecR_tmp)
     case (SPACE_C)
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       if (xgBlock%gpu_option==ABI_GPU_OPENMP) then

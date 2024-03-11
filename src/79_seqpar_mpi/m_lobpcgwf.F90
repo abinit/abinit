@@ -298,6 +298,8 @@ subroutine getghc_gsc1(X,AX,BX)
 
 ! *********************************************************************
 
+ ABI_NVTX_START_RANGE(NVTX_GETGHC)
+
  call xgBlock_getSize(X,spacedim,blockdim)
  call xgBlock_check(X,AX)
  call xgBlock_check(X,BX)
@@ -314,6 +316,8 @@ subroutine getghc_gsc1(X,AX,BX)
 #endif
 
  if ( .not. l_paw ) call xgBlock_copy(X,BX)
+
+ ABI_NVTX_END_RANGE()
 
 end subroutine getghc_gsc1
 
