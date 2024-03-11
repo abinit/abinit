@@ -36,7 +36,7 @@ module m_nonlop_ylm
  use m_opernlc_ylm,      only : opernlc_ylm
  use m_opernld_ylm,      only : opernld_ylm
  use m_kg,               only : mkkpgcart
- use m_time,             only : timab
+! use m_time,             only : timab
 
  implicit none
 
@@ -387,7 +387,7 @@ contains
  integer :: iatm,ic,idir1,idir2,ii,ierr,ilmn,ishift,ispinor,itypat,jc,mincat,mu,mua,mub,mu0
  integer :: n1,n2,n3,nd2gxdt,ndat_left_,ndgxdt,ndgxdt_stored,nd2gxdtfac,ndgxdtfac
  integer :: nincat,nkpgin_,nkpgout_,nlmn,nu,nua1,nua2,nub1,nub2,optder
- real(dp) :: enlk, tsec(2)
+ real(dp) :: enlk!, tsec(2)
  logical :: check,testnl,no_opernla_mv,no_opernlb_mv
  character(len=500) :: message
 !arrays
@@ -407,7 +407,7 @@ contains
 
  DBG_ENTER("COLL")
 
- call timab(1100,1,tsec)
+! call timab(1100,1,tsec)
 
 !Check consistency of arguments
 !==============================================================
@@ -877,17 +877,17 @@ contains
        if (cpopt<=1.or.(cpopt<=3.and.abs(choice_a)>1).or.choice==8.or.choice==81) then
 !       if ((cpopt<4.and.choice_a/=-1).or.choice==8.or.choice==81) then
          if (abs(choice_a)>1.or.no_opernla_mv) then
-           call timab(1101,1,tsec)
+!           call timab(1101,1,tsec)
            call opernla_ylm(choice_a,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,d2gxdt,dgxdt,ffnlin_typ,gx,&
 &           ia3,idir,indlmn_typ,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpgin_,nlmn,&
 &           nloalg,npwin,nspinor,ph3din,signs,ucvol,vectin,qdir=qdir)
-           call timab(1101,2,tsec)
+!           call timab(1101,2,tsec)
          else
-           call timab(1102,1,tsec)
+!           call timab(1102,1,tsec)
            call opernla_ylm_mv(choice_a,cplex,dimffnlin,ffnlin_typ,gx,&
 &           ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
 &           nloalg,npwin,nspinor,ph3din,ucvol,vectin)
-           call timab(1102,2,tsec)
+!           call timab(1102,2,tsec)
          end if
        end if
 
@@ -936,13 +936,13 @@ contains
 !      If choice==0, that's all for these atoms !
        if (choice>0) then
          if(choice/=7) then
-           call timab(1105,1,tsec)
+!           call timab(1105,1,tsec)
 !          Contraction from <p_i|c> to Sum_j[Dij.<p_j|c>] (and derivatives)
            call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,dgxdt,dgxdtfac,dgxdtfac_sij,&
 &           d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,gx,gxfac,gxfac_sij,&
 &           iatm,indlmn_typ,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
 &           nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ)
-           call timab(1105,2,tsec)
+!           call timab(1105,2,tsec)
          else
             gxfac_sij=gx
          end if
@@ -952,11 +952,11 @@ contains
 !        ==============================================================
          if (signs==1) then
            if (.not.present(cprjin_left)) then
-             call timab(1106,1,tsec)
+!             call timab(1106,1,tsec)
              call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &             enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &             nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-             call timab(1106,2,tsec)
+!             call timab(1106,2,tsec)
            else
              ABI_MALLOC(gx_left,(cplex,nlmn,nincat,nspinor*ndat_left_))
 !            Retrieve <p_lmn|c> coeffs
@@ -974,17 +974,17 @@ contains
 !            end do
 !            end if
              if (present(enlout_im)) then
-               call timab(1108,1,tsec)
+!               call timab(1108,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk,enlout_im=enlout_im)
-               call timab(1108,2,tsec)
+!               call timab(1108,2,tsec)
              else
-               call timab(1107,1,tsec)
+!               call timab(1107,1,tsec)
                call opernld_ylm(choice_b,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &               enlk,enlout,fnlk,gx_left,gxfac,gxfac_sij,ia3,natom,ndat_left_,nd2gxdt,ndgxdt,ndgxdtfac,&
 &               nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-               call timab(1107,2,tsec)
+!               call timab(1107,2,tsec)
              end if
              ABI_FREE(gx_left)
            end if
@@ -999,18 +999,18 @@ contains
              call ph1d3d(ia3,ia4,kgout,matblk,natom,npwout,n1,n2,n3,phkxredout,ph1d,ph3dout)
            end if
            if (abs(choice_b)>1.or.no_opernlb_mv) then
-             call timab(1103,1,tsec)
+!             call timab(1103,1,tsec)
              call opernlb_ylm(choice_b,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &             d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,&
 &             idir,indlmn_typ,kpgout_,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpgout_,nlmn,&
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout,qdir=qdir)
-             call timab(1103,2,tsec)
+!             call timab(1103,2,tsec)
            else
-             call timab(1104,1,tsec)
+!             call timab(1104,1,tsec)
              call opernlb_ylm_mv(choice_b,cplex,cplex_fac,&
 &             dimffnlout,ffnlout_typ,gxfac,gxfac_sij,ia3,indlmn_typ,matblk,nincat,nlmn,&
 &             nloalg,npwout,nspinor,paw_opt,ph3dout,svectout,ucvol,vectout)
-             call timab(1104,2,tsec)
+!             call timab(1104,2,tsec)
            end if
          end if ! signs == 2
 
@@ -1331,7 +1331,7 @@ contains
    ABI_FREE(kpgout_)
  end if
 
- call timab(1100,2,tsec)
+! call timab(1100,2,tsec)
 
  DBG_EXIT("COLL")
 

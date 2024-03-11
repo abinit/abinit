@@ -205,17 +205,9 @@ _ WF disk file :      0.521 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      6.7406531160E+00  6.7406531160E+00  6.7406531160E+00 Bohr
               amu      1.20110000E+01
-        autoparal1          1
-        autoparal2          1
-        autoparal4          0
-        autoparal5          0
-        autoparal6          0
-        autoparal7          0
-        autoparal11         0
-        autoparal12         0
-        autoparal21         0
-        autoparal22         0
+        autoparal           1
              bdgw           1       8       1       8       1       8       1       8
+         chkparal           0
              ecut      2.70000000E+01 Hartree
           ecuteps      2.00000000E+00 Hartree
          ecutsigx      2.70000000E+01 Hartree
@@ -3819,17 +3811,9 @@ data: !SigmaeeData |
  -outvars: echo values of variables after computation  --------
             acell      6.7406531160E+00  6.7406531160E+00  6.7406531160E+00 Bohr
               amu      1.20110000E+01
-        autoparal1          1
-        autoparal2          1
-        autoparal4          0
-        autoparal5          0
-        autoparal6          0
-        autoparal7          0
-        autoparal11         0
-        autoparal12         0
-        autoparal21         0
-        autoparal22         0
+        autoparal           1
              bdgw           1       8       1       8       1       8       1       8
+         chkparal           0
              ecut      2.70000000E+01 Hartree
           ecuteps      2.00000000E+00 Hartree
          ecutsigx      2.70000000E+01 Hartree

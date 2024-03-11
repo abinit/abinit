@@ -183,4 +183,8 @@ inp_files = [
 
     # nblock_lobpcg
     "t205.abi",  # test nblock_lobpcg input
+
+    # Chebfi2
+    "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
+    "t207.abi",  # same as t206 but with nspinor=2
 ]
