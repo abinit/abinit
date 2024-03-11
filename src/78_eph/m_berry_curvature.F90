@@ -35,7 +35,7 @@ module m_berry_curvature
  use defs_datatypes,    only : ebands_t
  use m_kpts,            only : kpts_timrev_from_kptopt, kpts_map, smpbz
  use m_ddb_hdr,         only : ddb_hdr_type, BLKTYP_d2E_mbc
- use m_ddb,             only : ddb_type, symdm9 ! symdm9 for test purposes
+ use m_ddb,             only : ddb_type
  use m_ifc,             only : ifc_type
  use m_gstore,          only : gstore_t, gqk_t
  use m_dynmat,          only : massmult_and_breaksym_cplx
@@ -187,14 +187,14 @@ subroutine berry_curvature(gstore, dtset, dtfil)
        !
        ! where b1 is the initial band and b2 the final band, p1, p2 are atomic perturbations in reduced coords
        ! and we're summing over k in the BZ at fixed q.
-       do ib2=1,nb-2
+       do ib2=1,nb
          band2 = ib2 + gqk%bstart - 1
          e_b2_k = ebands%eig(band2, ik_ibz, spin)
          f_b2_k = ebands%occ(band2, ik_ibz, spin) / spin_occ
          e_b2_kq = ebands%eig(band2, ikq_ibz, spin)
          f_b2_kq = ebands%occ(band2, ikq_ibz, spin) / spin_occ
 
-         do ib1=1,nb-2
+         do ib1=1,nb
            band1 = ib1 + gqk%bstart - 1
            e_b1_kq = ebands%eig(band1, ikq_ibz, spin)
            f_b1_kq = ebands%occ(band1, ikq_ibz, spin) / spin_occ
@@ -298,11 +298,10 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  ABI_MALLOC(dtset%wtk, (gstore%nkbz))
  dtset%wtk(:) = one / (one * gstore%nkbz)
  call berry_ddb_hdr%init(dtset,in_ddb_hdr%psps, in_ddb_hdr%pawtab, &
-                         dscrpt=' Molecular Berry curvature (test version) ', &
+                         dscrpt=' Molecular Berry curvature ', &
                          nblok=gstore%nqibz, nkpt=in_ddb_hdr%nkpt, kpt=in_ddb_hdr%kpt, &
                          occ=in_ddb_hdr%occ)
  ABI_FREE(dtset%wtk)
- call wrtout(units, "- Free up things:")
  call in_ddb_hdr%free()
  call in_ddb%free()
 
