@@ -3250,17 +3250,26 @@ contains
     else
 
       select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
+      case (SPACE_R)
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(shift+1:min_rows,iblock) = xgBlock%vecR(shift+1:min_rows,iblock) * vec(1:min_rows)
+          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+        end do
+      case (SPACE_CR)
+        !$omp parallel do shared(xgBlock,vec), &
+        !$omp& schedule(static)
+        do iblock = 1, xgBlock%cols
+          xgBlock%vecR(shift+1:min(2*xgBlock%rows,shift+2*rows),iblock) = &
+          xgBlock%vecR(shift+1:min(2*xgBlock%rows,shift+2*rows),iblock) * vec(1:min(2*xgBlock%rows-shift,2*rows))
         end do
       case (SPACE_C)
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(shift+1:min_rows,iblock) = xgBlock%vecC(shift+1:min_rows,iblock) * vec(1:min_rows)
+          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
+          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
         end do
       end select
 
