@@ -352,7 +352,6 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
      rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
      call abihist_free(hist_prev)
-     call abihist_free(hist_map)
    end if
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
@@ -366,7 +365,6 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
      xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
-     call abihist_free(hist_map)
    end if
 
  end if !if (ab_mover%restartxf<=0)
@@ -988,6 +986,10 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
  call abihist_free(hist)
  call abihist_free(hist_prev)
+
+ if (ab_mover%restartxf<0)then
+   call abihist_free(hist_map)
+ endif
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
