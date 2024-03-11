@@ -28,7 +28,6 @@ occopt1 1
 toldfe1 1.0d-10
 nband1  8
 getwfk1 0
-autoparal1 1
 
 # nscf
 iscf2   -2
@@ -37,7 +36,6 @@ nband2   16
 tolwfr2  1.0d-12
 nstep2   30
 getwfk2  0
-autoparal2 1
 
 # QSGW loop
 getwfk     2
@@ -53,7 +51,12 @@ gwgamma1? -6   # bootstrap (head-only) kernel in TC-TC dielectric function
 gwgamma2? -11  # LR+ALDA kernel
 use_oldchi 0
 
+chkparal    0   # Simply to test this variable. If chkparal 0 had not been specified, the next line should be made
+                # specific for the screening and sigma calculations, and similarly for the line with autoparal that should
+                # only apply for the GS calculations
 gwpara     2
+autoparal  1
+
 symchi     1
 symsigma   0
 gw_icutcoul  7   # Gygi-Baldereschi auxiliary function
