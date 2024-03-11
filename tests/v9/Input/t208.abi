@@ -27,7 +27,7 @@ tolvrs 1.0D-20
 
 kptopt 3
 
-istwfk *1
+#istwfk *1
 
 # severely unconverged
 ngkpt 3*2 
@@ -67,12 +67,12 @@ pseudos="P.xml, Al.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t206.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t208.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW
-#%% description = Compare chebfi2 with respect to other algorithms (istwfk=1).
+#%% description = Compare chebfi2 with respect to other algorithms (istwfk>1). Should give same results than v9[206].
 #%%<END TEST_INFO>
  
