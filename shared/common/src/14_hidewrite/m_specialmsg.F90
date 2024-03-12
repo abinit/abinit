@@ -7,7 +7,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MT)
+!! Copyright (C) 2008-2024 ABINIT group (MT,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,8 +204,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2023
- mm_rel=11
+ year_rel=2024
+ mm_rel=02
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain

@@ -95,6 +95,6 @@ pseudos="P.xml, Al.xml"
 #%% authors = J. Zwanziger
 #%% keywords = PAW
 #%% description = Orbital magnetism with nspinor 2
-#%% topics = MagField
+#%% topics = NMR, MagField
 #%%<END TEST_INFO>
  
