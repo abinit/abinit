@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2022 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,17 +75,19 @@ MODULE m_ddb_hdr
  integer,public,parameter :: BLKTYP_d1E_xx=4       ! First-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2E_ns=1       ! Second-order derivatives of total energy, non-stationary
  integer,public,parameter :: BLKTYP_d2E_st=2  ! Second-order derivatives of total energy, stationary
+ integer,public,parameter :: BLKTYP_d2E_mbc=85     ! Molecular Berry curvature (MBC)
  integer,public,parameter :: BLKTYP_d3E_xx=3       ! Third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d3E_lw=33   ! Long-wave third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2eig_re=5     ! Second-order derivatives of eigenvalues
  integer,public,parameter :: BLKTYP_d2eig_im=6 ! Static broadening of eigenvalues
 
  integer,public,parameter :: descrlen=500
- integer,public,parameter :: ntypes=8  ! The number of different block types
+ integer,public,parameter :: ntypes=9  ! The number of different block types
  character(len=descrlen),public,parameter :: DESCR_d0E_xx = ' Total energy                 - '
  character(len=descrlen),public,parameter :: DESCR_d1E_xx = ' 1st derivatives              - '
  character(len=descrlen),public,parameter :: DESCR_d2E_ns = ' 2nd derivatives (non-stat.)  - '
  character(len=descrlen),public,parameter :: DESCR_d2E_st = ' 2nd derivatives (stationary) - '
+ character(len=descrlen),public,parameter :: DESCR_d2E_mbc = ' 2nd derivatives (MBC)        - '
  character(len=descrlen),public,parameter :: DESCR_d3E_xx = ' 3rd derivatives              - '
  character(len=descrlen),public,parameter :: DESCR_d3E_lw = ' 3rd derivatives (long wave)  - '
  character(len=descrlen),public,parameter :: DESCR_d2eig_re = ' 2nd eigenvalue derivatives   - '
@@ -97,16 +99,16 @@ MODULE m_ddb_hdr
  character(len=descrlen),public,parameter :: DESCR_ipert_0 = 'displacement of atom '
  character(len=descrlen),public,parameter :: DESCR_ipert_1 = 'derivative wrt k'
  character(len=descrlen),public,parameter :: DESCR_ipert_2 = 'electric field'
- character(len=descrlen),public,parameter :: DESCR_ipert_3 = 'strain'  ! GA: Dont know the difference
- character(len=descrlen),public,parameter :: DESCR_ipert_4 = 'strain'  !     between these two
+ character(len=descrlen),public,parameter :: DESCR_ipert_3 = 'strain'  ! diagonal stress components
+ character(len=descrlen),public,parameter :: DESCR_ipert_4 = 'strain'  ! non-diagonal stress
  character(len=descrlen),public,parameter :: DESCR_ipert_5 = 'magnetic field'
  character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
  character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
 
- integer,public,parameter :: DDB_VERSION=20230401
+ integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
- integer,public,parameter :: DDB_VERSION_NC=20230219
+ integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
  type,public :: ddb_hdr_type
@@ -158,6 +160,9 @@ MODULE m_ddb_hdr
 
    ! GA: FIXME mblktyp doesnt make sense.
    ! Instead, we should have logical variables has_d2eig, has_d3E, etc.
+   ! MMig; I agree mblktyp does not make much sense and its not even always
+   ! treated properly throughout the code
+   ! The logical variables seems like a good idea to me
    integer :: mblktyp       ! Max block type
                             ! 0 = Total energy
                             ! 1 = 2nd derivatives (non-stat.)
@@ -165,7 +170,6 @@ MODULE m_ddb_hdr
                             ! 3 = 3rd derivatives
                             ! 4 = 1st derivatives
                             ! 5 = 2nd eigenvalue derivatives
-                            !
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
@@ -195,7 +199,7 @@ MODULE m_ddb_hdr
    ! typat(matom)
 
    integer,allocatable :: typ(:)
-   ! typ(nblok)
+   ! typ(nblok), type of the blocks: d2E_st, d3E_lw,...
 
    real(dp),allocatable :: amu(:)
    ! amu(mtypat)
@@ -1146,24 +1150,29 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
                       trim(DESCR_d2E_st), start=[1, 4])
  NCF_CHECK(ncerr)
 
- available_block_types(5) = BLKTYP_d3E_xx
+ available_block_types(5) = BLKTYP_d2E_mbc
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d3E_xx), start=[1, 5])
+                      trim(DESCR_d2E_mbc), start=[1, 5])
  NCF_CHECK(ncerr)
 
- available_block_types(6) = BLKTYP_d3E_lw
+ available_block_types(6) = BLKTYP_d3E_xx
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d3E_lw), start=[1, 6])
+                      trim(DESCR_d3E_xx), start=[1, 6])
  NCF_CHECK(ncerr)
 
- available_block_types(7) = BLKTYP_d2eig_re
+ available_block_types(7) = BLKTYP_d3E_lw
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d2eig_re), start=[1, 7])
+                      trim(DESCR_d3E_lw), start=[1, 7])
  NCF_CHECK(ncerr)
 
- available_block_types(8) = BLKTYP_d2eig_im
+ available_block_types(8) = BLKTYP_d2eig_re
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d2eig_im), start=[1, 8])
+                      trim(DESCR_d2eig_re), start=[1, 8])
+ NCF_CHECK(ncerr)
+
+ available_block_types(9) = BLKTYP_d2eig_im
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2eig_im), start=[1, 9])
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, vid("available_block_types"), available_block_types)
@@ -3377,8 +3386,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527 ! should I modify this ? I guess not
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527 ! should I modify this ? I guess not
  integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
@@ -4453,6 +4462,10 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
        blktyp=BLKTYP_d2E_ns
      else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then
        blktyp=BLKTYP_d2E_st
+     else if(blkname==' 2nd derivatives (MBC)        - ') then
+     ! wouldn't it be better to use conditions like:
+     ! else if(blkname==DESCR_d2E_mbc) then
+       blktyp=BLKTYP_d2E_mbc
      else if(blkname==' 3rd derivatives              - ')then
        blktyp=BLKTYP_d3E_xx
      else if(blkname==' Total energy                 - ')then
@@ -5062,7 +5075,7 @@ logical function is_type_d2E(blktyp) result(answer)
 !Arguments ------------------------------------
  integer, intent(in) :: blktyp
 
-   if ((blktyp==BLKTYP_d2E_ns).or.(blktyp==BLKTYP_d2E_st)) then
+   if ((blktyp==BLKTYP_d2E_ns).or.(blktyp==BLKTYP_d2E_st).or.(blktyp==BLKTYP_d2E_mbc)) then
      answer = .True.
    else
      answer = .False.
