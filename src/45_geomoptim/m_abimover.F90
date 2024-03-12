@@ -1963,7 +1963,7 @@ real(dp) :: rpt(3)
  ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
  ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
-!indexi contains the indeces to the bonds
+!indexi contains the indices to the bonds
  ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
  ABI_MALLOC(bonds_tmp%nbondi,(natom))
@@ -2410,7 +2410,7 @@ real(dp) :: rpt(3)
  ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
  ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
-!indexi contains the indeces to the bonds
+!indexi contains the indices to the bonds
  ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
  ABI_MALLOC(bonds_tmp%nbondi,(natom))
