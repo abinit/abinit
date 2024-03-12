@@ -628,7 +628,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
          !replace the implicit loop by an explicit one
          !workaround works with both ifort and ifx on oneapi 2024
          do ii=1,3
-           abc = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
+           abc(ii) = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
          end do
          sigma = max(maxval(abc), fs%min_smear)
        end if
