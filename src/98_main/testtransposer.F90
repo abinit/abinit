@@ -177,7 +177,7 @@ program testTransposer
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
-    call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
+    call xgBlock_map(xcgLinalg,cg,SPACE_CR,npw,nband,xmpi_world)
 
     write(std_out,*) " Real all2all"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
@@ -207,7 +207,7 @@ program testTransposer
     call xgTransposer_free(xgTransposer)
     call printTimes()
 
-    call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
+    call xgBlock_map(xcgLinalg,cg,SPACE_CR,npw,nband,xmpi_world)
 
     write(std_out,*) " Real all2all (nspinor=2)"
     call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
