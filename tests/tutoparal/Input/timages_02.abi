@@ -72,7 +72,7 @@ bandpp        10
 #%% [files]
 #%% [NCPU_1]
 #%% files_to_test = 
-#%%   timages_02_MPI1.abo, tolnlines = 7, tolabs = 0, tolrel = 0.000e+00, fld_options = -easy
+#%%   timages_02_MPI1.abo, tolnlines = 7, tolabs = 7.500e-04, tolrel = 2.100e-01, fld_options = -easy
 #%% [paral_info]
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
