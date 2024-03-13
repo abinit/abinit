@@ -3619,6 +3619,9 @@ contains
       ABI_ERROR("space(dot) should be SPACE_R")
     end if
 
+    if (xgBlock%space==SPACE_CR.and.xgBlock%me_g0<0) then
+      ABI_ERROR("xgBlock me_g0 is not initialized")
+    end if
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
@@ -3630,26 +3633,6 @@ contains
         if (xgBlock%space==SPACE_CR) then
           ABI_ERROR('Not implemented for GPU')
         end if
-        call computeBatchedDotProduct_scalar(c_loc(xgBlockA%vecR), c_loc(xgBlockB%vecR), &
-          & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
-
-        ! do reductions
-        if ( present(max_val) ) then
-          call computeMax_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_val)
-        end if
-        if ( present(min_val) ) then
-          call computeMin_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_val)
-        end if
-        if ( present(max_elt) ) then
-          call computeMaxloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_elt)
-        end if
-        if ( present(min_elt) ) then
-          call computeMinloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_elt)
-        end if
-
-      case(SPACE_C)
-        call computeBatchedDotProduct_cplx(c_loc(xgBlockA%vecC), c_loc(xgBlockB%vecC), &
-          & c_loc(dot%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
         call computeBatchedDotProduct_scalar(c_loc(xgBlock%vecR), c_loc(xgBlock%vecR), &
           & c_loc(dot%vecR), fact*xgBlock%rows, xgBlock%cols, fact*xgBlock%ldim)
 
@@ -3691,26 +3674,6 @@ contains
         if (xgBlock%space==SPACE_CR) then
           ABI_ERROR('Not implemented for GPU')
         end if
-        call computeBatchedDotProduct_scalar(c_loc(xgBlockA%vecR), c_loc(xgBlockB%vecR), &
-          & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
-
-        ! do reductions
-        if ( present(max_val) ) then
-          call computeMax_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_val)
-        end if
-        if ( present(min_val) ) then
-          call computeMin_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_val)
-        end if
-        if ( present(max_elt) ) then
-          call computeMaxloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, max_elt)
-        end if
-        if ( present(min_elt) ) then
-          call computeMinloc_scalar(c_loc(dot%vecR(1,1)), xgBlockA%cols, min_elt)
-        end if
-
-      case(SPACE_C)
-        call computeBatchedDotProduct_cplx(c_loc(xgBlockA%vecC), c_loc(xgBlockB%vecC), &
-          & c_loc(dot%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
         xgBlock__vecR => xgBlock%vecR
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecR) PRIVATE(icol,tmp)
         do icol = 1, cols
@@ -3764,6 +3727,14 @@ contains
           dot%vecR(icol,1) = fact*ddot(fact*xgBlock%rows,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
         end do
         !$omp end parallel do
+        if (xgBlock%me_g0==1) then
+          !$omp parallel do shared(dot,xgBlock) &
+          !$omp& schedule(static)
+          do icol = 1, xgBlock%cols
+            dot%vecR(icol,1) = dot%vecR(icol,1) - ddot(2,xgBlock%vecR(:,icol),1,xgBlock%vecR(:,icol),1)
+          end do
+          !$omp end parallel do
+        end if
       case(SPACE_C)
 #if defined(FC_CRAY)
 !FIXME zdotc call goes wrong with NVHPC (NVHPC 22.11, MKL 22.3) or CRAY
@@ -3771,7 +3742,7 @@ contains
         !$omp& schedule(static)
         do icol = 1, xgBlock%cols
           tmp=0
-          do ii = 1, fact*xgBlock%rows
+          do ii = 1, xgBlock%rows
             tmp = tmp + dconjg(xgBlock%vecC(ii,icol))*xgBlock%vecC(ii,icol)
           end do
           dot%vecR(icol,1)=tmp
@@ -3838,7 +3809,7 @@ contains
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,dot)
 
-    if (xgBlockA%space/=xgBLockB%space) then
+    if (xgBlockA%space/=xgBlockB%space) then
       ABI_ERROR('xgBlockA and xgBlockB should have the same space')
     end if
     if (xgBlockA%space/=SPACE_CR) then
