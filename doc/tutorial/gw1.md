@@ -190,7 +190,10 @@ plasmon frequency for the plasmon-pole model to work well. Plasmons
 frequencies are usually close to 0.5 Hartree. The parameters for the screening
 calculation are not far from the ones that give converged Electron Energy Loss Function
 ($-\mathrm{Im} \epsilon^{-1}_{00}$) spectra, so that one can start up by using indications
-from EELS calculations existing in literature.
+from EELS calculations existing in literature. Alternatively, ABINIT can compute
+an approximate plasmon frequency using the Drude formula. This is activated
+by letting [[ppmfrq]] to its default value. It is actually safer to use the Drude value
+than to use blindly a value like 16.7 eV for other materials than silicon.
 
 ### 1.d Computing the GW energies.
 
@@ -316,9 +319,9 @@ the density in the unit cell.
 - Number of bands treated by each node ~56
 ```
 
-With the valence density, one can obtain the classical Drude plasmon
+With the valence density, one can obtain the classical Drude plasma
 frequency. The next lines calculate the average density of the system, and
-evaluate the Wigner radius $r_s$, then compute the Drude plasmon frequency.
+evaluate the Wigner radius $r_s$, then compute the Drude plasma frequency, reported as omega_plasma.
 
 ```
  Number of electrons calculated from density =    7.9999; Expected =    8.0000
@@ -328,7 +331,8 @@ evaluate the Wigner radius $r_s$, then compute the Drude plasmon frequency.
 ```
 
 
-This is the value used by default for [[ppmfrq]]. It is in fact the second frequency
+This omega_plasma is the value used when the default for [[ppmfrq]], namely 0.0, is specified. 
+It is in fact the second frequency
 where the code calculates the dielectric matrix to adjust the plasmon-pole
 model parameters.
 

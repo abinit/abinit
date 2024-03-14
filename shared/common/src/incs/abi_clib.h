@@ -39,7 +39,7 @@
 #endif
 
 #ifdef HAVE_STDDEF_H
-#include <stddef.h>             /* ptrdiff_t */
+#include <stddef.h>             /* ptrdiff_t and size_t */
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -84,7 +84,7 @@
 #define STRINGIZE(x) STRINGIZEx(x)
 #define CONCAT(prefix, name) prefix ## name
 
-/* determine precision */ 
+/* determine precision */
 #if defined(ABINIT_SINGLE)
   typedef float R;
 #elif defined(ABINIT_LDOUBLE)

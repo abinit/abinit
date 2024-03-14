@@ -1,5 +1,5 @@
 
-.Version 9.9.2 of ABINIT 
+.Version 9.11.6.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,17 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  2 Mar 2023.
-- ( at 15h10 )
+.Starting date : Sun 11 Feb 2024.
+- ( at 12h41 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Test_suite/v9_t44/t44.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Test_suite/v9_t44/t44.abi
 - output file    -> t44.abo
 - root for input  files -> t44i
 - root for output files -> t44o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -42,7 +41,6 @@ P This job should need less than                      38.922 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.267 Mbytes ; DEN or POT disk file :      0.846 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -165,9 +163,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -422,9 +420,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.17656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jzwanzig_metal/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -500,9 +498,9 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.07363314E-01 eigvalue=   1.52974216E-01  local=  -1.98583979E-01  nuc. dip.=   1.18196114E-09
+     kin0=   4.07363314E-01 eigvalue=   1.52974216E-01  local=  -1.98583979E-01  nclr dpl0=   1.18196114E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=  -1.09482618E-02   enl1=   7.83299737E-02
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
@@ -534,12 +532,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.46223821464594     -4.622E-01 7.283E-05 0.000E+00
- ETOT  2 -0.46226093273660     -2.272E-05 2.705E-08 0.000E+00
- ETOT  3 -0.46226093707253     -4.336E-09 2.958E-12 0.000E+00
- ETOT  4 -0.46226093707406     -1.530E-12 1.963E-15 0.000E+00
- ETOT  5 -0.46226093707406     -3.442E-15 4.582E-19 0.000E+00
- ETOT  6 -0.46226093707406      7.772E-16 4.996E-21 0.000E+00
+-ETOT  1 -0.46223821346452     -4.622E-01 7.283E-05 0.000E+00
+ ETOT  2 -0.46226093155781     -2.272E-05 2.705E-08 0.000E+00
+ ETOT  3 -0.46226093589153     -4.334E-09 2.958E-12 0.000E+00
+ ETOT  4 -0.46226093589308     -1.553E-12 1.963E-15 0.000E+00
+ ETOT  5 -0.46226093589308     -1.665E-15 4.582E-19 0.000E+00
+ ETOT  6 -0.46226093589308      7.216E-16 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -560,18 +558,18 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.07363355E-01 eigvalue=   1.52974247E-01  local=  -1.98584005E-01  nuc. dip.=   2.22455655E-09
+     kin0=   4.07363355E-01 eigvalue=   1.52974247E-01  local=  -1.98584005E-01  nclr dpl0=   2.22455655E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nuc. dip.=  -1.18098012E-09
+     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -1.18098012E-09
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=  -1.09482608E-02   enl1=   7.83299186E-02
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -4.62260937E-01
+   erelax=  -4.62260936E-01
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.57277985E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4622609371E+00 Ha. Also 2DEtotal=   -0.125787598022E+02 eV
+ 2DEtotal=   -0.4622609359E+00 Ha. Also 2DEtotal=   -0.125787597701E+02 eV
     (  non-var. 2DEtotal :   -4.6226093593E-01 Ha)
 
 --------------------------------------------------------------------------------
@@ -594,12 +592,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.46223821463994     -4.622E-01 7.283E-05 0.000E+00
- ETOT  2 -0.46226093273060     -2.272E-05 2.705E-08 0.000E+00
- ETOT  3 -0.46226093706653     -4.336E-09 2.958E-12 0.000E+00
- ETOT  4 -0.46226093706806     -1.530E-12 1.963E-15 0.000E+00
- ETOT  5 -0.46226093706806     -2.054E-15 4.582E-19 0.000E+00
- ETOT  6 -0.46226093706806     -4.441E-16 4.996E-21 0.000E+00
+-ETOT  1 -0.46223821345852     -4.622E-01 7.283E-05 0.000E+00
+ ETOT  2 -0.46226093155181     -2.272E-05 2.705E-08 0.000E+00
+ ETOT  3 -0.46226093588552     -4.334E-09 2.958E-12 0.000E+00
+ ETOT  4 -0.46226093588708     -1.554E-12 1.963E-15 0.000E+00
+ ETOT  5 -0.46226093588708     -2.776E-16 4.582E-19 0.000E+00
+ ETOT  6 -0.46226093588708     -4.996E-16 4.996E-21 0.000E+00
 
  At SCF step    6   max residual=  5.00E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -620,18 +618,18 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.07363355E-01 eigvalue=   1.52974247E-01  local=  -1.98584005E-01  nuc. dip.=   2.22455655E-09
+     kin0=   4.07363355E-01 eigvalue=   1.52974247E-01  local=  -1.98584005E-01  nclr dpl0=   2.22455655E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nuc. dip.=  -1.18098012E-09
+     kin1=  -8.91396193E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -1.18098012E-09
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=  -1.09482608E-02   enl1=   7.83299186E-02
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
  1-10 gives the relaxation energy (to be shifted if some occ is /=2.0)
-   erelax=  -4.62260937E-01
+   erelax=  -4.62260936E-01
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -5.57277985E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.4622609371E+00 Ha. Also 2DEtotal=   -0.125787598020E+02 eV
+ 2DEtotal=   -0.4622609359E+00 Ha. Also 2DEtotal=   -0.125787597699E+02 eV
     (  non-var. 2DEtotal :   -4.6226093593E-01 Ha)
 
 ====================================================
@@ -744,7 +742,7 @@ tolerances: {tolwfr: 1.00E-20, }
              ecut      5.00000000E+00 Hartree
            enunit           2
            etotal1    -3.3612090135E+01
-           etotal2    -4.6226093707E-01
+           etotal2    -4.6226093589E-01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
@@ -802,6 +800,11 @@ P          mk1mem           1
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -822,7 +825,12 @@ P          mk1mem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Projector augmented-wave approach to density-functional perturbation theory.
+- [1] Orbital magnetism and chemical shielding in the projector augmented-wave formalism.
+- J.W. Zwanziger, M. Torrent, and X. Gonze Phys. Rev. B 107, 165157 (2023).
+- Comment: to be cited in case the computation of orbital magnetism is used, i.e. orbmag>0.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#zwanziger2023
+-
+- [2] Projector augmented-wave approach to density-functional perturbation theory.
 - C. Audouze, F. Jollet, M. Torrent and X. Gonze, Phys. Rev. B 73, 235101 (2006).
 - Comparison between projector augmented-wave and ultrasoft pseudopotential formalisms
 - at the density-functional perturbation theory level.
@@ -832,18 +840,18 @@ P          mk1mem           1
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#audouze2006,
 - and https://docs.abinit.org/theory/bibliography/#audouze2008
 -
-- [2] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
+- [3] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] Libxc: A library of exchange and correlation functionals for density functional theory.
+- [4] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
 - Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [4] The Abinit project: Impact, environment and recent developments.
+- [5] The Abinit project: Impact, environment and recent developments.
 - Computer Phys. Comm. 248, 107042 (2020).
 - X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
@@ -860,7 +868,7 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [5] ABINIT: Overview, and focus on selected capabilities
+- [6] ABINIT: Overview, and focus on selected capabilities
 - J. Chem. Phys. 152, 124102 (2020).
 - A. Romero, D.C. Allan, B. Amadon, G. Antonius, T. Applencourt, L.Baguet,
 - J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, F.Bruneval,
@@ -877,7 +885,7 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#romero2020
 -
-- [6] Recent developments in the ABINIT software package.
+- [7] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -895,10 +903,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         23.1  wall=         23.3
+- Proc.   0 individual time (sec): cpu=         21.9  wall=         22.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered  57 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.1  wall=         23.3
+.Delivered  57 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         21.9  wall=         22.1

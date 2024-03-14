@@ -32,11 +32,12 @@
 !! m_invars2.F90
 !! m_memeval.F90
 !! m_mpi_setup.F90
-!! m_out_acknowl.F90
 !! m_outvar_a_h.F90
 !! m_outvar_i_n.F90
 !! m_outvar_o_z.F90
 !! m_outvars.F90
 !! m_outxml.F90
+!! m_out_acknowl.F90
+!! m_out_spg_anal.F90
 !!
 !!***

@@ -13,6 +13,10 @@
   diemix   0.75
   diemac   1.0
 
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 #Common data
  acell   3*10.00
  amu 1.0d0

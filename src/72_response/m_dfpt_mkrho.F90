@@ -623,7 +623,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  integer,parameter :: level=14
  integer :: choice,cplex_cprj,i1,i2,i3,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij
  logical :: my_atmtab_allocated,paral_atom
- logical :: usetimerev
+ logical :: use_timerev,use_zeromag
  real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight
  real(dp) :: im0_up,im1_up,re0_up,re1_up,im0_down,im1_down,re0_down,re1_down
 !arrays
@@ -669,7 +669,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gs_hamkq%gpu_option)
        nullify(cwavef_sp)
      end if
 
@@ -706,7 +706,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
          call fourwf(cplex,rhoaug,cwavef_sp,dummy,wfraug1,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &         gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &         gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&         weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&         weight,weight,gpu_option=gs_hamkq%gpu_option)
          nullify(cwavef_sp)
        end if
 
@@ -721,7 +721,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        call fourwf(1,rhoaug,cwavef_sp,dummy,wfraug,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gs_hamkq%gpu_option)
        nullify(cwavef_sp)
 
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
@@ -774,14 +774,14 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gs_hamkq%gpu_option)
      nullify(cwavef_up)
 
      cwavef_down => cwavef(:,1+npw1_k:2*npw1_k) ! wfs down spin-polarized
      call fourwf(cplex,rhoaug(:,:,:,1),cwavef_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gs_hamkq%gpu_option)
      nullify(cwavef_down)
    end if
    if (option==2.or.option==3) then
@@ -823,13 +823,13 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_up,dummy,wfraug1_up,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gs_hamkq%gpu_option)
        nullify(cwave1_up)
 
        call fourwf(cplex,rhoaug(:,:,:,1),cwave1_down,dummy,wfraug1_down,gs_hamkq%gbound_kp,gs_hamkq%gbound_kp,&
 &       gs_hamkq%istwf_k,gs_hamkq%kg_kp,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &       gs_hamkq%npw_kp,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&       weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&       weight,weight,gpu_option=gs_hamkq%gpu_option)
        nullify(cwave1_down)
      end if
 
@@ -849,12 +849,12 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      call fourwf(1,rhoaug(:,:,:,2),cwave0_up,dummy,wfraug_up,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gs_hamkq%gpu_option)
      nullify(cwave0_up)
      call fourwf(1,rhoaug(:,:,:,2),cwave0_down,dummy,wfraug_down,gs_hamkq%gbound_k,gs_hamkq%gbound_k,&
 &     gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_k,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
 &     gs_hamkq%npw_k,1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,0,tim_fourwf,&
-&     weight,weight,use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+&     weight,weight,gpu_option=gs_hamkq%gpu_option)
      nullify(cwave0_down)
 !    Accumulate 1st-order density (x component)
      re0_up=zero;im0_up=zero;re1_up=zero;im1_up=zero;re0_down=zero;im0_down=zero
@@ -943,11 +943,13 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
 
    cplex_cprj=2;if (gs_hamkq%istwf_k>1) cplex_cprj=1
-   option_rhoij=2;usetimerev=(kptopt>0.and.kptopt<3)
+   option_rhoij=2
+   use_timerev=(kptopt>0.and.kptopt<3)
+   use_zeromag=.false.;if (my_natom>0) use_zeromag=(pawrhoij1(1)%nspden==4.and.gs_hamkq%nvloc==1)
 
    if (gs_hamkq%usecprj==1) then
-     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0,cwaveprj1,ipert,isppol,&
-&     my_natom,natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k,&
+     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj0,cwaveprj1,ipert,isppol,my_natom,&
+&     natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,use_timerev,use_zeromag,wtk_k,&
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
    else
      ABI_MALLOC(cwaveprj_tmp,(natom,nspinor))
@@ -959,8 +961,8 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &     gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &     gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &     gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
-     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,&
-&     my_natom,gs_hamkq%natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,usetimerev,wtk_k, &
+     call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,my_natom,&
+&     gs_hamkq%natom,nspinor,occ_k(iband),option_rhoij,pawrhoij1,use_timerev,use_zeromag,wtk_k, &
 &     comm_atom=my_comm_atom,mpi_atmtab=my_atmtab)
      call pawcprj_free(cwaveprj_tmp)
      ABI_FREE(cwaveprj_tmp)

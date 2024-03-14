@@ -19,6 +19,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_forstr
 
  use defs_basis
@@ -32,6 +35,7 @@ module m_forstr
  use m_xcdata
  use m_dtset
  use m_extfpmd
+ use m_ompgpu_utils
 
  use defs_datatypes,     only : pseudopotential_type
  use defs_abitypes,      only : MPI_type
@@ -63,6 +67,7 @@ module m_forstr
  use m_nonlop,           only : nonlop
  use m_gemm_nonlop,      only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
 &                               gemm_nonlop_ikpt_this_proc_being_treated
+ use m_gemm_nonlop_ompgpu,  only : make_gemm_nonlop_ompgpu
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
  use m_paw_nhat,         only : pawmknhat
@@ -72,7 +77,16 @@ module m_forstr
  use m_psolver,          only : psolver_hartree
  use m_wvl_psi,          only : wvl_nl_gradient
  use m_fft,              only : fourdp
- use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer
+ use, intrinsic :: iso_c_binding,      only : c_loc,c_f_pointer,c_double,c_size_t
+
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ use gator_mod
+ use m_gpu_toolbox, only : CPU_DEVICE_ID, gpu_device_synchronize, gpu_data_prefetch_async
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  implicit none
 
@@ -300,7 +314,6 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
 !Local variables-------------------------------
 !scalars
-
  integer :: comm_grid,ifft,ispden,ncpgr,occopt_,optgr,optgr2,option,optnc,optstr,optstr2,iorder_cprj,ctocprj_choice
  integer :: idir,iatom,unpaw,mcgbz
  integer,allocatable :: dimcprj(:)
@@ -400,7 +413,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,dtset%nband,dtset%nfft,dtset%ngfft,&
 &   dtset%nkpt,dtset%nloalg,npwarr,dtset%nspden,dtset%nspinor,dtset%nsppol,dtset%nsym,ntypat,&
 &   dtset%nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,stress_needed,symrec,dtset%typat,&
-&   usecprj,dtset%usefock,dtset%use_gpu_cuda,dtset%wtk,xred,ylm,ylmgr)
+&   usecprj,dtset%usefock,dtset%gpu_option,dtset%wtk,xred,ylm,ylmgr)
 !DEBUG
 !   write(6,*)' after forstrnps, nlstr=',nlstr(1:6)
 !ENDDEBUG
@@ -580,7 +593,7 @@ end subroutine forstr
 !!  symrec(3,3,nsym)=symmetries in reciprocal space (dimensionless)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda for nonlop call
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -602,13 +615,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &  grnl,istwfk,kg,kinstr,npsstr,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,nsym,&
 &  ntypat,nucdipmom,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,&
-&  stress_needed,symrec,typat,usecprj,usefock,use_gpu_cuda,wtk,xred,ylm,ylmgr)
+&  stress_needed,symrec,typat,usecprj,usefock,gpu_option,wtk,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,nsym,ntypat,optfor,stress_needed
- integer,intent(in) :: usecprj,usefock,use_gpu_cuda
+ integer,intent(in) :: usecprj,usefock,gpu_option
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(electronpositron_type),pointer :: electronpositron
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -646,7 +659,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: kpoint(3),nonlop_dum(1,1),rmet(3,3),tsec(2)
- real(dp),allocatable :: cwavef(:,:),enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: cwavef(:,:) => null()
+#else
+ real(dp),allocatable :: cwavef(:,:)
+#endif
+ real(dp),allocatable :: enlout(:),ffnl_sav(:,:,:,:),ffnl_str(:,:,:,:)
  real(dp),allocatable :: ghc_dum(:,:),gprimd(:,:),kpg_k(:,:),kpg_k_sav(:,:)
  real(dp),allocatable :: kstr1(:),kstr2(:),kstr3(:),kstr4(:),kstr5(:),kstr6(:)
  real(dp),allocatable :: lambda(:),occblock(:),ph3d(:,:,:),ph3d_sav(:,:,:)
@@ -659,8 +677,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !*************************************************************************
 
- call timab(920,1,tsec)
- call timab(921,1,tsec)
+ ABI_NVTX_START_RANGE(NVTX_FORSTRNPS)
+ call timab(920,1,tsec) ; call timab(921,-1,tsec)
 
 !Init mpicomm and me
  if(mpi_enreg%paral_kgb==1)then
@@ -730,9 +748,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj_local,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,electronpositron=electronpositron,fock=fock,&
-& nucdipmom=nucdipmom,use_gpu_cuda=use_gpu_cuda)
+& nucdipmom=nucdipmom,gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
- call timab(921,2,tsec)
 
 !need to reorder cprj=<p_lmn|Cnk> (from unsorted to atom-sorted)
  if (psps%usepaw==1.and.usecprj_local==1) then
@@ -791,7 +808,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
      mband_cprj=mband/mpi_enreg%nproc_band
      nband_cprj_k=nband_k/mpi_enreg%nproc_band
 
-     ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_MALLOC_MANAGED(cwavef,(/2,npw_k*my_nspinor*blocksize/))
+#endif
+     else
+       ABI_MALLOC(cwavef,(2,npw_k*my_nspinor*blocksize))
+     end if
+
      if (psps%usepaw==1.and.usecprj_local==1) then
        ABI_MALLOC(cwaveprj,(natom,my_nspinor*bandpp))
        call pawcprj_alloc(cwaveprj,0,gs_hamk%dimcprj)
@@ -924,20 +948,49 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
-       ffnl_k   =my_bandfft_kpt%ffnl_gather, &
-       ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
+&       ffnl_k   =my_bandfft_kpt%ffnl_gather, &
+&       ph3d_k   =my_bandfft_kpt%ph3d_gather,compute_gbound=compute_gbound)
+     end if
+
+!    If OpenMP GPU, load "hamiltonian" on GPU device
+     if (gpu_option == ABI_GPU_OPENMP) then
+       if(mpi_enreg%paral_kgb==0) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+       else if(gs_hamk%istwf_k==1) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather)
+       else if(gs_hamk%istwf_k==2) then
+         call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=my_bandfft_kpt%kg_k_gather_sym)
+       else
+         ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+       end if
      end if
 
 !    Setup gemm_nonlop
      if (gemm_nonlop_use_gemm) then
        gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-       call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax,gs_hamk%ntypat, &
-&            gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, &
-&            gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, gs_hamk%kg_k, gs_hamk%kpg_k, &
-&            compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       if ( gpu_option == ABI_GPU_DISABLED) then
+         call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+             gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
+             gs_hamk%kg_k, gs_hamk%kpg_k, &
+             compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
+       else if ( gpu_option == ABI_GPU_OPENMP) then
+         if(mpi_enreg%paral_kgb==0) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         else if(gs_hamk%istwf_k==1) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+         else if(gs_hamk%istwf_k==2) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+         else
+           ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+         end if
+         call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+             gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+             gs_hamk%ucvol,  gs_hamk%ffnl_k, gs_hamk%ph3d_k, gs_hamk%kpt_k, &
+             gs_hamk%kg_k, gs_hamk%kpg_k, &
+             compute_grad_strain=(stress_needed>0),compute_grad_atom=(optfor>0))
        end if
-
-     call timab(922,2,tsec)
+     end if
 
 !    Loop over (blocks of) bands; accumulate forces and/or stresses
 !    The following is now wrong. In sequential, nblockbd=nband_k/bandpp
@@ -959,6 +1012,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          fockcommon%forces_ikpt=zero
        end if
      end if
+
+     call timab(922,2,tsec)
 
      do iblock=1,nblockbd
 
@@ -987,20 +1042,23 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
          end if
 
          call timab(923,2,tsec)
-         call timab(926,1,tsec)
+         call timab(924,-1,tsec)
 
          lambda(1:blocksize)= eigen(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
+         ABI_NVTX_START_RANGE(NVTX_FORSTR_NONLOP)
          if (mpi_enreg%paral_kgb/=1) then
            call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,mpi_enreg,blocksize,nnlout,&
 &           paw_opt,signs,nonlop_dum,tim_nonlop,cwavef,cwavef)
          else
+           ! here we MUST pass option gpu_option=ABI_GPU_DISABLED, as cwavef here is a host memory buffer
            call prep_nonlop(choice,cpopt,cwaveprj,enlout,gs_hamk,idir,lambda,blocksize,&
-&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
+&           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef,&
+&           already_transposed=.False.,gpu_option=ABI_GPU_DISABLED)
          end if
+         ABI_NVTX_END_RANGE()
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
            call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
-         call timab(926,2,tsec)
 
 !        Accumulate non-local contributions from n,k
          if (optfor==1) then
@@ -1016,9 +1074,19 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
            end do
          end if
 
+         call timab(924,2,tsec)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+         if(gpu_option==ABI_GPU_KOKKOS) then
+           ! the following is done on CPU, so prefetch wave functions from device to host (for efficiency)
+           call gpu_data_prefetch_async(C_LOC(cwavef), INT(2, c_size_t)*npw_k*my_nspinor*blocksize, CPU_DEVICE_ID)
+           call gpu_device_synchronize()
+         end if
+#endif
+
 !        Accumulate stress tensor kinetic contributions
          if (stress_needed==1) then
-           call timab(924,1,tsec)
+           call timab(925,1,tsec)
            do iblocksize=1,blocksize
              call meanvalue_g(ar,kstr1,0,istwf_k,mpi_enreg,npw_k,my_nspinor,&
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),&
@@ -1045,12 +1113,13 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &             cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),0)
              kinstr(6)=kinstr(6)+weight(iblocksize)*ar
            end do
-           call timab(924,2,tsec)
+           call timab(925,2,tsec)
          end if
 
 !        Accumulate stress tensor and forces for the Fock part
          if (usefock_loc) then
            if(fockcommon%optstr.or.fockcommon%optfor) then
+             call timab(926,1,tsec)
              if (mpi_enreg%paral_kgb==1) then
                msg='forsrtnps: Paral_kgb is not yet implemented for fock stresses'
                ABI_BUG(msg)
@@ -1074,11 +1143,17 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
                end if
              end do
              ABI_FREE(ghc_dum)
+             call timab(926,2,tsec)
            end if
-         end if
+         end if ! usefock_loc
+       end if
+       if ( gpu_option == ABI_GPU_OPENMP) then
+         call ompgpu_free_hamilt_buffers()
        end if
 
      end do ! End of loop on block of bands
+
+     call timab(927,1,tsec)
 
 !    Restore the bandfft tabs
      if (mpi_enreg%paral_kgb==1) then
@@ -1103,7 +1178,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        call pawcprj_free(cwaveprj)
      end if
      ABI_FREE(cwaveprj)
-     ABI_FREE(cwavef)
+
+     if(gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+       ABI_FREE_MANAGED(cwavef)
+#endif
+     else
+       ABI_FREE(cwavef)
+     end if
 
      ABI_FREE(lambda)
      ABI_FREE(occblock)
@@ -1127,8 +1209,12 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
        ABI_FREE(ffnl_str)
      end if
 
+     call timab(927,2,tsec)
+
    end do ! End k point loop
  end do ! End loop over spins
+
+ call timab(928,1,tsec)
 
 !Stress is equal to dE/d_strain * (1/ucvol)
  npsstr(:)=npsstr(:)/gs_hamk%ucvol
@@ -1158,8 +1244,6 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
    end if
  end if
 
- call timab(925,1,tsec)
-
 !Do final normalizations and symmetrizations of stress tensor contributions
  if (stress_needed==1) then
    renorm_factor=-(two_pi**2)/effmass_free/gs_hamk%ucvol
@@ -1185,8 +1269,8 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if
- call timab(925,2,tsec)
- call timab(920,2,tsec)
+ call timab(928,2,tsec) ; call timab(920,-2,tsec)
+ ABI_NVTX_END_RANGE()
 
 end subroutine forstrnps
 !!***

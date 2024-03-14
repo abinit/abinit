@@ -2261,6 +2261,7 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out, *)' Give name for output molecular dynamics: '
    read(std_in, '(a)' ) filnam(4)
    write(std_out, '(a, a)' )'-   ',trim(filnam(4))
+   ! GA: This message is confusing, because filnam(5) is also for EIG2D files.
    write(std_out, *)' Give name for input elphon matrix elements (GKK file): '
    read(std_in, '(a)' ) filnam(5)
    write(std_out, '(a, a)' )'-   ',trim(filnam(5))
@@ -2297,6 +2298,8 @@ subroutine anaddb_init(input_path, filnam)
 
    ! Nobody knows the scope of this line in the files file.
    !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value = filnam(4))
+
+   ! GA: This variable name is confusing, because filnam(5) is also for EIG2D files.
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value = filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 

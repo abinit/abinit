@@ -18,7 +18,7 @@ that are computed on the basis of the density-functional perturbation theory
 Such computations are realized when one of the input variables [[rfphon]],
 [[rfelfd]] or [[rfstrs]] are non-zero, which activates [[optdriver]]=1.
 You are supposed to be well-familiarized with such calculations before starting
-the present tutorial. See the input variables described in [[varset:dfpt]] and
+the present tutorial. See the [respfn help file](/guide/respfn), the input variables described in [[varset:dfpt]] and
 the tutorial [Response-Function 1](/tutorial/rf1) and subsequent tutorials.
 
 You will learn about the basic implementation of parallelism for DFPT
@@ -129,7 +129,7 @@ drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
 In order to treat properly the phonon calculation, the number of bands is larger than the
 default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands 
-plays a role in the response calculations in the case of etallic occupations.
+plays a role in the response calculations in the case of metallic occupations.
 For example, the acoustic sum rule might be largely violated when too few unoccopied 
 bands are treated. 
 
@@ -160,7 +160,7 @@ The only relevant information from the first step is the *_WFK file.
 First copy the output of the ground-state calculation so that it can be used
 as the input of the DFPT calculation:
 
-    cp tdfpt_01.o_WFK tdfpt_02.i_WFK
+    cp tdfpt_01o_WFK tdfpt_02i_WFK
 
 (A _WFQ file is not needed, as all GS wavefunctions at k+q are present in the GW wavefuction at k).
 Then, you can launch the calculation:
@@ -320,8 +320,8 @@ delivered at the end of the run are meaningless.
 
 As in the previous case, a preparatory ground-state calculation is needed.
 We use the input variable [[autoparal]]=1 . It does not delivers the best repartition of
-processors among [[npkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
-With 24 processors, it selects [[npkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
+processors among [[np_spkpt]], [[npband]] and [[npfft]], but achieves a decent repartition, usually within a factor of two.
+With 24 processors, it selects [[np_spkpt]]=4 (optimal), [[npband]]=3 and [[npfft]]=2, while [[npband]]=6 and [[npband]]=1 would do better.
 For information, the speeup going from 24 cores to 64 cores is 1.76, not quite the increase of number of processor (2.76).
 Anyhow, the topics of the tutorial is not the GS calculation.
 
@@ -340,7 +340,7 @@ The preparatory step takes about 3 minutes, and the DFPT step takes about
 You can run now these test cases. For tdfpt_03, with [[autoparal]]=1, 
 you will be able to run on different numbers of processors compatible with [[nkpt]]=4,
 [[nband]]=120 and [[ngfft]]=[30 30 192], detected by ABINIT. Alternatively, you might decide to explicitly 
-define [[npkpt]], [[npband]] and [[npfft]].
+define [[np_spkpt]], [[npband]] and [[npfft]].
 At variance, for tdfpt_04, no adaptation of the input file is
 needed to be able to run on an arbitrary number of processors.
 To launch the ground-state computation, type:

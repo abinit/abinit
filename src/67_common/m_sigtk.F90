@@ -37,6 +37,7 @@ module m_sigtk
  use m_dtset
  use m_krank
 
+ use m_build_info,   only : abinit_version
  use m_fstrings,     only : sjoin, ltoa, strcat, itoa, ftoa
  use m_io_tools,     only : open_file
  use defs_datatypes, only : ebands_t, pseudopotential_type
@@ -184,14 +185,14 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
  integer :: spin, ik, bstop, mband, sigma_nkbz
 !arrays
  integer :: kptrlatt(3,3)
- integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: val_indices(ebands%nkpt, ebands%nsppol)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:)
 
 ! *************************************************************************
 
  mband = ebands%mband
 
- val_indeces = ebands_get_valence_idx(ebands)
+ val_indices = ebands_get_valence_idx(ebands)
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
@@ -220,8 +221,8 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
    call wrtout(std_out, " Using buffer of bands above and below the Fermi level.")
    do spin=1,dtset%nsppol
      do ik=1,nkcalc
-       bstart_ks(ik,spin) = max(val_indeces(ik,spin) - qprange, 1)
-       bstop = min(val_indeces(ik,spin) + qprange, mband)
+       bstart_ks(ik,spin) = max(val_indices(ik,spin) - qprange, 1)
+       bstop = min(val_indices(ik,spin) + qprange, mband)
        nbcalc_ks(ik,spin) = bstop - bstart_ks(ik,spin) + 1
      end do
    end do
@@ -231,7 +232,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
    bstart_ks = 1
    do spin=1,dtset%nsppol
      do ik=1,nkcalc
-       nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - qprange, mband)
+       nbcalc_ks(ik,spin) = min(val_indices(ik,spin) - qprange, mband)
      end do
    end do
  end if
@@ -276,7 +277,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  integer :: spin, nsppol, ii, ik, nk_found, ifo, jj
  logical :: found
 !arrays
- integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: val_indices(ebands%nkpt, ebands%nsppol)
  integer :: kpos(6)
 
 ! *************************************************************************
@@ -287,7 +288,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
- val_indeces = ebands_get_valence_idx(ebands)
+ val_indices = ebands_get_valence_idx(ebands)
 
  ! Include the direct and the fundamental KS gap.
  ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
@@ -318,7 +319,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
    ik = kpos(ii)
    kcalc(:,ii) = ebands%kptns(:,ik)
    do spin=1,nsppol
-     bstart_ks(ii,spin) = val_indeces(ik,spin)
+     bstart_ks(ii,spin) = val_indices(ik,spin)
      nbcalc_ks(ii,spin) = 2
    end do
  end do
@@ -580,7 +581,6 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  type(gaps_t) :: gaps, fine_gaps
  type(wvl_internal_type) :: dummy_wvl
  type(hdr_type) :: fine_hdr
- character(len=8) :: codvsn
 !arrays
  integer :: fine_kptrlatt(3,3), band_block(2), unts(2)
  integer,allocatable :: kshe_mask(:,:,:), krange2ibz(:)
@@ -670,8 +670,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  end if
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
- codvsn = ABINIT_VERSION
- call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
+ call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, abinit_version, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &

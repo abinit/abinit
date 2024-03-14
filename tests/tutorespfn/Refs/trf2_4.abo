@@ -1,6 +1,6 @@
 
-.Version 9.7.4 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 9.11.6.1 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 03h32 )
+.Starting date : Thu 22 Feb 2024.
+- ( at 09h30 )
   
 
 ================================================================================
@@ -45,13 +45,20 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.3050000  5.3050000  G(1)= -0.0942507  0.0942507  0.0942507
  R(2)=  5.3050000  0.0000000  5.3050000  G(2)=  0.0942507 -0.0942507  0.0942507
  R(3)=  5.3050000  5.3050000  0.0000000  G(3)=  0.0942507  0.0942507 -0.0942507
  Unit cell volume ucvol=  2.9859750E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Al
+    2)    0.2500000  0.2500000  0.2500000  As
+
+ DDB file with 8 blocks has been read.
 
 ================================================================================
 
@@ -76,22 +83,22 @@
        3               3       -0.022625        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.116093E+00   -3.789691E-17   -3.738319E-17
-         1         2   -3.789691E-17    2.116093E+00    3.841062E-17
-         1         3    3.789691E-17    3.789691E-17    2.116093E+00
-         2         1   -2.116093E+00    3.789691E-17    3.738319E-17
-         2         2    3.789691E-17   -2.116093E+00   -3.841062E-17
-         2         3   -3.789691E-17   -3.789691E-17   -2.116093E+00
+         1         1    2.116093E+00   -6.212091E-17   -6.175217E-17
+         1         2   -6.212091E-17    2.116093E+00    6.248964E-17
+         1         3    6.212091E-17    6.212091E-17    2.116093E+00
+         2         1   -2.116093E+00    6.212091E-17    6.175217E-17
+         2         2    6.212091E-17   -2.116093E+00   -6.248964E-17
+         2         3   -6.212091E-17   -6.212091E-17   -2.116093E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
 ================================================================================
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.024  and twall      0.037 sec
+-begin at tcpu      0.029  and twall      0.029 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -571,6 +578,6 @@
 
 ================================================================================
 
-+Total cpu time      0.150  and wall time      0.168 sec
++Total cpu time      0.153  and wall time      0.153 sec
 
  anaddb : the run completed succesfully.

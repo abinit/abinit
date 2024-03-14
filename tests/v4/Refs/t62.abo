@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h23 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h00 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v4_t62/t62.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t62/t62.abi
 - output file    -> t62.abo
 - root for input  files -> t62i
 - root for output files -> t62o
-
 
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -53,7 +52,6 @@ P newvtr chain                          3.806 Mbytes.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.112 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
-
 
  DATASET    2 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -193,8 +191,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/57la.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/57la.drh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/57la.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/57la.drh
 - psp for La for testing purposes only by D. R. Hamann in fhi format
 - 57.00000   3.00000    999999                znucl, zion, pspdat
     6    2    3    1      1295   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -207,8 +205,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              3   -8.662078
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.drh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/33as.drh
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.drh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/33as.drh
 - psp for Asw for testing purposes only by D. R. Hamann in fhi format
 - 33.00000   5.00000    999999                znucl, zion, pspdat
     6    2    2    2      1249   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1335,10 +1333,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.4
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.4
+.Delivered  12 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.0  wall=          3.1

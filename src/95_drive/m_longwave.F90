@@ -149,11 +149,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
- real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm ! CP added fermih
+ real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
-! logical :: has_strain,non_magnetic_xc
- character(len=fnlen) :: dscrpt
  character(len=500) :: msg
  type(ebands_t) :: bstruct
  type(ddb_hdr_type) :: ddb_hdr
@@ -409,16 +407,12 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
+
 !If parallelism over atom, hdr is distributed
-! CP modified
  call hdr%update(bantot,etot,fermie,fermih,&
 & residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
 & comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
-! call hdr%update(bantot,etot,fermie,&
-!& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
-!& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -727,31 +721,28 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
    ABI_FREE(mpi_enreg%proc_distrb)
  end if
 
- if (mpi_enreg%me == 0) then
-
 ! Write the DDB file
-   dscrpt=' Note : temporary (transfer) database '
-   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,xred=xred,occ=occ)
+ call ddb_hdr%init(dtset,psps,pawtab,&
+                   dscrpt=' Note : temporary (transfer) database ',&
+                   nblok=1,xred=xred,occ=occ)
 
-   call ddb%init(dtset, 1, mpert, 27*mpert*mpert*mpert)
+ call ddb%init(dtset, 1, mpert, with_d3E=.true.)
 
-   call ddb%set_d3matr(d3etot, blkflg, iblok=1, lw=.true.)
+ call ddb%set_d3matr(1, d3etot, blkflg, lw=.true.)
 
-   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
+ call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
-   call ddb_hdr%free()
-   call ddb%free()
-
-!  Close DDB
-   close(dtfil%unddb)
 
    !Calculate spatial-dispersion quantities in Cartesian coordinates and write
-  !them in abi_out
+   !them in abi_out
    ABI_MALLOC(blkflg_car,(3,mpert,3,mpert,3,mpert))
    ABI_MALLOC(d3etot_car,(2,3,mpert,3,mpert,3,mpert))
    call lwcart(blkflg,blkflg_car,d3etot,d3etot_car,gprimd,mpert,natom,rprimd)
    call dfptlw_out(blkflg_car,d3etot_car,dtset%lw_flexo,dtset%lw_qdrpl,dtset%lw_natopt,mpert,natom,ucvol)
- end if
+ !end if
+
+ call ddb_hdr%free()
+ call ddb%free()
 
 !Deallocate arrays
  ABI_FREE(atindx)

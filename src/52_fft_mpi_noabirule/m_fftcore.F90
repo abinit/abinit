@@ -694,13 +694,15 @@ end subroutine bound
 !! ngfft(7)=choice for FFT algorithm, see the input variable fftalg
 !! ngfft(8)=size of the cache, in bytes (not used here presently).!!
 !!   other ngfft slots are used for parallelism see ~abinit/doc/variables/vargs.htm#ngfft
-!! [unit] = Output Unit number (DEFAULT std_out)
+!! [ngfftc(1:18)]= -optional- value of ngfft for the "coarse" grid
+!! [unit] = -optional-  output unit number (DEFAULT std_out)
+!! [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
 !!
 !! SOURCE
 
 subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, ngfft, &
                 nproc_fft, nsym,paral_fft, symrel, tnons, &
-                ngfftc, use_gpu_cuda, unit) ! optional
+                ngfftc, unit, gpu_option) ! optional
 
  use defs_fftdata,  only : mg
 
@@ -708,7 +710,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
 !scalars
  integer,intent(in) :: chksymtnons,me_fft,nproc_fft,nsym,paral_fft
  integer,intent(out) :: mgfft,nfft
- integer,optional,intent(in) :: unit,use_gpu_cuda
+ integer,optional,intent(in) :: unit,gpu_option
  real(dp),intent(in) :: boxcutmin,ecut
 !arrays
  integer,intent(in) :: symrel(3,3,nsym)
@@ -1002,7 +1004,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
            end if
          endif
        else
-         write(msg, '(a,i12,5a)' ) &
+         write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
           'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &         '   for the symmetry number ',isym,ch10,&
@@ -1193,8 +1195,8 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
    ngfft(6)=ngfft(3)
  end if
 
- if (present(use_gpu_cuda)) then
-   if (use_gpu_cuda==1) then
+ if (present(gpu_option)) then
+   if (gpu_option/=ABI_GPU_DISABLED) then
      ngfft(4)=ngfft(1)
      ngfft(5)=ngfft(2)
      ngfft(6)=ngfft(3)
@@ -4269,6 +4271,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
+ mpi_enreg%me_g0_fft=mpi_enreg%me_g0
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
 !    In this case, the processors had the 0 G vector before the new distribution, and still keeps it

@@ -681,7 +681,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          end if
 
          ! =======================================
-         ! === Loop over the four band indeces ===
+         ! === Loop over the four band indices ===
          ! =======================================
          do ic=bidx(1,2),bidx(2,2) !do ic=BSp%lumo,BSp%nbnds
 
@@ -741,8 +741,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                  dim_rtwg,rhxtwg_cpc)
 
                if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                 call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_c%gvec,&
-                  Cp_ckp,Cp_ck,Pwij_q,rhxtwg_cpc)
+                 call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec, Cp_ckp,Cp_ck,rhxtwg_cpc)
                end if
              end if
 
@@ -811,14 +810,14 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
 
                  if (is_resonant) then
                    itp = BSp%vcks2t(ivp,icp,ikp_bz,spin2)
-                 else ! have to exchange band indeces
+                 else ! have to exchange band indices
                    itp = BSp%vcks2t(icp,ivp,ikp_bz,spin2)
                  end if
 
                  if (itp==0) CYCLE ! ir-uv-cutoff
 
                  ! FIXME Temporary work around, when ikp_bz == ik it might happen that itp<it
-                 ! should rewrite the loops using contracted k-dependent indeces for bands
+                 ! should rewrite the loops using contracted k-dependent indices for bands
                  if (itp<it) CYCLE
 
                  ir = it + itp*(itp-1)/2
@@ -863,8 +862,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                      dim_rtwg,rhxtwg_vpv)
 
                    if (Wfd%usepaw==1) then ! Add PAW onsite contribution.
-                     call paw_rho_tw_g(npweps,dim_rtwg,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,&
-                       Gsph_c%gvec,Cp_vkp,Cp_vk,Pwij_q,rhxtwg_vpv)
+                     call paw_rho_tw_g(cryst,Pwij_q,npweps,dim_rtwg,nspinor,Gsph_c%gvec,Cp_vkp,Cp_vk,rhxtwg_vpv)
                    end if
                  end if
 
@@ -2384,8 +2382,7 @@ subroutine wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,&
 
          if (Wfd%usepaw==1) then
            ! Add PAW onsite contribution.
-           call paw_rho_tw_g(npweps,dim_rtwg1,Wfd%nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-             Cp1,Cp2,Pwij_q0,rhotwg1)
+           call paw_rho_tw_g(cryst,Pwij_q0,npweps,dim_rtwg1,Wfd%nspinor,Gsph_x%gvec,Cp1,Cp2,rhotwg1)
          end if
 
          ! If q=0 treat Exchange and Coulomb-term independently

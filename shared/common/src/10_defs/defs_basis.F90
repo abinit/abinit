@@ -173,7 +173,6 @@ module defs_basis
 !real(dp), parameter :: quarter_pi=pi*quarter
 !real(dp), parameter :: two_thirds_pi=two_thirds*pi
 
-
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
@@ -220,6 +219,7 @@ module defs_basis
  ! This quantity might be used at runtime to determine how to distribute memory.
  ! The default value (2Gb) can be changed at runtime via the command line interface.
  real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
@@ -264,11 +264,13 @@ module defs_basis
  !double precision
  complex(dpc), parameter :: czero = (0._dp,0._dp)
  complex(dpc), parameter :: cone  = (1._dp,0._dp)
+ complex(dpc), parameter :: ctwo  = (2._dp,0._dp)
  complex(dpc), parameter :: j_dpc = (0._dp,1.0_dp)
 
  ! single-precision
  complex(spc), parameter :: czero_sp = (0._sp,0._sp)
  complex(spc), parameter :: cone_sp  = (1._sp,0._sp)
+ complex(spc), parameter :: ctwo_sp  = (2._sp,0._sp)
  complex(spc), parameter :: j_sp     = (0._sp,1.0_sp)
 
 !Pauli matrix
@@ -345,8 +347,23 @@ module defs_basis
   integer,parameter,public :: NLO_MBLKPW = 199
   integer,parameter,public :: NLO_MINCAT = 10
 
-! Parameter to compute the maximum index of the perturbation
+! This is used to compute the maximum index of the perturbation as natom + MPERT_MAX
+! GA: But this is not actually the maximum perturbation,
+!     see m_dfpt_loopert
   integer,parameter,public :: MPERT_MAX = 8
+
+! Parameters for the GPU implementation(s)
+ ! GPU implementation undetermined
+ integer,parameter,public :: ABI_GPU_UNKNOWN  =-1
+ ! Not using any GPU implementation, implies running on CPU
+ integer,parameter,public :: ABI_GPU_DISABLED = 0
+ ! Legacy GPU implementation relying on NVIDIA CUDA kernels, not prefered
+ integer,parameter,public :: ABI_GPU_LEGACY   = 1
+ ! GPU implementation relying on OpenMP v5 "TARGET" construct
+ integer,parameter,public :: ABI_GPU_OPENMP   = 2
+ ! GPU implementation relying on Kokkos + cuda framework
+ integer,parameter,public :: ABI_GPU_KOKKOS   = 3
+ ! Please note that a GPU linalg library supported in gpu_toolbox (ie: CUDA) backs up OpenMP and Kokkos variants.
 
 !Parameters for LOG/STATUS files treatment
 !This variables tell the code if some lines have to be written in a LOG/STATUS file
@@ -432,7 +449,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
+subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
@@ -442,7 +459,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
  if (PRESENT(new_do_write_status)) do_write_status=new_do_write_status
 
- end subroutine abi_log_status_state
+end subroutine abi_log_status_state
 !!***
 
 !----------------------------------------------------------------------
@@ -463,7 +480,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
+subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
@@ -474,7 +491,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_std_out)) std_out = new_std_out
  if (PRESENT(new_io_comm)) abinit_comm_output = new_io_comm
 
- end subroutine abi_io_redirect
+end subroutine abi_io_redirect
 !!***
 
 !----------------------------------------------------------------------
@@ -491,7 +508,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine print_kinds(unit)
+subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
  integer,optional,intent(in) :: unit
@@ -499,33 +516,33 @@ CONTAINS  !=====================================================================
 !Local variables-------------------------------
  integer :: my_unt
 
- ! *********************************************************************
+! *********************************************************************
 
-  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
+ my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
-  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
+ write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
-    ' REAL:      Data type name: REAL(DP) ',&
-    '            Kind value: ',KIND(0.0_dp),&
-    '            Precision:  ',PRECISION(0.0_dp),&
-    '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
-    '            Smallest positive number:                      ',TINY(0.0_dp),&
-    '            Largest representable number:                  ',HUGE(0.0_dp)
+ write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
+   ' REAL:      Data type name: REAL(DP) ',&
+   '            Kind value: ',KIND(0.0_dp),&
+   '            Precision:  ',PRECISION(0.0_dp),&
+   '            Smallest nonnegligible quantity relative to 1: ',EPSILON(0.0_dp),&
+   '            Smallest positive number:                      ',TINY(0.0_dp),&
+   '            Largest representable number:                  ',HUGE(0.0_dp)
 
-  write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
-    ' INTEGER:   Data type name: INTEGER(default) ', &
-    '            Kind value: ',KIND(0),              &
-    '            Bit size:   ',BIT_SIZE(0),          &
-    '            Largest representable number: ',HUGE(0)
+ write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
+   ' INTEGER:   Data type name: INTEGER(default) ', &
+   '            Kind value: ',KIND(0),              &
+   '            Bit size:   ',BIT_SIZE(0),          &
+   '            Largest representable number: ',HUGE(0)
 
-  write(my_unt,'(a,/,a,i0)')&
-    ' LOGICAL:   Data type name: LOGICAL ',&
-    '            Kind value: ',KIND(.TRUE.)
+ write(my_unt,'(a,/,a,i0)')&
+   ' LOGICAL:   Data type name: LOGICAL ',&
+   '            Kind value: ',KIND(.TRUE.)
 
-  write(my_unt,'(2a,i0)')&
-   ' CHARACTER: Data type name: CHARACTER ',&
-   '            Kind value: ',KIND('C')
+ write(my_unt,'(2a,i0)')&
+  ' CHARACTER: Data type name: CHARACTER ',&
+  '            Kind value: ',KIND('C')
 
 end subroutine print_kinds
 !!***
@@ -562,7 +579,7 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_DDK_DIAGO
  case ("wfk_kpts_erange")
    wfk_task = WFK_TASK_KPTS_ERANGE
- case ("optics_fullbz")
+ case ("optics_fullbz", "wfk_optics_fullbz")
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB

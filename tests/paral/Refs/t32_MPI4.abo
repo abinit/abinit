@@ -70,6 +70,7 @@ P           mkmem           3
             nband          16
             ngfft          36      36      36
              nkpt           3
+    nblock_lobpcg           2
 -          npband           2
 -        npspinor           2
           nspinor           2
@@ -332,6 +333,7 @@ P           mkmem           3
             nband          16
             ngfft          36      36      36
              nkpt           3
+    nblock_lobpcg           2
 -          npband           2
 -        npspinor           2
           nspinor           2

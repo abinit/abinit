@@ -278,9 +278,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  ! XG20200720: Why not saving string ? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
- INPUT_STRING = string_with_comments
+ INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
  !write(std_out,'(a)')string(:lenstr)
+ !stop
 
 end subroutine parsefile
 !!***
@@ -328,7 +331,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  integer :: done,idig,index_slash,sign
  real(dp) :: den,num
  logical :: logi
- character(len=500) :: msg,iomsg
+ character(len=500) :: msg
+ character(len=100) :: iomsg
 
 ! *************************************************************************
 
@@ -484,7 +488,7 @@ end subroutine inread
 !! OUTPUT
 !!  lenstr=actual number of character in string
 !!  string*(strln)=preprocessed string of character
-!!  raw_string=string without any preprocessine (comments are included.
+!!  raw_string=string without any preprocessing (comments are included)
 !!
 !! SOURCE
 
@@ -502,7 +506,7 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
+ integer :: b0,b1,b2,b3,ierr,ii,ii1,ii2,ij,iline,ios,iost,isign
  integer :: lenc,lenstr_inc,len_val,mline,nline1,input_unit,shift,sign,lenstr_raw
  logical :: include_found, ex
 !arrays
@@ -763,11 +767,12 @@ recursive subroutine instrng(filnam, lenstr, option, strln, string, raw_string)
  !write(std_out,'(a,a)')' incomprs : 1, string=',string(:lenstr)
 
 !Substitute environment variables, if any
- b1=0
+ b0=0
  do
-   b1=b1+1
-   b1 = index(string(b1:lenstr), '$')
+   b0=b0+1
+   b1 = index(string(b0:lenstr), '$')
    if(b1==0 .or. b1>=lenstr)exit
+   b1 = b0 + b1 - 1
    !Identify delimiter, either a '"', or a "'", or a blank, or a /
    b2=index(string(b1+1:lenstr),'"')
    b3=index(string(b1+1:lenstr),"'")
@@ -1030,6 +1035,7 @@ end subroutine incomprs
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
+!!   'INT_OR_KEY'=>integer scalar (returned in intarr(1)) or character (returned in key_value)
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
@@ -1041,7 +1047,7 @@ end subroutine incomprs
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY".
+!!   [key_value]=Stores the value of key if typevarphys=="KEY" or typevarphys=="INT_OR_KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
 !!      except when reading a list of files. The routine aborts if key_value cannot store the output.
 !!      Output string is left justified.
@@ -1119,7 +1125,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: b1,b2,b3,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
+ integer :: b1,b2,b3,cs1len,cslen,dozens,ier,ii,itoken,itoken1,itoken2,itoken2_1colon
  integer :: itoken2_1plus,itoken2_1times,itoken2_2colon,itoken2_2plus
  integer :: itoken2_2times,itoken2_colon,itoken2_plus,itoken2_times
  integer :: itoken_1colon,itoken_1plus,itoken_1times,itoken_2colon,itoken_2plus
@@ -1534,18 +1540,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
     typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
 
- if (typevarphys=='KEY') then
+ if (typevarphys=='KEY' .or. typevarphys=='INT_OR_KEY') then
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'a series has been defined in the input file.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'the number of data requested is larger than 1.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
@@ -1559,19 +1565,31 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Absolute location in string of blank which follows token:
    b1 = itoken + cslen - 1
 
-   if (typevarphys == 'KEY') then
+   if (typevarphys == 'KEY'  .or. typevarphys=='INT_OR_KEY') then
      ! In case of typevarphys='KEY', the chain of character will be returned in cs.
-     ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
-     b2 = index(string(b1+1:), '"')
-     ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
-     b2 = b1 + b2 + 1
-     b3 = index(string(b2:), '"')
-     ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
-     b3 = b3 + b2 - 2
-     if ((b3 - b2 + 1) > len(key_value)) then
-       ABI_ERROR("Len of key_value too small to contain value parsed from file")
+     ABI_CHECK(present(key_value), "typevarphys == KEY or INT_OR_KEY requires optional argument key_value")
+     if (typevarphys == 'INT_OR_KEY') then
+       ABI_CHECK(narr==1, "typevarphys == INT_OR_KEY requires narr==1")
      end if
-     key_value = adjustl(string(b2:b3))
+     b2 = index(string(b1+1:), '"')
+     b3=0 ; do ii=b1,b1+b2-1 ; if (string(ii:ii)/=blank) b3=1 ; end do
+     if (typevarphys == 'KEY') then
+       ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
+       ABI_CHECK(b3 == 0, sjoin('There are chars between token name and first " for token:', token))
+     end if
+     if (typevarphys == 'KEY' .or. (b2/=0.and.b3==0)) then
+       b2 = b1 + b2 + 1
+       b3 = index(string(b2:), '"')
+       ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
+       b3 = b3 + b2 - 2
+       if ((b3 - b2 + 1) > len(key_value)) then
+         ABI_ERROR("Len of key_value too small to contain value parsed from file")
+       end if
+       key_value = adjustl(string(b2:b3))
+     else if (typevarphys == 'INT_OR_KEY') then
+       ! Read the scalar that follows the blank
+       call inarray(b1,cs,dprarr,intarr,marr,narr,string,'INT')
+     endif
 
    else
      ! Read the array (or eventual scalar) that follows the blank

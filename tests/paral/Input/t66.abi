@@ -18,8 +18,12 @@ paral_kgb1  1
 npband1     4
 bandpp1     6
 npfft1      1
-npkpt1      1
+np_spkpt1      1
 tolwfr1     1.0d-18
+# Added in v9.11:
+tolwfr_diago 1d-30
+# Default of tolwfr_diago is tolwfr (or, for LOBPCG only, 1d-20 if tolwfr is not defined)
+# To reproduce old behaviour : set stringent value of tolwfr_diago
 
 ###########################################
 # Dataset 2: Phonons with bands para.
@@ -83,7 +87,7 @@ pseudos "Pseudodojo_paw_pw_standard/Si.xml, Pseudodojo_paw_pw_standard/O.xml"
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t66_MPI4.abo, tolnlines = 25, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% files_to_test = t66_MPI4.abo, tolnlines = 35, tolabs = 1.1e-03, tolrel = 9.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, DFPT

@@ -30,7 +30,7 @@ module m_spacepar
 
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
- use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
+ use m_symtk,           only : mati3inv, sg_multable, symdet, symatm, matr3inv
  use m_geometry,        only : metric, normv, symredcart,wedge_basis,wedge_product
  use m_gtermcutoff,     only : termcutoff
  use m_mpinfo,          only : ptabs_fourdp
@@ -545,8 +545,8 @@ end subroutine mkunitpawspherepot
 !! SOURCE
 
 subroutine hartre(cplex,gsqcut,icutcoul,izero,mpi_enreg,nfft,ngfft,nkpt,&
-                 &rcut,rhog,rprimd,vcutgeo,vhartr,&
-                 &qpt) ! Optional arguments
+                  rcut,rhog,rprimd,vcutgeo,vhartr,&
+                  qpt) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -753,7 +753,7 @@ end subroutine hartre
 !!
 !! INPUTS
 !!  diag(npw)=diagonal operator (real, spin-independent!)
-!!  filter= if 1, need to filter on the value of diag, that must be less than huge(0.0d0)*1.d-11
+!!  filter= if 1, need to filter on the value of diag, that must be less than huge(zero)*1.d-11
 !!          otherwise, should be 0
 !!  istwf_k=storage mode of the vectors
 !!  npw=number of planewaves of the vector
@@ -852,7 +852,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=1,npw
-       if(diag(ipw)<huge(0.0d0)*1.d-11)then
+       if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -860,7 +860,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !$OMP PARALLEL DO REDUCTION(+:ar) PRIVATE(jpw)
        do ipw=1+npw,2*npw
          jpw=ipw-npw
-         if(diag(jpw)<huge(0.0d0)*1.d-11)then
+         if(diag(jpw)<huge(zero)*1.d-11)then
            ar=ar+diag(jpw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
          end if
        end do
@@ -871,7 +871,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
        end if
 !$OMP PARALLEL DO REDUCTION(+:ar_im)
        do ipw=1,npw
-         if(diag(ipw)<huge(0.0d0)*1.d-11)then
+         if(diag(ipw)<huge(zero)*1.d-11)then
            ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
          end if
        end do
@@ -879,7 +879,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !$OMP PARALLEL DO REDUCTION(+:ar_im) PRIVATE(jpw)
          do ipw=1+npw,2*npw
            jpw=ipw-npw
-           if(diag(jpw)<huge(0.0d0)*1.d-11)then
+           if(diag(jpw)<huge(zero)*1.d-11)then
              ar_im=ar_im+diag(jpw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
            end if
          end do
@@ -889,7 +889,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 
 !    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1,npw
-!    if(diag(ipw)<huge(0.0d0)*1.d-11)then
+!    if(diag(ipw)<huge(zero)*1.d-11)then
 !    ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
 !    end if
@@ -897,7 +897,7 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
 !    if(nspinor==2)then
 !    !$OMP PARALLEL DO PRIVATE(ipw) REDUCTION(+:ar,ar_im)
 !    do ipw=1+npw,2*npw
-!    if(diag(ipw-npw)<huge(0.0d0)*1.d-11)then
+!    if(diag(ipw-npw)<huge(zero)*1.d-11)then
 !    ar=ar+diag(ipw-npw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
 !    if(use_ndo==1.and.nspinor==2) ar_im=ar_im+diag(ipw-npw)*(vect1(1,ipw)*vect(2,ipw)-vect1(2,ipw)*vect(1,ipw))
 !    end if
@@ -922,14 +922,14 @@ subroutine meanvalue_g(ar,diag,filter,istwf_k,mpi_enreg,npw,nspinor,vect,vect1,u
    else ! filter/=0
      i1=1
      if(istwf_k==2 .and. me_g0==1)then
-       if(diag(1)<huge(0.0d0)*1.d-11)then
+       if(diag(1)<huge(zero)*1.d-11)then
          ar=half*diag(1)*vect(1,1)*vect1(1,1) ; i1=2
        end if
      end if
 
 !$OMP PARALLEL DO REDUCTION(+:ar)
      do ipw=i1,npw
-       if(diag(ipw)<huge(0.0d0)*1.d-11)then
+       if(diag(ipw)<huge(zero)*1.d-11)then
          ar=ar+diag(ipw)*(vect(1,ipw)*vect1(1,ipw)+vect(2,ipw)*vect1(2,ipw))
        end if
      end do
@@ -2573,6 +2573,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 
 ! *************************************************************************
 
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : enter '
+!ENDDEBUG
+
  call timab(6,1,tsec)
 
 !Check that symmetries have unity determinant
@@ -2587,10 +2591,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  end do
 
 !Check for group closure
- call chkgrp(nsym,symafm,symrel,ierr)
+ call sg_multable(nsym,symafm,symrel,ierr,tnons=tnons,tnons_tol=tol5)
  ABI_CHECK(ierr==0,"Error in group closure")
 
- call chkgrp(nsym,symafm,symrec,ierr)
+ call sg_multable(nsym,symafm,symrec,ierr)
  ABI_CHECK(ierr==0,"Error in group closure")
 
 !Obtain a list of rotated atom labels:
@@ -2604,6 +2608,10 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
  end if
 
  call timab(6,2,tsec)
+
+!DEBUG
+!write(std_out,*)' m_spacepar%setsym : exit '
+!ENDDEBUG
 
 end subroutine setsym
 !!***

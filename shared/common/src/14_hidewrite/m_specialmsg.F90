@@ -7,7 +7,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MT)
+!! Copyright (C) 2008-2024 ABINIT group (MT,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,8 +204,8 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2023
- mm_rel=06
+ year_rel=2024
+ mm_rel=02
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
@@ -336,7 +336,7 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
  if (unit == dev_null) return
  !if (.not. is_open(unit)) return
 
- my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = mode_paral
+ my_mode_paral = "COLL"; if (present(mode_paral)) my_mode_paral = trim(mode_paral)
  my_flush = .false.; if (present(do_flush)) my_flush = do_flush
  my_newlines = 0; if (present(newlines)) my_newlines = newlines
  my_pre_newlines = 0; if (present(pre_newlines)) my_pre_newlines = pre_newlines
@@ -377,6 +377,7 @@ subroutine wrtout_unit(unit, msg, mode_paral, do_flush, newlines, pre_newlines)
    master = unit
 
  else
+   !print *, trim(my_mode_paral)
    write(string,'(7a)')ch10,&
    'wrtout_unit: ERROR -',ch10,&
    '  Unknown write mode: ',trim(my_mode_paral),ch10,&

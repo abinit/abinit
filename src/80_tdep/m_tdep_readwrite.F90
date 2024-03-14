@@ -164,7 +164,7 @@ contains
   integer :: values(8)  
   integer :: ncid, ncerr, me,ierr,master
   integer :: nimage, mdtime, natom_id,nimage_id,time_id,xyz_id,six_id
-  integer :: ntypat_id
+  integer :: ntypat_id,iatcell
   integer :: ii,jj,tmp,shift,iatom,itypat,sum_alloy1,sum_alloy2
   double precision :: version_value,dtion,amu_average,born_average
   character (len=30):: string,NormalMode,DebugMode,use_ideal_positions
@@ -178,6 +178,7 @@ contains
   character(len=500) :: ncfilename,inputfilename
   integer, allocatable :: typat_unitcell_tmp(:)
   logical :: has_nimage
+  double precision :: rprimd_mdt(3,3)
   real(dp), allocatable :: znucl(:),xred_unitcell_tmp(:,:),amu_tmp(:),born_charge_tmp(:)
 
 ! Define output files  
@@ -351,6 +352,19 @@ contains
   write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%natom_unitcell
   ABI_MALLOC(Invar%xred_unitcell,(3,Invar%natom_unitcell)); Invar%xred_unitcell(:,:)=zero
   read(40,*) string,Invar%xred_unitcell(:,:)
+! Check that atoms (defined in the input.in file) are set correctly in the unitcell
+  do ii=1,3
+    do iatcell=1,Invar%natom_unitcell
+      if ((Invar%xred_unitcell(ii,iatcell).le.(-0.5)).or.(Invar%xred_unitcell(ii,iatcell).gt.(0.5))) then
+        do while (Invar%xred_unitcell(ii,iatcell).le.(-0.5))
+          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)+1.d0
+        end do  
+        do while (Invar%xred_unitcell(ii,iatcell).gt.(0.5))
+          Invar%xred_unitcell(ii,iatcell)=Invar%xred_unitcell(ii,iatcell)-1.d0
+        end do  
+      endif
+    end do
+  end do
   write(Invar%stdout,'(1x,a20)') string
   do ii=1,Invar%natom_unitcell
     write(Invar%stdout,'(22x,3(f15.10,1x))') (Invar%xred_unitcell(jj,ii), jj=1,3)
@@ -390,6 +404,13 @@ contains
   write(Invar%stdout,'(a)') ' ======================= Define the supercell ================================' 
   if (Invar%netcdf) then
     Invar%rprimd_md(:,:)=Hist%rprimd(:,:,Hist%ihist)
+!   Transpose rprimd (which is defined column-line)
+    do ii=1,3
+      do jj=1,3
+        rprimd_mdt(ii,jj)=Invar%rprimd_md(jj,ii)
+      end do
+    end do
+    Invar%rprimd_md(:,:)=rprimd_mdt(:,:)
     string='rprimd'
   else
     read(40,*) string,Invar%rprimd_md(1,:),Invar%rprimd_md(2,:),Invar%rprimd_md(3,:)
@@ -535,6 +556,7 @@ contains
       write(Invar%stdout,'(1x,a20,f10.5)') 'tolmatch            ',Invar%tolmatch
     else if (string.eq.use_weights) then
       read(40,*) string,Invar%use_weights
+      write(Invar%stdout,'(1x,a20,1x,i4)') string,Invar%use_weights
     else if (string.eq.TheEnd) then
       exit
     else 

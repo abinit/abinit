@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h28 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h02 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/TestBot_MPI1/v5_t73/t73.in
-- output file    -> t73.out
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v5_t73/t73.abi
+- output file    -> t73.abo
 - root for input  files -> t73i
 - root for output files -> t73o
-
 
  DATASET    1 : space group P4 m m (# 99); Bravais tP (primitive tetrag.)
 ================================================================================
@@ -34,7 +33,7 @@
 -    mband =           6        mffmem =           1         mkmem =           2
        mpw =         466          nfft =       10000          nkpt =           2
 ================================================================================
-P This job should need less than                       3.640 Mbytes of memory.
+P This job should need less than                       3.924 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.087 Mbytes ; DEN or POT disk file :      0.078 Mbytes.
 ================================================================================
@@ -149,8 +148,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 2, paral_kgb: 0, }
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.08026
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk_rel2dev/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosHGH_pwteter/79au.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Au,  from PRB58, 3641 (1998)
 - 79.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -526,10 +525,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.8  wall=         11.8
+- Proc.   0 individual time (sec): cpu=          9.5  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         11.8
+.Delivered   8 WARNINGs and   2 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.5  wall=          9.5

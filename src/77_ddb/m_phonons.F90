@@ -47,12 +47,13 @@ module m_phonons
  use m_time,            only : cwtime, cwtime_report
  use m_io_tools,        only : open_file
  use m_geometry,        only : mkrdim, symredcart, normv, phdispl_cart2red
- use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, pheigvec_normalize, massmult_and_breaksym, phdispl_from_eigvec, &
-                               phangmom_from_eigvec
+ use m_dynmat,          only : gtdyn9, dfpt_phfrq, dfpt_prtph, &
+                               pheigvec_normalize, massmult_and_breaksym, &
+                               phdispl_from_eigvec, phangmom_from_eigvec
  use m_bz_mesh,         only : isamek, make_path, kpath_t, kpath_new
  use m_ifc,             only : ifc_type
  use m_anaddb_dataset,  only : anaddb_dataset_type
- use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, get_full_kgrid, kpts_map, kpts_timrev_from_kptopt
  use m_special_funcs,   only : bose_einstein
  use m_sort,            only : sort_dp
  use m_symfind,         only : symanal
@@ -1730,7 +1731,7 @@ subroutine phdos_ncwrite(phdos, ncid)
 ! Define dimensions
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
 
- ncerr = nctk_def_dims(ncid, [nctkdim_t("three", 3), nctkdim_t("number_of_atoms", phdos%natom),&
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("number_of_atoms", phdos%natom),&
    nctkdim_t("number_of_atom_species", phdos%ntypat), nctkdim_t("number_of_frequencies", phdos%nomega), &
    nctkdim_t("nqibz", phdos%nqibz)])
  NCF_CHECK(ncerr)
@@ -1937,12 +1938,10 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    ! In case eivec == 4, write output files for band2eps (visualization of phonon band structures)
    if (eivec == 4) then
      call sortph(eigvec,displ,strcat(prefix, "_B2EPS"),natom,phfrq)
-     ! modification of sortph to include ang mom ?
    end if
 
    ! Write the phonon frequencies
    call dfpt_prtph(displ,eivec,enunit,ab_out,natom,phfrq,qphnrm(1),qphon)
-   ! add printing of phangmom in dfpt_prtph ? This is only to stdout, maybe not needed
 
    save_phfrq(:,iphl1) = phfrq
    save_phdispl_cart(:,:,:,iphl1) = RESHAPE(displ, [2, 3*natom, 3*natom])
@@ -2003,8 +2002,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
 
    NCF_CHECK_MSG(nctk_open_create(ncid, strcat(prefix, "_PHBST.nc"), xmpi_comm_self), "Creating PHBST")
    NCF_CHECK(crystal%ncwrite(ncid))
-   ! call modified subroutine that also output the angular momentum (for .nc file)
-   ! -> added in phonons_ncwrite, maybe not the best idea as it is also used by mkphdos (this last had to be slightly modified)
    call phonons_ncwrite(ncid,natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart,save_phangmom)
 
    ! Now treat the second list of vectors (only at the Gamma point, but can include non-analyticities)
@@ -2013,8 +2010,6 @@ subroutine mkphbs(Ifc,Crystal,inp,ddb,asrq0,prefix,comm)
    end if
    NCF_CHECK(nf90_close(ncid))
 
-   ! call modified subroutine that also output the angular momentum (for _PHFRQ or another file)
-   ! -> added directly in phonons_write_phfrq
    call phonons_write_phfrq(prefix, natom,nfineqpath,save_qpoints,weights,save_phfrq,save_phdispl_cart, save_phangmom)
 
    select case (inp%prtphbands)
@@ -3477,7 +3472,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  !
  !   phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
  !
- isirr_q = (isym_q == 1 .and. trev_q == 0)
+ isirr_q = isym_q == 1 .and. trev_q == 0
 
  if (self%my_rank == master) then
    ! I own the data --> operate on it
@@ -3519,9 +3514,7 @@ subroutine phstore_wait(self, cryst, phfrq, displ_cart, displ_red)
  real(dp),intent(out) :: displ_red(2, 3, self%natom, self%natom3)
 
 !Local variables ------------------------------
-!scalars
  integer :: ierr
-
 ! *************************************************************************
 
  if (.not. self%use_ifc_fourq) call xmpi_waitall(self%requests, ierr)
@@ -3533,6 +3526,7 @@ end subroutine phstore_wait
 !!***
 
 !----------------------------------------------------------------------
+
 !!****f* m_phonons/test_phrotation
 !! NAME
 !! test_phrotation
@@ -3540,23 +3534,27 @@ end subroutine phstore_wait
 !! FUNCTION
 !!  Test the symmetrization of the phonon eigenvalues and eigenvectors.
 !!
-!! INPUTS
+!! INPUT
+!!  cryst=Crystalline structure
+!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!!  ngqpt(3)=Divisions of the ab-initio q-mesh.
+!!  qptopt=option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
+!!  comm= MPI communicator
 !!
 
-subroutine test_phrotation(ifc, cryst, ngqpt, comm)
+subroutine test_phrotation(ifc, cryst, qptopt, ngqpt, comm)
 
  use m_symtk, only : sg_multable
 
  type(ifc_type),intent(in) :: ifc
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: comm
- integer,intent(in) :: ngqpt(3)
+ integer,intent(in) :: qptopt, comm, ngqpt(3)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: qptopt1 = 1, nqshft1 = 1, master = 0, timrev1 = 1
+ integer,parameter :: nqshft1 = 1, master = 0
  integer :: nqibz, iq_bz, iq_ibz, nqbz, ii, natom, natom3, ierr
- integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol
+ integer :: isym, itimrev, ierr_freq, ierr_eigvec, prtvol, qtimrev
  real(dp), parameter ::  tol_phfreq_meV = tol3, tol_eigvec = tol6
  real(dp) :: maxerr_phfreq, err_phfreq, maxerr_eigvec ! err_eigvec
  logical :: isirr_q
@@ -3577,17 +3575,16 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  if (xmpi_comm_rank(comm) /= 0) return
 
- prtvol = 1
- natom = cryst%natom
- natom3 = cryst%natom * 3
+ prtvol = 1; natom = cryst%natom; natom3 = cryst%natom * 3
 
  call wrtout(std_out, sjoin(" Testing symmetrization of phonon frequencies and eigenvectors with ngqpt:", ltoa(ngqpt)), ch10)
 
  ! Create a regular grid
  in_qptrlatt = 0; in_qptrlatt(1, 1) = ngqpt(1); in_qptrlatt(2, 2) = ngqpt(2); in_qptrlatt(3, 3) = ngqpt(3)
  qshift = zero
+ qtimrev = kpts_timrev_from_kptopt(qptopt)
 
- call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt1, nqshft1, qshift, &
+ call kpts_ibz_from_kptrlatt(cryst, in_qptrlatt, qptopt, nqshft1, qshift, &
                              nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, bz2ibz=bz2ibz)
  ABI_FREE(bz2ibz)
 
@@ -3605,7 +3602,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
 
  qrank = krank_from_kptrlatt(nqibz, qibz, in_qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", timrev1, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, qrank, nqbz, qbz, bz2ibz_listkk) /= 0) then
    write(msg, '(3a)' ) "Error mapping BZ to IBZ",ch10,"The q-point could not be generated from a symmetrical one"
    ABI_ERROR(msg)
  end if
@@ -3626,7 +3623,7 @@ subroutine test_phrotation(ifc, cryst, ngqpt, comm)
  ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
 
  ABI_MALLOC(toinv, (4, cryst%nsym))
- call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, cryst%tnons, tol6, ierr, toinv=toinv)
+ call sg_multable(cryst%nsym, cryst%symafm, cryst%symrel, ierr, toinv=toinv, tnons=cryst%tnons, tnons_tol=tol6)
  ABI_CHECK(ierr == 0, "sg_multable returned ierr != 0")
 
  ! Precompute ph freqs in the BZ and compare with BZ

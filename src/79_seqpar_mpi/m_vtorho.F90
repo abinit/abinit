@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_vtorho
 !! NAME
 !!  m_vtorho
@@ -25,6 +24,7 @@
 
 module m_vtorho
 
+ use iso_fortran_env, only : int32,int64,real32,real64
  use defs_basis
  use defs_wvltypes
  use m_abicore
@@ -35,10 +35,13 @@ module m_vtorho
  use m_efield
  use m_cgtools
  use m_gemm_nonlop
+ use m_gemm_nonlop_gpu
+ use m_gemm_nonlop_ompgpu
  use m_hdr
  use m_dtset
  use m_dtfil
  use m_extfpmd
+ use m_ompgpu_utils
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -60,7 +63,7 @@ module m_vtorho
  use m_electronpositron,   only : electronpositron_type,electronpositron_calctype
  use m_paw_dmft,           only : paw_dmft_type,init_dmft,destroy_dmft,print_dmft,saveocc_dmft
  use m_paw_correlations,   only : setnoccmmp
- use m_paw_occupancies,   only : pawmkrhoij
+ use m_paw_occupancies,    only : pawmkrhoij
  use m_paw_mkrho,          only : pawmkrho
  use m_crystal,            only : crystal_init, crystal_t
  use m_oper,               only : oper_type,init_oper,destroy_oper
@@ -85,18 +88,28 @@ module m_vtorho
  use m_wvl_rho,            only : wvl_mkrho
  use m_wvl_psi,            only : wvl_hpsitopsi, wvl_psitohpsi, wvl_nl_gradient
  use m_inwffil,            only : cg_from_atoms
+ use m_chebfiwf,           only : chebfiwf2_blocksize
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
+#endif
+
+#if defined HAVE_YAKL
+ use gator_mod
 #endif
 
 #if defined HAVE_BIGDFT
  use BigDFT_API,           only : last_orthon, evaltoocc, write_energies, eigensystem_info
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
+
+#ifdef HAVE_FC_ISO_C_BINDING
+ use, intrinsic :: iso_c_binding, only : c_int64_t
+#endif
+
 
  implicit none
 
@@ -361,9 +374,9 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: ikpt_loc,ikpt1,my_ikpt,ikxc,ilm,imagn,index1,iorder_cprj,ipert,iplex
  integer :: iscf,ispden,isppol,istwf_k,mband_cprj,mbdkpsp,mb2dkpsp
  integer :: mcgq,mcprj_local,mcprj_tmp,me_distrb,mkgq,mpi_comm_sphgrid
- integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff !mwarning,
+ integer :: my_nspinor,n1,n2,n3,n4,n5,n6,nband_eff,nbdbuf_eff !mwarning,
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
- integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol
+ integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
@@ -375,16 +388,42 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(gs_hamiltonian_type) :: gs_hamk
 !arrays
- integer,allocatable :: kg_k(:,:)
+ integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
- real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
- real(dp),allocatable :: dphasek(:,:),eig_k(:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
+ real(dp),allocatable :: cgrkxc(:,:),doccde(:)
+ real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
- real(dp),allocatable :: grnlnk(:,:),kinpw(:),kpg_k(:,:),occ_k(:),ph3d(:,:,:)
- real(dp),allocatable :: pwnsfacq(:,:),resid_k(:),rhoaug(:,:,:,:)
+ real(dp),allocatable :: grnlnk(:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: kinpw(:) => null()
+ real(c_double), ABI_CONTIGUOUS pointer :: eig_k(:) => null()
+#else
+ real(dp),allocatable :: kinpw(:)
+ real(dp),allocatable :: eig_k(:)
+#endif
+
+ real(dp),allocatable :: kpg_k(:,:),occ_k(:),ph3d(:,:,:)
+ real(dp),allocatable :: pwnsfacq(:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(c_double), ABI_CONTIGUOUS pointer :: resid_k(:) => null()
+ real(c_double), ABI_CONTIGUOUS pointer :: rhoaug(:,:,:,:) => null()
+#else
+ real(dp),allocatable :: resid_k(:)
+ real(dp),allocatable :: rhoaug(:,:,:,:)
+#endif
+
  real(dp),allocatable :: rhowfg(:,:),rhowfr(:,:),tauwfg(:,:),tauwfr(:,:)
- real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:)
+ real(dp),allocatable :: vectornd_pac(:,:,:,:,:)
+
+#if defined HAVE_GPU && defined HAVE_YAKL
+ real(real64), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:) => null()
+#else
+ real(dp), allocatable :: vlocal(:,:,:,:)
+#endif
+
  real(dp),allocatable :: vxctaulocal(:,:,:,:,:),ylm_k(:,:),zshift(:)
  type(pawcprj_type),allocatable :: cprj_tmp(:,:)
  type(pawcprj_type),allocatable,target:: cprj_local(:,:)
@@ -396,6 +435,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 #if defined HAVE_BIGDFT
  integer :: occopt_bigdft
 #endif
+
+#if defined(HAVE_GPU_CUDA)
+ type(gemm_nonlop_gpu_type) :: gemm_nonlop_gpu_obj
+#endif
+
 
 ! *********************************************************************
 
@@ -570,7 +614,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,&
 & paw_ij=paw_ij,ph1d=ph1d,usecprj=usecprj_local,electronpositron=electronpositron,fock=fock,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-& nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+& nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
 !Initializations for PAW (projected wave functions)
  mcprj_local=0 ; mband_cprj=0
@@ -588,7 +632,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      ABI_MALLOC(cprj_local,(dtset%natom,mcprj_local))
      call pawcprj_alloc(cprj_local,0,gs_hamk%dimcprj)
-     cprj=> cprj_local
+     cprj => null()
+     cprj => cprj_local
    end if
  end if
 
@@ -680,8 +725,16 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      nkpt1 = dtefield%mkmem_max
    end if
 
-   ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
-   ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_MALLOC_MANAGED(rhoaug, (/n4,n5,n6,gs_hamk%nvloc/))
+     ABI_MALLOC_MANAGED(vlocal, (/n4,n5,n6,gs_hamk%nvloc/))
+#endif
+   else
+     ABI_MALLOC(rhoaug,(n4,n5,n6,gs_hamk%nvloc))
+     ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamk%nvloc))
+   end if
+
    if(with_vxctau) then
      ABI_MALLOC(vxctaulocal,(n4,n5,n6,gs_hamk%nvloc,4))
    end if
@@ -691,6 +744,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
       ABI_MALLOC(vectornd_pac,(n4,n5,n6,gs_hamk%nvloc,3))
       vectornd_pac=zero
    end if
+
+  nbdbuf_eff = dtset%nbdbuf
+  ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
+  if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
+    write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
+    call wrtout(std_out,msg,'COLL')
+    nbdbuf_eff = 0
+  end if
 
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
@@ -718,15 +779,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
-        do idir = 1, 3
-          ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
-          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-          ABI_FREE(cgrvtrial)
-        end do
-        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
+       call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-
+    
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -808,15 +865,23 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !         call bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 !       end if
 
-       ABI_MALLOC(eig_k,(nband_k))
        ABI_MALLOC(ek_k,(nband_k))
        ABI_MALLOC(end_k,(nband_k))
        ABI_MALLOC(enlx_k,(nband_k))
        ABI_MALLOC(ek_k_nd,(2,nband_k,nband_k*paw_dmft%use_dmft))
        ABI_MALLOC(occ_k,(nband_k))
-       ABI_MALLOC(resid_k,(nband_k))
        ABI_MALLOC(zshift,(nband_k))
        ABI_MALLOC(grnl_k,(3*natom,nband_k*optforces))
+
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_MALLOC_MANAGED(eig_k,(/nband_k/))
+         ABI_MALLOC_MANAGED(resid_k,(/nband_k/))
+#endif
+       else
+         ABI_MALLOC(eig_k,(nband_k))
+         ABI_MALLOC(resid_k,(nband_k))
+       end if
 
        eig_k(:)=zero
        ek_k(:)=zero
@@ -830,7 +895,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        !resid_k(:)=zero
        zshift(:)=dtset%eshift
 
-       ABI_MALLOC(kg_k,(3,npw_k))
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_MALLOC_MANAGED(kg_k, (/3,npw_k/))
+#endif
+       else
+         ABI_MALLOC(kg_k,(3,npw_k))
+       end if
+
        ABI_MALLOC(ylm_k,(npw_k,psps%mpsang*psps%mpsang*psps%useylm))
        kg_k(:,1:npw_k)=kg(:,1+ikg:npw_k+ikg)
        if (psps%useylm==1) then
@@ -842,7 +914,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !      Set up remaining of the Hamiltonian
 
 !      Compute (1/2) (2 Pi)**2 (k+G)**2:
-       ABI_MALLOC(kinpw,(npw_k))
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_MALLOC_MANAGED(kinpw,(/npw_k/))
+#endif
+       else
+         ABI_MALLOC(kinpw,(npw_k))
+       end if
+
        call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg_k,kinpw,kpoint,npw_k,0,0)
 
 !      Compute (k+G) vectors (only if useylm=1)
@@ -891,6 +970,30 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            ph3d_k   =my_bandfft_kpt%ph3d_gather)
        end if
 
+!      If OpenMP GPU, load "hamiltonian" on GPU device
+       if (dtset%gpu_option == ABI_GPU_OPENMP) then
+         if(dtset%paral_kgb==0) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+         else if(istwf_k==1) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+         else if(istwf_k==2) then
+           call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+         else
+           ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+         end if
+       end if
+
+       if(dtset%wfoptalg == 111 .and. istep <= 1) then
+         gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
+         ! Only compute CHEBFI number of blocks if user didn't set it themselves
+         if(gemm_nonlop_nblocks==1) then
+           call chebfiwf2_blocksize(gs_hamk,mpi_enreg%bandpp,npw_k,nband_k,dtset%nspinor,mpi_enreg%paral_kgb,&
+           &                        dtset%gpu_option,nblk_gemm_nonlop)
+           gemm_nonlop_nblocks = nblk_gemm_nonlop
+         end if
+         if(gemm_nonlop_nblocks > 1) gemm_nonlop_is_distributed = .true.
+       end if
+
 !      Build inverse of overlap matrix for chebfi
        if(psps%usepaw == 1 .and. (dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111) .and. istep <= 1) then
           ABI_NVTX_START_RANGE(NVTX_INVOVL)
@@ -904,15 +1007,49 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
          if (istep <= 1) then
            !Init the arrays
-           call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-&           gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, gs_hamk%ucvol, gs_hamk%ffnl_k,&
-&           gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,compute_grad_atom=(optforces>0))
+           !FIXME Settle this
+           if ( dtset%gpu_option == ABI_GPU_DISABLED) then
+             call make_gemm_nonlop(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+                 gs_hamk%ucvol, gs_hamk%ffnl_k,&
+                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,&
+                 compute_grad_atom=(optforces>0))
+           else if ( dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
+             call make_gemm_nonlop_gpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+                 gs_hamk%ucvol, gs_hamk%ffnl_k, &
+                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
+                 compute_grad_atom=(optforces>0))
+           else if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+             if(mpi_enreg%paral_kgb==0) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
+             else if(gs_hamk%istwf_k==1) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
+             else if(gs_hamk%istwf_k==2) then
+               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
+             else
+               ABI_ERROR("istwfk > 2 is not handled with OpenMP GPU offload mode !")
+             end if
+             call make_gemm_nonlop_ompgpu(my_ikpt,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
+                 gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
+                 gs_hamk%ucvol, gs_hamk%ffnl_k, &
+                 gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k, &
+                 compute_grad_atom=(optforces>0))
+           end if
          end if
        end if
 
 #if defined HAVE_GPU_CUDA
-       if (dtset%use_gpu_cuda==1) then
-         call gpu_update_ffnl_ph3d(ph3d,size(ph3d),ffnl,size(ffnl))
+       if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+         if (mpi_enreg%paral_kgb==1) then
+           call gpu_update_ffnl_ph3d( &
+             & my_bandfft_kpt%ph3d_gather, INT(size(my_bandfft_kpt%ph3d_gather),c_int64_t), &
+             & my_bandfft_kpt%ffnl_gather, INT(size(my_bandfft_kpt%ffnl_gather),c_int64_t) )
+         else
+           call gpu_update_ffnl_ph3d( &
+             & ph3d, INT(size(ph3d),c_int64_t), &
+             & ffnl, INT(size(ffnl),c_int64_t) )
+         end if
        end if
 #endif
 
@@ -942,19 +1079,33 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,&
 &       dtset,eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
-&       mpi_enreg,dtset%mpw,natom,nband_k,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
+&       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+! Note: Should we keep nvhpc-23.1 in eos?
+#ifndef FC_NVHPC
        call timab(985,1,tsec)
+#endif
 
 #if defined HAVE_GPU_CUDA
-       if(dtset%use_gpu_cuda==1) call gpu_finalize_ffnl_ph3d()
+       if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
 #endif
        ABI_FREE(ffnl)
-       ABI_FREE(kinpw)
-       ABI_FREE(kg_k)
+
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_FREE_MANAGED(kinpw)
+         ABI_FREE_MANAGED(kg_k)
+#endif
+       else
+         ABI_FREE(kinpw)
+         ABI_FREE(kg_k)
+       end if
+
        ABI_FREE(kpg_k)
        ABI_FREE(ylm_k)
        ABI_FREE(ph3d)
@@ -1014,17 +1165,32 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          end if
        end if
 
+       if ( dtset%gpu_option == ABI_GPU_OPENMP) then
+         call ompgpu_free_hamilt_buffers()
+       end if
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+#ifndef FC_NVHPC
        call timab(985,2,tsec)
+#endif
 
-       ABI_FREE(eig_k)
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
        ABI_FREE(end_k)
        ABI_FREE(grnl_k)
        ABI_FREE(occ_k)
-       ABI_FREE(resid_k)
        ABI_FREE(zshift)
        ABI_FREE(enlx_k)
+
+       if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+         ABI_FREE_MANAGED(eig_k)
+         ABI_FREE_MANAGED(resid_k)
+#endif
+       else
+         ABI_FREE(eig_k)
+         ABI_FREE(resid_k)
+       end if
 
 !      Keep track of total number of bands (all k points so far, even for k points not treated by me)
        bdtot_index=bdtot_index+nband_k
@@ -1040,7 +1206,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      call timab(986,1,tsec)
 
-     !ABI_NVTX_START_RANGE(NVTX_FFTPAC)
      if (fixed_occ .and. mpi_enreg%paral_kgb==1) then
        call xmpi_sum(rhoaug,mpi_enreg%comm_bandspinorfft,ierr) !Sum the contributions over bands/FFT/spinors
      end if
@@ -1065,8 +1230,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
      end if
 
-     !ABI_NVTX_END_RANGE()
-
      call timab(986,2,tsec)
 
    end do ! End loop over spins
@@ -1088,8 +1251,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      call xmpi_sum(dphasek,spaceComm_distrb,ierr)
      ABI_FREE(dphasek)
    end if ! berryflag
-   ABI_FREE(rhoaug)
-   ABI_FREE(vlocal)
+
+   if(dtset%gpu_option==ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(rhoaug)
+     ABI_FREE_MANAGED(vlocal)
+#endif
+   else
+     ABI_FREE(rhoaug)
+     ABI_FREE(vlocal)
+   end if
+
    if(with_vxctau) then
      ABI_FREE(vxctaulocal)
    end if
@@ -1261,8 +1433,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          do isppol=1,dtset%nsppol
            do ikpt=1,dtset%nkpt
              nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-             nband_eff=max(1,nband_k-dtset%nbdbuf)
-             residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+             if (nbdbuf_eff>=0) then
+               nband_eff=max(1,nband_k-nbdbuf_eff)
+               residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+             else if (nbdbuf_eff==-101) then
+               residm=max(residm,maxval(occ(ibdkpt:ibdkpt+nband_k-1)*resid(ibdkpt:ibdkpt+nband_k-1)))
+             else
+               ABI_ERROR('Bad value of nbdbuf_eff')
+             end if
              ibdkpt=ibdkpt+nband_k
            end do
          end do
@@ -1585,22 +1763,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      if(iscf/=-1 .and. iscf/=-2)then
        call timab(993,1,tsec)
        energies%e_fermie = -huge(one)
-! CP addition for occopt 9 case
        if (dtset%occopt==9) then
           energies%e_fermih = -huge(one)
        end if
-! End CP addition
        bdtot_index=1
        do isppol=1,dtset%nsppol
          do ikpt=1,dtset%nkpt
            nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-           ! CP modified
-           !do iband=1,nband_k
-           !  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
-           !    energies%e_fermie=eigen(bdtot_index)
-           !  end if
-           !  bdtot_index=bdtot_index+1
-           !end do
            if (dtset%occopt/=9) then
               do iband=1,nband_k
                  if(abs(occ(bdtot_index))>tol8 .and. eigen(bdtot_index)>energies%e_fermie+tol10) then
@@ -1624,15 +1793,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
                  bdtot_index=bdtot_index+1
               end do
            end if
-           ! End CP modified
          end do
        end do
        call xmpi_max(energies%e_fermie,spaceComm_distrb,ierr)
-       ! CP added in the case occopt = 9
        if (dtset%occopt == 9) then
           call xmpi_max(energies%e_fermih,spaceComm_distrb,ierr)
        end if
-       ! End CP added
        call timab(993,2,tsec)
      end if
 
@@ -1685,7 +1851,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      option=2 ; enunit=1 ; vxcavg_dum=zero
      call prteigrs(eigen,enunit,energies%e_fermie,energies%e_fermih,&
 &     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
-&     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
+&     dtset%nband,nbdbuf_eff,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
    end if
 
@@ -1695,8 +1861,14 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    do isppol=1,dtset%nsppol
      do ikpt=1,dtset%nkpt
        nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-       nband_eff=max(1,nband_k-dtset%nbdbuf)
-       residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+       if (nbdbuf_eff>=0) then
+         nband_eff=max(1,nband_k-nbdbuf_eff)
+         residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+       else if (nbdbuf_eff==-101) then
+         residm=max(residm,maxval(occ(ibdkpt:ibdkpt+nband_k-1)*resid(ibdkpt:ibdkpt+nband_k-1)))
+       else
+         ABI_ERROR('Bad value of nbdbuf_eff')
+       end if
        ibdkpt=ibdkpt+nband_k
      end do
    end do
@@ -1747,6 +1919,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end do
  end if
 
+ ABI_NVTX_START_RANGE(NVTX_VTORHO_EXTRA)
  if (iscf>0.or.iscf==-3 .or. (dtset%usewvl==1 .and. iscf==0)) then
 
 !  PAW: Build new rhoij quantities from new occ then symetrize them
@@ -1764,8 +1937,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
      if (usecprj_local==1) then
        call pawmkrhoij(atindx,atindx1,cprj,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       mcprj_local,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&       dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,dtset%usewvl,dtset%wtk)
      else
        mcprj_tmp=my_nspinor*mband_cprj*dtset%mkmem*dtset%nsppol
        ABI_MALLOC(cprj_tmp,(natom,mcprj_tmp))
@@ -1777,8 +1950,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ucvol,dtfil%unpaw,xred,ylm,ylmgr_dum)
        call pawmkrhoij(atindx,atindx1,cprj_tmp,gs_hamk%dimcprj,dtset%istwfk,dtset%kptopt,&
 &       dtset%mband,mband_cprj,mcprj_tmp,dtset%mkmem,mpi_enreg,natom,dtset%nband,dtset%nkpt,&
-&       dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,dtfil%unpaw,&
-&       dtset%usewvl,dtset%wtk)
+&       dtset%nspden,dtset%nspinor,dtset%nsppol,occ,dtset%paral_kgb,paw_dmft,pawrhoij_unsym,&
+&       dtfil%unpaw,dtset%usewvl,dtset%wtk)
        call pawcprj_free(cprj_tmp)
        ABI_FREE(cprj_tmp)
      end if
@@ -1807,7 +1980,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call pawrhoij_free(pawrhoij_unsym)
        ABI_FREE(pawrhoij_unsym)
      end if
-   end if
+   end if ! psps%usepaw==1
 
    if(paw_dmft%use_dmft==1) then
 !    == check noccmmp
@@ -1834,6 +2007,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    end if
 
  end if ! iscf>0 or iscf=-3
+ ABI_NVTX_END_RANGE()
 
  if(psps%usepaw==1.and.(iscf>=0.or.iscf==-3))  then
    ABI_FREE(rhowfr)
@@ -1906,7 +2080,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
    ABI_FREE(EigMin)
    ABI_FREE(doccde)
 #if defined HAVE_GPU_CUDA
-   if(dtset%use_gpu_cuda==1) call gpu_finalize_ham_data()
+   if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ham_data()
 #endif
  end if
 
