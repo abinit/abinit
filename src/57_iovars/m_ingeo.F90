@@ -913,12 +913,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
 &          rprimd_primitive(1:3,1),ch10,&
 &          rprimd_primitive(1:3,2),ch10,&
 &          rprimd_primitive(1:3,3),ch10,&
-&          ' The Bravais lattice has iholohedry   =',bravais(1),ch10,&
-&          '                         center       =',bravais(2),ch10,&
-&          '                         bravais(3:5) =',bravais(3:5),ch10,&
-&          '                         bravais(6:8) =',bravais(6:8),ch10,&
-&          '                         bravais(9:11)=',bravais(9:11),ch10,&
-&          ' The number of point symmetries is nptsym=',nptsym           
+&          ' This Bravais lattice has iholohedry   =',bravais(1),ch10,&
+&          '                          center       =',bravais(2),ch10,&
+&          '                          bravais(3:5) =',bravais(3:5),ch10,&
+&          '                          bravais(6:8) =',bravais(6:8),ch10,&
+&          '                          bravais(9:11)=',bravais(9:11),ch10,&
+&          ' The number of point symmetries would be nptsym=',nptsym           
          ABI_COMMENT(msg)
 
          !Convert the point symmetries to the non-primitive reduced coordinates
