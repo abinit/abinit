@@ -1,5 +1,5 @@
 
-.Version 10.0.0.5 of ABINIT 
+.Version 10.0.0.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 13 Mar 2024.
-- ( at 10h07 )
+- ( at 17h01 )
   
 - input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_istwfk/tests/TestBot_MPI4/paral_t65_MPI4/t65.abi
 - output file    -> t65_MPI4.abo
@@ -245,8 +245,8 @@ tolerances: {tolwfr: 1.00E-18, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -111.76605662571    -1.118E+02 4.298E-05 8.242E+02
- ETOT  2  -111.67017841658     9.588E-02 1.551E-09 8.445E+02
+ ETOT  1  -111.76605662571    -1.118E+02 4.214E-05 8.242E+02
+ ETOT  2  -111.67017841658     9.588E-02 1.375E-09 8.445E+02
  ETOT  3  -112.20264535614    -5.325E-01 3.983E-07 7.764E+00
  ETOT  4  -112.20495389630    -2.309E-03 2.730E-09 2.033E-01
  ETOT  5  -112.20500127894    -4.738E-05 1.259E-07 1.296E-03
@@ -1797,10 +1797,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         22.8  wall=         22.9
+- Proc.   0 individual time (sec): cpu=         22.9  wall=         23.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         91.1  wall=         91.5
++Overall time at end (sec) : cpu=         91.7  wall=         92.1

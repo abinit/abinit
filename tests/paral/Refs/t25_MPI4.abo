@@ -1,5 +1,5 @@
 
-.Version 10.0.0.5 of ABINIT 
+.Version 10.0.0.6 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 13 Mar 2024.
-- ( at 10h06 )
+- ( at 17h01 )
   
 - input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/baguetl_istwfk/tests/TestBot_MPI4/paral_t25_MPI4/t25.abi
 - output file    -> t25_MPI4.abo
@@ -202,7 +202,7 @@ tolerances: {toldfe: 1.00E-10, }
 ...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
- ETOT  1  -10.529009169654    -1.053E+01 2.994E-06 9.508E+01
+ ETOT  1  -10.529009169654    -1.053E+01 2.991E-06 9.508E+01
  ETOT  2  -10.429282908305     9.973E-02 6.504E-08 9.390E+00
  ETOT  3  -10.417982468021     1.130E-02 7.996E-09 1.491E-01
  ETOT  4  -10.417942118393     4.035E-05 6.243E-10 2.432E-03
@@ -385,7 +385,7 @@ force_length_stats: {min:   4.07878567E-01, max:   4.07878567E-01, mean:   4.078
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   45.802E-14; max=  54.483E-13
+ Mean square residual over all n,k,spin=   45.801E-14; max=  54.482E-13
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.220000000000      0.220000000000      0.220000000000
@@ -629,4 +629,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
++Overall time at end (sec) : cpu=          3.0  wall=          3.1
