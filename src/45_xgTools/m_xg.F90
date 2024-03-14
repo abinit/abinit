@@ -3806,12 +3806,13 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
 #endif
 
+    call xgBlock_check(xgBlockA,xgBlockB)
+    if (comm(xgBlockA)/=comm(xgBlockB)) then
+      ABI_ERROR('xgBlockA and xgBlockB should have the same comm')
+    end if
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,dot)
 
-    if (xgBlockA%space/=xgBlockB%space) then
-      ABI_ERROR('xgBlockA and xgBlockB should have the same space')
-    end if
     if (xgBlockA%space/=SPACE_CR) then
       if (dot%space/=xgBlockA%space) then
         ABI_ERROR('xgBlockA and dot should have the same space')
@@ -3823,7 +3824,7 @@ contains
       if (xgBlockB%me_g0<0) then
         ABI_ERROR("xgBlockB me_g0 is not initialized")
       end if
-      if (xgBlockA%me_g0/=xgBLockB%me_g0) then
+      if (xgBlockA%me_g0/=xgBlockB%me_g0) then
         ABI_ERROR('xgBlockA and xgBlockB should have the same me_g0')
       end if
       if (dot%space/=SPACE_R) then
@@ -4054,6 +4055,8 @@ contains
       end select
 
     end if ! gpu_option
+
+    call xgBlock_mpi_sum(dot,comm=comm(xgBlockA))
 
   end subroutine xgBlock_colwiseDotProduct
   !!***
