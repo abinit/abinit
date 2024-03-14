@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h21 )
+.Starting date : Sun 16 Jul 2023.
+- ( at 07h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/paral_t60_MPI1/t60.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/paral_t60_MPI1/t60.abi
 - output file    -> t60_MPI1.abo
 - root for input  files -> t60_MPI1i
 - root for output files -> t60_MPI1o
-
 
  DATASET   11 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       1.628 Mbytes of memory.
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   12 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 12.
@@ -55,7 +53,6 @@ P This job should need less than                       1.216 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   13 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -74,7 +71,6 @@ P This job should need less than                       1.631 Mbytes of memory.
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   21 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 21.
@@ -91,7 +87,6 @@ P This job should need less than                       1.628 Mbytes of memory.
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   22 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 22.
@@ -107,7 +102,6 @@ P This job should need less than                       1.216 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   23 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -126,7 +120,6 @@ P This job should need less than                       1.811 Mbytes of memory.
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   31 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 31.
@@ -143,7 +136,6 @@ P This job should need less than                       1.628 Mbytes of memory.
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
 
-
  DATASET   32 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 32.
@@ -159,7 +151,6 @@ P This job should need less than                       1.216 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.144 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
-
 
  DATASET   33 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
@@ -396,8 +387,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09552
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1077,23 +1068,23 @@ tolerances: {tolwfr: 1.00E-08, }
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    1   1    1         0.7928203946         0.0000000000
-   1    1   2    1        -0.0000762703         0.0000000000
-   1    1   3    1         0.0000017280         0.0000000000
+   1    1   1    1         0.7934951056        -0.0000000000
+   1    1   2    1         0.0000388249         0.0000000000
+   1    1   3    1         0.0003485943         0.0000000000
    1    1   1    2        -0.7934951056         0.0000000000
    1    1   2    2        -0.0000388249        -0.0000000000
    1    1   3    2        -0.0003485943        -0.0000000000
   
-   2    1   1    1        -0.0000770378         0.0000000000
-   2    1   2    1         0.7935503227         0.0000000000
-   2    1   3    1        -0.0002211181         0.0000000000
+   2    1   1    1         0.0001265925         0.0000000000
+   2    1   2    1         0.7929849748        -0.0000000000
+   2    1   3    1         0.0002355117         0.0000000000
    2    1   1    2        -0.0001265925        -0.0000000000
    2    1   2    2        -0.7929849748         0.0000000000
    2    1   3    2        -0.0002355117        -0.0000000000
   
-   3    1   1    1         0.0000004939         0.0000000000
-   3    1   2    1        -0.0002206950         0.0000000000
-   3    1   3    1         0.7936921943         0.0000000000
+   3    1   1    1        -0.0001112178         0.0000000000
+   3    1   2    1         0.0001274527         0.0000000000
+   3    1   3    1         0.7929693094        -0.0000000000
    3    1   1    2         0.0001112178        -0.0000000000
    3    1   2    2        -0.0001274527        -0.0000000000
    3    1   3    2        -0.7929693094         0.0000000000
@@ -1101,40 +1092,40 @@ tolerances: {tolwfr: 1.00E-08, }
    1    2   1    1        -0.7934929002        -0.0000000000
    1    2   2    1        -0.0001244379         0.0000000000
    1    2   3    1         0.0001110749         0.0000000000
-   1    2   1    2         0.7930772510         0.0000000000
-   1    2   2    2        -0.0000362544         0.0000000000
-   1    2   3    2        -0.0000142850         0.0000000000
+   1    2   1    2         0.7934929002         0.0000000000
+   1    2   2    2         0.0001244379        -0.0000000000
+   1    2   3    2        -0.0001110749        -0.0000000000
   
    2    2   1    1        -0.0000389558         0.0000000000
    2    2   2    1        -0.7929827515        -0.0000000000
    2    2   3    1        -0.0001278095         0.0000000000
-   2    2   1    2        -0.0000362183         0.0000000000
-   2    2   2    2         0.7933386182         0.0000000000
-   2    2   3    2        -0.0000897820         0.0000000000
+   2    2   1    2         0.0000389558        -0.0000000000
+   2    2   2    2         0.7929827515         0.0000000000
+   2    2   3    2         0.0001278095        -0.0000000000
   
    3    2   1    1        -0.0003496886         0.0000000000
    3    2   2    1        -0.0002327277         0.0000000000
    3    2   3    1        -0.7929677344        -0.0000000000
-   3    2   1    2        -0.0000151495         0.0000000000
-   3    2   2    2        -0.0000900748         0.0000000000
-   3    2   3    2         0.7931865446         0.0000000000
+   3    2   1    2         0.0003496886        -0.0000000000
+   3    2   2    2         0.0002327277        -0.0000000000
+   3    2   3    2         0.7929677344         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
-  -1.646673E-04  9.010822E-05  1.913948E-04  8.511864E-03  8.512147E-03
-   8.512502E-03
+  -1.290837E-06 -1.286418E-06  0.000000E+00  8.509921E-03  8.511595E-03
+   8.513960E-03
  Phonon energies in meV     :
-- -4.480825E+00  2.451969E+00  5.208118E+00  2.316196E+02  2.316273E+02
--  2.316369E+02
+- -3.512547E-02 -3.500520E-02  0.000000E+00  2.315667E+02  2.316123E+02
+-  2.316766E+02
  Phonon frequencies in cm-1    :
-- -3.614030E+01  1.977647E+01  4.200630E+01  1.868138E+03  1.868200E+03
--  1.868278E+03
+- -2.833060E-01 -2.823360E-01  0.000000E+00  1.867712E+03  1.868079E+03
+-  1.868598E+03
  Phonon frequencies in Thz     :
-- -1.083459E+00  5.928836E-01  1.259317E+00  5.600537E+01  5.600724E+01
--  5.600957E+01
+- -8.493301E-03 -8.464221E-03  0.000000E+00  5.599259E+01  5.600360E+01
+-  5.601917E+01
  Phonon energies in Kelvin  :
-- -5.199776E+01  2.845389E+01  6.043763E+01  2.687831E+03  2.687920E+03
--  2.688032E+03
+- -4.076137E-01 -4.062180E-01  0.000000E+00  2.687217E+03  2.687746E+03
+-  2.688493E+03
  Components of second-order derivatives of the electronic energy, EIGR2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
    1   1   1   1   -1.6872518304E+00    0.0000000000E+00
@@ -1184,14 +1175,14 @@ tolerances: {tolwfr: 1.00E-08, }
  Fan corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.01859   -0.28524   -0.37201   -0.40398   -0.28854   -0.23455   -0.18958   -0.02893
-   0.05969    0.04853
+  -0.00084   -0.00581   -0.00581   -0.00581   -0.00619   -0.00619   -0.00619   -0.00110
+   0.00040    0.00245
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 10, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.50597   -7.76168  -10.12303  -10.99293   -7.85150   -6.38235   -5.15869   -0.78714
-   1.62436    1.32062
+  -0.02278   -0.15823   -0.15816   -0.15810   -0.16856   -0.16841   -0.16844   -0.02983
+   0.01096    0.06667
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1199,14 +1190,14 @@ tolerances: {tolwfr: 1.00E-08, }
  DDW corrections to eigenvalues at T=0 (hartree) for nkpt=   8  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.01814    0.28694    0.37371    0.40569    0.28734    0.23335    0.18838    0.02843
-  -0.06057   -0.04784
+   0.00038    0.00752    0.00751    0.00752    0.00500    0.00500    0.00500    0.00060
+  -0.00128   -0.00176
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
  DDW corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 10, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.49362    7.80798   10.16927   11.03932    7.81888    6.34991    5.12617    0.77367
-  -1.64824   -1.30187
+   0.01043    0.20453    0.20440    0.20450    0.13594    0.13596    0.13593    0.01635
+  -0.03484   -0.04792
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -1220,7 +1211,7 @@ tolerances: {tolwfr: 1.00E-08, }
 
  Fan+DDW corrs   to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband= 10, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.01235    0.04630    0.04624    0.04639   -0.03262   -0.03245   -0.03251   -0.01347
+  -0.01235    0.04630    0.04624    0.04639   -0.03262   -0.03245   -0.03252   -0.01347
   -0.02388    0.01875
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
@@ -1515,8 +1506,8 @@ meta: {optdriver: 1, rfphon: 1, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   1.93885
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2084,8 +2075,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09552
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3079,6 +3070,11 @@ P          mk1mem           8
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -3175,10 +3171,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.6
+- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered  13 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.0  wall=         10.6
+.Delivered  17 WARNINGs and  28 COMMENTs to log file.
++Overall time at end (sec) : cpu=          8.4  wall=          8.7

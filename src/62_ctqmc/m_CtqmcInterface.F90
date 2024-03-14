@@ -23,6 +23,7 @@
 #include "defs.h"
 MODULE m_CtqmcInterface
 USE m_Ctqmc
+use defs_basis
 
 IMPLICIT NONE
 
@@ -102,7 +103,7 @@ CONTAINS
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM)
+SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,flavors,samples,beta,U,ostream,MPI_COMM,nspinor)
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -115,12 +116,13 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   INTEGER, INTENT(IN) :: samples
   !INTEGER, INTENT(IN) :: Wmax
   INTEGER, INTENT(IN) :: ostream
+  INTEGER, INTENT(IN) :: nspinor
   DOUBLE PRECISION, INTENT(IN) :: beta
   DOUBLE PRECISION, INTENT(IN) :: u
   !DOUBLE PRECISION, INTENT(IN) :: mu
 !Local arguements -----------------------------
   INTEGER          :: ifstream!,opt_nondiag
-  DOUBLE PRECISION, DIMENSION(1:9) :: buffer
+  DOUBLE PRECISION, DIMENSION(1:10) :: buffer
  ! opt_nondiag=0
 
   ifstream = 42
@@ -134,6 +136,7 @@ SUBROUTINE CtqmcInterface_init(this,iseed,sweeps,thermalization,measurements,fla
   buffer(7)=beta
   buffer(8)=U
   buffer(9)=GREENHYB_TAU
+  buffer(10)=nspinor
  ! buffer(10)=DBLE(opt_nondiag)
   !buffer(9)=0.d0!mu
   !buffer(9)=DBLE(Wmax)
@@ -260,7 +263,8 @@ END SUBROUTINE CtqmcInterface_setOpts
 !!
 !! SOURCE
 
-SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels) 
+SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt_levels,Magmom_orb,Magmom_spin,Magmom_tot,Iatom, &
+&fname) 
 
 !Arguments ------------------------------------
   TYPE(CtqmcInterface), INTENT(INOUT) :: this
@@ -273,7 +277,11 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN   ) :: matU
   DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN   ) :: opt_sym
   DOUBLE PRECISION, DIMENSION(:  ), OPTIONAL, INTENT(IN   ) :: opt_levels
-
+  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_orb
+  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_spin
+  DOUBLE PRECISION, DIMENSION(:,:), OPTIONAL, INTENT(IN ) :: Magmom_tot
+  INTEGER, INTENT(IN )  :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
   CALL Ctqmc_reset(this%Hybrid)
 
 !  ifstream = 42
@@ -291,6 +299,9 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
   IF ( PRESENT(matU) ) &
     CALL Ctqmc_setU(this%Hybrid, matU)
 
+  IF ( PRESENT(Magmom_orb) ) &
+    CALL Ctqmc_setMagmom(this%Hybrid, Magmom_orb, Magmom_spin, Magmom_tot)
+
   CALL Ctqmc_run(this%Hybrid,opt_order=this%opt_order, &
                            opt_histo=this%opt_histo, &
                            opt_movie=this%opt_movie, &
@@ -300,7 +311,7 @@ SUBROUTINE CtqmcInterface_run(this,G0omega, Gtau, Gw, D,E,Noise,matU,opt_sym,opt
                            opt_spectra=this%opt_spectra, &
                            opt_gMove=this%opt_gMove)
 
-  CALL Ctqmc_getResult(this%Hybrid)
+  CALL Ctqmc_getResult(this%Hybrid,Iatom,fname)
 
   IF ( PRESENT(opt_sym) ) THEN
     CALL Ctqmc_symmetrizeGreen(this%Hybrid,opt_sym)

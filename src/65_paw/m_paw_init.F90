@@ -216,9 +216,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 !* REAL SPHERICAL HARMONICS
 !* REAL GAUNT COEFFICIENTS
 
-!if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
  usekden=pawxc_get_usekden(ixc)
- nabgnt_option=0;if (usekden>0) nabgnt_option=1
+ nabgnt_option=0;if (usekden>0) nabgnt_option=1 ! If kin. ene. density is used, need nabla Gaunt coeffs
  use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
@@ -752,13 +751,13 @@ subroutine paw_gencond(Dtset,gnt_option,mode,call_pawinit)
  case ("test")
 
    if (gencond(1)/=Dtset%pawlcutd  .or.gencond(2) /=Dtset%pawlmix  .or.&
-&      gencond(3)/=Dtset%pawnphi   .or.gencond(4) /=Dtset%pawntheta.or.&
-&      gencond(5)/=Dtset%pawspnorb .or.gencond(6) /=Dtset%pawxcdev .or.&
-&      gencond(7)/=Dtset%nsym      .or.gencond(8) /=gnt_option     .or.&
-&      gencond(9)/=Dtset%usepotzero.or.gencond(10)/=Dtset%usekden) call_pawinit = .True.
+       gencond(3)/=Dtset%pawnphi   .or.gencond(4) /=Dtset%pawntheta.or.&
+       gencond(5)/=Dtset%pawspnorb .or.gencond(6) /=Dtset%pawxcdev .or.&
+       gencond(7)/=Dtset%nsym      .or.gencond(8) /=gnt_option     .or.&
+       gencond(9)/=Dtset%usepotzero.or.gencond(10)/=Dtset%usekden) call_pawinit = .True.
 
  case ("save")
-    ! Update internal values
+   ! Update internal values
    gencond(1)=Dtset%pawlcutd  ; gencond(2) =Dtset%pawlmix
    gencond(3)=Dtset%pawnphi   ; gencond(4) =Dtset%pawntheta
    gencond(5)=Dtset%pawspnorb ; gencond(6) =Dtset%pawxcdev

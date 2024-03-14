@@ -29,6 +29,7 @@ Coming now to individuals,
 recent direct contributors to ABINIT (versions 8.10.0 to 9.8.0) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
+F. Akhmetov (Radioteddy on abinit github)
 B. Amadon
 G. Antonius
 L. Baguet

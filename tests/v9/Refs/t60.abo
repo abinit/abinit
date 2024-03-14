@@ -1,5 +1,5 @@
 
-.Version 9.9.0 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  8 Mar 2023.
-- ( at 16h02 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h14 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.abi
 - output file    -> t60.abo
 - root for input  files -> t60i
 - root for output files -> t60o
-
 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,7 +117,6 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -141,7 +134,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    8 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -157,7 +149,6 @@ P This job should need less than                       5.010 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    9 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -175,7 +166,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET   10 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -192,7 +182,6 @@ P This job should need less than                       5.010 Mbytes of memory.
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET   11 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 11.
@@ -208,7 +197,6 @@ P This job should need less than                       5.742 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET   12 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
@@ -698,13 +686,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -729,7 +724,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -756,8 +751,8 @@ meta: {optdriver: 7, eph_task: 4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -771,8 +766,8 @@ meta: {optdriver: 7, eph_task: 4, }
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/jabreu_cumulant_for_merge/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -980,13 +975,20 @@ meta: {optdriver: 7, eph_task: 5, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1011,7 +1013,7 @@ meta: {optdriver: 7, eph_task: 5, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -1076,13 +1078,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1107,7 +1116,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -1326,13 +1335,20 @@ meta: {optdriver: 7, eph_task: -4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1357,7 +1373,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -1565,13 +1581,20 @@ meta: {optdriver: 7, eph_task: -5, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1596,7 +1619,7 @@ meta: {optdriver: 7, eph_task: -5, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -1661,13 +1684,20 @@ meta: {optdriver: 7, eph_task: -4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1692,7 +1722,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -1907,13 +1937,20 @@ meta: {optdriver: 7, eph_task: -4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -1938,7 +1975,7 @@ meta: {optdriver: 7, eph_task: -4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2153,13 +2190,20 @@ meta: {optdriver: 7, eph_task: 4, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -2184,7 +2228,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2402,13 +2446,20 @@ meta: {optdriver: 7, eph_task: 15, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -2433,7 +2484,7 @@ meta: {optdriver: 7, eph_task: 15, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2497,13 +2548,20 @@ meta: {optdriver: 7, eph_task: -15, }
 
 
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -2528,7 +2586,7 @@ meta: {optdriver: 7, eph_task: -15, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2598,13 +2656,20 @@ meta: {optdriver: 7, eph_task: 4, }
  Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
  Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
  New fermi level:     5.528197E-02, with nelect:     7.998307E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -2629,7 +2694,7 @@ meta: {optdriver: 7, eph_task: 4, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2806,13 +2871,20 @@ meta: {optdriver: 7, eph_task: 9, }
  Adding eph_extrael: -1.693263E-03 to input nelect: 8.000000E+00
  Old fermi level:     1.659170E-01, with nelect:     8.000000E+00
  New fermi level:     5.528197E-02, with nelect:     7.998307E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
  R(3)=  3.8515040  3.8515040  0.0000000  G(3)=  0.1298194  0.1298194 -0.1298194
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  Li
+    2)    0.5000000  0.5000000  0.5000000   F
+
+ DDB file with 3 blocks has been read.
 
 ================================================================================
 
@@ -2837,7 +2909,7 @@ meta: {optdriver: 7, eph_task: 9, }
        3               3        0.004143        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    1.040868E+00   -1.294974E-16   -1.295194E-16
@@ -2895,7 +2967,7 @@ meta: {optdriver: 7, eph_task: 9, }
   3.90728E+01  3.73106E+01  3.56189E+01  3.39923E+01  3.24259E+01  3.09153E+01  2.94567E+01  2.80464E+01  2.66815E+01  2.53591E+01
  -8.16101E+00 -7.92371E+00 -7.71120E+00 -7.52148E+00 -7.35291E+00 -7.20397E+00 -7.07347E+00 -6.96039E+00 -6.86382E+00 -6.78305E+00
 
- Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+ Print first 5 temperatures of diagonal mobility_mu  > 1e-6 (with ieh as electrons or holes) for testing purposes:
  spin: 1
  mobility_mu for itemp:1 ieh: 2 xyz: 1
   4.78510E-02
@@ -3458,5 +3530,5 @@ P           mkmem           8
 ================================================================================
 
  Calculation completed.
-.Delivered  14 WARNINGs and  23 COMMENTs to log file.
+.Delivered  14 WARNINGs and  24 COMMENTs to log file.
 +Overall time at end (sec) : cpu=          9.2  wall=          9.8

@@ -366,7 +366,7 @@ types of 2DTE's follows (all converted to Cartesian coordinates and in atomic un
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
 
-       1    1   1    1         0.1098837504         0.0000000000
+       1    1   1    1         0.1098826675         0.0000000000
        1    1   2    1         0.0000000000         0.0000000000
        1    1   3    1         0.0000000000         0.0000000000
                 .....
@@ -377,7 +377,7 @@ which basically is a way of making sure that forces sum to zero when an atom is 
 
       Effective charges, in cartesian coordinates,
       (from phonon response)
-       if specified in the inputs, asr has been imposed
+       if specified in the inputs, charge neutrality has been imposed
          j1       j2             matrix element
       dir pert dir pert     real part    imaginary part
 

@@ -1,5 +1,5 @@
 
-.Version 9.7.4 of ABINIT 
+.Version 9.11.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  4 May 2022.
-- ( at 01h27 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 12h11 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t55.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v9_t50-t51-t52-t53-t54-t55-t56/t55.abi
 - output file    -> t55.abo
 - root for input  files -> t55i
 - root for output files -> t55o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       4.102 Mbytes of memory.
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -56,7 +54,6 @@ P This job should need less than                       4.102 Mbytes of memory.
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
 
-
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,7 +69,6 @@ P This job should need less than                       4.102 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -271,13 +267,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t55o_DS20_DDB
@@ -296,8 +299,8 @@ meta: {optdriver: 7, eph_task: -4, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/gmatteo_develop/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -605,13 +608,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t55o_DS20_DDB
@@ -921,13 +931,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t55o_DS20_DDB
@@ -1235,13 +1252,20 @@ meta: {optdriver: 7, eph_task: -4, }
  Adding eph_extrael: 1.000000E-06 to input nelect: 8.000000E+00
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     5.485002E-01, with nelect:     8.000001E+00
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
  R(3)=  3.3517340  3.3517340  0.0000000  G(3)=  0.1491765  0.1491765 -0.1491765
  Unit cell volume ucvol=  7.5307571E+01 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000   C
+    2)    0.2500000  0.2500000  0.2500000   C
+
+ DDB file with 3 blocks has been read.
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
  Values initialized with zeros.
 - Cannot find quadrupole tensor in DDB file: t55o_DS20_DDB
@@ -1741,10 +1765,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          5.3
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          5.3
+.Delivered   4 WARNINGs and  25 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.7  wall=          3.9

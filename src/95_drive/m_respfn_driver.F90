@@ -86,6 +86,7 @@ module m_respfn_driver
  use m_dfpt_loopert,only : dfpt_looppert, eigen_meandege
  use m_rhotoxc,     only : rhotoxc
  use m_drivexc,     only : check_kxc
+ use m_xc_tb09,     only : xc_tb09_update_c
  use m_mklocl,      only : mklocl, mklocl_recipspace
  use m_common,      only : setup1, prteigrs
  use m_fourier_interpol, only : transgrid
@@ -97,7 +98,7 @@ module m_respfn_driver
  use m_d2frnl,     only : d2frnl
 
 #if defined HAVE_GPU_CUDA
- use m_manage_cuda
+ use m_alloc_hamilt_gpu
 #endif
 
  implicit none
@@ -210,10 +211,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,parameter :: formeig=0,level=10
  integer,parameter :: response=1,syuse=0,master=0,cplex1=1
  integer :: nk3xc
- integer :: analyt,ask_accurate,bantot,bdeigrf,coredens_method,cplex,cplex_rhoij
+ integer :: analyt,ask_accurate,asr,bantot,bdeigrf,chneut,coredens_method,coretau_method,cplex,cplex_rhoij
  !integer :: nkpt_eff, band_index, ikpt, isppol, nkpt_max, nband_k,
  integer :: dim_eig2nkq,dim_eigbrd,dyfr_cplex,dyfr_nondiag,gnt_option
- integer :: gscase,has_dijnd,has_diju,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
+ integer :: gscase,has_dijnd,has_diju,has_vhartree,has_kxc,iatom,iatom_tot,iband,idir,ider,ierr,ifft,ii,indx
  integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  integer :: initialized,ipert,ipert2,ireadwf0,iscf,iscf_eff,ispden,isym
  integer :: itypat,izero,mcg,me,mgfftf,mk1mem,mkqmem,mpert,mu
@@ -221,15 +222,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: nkpt_rbz,nkxc,nkxc1,nspden_rhoij,ntypat,nzlmopt,openexit
  integer :: optcut,option,optgr0,optgr1,optgr2,optorth,optrad
  integer :: optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv
- integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwr,rdwrpaw
- integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
+ integer :: outd2,pawbec,pawpiezo,prtbbb,psp_gencond,qzero,rdwrpaw
+ integer :: rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
  real(dp) :: eei,eew,ehart,eii,ek,enl,entropy,enxc
- real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm ! CP added fermih
+ real(dp) :: epaw,epawdc,etot,evdw,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,qphnrm,residm
  real(dp) :: ucvol,vxcavg
  character(len=500) :: message
  type(ebands_t) :: bstruct
@@ -250,6 +251,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
+ real(dp) :: dummy_in(0)
+ real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3),strn_dummy6(6),strv_dummy6(6),strsxc(6),tsec(2)
  real(dp),parameter :: k0(3)=(/zero,zero,zero/)
  real(dp),allocatable :: becfrnl(:,:,:),cg(:,:),d2bbb(:,:,:,:,:,:),d2cart(:,:,:,:,:)
@@ -269,9 +272,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: grxc(:,:),kxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phfrq(:),phnons(:,:,:),piezofrnl(:,:)
  real(dp),allocatable :: rhog(:,:),rhor(:,:),rhowfg(:,:),rhowfr(:,:)
- real(dp),allocatable :: symrel_cart(:,:,:)
+ real(dp),allocatable :: symrel_cart(:,:,:),taug(:,:),taur(:,:)
  real(dp),allocatable :: vhartr(:),vpsp(:),vtrial(:,:)
- real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
+ real(dp),allocatable :: vxc(:,:),vxctau(:,:,:),xccc3d(:),xcctau3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -306,7 +309,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  iscf=dtset%iscf
 
 !Respfn input variables
- rfasr=dtset%rfasr   ; rfdir(1:3)=dtset%rfdir(1:3)
+ asr=dtset%asr   ; chneut=dtset%chneut ; rfdir(1:3)=dtset%rfdir(1:3)
  rfddk=dtset%rfddk   ; rfelfd=dtset%rfelfd ; rfmagn=dtset%rfmagn
  rfphon=dtset%rfphon ; rfstrs=dtset%rfstrs
  rfuser=dtset%rfuser ; rf2_dkdk=dtset%rf2_dkdk ; rf2_dkde=dtset%rf2_dkde
@@ -345,6 +348,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  gmet_for_kg=matmul(transpose(gprimd_for_kg),gprimd_for_kg)
 
 !Define the set of admitted perturbations
+! Note that we have a global parameter (mpert=natom+MPERT_MAX)
+! with MPERT_MAX=8, but we use a smaller value here.
  mpert=natom+7
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
@@ -429,7 +434,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
+
 !If parallelism over atom, hdr is distributed
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
@@ -544,8 +550,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Here allocation of GPU for fft calculations
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%use_gpu_cuda)
+ if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,0,psps,dtset%gpu_option)
  end if
 #endif
 
@@ -680,12 +686,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      has_kxc=1
      call pawxc_get_nkxc(nkxc1,dtset%nspden,dtset%xclevel)
    end if
+   has_vhartree=0
+   if(dtset%orbmag>0 .AND. dtset%pawspnorb > 0) has_vhartree=1
    call paw_an_init(paw_an,dtset%natom,dtset%ntypat,nkxc1,0,dtset%nspden,&
-&   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vxc_ex=1,has_kxc=has_kxc,&
-&   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
+        &   cplex,dtset%pawxcdev,dtset%typat,pawang,pawtab,has_vxc=1,has_vhartree=has_vhartree,has_vxctau=dtset%usekden,&
+        &   has_vxc_ex=1,has_kxc=has_kxc,mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
    call paw_ij_init(paw_ij,cplex,dtset%nspinor,dtset%nsppol,dtset%nspden,dtset%pawspnorb,&
 &   natom,dtset%ntypat,dtset%typat,pawtab,has_dij=1,has_dijhartree=1,has_dijnd=has_dijnd,&
-&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,nucdipmom=dtset%nucdipmom,&
+&   has_dijso=1,has_dijU=has_diju,has_pawu_occ=1,has_exexch_pot=1,&
+&   nucdipmom=dtset%nucdipmom,&
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
  else ! PAW vs NCPP
@@ -698,64 +707,92 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_MALLOC(rhog,(2,nfftf))
  ABI_MALLOC(rhor,(nfftf,dtset%nspden))
+ ABI_MALLOC(taug,(2,nfftf*dtset%usekden))
+ ABI_MALLOC(taur,(nfftf,dtset%nspden*dtset%usekden))
 
-!Read ground-state charge density from diskfile in case getden /= 0
-!or compute it from wfs that were read previously : rhor as well as rhog
+!>>> Initialize charge density
 
- if (dtset%getden /= 0 .or. dtset%irdden /= 0) then
-   ! Read rho1(r) from a disk file and broadcast data.
-   ! This part is not compatible with MPI-FFT (note single_proc=.True. below)
-
-   rdwr=1;rdwrpaw=psps%usepaw;if(ireadwf0/=0) rdwrpaw=0
+ if (dtset%getden/=0.or.dtset%irdden/=0) then
+   ! Choice 1: read charge density from a disk file and broadcast data
+   !   This part is not compatible with MPI-FFT (note single_proc=.True. below)
+   rdwrpaw=psps%usepaw ; if(ireadwf0/=0) rdwrpaw=0
    if (rdwrpaw/=0) then
      ABI_MALLOC(pawrhoij_read,(natom))
      call pawrhoij_nullify(pawrhoij_read)
      call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
-&              nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
+&         nspden=dtset%nspden,spnorb=dtset%pawspnorb,cpxocc=dtset%pawcpxocc)
      call pawrhoij_alloc(pawrhoij_read,cplex_rhoij,nspden_rhoij,dtset%nspinor,&
 &                        dtset%nsppol,dtset%typat,pawtab=pawtab)
    else
      ABI_MALLOC(pawrhoij_read,(0))
    end if
-
-!    MT july 2013: Should we read rhoij from the density file ?
-   call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
-   hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_den%free()
-
+   ! Note MT july 2013: should we read rhoij from the density file?
+   call read_rhor(dtfil%fildensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw,&
+&                 mpi_enreg,rhor,hdr_den,pawrhoij_read,spaceworld,check_hdr=hdr)
+   etotal = hdr_den%etot
+   call hdr_den%free()
    if (rdwrpaw/=0) then
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
      call pawrhoij_free(pawrhoij_read)
    end if
    ABI_FREE(pawrhoij_read)
-
-!  Compute up+down rho(G) by fft
-   ABI_MALLOC(work,(nfftf))
-   work(:)=rhor(:,1)
-   call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
-   ABI_FREE(work)
+   ! Compute up+down rho(G) by fft
+   call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
 
  else
-   izero=0
-!  Obtain the charge density from read wfs
-!  Be careful: in PAW, compensation density has to be added !
+   ! Choice 2: obtain the charge density from read wfs
+   !   Warning: in PAW, compensation density has to be added !
    tim_mkrho=4
-   paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
-   paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+   paw_dmft%use_dmft=0 ; paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    if (psps%usepaw==1) then
      ABI_MALLOC(rhowfg,(2,dtset%nfft))
      ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
-     ABI_FREE(rhowfg)
-     ABI_FREE(rhowfr)
+      ABI_FREE(rhowfg)
+      ABI_FREE(rhowfr)
    else
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
-&     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if
- end if ! getden
+
+ end if ! choice for charge density initialization
+
+!>>> Initialize kinetic energy density
+ if (dtset%usekden==1) then 
+
+   if (dtset%getkden/=0.or.dtset%irdkden/=0) then
+     ! Choice 1: read kinetic energy density from a disk file and broadcast data
+     !   This part is not compatible with MPI-FFT (note single_proc=.True. below)
+     rdwrpaw=0
+     ABI_MALLOC(pawrhoij_read,(0))
+     call read_rhor(dtfil%filkdensin,cplex1,dtset%nspden,nfftf,ngfftf,rdwrpaw,&
+&                   mpi_enreg,taur,hdr_den,pawrhoij_read,spaceworld,check_hdr=hdr)
+     call hdr_den%free()
+     ABI_FREE(pawrhoij_read)
+     ! Compute up+down tau(G) by fft
+     call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
+
+   else
+     ! Choice 2: obtain the kinetic energy density from read wfs
+     tim_mkrho=4
+     paw_dmft%use_dmft=0 ; paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
+     if (psps%usepaw==1) then
+       ABI_MALLOC(rhowfg,(2,dtset%nfft))
+       ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&                 rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+       call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+       ABI_FREE(rhowfg)
+       ABI_FREE(rhowfr)
+     else
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&                 taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     end if
+
+   end if ! choice for kinetic energy density initialization
+ end if ! usekden
 
 !In PAW, compensation density has eventually to be added
  nhatgrdim=0;nhatdim=0
@@ -789,13 +826,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(irrzon)
  ABI_FREE(phnons)
 
-!jmb 2012 write(std_out,'(a)')' ' ! needed to make ibm6_xlf12 pass tests. No idea why this works. JWZ 5 Sept 2011
 !Will compute now the total potential
 
-!Compute local ionic pseudopotential vpsp and core electron density xccc3d:
+!Compute local ionic pseudopotential vpsp and core electron density xccc3d
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
  ABI_MALLOC(vpsp,(nfftf))
+ if(psps%usepaw==1) then
+    ABI_MALLOC(xcctau3d,(n3xccc*dtset%usekden))
+ else
+    ABI_MALLOC(xcctau3d,(0))
+ end if
+ 
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -808,6 +850,16 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
 
+ ! Core kinetic energy density method
+ coretau_method = 0
+ if (dtset%usekden==1.and.psps%usepaw==1) then
+    coretau_method=1
+    if (psps%nc_xccc_gspace==0) then
+       coretau_method=2
+    end if
+ end if
+ 
+
 !Local ionic potential and/or pseudo core charge by method 1
  if (vloc_method==1.or.coredens_method==1) then
    call timab(562,1,tsec)
@@ -819,6 +871,17 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,&
 &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
    call timab(562,2,tsec)
+ end if
+
+ if (coretau_method==1) then
+   optv=0;optn=1
+   optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optn2=4
+   call atm2fft(atindx1,xcctau3d,dummy_out6,dummy_out1,dummy_out2,dummy_out3,dummy_in,&
+&   gmet,gprimd,dummy_out4,dummy_out5,gsqcut,mgfftf,psps%mqgrid_vl,dtset%natom,nattyp,nfftf,ngfftf,ntypat,&
+&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1df,psps%qgrid_vl,dtset%qprtrb,&
+&   dtset%rcut,dummy_in,rprimd,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,dummy_in,dummy_in,dummy_in,dtset%vprtrb,psps%vlspl,&
+&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
  end if
 
 !Local ionic potential by method 2
@@ -857,12 +920,22 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call check_kxc(dtset%ixc,dtset%optdriver)
  ABI_MALLOC(kxc,(nfftf,nkxc))
  ABI_MALLOC(vxc,(nfftf,dtset%nspden))
+ ABI_MALLOC(vxctau,(nfftf,dtset%nspden,4*dtset%usekden))
 
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
+!If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+ if (dtset%xc_tb09_c>99._dp) then
+   call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom,nfftf,ngfftf, &
+&    nhat,psps%usepaw,nhatgr,nhatgrdim,dtset%nspden,dtset%ntypat,n3xccc, &
+&    pawang,pawrad,pawrhoij,pawtab,dtset%pawxcdev,rhor,rprimd,psps%usepaw, &
+&    xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ end if
+
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
-& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,vhartr=vhartr)
+& rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
+& taur=taur,vhartr=vhartr,vxctau=vxctau,xcctau3d=xcctau3d)
 
 !Compute local + Hxc potential, and subtract mean potential.
  ABI_MALLOC(vtrial,(nfftf,dtset%nspden))
@@ -878,7 +951,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
  end if
- ABI_FREE(vhartr)
+
+ ABI_FREE(vhartr) 
 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: ground-state density and potential set up.')
 
@@ -890,7 +964,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call pawdenpot(compch_sph,epaw,epawdc,ipert,dtset%ixc,my_natom,natom,dtset%nspden,&
 &   ntypat,dtset%nucdipmom,nzlmopt,option,paw_an,paw_an,paw_ij,pawang,dtset%pawprtvol,&
 &   pawrad,pawrhoij,dtset%pawspnorb,pawtab,dtset%pawxcdev,&
-&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,ucvol,psps%znuclpsp, &
+&   dtset%spnorbscl,dtset%xclevel,dtset%xc_denpos,dtset%xc_taupos,ucvol,psps%znuclpsp, &
 &   mpi_atmtab=mpi_enreg%my_atmtab,comm_atom=mpi_enreg%comm_atom)
 
    call timab(561,1,tsec)
@@ -905,7 +979,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call timab(561,2,tsec)
 
  end if
-
+ 
 !-----2. Frozen-wavefunctions and Ewald(q=0) parts of 2DTE
 
  dyfr_nondiag=0;if (psps%usepaw==1.and.rfphon==1) dyfr_nondiag=1
@@ -1069,7 +1143,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_FREE(vpsp)
  ABI_FREE(xccc3d)
-
+ if(allocated(xcctau3d)) then
+    ABI_FREE(xcctau3d)
+ end if
+ 
  if(dtset%prtvol==-level) call wrtout(std_out,' respfn: frozen wavef. and Ewald(q=0) part of 2DTE done.')
 
  call timab(136,2,tsec)
@@ -1104,11 +1181,18 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &     ' and rfstrs=',rfstrs,'.',ch10,&
 &     'Action: change qpt, or rfelfd, or rfstrs in the input file.'
      ABI_ERROR(message)
-   else if(rfasr.eq.2)then
-     write(message,'(2a)')ch10,' rfasr=2 not allowed with q/=0 => rfasr was reset to 0.'
-     ABI_WARNING(message)
-     rfasr=0
    end if
+   if(chneut/=0)then
+     write(message,'(2a)')ch10,' chneut/=0 not allowed with q/=0 => chneut reset to 0 locally.'
+     ABI_WARNING(message)
+     chneut=0
+   end if
+   if(asr/=0)then
+     write(message,'(2a)')ch10,' asr/=0 not allowed with q/=0 => asr reset to 0 locally.'
+     ABI_WARNING(message)
+     asr=0
+   end if
+
  end if
 
 !Determine the symmetrical perturbations
@@ -1118,7 +1202,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout([std_out, ab_out] ,message)
  ii=1
- do ipert=1,natom+6
+ do ipert=1,natom+6  ! GA: Why natom+6 instead of natom+MPERT_MAX ?
    do idir=1,3
      if(rfpert(ipert)==1.and.rfdir(idir)==1)then
        if( pertsy(idir,ipert)==1 )then
@@ -1374,7 +1458,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nfftf,nhat,dtset%nkpt,nkxc,dtset%nspden,dtset%nsym,occ,&
 &   paw_an,paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &   pertsy,prtbbb,psps,rfpert,rf2_dirs_from_rfpert_nl,rhog,rhor,symq,symrec,timrev,&
-&   usecprj,usevdw,vtrial,vxc,vxcavg,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
+&   usecprj,usevdw,vtrial,vxc,vxcavg,vxctau,xred,clflg,occ_rbz_pert,eigen0_pert,eigenq_pert,&
 &   eigen1_pert,nkpt_rbz,eigenq_fine,hdr_fine,hdr0)
 
 !  #####################################################################
@@ -1387,6 +1471,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  call wrtout([std_out, ab_out], message)
 
  ABI_FREE(vxc)
+ ABI_FREE(vxctau)
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_FREE(rfpert_nl)
@@ -1471,11 +1556,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_MALLOC(carflg,(3,mpert,3,mpert))
    ABI_MALLOC(d2matr,(2,3,mpert,3,mpert))
    outd2=1
-   call dfpt_gatherdy(becfrnl,dtset%berryopt,blkflg,carflg,&
-&   dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
+   call dfpt_gatherdy(asr,becfrnl,dtset%berryopt,blkflg,carflg,&
+&   chneut,dyew,dyfrwf,dyfrx1,dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 &   eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 &   gprimd,dtset%mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,dtset%prtbbb,&
-&   rfasr,rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
+&   rfpert,rprimd,dtset%typat,ucvol,usevdw,psps%ziontypat)
 
 !  Output of the dynamical matrix (master only)
    call dfpt_dyout(becfrnl,dtset%berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,&
@@ -1493,17 +1578,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 &   nblok=1,xred=xred,occ=occ,ngfft=ngfft)
 
 !  Initialize ddb object
-   call ddb%init(dtset, nblok=1, mpert=mpert, msize=(3*mpert*3*mpert))
+   call ddb%init(dtset, nblok=1, mpert=mpert, with_d2E=.true.)
 
 ! Set the values for the 2nd order derivatives
    call ddb%set_qpt(iblok=1, qpt=qphon(1:3))
-   call ddb%set_d2matr(d2matr, blkflg, iblok=1)
+   call ddb%set_d2matr(1, d2matr, blkflg)
 
-! Output dynamical matrix in text format.
-   call ddb%write_txt(ddb_hdr, dtfil%fnameabo_ddb)
-
-! Output dynamical matrix in netcdf format.
-   call ddb%write_nc(ddb_hdr, strcat(dtfil%fnameabo_ddb, ".nc"))
+! Output dynamical matrix
+   call ddb%write(ddb_hdr, dtfil%fnameabo_ddb)
 
 ! Deallocate ddb object
    call ddb_hdr%free()
@@ -1793,6 +1875,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_FREE(rfpert)
  ABI_FREE(rhog)
  ABI_FREE(rhor)
+ ABI_FREE(taug)
+ ABI_FREE(taur)
  ABI_FREE(symq)
  ABI_FREE(symrec)
  ABI_FREE(symrel_cart)
@@ -1821,8 +1905,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !Clean GPU data
 #if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call dealloc_hamilt_gpu(0,dtset%use_gpu_cuda)
+ if (dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+   call dealloc_hamilt_gpu(0,dtset%gpu_option)
  end if
 #endif
 
@@ -3034,7 +3118,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
  if(outd2==2 .and. rfpert(natom+2)==1 .and.rfphon==1)then
    write(iout,*)' '
    write(iout,*)' Effective charges, in cartesian coordinates,'
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    ipert1=natom+2
@@ -3064,7 +3148,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
    end if
    write(iout,*)' Effective charges, in cartesian coordinates,'
    write(iout,*)' (from electric field response) '
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    ipert2=natom+2
@@ -3095,7 +3179,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
    end if
    write(iout,*)' Effective charges, in cartesian coordinates,'
    write(iout,*)' (from phonon response) '
-   write(iout,*)'  if specified in the inputs, asr has been imposed'
+   write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
    write(iout,*)'    j1       j2             matrix element'
    write(iout,*)' dir pert dir pert     real part    imaginary part'
    nline=1
@@ -3148,7 +3232,7 @@ subroutine dfpt_dyout(becfrnl,berryopt,blkflg,carflg,ddkfil,dyew,dyfrlo,dyfrnl,&
        write(iout,*)' '
        write(iout,*)' Effective charges, in cartesian coordinates, for band',iband
        write(iout,*)' (from phonon response) '
-       write(iout,*)'  if specified in the inputs, asr has been imposed'
+       write(iout,*)'  if specified in the inputs, charge neutrality has been imposed'
        write(iout,*)'    j1       j2             matrix element'
        write(iout,*)' dir pert dir pert     real part    imaginary part'
        nline=1
@@ -3302,10 +3386,14 @@ end subroutine dfpt_dyout
 !! but the correct non-cartesian coordinates ( => d2cart)
 !!
 !! INPUTS
+!! asr= (0=> no acoustic sum rule [asr] imposed), (1 or 2=> asr is imposed) only for dynamical matrix at Gamma
 !! becfrnl(3,natom,3*pawbec)=NL frozen contribution to Born Effective Charges (PAW only)
 !! berryopt=option for berry phase treatment
 !! blkflg(3,mpert,3,mpert)= ( 1 if the element of the dynamical
 !!  matrix has been calculated ; 0 otherwise )
+!! chneut= (0=> no charge neutrality sum rule imposed), (1=> charge neutrality is imposed,
+!!  with equal repartition of the charge neutrality correction for the effective charges),
+!! (2=> charge neutrality is imposed, with weighted repartition of the charge neutrality correction for the effective charges),
 !! dyew(2,3,natom,3,natom)=Ewald part of the dyn.matrix
 !! dyfrwf(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)=frozen wf part of the dyn.matrix (except xc1)
 !! dyfrx1(2,3,natom,3,natom)=xc core correction (1) part of the frozen-wf
@@ -3334,10 +3422,6 @@ end subroutine dfpt_dyout
 !!  if outd2=2, stationary part.
 !! pawbec= flag for the computation of frozen part of Born Effective Charges (PAW only)
 !! prtbbb=if 1, print the band-by-band decomposition, otherwise, prtbbb=0
-!! rfasr= (0=> no acoustic sum rule [asr] imposed), (1=> asr is imposed,
-!!  in the democratic way for the effective charges),
-!! (2=> asr is imposed, in the aristocratic way for the effective
-!!  charges)
 !! rfpert(mpert)=define the perturbations
 !! rprimd(3,3)=dimensional primitive translations (bohr)
 !! typat(natom)=integer label of each type of atom (1,2,...)
@@ -3359,16 +3443,16 @@ end subroutine dfpt_dyout
 !!
 !! SOURCE
 
-subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
+subroutine dfpt_gatherdy(asr,becfrnl,berryopt,blkflg,carflg,chneut,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfpert,rprimd,typat,ucvol,usevdw,zion)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: berryopt,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
- integer,intent(in) :: pawbec,pawpiezo,prtbbb,rfasr,usevdw
+ integer,intent(in) :: asr,berryopt,chneut,dyfr_cplex,dyfr_nondiag,mband,mpert,natom,ntypat,outd2
+ integer,intent(in) :: pawbec,pawpiezo,prtbbb,usevdw
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: rfpert(mpert),typat(natom)
@@ -3390,7 +3474,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 
 !Local variables -------------------------
 !scalars
- integer :: chneut,iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
+ integer :: iband,iblok,idir,idir1,idir2,ii,ipert,ipert1,ipert2
  integer :: jj,nblok,selectz
  character(len=500) :: message
 !arrays
@@ -3651,19 +3735,18 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
  end if
 
 !  Imposition of the ASR on the analytical part of the DynMat
-!  Assume that if rfasr/=0, the whole cartesian matrix is correct
- if(rfasr/=0)then
+!  Assume that if asr/=0, the whole cartesian matrix is correct
+ if(asr/=0)then
 
    ABI_MALLOC(d2work,(2,3,mpert,3,mpert))
-   call asria_calc(rfasr,d2work,d2cart,mpert,natom)
+   call asria_calc(asr,d2work,d2cart,mpert,natom)
 !  The following line imposes ASR:
-   call asria_corr(rfasr,d2work,d2cart,mpert,natom)
+   call asria_corr(asr,d2work,d2cart,mpert,natom)
 
    ABI_FREE(d2work)
 
-!  Imposition of the ASR on the effective charges.
+!  Imposition of the charge neutrality on the effective charges.
    if(rfpert(natom+2)==1)then
-     chneut=rfasr
      selectz=0
      call chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
    end if
@@ -3896,8 +3979,8 @@ subroutine dfpt_dyfro(atindx1,dyfrnl,dyfrlo,dyfrwf,dyfrxc,dyfr_cplex,dyfr_nondia
 
 ! *************************************************************************
 
- if(nspden==4)then
-   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for insulators and norm-conserving psp!')
+ if(nspden==4 .and. usepaw==1)then
+   ABI_WARNING('dfpt_dyfro : DFPT with nspden=4 works at the moment just for norm-conserving psp! (no paw support yet with nspden=4)')
  end if
 
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)

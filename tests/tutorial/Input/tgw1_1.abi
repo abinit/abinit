@@ -34,7 +34,9 @@ nband3      60       # Bands to be used in the screening calculation
 ecuteps3    3.6      # Cut-off energy of the planewave set to represent the dielectric matrix. 
                      # It is important to adjust this parameter, that is usually smaller than ecut,
                      # and between 5 and 10 Ha..
-ppmfrq3    16.7 eV   # Imaginary frequency where to calculate the screening
+ppmfrq3    16.7 eV   # Imaginary frequency where to calculate the screening. 
+                     # It is easier (and safer) to let ABINIT compute and use the Drude plasma frequency, 
+                     # instead of selecting a value by hand. This would be done thanks to the default value ppmfrq 0.0 .
 
 ############
 # Dataset 4

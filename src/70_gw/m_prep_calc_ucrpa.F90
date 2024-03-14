@@ -729,8 +729,8 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
            if (Psps%usepaw==1.and.use_pawnhat==0) then ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
              spad=(nspinor-1)
-             call paw_rho_tw_g(Sigp%npwx,nspinor,nspinor,Cryst%natom,Cryst%ntypat,Cryst%typat,Cryst%xred,Gsph_x%gvec,&
-&              Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),Pwij_qg,rhotwg_ki(:,jb))
+             call paw_rho_tw_g(cryst, Pwij_qg,Sigp%npwx,nspinor,nspinor,Gsph_x%gvec,&
+               Cprj_ksum(:,:),Cprj_kgw(:,i2:i2+spad),rhotwg_ki(:,jb))
            end if
            if(iq_bz==1) then
              if((ib_sum/=jb).and.(abs(rhotwg_ki(1,jb))>tol8)) then

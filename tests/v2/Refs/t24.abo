@@ -1,5 +1,5 @@
 
-.Version 9.3.1 of ANADDB 
+.Version 9.11.2 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
 .Copyright (C) 1998-2022 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 10 Nov 2020.
-- ( at 22h25 )
+.Starting date : Sat 15 Jul 2023.
+- ( at 11h59 )
   
 
 ================================================================================
@@ -37,13 +37,23 @@
 
  read the DDB information and perform some checks
 
+
+  ==== Info on the Cryst% object ====
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.5589000  0.0000000  0.0000000  G(1)=  0.1322944  0.0000000  0.0000000
  R(2)=  0.0000000  7.5589000  0.0000000  G(2)=  0.0000000  0.1322944  0.0000000
  R(3)=  0.0000000  0.0000000  7.5589000  G(3)=  0.0000000  0.0000000  0.1322944
  Unit cell volume ucvol=  4.3189264E+02 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
- Now the whole DDB is in central memory
+ Time-reversal symmetry is present
+ Reduced atomic positions [iatom, xred, symbol]:
+    1)    0.0000000  0.0000000  0.0000000  no
+    2)    0.5000000  0.5000000  0.5000000  no
+    3)    0.5000000  0.5000000  0.0000000  no
+    4)    0.5000000  0.0000000  0.5000000  no
+    5)    0.0000000  0.5000000  0.5000000  no
+
+ DDB file with 4 blocks has been read.
 
 ================================================================================
 
@@ -68,7 +78,7 @@
        3               3        0.012174        0.000000
 
  Effective charge tensors after 
- imposition of the charge neutrality,
+ imposition of the charge neutrality (if requested by user),
  and eventual restriction to some part :
    atom    displacement
          1         1    2.736512E+00    1.217076E-27    1.097082E-27
@@ -158,10 +168,10 @@
 -  1.998190E+02  2.629638E+02  2.629638E+02  3.886644E+02  3.886644E+02
 -  3.886644E+02  5.127796E+02  5.241847E+02  5.241847E+02  6.747139E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.038  and wall time      0.039 sec
++Total cpu time      0.042  and wall time      0.070 sec
 
  anaddb : the run completed succesfully.

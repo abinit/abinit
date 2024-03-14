@@ -219,7 +219,7 @@ subroutine exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_Bst,Wfd
    call calc_optical_mels(hexc%Wfd,hexc%Kmesh,hexc%KS_BSt,Cryst,Psps,Pawtab,Hur, &
 &     BSp%inclvkb,BSp%lomo_spin,lomo_min,max_band,hexc%nbz,BSp%q(:,iq),opt_cvk(:,:,:,:,iq))
 
- ! Fill ket0 using the same ordering for the indeces as the one used for the excitonic Hamiltonian.
+ ! Fill ket0 using the same ordering for the indices as the one used for the excitonic Hamiltonian.
  ! Note that only the resonant part is used here.
    do spin=1,nsppol
 
