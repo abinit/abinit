@@ -480,8 +480,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  if (.not.present(Ifc_coarse)) then
 
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
+   ! SP - gprimd and rprimd is required instead of gprim and rprim for non-diagonal supercells.
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,Crystal%gprimd,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprimd,qbz,&
      Crystal%symrec, Crystal%symrel, comm)
 
  else
@@ -497,7 +498,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
 
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,Crystal%gprimd,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprimd,qbz,&
      Crystal%symrec,Crystal%symrel,comm, qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
