@@ -149,14 +149,16 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspinor,option,unit_out,iir,jjr,kkr
+ integer :: mcg13,my_nspinor,option,unit_out,iir,jjr,kkr
  real(dp) :: pdif_mod,eenth,ucvol_local
+ logical :: save_cg13
  character(len=500) :: message
 !arrays
  real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)
 !! ptot(3) = total polarization (not reduced) REC
 !! red_ptot(3) = internal reduced total polarization REC
  real(dp) ::  A(3,3),A1(3,3),A_new(3,3),efield_new(3)
+ real(dp),allocatable :: cg13(:,:,:)
 
 ! *************************************************************************
 
@@ -229,13 +231,17 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    end select
 
    unit_out = ab_out
-   call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
+   save_cg13 = .FALSE.
+   mcg13 = 0
+   allocate(cg13(2,mcg13,3))
+   call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
 &   gprimd,hdr,psps%indlmn,kg,&
-&   psps%lmnmax,mband,mcg,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
+&   psps%lmnmax,mband,mcg,mcg13,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
 &   nsppol,psps%ntypat,nkpt,option,pawrhoij,&
 &   pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&                            !!REC
-&  pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
+&  pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,&
 &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+   deallocate(cg13)
 
    dtefield%red_ptot1(:)=red_ptot(:)
 
