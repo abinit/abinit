@@ -5116,14 +5116,13 @@ contains
   !! NAME
   !! xgBlock_getid
 
-  function xgBlock_getid(xgBlock,do_mpi_sum) result (id)
+  function xgBlock_getid(xgBlock,comm) result (id)
 
     type(xgBlock_t), intent(in) :: xgBlock
-    logical, intent(in),optional :: do_mpi_sum
+    integer, intent(in),optional :: comm
 
     real(dp) :: id
-    integer :: ierr
-    logical :: do_mpi_sum_
+    integer :: ierr,comm_
 
     if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
       call xgBlock_copy_from_gpu(xgBlock)
@@ -5142,9 +5141,11 @@ contains
       case (SPACE_C)
         id = sum(abs(dble(xgBlock%vecC(:,:))))+sum(abs(dimag(xgBlock%vecC(:,:))))
     end select
-    do_mpi_sum_=.true.
-    if (present(do_mpi_sum)) do_mpi_sum_=do_mpi_sum
-    if (do_mpi_sum_) call xmpi_sum(id,xgBlock%spacedim_comm,ierr)
+    comm_=xgBlock%spacedim_comm
+    if (present(comm)) then
+      comm_=comm
+    end if
+    if (xmpi_comm_size(comm_)>1) call xmpi_sum(id,comm_,ierr)
 
   end function xgBlock_getid
   !!***
