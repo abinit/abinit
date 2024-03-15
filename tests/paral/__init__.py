@@ -35,8 +35,9 @@ inp_files = [
 "t31.abi",
 "t32.abi",
 "t41.abi",
-"t43.abi", # test chebfi2
-"t44.abi", # test chebfi2 (istwfk>1)
+"t43.abi", # test chebfi2 (paw+soc)
+"t44.abi", # test chebfi2 (istwfk>1,paw)
+"t45.abi", # test chebfi2 (istwfk>1,norm conserving)
 "t51.abi",
 "t52.abi",
 "t53.abi",
