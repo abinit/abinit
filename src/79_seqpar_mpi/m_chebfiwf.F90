@@ -261,7 +261,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Local variables-------------------------------
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
- integer :: ipw,space,blockdim,nline,total_spacedim,ierr
+ integer :: iband,shift,ipw,space,blockdim,nline,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(c_ptr) :: cptr
@@ -273,7 +273,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  real(dp),pointer :: resid_ptr(:,:) => NULL()
  real(dp), allocatable :: l_gvnlxc(:,:)
 
- ! Stupid things for NC
+ ! Parameters for nonlop call in NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
  real(dp) :: gsc_dummy(1,1)
  type(pawcprj_type) :: cprj_dum(gs_hamk%natom,1)
@@ -388,11 +388,11 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Trick with C is to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
  call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 !Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gu_option=dtset%gpu_option)
 
  call timab(tim_chebfiwf2,2,tsec)
 
@@ -432,8 +432,24 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NONLOP)
    !Call nonlop
-   call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
-        &            signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+   if (l_paral_kgb==0) then
+
+     call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
+&                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
+
+   else
+     do iband=1,nband/blockdim
+       shift = (iband-1)*blockdim*l_npw*l_nspinor
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        gsc_dummy,l_tim_getghc, &
+&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&        l_gvnlxc(:,:),&
+&        already_transposed=.false.)
+     end do
+   end if
    ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
  end if
@@ -556,11 +572,11 @@ subroutine getBm1X(X,Bm1X)
 
  call xgBlock_getSize(X,spacedim,blockdim)
 
- call xgBlock_reverseMap(X,ghc_filter,rows=1,cols=spacedim*blockdim)
-
- call xgBlock_reverseMap(Bm1X,gsm1hc_filter,rows=1,cols=spacedim*blockdim)
-
  if(l_paw) then
+
+   call xgBlock_reverseMap(X,ghc_filter,rows=1,cols=spacedim*blockdim)
+   call xgBlock_reverseMap(Bm1X,gsm1hc_filter,rows=1,cols=spacedim*blockdim)
+
    !cwaveprj_next is dummy
    if(gemm_nonlop_use_gemm) then
      ABI_MALLOC(cwaveprj_next, (1,1))
@@ -573,13 +589,14 @@ subroutine getBm1X(X,Bm1X)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
        spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
    ABI_NVTX_END_RANGE()
- else
-   gsm1hc_filter(:,:) = ghc_filter(:,:)
- end if
 
- if (l_paw) then
    call pawcprj_free(cwaveprj_next)
    ABI_FREE(cwaveprj_next)
+
+ else
+
+   call xgBlock_copy(X,Bm1X)
+
  end if
 
 end subroutine getBm1X
