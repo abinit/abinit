@@ -449,7 +449,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          &    projs, npw, &
          &    dgxdtfac_sij, nprojs, czero, svectout, npw,&
          &    gpu_option, use_distrib)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cminusone, &
+         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    dprojs, npw, &
          &    gxfac_sij, nprojs, cone, svectout, npw,&
          &    gpu_option, use_distrib)
@@ -603,7 +603,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          &    projs, npw, &
          &    dgxdtfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cminusone, &
+         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, cone, vectout, npw,&
          &    gpu_option, use_distrib)
