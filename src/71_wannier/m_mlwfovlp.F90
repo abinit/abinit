@@ -1654,6 +1654,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !
 !      MPI: if ikpt2 not found in this processor then
 !      read info from an unformatted file
+! TODO: also get MPI mapping to retrieve who has this wf k-point
 !
 !        if (nprocs>1) then
 !           if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
@@ -2047,7 +2048,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
    do isppol=1,nsppol
 !    Allocate arrays
 !      this has to be done this way because the variable icg changes at the end of the
-!      cycle. We cannot just skip the hole cycle.
+!      cycle. We cannot just skip the whole cycle.
      ABI_MALLOC(gf,(mpw,nproj(isppol)))
      ABI_MALLOC(gft_lm,(lmax2(isppol)))
      ABI_MALLOC(gsum2,(nproj(isppol)))
