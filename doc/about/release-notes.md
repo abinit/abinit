@@ -1,14 +1,15 @@
 ## v10.0
 
-Version 10.0, released on March 16, 2024.
+Version 10.0, released on March 18, 2024.
 List of changes with respect to version 9.10.
-<!-- Release notes updated on Mar 16, 2024. -->
+<!-- Release notes updated on Mar 18, 2024. -->
 
 Many thanks to the contributors to the ABINIT project between
 May 2023 and March 2024 
-<!-- (with some late contributions until Nov 2024). -->
+<!-- (with some late contributions until XXX 2024). -->
 These release notes
-are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v9.10, after Nov 2023, not yet documented.
+are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10, with also some late fixes to v9.10, after Nov 2023, 
+that had not yet been documented.
 <!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
 
 The list of contributors includes:
@@ -29,17 +30,14 @@ by [[asr]] and [[chneut]]. The latter variables have been used already for some 
 and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
 in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue.
 The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
-Thus a large fraction of the reference files of the test have been upgraded to the new default, but in a sizeable number
+Thus a large fraction of the reference files of the test have been upgraded to the new default. However, in a sizeable number of reference files
 the old default value has been specified explicitly.
 
 By X. Gonze  (MR929)
 
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
 They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field, 
-but have been superceded by rf2_XXX input variables. 
-
-Who ?
-
+but have been superceded by rf2_XXX input variables a long time ago. 
 
 ### **B.** Most noticeable achievements
 
@@ -47,8 +45,8 @@ Who ?
 
 A cubic scaling real space imaginary time algorithm for GW and RPA has been implemented.
 See the theory in [[cite:Liu2016]] and related references. It relies on the minimax time-frequency grids
-available in the GreenX library (reference to be provided).
-At present: only norm-conserving pseudopotentials can be used, restriction to non-magnetic materials,
+available in the GreenX library [[cite:Azizi2023]].
+At present, only norm-conserving pseudopotentials can be used. The implementation is restricted to non-magnetic materials,
 and without spin-orbit coupling.
 Still, different types of flows and algorithms (including self-consistency) are available, see [[gwr_task]].
 
@@ -59,141 +57,66 @@ New input variables : [[gwr_task]], [[gwr_chi_algo]], [[gwr_sigma_algo]],
 [[gwr_boxcutmin]], [[gwr_max_hwtene]], [[gwr_rpa_ncut]], [[gwr_nstep]]. Also, [[gwr_tolqpe]] replaces the obsolete gw_toldfeig input variable.
 
 A tutorial is available, see [[tutorial:gwr_intro]] and [[tutorial:gwr]].
-Tests are provided in the newly created subdirectory tests/gwr, [[test:gwr_01]] to [[test:gwr_08]]
+Tests are provided in the newly created subdirectory tests/gwr, see [[test:gwr_01]] to [[test:gwr_08]]
 See also [[test:paral_78]] and [[test:paral_79]]
-
-
-GWR code for the Abinit school
-Deactivate the check on line length (132 chars). Now we assume that the build system is able to automatically set the compilation option required to  support "long lines". If FCFLAGS is set manually, it's user responsibility to include this option manually.
-
 
 By M. Giantomassi (MR875, MR907, MR964)
 
 **B.2** GPU porting of ABINIT
 
 While there was already an old CUDA-based port of ABINIT on GPU, two new implementations are provided.
+One implementation is based on OpenMP, the other one is based on KOKKOS+CUDA.
+At present, this is only available for ground-state calculations [[optdriver]]=0.
+See the description of the GPU possibilities of ABINIT in the documentation, input variable [[gpu_option]].
 
-The full GPU implementation (2 year work). Still AMD support and automatic tests are missing but we are on the way... and still experimental 
-MR951
+The 
+OpenMP implementation works on NVidia accelerators, if ABINIT has been
+compiled with a [[CUDA]] compatible compiler and linked with NVidia FFT/linear algebra
+libraries ([cuFFT](https://docs.nvidia.com/cuda/cufft),
+[cuBLAS](https://docs.nvidia.com/cuda/cublas) and
+[cuSOLVER](https://docs.nvidia.com/cuda/cusolvermp)).
+It also works on AMD accelerators (EXPERIMENTAL),
+if ABINIT has been compiled with a AMD compatible compiler and linked with NVidia
+FFT/linear algebra libraries ([ROCm](https://www.amd.com/fr/graphics/servers-solutions-rocm)
+or [HIP](https://github.com/ROCm/HIP)).
 
+The [[KOKKOS]]+[[CUDA]] implementation -- at present -- is only compatible with
+NVidia accelerators. It requires that ABINIT has been linked to the
+[Kokkos](https://github.com/kokkos/kokkos) and [YAKL](https://github.com/mrnorman/YAKL)
+performance libraries. It also uses NVidia FFT/linear algebra libraries
+([cuFFT](https://docs.nvidia.com/cuda/cufft), [cuBLAS](https://docs.nvidia.com/cuda/cublas)).
+The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
+on CPU (see [[gpu_kokkos_nthrd]]).
 
-Code sections to run on AMD+CRAY/HIP (GPU) 
-MR954
+For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See
+[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
 
-Additional changes (not correctly solved merge conflits) to run on AMD
-MR955
+Several GPU devices can be detected and used on a node.
 
-
-Changes needed to support nvHPC (from M. Sarraute) 
-This commit is needed to support nvhpc and run EOS bot on the testfarm.
-It is submitted in the release channel because EOS has to run release and develop branches.
-Thus the release branch has to be incorporated into the develop one just after this commit is merged.
-Also, once both branches (release & develop) have been updated, one has to ask all developers to synchronize with the trunk. If not they won't be able to run on EOS once it has been added to the testfarm.
-MR942
-
-fix NVHPC compilation (bad continuation lines) (from M. Sarraute)
-This commit is needed to compile with nvhpc and run EOS bot.
-MR943
-
-GPU improvements:
-
-"Make dist" now works for GPU version
-gpu_option can be given as a string
-Handling of buggy MPI interfaces
-Automatic detection of MPI_IN_PLACE
-MR961
-
-
-Fix testfarm.conf for EOS@NVHPC 23.9 and EOS@NVHPC 23.11
-EOS@NVHPC builders used to be managed with hard configuration files overwriting those generated by ABINIT's testfarm.conf.
-As discussed with JM Beuken, this workaround was removed... which then revealed build issues that are addressed in this MR.
-This MR :
-Fix build issues on EOS@NVHPC 23.9 (bad fallback path in generated config)
-Add build config for EOS@NVHPC 23.11 (config was previously downloaded)
-Exclude regression tests from EOS@NVHPC 23.11 that were already excluded from other EOS@NVHPC bots
-One faulty test remains on EOS@NVHPC 23.11, while other bots are fine.
-MR965
-
-Some fixes to compile on additional platforms
-MR966
-
-This MR contains modifications following experiments with ABINIT on Adastra cluster with newest Cray version (23.12) and first crash tests on testfarm EOS with OpenMP GPU.
-
-Performance fix for invovl on AMD GPUs
-Fix CUDA error when trying respfn with gpu_option==2
-Disable GPU use by default (actually too error prone)
-Fix race condition in `opernlc_ompgpu`
-Various buildsystem improvements around Cray and HIP/CUDA
-MR967
-
-Add OpenMP GPU regression tests
-Added tests aims to add coverage for GS calculation performed using OpenMP GPU through LOBPCG and CHEBFI algorithms.
-Some tests were temporary disabled for eos_nvhpc_23.9_elpa bot :
-gputestsuite, testing CUDA legacy code, which doesn't work with NVHPC (seg fault)
-unitary/tfftgw[2,3] tests, raising a 1e-8 numerical error on Goedecker FFT with OpenMP enabled
-Finally, a bug in m_rec.F90 has been fixed, involving CUDA recursion code, covered by mpiio/t42
-MR968
-
-I forgot to enable the use of GPU for hpc_gpu_omp/t01, hence while it took soooooo long...
-MR969
-
-Fixes and code refacto around OpenMP GPU use cases
-This MR embeds some code refactoring to adress duplication induced by AMD LLVM workarounds.
-It also address the following bugs:
-fix compilation on Adastra (broken since f2f27c39)
-Disable OpenMP parallelism for kinetic in getghc outside of GEMM nonlop
-fix race conditions in some OpenMP parallel do directives (opernlc CPU and GPU, ph1d3d)
-fix GPU memory error in vtowfk (happening when bandpp is maximized but paral_kgb is disabled)
-MR974
-
-Increase the number of GPU devices that can be detected/used on a node
-MR978
-
-Tests are present in new directories :
+GPU regression tests are present in new directories,
 [[test:gpu_omp_1]], [[test:gpu_omp_2]], [[test:gpu_omp_3]], [[test:gpu_omp_uo3]],
-[[test:hpc_gpu_omp_1]] to [[test:hpc_gpu_omp_13]]
+[[test:hpc_gpu_omp_1]] to [[test:hpc_gpu_omp_13]],
+as well as in the previously existing directory gpu.
 
-By P. Kesterneer, M. Sarraute and M. Torrent (MR942, 943, 951)
+The ABINIT test farm has been upgraded to support those tests. The NVHPC compiler is supported. Also, ABINIT works on Adastra cluster with newest Cray version (23.12).
+
+By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
+(MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
 
 
 **B.3** CMake build of ABINIT 
 
-ABINIT can now be build using CMake instead of the standard configure+make
+ABINIT can now be build using CMake instead of the standard configure+make.
+Also, the version number of ABINIT is now generated automatically from the git tag information.
 
-Fix CMake buildystem
-I didn't watch over CMake buildsystem and it became broken after many contributions, including my own.
-This MR fixes it.
-MR979
-
-
-Add logic to generate version number.
-
-This is a draft MR.
-This MR is about refactoring the way the project number is set in the autotools build system with the long term goal to be able to use either autotools or cmake which both use the same logic to set project version.
-The main feature of this MR is brought by the script config/gnu/git-version-gen, which works as follow
-
-if building abinit from a git repository, the project number is set using 'git describe', which itself to be fully functional relies on git tag (every commit that changes version must be tagged; to this regards, commit e53a4898 should be tag 9.11.3)
-if building abinit from an archive tarball, the project version is set from file .tarball-version which is generated when the archive is created by make dist
-
-
-I suggest the following: right after this MR is merged, to increase version to 9.11.4 and tag; as such, from this new tag, all build show the right version number based on the script config/gnu/git-version-gen
-
-Additionnal notes:
-
-when build abinit from commit that is not a release tagged commit, the version number will look like 9.11.4-xxxxxx where the xxxxxx suffix is a number that characterises the commit use for building abinit; as such each each commit will a different version number. Only release tag will have a "rounded" project version
-regarding document / mkdocs : I also updated the build so that mkdocs uses the same project version, so mkdocs.yml was renamed mkdocs.yml.in; mkdocs.yml is now generated from mkdocs.yml.in; this must be tested to make sure you all agree to this change (this is why this is a draft MR)
-MR944
-
-By P. Kesterneer (MR944)
+By P. Kesterneer (MR944, 979)
 
 
 **B.4** Computation of phonon angular momentum
 
-Computation of phonon angular momentum in anaddb, following the formula provided in Zhang PRL 2014.
-Added a file (*_PHANGMOM) to be tested in tutorespfn/trf2_5, the test is not modified per se.
-
-Molecular Berry curvature computation + ddb support 
-This merge request contains a revised version of the 78_eph/m_berry_curvature module and adds ddb support. A new block type is introduced inside the ddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
+It is now possible to compute of phonon angular momentum in anaddb, following the formula provided in Zhang PRL 2014.
+DDB support has been added, a new block type is introduced inside the ddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
+A new type of file (*_PHANGMOM) has been defined. See [[test:trf2_5]].
 
 By M. Mignolet (MR921, MR984)
 
@@ -203,7 +126,7 @@ By M. Mignolet (MR921, MR984)
 It is now possible to govern the printing of files thanks to the "supra"variable [[write_files]],
 instead of using the numerous prt* input variables.
 
-A supravariable is introduced while mainting the underlying logic of the prt file options inside abinit.
+This supravariable is introduced while maintaining the underlying logic of the prt file options inside abinit.
 (Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using //write_files "  "//.
 When rationalizing the set of prt* variables and their behavior, new ones were introduced : [[prtevk]], [[prthist]] and [[prtddb]].
 
@@ -212,52 +135,37 @@ See [[test:v9_150]].
 By B. Guster (MR920)
 
 
-**B.6** Overhaul of ddb and ddb_hdr types 
+**B.6** New capabilities of mrgddb, and netcdf reading/writing for pseudopotential and crystal types.
 
-New DDB IO interface
-Netcdf format activated with iomode
-mrgddb can convert a single DDB file between text format and netcdf format
-New netcdf reading for pseudopotential and crystal types
-Extended IO capabilities for pseudopotential_type and crystal_t
+A new DDB IO interface has been coded.
+The netcdf format can be activated with [[iomode]].
+The postprocessor mrgddb can convert a single DDB file between text format and netcdf format
+Also the IO capabilities have been extended for pseudopotential_type and crystal_t
 See [[test:v9_160]] and [[test:v9_161]]
 
 By G. Antonius (MR 927)
 
 
-**B.7** Several improvements for metaGGA, and notably for TB09 functional
-List of improvements:
+**B.7** Improvements for metaGGA.
 
-new variable [[xc_taupos]] to control positivity of kinetic energy density, regardless the one for the density.
-new variables [[irdkden]] and [[getkden]]: allow for not reading KDEN when reading DEN (and other possible applications)
-computation of c parameter of TB09 functional, compatible with NCPP and PAW, implemented in a specific routine
-several improvements for automatic settings (forces, stresses, self-consistent cycle)
-
+There are several new input variables related to metaGGA.
+The new variable [[xc_taupos]] allows one to control positivity of kinetic energy density, regardless the one for the density.
+The new variables [[irdkden]] and [[getkden]] allow one not to read KDEN when reading DEN (and other possible applications)
+There are several other improvements for automatic settings (forces, stresses, self-consistent cycle).
+The computation of c parameter of TB09 functional, compatible with NCPP and PAW, is now implemented in a specific routine
 BTW: mBJ/TB09 is not adapted to forces/stresses computation because it doesn't solve a variational problem on energy. This means that it is probably not suitable for DFPT.
 
-New input variables : [[irdkden]]
 See the new tests [[test:libxc_23]], [[test:libxc_24]], [[test:libxc_23]], [[test:libxc_35]].
 
 By M. Torrent (MR 938)
 
-**B.8** Implementation of the strong coupling variational polaron equations
+**B.8** Spin-orbit for orbital magnetism.
 
-Introuduced a new frohlich_t datatype (replaces the src/78_eph/m_frohlichmodel.f90 module) 
-The src/78_eph/m_frohlichmodel.f90 module is replaced by the src/78_eph/m_frohlich.f90, containing the frohlich_t datatype.
-The previous module provided routines that didn't store any data and only produced output to the main output file.
-The new datatype is more modular and allows for reusing the Fröhlich model data for multiple calculations.
+The spin-orbit coupling has been added to the computation of orbital magnetism. 
 
-NOT ASSOCIATED TO A MR :
-New input variable : 
-[[eph_frohl_ntheta]] for tutorespfn teph4zpr 4 to 8 ; v8 57 and 60 ; v9 60 and 66.
-[[eph_ahc_type]] for test v8#44
-
-By V. Vasilchenko (MR971)
-
-**B.9**
-Add spin orbit coupling to orbmag, and make significant documentation updates to rf2 tutorial and EFG and NMR topics
 By J. Zwanziger (MR980)
 
-**B.10** Interface to coupled-cluster CC4S calculations.
+**B.9** Interface to coupled-cluster CC4S calculations.
 
 The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
 allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
@@ -265,202 +173,128 @@ See test test:gwr_07
 
 By M. Giantomassi (MR 875, 907)
 
+
 ### **C.** Changes for the developers (including information about compilers)
 
-**C.1** New bot EOS to test GPU
-Everything to run on new bot EOS
-By M. Torrent and J.-M. Beuken (MR949)
+**C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs. 
 
-**C.2** Other new bots
-bob_gnu_13.2_openmp  replacing ...
-higgs_gnu_12.3_cov
-scope_gnu_13.2_dep
+By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterneer (MR949)
+
+
+**C.2** New bots have been introduced to replace obsolete ones :
+bob_gnu_13.2_openmp, higgs_gnu_12.3_cov, scope_gnu_13.2_dep.
 By J.-M. Beuken (MR960)
 
-**C.3** Add runtests support for Py3.12
-Use importlib if py>3.12, fix SyntaxWarning due to invalid escape sequence
+
+**C.3** runtests support has been added for Py3.12
+Use importlib if py>3.12, this fixes SyntaxWarning due to invalid escape sequence.
 By M. Giantomassi (MR958)
 
 
-### **D.**  Other changes (or on-going developments, not yet finalized)
+### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
-**D.1** 
-Warning in m_respfn_driver.f90 regarding non-colinear dfpt in metals for norm-conserving psps. I compared results obtained by dfpt to results obtained via finite differences on Fe bcc. Everything seems alright.
-There is no paw implementation yet for nspden=4.
-By M. Mignolet (MR922)
+
+**D.1**
+There are several improvements related to [[tolwfr]].
+
+Now one can couple [[tolwfr]] with other tolerances. 
+In that case, the SCF loop stops if both criteria are satisfied. The documentation has been upgraded accordingly. See [[test:v9_200]].
+
+The input variable [[tolwfr_diago]] has been added, to distinguish the criterion used for SCF loop 
+and the one used inside diagonalization algorithms to skip lines. 
+[[tolwfr_diago]] is set to [[tolwfr]] by default. Note that one can define [[tolwfr_diago]] while [[tolwfr]] is not.
+
+There is a new use of nbdbuf (=-101), which is kind of an automatic buffering. 
+In that case, the maximum of residuals is computed as max(res*occ) instead of max(res). 
+Used for both [[tolwfr]] and [[tolwfr_diago]]. This is experimental, so not documented yet.
+
+Apart from LOBPCG (wfoptalg==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
+See [[test:mpiio_26]], [[test:mpiio_27]], [[test:mpiio_51]],
+[[test:paral_31]],[[test:paral_63]],
+[[test:paral_66]],[[test:paral_86]] 
+[[test:psic_03]], [[test:v9_202]].
+
+By L. Baguet (MR947)
 
 **D.2**
-Fix parser issue:
-The input would not be parsed correctly when more than one environment variable is present in the input file.
+Introduced the new [[nblock_lobpcg]] variable (default=1), and set [[bandpp]] accordingly (taking into account npband). 
+If [[bandpp]] is used, set [[nblock_lobpcg]] accordingly (taking into account npband). 
+[[bandpp]] and [[nblock_lobpcg]] cannot be used simultaneously.
+[[bandpp]] should be considered as an internal variable in the future.
+[[autoparal]] behavior is not changed, so it sets [[nblock_lobpcg]] according to [[npband]] and [[bandpp]].
 
-By M. Mignolet (MR928)
+A preferable behavior would be to look for the best values of [[npband]] with a fixed value of [[nblock_lobpcg]], and set [[bandpp]] accordingly.
+But this would be a big modification of [[autoparal]] and would require more tests.
+Ground state parallelization tutorial should be updated too.
+
+See [[test:v9_201]], [[test:v9_202]], [[test:v9_205]].
+From L. Baguet (MR957)
+
 
 **D.3**
-Fix d2eig parallel writing 
-Reactivated the tests v6[37-40], v6[50-53], v7[50-54].
-Now the communicator is properly passed to the ddb when writing d2eig.
-By G. Antonius (MR931)
+Miscellaneous developments for ground state CPU calculations, 
+including refactoring (e.g. create independent Rayleigh-Ritz and Ortho routines, 
+originally linked to lobpcg or chebfi modules, and merge of the two RR routines).
+Timing is improved thanks to these modifications, also related to GPU development.
+From L. Baguet (MR973 and MR981)
+
+
 
 **D.4**
-Add post comparison of initial spgroup with final spgroup + related bug fixes and improvements. 
+Add post comparison of initial spgroup with final spgroup + related bug fixes and improvements. Also, information about non-primitive cells.
 
-In this revision, after echoing all the variables as usual, ABINIT performs a post-analysis of the symmetries and associated spgroup (and spgroupma),
+After echoing all the variables as usual, ABINIT performs a post-analysis of the symmetries and associated spgroup (and spgroupma),
 with comparison with the initial assessment. In case the post analysis and the initial one give differences,
 a comment is issued in the output file, and a more detailed analysis is produced in the log file.
-While implementing this feature, several bug fixes and improvements have been done :
-replacing chkgrp by sg_multable when chkgrp was still used (sg_multable checks the group closure including tnons, while this was not the case for chkgrp).
-speeding sg_multable (this seems a bit ridiculous, but test paral 31 is a large 256 atom cubic supercell without breaking of translational symmetry, so that nsym=48256 ! The input contained nsym=1, but the post analysis gave nsym=48256, and the CPU time was prohibitive, since the algorithm is cubic in nsym...
-fixing several errors in the (magnetic) space group generator, that were uncovered by the replacement of chkgrp by sg_multable.
-improve the documentation of spgroupma
-avoid unneeded redundant write of spgroup in the log file
-Fix the description of arguments of symmetrize_xred
-create symfind_expert to encapsulate several calls to symfind 
-with different tolerances as well as the fix of acell, rprim and xred with respect to the symmetries, already present in ABINIT.
+While implementing this feature, several bug fixes and improvements have been done.
+Several errors in the (magnetic) space group generator were uncovered.
+The documentation of spgroupma has been fixed.
+Unneeded redundant write of spgroup in the log file is avoided.
 
-Echo in the log file information about the primitive cell when the input contains  non-primitive cell. Also miscellaneous minor fixes.
+The information about the primitive cell when the input contains a non-primitive cell is now echoed in the log file.
 See [[test:v9_189]].
 
 By X. Gonze (MR932, MR976)
 
-
 **D.5**
-Typo in 'bs_nstates' docs where direct diago was mapped to 'bs_algorithm=2' while it is 1.
- 
-By F. Goudreault (MR945)
+ANADDB can now read and write DDB files with more than 1000 atoms.
+
+By J. Bouquiaux (MR956)
 
 **D.6**
-Developments in the aTDEP post-processing application..
-See e.g. [[test:atdep_38]]
-
-By F. Bottin and J. Bouchet (MR496)
-
-**D.7**
-Improvements related to tolwfr 
-
-This commit contains 3 modifications :
-
-Allow to couple tolwfr with other tolerances. In that case, SCF loop stops if both criteria are satisfied. Upgrade the documentation accordingly. See [[test:v9_200]].
-add the input variable [[tolwfr_diago]], to distinguish the criterion used for SCF loop and the one used inside diagonalization algorithms to skip lines. Set to tolwfr by default. Note that one can define tolwfr_diago while tolwfr is not.
-add new use of nbdbuf (=-101), which is kind of automatic buffering. In that case, maximum of residuals is computed as max(res*occ) instead of max(res). Used for both tolwfr and tolwfr_diago. This is experimental, so not documented yet.
-
-Apart from LOBPCG (wfoptalg==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
-Tests : mpiio_26, 27, 51, paral_31,63,66,86, tutorial psic 03 , v9_202
-
-By L. Baguet (MR947)
-
-**D.8**
-Fix DFT+U + SOC + nspden=1 case
-Now local magnetic moment is corrected forced to be zero
-
-By M Torrent (MR948)
-
-**D.9** 
-Fix in posdoppler routine
-
-From A. Donkov, through M. Torrent (MR950)
-
-**D.10**
-Bug when doing AHC with dipoles+quadrupoles activated.
-In that case the DDB block dimension is bigger, from 3mpert3mpert to 3mpert3mpert3mpert
-and a reshaping is needed in ddb_get_dielt_zeff
-
-From S. Ponce (MR952)
-
-**D.11**
-Minor changes in 72_response/ that allows to read and write DDB files with more than 1000 atoms.
-From J. Bouquiaux (MR956)
-
-**D.12**
-Introduce [[nblock_lobpcgi]] variable (default=1), and set bandpp accordingly (taking into account npband). If bandpp is used, set nblock_lobpcg accordingly (taking into account npband). bandpp and nblock_lobpcg cannot be used simultaneously.
-bandpp should be considered as an internal variable in the future.
-Autoparal behavior is not changed, so it sets nblock_lobpcg according to npband and bandpp.
-A preferable behavior would be to look for the best values of npband with a fixed value of nblock_lobpcg, and set bandpp accordingly.
-But this would be a big modification of autoparal and would require more tests.
-Ground state parallelization tutorial should be updated too.
-See [[test:v9_201]], [[test:v9_202]], [[test:v9_205]]. 
-From L. Baguet (MR957)
-
-**D.13**
-Get rid of all cp added/cp modified lines
-From M. Torrent (MR959)
-
-**D.14**
 The new input variable [[eph_ahc_type]] has been introduced to allow computing of adiabatic AHC ZPR (previously, only the non-adiabatic one).
 See the new test case [[test:v8_44]], where the new dataset 7 has been added for that purpose.
-From S. Ponce (MR962)
 
-**D.15**
-Dmft susceptibility 
+By S. Ponce (MR962)
+
+**D.7**
+DMFT susceptibility
 Add local charge and magnetic susceptibility for DMFT in CTQMC
 Add two tests, t100 and t101, in paral repository for testing local susceptibility in DMFT
-From F. Gendron (MR963, MR983)
 
+By F. Gendron (MR963, MR983)
 
-**D.16**
-Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP
-From M. Torrent (MR970)
+**D.8**
+Check on consistency of parallelism input variables [[autoparal]] and [[paral_kgb]] with [[optdriver]]. 
+Introduce [[chkparal]]. Can be disabled by non-zero [[expert_user]] input variable (already existed, from 9.2)
+See [[test:v67mbpt_36]]/
 
-**D.17**
-Handle the Debye-Waller when only VB in the active space.
-From S. Ponce (MR972)
+By X. Gonze (MR982)
 
-**D.18** 
-Miscellaneous dev for ground state CPU : part 1
-Finally merging old work! More will come soon.
-Most important changes are:
-
-use of xg_transposer in lobpcg (initially developed for chebfi), so no more calls of prep_getghc.
-extension of xg_transposer to npfft>1 (to keep compatibility), and more importantly to nspinor=2. Update transposer unit tests accordingly.
-introduction of me_g0_fft : =1 for the MPI process which contains G=0 in the "FFT" representation (= after transposition).
-use of double fft trick in getghc for istwfk=2 (previously coded in prep_getghc).
-
-Miscellaneous dev for ground state CPU : part 2
-Most important changes are:
-
-create independent Rayleigh-Ritz and Ortho routines, originally linked to lobpcg or chebfi modules, and merge of the two RR routines. Put into new module m_xg_ortho_RR. Concern CPU and GPU, performances are unchanged.
-change timing accordingly (timana and nvtx)
-correction of chebfi2 for nspinor=2 (CPU only, don't work yet for GPU). Now tested added in [[test:v9_207]] , with parallel version [[test:paral_43]].
-correct memory leak in chebfi2 (both CPU and GPU). Detected thanks to new test [[test:v9_206]].
-[[gpu_option]] : now initialized in xg_init and xgBloxk_map, then passed through xgblock object (as discussed with @torrent). xg_copy handle transfer from CPU to GPU if necessary (openmp target only). Add check_gpu_option to check argument consistency in many xg_tools routines.
-correction in xgBlock_zero (GPU only)
-improve timing in chebfi2
-remove timing of nonlop_ylm that I introduced some time ago (too much low-level, not compatible with threads).
-
-[[gpu_option]] tested in [[test:gpu_1]], [[test:gpu_2]], [[test:gpu_4]], [[test:gpu_5]] ; [[test:gpu_omp_1]], [[test:gpu_omp_2]] ; [[test:hpc_gpu_omp_1]] to [[test:hpc_gpu_omp_13]] ; also [[test:v5_75]].
-Others input variables are not (yet) tested : [[gpu_kokkos_nthrd]], [[gpu_nl_distrib]], [[gpu_nl_splitsize]], [[gpu_use_nvtx]].
-
-
-From L. Baguet (MR973 and MR981)
-
-**D.19**
-Bug fixes for the lruj utility, documentation, and subroutines. 
-Polynomial regression subroutine written from scratch to replace that subroutine.
-LRUJ tutorial documentation updated.
-LRUJ post-processor now calculates HP error correctly.
-Reference files redone and updated.
-
-From L. MacEnulty (MR975)
-
-**D.20**
-Reactivate check on consistency of parallelism input variables autoparal and paral_kgb with optdriver. By pass it with expert_user. 
-Introduce [[chkparal]]. Can be disabled by non-zero expert_user input variable (already existed, from 9.2)
-Test v67mbpt#36
-From X. Gonze (MR982)
-
-
-**D.21**
+**D.9**
 New input variable [[vloc_rcut]].
 This variable defines the cutoff for the radial mesh used to compute `epsatm`
 (the alpha term in the total energy due to the pseudos) and the Bessel transform
 for the local part in the case of NC pseudos given in UPF2 format.
 
 This parameter can be used to cut off the numerical noise arising from the large-r tail when integrating V_loc(r) - Z_v/r.
-In QE, vloc_rcut is harcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
+In Quantum Espresso, [[vloc_rcut]] is harcoded to 10 Bohr. However, numerical experiments showed that such value leads to oscillations
 in the second order derivatives of the vloc form factors.
 For this reason, the default value in Abinit is set to 6.0.
-From M. Giantomassi (6 April 2023)
 
-**D.22**
+By M. Giantomassi (6 April 2023)
+
+**D.10**
 New input variable [[eph_frohl_ntheta]].
 Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the electron-phonon self-energy.
 This variable defines the angular mesh for the spherical integration of the Frohlich divergence
@@ -468,18 +302,98 @@ in the microzone around the Gamma point to accelerate the convergence with the n
 
 Numerous tests : [[test:v8_57]], [[test:v8_60]], [[test:v9_60]], [[test:v9_66]] and several tests in the [[tutorial:eph4zpr]]
 
-**D.23** Implementation of the strong coupling variational polaron equations is on-going
+By M. Giantomassi 
+
+**D.11** Progress in the implementation of the strong coupling variational polaron equations.
 
 Introduced a new frohlich_t datatype (replaces the src/78_eph/m_frohlichmodel.f90 module)
 The src/78_eph/m_frohlichmodel.f90 module is replaced by the src/78_eph/m_frohlich.f90, containing the frohlich_t datatype.
 The previous module provided routines that didn't store any data and only produced output to the main output file.
 The new datatype is more modular and allows for reusing the Fröhlich model data for multiple calculations.
 
-NOT ASSOCIATED TO A MR :
-[[eph_ahc_type]] for test v8#44
-
 By V. Vasilchenko (MR971)
 
+**D.12**
+Developments in the aTDEP post-processing application. 
+See e.g. [[test:atdep_38]]
+
+By F. Bottin and J. Bouchet (MR496)
+
+**B.13**
+There are significant documentation updates to EFG and NMR topics, as well as for the rf2 tutorial.
+By J. Zwanziger (MR980)
+
+
+**D.14** 
+
+Warning in m_respfn_driver.f90 regarding non-colinear dfpt in metals for norm-conserving psps. I compared results obtained by dfpt to results obtained via finite differences on Fe bcc. Everything seems alright.
+There is no paw implementation yet for nspden=4.
+By M. Mignolet (MR922)
+
+**D.15**
+
+Fix parser issue:
+The input would not be parsed correctly when more than one environment variable is present in the input file.
+
+By M. Mignolet (MR928)
+
+**D.16**
+Fix d2eig parallel writing 
+Reactivated the tests [[test:v6_37]] to [[test:v6_37]],
+[[test:v6_50]] to [[test:v6_53]], [[test:v7_50]] to [[test:v6_54]].
+Now the communicator is properly passed to the ddb when writing d2eig.
+
+By G. Antonius (MR931)
+
+
+**D.17**
+Fixed a typo in 'bs_nstates' docs where direct diago was mapped to 'bs_algorithm=2' while it is 1.
+ 
+By F. Goudreault (MR945)
+
+**D.18**
+Fix DFT+U + SOC + nspden=1 case
+Now local magnetic moment is corrected forced to be zero
+
+By M Torrent (MR948)
+
+**D.19** 
+Fix in posdoppler routine
+
+From A. Donkov, through M. Torrent (MR950)
+
+**D.20**
+There was a Bug when doing AHC with dipoles+quadrupoles activated.
+In that case the DDB block dimension is bigger, from 3mpert3mpert to 3mpert3mpert3mpert
+and a reshaping is needed in ddb_get_dielt_zeff.
+This has been fixed.
+
+From S. Ponce (MR952)
+
+**D.21**
+Get rid of all cp added/cp modified lines
+
+From M. Torrent (MR959)
+
+
+**D.22**
+Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP
+
+From M. Torrent (MR970)
+
+**D.22**
+Handle the Debye-Waller when only VB in the active space.
+
+From S. Ponce (MR972)
+
+**D.23**
+Bug fixes for the lruj utility, documentation, and subroutines. 
+Polynomial regression subroutine written from scratch to replace that subroutine.
+LRUJ tutorial documentation updated.
+LRUJ post-processor now calculates HP error correctly.
+Reference files redone and updated.
+
+From L. MacEnulty (MR975)
 
 
 * * *
