@@ -14,8 +14,8 @@ that had not yet been documented.
 
 The list of contributors includes:
 G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
-F. Goudreault, B. Guster, P. Kesterner, L. Mac Enulty, M. Mignolet, 
-S. Ponce, M. Sarraute, M. Torrent, M. Verstraete, V. Vasilchenko, J. Zwanziger 
+F. Goudreault, B. Guster, P. Kestener, L. Mac Enulty, M. Mignolet, 
+S. Ponce, M. Sarraute, M. Torrent, V. Vasilchenko, M. Verstraete, J. Zwanziger 
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -107,7 +107,7 @@ By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent
 ABINIT can now be build using CMake instead of the standard configure+make.
 Also, the version number of ABINIT is now generated automatically from the git tag information.
 
-By P. Kesteneer (MR944, 979)
+By P. Kestener (MR944, 979)
 
 
 **B.4** Computation of phonon angular momentum
@@ -658,7 +658,7 @@ By M. Giantomassi (commit 31e8aa66d8).
 By X. Gonze (commit dabc1b905).
 
 **D.11** Fixed typo in CITATION.cff.
-By P. Kesteneer (MR910). 
+By P. Kestener (MR910). 
 
 **D.12** New topic [[topic:AtomCentered]] created.
 By X. Gonze (commit 425e8c)
@@ -758,7 +758,7 @@ By JM Beuken (MR900)
 **A.9**
 Several improvements for external libs: FFTW3 thread safety, openBLAS multithreading, netCDF Fortran parallel
 
-By M. Torrent, with patch from P. Kesteneer (MR902)
+By M. Torrent, with patch from P. Kestener (MR902)
 
 **A.10**
 Several fixes, including documentation for icutcoul and related input variables
@@ -881,7 +881,7 @@ Add new parameter use_nvtx (now [[gpu_use_nvtx]])
 to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
-From P. Kesteneer (MR843)
+From P. Kestener (MR843)
 
 **C.3** Improve detection of inlined macros. The developers should now use 
 
