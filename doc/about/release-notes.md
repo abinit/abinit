@@ -12,14 +12,9 @@ are relative to modifications/improvements of ABINIT v10.0 with respect to v9.10
 <!-- TO BE CHANGED Merge requests up to and including MR984. Also, MRXXX to MRYYY are taken into account. -->
 
 The list of contributors includes:
-J.-M. Beuken, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner, L. Mac Enulty, M. Mignolet, D.D. O'Regan, S. Rostami,
-M. Sarraute, M. Torrent, M. Verstraete,
-
-
-TO BE CHANGED 
-J. Abreu, F. Akhmetov (Radioteddy on github), J.-M. Beuken, A. Blanchet, F. Bruneval, M. Cote, M. Giantomassi, X. Gonze, B. Guster, P. Kesterner,
-L. Mac Enulty, D.D. O'Regan, S. Rostami,
-M. Royo, A. Sasani, M. Stengel, M. Torrent, M. Verstraete, A. Zabalo, J. Zwanziger.
+G. Antonius, L. Baguet, J.-M. Beuken, F. Bottin, J. Bouchet, J. Bouquiaux, A. Donkov, F. Gendron, M. Giantomassi, X. Gonze, 
+F. Goudreault, B. Guster, P. Kesterner, L. Mac Enulty, M. Mignolet, 
+S. Ponce, M. Sarraute, M. Torrent, M. Verstraete, V. Vasilchenko, J. Zwanziger 
 
 It is worthwhile to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -42,6 +37,8 @@ By X. Gonze  (MR929)
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
 They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field, 
 but have been superceded by rf2_XXX input variables. 
+
+Who ?
 
 
 ### **B.** Most noticeable achievements
@@ -152,6 +149,10 @@ MR974
 Increase the number of GPU devices that can be detected/used on a node
 MR978
 
+Tests are present in new directories :
+[[test:gpu_omp_1]], [[test:gpu_omp_2]], [[test:gpu_omp_3]], [[test:gpu_omp_uo3]],
+[[test:hpc_gpu_omp_1]] to [[test:hpc_gpu_omp_13]]
+
 By P. Kesterneer, M. Sarraute and M. Torrent (MR942, 943, 951)
 
 
@@ -204,6 +205,9 @@ instead of using the numerous prt* input variables.
 
 A supravariable is introduced while mainting the underlying logic of the prt file options inside abinit.
 (Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using //write_files "  "//.
+When rationalizing the set of prt* variables and their behavior, new ones were introduced : [[prtevk]], [[prthist]] and [[prtddb]].
+
+See [[test:v9_150]].
 
 By B. Guster (MR920)
 
@@ -215,6 +219,7 @@ Netcdf format activated with iomode
 mrgddb can convert a single DDB file between text format and netcdf format
 New netcdf reading for pseudopotential and crystal types
 Extended IO capabilities for pseudopotential_type and crystal_t
+See [[test:v9_160]] and [[test:v9_161]]
 
 By G. Antonius (MR 927)
 
@@ -222,12 +227,15 @@ By G. Antonius (MR 927)
 **B.7** Several improvements for metaGGA, and notably for TB09 functional
 List of improvements:
 
-new variable xc_taupos to control positivity of kinetic energy density, regardless the one for the density.
-new variables irdkden and getkden: allow for not reading KDEN when reading DEN (and other possible applications)
+new variable [[xc_taupos]] to control positivity of kinetic energy density, regardless the one for the density.
+new variables [[irdkden]] and [[getkden]]: allow for not reading KDEN when reading DEN (and other possible applications)
 computation of c parameter of TB09 functional, compatible with NCPP and PAW, implemented in a specific routine
 several improvements for automatic settings (forces, stresses, self-consistent cycle)
 
 BTW: mBJ/TB09 is not adapted to forces/stresses computation because it doesn't solve a variational problem on energy. This means that it is probably not suitable for DFPT.
+
+New input variables : [[irdkden]]
+See the new tests [[test:libxc_23]], [[test:libxc_24]], [[test:libxc_23]], [[test:libxc_35]].
 
 By M. Torrent (MR 938)
 
@@ -238,11 +246,24 @@ The src/78_eph/m_frohlichmodel.f90 module is replaced by the src/78_eph/m_frohli
 The previous module provided routines that didn't store any data and only produced output to the main output file.
 The new datatype is more modular and allows for reusing the Fröhlich model data for multiple calculations.
 
+NOT ASSOCIATED TO A MR :
+New input variable : 
+[[eph_frohl_ntheta]] for tutorespfn teph4zpr 4 to 8 ; v8 57 and 60 ; v9 60 and 66.
+[[eph_ahc_type]] for test v8#44
+
 By V. Vasilchenko (MR971)
 
 **B.9**
 Add spin orbit coupling to orbmag, and make significant documentation updates to rf2 tutorial and EFG and NMR topics
 By J. Zwanziger (MR980)
+
+**B.10** Interface to coupled-cluster CC4S calculations.
+
+The writing of the file needed as input for computations with the CC4S package, <https://manuals.cc4s.org/user-manual>,
+allowing to perform coupled-cluster calculations (e.g. CCSD), perturbative triples (and more), can be activated using [[optdriver]]=6 and [[gwr_task]]="CC4S".
+See test test:gwr_07 
+
+By M. Giantomassi (MR 875, 907)
 
 ### **C.** Changes for the developers (including information about compilers)
 
@@ -297,6 +318,7 @@ create symfind_expert to encapsulate several calls to symfind
 with different tolerances as well as the fix of acell, rprim and xred with respect to the symmetries, already present in ABINIT.
 
 Echo in the log file information about the primitive cell when the input contains  non-primitive cell. Also miscellaneous minor fixes.
+See [[test:v9_189]].
 
 By X. Gonze (MR932, MR976)
 
@@ -307,20 +329,22 @@ Typo in 'bs_nstates' docs where direct diago was mapped to 'bs_algorithm=2' whil
 By F. Goudreault (MR945)
 
 **D.6**
-Developments in the aTDEP post-process
+Developments in the aTDEP post-processing application..
+See e.g. [[test:atdep_38]]
 
-By F. Bottin (MR496)
+By F. Bottin and J. Bouchet (MR496)
 
 **D.7**
 Improvements related to tolwfr 
 
 This commit contains 3 modifications :
 
-allow to couple tolwfr with other tolerances. In that case, SCF loop stops if both criteria are satisfied. Upgrade the documentation accordingly.
-add the input variable tolwfr_diago, to distinguish the criterion used for SCF loop and the one used inside diagonalization algorithms to skip lines. Set to tolwfr by default. Note that one can define tolwfr_diago while tolwfr is not.
+Allow to couple tolwfr with other tolerances. In that case, SCF loop stops if both criteria are satisfied. Upgrade the documentation accordingly. See [[test:v9_200]].
+add the input variable [[tolwfr_diago]], to distinguish the criterion used for SCF loop and the one used inside diagonalization algorithms to skip lines. Set to tolwfr by default. Note that one can define tolwfr_diago while tolwfr is not.
 add new use of nbdbuf (=-101), which is kind of automatic buffering. In that case, maximum of residuals is computed as max(res*occ) instead of max(res). Used for both tolwfr and tolwfr_diago. This is experimental, so not documented yet.
 
 Apart from LOBPCG (wfoptalg==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
+Tests : mpiio_26, 27, 51, paral_31,63,66,86, tutorial psic 03 , v9_202
 
 By L. Baguet (MR947)
 
@@ -347,12 +371,13 @@ Minor changes in 72_response/ that allows to read and write DDB files with more 
 From J. Bouquiaux (MR956)
 
 **D.12**
-Introduce nblock_lobpcg variable (default=1), and set bandpp accordingly (taking into account npband). If bandpp is used, set nblock_lobpcg accordingly (taking into account npband). bandpp and nblock_lobpcg cannot be used simultaneously.
+Introduce [[nblock_lobpcgi]] variable (default=1), and set bandpp accordingly (taking into account npband). If bandpp is used, set nblock_lobpcg accordingly (taking into account npband). bandpp and nblock_lobpcg cannot be used simultaneously.
 bandpp should be considered as an internal variable in the future.
 Autoparal behavior is not changed, so it sets nblock_lobpcg according to npband and bandpp.
 A preferable behavior would be to look for the best values of npband with a fixed value of nblock_lobpcg, and set bandpp accordingly.
 But this would be a big modification of autoparal and would require more tests.
 Ground state parallelization tutorial should be updated too.
+See [[test:v9_201]], [[test:v9_202]], [[test:v9_205]]. 
 From L. Baguet (MR957)
 
 **D.13**
@@ -360,9 +385,8 @@ Get rid of all cp added/cp modified lines
 From M. Torrent (MR959)
 
 **D.14**
-Support for adiabatic AHC ZPR
-New input variable 'eph_ahc_type' for this.
-New test case in v8/t44.in --> addition of a Dataset 7.
+The new input variable [[eph_ahc_type]] has been introduced to allow computing of adiabatic AHC ZPR (previously, only the non-adiabatic one).
+See the new test case [[test:v8_44]], where the new dataset 7 has been added for that purpose.
 From S. Ponce (MR962)
 
 **D.15**
@@ -395,12 +419,16 @@ Most important changes are:
 
 create independent Rayleigh-Ritz and Ortho routines, originally linked to lobpcg or chebfi modules, and merge of the two RR routines. Put into new module m_xg_ortho_RR. Concern CPU and GPU, performances are unchanged.
 change timing accordingly (timana and nvtx)
-correction of chebfi2 for nspinor=2 (CPU only, don't work yet for GPU). Now tested added in v9/207.
-correct memory leak in chebfi2 (both CPU and GPU). Detected thanks to new test v9/206.
-gpu_option : now initialized in xg_init and xgBloxk_map, then passed through xgblock object (as discussed with @torrent). xg_copy handle transfer from CPU to GPU if necessary (openmp target only). Add check_gpu_option to check argument consistency in many xg_tools routines.
+correction of chebfi2 for nspinor=2 (CPU only, don't work yet for GPU). Now tested added in [[test:v9_207]] , with parallel version [[test:paral_43]].
+correct memory leak in chebfi2 (both CPU and GPU). Detected thanks to new test [[test:v9_206]].
+[[gpu_option]] : now initialized in xg_init and xgBloxk_map, then passed through xgblock object (as discussed with @torrent). xg_copy handle transfer from CPU to GPU if necessary (openmp target only). Add check_gpu_option to check argument consistency in many xg_tools routines.
 correction in xgBlock_zero (GPU only)
 improve timing in chebfi2
 remove timing of nonlop_ylm that I introduced some time ago (too much low-level, not compatible with threads).
+
+[[gpu_option]] tested in [[test:gpu_1]], [[test:gpu_2]], [[test:gpu_4]], [[test:gpu_5]] ; [[test:gpu_omp_1]], [[test:gpu_omp_2]] ; [[test:hpc_gpu_omp_1]] to [[test:hpc_gpu_omp_13]] ; also [[test:v5_75]].
+Others input variables are not (yet) tested : [[gpu_kokkos_nthrd]], [[gpu_nl_distrib]], [[gpu_nl_splitsize]], [[gpu_use_nvtx]].
+
 
 From L. Baguet (MR973 and MR981)
 
@@ -415,8 +443,43 @@ From L. MacEnulty (MR975)
 
 **D.20**
 Reactivate check on consistency of parallelism input variables autoparal and paral_kgb with optdriver. By pass it with expert_user. 
-Introduce chkparal. Can be disabled by non-zero expert_user input variable (already existed, from 9.2)
+Introduce [[chkparal]]. Can be disabled by non-zero expert_user input variable (already existed, from 9.2)
+Test v67mbpt#36
 From X. Gonze (MR982)
+
+
+**D.21**
+New input variable [[vloc_rcut]].
+This variable defines the cutoff for the radial mesh used to compute `epsatm`
+(the alpha term in the total energy due to the pseudos) and the Bessel transform
+for the local part in the case of NC pseudos given in UPF2 format.
+
+This parameter can be used to cut off the numerical noise arising from the large-r tail when integrating V_loc(r) - Z_v/r.
+In QE, vloc_rcut is harcoded to 10 Bohr but numerical experiments showed that such value leads to oscillations
+in the second order derivatives of the vloc form factors.
+For this reason, the default value in Abinit is set to 6.0.
+From M. Giantomassi (6 April 2023)
+
+**D.22**
+New input variable [[eph_frohl_ntheta]].
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the electron-phonon self-energy.
+This variable defines the angular mesh for the spherical integration of the Frohlich divergence
+in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
+
+Numerous tests : [[test:v8_57]], [[test:v8_60]], [[test:v9_60]], [[test:v9_66]] and several tests in the [[tutorial:eph4zpr]]
+
+**D.23** Implementation of the strong coupling variational polaron equations is on-going
+
+Introduced a new frohlich_t datatype (replaces the src/78_eph/m_frohlichmodel.f90 module)
+The src/78_eph/m_frohlichmodel.f90 module is replaced by the src/78_eph/m_frohlich.f90, containing the frohlich_t datatype.
+The previous module provided routines that didn't store any data and only produced output to the main output file.
+The new datatype is more modular and allows for reusing the Fröhlich model data for multiple calculations.
+
+NOT ASSOCIATED TO A MR :
+[[eph_ahc_type]] for test v8#44
+
+By V. Vasilchenko (MR971)
+
 
 
 * * *
@@ -920,10 +983,10 @@ From J.-M. Beuken (MR830).
 
 **C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
 This makes more readable profiling and tracing information when viewed with nsys-ui. 
-Add new parameter `use_nvtx to enable/disable nvtx annotations at runtime. 
+Add new parameter [[use_nvtx]] to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
-From P. Kestener (MR843)
+From P. Kesteneer (MR843)
 
 **C.3** Improve detection of inlined macros. The developers should now use 
 

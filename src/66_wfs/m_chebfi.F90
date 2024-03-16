@@ -371,7 +371,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor, dtset%invol_blk_sliced)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%invovl_blk_sliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)

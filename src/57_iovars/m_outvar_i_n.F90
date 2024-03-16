@@ -359,8 +359,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
 
- intarr(1,:)=dtsets(:)%invol_blk_sliced
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invol_blk_sliced',&
+ intarr(1,:)=dtsets(:)%invovl_blk_sliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invovl_blk_sliced',&
 &             'INT',0,firstchar=firstchar_gpu)
 
  intarr(1,:)=dtsets(:)%ionmov
