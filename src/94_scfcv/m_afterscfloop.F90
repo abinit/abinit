@@ -37,6 +37,7 @@ module m_afterscfloop
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
@@ -355,10 +356,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
- integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: bantot,bufsz,calc_pol_ddk,choice,cplex,ierr,ifft,igrad,ishift,ispden
+ integer :: mcg13,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
- logical :: test_gylmgr,test_nfgd,test_rfgd
+ logical :: save_cg13,test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
@@ -369,9 +370,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: cg13(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
  real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
@@ -517,10 +518,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(252,1,tsec)
 
 !----------------------------------------------------------------------
-!Polarization Calculation
+!Polarization Calculation, but not orbital magnetism
 !----------------------------------------------------------------------
 
- if(dtset%berryopt/=0)then
+ if(dtset%berryopt/=0 .AND. dtset%orbmag == 0)then
    call elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,energies%e_elecfield,gprimd,hdr,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
@@ -529,6 +530,26 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
+
+!----------------------------------------------------------------------
+!Orbital magnetization calculation using PEAD DDK wavefunctions
+!----------------------------------------------------------------------
+
+ if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+   save_cg13 = .TRUE.
+   mcg13 = mcg
+   ABI_MALLOC(cg13,(2,mcg13,3))
+
+   calc_pol_ddk = 2
+   call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
+       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg13,mcprj,&
+       &  dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,npwarr,dtset%nsppol,psps%ntypat,&
+       &  dtset%nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
+       &  pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,ab_out,&
+       &  usecprj,psps%usepaw,xred,psps%ziontypat)
+
+   ABI_FREE(cg13)
+ end if
 
 !----------------------------------------------------------------------
 !Gradient and Laplacian of the Density Calculation

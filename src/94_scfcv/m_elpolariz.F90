@@ -231,6 +231,9 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    end select
 
    unit_out = ab_out
+
+   ! by default berryphase_new writes ddk wavefunctions to disk
+   ! with save_cg13 set to true it can return them in memory
    save_cg13 = .FALSE.
    mcg13 = 0
    allocate(cg13(2,mcg13,3))
