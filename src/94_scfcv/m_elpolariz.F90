@@ -149,16 +149,16 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
 !Local variables-------------------------------
 !scalars
- integer :: mcg13,my_nspinor,option,unit_out,iir,jjr,kkr
+ integer :: mcg1_3,my_nspinor,option,unit_out,iir,jjr,kkr
  real(dp) :: pdif_mod,eenth,ucvol_local
- logical :: save_cg13
+ logical :: save_cg1_3
  character(len=500) :: message
 !arrays
  real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)
 !! ptot(3) = total polarization (not reduced) REC
 !! red_ptot(3) = internal reduced total polarization REC
  real(dp) ::  A(3,3),A1(3,3),A_new(3,3),efield_new(3)
- real(dp),allocatable :: cg13(:,:,:)
+ real(dp),allocatable :: cg1_3(:,:,:)
 
 ! *************************************************************************
 
@@ -233,18 +233,20 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    unit_out = ab_out
 
    ! by default berryphase_new writes ddk wavefunctions to disk
-   ! with save_cg13 set to true it can return them in memory
-   save_cg13 = .FALSE.
-   mcg13 = 0
-   allocate(cg13(2,mcg13,3))
-   call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
+   ! with save_cg1_3 set to true it can return them in memory
+   ! this feature is used at present when orbmag is also called,
+   ! as in afterscfloop
+   save_cg1_3 = .FALSE.
+   mcg1_3 = 0
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
 &   gprimd,hdr,psps%indlmn,kg,&
-&   psps%lmnmax,mband,mcg,mcg13,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
+&   psps%lmnmax,mband,mcg,mcg1_3,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
 &   nsppol,psps%ntypat,nkpt,option,pawrhoij,&
 &   pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&                            !!REC
-&  pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,&
+&  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,&
 &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
-   deallocate(cg13)
+   ABI_FREE(cg1_3)
 
    dtefield%red_ptot1(:)=red_ptot(:)
 
