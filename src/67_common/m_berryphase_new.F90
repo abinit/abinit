@@ -308,6 +308,11 @@ subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
    ABI_BUG(message)
  end if
 
+ if (save_cg13 .AND. (size(cg13) /= 2*mcg13*3 ) ) then
+   message = ' cg13 output requested but cg13 size incorrect '
+   ABI_BUG(message)
+ end if
+
 ! useful flags for various efield possibilities
  efield_flag = ( dtset%berryopt == 4 .or. dtset%berryopt == 6 .or. dtset%berryopt == 7 .or. &
 & dtset%berryopt ==14 .or. dtset%berryopt ==16 .or. dtset%berryopt ==17 )
@@ -1900,14 +1905,14 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 
      mcg13 = 0
      save_cg13 = .FALSE.
-     allocate(cg13(2,mcg13,3))
+     ABI_MALLOC(cg13,(2,mcg13,3))
      call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
           &   psps%lmnmax,dtset%mband,mcg,mcg13,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
           &   dtset%natom,npwarr,dtset%nsppol,psps%ntypat,dtset%nkpt,optberry,pawrhoij,pawtab,&
           &   pel_cg,pelev,pion,ptot,red_ptot,pwind,&
           &   pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,&
           &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
-     deallocate(cg13)
+     ABI_FREE(cg13)
 
      dtefield%red_ptot1(:)=red_ptot(:)
 
