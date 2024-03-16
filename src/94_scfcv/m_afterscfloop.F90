@@ -61,6 +61,7 @@ module m_afterscfloop
  use m_spin_current,     only : spin_current
  use m_mkrho,            only : mkrho, prtrhomxmn
  use m_elpolariz,        only : elpolariz
+ use m_orbmag,           only : orbmag
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
@@ -357,9 +358,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !scalars
  integer,parameter :: response=0
  integer :: bantot,bufsz,calc_pol_ddk,choice,cplex,ierr,ifft,igrad,ishift,ispden
- integer :: mcg13,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
- logical :: save_cg13,test_gylmgr,test_nfgd,test_rfgd
+ logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
@@ -372,8 +373,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !arrays
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: cg13(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
- real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -536,19 +537,28 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 
  if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
-   save_cg13 = .TRUE.
-   mcg13 = mcg
-   ABI_MALLOC(cg13,(2,mcg13,3))
+   save_cg1_3 = .TRUE.
+   mcg1_3 = mcg
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
 
    calc_pol_ddk = 2
-   call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
-       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg13,mcprj,&
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
+       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg1_3,mcprj,&
        &  dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,npwarr,dtset%nsppol,psps%ntypat,&
        &  dtset%nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
-       &  pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,ab_out,&
+       &  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,ab_out,&
        &  usecprj,psps%usepaw,xred,psps%ziontypat)
 
-   ABI_FREE(cg13)
+   if ( .NOT. ALLOCATED(vtrial_local)) then
+     ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
+   end if
+   vtrial_local = vtrial
+!     call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
+!        & npwarr,occ,paw_an,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+
+   ABI_FREE(vtrial_local)
+   ABI_FREE(cg1_3)
+
  end if
 
 !----------------------------------------------------------------------
