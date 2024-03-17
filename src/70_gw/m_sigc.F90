@@ -40,7 +40,7 @@ module m_sigc
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
  use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
- use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
+ use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_pawang,        only : pawang_type
@@ -724,11 +724,11 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        if (sigma_needs_ppm(Sigp)) then
          if (Wfd%usepaw==1.and.PPm%userho==1) then
            ! Use PAW AE rhor.
-           call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
+           call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
                               rho_ngfft,aepaw_rhor(:,1),iqiA=iq_ibz)
          else
-           call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
-                              rho_ngfft,rhor(:,1),iqiA=iq_ibz)
+           call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
+                          rho_ngfft,rhor(:,1),iqiA=iq_ibz)
          end if
        end if
      end if
@@ -743,7 +743,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ABI_MALLOC(botsq,(PPm%npwc,PPm%dm2_botsq))
        ABI_MALLOC(otq,(PPm%npwc,PPm%dm2_otq))
        ABI_MALLOC(eig,(PPm%dm_eig,PPm%dm_eig))
-       call ppm_get_qbz(PPm,Gsph_c,Qmesh,iq_bz,botsq,otq,eig)
+       call PPm%get_qbz(Gsph_c,Qmesh,iq_bz,botsq,otq,eig)
      end if
 
      if ( ANY(mod10 == [SIG_GW_AC,SIG_GW_CD,SIG_QPGW_CD])) then
@@ -944,7 +944,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
            sigc_ket  = czero_gw
-           call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
+           call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
                              omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
 
            if (PPm%model==3.or.PPm%model==4) then
@@ -1004,7 +1004,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ket1      = czero_gw
            ket2      = czero_gw
 
-           call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
+           call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
                              omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
 
            if (Sigp%gwcalctyp==28) then
@@ -1021,8 +1021,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
              otq_transp=TRANSPOSE(otq)
 
-             call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq_conjg_transp,otq_transp,&
-                omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
+             call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq_conjg_transp,otq_transp,&
+                               omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
 
              ABI_FREE(botsq_conjg_transp)
              ABI_FREE(otq_transp)

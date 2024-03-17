@@ -29,7 +29,6 @@ module m_bethe_salpeter
  use m_abicore
  use m_xmpi
  use m_errors
- use m_screen
  use m_nctk
  use m_distribfft
  use netcdf
@@ -37,6 +36,7 @@ module m_bethe_salpeter
  use m_dtset
  use m_dtfil
  use m_crystal
+ use m_screen
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -842,8 +842,9 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! TODO clean this part and add an option to retrieve a single frequency to save memory.
  call timab(654,1,tsec) ! bse(rdmkeps^-1)
 
- call screen_nullify(W)
- if (BSp%use_coulomb_term) then !  Init W.
+ call W%nullify()
+ if (BSp%use_coulomb_term) then
+   ! Init W.
    ! Incore or out-of-core solution?
    mqmem=0; if (Dtset%gwmem/10==1) mqmem=Qmesh%nibz
 
@@ -862,8 +863,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    W_info%eps_inf = BSp%eps_inf
    !W_info%drude_plsmf
 
-   call screen_init(W,W_Info,Cryst,Qmesh,Gsph_c,Vcp,w_fname,mqmem,Dtset%npweps,&
-    Dtset%iomode,ngfftf,nfftf_tot,Wfd%nsppol,Wfd%nspden,qp_aerhor,Wfd%prtvol,Wfd%comm)
+   call W%init(W_Info,Cryst,Qmesh,Gsph_c,Vcp,w_fname,mqmem,Dtset%npweps,&
+                    Dtset%iomode,ngfftf,nfftf_tot,Wfd%nsppol,Wfd%nspden,qp_aerhor,Wfd%prtvol,Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
  !
@@ -874,10 +875,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(656,1,tsec) ! bse(mkexcham)
 
  call exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-& Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
- !
- ! Free Em1 to make room for the full excitonic Hamiltonian.
- call screen_free(W)
+                    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
+
+ ! Free W to make room for the full excitonic Hamiltonian.
+ call W%free()
 
  call timab(656,2,tsec) ! bse(mkexcham)
  !
@@ -1055,7 +1056,7 @@ end subroutine bethe_salpeter
 !! SOURCE
 
 subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-& Cryst,Kmesh,Qmesh,ks_ebands,qp_ebands,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
+                     Cryst,Kmesh,Qmesh,ks_ebands,qp_ebands,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
 
 !Arguments ------------------------------------
 !scalars
