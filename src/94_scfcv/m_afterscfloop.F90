@@ -553,8 +553,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
    end if
    vtrial_local = vtrial
-!     call orbmag(cg,cg1_3,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mpi_enreg,mpw,nfftf,ngfftf,&
-!        & npwarr,occ,paw_an,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+   call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
+     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
+     & pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
 
    ABI_FREE(vtrial_local)
    ABI_FREE(cg1_3)
