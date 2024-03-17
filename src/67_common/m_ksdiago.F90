@@ -54,7 +54,7 @@ module m_ksdiago
  use m_crystal,           only : crystal_t
  use m_fftcore,           only : kpgsph, get_kg
  use m_fft_mesh,          only : calc_ceigr, get_gfft
- use m_fft,               only : fftpac, uplan_t, fftbox_plan3_t
+ use m_fft,               only : fftpac, uplan_t, fftbox_plan3_t, zerosym
  use m_cgtools,           only : set_istwfk
  use m_electronpositron,  only : electronpositron_type
  use m_mpinfo,            only : destroy_mpi_enreg, initmpi_seq
@@ -978,9 +978,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  integer :: ik_ibz, ik_bz, isym_k, trev_k, g0_k(3), g0(3)
  integer :: iq_bz !, isym_q, trev_q !, g0_q(3) iq_ibz,
  real(dp),parameter :: lambda0 = zero
- real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol
- logical :: do_full_diago, haveit, isirr_k, isirr_q, q_is_gamma
- character(len=80) :: frmt1,frmt2
+ real(dp) :: cpu, wall, gflops, mem_mb, f_bsum, fact_spin, tol_empty_in, tol_empty, gsq_max, inv_sqrt_ucvol, rcut
+ logical :: do_full_diago, haveit, isirr_k, q_is_gamma ! isirr_q,
+ character(len=80) :: frmt1
  character(len=10) :: stag(2)
  character(len=500) :: msg
  type(MPI_type) :: mpi_enreg_seq
@@ -991,7 +991,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  type(fftbox_plan3_t) :: box_plan
 !arrays
  integer,allocatable :: gfft(:,:)
- real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), q0(3), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3)
+ real(dp) :: kptns_(3,1), ylmgr_dum(1,1,1), tsec(2), ksum(3), kk_ibz(3), kgw_m_ksum(3), qq_bz(3), my_gw_qlwl(3) ! q0(3),
  real(dp),allocatable :: ph3d(:,:,:), ffnl(:,:,:,:), kinpw(:), kpg_k(:,:)
  real(dp),allocatable :: vlocal(:,:,:,:), ylm_k(:,:), dum_ylm_gr_k(:,:,:), eig_ene(:), ghc(:,:), gvnlxc(:,:), gsc(:,:), vcg_qbz(:,:)
  real(dp),target,allocatable :: bras(:,:)
@@ -1006,8 +1006,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! See sequence of calls in vtorho.
  ! Check that usekden is not 0 if want to use vxctau
  !with_vxctau = (present(vxctau).and.dtset%usekden/=0)
-
- !ABI_CHECK_IEQ(dtset%usefock, 0, "direct diagonalization does not support usefock")
 
  !====================
  !=== Check input ====
@@ -1152,7 +1150,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  batch_size = 8 * omp_nt
  if (istwf_k == 2) batch_size = 1  ! FIXME
  !batch_size = 1
- call wrtout(std_out, sjoin(" Using batch_size:", itoa(batch_size)))
+ call wrtout(std_out, sjoin(" Building H^KS with batch_size:", itoa(batch_size)))
 
  ABI_MALLOC(bras, (2, npwsp * batch_size))
  ! cwaveprj is ordered by atom type, see nonlop_ylm.
@@ -1228,6 +1226,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    end if ! istwf_k
  end do ! il_g2
 
+ ! MG: DEBUG
+ call wrtout(std_out, " Setting H_KS to zero for debugging purposes!")
+ ghg_mat%buffer_cplx = czero
+
  call cwtime_report(" build H^KS_g1g2", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
@@ -1244,7 +1246,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  ! Compute Fock operator F^k_{g1,g2}
  ! ==================================
  if (dtset%usefock == 1) then
+ !if (.False.) then
    call cwtime(cpu, wall, gflops, "start")
+   call wrtout(std_out, sjoin(" Building Fock with batch_size:", itoa(batch_size)))
    ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
    inv_sqrt_ucvol = one/sqrt(cryst%ucvol)
 
@@ -1266,7 +1270,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_MALLOC(gfft, (3, nfftc))
    call get_gfft(ngfftc, kpoint, cryst%gmet, gsq_max, gfft)
 
-   my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
+   !my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
+   my_gw_qlwl = zero
    do ik_bz=1,hyb%nkbz
      ksum = hyb%kbz(:, ik_bz)
      kgw_m_ksum = kpoint - ksum
@@ -1276,10 +1281,17 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      qq_bz = hyb%qbz(:,iq_bz)
      q_is_gamma = normv(qq_bz, cryst%gmet, "G") < GW_TOLQ0
      call hyb%vcgen%get_vc_sqrt(qq_bz, nfftc, gfft, my_gw_qlwl, cryst, vc_sqrt, comm, vc=vcg_qbz(:,iq_bz))
-     if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
+     ! A non-positive value of rcut activates the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
+     rcut = (cryst%ucvol * hyb%nkbz * 3.d0 / four_pi) ** third
+     !vcgen%i_sz = two_pi * rcut**2
+     !if (q_is_gamma) vcg_qbz(1,iq_bz) = two_pi * rcut**2      ! FIXME: This is used in GW
+     if (q_is_gamma) vcg_qbz(1,iq_bz) = two_pi/three * rcut**2 ! FIXME: This is used in m_fock
+     !if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
      !if (q_is_gamma) vcg_qbz(1,iq_bz) = zero
-     vcg_qbz(2:,iq_bz) = vcg_qbz(2:,iq_bz) * (inv_sqrt_ucvol**2)
-   end do
+     vcg_qbz(:,iq_bz) = vcg_qbz(:,iq_bz) * (inv_sqrt_ucvol**2)
+     !vcg_qbz(2:,iq_bz) = vcg_qbz(2:,iq_bz) * (inv_sqrt_ucvol**2)
+     !call zerosym(vcg_qbz(:,iq_bz), 1, n1, n2, n3)
+   end do ! ik_bz
 
    ! Build plans for (dense, g-sphere) FFTs.
    call box_plan%from_ngfft(ngfftc, nspinor*batch_size, dtset%gpu_option)
@@ -1288,7 +1300,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
 
-     ! Fill cbras_box with e^{ig2.r}
+     ! Fill cbras_box with e^{ig2.r}.
      do idat=1,ndat
        call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
        cbras_box(:,idat) = cbras_box(:,idat) * inv_sqrt_ucvol
@@ -1337,7 +1349,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
          call hyb%wfd%get_ur(band_sum, ik_ibz, spin, ur)
          ur = ur * inv_sqrt_ucvol
          do idat=1,ndat
-           cbras_box(:,idat) = f_bsum * cbras_box(:,idat) * conjg(ur(:))
+           cbras_box(:,idat) = f_bsum * conjg(ur) * cbras_box(:,idat)
          end do
 
          ! FFT r --> g and multiply by v(g,q) on the FFT box.
@@ -1356,7 +1368,10 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! FFT r --> g_sphere and MPI sum partial contributions.
      call uplan_k%execute_rg(ndat, rfg_box(:,1), cbras_g(:,1))
      call xmpi_sum(cbras_g, hyb%wfd%comm_spin(spin), ierr)
-     cbras_g = -cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     cbras_g = - 10000 * cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     !cbras_g = - sqrt(cryst%ucvol) * cbras_g ! / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     !cbras_g = -half * inv_sqrt_ucvol * cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     !cbras_g = -half * sqrt(cryst%ucvol) * cbras_g  !/ (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
 
      ! Update my local buffer of ghg_mat.
      do idat=1,ndat
@@ -1438,14 +1453,14 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  if (my_rank == master) then
    ! Write eigenvalues.
-   frmt1 = '(8x,9(1x,f7.2))'; frmt2 = '(8x,9(1x,f7.2))'
+   frmt1 = '(8x,*(1x,f7.3))'
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
    write(msg, frmt1)(eig_ene(ib)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
    ! HYB DEBUG
-   write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
+   write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV, ib=1,min(9,hyb%ebands%mband)); call wrtout(std_out, msg)
    if (nband_k > 9 .and. dtset%prtvol > 0) then
      do jj=10,nband_k,9
-       write(msg, frmt2) (eig_ene(ib)*Ha_eV,ib=jj,min(jj+8,nband_k)); call wrtout(std_out, msg)
+       write(msg, frmt1) (eig_ene(ib)*Ha_eV,ib=jj,min(jj+8,nband_k)); call wrtout(std_out, msg)
      end do
    end if
  end if

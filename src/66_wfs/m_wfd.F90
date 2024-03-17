@@ -316,7 +316,7 @@ module m_wfd
   integer :: nloalg(3)
    ! Governs the choice of the algorithm for nonlocal operator. See doc.
 
-  integer,allocatable :: comm_spin(: )
+  integer,allocatable :: comm_spin(:)
    ! (nsppol)
    ! MPI communicator for collinear spin.
 
@@ -541,6 +541,19 @@ module m_wfd
  public :: wfdgw_copy
 !!***
 
+ type, public :: u1cache_t
+   integer :: prev_npw_kq = -1, prev_bstart_ks = -1, prev_nbcalc_ks = - 1
+   !integer :: tot_nlines_done = 0
+   integer :: hits = 0, miss = 0
+   real(dp) :: prev_qpt(3)
+   integer, allocatable :: prev_kg_kq(:,:)
+   real(dp),allocatable :: prev_cg1s_kq(:,:,:,:)
+    ! (2, npw_kq*nspinor, natom3, nbcalc_ks))
+ contains
+   procedure :: store => u1cache_store
+   procedure :: find_band => u1cache_find_band
+   procedure :: free => u1cache_free
+ end type u1cache_t
 
 CONTAINS  !==============================================================================
 
@@ -1087,7 +1100,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
  ABI_MALLOC(wfd%comm_spin, (nsppol))
  do spin=1,nsppol
    color = merge(0, 1, any(bks_mask(:,:,spin)))
-   call xmpi_comm_split(comm, color, wfd%my_rank, wfd%comm_spin(spin), ierr)
+   call xmpi_comm_split(wfd%comm, color, wfd%my_rank, wfd%comm_spin(spin), ierr)
  end do
 
  call cwtime_report(" wfd_init", cpu, wall, gflops)
@@ -1164,9 +1177,10 @@ subroutine wfd_free(Wfd)
 
  call destroy_mpi_enreg(Wfd%MPI_enreg)
 
- do is=1,wfd%nsppol
-   call xmpi_comm_free(wfd%comm_spin(is))
- end do
+ ! FIXME: I don't why but this causes a SIGSEFV on the test farm.
+ !do is=1,wfd%nsppol
+ !  call xmpi_comm_free(wfd%comm_spin(is))
+ !end do
  ABI_SFREE(wfd%comm_spin)
 
 end subroutine wfd_free
@@ -5913,6 +5927,49 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
 
 end subroutine wfdgw_pawrhoij
 !!***
+
+
+
+
+
+subroutine u1cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+ class(u1cache_t),intent(inout) :: u1c
+ real(dp),intent(in) :: qpt(3)
+ integer,intent(in) :: npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq(3,npw_kq)
+ real(dp),intent(in) :: cg1s_kq(2, npw_kq*nspinor, natom3, nbcalc_ks)
+
+ call u1c%free()
+ u1c%prev_qpt = qpt
+ u1c%prev_npw_kq = npw_kq
+ u1c%prev_bstart_ks = bstart_ks
+ u1c%prev_nbcalc_ks = nbcalc_ks
+ call alloc_copy(kg_kq, u1c%prev_kg_kq)
+ call alloc_copy(cg1s_kq, u1c%prev_cg1s_kq)
+end subroutine u1cache_store
+
+integer function u1cache_find_band(u1c, band) result(u1c_band)
+ class(u1cache_t),intent(inout) :: u1c
+ integer,intent(in) :: band
+ ! Make sure we have the proper global band index in the cache as bstart_ks depends on the
+ ! k-point in Sigma_{nk}. If not, fill cg1s_kq with zeros and return.
+ u1c_band = -1
+ if (u1c%prev_nbcalc_ks == -1) return
+ u1c_band = band - u1c%prev_bstart_ks + 1
+ if (.not. (u1c_band >= 1 .and. u1c_band <= u1c%prev_nbcalc_ks)) u1c_band = -1
+ if (u1c_band == -1) then
+   u1c%miss = u1c%miss + 1
+ else
+   u1c%hits = u1c%hits + 1
+ end if
+end function u1cache_find_band
+
+subroutine u1cache_free(u1c)
+ class(u1cache_t),intent(inout) :: u1c
+ !u1c%miss = 0
+ !u1c%hits = 0
+ ABI_SFREE(u1c%prev_kg_kq)
+ ABI_SFREE(u1c%prev_cg1s_kq)
+end subroutine u1cache_free
 
 end module m_wfd
 !!***
