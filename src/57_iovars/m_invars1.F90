@@ -2467,9 +2467,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
-   dtsets(idtset)%invovl_blk_sliced=1
+   dtsets(idtset)%invovl_blksliced=1
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
-     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blk_sliced=0
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
    end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2

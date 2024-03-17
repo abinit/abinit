@@ -299,7 +299,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
- l_block_sliced = dtset%invovl_blk_sliced
+ l_block_sliced = dtset%invovl_blksliced
 
 !Variables
  nline=dtset%nline

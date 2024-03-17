@@ -184,12 +184,20 @@ By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterneer (MR949)
 
 **C.2** New bots have been introduced to replace obsolete ones :
 bob_gnu_13.2_openmp, higgs_gnu_12.3_cov, scope_gnu_13.2_dep.
+
 By J.-M. Beuken (MR960)
 
 
 **C.3** Support for Py3.12 has been added to ./runtest.py
 Use importlib if py>3.12, this fixes SyntaxWarning due to invalid escape sequence.
+
 By M. Giantomassi (MR958)
+
+**C.4**
+Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP.
+
+By M. Torrent (MR970)
+
 
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
@@ -378,9 +386,9 @@ From M. Torrent (MR959)
 
 
 **D.22**
-Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP.
+Introduced new input variable [[invovl_blksliced]].
 
-From M. Torrent (MR970)
+From M. Torrent 
 
 **D.23**
 Handle the Debye-Waller when only VB in the active space.
