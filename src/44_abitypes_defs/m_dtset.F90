@@ -314,7 +314,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
- integer :: invovl_blk_sliced
+ integer :: invovl_blksliced
  integer :: iomode
  integer :: ionmov
  integer :: iprcel
@@ -1692,7 +1692,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
- dtout%invovl_blk_sliced  = dtin%invovl_blk_sliced
+ dtout%invovl_blksliced  = dtin%invovl_blksliced
  dtout%ionmov             = dtin%ionmov
  dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
@@ -3392,7 +3392,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blk_sliced iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
