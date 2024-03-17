@@ -4119,7 +4119,6 @@ end subroutine fftmpi_u
 subroutine zerosym(array,cplex,n1,n2,n3, &
                    ig1,ig2,ig3,comm_fft,distribfft) ! Optional arguments
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,n1,n2,n3
@@ -4136,8 +4135,6 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
 
 ! **********************************************************************
-
- DBG_ENTER("COLL")
 
  me_fft=0;nproc_fft=1
  if (present(comm_fft)) then
@@ -4253,8 +4250,6 @@ subroutine zerosym(array,cplex,n1,n2,n3, &
    ABI_FREE(fftn2_distrib)
    ABI_FREE(ffti2_local)
  end if
-
- DBG_EXIT("COLL")
 
 end subroutine zerosym
 !!***

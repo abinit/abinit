@@ -3,7 +3,7 @@
 !!  m_exc_build
 !!
 !! FUNCTION
-!!  Build BSE Hamiltonian in e-h reprensentation.
+!!  Build the BSE Hamiltonian in the e-h representation with MPI
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)

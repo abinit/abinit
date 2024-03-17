@@ -70,6 +70,7 @@ module m_eph_driver
  use m_berry_curvature,  only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
+ use m_gwpt,            only : gwpt_run
 
  implicit none
 
@@ -558,7 +559,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  call cwtime_report(" eph%ifc:", cpu, wall, gflops)
 
- ! Initialize the object used to read DeltaVscf (required if eph_task /= 0)
+ ! Initialize the object used to read DeltaVscf
  if (use_dvdb) then
    dvdb = dvdb_new(dvdb_filepath, comm)
 
@@ -736,6 +737,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
    call gstore%free()
+
+ case (13)
+   ! Compute e-ph matrix elements with GWPT formalism.
+   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
+                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  !case (13)
    ! Variational polaron equations
