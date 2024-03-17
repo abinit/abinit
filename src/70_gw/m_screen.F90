@@ -105,7 +105,7 @@ MODULE m_screen
 !! NOTES
 !!  The list of parameters passed to screening_init is copied in W%Info.
 !!  At present there is no need to provide a copy method since the structure does
-!!  not contain pointers but such a method must be defined and used if the
+!!  not contain pointers but such a method must be defined and used if
 !!  dynamic entities are added to the datatype.
 !!
 !! SOURCE
@@ -1083,7 +1083,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      end if
    end do
  end if
- !
+
  ! Deallocate Fgg if the matrices are not needed anymore.
  if (deallocate_Fgg) then
    call screen_fgg_qbz_set(W,0,0,"Pointer") ! Avoid dangling pointer.
@@ -1178,7 +1178,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
    if (W%has_ppmodel>0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
      call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,&
-&      W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
+                          W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
    end if
 
  else if (screen_ihave_fgg(W,iq_ibz,how="Allocated")) then
@@ -1195,7 +1195,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
        ! Compute the model-dielectric function at qbz on-the fly and in sequential
        !call wrtout(std_out,"Will compute MDF on the fly","COLL")
        call screen_mdielf(iq_bz,npw,nomega,W%Info%use_mdf,W%Info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
-&         W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",W%Fgg_qbz%mat,xmpi_comm_self)
+                          W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",W%Fgg_qbz%mat,xmpi_comm_self)
 
      else
        ! Read W(q_ibz) and symmetrize it (do this only if we don't have the correct q_bz in memory).
@@ -1274,7 +1274,7 @@ end subroutine screen_symmetrizer
 !!
 !! SOURCE
 
-subroutine screen_w0gemv(W,trans,in_npw,nspinor,only_diago,alpha,beta,in_ket,out_ket)
+subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_ket, out_ket)
 
 !Arguments ------------------------------------
 !scalars
@@ -1375,7 +1375,7 @@ end subroutine screen_w0gemv
 !!
 !! SOURCE
 
-subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
+subroutine em1_symmetrize_ip(iq_bz, npwc, nomega, Gsph, Qmesh, epsm1)
 
 !Arguments ------------------------------------
 !scalars
@@ -1397,7 +1397,7 @@ subroutine em1_symmetrize_ip(iq_bz,npwc,nomega,Gsph,Qmesh,epsm1)
 
 ! *********************************************************************
 
- ! * Get iq_ibz, and symmetries from iq_ibz.
+ ! Get iq_ibz, and symmetries from iq_ibz.
  call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
 
  if (q_isirred) RETURN ! Nothing to do
@@ -1509,12 +1509,12 @@ subroutine em1_symmetrize_op(iq_bz,npwc,nomega,Gsph,Qmesh,in_epsm1,out_epsm1)
      end do
    end do
  end do
- !
- ! Account for time-reversal ----------------------
+
+ ! Account for time-reversal
  if (itim_q==2) then
 !$OMP PARALLEL DO IF (nomega > 1)
    do iw=1,nomega
-     call sqmat_itranspose(npwc,out_epsm1(:,:,iw))
+     call sqmat_itranspose(npwc, out_epsm1(:,:,iw))
    end do
  end if
 
