@@ -64,10 +64,9 @@ module m_gwpt
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
  use m_io_tools,       only : iomode_from_fname, file_exists, is_open, open_file, flush_unit
- !use m_special_funcs,  only : gaussian
  use m_fftcore,        only : ngfft_seq, sphereboundary, get_kg, kgindex
  use m_cgtk,           only : cgtk_rotate, cgtk_change_gsphere
- use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm !, fxphas_seq
+ use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph, mkkpg
@@ -338,9 +337,6 @@ module m_gwpt
    ! Table used to average QP results in the degenerate subspace if symsigma == 1
 
   contains
-
-    !procedure :: write => gwpt_write
-     ! Write main dimensions and header of gwpt on a netcdf file.
 
     !procedure :: compare => gwpt_compare
      ! Compare two instances of gwpt raise error if different
@@ -622,7 +618,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end do
  end do
 
- bks_mask(gwpt%my_bsum_start:gwpt%my_bsum_stop, : ,:) = .True.
+ bks_mask(gwpt%my_bsum_start:gwpt%my_bsum_stop,:,:) = .True.
 
  !if (dtset%userie == 124) then
  !  ! Uncomment this line to have all states on each MPI rank.
@@ -753,7 +749,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CALLOC(vlocal, (n4, n5, n6, gs_hamkq%nvloc))
 
  if (dtset%eph_stern /= 0) then
-   ! Read GS POT (vtrial) from input POT file
+   ! Read the GS potential (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
@@ -826,9 +822,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_FREE(qselect)
 
+ do my_spin=1,gwpt%my_nspins
+   spin = gwpt%my_spins(my_spin)
+   do iq_ibz=1,gwpt%nqibz
+     do imyp=1,my_npert
+
+
+
+
+
+
+     end do
+   end do ! iq_ibz
+ end do ! spin
+
  ! Loop over k-points in gwpt_nk. Loop over spin is internal as we operate on nspden components at once.
  do my_ikcalc=1,gwpt%my_nkcalc
-   !if (my_ikcalc > 1) exit
    ikcalc = gwpt%my_ikcalc(my_ikcalc)
 
    ! Check if this (kpoint, spin) was already calculated
@@ -2163,8 +2172,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
  call cwtime_report(" MPI setup", cpu, wall, gflops)
 
  bstart = new%bsum_start
-
- call cwtime_report(" gwpt_new: after doublegrid", cpu, wall, gflops)
 
  !if (my_rank == master) then
  !  msg = "Gaps, band edges and relative position wrt Fermi level"

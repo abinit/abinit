@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-MODULE m_screen
+module m_screen
 
  use defs_basis
  use m_xmpi
@@ -41,7 +41,7 @@ MODULE m_screen
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
- use m_ppmodel,        only : ppmodel_t, ppm_init, ppm_free, ppm_nullify, PPM_NONE, new_setup_ppmodel, ppm_symmetrizer
+ use m_ppmodel,        only : ppmodel_t, PPM_NONE
 
  implicit none
 
@@ -150,9 +150,12 @@ type,public :: screen_info_t
   real(dp) :: drude_plsmf = zero
   ! Drude plasma frequency used for PPmodel 1.
 
+contains
+
+ procedure :: print => screen_info_print
+
 end type screen_info_t
 
- public :: screen_info_print
 !!***
 
 !----------------------------------------------------------------------
@@ -180,9 +183,8 @@ end type screen_info_t
   integer :: has_mat = MAT_NODATA
   ! Flag giving the status of mat.
 
-  !arrays
   complex(gwpc),allocatable :: mat(:,:,:)
-  ! mat(npw,npw,nomega)
+  ! (npw, npw, nomega)
   ! The component of the two-point function $F_{G,G',w}$ for a given q.
 
   !complex(dpc),allocatable :: head(:,:,:)
@@ -220,7 +222,7 @@ end type screen_info_t
 
  type,public :: screen_t
 
-! scalars
+  ! scalars
   integer :: iomode               ! Flag defining the IO mode.
   integer :: debug_level=0        ! Internal Flag defining the debug level.
   integer :: mqmem                ! =0 for out-of-core solution, =nqibz if entire matrix is stored in memory.
@@ -239,7 +241,7 @@ end type screen_info_t
   integer :: nfftf_tot
   integer :: nspden
 
-!arrays
+  ! arrays
   integer :: ngfftf(18)          ! Info on the FFT mesh used for ae_rhor (used for the model dielectric function)
 
   real(dp),allocatable :: ae_rhor(:,:)
@@ -298,19 +300,29 @@ end type screen_info_t
   type(screen_info_t) :: Info
   ! Parameters used to construct the screening.
 
- end type screen_t
+contains
 
- public :: screen_nullify       ! Nullify all pointers before use.
- public :: screen_init          ! Creation method.
- !public :: screen_print         ! Print info
- public :: screen_free          ! Free all associated pointers.
- public :: screen_symmetrizer   ! Prepare the object for applying W_qbz.
- public :: screen_w0gemv        ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
- !public :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
-!!***
+  procedure :: nullify => screen_nullify
+    ! Nullify all pointers before use.
 
-CONTAINS  !========================================================================================
+  procedure :: init => screen_init
+    ! Creation method.
 
+  !procedure :: print => screen_print         ! Print info
+
+  procedure :: free => screen_free
+   ! Free dynamic memory
+
+  procedure :: symmetrizer => screen_symmetrizer
+    ! Prepare the object for applying W_qbz.
+
+  procedure :: w0gemv => screen_w0gemv
+    ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
+
+  !procedure :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
+end type screen_t
+
+contains
 !----------------------------------------------------------------------
 
 !!****f* m_screen/screen_info_print
@@ -332,14 +344,14 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine screen_info_print(W_info,header,unit,mode_paral,prtvol)
+subroutine screen_info_print(W_info, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_info_t),intent(in) :: W_info
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(screen_info_t),intent(in) :: W_info
 
 !Local variables-------------------------------
  integer :: my_unt,my_prtvol
@@ -394,7 +406,7 @@ end subroutine screen_info_print
 !! fgg_free_0D
 !!
 !! FUNCTION
-!!  Free memory.
+!!  Free dynamic memory.
 !!
 !! SOURCE
 
@@ -405,11 +417,8 @@ subroutine fgg_free_0D(Fgg)
  type(fgg_t),intent(inout) :: Fgg
 ! *************************************************************************
 
- !@fgg_t
  !complex
- if (allocated(Fgg%mat))  then
-   ABI_FREE(Fgg%mat)
- end if
+ ABI_SFREE(Fgg%mat)
  Fgg%has_mat = MAT_NODATA
 
 end subroutine fgg_free_0D
@@ -600,10 +609,10 @@ pure function screen_ihave_fgg(W,iq_ibz,how)
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_t),intent(in) :: W
  integer,intent(in) :: iq_ibz
  logical :: screen_ihave_fgg
  character(len=*),optional,intent(in) :: how
- type(screen_t),intent(in) :: W
 
 !Local variables ------------------------------
 !scalars
@@ -652,17 +661,13 @@ end function screen_ihave_fgg
 subroutine screen_nullify(W)
 
 !Arguments ------------------------------------
-!scalars
- type(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: W
 ! *************************************************************************
 
- !@screen_t
- !
- !types
  nullify(W%Fgg_qbz); W%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Nedded since the initial status is undefined.
  nullify(W%Fgg)
 
- call ppm_nullify(W%PPm)
+ call W%PPm%nullify()
 
 end subroutine screen_nullify
 !!***
@@ -676,18 +681,13 @@ end subroutine screen_nullify
 !! FUNCTION
 !! Free the memory allocate in the datatype.
 !!
-!! SIDE EFFECTS
-!! W<screen_t>=The data structure to be nullified.
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine screen_free(W)
 
 !Arguments ------------------------------------
 !scalars
- type(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: W
 
 ! *************************************************************************
 
@@ -706,9 +706,8 @@ subroutine screen_free(W)
 
  ! logical
  ABI_SFREE(W%keep_q)
- !
- ! types ------------------------------------------
- !
+
+ ! types
  ! Here be careful with dangling pointers.
  ! First Fgg_qbz that might point to one of the %Fgg then %Fgg.
  select case (W%fgg_qbz_stat)
@@ -725,15 +724,15 @@ subroutine screen_free(W)
  case default
    continue
  end select
- !
+
  ! Free the Fgg matrices.
  if (associated(W%Fgg)) then
    call fgg_free(W%Fgg)
    ABI_FREE(W%Fgg)
  end if
- !
+
  ! Free the plasmon pole tables.
- call ppm_free(W%PPm)
+ call W%PPm%free()
 
 end subroutine screen_free
 !!***
@@ -773,10 +772,11 @@ end subroutine screen_free
 !! SOURCE
 
 subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
-&  iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
+                       iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_t),intent(out) :: W
  integer,intent(in) :: mqmem,iomode,npw_asked,comm,prtvol,nsppol
  integer,intent(in) :: nfftf_tot,nspden
  character(len=fnlen),intent(in) :: ifname
@@ -785,7 +785,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  type(vcoul_t),intent(in) :: Vcp
  type(kmesh_t),intent(in) :: Qmesh
  type(screen_info_t),intent(in) :: W_Info
- type(screen_t),intent(out) :: W
+
 !arrays
  integer,intent(in) :: ngfftf(18)
  real(dp),intent(in) :: ae_rhor(nfftf_tot,nspden)
@@ -818,11 +818,9 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  !@screen_t
  my_rank = xmpi_comm_rank(comm)
 
- call screen_nullify(W)
- !
+ call W%nullify()
+
  ! Initialize basic parameters ----------------------------------------
- !
- !@screen_info_t
  W%Info = W_info ! Copy basic parameters.
  call screen_info_print(W%Info,header="W info",unit=std_out)
 
@@ -1073,13 +1071,12 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  if (W%has_ppmodel>0) then
    ABI_WARNING("Calculating PPmodel parameters")
    ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf
-   call ppm_init(W%PPm,W%mqmem,W%nqibz,W%npw,ppmodel,drude_plsmf,W%Info%invalid_freq)
+   call W%PPm%init(W%mqmem,W%nqibz,W%npw,ppmodel,drude_plsmf,W%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
      if (screen_ihave_fgg(W,iq_ibz,how="Stored")) then
        !em1_ggw => W%Fgg(iq_ibz)%mat
-       call new_setup_ppmodel(W%PPm,iq_ibz,Cryst,Qmesh,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,&
-          nfftf_tot,Gsph%gvec,ngfftf,W%ae_rhor(:,1))
+       call W%PPm%new_setup(iq_ibz,Cryst,Qmesh,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,nfftf_tot,Gsph%gvec,ngfftf,W%ae_rhor(:,1))
      end if
    end do
  end if
@@ -1129,12 +1126,12 @@ end subroutine screen_init
 !!
 !! SOURCE
 
-subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
+subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_t),intent(inout) :: W
  integer,intent(in) :: iq_bz
- type(screen_t),intent(inout) :: W
  type(crystal_t),intent(in) :: Cryst
  type(gsphere_t),intent(in) :: Gsph
  type(kmesh_t),intent(in) :: Qmesh
@@ -1177,8 +1174,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
 
    if (W%has_ppmodel>0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
-     call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,&
-                          W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
+     call W%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
    end if
 
  else if (screen_ihave_fgg(W,iq_ibz,how="Allocated")) then
@@ -1218,8 +1214,7 @@ subroutine screen_symmetrizer(W,iq_bz,Cryst,Gsph,Qmesh,Vcp)
    if (W%has_ppmodel>0) then
      ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
-     !%call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,em1_qibz,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
-     call ppm_symmetrizer(W%PPm,iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg_qbz%mat ,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
+     call W%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg_qbz%mat ,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
    end if
  end if
 
@@ -1278,11 +1273,11 @@ subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_t),intent(in) :: W
  integer,intent(in) :: in_npw,nspinor
  complex(gwpc),intent(in) :: alpha,beta
  logical,intent(in) :: only_diago
  character(len=*),intent(in) ::  trans
- type(screen_t),intent(in) :: W
 !arrays
  complex(gwpc),intent(in) :: in_ket(in_npw*nspinor)
  complex(gwpc),intent(out) :: out_ket(in_npw*nspinor)
@@ -1523,5 +1518,5 @@ end subroutine em1_symmetrize_op
 
 !----------------------------------------------------------------------
 
-END MODULE m_screen
+end module m_screen
 !!***

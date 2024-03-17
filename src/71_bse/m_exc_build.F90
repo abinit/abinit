@@ -658,9 +658,9 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
          ! Symmetrize em1(omega=0)
-         call screen_symmetrizer(W,iq_bz,Cryst,Gsph_c,Qmesh,Vcp)
-         !
-         ! * Set up table of |q_BZ+G|
+         call W%symmetrizer(iq_bz,Cryst,Gsph_c,Qmesh,Vcp)
+
+         ! Set up table of |q_BZ+G|
          if (iq_ibz==1) then
            do ig=1,npweps
              isg = Gsph_c%rottb(ig,itim_q,isym_q)
@@ -765,20 +765,20 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,W,H
                end if
 
                ! MG TODO: a does not require a call to w0gemv
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,aa_cpc,aa_ctccp)
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc1,bb_ctccp1)
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc2,bb_ctccp2)
+               call W%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,aa_cpc,aa_ctccp)
+               call W%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc1,bb_ctccp1)
+               call W%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,bb_cpc2,bb_ctccp2)
 
                cc_cpc = vc_sqrt_qbz*rhxtwg_cpc
                cc_cpc(1) = czero
 
-               call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,cc_cpc,cc_ctccp)
+               call W%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,cc_cpc,cc_ctccp)
              end if
 
              ! Prepare sum_GG' rho_c'c*(G) W_qbz(G,G') rho_v'v(G')
              ! First sum on G: sum_G rho_c'c(G) W_qbz*(G,G') (W_qbz conjugated)
              rhxtwg_cpc = rhxtwg_cpc * vc_sqrt_qbz
-             call screen_w0gemv(W,"C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,rhxtwg_cpc,ctccp)
+             call W%w0gemv("C",npweps,nspinor,w_is_diagonal,cone_gw,czero_gw,rhxtwg_cpc,ctccp)
 
              do iv=bidx(1,1),bidx(2,1)    !do iv=BSp%lomo,BSp%homo
                it = BSp%vcks2t(iv,ic,ik_bz,spin1); if (it==0) CYCLE ! ir-uv-cutoff
@@ -2090,7 +2090,7 @@ end subroutine exc_build_v
 !! SOURCE
 
 subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-& Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
+                         Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
 
 !Arguments ------------------------------------
 !scalars
@@ -2152,7 +2152,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  call wrtout(std_out," Calculating all matrix elements for q=0 to save CPU time")
 
  call wfd_all_mgq0(Wfd,Cryst,Qmesh,Gsph_x,Vcp,Psps,Pawtab,Paw_pwff,&
-&  Bsp%lomo_spin,Bsp%homo_spin,Bsp%humo_spin,nfftot_osc,ngfft_osc,Bsp%npweps,all_mgq0)
+                   Bsp%lomo_spin,Bsp%homo_spin,Bsp%humo_spin,nfftot_osc,ngfft_osc,Bsp%npweps,all_mgq0)
 
  ! ========================
  ! ==== Resonant Block ====
@@ -2160,7 +2160,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  if (do_resonant) then
    call timab(672,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-&    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.TRUE.,BS_files%out_hreso)
+                        Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.TRUE.,BS_files%out_hreso)
    call timab(672,2,tsec)
  end if
 
@@ -2170,7 +2170,7 @@ subroutine exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,
  if (do_coupling.and.BSp%use_coupling>0) then
    call timab(673,1,tsec)
    call exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-&    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
+                        Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff,all_mgq0,.FALSE.,BS_files%out_hcoup)
    call timab(673,2,tsec)
  end if
 

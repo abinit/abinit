@@ -65,7 +65,7 @@ module m_sigma_driver
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
- use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
+ use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
                              mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
@@ -1880,7 +1880,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (sigma_needs_ppm(Sigp)) then
    my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
-   call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
+   call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
 
    ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
 
@@ -1927,14 +1927,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      if (Er%mqmem/=0) then
        ! Calculate ppmodel parameters for all q-points.
-       call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
      end if
 
    else
      ! NC or PAW with PPmodel 1.
      if (Er%mqmem/=0) then
        ! Calculate ppmodel parameters for all q-points
-       call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
  end if ! sigma_needs_ppm
@@ -2929,7 +2929,7 @@ endif
  if(.not.rdm_update) then
    call em1results_free(Er)
  end if
- call ppm_free(PPm)
+ call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
  call ebands_free(ks_ebands)
