@@ -231,7 +231,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
- type(pseudopotential_type), intent(inout) :: psps
+ type(pseudopotential_type), intent(in) :: psps
 
  !arrays
  integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfftf(18),npwarr(dtset%nkpt)
@@ -248,7 +248,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
- type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
  !Local
  !scalars
@@ -474,8 +474,14 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
      ! compute P_c|cg1>
      ABI_MALLOC(pcg1_k,(2,mcgk,3))
-     call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+     if (dtset%berryopt /= -2) then
+       ! DDK wavefunctions computed in DFPT, must be projected onto conduction space
+       call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
+         & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+     else
+       ! we are using berryopt PEAD DDK functions which are already projected by construction
+       pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
+     end if
 
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -2425,7 +2431,7 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2505,7 +2511,7 @@ subroutine dterm_SOB1(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,q
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawang_type),intent(in) :: pawang
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2705,7 +2711,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
   !scalars
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
-  type(pseudopotential_type), intent(inout) :: psps
+  type(pseudopotential_type), intent(in) :: psps
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
@@ -2714,7 +2720,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawang_type),intent(in) :: pawang
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
