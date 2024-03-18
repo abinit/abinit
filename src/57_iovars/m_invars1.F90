@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2467,9 +2467,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
-   dtsets(idtset)%invol_blk_sliced=1
+   dtsets(idtset)%invovl_blksliced=1
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
-     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invol_blk_sliced=0
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
    end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2
