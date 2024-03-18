@@ -392,7 +392,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gu_option=dtset%gpu_option)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  call timab(tim_chebfiwf2,2,tsec)
 
