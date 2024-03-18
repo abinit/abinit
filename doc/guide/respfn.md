@@ -38,7 +38,9 @@ of the wavefunctions (1WF) with respect to these perturbations. The later
 calculation of the 2DTE and 3DTE from these 1WF is an easy computational task:
 the construction of the 2DTE with respect to perturbations j1 and j2
 involves mainly evaluating matrix elements between the 1WF of j1 and/or the 1WF of j2. 
-More details on this technique can be found in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
+
+A basic introduction to the theory is given in [[cite:gonze2005]]. You might also benefit from reading the longer review [[cite:baroni2001]].
+Further details are in [[cite:Gonze1997]] and [[cite:Gonze1997a]].
 
 The calculation of the 1WF for a particular perturbation is done using a
 variational principle and an algorithm rather similar to the one used to find

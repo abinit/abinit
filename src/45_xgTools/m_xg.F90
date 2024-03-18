@@ -440,7 +440,7 @@ contains
       end select
 #endif
 
-    else if ( l_gpu_option==ABI_GPU_DISABLED ) then
+    else if ( l_gpu_option==ABI_GPU_DISABLED .or. l_gpu_option==ABI_GPU_LEGACY ) then
 
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -722,6 +722,10 @@ contains
       xgBlock%gpu_option = gpu_option
     else if ( xomp_target_is_present(c_loc(array)) ) then
       xgBlock%gpu_option = ABI_GPU_OPENMP
+    end if
+    if ( xgBlock%gpu_option /= ABI_GPU_DISABLED .and. xgBlock%gpu_option /= ABI_GPU_LEGACY .and. &
+         xgBlock%gpu_option /= ABI_GPU_OPENMP   .and. xgBlock%gpu_option /= ABI_GPU_KOKKOS ) then
+       ABI_ERROR('Bad GPU option in xgBlock_map')
     end if
 
   end subroutine xgBlock_map
@@ -1195,6 +1199,9 @@ contains
 
     if (xgBlockA%gpu_option==xgBlockB%gpu_option) then
       l_gpu_option = xgBlockA%gpu_option
+    else if ((xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBlockB%gpu_option==ABI_GPU_LEGACY) &
+       .or.  (xgBlockA%gpu_option==ABI_GPU_LEGACY  .and.xgBlockB%gpu_option==ABI_GPU_DISABLED)) then
+      l_gpu_option = ABI_GPU_DISABLED
     else if (xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBlockB%gpu_option==ABI_GPU_OPENMP) then
       l_gpu_option = ABI_GPU_DISABLED
       call xgBlock_copy_from_gpu(xgBlockB)
