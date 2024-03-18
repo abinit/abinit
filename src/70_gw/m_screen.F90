@@ -321,6 +321,7 @@ contains
 
   !procedure :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 end type screen_t
+!!***
 
 contains
 !----------------------------------------------------------------------
@@ -491,11 +492,11 @@ subroutine fgg_init(Fgg,npw,nomega,nqlwl)
 ! *************************************************************************
 
  !@fgg_t
- Fgg%nomega= nomega; Fgg%npw   = npw
+ Fgg%nomega = nomega; Fgg%npw = npw
  Fgg%nqlwl = nqlwl
 
- if (npw>0.and.nomega>0) then
-   ABI_MALLOC_OR_DIE(Fgg%mat,(npw,npw,nomega), ierr)
+ if (npw > 0 .and. nomega > 0) then
+   ABI_MALLOC_OR_DIE(Fgg%mat, (npw, npw, nomega), ierr)
    Fgg%has_mat = MAT_ALLOCATED
  end if
 
@@ -815,14 +816,13 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
  ABI_UNUSED(nsppol)
 
- !@screen_t
  my_rank = xmpi_comm_rank(comm)
 
  call W%nullify()
 
- ! Initialize basic parameters ----------------------------------------
+ ! Initialize basic parameters
  W%Info = W_info ! Copy basic parameters.
- call screen_info_print(W%Info,header="W info",unit=std_out)
+ call W%Info%print(header="W info",unit=std_out)
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
@@ -830,7 +830,6 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  ixc_required = W_Info%ixc
  varname = ncname_from_id(id_required)
 
- !if (ALL(id_required /= (/MAT_W_M1, MAT_W/)) ) then
  if (all(id_required /= [MAT_INV_EPSILON])) then
    ABI_ERROR(sjoin("id_required:",itoa(id_required),"not available"))
  end if
@@ -840,7 +839,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
  if (W%Info%use_mdf == MDL_NONE) W%fname = ifname
  W%nI = 1; W%nJ = 1
- !
+
  ! The Q-point sampling is inited from Qmesh.
  W%nqibz=Qmesh%nibz
  ABI_MALLOC(W%qibz,(3,W%nqibz))
@@ -987,7 +986,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    ! Read the ab-initio em1 from file.
    select case (mat_type_read)
    case (MAT_INV_EPSILON)
-     call wrtout(std_out,strcat("Em1 will be initialized from SCR file: ",W%fname),"COLL")
+     call wrtout(std_out,strcat("Em1 will be initialized from SCR file: ",W%fname))
      !
    case  (MAT_CHI0)  ! Write new SCR file.
      ABI_ERROR("Not coded yet")
@@ -1002,7 +1001,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
    do iq_ibz=1,nqibz
      if (.not.W%keep_q(iq_ibz)) then
-        call wrtout(std_out,strcat("Skipping iq_ibz: ",itoa(iq_ibz)),"COLL")
+        call wrtout(std_out,strcat("Skipping iq_ibz: ",itoa(iq_ibz)))
         CYCLE
      end if
      !
@@ -1026,7 +1025,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  else
    !
    ! Model dielectric function. Only epsm-1 is supported here.
-   call wrtout(std_out," Calculating model dielectric function... ","COLL")
+   call wrtout(std_out," Calculating model dielectric function... ")
    ABI_CHECK(W%nomega==1,"Cannot use nomega>1 in model dielectric function")
    !
    do iq_ibz=1,nqibz
@@ -1058,7 +1057,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      if (W%prtvol > 0) then
        do iw=1,nomega
          write(msg,'(a,i3,a,i4,a)')'  Model symmetrical e^{-1} (q=',iq_ibz,', omega=',iw,', G,G'')'
-         call wrtout(std_out,msg,'COLL')
+         call wrtout(std_out,msg)
          call print_arr(W%Fgg(iq_ibz)%mat(:,:,iw))
        end do
      end if
@@ -1189,13 +1188,13 @@ subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
      if (W%Info%use_mdf /= MDL_NONE) then
        ! Compute the model-dielectric function at qbz on-the fly and in sequential
-       !call wrtout(std_out,"Will compute MDF on the fly","COLL")
+       !call wrtout(std_out,"Will compute MDF on the fly")
        call screen_mdielf(iq_bz,npw,nomega,W%Info%use_mdf,W%Info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
                           W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",W%Fgg_qbz%mat,xmpi_comm_self)
 
      else
        ! Read W(q_ibz) and symmetrize it (do this only if we don't have the correct q_bz in memory).
-       call wrtout(std_out,sjoin("Out of core with file: ",W%fname),"COLL")
+       call wrtout(std_out,sjoin("Out of core with file: ",W%fname))
        call read_screening(em1_ncname,W%fname,npw,1,nomega,W%Fgg_qbz%mat,W%iomode,xmpi_comm_self,iqiA=iq_ibz)
 
        ! In-place symmetrization to get the q-point in the BZ.
@@ -1222,7 +1221,7 @@ subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
  eps_inf = W%Info%eps_inf; mdf_type = W%Info%use_mdf
 
  ! Model dielectric function. Only epsm-1 is supported here.
- !call wrtout(std_out," Calculating model dielectric function... ","COLL")
+ !call wrtout(std_out," Calculating model dielectric function... ")
  !ABI_CHECK(W%nomega==1,"Cannot use nomega>1 in model dielectric function")
 
  ! W%Fgg_qbz%mat

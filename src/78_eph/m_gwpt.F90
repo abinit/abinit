@@ -360,7 +360,6 @@ module m_gwpt
 !!***
 
  public :: gwpt_run        ! Main entry point to compute GWpt matrix elements
- !public :: gwpt_read   ! Read main dimensions and header of gwpt from a netcdf file.
  private :: gwpt_new   ! Creation method (allocates memory, initialize data from input vars).
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
@@ -466,14 +465,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:), rank_band(:), root_bcalc(:)
+ integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), rank_band(:), root_bcalc(:) ! osc_indpw(:),
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: recvcounts(:), displs(:)
- real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
+ real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3) !qpt_cart(3),
+ real(dp) :: tsec(2) ! vk(3), vkq(3),
  real(dp) :: vec_natom3(2, 3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq, f_nk
- real(dp) :: gdw2, gdw2_stern, rtmp
+ real(dp) :: wqnu,gkq2,eig0nk,eig0mkq !eig0mk,
+ !real(dp) :: gdw2, gdw2_stern, rtmp
  real(dp),allocatable,target :: cgq(:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -490,10 +489,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: gkq_allgather(:,:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
- logical,allocatable :: osc_mask(:)
- real(dp),allocatable :: gkq2_lr(:,:,:)
- complex(dpc) :: cp3(3)
- complex(dpc),allocatable :: osc_ks(:,:)
+ !logical,allocatable :: osc_mask(:)
+ !real(dp),allocatable :: gkq2_lr(:,:,:)
+ !complex(dpc),allocatable :: osc_ks(:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
@@ -738,9 +736,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_hamkq, psps, pawtab, nspinor, nsppol, nspden, natom,&
-  dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
-  comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
-  usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
+   dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
+   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
+   usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
 
  ! Allocate work space arrays.
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
@@ -1174,7 +1172,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Compute H(1) applied to GS wavefunction Psi_nk(0)
          do ib_k=1,nbcalc_ks
            if (gwpt%bsum_comm%skip(ib_k, root=root_bcalc(ib_k))) cycle ! MPI parallelism inside bsum_comm
-                                                                        ! Store rank treating ib_k in root_bcalc
+                                                                       ! Store rank treating ib_k in root_bcalc
            band_ks = ib_k + bstart_ks - 1
            eig0nk = ebands%eig(band_ks, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue

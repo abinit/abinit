@@ -172,21 +172,21 @@ contains
    procedure :: free => ppm_free
      ! Destruction method.
 
-   procedure :: setup => setup_ppmodel
+   procedure :: setup => ppm_setup
      ! Main Driver
 
-   procedure :: new_setup => new_setup_ppmodel
+   procedure :: new_setup => ppm_new_setup
      ! New Main Driver
 
-   procedure :: getem1 => getem1_from_PPm
+   procedure :: getem1 => ppm_getem1
      ! Reconstruct e^{-1}(w) from PPm.
 
-   procedure :: getem1_one_ggp => getem1_from_PPm_one_ggp
+   procedure :: getem1_one_ggp => ppm_getem1_one_ggp
      ! Reconstruct e^{-1}(w) from PPm for one G,G' pair
 
-   procedure :: get_eigenvalues => get_ppm_eigenvalues
+   procedure :: get_eigenvalues => ppm_get_eigenvalues
 
-   procedure :: calc_sig => calc_sig_ppm
+   procedure :: calc_sig => ppm_calc_sic
      ! Matrix elements of the self-energy with ppmodel.
 
    procedure :: times_ket => ppm_times_ket
@@ -235,7 +235,7 @@ contains
 !!
 !! SOURCE
 
-subroutine ppm_get_qbz(PPm, Gsph,Qmesh, iq_bz, botsq, otq, eig)
+subroutine ppm_get_qbz(PPm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
 
 !Arguments ------------------------------------
 !scalars
@@ -248,7 +248,6 @@ subroutine ppm_get_qbz(PPm, Gsph,Qmesh, iq_bz, botsq, otq, eig)
 !Local variables-------------------------------
 !scalars
  integer :: ii,jj,iq_ibz,itim_q,isym_q,iq_curr,isg1,isg2
- !character(len=500) :: msg
 !arrays
  integer, ABI_CONTIGUOUS pointer :: grottb(:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: phsgt(:),bigomegatwsq(:,:),omegatw(:,:)
@@ -514,7 +513,7 @@ end subroutine ppm_table_free
 !!
 !! SOURCE
 
-subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
+subroutine ppm_init(PPm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
 !Arguments ------------------------------------
  class(ppmodel_t),intent(out) :: PPm
@@ -530,7 +529,7 @@ subroutine ppm_init(PPm,mqmem,nqibz,npwe,ppmodel,drude_plsmf,invalid_freq)
 
  DBG_ENTER("COLL")
 
- call ppm_nullify(PPm)
+ call PPm%nullify()
 
  PPm%invalid_freq=invalid_freq
  PPm%nqibz = nqibz
@@ -608,9 +607,9 @@ end subroutine ppm_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/setup_ppmodel
+!!****f* m_ppmodel/ppm_setup
 !! NAME
-!! setup_ppmodel
+!! ppm_setup
 !!
 !! FUNCTION
 !!  Initialize some values of several arrays of the PPm datastructure
@@ -650,8 +649,8 @@ end subroutine ppm_init
 !!
 !! SOURCE
 
-subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
-                         iqiA) !Optional
+subroutine ppm_setup(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngfftf,rhor_tot,&
+                     iqiA) !Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -745,14 +744,14 @@ subroutine setup_ppmodel(PPm,Cryst,Qmesh,npwe,nomega,omega,epsm1,nfftf,gvec,ngff
 
  DBG_EXIT("COLL")
 
-end subroutine setup_ppmodel
+end subroutine ppm_setup
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/getem1_from_ppm
+!!****f* m_ppmodel/ppm_getem1
 !! NAME
-!!  getem1_from_ppm
+!!  ppm_getem1
 !!
 !! FUNCTION
 !!  Calculate the symmetrized inverse dielectric matrix from the parameters of the plasmon-pole model.
@@ -765,8 +764,8 @@ end subroutine setup_ppmodel
 !!
 !! SOURCE
 
-subroutine getem1_from_ppm(PPm, mpwc, iqibz, zcut, nomega, omega, Vcp, em1q, &
-                           only_ig1, only_ig2) ! Optional
+subroutine ppm_getem1(PPm, mpwc, iqibz, zcut, nomega, omega, Vcp, em1q, &
+                      only_ig1, only_ig2) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -884,17 +883,17 @@ subroutine getem1_from_ppm(PPm, mpwc, iqibz, zcut, nomega, omega, Vcp, em1q, &
    ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  end select
 
-end subroutine getem1_from_ppm
+end subroutine ppm_getem1
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/getem1_from_ppm_one_ggp
+!!****f* m_ppmodel/ppm_getem1_one_ggp
 !! NAME
-!!  getem1_from_ppm_one_ggp
+!!  ppm_getem1_one_ggp
 !!
 !! FUNCTION
-!!  Same as getem1_from_ppm, but does it for a single set of G,G' vectors
+!!  Same as ppm_getem1, but does it for a single set of G,G' vectors
 !!
 !! INPUTS
 !!
@@ -902,7 +901,7 @@ end subroutine getem1_from_ppm
 !!
 !! SOURCE
 
-subroutine getem1_from_ppm_one_ggp(PPm, iqibz, zcut, nomega, omega, Vcp, em1q, ig1, ig2)
+subroutine ppm_getem1_one_ggp(PPm, iqibz, zcut, nomega, omega, Vcp, em1q, ig1, ig2)
 
 !Arguments ------------------------------------
 !scalars
@@ -990,14 +989,14 @@ subroutine getem1_from_ppm_one_ggp(PPm, iqibz, zcut, nomega, omega, Vcp, em1q, i
    ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  end select
 
-end subroutine getem1_from_ppm_one_ggp
+end subroutine ppm_getem1_one_ggp
 !!***
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/get_ppm_eigenvalues
+!!****f* m_ppmodel/ppm_get_eigenvalues
 !! NAME
-!!  get_ppm_eigenvalues
+!!  ppm_get_eigenvalues
 !!
 !! FUNCTION
 !!  Constructs the inverse dielectri matrixc starting from the plasmon-pole
@@ -1010,7 +1009,7 @@ end subroutine getem1_from_ppm_one_ggp
 !!
 !! SOURCE
 
-subroutine get_ppm_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues)
+subroutine ppm_get_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues)
 
 !Arguments ------------------------------------
 !scalars
@@ -1039,7 +1038,7 @@ subroutine get_ppm_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
 
  ABI_MALLOC(em1q,(PPm%npwc,PPm%npwc,nomega))
 
- call getem1_from_PPm(PPm,PPm%npwc,iqibz,zcut,nomega,omega,Vcp,em1q)
+ call PPm%getem1(PPm%npwc,iqibz,zcut,nomega,omega,Vcp,em1q)
 
  do iomega=1,nomega
    !
@@ -1059,7 +1058,7 @@ subroutine get_ppm_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
      !for the moment no sort, maybe here I should sort using the real part?
      call ZGEES('V','N',sortcplx,PPm%npwc,Afull,PPm%npwc,sdim,wwc,vs,PPm%npwc,work,lwork,rwork,bwork,info)
      if (info/=0) then
-      write(msg,'(2a,i10)')' get_ppm_eigenvalues : Error in ZGEES, diagonalizing complex matrix, info = ',info
+      write(msg,'(2a,i10)')' ppm_get_eigenvalues : Error in ZGEES, diagonalizing complex matrix, info = ',info
       call wrtout(std_out,msg)
      end if
 
@@ -1095,7 +1094,7 @@ subroutine get_ppm_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
      call ZHPEV('V','U',PPm%npwc,Adpp,ww,eigvec,PPm%npwc,work,rwork,info)
 
      if (info/=0) then
-       write(msg,'(2a,i10)')' get_ppm_eigenvalues : Error diagonalizing matrix, info = ',info
+       write(msg,'(2a,i10)')' ppm_get_eigenvalues : Error diagonalizing matrix, info = ',info
        call wrtout(std_out,msg)
      end if
      negw = (COUNT((REAL(ww)<tol6)))
@@ -1117,7 +1116,7 @@ subroutine get_ppm_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
 
  ABI_FREE(em1q)
 
-end subroutine get_ppm_eigenvalues
+end subroutine ppm_get_eigenvalues
 !!***
 
 !----------------------------------------------------------------------
@@ -2039,10 +2038,10 @@ end subroutine cqratio
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/calc_sig_ppm
+!!****f* m_ppmodel/ppm_calc_sic
 !!
 !! NAME
-!! calc_sig_ppm
+!! ppm_calc_sic
 !!
 !! FUNCTION
 !!  Calculate the contribution to self-energy operator using a plasmon-pole model.
@@ -2077,7 +2076,7 @@ end subroutine cqratio
 !!
 !! SOURCE
 
-subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
+subroutine ppm_calc_sic(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
                         omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
 
 !Arguments ------------------------------------
@@ -2221,7 +2220,7 @@ subroutine calc_sig_ppm(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
    ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
  END SELECT
 
-end subroutine calc_sig_ppm
+end subroutine ppm_calc_sic
 !!***
 
 !----------------------------------------------------------------------
@@ -2301,18 +2300,18 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
 
  if (PPm%has_q(iq_ibz)==PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
-   call new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,Gsph%gvec,ngfftf,rhor_tot) !Optional
+   call PPm%new_setup(iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,Gsph%gvec,ngfftf,rhor_tot) !Optional
  end if
 
  if (q_isirred) then
    ! Symmetrization is not needed.
-   if (PPm%bigomegatwsq_qbz_stat==PPM_ISALLOCATED)  then
+   if (PPm%bigomegatwsq_qbz_stat==PPM_ISALLOCATED) then
      ABI_FREE(PPm%bigomegatwsq_qbz%vals)
    end if
-   if (PPm%omegatw_qbz_stat==PPM_ISALLOCATED)  then
+   if (PPm%omegatw_qbz_stat==PPM_ISALLOCATED) then
      ABI_FREE(PPm%omegatw_qbz%vals)
    end if
-   if (PPm%eigpot_qbz_stat==PPM_ISALLOCATED)  then
+   if (PPm%eigpot_qbz_stat==PPM_ISALLOCATED) then
      ABI_FREE(PPm%eigpot_qbz%vals)
    end if
 
@@ -2351,8 +2350,7 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
    !otq   => PPm%omegatw_qbz%vals
    !eig   => PPm%eigpot_qbz%vals
 
-   call ppm_get_qbz(PPm,Gsph,Qmesh,iq_bz,PPm%bigomegatwsq_qbz%vals,&
-                    PPm%omegatw_qbz%vals,PPm%eigpot_qbz%vals)
+   call PPm%get_qbz(Gsph,Qmesh,iq_bz,PPm%bigomegatwsq_qbz%vals, PPm%omegatw_qbz%vals,PPm%eigpot_qbz%vals)
 
    ! Release the table in the IBZ if required.
    if (.not.PPm%keep_q(iq_ibz)) call ppm_table_free(PPm,iq_ibz)
@@ -2363,9 +2361,9 @@ end subroutine ppm_symmetrizer
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/new_setup_ppmodel
+!!****f* m_ppmodel/ppm_new_setup
 !! NAME
-!! new_setup_ppmodel
+!! ppm_new_setup
 !!
 !! FUNCTION
 !!  Initialize some values of several arrays of the PPm datastructure
@@ -2401,7 +2399,7 @@ end subroutine ppm_symmetrizer
 !!
 !! SOURCE
 
-subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,gvec,ngfftf,rhor_tot)
+subroutine ppm_new_setup(PPm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, gvec, ngfftf, rhor_tot)
 
 !Arguments ------------------------------------
 !scalars
@@ -2477,7 +2475,7 @@ subroutine new_setup_ppmodel(PPm,iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,
 
  DBG_EXIT("COLL")
 
-end subroutine new_setup_ppmodel
+end subroutine ppm_new_setup
 !!***
 
 !----------------------------------------------------------------------
