@@ -1316,7 +1316,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
      end if
      if (abs(nelect_occ-nelect_img)>tol11 .and. dtset%iscf/=-3) then
 
-!      There is a discrepancy
+       ! There is a discrepancy
        write(msg, &
        '(a,a,i4,a,e22.14,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' initocc_chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
@@ -1327,14 +1327,14 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        call wrtout(std_out,msg)
 
        if (abs(nelect_occ-dtset%nelect)>tol8) then
-!        The discrepancy is severe
+         ! The discrepancy is severe
          write(msg,'(a,a,e9.2,a,a)')ch10,&
          'These must obey zval-nelect_occ=cellcharge-nelectjell to better than ',tol8,ch10,&
          ' This is not the case. '
        else
-!        The discrepancy is not so severe
+         ! The discrepancy is not so severe
          write(msg, '(2a,e9.2)' )ch10,&
-&         'These should obey zval-nelect_occ=cellcharge-nelectjell to better than: ',tol11
+          'These should obey zval-nelect_occ=cellcharge-nelectjell to better than: ',tol11
        end if
        ABI_WARNING(msg)
 
@@ -1345,7 +1345,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        call wrtout(std_out,msg)
 
        ! If the discrepancy is severe, stop
-       if (abs(nelect_occ-nelect_img)>tol8)then
+       if (abs(nelect_occ-nelect_img) > tol6) then
          ABI_ERROR(msg)
        end if
 
