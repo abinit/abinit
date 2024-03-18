@@ -342,7 +342,12 @@ for lib in abinit_corelibs:
   # Include RoboDOC header
   hdr = "%s/_%s_" % (par_dir,lib)
   if ( os.path.exists(hdr) ):
-    makefile += "\nEXTRA_DIST += _%s_\n" % (lib)
+    makefile += "\n\nEXTRA_DIST += _%s_\n" % (lib)
+
+  # Write additional cmake information
+  cml = os.path.join(par_dir, "CMakeLists.txt")
+  if ( os.path.exists(cml) ):
+    makefile += "\nEXTRA_DIST += CMakeLists.txt\n"
 
   # Output to Makefile.am
   mf = open(os.path.join(par_dir, "Makefile.am"), "wt")
