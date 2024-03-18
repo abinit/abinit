@@ -429,7 +429,7 @@ contains
       end select
 #endif
 
-    else if ( l_gpu_option==ABI_GPU_DISABLED ) then
+    else if ( l_gpu_option==ABI_GPU_DISABLED .or. l_gpu_option==ABI_GPU_LEGACY ) then
 
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -678,10 +678,15 @@ contains
     xgBlock%LDim = rows
     xgBlock%cols = cols
     xgBlock%normal = 'n'
+    xgBlock%spacedim_comm = xmpi_comm_null
     if ( present(comm) ) xgBlock%spacedim_comm = comm
     xgBlock%gpu_option = ABI_GPU_DISABLED
     if ( xomp_target_is_present(c_loc(array)) ) xgBlock%gpu_option = ABI_GPU_OPENMP
     if ( present(gpu_option) ) xgBlock%gpu_option = gpu_option
+    if ( xgBlock%gpu_option /= ABI_GPU_DISABLED .and. xgBlock%gpu_option /= ABI_GPU_LEGACY .and. &
+         xgBlock%gpu_option /= ABI_GPU_OPENMP   .and. xgBlock%gpu_option /= ABI_GPU_KOKKOS ) then
+       ABI_ERROR('Bad GPU option in xgBlock_map')
+    end if
 
   end subroutine xgBlock_map
   !!***
