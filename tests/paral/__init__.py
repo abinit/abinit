@@ -79,4 +79,6 @@ inp_files = [
 "t97.abi",
 "t98.abi",
 "t99.abi",
+"t100.abi",
+"t101.abi",
 ]
