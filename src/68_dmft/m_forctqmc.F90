@@ -1395,7 +1395,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &         Gw=gw_tmp,D=docc(:,:),E=green%ecorr_qmc(iatom),&
 !&       matU=hu(itypat)%udens,opt_levels=levels_ctqmc)
 &         matU=udens_atoms(iatom)%value,opt_levels=levels_ctqmc,Magmom_orb=REAL(magmom_orb(iatom)%value),&
-&        Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
+&        Magmom_spin=REAL(magmom_spin(iatom)%value),Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
          call data4entropyDMFT_setDocc(paw_dmft%forentropyDMFT,iatom,docc)
          ABI_FREE(docc)
          !DO iflavor = 1, nflavor
@@ -1463,7 +1463,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 &        Gw=gw_tmp_nd,D=doccsum,E=green%ecorr_qmc(iatom),&
 &        Noise=noise,matU=udens_atoms(iatom)%value,Docc=docc,opt_levels=levels_ctqmc,hybri_limit=hybri_limit,&
 &        Magmom_orb=REAL(magmom_orb(iatom)%value),Magmom_spin=REAL(magmom_spin(iatom)%value),&
-&        Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom)
+&        Magmom_tot=REAL(magmom_tot(iatom)%value),Iatom=iatom,fname=paw_dmft%filapp)
 
          ! For entropy (alternative formulation)
          if(paw_dmft%ientropy==1) then
@@ -1516,7 +1516,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
      else if (testcode>=1) then
        call CtqmcInterface_run(hybrid,fw1(1:nomega,:),Gtau=gtmp,&
 &       Gw=gw_tmp,E=green%ecorr_qmc(iatom),&
-&       matU=umod,opt_levels=levels_ctqmc,Iatom=iatom)
+&       matU=umod,opt_levels=levels_ctqmc,Iatom=iatom,fname=paw_dmft%filapp)
 
       ! for non diagonal code
       !       call CtqmcInterface_run(hybrid,fw1_nd(1:nomega,:,:),Gtau=gtmp_nd,&
