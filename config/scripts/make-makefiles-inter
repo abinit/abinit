@@ -162,6 +162,12 @@ for parent in abinit_parents:
     makefile += "\n# Registered subdirectories\nSUBDIRS = \\\n  "
     makefile += " \\\n  ".join(lib_specs["subdirs"]) + "\n"
 
+  # Add cmake file(s)
+  cml = os.path.join(par_dir, "CMakeLists.txt")
+  if ( os.path.exists(cml) ):
+    makefile += "\n# CMake file\n  "
+    makefile += "EXTRA_DIST = CMakeLists.txt\n"
+
   # Add an abirules target
   if ( len(lib_specs["abirules"]) > 0 ):
     makefile += mf_sep
@@ -217,6 +223,11 @@ for parent in abinit_parents:
       inc_text += "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
       if ( len(includes) > 0 ):
         inc_text += "EXTRA_DIST = \\\n\t" + " \\\n\t".join(includes) + "\n"
+      if ( os.path.exists(os.path.join(par_dir, "incs", "CMakeLists.txt")) ):
+        if ( len(includes) > 0 ):
+          inc_text += "\nEXTRA_DIST += CMakeLists.txt\n"
+        else:
+          inc_text += "\nEXTRA_DIST = CMakeLists.txt\n"
       mf_incs.write(inc_text)
 
   # Write Makefile.am for modules
@@ -225,6 +236,8 @@ for parent in abinit_parents:
       mod_text  = makefile_header(my_name, now)
       mod_text += "all-local:\n\t@echo \"There is no buildable file here\"\n\n"
       mod_text += "mostlyclean-local:\n\trm -f *.$(MODEXT) *.h\n"
+      if ( os.path.exists(os.path.join(par_dir, "mods", "CMakeLists.txt")) ):
+        inc_text += "\nEXTRA_DIST = CMakeLists.txt\n"
       mf_mods.write(mod_text)
 
 # Write shared intermediate Makefile.am files
@@ -239,9 +252,14 @@ if DO_BUILD_SHARED_LIBPAW
   SUBDIRS += libpaw
 endif
 """)
+  if ( os.path.exists("shared/CMakeLists.txt") ):
+    mf_shared.write("\nEXTRA_DIST = CMakeLists.txt\n")
+
 with open("shared/common/Makefile.am", "w") as mf_common:
   mf_common.write(makefile_header(my_name, now))
   mf_common.write("SUBDIRS = src\n")
+  if ( os.path.exists("shared/common/CMakeLists.txt") ):
+    mf_common.write("\nEXTRA_DIST = CMakeLists.txt\n")
 
 # Write makefiles for subsystems
 cnf_bsys = MyConfigParser()
@@ -256,3 +274,7 @@ for subsys in cnf_bsys.sections():
       with open(os.path.join(subsys, "Makefile.am"), "w") as mf_sub:
         mf_sub.write(makefile_header(my_name, now))
         mf_sub.write("EXTRA_DIST = \\\n  " + " \\\n  ".join(sub_files) + "\n")
+        # Add cmake file
+        cml = os.path.join(sub_path, "CMakeLists.txt")
+        if ( os.path.exists(cml) ):
+          mf_sub.write("EXTRA_DIST += CMakeLists.txt\n")

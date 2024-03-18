@@ -283,6 +283,11 @@ if ( ext_print == 1 ):
 if ( os.path.exists(add) ):
   makefile += "\n" + open(add, "rt").read()
 
+# Write additional cmake information
+cml = "src/98_main/CMakeLists.txt"
+if ( os.path.exists(cml) ):
+  makefile += "\nEXTRA_DIST = CMakeLists.txt\n"
+
 mf = open(my_output, "wt")
 mf.write(makefile)
 mf.close()

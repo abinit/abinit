@@ -40,6 +40,7 @@ MODULE m_Ctqmcoffdiag
  USE m_Stat
  USE m_FFTHyb
  USE m_OurRng
+ use defs_basis
 #ifdef HAVE_MPI2
  USE mpi
 #endif
@@ -2988,7 +2989,7 @@ END SUBROUTINE Ctqmcoffdiag_measPerturbation
 !!
 !! SOURCE
 
-SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom)
+SUBROUTINE Ctqmcoffdiag_getResult(op,Iatom,fname)
 
 
 #ifdef HAVE_MPI1
@@ -2997,6 +2998,7 @@ include 'mpif.h'
 !Arguments ------------------------------------
   TYPE(Ctqmcoffdiag)  , INTENT(INOUT)                    :: op
   INTEGER, INTENT(IN ) :: Iatom
+  character(len=fnlen), INTENT(INOUT) :: fname
 !Local variables ------------------------------
   INTEGER                                       :: iflavor
 !  INTEGER                                       :: iflavor1
@@ -3632,7 +3634,7 @@ include 'mpif.h'
     if(op%opt_histo .gt. 1) then
       ! Scalar
       if(op%nspinor .eq. 1) then
-        open (unit=735,file='LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        open (unit=735,file=trim(fname)//'_LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total t2g eg'
         do n1=1,op%samples
           op%suscep(:,n1)=op%suscep(:,n1)/float(nbprocs)/float(op%samples)
@@ -3641,7 +3643,7 @@ include 'mpif.h'
 
       else
         ! SOC
-        open (unit=735,file='LocalMagneticSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        open (unit=735,file=trim(fname)//'_LocalMagneticSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total Orbital Spin'
         do n1=1,op%samples
           op%chi(:,n1) = op%chi(:,n1)/float(nbprocs)/float(op%samples)
@@ -3654,7 +3656,7 @@ include 'mpif.h'
     ! Local Charge Susceptiblity
     if(op%opt_histo .gt. 2) then 
       op%ntot(:) = op%ntot(:)/float(nbprocs)/float(op%samples)
-      open (unit=735,file='LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+      open (unit=735,file=trim(fname)//'_LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
       write(735,*) '#Tau Total <ntot>'
       do n1=1,op%samples
         op%chicharge(1,n1)=(op%chicharge(1,n1)/float(nbprocs)/float(op%samples))-(op%ntot(1)*op%ntot(1))
