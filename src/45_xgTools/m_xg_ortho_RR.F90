@@ -20,7 +20,6 @@
 
 #include "abi_common.h"
 
-! nvtx related macro definition
 #include "nvtx_macros.h"
 
 module m_xg_ortho_RR

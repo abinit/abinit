@@ -162,6 +162,12 @@ fbk_tgz = sorted([item for item in os.listdir("./fallbacks") \
 ext += "EXTRA_DIST += fallbacks/%s\n\n" % fbk_tgz
 ext += "DISTCLEANFILES = fallbacks/Makefile\n\n"
 
+# Write additional cmake information
+if ( os.path.exists("CMakeLists.txt") ):
+  ext += "EXTRA_DIST += CMakeLists.txt\n"
+if ( os.path.exists("config.h.cmake") ):
+  ext += "EXTRA_DIST += config.h.cmake\n\n"
+
 # Write Makefile.am
 mf = open("Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
