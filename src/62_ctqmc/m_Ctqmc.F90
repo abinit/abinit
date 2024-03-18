@@ -2715,7 +2715,7 @@ include 'mpif.h'
     if(this%opt_histo .gt. 1) then
       !Scalar
       if(this%nspinor .eq. 1) then
-        open(unit=735,file=trim(fname)//'_LocalSpinSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        open(unit=735,file=trim(fname)//'_LocalSpinSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total t2g eg'
         do n1=1,this%samples
           this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
@@ -2724,7 +2724,7 @@ include 'mpif.h'
 
       else
         !SOC
-        open (unit=735,file=trim(fname)//'_LocalMagneticSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+        open (unit=735,file=trim(fname)//'_LocalMagnSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
         write(735,*) '#Tau Total Orbital Spin'
         do n1=1,this%samples
           this%chi(:,n1)=this%chi(:,n1)/float(this%size)/float(this%samples)
@@ -2737,7 +2737,7 @@ include 'mpif.h'
     !Local Charge Susceptibility
     if(this%opt_histo .gt. 2) then
       this%ntot(:)=this%ntot(:)/float(this%size)/float(this%samples)
-      open (unit=735,file=trim(fname)//'_LocalChargeSusceptibility_atom_'//atomnb//'.dat',status='unknown',form='formatted')
+      open (unit=735,file=trim(fname)//'_LocalChargeSuscept_atom_'//atomnb//'.dat',status='unknown',form='formatted')
       write(735,*) '#Tau Total <ntot> '
       do n1=1,this%samples
         this%chicharge(1,n1)=(this%chicharge(1,n1)/float(this%size)/float(this%samples))-(this%ntot(1)*this%ntot(1))
