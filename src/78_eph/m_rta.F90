@@ -1248,6 +1248,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
     nctkarr_t('sigma_erange', "dp", "two"), &
     nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
     nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+    nctkarr_t("kibz", "dp", "three, nkibz"), &
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('n_ehst', "dp", "two, nsppol, ntemp"), &
@@ -1293,6 +1294,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), self%kcalc2ebands))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%ebands%kptns))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  if (self%assume_gap) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
@@ -1841,6 +1843,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
      nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+    nctkarr_t("kibz", "dp", "three, nkibz"), &
      nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1961,6 +1964,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
+     ! Write fnk_out_sigma to disk
      if (my_rank == master) then
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fkn_out_sigma"), fkn_out, start=[1,1,1,1,itemp]))
      end if
@@ -2093,6 +2097,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_rho"), ibte_rho))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), ibte%kcalc2ibz))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), ibte%kcalc2ebands))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), ibte%ebands%kptns))
    NCF_CHECK(nf90_close(ncid))
 #endif
 

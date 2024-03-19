@@ -53,9 +53,9 @@ MODULE m_io_screening
  include 'mpif.h'
 #endif
 
- character(len=nctk_slen),public,parameter :: e_ncname="dielectric_function"
- character(len=nctk_slen),public,parameter :: em1_ncname="inverse_dielectric_function"
- character(len=nctk_slen),public,parameter :: chi0_ncname="polarizability"
+ character(len=nctk_slen),public,parameter :: e_ncname = "dielectric_function"
+ character(len=nctk_slen),public,parameter :: em1_ncname = "inverse_dielectric_function"
+ character(len=nctk_slen),public,parameter :: chi0_ncname = "polarizability"
 
  public :: ncname_from_id       ! return the name of the netcdf variable from the id
 
@@ -240,17 +240,8 @@ MODULE m_io_screening
 
 ! public :: hscr_from_file       ! Read the header from file.
  public :: hscr_io              ! I/O of the header (read/write/echo).
- !public :: hscr_fort_read
- !public :: hscr_fort_write
- !public :: hscr_ncwread
- !public :: hscr_ncwrite
- !public :: hscr_echo            ! I/O of the header (read/write/echo).
 
  public :: hscr_new             ! Create header.
-! public :: hscr_print           ! Print the SCR-related part of the header.
-! public :: hscr_bcast           ! Broadcast the header.
-! public :: hscr_free            ! Free the header.
- !public :: hscr_copy            ! Copy the SCR|SUSC header.
  public :: hscr_merge           ! Merge two or more headers.
  public :: write_screening      ! Write a q-slice of the matrix in G-space.
  public :: read_screening       ! Read the content of the (SCR|SUSC) file placed after the header.
@@ -1398,7 +1389,7 @@ end subroutine write_screening
 !! SOURCE
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm, &
-& iqiA) ! Optional
+                          iqiA) ! Optional
 
 !Arguments ------------------------------------
 !scalars

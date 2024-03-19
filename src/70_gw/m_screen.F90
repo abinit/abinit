@@ -198,9 +198,12 @@ end type screen_info_t
   ! uwing(3,npwe,nomega)
   ! Upper wings.
 
+ contains
+
+   procedure :: init => fgg_init   ! Creation method.
+   !procedure :: free => fgg_free
  end type fgg_t
 
- public :: fgg_init   ! Creation method.
  public :: fgg_free   ! Free memory.
 !!***
 
@@ -414,11 +417,9 @@ end subroutine screen_info_print
 subroutine fgg_free_0D(Fgg)
 
 !Arguments ------------------------------------
-!scalars
  type(fgg_t),intent(inout) :: Fgg
 ! *************************************************************************
 
- !complex
  ABI_SFREE(Fgg%mat)
  Fgg%has_mat = MAT_NODATA
 
@@ -439,7 +440,7 @@ end subroutine fgg_free_0D
 !!
 !! SOURCE
 
-subroutine fgg_free_1D(Fgg,keep_q)
+subroutine fgg_free_1D(Fgg, keep_q)
 
 !Arguments ------------------------------------
 !scalars
@@ -473,25 +474,20 @@ end subroutine fgg_free_1D
 !!  npw
 !!  nqlwl
 !!
-!! SIDE EFFECTS
-!!  Fgg, See function description
-!!
 !! SOURCE
 
-subroutine fgg_init(Fgg,npw,nomega,nqlwl)
+subroutine fgg_init(Fgg, npw, nomega, nqlwl)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: npw,nqlwl,nomega
- type(fgg_t),intent(inout) :: Fgg
+ class(fgg_t),intent(inout) :: Fgg
+ integer,intent(in) :: npw, nqlwl, nomega
 
 !Local variables ------------------------------
-!scalars
  integer :: ierr
 
 ! *************************************************************************
 
- !@fgg_t
  Fgg%nomega = nomega; Fgg%npw = npw
  Fgg%nqlwl = nqlwl
 
@@ -525,13 +521,13 @@ end subroutine fgg_init
 !!
 !! SOURCE
 
-subroutine screen_fgg_qbz_set(W,iq_bz,nqlwl,how)
+subroutine screen_fgg_qbz_set(W, iq_bz, nqlwl, how)
 
 !Arguments ------------------------------------
 !scalars
+ class(screen_t),intent(inout) :: W
  integer,intent(in) :: iq_bz,nqlwl
  character(len=*),intent(in) :: how
- type(screen_t),intent(inout) :: W
 
 !Local variables ------------------------------
 !scalars
@@ -606,7 +602,7 @@ end subroutine screen_fgg_qbz_set
 !!
 !! SOURCE
 
-pure function screen_ihave_fgg(W,iq_ibz,how)
+pure function screen_ihave_fgg(W, iq_ibz, how)
 
 !Arguments ------------------------------------
 !scalars
@@ -692,8 +688,6 @@ subroutine screen_free(W)
 
 ! *************************************************************************
 
- !@screen_t
- !
  ! integer
  ABI_SFREE(W%gvec)
  !
@@ -772,14 +766,13 @@ end subroutine screen_free
 !!
 !! SOURCE
 
-subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
-                       iomode,ngfftf,nfftf_tot,nsppol,nspden,ae_rhor,prtvol,comm)
+subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_asked, &
+                       iomode, ngfftf, nfftf_tot, nsppol, nspden, ae_rhor, prtvol, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(screen_t),intent(out) :: W
- integer,intent(in) :: mqmem,iomode,npw_asked,comm,prtvol,nsppol
- integer,intent(in) :: nfftf_tot,nspden
+ integer,intent(in) :: mqmem,iomode,npw_asked,comm,prtvol,nsppol, nfftf_tot,nspden
  character(len=fnlen),intent(in) :: ifname
  type(crystal_t),intent(in) :: Cryst
  type(gsphere_t),intent(in) :: Gsph
@@ -841,17 +834,17 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  W%nI = 1; W%nJ = 1
 
  ! The Q-point sampling is inited from Qmesh.
- W%nqibz=Qmesh%nibz
- ABI_MALLOC(W%qibz,(3,W%nqibz))
+ W%nqibz = Qmesh%nibz
+ ABI_MALLOC(W%qibz, (3, W%nqibz))
  W%qibz= Qmesh%ibz
 
- W%mqmem=mqmem!;  W%mqmem = 0
+ W%mqmem = mqmem!;  W%mqmem = 0
  if (W%mqmem/=0) W%mqmem=W%nqibz
 
- ABI_MALLOC(W%keep_q,(W%nqibz))
+ ABI_MALLOC(W%keep_q, (W%nqibz))
  W%keep_q=.TRUE.; if (W%mqmem == 0) W%keep_q = .False.
 
- if (W%mqmem/=0 .and. W%mqmem<W%nqibz) then
+ if (W%mqmem/=0 .and. W%mqmem < W%nqibz) then
    ! Keep in memory the most representative q-points.
    W%keep_q=.FALSE.
    wt_list = Qmesh%wt; iperm = (/(ii,ii=1,Qmesh%nibz)/)
@@ -866,14 +859,14 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  W%iomode = iomode
  W%prtvol = prtvol
 
- W%has_ppmodel=0; if (W%Info%use_ppm/=PPM_NONE) W%has_ppmodel=1
- !
+ W%has_ppmodel = 0; if (W%Info%use_ppm /= PPM_NONE) W%has_ppmodel=1
+
  ! Copy the AE density for the model dielectric function or for the vertex corrections.
  W%nspden     = nspden
  W%ngfftf     = ngfftf
  W%nfftf_tot  = nfftf_tot
 
- ABI_MALLOC(W%ae_rhor,(nfftf_tot,nspden))
+ ABI_MALLOC(W%ae_rhor, (nfftf_tot,nspden))
  W%ae_rhor = ae_rhor
 
  deallocate_Fgg=.FALSE.
@@ -915,36 +908,36 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  W%nqlwl  = nqlwl
  W%nomega = nomega
 
- ABI_MALLOC(W%qlwl,(3,W%nqlwl))
- ABI_MALLOC(W%omega,(W%nomega))
+ ABI_MALLOC(W%qlwl, (3,W%nqlwl))
+ ABI_MALLOC(W%omega, (W%nomega))
 
  if (from_file) then
    W%qlwl  = Hscr%qlwl
    W%omega = Hscr%omega
    !
    ! G-vectors.
-   W%npw=Hscr%npwe
-   if (npw_asked>0) then
-     if (npw_asked>Hscr%npwe) then
-       write(msg,'(a,i8,2a,i8)')&
+   W%npw = Hscr%npwe
+   if (npw_asked > 0) then
+     if (npw_asked > Hscr%npwe) then
+       write(msg,'(a,i0,2a,i0)')&
         'The number of G-vectors saved on file is less than the value required = ',npw_asked,ch10,&
         'Calculation will proceed with the Max available npw = ',Hscr%npwe
        ABI_WARNING(msg)
      else
-       W%npw=npw_asked ! Redefine the no. of G"s for W.
-       write(msg,'(a,i8,2a,i8)')&
-        'The Number of G-vectors saved on file is larger than the value required = ',npw_asked,ch10,&
+       W%npw = npw_asked ! Redefine the no. of G"s for W.
+       write(msg,'(a,i0,2a,i0)')&
+        'The number of G-vectors saved on file is larger than the value required = ',npw_asked,ch10,&
         'Calculation will proceed with npw = ',W%npw
        ABI_COMMENT(msg)
      end if
    end if
-   !
+
    ! consistency check on G-vectors and q-points.
-   if ( ANY(Hscr%gvec(:,1:W%npw) /= Gsph%gvec(:,1:W%npw)) ) then
+   if (ANY(Hscr%gvec(:,1:W%npw) /= Gsph%gvec(:,1:W%npw))) then
      !write(std_out) W%gvec, Gsph%gvec
      ABI_ERROR("Hscr%gvec /= Gsph%gvec(1:W%npw)")
    end if
-   ABI_CHECK(Hscr%nqibz==Qmesh%nibz,"Mismatch in the number of q-points")
+   ABI_CHECK(Hscr%nqibz == Qmesh%nibz, "Mismatch in the number of q-points in the IBZ")
    ierr=0
    do iq_ibz=1,Hscr%nqibz
      if (ANY( ABS(Qmesh%ibz(:,iq_ibz) - Hscr%qibz(:,iq_ibz)) > tol6) ) then
@@ -952,10 +945,10 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
        write(std_out,'(i0,2(3f7.3,1x))')iq_ibz,Qmesh%ibz(:,iq_ibz),Hscr%qibz(:,iq_ibz)
      end if
    end do
-   ABI_CHECK(ierr==0,"Wrong ordering in q-point list, aborting now")
+   ABI_CHECK(ierr==0, "Wrong ordering in q-point list, aborting now")
  end if
 
- ABI_MALLOC(W%gvec,(3,W%npw))
+ ABI_MALLOC(W%gvec, (3, W%npw))
  W%gvec = Gsph%gvec(:,1:W%npw)
 
  ! Frequency mesh.
@@ -964,11 +957,11 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    W%nomega_r=1; W%nomega_i=1
  else
    ! Real frequencies are packed in the first locations.
-   W%nomega_r=1
+   W%nomega_r = 1
    do iw=1,W%nomega
      if (DBLE(W%omega(iw))>0.001*Ha_eV) W%nomega_r=iw
    end do
-   W%nomega_i=W%nomega-W%nomega_r
+   W%nomega_i = W%nomega - W%nomega_r
  end if
  !
  ! ------------------------------ Initialization completed --------------------------------
@@ -979,7 +972,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  nomega = W%nomega
  nI     = W%ni
  nJ     = W%nj
- ABI_MALLOC(W%Fgg,(nqibz))
+ ABI_MALLOC(W%Fgg, (nqibz))
 
  if (from_file) then
 
@@ -1009,14 +1002,14 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      if (is_qeq0) nqlwl=W%nqlwl
      !
      ! Allocate F_{GG'}(w)
-     call fgg_init(W%Fgg(iq_ibz),npw,nomega,nqlwl)
+     call W%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
      !
      ! Read data from file (use MPI-IO if possible)
      if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
-       call wrtout(std_out, "read_screening with MPI_IO")
-       call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,IO_MODE_MPI,comm,iqiA=iq_ibz)
+       !call wrtout(std_out, "read_screening with MPI_IO")
+       call read_screening(varname, W%fname, npw, 1, nomega, W%Fgg(iq_ibz)%mat, IO_MODE_MPI, comm, iqiA=iq_ibz)
      else
-       call read_screening(varname,W%fname,npw,1,nomega,W%Fgg(iq_ibz)%mat,W%iomode,comm,iqiA=iq_ibz)
+       call read_screening(varname, W%fname, npw, 1, nomega, W%Fgg(iq_ibz)%mat, W%iomode, comm, iqiA=iq_ibz)
      end if
      W%Fgg(iq_ibz)%has_mat = MAT_STORED
      ! W contains Em1 and is ready to use.
@@ -1026,12 +1019,11 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
    !
    ! Model dielectric function. Only epsm-1 is supported here.
    call wrtout(std_out," Calculating model dielectric function... ")
-   ABI_CHECK(W%nomega==1,"Cannot use nomega>1 in model dielectric function")
-   !
+   ABI_CHECK(W%nomega==1,"Cannot use nomega > 1 in model dielectric function")
+
    do iq_ibz=1,nqibz
-     !
      if (.not.W%keep_q(iq_ibz)) CYCLE
-     !
+
      ! The wings are not used here.
      nqlwl=0; is_qeq0= (normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
      !
@@ -1042,7 +1034,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
      end if
      !
      ! Allocate F_{GG'}(w).
-     call fgg_init(W%Fgg(iq_ibz),npw,nomega,nqlwl)
+     call W%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
 
      eps_inf  =  W%Info%eps_inf
      mdf_type =  W%Info%use_mdf
@@ -1050,7 +1042,7 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
 
      ! Construct W TODO check the new implementation.
      call screen_mdielf(iq_bz,npw,nomega,mdf_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,&
-&      nspden,nfftf_tot,ngfftf,ae_rhor,"EM1",W%Fgg(iq_ibz)%mat,comm)
+                        nspden,nfftf_tot,ngfftf,ae_rhor,"EM1",W%Fgg(iq_ibz)%mat,comm)
 
      W%Fgg(iq_ibz)%has_mat = MAT_STORED
 
@@ -1067,14 +1059,13 @@ subroutine screen_init(W,W_Info,Cryst,Qmesh,Gsph,Vcp,ifname,mqmem,npw_asked,&
  end if
  !
  ! Init plasmon-pole parameters.
- if (W%has_ppmodel>0) then
-   ABI_WARNING("Calculating PPmodel parameters")
+ if (W%has_ppmodel > 0) then
+   call wrtout(std_out, "Calculating PPmodel parameters")
    ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf
-   call W%PPm%init(W%mqmem,W%nqibz,W%npw,ppmodel,drude_plsmf,W%Info%invalid_freq)
+   call W%PPm%init(W%mqmem, W%nqibz, W%npw, ppmodel, drude_plsmf, W%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
-     if (screen_ihave_fgg(W,iq_ibz,how="Stored")) then
-       !em1_ggw => W%Fgg(iq_ibz)%mat
+     if (screen_ihave_fgg(W, iq_ibz, how="Stored")) then
        call W%PPm%new_setup(iq_ibz,Cryst,Qmesh,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,nfftf_tot,Gsph%gvec,ngfftf,W%ae_rhor(:,1))
      end if
    end do
