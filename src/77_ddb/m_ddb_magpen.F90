@@ -101,7 +101,7 @@ contains
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: omega(3),qphnrm(3),qphon(3,3)
- complex(dpc) :: epsilon(3,3)
+ complex(dpc) :: epsilon(3,3), macmagsus(3,3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
@@ -138,7 +138,7 @@ contains
  nblok=ddb%nblok
  do kblok=1,nblok
 
-   ! Look for the spin-susceptibility block in the DDB
+   ! Look for the local spin-susceptibility block in the DDB
    omega=zero
    qphon=zero
    qphon(:,1)=ddb%qpt(1:3,kblok)
@@ -172,7 +172,7 @@ contains
        call wrtout([std_out, ab_out], msg)
      end if
 
-     call spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
+     call local_spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
    & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
 
    end if
@@ -258,6 +258,18 @@ contains
    if (lblok /= 0 ) then
      call mp_diel(barmagsus,ddb%val,epsilon,lblok,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield)
+   end if
+
+   !Magnetic susceptibility block
+   iblok=0
+   rfphon(:)=0
+   rfelfd(1:2)=0
+   rfstrs(1:2)=0
+   rfmagn(1:2)=1
+   call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
+   if (lblok /= 0 ) then
+     call mp_macmagsus(barmagsus,ddb%val,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
+   & natom,nblok,ndim,nmdir,prtopt,prtvol)
    end if
 
  end do
@@ -369,9 +381,9 @@ contains
  end subroutine ddb_magpen
 !!***
 
-!!****f* m_ddb_magpen/spinsus
+!!****f* m_ddb_magpen/local_spinsus
 !! NAME
-!! spinsus
+!! local_spinsus
 !!
 !! FUNCTION
 !! Calculate the spin-susceptibility matrix and its inverse
@@ -398,7 +410,7 @@ contains
 !!
 !! SOURCE
 
- subroutine spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
+ subroutine local_spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
 & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
 
 !Arguments -------------------------------
@@ -588,7 +600,7 @@ contains
 
  end if !prtopt
  
- end subroutine spinsus
+ end subroutine local_spinsus
 !!***
 
 !!****f* m_ddb_magpen/magmom
@@ -1108,6 +1120,161 @@ contains
  end subroutine mp_diel
 !!***
 
+!!****f* m_ddb_magpen/mp_macmagsus
+!! NAME
+!! mp_macmagsus
+!!
+!! FUNCTION
+!! Calculate the different flavor (see mpopt below) of the second-
+!! order linear-response quantities
+!!
+!! INPUTS
+!! barmagsus(ndim,ndim)= Penalized spin-sussceptibility tensor
+!! blkval(2,3*mpert*3*mpert,nblok)=  Second-order derivative matrices
+!!  In our case, the nblok is restricted to iblok
+!! iblok= index of the IFCs block
+!! magsus(ndim,ndim)= Spin-sussceptibility tensor
+!! mpert =maximum number of ipert
+!! mpopt = 1 calculate the frozen-magnetic second-order quantities
+!!         2 calculate the spin-relaxed second-order quantities 
+!! natom= number of atoms in unit cell
+!! nblok= number of blocks in the DDB
+!! ndim= dimension of the square susceptibilities 
+!! prtvol= control the volume of information written on output
+!! ucvol= unit cell volume
+!!
+!! OUTPUT
+!!  
+!! macmagsus(3,3)= Complex magnetic susceptibility tensor calculated at the level of mpopt.
+!!
+!! SOURCE
+
+ subroutine mp_macmagsus(barmagsus,blkval,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
+& natom,nblok,ndim,nmdir,prtopt,prtvol)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,nmdir,prtopt,prtvol
+!arrays
+ integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ complex(dpc),intent(in) :: barmagsus(ndim,ndim)
+ complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
+ complex(dpc),intent(out) :: macmagsus(3,3)
+ complex(dpc),intent(in) :: magsus(ndim,ndim)
+
+!Local variables -------------------------
+!scalars
+ integer :: iat1,idir1,idir2,ipert1,ipert2,irow
+ integer :: ipert1_red,ipert2_red,idir1_red,idir2_red
+ character(len=1000) :: msg
+!arrays
+ complex(dpc) :: barmacmagsus(3,3)
+ complex(dpc) :: fmmacmagsus(3,3)
+ complex(dpc) :: srmacmagsus(3,3)
+ complex(dpc), allocatable :: barmmom(:,:)
+ complex(dpc), allocatable :: macmag_zfield(:,:)
+ character(len=1) :: cart(3)=(/'x','y','z'/)
+
+! *********************************************************************
+
+!Extract the penalized magnetic susceptibility
+ ipert2= natom + 5
+ ipert1= natom + 5
+ barmacmagsus=(zero,zero)
+ do idir2= 1, 3
+   do idir1= 1, 3
+     barmacmagsus(idir1,idir2)= &
+   & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
+   &       blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
+   end do
+ end do
+
+!Extract the penalized magnetic moments and fields
+ ABI_MALLOC(barmmom,(ndim,3))
+ barmmom=(zero,zero)
+ ipert2=natom+5
+ do idir2=1,3
+   ipert1_red= 0
+   do iat1= mpatpol(1), mpatpol(2)
+     ipert1= natom + 11 + iat1
+     ipert1_red= ipert1_red + 1
+     idir1_red= 0
+     do idir1= 1, 3
+       if (mpdir(idir1)==0) cycle
+       idir1_red= idir1_red + 1
+       irow=idir1_red+(ipert1_red-1)*nmdir
+       barmmom(irow,idir2)= &
+     & cmplx(blkval(1,idir1,ipert1,idir2,ipert2,iblok), &
+      & blkval(2,idir1,ipert1,idir2,ipert2,iblok),16)
+
+     end do
+   end do
+ end do
+
+ !Zeeman fields
+ ABI_MALLOC(macmag_zfield,(ndim,3))
+ macmag_zfield=-matmul(invbarmagsus,barmmom)
+
+!Calculate the frozen-magnetic flavor
+ fmmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(barmagsus,macmag_zfield))
+ fmmacmagsus= barmacmagsus + fmmacmagsus
+
+ macmagsus= fmmacmagsus
+!
+!Calculate the spin-relaxed flavor
+ if (mpopt==2) then
+   srmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(magsus,macmag_zfield))
+   srmacmagsus= fmmacmagsus - srmacmagsus
+
+   macmagsus= srmacmagsus
+ end if
+
+ ABI_FREE(barmmom)
+ ABI_FREE(macmag_zfield)
+
+ if (prtopt==1) then
+   !Write the results
+   call wrtout([ab_out,std_out], ' Frozen-magnetic magnetic susceptibility tensor (clamped ion)')
+   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+   do idir1= 1, 3
+     do idir2= 1, 3
+       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
+     & real(fmmacmagsus(idir1,idir2)), aimag(fmmacmagsus(idir1,idir2))
+       call wrtout([ab_out,std_out], msg)
+     end do
+   end do
+   call wrtout([ab_out,std_out], '   ')
+  
+   if (mpopt==2) then
+     call wrtout([ab_out,std_out], ' Spin-relaxed magnetic susceptibility (clamped ion)')
+     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+     do idir1= 1, 3
+       do idir2= 1, 3
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)' ) cart(idir1), cart(idir2), &
+       & real(srmacmagsus(idir1,idir2)), aimag(srmacmagsus(idir1,idir2))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
+   
+   if (prtvol > 1) then
+     call wrtout([ab_out,std_out], ' Penalized magnetic susceptibility tensor (clamped ion)')
+     call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+     do idir1= 1, 3
+       do idir2= 1, 3
+         write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
+       & real(barmacmagsus(idir1,idir2)), aimag(barmacmagsus(idir1,idir2))
+         call wrtout([ab_out,std_out], msg)
+       end do
+     end do
+     call wrtout([ab_out,std_out], '   ')
+   end if
+ end if
+
+ end subroutine mp_macmagsus
+!!***
 !!****f* m_ddb_magpen/mp_zeff
 !! NAME
 !! mp_zeff
@@ -1249,16 +1416,16 @@ contains
        call wrtout([ab_out,std_out], '   ')
      end do 
    end if
-   call wrtout([ab_out,std_out], ' Lattice-mediated contribution to dielectric tensor')
-   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
-   do idir1= 1, 3
-     do idir2= 1, 3
-       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
-     & real(lm_epsilon(idir1,idir2)), aimag(lm_epsilon(idir1,idir2))
-       call wrtout([ab_out,std_out], msg)
-     end do
-   end do
-   call wrtout([ab_out,std_out], '   ')
+!   call wrtout([ab_out,std_out], ' Lattice-mediated contribution to dielectric tensor')
+!   call wrtout([ab_out,std_out], '  dir  dir        Real              Imag')
+!   do idir1= 1, 3
+!     do idir2= 1, 3
+!       write(msg,'(2x,a2,3x,a2,2x,2es18.9)') cart(idir1), cart(idir2), &
+!     & real(lm_epsilon(idir1,idir2)), aimag(lm_epsilon(idir1,idir2))
+!       call wrtout([ab_out,std_out], msg)
+!     end do
+!   end do
+!   call wrtout([ab_out,std_out], '   ')
  end if
 
  end subroutine mp_zeff
@@ -1709,9 +1876,20 @@ contains
  complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),phongreen(:,:,:)
- complex(dpc), allocatable :: lm_epsilon(:,:,:)
+ complex(dpc), allocatable :: lm_epsilon(:,:,:),lm_magelsus(:,:,:)
 
+!TMP: CrI3 varaibles:
+ complex(dpc) :: magbasis(4,4),work(4,4)
+ complex(dpc),parameter :: ure=(1.d0,0.d0),uim=(0.d0,1.d0)
+ 
 ! *********************************************************************
+
+
+!TMP: Complete magnon basis
+ magbasis(1,:)=0.5d0*(/ure,uim,ure,uim/)
+ magbasis(2,:)=0.5d0*(/ure,-uim,ure,-uim/)
+ magbasis(3,:)=0.5d0*(/ure,uim,-ure,-uim/)
+ magbasis(4,:)=0.5d0*(/ure,-uim,-ure,uim/)
 
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
  ' Omega interpolation of magnetic penalty quantities section ',ch10
@@ -1748,6 +1926,7 @@ contains
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(lm_magsus,(ndim,ndim,nomega))
+ ABI_MALLOC(lm_magelsus,(ndim,3,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(invhmat,(ndim,ndim,nomega))
@@ -1776,7 +1955,7 @@ contains
    end do 
 
    !Calculate the spin susceptibilities
-   call spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
+   call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
  & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol)
 
    !Calculate the magnetic moments
@@ -1806,8 +1985,17 @@ contains
    call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
  & typat,zeff(:,:,iw),zeffspec(:,iw))
 
-   !Calculate here the lattice-mediated dielectric susceptibility
+   !Calculate here the phonons contribution to the spin susceptibility
    lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen(:,:,iw),transpose(conjg(mmom(:,1:natom*3,iw)))))
+
+   !Calclate here the lattice-mediated magnetic moments induced by an electric field
+   lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen(:,:,iw),transpose(conjg(zeff(:,:,iw)))))
+
+   !Convert magnetic susceptibilities to the magnon basis
+!   work(:,:)=magsus(:,:,iw)
+!   magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
+!   work(:,:)=lm_magsus(:,:,iw)
+!   lm_magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
  end do
 
 !Calculate the norm of the phonon spectral function
@@ -1940,7 +2128,7 @@ contains
 
  write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Real part of magnetic moments induced by electric field (at. units)'
+ write(mmom_unit,*) '#  Real part of the clamped-ion local magnetoelectric tensor(at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -1952,7 +2140,7 @@ contains
  end do
 
  write(mmom_unit,*) ' '
- write(mmom_unit,*) '#  Imaginary part of magnetic moments induced by electric field (at. units)'
+ write(mmom_unit,*) '#  Imaginary part of the clamped-ion local magnetoelectric tensor(at. units)'
  write(msg,'(a,a,a)') ch10,&
 &           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
@@ -1960,6 +2148,31 @@ contains
  do iw=1,nomega
     write(msg,pfmt) &
  &  omega(iw), ((aimag(mmom(i,j,iw)),j=3*(natom+1)+1,3*(natom+2)),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim*3
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Real part of the phonon-modes contribution to the local magnetoelectric tensor(at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(lm_magelsus(i,j,iw)),j=1,3),i=1,ndim)
+    call wrtout(mmom_unit,msg,'COLL')
+ end do
+
+ write(mmom_unit,*) ' '
+ write(mmom_unit,*) '#  Imaginary part of the phonon-modes contribution to the local magnetoelectric tensor(at. units)'
+ write(msg,'(a,a,a)') ch10,&
+&           ' # At  hw     m_{mat_1,1}^{Ex}     m_{mat_1,1}^{Ey}',&
+&           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
+ call wrtout(mmom_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(lm_magelsus(i,j,iw)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -2211,6 +2424,7 @@ contains
  ABI_FREE(modemm)
  ABI_FREE(zeff)
  ABI_FREE(lm_epsilon)
+ ABI_FREE(lm_magelsus)
  ABI_FREE(modezeff)
 
  end subroutine ddb_omega_interpol
@@ -2392,6 +2606,21 @@ subroutine phonon_green(amu,eigvec,ifc,mode_phonspec,natom,ntypat,omega,&
 
  ! Normalise the eigenvectors
  call pheigvec_normalize(natom, eigvec)
+
+ ! Apply mass factos to Green's function to use it later in the calculation of the 
+ ! phonon contributions to the susceptibilities.
+ do iat2= 1, natom
+   do idir2= 1, 3
+     icol= (iat2-1)*3 + idir2
+     do iat1= 1, natom
+       do idir1= 1, 3
+         irow= (iat1-1)*3 + idir1
+         phongreen(irow,icol)= massfac(iat1,iat2)*phongreen(irow,icol)
+       end do
+     end do
+   end do
+ end do
+ 
 
  ABI_FREE(ipiv)
  ABI_FREE(work1)
