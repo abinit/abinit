@@ -857,11 +857,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
                Dtset%iomode, ngfftf, nfftf_tot, Wfd%nsppol, Wfd%nspden, qp_aerhor, Wfd%prtvol, Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
- !
+
  ! =============================================
  ! ==== Build of the excitonic Hamiltonian =====
  ! =============================================
- !
  call timab(656,1,tsec) ! bse(mkexcham)
 
  call exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
@@ -965,7 +964,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call Vcp%free()
  call pawhur_free(Hur)
  ABI_FREE(Hur)
- call bs_parameters_free(BSp)
+ call BSp%free()
  call wfd%free()
  call pawfgr_destroy(Pawfgr)
  call eprenorms_free(Epren)
@@ -1157,6 +1156,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  if (w_fname /= ABI_NOFILE) then
 
+   ! GWPT
+   !call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, comm)
+
    if (my_rank == master) then
      ! Read dimensions from the external file.
      if (.not. file_exists(w_fname)) then
@@ -1164,7 +1166,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
        ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
      end if
      ! Master reads npw and nqlwl from the SCR file.
-     call wrtout(std_out,sjoin('Testing file: ', w_fname))
+     call wrtout(std_out, sjoin('Testing file: ', w_fname))
      call hscr%from_file(w_fname, fform, xmpi_comm_self); if (dtset%prtvol > 0) call Hscr%print()
 
      ! Have to change %npweps if it was larger than dim on disk.
@@ -1630,7 +1632,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  ABI_MALLOC(igwene,(qp_ebands%mband,qp_ebands%nkpt,qp_ebands%nsppol))
  igwene=zero
 
- call bsp_calctype2str(Bsp,msg)
+ call Bsp%calctype2str(msg)
  call wrtout(std_out,"Calculation type: "//TRIM(msg))
 
  SELECT CASE (Bsp%calc_type)
@@ -1764,8 +1766,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  end if
 
  msg=' Fundamental parameters for the solution of the Bethe-Salpeter equation:'
- call print_bs_parameters(BSp,unit=std_out,header=msg,mode_paral="COLL",prtvol=Dtset%prtvol)
- call print_bs_parameters(BSp,unit=ab_out, header=msg,mode_paral="COLL")
+ call BSp%print(unit=std_out,header=msg,mode_paral="COLL",prtvol=Dtset%prtvol)
+ call BSp%print(unit=ab_out, header=msg,mode_paral="COLL")
 
  if (ANY (Cryst%symrec(:,:,1) /= RESHAPE ( (/1,0,0,0,1,0,0,0,1/),(/3,3/) )) .or. ANY( ABS(Cryst%tnons(:,1)) > tol6) ) then
    write(msg,'(3a,9i2,2a,3f6.3,2a)')&
@@ -1808,7 +1810,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
    BS_files%out_eig = TRIM(BS_files%out_basename)//"_BSEIG"
  end if
 
- call print_bs_files(BS_files,unit=std_out)
+ call BS_files%print(unit=std_out)
  !
  ! ==========================================================
  ! ==== Temperature dependence of the spectrum ==============

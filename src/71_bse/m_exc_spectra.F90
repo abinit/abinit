@@ -206,13 +206,13 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      ! =======================================================
      ! === Make EPS RPA and GW without local-field effects ===
      ! =======================================================
-     call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon","COLL")
+     call wrtout(std_out," Calculating RPA NLF and QP NLF epsilon")
 
      call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,EPBSt,BSp%nq,nsppol,opt_cvk,&
-&      Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
+       Cryst%ucvol,BSp%broad,BSp%nomega,BSp%omega,eps_rpanlf,dos_ks)
 
      call exc_eps_rpa(BSp%nbnds,BSp%lomo_spin,Bsp%lomo_min,BSp%homo_spin,Kmesh,EP_QPBSt,BSp%nq,nsppol,opt_cvk,&
-&      Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
+      Cryst%ucvol,Bsp%broad,BSp%nomega,BSp%omega,eps_gwnlf,dos_gw)
      !
      ! =========================
      ! === Write out Epsilon ===
@@ -234,31 +234,29 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      !
      ! Master node writes final results on file.
      call exc_write_data(BSp,BS_files,"RPA_NLF_MDF",eps_rpanlf,prefix=prefix,dos=dos_ks)
-
      call exc_write_data(BSp,BS_files,"GW_NLF_MDF",eps_gwnlf,prefix=prefix,dos=dos_gw)
-
      call exc_write_data(BSp,BS_files,"EXC_MDF",eps_exc,prefix=prefix,dos=dos_exc)
 
-     call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking Kramers Kronig on Excitonic Macroscopic Epsilon")
      call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_exc(:,1))
 
-     call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking Kramers Kronig on RPA NLF Macroscopic Epsilon")
      call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_rpanlf(:,1))
 
-     call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking Kramers Kronig on GW NLF Macroscopic Epsilon")
      call check_kramerskronig(BSp%nomega,REAL(BSp%omega),eps_gwnlf(:,1))
 
-     call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking f-sum rule on Excitonic Macroscopic Epsilon")
 
      if (BSp%exchange_term>0) then
        ABI_COMMENT(' f-sum rule should be checked without LF')
      end if
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_exc(:,1)),drude_plsmf)
 
-     call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking f-sum rule on RPA NLF Macroscopic Epsilon")
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_rpanlf(:,1)),drude_plsmf)
 
-     call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon","COLL")
+     call wrtout(std_out," Checking f-sum rule on GW NLF Macroscopic Epsilon")
      call check_fsumrule(BSp%nomega,REAL(BSp%omega),AIMAG(eps_gwnlf(:,1)),drude_plsmf)
 
      path = strcat(BS_files%out_basename, strcat(prefix,"_MDF.nc"))
@@ -272,7 +270,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
      !TODO
      call ebands_free(EPBSt)
      call ebands_free(EP_QPBSt)
-
    end do
 
    ABI_FREE(eps_rpanlf)
@@ -351,13 +348,13 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
 
  select case (toupper(what))
  case ("EXC_MDF")
-   call wrtout(ab_out," Writing EXC Macroscopic dielectric function to file: "//trim(fname),"COLL")
+   call wrtout(ab_out," Writing EXC Macroscopic dielectric function to file: "//trim(fname))
 
    write(funt,'("# Macroscopic dielectric function obtained with the BS equation.")')
 
    lf_type = 'WITHOUT LOCAL FIELD EFFECTS'
    if (BSp%exchange_term>0) lf_type='LOCAL FIELD EFFECTS INCLUDED'
-   call bsp_calctype2str(Bsp,str_type)
+   call bsp%calctype2str(str_type)
    write(funt,'("# ",a,"     " ,a)') TRIM(str_type), TRIM(lf_type)
 
    block_type = 'RESONANT-ONLY calculation'
@@ -373,11 +370,11 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
    write(funt,'(a,f7.4,a)')'# Scissor operator energy = ',BSp%mbpt_sciss*Ha_eV,' [eV]'
 
  case ("RPA_NLF_MDF")
-   call wrtout(ab_out," Writing KS-RPA macroscopic dielectric function without local fields to file: "//trim(fname),"COLL")
+   call wrtout(ab_out," Writing KS-RPA macroscopic dielectric function without local fields to file: "//trim(fname))
    write(funt,'("# RPA macroscopic dielectric function without local fields")')
 
  case ("GW_NLF_MDF")
-   call wrtout(ab_out," Writing GW-RPA macroscopic dielectric function without local fields to file: "//trim(fname),"COLL")
+   call wrtout(ab_out," Writing GW-RPA macroscopic dielectric function without local fields to file: "//trim(fname))
 
    write(funt,'("# GW Macroscopic dielectric function without local field effects ")')
    write(funt,'(a,f7.4,a)')'# Scissor operator energy = ',BSp%mbpt_sciss*Ha_eV,' [eV]'
@@ -634,7 +631,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
 !************************************************************************
 
- call wrtout(std_out," Calculating excitonic epsilon with antiresonant","COLL")
+ call wrtout(std_out," Calculating excitonic epsilon with antiresonant")
 
  if (nsppol==2) then
    ABI_WARNING("nsppol==2 still under development")
@@ -658,7 +655,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  ! present implementation is not compatible with the cutoff technique.
  fact=four_pi/(ucvol*nkbz); if (nsppol==1) fact=two*fact ! two to account for the occupation numbers.
 
- call wrtout(std_out," Reading excitonic eigenstates from file: "//TRIM(filbseig),"COLL")
+ call wrtout(std_out," Reading excitonic eigenstates from file: "//TRIM(filbseig))
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted",status="old",action="read") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -876,7 +873,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
 
 !************************************************************************
 
- call wrtout(std_out," Calculating absorption strength with full coupling","COLL")
+ call wrtout(std_out," Calculating absorption strength with full coupling")
 
  if (nsppol==2) then
    ABI_WARNING("nsppol==2 is still under development")
@@ -897,7 +894,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
    filbseig = BS_files%out_eig
  end if
 
- call wrtout(std_out," Reading excitonic eigenstates from file: "//trim(filbseig),"COLL")
+ call wrtout(std_out," Reading excitonic eigenstates from file: "//trim(filbseig))
  if (open_file(filbseig,msg,newunit=eig_unt,form="unformatted", status="old", action="read") /= 0) then
    ABI_ERROR(msg)
  end if
@@ -1055,13 +1052,12 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
  end if
 
  select case (toupper(what))
-
  case ("EXC_TSR_CART")
    write(funt,'("# Complex dielectric tensor (cart. coord.) obtained with the BS equation.")')
 
    lf_type = 'WITHOUT LOCAL FIELD EFFECTS'
    if (BSp%exchange_term>0) lf_type='LOCAL FIELD EFFECTS INCLUDED'
-   call bsp_calctype2str(Bsp,str_type)
+   call bsp%calctype2str(str_type)
    write(funt,'("# ",a,"     " ,a)') TRIM(str_type), TRIM(lf_type)
 
    block_type = 'RESONANT-ONLY calculation'
@@ -1081,7 +1077,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
 
    lf_type = 'WITHOUT LOCAL FIELD EFFECTS'
    if (BSp%exchange_term>0) lf_type='LOCAL FIELD EFFECTS INCLUDED'
-   call bsp_calctype2str(Bsp,str_type)
+   call bsp%calctype2str(str_type)
    write(funt,'("# ",a,"     " ,a)') TRIM(str_type), TRIM(lf_type)
 
    block_type = 'RESONANT-ONLY calculation'
@@ -1113,7 +1109,7 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
  case default
    ABI_ERROR("Unknown value for what: "//TRIM(what))
  end select
- !
+
  ! Paramaters common to the different calculations.
  if (BSp%algorithm /= BSE_ALGO_HAYDOCK) then
    write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates
@@ -1132,11 +1128,10 @@ subroutine exc_write_tensor(BSp,BS_files,what,tensor)
  write(funt,'(a,i0)')"# nkbz    = ",BSp%nkbz
  write(funt,'(a,f7.4,a)')'# Lorentzian broadening = ',BSp%broad*Ha_eV,' [eV]'
 
- !
  ! Write tensor.
  write(funt,'(3a)') "# omega [eV] RE(eps_11) IM(eps_11) RE(eps_22)", &
-&  "IM(eps_22) RE(eps_33) IM(eps_33) RE(eps_12) IM(eps_12)", &
-&  "RE(eps_13) IM(eps_13) RE(eps_23) IM(eps_23))"
+                    "IM(eps_22) RE(eps_33) IM(eps_33) RE(eps_12) IM(eps_12)", &
+                    "RE(eps_13) IM(eps_13) RE(eps_23) IM(eps_23))"
  write(frm,*) '(f7.3,12es14.6)'
  do io=1,BSp%nomega
    omegaev = DBLE(BSp%omega(io))*Ha_eV
@@ -1191,24 +1186,23 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
  ! =========================
 
  ncerr = nctk_defnwrite_ivars(ncid, [character(len=nctk_slen) :: &
-&  "mdf_version", "nsppol", "npwwfn", "npweps", "nkibz", "nkbz",&
-&  "nkibz_iterp", "nkbz_interp", "wtype", "interp_mode"],&
-&  [1, Bsp%nsppol, Bsp%npwwfn, Bsp%npweps, Bsp%nkibz, Bsp%nkbz, &
-&   Bsp%nkibz_interp, Bsp%nkbz_interp,Bsp%wtype, Bsp%interp_mode])
+  "mdf_version", "nsppol", "npwwfn", "npweps", "nkibz", "nkbz",&
+  "nkibz_iterp", "nkbz_interp", "wtype", "interp_mode"],&
+  [1, Bsp%nsppol, Bsp%npwwfn, Bsp%npweps, Bsp%nkibz, Bsp%nkbz, &
+   Bsp%nkibz_interp, Bsp%nkbz_interp,Bsp%wtype, Bsp%interp_mode])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
-&  "ecutwfn", "ecuteps", "mbpt_sciss", "broad", "eps_inf"],&
-&  [Bsp%ecutwfn, Bsp%ecuteps, Bsp%mbpt_sciss, Bsp%broad, Bsp%eps_inf])
+  "ecutwfn", "ecuteps", "mbpt_sciss", "broad", "eps_inf"],&
+  [Bsp%ecutwfn, Bsp%ecuteps, Bsp%mbpt_sciss, Bsp%broad, Bsp%eps_inf])
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_dims(ncid, [nctkdim_t("two", 2), nctkdim_t("three", 3), nctkdim_t("number_of_qpoints", Bsp%nq),&
    nctkdim_t("number_of_frequencies", Bsp%nomega), nctkdim_t("number_of_spins", bsp%nsppol)], defmode=.True.)
  NCF_CHECK(ncerr)
 
-! Define variables.
-
-!arrays
+ ! Define variables.
+ !arrays
  ncerr = nctk_def_arrays(ncid, [&
    nctkarr_t('qpoints', "dp", 'three, number_of_qpoints'),&
    nctkarr_t('wmesh', "dp", 'number_of_frequencies'),&
@@ -1220,7 +1214,7 @@ subroutine mdfs_ncwrite(ncid,Bsp,eps_exc,eps_rpanlf,eps_gwnlf)
    nctkarr_t('gwnlf_mdf', "dp", 'two, number_of_frequencies, number_of_qpoints')])
  NCF_CHECK(ncerr)
 
-! Write data.
+ ! Write data.
  NCF_CHECK(nctk_set_datamode(ncid))
  NCF_CHECK(nf90_put_var(ncid, vid('qpoints'), Bsp%q))
  NCF_CHECK(nf90_put_var(ncid, vid('nreh'), bsp%nreh))
@@ -1308,13 +1302,13 @@ subroutine check_kramerskronig(n,o,eps)
 
  if (aimag(eps(n)) > 0.1) then
    write(msg,'(a,f12.6,3a,f12.6,2a)')&
-&   ' Im epsilon for omega= ',o(n)*Ha_eV,'eV',ch10,&
-&   ' is not yet zero, epsilon_2= ',aimag(eps(n)),ch10,&
-&   ' Kramers Kronig test could give wrong results. '
+   ' Im epsilon for omega= ',o(n)*Ha_eV,'eV',ch10,&
+   ' is not yet zero, epsilon_2= ',aimag(eps(n)),ch10,&
+   ' Kramers Kronig test could give wrong results. '
    ABI_WARNING(msg)
  end if
 
-! Fill array for kramers kronig.
+ ! Fill array for kramers kronig.
  do ii=1,n
    omega=o(ii)
    c = (0.0,0.0)
@@ -1326,7 +1320,7 @@ subroutine check_kramerskronig(n,o,eps)
    e1kk(ii) = one + two/pi * domega*real(c)
  end do
 
-!perform kramers kronig with simpson integration
+ ! perform kramers kronig with simpson integration
  do ii=1,n
    omega=o(ii)
    do ip=1,n
@@ -1338,7 +1332,7 @@ subroutine check_kramerskronig(n,o,eps)
    e1kk(ii) = one + two/pi * real(c)
  end do
 
-!verify kramers kronig
+ !verify kramers kronig
  eav=zero; kk=zero; kkrms=zero
  do ii=1,n
    kk = kk + abs(real(eps(ii)) - e1kk(ii))
@@ -1352,9 +1346,9 @@ subroutine check_kramerskronig(n,o,eps)
 
  kk = abs(real(eps(1)) - e1kk(1)) / real(eps(1))
 
-! write data
+ ! write data
  write(msg,'(a,f7.2,a)')" The Kramers-Kronig is verified within ",100*kk,"%"
- call wrtout(std_out,msg,"COLL")
+ call wrtout(std_out, msg)
 
 ! write(std_out,'("# Kramers Kronig calculation of epsilon1")')
 ! write(std_out,'("# omega   epsilon1  epsilon1kk")')
@@ -1412,7 +1406,7 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 
 !************************************************************************
 
-! calculate domega step and verify
+ ! calculate domega step and verify
  domega = (o(n) - o(1)) / (n-1)
 
  do ii=2,n
@@ -1429,13 +1423,13 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 
  if (e2(n) > 0.1) then
    write(msg,'(a,f12.6,3a,f12.6,2a)')&
-&   ' Im epsilon for omega= ',o(n)*Ha_eV,' eV ',ch10,&
-&   ' is not yet zero, epsilon_2= ',e2(n),ch10,&
-&   ' f-sum rule test could give wrong results.'
+   ' Im epsilon for omega= ',o(n)*Ha_eV,' eV ',ch10,&
+   ' is not yet zero, epsilon_2= ',e2(n),ch10,&
+   ' f-sum rule test could give wrong results.'
    ABI_WARNING(msg)
  end if
 
-! integrate to obtain f-sum rule
+ ! integrate to obtain f-sum rule
  integral=zero
  do ip=1,n
    omegap=o(ip)
@@ -1443,7 +1437,7 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
  end do
  integral = domega * integral
 
-!integrate with simpson to obtain f-sum rule
+ ! integrate with simpson to obtain f-sum rule
  do ip = 1, n
    omegap = o(ip)
    intg(ip) = omegap * e2(ip)
@@ -1458,12 +1452,12 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
 
  fsumrule = abs((omegaplasmaeff - omegaplasma)) / omegaplasma
 
-! write data
+ ! write data
  write(msg,'(3(a,f6.2,2a))')&
-&  " omega_plasma     = ",omegaplasma*Ha_eV,   " [eV]",ch10,&
-&  " omega_plasma^eff = ",omegaplasmaeff*Ha_eV," [eV]",ch10,&
-&  " the f-sum rule is verified within ",fsumrule*100,"%",ch10
- call wrtout(std_out,msg,"COLL")
+  " omega_plasma     = ",omegaplasma*Ha_eV,   " [eV]",ch10,&
+  " omega_plasma^eff = ",omegaplasmaeff*Ha_eV," [eV]",ch10,&
+  " the f-sum rule is verified within ",fsumrule*100,"%",ch10
+ call wrtout(std_out, msg)
 
 end subroutine check_fsumrule
 !!***
