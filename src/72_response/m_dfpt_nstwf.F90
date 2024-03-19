@@ -1873,28 +1873,35 @@ has_vectornd = (with_vectornd .EQ. 1)
 #endif
 !            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
-             ABI_MALLOC(dcwavef,(2,npw1_k*nspinor))
-             ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor))
+             ABI_MALLOC(dcwavef,(2,npw1_k*nspinor*ndat))
+             ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor*ndat))
+             call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
              do idat=1,ndat
-               call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
   ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
-               call getdc1(iband+idat-1,band_procs,bands_treated_now_ndat(:,idat),cgq,cprjq,dcwavef,dcwaveprj,&
+               call getdc1(iband+idat-1,band_procs,bands_treated_now_ndat(:,idat),cgq,cprjq,&
+&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+&                 dcwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),&
 &                 ibgq,icgq,istwf_k,mcgq,&
 &                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
 &                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=dtset%gpu_option)
 
+             end do !idat
+             do idat=1,ndat
                if (abs(occ_k(iband+idat-1))>tol8) then
   !              Accumulate 1st-order density due to delta_u^(j1)
                  option=1;wfcorr=0
                  call dfpt_accrho(cplex,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-&                 dcwavef,dcwavef,cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),dcwaveprj,&
+&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+&                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
+&                 dcwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),&
 &                 eig_k(iband+idat-1),gs_hamkq,iband+idat-1,idir1,ipert1,isppol,dtset%kptopt,&
 &                 mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &                 pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
                end if
 
-               call pawcprj_free(dcwaveprj)
              end do !idat
+             call pawcprj_free(dcwaveprj)
              ABI_FREE(dcwaveprj)
              ABI_FREE(dcwavef)
            end if ! has_drho
