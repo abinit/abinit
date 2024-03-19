@@ -16,6 +16,7 @@ set(66_wfs_SRC
   m_prep_kgb.F90
   m_rayleigh_ritz.F90
   m_rmm_diis.F90
+  m_wfd.F90
   )
 
 add_library(66_wfs STATIC

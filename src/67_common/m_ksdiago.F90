@@ -1249,7 +1249,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  !if (.False.) then
    call cwtime(cpu, wall, gflops, "start")
    call wrtout(std_out, sjoin(" Building Fock with batch_size:", itoa(batch_size)))
-   ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK WITH PAW IS NOT CODED!")
+   ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK OPERATOR WITH PAW IS NOT CODED!")
    inv_sqrt_ucvol = one/sqrt(cryst%ucvol)
 
    call hyb%wfd%change_ngfft(cryst, psps, ngfftc)

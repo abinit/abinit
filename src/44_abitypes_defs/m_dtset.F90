@@ -1341,7 +1341,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and cellcharge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
-       'but IS automatically normalized otherwise.',ch10
+       'but is automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
 
        ! If the discrepancy is severe, stop

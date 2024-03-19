@@ -21,12 +21,12 @@
 
 module m_gwpt
 
- use defs_basis
- use, intrinsic :: iso_c_binding
- use m_abicore
 #ifdef HAVE_MPI2
  use mpi
 #endif
+ use, intrinsic :: iso_c_binding
+ use defs_basis
+ use m_abicore
  use m_xmpi
  use m_mpinfo
  use m_errors
@@ -820,15 +820,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_FREE(qselect)
 
+ ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{q\ipert)
  do my_spin=1,gwpt%my_nspins
    spin = gwpt%my_spins(my_spin)
    do iq_ibz=1,gwpt%nqibz
      do imyp=1,my_npert
 
+        ! Prepare DeltaVscf^{spin}_{q\ipert)(r)
 
-
-
-
+        ! NSCF solution of Sternheimer equation for all the bands included in the sum over states.
 
      end do
    end do ! iq_ibz

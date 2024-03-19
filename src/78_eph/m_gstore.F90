@@ -102,6 +102,7 @@
 
 module m_gstore
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -109,7 +110,6 @@ module m_gstore
  use m_htetra
  use libtetrabz
  use m_ebands
- use, intrinsic :: iso_c_binding
  use netcdf
  use m_nctk
  use m_wfk
@@ -164,8 +164,7 @@ module m_gstore
 !! FUNCTION
 !!  This object stores MPI-distributed e-ph matrix elements for
 !!  a given spin index (if collinear magnetism i.e. nsppol 2).
-!!  local dimensions and arrays start with `my_`,
-!!  global dimensions start with `glob_
+!!  local dimensions and arrays start with `my_`, global dimensions start with `glob_
 !!
 !! SOURCE
 
