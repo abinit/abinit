@@ -6970,7 +6970,7 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
    do ii=1,3
      qq(ii)=ddb%qpt(ii,q1)/ddb%nrm(1,q1)
    end do
-   if (qtest(iqpt,3)==0) qq(:) = -qq(:)
+   if (qtest(iqpt,3)/=0) qq(:) = -qq(:)
    !
    do ii=1,3
      do jj=1,3
