@@ -1513,14 +1513,11 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      'Action: set istwfk to 1 for all k-points'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   if (dt%optdriver==RUNL_GSTATE) then
-!     if ((dt%wfoptalg==4.or.dt%wfoptalg==14).and.any(dt%istwfk(:)==2) .and.dt%paral_kgb==1.and.fftalg/=401.and.fftalg/=312) then
-!       write(msg, '(a,i3,a,a,a)' )&
-!&       ' For istwfk=2, the value fftalg= ',fftalg, &
-!&       ' is not allowed in case of wfoptalg=4 or 14 !', ch10,&
-!&       ' Change if to fftalg=401.'
-!       ABI_ERROR_NOSTOP(msg, ierr)
-!     end if
+   if ( dt%gpu_option/=0 .and. dt%gpu_option/=2 .and. maxval( abs(dt%istwfk(1:nkpt)-1) ) > 0 ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is neither 0 nor 2, all the components of istwfk must be 1.',ch10,&
+      'Action: set istwfk to 1 for all k-points or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
    end if
 
 !  ixc
