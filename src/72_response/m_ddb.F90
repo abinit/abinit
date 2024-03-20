@@ -9,7 +9,7 @@
 !!  Main entry point for client code that needs to read the DDB data.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
+!! Copyright (C) 2011-2024 ABINIT group (MJV, XG, MT, MM, MVeithen, MG, PB, JCC, SP, GA, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
