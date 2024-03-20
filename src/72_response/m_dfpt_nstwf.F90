@@ -1231,7 +1231,7 @@ has_vectornd = (with_vectornd .EQ. 1)
   &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
   &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
   &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
-  &                 gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+  &                 gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
   &                 gs_hamkq%nloalg,gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,&
   &                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm)
                  end do
@@ -1267,7 +1267,7 @@ has_vectornd = (with_vectornd .EQ. 1)
   &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
   &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
   &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
-  &                 gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
+  &                 gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
   &                 gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,&
   &                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm)
                  end do
@@ -1300,7 +1300,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                    call getcprj(choice,cpopt,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
   &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
   &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,gs_hamkq%kg_kp,&
-  &                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,&
+  &                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,1,&
   &                 gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,gs_hamkq%npw_kp,&
   &                 gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,gs_hamkq%ph3d_kp,&
   &                 gs_hamkq%ucvol,gs_hamkq%useylm)
