@@ -717,11 +717,11 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !* Initialize qp_ebands with KS values.
  !* In case of SC update qp_ebands using the QPS file.
  ABI_MALLOC(qp_rhor,(nfftf,Dtset%nspden))
- qp_rhor=ks_rhor
+ qp_rhor = ks_rhor
 
  ! AE density used for the model dielectric function.
- ABI_MALLOC(qp_aerhor,(nfftf,Dtset%nspden))
- qp_aerhor=ks_rhor
+ ABI_MALLOC(qp_aerhor, (nfftf,Dtset%nspden))
+ qp_aerhor = ks_rhor
 
  ! PAW: Compute AE rhor. Under testing
  if (Wfd%usepaw==1 .and. BSp%mdlf_type/=0) then

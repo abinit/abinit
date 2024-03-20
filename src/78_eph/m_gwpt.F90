@@ -197,9 +197,6 @@ module m_gwpt
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
 
-  logical :: use_doublegrid = .False.
-   ! whether to use double grid or not
-
   logical :: use_ftinterp = .False.
    ! whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
 
@@ -337,9 +334,6 @@ module m_gwpt
    ! Table used to average QP results in the degenerate subspace if symsigma == 1
 
   contains
-
-    !procedure :: compare => gwpt_compare
-     ! Compare two instances of gwpt raise error if different
 
     procedure :: setup_kcalc => gwpt_setup_kcalc
      ! Return tables used to perform the sum over q-points for given k-point.
@@ -820,13 +814,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_FREE(qselect)
 
- ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{q\ipert)
+ ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{q, ipert)
  do my_spin=1,gwpt%my_nspins
    spin = gwpt%my_spins(my_spin)
    do iq_ibz=1,gwpt%nqibz
      do imyp=1,my_npert
 
-        ! Prepare DeltaVscf^{spin}_{q\ipert)(r)
+        ! Prepare DeltaVscf^{spin}_{q, ipert)(r)
 
         ! NSCF solution of Sternheimer equation for all the bands included in the sum over states.
 
