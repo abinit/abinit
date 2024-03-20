@@ -27,8 +27,8 @@ MODULE m_exc_spectra
  use, intrinsic :: iso_c_binding
  use m_xmpi
  use m_errors
- use m_nctk
  use netcdf
+ use m_nctk
  use m_ebands
  use m_hdr
 
@@ -117,14 +117,12 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
  real(dp) :: omegaev
  complex(dpc) :: ks_avg,gw_avg,exc_avg
  character(len=4) :: ts
- character(len=fnlen) :: path,prefix
- character(len=fnlen) :: filbseig, ost_fname
+ character(len=fnlen) :: path,prefix,filbseig, ost_fname
  !character(len=500) :: msg
  type(ebands_t) :: EPBSt, EP_QPBSt
 !arrays
  real(dp),allocatable :: dos_exc(:),dos_gw(:),dos_ks(:)
- complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:)
- complex(dpc),allocatable :: eps_exc(:,:),opt_cvk(:,:,:,:,:)
+ complex(dpc),allocatable :: eps_rpanlf(:,:),eps_gwnlf(:,:), eps_exc(:,:),opt_cvk(:,:,:,:,:)
 
 !************************************************************************
 
@@ -139,7 +137,6 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
    ntemp = Epren%ntemp
  end if
 
- !
  ! =====================================================
  ! === Calculate fcv(k)=<c k s|e^{-iqr}|v k s> in BZ ===
  ! =====================================================
@@ -148,7 +145,7 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
  do iq=1,BSp%nq
    call calc_optical_mels(Wfd,Kmesh,KS_BSt,Cryst,Psps,Pawtab,Hur,BSp%inclvkb,Bsp%lomo_spin,lomo_min,max_band,&
-&                         BSp%nkbz,BSp%q(:,iq),opt_cvk(:,:,:,:,iq))
+                          BSp%nkbz,BSp%q(:,iq),opt_cvk(:,:,:,:,iq))
  end do
  !
  ! ============================
@@ -158,15 +155,12 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
    ABI_MALLOC(eps_exc,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_exc,(BSp%nomega))
-
    ABI_MALLOC(eps_rpanlf,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_ks,(BSp%nomega))
-
    ABI_MALLOC(eps_gwnlf ,(BSp%nomega,BSp%nq))
    ABI_MALLOC(dos_gw,(BSp%nomega))
 
    do itemp = 1, ntemp
-
      call int2char4(itemp,ts)
 
      if(do_ep_renorm) then
@@ -197,10 +191,10 @@ subroutine build_spectra(BSp,BS_files,Cryst,Kmesh,KS_BSt,QP_BSt,Psps,Pawtab,Wfd,
 
      if (BSp%use_coupling==0) then
        call exc_eps_resonant(BSp,filbseig,ost_fname,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
-&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc,elph_lifetime=do_ep_renorm)
+        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc,elph_lifetime=do_ep_renorm)
      else
        call exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,BSp%nkbz,nsppol,opt_cvk,&
-&        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
+        Cryst%ucvol,BSp%nomega,BSp%omega,eps_exc,dos_exc)
      end if
      !
      ! =======================================================
@@ -382,7 +376,7 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  case default
    ABI_ERROR("Unknown value for what: "//trim(what))
  end select
- !
+
  ! Paramaters common to the different calculations.
  if (BSp%algorithm /= BSE_ALGO_HAYDOCK) then
    write(funt,'(a,i0)')"# nstates included in the diagonalization = ",BSp%nstates
@@ -400,17 +394,16 @@ subroutine exc_write_data(BSp,BS_files,what,eps,prefix,dos)
  write(funt,'(a,i0)')"# nkibz   = ",BSp%nkibz
  write(funt,'(a,i0)')"# nkbz    = ",BSp%nkbz
  write(funt,'(a,f7.4,a)')'# Lorentzian broadening = ',BSp%broad*Ha_eV,' [eV]'
- !
+
  ! Write the list of q-points.
  write(funt,'(a)')"# List of q-points for the optical limit:"
  do iq=1,BSp%nq
    write(funt,'(a,3(f9.6,","),a)')'# q = ',BSp%q(:,iq),' [Reduced coords] '
  end do
- !
+
  ! Write spectra.
  if (.not.PRESENT(dos)) then
    write(funt,'(a)')"# omega [eV]    RE(eps(q=1)) IM(eps(q=1) RE(eps(q=2) ) ... "
-   !write(frm,*)'(f7.3,',2*BSp%nq,'es12.4)'
    write(frm,*)'(f7.3,',2*BSp%nq,'(1x,f9.4))'
    do io=1,BSp%nomega
      omegaev = DBLE(BSp%omega(io))*Ha_eV
@@ -524,17 +517,15 @@ subroutine exc_eps_rpa(nbnds,lomo_spin,lomo_min,homo_spin,Kmesh,Bst,nq,nsppol,op
          ! TODO here energies are always assumed to be real.
          ediff = BSt%eig(ib_c,ik_ibz,spin) - BSt%eig(ib_v,ik_ibz,spin)
 
-         !
          if(do_linewidth) then
            linewidth = BSt%linewidth(1,ib_c,ik_ibz,spin) + BSt%linewidth(1,ib_v,ik_ibz,spin)
            do iq=1,nq
              ctemp = opt_cvk(ib_c,ib_v,ik_bz,spin,iq)
              do iw=1,nomega
                eps_rpa(iw,iq) = eps_rpa(iw,iq)  + ctemp * CONJG(ctemp) *&
-&             (one/(ediff-j_dpc*linewidth-omega(iw)) + one/(ediff+j_dpc*linewidth+omega(iw)))
+                 (one/(ediff-j_dpc*linewidth-omega(iw)) + one/(ediff+j_dpc*linewidth+omega(iw)))
              end do
            end do
-           !
            ! The JDOS at q=0
            !if (ediff*Ha_eV < 0.3) then
            !  write(std_out,*)"Small transition ",ik_ibz,ib_v,ib_c
@@ -601,7 +592,7 @@ end subroutine exc_eps_rpa
 !! SOURCE
 
 subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol,opt_cvk,&
-&    ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
+                            ucvol,nomega,omega,eps_exc,dos_exc,elph_lifetime)
 
 !Arguments ------------------------------------
 !scalars
@@ -623,7 +614,6 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  real(dp) :: fact,arg
  complex(dpc) :: dotprod
  character(len=500) :: msg,frm,errmsg
- !type(Hdr_type) :: tmp_Hdr
 !arrays
  real(dp),allocatable :: exc_ene(:)
  complex(dpc) :: ctemp(BSp%nq),dtemp(BSp%nq)
@@ -641,9 +631,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
  nstates  = BSp%nstates
 
  do_ep_lifetime = .FALSE.
- if(PRESENT(elph_lifetime)) then
-   do_ep_lifetime = elph_lifetime
- end if
+ if (PRESENT(elph_lifetime)) do_ep_lifetime = elph_lifetime
 
  if (ANY(Bsp%nreh/=Bsp%nreh(1))) then
    write(msg,'(a,2(i0,1x))')"BSE does not support different number of transitions for the two spin channels. nreh: ",Bsp%nreh
@@ -751,7 +739,7 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      do iq=1,BSp%nq
         do iw=1,nomega
           eps_exc(iw,iq) = eps_exc(iw,iq) +  &
-  &         fact * ostrength(ll,iq) * (one/(exc_ene_cplx(ll) - omega(iw)) - one/(-DCONJG(exc_ene_cplx(ll)) - omega(iw)))
+            fact * ostrength(ll,iq) * (one/(exc_ene_cplx(ll) - omega(iw)) - one/(-DCONJG(exc_ene_cplx(ll)) - omega(iw)))
         end do
      end do !ll
    end do !iw
@@ -761,13 +749,12 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      do iq=1,BSp%nq
         do iw=1,nomega
           eps_exc(iw,iq) = eps_exc(iw,iq) +  &
-  &         fact * ostrength(ll,iq) * (one/(exc_ene(ll) - omega(iw)) - one/(-exc_ene(ll) - omega(iw)))
+            fact * ostrength(ll,iq) * (one/(exc_ene(ll) - omega(iw)) - one/(-exc_ene(ll) - omega(iw)))
         end do
      end do !ll
    end do !iw
  end if
 
- !
  ! The excitonic DOS.
  dos_exc=zero
  do ll=1,neig_read ! Sum over the calculate excitonic eigenstates.
@@ -780,14 +767,14 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
      end if
    end do
  end do
- !
- ! Write the oscillator strengths to file.
+
+ ! Write oscillator strengths to file.
  if (open_file(ost_fname,msg,newunit=ost_unt,form="formatted",action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
  write(ost_unt,'("# Oscillator strengths of the excitonic states for the different q-polarizations.")')
- !
+
  ! Write the list of q-points.
  write(ost_unt,*)"# List of q-points for the optical limit"
  do iq=1,BSp%nq
@@ -808,7 +795,6 @@ subroutine exc_eps_resonant(Bsp,filbseig,ost_fname,lomo_min,max_band,nkbz,nsppol
 
  !call exc_amplitude(Bsp,filbseig,1,(/(ll,ll=1,10)/),"TEST_AMPLITUDE")
  !call exc_amplitude(Bsp,filbseig,1,(/30/),"TEST_AMPLITUDE")
-
  return
 
  ! Handler IO-error
@@ -866,7 +852,6 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: filbseig
  logical :: do_lifetime
- !type(Hdr_type) :: tmp_Hdr
 !arrays
  complex(dpc),allocatable :: Ami(:),exc_ene(:),Sm1mi(:)
  complex(dpc),allocatable :: msfap(:,:),fa(:,:),fap(:,:)
@@ -937,10 +922,10 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
          end if
 
          fam = fam + CONJG(opt_cvk(ib_c,ib_v,ik_bz,spin,iq)) * Ami(tr_idx) &
-&                  + CONJG(opt_cvk(ib_v,ib_c,ik_bz,spin,iq)) * Ami(tar_idx)
+                   + CONJG(opt_cvk(ib_v,ib_c,ik_bz,spin,iq)) * Ami(tar_idx)
 
          famp = famp - opt_cvk(ib_c,ib_v,ik_bz,spin,iq) * CONJG(Ami(tr_idx)) &
-&                    + opt_cvk(ib_v,ib_c,ik_bz,spin,iq) * CONJG(Ami(tar_idx))
+                     + opt_cvk(ib_v,ib_c,ik_bz,spin,iq) * CONJG(Ami(tar_idx))
        end do
      end do
      ! Save results.
@@ -966,7 +951,7 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
  ABI_FREE(Sm1mi)
 
  close(eig_unt, err=10, iomsg=errmsg)
- !
+
  ! === Calculate excitonic epsilon with coupling ===
  do iq=1,BSp%nq
    !
@@ -977,13 +962,12 @@ subroutine exc_eps_coupling(Bsp,BS_files,lomo_min,max_band,nkbz,nsppol,opt_cvk,u
      end do
      eps_exc(ii,iq) = one + fact * eps
    end do
-   !
  end do
 
  ABI_FREE(fa)
  ABI_FREE(msfap)
  ABI_FREE(fap)
- !
+
  ! The excitonic DOS.
  dos_exc=zero
  do ll=1,nstates ! Sum over the calculate excitonic eigenstates.
@@ -1444,12 +1428,11 @@ subroutine check_fsumrule(n,o,e2,omegaplasma)
  end do
 
  integral = real(simpson_cplx(n,domega,intg))
- if(integral < 0) then
+ if (integral < 0) then
    ABI_ERROR("The integral of the imaginary of dielectric function is negative !!!")
  else
    omegaplasmaeff = sqrt(integral*two/pi)
  end if
-
  fsumrule = abs((omegaplasmaeff - omegaplasma)) / omegaplasma
 
  ! write data
