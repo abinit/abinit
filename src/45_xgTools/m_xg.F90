@@ -1209,7 +1209,7 @@ contains
       l_gpu_option = ABI_GPU_DISABLED
       call xgBlock_copy_from_gpu(xgBlockA)
     else
-      ABI_ERROR('When xgA%gpu_option/=xgB%gpu_option, gpu_option can be only ABI_GPU_OPENMP or ABI_GPU_DISABLED')
+      ABI_ERROR('When xgA%gpu_option/=xgB%gpu_option is possible only with ABI_GPU_OPENMP, ABI_GPU_LEGACY or ABI_GPU_DISABLED')
     end if
 
     incx = 1; if ( present(inc1) ) incx = inc1
@@ -1435,7 +1435,7 @@ contains
 
     if ( xgBlockA%space == xgBlockB%space ) then
 
-      if ( xgBlockA%space /= SPACE_CR .and. xgBlockW%space/= xgBlockA%space) then
+      if ( xgBlockA%space /= SPACE_CR .and. xgBlockW%space /= xgBlockA%space ) then
         ABI_ERROR("Not same space for A and W")
       end if
       if ( xgBlockA%space == SPACE_CR ) then
@@ -1490,31 +1490,50 @@ contains
       end if
 
       case (SPACE_CR)
+        calpha = dcmplx(2*alpha,0.d0)
+        alpha_ = 2.0d0 * alpha
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
           ABI_ERROR('SPACE_CR for ABI_GPU_KOKKOS or ABI_GPU_OPENMP is not implemented yet')
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
-          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
-            xgBlockA%vecR, xgBlockA%LDim, &
-            xgBlockB%vecR, xgBlockB%LDim, &
+            xgBlockA%vecR, 2*xgBlockA%LDim, &
+            xgBlockB%vecR, 2*xgBlockB%LDim, &
             cbeta, &
             xgBlockW%vecR, xgBlockW%LDim)
+          if (xgBlockA%me_g0 == 1) then
+            calpha = dcmplx(-alpha,0.d0)
+            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
+              calpha, &
+              xgBlockA%vecR, 2*xgBlockA%LDim, &
+              xgBlockB%vecR, 2*xgBlockB%LDim, &
+              cone, &
+              xgBlockW%vecR, xgBlockW%LDim)
+          end if
 #elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
           xgBlockA__vecR => xgBlockA%vecR
           xgBlockB__vecR => xgBlockB%vecR
           xgBlockW__vecR => xgBlockW%vecR
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
-          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, K, &
+          call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
-            c_loc(xgBlockA__vecR), xgBlockA%LDim, &
-            c_loc(xgBlockB__vecR), xgBlockB%LDim, &
+            c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
+            c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
             cbeta, &
             c_loc(xgBlockW__vecR), xgBlockW%LDim)
+          if (xgBlockA%me_g0 == 1) then
+            calpha = dcmplx(-alpha,0.d0)
+            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
+              calpha, &
+              c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
+              c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
+              cone, &
+              c_loc(xgBlockW__vecR), xgBlockW%LDim)
+          end if
           !$OMP END TARGET DATA
 #endif
         else
-          alpha_ = 2.0d0 * alpha
           call dgemm(transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             alpha_, &
             xgBlockA%vecR, 2*xgBlockA%LDim, &
@@ -1524,8 +1543,11 @@ contains
           if (xgBlockA%me_g0 == 1) then
             alpha_ = - alpha
             call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, 1, &
-              alpha_,xgBlockA%vecR, 2*xgBlockA%LDim, &
-              xgBlockB%vecR, 2*xgBlockB%LDim, one ,xgBlockW%vecR,xgBlockW%LDim)
+              alpha_, &
+              xgBlockA%vecR, 2*xgBlockA%LDim, &
+              xgBlockB%vecR, 2*xgBlockB%LDim, &
+              one, &
+              xgBlockW%vecR,xgBlockW%LDim)
           end if
         end if
 
@@ -3638,7 +3660,7 @@ contains
       select case(xgBlock%space)
       case(SPACE_R,SPACE_CR)
         if (xgBlock%space==SPACE_CR) then
-          ABI_ERROR('Not implemented for GPU')
+          ABI_ERROR('Not implemented for GPU with KOKKOS')
         end if
         call computeBatchedDotProduct_scalar(c_loc(xgBlock%vecR), c_loc(xgBlock%vecR), &
           & c_loc(dot%vecR), fact*xgBlock%rows, xgBlock%cols, fact*xgBlock%ldim)
@@ -3678,19 +3700,22 @@ contains
       dot__vecR => dot%vecR
       select case(xgBlock%space)
       case(SPACE_R,SPACE_CR)
-        if (xgBlock%space==SPACE_CR) then
-          ABI_ERROR('Not implemented for GPU')
-        end if
         xgBlock__vecR => xgBlock%vecR
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecR) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
           do ii = 1,rows
-            tmp = tmp + xgBlock__vecR(ii,icol)*xgBlock__vecR(ii,icol)
+            tmp = tmp + fact*xgBlock__vecR(ii,icol)*xgBlock__vecR(ii,icol)
           end do
           dot__vecR(icol,1)=tmp
         end do
+        if (xgBlock%me_g0==1) then
+          !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecR) PRIVATE(icol)
+          do icol = 1, cols
+            dot__vecR(icol,1) = dot__vecR(icol,1) - xgBlock__vecR(1,icol)*xgBlock__vecR(1,icol)
+          end do
+        end if
       case(SPACE_C)
         xgBlock__vecC => xgBlock%vecC
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecC) PRIVATE(icol,tmp)
@@ -3807,7 +3832,7 @@ contains
     double complex,external :: zdotc !conjugated dot product
 
 #if (defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD) || defined(FC_NVHPC) || defined(FC_CRAY)
-    integer :: rows,cols,ii
+    integer :: rows,cols,ii,me_g0
     double precision :: tmp
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
@@ -3848,7 +3873,7 @@ contains
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
         if (xgBlockA%space==SPACE_CR) then
-          ABI_ERROR('Not implemented for GPU')
+          ABI_ERROR('Not implemented for GPU with KOKKOS')
         end if
         call computeBatchedDotProduct_scalar(c_loc(xgBlockA%vecR), c_loc(xgBlockB%vecR), &
           & c_loc(dot%vecR), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
@@ -3899,22 +3924,26 @@ contains
       rows = xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case(SPACE_R,SPACE_CR)
-        if (xgBlockA%space==SPACE_CR) then
-          ABI_ERROR('Not implemented for GPU')
-        end if
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         dot__vecR => dot%vecR
+        me_g0 = xgBlockA%me_g0
 #if defined FC_NVHPC
         !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol,tmp)
         do icol = 1, cols
           tmp=0
           !$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
-          do ii = 1, rows
-            tmp = tmp + xgBlockA__vecR(ii,icol)*xgBlockB__vecR(ii,icol)
+          do ii = 1, fact*rows
+            tmp = tmp + fact*xgBlockA__vecR(ii,icol)*xgBlockB__vecR(ii,icol)
           end do
           dot__vecR(icol,1)=tmp
         end do
+        if (me_g0==1) then
+          !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlockA__vecR,xgBlockB__vecR) PRIVATE(icol)
+          do icol = 1, cols
+            dot__vecR(icol,1) = dot__vecR(icol,1) - xgBlockA__vecR(1,icol)*xgBlockB__vecR(1,icol)
+          end do
+        end if
         !$OMP TARGET UPDATE FROM(dot__vecR)
 #else
 !FIXME For several compilers, this section doesnt work properly
@@ -3923,11 +3952,16 @@ contains
         do icol = 1, cols
           tmp=0
           !!$OMP PARALLEL DO REDUCTION(+:tmp) PRIVATE(ii)
-          do ii = 1, rows
-            tmp = tmp + xgBlockA__vecR(ii,icol)*xgBlockB__vecR(ii,icol)
+          do ii = 1, fact*rows
+            tmp = tmp + fact*xgBlockA__vecR(ii,icol)*xgBlockB__vecR(ii,icol)
           end do
           dot__vecR(icol,1)=tmp
         end do
+        if (me_g0==1) then
+          do icol = 1, cols
+            dot__vecR(icol,1) = dot__vecR(icol,1) - xgBlockA__vecR(1,icol)*xgBlockB__vecR(1,icol)
+          end do
+        end if
         !$OMP TARGET UPDATE TO(dot__vecR)
 #endif
 
@@ -4598,6 +4632,7 @@ contains
     use, intrinsic :: iso_c_binding
     type(xgBlock_t), intent(inout) :: xgBlock
     integer        , intent(in   ) :: newShape(2)
+    integer :: fact
     type(c_ptr) :: cptr
 
     if ( xgBlock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
@@ -4610,12 +4645,14 @@ contains
       ABI_ERROR("Bad shape")
     end if
 
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
     xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newShape(2)
     xgBlock%rows = newShape(1)
     xgBlock%cols = newShape(2)
     select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
-      cptr = getClocR(xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
+      cptr = getClocR(fact*xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
       call c_f_pointer(cptr,xgBlock%vecR,newshape)
     case (SPACE_C)
       cptr = getClocC(xgBlock%LDim,xgBlock%cols,xgBlock%vecC)
@@ -4640,6 +4677,9 @@ contains
 
     if (nspinor/=1.and.nspinor/=2) then
       ABI_ERROR('It should not happen : nspinor must be 1 or 2')
+    end if
+    if (xgBlock%space==SPACE_CR.and.nspinor==2) then
+      ABI_ERROR('It should not happen : space_CR cannot be used with nspinor=2')
     end if
 
     nrows = rows(xgBlock)
