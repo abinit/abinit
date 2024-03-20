@@ -612,7 +612,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        eloc0_k(iband) = zero
        option=2;if (iscf_mod>0.and.inonsc==nnsclo_now) option=3
        call dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,eloc0_k(iband),&
-&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,natom,nband_k,ncpgr,&
+&       gs_hamkq,iband,idir,ipert,isppol,dtset%kptopt,mpi_enreg,1,natom,nband_k,ncpgr,&
 &       npw_k,npw1_k,nspinor,occ_k,option,pawrhoij1,rhoaug1,tim_fourwf,tocceig,wtk_k)
        if(ipert==natom+10.or.ipert==natom+11) eloc0_k(iband)=energy_factor*eloc0_k(iband)/two
 

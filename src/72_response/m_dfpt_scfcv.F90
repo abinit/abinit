@@ -4287,7 +4287,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: iband_me, nband_me
  integer :: ipw,me,nkpt_max,optlocal,optnl,opt_accrho,opt_corr
  integer :: opt_gvnlx1,sij_opt,tim_fourwf,tim_getgh1c,usevnl
- real(dp) :: dotr,lambda,wtband
+ real(dp) :: dotr(1),lambda,wtband
  character(len=500) :: msg
 !arrays
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),tsec(2)
@@ -4397,18 +4397,18 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &     idir,ipert,(/lambda/),mpi_enreg,1,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,&
 &     tim_getgh1c,usevnl)
 !    Compute Eig1=<Psi^(0)|H^(1)-Eps.S^(1)|Psi(0)>
-     call dotprod_g(dotr,lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
+     call dotprod_g(dotr(1),lambda,gs_hamkq%istwf_k,npw_k*nspinor,1,cwave0,gh1,mpi_enreg%me_g0, &
 &     mpi_enreg%comm_spinorfft)
      indx=2*iband-1+(iband-1)*2*nband_k
-     eig1_k(indx)=dotr
+     eig1_k(indx)=dotr(1)
 !    Compute the fixed contribution to the 1st-order Fermi energy
      fe1fixed_k(iband)=two*wtband*eig1_k(indx)
      fe1norm_k(iband) =two*wtband
 
 !    Accumulate contribution to density and PAW occupation matrix
 
-     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr,&
-       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,gs_hamkq%natom,nband_k,ncpgr,&
+     call dfpt_accrho(cplex,cwave0,cwaveq,cwaveq,cwaveprj0,cwaveprjq,dotr(1),&
+       gs_hamkq,iband,0,0,isppol,kptopt,mpi_enreg,1,gs_hamkq%natom,nband_k,ncpgr,&
        npw_k,npw1_k,nspinor,occ_k,opt_accrho,pawrhoijfermi,rhoaug,tim_fourwf,&
        opt_corr,wtk_k)
    end if ! End of non-zero occupation and rocceig
