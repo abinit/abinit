@@ -350,7 +350,7 @@ To launch the ground-state computation, type:
 then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
 
-    mv tdfpt_03o_WFK.nc tdfpt_04i_WFK.nc
+    mv tdfpt_03o_WFK tdfpt_04i_WFK
 
 and launch the calculation:
 
