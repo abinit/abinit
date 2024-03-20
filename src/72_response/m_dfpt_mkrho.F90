@@ -961,7 +961,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      call getcprj(choice,0,cwave0,cwaveprj_tmp,&
 &     gs_hamkq%ffnl_k,idir,gs_hamkq%indlmn,gs_hamkq%istwf_k,&
 &     gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,gs_hamkq%lmnmax,&
-&     gs_hamkq%mgfft,mpi_enreg,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&     gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &     gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &     gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
      call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,my_natom,&

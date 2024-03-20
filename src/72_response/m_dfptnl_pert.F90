@@ -784,11 +784,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            cpopt  = 0
            call getcprj(choice,cpopt,cgj,cwaveprj0,&
 &           ffnl1,idir_phon,psps%indlmn,gs_hamkq%istwf_k,kg_k,kpg_k,kpt,psps%lmnmax,&
-&           mgfft,mpi_enreg,natom,nattyp,dtset%ngfft,dtset%nloalg,&
+&           mgfft,mpi_enreg,1,natom,nattyp,dtset%ngfft,dtset%nloalg,&
 &           npw_k,nspinor,psps%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
            call getcprj(choice,cpopt,cwave_right,cwaveprj1,&
 &           ffnl1,idir_phon,psps%indlmn,gs_hamkq%istwf_k,kg_k,kpg_k,kpt,psps%lmnmax,&
-&           mgfft,mpi_enreg,natom,nattyp,dtset%ngfft,dtset%nloalg,&
+&           mgfft,mpi_enreg,1,natom,nattyp,dtset%ngfft,dtset%nloalg,&
 &           npw_k,nspinor,psps%ntypat,phkxred,ph1d,ph3d,ucvol,psps%useylm)
 
            cplex_cprj=2;if (gs_hamkq%istwf_k>1) cplex_cprj=1

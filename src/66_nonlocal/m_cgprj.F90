@@ -115,28 +115,28 @@ contains
 !! SOURCE
 
  subroutine getcprj(choice,cpopt,cwavef,cwaveprj,ffnl,&
-&                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,&
+&                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,ndat,&
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
 &                   phkxred,ph1d,ph3d,ucvol,useylm)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax
+ integer,intent(in) :: choice,cpopt,idir,istwf_k,lmnmax,ndat
  integer,intent(in) :: mgfft,natom,npw_k,nspinor,ntypat,useylm
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),kg_k(3,npw_k),nattyp(ntypat)
  integer,intent(in) :: ngfft(18),nloalg(3)
- real(dp),intent(in) :: cwavef(2,npw_k*nspinor)
+ real(dp),intent(in) :: cwavef(2,npw_k*nspinor*ndat)
  real(dp),intent(in),target :: ffnl(:,:,:,:),kpg(:,:),ph3d(:,:,:)
  real(dp),intent(in) :: kpoint(3),ph1d(2,3*(2*mgfft+1)*natom),phkxred(2,natom)
- type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj(natom,nspinor*ndat)
 
 !Local variables-------------------------------
 !scalars
  logical :: no_opernla_mv
- integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat
+ integer :: choice_,cplex,dimffnl,ia,ia1,ia2,ia3,ia4,iatm,ic,ii,ilmn,ishift,ispinor,itypat,idat
  integer :: jc,matblk,mincat,nd2gxdt,ndgxdt,nincat,nkpg,nkpg_,nlmn,signs
 !arrays
  real(dp) :: tsec(2)
@@ -260,15 +260,15 @@ contains
      end if
 
 !    Allocate memory for projected scalars
-     ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor))
-     ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor))
-     ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor))
+     ABI_MALLOC(gx,(cplex,nlmn,nincat,nspinor*ndat))
+     ABI_MALLOC(dgxdt,(cplex,ndgxdt,nlmn,nincat,nspinor*ndat))
+     ABI_MALLOC(d2gxdt,(cplex,nd2gxdt,nlmn,nincat,nspinor*ndat))
      ABI_MALLOC(cplex_dgxdt,(ndgxdt))
      ABI_MALLOC(cplex_d2gxdt,(nd2gxdt))
 
 !    Retrieve eventually <p_i|c> coeffs
      if (cpopt==1) then
-       do ispinor=1,nspinor
+       do ispinor=1,nspinor*ndat
          do ia=1,nincat
            gx(1:cplex,1:nlmn,ia,ispinor)=cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)
          end do
@@ -278,21 +278,24 @@ contains
 !    Compute <p_i|c> scalars (and derivatives) for this block of atoms
      if (abs(choice_)>1.or.no_opernla_mv) then
        call timab(1291,1,tsec)
-       call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl_typ,gx,&
+       call opernla_ylm(choice_,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
+&       d2gxdt(:,:,:,:,1+nspinor*(idat-1):nspinor*idat),&
+&       dgxdt(:,:,:,:,1+nspinor*(idat-1):nspinor*idat),ffnl_typ,&
+&       gx(:,:,:,1+nspinor*(idat-1):nspinor*idat),&
 &       ia3,idir,indlmn_typ,istwf_k,kpg_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg_,nlmn,&
-&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef)
+&       nloalg,npw_k,nspinor,ph3d_,signs,ucvol,cwavef(:,1+npw_k*nspinor*(idat-1):npw_k*nspinor*idat))
        call timab(1291,2,tsec)
      else
        call timab(1292,1,tsec)
-       call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx,&
+       call opernla_ylm_mv(choice_,cplex,dimffnl,ffnl_typ,gx(:,:,:,1+nspinor*(idat-1):nspinor*idat),&
 &       ia3,indlmn_typ,istwf_k,matblk,mpi_enreg,nincat,nlmn,&
-&       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef)
+&       nloalg,npw_k,nspinor,ph3d_,ucvol,cwavef(:,1+npw_k*nspinor*(idat-1):npw_k*nspinor*idat))
        call timab(1292,2,tsec)
      end if
 
 !    Transfer result to output variable cwaveprj
      if (cpopt==0) then
-       do ispinor=1,nspinor
+       do ispinor=1,nspinor*ndat
          do ia=1,nincat
            cwaveprj(iatm+ia,ispinor)%nlmn=nlmn
            cwaveprj(iatm+ia,ispinor)%cp(1:cplex,1:nlmn)=gx(1:cplex,1:nlmn,ia,ispinor)
@@ -304,7 +307,7 @@ contains
        ishift=0
        if ((idir>0).and.(cwaveprj(1,1)%ncpgr>ndgxdt)) ishift=idir-1
        if(cplex==2)then
-         do ispinor=1,nspinor
+         do ispinor=1,nspinor*ndat
            do ia=1,nincat
 !             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
              if (ndgxdt>0) cwaveprj(iatm+ia,ispinor)%dcp(1:2,1+ishift:ndgxdt+ishift,1:nlmn)=&
@@ -316,7 +319,7 @@ contains
        else
 !        cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
 !        cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
-         do ispinor=1,nspinor
+         do ispinor=1,nspinor*ndat
            do ia=1,nincat
 !             cwaveprj(iatm+ia,ispinor)%ncpgr=ndgxdt+nd2gxdt
              if (ndgxdt>0) then
@@ -899,7 +902,7 @@ contains
            call timab(1294,1,tsec)
            call getcprj(choice,cpopt,cwavef(:,iwf1:iwf2),cwaveprj(:,icp1:icp2),&
 &           ffnl,jdir,indlmn_atm,istwf_k,kg_k,kpg_k,kpoint,psps%lmnmax,&
-&           mgfft,mpi_enreg,ncprj,nattyp_atm,ngfft,nloalg,&
+&           mgfft,mpi_enreg,1,ncprj,nattyp_atm,ngfft,nloalg,&
 &           npw_nk,my_nspinor,ntypat0,phkxred,ph1d_atm,ph3d,ucvol,psps%useylm)
            call timab(1294,2,tsec)
          end do

@@ -873,7 +873,7 @@ subroutine cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband,mpi_enreg,tim_getc
    call timab(1290+tim_getcprj,1,tsec)
    call getcprj(choice,0,cwavef,cprj_cwavef,&
 &    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,&
 &    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
    call timab(1290+tim_getcprj,2,tsec)
@@ -928,7 +928,7 @@ subroutine cprj_update_oneband(cwavef,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
  call timab(1290+tim_getcprj,1,tsec)
  call getcprj(choice,0,cwavef,cprj_cwavef,&
 &  gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,&
 &  gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &  gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
  call timab(1290+tim_getcprj,2,tsec)
@@ -999,7 +999,7 @@ subroutine cprj_check(cg,cprj_cwavef_bands,gs_hamk,icg,nband,message,mpi_enreg)
    cwavef => cwavef_bands(:,1+(iband-1)*wfsize:iband*wfsize)
    call getcprj(choice,0,cwavef,cprj_tmp,&
 &    gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&    gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,&
 &    gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &    gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
    do ispinor=1,gs_hamk%nspinor
@@ -1093,7 +1093,7 @@ subroutine cprj_check_oneband(cwavef,cprj_cwavef,gs_hamk,message,mpi_enreg)
 
  call getcprj(choice,0,cwavef,cprj_tmp,&
 &  gs_hamk%ffnl_k,0,gs_hamk%indlmn,gs_hamk%istwf_k,gs_hamk%kg_k,gs_hamk%kpg_k,gs_hamk%kpt_k,&
-&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,gs_hamk%natom,gs_hamk%nattyp,&
+&  gs_hamk%lmnmax,gs_hamk%mgfft,mpi_enreg,1,gs_hamk%natom,gs_hamk%nattyp,&
 &  gs_hamk%ngfft,gs_hamk%nloalg,gs_hamk%npw_k,gs_hamk%nspinor,gs_hamk%ntypat,&
 &  gs_hamk%phkxred,gs_hamk%ph1d,gs_hamk%ph3d_k,gs_hamk%ucvol,gs_hamk%useylm)
  do iatom=1,gs_hamk%natom
