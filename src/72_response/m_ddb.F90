@@ -6801,20 +6801,17 @@ subroutine dtqdrp(blkval,ddb_version,lwsym,mpert,natom,lwtens)
 !!
 !! SOURCE
 
-subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
-                  rprim, spqpt, symrec, symrel, comm, qmissing)
+subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,&
+                  rprimd, spqpt, symrec, symrel, comm, qmissing)
 
 !Arguments -------------------------------
 !scalars
  type(ddb_type),intent(in) :: ddb
  integer,intent(in) :: mpert,natom,nqpt,nsym,rfmeth,comm
 !arrays
- !integer,intent(in) :: blkflg(3,mpert,3,mpert,nblok),blktyp(nblok)
  integer,intent(in) :: indsym(4,nsym,natom),symrec(3,3,nsym),symrel(3,3,nsym)
  integer,allocatable,optional,intent(out) :: qmissing(:)
- !real(dp),intent(in) :: blknrm(3,nblok),blkqpt(9,nblok)
- !real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nblok),gprim(3,3),rprim(3,3)
- real(dp),intent(in) :: gprim(3,3),rprim(3,3)
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
  real(dp),intent(in) :: spqpt(3,nqpt)
  real(dp),intent(out) :: dynmat(2,3,natom,3,natom,nqpt)
 
@@ -6970,31 +6967,21 @@ subroutine symdm9(ddb, dynmat, gprim, indsym, mpert, natom, nqpt, nsym, rfmeth,&
    if (allow_qmiss .and. q1==0) cycle
 
    ! Check if the symmetry accompagnied with time reversal : q <- -q
-   if (qtest(iqpt,3)==0) then
-     do ii=1,3
-       qq(ii)=ddb%qpt(ii,q1)/ddb%nrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
+   do ii=1,3
+     qq(ii)=ddb%qpt(ii,q1)/ddb%nrm(1,q1)
+   end do
+   if (qtest(iqpt,3)/=0) qq(:) = -qq(:)
+   !
+   do ii=1,3
+     do jj=1,3
+       ss(ii,jj)=zero
+       do kk=1,3
+         do ll=1,3
+           ss(ii,jj) = ss(ii,jj) + rprimd(ii,kk) * symrel(kk,ll,q2) * gprimd(jj,ll)
          end do
        end do
      end do
-   else
-     do ii=1,3
-       qq(ii)=-ddb%qpt(ii,q1)/ddb%nrm(1,q1)
-       do jj=1,3
-         ss(ii,jj)=zero
-         do kk=1,3
-           do ll=1,3
-             ss(ii,jj)=ss(ii,jj)+rprim(ii,kk)*gprim(jj,ll)*symrel(kk,ll,q2)
-           end do
-         end do
-       end do
-     end do
-   end if
+   end do
 
    ! Check whether all the information is contained in the DDB
    do ipert2=1,natom
