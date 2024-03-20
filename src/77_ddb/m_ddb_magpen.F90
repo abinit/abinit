@@ -1877,6 +1877,7 @@ contains
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),phongreen(:,:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:,:),lm_magelsus(:,:,:)
+ complex(dpc), allocatable :: macmagsus(:,:,:)
 
 !TMP: CrI3 varaibles:
  complex(dpc) :: magbasis(4,4),work(4,4)
@@ -1934,6 +1935,7 @@ contains
  ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(epsilon,(3,3,nomega))
+ ABI_MALLOC(macmagsus,(3,3,nomega))
  ABI_MALLOC(ifcmat,(3*natom,3*natom,nomega))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
@@ -1954,7 +1956,7 @@ contains
      end if
    end do 
 
-   !Calculate the spin susceptibilities
+   !Calculate the local spin susceptibilities
    call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
  & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol)
 
@@ -1969,6 +1971,11 @@ contains
    !Calculate the interatomic force constants
    call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
  & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
+
+   !Calculate the macroscopic magnetic susceptibility
+   call mp_macmagsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),&
+ & macmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
+ & natom,nblok,ndim,nmdir,prtopt,prtvol)
 
    !Calculate the phonon Green's function and spectral function
    call phonon_green(amu,eigvec,ifcmat(:,:,iw),mode_phonspec(:,iw),natom,ntypat,omega(iw), &
@@ -2087,6 +2094,30 @@ contains
     write(msg,pfmt) &
 ! &  omega(iw), ((aimag(invbarmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
  &  omega(iw), ((aimag(invmagsus(i,j,iw)),j=1,ndim),i=1,ndim)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(pfmt, '( "(es15.7, ", I4, "(es15.7))" )' ) 9 
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Real part of macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((real(macmagsus(i,j,iw)),j=1,3),i=1,3)
+    call wrtout(spin_unit,msg,'COLL')
+ end do
+
+ write(spin_unit,*) ' '
+ write(spin_unit,*) '#  Imaginary part of macroscopic spin susceptibility tensor (at. units)'
+ write(msg,'(a,a)') ch10,&
+&           ' # At  hw     X_11     X_12     ...     X_21     X_22     ...'
+ call wrtout(spin_unit,msg,'COLL')
+ do iw=1,nomega
+    write(msg,pfmt) &
+ &  omega(iw), ((aimag(macmagsus(i,j,iw)),j=1,3),i=1,3)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -2412,6 +2443,7 @@ contains
  ABI_FREE(mmom)
  ABI_FREE(zfield)
  ABI_FREE(epsilon)
+ ABI_FREE(macmagsus)
  ABI_FREE(ifcmat)
  ABI_FREE(omega)
  ABI_FREE(phfrq)

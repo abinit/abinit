@@ -209,7 +209,7 @@ contains
  end if
 
 
-!Constrained DFPT
+!Preconditioned DFPT
  if((ipert>natom+11.and.ipert<=2*natom+11).or.abs(magpen)>tol6) then
 
   !Compute the first-order magnetic moments. 
