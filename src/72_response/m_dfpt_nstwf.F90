@@ -1886,21 +1886,19 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=dtset%gpu_option)
 
              end do !idat
-             do idat=1,ndat
-               if (abs(occ_k(iband+idat-1))>tol8) then
-  !              Accumulate 1st-order density due to delta_u^(j1)
-                 option=1;wfcorr=0
-                 call dfpt_accrho(cplex,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
-&                 dcwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),&
-&                 eig_k(iband+idat-1),gs_hamkq,iband+idat-1,idir1,ipert1,isppol,dtset%kptopt,&
-&                 mpi_enreg,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
+             option=1;wfcorr=0
+             if (abs(occ_k(iband))>tol8) then
+!              Accumulate 1st-order density due to delta_u^(j1)
+               call dfpt_accrho(cplex,cwave0,&
+&                 dcwavef,&
+&                 dcwavef,&
+&                 cwaveprj0_idir1,&
+&                 dcwaveprj,&
+&                 eig_k(iband:iband+ndat-1),gs_hamkq,iband,idir1,ipert1,isppol,dtset%kptopt,&
+&                 mpi_enreg,ndat,dtset%natom,nband_k,1,npw_k,npw1_k,nspinor,occ_k,option,&
 &                 pawdrhoij1_unsym(:,idir1),drhoaug1(:,:,:,idir1),tim_fourwf,wfcorr,wtk_k)
-               end if
+             end if
 
-             end do !idat
              call pawcprj_free(dcwaveprj)
              ABI_FREE(dcwaveprj)
              ABI_FREE(dcwavef)
