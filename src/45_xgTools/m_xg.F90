@@ -1493,7 +1493,6 @@ contains
         calpha = dcmplx(2*alpha,0.d0)
         alpha_ = 2.0d0 * alpha
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-          ABI_ERROR('SPACE_CR for ABI_GPU_KOKKOS or ABI_GPU_OPENMP is not implemented yet')
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
           call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2*K, &
             calpha, &
