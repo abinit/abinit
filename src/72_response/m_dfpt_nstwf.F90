@@ -33,7 +33,7 @@ module m_dfpt_nstwf
  use m_nctk
  use m_dtset
  use m_dtfil
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_abi_linalg
 
  use defs_datatypes, only : pseudopotential_type
@@ -1226,15 +1226,13 @@ has_vectornd = (with_vectornd .EQ. 1)
                    idir_cprj=istr1;choice=3
                  end if
                  call pawcprj_copy(cwaveprj0,cwaveprj0_idir1,icpgr=-1)
-                 do idat=1,ndat
-                   call getcprj(choice,cpopt,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-  &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
-  &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
-  &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
-  &                 gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
-  &                 gs_hamkq%nloalg,gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,&
-  &                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm)
-                 end do
+                 call getcprj(choice,cpopt,cwave0,&
+&                 cwaveprj0_idir1,&
+&                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
+&                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
+&                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&                 gs_hamkq%nloalg,gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,&
+&                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
                end if
 
 !            === Wave-vector perturbation
@@ -1262,15 +1260,13 @@ has_vectornd = (with_vectornd .EQ. 1)
                    idir_cprj=istr1;choice=3
                  end if
                  call pawcprj_copy(cwaveprj0,cwaveprj0_idir1,icpgr=-1)
-                 do idat=1,ndat
-                   call getcprj(choice,cpopt,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-  &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
-  &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
-  &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
-  &                 gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
-  &                 gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,&
-  &                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm)
-                 end do
+                 call getcprj(choice,cpopt,cwave0,&
+&                 cwaveprj0_idir1,&
+&                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,&
+&                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
+&                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
+&                 gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,&
+&                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
                end if
 
 
@@ -1296,15 +1292,13 @@ has_vectornd = (with_vectornd .EQ. 1)
                    idir_cprj=istr1;choice=3
                  end if
                  call pawcprj_copy(cwaveprj0,cwaveprj0_idir1,icpgr=-1)
-                 do idat=1,ndat
-                   call getcprj(choice,cpopt,cwave0(:,1+(idat-1)*npw_k*nspinor:idat*npw_k*nspinor),&
-  &                 cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),&
-  &                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,gs_hamkq%kg_kp,&
-  &                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,1,&
-  &                 gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,gs_hamkq%npw_kp,&
-  &                 gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,gs_hamkq%ph3d_kp,&
-  &                 gs_hamkq%ucvol,gs_hamkq%useylm)
-                 end do
+                 call getcprj(choice,cpopt,cwave0,&
+&                 cwaveprj0_idir1,&
+&                 gs_hamkq%ffnl_kp,idir_cprj,gs_hamkq%indlmn,gs_hamkq%istwf_kp,gs_hamkq%kg_kp,&
+&                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,ndat,&
+&                 gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,gs_hamkq%npw_kp,&
+&                 gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,gs_hamkq%ph3d_kp,&
+&                 gs_hamkq%ucvol,gs_hamkq%useylm,gpu_option=dtset%gpu_option)
                end if
              end if ! ipert
 
