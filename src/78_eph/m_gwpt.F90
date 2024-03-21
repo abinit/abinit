@@ -21,10 +21,10 @@
 
 module m_gwpt
 
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_MPI2
  use mpi
 #endif
- use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_xmpi
@@ -120,9 +120,6 @@ module m_gwpt
 
   integer :: nspinor
    ! Number of spinor components.
-
-  integer :: ntemp
-   ! Number of temperatures.
 
   integer :: symsigma
    ! 1 if matrix elements should be symmetrized.
@@ -557,13 +554,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call hscr%free()
  nqlwl = size(qlwl, dim=2)
  ABI_FREE(qlwl)
- call gsph_c%free()
- call qmesh%free()
 
 #if 0
    ! Init W.
    ! Incore or out-of-core solution?
-   mqmem = 0; if (Dtset%gwmem /10 == 1) mqmem = Qmesh%nibz
+   mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = qmesh%nibz
 
    W_info%invalid_freq = Dtset%gw_invalid_freq
    W_info%mat_type = MAT_INV_EPSILON
@@ -574,6 +569,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                dtset%iomode, ngfftf, nfftf_tot, wfd%nsppol, wfd%nspden, qp_aerhor, wfd%prtvol, comm)
    call W%free()
 #endif
+
+ call gsph_c%free()
+ call qmesh%free()
 
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  if (ierr == 0) then
@@ -2296,7 +2294,7 @@ type(ebands_t) function gwpt_get_ebands(self, cryst, ebands, brange, kcalc2eband
  ! so that only the relevant k-points are stored on file.
 
  ABI_CALLOC(velocity, (3, bmin:bmax, nkpt, nsppol))
- ABI_CALLOC(linewidths, (self%ntemp, bmin:bmax, nkpt, nsppol, 2))
+ !ABI_CALLOC(linewidths, (self%ntemp, bmin:bmax, nkpt, nsppol, 2))
 
  !if (my_rank == master) then
  !end if
@@ -2711,7 +2709,7 @@ end subroutine gwpt_gather_and_write
 !!  gwpt_print
 !!
 !! FUNCTION
-!!  Print self-energy and QP corrections for given (k-point, spin).
+!!  Print info on gwpt datatype.
 !!
 !! INPUTS
 !!  dtset<dataset_type>=All input variables for this dataset.
