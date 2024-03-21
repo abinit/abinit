@@ -376,7 +376,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !arrays
  integer :: ngqpt(9),qptrlatt(3,3)
  integer,allocatable :: qmissing(:),ibz2bz(:),bz2ibz_smap(:,:)
- real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3)
+ real(dp) :: gprim(3,3),rprim(3,3),qpt(3),rprimd(3,3), gprim_tmp(3,3), rprim_tmp(3,3)
  real(dp):: rcan(3,Crystal%natom),trans(3,Crystal%natom),dyewq0(3,3,Crystal%natom)
  real(dp) :: displ_cart(2*3*Crystal%natom*3*Crystal%natom)
  real(dp) :: phfrq(3*Crystal%natom)
@@ -476,12 +476,22 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ABI_MALLOC(Ifc%dynmat,(2,3,natom,3,natom,nqbz))
 
+ ! This is needed to preserve the behavior of the old implementation with canonical coordinate.
+ if (Ifc%brav == 1) then
+   gprim_tmp = Crystal%gprimd
+   rprim_tmp = rprimd
+ else
+   gprim_tmp = gprim
+   rprim_tmp = rprim
+ endif
+
 ! Find symmetrical dynamical matrices
  if (.not.present(Ifc_coarse)) then
 
    ! Each q-point in the BZ mush be the symmetrical of one of the qpts in the ddb file.
+   ! SP - gprimd and rprimd is required instead of gprim and rprim for non-diagonal supercells.
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,gprim_tmp,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim_tmp,qbz,&
      Crystal%symrec, Crystal%symrel, comm)
 
  else
@@ -497,7 +507,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call wrtout(std_out,"Will fill missing qpoints in the full BZ using the coarse q-mesh","COLL")
 
    call symdm9(ddb, &
-     Ifc%dynmat,gprim,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim,qbz,&
+     Ifc%dynmat,gprim_tmp,Crystal%indsym,mpert,natom,nqbz,nsym,rfmeth,rprim_tmp,qbz,&
      Crystal%symrec,Crystal%symrel,comm, qmissing=qmissing)
 
    ! Compute dynamical matrix with Fourier interpolation on the coarse q-mesh.
