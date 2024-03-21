@@ -69,6 +69,7 @@ bandpp        10
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa
 #%% [files]
 #%% [NCPU_1]
 #%% files_to_test = 
