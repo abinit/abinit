@@ -269,7 +269,7 @@ contains
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (lblok /= 0 ) then
      call mp_macmagsus(barmagsus,ddb%val,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
-   & natom,nblok,ndim,nmdir,prtopt,prtvol)
+   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
    end if
 
  end do
@@ -1150,11 +1150,12 @@ contains
 !! SOURCE
 
  subroutine mp_macmagsus(barmagsus,blkval,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
-& natom,nblok,ndim,nmdir,prtopt,prtvol)
+& natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,nmdir,prtopt,prtvol
+ real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -1216,16 +1217,19 @@ contains
  ABI_MALLOC(macmag_zfield,(ndim,3))
  macmag_zfield=-matmul(invbarmagsus,barmmom)
 
+!The signs of FM and SR terms is reversed here because barmacmagsus is already 
+!the magnetic susceptibility, i.e., *minus* the second derivative of the total 
+!energy wrt two uniform Zeeman fields. 
 !Calculate the frozen-magnetic flavor
  fmmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(barmagsus,macmag_zfield))
- fmmacmagsus= barmacmagsus + fmmacmagsus
+ fmmacmagsus= barmacmagsus - fmmacmagsus
 
  macmagsus= fmmacmagsus
 !
 !Calculate the spin-relaxed flavor
  if (mpopt==2) then
    srmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(magsus,macmag_zfield))
-   srmacmagsus= fmmacmagsus - srmacmagsus
+   srmacmagsus= fmmacmagsus + srmacmagsus
 
    macmagsus= srmacmagsus
  end if
@@ -1348,18 +1352,21 @@ contains
    end do
  end do
 
+!The signs of FM and SR terms is reversed here because barzeff are already 
+!the Born charges , i.e., *minus* the second derivative of the total 
+!energy wrt an electric field and atomic displacement. 
  !Calculate the frozen-magnetic flavor
  ifc_zfield(:,:)=zfield(:,1:natom*3)
  diel_zfield(:,:)=zfield(:,(natom+2)*3-2:(natom+2)*3)
  fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
- fmzeff= barzeff + fmzeff
+ fmzeff= barzeff - fmzeff
 
  zeff= fmzeff
 
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
    srzeff= matmul(transpose(conjg(diel_zfield)),matmul(magsus,ifc_zfield))
-   srzeff= fmzeff - srzeff
+   srzeff= fmzeff + srzeff
  
    zeff= srzeff
  end if
@@ -1975,22 +1982,22 @@ contains
    !Calculate the macroscopic magnetic susceptibility
    call mp_macmagsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),&
  & macmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
- & natom,nblok,ndim,nmdir,prtopt,prtvol)
+ & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
 
    !Calculate the phonon Green's function and spectral function
    call phonon_green(amu,eigvec,ifcmat(:,:,iw),mode_phonspec(:,iw),natom,ntypat,omega(iw), &
  & phfrq(:,iw),phongreen(:,:,iw),phonspec(iw),typat)
 
-   !Calculate the mode-resolved magnetic moments
-   call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
+!   !Calculate the mode-resolved magnetic moments
+!   call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
-   !Calculate the Born effective charges
+!   !Calculate the Born effective charges
    call mp_zeff(barmagsus(:,:,iw),int_barddb,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
  & natom,1,ndim,phongreen(:,:,iw),prtopt,prtvol,ucvol,zeff(:,:,iw),zfield(:,:,iw))
 
    !Calculate the mode-resolved Born effective charges
-   call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
- & typat,zeff(:,:,iw),zeffspec(:,iw))
+!   call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
+! & typat,zeff(:,:,iw),zeffspec(:,iw))
 
    !Calculate here the phonons contribution to the spin susceptibility
    lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen(:,:,iw),transpose(conjg(mmom(:,1:natom*3,iw)))))
@@ -2209,36 +2216,36 @@ contains
 
  close(mmom_unit)
 
- mmspec_filename=trim(outfilename_radix)//"_SPECTRAL_MAGMOM"
- if (open_file(mmspec_filename, msg, newunit=mmspec_unit) /= 0) then
-   ABI_ERROR(msg)
- end if
-
- write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
- write(mmspec_unit,*) ' '
- write(mmspec_unit,'(a)') '#  Real part of magnetic moments spectral function:'
- write(mmspec_unit,*) ' '
- write(msg,'(a,a)') ch10,&
- &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
- call wrtout(mmspec_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,pfmt) omega(iw), real(mmomspec(:,iw))
-   call wrtout(mmspec_unit,msg,'COLL')
- end do
-
- write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
- write(mmspec_unit,*) ' '
- write(mmspec_unit,'(a)') '#  Imaginary part of magnetic moments spectral function:'
- write(mmspec_unit,*) ' '
- write(msg,'(a,a)') ch10,&
- &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
- call wrtout(mmspec_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,pfmt) omega(iw), aimag(mmomspec(:,iw))
-   call wrtout(mmspec_unit,msg,'COLL')
- end do
-
- close(mmspec_unit)
+! mmspec_filename=trim(outfilename_radix)//"_SPECTRAL_MAGMOM"
+! if (open_file(mmspec_filename, msg, newunit=mmspec_unit) /= 0) then
+!   ABI_ERROR(msg)
+! end if
+!
+! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+! write(mmspec_unit,*) ' '
+! write(mmspec_unit,'(a)') '#  Real part of magnetic moments spectral function:'
+! write(mmspec_unit,*) ' '
+! write(msg,'(a,a)') ch10,&
+! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+! call wrtout(mmspec_unit,msg,'COLL')
+! do iw=1,nomega
+!   write(msg,pfmt) omega(iw), real(mmomspec(:,iw))
+!   call wrtout(mmspec_unit,msg,'COLL')
+! end do
+!
+! write(pfmt, '( "(es15.7, ", I2, "(es17.7))" )' )  ndim
+! write(mmspec_unit,*) ' '
+! write(mmspec_unit,'(a)') '#  Imaginary part of magnetic moments spectral function:'
+! write(mmspec_unit,*) ' '
+! write(msg,'(a,a)') ch10,&
+! &           ' # At  hw     m_{mat_1,1}     m_{mat_1,2}     ...     m_{mat_2,1}     m_{mat_2,2}'
+! call wrtout(mmspec_unit,msg,'COLL')
+! do iw=1,nomega
+!   write(msg,pfmt) omega(iw), aimag(mmomspec(:,iw))
+!   call wrtout(mmspec_unit,msg,'COLL')
+! end do
+!
+! close(mmspec_unit)
 
 !Dielectric susceptibility
  diel_filename=trim(outfilename_radix)//"_DIELSUS"
@@ -2403,33 +2410,33 @@ contains
 
  close(zeff_unit)
 
- zeffspec_filename=trim(outfilename_radix)//"_SPECTRAL_ZEFF"
- if (open_file(zeffspec_filename, msg, newunit=zeffspec_unit) /= 0) then
-   ABI_ERROR(msg)
- end if
- write(zeffspec_unit,*) ' '
- write(zeffspec_unit,'(a)') '#  Real part of Born charges spectral function:'
- write(zeffspec_unit,*) ' '
- write(msg,'(a,a)') ch10,&
- &           ' # At  hw     Z^x     Z^y     Z^z'
- call wrtout(zeffspec_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,'(4es15.7)') omega(iw), real(zeffspec(:,iw))
-   call wrtout(zeffspec_unit,msg,'COLL')
- end do
-
- write(zeffspec_unit,*) ' '
- write(zeffspec_unit,'(a)') '#  Imaginary part of Born charges spectral function:'
- write(zeffspec_unit,*) ' '
- write(msg,'(a,a)') ch10,&
- &           ' # At  hw     Z^x     Z^y     Z^z'
- call wrtout(zeffspec_unit,msg,'COLL')
- do iw=1,nomega
-   write(msg,'(4es15.7)') omega(iw), aimag(zeffspec(:,iw))
-   call wrtout(zeffspec_unit,msg,'COLL')
- end do
-
- close(zeffspec_unit)
+! zeffspec_filename=trim(outfilename_radix)//"_SPECTRAL_ZEFF"
+! if (open_file(zeffspec_filename, msg, newunit=zeffspec_unit) /= 0) then
+!   ABI_ERROR(msg)
+! end if
+! write(zeffspec_unit,*) ' '
+! write(zeffspec_unit,'(a)') '#  Real part of Born charges spectral function:'
+! write(zeffspec_unit,*) ' '
+! write(msg,'(a,a)') ch10,&
+! &           ' # At  hw     Z^x     Z^y     Z^z'
+! call wrtout(zeffspec_unit,msg,'COLL')
+! do iw=1,nomega
+!   write(msg,'(4es15.7)') omega(iw), real(zeffspec(:,iw))
+!   call wrtout(zeffspec_unit,msg,'COLL')
+! end do
+!
+! write(zeffspec_unit,*) ' '
+! write(zeffspec_unit,'(a)') '#  Imaginary part of Born charges spectral function:'
+! write(zeffspec_unit,*) ' '
+! write(msg,'(a,a)') ch10,&
+! &           ' # At  hw     Z^x     Z^y     Z^z'
+! call wrtout(zeffspec_unit,msg,'COLL')
+! do iw=1,nomega
+!   write(msg,'(4es15.7)') omega(iw), aimag(zeffspec(:,iw))
+!   call wrtout(zeffspec_unit,msg,'COLL')
+! end do
+!
+! close(zeffspec_unit)
 
  ABI_FREE(dint_barddb)
  ABI_FREE(int_barddb)
