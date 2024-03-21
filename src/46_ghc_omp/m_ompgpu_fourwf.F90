@@ -294,7 +294,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
  if(option==0) then
    ! We copy back fofr
-   !$OMP TARGET UPDATE from(fofr)
+   !$OMP TARGET UPDATE from(fofr)    IF(transfer_fofr)
  end if
 
  if(option==1) then
