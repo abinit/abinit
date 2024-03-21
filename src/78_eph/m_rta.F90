@@ -147,7 +147,7 @@ type,public :: rta_t
    ! (6, nkcalc)
    ! Mapping ikcalc --> ebands IBZ
    ! Note that this array is not necessarily equal to kcalc2ibz computed in sigmaph
-   ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
+   ! because we may have used sigma_ngkpt to downsample the initial nkpt mesh.
    ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
    real(dp),allocatable :: kTmesh(:)
@@ -1239,7 +1239,7 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  ncerr = nctk_def_dims(ncid, [ &
     nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol), &
-    nctkdim_t("nkcalc", self%nkcalc) &
+    nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("nkibz", self%ebands%nkpt) &
  ], defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -1843,7 +1843,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
      nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
-    nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
      nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1964,7 +1964,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
-     ! Write fnk_out_sigma to disk
+     ! Write fnk_out_sigma to disk.
      if (my_rank == master) then
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fkn_out_sigma"), fkn_out, start=[1,1,1,1,itemp]))
      end if

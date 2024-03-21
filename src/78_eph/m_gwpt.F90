@@ -57,6 +57,7 @@ module m_gwpt
  use m_dtfil
  use m_clib
  use m_mkffnl
+ use m_screen
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -70,7 +71,8 @@ module m_gwpt
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
  use m_kg,             only : getph, mkkpg
- use m_bz_mesh,        only : isamek
+ use m_bz_mesh,        only : isamek, kmesh_t
+ use m_gsphere,        only : gsphere_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ioarr,          only : read_rhor
  use m_pawang,         only : pawang_type
@@ -80,6 +82,7 @@ module m_gwpt
  use m_pawfgr,         only : pawfgr_type
  use m_dfpt_cgwf,      only : dfpt_cgwf
  use m_phonons,        only : phstore_t, phstore_new
+ use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
 
  implicit none
 
@@ -399,7 +402,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  character(len=*),intent(in) :: wfk0_path
  integer,intent(in) :: comm
  type(datafiles_type),intent(in) :: dtfil
- type(dataset_type),intent(in) :: dtset
+ type(dataset_type),intent(inout) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(dvdb_t),intent(inout) :: dvdb
@@ -435,7 +438,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
- integer :: comm_rpt, osc_npw
+ integer :: comm_rpt, osc_npw, nqlwl
  integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
@@ -453,6 +456,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(hdr_type) :: pot_hdr
  type(phstore_t) :: phstore
  type(u1cache_t) :: u1c
+ type(kmesh_t) :: qmesh
+ type(gsphere_t) :: gsph_c
+ type(hscr_t) :: hscr
+ type(screen_t) :: W
+ type(screen_info_t) :: W_info
+ character(len=fnlen) :: w_fname
  character(len=5000) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3), units(2), work_ngfft(18), gmax(3)
@@ -468,6 +477,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: wqnu,gkq2,eig0nk,eig0mkq !eig0mk,
  !real(dp) :: gdw2, gdw2_stern, rtmp
  real(dp),allocatable,target :: cgq(:,:,:)
+ real(dp),allocatable :: qlwl(:,:) ! doccde(:),eigen(:),occfact(:),
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -533,6 +543,37 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Construct object to store final results.
  gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+
+ ! Read gsphere and qmesh from SCR file.
+ nqlwl = 0; w_fname = ABI_NOFILE
+ if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
+   w_fname = dtfil%fnameabi_scr
+ else if (dtset%getsuscep /= 0 .or. dtset%irdsuscep /= 0) then
+   w_fname = dtfil%fnameabi_sus
+   ABI_ERROR("(get|ird)suscep not implemented")
+ end if
+
+ call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+ call hscr%free()
+ nqlwl = size(qlwl, dim=2)
+ ABI_FREE(qlwl)
+ call gsph_c%free()
+ call qmesh%free()
+
+#if 0
+   ! Init W.
+   ! Incore or out-of-core solution?
+   mqmem = 0; if (Dtset%gwmem /10 == 1) mqmem = Qmesh%nibz
+
+   W_info%invalid_freq = Dtset%gw_invalid_freq
+   W_info%mat_type = MAT_INV_EPSILON
+   W_info%use_mdf = BSp%mdlf_type
+   W_info%eps_inf = BSp%eps_inf
+
+   call W%init(w_info, cryst, qmesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
+               dtset%iomode, ngfftf, nfftf_tot, wfd%nsppol, wfd%nspden, qp_aerhor, wfd%prtvol, comm)
+   call W%free()
+#endif
 
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  if (ierr == 0) then
@@ -819,10 +860,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    spin = gwpt%my_spins(my_spin)
    do iq_ibz=1,gwpt%nqibz
      do imyp=1,my_npert
+        idir = gwpt%my_pinfo(1, imyp); ipert = gwpt%my_pinfo(2, imyp); ipc = gwpt%my_pinfo(3, imyp)
 
         ! Prepare DeltaVscf^{spin}_{q, ipert)(r)
 
-        ! NSCF solution of Sternheimer equation for all the bands included in the sum over states.
+        ! NSCF solution of the Sternheimer equation for all the bands included in the sum over states.
 
      end do
    end do ! iq_ibz
