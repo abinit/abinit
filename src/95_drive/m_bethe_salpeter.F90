@@ -61,7 +61,7 @@ module m_bethe_salpeter
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
- use m_io_screening,    only : hscr_t, hscr_io
+ use m_io_screening,    only : hscr_t, hscr_io, get_hscr_qmesh_gsph
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
  use m_exc_analyze,     only : exc_den
@@ -1075,7 +1075,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  integer :: bantot,enforce_sym,ib,ibtot,ik_ibz,isppol,jj,method,iat,ount !ii,
  integer :: mband,io,nfftot_osc,spin,hexc_size,nqlwl,iq
  integer :: timrev,iq_bz,isym,iq_ibz,itim
- integer :: my_rank,nprocs,fform,npwe_file,ierr,my_k1, my_k2,my_nbks
+ integer :: my_rank,nprocs,fform,ierr,my_k1, my_k2,my_nbks
  integer :: first_dig,second_dig,it
  real(dp) :: ucvol,qnorm
  real(dp):: eff,mempercpu_mb,wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -1147,61 +1147,18 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  nqlwl = 0; w_fname = ABI_NOFILE
- if (dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
+ if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    w_fname = dtfil%fnameabi_scr
- else if (dtset%getsuscep/=0 .or. dtset%irdsuscep/=0) then
+ else if (dtset%getsuscep /= 0 .or. dtset%irdsuscep /= 0) then
    w_fname = dtfil%fnameabi_sus
    ABI_ERROR("(get|ird)suscep not implemented")
  end if
 
  if (w_fname /= ABI_NOFILE) then
-
    ! GWPT
-   !call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, comm)
-
-   if (my_rank == master) then
-     ! Read dimensions from the external file.
-     if (.not. file_exists(w_fname)) then
-       w_fname = nctk_ncify(w_fname)
-       ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
-     end if
-     ! Master reads npw and nqlwl from the SCR file.
-     call wrtout(std_out, sjoin('Testing file: ', w_fname))
-     call hscr%from_file(w_fname, fform, xmpi_comm_self); if (dtset%prtvol > 0) call Hscr%print()
-
-     ! Have to change %npweps if it was larger than dim on disk.
-     npwe_file = Hscr%npwe
-     nqlwl     = Hscr%nqlwl
-
-     if (dtset%npweps > npwe_file) then
-       write(msg,'(2(a,i0),2a,i0)')&
-        "The number of G-vectors stored on file (",npwe_file,") is smaller than dtset%npweps: ",dtset%npweps,ch10,&
-        "Calculation will proceed with the maximum available set, npwe_file: ",npwe_file
-       ABI_WARNING(msg)
-       dtset%npweps = npwe_file
-     else if (Dtset%npweps < npwe_file) then
-       write(msg,'(2(a,i0),2a,i0)')&
-        "The number of G-vectors stored on file (",npwe_file,") is larger than dtset%npweps: ",dtset%npweps,ch10,&
-        "Calculation will proceed with dtset%npweps: ",dtset%npweps
-       ABI_COMMENT(msg)
-     end if
-   end if
-
-   call xmpi_bcast(w_fname, master, comm, ierr)
-   call Hscr%bcast(master, my_rank, comm)
-   call xmpi_bcast(dtset%npweps, master, comm, ierr)
-   call xmpi_bcast(nqlwl, master, comm, ierr)
-
-   if (nqlwl > 0) then
-     ABI_MALLOC(qlwl, (3, nqlwl))
-     qlwl = Hscr%qlwl
-   end if
-
-   ! Init qmesh from the SCR file.
-   call Qmesh%init(cryst, Hscr%nqibz, Hscr%qibz, Dtset%kptopt)
-   ! The G-sphere for W and Sigma_c is initialized from the g-vectors found in the SCR file.
-   call Gsph_c%init(cryst, dtset%npweps, gvec=Hscr%gvec)
-   call Hscr%free()
+   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+   call hscr%free()
+   nqlwl = size(qlwl, dim=2)
 
  else
    ! Init Qmesh from the K-mesh reported in the WFK file.
