@@ -281,7 +281,15 @@ in excellent agreement with the higher-order finite-difference values for the
 2DTE, determined in the previous section: 5.007939 Hartree from the energy
 differences, and 5.007914 Hartree from the force differences.
 
-Now, you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file.
+Still, this run did not allow to compute the full dynamical matrix, as pointed out when the
+phonon frequencies were delivered:
+
+    chkph3 : WARNING -
+     Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.
+
+This incompleteness will be dealt with in the next section.
+
+Now you can read the remaining of the [[help:respfn#output|section 6.2]] of the respfn help file.
 Then, you should also open the *trf1_3o_DDB* file, and read the
 corresponding [[help:respfn#ddb|section 6.5]] of the respfn help file.
 
