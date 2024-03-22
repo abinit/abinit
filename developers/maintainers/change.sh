@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file 
- sed -e 's!indeces!indices!' $file > tmp.file
+ sed -e 's!non-linear optical coefficients may be wrong, see the log file for more explanations!non-linear optical coefficients may be wrong, check input variables rfatpol and rfdir!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
