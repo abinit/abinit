@@ -26,8 +26,6 @@ module m_nvtx_data
 
   implicit none
 
-  logical :: nvtx_activated = .false.
-
   integer, parameter :: NUMBER_OF_NVTX_REGIONS = 65
   character(len=32), dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_names
   integer          , dimension(NUMBER_OF_NVTX_REGIONS) :: nvtx_ids
@@ -102,14 +100,9 @@ contains
 
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !! !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  subroutine nvtx_init(activate)
+  subroutine nvtx_init()
 
     implicit none
-
-    ! dummy variables
-    logical :: activate
-
-    nvtx_activated = activate
 
     nvtx_names = [character(len=32) :: &
          & "MAIN_COMPUTATION", &
@@ -257,10 +250,8 @@ contains
     ! dummy variables
     integer :: id
 
-    if (nvtx_activated) then
-       if (id .le. NUMBER_OF_NVTX_REGIONS) then
-          call nvtxStartRange(nvtx_names(id),id)
-       end if
+    if (id .le. NUMBER_OF_NVTX_REGIONS) then
+       call nvtxStartRange(nvtx_names(id),id)
     end if
 
   end subroutine abi_nvtx_start_range
@@ -271,9 +262,7 @@ contains
 
     implicit none
 
-    if (nvtx_activated) then
-       call nvtxEndRange()
-    end if
+    call nvtxEndRange()
 
   end subroutine abi_nvtx_end_range
 
