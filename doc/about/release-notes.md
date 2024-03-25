@@ -107,11 +107,11 @@ By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent
 **B.3** CMake build of ABINIT 
 
 ABINIT can now be build using CMake instead of the standard configure+make. This was needed to build the GPU version
-of ABINIT relying on KOKKOS.
-Also, the version number of ABINIT is now generated automatically from the git tag information.
+of ABINIT relying on KOKKOS. Try :
 
-FOR THE TIME BEING (MARCH 2024), THE DOCUMENTATION TO BUILD ABINIT USING CMAKE REMAINS TO BE WRITTEN. CONTACT MARC TORRENT IF YOU WANT TO BE
- A BETA TESTER.
+mkdir build; cd build; cmake ..
+
+Also, the version number of ABINIT is now generated automatically from the git tag information.
 
 By P. Kestener with M. Torrent (MR944, 979))
 
