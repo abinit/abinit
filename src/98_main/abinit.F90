@@ -158,7 +158,6 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
- logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -365,14 +364,12 @@ program abinit
 
 !Activate GPU is required
  gpu_option=ABI_GPU_DISABLED
- use_nvtx=.false.
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
    if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
      gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%gpu_use_nvtx==1) use_nvtx=.true.
  end do
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,gpu_option)
@@ -383,8 +380,9 @@ program abinit
  end if
 #endif
 
+!Enable GPU markers (NVTX/ROCTX) if required
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
- NVTX_INIT(use_nvtx)
+ NVTX_INIT()
 #endif
 
 !------------------------------------------------------------------------------

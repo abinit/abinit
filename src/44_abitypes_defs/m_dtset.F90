@@ -238,7 +238,6 @@ type, public :: dataset_type
  integer :: gpu_nl_distrib = 0
  integer :: gpu_nl_splitsize = 1
  integer :: gpu_option
- integer :: gpu_use_nvtx
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
@@ -1617,7 +1616,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
  dtout%gpu_nl_splitsize   = dtin%gpu_nl_splitsize
  dtout%gpu_option         = dtin%gpu_option
- dtout%gpu_use_nvtx       = dtin%gpu_use_nvtx
 
  dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
@@ -3371,7 +3369,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
- list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option gpu_use_nvtx'
+ list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
