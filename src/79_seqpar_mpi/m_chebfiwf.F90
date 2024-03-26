@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (BS)
+!! Copyright (C) 2018-2024 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -249,7 +249,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 
  ! Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
- type(mpi_type),target,intent(inout) :: mpi_enreg
+ type(mpi_type),target,intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*nspinor*nband)
  real(dp),intent(in) :: kinpw(npw)
  real(dp),target,intent(out) :: resid(nband)
@@ -261,8 +261,8 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Local variables-------------------------------
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
- integer :: ipw,space,blockdim,nline,total_spacedim,ierr,nthreads
- real(dp) :: cputime,walltime,localmem
+ integer :: ipw,space,blockdim,nline,total_spacedim,ierr
+ real(dp) :: localmem
  type(c_ptr) :: cptr
  type(chebfi_t) :: chebfi
  type(xgBlock_t) :: xgx0,xgeigen,xgresidu
@@ -287,8 +287,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !######################################################################
 
   call timab(tim_chebfiwf2,1,tsec)
-  cputime = abi_cpu_time()
-  walltime = abi_wtime()
 
 !Set module variables
  l_paw = (gs_hamk%usepaw==1)
@@ -301,7 +299,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
- l_block_sliced = dtset%invol_blk_sliced
+ l_block_sliced = dtset%invovl_blksliced
 
 !Variables
  nline=dtset%nline
@@ -368,7 +366,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  end if
 #endif
 
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SQRT2)
  if ( l_istwf == 2 ) then ! Real only
@@ -390,42 +388,28 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !Trick with C is to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
  call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 !Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
 
 ! ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*l_nband_filter))
  call timab(tim_chebfiwf2,2,tsec)
 
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
-
- nthreads = xomp_get_num_threads(open_parallel = .true.)
-
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
-
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_INIT)
  call chebfi_init(chebfi,nband,l_icplx*l_npw*l_nspinor,dtset%tolwfr_diago,dtset%ecut, &
-&                 dtset%paral_kgb,l_mpi_enreg%nproc_band,l_mpi_enreg%bandpp, &
-&                 l_mpi_enreg%nproc_fft,nline, space,1,l_gs_hamk%istwf_k, &
-&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw, &
-&                 l_gs_hamk%gpu_option, &
-&                 gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
+&                 dtset%paral_kgb,l_mpi_enreg%bandpp, &
+&                 nline, space,1,l_gs_hamk%istwf_k, &
+&                 l_mpi_enreg%comm_bandspinorfft,l_mpi_enreg%me_g0,l_paw,&
+&                 l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+&                 l_gs_hamk%gpu_option,gpu_kokkos_nthrd=dtset%gpu_kokkos_nthrd)
  ABI_NVTX_END_RANGE()
 
 !################    RUUUUUUUN    #####################################
 !######################################################################
 
- call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,l_mpi_enreg)
+ call chebfi_run(chebfi,xgx0,getghc_gsc1,getBm1X,precond1,xgeigen,xgresidu,nspinor)
 
 !Free preconditionning since not needed anymore
  if(dtset%gpu_option==ABI_GPU_KOKKOS) then
@@ -470,20 +454,6 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !######################################################################
 
  call timab(tim_chebfiwf2,2,tsec)
-
- cputime = abi_cpu_time() - cputime
- walltime = abi_wtime() - walltime
-
- nthreads = xomp_get_num_threads(open_parallel = .true.)
-
- if ( cputime/walltime/dble(nthreads) < 0.75 .and. (int(cputime/walltime)+1) /= nthreads) then
-   if ( prtvol >= 3 ) then
-     write(std_out,'(a)',advance='no') sjoin(" Chebfi took", sec2str(cputime), "of cpu time")
-     write(std_out,*) sjoin("for a wall time of", sec2str(walltime))
-     write(std_out,'(a,f6.2)') " -> Ratio of ", cputime/walltime
-   end if
-   ABI_COMMENT(sjoin("You should set the number of threads to something close to",itoa(int(cputime/walltime)+1)))
- end if
 
  DBG_EXIT("COLL")
 
@@ -544,7 +514,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
  !Scale back cg
  if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,inv_sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
@@ -585,8 +555,8 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
 
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X ,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
-   call xgBlock_scale(AX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X ,sqrt2,1)
+   call xgBlock_scale(AX,sqrt2,1)
 
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -624,7 +594,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
      end if
    end if
    if(l_paw) then
-     call xgBlock_scale(BX,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(BX,sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -651,7 +621,7 @@ subroutine getghc_gsc1(X,AX,BX,transposer)
    end if ! l_paw
  end if ! l_istwf==2
 
- if ( .not. l_paw ) call xgBlock_copy(X,BX,gpu_option=l_gs_hamk%gpu_option)
+ if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
 end subroutine getghc_gsc1
 !!***
@@ -706,7 +676,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
  !scale back cg
  if(l_istwf == 2) then
-   call xgBlock_scale(X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,inv_sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0 ) then
@@ -734,7 +704,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,inv_sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(Bm1X,inv_sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -775,7 +745,7 @@ subroutine getBm1X(X,Bm1X,transposer)
 
    ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call apply_invovl(l_gs_hamk, ghc_filter(:,:), gsm1hc_filter(:,:), cwaveprj_next(:,:), &
-       spacedim, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
+       spacedim/l_nspinor, blockdim, l_mpi_enreg, l_nspinor, l_block_sliced)
    ABI_NVTX_END_RANGE()
  else
    gsm1hc_filter(:,:) = ghc_filter(:,:)
@@ -784,7 +754,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST1)
  !Scale cg, ghc, gsc
  if ( l_istwf == 2 ) then
-   call xgBlock_scale(X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+   call xgBlock_scale(X,sqrt2,1)
    if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
      if (l_paral_kgb == 0) then
@@ -814,7 +784,7 @@ subroutine getBm1X(X,Bm1X,transposer)
    end if
 
    if(l_paw) then
-     call xgBlock_scale(Bm1X,sqrt2,1,gpu_option=l_gs_hamk%gpu_option)
+     call xgBlock_scale(Bm1X,sqrt2,1)
      if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        if (l_paral_kgb == 0) then
@@ -845,6 +815,7 @@ subroutine getBm1X(X,Bm1X,transposer)
  end if
 
  if (l_paw) then
+   call pawcprj_free(cwaveprj_next)
    ABI_FREE(cwaveprj_next)
  end if
 
@@ -869,31 +840,23 @@ end subroutine getBm1X
 !!
 !! SOURCE
 
-subroutine precond1(W, gpu_option)
+subroutine precond1(W)
 
  implicit none
 
  ! Arguments ------------------------------------
  type(xgBlock_t), intent(inout)           :: W
- integer        , intent(in   ), optional :: gpu_option
 
 
  ! Local variables-------------------------------
  ! scalars
  integer :: ispinor
- integer :: l_gpu_option = ABI_GPU_DISABLED
 
  ! *********************************************************************
 
- ! if optional parameter is present, use it
- ! else use default value, i.e. don't use GPU
- if (present(gpu_option)) then
-   l_gpu_option = gpu_option
- end if
-
  ! Precondition resid_vec
  do ispinor = 1,l_nspinor
-   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1), l_gpu_option)
+   call xgBlock_colwiseMul(W, l_pcon, l_icplx*l_npw*(ispinor-1))
  end do
 
 end subroutine precond1

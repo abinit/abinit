@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (AL)
+!! Copyright (C) 2013-2024 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,7 +492,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  integer :: itypat, ilmn, nlmn, jlmn, ia, iaph3d, shift
  integer :: il, ilm, jlm, ipw, info, ierr, cplx
- integer :: ikpt_this_proc
+ integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
  character(len=500) :: message
@@ -555,15 +555,28 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  shift = 0
  do itypat = 1, ham%ntypat
    nlmn = count(ham%indlmn(3,:,itypat)>0)
+   if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)/2) then
+     cplex_dij = 1
+   else if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)) then
+     cplex_dij = 2
+   else
+     ABI_ERROR('sij size not recognize')
+   end if
    !! unpack ham%sij into inv_sij
    do jlmn = 1, nlmn
-     invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
-     jlm=ham%indlmn(4,jlmn, itypat)
+     if (cplex_dij==1) then
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
+     else
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*jlmn-1, itypat)
+     end if
      do ilmn = 1, jlmn-1
-       ilm=ham%indlmn(4,ilmn, itypat)
-       if (ilm == jlm) then ! sparsity check
+       if (cplex_dij==1) then
          invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
          invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
+       else
+         invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+         invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+
        end if
      end do
    end do
@@ -1290,9 +1303,9 @@ subroutine apply_invovl_ompgpu(ham, cwavef, sm1cwavef, cwaveprj, npw, ndat, mpi_
   integer, intent(in) :: npw, ndat
   integer, intent(in) :: nspinor
   integer, intent(in) :: block_sliced
-  real(dp), intent(inout) :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
+  real(dp), intent(inout), target :: cwavef(2, npw*nspinor*ndat) ! TODO should be in, fix nonlop
   type(mpi_type) :: mpi_enreg
-  real(dp), intent(inout) :: sm1cwavef(2, npw*nspinor*ndat)
+  real(dp), intent(inout), target :: sm1cwavef(2, npw*nspinor*ndat)
   type(pawcprj_type), intent(inout) :: cwaveprj(:,:)
   logical :: transfer_omp_args
 
@@ -1473,11 +1486,10 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
  Ptsize(2) = invovl%nprojs
  Ptsize(3) = ndat
  nprojs = invovl%nprojs
-#ifdef HAVE_GPU_HIP
- !$OMP TARGET MAP(to:sm1proj,PtPsm1proj) MAP(from:sm1proj_amdcopy,PtPsm1proj_amdcopy)
- sm1proj_amdcopy = c_loc(sm1proj)
- PtPsm1proj_amdcopy = c_loc(PtPsm1proj)
- !$OMP END TARGET
+#if defined HAVE_GPU_HIP  && defined FC_LLVM
+ !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
+ sm1proj_amdref => sm1proj
+ PtPsm1proj_amdref => PtPsm1proj
 #endif
 
  !$OMP TARGET ENTER DATA MAP(alloc:errs,precondresid,resid,normprojs)
@@ -1520,17 +1532,19 @@ subroutine solve_inner_ompgpu(invovl, ham, cplx, mpi_enreg, proj, ndat, sm1proj,
 
    ! compute matrix multiplication : PtPsm1proj(:,:,1) = invovl%gram * sm1proj(:,:,1)
    ABI_NVTX_START_RANGE(NVTX_INVOVL_INNER_GEMM)
-#if defined HAVE_GPU_CUDA
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+   !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj_amdref, PtPsm1proj_amdref)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
-                invovl%gram_projs, nprojs,&
-                sm1proj, nlmntot_this_proc, czero, &
-                PtPsm1proj, nprojs)
-#elif defined HAVE_GPU_HIP
+                c_loc(current_gram_projs), nprojs,&
+                c_loc(sm1proj_amdref), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj_amdref), nprojs)
+   !$OMP END TARGET DATA
+#else
    !$OMP TARGET DATA USE_DEVICE_PTR(current_gram_projs, sm1proj, PtPsm1proj)
    call abi_gpu_xgemm(cplx, 'N', 'N', nprojs, ndat, nlmntot_this_proc, cone, &
                 c_loc(current_gram_projs), nprojs,&
-                sm1proj_amdcopy, nlmntot_this_proc, czero, &
-                PtPsm1proj_amdcopy, nprojs)
+                c_loc(sm1proj), nlmntot_this_proc, czero, &
+                c_loc(PtPsm1proj), nprojs)
    !$OMP END TARGET DATA
 #endif
 

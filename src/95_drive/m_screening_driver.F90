@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -491,7 +491,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 ! valence and partially occupied are replicate on each node  while conduction bands are MPI distributed.
 ! This method is mandatory if gwpara==2 and/or we are using awtr==1 or the spectral method.
 ! If awtr==1, we evaluate chi0 taking advantage of time-reversal (speed-up~2)
-! Useful indeces:
+! Useful indices:
 !       nbvw = Max. number of fully/partially occupied states over spin
 !       nbcw = Max. number of unoccupied states considering the spin
 !TODO:

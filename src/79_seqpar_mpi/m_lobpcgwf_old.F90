@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group ()
+!!  Copyright (C) 2008-2024 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,7 +44,7 @@ contains
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (FBottin,GZ,AR,MT,FDahm)
+!! Copyright (C) 1998-2024 ABINIT group (FBottin,GZ,AR,MT,FDahm)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,7 +104,7 @@ subroutine lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
  integer,intent(in) :: icg,igsc,mcg,mgsc,nband_k,nbdblock,npw_k,prtvol,use_totvnlx
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),intent(inout) :: cg(2,mcg),gsc(2,mgsc)
  real(dp),intent(in) :: kinpw(npw_k)
  real(dp),intent(out) :: resid_k(nband_k)

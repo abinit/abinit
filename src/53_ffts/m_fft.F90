@@ -7,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision FFTs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2340,7 +2340,7 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  me_fft=ngfft(11)
  nproc_fft=ngfft(10)
 
- comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0
+ comm_fft = mpi_enreg%comm_fft; me_g0 = mpi_enreg%me_g0_fft
  paral_kgb = mpi_enreg%paral_kgb
 
  !if (ndat/=1) then

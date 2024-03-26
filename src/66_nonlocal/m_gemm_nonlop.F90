@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2022 ABINIT group (AL)
+!! Copyright (C) 2014-2024 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1041,7 +1041,7 @@ contains
 
       ! only compute real part of projections = P^* psi => projections_r = P_r^T psi_r + P_i^T psi_i
       temp_realvec(1:npwin*nspinor*ndat) = vectin(1,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         do idat=1, ndat*nspinor
           temp_realvec(1+(idat-1)*npwin) = temp_realvec(1+(idat-1)*npwin)/2
         end do
@@ -1074,7 +1074,7 @@ contains
         end if
       end if
       temp_realvec(1:npwin*nspinor*ndat) = vectin(2,1:npwin*nspinor*ndat)
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         do idat=1, ndat*nspinor
           temp_realvec(1+(idat-1)*npwin) = zero
         end do

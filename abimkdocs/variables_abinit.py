@@ -313,10 +313,10 @@ distribution if not specified in input file.
 
 !!! note
 
-    Note that this variable is only used when running **ground-state calculations** in parallel with MPI.
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1).
     Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
-    not automatically set by [[autoparal]]. Please consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
-    to run beyond-GS calculations with MPI.
+    not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
+    to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
 
 Given a total number of processors, ABINIT can find a suitable distribution that fill (when possible)
 all the different levels of parallelization. ABINIT can also determine optimal
@@ -1600,6 +1600,39 @@ of the [[help:abinit#parameters]]).
   * 2 --> the check is performed frequently (after a few bands, at each k point)
 
 In all cases, the check is performed at most every 2 seconds of CPU time.
+""",
+),
+
+Variable(
+    abivarname="chkparal",
+    varset="gstate",
+    vartype="integer",
+    topics=['parallelism_useful'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="CHecK whether the PARALelism is adequate",
+    added_in_version="before_v9",
+    text=r"""
+Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
+It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy 
+of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
+Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
+when they are booked for a run that cannot use these. 
+Accordingly, the user might blame ABINIT for being slow while the user has simply not activated 
+the relevant parallelism, or activated an irrelevant parallelism. 
+
+However, if the user correctly understand the parallelism,
+it might be more convenient to leave in the input file irrelevant variables. This is especially the case for high-throughput calculations
+driven by workflows developed for earlier versions of ABINIT.
+
+The default value of [[chkparal]], will enforce some basic relevance of the input variables related to parallelism,
+thus hopefully preventing some users to loose computing power.
+
+The following relevances and adequacies are checked at present if [[chkparal]]=1 :
+the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW). 
+
+The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
 """,
 ),
 
@@ -4118,7 +4151,7 @@ If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to co
 zero-point renormalisation as well as temperature dependence.
 If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
 zero-point renormalisation as well as temperature dependence.
-Note: The use of [[eph_ahc_type]]=0 is not recommanded in IR-active materials.
+Note: The use of [[eph_ahc_type]]=0 is not recommended in IR-active materials.
 """,
 ),
 
@@ -4469,7 +4502,8 @@ Variable(
     mnemonics="EXPERTise of the USER",
     added_in_version="9.2.2",
     text=r"""
-If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]]).
+If set to 0, the checking provided by ABINIT is maximum (default values of [[chkprim]], [[chksymbreak]], [[chksymtnons]], [[chkdilatmx]],
+[[chkparal]]).
 If non-zero (up to three), the above-mentioned checking input variables are all disabled (set to zero)
 although it is still possible to activate particular tests by specifying input variables directly in the input file.
 In the future, the level three will always be the maximum allowed value, with all checks set to zero,
@@ -5961,7 +5995,7 @@ Bethe-Salpeter calculation:
     produced in a previous ground state calculation
   * This variable or [[irdwfkfine]] is mandatory when [[bs_interp_mode]] == 1
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 **This variable is experimental. In development.**
 """,
@@ -6101,8 +6135,8 @@ Variable(
     varset="paral",
     vartype="integer",
     topics=['parallelism_expert'],
-    dimensions=[5],
-    defaultval=[-1, -1, -1, -1, -1],
+    dimensions=[12],
+    defaultval=12*(-1),
     mnemonics="GPU: choice of DEVICES on one node",
     requires="[[gpu_option]] > 0 and [[CUDA]] (Nvidia GPU)",
     added_in_version="before_v9",
@@ -6116,19 +6150,19 @@ the GPU devices are chosen by order of performance (FLOPS, memory).
 
 Examples:
 
-  * 2 GPU devices per node, 4 MPI processes per node, **gpu_device** =[-1,-1,-1,-1,-1] (default):
+  * 2 GPU devices per node, 4 MPI processes per node, **gpu_device** = *-1 (default):
 MPI processes 0 and 2 use the best GPU card, MPI processes 1 and 3 use the
 slowest GPU card.
 
-  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[1,0,2,-1,-1]:
+  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[1,0,2,-1,-1, . . .]:
 MPI processes 0 and 3 use GPU card 1, MPI processes 1 and 4 use GPU card 0,
 MPI process 2 uses GPU card 2.
 
-  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[0,1,-1,-1,-1]:
+  * 3 GPU devices per node, 5 MPI processes per node, **gpu_device** =[0,1,-1,-1, . . .]:
 MPI processes 0, 2 and 4 use GPU card 0, MPI processes 1 and 3 use GPU card 1;
 the 3rd GPU card is not used.
 
-GPU card are numbered starting from 0; to get the GPU devices list, type
+GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia): 
 "nvidia-smi" or "lspci | grep -i nvidia".
 """,
 ),
@@ -7802,18 +7836,18 @@ Other targets are prioritary. You will notice that many automatic tests use
 ),
 
 Variable(
-    abivarname="invol_blk_sliced",
+    abivarname="invovl_blksliced",
     varset="dev",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
-    mnemonics="INVerse OverLap: BLocK-diagonal matrix applied SLICED",
+    mnemonics="INVerse OVerLap: BLocK-diagonal matrix applied SLICED",
     added_in_version="9.7.2",
     defaultval=ValueWithConditions({'[[gpu_option]] > 0': '0', 'defaultval': 1}),
     text=r"""
 Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).
 In the Chebyshev-filtered subspace method (iterative diagonalization algorithm))
-one needs to apply the inverse of the overlap matrix. [[invol_blk_sliced]] allows one
+one needs to apply the inverse of the overlap matrix. [[invovl_blksliced]] allows one
 to choose between two variants, sliced (1) or non-sliced (0).
 Default value is different for an execution on GPU.
 """,
@@ -8222,7 +8256,7 @@ from _DENx files produced in other calculations. In multi-dataset mode use [[get
 When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of **ird1den** is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8261,7 +8295,7 @@ is described in the following.
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation.
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8344,7 +8378,7 @@ speed as the density of the k-point grid required to obtain the fulfillment of
 the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 The input variable [[getddb]] is an alternative to [[irdddb]], in the multidataset case.
 Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
@@ -8372,7 +8406,7 @@ input variable [[getddk]].
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8391,7 +8425,7 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 Alternative to [[getden_filepath]] and [[getden]].
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8412,7 +8446,7 @@ When [[iscf]] < 0, the reading of a KDEN file is always enforced.
 Alternative to [[getkden]].
 
 A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8492,7 +8526,7 @@ When [[optdriver]] = 4, at least one of [[irdscr]] or [[getscr]] (alternatively,
 [[irdsuscep]] or [[getsuscep]]) must be non-zero.
 
 A non-zero value of [[irdscr]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8513,7 +8547,7 @@ When [[optdriver]] = 4, at least one of [[irdsuscep]] or [[getsuscep]]
 (alternatively, [[irdscr]] or [[getscr]]) must be non-zero.
 
 A non-zero value of [[irdsuscep]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8577,7 +8611,7 @@ Response-function calculation:
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8614,7 +8648,7 @@ Bethe-Salpeter calculation:
      produced in a previous ground state calculation
   * This variable or [[getwfkfine]] is mandatory when [[bs_interp_mode]] = 1
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 **This variable is experimental. In development.**
 """,
@@ -9943,7 +9977,7 @@ Variable(
     abivarname="lambsig",
     varset="paw",
     vartype="real",
-    topics=['MagField_expert'],
+    topics=['NMR_basic','MagField_expert'],
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="LAMB shielding SIGma",
@@ -12669,7 +12703,7 @@ is applied, to give calculation at k+q. In this case, the output wavefunction
 will be appended by _WFQ instead of _WFK
 Also, if 1 and a RF calculation is done, defines the wavevector of the perturbation.
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -13068,7 +13102,7 @@ Variable(
     abivarname="nucdipmom",
     varset="gstate",
     vartype="real",
-    topics=['MagField_expert'],
+    topics=['NMR_basic','MagField_expert'],
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
@@ -13792,7 +13826,7 @@ Variable(
     abivarname="orbmag",
     varset="dfpt",
     vartype="integer",
-    topics=['MagField_expert'],
+    topics=['NMR_basic','MagField_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="ORBital MAGnetization",
@@ -13883,8 +13917,11 @@ Variable(
 Relevant only for PAW calculations.
 This keyword controls the parallel distribution of memory over atomic sites.
 Calculations are also distributed using the "kpt-band" communicator.
-Compatible with ground-state calculations and response function calculations
-""",
+Compatible with ground-state calculations and response function calculations.
+
+This parallelization concerns only a small part of the whole calculation in the sequential case.
+When using parallelism, it might be that this small part becomes predominant if [[paral_atom]] is not activated.
+"""
 ),
 
 Variable(
@@ -13897,6 +13934,14 @@ Variable(
     mnemonics="activate PARALelization over K-point, G-vectors and Bands",
     added_in_version="before_v9",
     text=r"""
+
+!!! note
+
+    Note that this variable is only used when running **ground-state calculations** in parallel with MPI ([[optdriver]]=1) (or GW Lanczos-Sternheimer [[optdriver]]=66, but this is very rare).
+    Other [[optdriver]] runlevels implement different MPI algorithms that rely on other input variables that are
+    not automatically set by [[autoparal]]. For example, consult the [[tutorial:paral_mbt|tutorial on parallelism for Many-Body Perturbation Theory]] to learn how
+    to run beyond-GS calculations with MPI. Other tutorials on parallelism are also available.
+
 **If paral_kgb is not explicitely put in the input file**, ABINIT
 automatically detects if the job has been sent in sequential or in parallel.
 In this last case, it detects the number of processors on which the job has
@@ -13912,7 +13957,7 @@ Require compilation option --enable-mpi="yes".
 components is activated (see [[np_spkpt]], [[npfft]] [[npband]] and possibly
 [[npspinor]]). With this parallelization, the work load is split over four
 levels of parallelization (three level of parallelisation (kpt-band-fft )+
-spin) The different communications almost occur along one dimension only.
+spin). The different communications almost occur along one dimension only.
 Require compilation option --enable-mpi="yes".
 
 HOWTO fix the number of processors along one level of parallelisation:

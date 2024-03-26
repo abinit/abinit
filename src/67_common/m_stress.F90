@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -298,6 +298,7 @@ contains
 &     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
 &     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
      corstr(1:6)=corstr(1:6)+taustr(1:6)
+     ABI_FREE(vxctotg)
    end if
    call timab(551,2,tsec)
  end if

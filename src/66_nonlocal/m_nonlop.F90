@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (MT)
+!!  Copyright (C) 1998-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -891,7 +891,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2024 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1118,7 +1118,7 @@ end subroutine nonlop
  call gpu_nonlop(atindx1,choice,cpopt,proj,dimenl1,dimenl2,dimffnlin,dimffnlout,&
 & enl,enlout,ffnlin,ffnlout,gprimd,idir,indlmn,istwf_k,&
 & kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
-& mpi_enreg%me_g0,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
+& mpi_enreg%me_g0_fft,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 & npwin,npwout,nspinor,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 & ph3din,ph3dout,signs_,sij,svectout_,pi,ucvol,vectin,vectout_)
 #else
@@ -1127,9 +1127,9 @@ end subroutine nonlop
 
  if (choice==1.and.signs==1) then
    if (paw_opt/=3) then
-     call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,vectout_,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,vectout_,mpi_enreg%me_g0_fft,mpi_enreg%comm_spinorfft)
    else
-     call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,svectout_,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+     call dotprod_g(enlout(1),doti,istwf_k,npwin*nspinor,1,vectin,svectout_,mpi_enreg%me_g0_fft,mpi_enreg%comm_spinorfft)
    end if
    ABI_FREE(vectout_)
    ABI_FREE(svectout_)

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2024 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1513,7 +1513,7 @@ use m_wfutils
 
 !Arguments of gw_sternheimer, reveived as argument by build_H-------------------------
 type(dataset_type),  intent(in) :: dtset2
-type(MPI_type),   intent(inout) :: mpi_enreg2
+type(MPI_type),   intent(in) :: mpi_enreg2
 type(gs_hamiltonian_type), intent(inout) :: gs_hamk2
 
 integer, intent(in) :: cpopt2

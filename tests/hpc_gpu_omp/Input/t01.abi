@@ -1,6 +1,8 @@
 #ABINIT - INPUT FILE
 #UO2 54 ATOMS
 
+gpu_option 2
+
 #Process distribution (parallelism)
 npkpt 1 npband 2 npfft 1 bandpp 32   # 2 MPI processes
 paral_kgb 1

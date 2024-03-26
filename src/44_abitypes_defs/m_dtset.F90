@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2024 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -111,6 +111,7 @@ type, public :: dataset_type
  integer :: chkdilatmx
  integer :: chkexit
  integer :: chneut = 1
+ integer :: chkparal
  integer :: chkprim
  integer :: chksymbreak
  integer :: chksymtnons
@@ -237,7 +238,6 @@ type, public :: dataset_type
  integer :: gpu_nl_distrib = 0
  integer :: gpu_nl_splitsize = 1
  integer :: gpu_option
- integer :: gpu_use_nvtx
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
@@ -313,7 +313,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
- integer :: invol_blk_sliced
+ integer :: invovl_blksliced
  integer :: iomode
  integer :: ionmov
  integer :: iprcel
@@ -692,7 +692,7 @@ type, public :: dataset_type
  integer :: kptrlatt_orig(3,3)=0
  integer :: qptrlatt(3,3)
  integer :: ga_rules(30)
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
  integer :: ngfft(18)
  integer :: ngfftdg(18)
  integer :: nloalg(3)
@@ -1427,6 +1427,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%cd_full_grid       = dtin%cd_full_grid
  dtout%chkdilatmx         = dtin%chkdilatmx
  dtout%chkexit            = dtin%chkexit
+ dtout%chkparal           = dtin%chkparal
  dtout%chkprim            = dtin%chkprim
  dtout%chksymbreak        = dtin%chksymbreak
  dtout%chksymtnons        = dtin%chksymtnons
@@ -1615,7 +1616,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
  dtout%gpu_nl_splitsize   = dtin%gpu_nl_splitsize
  dtout%gpu_option         = dtin%gpu_option
- dtout%gpu_use_nvtx       = dtin%gpu_use_nvtx
 
  dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
@@ -1690,7 +1690,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
- dtout%invol_blk_sliced   = dtin%invol_blk_sliced
+ dtout%invovl_blksliced  = dtin%invovl_blksliced
  dtout%ionmov             = dtin%ionmov
  dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
@@ -3302,7 +3302,7 @@ subroutine chkvars(string)
 !C
  list_vars=trim(list_vars)//' cd_customnimfrqs cd_frqim_method cd_full_grid cd_imfrqs'
  list_vars=trim(list_vars)//' cd_halfway_freq cd_max_freq cd_subset_freq'
- list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkprim'
+ list_vars=trim(list_vars)//' cellcharge charge chrgat chempot chkdilatmx chkexit chkparal chkprim'
  list_vars=trim(list_vars)//' chksymbreak chksymtnons chneut cineb_start coefficients constraint_kind'
  list_vars=trim(list_vars)//' cprj_update_lvl cpus cpum cpuh'
 !D
@@ -3369,7 +3369,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
- list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option gpu_use_nvtx'
+ list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
@@ -3390,7 +3390,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invol_blk_sliced iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
  list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
@@ -3462,16 +3462,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
- list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf prtevk'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
- list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prtpot prtprocar prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model'
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q

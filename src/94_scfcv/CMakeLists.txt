@@ -31,6 +31,7 @@ target_link_libraries(94_scfcv
   PUBLIC
   abinit::10_defs
   abinit::16_hideleave
+  abinit::17_minimax
   abinit::43_wvl_wrappers
   abinit::44_abitypes_defs
   abinit::51_manage_mpi
