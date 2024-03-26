@@ -160,6 +160,7 @@ module m_anaddb_dataset
   real(dp):: elphsmear
   real(dp):: elph_fermie
   real(dp):: ep_extrael
+  real(dp):: eta_phongreen
   real(dp):: freeze_displ
   real(dp):: frmax
   real(dp):: frmin
@@ -628,6 +629,10 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
      ABI_ERROR(message)
    end if
  end if
+
+ anaddb_dtset%eta_phongreen = 0.000001_dp
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta_phongreen',tread, 'DPR')
+ if(tread == 1) anaddb_dtset%eta_phongreen = dprarr(1)
 
 
 !F
@@ -2296,6 +2301,7 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    write(nunit, '(3x, a9, i10)')       '   nomega',anaddb_dtset%nomega
    write(nunit, '(3x, a9, 7x, es16.8)')' omegamin',anaddb_dtset%omegamin
    write(nunit, '(3x, a9, 7x, es16.8)')' omegamax',anaddb_dtset%omegamax
+   write(nunit, '(3x, a9, 7x, es16.8)')' eta_phongreen',anaddb_dtset%eta_phongreen
  end if
 
 
@@ -2482,7 +2488,7 @@ subroutine anaddb_chkvars(string)
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
- list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist'
+ list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta_phongreen'
 !F
  list_vars = trim(list_vars)//' flexoflag freeze_displ frmax frmin'
 !G
