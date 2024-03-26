@@ -619,11 +619,11 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- real(dp),intent(in),target :: cwave0(2,npw_k*nspinor),cwave1(2,npw1_k*nspinor),cwavef(2,npw1_k*nspinor)
+ real(dp),intent(in),target :: cwave0(2,npw_k*nspinor*ndat),cwave1(2,npw1_k*nspinor*ndat),cwavef(2,npw1_k*nspinor*ndat)
  real(dp),intent(in) :: occ_k(nband_k)
  real(dp),intent(inout) :: rhoaug1(cplex*gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc)
- type(pawcprj_type),intent(in) :: cwaveprj0(natom,nspinor*gs_hamkq%usecprj)
- type(pawcprj_type),intent(in) :: cwaveprj1(natom,nspinor*gs_hamkq%usepaw)
+ type(pawcprj_type),intent(in) :: cwaveprj0(natom,nspinor*ndat*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(in) :: cwaveprj1(natom,nspinor*ndat*gs_hamkq%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij1(:)
 
 !Local variables-------------------------------
