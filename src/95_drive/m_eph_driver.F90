@@ -70,6 +70,7 @@ module m_eph_driver
  use m_berry_curvature,  only : berry_curvature
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
+ use m_varpeq
 
  implicit none
 
