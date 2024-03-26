@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -556,7 +556,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
- dtsets(:)%gpu_use_nvtx=0
 #if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
@@ -586,11 +585,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        dtsets(idtset)%gpu_option=intarr(1)
      end if
    end if
-
-#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
-#endif
 
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
@@ -2291,6 +2285,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%chempot(:,:,:)=zero
    dtsets(idtset)%chkdilatmx=1
    dtsets(idtset)%chkexit=0
+   dtsets(idtset)%chkparal=1
    dtsets(idtset)%chksymbreak=1
    dtsets(idtset)%chksymtnons=1
    dtsets(idtset)%chneut=1      
@@ -2410,7 +2405,7 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%ga_rules(:) =1
    dtsets(idtset)%goprecon =0
    dtsets(idtset)%goprecprm(:)=0
-   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1/)
+   dtsets(idtset)%gpu_devices=(/-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1/)
    dtsets(idtset)%gpu_kokkos_nthrd=xomp_get_num_threads(open_parallel=.true.)
    dtsets(idtset)%gpu_linalg_limit=2000000
    dtsets(idtset)%gpu_nl_distrib=0
@@ -2466,9 +2461,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
-   dtsets(idtset)%invol_blk_sliced=1
+   dtsets(idtset)%invovl_blksliced=1
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
-     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invol_blk_sliced=0
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
    end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (XG)
+!!  Copyright (C) 1999-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -812,8 +812,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
  end do
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'invol_blk_sliced',tread,'INT')
- if(tread==1)dtset%invol_blk_sliced=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'invovl_blksliced',tread,'INT')
+ if(tread==1)dtset%invovl_blksliced=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)
@@ -1266,6 +1266,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (dtset%expert_user > 0) then
    ! Set all flags to zero although we still allow users to activate particular tests via explicit values.
    dtset%chkdilatmx=0
+   dtset%chkparal=0
    dtset%chkprim=0
    dtset%chksymbreak=0
    dtset%chksymtnons=0
@@ -1273,6 +1274,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkdilatmx',tread,'INT')
  if(tread==1) dtset%chkdilatmx=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkparal',tread,'INT')
+ if(tread==1) dtset%chkparal=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
  if(tread==1) dtset%chkprim=intarr(1)

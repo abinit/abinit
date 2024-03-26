@@ -7,7 +7,7 @@
 !!  character tables of the 32 point groups.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MG)
+!! Copyright (C) 2010-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1033,7 +1033,7 @@ function sum_irreps(Irrep1,Irrep2,ii,jj,kk,ll) result(res)
 
  if (ii>Irrep2%dim .or. jj>Irrep2%dim .or. &
 &    kk>Irrep1%dim .or. ll>Irrep1%dim) then
-   ABI_WARNING("Wrong indeces")
+   ABI_WARNING("Wrong indices")
    write(std_out,*)ii,Irrep2%dim,jj,Irrep2%dim,kk>Irrep1%dim,ll,Irrep1%dim
    ierr=ierr+1
  end if

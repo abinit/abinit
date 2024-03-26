@@ -8,7 +8,7 @@
 !!  methods bound to the object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2024 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,7 +67,7 @@ MODULE m_sigma
 
  type,public :: sigma_t
 
-  integer :: b1gw, b2gw     ! min and Max gw band indeces over spin and k-points (used to dimension arrays)
+  integer :: b1gw, b2gw     ! min and Max gw band indices over spin and k-points (used to dimension arrays)
   integer :: gwcalctyp      ! Flag defining the calculation type.
   integer :: nkptgw         ! No. of points calculated
   integer :: nkibz          ! No. of irreducible k-points.

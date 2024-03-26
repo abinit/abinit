@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2024 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,7 +219,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical,allocatable :: lmselect(:)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
- real(dp),allocatable :: dijnd(:,:),dijso(:,:),dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
+ real(dp),allocatable :: dijnd(:,:),dijso(:,:)
+ real(dp),allocatable :: dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
  real(dp),pointer :: v_dijhat(:,:),vpawu(:,:,:,:),vpawx(:,:,:)
 
 ! *************************************************************************
@@ -409,8 +410,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    dij_need=.false.;dij0_need=.false.;dijexxc_need=.false.;dijfock_need=.false.
    dijhartree_need=.false.;dijhat_need=.false.;dijhatfr_need=.false.;
-   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.;dijxchat_need=.false.
-   dijxcval_need=.false.; dijnd_need=.false.
+   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.
+   dijxchat_need=.false.;dijxcval_need=.false.; dijnd_need=.false.
 
    if (dij_available) then
      if (paw_ij(iatom)%has_dij==1) then
@@ -2697,6 +2698,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(dijso_rad)
 
 end subroutine pawdijso
+
 !!***
 
 !----------------------------------------------------------------------

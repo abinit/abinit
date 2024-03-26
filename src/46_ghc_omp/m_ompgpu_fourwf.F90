@@ -7,7 +7,7 @@
 !!   in the chain of dependencies.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2022 ABINIT group (MT)
+!!  Copyright (C) 2000-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -56,9 +56,6 @@ integer :: npw=-1
 
 ! GPU ffts buffers
 real(dp),allocatable,target :: work_gpu(:,:,:,:)
-#if defined HAVE_GPU_HIP && defined FC_LLVM
-type(c_ptr),target,save :: fofr_amdref
-#endif
 
 #endif
 
@@ -126,6 +123,10 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
  integer :: i1inv,i2inv,i3inv
  logical :: transfer_fofgin, transfer_fofgout, transfer_fofr
  integer(C_SIZE_T) :: byte_count
+
+#if defined HAVE_GPU_HIP && defined FC_LLVM
+ real(dp), ABI_CONTIGUOUS pointer :: fofr_amdref(:,:,:,:)
+#endif
 
  n1=ngfft(1);
  n2=ngfft(2);
@@ -196,9 +197,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    !FIXME Work-around for AOMP v15.0.3 (AMD Flang fork)
    ! For some reason, fofr won't be processed normally when passed as argument
    ! of FFT routine within TARGET DATA directives
-   !$OMP TARGET MAP(to:fofr) MAP(from:fofr_amdref)
-   fofr_amdref=c_loc(fofr)
-   !$OMP END TARGET
+   fofr_amdref => fofr
 #endif
 
    ! GPU_SPHERE_IN
@@ -282,8 +281,8 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    ! call backward fourrier transform on gpu work_gpu => fofr_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
-   call gpu_fft_exec_z2z(c_loc(work_gpu), fofr_amdref, FFT_INVERSE)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
+   call gpu_fft_exec_z2z(c_loc(work_gpu), c_loc(fofr_amdref), FFT_INVERSE)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)
@@ -346,8 +345,8 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
 
    ! call forward fourier transform on gpu: fofr_gpu ==> work_gpu
 #if defined HAVE_GPU_HIP && defined FC_LLVM
-   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu)
-   call gpu_fft_exec_z2z(fofr_amdref, c_loc(work_gpu), FFT_FORWARD)
+   !$OMP TARGET DATA USE_DEVICE_ADDR(work_gpu,fofr_amdref)
+   call gpu_fft_exec_z2z(c_loc(fofr_amdref), c_loc(work_gpu), FFT_FORWARD)
    !$OMP END TARGET DATA
 #else
    !$OMP TARGET DATA USE_DEVICE_PTR(work_gpu,fofr)

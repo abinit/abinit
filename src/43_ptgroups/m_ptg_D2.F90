@@ -6,7 +6,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MG)
+!! Copyright (C) 2010-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +61,7 @@ contains
  sym(:,:,3) = RESHAPE( (/-1, 0, 0, 0, 1, 0, 0, 0, -1/) ,(/3,3/) )
  sym(:,:,4) = RESHAPE( (/1, 0, 0, 0, -1, 0, 0, 0, -1/) ,(/3,3/) )
 
-! Number of classes and corresponding indeces
+! Number of classes and corresponding indices
  nclass = 4
  ABI_MALLOC(class_ids, (2,nclass))
  class_ids(1,1) = 1

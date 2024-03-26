@@ -6,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2029,7 +2029,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  nomega_sigc=Sr%nomega_r+Sr%nomega4sd; if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
 
- ! min and max band indeces for GW corrections.
+ ! min and max band indices for GW corrections.
  ib1=Sigp%minbdgw; ib2=Sigp%maxbdgw
 
  !MG TODO: I don't like the fact that ib1 and ib2 are redefined here because this
@@ -3028,7 +3028,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  type(gaps_t) :: gaps
 !arrays
  integer :: ng0sh_opt(3),G0(3),q_umklp(3),kpos(6), units(2)
- integer,allocatable :: npwarr(:),val_indeces(:,:)
+ integer,allocatable :: npwarr(:),val_indices(:,:)
  integer,pointer :: gvec_kss(:,:),gsphere_sigx_p(:,:)
  integer,pointer :: test_gvec_kss(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3),q_bz(3),gamma_point(3,1)
@@ -3371,8 +3371,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  call gaps%print(unit=std_out)
  call ebands_report_gap(ks_ebands, unit=std_out)
 
- ABI_MALLOC(val_indeces,(ks_ebands%nkpt, nsppol))
- val_indeces = ebands_get_valence_idx(ks_ebands)
+ ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))
+ val_indices = ebands_get_valence_idx(ks_ebands)
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3443,8 +3443,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        ! All k-points: Add buffer of bands above and below the Fermi level.
        do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%minbnd(ik, spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
-           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) + gw_qprange + 1, Sigp%nbnds)
+           Sigp%minbnd(ik, spin) = MAX(val_indices(ik,spin) - gw_qprange, 1)
+           Sigp%maxbnd(ik, spin) = MIN(val_indices(ik,spin) + gw_qprange + 1, Sigp%nbnds)
          end do
        end do
 
@@ -3453,7 +3453,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        Sigp%minbnd = 1
        do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) - gw_qprange, Sigp%nbnds)
+           Sigp%maxbnd(ik, spin) = MIN(val_indices(ik,spin) - gw_qprange, Sigp%nbnds)
          end do
        end do
      end if
@@ -3493,8 +3493,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        ik = kpos(ii)
        Sigp%kptgw(:,ii) = Kmesh%ibz(:,ik)
        do spin=1,nsppol
-         Sigp%minbnd(ii,spin) = val_indeces(ik, spin)
-         Sigp%maxbnd(ii,spin) = val_indeces(ik, spin) + 1
+         Sigp%minbnd(ii,spin) = val_indices(ik, spin)
+         Sigp%maxbnd(ii,spin) = val_indices(ik, spin) + 1
        end do
      end do
    end if
@@ -3922,7 +3922,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  call gaps%free()
 
- ABI_FREE(val_indeces)
+ ABI_FREE(val_indices)
 
  DBG_EXIT('COLL')
 

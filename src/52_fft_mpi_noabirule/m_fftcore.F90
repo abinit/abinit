@@ -8,7 +8,7 @@
 !!  inside a sphere or to count them.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (SG, XG, AR, MG, MT)
+!!  Copyright (C) 2014-2024 ABINIT group (SG, XG, AR, MG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1004,7 +1004,7 @@ subroutine getng(boxcutmin, chksymtnons, ecut, gmet, kpt, me_fft, mgfft, nfft, n
            end if
          endif
        else
-         write(msg, '(a,i12,5a)' ) &
+         write(msg, '(5a,i12,2a,9i12,2a,3f10.7,2a)' ) &
           'Chksymtnons=1 . Found potentially symmetry-breaking value of tnons, ', ch10,&
 &         '   which is neither a rational fraction in 1/8th nor in 1/12th (1/9th and 1/10th are tolerated also) :', ch10,&
 &         '   for the symmetry number ',isym,ch10,&
@@ -4271,6 +4271,7 @@ subroutine kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpt,mkmem,mpi_enreg,mp
  ABI_FREE(array_ipw)
 
 !Take care of the me_g0 flag
+ mpi_enreg%me_g0_fft=mpi_enreg%me_g0
  if(mpi_enreg%paral_kgb==1.and.mpi_enreg%nproc_band>0) then
    if(mpi_enreg%me_band==0.and.mpi_enreg%me_g0==1) then
 !    In this case, the processors had the 0 G vector before the new distribution, and still keeps it
