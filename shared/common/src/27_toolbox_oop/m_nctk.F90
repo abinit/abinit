@@ -6,7 +6,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -385,7 +385,7 @@ end function nctk_idgroup
 
 function nctk_ncify(ipath) result(opath)
 
- character(len=fnlen),intent(in) :: ipath
+ character(len=*),intent(in) :: ipath
  character(len=fnlen) :: opath
 
 ! *********************************************************************

@@ -4151,7 +4151,7 @@ If set to 0, use the adiabatic version of the Allen-Heine-Cardona equation to co
 zero-point renormalisation as well as temperature dependence.
 If set to 1 (default), use the non-adiabatic version of the Allen-Heine-Cardona equation to compute the
 zero-point renormalisation as well as temperature dependence.
-Note: The use of [[eph_ahc_type]]=0 is not recommanded in IR-active materials.
+Note: The use of [[eph_ahc_type]]=0 is not recommended in IR-active materials.
 """,
 ),
 
@@ -4386,6 +4386,7 @@ The choice is among:
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
+* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path
@@ -5995,7 +5996,7 @@ Bethe-Salpeter calculation:
     produced in a previous ground state calculation
   * This variable or [[irdwfkfine]] is mandatory when [[bs_interp_mode]] == 1
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 **This variable is experimental. In development.**
 """,
@@ -7836,18 +7837,18 @@ Other targets are prioritary. You will notice that many automatic tests use
 ),
 
 Variable(
-    abivarname="invol_blk_sliced",
+    abivarname="invovl_blksliced",
     varset="dev",
     vartype="integer",
     topics=['parallelism_expert'],
     dimensions="scalar",
-    mnemonics="INVerse OverLap: BLocK-diagonal matrix applied SLICED",
+    mnemonics="INVerse OVerLap: BLocK-diagonal matrix applied SLICED",
     added_in_version="9.7.2",
     defaultval=ValueWithConditions({'[[gpu_option]] > 0': '0', 'defaultval': 1}),
     text=r"""
 Only relevant if [[wfoptalg]] == 1 or 111 (WF optimization by Chebyshev filtering algorithm).
 In the Chebyshev-filtered subspace method (iterative diagonalization algorithm))
-one needs to apply the inverse of the overlap matrix. [[invol_blk_sliced]] allows one
+one needs to apply the inverse of the overlap matrix. [[invovl_blksliced]] allows one
 to choose between two variants, sliced (1) or non-sliced (0).
 Default value is different for an execution on GPU.
 """,
@@ -8256,7 +8257,7 @@ from _DENx files produced in other calculations. In multi-dataset mode use [[get
 When [[iscf]] < 0, the reading of a DEN file is always enforced.
 
 A non-zero value of **ird1den** is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8295,7 +8296,7 @@ is described in the following.
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation.
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8378,7 +8379,7 @@ speed as the density of the k-point grid required to obtain the fulfillment of
 the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 The input variable [[getddb]] is an alternative to [[irdddb]], in the multidataset case.
 Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
@@ -8406,7 +8407,7 @@ input variable [[getddk]].
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8425,7 +8426,7 @@ When [[iscf]] < 0, the reading of a DEN file is always enforced.
 Alternative to [[getden_filepath]] and [[getden]].
 
 A non-zero value of [[irdden]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8446,7 +8447,7 @@ When [[iscf]] < 0, the reading of a KDEN file is always enforced.
 Alternative to [[getkden]].
 
 A non-zero value of [[irdkden]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8526,7 +8527,7 @@ When [[optdriver]] = 4, at least one of [[irdscr]] or [[getscr]] (alternatively,
 [[irdsuscep]] or [[getsuscep]]) must be non-zero.
 
 A non-zero value of [[irdscr]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8547,7 +8548,7 @@ When [[optdriver]] = 4, at least one of [[irdsuscep]] or [[getsuscep]]
 (alternatively, [[irdscr]] or [[getscr]]) must be non-zero.
 
 A non-zero value of [[irdsuscep]] is treated in the same way as other "ird" variables.
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8611,7 +8612,7 @@ Response-function calculation:
   * if [[irdddk]] = 1: read first-order ddk wavefunctions from a disk file appended with _1WFx,
     produced in a previous response function calculation
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
@@ -8648,7 +8649,7 @@ Bethe-Salpeter calculation:
      produced in a previous ground state calculation
   * This variable or [[getwfkfine]] is mandatory when [[bs_interp_mode]] = 1
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 
 **This variable is experimental. In development.**
 """,
@@ -12703,7 +12704,7 @@ is applied, to give calculation at k+q. In this case, the output wavefunction
 will be appended by _WFQ instead of _WFK
 Also, if 1 and a RF calculation is done, defines the wavevector of the perturbation.
 
-For further information about the *files file*, consult the [[help:abinit#files-file]].
+For further information about the naming of files in ABINIT, consult the [[help:abinit#files-file]].
 """,
 ),
 
