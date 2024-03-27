@@ -141,12 +141,6 @@ if(ABINIT_ENABLE_GPU_CUDA)
   set(HAVE_GPU 1)
   set(HAVE_GPU_SERIAL 1)
 
-  # check nvtx library is available
-  if (TARGET CUDA::nvToolsExt)
-    set(HAVE_GPU_CUDA10 1)
-    set(HAVE_GPU_MARKERS 1)
-  endif()
-
 endif()
 
 option(ABINIT_ENABLE_GPU_HIP "Enable GPU build (using AMD HIP backend, default OFF)" OFF)
@@ -164,18 +158,33 @@ if(ABINIT_ENABLE_GPU_HIP)
   set(HAVE_GPU 1)
   set(HAVE_GPU_SERIAL 1)
 
-  # ROCTX: ROC tracer library similar in use to NVTX for CUDA
-  find_library(ROCTX
-    NAMES libroctx64.so
-    HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
-    REQUIRED)
-
-  # check roctx library is available
-  if (EXISTS ${ROCTX})
-    set(HAVE_GPU_MARKERS 1)
-  endif()
   add_compile_definitions("__HIP_PLATFORM_AMD__")
 
+endif()
+
+option(ABINIT_ENABLE_GPU_MARKERS "Enable GPU markers for profiling (requires CUDA or ROCM/HIP, default OFF)" OFF)
+if(ABINIT_ENABLE_GPU_MARKERS)
+
+  if(ABINIT_ENABLE_GPU_CUDA)
+    # check nvtx library is available
+    if (TARGET CUDA::nvToolsExt)
+      set(HAVE_GPU_CUDA10 1)
+      set(HAVE_GPU_MARKERS 1)
+    endif()
+  endif()
+
+  if(ABINIT_ENABLE_GPU_HIP)
+    # ROCTX: ROC tracer library similar in use to NVTX for CUDA
+    find_library(ROCTX
+      NAMES libroctx64.so
+      HINTS ${ROCM_ROOT}/roctracer/lib ${ROCM_PATH}/roctracer/lib ${ROCM_HOME}/roctracer/lib
+      REQUIRED)
+
+    # check roctx library is available
+    if (EXISTS ${ROCTX})
+      set(HAVE_GPU_MARKERS 1)
+    endif()
+  endif()
 endif()
 
 if (ABINIT_ENABLE_GPU_CUDA OR ABINIT_ENABLE_GPU_HIP)

@@ -1183,9 +1183,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(1,:)=dtsets(:)%gpu_option
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_option','INT',0,firstchar=firstchar_gpu)
 
-   intarr(1,:)=dtsets(:)%gpu_use_nvtx
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_use_nvtx','INT',0,firstchar=firstchar_gpu)
-
    if (any(dtsets(:)%gpu_option/=ABI_GPU_KOKKOS)) then
      intarr(1,:)=dtsets(:)%gpu_kokkos_nthrd
      call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_kokkos_nthrd','INT',0,firstchar=firstchar_gpu)
