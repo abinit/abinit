@@ -118,11 +118,9 @@ By P. Kestener with M. Torrent (MR944, 979))
 
 **B.4** Computation of phonon angular momentum
 
-It is now possible to compute of phonon angular momentum in anaddb, following the formula provided in [[cite:Zhang2014]].
-DDB support has been added, a new block type is introduced inside the ddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
-A new type of file (*_PHANGMOM) has been defined. See [[test:rf2_5]].
+It is now possible to compute the angular momentum of phonons in anaddb, following the formula provided in [[cite:Zhang2014]]. A new type of file (*_PHANGMOM) has been defined. The phonon angular momentum is also written to *_PHBST.nc. See [[test:rf2_5]].
 
-By M. Mignolet (MR921, MR984)
+By M. Mignolet (MR921)
 
 
 **B.5** New input "supra"variable write_files
@@ -410,6 +408,13 @@ Reference files redone and updated.
 
 From L. MacEnulty (MR975)
 
+**D.25** Molecular Berry curvature
+
+DDB support has been added for the molecular Berry curvature. A new block type has been introduced inside anaddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
+
+When computing the molecular Berry curvature (eph_task=14), it is now written to a ddb file (*_BERRY_DBB).
+
+From M. Mignolet (MR984)
 
 * * *
 
