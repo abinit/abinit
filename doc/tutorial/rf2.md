@@ -20,6 +20,9 @@ and the [Abipy tutorials](https://github.com/abinit/abitutorials).
 
 This tutorial should take about 1 hour.
 
+WARNING : this tutorial is a bit old, and should be updated by removing the use of the ANADDB input variable brav in 
+trf2_4.abi, trf2_5.abi, and trf2_7.abi, with the accompanying modifications in the text of the tutorial.
+
 [TUTORIAL_README]
 
 ## 0 Generation of necessary input wavefunctions

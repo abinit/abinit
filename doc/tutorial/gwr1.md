@@ -48,9 +48,9 @@ Ideally the total number of cores should be a multiple of [[nkpt]] * [[nsppol]] 
 
 ### QP corrections with GWR
 
-The k-points for the QP corrections can be specified in different ways
+The k-points for the QP corrections can be specified in different ways.
 
-Explictly via:
+Explicitly via:
 
 [[nkptgw]], [[kptgw]] and [[bdgw]]
 
@@ -62,5 +62,5 @@ For the spectral function
 
 Notes on the MPI parallelization
 
-The GWR code employs [[gwr_np_kgts]]
+The GWR code employs [[gwr_np_kgts]].
 Ideally the total number of MPI processes should be a multiple of [[gwr_ntau]] * [[nsppol]].

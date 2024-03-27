@@ -16,6 +16,7 @@ EXTRA_DIST += \
 	abimkdocs_plugin \
 	abimkdocs_tests \
 	abinit_theme \
+	abinit.pc.in \
 	abisrc.py \
 	abisrc_requirements.txt \
 	autogen.sh \
@@ -46,7 +47,7 @@ CLEANFILES += \
 install-data-local: config.pc
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) -m 644 config.pc \
-	 $(DESTDIR)$(libdir)/pkgconfig/abinit.pc
+	$(DESTDIR)$(libdir)/pkgconfig/abinit.pc
 
 # Files to uninstall
 uninstall-local:
