@@ -22,6 +22,7 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_ldflags=""
   sd_gpu_libs=""
   sd_gpu_enable=""
+  sd_gpu_markers_enable=""
   sd_gpu_init="unknown"
   sd_gpu_ok="unknown"
   sd_gpu_prefix=""
@@ -35,6 +36,7 @@ AC_DEFUN([SD_GPU_INIT], [
   sd_gpu_fcflags_def="$6"
   sd_gpu_ldflags_def="$7"
   sd_gpu_enable_def=""
+  sd_gpu_markers_enable_def=""
   sd_gpu_policy=""
   sd_gpu_status=""
 
@@ -58,6 +60,7 @@ AC_DEFUN([SD_GPU_INIT], [
 
   # Set reasonable defaults if not provided
   test -z "${sd_gpu_enable_def}" && sd_gpu_enable_def="no"
+  test -z "${sd_gpu_markers_enable_def}" && sd_gpu_markers_enable_def="no"
   test -z "${sd_gpu_policy}" && sd_gpu_policy="warn"
   test -z "${sd_gpu_status}" && sd_gpu_status="optional"
   # FIXME: improve the setting mechanism
@@ -77,6 +80,18 @@ AC_DEFUN([SD_GPU_INIT], [
         sd_gpu_init="dir"
       fi],
     [ sd_gpu_enable="${sd_gpu_enable_def}"; sd_gpu_init="def"])
+
+  # Declare main configure option
+  AC_ARG_WITH([gpu_markers],
+    [AS_HELP_STRING(
+      [--with-gpu-markers],
+      [Enable GPU markers such as NVTX for NVIDIA CUDA or ROCTX for AMD ROCm.])],
+    [ if test "${withval}" = "no" -o "${withval}" = "yes"; then
+        sd_gpu_markers_enable="${withval}"
+      else
+        sd_gpu_markers_enable="no"
+      fi],
+    [ sd_gpu_markers_enable="${sd_gpu_markers_enable_def}"; sd_gpu_markers_init="def"])
 
   # Declare flavor option
   sd_gpu_flavors_supported="cuda-double cuda-single hip-double"
@@ -202,6 +217,7 @@ AC_DEFUN([SD_GPU_INIT], [
   AC_SUBST(sd_gpu_prefix)
   AC_SUBST(sd_gpu_status)
   AC_SUBST(sd_gpu_enable)
+  AC_SUBST(sd_gpu_markers_enable)
   AC_SUBST(sd_gpu_init)
   AC_SUBST(sd_gpu_ok)
   AC_SUBST(sd_gpu_cppflags)

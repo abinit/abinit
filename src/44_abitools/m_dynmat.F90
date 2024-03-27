@@ -1131,9 +1131,24 @@ subroutine chkph3(carflg,idir,mpert,natom)
  ! If needed, send the message
  if(send==1)then
    write(msg, '(a,a,a,a)' )&
-   ' chkph3 : WARNING -',ch10,&
-   '  Dynamical matrix incomplete, phonon frequencies may be wrong, check input variables rfatpol and rfdir.'
-   call wrtout([std_out, ab_out],msg)
+&    ' chkph3 : WARNING -',ch10,&
+&    '  Dynamical matrix incomplete, phonon frequencies may be wrong, see the log file for more explanations.'
+   call wrtout(ab_out,msg)
+   write(msg, '(11a)' )&
+&   ' chkph3 : WARNING -',ch10,&
+&   '  Dynamical matrix incomplete, phonon frequencies may be wrong.',ch10,&
+&   '  Likely due to a list of perturbations, as defined by rfatpol and rfdir, that does not include',ch10,&
+&   '  all displacements of all atoms and (if non-metallic material) electric field type perturbation.',ch10,&
+&   '  Then, the dynamical matrix includes zeroes when the matrix element is not computed.',ch10,&
+&   '  This is allowed for testing purposes. But the phonon frequencies may be wrong.'
+   call wrtout(std_out,msg)
+   write(msg, '(9a)' )&
+&  '  If there are symmetries, perhaps these matrix elements are zero by symmetry anyhow, and phonon frequencies might be right.',ch10,&
+&  '  Please check the input variables rfatpol and rfdir, to determine whether abinit is doing what you intend it to do.',ch10,&
+&  '  Note that ANADDB is able to detect whether the symmetries allow one to reconstruct the full dynamical matrix from',ch10,&
+&  '  an incomplete one. In this case, passing to ANADDB the delivered _DDB file might confirm (or not) that',ch10,&
+&  '  phonon frequencies are right.'
+   call wrtout(std_out,msg)
  end if
 
 end subroutine chkph3
