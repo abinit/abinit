@@ -36,7 +36,6 @@ module m_dfpt_scfcv
  use m_hdr
  use m_dtfil
  use m_hamiltonian
- use m_gemm_nonlop_projectors
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -518,20 +517,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  end0_mq=zero; end1_mq=zero; eovl1_mq=zero; evxctau0_mq=zero; evxctau1_mq=zero; exc1_mq=zero
  deltae_mq=zero ; fermie1_mq=zero ; epaw1_mq=zero ; eberry_mq=zero ; elmag1_mq=zero
  res2_mq=zero
-
- ! Handling GEMM nonlop use
- ! Not enabled by default for CPU and CUDA implementations
- ! Enabled if using OpenMP GPU offload
- gemm_nonlop_use_gemm = .false.
-
- ! OpenMP GPU offload case (GEMM nonlop used by default)
- if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
-   gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
- end if
-
- gemm_nonlop_is_distributed = .false.
- if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Examine tolerance criteria, and eventually  print a line to the output
 !file (with choice=1, the only non-dummy arguments of scprqt are
@@ -1279,12 +1264,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !
 !endif
 
-
- ! Cleaning GEMM nonlop data
- if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt)
-   gemm_nonlop_use_gemm = .false.
- end if
 
 !Eventually close the dot file, before calling dfpt_nstdy
  if ((ipert==dtset%natom+2.and.sum((dtset%qptn(1:3))**2)<=1.0d-7.and.&
