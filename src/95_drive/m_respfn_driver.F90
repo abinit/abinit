@@ -36,6 +36,7 @@ module m_respfn_driver
  use m_xcdata
  use m_dtset
  use m_dtfil
+ use m_gemm_nonlop_projectors
 
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
@@ -838,6 +839,19 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
     ABI_MALLOC(xcctau3d,(0))
  end if
 
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   call init_gemm_nonlop(dtset%gpu_option)
+ end if
+
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Determine by which method the local ionic potential and/or
 ! the pseudo core charge density have to be computed
@@ -1472,6 +1486,12 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
  ABI_FREE(vxc)
  ABI_FREE(vxctau)
+
+ ! Cleaning GEMM nonlop data
+ if(gemm_nonlop_use_gemm) then
+   call destroy_gemm_nonlop(dtset%gpu_option)
+   gemm_nonlop_use_gemm = .false.
+ end if
 
  if (dtset%prepanl==1.and.(rf2_dkdk/=0 .or. rf2_dkde/=0)) then
    ABI_FREE(rfpert_nl)
