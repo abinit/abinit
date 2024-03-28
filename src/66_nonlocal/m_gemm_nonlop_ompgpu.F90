@@ -478,7 +478,7 @@ contains
   end do
   projs_beg=1; projs_end=nprojs;
   dprojs_beg=1; dprojs_end=nprojs*ngrads;
-  if((choice==2 .and. signs==2) .or. ((choice==2 .or. choice==3 .or. choice==23) .and. signs==1)) then
+  if((choice==2 .and. signs==2)) then
     projs_beg=atom_proj_shift+1
     projs_end=projs_beg+nprojs-1
     dprojs_beg=atom_proj_shift*ngrads+1
