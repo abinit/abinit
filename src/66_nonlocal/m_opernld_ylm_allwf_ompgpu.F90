@@ -145,7 +145,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
  real(dp),intent(in) :: gxfac_sij(cplex_fac,nprojs,ndat*nspinor)
 
  ! locals
- integer :: enlout_shift, force_shift, grad_shift, proj_shift, nnlout_test, shift, nattyp_i
+ integer :: enlout_shift, force_shift, proj_shift, nnlout_test, shift, nattyp_i
  integer :: itypat, ilmn, ia, idat, ierr, igrad, ii, nlmn, iend, ibeg, iatm
  real(dp) :: esum
  real(dp) :: work(6)
@@ -194,7 +194,6 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
    end if
  end if ! choice=1/3/23
  if(choice==2.or.choice==3.or.choice==23) then
-   grad_shift=merge(9,6,choice==23)
    if (choice==3.or.choice==23) then
      shift=0
      iatm=0
@@ -216,7 +215,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,grad_shift*shift + (ia-1)*nlmn*grad_shift + (igrad-1)*nlmn +ilmn,idat)
+                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (igrad-1)*nlmn +ilmn,idat)
                end do
              end do
            end do
@@ -232,7 +231,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
    if (choice==2.or.choice==23) then
      shift=0
      iatm=0
-     force_shift=merge(6,0,choice==23)
+     force_shift=0; if(choice==23) force_shift=6
      do itypat=1, ntypat
        nlmn=count(indlmn(3,:,itypat)>0)
        nattyp_i = nattyp(itypat)
@@ -249,7 +248,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,grad_shift*shift+(ia-1)*nlmn*grad_shift+(igrad-1+force_shift)*nlmn +ilmn,idat)
+                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (igrad-1+force_shift)*nlmn +ilmn,idat)
                end do
              end do
              enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad)= &
@@ -269,6 +268,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
    if (size(enlout)>0) then
      !$OMP TARGET UPDATE FROM(enlout)
      call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
+     !$OMP TARGET UPDATE TO(enlout)
    end if
    if (choice==3.or.choice==23) then
      !$OMP TARGET UPDATE FROM(enlk)
@@ -287,10 +287,11 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
      enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
      enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
    end do
+   !$OMP TARGET UPDATE TO(enlout)
  end if
 
  if (allocated(enlk)) then
-   !$OMP TARGET EXIT DATA MAP(delete:enlk,nattyp)
+   !$OMP TARGET EXIT DATA MAP(delete:enlk)
    ABI_FREE(enlk)
  end if
  !$OMP TARGET EXIT DATA MAP(delete:nattyp)
