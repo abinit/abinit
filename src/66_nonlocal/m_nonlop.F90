@@ -568,6 +568,33 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    dimenl1=hamk%dimekb1;dimenl2=hamk%dimekb2;dimekbq=1
  end if
 
+
+!A specific version of nonlop based on BLAS3 can be used
+!But there are several restrictions
+
+ use_gemm_nonlop=.false.
+ if (gemm_nonlop_use_gemm) then
+   use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
+   if(signs==2) then
+     use_gemm_nonlop= ( use_gemm_nonlop .and. &
+&      ( paw_opt /= 2 .and. &
+&        hamk%useylm /= 0 .and.&
+&        ((cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
+&        (choice==1 .or. choice==2  .or. choice==3 .or. choice==5 .or. choice==51))))
+   end if
+   if(signs==1) then
+     use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
+       ! Forces and stress (forstr)
+&      ( ((choice >= 1 .and. choice <= 3) .or. choice == 23) .and. &
+&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0 ) .or. &
+       ! Rho ij
+&      choice == 0  )
+     !FIXME forces and constraints computation not handled in CUDA GEMM nonlop
+     if(choice > 0 .and. (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
+   end if
+ end if
+
+
 !In the case of a derivative with respect to an atomic displacement,
 !and if <g|dVnl/dR|c> is required (signs=2), we only need to compute the
 !derivatives of the projectors associated with the displaced atom.
@@ -575,9 +602,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  atom_pert=((signs==2).and.(choice==2.or.choice==4.or.choice==22.or.choice==24.or.choice==25.or.choice==54))
  proj_shift=0
 
- if (iatom_only_>0.and.atom_pert) then
-
-   if(gemm_nonlop_use_gemm) then
+ if (iatom_only_>0 .and. atom_pert) then
+!  Handling atomic displacement with GEMM variant.
+!  Arrays are fully passed as argument as when treating all atoms.
+!  An atom offset computed below is passed to gemm_nonlop instead.
+   if (use_gemm_nonlop) then
      iatm=1; proj_shift=0
      do itypat=1, hamk%ntypat
        nlmn=count(hamk%indlmn(3,:,itypat)>0)
@@ -686,36 +715,15 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
      ph3din_     => ph3din
      ph3dout_    => ph3dout
    end if
- end if
 
-!A specific version of nonlop based on BLAS3 can be used
-!But there are several restrictions
-
- use_gemm_nonlop=.false.
- if (gemm_nonlop_use_gemm) then
-   use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
-   if(signs==2) then
-     use_gemm_nonlop= ( use_gemm_nonlop .and. &
-&      ( paw_opt /= 2 .and. &
-&        hamk%useylm /= 0 .and.&
-&        (cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
-&        (choice==1 .or. choice==2  .or. choice==3 .or. choice==5 .or. choice==51)))
-     if(istwf_k>1 .and. choice>1) use_gemm_nonlop=.false.
-   end if
-   if(signs==1) then
-     use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
-       ! Forces and stress (forstr)
-&      ( ((choice >= 1 .and. choice <= 3) .or. choice == 23) .and. &
-&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0 ) .or. &
-       ! Rho ij
-&      choice == 0  )
-     !FIXME forces and constraints computation not handled in CUDA GEMM nonlop
-     if(choice > 0 .and. (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
-   end if
  end if
 
  if(use_gemm_nonlop) then
 
+   call make_gemm_nonlop(gemm_nonlop_ikpt_this_proc_being_treated,signs,choice,npwout,&
+&                            hamk%lmnmax,hamk%ntypat,hamk%indlmn,hamk%nattyp,istwf_k,hamk%ucvol, &
+&                            ffnlout,ph3dout,kptout,kgout,kpgout, &
+&                            idir_pert=idir,gpu_option=hamk%gpu_option) ! Optional parameters
    !FIXME Settle this
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
 
