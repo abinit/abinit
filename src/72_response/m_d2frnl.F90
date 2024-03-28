@@ -743,9 +743,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
            end if
 
            if(need_becfr)then
-             do iatom=1,natom !Loop over atom
-               ia=gs_ham%atindx(iatom)
-               do mu=1,3 !loop over atom direction
+             do mu=1,3 !loop over atom direction
+               do iatom=1,natom !Loop over atom
+                 ia=gs_ham%atindx(iatom)
                  call nonlop(choice_bec2,cpopt_bec,cwaveprj,enlout_bec1,gs_ham,mu,(/zero/),&
 &                    mpi_enreg,ndat,nnlout_bec1,paw_opt_3,signs_field,svectout,tim_nonlop,&
 &                    cwavef,cwavef,iatom_only=iatom)
