@@ -1016,23 +1016,25 @@ contains
       igrad=0
 
       if(signs==1 .and. (choice==3 .or. choice==23)) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("fill a",2)
-#endif
-        !$OMP TARGET UPDATE FROM(atom_dprojs) if (ndprojs>0)
         if(istwf_k <= 1) then
           do idir=1,6
             idir1=alpha(idir);idir2=beta(idir)
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:atom_dprojs,dprojs,kpg) &
+            !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
             do ilmn=lmn_beg,nlmn
               do ipw=1,npw
-                dprojs(1:2, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     -half*(atom_dprojs(1:2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
-                &     +atom_dprojs(1:2, ipw, idir2, ilmn)*kpg(ipw,idir1))
+                dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                &     +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
+                dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                &     -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
+                &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
             end do
             igrad=igrad+1
           end do
         else ! istwf_k>1
+          !$OMP TARGET UPDATE FROM(atom_dprojs) IF(gpu_option==ABI_GPU_OPENMP)
           do idir=1,6
             idir1=alpha(idir);idir2=beta(idir)
             do ilmn=lmn_beg,nlmn
@@ -1049,19 +1051,14 @@ contains
             igrad=igrad+1
           end do
         end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
       end if
 
 
       if(signs==1 .and. (choice==2 .or. choice==23)) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("fill b",3)
-#endif
-        !$OMP TARGET UPDATE FROM(atom_dprojs) if (ndprojs>0)
         if(istwf_k <= 1) then
           do idir=1,3
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:projs,dprojs,kpg) &
+            !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
             do ilmn=lmn_beg,nlmn
               do ipw=1,npw
                 dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
@@ -1073,28 +1070,23 @@ contains
             igrad=igrad+1
           end do
         else ! istwf_k>1
+          !$OMP TARGET UPDATE FROM(projs_r,projs_i) IF(gpu_option==ABI_GPU_OPENMP)
           do idir=1,3
             do ilmn=lmn_beg,nlmn
               do ipw=1,npw
                 dprojs_r(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     +projs(2, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     +projs_i(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
                 dprojs_i(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
-                &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
+                &     -projs_r(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
               end do
             end do
             igrad=igrad+1
           end do
         end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
       end if
 
 
       if(signs==2 .and. (choice==2)) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("fill c",4)
-#endif
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:projs,dprojs,kpg) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
@@ -1106,9 +1098,6 @@ contains
           end do
         end do
         igrad=igrad+1
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
       end if
 
 
@@ -1150,11 +1139,8 @@ contains
 
   !if(.not. (signs==2 .and. (choice==5 .or. choice==51 .or. choice==3))) then
   if(signs==1) then
-    if(istwf_k==1) then
-      !$OMP TARGET UPDATE TO(dprojs) IF(gpu_option==ABI_GPU_OPENMP)
-    else if(istwf_k==2) then
-      !$OMP TARGET UPDATE TO(dprojs_r) IF(gpu_option==ABI_GPU_OPENMP)
-      !$OMP TARGET UPDATE TO(dprojs_i) IF(gpu_option==ABI_GPU_OPENMP)
+    if(istwf_k==2) then
+      !$OMP TARGET UPDATE TO(dprojs_i,dprojs_r) IF(gpu_option==ABI_GPU_OPENMP)
     end if
   end if
 
