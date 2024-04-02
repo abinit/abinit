@@ -122,20 +122,17 @@ contains
 
 subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
 &                      dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
-&                      enlout,gx,gxfac,gxfac_sij,ndat,nd2gxdt,ndgxdt,&
+&                      enlk,enlout,gx,gxfac,gxfac_sij,ndat,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-&                      gprimd,nattyp,mpi_enreg)
+&                      nattyp)
 
  ! Arguments ------------------------------------
  ! scalars
  integer,intent(in) :: choice,paw_opt,ntypat,ndgxdtfac,nd2gxdt,ndgxdt
  integer,intent(in) :: cplex,cplex_fac,ndat,nnlout,nspinor,nprojs,lmnmax
- real(dp),intent(inout) :: enlout(nnlout*ndat)
- type(MPI_type),intent(in) :: mpi_enreg
 
  ! arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
- real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nprojs,ndat*nspinor)
  real(dp),intent(in) :: dgxdt(cplex,ndgxdt*nprojs,ndat*nspinor)
  real(dp),intent(in) :: dgxdtfac(cplex,ndgxdt*nprojs,ndat*nspinor)
@@ -143,18 +140,19 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
  real(dp),intent(in) :: gx(cplex,nprojs,ndat*nspinor)
  real(dp),intent(in) :: gxfac(cplex,nprojs,ndat*nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex_fac,nprojs,ndat*nspinor)
+ real(dp),intent(inout) :: enlout(nnlout*ndat)
+ real(dp),intent(inout) :: enlk(ndat)
 
  ! locals
- integer :: enlout_shift, force_shift, grad_shift, proj_shift, nnlout_test
+ integer :: enlout_shift, force_shift, atom_force_shift, grad_shift, proj_shift, nnlout_test
  integer :: itypat, ilmn, ia, idat, ierr, igrad, ii, nlmn
  real(dp) :: esum
  real(dp) :: work(6)
- real(dp), allocatable :: enlk(:)
+ integer :: i1,i2,i3
 
  enlout=zero
+ enlk=zero
  if(choice==1.or.choice==3.or.choice==23) then
-   ABI_MALLOC(enlk,(ndat))
-   enlk=zero
    do idat=1,ndat*nspinor
      proj_shift=0
      do itypat=1, ntypat
@@ -179,6 +177,7 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
    do idat=1,ndat*nspinor
      proj_shift=0 ; grad_shift=0
      enlout_shift=(idat-1)*nnlout
+     atom_force_shift=merge(6,0,choice==23)
      force_shift=merge(6,0,choice==23)
      do itypat=1, ntypat
        nlmn=count(indlmn(3,:,itypat)>0)
@@ -207,11 +206,10 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
                  &         *dgxdt(ii,grad_shift+ilmn,idat)
                end do
              end do
-             grad_shift=grad_shift+nlmn
-             enlout(enlout_shift+force_shift+igrad)= &
-             &    enlout(enlout_shift+force_shift+igrad) + two*esum
+             enlout(enlout_shift+atom_force_shift+igrad)= &
+             &    enlout(enlout_shift+atom_force_shift+igrad) + two*esum
            end do
-           force_shift=force_shift+3
+           atom_force_shift=atom_force_shift+3
          end if
          proj_shift=proj_shift+nlmn
        end do
@@ -219,31 +217,6 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
    end do
  end if ! choice=2, 3 or 23
 
- ! Reduction in case of parallelism
- if (mpi_enreg%paral_spinor==1) then
-   if (size(enlout)>0) then
-     call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
-   end if
-   if (choice==3.or.choice==23) then
-     call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
-   end if
- end if
-
- ! Derivatives wrt strain
- !  - Convert from reduced to cartesian coordinates
- !  - Substract volume contribution
- if ((choice==3.or.choice==23).and.paw_opt<=3) then
-   do idat=1,ndat
-     enlout_shift=(idat-1)*nnlout
-     call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
-     enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
-     enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
-   end do
- end if
-
- if (allocated(enlk)) then
-   ABI_FREE(enlk)
- end if
 
 end subroutine opernld_ylm_allwf_cpu
 

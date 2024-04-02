@@ -424,6 +424,9 @@ contains
   real(dp), allocatable :: projs_recv(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
   integer :: ngrads_tmp
+  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
+  integer :: enlout_shift
+  real(dp) :: work(6)
 
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
   integer(C_SIZE_T) :: byte_count
@@ -622,6 +625,12 @@ contains
   if(signs == 1 .and. choice > 0) then
     enlout=zero
     !$OMP TARGET ENTER DATA MAP(to:enlout)
+    ABI_MALLOC(enlk,(ndat))
+    enlk=zero
+    ABI_MALLOC(fnlk,(3*natom,ndat))
+    ABI_MALLOC(ddkk,(6,ndat))
+    ABI_MALLOC(strnlk,(6,ndat))
+    !$OMP TARGET ENTER DATA MAP(to:enlk)
   end if
 
   !$OMP TASKWAIT
@@ -776,10 +785,38 @@ contains
     if(signs==1) then
       call opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
       &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
-      &       enlout,projections,vnl_projections,s_projections,&
+      &       enlk,enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-      &       gprimd,nattyp,mpi_enreg)
+      &       nattyp)
+
+      ! Reduction in case of parallelism
+      if (mpi_enreg%paral_spinor==1) then
+        if (size(enlout)>0) then
+          !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
+          call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
+          !$OMP TARGET UPDATE TO(enlout) if(nld_on_gpu)
+        end if
+        if (choice==3.or.choice==23) then
+          !$OMP TARGET UPDATE FROM(enlk) if(nld_on_gpu)
+          call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
+        end if
+      end if
+
+      ! Derivatives wrt strain
+      !  - Convert from reduced to cartesian coordinates
+      !  - Substract volume contribution
+      if ((choice==3.or.choice==23).and.paw_opt<=3) then
+        !$OMP TARGET UPDATE FROM(enlout,enlk) if(nld_on_gpu)
+        do idat=1,ndat
+          enlout_shift=(idat-1)*nnlout
+          call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
+          enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
+          enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
+        end do
+        !$OMP TARGET UPDATE TO(enlout) if(nld_on_gpu)
+      end if
+
     end if !opernld
 
   end if ! choice>0
@@ -798,7 +835,14 @@ contains
 
 ! Release memory
   if(signs == 1 .and. choice > 0) then
+    !$OMP TARGET EXIT DATA MAP(delete:enlk)
+    ABI_FREE(enlk)
+    ABI_FREE(fnlk)
+    ABI_FREE(strnlk)
+    ABI_FREE(ddkk)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
+  end if
+
   end if
   if(gemm_nonlop_is_distributed) then
     !$OMP TARGET EXIT DATA MAP(delete:projs_recv)
