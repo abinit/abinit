@@ -209,7 +209,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (igrad-1)*nlmn +ilmn,idat)
+                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + igrad,idat)
                end do
              end do
            end do
@@ -242,7 +242,7 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (igrad-1+force_shift)*nlmn +ilmn,idat)
+                 &         *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + (igrad+force_shift) ,idat)
                end do
              end do
              enlout((idat-1)*nnlout + force_shift + (iatm+ia-1)*3 + igrad)= &

@@ -54,6 +54,7 @@ module m_gemm_nonlop_ompgpu
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf_ompgpu, only : opernld_ylm_allwf_ompgpu
+ use m_opernld_ylm, only : opernld_ylm
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
@@ -425,8 +426,9 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
   integer :: ngrads_tmp
   real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
-  integer :: enlout_shift
+  integer :: idbeg,idend,dshift,enlout_shift
   real(dp) :: work(6)
+  logical :: nld_on_gpu
 
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
   integer(C_SIZE_T) :: byte_count
@@ -783,12 +785,46 @@ contains
 
     ! opernld
     if(signs==1) then
+#if 1
+      nld_on_gpu = .true.
       call opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
       &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
       &       enlk,enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
       &       nattyp)
+#else
+      shift=0; dshift=0; iatm=1
+      nld_on_gpu = .false.
+      !$OMP TARGET UPDATE FROM(dprojections,projections,vnl_projections)
+      do itypat=1, ntypat
+        nlmn=count(indlmn(3,:,itypat)>0)
+
+        ibeg = shift+1
+        iend = shift+nattyp(itypat)*nlmn
+
+        idbeg = dshift+1
+        idend = dshift+nattyp(itypat)*nlmn*ngrads
+
+        do idat=1,ndat
+          call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
+          &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       d2gxdt_dum_in,&
+          &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
+          &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+          &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+        end do
+
+        shift = shift + nattyp(itypat)*nlmn
+        dshift = dshift + nattyp(itypat)*nlmn*ngrads
+        iatm = iatm+nattyp(itypat)
+      end do
+#endif
 
       ! Reduction in case of parallelism
       if (mpi_enreg%paral_spinor==1) then
@@ -840,10 +876,10 @@ contains
     ABI_FREE(fnlk)
     ABI_FREE(strnlk)
     ABI_FREE(ddkk)
+    !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
 
-  end if
   if(gemm_nonlop_is_distributed) then
     !$OMP TARGET EXIT DATA MAP(delete:projs_recv)
     ABI_FREE(projs_recv)
