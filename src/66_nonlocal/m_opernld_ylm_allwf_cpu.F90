@@ -189,10 +189,9 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,proj_shift+ilmn,idat) &
-                 &         *dgxdt(ii,grad_shift+ilmn,idat)
+                 &         *dgxdt(ii,grad_shift+(ilmn-1)*ndgxdt+igrad,idat)
                end do
              end do
-             grad_shift=grad_shift+nlmn
              enlout(enlout_shift+igrad)=enlout(enlout_shift+igrad) + two*esum
            end do
          end if
@@ -203,7 +202,7 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
              do ilmn=1,nlmn
                do ii=1,cplex
                  esum=esum +gxfac(ii,proj_shift+ilmn,idat) &
-                 &         *dgxdt(ii,grad_shift+ilmn,idat)
+                   &       *dgxdt(ii,grad_shift+(ilmn-1)*ndgxdt+force_shift+igrad,idat)
                end do
              end do
              enlout(enlout_shift+atom_force_shift+igrad)= &
@@ -211,6 +210,7 @@ subroutine opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
            end do
            atom_force_shift=atom_force_shift+3
          end if
+         grad_shift=grad_shift+nlmn*ndgxdt
          proj_shift=proj_shift+nlmn
        end do
      end do
