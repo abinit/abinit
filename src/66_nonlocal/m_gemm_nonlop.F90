@@ -47,6 +47,7 @@ module m_gemm_nonlop
  use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf_cpu, only : opernld_ylm_allwf_cpu
  use m_pawcprj, only : pawcprj_type
+ use m_geometry, only : strconv
  use m_kg, only : mkkpg
 
 #if defined(HAVE_GPU)
@@ -1237,6 +1238,9 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
   integer :: ngrads_tmp
+  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
+  integer :: enlout_shift
+  real(dp) :: work(6)
 
 ! *************************************************************************
 
@@ -1364,6 +1368,25 @@ contains
     end if
   end if
 
+  if(signs == 1) then
+    enlout=zero
+    ABI_MALLOC(enlk,(ndat))
+    enlk=zero
+    ABI_MALLOC(fnlk,(3*natom,ndat))
+    ABI_MALLOC(ddkk,(6,ndat))
+    ABI_MALLOC(strnlk,(6,ndat))
+  end if
+
+  ndgxdt = ngrads
+  ndgxdtfac = ngrads
+  nd2gxdt = 0
+  nd2gxdtfac = 0
+  optder = 0;if (ndgxdtfac>0 .and. signs == 2) optder=1
+  cplex_dgxdt(:) = 1;
+  if(ndgxdt > 0) then
+   if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
+  end if
+
   ! determine precisely when temp_realvec needs to be allocated
   ! to factorize allocate (resp. deallocate) at the begining (resp. at the end) of subroutine
   ! to avoid multiple allocate/deallocate that can be costly
@@ -1455,16 +1478,6 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      ndgxdt = ngrads
-      ndgxdtfac = ngrads
-      nd2gxdt = 0
-      nd2gxdtfac = 0
-      optder = 0;if (ndgxdtfac>0 .and. signs == 2) optder=1
-      cplex_dgxdt(:) = 1;
-      if(ndgxdt > 0) then
-       if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
-      end if
-
       shift = 0
       ABI_MALLOC(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
       do itypat=1, ntypat
@@ -1529,15 +1542,46 @@ contains
     if(signs==1) then
       call opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
       &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
-      &       enlout,projections,vnl_projections,s_projections,&
+      &       enlk,enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-      &       gprimd,nattyp,mpi_enreg)
+      &       nattyp)
+
+      ! Reduction in case of parallelism
+      if (mpi_enreg%paral_spinor==1) then
+        if (size(enlout)>0) then
+          call xmpi_sum(enlout,mpi_enreg%comm_spinor,ierr)
+        end if
+        if (choice==3.or.choice==23) then
+          call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
+        end if
+      end if
+
+      ! Derivatives wrt strain
+      !  - Convert from reduced to cartesian coordinates
+      !  - Substract volume contribution
+      if ((choice==3.or.choice==23).and.paw_opt<=3) then
+        do idat=1,ndat
+          enlout_shift=(idat-1)*nnlout
+          call strconv(enlout(enlout_shift+1:enlout_shift+6),gprimd,work)
+          enlout(enlout_shift+1:enlout_shift+3)=(work(1:3)-enlk(idat))
+          enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
+        end do
+      end if
+
     end if !opernld
 
   end if ! choice>0
 
 ! Release memory
+
+  if (allocated(enlk)) then
+    ABI_FREE(enlk)
+    ABI_FREE(fnlk)
+    ABI_FREE(strnlk)
+    ABI_FREE(ddkk)
+  end if
+
   if(.not. local_vectproj) then
     ABI_FREE(projections)
   end if
