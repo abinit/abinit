@@ -60,7 +60,7 @@ module m_gemm_nonlop
 #endif
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc
+ use, intrinsic :: iso_c_binding, only : c_int32_t, c_int64_t, c_float, c_double, c_size_t, c_loc, c_ptr
 #endif
 
 #ifdef HAVE_GPU_MARKERS
@@ -468,10 +468,13 @@ contains
 
     if(istwf_k <= 1) then
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (2, npw, nprojs))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1,1,1))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1,1,1))
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%projs) IF(gpu_option_==ABI_GPU_OPENMP)
     else
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_r, (1, npw, nprojs))
       ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs_i, (1, npw, nprojs))
+      ABI_MALLOC(gemm_nonlop_kpt(ikpt)%projs, (1, 1, 1))
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
     end if
@@ -500,16 +503,19 @@ contains
   if(ngrads>0) then
     if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ngrads /= gemm_nonlop_kpt(ikpt)%ngrads) then
       if(gpu_option_ == ABI_GPU_OPENMP) call free_ompgpu_current_ikpt_dprojs()
-      if(istwf_k <= 1) then
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
+        if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
+        if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_i)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
+      if(istwf_k <= 1) then
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ngrads))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, 1, 1))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, 1, 1))
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs) IF(gpu_option_==ABI_GPU_OPENMP)
       else
-        if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ngrads))
-        !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r) IF(gpu_option_==ABI_GPU_OPENMP)
-        if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_i)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs*ngrads))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (1, 1, 1))
+        !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r) IF(gpu_option_==ABI_GPU_OPENMP)
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_i) IF(gpu_option_==ABI_GPU_OPENMP)
       end if
       compute_dprojs=.true.
@@ -961,10 +967,11 @@ contains
         end do
         ! multiply by -1
         if(gpu_option==ABI_GPU_OPENMP) then
-          !$OMP TARGET UPDATE TO(scal)
-          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_dprojs,scal) &
-          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+          !$OMP TARGET UPDATE FROM(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
+          !!$OMP TARGET UPDATE TO(scal)
+          !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !!$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_dprojs,scal) &
+          !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
           do ilmn=1,nlmn_o
             do idir=1,ndprojs
               do ipw=1,npw
@@ -979,11 +986,11 @@ contains
           end do
         end if
         ! multiply by -i
-        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_dprojs,parity) &
-        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        !!$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_dprojs,parity) &
+        !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=1,nlmn_o
           if(.not. parity(ilmn)) then
-            !$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
+            !!$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
             do idir=1,ndprojs
               do ipw=1,npw
                 tmp = atom_dprojs(2,ipw,idir,ilmn)
@@ -993,6 +1000,7 @@ contains
             end do
           end if
         end do
+        !$OMP TARGET UPDATE TO(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
       end if
 
       ! multiply by conj(ph3d)
@@ -1014,8 +1022,6 @@ contains
 
 
       !! Handling dprojs
-
-      igrad=0
 
       if(signs==1 .and. (choice==3 .or. choice==23)) then
         if(istwf_k <= 1) then
@@ -1080,7 +1086,6 @@ contains
                 &     -projs_r(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
               end do
             end do
-            igrad=igrad+1
           end do
         end if
       end if
@@ -1091,13 +1096,12 @@ contains
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
           do ipw=1,npw
-            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(1, ipw, shift_grad+ilmn) = &
             &      projs(2, ipw, shift+ilmn)*kpg(ipw,idir_pert)*two_pi
-            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(2, ipw, shift_grad+ilmn) = &
             &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir_pert)*two_pi
           end do
         end do
-        igrad=igrad+1
       end if
 
 
@@ -1106,13 +1110,12 @@ contains
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
           do ipw=1,npw
-            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(1, ipw, shift_grad+ilmn) = &
             &     -atom_dprojs(1, ipw, 1, ilmn)
-            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(2, ipw, shift_grad+ilmn) = &
             &     -atom_dprojs(2, ipw, 1, ilmn)
           end do
         end do
-        igrad=igrad+1
       end if
 
 
@@ -1121,13 +1124,12 @@ contains
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
           do ipw=1,npw
-            dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(1, ipw, shift_grad+ilmn) = &
             &     +atom_dprojs(1, ipw, 1, ilmn)
-            dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+            dprojs(2, ipw, shift_grad+ilmn) = &
             &     +atom_dprojs(2, ipw, 1, ilmn)
           end do
         end do
-        igrad=igrad+1
       end if
 
       iaph3d = iaph3d + 1
