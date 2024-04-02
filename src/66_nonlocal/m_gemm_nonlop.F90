@@ -46,6 +46,7 @@ module m_gemm_nonlop
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf_cpu, only : opernld_ylm_allwf_cpu
+ use m_opernld_ylm, only : opernld_ylm
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
@@ -1018,21 +1019,20 @@ contains
 
       if(signs==1 .and. (choice==3 .or. choice==23)) then
         if(istwf_k <= 1) then
-          do idir=1,6
-            idir1=alpha(idir);idir2=beta(idir)
-            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:atom_dprojs,dprojs,kpg) &
-            !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-            do ilmn=lmn_beg,nlmn
+          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw,idir,idir1,idir2) COLLAPSE(3) MAP(to:atom_dprojs,dprojs,kpg) &
+          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+          do ilmn=lmn_beg,nlmn
+            do idir=1,6
               do ipw=1,npw
-                dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                idir1=alpha(idir);idir2=beta(idir)
+                dprojs(1, ipw, shift_grad+(ilmn-1)*ngrads+idir) = &
                 &     -half*(atom_dprojs(1, ipw, idir1, ilmn)*kpg(ipw,idir2) &
                 &     +atom_dprojs(1, ipw, idir2, ilmn)*kpg(ipw,idir1))
-                dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                dprojs(2, ipw, shift_grad+(ilmn-1)*ngrads+idir) = &
                 &     -half*(atom_dprojs(2, ipw, idir1, ilmn)*kpg(ipw,idir2) &
                 &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
             end do
-            igrad=igrad+1
           end do
         else ! istwf_k>1
           !$OMP TARGET UPDATE FROM(atom_dprojs) IF(gpu_option==ABI_GPU_OPENMP)
@@ -1049,26 +1049,25 @@ contains
                 &     +atom_dprojs(2, ipw, idir2, ilmn)*kpg(ipw,idir1))
               end do
             end do
-            igrad=igrad+1
           end do
         end if
       end if
 
 
       if(signs==1 .and. (choice==2 .or. choice==23)) then
+        igrad=0; if(choice==23) igrad=6
         if(istwf_k <= 1) then
-          do idir=1,3
-            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:projs,dprojs,kpg) &
-            !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-            do ilmn=lmn_beg,nlmn
+          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw,idir) COLLAPSE(3) MAP(to:projs,dprojs,kpg) &
+          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+          do ilmn=lmn_beg,nlmn
+            do idir=1,3
               do ipw=1,npw
-                dprojs(1, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                dprojs(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
                 &     +projs(2, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
-                dprojs(2, ipw, shift_grad+nlmn*igrad+ilmn) = &
+                dprojs(2, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
                 &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir)*two_pi
               end do
             end do
-            igrad=igrad+1
           end do
         else ! istwf_k>1
           !$OMP TARGET UPDATE FROM(projs_r,projs_i) IF(gpu_option==ABI_GPU_OPENMP)
@@ -1239,7 +1238,7 @@ contains
   real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
   integer :: ngrads_tmp
   real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
-  integer :: enlout_shift
+  integer :: idbeg,idend,dshift,enlout_shift
   real(dp) :: work(6)
 
 ! *************************************************************************
@@ -1540,12 +1539,43 @@ contains
 
     ! opernld
     if(signs==1) then
+#if 1
       call opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
       &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
       &       enlk,enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
       &       nattyp)
+#else
+      shift=0; dshift=0; iatm=1
+      do itypat=1, ntypat
+        nlmn=count(indlmn(3,:,itypat)>0)
+
+        ibeg = shift+1
+        iend = shift+nattyp(itypat)*nlmn
+
+        idbeg = dshift+1
+        idend = dshift+nattyp(itypat)*nlmn*ngrads
+
+        do idat=1,ndat
+          call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
+          &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       d2gxdt_dum_in,&
+          &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
+          &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+          &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+          &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+        end do
+
+        shift = shift + nattyp(itypat)*nlmn
+        dshift = dshift + nattyp(itypat)*nlmn*ngrads
+        iatm = iatm+nattyp(itypat)
+      end do
+#endif
 
       ! Reduction in case of parallelism
       if (mpi_enreg%paral_spinor==1) then
