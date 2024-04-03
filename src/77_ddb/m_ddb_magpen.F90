@@ -107,7 +107,7 @@ contains
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
  complex(dpc), allocatable :: barmmom(:,:),mmom(:,:), zfield(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: ifcmat(:,:),zeff(:,:)
+ complex(dpc), allocatable :: ifcmat(:,:),ifcmat_fm(:,:),zeff(:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:),dum_phongreen(:,:)
 
 ! *********************************************************************
@@ -132,6 +132,7 @@ contains
  ABI_MALLOC(mmom,(ndim,(natom+2)*3))
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
+ ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(delta_asrw0,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
  ABI_MALLOC(lm_epsilon,(3,3))
@@ -234,7 +235,7 @@ contains
    rfphon(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (iblok /= 0 ) then
-     call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,magsus,mpert,mpopt,&
+     call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
      
      !Apply ASR
@@ -383,6 +384,7 @@ contains
  ABI_FREE(mmom)
  ABI_FREE(zfield)
  ABI_FREE(ifcmat)
+ ABI_FREE(ifcmat_fm)
  ABI_FREE(delta_asrw0)
  ABI_FREE(zeff)
  ABI_FREE(lm_epsilon)
@@ -865,10 +867,11 @@ contains
 !!
 !! OUTPUT
 !! ifcmat(3*natom,3*natom)= IFC matrix calculated at the level of mpopt.
+!! ifcmat_fm(3*natom,3*natom)= IFC matrix calculated at the frozen magnetic level.
 !!
 !! SOURCE
 
- subroutine mp_ifc(barmagsus,blkval,iblok,ifcmat,magsus,mpert,mpopt,&
+ subroutine mp_ifc(barmagsus,blkval,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
 & natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
@@ -881,6 +884,7 @@ contains
  complex(dpc),intent(in) :: magsus(ndim,ndim)
  complex(dpc),intent(in) :: zfield(ndim,(natom+2)*3)
  complex(dpc),intent(out) :: ifcmat(3*natom,3*natom)
+ complex(dpc),intent(out) :: ifcmat_fm(3*natom,3*natom)
 !Local variables -------------------------
 !scalars
  integer :: icol,idir1,idir2,ipert1,ipert2,irow
@@ -917,6 +921,7 @@ contains
  fmifc= barifc + fmifc
 
  ifcmat= fmifc
+ ifcmat_fm= fmifc
 
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
@@ -1952,14 +1957,14 @@ contains
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:),phonspec(:),mode_phonspec(:,:)
- real(dp), allocatable :: delta_asrw0(:,:)
+ real(dp), allocatable :: delta_asrw0(:,:), delta_asrw0_fm(:,:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
- complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:,:)
+ complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:)
  complex(dpc), allocatable :: bc_barmagsus(:,:),bc_ss(:,:),bc_sp(:,:)
- complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:,:)
+ complex(dpc), allocatable :: epsilon(:,:,:),ifcmat(:,:),ifcmat_fm(:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),modezeff(:,:,:)
- complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),phongreen(:,:,:)
+ complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),phongreen(:,:)
  complex(dpc), allocatable :: lm_epsilon(:,:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
 
@@ -2000,7 +2005,7 @@ contains
  ABI_MALLOC(omega,(nomega))
  ABI_MALLOC(phfrq,(3*natom,nomega))
  ABI_MALLOC(phonspec,(nomega))
- ABI_MALLOC(phongreen,(3*natom,3*natom,nomega))
+ ABI_MALLOC(phongreen,(3*natom,3*natom))
  ABI_MALLOC(mode_phonspec,(3*natom,nomega))
  ABI_MALLOC(zeffspec,(3,nomega))
  ABI_MALLOC(mmomspec,(ndim,nomega))
@@ -2018,11 +2023,13 @@ contains
  ABI_MALLOC(invhmat,(ndim,ndim,nomega))
  ABI_MALLOC(barmmom,(ndim,(natom+2)*3,nomega))
  ABI_MALLOC(mmom,(ndim,(natom+2)*3,nomega))
- ABI_MALLOC(zfield,(ndim,(natom+2)*3,nomega))
+ ABI_MALLOC(zfield,(ndim,(natom+2)*3))
  ABI_MALLOC(epsilon,(3,3,nomega))
  ABI_MALLOC(macmagsus,(3,3,nomega))
- ABI_MALLOC(ifcmat,(3*natom,3*natom,nomega))
+ ABI_MALLOC(ifcmat,(3*natom,3*natom))
+ ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(delta_asrw0,(3*natom,3))
+ ABI_MALLOC(delta_asrw0_fm,(3*natom,3))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
 
@@ -2051,21 +2058,23 @@ contains
 
    !Calculate the magnetic moments
    call magmom(barmmom(:,:,iw),int_barddb,invbarmagsus(:,:,iw),invhmat(:,:,iw),1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),&
- & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
+ & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
 
    !Calculate the dielectric susceptibility
    call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,prtopt,prtvol,ucvol,zfield(:,:,iw))
+ & natom,1,ndim,prtopt,prtvol,ucvol,zfield)
 
    !Calculate the interatomic force constants
-   call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield(:,:,iw))
+   call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
+ & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield)
 
    !Apply ASR
    if (omega(1) < tol12) then
-     call asrw0(delta_asrw0,ifcmat(:,:,iw),natom,0) 
+     call asrw0(delta_asrw0,ifcmat,natom,0) 
+     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
    else 
-     call asrw0(delta_asrw0,ifcmat(:,:,iw),natom,1) 
+     call asrw0(delta_asrw0,ifcmat,natom,1) 
+     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
    end if
 
    !Calculate the macroscopic magnetic susceptibility
@@ -2074,25 +2083,25 @@ contains
  & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
 
    !Calculate the phonon Green's function and spectral function
-   call phonon_green(amu,eigvec,eta,ifcmat(:,:,iw),mode_phonspec(:,iw),natom,ntypat,omega(iw), &
- & phfrq(:,iw),phongreen(:,:,iw),phonspec(iw),typat)
+   call phonon_green(amu,eigvec,eta,ifcmat,ifcmat_fm,mode_phonspec(:,iw),natom,ndim,ntypat,omega(iw), &
+ & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield)
 
 !   !Calculate the mode-resolved magnetic moments
 !   call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
 !   !Calculate the Born effective charges
    call mp_zeff(barmagsus(:,:,iw),int_barddb,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,phongreen(:,:,iw),prtopt,prtvol,ucvol,zeff(:,:,iw),zfield(:,:,iw))
+ & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield)
 
    !Calculate the mode-resolved Born effective charges
 !   call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
 ! & typat,zeff(:,:,iw),zeffspec(:,iw))
 
    !Calculate here the phonons contribution to the spin susceptibility
-   lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen(:,:,iw),transpose(conjg(mmom(:,1:natom*3,iw)))))
+   lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(mmom(:,1:natom*3,iw)))))
 
    !Calclate here the lattice-mediated magnetic moments induced by an electric field
-   lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen(:,:,iw),transpose(conjg(zeff(:,:,iw)))))
+   lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
 
    !Convert magnetic susceptibilities to the magnon basis
 !   work(:,:)=magsus(:,:,iw)
@@ -2546,7 +2555,9 @@ contains
  ABI_FREE(epsilon)
  ABI_FREE(macmagsus)
  ABI_FREE(ifcmat)
+ ABI_FREE(ifcmat_fm)
  ABI_FREE(delta_asrw0)
+ ABI_FREE(delta_asrw0_fm)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
  ABI_FREE(phongreen)
@@ -2609,8 +2620,8 @@ contains
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,eigvec,eta,ifc,mode_phonspec,natom,ntypat,omega,&
-& phfrq,phongreen,phonspec,typat)
+subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,mode_phonspec,natom,ndim,ntypat,omega,&
+& phfrq,phongreen,phonspec,typat,zfield)
 
  use defs_basis
  use m_errors
@@ -2620,7 +2631,7 @@ subroutine phonon_green(amu,eigvec,eta,ifc,mode_phonspec,natom,ntypat,omega,&
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in)  :: natom,ntypat 
+ integer, intent(in)  :: natom,ndim,ntypat 
  real(dp), intent(in) :: eta,omega
  real(dp), intent(out) :: phonspec
 !arrays
@@ -2630,11 +2641,13 @@ subroutine phonon_green(amu,eigvec,eta,ifc,mode_phonspec,natom,ntypat,omega,&
  real(dp),intent(out) :: phfrq(3*natom)
  real(dp), intent(out) :: mode_phonspec(3*natom)
  complex(dpc), intent(in) :: ifc(3*natom,3*natom)
+ complex(dpc), intent(in) :: ifc_fm(3*natom,3*natom)
  complex(dpc), intent(out) :: phongreen(3*natom,3*natom)
+ complex(dpc), intent(in) :: zfield(ndim,(natom+2)*3)
 
 !Local variables-------------------------------
 !scalars
- integer :: iat1,iat2,idir1,idir2,icol,ier,imode,info,irow,lwork,ndim
+ integer :: iat1,iat2,idir1,idir2,icol,ier,imode,info,irow,lwork,mdim
  complex(dpc) :: cplx_eta
 !arrays
  integer, allocatable :: ipiv(:)
@@ -2659,9 +2672,9 @@ subroutine phonon_green(amu,eigvec,eta,ifc,mode_phonspec,natom,ntypat,omega,&
  end do
 
 !Build the ((w+eta)**2 - D(w)) matrix 
- ndim=3*natom
- ABI_MALLOC(dynmat,(ndim,ndim))
- ABI_MALLOC(w2dynmat,(ndim,ndim))
+ mdim=3*natom
+ ABI_MALLOC(dynmat,(mdim,mdim))
+ ABI_MALLOC(w2dynmat,(mdim,mdim))
 
  cplx_eta=cmplx(0.0_dp,eta)
  do iat2= 1, natom
@@ -2681,34 +2694,34 @@ subroutine phonon_green(amu,eigvec,eta,ifc,mode_phonspec,natom,ntypat,omega,&
  end do
 
 !Invert to obtain the phonon Green's function
- ABI_MALLOC(work1,(ndim,ndim))
+ ABI_MALLOC(work1,(mdim,mdim))
  work1=w2dynmat
 
- ABI_MALLOC(ipiv,(ndim))
- call zgetrf( ndim, ndim, work1, ndim, ipiv, info )
+ ABI_MALLOC(ipiv,(mdim))
+ call zgetrf( mdim, mdim, work1, mdim, ipiv, info )
  ABI_CHECK(info == 0, sjoin('zgetrf returned:', itoa(info)))
 
  ABI_MALLOC(work,(2))
- call zgetri( ndim, work1, ndim, ipiv, work, -1, info )
+ call zgetri( mdim, work1, mdim, ipiv, work, -1, info )
  ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
  lwork=int(work(1))
 
  ABI_REMALLOC(work,(lwork))
- call zgetri( ndim, work1, ndim, ipiv, work, lwork, info )
+ call zgetri( mdim, work1, mdim, ipiv, work, lwork, info )
  ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
 
  phongreen=work1
 
 !Finally extract the spectral function from the trace
- do irow= 1, ndim
+ do irow= 1, mdim
    mode_phonspec(irow)= -two*omega/pi * aimag(work1(irow,irow))
  end do
  phonspec= sum(mode_phonspec(:))
 
 !Diagonalize the Dynamical matrix
  ABI_MALLOC(matrx,(2,(3*natom*(3*natom+1))/2))
- ABI_MALLOC(eigval,(ndim))
- do icol= 1, ndim
+ ABI_MALLOC(eigval,(mdim))
+ do icol= 1, mdim
    do irow= 1, icol
      matrx(1,irow + (icol-1)*icol/2)=real(dynmat(irow,icol))
      matrx(2,irow + (icol-1)*icol/2)=aimag(dynmat(irow,icol))
