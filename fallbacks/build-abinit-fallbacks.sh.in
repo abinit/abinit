@@ -7,7 +7,7 @@ Disabled="--disable-bigdft --disable-atompaw --disable-wannier90 --disable-libps
 
 Optional_fbks="--disable-bigdft --disable-atompaw --disable-wannier90 --disable-libpsml --disable-xmlf90"
 
-if [ "echo $#" == "0" ]; then
+if [[ -z $1 ]]; then
    Disabled=$Optional_fbks
 fi
 
