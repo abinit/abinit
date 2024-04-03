@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_results_gs
 !! NAME
 !!  m_results_gs
@@ -8,7 +7,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MT)
+!! Copyright (C) 2011-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -117,7 +116,7 @@ MODULE m_results_gs
                        ! for varying occupation numbers (occopt>=3):
                        !   etotal=ek+ehart+enxc+eei+eew+eii+enl - tsmear*entropy +PAW_spherical_part
   real(dp) :: fermie   ! Fermi energy (Hartree)
-  real(dp) :: fermih   ! Fermi energy (Hartree) for excited holes in case occopt 9 (CP added)
+  real(dp) :: fermih   ! Fermi energy (Hartree) for excited holes in case occopt 9
   real(dp) :: residm   ! maximum value for the residual over all bands, all k points,
                        !   and all spins (Hartree or Hartree**2, to be checked !)
   real(dp) :: res2     ! density/potential residual (squared)
@@ -280,7 +279,7 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%entropy_extfpmd=zero
  results_gs%etotal =zero
  results_gs%fermie =zero
- results_gs%fermih =zero ! CP added for case occopt 9
+ results_gs%fermih =zero
  results_gs%nelect_extfpmd=zero
  results_gs%residm =zero
  results_gs%res2   =zero
@@ -384,7 +383,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%entropy_extfpmd=zero
        results_gs(jj,ii)%etotal =zero
        results_gs(jj,ii)%fermie =zero
-       results_gs(jj,ii)%fermih =zero ! CP added for occopt 9 cases
+       results_gs(jj,ii)%fermih =zero
        results_gs(jj,ii)%nelect_extfpmd=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
@@ -646,7 +645,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%entropy_extfpmd=results_gs_in%entropy_extfpmd
  results_gs_out%etotal =results_gs_in%etotal
  results_gs_out%fermie =results_gs_in%fermie
- results_gs_out%fermih =results_gs_in%fermih ! CP added for occopt 9
+ results_gs_out%fermih =results_gs_in%fermih
  results_gs_out%nelect_extfpmd=results_gs_in%nelect_extfpmd
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
@@ -717,13 +716,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 
 ! Define variables.
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
-! CP modified
-!ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-!  "ecut", "pawecutdg", "deltae", "diffor", "entropy", "etotal", "fermie", "residm", "res2"])
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
    "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
-&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"]) ! CP added fermih
- ! End CP modified
+&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"])
  NCF_CHECK(ncerr)
 
  ! arrays
@@ -744,20 +739,14 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
    NCF_CHECK(ncerr)
  end if
 
-! Write data.
+! Write data
 ! Write variables
-! CP modified
-! ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-!&  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'etotal', 'fermie', 'residm', 'res2'],&
-!&  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%etotal, res%fermie, res%residm, res%res2],&
-!&  datamode=.True.)
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
 &  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
 &  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
 &  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
 &  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
 &  datamode=.True.)
- ! End CP modified
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nctk_set_datamode(ncid))
@@ -804,15 +793,12 @@ end function results_gs_ncwrite
 !!  [with_conv]: optional True if the convergence dictionary with residuals and diffs should be written.
 !!
 !! SOURCE
-! CP modified argument list
-!subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
 subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
-! End CP modified
 
  class(results_gs_type),intent(in) :: results
  integer,intent(in) :: unit
  type(crystal_t),intent(in),optional :: cryst
- integer, intent(in),optional :: occopt ! CP added for special output in the case occopt 9
+ integer, intent(in),optional :: occopt
  logical,intent(in),optional :: with_conv
  character(len=*),intent(in),optional :: info
 
@@ -861,9 +847,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  endif
 
  ! Write energies.
- ! CP modified
- !call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
- ! CP add modificatopm for occopt 9: fermih
  if (present(occopt))then
    if (occopt == 9) then
      call ydoc%add_reals("etotal, entropy, fermie, fermih", [results%etotal, results%entropy, results%fermie, results%fermih])
@@ -873,7 +856,6 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  else
    call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
  endif
- ! End CP modified
 
  ! Cartesian stress tensor and forces.
  call stress_voigt_to_mat(results%strten, strten)

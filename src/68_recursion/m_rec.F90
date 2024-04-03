@@ -9,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (MMancini)
+!! Copyright (C) 2002-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -307,8 +307,10 @@ end subroutine find_maxmin_proc
 #if defined HAVE_GPU_CUDA
  else
    if(rset%tp==4)then
-     ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
-     ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     if(.not. allocated(rset%GPU%par%displs)) then
+       ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
+       ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     end if
    endif
    recpar => rset%GPU%par
 #endif

@@ -61,6 +61,7 @@
  timopt 0
  np_spkpt 1
  npband 2
+ bandpp 1
  npfft 2
  paral_kgb 1
  iomode 0 # Only for testing purposes
@@ -72,6 +73,7 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test = 4

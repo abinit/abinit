@@ -6,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2022 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2024 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1520,7 +1520,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
- real(dp) :: axes(3,3),rprimdconv(3,3),trialt(3),vect(3,3)
+ real(dp) :: axes(3,3),rprimdconv(3,3),vect(3,3)
  real(dp),allocatable :: shift(:,:),tnonsconv(:,:)
 
 !**************************************************************************
@@ -1558,6 +1558,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
  symrelconv(:,:,1:nsym)=symrel(:,:,1:nsym)
 !Note that the number of symmetry operations is still nsym
  call symrelrot(nsym,rprimdconv,axes,symrelconv,tolsym)
+
  call xred2xcart(nsym,rprimdconv,tnonsconv,tnons)
 !Gives the associated translation, with components in the
 !interval ]-0.5,0.5] .
@@ -1621,8 +1622,7 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
      '  symrelconv(:,1,isym)=',symrelconv(:,1,isym),ch10,&
      '  symrelconv(:,2,isym)=',symrelconv(:,2,isym),ch10,&
      '  symrelconv(:,3,isym)=',symrelconv(:,3,isym),ch10,&
-     '  tnonsconv(:,isym)=',tnonsconv(:,isym),ch10,&
-     '  trialt(:)=',trialt(:)
+     '  tnonsconv(:,isym)=',tnonsconv(:,isym)
      call wrtout(std_out,msg)
      write(msg, '(a,i4,2a)' )&
        'The space symmetry operation number',isym,ch10,'is not a (translated) root of unity'

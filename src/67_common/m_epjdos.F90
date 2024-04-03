@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_epjdos
 !! NAME
 !!  m_epjdos
@@ -7,7 +6,7 @@
 !!  Tools for the computiation of electronic PJDOSes
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
+!!  Copyright (C) 2008-2024 ABINIT group (MVer, XG, SM, MT, BAmadon, MG, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -474,24 +473,14 @@ subroutine dos_calcnwrite(dos,dtset,crystal,ebands,fildata,comm)
 
  if (iam_master) then
    if (any(dtset%prtdos == [2, 5])) then
-     ! CP modified
-     !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-     !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-     !dtset%tphysel,dtset%tsmear,unitdos)
      call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
      dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
      dtset%tphysel,dtset%tsmear,unitdos)
-     ! End CP modified
    else if (dtset%prtdos == 3) then
      do iat=0,natsph+natsph_extra
-       ! CP modified
-       !call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,dtset%mband,&
-       !dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
-       !dtset%tphysel,dtset%tsmear,unt_atsph(iat))
        call dos_hdr_write(deltaene,ebands%eig,enemax,enemin,ebands%fermie,ebands%fermih,&
        dtset%mband,dtset%nband,nene,nkpt,nsppol,dtset%occopt,prtdos,&
        dtset%tphysel,dtset%tsmear,unt_atsph(iat))
-       ! End CP modified
      end do
    end if
  end if
