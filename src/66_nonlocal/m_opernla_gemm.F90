@@ -367,8 +367,8 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
 &       npw,nspinor,signs,ndat,rank,&
 &       cpopt,nprocs,&
 &       nprojs,nprojs_blk,nprojs_my_blk,nprojs_last_blk,&
-&       vectin,projs,dprojs,&
-&       projs_r,projs_i,dprojs_r,dprojs_i,temp_realvec,&
+&       vectin,projs,dprojs,d2projs,&
+&       projs_r,projs_i,dprojs_r,dprojs_i,d2projs_r,d2projs_i,temp_realvec,&
 &       projs_local,projs_recv,&
 &       gpu_option,use_distrib)
 
@@ -389,6 +389,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
  real(dp),target,intent(inout) :: gx(cplex,nprojs,ndat*nspinor)
  real(dp),target,intent(inout) :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
  real(dp),target,intent(inout) :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
+ real(dp),target,intent(inout) :: d2projs(:,:,:),d2projs_r(:,:,:),d2projs_i(:,:,:)
  real(dp),target,intent(inout) :: projs_local(:,:,:),projs_recv(:,:,:),temp_realvec(:)
 
 !Local variables-------------------------------
@@ -411,6 +412,13 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
        call opernl_xgemm(cplex, 'C', 'N', ndgxdt*nprojs, ndat*nspinor, npw, cone, &
        &    dprojs, npw,&
        &    vectin, npw, czero, dgxdt, ndgxdt*nprojs,&
+       &    gpu_option, use_distrib)
+     end if
+
+     if(nd2gxdt>0) then
+       call opernl_xgemm(cplex, 'C', 'N', nd2gxdt*nprojs, ndat*nspinor, npw, cone, &
+       &    d2projs, npw,&
+       &    vectin, npw, czero, d2gxdt, nd2gxdt*nprojs,&
        &    gpu_option, use_distrib)
      end if
    else

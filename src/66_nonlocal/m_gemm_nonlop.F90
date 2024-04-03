@@ -96,6 +96,7 @@ module m_gemm_nonlop
 
    integer :: nprojs
    integer :: ngrads
+   integer :: ngrads2
 
    integer :: nprojs_blk
    integer :: nprojs_last_blk
@@ -114,6 +115,13 @@ module m_gemm_nonlop
    real(dp), allocatable :: dprojs_r(:, :, :)
    ! (1, npw, nprojs*ngrads)
    real(dp), allocatable :: dprojs_i(:, :, :)
+   ! (1, npw, nprojs*ngrads)
+
+   real(dp), allocatable :: d2projs(:, :, :)
+   ! (2, npw, nprojs*ngrads)
+   real(dp), allocatable :: d2projs_r(:, :, :)
+   ! (1, npw, nprojs*ngrads)
+   real(dp), allocatable :: d2projs_i(:, :, :)
    ! (1, npw, nprojs*ngrads)
    integer :: idir
    integer :: choice
@@ -206,6 +214,9 @@ contains
   do ikpt=1,nkpt
     gemm_nonlop_kpt(ikpt)%nprojs = -1
     gemm_nonlop_kpt(ikpt)%ngrads = -1
+    gemm_nonlop_kpt(ikpt)%ngrads2 = -1
+    gemm_nonlop_kpt(ikpt)%choice = -1
+    gemm_nonlop_kpt(ikpt)%idir = -1
   end do
 
   if(gpu_option == ABI_GPU_LEGACY .or. gpu_option == ABI_GPU_KOKKOS) then
@@ -324,6 +335,18 @@ contains
      end if
      gemm_nonlop_kpt(ikpt)%ngrads = -1
    end if
+   if(gemm_nonlop_kpt(ikpt)%ngrads2 /= -1) then
+     if (allocated(gemm_nonlop_kpt(ikpt)%d2projs)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs)
+     end if
+     if (allocated(gemm_nonlop_kpt(ikpt)%d2projs_r)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs_r)
+     end if
+     if (allocated(gemm_nonlop_kpt(ikpt)%d2projs_i)) then
+       ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs_i)
+     end if
+     gemm_nonlop_kpt(ikpt)%ngrads2 = -1
+   end if
  end if
 
  end subroutine free_gemm_nonlop_ikpt
@@ -417,9 +440,9 @@ contains
   real(dp), intent(in) :: kpt_k(:)
   real(dp), intent(in), target :: kpg_k(:,:)
 
-  integer :: nprojs,ndprojs,ngrads
+  integer :: nprojs,ndprojs,ndgxdt,nd2gxdt
 
-  integer :: rank, nprocs, ierr, itypat
+  integer :: rank, nprocs, ierr, itypat, i, ipw
   integer :: nprojs_blk, nprojs_last_blk, nprojs_my_blk
   integer :: idir_beg,idir_end,idir_pert_,gpu_option_
   logical :: is_last_rank,compute_dprojs
@@ -439,23 +462,61 @@ contains
   ABI_CHECK(allocated(gemm_nonlop_kpt),"init_gemm_nonlop wasn't called prior make_gemm_nonlop !")
 
   if(choice>1) then
-    ABI_CHECK(signs==2.or. choice==2 .or. choice==3 .or. choice==23,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
+    ABI_CHECK(signs==2.or. choice==2 .or. choice==3 .or. choice==23 .or. choice==54 .or. choice==55,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
     ABI_CHECK(gpu_option_/=ABI_GPU_LEGACY,'CUDA GEMM nonlop not compatible with respfn workloads.')
     ABI_CHECK(gpu_option_/=ABI_GPU_KOKKOS,'KOKKOS GEMM nonlop not compatible with respfn workloads.')
   end if
 
-  ! build nprojs, ngrads
-  nprojs = 0 ; ngrads = 0
+  ! build nprojs, ndgxdt
+  nprojs = 0 ; ndgxdt = 0
   do itypat=1,ntypat
     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
   end do
-  if(signs==2) then
-    if (choice>1) ngrads=ngrads+1
-  else ! signs==1
-    if (choice==3) ngrads=ngrads+6
-    if (choice==2) ngrads=ngrads+3
-    if (choice==23) ngrads=ngrads+9
+
+!Define dimensions of projected scalars
+  ndgxdt=0;nd2gxdt=0
+  if (choice==2) then
+    if (signs==1) ndgxdt=3
+    if (signs==2) ndgxdt=1
   end if
+  if (choice==3) then
+    if (signs==1) ndgxdt=6
+    if (signs==2) ndgxdt=1
+  end if
+  if (choice==23) then
+    if (signs==1) ndgxdt=9
+  end if
+  if (choice==5) then
+    !if(signs==1) ndgxdt=3
+    if(signs==2) ndgxdt=1
+  end if
+  if (choice==51) then
+    !if(signs==1) ndgxdt=3
+    if(signs==2) ndgxdt=1
+  end if
+  !if (choice==4) then
+  !  if(signs==1) ndgxdt=3
+  !  if(signs==1) nd2gxdt=6
+  !end if
+  if (choice==54) then
+    if(signs==1) ndgxdt=6
+    if(signs==1) nd2gxdt=9
+
+    !if(signs==2) ndgxdt=1
+    !if(signs==2) nd2gxdt=1
+  end if
+  if (choice==55) then
+    if(signs==1) ndgxdt=9
+    if(signs==1) nd2gxdt=18
+  end if
+  !if (choice==6) then
+  !  if(signs==1) ndgxdt=9
+  !  if(signs==1) nd2gxdt=54
+  !end if
+
+
+
+
 
   compute_dprojs = .false.
   if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs) then
@@ -500,23 +561,47 @@ contains
   end if
 
 
-  if(ngrads>0) then
-    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ngrads /= gemm_nonlop_kpt(ikpt)%ngrads) then
+  if(ndgxdt>0) then
+    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ikpt)%ngrads) then
       if(gpu_option_ == ABI_GPU_OPENMP) call free_ompgpu_current_ikpt_dprojs()
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_i)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_i)
+        if(allocated(gemm_nonlop_kpt(ikpt)%d2projs)) ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs)
+        if(allocated(gemm_nonlop_kpt(ikpt)%d2projs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs_r)
+        if(allocated(gemm_nonlop_kpt(ikpt)%d2projs_i)) ABI_FREE(gemm_nonlop_kpt(ikpt)%d2projs_i)
+        gemm_nonlop_kpt(ikpt)%ngrads = -1
+        gemm_nonlop_kpt(ikpt)%ngrads2 = -1
       if(istwf_k <= 1) then
-        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ngrads))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (2, npw, nprojs*ndgxdt))
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, 1, 1))
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, 1, 1))
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs) IF(gpu_option_==ABI_GPU_OPENMP)
+        if(nd2gxdt>0) then
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (2, npw, nprojs*nd2gxdt))
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, 1, 1))
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, 1, 1))
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
+        end if
       else
-        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ngrads))
-        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs*ngrads))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ndgxdt))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_i, (1, npw, nprojs*ndgxdt))
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs, (1, 1, 1))
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r) IF(gpu_option_==ABI_GPU_OPENMP)
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_i) IF(gpu_option_==ABI_GPU_OPENMP)
+        if(nd2gxdt>0) then
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, npw, nprojs*nd2gxdt))
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, npw, nprojs*nd2gxdt))
+          ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (1, 1, 1))
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
+        end if
+      end if
+      if(nd2gxdt==0) then
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (1, 1, 1))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, 1, 1))
+        ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, 1, 1))
+        !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
       end if
       compute_dprojs=.true.
     else
@@ -529,9 +614,12 @@ contains
           end if
           if(istwf_k <= 1) then
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) if(nd2gxdt>0)
           else
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r)
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_i)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) if(nd2gxdt>0)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) if(nd2gxdt>0)
           end if
           compute_dprojs = .true.
         end if
@@ -543,20 +631,22 @@ contains
     &  .or. compute_dprojs) then
       call prep_dprojectors(npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k,&
       &                    ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k,&
-      &                    nprojs,ngrads,choice,signs,idir_pert_,gpu_option_,&
+      &                    nprojs,ndgxdt,nd2gxdt,choice,signs,idir_pert_,gpu_option_,&
       &                    gemm_nonlop_kpt(ikpt)%projs,&
       &                    gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
       &                    gemm_nonlop_kpt(ikpt)%dprojs,&
-      &                    gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i)
+      &                    gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+      &                    gemm_nonlop_kpt(ikpt)%d2projs,&
+      &                    gemm_nonlop_kpt(ikpt)%d2projs_r,gemm_nonlop_kpt(ikpt)%d2projs_i)
     end if
   end if
 
   if (nprojs>0) gemm_nonlop_kpt(ikpt)%nprojs = nprojs
-  if (ngrads>0) gemm_nonlop_kpt(ikpt)%ngrads = ngrads
-  if (ngrads>0) gemm_nonlop_kpt(ikpt)%choice = choice
-  if (ngrads>0) gemm_nonlop_kpt(ikpt)%idir = idir_pert_
+  if (ndgxdt>0) gemm_nonlop_kpt(ikpt)%ngrads = ndgxdt
+  if (nd2gxdt>0) gemm_nonlop_kpt(ikpt)%ngrads2 = nd2gxdt
+  if (ndgxdt>0) gemm_nonlop_kpt(ikpt)%choice = choice
+  if (ndgxdt>0) gemm_nonlop_kpt(ikpt)%idir = idir_pert_
   !!!!! GPU stuff
-
 
   if(gpu_option_ == ABI_GPU_LEGACY .or. gpu_option_ == ABI_GPU_KOKKOS) then
 #ifdef HAVE_GPU_CUDA
@@ -611,7 +701,7 @@ contains
       current_ikpt_projs_i => gpu_nonlop_current_ikpt%projs_i
       nullify(current_ikpt_projs)
     end if
-    if(ngrads > 0) then
+    if(ndgxdt > 0) then
       if(allocated(gpu_nonlop_current_ikpt%dprojs)) then
         current_ikpt_dprojs   => gpu_nonlop_current_ikpt%dprojs
         nullify(current_ikpt_dprojs_r)
@@ -676,10 +766,10 @@ contains
 
     if(istwf_k <= 1) then
       if(.not. xomp_target_is_present(c_loc(projs)) .and. istwf_k==1) ABI_BUG("Stopii......")
-      call gpu_set_to_zero(projs,2*npw*nprojs)
+      call gpu_set_to_zero(projs,int(2,c_size_t)*npw*nprojs)
     else
-      call gpu_set_to_zero(projs_r,npw*nprojs)
-      call gpu_set_to_zero(projs_i,npw*nprojs)
+      call gpu_set_to_zero(projs_r,int(npw,c_size_t)*nprojs)
+      call gpu_set_to_zero(projs_i,int(npw,c_size_t)*nprojs)
     end if
 
   else
@@ -831,32 +921,34 @@ contains
 !! SOURCE
  subroutine prep_dprojectors(npw,lmnmax,ntypat,indlmn,kg_k,nattyp,istwf_k,&
  &                          ucvol,ffnl_k,ph3d_k,kpt_k,kpg_k,&
- &                          nprojs,ngrads,choice,signs,idir_pert,gpu_option,&
+ &                          nprojs,ngrads,ngrads2,choice,signs,idir_pert,gpu_option,&
  &                          projs,projs_r,projs_i,&
- &                          dprojs,dprojs_r,dprojs_i)
+ &                          dprojs,dprojs_r,dprojs_i,&
+ &                          d2projs,d2projs_r,d2projs_i)
 
   integer, intent(in) :: npw, lmnmax, ntypat
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
-  integer, intent(in) :: nprojs,ngrads,choice,signs,idir_pert,gpu_option
+  integer, intent(in) :: nprojs,ngrads,ngrads2,choice,signs,idir_pert,gpu_option
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
   real(dp), intent(in) :: kpt_k(:)
   real(dp), intent(in), target :: kpg_k(:,:)
-  real(dp),intent(inout), target :: projs(2,npw,nprojs),dprojs(2,npw,nprojs*ngrads)
-  real(dp),intent(inout), target :: projs_r(1,npw,nprojs),dprojs_r(1,npw,nprojs*ngrads)
-  real(dp),intent(inout), target :: projs_i(1,npw,nprojs),dprojs_i(1,npw,nprojs*ngrads)
+  real(dp),intent(inout), target :: projs(2,npw,nprojs)  ,dprojs(2,npw,nprojs*ngrads)  ,d2projs(2,npw,nprojs*ngrads2)
+  real(dp),intent(inout), target :: projs_r(1,npw,nprojs),dprojs_r(1,npw,nprojs*ngrads),d2projs_r(1,npw,nprojs*ngrads2)
+  real(dp),intent(inout), target :: projs_i(1,npw,nprojs),dprojs_i(1,npw,nprojs*ngrads),d2projs_i(1,npw,nprojs*ngrads2)
 
   logical,allocatable :: parity(:)
+  logical :: map_ffnl_k,map_ph3d_k
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
-  integer :: ndprojs
+  integer :: ndprojs, nd2projs
   integer :: il, ipw, idir, idir1, idir2, nkpg_local, ffnl_dir, dimffnl
-  integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad
+  integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad, shift_grad2
   integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
   real(dp):: wt,tmp
-  real(dp),allocatable, target :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), temp(:,:), scal(:)
+  real(dp),allocatable, target :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), atom_d2projs(:,:,:,:), temp(:,:), scal(:)
   real(dp),pointer :: kpg(:,:)
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
@@ -866,23 +958,33 @@ contains
   if(gpu_option==ABI_GPU_OPENMP) then
 
     if(istwf_k <= 1) then
-      !$OMP TARGET DATA USE_DEVICE_PTR(dprojs)
-      call gpu_memset(c_loc(dprojs), 0, int(2,c_size_t)*npw*nprojs*ngrads*dp)
-      !$OMP END TARGET DATA
+      call gpu_set_to_zero(dprojs,int(2,c_size_t)*npw*nprojs*ngrads)
+      if(ngrads2 > 0) then
+        call gpu_set_to_zero(d2projs,int(2,c_size_t)*npw*nprojs*ngrads2)
+      end if
     else
-      !$OMP TARGET DATA USE_DEVICE_PTR(dprojs_r,dprojs_i)
-      call gpu_memset(c_loc(dprojs_r), 0, int(1,c_size_t)*npw*nprojs*ngrads*dp)
-      call gpu_memset(c_loc(dprojs_i), 0, int(1,c_size_t)*npw*nprojs*ngrads*dp)
-      !$OMP END TARGET DATA
+      call gpu_set_to_zero(dprojs_r,int(npw,c_size_t)*nprojs*ngrads)
+      call gpu_set_to_zero(dprojs_i,int(npw,c_size_t)*nprojs*ngrads)
+      if(ngrads2 > 0) then
+        call gpu_set_to_zero(d2projs_r,int(npw,c_size_t)*nprojs*ngrads2)
+        call gpu_set_to_zero(d2projs_i,int(npw,c_size_t)*nprojs*ngrads2)
+      end if
     end if
 
   else
 
     if(istwf_k <= 1) then
       dprojs(:,:,:) = zero
+      if(ngrads2 > 0) then
+        d2projs(:,:,:) = zero
+      end if
     else
       dprojs_r(:,:,:) = zero
       dprojs_i(:,:,:) = zero
+      if(ngrads2 > 0) then
+        d2projs_r(:,:,:) = zero
+        d2projs_i(:,:,:) = zero
+      end if
     end if
 
   end if
@@ -893,15 +995,26 @@ contains
   ffnl_dir=1; if(dimffnl>2) ffnl_dir=idir_pert
 
   ndprojs = 0
-  if (signs==1 .and. (choice==3 .or. choice==23)) then
+  if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55)) then
     ndprojs = 3
   else if(signs==2 .and. (choice==5 .or. choice==51 .or. choice==3)) then
     ndprojs = 1
   end if
+  nd2projs = 0
+  if(signs==1 .and. choice==54) then
+    nd2projs = 3
+  else if(signs==1 .and. choice==55) then
+    nd2projs = 6
+  end if
+
 
   if (ndprojs>0) then
     ABI_MALLOC(atom_dprojs, (2, npw, ndprojs, lmnmax))
     !$OMP TARGET ENTER DATA MAP(alloc:atom_dprojs) IF(gpu_option==ABI_GPU_OPENMP)
+    if(ngrads2>0) then
+      ABI_MALLOC(atom_d2projs, (2, npw, nd2projs, lmnmax))
+      !$OMP TARGET ENTER DATA MAP(alloc:atom_d2projs) IF(gpu_option==ABI_GPU_OPENMP)
+    end if
   end if
 
   ABI_MALLOC(temp, (npw, lmnmax))
@@ -911,7 +1024,7 @@ contains
 
   ! Compute (k+G) vectors if needed
   nkpg_local=0
-  if ((choice==2 .or. choice==3 .or. choice==23).and.size(kpg_k)==0) then
+  if ((choice==2 .or. choice==3 .or. choice==23 .or. choice==54 .or. choice==55).and.size(kpg_k)==0) then
     nkpg_local=3
     ABI_MALLOC(kpg,(npw,nkpg_local))
     call mkkpg(kg_k,kpg,kpt_k,nkpg_local,npw)
@@ -919,9 +1032,14 @@ contains
     kpg => kpg_k
   end if
 
-  !$OMP TARGET ENTER DATA MAP(to:kpg,ffnl_k,ph3d_k) IF(gpu_option==ABI_GPU_OPENMP)
+  !$OMP TARGET ENTER DATA MAP(to:kpg) IF(gpu_option==ABI_GPU_OPENMP)
+  map_ph3d_k=.false.; map_ffnl_k=.false.
+  if(.not. xomp_target_is_present(c_loc(ffnl_k))) map_ffnl_k = .true.
+  if(.not. xomp_target_is_present(c_loc(ph3d_k))) map_ph3d_k = .true.
+  !$OMP TARGET ENTER DATA MAP(to:ffnl_k) IF(gpu_option==ABI_GPU_OPENMP .and. map_ffnl_k)
+  !$OMP TARGET ENTER DATA MAP(to:ph3d_k) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d_k)
 
-  shift = 0 ; shift_grad = 0
+  shift = 0 ; shift_grad = 0; shift_grad2 = 0
   lmn_beg = 1
 
   do itypat = 1, ntypat
@@ -936,14 +1054,16 @@ contains
       ! start from 4pi/sqrt(ucvol)*ffnl
       if(gpu_option==ABI_GPU_OPENMP) then
         if (ndprojs>0) then
-          !$OMP TARGET DATA USE_DEVICE_PTR(atom_dprojs)
-          call gpu_memset(c_loc(atom_dprojs), 0, int(2,c_size_t)*npw*ndprojs*lmnmax*dp)
-          !$OMP END TARGET DATA
+          call gpu_set_to_zero(atom_dprojs,int(2,c_size_t)*npw*ndprojs*lmnmax)
+          if(ngrads2>0) then
+            call gpu_set_to_zero(atom_d2projs,int(2,c_size_t)*npw*nd2projs*lmnmax)
+          end if
         end if
       else
         if (ndprojs>0) atom_dprojs(:,:,:,:) = zero
+        if (nd2projs>0) atom_d2projs(:,:,:,:) = zero
       end if
-      if (signs==1 .and. (choice==3 .or. choice==23)) then
+      if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55)) then
         !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_dprojs,ffnl_k) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ipw=1, npw
@@ -957,6 +1077,19 @@ contains
           atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl_k(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
         end do
       end if
+      if(signs==1 .and. choice==54) then
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_d2projs,ffnl_k) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ipw=1, npw
+          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl_k(ipw, 2:nd2projs+1, 1:nlmn_o, itypat)
+        end do
+      else if(signs==1 .and. choice==55) then
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_d2projs,ffnl_k) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ipw=1, npw
+          atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl_k(ipw, 5:nd2projs+4, 1:nlmn_o, itypat)
+        end do
+      end if
 
       ! multiply by (-i)^l
       if (ndprojs>0) then
@@ -967,11 +1100,12 @@ contains
         end do
         ! multiply by -1
         if(gpu_option==ABI_GPU_OPENMP) then
-          !$OMP TARGET UPDATE FROM(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
-          !!$OMP TARGET UPDATE TO(scal)
-          !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-          !!$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_dprojs,scal) &
-          !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+          !!$OMP TARGET UPDATE FROM(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
+          !!$OMP TARGET UPDATE FROM(atom_d2projs) if(ngrads2>0 .and. gpu_option==ABI_GPU_OPENMP)
+          !$OMP TARGET UPDATE TO(scal)
+          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+          !$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_dprojs,scal) &
+          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
           do ilmn=1,nlmn_o
             do idir=1,ndprojs
               do ipw=1,npw
@@ -980,17 +1114,36 @@ contains
               end do
             end do
           end do
+          if(nd2projs>0) then
+            !$OMP TARGET UPDATE TO(scal)
+            !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+            !$OMP& PRIVATE(idir,ipw,ilmn) MAP(to:atom_d2projs,scal) &
+            !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+            do ilmn=1,nlmn_o
+              do idir=1,ndprojs
+                do ipw=1,npw
+                  atom_d2projs(1,ipw,idir,ilmn) = atom_d2projs(1,ipw,idir,ilmn) * scal(ilmn)
+                  atom_d2projs(2,ipw,idir,ilmn) = atom_d2projs(2,ipw,idir,ilmn) * scal(ilmn)
+                end do
+              end do
+            end do
+          end if
         else
           do ilmn=1,nlmn_o
             atom_dprojs(:,:,:,ilmn) = atom_dprojs(:,:,:,ilmn) * scal(ilmn)
           end do
+          if(nd2projs>0) then
+            do ilmn=1,nlmn_o
+              atom_d2projs(:,:,:,ilmn) = atom_d2projs(:,:,:,ilmn) * scal(ilmn)
+            end do
+          end if
         end if
         ! multiply by -i
-        !!$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_dprojs,parity) &
-        !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        !$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_dprojs,parity) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=1,nlmn_o
           if(.not. parity(ilmn)) then
-            !!$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
+            !$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
             do idir=1,ndprojs
               do ipw=1,npw
                 tmp = atom_dprojs(2,ipw,idir,ilmn)
@@ -1000,7 +1153,32 @@ contains
             end do
           end if
         end do
-        !$OMP TARGET UPDATE TO(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
+        if(ngrads2>0) then
+          !$OMP TARGET TEAMS DISTRIBUTE MAP(to:atom_d2projs,parity) &
+          !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+          do ilmn=1,nlmn_o
+            if(.not. parity(ilmn)) then
+              !$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
+              do idir=1,nd2projs
+                do ipw=1,npw
+                  tmp = atom_d2projs(2,ipw,idir,ilmn)
+                  atom_d2projs(2,ipw,idir,ilmn) =  atom_d2projs(1,ipw,idir,ilmn)
+                  atom_d2projs(1,ipw,idir,ilmn) = -tmp
+                end do
+              end do
+            else
+              !$OMP PARALLEL DO PRIVATE(idir,ipw,tmp) COLLAPSE(2)
+              do idir=1,nd2projs
+                do ipw=1,npw
+                  atom_d2projs(1,ipw,idir,ilmn) = -atom_d2projs(1,ipw,idir,ilmn)
+                  atom_d2projs(2,ipw,idir,ilmn) = -atom_d2projs(2,ipw,idir,ilmn)
+                end do
+              end do
+            end if
+          end do
+        end if
+        !!$OMP TARGET UPDATE TO(atom_dprojs) if(gpu_option==ABI_GPU_OPENMP)
+        !!$OMP TARGET UPDATE TO(atom_d2projs) if(ngrads2>0 .and. gpu_option==ABI_GPU_OPENMP)
       end if
 
       ! multiply by conj(ph3d)
@@ -1019,11 +1197,26 @@ contains
           end do
         end do
       end if
+      if (nd2projs>0) then
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,idir,ipw,tmp) COLLAPSE(3) MAP(to:atom_d2projs,ph3d_k) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ilmn=1,nlmn_o
+          do idir=1,nd2projs
+            do ipw=1,npw
+              tmp = atom_d2projs(1, ipw, idir,ilmn)
+              atom_d2projs(1, ipw, idir,ilmn) = atom_d2projs(1, ipw, idir,ilmn) * ph3d_k(1, ipw, iaph3d) &
+              &                               + atom_d2projs(2, ipw, idir,ilmn) * ph3d_k(2, ipw, iaph3d)
+              atom_d2projs(2, ipw, idir,ilmn) = atom_d2projs(2, ipw, idir,ilmn) * ph3d_k(1, ipw, iaph3d) &
+              &                               - tmp                 * ph3d_k(2, ipw, iaph3d)
+            end do
+          end do
+        end do
+      end if
 
 
       !! Handling dprojs
 
-      if(signs==1 .and. (choice==3 .or. choice==23)) then
+      if(signs==1 .and. (choice==3 .or. choice==23 .or. choice==55)) then
         if(istwf_k <= 1) then
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw,idir,idir1,idir2) COLLAPSE(3) MAP(to:atom_dprojs,dprojs,kpg) &
           !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
@@ -1060,7 +1253,7 @@ contains
       end if
 
 
-      if(signs==1 .and. (choice==2 .or. choice==23)) then
+      if(signs==1 .and. (choice==2 .or. choice==23 .or. choice==54)) then
         igrad=0; if(choice==23) igrad=6
         if(istwf_k <= 1) then
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw,idir) COLLAPSE(3) MAP(to:projs,dprojs,kpg) &
@@ -1090,6 +1283,21 @@ contains
         end if
       end if
 
+      if(signs==1 .and. (choice==5 .or. choice==51 .or. choice==54 .or. choice==55)) then
+        igrad=0; if(choice==54) igrad=3; if(choice==55) igrad=6
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:atom_dprojs,dprojs) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ilmn=lmn_beg,nlmn
+          do idir=1,3
+            do ipw=1,npw
+              dprojs(1, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
+              &     +atom_dprojs(1, ipw, idir, ilmn)
+              dprojs(2, ipw, shift_grad+(ilmn-1)*ngrads+igrad+idir) = &
+              &     +atom_dprojs(2, ipw, idir, ilmn)
+            end do
+          end do
+        end do
+      end if
 
       if(signs==2 .and. (choice==2)) then
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw) COLLAPSE(2) MAP(to:projs,dprojs,kpg) &
@@ -1132,9 +1340,49 @@ contains
         end do
       end if
 
+
+
+      ! Handling d2projs
+
+      if(signs==1 .and. choice==54) then
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ilmn=lmn_beg,nlmn
+          do idir1=1,3
+            do idir2=1,3
+              do ipw=1,npw
+                d2projs(1, ipw, shift_grad2+(ilmn-1)*ngrads2+(idir1-1)*3+idir2) = &
+                &     -atom_d2projs(2, ipw, idir2, ilmn)*kpg(ipw,idir1)*two_pi
+                d2projs(2, ipw, shift_grad2+(ilmn-1)*ngrads2+(idir1-1)*3+idir2) = &
+                &     +atom_d2projs(1, ipw, idir2, ilmn)*kpg(ipw,idir1)*two_pi
+              end do
+            end do
+          end do
+        end do
+      end if
+
+      if(signs==1 .and. choice==55) then
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ilmn=lmn_beg,nlmn
+          do idir1=1,6
+            do idir2=1,3
+              do ipw=1,npw
+                d2projs(1, ipw, shift_grad2+(ilmn-1)*ngrads2+(idir1-1)*3+idir2) = &
+                &     +atom_d2projs(1, ipw, idir1, ilmn)*kpg(ipw,idir2)
+                d2projs(2, ipw, shift_grad2+(ilmn-1)*ngrads2+(idir1-1)*3+idir2) = &
+                &     +atom_d2projs(2, ipw, idir1, ilmn)*kpg(ipw,idir2)
+!                print*,d2projs(:, ipw, shift_grad2+(ilmn-1)*ngrads2+(idir-1)*3+idir2); flush(6)
+              end do
+            end do
+          end do
+        end do
+      end if
+
       iaph3d = iaph3d + 1
-      shift_grad = shift_grad + ngrads*nlmn_o
-      shift = shift + nlmn
+      shift_grad2 = shift_grad2 + ngrads2*nlmn_o
+      shift_grad  = shift_grad  + ngrads*nlmn_o
+      shift       = shift       + nlmn
 
     end do
   end do
@@ -1154,10 +1402,16 @@ contains
     !$OMP TARGET EXIT DATA MAP(delete:atom_dprojs) IF(gpu_option==ABI_GPU_OPENMP)
     ABI_FREE(atom_dprojs)
   end if
-  !$OMP TARGET EXIT DATA MAP(delete:kpg,ffnl_k,ph3d_k) IF(gpu_option==ABI_GPU_OPENMP)
+  if (allocated(atom_d2projs)) then
+    !$OMP TARGET EXIT DATA MAP(delete:atom_d2projs) IF(gpu_option==ABI_GPU_OPENMP)
+    ABI_FREE(atom_d2projs)
+  end if
+  !$OMP TARGET EXIT DATA MAP(delete:kpg) IF(gpu_option==ABI_GPU_OPENMP)
   if (nkpg_local>0) then
     ABI_FREE(kpg)
   end if
+  !$OMP TARGET EXIT DATA MAP(delete:ffnl_k) IF(gpu_option==ABI_GPU_OPENMP .and. map_ffnl_k)
+  !$OMP TARGET EXIT DATA MAP(delete:ph3d_k) IF(gpu_option==ABI_GPU_OPENMP .and. map_ph3d_k)
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
        call nvtxEndRange()
@@ -1216,12 +1470,12 @@ contains
 
   ! locals
   complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
+  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
-  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end
+  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
   logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
@@ -1230,18 +1484,24 @@ contains
   real(dp), allocatable :: s_projections(:,:,:), vnl_projections(:,:,:)
   real(dp), allocatable :: dprojections(:,:,:), temp_realvec(:)
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
+  real(dp), allocatable, target :: d2projections(:,:,:)
   integer :: nprojs_my_blk
   integer :: rank, nprocs
   logical :: is_last
   real(dp), allocatable :: projs_local(:,:,:)
   real(dp), allocatable :: projs_recv(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
-  integer :: ngrads_tmp
-  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
-  integer :: idbeg,idend,dshift,enlout_shift
+  real(dp), ABI_CONTIGUOUS pointer :: d2projs_r_(:,:,:),d2projs_i_(:,:,:)
+  integer :: ngrads_tmp,ngrads2_tmp
+  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:),gmet2(:,:)
+  real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
+  integer :: idbeg,idend,dshift,id2beg,id2end,d2shift,enlout_shift,ipw,i
   real(dp) :: work(6)
+  integer :: mu0,ic,nu,mu,jc
+  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
 
 ! *************************************************************************
 
@@ -1258,7 +1518,7 @@ contains
     ABI_BUG('computation not prepared for gemm_nonlop use!')
   end if
   if ( (choice>3.and.choice/=7.and.choice/=5.and.choice/=51.and.signs==2) .or. &
-&      (choice>3.and.choice/=7.and.choice/=23.and.signs==1) .or. &
+&      (choice>3.and.choice/=7.and.choice/=23.and.choice/=54.and.choice/=55.and.signs==1) .or. &
 &      (useylm/=1) ) then
     ABI_BUG('gemm_nonlop option not supported!')
   end if
@@ -1280,6 +1540,7 @@ contains
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
   ngrads = gemm_nonlop_kpt(ikpt)%ngrads
+  ngrads2 = gemm_nonlop_kpt(ikpt)%ngrads2
   nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
@@ -1292,20 +1553,26 @@ contains
   end do
   projs_beg=1; projs_end=nprojs;
   dprojs_beg=1; dprojs_end=nprojs*ngrads;
+  d2projs_beg=1; d2projs_end=nprojs*ngrads2;
   if((choice==2 .and. signs==2)) then
     projs_beg=atom_proj_shift+1
     projs_end=projs_beg+nprojs-1
     dprojs_beg=atom_proj_shift*ngrads+1
     dprojs_end=dprojs_beg+nprojs*ngrads-1
+    d2projs_beg=atom_proj_shift*ngrads2+1
+    d2projs_end=dprojs_beg+nprojs*ngrads2-1
   end if
   if(istwf_k == 1) then
     projs_  => gemm_nonlop_kpt(ikpt)%projs(:,:,projs_beg:projs_end)
-    dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
+    if(ngrads>0)  dprojs_ => gemm_nonlop_kpt(ikpt)%dprojs(:,:,dprojs_beg:dprojs_end)
+    if(ngrads2>0) d2projs_ => gemm_nonlop_kpt(ikpt)%d2projs(:,:,d2projs_beg:d2projs_end)
   else
     projs_r_  => gemm_nonlop_kpt(ikpt)%projs_r(:,:,projs_beg:projs_end)
     projs_i_  => gemm_nonlop_kpt(ikpt)%projs_i(:,:,projs_beg:projs_end)
-    dprojs_r_ => gemm_nonlop_kpt(ikpt)%dprojs_r(:,:,dprojs_beg:dprojs_end)
-    dprojs_i_ => gemm_nonlop_kpt(ikpt)%dprojs_i(:,:,dprojs_beg:dprojs_end)
+    if(ngrads>0)  dprojs_r_ => gemm_nonlop_kpt(ikpt)%dprojs_r(:,:,dprojs_beg:dprojs_end)
+    if(ngrads>0)  dprojs_i_ => gemm_nonlop_kpt(ikpt)%dprojs_i(:,:,dprojs_beg:dprojs_end)
+    if(ngrads2>0) d2projs_r_ => gemm_nonlop_kpt(ikpt)%d2projs_r(:,:,d2projs_beg:d2projs_end)
+    if(ngrads2>0) d2projs_i_ => gemm_nonlop_kpt(ikpt)%d2projs_i(:,:,d2projs_beg:d2projs_end)
   end if
 
   if(gemm_nonlop_is_distributed) then
@@ -1336,26 +1603,6 @@ contains
     ABI_MALLOC(projs_local, (cplex, npwin, MAX(ngrads,1)*gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
   end if
 
-  ! These will store the non-local factors for vectin, svectout and vectout respectively
-  if(.not. local_vectproj) then
-    ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
-  end if
-  ABI_MALLOC(s_projections,(cplex, nprojs,nspinor*ndat))
-  ABI_MALLOC(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
-
-  if(.not. local_vectproj) projections = zero
-  s_projections = zero
-  vnl_projections = zero
-  !if (ngrads>0) then
-  ngrads_tmp=1; if (ngrads>0) ngrads_tmp=ngrads
-    ABI_MALLOC(dprojections,(cplex, ngrads_tmp*nprojs,nspinor*ndat))
-    ABI_MALLOC(s_dprojections,(cplex, ngrads_tmp*nprojs,nspinor*ndat))
-    ABI_MALLOC(vnl_dprojections,(cplex_fac, ngrads_tmp*nprojs,nspinor*ndat))
-    dprojections(:,:,:) = zero
-    s_dprojections(:,:,:) = zero
-    vnl_dprojections(:,:,:) = zero
-  !end if
-
   if(nprojs == 0) then
     ! TODO check if this is correct
     if(signs == 1) then
@@ -1374,19 +1621,93 @@ contains
     ABI_MALLOC(enlk,(ndat))
     enlk=zero
     ABI_MALLOC(fnlk,(3*natom,ndat))
+    fnlk=zero
     ABI_MALLOC(ddkk,(6,ndat))
+    ddkk=zero
     ABI_MALLOC(strnlk,(6,ndat))
+    strnlk=zero
   end if
 
   ndgxdt = ngrads
-  ndgxdtfac = ngrads
-  nd2gxdt = 0
-  nd2gxdtfac = 0
-  optder = 0;if (ndgxdtfac>0 .and. signs == 2) optder=1
-  cplex_dgxdt(:) = 1;
+  nd2gxdt = ngrads2
+
+  ndgxdtfac = 0; nd2gxdtfac = 0
+  if (choice==2) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==22) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==3) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==4) then
+    if(signs==1) ndgxdtfac=3
+  end if
+  if (choice==5) then
+    if(signs==2) ndgxdtfac=1
+  end if
+  if (choice==51) then
+    if(signs==2) ndgxdtfac=1
+  end if
+  if (choice==54) then
+    if(signs==1) ndgxdtfac=6
+    if(signs==2) ndgxdtfac=1
+    if(signs==2) nd2gxdtfac=1
+  end if
+  if (choice==55) then
+    if(signs==1) ndgxdtfac=9
+  end if
+  if (choice==6) then
+    if(signs==1) ndgxdtfac=9
+  end if
+  ABI_CHECK(ndgxdtfac<=ndgxdt,"BUG: ndgxdtfac>ndgxdt!")
+  optder = 0;if (ndgxdtfac>0) optder = 1
+  if (nd2gxdtfac>0) optder=2
+  cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
+  ! When istwf_k > 1, gx derivatives can be real or pure imaginary
+  ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
+  ! cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
   if(ndgxdt > 0) then
    if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
+   if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+   !if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
+   if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
   end if
+  if(nd2gxdt > 0) then
+    if (choice==54) cplex_d2gxdt(:) = 2
+    if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
+  end if
+
+  ! These will store the non-local factors for vectin, svectout and vectout respectively
+  if(.not. local_vectproj) then
+    ABI_MALLOC(projections,(cplex, nprojs,nspinor*ndat))
+  end if
+  ABI_MALLOC(s_projections,(cplex, nprojs,nspinor*ndat))
+  ABI_MALLOC(vnl_projections,(cplex_fac, nprojs,nspinor*ndat))
+
+  if(.not. local_vectproj) projections = zero
+  s_projections = zero
+  vnl_projections = zero
+
+  ! Working buffers for storing derivative
+  !if (ngrads>0) then
+  ngrads_tmp=1; if (ngrads>0) ngrads_tmp=ngrads
+    ABI_MALLOC(dprojections,(cplex, ngrads_tmp*nprojs,nspinor*ndat))
+    ABI_MALLOC(s_dprojections,(cplex, ngrads_tmp*nprojs,nspinor*ndat))
+    ABI_MALLOC(vnl_dprojections,(cplex_fac, ngrads_tmp*nprojs,nspinor*ndat))
+    dprojections(:,:,:) = zero
+    s_dprojections(:,:,:) = zero
+    vnl_dprojections(:,:,:) = zero
+  !end if
+
+  ! Working buffers for storing 2nd-derivative
+  !if (ngrads2>0) then
+  ngrads2_tmp=1; if (ngrads>0) ngrads2_tmp=ngrads2
+    ABI_MALLOC(d2projections,(cplex, ngrads2_tmp*nprojs,nspinor*ndat))
+    d2projections(:,:,:) = zero
+  !end if
+
 
   ! determine precisely when temp_realvec needs to be allocated
   ! to factorize allocate (resp. deallocate) at the begining (resp. at the end) of subroutine
@@ -1431,14 +1752,15 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
-    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt_dum_in,dprojections,projections,&
+    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2projections,dprojections,projections,&
     &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-    &       vectin,projs_,dprojs_,&
+    &       vectin,projs_,dprojs_,d2projs_,&
     &       projs_r_,projs_i_,&
     &       dprojs_r_,dprojs_i_,&
+    &       d2projs_r_,d2projs_i_,&
     &       temp_realvec,&
     &       projs_local,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
@@ -1479,7 +1801,7 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      shift = 0
+      shift = 0; dshift = 0; d2shift = 0
       ABI_MALLOC(sij_typ,(((paw_opt+1)/3)*lmnmax*(lmnmax+1)/2))
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
@@ -1498,12 +1820,20 @@ contains
         ibeg = shift+1
         iend = shift+nattyp(itypat)*nlmn
 
+        idbeg = dshift+1
+        idend = dshift+nattyp(itypat)*nlmn*ngrads_tmp
+
+        id2beg = d2shift+1
+        id2end = d2shift+nattyp(itypat)*nlmn*ngrads2_tmp
+
         do idat = 1,ndat
           call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
-&         dprojections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_dprojections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_dprojections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
+&         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+&         vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+&         s_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+&         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
+&         d2gxdt_dum_out,d2gxdt_dum_out2,&
+&         dimenl1,dimenl2,dimekbq,enl,&
 &         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
 &         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
 &         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
@@ -1512,6 +1842,8 @@ contains
         end do
 
         shift = shift + nattyp(itypat)*nlmn
+        dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
+        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
         iatm = iatm+nattyp(itypat)
       end do
       ABI_FREE(sij_typ)
@@ -1541,15 +1873,15 @@ contains
 
     ! opernld
     if(signs==1) then
-#if 1
+#if 0
       call opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
-      &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
+      &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
       &       enlk,enlout,projections,vnl_projections,s_projections,&
       &       ndat,nd2gxdt,ndgxdt,&
       &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
       &       nattyp)
 #else
-      shift=0; dshift=0; iatm=1
+      shift=0; dshift=0; d2shift = 0; iatm=1
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
 
@@ -1557,14 +1889,17 @@ contains
         iend = shift+nattyp(itypat)*nlmn
 
         idbeg = dshift+1
-        idend = dshift+nattyp(itypat)*nlmn*ngrads
+        idend = dshift+nattyp(itypat)*nlmn*ngrads_tmp
+
+        id2beg = d2shift+1
+        id2end = d2shift+nattyp(itypat)*nlmn*ngrads2_tmp
 
         do idat=1,ndat
           call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
           &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
           &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
           &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       d2gxdt_dum_in,&
+          &       d2projections (:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
           &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
           &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
           &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
@@ -1574,7 +1909,8 @@ contains
         end do
 
         shift = shift + nattyp(itypat)*nlmn
-        dshift = dshift + nattyp(itypat)*nlmn*ngrads
+        dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
+        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
         iatm = iatm+nattyp(itypat)
       end do
 #endif
@@ -1587,7 +1923,20 @@ contains
         if (choice==3.or.choice==23) then
           call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
         end if
+        if (choice==55) then
+          call xmpi_sum(ddkk,mpi_enreg%comm_spinor,ierr)
+        end if
       end if
+
+      !Need sometimes gmet
+      if ((signs==1.and.paw_opt<=3).and. &
+          & (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
+          & choice==54.or.choice==55)) then
+        ABI_MALLOC(gmet2,(3,3))
+        gmet2 = MATMUL(TRANSPOSE(gprimd),gprimd)
+      end if
+
+      !Coordinate transformations
 
       ! Derivatives wrt strain
       !  - Convert from reduced to cartesian coordinates
@@ -1601,6 +1950,107 @@ contains
         end do
       end if
 
+      !2nd derivative wrt to k wave vector and atomic position (effective charges):
+      ! - convert from cartesian to reduced coordinates
+      if (choice==54.and.signs==1.and.paw_opt<=3) then
+        ABI_MALLOC(work1,(3))
+        ABI_MALLOC(work2,(3))
+        do idat=1,ndat
+          mu0=0 ! Shift to be applied in enlout array
+          enlout_shift=(idat-1)*nnlout
+          do mu=1,3*natom
+        !   First, real part
+            work1(1)=enlout(enlout_shift+mu0+1);work1(2)=enlout(enlout_shift+mu0+3);work1(3)=enlout(enlout_shift+mu0+5)
+            work2(:)=gmet2(:,1)*work1(1)+gmet2(:,2)*work1(2)+gmet2(:,3)*work1(3)
+            enlout(enlout_shift+mu0+1)=work2(1);enlout(enlout_shift+mu0+3)=work2(2);enlout(enlout_shift+mu0+5)=work2(3)
+        !   Then imaginary part
+            work1(1)=enlout(enlout_shift+mu0+2);work1(2)=enlout(enlout_shift+mu0+4);work1(3)=enlout(enlout_shift+mu0+6)
+            work2(:)=gmet2(:,1)*work1(1)+gmet2(:,2)*work1(2)+gmet2(:,3)*work1(3)
+            enlout(enlout_shift+mu0+2)=work2(1);enlout(enlout_shift+mu0+4)=work2(2);enlout(enlout_shift+mu0+6)=work2(3)
+            mu0=mu0+6
+          end do
+        end do !idat
+        ABI_FREE(work1)
+        ABI_FREE(work2)
+      end if
+
+      !2nd derivative wrt to k wave vector and strain (piezoelectric tensor):
+      ! - convert from cartesian to reduced coordinates (k point)
+      ! - convert from reduced to cartesian coordinates (strain)
+      ! - substract volume contribution
+      ! - symetrize strain components
+      if (choice==55.and.signs==1.and.paw_opt<=3) then
+        ABI_MALLOC(work3,(2,3))
+        ABI_MALLOC(work4,(2,3))
+        ABI_MALLOC(work5,(2,3,6))
+        ABI_MALLOC(work7,(2,3,6))
+        ABI_MALLOC(work6,(2,3,3))
+        do idat=1,ndat
+          enlout_shift=(idat-1)*nnlout
+          do ic=1,3 ! gamma
+            work5=zero
+            do jc=1,3 ! nu
+              do ii=1,3 ! lambda
+                mu=(gamma(jc,ii)-1)*3+1
+                work5(1,jc,ii)=gmet2(ic,1)*enlout(enlout_shift+2*mu-1)+gmet2(ic,2)*enlout(enlout_shift+2*mu+1) &
+       &         +gmet2(ic,3)*enlout(enlout_shift+2*mu+3)
+                work5(2,jc,ii)=gmet2(ic,1)*enlout(enlout_shift+2*mu  )+gmet2(ic,2)*enlout(enlout_shift+2*mu+2) &
+       &         +gmet2(ic,3)*enlout(enlout_shift+2*mu+4)
+              end do
+            end do
+            work6=zero
+            do jc=1,3 ! nu
+              do ii=1,3 ! beta
+                work6(1:cplex,ii,jc)=gprimd(ii,1)*work5(1:cplex,jc,1)+gprimd(ii,2)*work5(1:cplex,jc,2) &
+       &         +gprimd(ii,3)*work5(1:cplex,jc,3)
+              end do
+            end do
+            do jc=1,3 ! alpha
+              do ii=1,3 ! beta
+                mu=gamma(jc,ii)
+                work7(1:cplex,ic,mu)=gprimd(jc,1)*work6(1:cplex,ii,1)+gprimd(jc,2)*work6(1:cplex,ii,2) &
+       &         +gprimd(jc,3)*work6(1:cplex,ii,3)
+              end do
+            end do
+          end do ! gamma
+
+          do ii=1,3 ! alpha
+            work3(1,ii)=gprimd(ii,1)*ddkk(2*1-1,idat)+gprimd(ii,2)*ddkk(2*2-1,idat) &
+       &     +gprimd(ii,3)*ddkk(2*3-1,idat)
+            work3(2,ii)=gprimd(ii,1)*ddkk(2*1  ,idat)+gprimd(ii,2)*ddkk(2*2  ,idat) &
+       &     +gprimd(ii,3)*ddkk(2*3  ,idat)
+          end do
+          do ii=1,3 ! gamma
+            work4(1,ii)=gmet2(ii,1)*ddkk(2*1-1,idat)+gmet2(ii,2)*ddkk(2*2-1,idat) &
+       &     +gmet2(ii,3)*ddkk(2*3-1,idat)
+            work4(2,ii)=gmet2(ii,1)*ddkk(2*1  ,idat)+gmet2(ii,2)*ddkk(2*2  ,idat) &
+       &     +gmet2(ii,3)*ddkk(2*3  ,idat)
+          end do
+
+          do mu=1,6
+            ii=alpha(mu) ! alpha
+            ic=beta(mu) ! beta
+            do jc=1,3 ! gamma
+              work7(1:cplex,jc,mu)=work7(1:cplex,jc,mu)-half &
+       &       *(gprimd(ic,jc)*work3(1:cplex,ii)+gprimd(ii,jc)*work3(1:cplex,ic))
+              if (ii==ic) work7(1:cplex,jc,mu)=work7(1:cplex,jc,mu)-work4(1:cplex,jc)
+            end do
+          end do
+          do mu=1,6 ! alpha,beta
+            do nu=1,3 ! gamma
+              mu0=3*(mu-1)+nu
+              enlout(enlout_shift+2*mu0-1)=work7(1,nu,mu)
+              enlout(enlout_shift+2*mu0  )=work7(2,nu,mu)
+            end do
+          end do
+        end do !idat
+        ABI_FREE(work3)
+        ABI_FREE(work4)
+        ABI_FREE(work5)
+        ABI_FREE(work6)
+        ABI_FREE(work7)
+      end if
+
     end if !opernld
 
   end if ! choice>0
@@ -1612,6 +2062,10 @@ contains
     ABI_FREE(fnlk)
     ABI_FREE(strnlk)
     ABI_FREE(ddkk)
+  end if
+
+  if (allocated(gmet2)) then
+    ABI_FREE(gmet2)
   end if
 
   if(.not. local_vectproj) then
@@ -1631,6 +2085,9 @@ contains
   end if
   if (allocated(vnl_dprojections)) then
     ABI_FREE(vnl_dprojections)
+  end if
+  if (allocated(d2projections)) then
+    ABI_FREE(d2projections)
   end if
   if (allocated(temp_realvec)) then
     ABI_FREE(temp_realvec)
