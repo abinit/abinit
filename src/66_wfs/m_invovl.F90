@@ -761,12 +761,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
 #endif
 
-<<<<<<< HEAD
-||||||| f953061cee
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
-
-=======
 #ifdef HAVE_OPENMP_OFFLOAD
  if (ham%gpu_option==ABI_GPU_OPENMP) then
    call refresh_invovl_ompgpu_kpt(ikpt_this_proc)
@@ -776,7 +770,6 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  write(message,*) 'Invovl built'
  call wrtout(std_out,message,'COLL')
 
->>>>>>> develop
 end subroutine make_invovl
 !!***
 
