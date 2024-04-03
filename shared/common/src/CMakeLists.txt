@@ -20,4 +20,11 @@ add_subdirectory(28_numeric_noabirule)
 add_subdirectory(29_kpoints)
 add_subdirectory(32_util)
 add_subdirectory(33_xc_lowlevel)
+
+# Temporary: create symbolic link to libPAW
+IF(NOT EXISTS "${CMAKE_SOURCE_DIR}/shared/common/src/39_libpaw")
+  message("-- Create 39_libpaw symbolic link")
+  execute_process(WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/shared/common/src
+                  COMMAND ${CMAKE_COMMAND} -E create_symlink ../../libpaw/src 39_libpaw)
+endif()
 add_subdirectory(39_libpaw)

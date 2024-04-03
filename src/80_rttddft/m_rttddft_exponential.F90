@@ -7,7 +7,7 @@
 !!  part of the propagator using various approximations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FB)
+!!  Copyright (C) 2021-2024 ABINIT group (FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ contains
 
    !** Also apply S^-1 in PAW case
    if (l_paw) then
-      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%invol_blk_sliced)
+      call apply_invovl(ham_k,ghc,gsm1hc,cwaveprj,npw_t,nband_t,mpi_enreg,nspinor,dtset%invovl_blksliced)
       tmp(1,:) =  dt*gsm1hc(2,:)/real(nfact,dp)
       tmp(2,:) = -dt*gsm1hc(1,:)/real(nfact,dp)
    else
