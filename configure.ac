@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2023 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -38,7 +38,10 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.11.4],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],
+    [m4_esyscmd([config/scripts/git-version-gen .tarball-version])],
+    [https://bugs.launchpad.net/abinit/],
+    [abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -278,9 +281,6 @@ ABI_FC_EXTENSIONS
 # Get module file case
 ABI_FC_MOD_CASE
 
-# Determine Fortran-C name mangling scheme
-AC_FC_WRAPPERS
-
 # The IBM Fortran compiler crashes if the mpi module is included
 # more than once
 if test "${abi_fc_vendor}" = "ibm" -a "${abi_mpi_enable}" = "yes"; then
@@ -389,6 +389,32 @@ if test "${abi_openmp_enable}" != "yes"; then
   FCFLAGS_OPENMP=""
 fi
 
+# Handling OpenMP offload
+if test "${abi_openmp_offload_enable}" = "yes"; then
+  # Fail if GPU support is not enabled
+  if test "${abi_gpu_enable}" = "no"; then
+    AC_MSG_ERROR([OpenMP offload is enabled with no GPU support (ie: CUDA), please check your config.])
+  fi
+  # Enable OpenMP if OpenMP offload is requested, to remain consistent
+  abi_openmp_enable="yes"
+  if test "${GPU_ARCH}" = ""; then
+    AC_MSG_WARN([GPU arch wasn't not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
+    GPU_ARCH=80
+  fi
+  # Perform pattern replacement in OpenMP offload flags with requested GPU arch
+  FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
+
+  #FIXME With LLVM 16 embedded with ROCm 5.6.0, issues occurs if OpenMP offload is enabled everywhere
+  #Therefore, we enable it only if subfolders where it's needed and link time.
+  if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
+    amd_openmp_flags="${FCFLAGS_OPENMP_OFFLOAD}"
+    FC_LDFLAGS_EXTRA="${FCFLAGS_OPENMP_OFFLOAD} ${FC_LDFLAGS_EXTRA}"
+    FCFLAGS_OPENMP_OFFLOAD=""
+  fi
+else
+  FCFLAGS_OPENMP_OFFLOAD=""
+fi
+
 # Set Fortran preprocessing flags
 if test "${abi_fc_wrap}" = "yes"; then
   test "${FPPFLAGS}" = "" && FPPFLAGS="${FPPFLAGS_HINTS_EXT}"
@@ -470,11 +496,24 @@ fi
 ABI_OPTIM_INIT([${abi_optim_flavor}])
 
 # FIXME: 20_datashare does not support optimizations
-if test "${abi_optim_flavor}" != "none"; then
   AC_MSG_NOTICE([disabling optimizations for src/20_datashare/])
   fcflags_opt_20_datashare="-O0"
   AC_MSG_NOTICE([disabling optimizations for src/43_ptgroups/])
   fcflags_opt_43_ptgroups="-O0"
+
+# FIXME: AMD LLVM fork for OpenMP GPU (aka AOMP) has a sensitive OpenMP GPU implementation, so we enable it where needed.
+# Checked with version 16.0.0 shipped with ROCm 5.6.0 (July 2023).
+if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
+  if test "${abi_openmp_offload_enable}" = "yes"; then
+    fcflags_opt_28_numeric_noabirule="${amd_openmp_flags}"
+    fcflags_opt_45_xgTools="${amd_openmp_flags}"
+    fcflags_opt_46_ghc_omp="${amd_openmp_flags}"
+    fcflags_opt_66_nonlocal="${amd_openmp_flags}"
+    fcflags_opt_66_wfs="${amd_openmp_flags}"
+    fcflags_opt_67_common="${amd_openmp_flags}"
+    fcflags_opt_79_seqpar_mpi="${amd_openmp_flags}"
+    fcflags_opt_98_main="${amd_openmp_flags}"
+  fi
 fi
 
 # Set per-directory Fortran optimizations
@@ -548,7 +587,7 @@ test "${CXX_LIBS}" = "" && \
 # Final adjustments for Fortran
 # Note: FCFLAGS_OPTIM must not be included (per-directory optimizations)
 test "${FCFLAGS}" = "" && \
-  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_EXTRA} ${FCFLAGS_OPENMP}"
+  FCFLAGS="${FCFLAGS_DEBUG} ${FCFLAGS_HINTS} ${FCFLAGS_OPENMP} ${FCFLAGS_OPENMP_OFFLOAD} ${FCFLAGS_EXTRA}"
 test "${FC_LDFLAGS}" = "" && \
   FC_LDFLAGS="${FC_LDFLAGS_DEBUG} ${FC_LDFLAGS_OPTIM} ${FC_LDFLAGS_HINTS} ${FC_LDFLAGS_EXTRA}"
 test "${FC_LIBS}" = "" && \
@@ -561,6 +600,20 @@ test "${XPPFLAGS}" = "" && \
   XPPFLAGS="${XPPFLAGS_DEBUG} ${XPPFLAGS_OPTIM} ${XPPFLAGS_HINTS} ${XPPFLAGS_EXTRA}"
 test "${FPPFLAGS}" = "" -a "${abi_fc_wrap}" = "no" && \
   FPPFLAGS="${FPPFLAGS_DEBUG} ${FPPFLAGS_OPTIM} ${FPPFLAGS_HINTS} ${FPPFLAGS_EXTRA}"
+
+# Determine Fortran link flags (FCLIBS)
+# This is needed after FCFLAGS has been set as some compilers have extra
+# libraries linked due to optimizations levels or OpenMP
+# This step would be performed inside AC_FC_WRAPPERS but it fails due to a mischievous
+# double-quote in FCLIBS when using Cray compiler, so we trim it out in that specific case.
+AC_FC_LIBRARY_LDFLAGS
+
+if test "${abi_fc_vendor}" = "cray"; then
+  FCLIBS=`echo ${FCLIBS} | tr '"' ' '`
+fi
+
+# Determine Fortran-C name mangling scheme
+AC_FC_WRAPPERS
 
 # FIXME: temporary workaround for Macs
 if test "${abi_cpu_platform}" = "apple"; then
@@ -632,6 +685,9 @@ if test "${abi_openmp_enable}" = "yes"; then
   AC_MSG_CHECKING([Fortran flags for OpenMP])
   AC_MSG_RESULT([${FCFLAGS_OPENMP}])
   ABI_OMP_CHECK_COLLAPSE
+  if test "${abi_openmp_offload_enable}" = "yes"; then
+    ABI_OMP_CHECK_GPU_OFFLOAD
+  fi
   AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
 fi
 
@@ -696,6 +752,14 @@ SD_WANNIER90_INIT([optional warn], [-lwannier90])
 # Init XMLF90
 #SD_XMLF90_INIT([optional fail])
 SD_XMLF90_INIT([optional warn])
+
+# Init KOKKOS
+SD_KOKKOS_INIT([optional fail])
+#SD_KOKKOS_INIT([optional warn])
+
+# Init YAKL
+SD_YAKL_INIT([optional fail])
+#SD_YAKL_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -870,6 +934,12 @@ SD_WANNIER90_DETECT
 
 # AtomPAW integration support
 ABI_CHECK_ATOMPAW_BINS
+
+# KOKKOS library support
+SD_KOKKOS_DETECT
+
+# YAKL library support
+SD_YAKL_DETECT
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -1049,7 +1119,7 @@ fi
 # Help to produce libraires
 if test ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
-fi 
+fi
 
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
@@ -1076,7 +1146,7 @@ ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 
 # Check exit
 if test ! -z "${status}" -o ! -z "${mandatory}"; then
-      exit
+      exit 2
 fi
 
 
@@ -1222,13 +1292,14 @@ if test "${sd_linalg_flavor}" = "netlib-fallback"; then
   ABI_MSG_NOTICE([linalg-abinit],
     [Suboptimal linear algebra configuration])
 fi
-if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
-  ABI_MSG_NOTICE([gpu-without-magma],
-    [Suboptimal GPU configuration])
-fi
 if test "${sd_libxc_kxc_ok}" = "no"; then
   ABI_MSG_NOTICE([libxc-kxc],
     [Suboptimal libxc configuration])
 fi
+# GPU 2024 implementation : deactivate this warning
+#if test "${abi_gpu_enable}" = "yes" -a "${sd_linalg_chk_gpu}" != "magma"; then
+#  ABI_MSG_NOTICE([gpu-without-magma],
+#    [Suboptimal GPU configuration])
+#fi
 ABI_MSG_FC_BUGGY(${abi_fc_vendor})
 ABI_MSG_END

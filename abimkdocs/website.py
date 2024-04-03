@@ -24,7 +24,8 @@ from collections import OrderedDict, defaultdict
 from itertools import groupby
 from pprint import pprint
 from pybtex.database import parse_file, Entry, BibliographyData
-from markdown.util import etree
+#from markdown.util import etree
+import xml.etree.ElementTree as etree
 from pygments import highlight
 from pygments.lexers import BashLexer, PythonLexer, BibTeXLexer
 from pygments.formatters import HtmlFormatter

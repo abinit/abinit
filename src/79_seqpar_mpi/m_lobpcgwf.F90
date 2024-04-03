@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,6 +24,9 @@
 
 #include "abi_common.h"
 
+! nvtx related macro definition
+#include "nvtx_macros.h"
+
 module m_lobpcgwf
 
  use defs_basis
@@ -35,6 +38,7 @@ module m_lobpcgwf
  use m_xomp
  use m_fstrings
  use m_xg
+ use m_xgTransposer
  use m_lobpcg2
  use m_dtset
 
@@ -45,6 +49,10 @@ module m_lobpcgwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
 
  use, intrinsic :: iso_c_binding
 
@@ -60,6 +68,7 @@ module m_lobpcgwf
  integer,save  :: l_npw
  integer,save  :: l_nspinor
  logical,save  :: l_paw
+ integer, save :: l_paral_kgb
  integer,save  :: l_prtvol
  integer,save  :: l_sij_opt
  real(dp), allocatable,save ::  l_pcon(:)
@@ -80,7 +89,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  integer,intent(in) :: isppol,ikpt,inonsc,istep,nbdbuf
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
- type(mpi_type)           ,target,intent(inout) :: mpi_enreg
+ type(mpi_type)           ,target,intent(in)    :: mpi_enreg
  real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)!,gsc(2,nspinor*nband*npw)
  real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)
@@ -104,7 +113,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 ! double precision :: lobpcgMem(2)
 ! double precision :: localmem
 
- integer, parameter :: tim_lobpcgwf2 = 1650
+ integer, parameter :: tim_lobpcgwf2 = 1640
  double precision :: cputime, walltime
  double precision :: tsec(2)
 
@@ -115,7 +124,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
- type(pawcprj_type) :: cprj_dum(gs_hamk%natom,0)
+ type(pawcprj_type) :: cprj_dum(1,1)
  integer :: iband, shift
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: l_gvnlxc(:,:)
@@ -140,10 +149,11 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  l_prtvol = prtvol
  l_mpi_enreg => mpi_enreg
  l_gs_hamk => gs_hamk
+ l_paral_kgb = dtset%paral_kgb
 
 !Variables
  nline=dtset%nline
- blockdim=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
+ blockdim=nband/dtset%nblock_lobpcg !=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
 
 !Depends on istwfk
  if ( l_istwf == 2 ) then ! Real only
@@ -179,7 +189,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ABI_MALLOC(l_pcon,(1:l_icplx*npw))
  !$omp parallel do schedule(static), shared(l_pcon,kinpw)
  do ipw=1-1,l_icplx*npw-1
-   if(kinpw(ipw/l_icplx+1)>huge(0.0_dp)*1.d-11) then
+   if(kinpw(ipw/l_icplx+1)>huge(zero)*1.d-11) then
      l_pcon(ipw+1)=0.d0
    else
      l_pcon(ipw+1) = (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1)))) &
@@ -187,45 +197,63 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    end if
  end do
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+   !$OMP TARGET ENTER DATA MAP(to:cg,eig,resid)
+ end if
+#endif
+
  ! Local variables for lobpcg
  !call xg_init(xgx0,space,icplx*npw*nspinor,nband)
- call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft)
+ call xgBlock_map(xgx0,cg,space,l_icplx*l_npw*l_nspinor,nband,l_mpi_enreg%comm_bandspinorfft,gpu_option=dtset%gpu_option)
  if ( l_istwf == 2 ) then ! Real only
    ! Scale cg
    call xgBlock_scale(xgx0,sqrt2,1)
    ! This is possible since the memory in cg and xgx0 is the same
    ! Don't know yet how to deal with this with xgBlock
-   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+   if(l_mpi_enreg%me_g0 == 1) then
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET MAP(to:cg)
+       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+       !$OMP END TARGET
+#endif
+     else
+       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * inv_sqrt2
+     end if
+   end if
  end if
 
  !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(eig)
  call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(resid)
  call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
  ! Trick the with C to change rank of arrays (:) to (:,:)
  cptr = c_loc(occ)
  call c_f_pointer(cptr,occ_ptr,(/ nband,1 /))
- call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1)
+ call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
 
  !ABI_MALLOC(l_gvnlxc,(2,l_npw*l_nspinor*blockdim))
 
- call lobpcg_init(lobpcg,nband, l_icplx*l_npw*l_nspinor, blockdim,dtset%tolwfr_diago,nline,space,l_mpi_enreg%comm_bandspinorfft)
+ call lobpcg_init(lobpcg,nband,l_icplx*l_npw*l_nspinor,blockdim,dtset%tolwfr,nline,&
+   space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
+   gs_hamk%gpu_option)
 
 !###########################################################################
 !################    RUUUUUUUN    ##########################################
 !###########################################################################
 
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc,precond,xgeigen,xgocc,xgresidu,prtvol,isppol,ikpt,inonsc,istep,nbdbuf)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc1,precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(l_pcon)
@@ -233,7 +261,17 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Scale back
  if(l_istwf == 2) then
    call xgBlock_scale(xgx0,inv_sqrt2,1)
-   if(l_mpi_enreg%me_g0 == 1) cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+   if(l_mpi_enreg%me_g0 == 1) then
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET MAP(to:cg)
+       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+       !$OMP END TARGET
+#endif
+     else
+       cg(:, 1:npw*nspinor*nband:npw) = cg(:, 1:npw*nspinor*nband:npw) * sqrt2
+     end if
+   end if
  end if
 
  ! Compute enlout (nonlocal energy for each band if necessary) This is the best
@@ -245,10 +283,14 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    !if ( size(l_gvnlxc) /= 0 ) then
    !  ABI_FREE(l_gvnlxc)
      !ABI_MALLOC(l_gvnlxc,(2,nband*l_npw*l_nspinor))
+#ifdef FC_CRAY
+   ABI_MALLOC(l_gvnlxc,(1,1))
+#else
    ABI_MALLOC(l_gvnlxc,(0,0))
+#endif
 
    !Call nonlop
-   if (mpi_enreg%paral_kgb==0) then
+   if (l_paral_kgb==0) then
 
      call nonlop(choice,l_cpopt,cprj_dum,enl_out,l_gs_hamk,0,eig,mpi_enreg,nband,1,paw_opt,&
 &                signs,gsc_dummy,l_tim_getghc,cg,l_gvnlxc)
@@ -256,14 +298,14 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    else
      do iband=1,nband/blockdim
        shift = (iband-1)*blockdim*l_npw*l_nspinor
-      call prep_nonlop(choice,l_cpopt,cprj_dum, &
-&       enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
-&       eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
-&       gsc_dummy,l_tim_getghc, &
-&       cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-!&       l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
-&       l_gvnlxc(:,:),&
-&       already_transposed=.false.)
+       call prep_nonlop(choice,l_cpopt,cprj_dum, &
+&        enl_out((iband-1)*blockdim+1:iband*blockdim),l_gs_hamk,0,&
+&        eig((iband-1)*blockdim+1:iband*blockdim),blockdim,mpi_enreg,1,paw_opt,signs,&
+&        gsc_dummy,l_tim_getghc, &
+&        cg(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+!&        l_gvnlxc(:,shift+1:shift+blockdim*l_npw*l_nspinor),&
+&        l_gvnlxc(:,:),&
+&        already_transposed=.false.)
      end do
    end if
    !Compute enlout
@@ -275,10 +317,14 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    ABI_FREE(l_gvnlxc)
  end if
 
-
  ! Free lobpcg
  call lobpcg_free(lobpcg)
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+   !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid)
+ end if
+#endif
 !###########################################################################
 !################    SORRY IT'S ALREADY FINISHED : )  ######################
 !###########################################################################
@@ -301,81 +347,154 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 end subroutine lobpcgwf2
 
+subroutine getghc_gsc1(X,AX,BX,transposer)
 
- subroutine getghc_gsc(X,AX,BX)
-   use m_xg, only : xg_t, xgBlock_get, xgBlock_set, xgBlock_getSize, xgBlock_t
-#ifdef HAVE_OPENMP
-   use omp_lib
+ implicit none
+
+!Arguments ------------------------------------
+ type(xgBlock_t), intent(inout) :: X
+ type(xgBlock_t), intent(inout) :: AX
+ type(xgBlock_t), intent(inout) :: BX
+ type(xgTransposer_t), intent(inout) :: transposer
+ integer         :: blockdim
+ integer         :: spacedim
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
+
+!Local variables-------------------------------
+!scalars
+ integer :: cpuRow
+ real(dp) :: eval
+!arrays
+ real(dp), pointer :: cg(:,:)
+ real(dp), pointer :: ghc(:,:)
+ real(dp), pointer :: gsc(:,:)
+ real(dp)          :: l_gvnlxc(1,1)
+
+! *********************************************************************
+
+ call xgBlock_getSize(X,spacedim,blockdim)
+ call xgBlock_check(X,AX)
+ call xgBlock_check(X,BX)
+
+ spacedim = spacedim/l_icplx
+
+ call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
+ call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
+ call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
+
+ !Scale back cg
+ if (l_paral_kgb == 1) cpuRow = xgTransposer_getRank(transposer, 2)
+ if(l_istwf == 2) then
+   call xgBlock_scale(X,inv_sqrt2,1)
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     if (l_paral_kgb == 0) then
+       if(l_mpi_enreg%me_g0 == 1) then
+         !$OMP TARGET MAP(cg)
+         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+         !$OMP END TARGET
+       end if
+     else
+       if (cpuRow == 0) then
+         !$OMP TARGET MAP(cg)
+         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
+         !$OMP END TARGET
+       end if
+     end if
 #endif
-  type(xgBlock_t), intent(inout) :: X
-  type(xgBlock_t), intent(inout) :: AX
-  type(xgBlock_t), intent(inout) :: BX
-  integer         :: blockdim
-  integer         :: spacedim
-  type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,0)
-  double precision :: dum
-  double precision, parameter :: inv_sqrt2 = 1/sqrt2
-  double precision, pointer :: cg(:,:)
-  double precision, pointer :: ghc(:,:)
-  double precision, pointer :: gsc(:,:)
-  double precision, allocatable :: l_gvnlxc(:,:)
+   else
+     if (l_paral_kgb == 0) then
+       if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
+     else
+       if (cpuRow == 0) cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * sqrt2
+     end if
+   end if
+ end if
 
-  call xgBlock_getSize(X,spacedim,blockdim)
-  spacedim = spacedim/l_icplx
+ !if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
+ !  ABI_FREE(l_gvnlxc)
+ !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
+ !end if
+
+ call multithreaded_getghc(l_cpopt,cg,cprj_dum,ghc,gsc,&
+   l_gs_hamk,l_gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
 
 
-  !call xgBlock_get(X,cg(:,1:blockdim*spacedim),0,spacedim)
-  call xgBlock_reverseMap(X,cg,l_icplx,spacedim*blockdim)
-  call xgBlock_reverseMap(AX,ghc,l_icplx,spacedim*blockdim)
-  call xgBlock_reverseMap(BX,gsc,l_icplx,spacedim*blockdim)
+#if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
+ call gpu_device_synchronize()
+#endif
 
-  ! scale back cg
-  if(l_istwf == 2) then
-    !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * inv_sqrt2
-    call xgBlock_scale(X,inv_sqrt2,1)
-    if(l_mpi_enreg%me_g0 == 1) cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * sqrt2
-  end if
+ !Scale cg, ghc, gsc
+ if ( l_istwf == 2 ) then
+   call xgBlock_scale(X ,sqrt2,1)
+   call xgBlock_scale(AX,sqrt2,1)
 
-  !if ( size(l_gvnlxc) < 2*blockdim*spacedim ) then
-  !  ABI_FREE(l_gvnlxc)
-  !  ABI_MALLOC(l_gvnlxc,(2,blockdim*spacedim))
-  !end if
-  ABI_MALLOC(l_gvnlxc,(0,0))
+   if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     if (l_paral_kgb == 0) then
+       if(l_mpi_enreg%me_g0 == 1) then
+         !$OMP TARGET MAP(cg)
+         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+         !$OMP END TARGET
+         !$OMP TARGET MAP(ghc)
+         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+         !$OMP END TARGET
+       endif
+     else
+       if (cpuRow == 0) then
+         !$OMP TARGET MAP(cg)
+         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+         !$OMP END TARGET
+         !$OMP TARGET MAP(ghc)
+         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+         !$OMP END TARGET
+       end if
+     end if
+#endif
+   else
+     if (l_paral_kgb == 0) then
+       if(l_mpi_enreg%me_g0 == 1) then
+         cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+         ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+       endif
+     else
+       if (cpuRow == 0) then
+         cg(:, 1:spacedim*blockdim:spacedim) = cg(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+         ghc(:, 1:spacedim*blockdim:spacedim) = ghc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+       end if
+     end if
+   end if
+   if(l_paw) then
+     call xgBlock_scale(BX,sqrt2,1)
+     if(l_gs_hamk%gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       if (l_paral_kgb == 0) then
+         if(l_mpi_enreg%me_g0 == 1) then
+           !$OMP TARGET MAP(gsc)
+           gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+           !$OMP END TARGET
+         end if
+       else
+         if (cpuRow == 0) then
+           !$OMP TARGET MAP(gsc)
+           gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+           !$OMP END TARGET
+         end if
+       end if
+#endif
+     else
+       if (l_paral_kgb == 0) then
+         if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
+       else
+         if (cpuRow == 0) gsc(:, 1:spacedim*blockdim:spacedim) = gsc(:, 1:spacedim*blockdim:spacedim) * inv_sqrt2
+       end if
+     end if
+   end if ! l_paw
+ end if ! l_istwf==2
 
-  if (l_mpi_enreg%paral_kgb==0) then
+ if ( .not. l_paw ) call xgBlock_copy(X,BX)
 
-    call multithreaded_getghc(l_cpopt,cg(:,1:blockdim*spacedim),cprj_dum,ghc,gsc(:,1:blockdim*spacedim),&
-      l_gs_hamk,l_gvnlxc,dum, l_mpi_enreg,blockdim,l_prtvol,l_sij_opt,l_tim_getghc,0)
-
-  else
-    call prep_getghc(cg(:,1:blockdim*spacedim),l_gs_hamk,l_gvnlxc,ghc,gsc(:,1:blockdim*spacedim),dum,blockdim,l_mpi_enreg,&
-&                     l_prtvol,l_sij_opt,l_cpopt,cprj_dum,already_transposed=.false.)
-  end if
-
-  ! scale cg, ghc, gsc
-  if ( l_istwf == 2 ) then
-    !cg(:,1:spacedim*blockdim) = cg(:,1:spacedim*blockdim) * sqrt2
-    !ghc(:,1:spacedim*blockdim) = ghc(:,1:spacedim*blockdim) * sqrt2
-    call xgBlock_scale(X,sqrt2,1)
-    call xgBlock_scale(AX,sqrt2,1)
-    if(l_mpi_enreg%me_g0 == 1) then
-      cg(:, 1:spacedim*blockdim:l_npw) = cg(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-      ghc(:, 1:spacedim*blockdim:l_npw) = ghc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-    endif
-    if(l_paw) then
-      !gsc(:,1:spacedim*blockdim) = gsc(:,1:spacedim*blockdim) * sqrt2
-      call xgBlock_scale(BX,sqrt2,1)
-      if(l_mpi_enreg%me_g0 == 1) gsc(:, 1:spacedim*blockdim:l_npw) = gsc(:, 1:spacedim*blockdim:l_npw) * inv_sqrt2
-    end if
-  end if
-
-  ABI_FREE(l_gvnlxc)
-
-  if ( .not. l_paw ) call xgBlock_copy(X,BX)
-
-  !call xgBlock_set(AX,ghc,0,spacedim)
-  !call xgBlock_set(BX,gsc(:,1:blockdim*spacedim),0,spacedim)
- end subroutine getghc_gsc
+end subroutine getghc_gsc1
 
  subroutine precond(W)
    use m_xg, only : xg_t, xgBlock_colwiseMul

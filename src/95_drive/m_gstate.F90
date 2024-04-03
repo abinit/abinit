@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_gstate
 !! NAME
 !!  m_gstate
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -18,6 +17,9 @@
 #endif
 
 #include "abi_common.h"
+
+! nvtx related macro definition
+#include "nvtx_macros.h"
 
 module m_gstate
 
@@ -38,6 +40,8 @@ module m_gstate
  use m_bandfft_kpt
  use m_invovl
  use m_gemm_nonlop
+ use m_gemm_nonlop_gpu
+ use m_gemm_nonlop_ompgpu
  use m_wfk
  use m_nctk
  use m_hdr
@@ -59,7 +63,7 @@ module m_gstate
  use m_fft,              only : fourdp
  use m_pawang,           only : pawang_type
  use m_pawrad,           only : pawrad_type
- use m_pawtab,           only : pawtab_type
+ use m_pawtab,           only : pawtab_type, pawtab_print
  use m_pawcprj,          only : pawcprj_type,pawcprj_free,pawcprj_alloc, pawcprj_getdim
  use m_pawfgr,           only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_abi2big,          only : wvl_occ_abi2big, wvl_setngfft, wvl_setBoxGeometry
@@ -101,9 +105,18 @@ module m_gstate
  use m_cgprj,            only : ctocprj
  use m_nonlop_ylm,       only : nonlop_ylm_init_counters,nonlop_ylm_output_counters
  use m_fft,              only : fft_init_counters,fft_output_counters
+ use m_getghc_ompgpu,    only : free_getghc_ompgpu_buffers
 
-#if defined HAVE_GPU_CUDA
- use m_manage_cuda
+#if defined HAVE_GPU
+ use m_alloc_hamilt_gpu
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ use m_nvtx_data
+#endif
+
+#if defined HAVE_YAKL
+ use gator_mod
 #endif
 
  use defs_wvltypes,      only : wvl_data,coulomb_operator,wvl_wf_type
@@ -270,7 +283,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  integer :: openexit,option,optorth,psp_gencond,conv_retcode
  integer :: pwind_alloc,rdwrpaw,comm,tim_mkrho,use_sc_dmft
  integer :: cnt,spin,band,ikpt,usecg,usecprj,ylm_option
- real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih ! CP added fermih
+ real(dp) :: cpus,ecore,ecut_eff,ecutdg_eff,etot,fermie,fermih
  real(dp) :: gsqcut_eff,gsqcut_shp,gsqcutc_eff,hyb_range_fock,residm,ucvol
  logical :: read_wf_or_den,has_to_init,call_pawinit,write_wfk
  logical :: is_dfpt=.false.,wvlbigdft=.false.
@@ -304,7 +317,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons(:,:,:),resid(:),rhowfg(:,:)
  real(dp),allocatable :: rhowfr(:,:),spinat_dum(:,:),start(:,:),work(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
- real(dp),pointer :: cg(:,:),eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: cg(:,:) => null()
+ real(dp),pointer :: eigen(:),pwnsfac(:,:),rhog(:,:),rhor(:,:)
  real(dp),pointer :: taug(:,:),taur(:,:),xred_old(:,:)
  type(pawrhoij_type),pointer :: pawrhoij(:)
  type(coulomb_operator) :: kernel_dummy
@@ -412,7 +426,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,&
 &   dtset%mpw,npwarr,npwtot,dtset%nsppol)
    call bandfft_kpt_init1(bandfft_kpt,dtset%istwfk,kg,dtset%mgfft,dtset%mkmem,mpi_enreg,&
-&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol)
+&   dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,gpu_option=dtset%gpu_option)
  else
    ABI_MALLOC(kg,(0,0))
    npwarr(:) = 0
@@ -423,13 +437,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call init_invovl(dtset%nkpt)
  end if
 
- if(dtset%use_gemm_nonlop == 1 .and. dtset%use_gpu_cuda/=1) then
-   ! set global variable
+ ! Handling GEMM nonlop use
+ ! Not enabled by default for CPU and CUDA implementations
+ ! Enabled if using OpenMP GPU offload
+ gemm_nonlop_use_gemm = .false.
+
+ ! OpenMP GPU offload case (GEMM nonlop used by default)
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt)
- else
-   gemm_nonlop_use_gemm = .false.
+   call init_gemm_nonlop_ompgpu(dtset%nkpt)
+ else if(dtset%use_gemm_nonlop == 1) then
+   gemm_nonlop_use_gemm = .true.
+   ! CUDA & Kokkos case (same routine used)
+   if(dtset%gpu_option == ABI_GPU_LEGACY .or. dtset%gpu_option == ABI_GPU_KOKKOS) then
+     call init_gemm_nonlop(dtset%nkpt)
+     call init_gemm_nonlop_gpu(dtset%nkpt)
+   ! CPU case
+   else if(dtset%gpu_option == ABI_GPU_DISABLED) then
+     call init_gemm_nonlop(dtset%nkpt)
+   end if
  end if
+
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
@@ -569,15 +599,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Update header, with evolving variables, when available
 !Here, rprimd, xred and occ are available
- etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm ! CP added fermih
- ! CP modified
- !call hdr%update(bantot,etot,fermie,&
- !  residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
- !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+ etot=hdr%etot ; fermie=hdr%fermie ; fermih=hdr%fermih ; residm=hdr%residm
  call hdr%update(bantot,etot,fermie,fermih,&
    residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
- ! End CP modified
 
  ! PW basis set: test if the problem is ill-defined.
  if (dtset%usewvl == 0 .and. dtset%tfkinfunc /= 2) then
@@ -648,6 +673,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !###########################################################
 !### 05. Calls inwffil
+ ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL)
 
  ! if paral_kgb == 0, it may happen that some processors are idle (no entry in proc_distrb)
  ! but mkmem == nkpt and this can cause integer overflow in mcg or allocation error.
@@ -675,17 +701,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%usewvl == 0 .and. dtset%mpw > 0 .and. cnt /= 0)then
    if (my_nspinor*dtset%mband*dtset%mkmem*dtset%nsppol > floor(real(HUGE(0))/real(dtset%mpw) )) then
      write (msg,'(9a)')&
-&     "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
-&     "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
-&     "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
-&     "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
-&     "to decrease the memory requirements. Consider also OpenMP threads."
-!     ii = 0
+      "Default integer is not wide enough to store the size of the wavefunction array (mcg).",ch10,&
+      "This usually happens when paral_kgb == 0 and there are not enough procs to distribute kpts and spins",ch10,&
+      "Action: if paral_kgb == 0, use nprocs = nkpt * nsppol to reduce the memory per node.",ch10,&
+      "If this does not solve the problem, use paral_kgb 1 with nprocs > nkpt * nsppol and use npfft/npband/npspinor",ch10,&
+      "to decrease the memory requirements. Consider also OpenMP threads."
+     ii = 0
      ABI_ERROR_NOSTOP(msg,ii)
      write (msg,'(5(a,i0), 2a)')&
-&     "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
-&     ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
-&     'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
+      "my_nspinor: ",my_nspinor, ", mpw: ",dtset%mpw, ", mband: ",dtset%mband,&
+      ", mkmem: ",dtset%mkmem, ", nsppol: ",dtset%nsppol,ch10,&
+      'Note: Compiling with large int (int64) requires a full software stack (MPI/FFTW/BLAS...) compiled in int64 mode'
      ABI_ERROR(msg)
    end if
  end if
@@ -694,7 +720,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    cg => scf_history%cg(:,:,1)
    eigen => scf_history%eigen(:,1)
  else
-   ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_MALLOC_MANAGED(cg, (/2,mcg/))
+#endif
+   else
+     ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+   end if
    ABI_MALLOC(eigen,(dtset%mband*dtset%nkpt*dtset%nsppol))
  end if
 
@@ -752,6 +784,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    optorth=1   !if (psps%usepaw==1) optorth=0
    if(psps%usepaw==1 .and. dtfil%ireadwf==1)optorth=0
    hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
+   ABI_NVTX_START_RANGE(NVTX_INIT_INWFFIL2)
    call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen,&
 &   dtset%exchn2n3d,formeig,hdr,dtfil%ireadwf,dtset%istwfk,kg,&
 &   dtset%kptns,dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,&
@@ -759,6 +792,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   dtset%nsppol,dtset%nsym,occ,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wff1,wffnow,dtfil%unwff1,&
 &   dtfil%fnamewffk,wvl)
+   ABI_NVTX_END_RANGE()
    hdr%rprimd=rprimd
  end if
 
@@ -774,6 +808,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if (dtset%fft_count/=0.and.dtset%paral_kgb==0) then
    call fft_init_counters()
  end if
+ ABI_NVTX_END_RANGE()
 
 !###########################################################
 !### 06. Operations related to restartxf (Old version)
@@ -892,10 +927,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !were read from disk, occupation scheme is metallic (this excludes iscf=-1),
 !and occupation numbers are required by iscf
  if( dtfil%ireadwf==1 .and. &
-! CP modified
-!& (dtset%occopt>=3.and.dtset%occopt<=8) .and. &
-& (dtset%occopt>=3.and.dtset%occopt<=9) .and. & ! allowing for occopt 9
-! End CP modified
+& (dtset%occopt>=3.and.dtset%occopt<=9) .and. &
 & (dtset%iscf>0 .or. dtset%iscf==-3) .and. dtset%positron/=1 ) then
 
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
@@ -957,9 +989,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
 !Here allocation of GPU for vtorho calculations
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%use_gpu_cuda)
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,2,psps,dtset%gpu_option)
  end if
 #endif
 
@@ -1027,6 +1059,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call pawpuxinit(dtset%dmatpuopt,dtset%exchmix,dtset%f4of2_sla,dtset%f6of2_sla,&
 &     is_dfpt,args_gs%jpawu,dtset%lexexch,dtset%lpawu,dtset%nspinor,dtset%ntypat,dtset%optdcmagpawu,pawang,dtset%pawprtvol,&
 &     pawrad,pawtab,args_gs%upawu,dtset%usedmft,dtset%useexexch,dtset%usepawu,ucrpa=dtset%ucrpa)
+
+   ! DEBUG:
+   !if (me == master) call pawtab_print(Pawtab)
  end if
 
 !###########################################################
@@ -1208,7 +1243,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      end if ! choice for charge density initialization
 
 !    >>> Initialize kinetic energy density
-     if (dtset%usekden==1) then 
+     if (dtset%usekden==1) then
 
        if (dtfil%ireadkden/=0.and.dtset%positron<=0) then
          ! Choice 1: read kinetic energy density from file
@@ -1430,9 +1465,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  ebands%fermie = results_gs%energies%e_fermie
- ebands%fermih = results_gs%energies%e_fermih ! CP modified
+ ebands%fermih = results_gs%energies%e_fermih
  ABI_FREE(doccde)
- !write(std_out,*)"efermi after ebands_init",ebands%fermie
 
  ! Compute and print the gaps.
  call ebands_report_gap(ebands,header="Gap info",unit=std_out,mode_paral="COLL",gaps=results_gs%gaps)
@@ -1457,9 +1491,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  hdr%rprimd=rprimd_for_kg
 
  if (write_wfk) then
-   call outresid(dtset,dtset%kptns,dtset%mband,&
-&                dtset%nband,dtset%nkpt,&
-&                dtset%nsppol,resid)
+   call outresid(dtset,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt, dtset%nsppol,resid)
 
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
@@ -1631,7 +1663,13 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call pawfgr_destroy(pawfgr)
 
  if(dtset%imgwfstor==0)then
-   ABI_FREE(cg)
+   if(dtset%gpu_option == ABI_GPU_KOKKOS) then
+#if defined HAVE_GPU && defined HAVE_YAKL
+     ABI_FREE_MANAGED(cg)
+#endif
+   else
+     ABI_FREE(cg)
+   end if
    ABI_FREE(eigen)
  else
    nullify(cg,eigen)
@@ -1751,18 +1789,29 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if((dtset%wfoptalg == 1 .or. dtset%wfoptalg == 111)  .and. psps%usepaw == 1) then
-   call destroy_invovl(dtset%nkpt,dtset%use_gpu_cuda)
+   call destroy_invovl(dtset%nkpt,dtset%gpu_option)
  end if
 
+!Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt)
+   if(dtset%gpu_option == ABI_GPU_OPENMP) then
+     call destroy_gemm_nonlop_ompgpu()
+   else if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) then
+     call destroy_gemm_nonlop_gpu(dtset%nkpt)
+     call destroy_gemm_nonlop(dtset%nkpt)
+   else if(dtset%gpu_option==ABI_GPU_DISABLED) then
+     call destroy_gemm_nonlop(dtset%nkpt)
+   end if
    gemm_nonlop_use_gemm = .false.
  end if
 
-!Eventually clean cuda runtime
-#if defined HAVE_GPU_CUDA
- if (dtset%use_gpu_cuda==1) then
-   call dealloc_hamilt_gpu(2,dtset%use_gpu_cuda)
+!Clean GPU work spaces
+ if(dtset%gpu_option == ABI_GPU_OPENMP) then
+   call free_getghc_ompgpu_buffers()
+ end if
+#if defined HAVE_GPU
+ if (dtset%gpu_option/=ABI_GPU_DISABLED) then
+   call dealloc_hamilt_gpu(2,dtset%gpu_option)
  end if
 #endif
 
@@ -1885,7 +1934,7 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  enunit=choice for units of output eigenvalues: 0=>hartree,
 !!   1=> eV, 2=> hartree and eV
 !!  fermie=fermi energy (Hartree)
-!!  fermih=fermi energy for holes (Hartree) ! CP added for occopt 9
+!!  fermih=fermi energy for holes (Hartree) (for occopt 9)
 !!  fnameabo_dos=filename of output DOS file
 !!  fnameabo_eig=filename of output EIG file
 !!  gred(3,natom)=d(E)/d(xred) (hartree)
@@ -1924,14 +1973,13 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 !!  (only print and write to disk)
 !!
 !! SOURCE
-! CP added fermih to the list of arguments
 subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gred,&
                   mpi_enreg,nfft,ngfft,occ,prtfor, resid,rhor,rprimd,vxcavg,xred)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfft, prtfor
- real(dp),intent(in) :: fermie, fermih, vxcavg !CP added fermih
+ real(dp),intent(in) :: fermie, fermih, vxcavg
  character(len=*),intent(in) :: fnameabo_dos,fnameabo_eig
  type(dataset_type),intent(in) :: dtset
  type(MPI_type),intent(in) :: mpi_enreg
@@ -2061,17 +2109,10 @@ subroutine clnup1(acell,dtset,eigen,fermie,fermih, fnameabo_dos,fnameabo_eig,gre
    maxocc=two/(dtset%nspinor*dtset%nsppol)  ! Will not work in the fixed moment case
    option=2
    ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
-   ! CP modified
-   !call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,&
-!&   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
-!&   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
-!&   dtset%tsmear,unitdos,dtset%wtk)
    call getnel(doccde,dtset%dosdeltae,eigen,entropy,fermie,fermih,&
 &   maxocc,dtset%mband,dtset%nband,nelect,dtset%nkpt,&
 &   dtset%nsppol,occ,dtset%occopt,option,dtset%tphysel,&
 &   dtset%tsmear,unitdos,dtset%wtk,1,dtset%nband(1))!CP: added 1, nband(1) to fit new definition of getnel; parameters only used if
-! occopt 9
-   ! End CP modified
    ABI_FREE(doccde)
  end if
 
@@ -2583,7 +2624,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT group (MB)
+!! Copyright (C) 2003-2024 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

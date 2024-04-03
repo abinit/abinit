@@ -11,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1528,7 +1528,7 @@ subroutine identk(kibz,nkibz,nkbzmx,nsym,timrev,symrec,symafm,kbz,ktab,ktabi,kta
      found=.FALSE.
 
      do ikbz=1,nkbz ! Loop on the set of BZ points found above.
-       if (isequalk(kref,kbz(:,ikbz))) then ! Swap indeces.
+       if (isequalk(kref,kbz(:,ikbz))) then ! Swap indices.
          kbz_swp   = kbz(:,ikref)
          ikibz_swp = ktab (ikref)
          isym_swp  = ktabo(ikref)

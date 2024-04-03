@@ -7,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2022 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2024 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,6 @@ program mrgscr
  use defs_basis
  use m_xmpi
  use m_abicore
- use m_build_info
  use m_errors
  use m_nctk
  use netcdf
@@ -49,6 +48,7 @@ program mrgscr
  use m_dtset
 
  use defs_abitypes,         only : MPI_type
+ use m_build_info,          only : abinit_version
  use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT

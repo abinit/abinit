@@ -1,4 +1,11 @@
-!Input file for the anaddb code. Analysis of the SiO2 DDB                       
+!Input file for the anaddb code. Analysis of the AlAs ddb
+
+! ddb file 
+ddb_filepath = "trf2_3.ddb.abo"
+
+! output file
+output_file = "trf2_7.abo"
+outdata_prefix = "trf2_7o"
 
 !Flags
  ifcflag   1     ! Interatomic force constant flag
@@ -7,6 +14,8 @@
 
 !Wavevector grid number 1 (coarse grid, from DDB)
   brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+                 ! Warning : This ANADDB input variable is obsolete. One should be able to use the default brav=1 in all cases.
+                 !           The tutorial should be updated to reflect correctly the current practice.
   ngqpt   4  4  4   ! Monkhorst-Pack indices
   nqshft  1         ! number of q-points in repeated basic q-cell
   q1shft  3*0.0
@@ -30,15 +39,13 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% test_chain = trf2_1.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
-#%% input_ddb = trf2_3.ddb.abo 
+#%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
-#%% files_to_test = 
-#%%   trf2_7.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00, fld_options=-easy
+#%% files_to_test = trf2_7.abo, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]
-#%% authors = X. Gonze
+#%% authors = X. Gonze, J. Zwanziger
 #%% keywords = 
 #%% description = Input file for the anaddb code. Analysis of the SiO2 DDB
 #%%<END TEST_INFO>

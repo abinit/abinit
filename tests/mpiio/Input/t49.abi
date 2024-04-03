@@ -28,6 +28,7 @@ ngfft 8 8 8
  timopt -1
  np_spkpt 1
  npband 2
+ bandpp 1
  npfft 2
  paral_kgb 1
 
@@ -44,7 +45,6 @@ ngfft 8 8 8
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [files]
 #%% [paral_info]
 #%% nprocs_to_test =  4

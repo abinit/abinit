@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,9 +90,9 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
-#ifdef __HAVE_GREENX
- use gx_minimax,      only : gx_minimax_grid, gx_get_error_message
-#endif
+!#ifdef __HAVE_GREENX
+ use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
+!#endif
 
  implicit none
 
@@ -491,7 +491,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 ! valence and partially occupied are replicate on each node  while conduction bands are MPI distributed.
 ! This method is mandatory if gwpara==2 and/or we are using awtr==1 or the spectral method.
 ! If awtr==1, we evaluate chi0 taking advantage of time-reversal (speed-up~2)
-! Useful indeces:
+! Useful indices:
 !       nbvw = Max. number of fully/partially occupied states over spin
 !       nbcw = Max. number of unoccupied states considering the spin
 !TODO:
@@ -788,8 +788,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_MALLOC(rhor,(nfftf,Dtset%nspden))
  ABI_MALLOC(taur,(nfftf,Dtset%nspden*Dtset%usekden))
 
- call wfd%mkrho(Cryst,Psps,Kmesh,qp_ebands,ngfftf,nfftf,rhor)
- if (Dtset%usekden==1) call wfd%mkrho(Cryst,Psps,Kmesh,qp_ebands,ngfftf,nfftf,taur,optcalc=1)
+ call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, rhor)
+ if (Dtset%usekden==1) call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, taur, optcalc=1)
 
  call timab(305,2,tsec) ! screening(densit
 
@@ -1005,40 +1005,38 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ABI_FREE(z)
    ABI_FREE(zw)
 
-#ifdef __HAVE_GREENX
-if (.False.) then
-!if (dtset%gwr_ntau /= 0) then
-   call wrtout(std_out, sjoin("Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
-   gaps = ebands_get_gaps(ks_ebands, gap_err)
-   ABI_CHECK(gap_err == 0, "gap_err")
-   ! ================================
-   ! Setup tau/omega mesh and weights
-   ! ================================
-   ! Compute min/max transition energy taking into account nsppol if any.
-   te_min = minval(gaps%cb_min - gaps%vb_max)
-   te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
-   if (te_min <= tol6) then
-     te_min = tol6
-     ABI_WARNING("System is metallic or with a very small fundamental gap!")
-   end if
+   if (dtset%userie == 4242) then
+       call wrtout(std_out, sjoin("userie == 4242 --> Using minimax mesh with ntau:", itoa(dtset%nfreqim)))
+       gaps = ebands_get_gaps(ks_ebands, gap_err)
+       ABI_CHECK(gap_err == 0, "gap_err")
+       ! ================================
+       ! Setup tau/omega mesh and weights
+       ! ================================
+       ! Compute min/max transition energy taking into account nsppol if any.
+       te_min = minval(gaps%cb_min - gaps%vb_max)
+       te_max = maxval(ks_ebands%eig(mband,:,:) - ks_ebands%eig(1,:,:))
+       if (te_min <= tol6) then
+         te_min = tol6
+         ABI_ERROR("System is metallic or with a very small fundamental gap!")
+       end if
 
-   call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
-                        tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
-                        iw_mesh, iw_wgs,   &
-                        t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
-                        ft_max_error, cosft_duality_error, ierr)
-   if (ierr /= 0) then
-     call gx_get_error_message(msg)
-     ABI_ERROR(msg)
-   end if
+       call gx_minimax_grid(dtset%nfreqim, te_min, te_max,  &  ! in
+                            tau_mesh, tau_wgs, &  ! all these args are out and allocated by the routine.
+                            iw_mesh, iw_wgs,   &
+                            t2w_cos_wgs, w2t_cos_wgs, t2w_sin_wgs, &
+                            ft_max_error, cosft_duality_error, ierr)
+       ABI_CHECK(ierr == 0, "Error in gx_minimax_grid")
+       !if (ierr /= 0) then
+       !  call gx_get_error_message(msg)
+       !  ABI_ERROR(msg)
+       !end if
 
-   call gaps%free()
-   do iomega=1,Ep%nomegaei
-     Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
-     write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
-   end do
-end if
-#endif
+       call gaps%free()
+       do iomega=1,Ep%nomegaei
+         Ep%omega(Ep%nomegaer + iomega) = CMPLX(zero, iw_mesh(iomega), kind=dpc)
+         !write(std_out, *)"iomega", Ep%omega(Ep%nomegaer + iomega)
+       end do
+    end if
 
  else if (Ep%contour_deformation .and. Dtset%cd_customnimfrqs /= 0) then
    Ep%omega(Ep%nomegaer+1)=CMPLX(zero,Dtset%cd_imfrqs(1))
@@ -2206,10 +2204,7 @@ subroutine setup_screening(codvsn,acell,rprim,wfk_fname,Dtset,Psps,Pawtab,&
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- ! CP modified
- ! call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
  call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
- ! End CP modified
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)

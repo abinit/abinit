@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2024 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,6 +64,7 @@ MODULE m_geometry
  public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
+ public :: reduce2primitive   ! Find real space primitive vectors from non-primitive ones and set of translations
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
  public :: strainsym          ! Symmetrize the strain tensor.
  public :: stresssym          ! Symmetrize the stress tensor.
@@ -1557,7 +1558,7 @@ end subroutine mkrdim
 !!            +gprimd(2,mu)*xcart(2,ia)
 !!            +gprimd(3,mu)*xcart(3,ia)
 !! where gprimd is the inverse of rprimd
-!! Note that the reverse operation is deon by xred2xcart
+!! Note that the reverse operation is done by xred2xcart
 !!
 !! INPUTS
 !!  natom=number of atoms in unit cell
@@ -1932,7 +1933,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 !    the later sorting : neighbors 0 and neighb+1 are non-existent, while
 !    neighbor 1 will be the atom itself ...
      list_neighb(0:mneighb+1,1:4,1)=0
-     sqrlength(1:mneighb+1)=huge(0.0d0)
+     sqrlength(1:mneighb+1)=huge(zero)
      sqrlength(0)=-1.0d0
 
 !    Here search on all atoms inside the box defined by tmax
@@ -2799,6 +2800,99 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  end if
 
 end subroutine remove_inversion
+!!***
+
+!!****f* m_symtk/reduce2primitive
+!! NAME
+!! reduce2primitive
+!!
+!! FUNCTION
+!! Find real space primitive vectors from non-primitive ones and the set of non-integer translations
+!! that leave the system invariant
+!!
+!! INPUTS
+!! ntranslat=number of translations
+!! rprimd(3,3)=dimensional non-primitive vectors in real space (bohr)
+!! tolsym=tolerance for the symmetry operations
+!! translations(3,ntranslat)=translation vectors, in reduced coordinates
+!!
+!! OUTPUT
+!! rprimd_primitive(3,3)=dimensional primitive vectors in real space (bohr)
+!!
+!! SOURCE
+
+subroutine reduce2primitive(ntranslat, rprimd, rprimd_primitive, tolsym, translations)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ntranslat
+ real(dp),intent(in) :: tolsym
+!arrays
+ real(dp),intent(in) :: rprimd(3,3),translations(3,ntranslat)
+ real(dp),intent(out) :: rprimd_primitive(3,3)
+
+
+!Local variables-------------------------------
+!scalars
+ integer :: idir,itentative,itrans,replace
+ character(len=500) :: msg
+!arrays
+ real(dp) :: trans_cart(3,ntranslat),trans_red(3,ntranslat)
+
+!**************************************************************************
+
+!These translations should form the primitive lattice when combined with the non-primitive vectors.
+!Each translation, in reduced coordinates, should be constituted of rational numbers.
+!They should pave the non-primitive cell homogeneously. The issue is to replace
+!at least one (or more) of the non-primitive vectors by one (or more) selected translation vectors among the list.
+!All translation vectors should be an integer linear combination of the vectors of the new basis.
+
+ rprimd_primitive(:,:)=rprimd(:,:)
+
+!First, the reduced coordinates of translation vectors are transferred to the [0,1[ interval
+ trans_red(:,1:ntranslat)=translations(:,1:ntranslat)-nint(translations(:,1:ntranslat)-tolsym)
+
+!Then, one of the translation vectors with the smallest non-zero first coordinate will replace the first vector, if any.
+!Similarly for the three directions.
+ do idir=1,3
+   replace=0
+   do itrans=1,ntranslat
+     if(trans_red(idir,itrans)>tolsym)then
+       if(replace==0)then
+         replace=1 ; itentative=itrans
+       else
+         if(trans_red(idir,itentative)>trans_red(idir,itrans)+tolsym)then
+           itentative=itrans
+         endif
+       endif
+     endif
+   enddo
+   if(replace==1)then
+     ! Change the trans vectors to cartesian coordinates, using "old" rprimd
+     call xred2xcart(ntranslat,rprimd_primitive,trans_cart,trans_red)
+     ! Replace rprimd vector with index idir by the selected trans_cart vector
+     rprimd_primitive(:,idir)=trans_cart(:,itentative)
+     ! Change the translation vectors to new reduced coordinates using updated rprimd_primitive
+     call xcart2xred(ntranslat,rprimd_primitive,trans_cart,trans_red)
+     !Transfer to the [0,1[ interval
+     trans_red(:,1:ntranslat)=trans_red(:,1:ntranslat)-nint(trans_red(:,1:ntranslat)-tolsym)
+   endif
+ enddo ! idir
+
+!Now, check that all translation vectors have zero reduced coordinates.
+ do itrans=1,ntranslat
+   do idir=1,3
+     if (abs(trans_red(idir,itrans))>tolsym) then
+       write(msg,'(5a)')&
+        'Did not succeed to find primitive cell from non-primitive one.',ch10,&
+        'Indeed, there remains a non-vanishing pure translation after reduction.',ch10,&
+        'Action: this is a bug, contact ABINIT group. Then, use a primitive cell in your input file.'
+       ABI_ERROR(msg)
+     end if
+   enddo
+ enddo
+
+end subroutine reduce2primitive
 !!***
 
 !!****f* m_geometry/symredcart

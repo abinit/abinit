@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,9 +25,9 @@ module m_dtfil
  use m_abicore
  use m_errors
  use m_xmpi
- use m_build_info
  use m_dtset
 
+ use m_build_info,   only : abinit_version
  use defs_abitypes,  only : MPI_type
  use m_clib,         only : clib_rename
  use m_fstrings,     only : int2char4, rmquotes, sjoin, strcat, basename

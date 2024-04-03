@@ -7,7 +7,7 @@
 !!  Use `abitk --help` to get list of possible commands.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MG)
+!! Copyright (C) 2013-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,7 +30,6 @@ program abitk
 
  use defs_basis
  use m_abicore
- use m_build_info
  use m_xmpi
  use m_errors
  use m_hdr
@@ -43,6 +42,7 @@ program abitk
  use m_nctk
 
  use defs_datatypes,   only : ebands_t
+ use m_build_info,     only : abinit_version
  use m_fstrings,       only : sjoin, strcat, basename, itoa
  use m_io_tools,       only : open_file, enforce_fortran_io
  use m_specialmsg,     only : herald

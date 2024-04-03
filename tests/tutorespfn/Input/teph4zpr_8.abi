@@ -29,6 +29,8 @@
 ##############################################
  optdriver 7
  eph_task 4
+ eph_frohl_ntheta 0       # Disable spherical integration of FM integrand in the microzone around Gamma.
+                          # to preserve previous behaviour.
  tmesh 0 100 4    # [start, step, num_T] in K
 
  prtphdos 0       # Disable computation of PHDOS to save some time

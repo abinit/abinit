@@ -175,9 +175,17 @@ inp_files = [
     "t198.abi",  # test treatment of inaccurate POSCAR file
     "t199.abi",  # test treatment of inaccurate POSCAR file
 
+    # new tolwfr usage
     "t200.abi",  # tolwfr with other tolerances
     "t201.abi",  # tolwfr with tolvrs + nbdbuf with lobpcg
     "t202.abi",  # tolwfr_diago with tolvrs and tolvrs+tolwfr with lobpcg
+
+    # nblock_lobpcg
+    "t205.abi",  # test nblock_lobpcg input
+
+    # Chebfi2
+    "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
+    "t207.abi",  # same as t206 but with nspinor=2
 
     # RT-TDDFT
     "t210.abi",  # GS, Ni 4 atoms, PAW to generate initial WFK for next RT-TDDFT tests
