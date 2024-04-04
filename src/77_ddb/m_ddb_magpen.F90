@@ -80,7 +80,7 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+ subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & ntypat,prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
@@ -90,6 +90,7 @@ contains
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp), intent(inout) :: delta_asrw0(3*natom,3), delta_asrw0_fm(3*natom,3)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
@@ -101,7 +102,6 @@ contains
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4),rfmagn(4),rffreq(4)
  real(dp) :: omega(3),qphnrm(3),qphon(3,3)
- real(dp), allocatable :: delta_asrw0(:,:)
  complex(dpc) :: epsilon(3,3), macmagsus(3,3)
  complex(dpc), allocatable :: barmagsus(:,:),invbarmagsus(:,:)
  complex(dpc), allocatable :: invmagsus(:,:), magsus(:,:), invhmat(:,:)
@@ -133,7 +133,6 @@ contains
  ABI_MALLOC(zfield,(ndim,(natom+2)*3))
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
- ABI_MALLOC(delta_asrw0,(3*natom,3))
  ABI_MALLOC(zeff,(3,3*natom))
  ABI_MALLOC(lm_epsilon,(3,3))
  ABI_MALLOC(dum_phongreen,(3*natom,3*natom))
@@ -241,8 +240,10 @@ contains
      !Apply ASR
      if (omega(1) < tol12) then
        call asrw0(delta_asrw0,ifcmat,natom,0) 
+       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
      else 
        call asrw0(delta_asrw0,ifcmat,natom,1) 
+       call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
      end if
    end if
 
@@ -385,7 +386,6 @@ contains
  ABI_FREE(zfield)
  ABI_FREE(ifcmat)
  ABI_FREE(ifcmat_fm)
- ABI_FREE(delta_asrw0)
  ABI_FREE(zeff)
  ABI_FREE(lm_epsilon)
  ABI_FREE(dum_phongreen)
@@ -1931,23 +1931,24 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_omega_interpol(amu,ddb,eta,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& nomega,ntypat,omegamax,omegamin,prtvol,rftyp,typat,ucvol,xred)
+ subroutine ddb_omega_interpol(amu,ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,eta,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+& nomega,ntypat,omegaflag,omegamax,omegamin,prtvol,rftyp,typat,ucvol,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,mpopt,natom,nomega,ntypat,prtvol,rftyp
+ integer,intent(in) :: mpert,mpopt,natom,nomega,ntypat,omegaflag,prtvol,rftyp
  real(dp),intent(in) :: eta,magpen,omegamax,omegamin,ucvol
  character(len=*),intent(in) :: outfilename_radix
 !arrays
- type(ddb_type),intent(inout) :: ddb
+ type(ddb_type),intent(inout) :: ddb,ddb_lw
  integer,intent(in) :: mpatpol(2),mpdir(3),typat(natom)
  real(dp),intent(in) :: amu(ntypat)
+ real(dp), intent(inout) :: delta_asrw0(3*natom,3), delta_asrw0_fm(3*natom,3)
  real(dp),intent(in) :: xred(3,natom)
 
 !Local variables -------------------------
 !scalars
- integer :: diel_unit,i,iblok,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
+ integer :: diel_unit,i,iblok,ifound,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
@@ -1956,9 +1957,9 @@ contains
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
+ real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: magphonspec(:),mode_magphonspec(:,:),mode_phonspec(:,:),phonspec(:)
- real(dp), allocatable :: delta_asrw0(:,:), delta_asrw0_fm(:,:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:)
@@ -2032,26 +2033,63 @@ contains
  ABI_MALLOC(macmagsus,(3,3,nomega))
  ABI_MALLOC(ifcmat,(3*natom,3*natom))
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
- ABI_MALLOC(delta_asrw0,(3*natom,3))
- ABI_MALLOC(delta_asrw0_fm,(3*natom,3))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
+
+!For linear interpolation detect the w=0 Hessians and Berry curvatures
+ if (omegaflag == 2) then
+
+   ABI_MALLOC(w0hessian,(2,ddb%msize))
+   nblok= ddb%nblok
+   ifound= 0
+   do iblok= 1, nblok
+     if (ddb%omega(1,iblok) <= tol12) then
+       w0hessian(:,:)= ddb%val(:,:,iblok)
+       ifound= 1
+     end if
+   end do
+   if (ifound==0) then
+     write(msg, '(3a)' )' No omega=0 block with second-order derivatives', &
+   & ' found in the DDB file. This is necessary if omegaflag=2 ',ch10
+     ABI_ERROR(msg)
+   end if
+
+   ABI_MALLOC(w0berry,(2,ddb_lw%msize))
+   nblok= ddb_lw%nblok
+   ifound= 0
+   do iblok= 1, nblok
+     if (ddb_lw%omega(1,iblok) <= tol12) then
+       w0berry(:,:)= ddb_lw%val(:,:,iblok)
+       ifound= 1
+     end if
+   end do
+   if (ifound==0) then
+     write(msg, '(3a)' )' No omega=0 block with third-order derivatives', &
+   & ' found in the DDB file. This is necessary if omegaflag=2 ',ch10
+     ABI_ERROR(msg)
+   end if
+ end if
 
 !Loop over the frequency
  do iw=1,nomega
    omega(iw)=omegamin+omegastp*(iw-1)
 
-   do ii=1,ddb%msize
-     if (all(ddb%flg(ii,:)==1)) then
-       call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega(iw),int_barddb(1,ii,1),dint_barddb(1,ii)) 
-       call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega(iw),int_barddb(2,ii,1),dint_barddb(2,ii)) 
-     else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
-       write(msg,'(a,a,a)')&
-       'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
-     & ' The interpolation has been stopped.' 
-       ABI_ERROR(msg)
-     end if
-   end do 
+   if (omegaflag==1) then
+     do ii=1,ddb%msize
+       if (all(ddb%flg(ii,:)==1)) then
+         call POLINT(omegacalc,ddb%val(1,ii,:),nwcalc,omega(iw),int_barddb(1,ii,1),dint_barddb(1,ii)) 
+         call POLINT(omegacalc,ddb%val(2,ii,:),nwcalc,omega(iw),int_barddb(2,ii,1),dint_barddb(2,ii)) 
+       else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
+         write(msg,'(a,a,a)')&
+         'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
+       & ' The interpolation has been stopped.' 
+         ABI_ERROR(msg)
+       end if
+     end do 
+   else if (omegaflag==2) then
+     call lineal_omega_interp(w0hessian,w0berry,mpert,ddb%msize, &
+   & natom,ndim,int_barddb,omega(iw))
+   end if
 
 !To deactivate interpolation
 !   int_barddb(:,:,1)=ddb%val(:,:,1)
@@ -2574,8 +2612,6 @@ contains
  ABI_FREE(macmagsus)
  ABI_FREE(ifcmat)
  ABI_FREE(ifcmat_fm)
- ABI_FREE(delta_asrw0)
- ABI_FREE(delta_asrw0_fm)
  ABI_FREE(omega)
  ABI_FREE(phfrq)
  ABI_FREE(magphongreen)
@@ -2592,8 +2628,103 @@ contains
  ABI_FREE(lm_epsilon)
  ABI_FREE(lm_magelsus)
  ABI_FREE(modezeff)
+ ABI_SFREE(w0hessian)
+ ABI_SFREE(w0berry)
 
  end subroutine ddb_omega_interpol
+!!***
+
+!!****f* ABINIT/lineal_omega_interp
+!! NAME
+!!  lineal_omega_interp
+!!
+!! FUNCTION
+!!  Calgulates a omega dependent matrix of penalized second-order energies via
+!!  \Phi(w)=K+iwG, where K and G are the w=0 penalized Hessians and Berry curvatures.    
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2024 ABINIT group (FIXME: add author)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!! blkval(2,3*mpert*3*mpert)=  Second-order w=0 derivative matrices
+!! blkval_lw(2,3*mpert*3*mpert)=  Third-order w=0 derivative matrices
+!!  mpert= maximum number of perturbations
+!!  natom= number of atoms in the cell
+!!  ndim= dimension of the local spin susceptibilities 
+!!  omega= frequency at which the IFCs have been calculated
+!!
+!! OUTPUT
+!!  int_barddb(2,ddb%msize,1)= interpolated hessian at omega
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+#if defined HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "abi_common.h"
+
+subroutine lineal_omega_interp(blkval,blkval_lw,mpert,msize,natom,ndim,int_barddb,omega)
+
+ use defs_basis
+ use m_errors
+ use m_profiling_abi
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer, intent(in)  :: mpert,msize,natom,ndim 
+ real(dp), intent(in) :: omega
+!arrays
+ real(dp),intent(in) :: blkval(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: blkval_lw(2,3,mpert,3,mpert,3,mpert)
+ real(dp), intent(out) :: int_barddb(2,msize,1)
+ 
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3
+ real(dp) :: gsign
+!arrays
+ real(dp), allocatable :: lhess(:,:,:,:,:)
+ 
+! *********************************************************************
+
+ ABI_MALLOC(lhess,(2,3,mpert,3,mpert))
+ ipert3= natom + 9
+ idir3= 1
+ do ipert2= 1, mpert
+   do idir2= 1, 3
+     do ipert1= 1, mpert
+       if (ipert1 <= natom .and. ipert2 <= natom) then
+         gsign= one
+       else
+         gsign= -one
+       end if
+       do idir1= 1, 3
+         lhess(:,idir1,ipert1,idir2,ipert2)= blkval(:,idir1,ipert1,idir2,ipert2) + &
+       & gsign*omega*blkval_lw(:,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+       end do
+     end do
+   end do
+ end do
+ int_barddb(1,:,1)= reshape( lhess(1,:,:,:,:), shape = (/msize/) )
+ int_barddb(2,:,1)= reshape( lhess(2,:,:,:,:), shape = (/msize/) )
+
+ ABI_FREE(lhess)
+
+end subroutine lineal_omega_interp
 !!***
 
 !!****f* ABINIT/phonon_green
@@ -2689,14 +2820,13 @@ subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,&
 
  DBG_ENTER("COLL")
 
-!Build an array with the mass factors
+!Build an array with the inverse mass factors
  ABI_MALLOC(invmassfac,(natom,natom))
  do iat2= 1, natom
    do iat1= 1, natom
      invmassfac(iat1,iat2)=one/sqrt(amu(typat(iat1))*amu(typat(iat2)))/amu_emass
    end do
  end do
-
 
 !Build the ((w+eta)**2 - D(w)) matrix 
  pdim=3*natom
@@ -2801,6 +2931,7 @@ subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,&
 !Build the (M(w+eta)**2 - C(w)) matrix 
  mpdim= pdim + ndim
  ABI_REMALLOC(w2dynmat,(mpdim,mpdim))
+ w2dynmat= (zero,zero)
 
 !First the phonon-phonon sector
  do iat2= 1, natom
@@ -2854,26 +2985,28 @@ subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,&
  call zgetri( mpdim, work1, mpdim, ipiv, work, lwork, info )
  ABI_CHECK(info == 0, sjoin('zgetri returned:', itoa(info)))
 
+ magphongreen=work1
+
 !Now apply the mass factors
-do icol= 1, mpdim
-  if (icol <= pdim) then
-    iat2= ceiling(icol/three)
-    mfac2= sqrt(amu(typat(iat2))*amu_emass)
-  else
-    mfac2= one
-  end if
-  do irow= 1, mpdim
-    if (irow <= pdim) then
-      iat1= ceiling(irow/three)
-      mfac1= sqrt(amu(typat(iat1))*amu_emass)
-    else
-      mfac1= one
-    end if
-
-    magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
-
-  end do
-end do
+ do icol= 1, mpdim
+   if (icol <= pdim) then
+     iat2= ceiling(icol/three)
+     mfac2= sqrt(amu(typat(iat2))*amu_emass)
+   else
+     mfac2= one
+   end if
+   do irow= 1, mpdim
+     if (irow <= pdim) then
+       iat1= ceiling(irow/three)
+       mfac1= sqrt(amu(typat(iat1))*amu_emass)
+     else
+       mfac1= one
+     end if
+ 
+     magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
+ 
+   end do
+ end do
 
 !Finally extract the generalized spectral function
  do irow= 1, mpdim
