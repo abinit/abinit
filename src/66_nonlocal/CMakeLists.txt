@@ -30,8 +30,7 @@ set(66_nonlocal_SRC
   m_opernlc_ylm_allwf_cpu.F90
   m_opernlc_ylm_ompgpu.F90
   m_opernld_ylm.F90
-  m_opernld_ylm_allwf_cpu.F90
-  m_opernld_ylm_allwf_ompgpu.F90
+  m_opernld_ylm_allwf.F90
   )
 
 add_library(66_nonlocal STATIC

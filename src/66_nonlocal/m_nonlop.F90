@@ -589,7 +589,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0 ) .or. &
        ! Rho ij
 &      choice == 0  .or.&
-       ( (choice == 54 .or. choice == 55) ))
+       ( (choice == 54 .or. choice == 55) ) .and. hamk%gpu_option==ABI_GPU_DISABLED)
      !FIXME forces and constraints computation not handled in CUDA GEMM nonlop
      if(choice > 0 .and. (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
    end if
