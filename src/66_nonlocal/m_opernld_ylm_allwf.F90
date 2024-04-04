@@ -1,6 +1,6 @@
-!!****m* ABINIT/m_opernld_ylm_allwf_ompgpu
+!!****m* ABINIT/m_opernld_ylm_allwf
 !! NAME
-!!  m_opernld_ylm
+!!  m_opernld_ylm_allwf
 !!
 !! FUNCTION
 !!
@@ -19,7 +19,7 @@
 
 #include "abi_common.h"
 
-module m_opernld_ylm_allwf_ompgpu
+module m_opernld_ylm_allwf
 
  use defs_basis
  use m_errors
@@ -33,15 +33,15 @@ module m_opernld_ylm_allwf_ompgpu
  private
 !!***
 
- public :: opernld_ylm_allwf_ompgpu
+ public :: opernld_ylm_allwf
 !!***
 
 contains
 !!***
 
-!!****f* ABINIT/opernld_ylm_allwf_ompgpu
+!!****f* ABINIT/opernld_ylm_allwf
 !! NAME
-!! opernld_ylm_allwf_ompgpu
+!! opernld_ylm_allwf
 !!
 !! FUNCTION
 !! * Operate with the non-local part of the hamiltonian,
@@ -120,16 +120,16 @@ contains
 !!
 !! SOURCE
 
-subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
+subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
 &                      dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,gx,gxfac,gxfac_sij,ndat,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-&                      nattyp)
+&                      nattyp,gpu_option)
 
  ! Arguments ------------------------------------
  ! scalars
  integer,intent(in) :: choice,paw_opt,ntypat,ndgxdtfac,nd2gxdt,ndgxdt
- integer,intent(in) :: cplex,cplex_fac,ndat,nnlout,nspinor,nprojs,lmnmax
+ integer,intent(in) :: cplex,cplex_fac,ndat,nnlout,nspinor,nprojs,lmnmax,gpu_option
 
  ! arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
@@ -162,7 +162,8 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
 
      !$OMP TARGET TEAMS DISTRIBUTE &
      !$OMP& MAP(to:enlk,gxfac,gx) &
-     !$OMP& PRIVATE(idat,esum)
+     !$OMP& PRIVATE(idat,esum) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
      do idat=1,ndat*nspinor
        esum=zero
        !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ia,ilmn,ii)
@@ -181,7 +182,8 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
      iatm = iatm+nattyp(itypat)
    end do
    if (choice==1) then
-     !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat)
+     !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
      do idat=1,ndat
        enlout(idat)=enlk(idat)
      end do
@@ -199,7 +201,8 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
 
        !$OMP TARGET TEAMS DISTRIBUTE &
        !$OMP& MAP(to:enlout,gxfac,dgxdt) &
-       !$OMP& PRIVATE(idat,igrad,esum)
+       !$OMP& PRIVATE(idat,igrad,esum) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat*nspinor
          do igrad=1,6
            esum=zero
@@ -232,7 +235,8 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
 
        !$OMP TARGET TEAMS DISTRIBUTE &
        !$OMP& MAP(to:enlout,gxfac,dgxdt) &
-       !$OMP& PRIVATE(idat,igrad,ia,esum)
+       !$OMP& PRIVATE(idat,igrad,ia,esum) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat*nspinor
          do ia=1,nattyp_i
            do igrad=1,3
@@ -257,6 +261,8 @@ subroutine opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
    end if
  end if ! choice=2, 3 or 23
 
-end subroutine opernld_ylm_allwf_ompgpu
+end subroutine opernld_ylm_allwf
+!!***
 
-end module m_opernld_ylm_allwf_ompgpu
+end module m_opernld_ylm_allwf
+!!***

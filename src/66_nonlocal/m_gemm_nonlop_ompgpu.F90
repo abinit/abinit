@@ -53,7 +53,7 @@ module m_gemm_nonlop_ompgpu
  use m_opernlc_ylm, only : opernlc_ylm
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
- use m_opernld_ylm_allwf_ompgpu, only : opernld_ylm_allwf_ompgpu
+ use m_opernld_ylm_allwf, only : opernld_ylm_allwf
  use m_opernld_ylm, only : opernld_ylm
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
@@ -406,12 +406,12 @@ contains
 
   ! locals
   complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
+  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
-  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end
+  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
-  integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
   logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
@@ -423,11 +423,15 @@ contains
   integer :: rank, nprocs
   logical :: is_last
   real(dp), allocatable :: projs_recv(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:)
-  integer :: ngrads_tmp
-  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:)
-  integer :: idbeg,idend,dshift,enlout_shift
+  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
+  integer :: ngrads_tmp,ngrads2_tmp
+  real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:),gmet2(:,:)
+  real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
+  integer :: idbeg,idend,dshift,id2beg,id2end,d2shift,enlout_shift
   real(dp) :: work(6)
+  integer :: mu0,ic,nu,mu,jc
+  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+  integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
   logical :: nld_on_gpu
 
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
@@ -471,6 +475,7 @@ contains
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
   ngrads = gemm_nonlop_kpt(ikpt)%ngrads
+  ngrads2 = gemm_nonlop_kpt(ikpt)%ngrads2
   nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
@@ -483,11 +488,14 @@ contains
   end do
   projs_beg=1; projs_end=nprojs;
   dprojs_beg=1; dprojs_end=nprojs*ngrads;
+  d2projs_beg=1; d2projs_end=nprojs*ngrads2;
   if((choice==2 .and. signs==2)) then
     projs_beg=atom_proj_shift+1
     projs_end=projs_beg+nprojs-1
     dprojs_beg=atom_proj_shift*ngrads+1
     dprojs_end=dprojs_beg+nprojs*ngrads-1
+    d2projs_beg=atom_proj_shift*ngrads2+1
+    d2projs_end=dprojs_beg+nprojs*ngrads2-1
   end if
 
   if(gemm_nonlop_is_distributed) then
@@ -630,12 +638,35 @@ contains
     ABI_MALLOC(enlk,(ndat))
     enlk=zero
     ABI_MALLOC(fnlk,(3*natom,ndat))
+    fnlk=zero
     ABI_MALLOC(ddkk,(6,ndat))
+    ddkk=zero
     ABI_MALLOC(strnlk,(6,ndat))
+    strnlk=zero
     !$OMP TARGET ENTER DATA MAP(to:enlk)
   end if
 
-  !$OMP TASKWAIT
+  ndgxdt = ngrads
+  ndgxdtfac = ngrads
+  nd2gxdt = ngrads2
+  nd2gxdtfac = ngrads2
+  optder = 0;if (ndgxdtfac>0) optder = 1
+  if (nd2gxdtfac>0) optder=2
+  cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
+  ! When istwf_k > 1, gx derivatives can be real or pure imaginary
+  ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
+  ! cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
+  if(ndgxdt > 0) then
+   if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
+   if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+   !if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
+   if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
+  end if
+  if(nd2gxdt > 0) then
+    if (choice==54) cplex_d2gxdt(:) = 2
+    if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
+  end if
+
   if(cpopt >= 2) then
     ! retrieve from cprjin
     if(.not. local_vectproj .and. cpopt/=3) then
@@ -677,9 +708,10 @@ contains
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
-    &       vectin,projs_,dprojs_,&
+    &       vectin,projs_,dprojs_,d2projs_,&
     &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
     &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+    &       gemm_nonlop_kpt(ikpt)%d2projs_r,gemm_nonlop_kpt(ikpt)%d2projs_i,&
     &       temp_realvec_r,&
     &       projs_recv,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
@@ -724,17 +756,7 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      ndgxdt = ngrads
-      ndgxdtfac = ngrads
-      nd2gxdt = 0
-      nd2gxdtfac = 0
-      optder = 0;if (ndgxdtfac>0 .and. signs == 2) optder=1
-      cplex_dgxdt(:) = 1;
-      if(ndgxdt > 0) then
-       if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
-      end if
-
-      shift = 0
+      shift = 0; dshift = 0; d2shift = 0
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
 
@@ -753,6 +775,8 @@ contains
   &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ,ndat,ibeg-1,iend,nprojs,ntypat)
 
         shift = shift + nattyp(itypat)*nlmn
+        dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
+        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
         iatm = iatm+nattyp(itypat)
       end do
     else
@@ -785,46 +809,50 @@ contains
 
     ! opernld
     if(signs==1) then
-#if 1
-      nld_on_gpu = .true.
-      call opernld_ylm_allwf_ompgpu(choice,cplex,cplex_fac,&
-      &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
-      &       enlk,enlout,projections,vnl_projections,s_projections,&
-      &       ndat,nd2gxdt,ndgxdt,&
-      &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-      &       nattyp)
-#else
-      shift=0; dshift=0; iatm=1
-      nld_on_gpu = .false.
-      !$OMP TARGET UPDATE FROM(dprojections,projections,vnl_projections)
-      do itypat=1, ntypat
-        nlmn=count(indlmn(3,:,itypat)>0)
+      if(choice==2 .or. choice==3 .or. choice==23) then
+        nld_on_gpu = .true.
+        call opernld_ylm_allwf(choice,cplex,cplex_fac,&
+        &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
+        &       enlk,enlout,projections,vnl_projections,s_projections,&
+        &       ndat,nd2gxdt,ndgxdt,&
+        &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
+        &       nattyp,gpu_option)
+      else
+        shift=0; dshift=0; d2shift = 0; iatm=1
+        nld_on_gpu = .false.
+        !$OMP TARGET UPDATE FROM(dprojections,projections,vnl_projections)
+        do itypat=1, ntypat
+          nlmn=count(indlmn(3,:,itypat)>0)
 
-        ibeg = shift+1
-        iend = shift+nattyp(itypat)*nlmn
+          ibeg = shift+1
+          iend = shift+nattyp(itypat)*nlmn
 
-        idbeg = dshift+1
-        idend = dshift+nattyp(itypat)*nlmn*ngrads
+          idbeg = dshift+1
+          idend = dshift+nattyp(itypat)*nlmn*ngrads_tmp
 
-        do idat=1,ndat
-          call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
-          &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       d2gxdt_dum_in,&
-          &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
-          &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
-          &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+          id2beg = d2shift+1
+          id2end = d2shift+nattyp(itypat)*nlmn*ngrads2_tmp
+
+          do idat=1,ndat
+            call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
+            &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       d2gxdt_dum_in,&
+            &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
+            &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+            &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+          end do
+
+          shift = shift + nattyp(itypat)*nlmn
+          dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
+          d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
+          iatm = iatm+nattyp(itypat)
         end do
-
-        shift = shift + nattyp(itypat)*nlmn
-        dshift = dshift + nattyp(itypat)*nlmn*ngrads
-        iatm = iatm+nattyp(itypat)
-      end do
-#endif
+      end if
 
       ! Reduction in case of parallelism
       if (mpi_enreg%paral_spinor==1) then
@@ -837,7 +865,20 @@ contains
           !$OMP TARGET UPDATE FROM(enlk) if(nld_on_gpu)
           call xmpi_sum(enlk,mpi_enreg%comm_spinor,ierr)
         end if
+        if (choice==55) then
+          call xmpi_sum(ddkk,mpi_enreg%comm_spinor,ierr)
+        end if
       end if
+
+      !Need sometimes gmet
+      if ((signs==1.and.paw_opt<=3).and. &
+          & (choice==5 .or.choice==51.or.choice==52.or.choice==53.or.&
+          & choice==54.or.choice==55)) then
+        ABI_MALLOC(gmet2,(3,3))
+        gmet2 = MATMUL(TRANSPOSE(gprimd),gprimd)
+      end if
+
+      !Coordinate transformations
 
       ! Derivatives wrt strain
       !  - Convert from reduced to cartesian coordinates
@@ -851,6 +892,107 @@ contains
           enlout(enlout_shift+4:enlout_shift+6)= work(4:6)
         end do
         !$OMP TARGET UPDATE TO(enlout) if(nld_on_gpu)
+      end if
+
+      !2nd derivative wrt to k wave vector and atomic position (effective charges):
+      ! - convert from cartesian to reduced coordinates
+      if (choice==54.and.signs==1.and.paw_opt<=3) then
+        ABI_MALLOC(work1,(3))
+        ABI_MALLOC(work2,(3))
+        do idat=1,ndat
+          mu0=0 ! Shift to be applied in enlout array
+          enlout_shift=(idat-1)*nnlout
+          do mu=1,3*natom
+        !   First, real part
+            work1(1)=enlout(enlout_shift+mu0+1);work1(2)=enlout(enlout_shift+mu0+3);work1(3)=enlout(enlout_shift+mu0+5)
+            work2(:)=gmet2(:,1)*work1(1)+gmet2(:,2)*work1(2)+gmet2(:,3)*work1(3)
+            enlout(enlout_shift+mu0+1)=work2(1);enlout(enlout_shift+mu0+3)=work2(2);enlout(enlout_shift+mu0+5)=work2(3)
+        !   Then imaginary part
+            work1(1)=enlout(enlout_shift+mu0+2);work1(2)=enlout(enlout_shift+mu0+4);work1(3)=enlout(enlout_shift+mu0+6)
+            work2(:)=gmet2(:,1)*work1(1)+gmet2(:,2)*work1(2)+gmet2(:,3)*work1(3)
+            enlout(enlout_shift+mu0+2)=work2(1);enlout(enlout_shift+mu0+4)=work2(2);enlout(enlout_shift+mu0+6)=work2(3)
+            mu0=mu0+6
+          end do
+        end do !idat
+        ABI_FREE(work1)
+        ABI_FREE(work2)
+      end if
+
+      !2nd derivative wrt to k wave vector and strain (piezoelectric tensor):
+      ! - convert from cartesian to reduced coordinates (k point)
+      ! - convert from reduced to cartesian coordinates (strain)
+      ! - substract volume contribution
+      ! - symetrize strain components
+      if (choice==55.and.signs==1.and.paw_opt<=3) then
+        ABI_MALLOC(work3,(2,3))
+        ABI_MALLOC(work4,(2,3))
+        ABI_MALLOC(work5,(2,3,6))
+        ABI_MALLOC(work7,(2,3,6))
+        ABI_MALLOC(work6,(2,3,3))
+        do idat=1,ndat
+          enlout_shift=(idat-1)*nnlout
+          do ic=1,3 ! gamma
+            work5=zero
+            do jc=1,3 ! nu
+              do ii=1,3 ! lambda
+                mu=(gamma(jc,ii)-1)*3+1
+                work5(1,jc,ii)=gmet2(ic,1)*enlout(enlout_shift+2*mu-1)+gmet2(ic,2)*enlout(enlout_shift+2*mu+1) &
+       &         +gmet2(ic,3)*enlout(enlout_shift+2*mu+3)
+                work5(2,jc,ii)=gmet2(ic,1)*enlout(enlout_shift+2*mu  )+gmet2(ic,2)*enlout(enlout_shift+2*mu+2) &
+       &         +gmet2(ic,3)*enlout(enlout_shift+2*mu+4)
+              end do
+            end do
+            work6=zero
+            do jc=1,3 ! nu
+              do ii=1,3 ! beta
+                work6(1:cplex,ii,jc)=gprimd(ii,1)*work5(1:cplex,jc,1)+gprimd(ii,2)*work5(1:cplex,jc,2) &
+       &         +gprimd(ii,3)*work5(1:cplex,jc,3)
+              end do
+            end do
+            do jc=1,3 ! alpha
+              do ii=1,3 ! beta
+                mu=gamma(jc,ii)
+                work7(1:cplex,ic,mu)=gprimd(jc,1)*work6(1:cplex,ii,1)+gprimd(jc,2)*work6(1:cplex,ii,2) &
+       &         +gprimd(jc,3)*work6(1:cplex,ii,3)
+              end do
+            end do
+          end do ! gamma
+
+          do ii=1,3 ! alpha
+            work3(1,ii)=gprimd(ii,1)*ddkk(2*1-1,idat)+gprimd(ii,2)*ddkk(2*2-1,idat) &
+       &     +gprimd(ii,3)*ddkk(2*3-1,idat)
+            work3(2,ii)=gprimd(ii,1)*ddkk(2*1  ,idat)+gprimd(ii,2)*ddkk(2*2  ,idat) &
+       &     +gprimd(ii,3)*ddkk(2*3  ,idat)
+          end do
+          do ii=1,3 ! gamma
+            work4(1,ii)=gmet2(ii,1)*ddkk(2*1-1,idat)+gmet2(ii,2)*ddkk(2*2-1,idat) &
+       &     +gmet2(ii,3)*ddkk(2*3-1,idat)
+            work4(2,ii)=gmet2(ii,1)*ddkk(2*1  ,idat)+gmet2(ii,2)*ddkk(2*2  ,idat) &
+       &     +gmet2(ii,3)*ddkk(2*3  ,idat)
+          end do
+
+          do mu=1,6
+            ii=alpha(mu) ! alpha
+            ic=beta(mu) ! beta
+            do jc=1,3 ! gamma
+              work7(1:cplex,jc,mu)=work7(1:cplex,jc,mu)-half &
+       &       *(gprimd(ic,jc)*work3(1:cplex,ii)+gprimd(ii,jc)*work3(1:cplex,ic))
+              if (ii==ic) work7(1:cplex,jc,mu)=work7(1:cplex,jc,mu)-work4(1:cplex,jc)
+            end do
+          end do
+          do mu=1,6 ! alpha,beta
+            do nu=1,3 ! gamma
+              mu0=3*(mu-1)+nu
+              enlout(enlout_shift+2*mu0-1)=work7(1,nu,mu)
+              enlout(enlout_shift+2*mu0  )=work7(2,nu,mu)
+            end do
+          end do
+        end do !idat
+        ABI_FREE(work3)
+        ABI_FREE(work4)
+        ABI_FREE(work5)
+        ABI_FREE(work6)
+        ABI_FREE(work7)
       end if
 
     end if !opernld
@@ -878,6 +1020,10 @@ contains
     ABI_FREE(ddkk)
     !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
+  end if
+
+  if (allocated(gmet2)) then
+    ABI_FREE(gmet2)
   end if
 
   if(gemm_nonlop_is_distributed) then
