@@ -1147,10 +1147,10 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
  anaddb_dtset%omegaflag = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'omegaflag',tread, 'INT')
  if(tread == 1) anaddb_dtset%omegaflag = intarr(1)
- if(anaddb_dtset%omegaflag < 0 .or. anaddb_dtset%omegaflag > 1)then
+ if(anaddb_dtset%omegaflag < 0 .or. anaddb_dtset%omegaflag > 2)then
    write(message, '(a, i0, 5a)' )&
    'omegaflag is ',anaddb_dtset%omegaflag, ', but the only allowed values',ch10, &
-   'are between 0 to 1 (included).',ch10, 'Action: correct omegaflag in your input file.'
+   'are between 0 to 2 (included).',ch10, 'Action: correct omegaflag in your input file.'
    ABI_ERROR(message)
  end if
 

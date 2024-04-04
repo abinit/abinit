@@ -99,6 +99,7 @@ program anaddb
  real(dp), allocatable:: rsus(:,:,:)
  real(dp), allocatable:: zeff(:,:,:)
  real(dp), allocatable:: qdrp_cart(:,:,:,:)
+ real(dp), allocatable:: delta_asrw0(:,:), delta_asrw0_fm(:,:)
  character(len = 10):: procstr
  character(len = 24):: codename, start_datetime
  character(len = strlen):: string, raw_string
@@ -247,15 +248,19 @@ program anaddb
  ! MR: Second- and third-order total energy derivatives calculated with the 
  ! magnetic penalty are converted to physically relevant ones here. 
  if (abs(inp%magpen) > tol8) then
-   call ddb_magpen(ddb, ddb_lw, inp%magpen, inp%mpatpol, inp%mpdir, mpert, & 
- & inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp,    &
+   ABI_MALLOC(delta_asrw0,(3*natom,3))
+   ABI_MALLOC(delta_asrw0_fm,(3*natom,3))
+   call ddb_magpen(ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%magpen, inp%mpatpol, & 
+ & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
  & Crystal%xred)
 
-   if (inp%omegaflag==1) then
-     call ddb_omega_interpol(Crystal%amu,ddb,inp%eta_phongreen,filnam(8),&
-   & inp%magpen,inp%mpatpol,inp%mpdir,mpert,inp%mpopt,natom, &
-   & inp%nomega,ntypat,inp%omegamax,inp%omegamin,inp%prtvol,1,Crystal%typat,Crystal%ucvol,Crystal%xred)
+   if (inp%omegaflag/=0) then
+     call ddb_omega_interpol(Crystal%amu, ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%eta_phongreen, filnam(8), &
+   & inp%magpen, inp%mpatpol, inp%mpdir, mpert, inp%mpopt, natom, inp%nomega, ntypat, & 
+   & inp%omegaflag, inp%omegamax, inp%omegamin, inp%prtvol, 1, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
+   ABI_FREE(delta_asrw0)
+   ABI_FREE(delta_asrw0_fm)
  end if
 
  ! Acoustic Sum Rule
