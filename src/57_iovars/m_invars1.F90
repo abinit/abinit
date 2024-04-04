@@ -556,7 +556,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
- dtsets(:)%gpu_use_nvtx=0
 #if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
@@ -586,11 +585,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        dtsets(idtset)%gpu_option=intarr(1)
      end if
    end if
-
-#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
-#endif
 
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do

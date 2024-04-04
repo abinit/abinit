@@ -4386,6 +4386,7 @@ The choice is among:
          Save results in GSTORE.nc file (requires netcdf library with MPI-IO support).
          The k-mesh must be equal to the one associated to the input WFK file, the q-mesh is specified
          by [[eph_ngqpt_fine]] (NB: the q-mesh must be a sub-mesh of the k-mesh or equal).
+* 14 --> Compute the molecular Berry curvature from GSTORE.nc. No support for metals or non-collinear magnetism yet. Reference: [[cite:Saparov2022]], [[cite:Coh2023]].
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path
@@ -18904,8 +18905,8 @@ Variable(
     mnemonics="STRess FACTor",
     added_in_version="before_v9",
     text=r"""
-The stresses multiplied by [[strfact]] will be treated like forces in the
-process of optimization ([[ionmov]] = 2 or 22, non-zero [[optcell]]).
+The stresses (in atomic units) multiplied by [[strfact]] will be treated like forces (in atomic units) in the
+algorithms for optimization ([[ionmov]] = 2 or 22, non-zero [[optcell]]).
 For example, the stopping criterion defined by [[tolmxf]] relates to these
 scaled stresses.
 """,

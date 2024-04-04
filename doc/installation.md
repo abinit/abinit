@@ -38,7 +38,7 @@ working in the terminal), the installation/compilation steps are:
 
 Note that the details of step 1 and 3 might vary significantly depending on the operating system.
 Further details are provided by 
-[the ABINIT_build tutorial](/tutorial/abinit_build) that cover the scenario in which you want to build everything from source
+[the ABINIT_build tutorial](/tutorial/abinit_build) that covers the scenario in which you want to build everything from source
 and install libraries in your $HOME directory.
 There are also other pages focusing on
 [macOS](/INSTALL_MacOS), [CentOS](/INSTALL_CentOS) and [Ubuntu](/INSTALL_Ubuntu)
