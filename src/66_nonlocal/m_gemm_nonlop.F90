@@ -453,7 +453,7 @@ contains
   ABI_CHECK(allocated(gemm_nonlop_kpt),"init_gemm_nonlop wasn't called prior make_gemm_nonlop !")
 
   if(choice>1) then
-    ABI_CHECK(signs==2.or. choice==2 .or. choice==3 .or. choice==23 .or. choice==54 .or. choice==55,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
+    ABI_CHECK(signs==2.or. choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55,'signs/=2 and idir_pert not compatible with GEMM nonlop.')
     ABI_CHECK(gpu_option_/=ABI_GPU_LEGACY,'CUDA GEMM nonlop not compatible with respfn workloads.')
     ABI_CHECK(gpu_option_/=ABI_GPU_KOKKOS,'KOKKOS GEMM nonlop not compatible with respfn workloads.')
   end if
@@ -485,10 +485,10 @@ contains
     !if(signs==1) ndgxdt=3
     if(signs==2) ndgxdt=1
   end if
-  !if (choice==4) then
-  !  if(signs==1) ndgxdt=3
-  !  if(signs==1) nd2gxdt=6
-  !end if
+  if (choice==4) then
+    if(signs==1) ndgxdt=3
+    if(signs==1) nd2gxdt=6
+  end if
   if (choice==54) then
     if(signs==1) ndgxdt=6
     if(signs==1) nd2gxdt=9
@@ -918,6 +918,7 @@ contains
   integer :: il, ipw, idir, idir1, idir2, nkpg_local, ffnl_dir, dimffnl
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad, shift_grad2
   integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
+  real(dp), parameter :: two_pi2=two_pi*two_pi
   real(dp):: wt,tmp
   real(dp),allocatable, target :: atom_projs(:,:,:), atom_dprojs(:,:,:,:), atom_d2projs(:,:,:,:), temp(:,:), scal(:)
   real(dp),pointer :: kpg(:,:)
@@ -999,6 +1000,10 @@ contains
     nkpg_local=3
     ABI_MALLOC(kpg,(npw,nkpg_local))
     call mkkpg(kg_k,kpg,kpt_k,nkpg_local,npw)
+  else if (choice==4.and.size(kpg_k,2)<9) then
+    nkpg_local=9
+    ABI_MALLOC(kpg,(npw,nkpg_local))
+    call mkkpg(kg_k,kpg,kpt_k,nkpg_local,npw)
   else
     kpg => kpg_k
   end if
@@ -1035,27 +1040,27 @@ contains
         if (nd2projs>0) atom_d2projs(:,:,:,:) = zero
       end if
       if (signs==1 .and. (choice==3 .or. choice==23 .or. choice==54 .or. choice==55)) then
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_dprojs,ffnl_k) &
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl_k) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ipw=1, npw
           atom_dprojs(1,ipw, 1:ndprojs, 1:nlmn_o) = wt * ffnl_k(ipw, 2:ndprojs+1, 1:nlmn_o, itypat)
         end do
       end if
       if (signs==2 .and. (choice==3 .or. choice==5 .or. choice==51)) then
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_dprojs,ffnl_k) &
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_dprojs,ffnl_k) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ipw=1, npw
           atom_dprojs(1,ipw, 1, 1:nlmn_o) = wt * ffnl_k(ipw, 1+ffnl_dir, 1:nlmn_o, itypat)
         end do
       end if
       if(signs==1 .and. choice==54) then
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_d2projs,ffnl_k) &
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl_k) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ipw=1, npw
           atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl_k(ipw, 2:nd2projs+1, 1:nlmn_o, itypat)
         end do
       else if(signs==1 .and. choice==55) then
-        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(atom_d2projs,ffnl_k) &
+        !$OMP TARGET PARALLEL DO PRIVATE(ipw) MAP(to:atom_d2projs,ffnl_k) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ipw=1, npw
           atom_d2projs(1,ipw, 1:nd2projs, 1:nlmn_o) = wt * ffnl_k(ipw, 5:nd2projs+4, 1:nlmn_o, itypat)
@@ -1224,7 +1229,7 @@ contains
       end if
 
 
-      if(signs==1 .and. (choice==2 .or. choice==23 .or. choice==54)) then
+      if(signs==1 .and. (choice==2 .or. choice==23 .or. choice==4 .or. choice==54)) then
         igrad=0; if(choice==23) igrad=6
         if(istwf_k <= 1) then
           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ilmn,ipw,idir) COLLAPSE(3) MAP(to:projs,dprojs,kpg) &
@@ -1315,8 +1320,23 @@ contains
 
       ! Handling d2projs
 
+      if(signs==1 .and. choice==4) then
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir,ilmn,ipw) COLLAPSE(2) MAP(to:projs,d2projs,kpg) &
+        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+        do ilmn=lmn_beg,nlmn
+          do idir=1,6
+            do ipw=1,npw
+              d2projs(1, ipw, shift_grad2+(ilmn-1)*ngrads2+idir) = &
+              &     -projs(1, ipw, shift+ilmn)*kpg(ipw,idir+3)*two_pi2
+              d2projs(2, ipw, shift_grad2+(ilmn-1)*ngrads2+idir) = &
+              &     -projs(2, ipw, shift+ilmn)*kpg(ipw,idir+3)*two_pi2
+            end do
+          end do
+        end do
+      end if
+
       if(signs==1 .and. choice==54) then
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs,kpg) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
           do idir1=1,3
@@ -1333,7 +1353,7 @@ contains
       end if
 
       if(signs==1 .and. choice==55) then
-        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs) &
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(idir1,idir2,ilmn,ipw) COLLAPSE(2) MAP(to:atom_d2projs,d2projs,kpg) &
         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
         do ilmn=lmn_beg,nlmn
           do idir1=1,6
@@ -1489,7 +1509,7 @@ contains
     ABI_BUG('computation not prepared for gemm_nonlop use!')
   end if
   if ( (choice>3.and.choice/=7.and.choice/=5.and.choice/=51.and.signs==2) .or. &
-&      (choice>3.and.choice/=7.and.choice/=23.and.choice/=54.and.choice/=55.and.signs==1) .or. &
+&      (choice>3.and.choice/=7.and.choice/=23.and.choice/=4.and.choice/=54.and.choice/=55.and.signs==1) .or. &
 &      (useylm/=1) ) then
     ABI_BUG('gemm_nonlop option not supported!')
   end if
