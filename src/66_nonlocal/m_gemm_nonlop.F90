@@ -45,7 +45,7 @@ module m_gemm_nonlop
  use m_opernlc_ylm, only : opernlc_ylm
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
- use m_opernld_ylm_allwf_cpu, only : opernld_ylm_allwf_cpu
+ use m_opernld_ylm_allwf, only : opernld_ylm_allwf
  use m_opernld_ylm, only : opernld_ylm
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
@@ -581,7 +581,7 @@ contains
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (2, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, 1, 1))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, 1, 1))
-          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
+          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
         end if
       else
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ndgxdt))
@@ -593,15 +593,15 @@ contains
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (1, 1, 1))
-          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
-          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
+          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
+          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
         end if
       end if
       if(nd2gxdt==0) then
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (1, 1, 1))
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, 1, 1))
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, 1, 1))
-        !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
+        !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
       end if
       compute_dprojs=.true.
     else
@@ -614,12 +614,12 @@ contains
           end if
           if(istwf_k <= 1) then
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs)
-            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) if(nd2gxdt>0)
+            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) if(nd2gxdt>0)
           else
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r)
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_i)
-            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) if(nd2gxdt>0)
-            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) if(nd2gxdt>0)
+            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) if(nd2gxdt>0)
+            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) if(nd2gxdt>0)
           end if
           compute_dprojs = .true.
         end if
@@ -1873,47 +1873,47 @@ contains
 
     ! opernld
     if(signs==1) then
-#if 0
-      call opernld_ylm_allwf_cpu(choice,cplex,cplex_fac,&
-      &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
-      &       enlk,enlout,projections,vnl_projections,s_projections,&
-      &       ndat,nd2gxdt,ndgxdt,&
-      &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
-      &       nattyp)
-#else
-      shift=0; dshift=0; d2shift = 0; iatm=1
-      do itypat=1, ntypat
-        nlmn=count(indlmn(3,:,itypat)>0)
+      if(choice==2 .or. choice==3 .or. choice==23) then
+        call opernld_ylm_allwf(choice,cplex,cplex_fac,&
+        &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
+        &       enlk,enlout,projections,vnl_projections,s_projections,&
+        &       ndat,nd2gxdt,ndgxdt,&
+        &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
+        &       nattyp,gpu_option)
+      else
+        shift=0; dshift=0; d2shift = 0; iatm=1
+        do itypat=1, ntypat
+          nlmn=count(indlmn(3,:,itypat)>0)
 
-        ibeg = shift+1
-        iend = shift+nattyp(itypat)*nlmn
+          ibeg = shift+1
+          iend = shift+nattyp(itypat)*nlmn
 
-        idbeg = dshift+1
-        idend = dshift+nattyp(itypat)*nlmn*ngrads_tmp
+          idbeg = dshift+1
+          idend = dshift+nattyp(itypat)*nlmn*ngrads_tmp
 
-        id2beg = d2shift+1
-        id2end = d2shift+nattyp(itypat)*nlmn*ngrads2_tmp
+          id2beg = d2shift+1
+          id2end = d2shift+nattyp(itypat)*nlmn*ngrads2_tmp
 
-        do idat=1,ndat
-          call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
-          &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       d2projections (:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-          &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
-          &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-          &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
-          &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+          do idat=1,ndat
+            call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
+            &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       d2projections (:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
+            &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
+            &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+            &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+          end do
+
+          shift = shift + nattyp(itypat)*nlmn
+          dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
+          d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
+          iatm = iatm+nattyp(itypat)
         end do
-
-        shift = shift + nattyp(itypat)*nlmn
-        dshift = dshift + nattyp(itypat)*nlmn*ngrads_tmp
-        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2_tmp
-        iatm = iatm+nattyp(itypat)
-      end do
-#endif
+      end if
 
       ! Reduction in case of parallelism
       if (mpi_enreg%paral_spinor==1) then
