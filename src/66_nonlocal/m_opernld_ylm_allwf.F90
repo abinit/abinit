@@ -120,7 +120,7 @@ contains
 !!
 !! SOURCE
 
-subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
+subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
 &                      dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,gx,gxfac,gxfac_sij,ndat,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
@@ -133,7 +133,7 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
 
  ! arrays
  integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
- real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nprojs,ndat*nspinor)
+ real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt*nprojs,ndat*nspinor)
  real(dp),intent(in) :: dgxdt(cplex,ndgxdt*nprojs,ndat*nspinor)
  real(dp),intent(in) :: dgxdtfac(cplex,ndgxdt*nprojs,ndat*nspinor)
  real(dp),intent(in) :: dgxdtfac_sij(cplex_fac,ndgxdt*nprojs,ndat*nspinor)
@@ -141,55 +141,62 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
  real(dp),intent(in) :: gxfac(cplex,nprojs,ndat*nspinor)
  real(dp),intent(in) :: gxfac_sij(cplex_fac,nprojs,ndat*nspinor)
  real(dp),intent(inout) :: enlout(nnlout*ndat)
- real(dp),intent(inout) :: enlk(ndat)
+ real(dp),intent(inout) :: enlk(ndat),ddkk(6,ndat)
 
  ! locals
- integer :: enlout_shift, force_shift, proj_shift, nnlout_test, shift, nattyp_i
- integer :: itypat, ilmn, ia, idat, ierr, igrad, ii, nlmn, iend, ibeg, iatm
- real(dp) :: esum
- real(dp) :: work(6)
+ integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ integer :: force_shift, shift, nattyp_i
+ integer :: itypat, ilmn, ia, idat, igrad, ii, nlmn, iend, ibeg, iatm, iashift
+ integer :: mua, mub, nu, mu, mua1, mua2, muu, mut
+ real(dp) :: esum,esumi
+ real(dp) :: d2gx(cplex)
+
+ ABI_UNUSED((/gpu_option/))
 
  enlout=zero
- if(choice==1.or.choice==3.or.choice==23) then
-   shift=0
-   iatm=0
-   esum=zero
-   do itypat=1, ntypat
-     nlmn=count(indlmn(3,:,itypat)>0)
-     ibeg = shift+1
-     iend = shift+nattyp(itypat)*nlmn
-     nattyp_i = nattyp(itypat)
+ if(paw_opt < 3) then
+   if(choice==1.or.choice==3.or.choice==23) then
+     shift=0
+     iatm=0
+     esum=zero
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       ibeg = shift+1
+       iend = shift+nattyp(itypat)*nlmn
+       nattyp_i = nattyp(itypat)
 
-     !$OMP TARGET TEAMS DISTRIBUTE &
-     !$OMP& MAP(to:enlk,gxfac,gx) &
-     !$OMP& PRIVATE(idat,esum) &
-     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-     do idat=1,ndat*nspinor
-       esum=zero
-       !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ia,ilmn,ii)
-       do ia=1,nattyp_i
-         do ilmn=1,nlmn
-           do ii=1,cplex
-             esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
-             &         *gx   (ii,shift+(ia-1)*nlmn+ilmn,idat)
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& MAP(to:enlk,gxfac,gx) &
+       !$OMP& PRIVATE(idat,esum) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat*nspinor
+         esum=zero
+         !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ia,ilmn,ii)
+         do ia=1,nattyp_i
+           do ilmn=1,nlmn
+             do ii=1,cplex
+               esum=esum +gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat) &
+               &         *gx   (ii,shift+(ia-1)*nlmn+ilmn,idat)
+             end do
            end do
          end do
+         enlk(idat) = enlk(idat) + esum
        end do
-       enlk(idat) = enlk(idat) + esum
-     end do
 
-     shift = shift + nattyp(itypat)*nlmn
-     iatm = iatm+nattyp(itypat)
-   end do
-   if (choice==1) then
-     !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat) &
-     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-     do idat=1,ndat
-       enlout(idat)=enlk(idat)
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
      end do
-   end if
- end if ! choice=1/3/23
- if(choice==2.or.choice==3.or.choice==23) then
+     if (choice==1) then
+       !$OMP TARGET PARALLEL DO MAP(to:enlout,enlk) PRIVATE(idat) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat
+         enlout(idat)=enlk(idat)
+       end do
+     end if
+   end if ! choice=1/3/23
+
+!  ======== Accumulate the stress tensor contributions ==========
    if (choice==3.or.choice==23) then
      shift=0
      iatm=0
@@ -225,6 +232,7 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
      end do
    end if
 
+!  ============ Accumulate the forces contributions =============
    if (choice==2.or.choice==23) then
      shift=0
      iatm=0
@@ -259,7 +267,171 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,&
        iatm = iatm+nattyp(itypat)
      end do
    end if
- end if ! choice=2, 3 or 23
+ end if ! paw_opt < 3
+
+ if(paw_opt==3) then
+
+!  ====== Accumulate contribution to <c|d2S/d_atm_pos d_left_k|c> =========
+   if (choice==54) then
+     shift=0
+     iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& MAP(to:enlout,gxfac_sij,dgxdt,dgxdtfac_sij,d2gxdt) &
+       !$OMP& PRIVATE(idat,igrad,ia,esum,esumi,mu,nu,mua,mub,iashift) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat*nspinor
+       do ia=1,nattyp_i
+         iashift=18*(ia+iatm-1)
+         if(cplex==2) then
+           do mua=1,3 ! atm. pos
+             do mub=1,3 ! k
+               mu=(mua-1)*3+mub
+               nu=(mua-1)*6+mub*2-1
+               esum=zero; esumi=zero
+               !$OMP PARALLEL DO REDUCTION(+:esum,esumi) PRIVATE(ilmn)
+               do ilmn=1,nlmn
+                 esum=esum &
+&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
+                    *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
+&                 +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
+&                   *dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
+&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat) &
+&                 +gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(2,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+
+                 esumi=esumi &
+&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
+                    *dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
+&                 -dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
+                    *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
+&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(2,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat) &
+&                 -gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+               end do
+               enlout(nnlout*(idat-1)+iashift+nu)=enlout(nnlout*(idat-1)+iashift+nu)+esum
+               enlout(nnlout*(idat-1)+iashift+nu+1)=enlout(nnlout*(idat-1)+iashift+nu+1)+esumi
+             end do
+           end do
+!        If cplex=1, dgxdt, d2gxdt and dgxdtfac_sij are real for atm. pos, pure imaginary for k
+         else
+           do mua=1,3 ! atm. pos
+             do mub=1,3 ! k
+               mu=(mua-1)*3+mub
+               nu=(mua-1)*6+mub*2-1
+               esumi=zero
+               !$OMP PARALLEL DO REDUCTION(+:esumi) PRIVATE(ilmn)
+               do ilmn=1,nlmn
+                 esumi=esumi &
+&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)&
+&                   *dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 3+mub,idat) &
+&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gxdt(1,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)
+               end do
+               enlout(nnlout*(idat-1)+iashift+nu+1)=enlout(nnlout*(idat-1)+iashift+nu+1)+esumi
+             end do
+           end do
+         end if
+       end do ! ia
+       end do ! idat
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do ! itypat
+   end if
+
+!  ====== Accumulate contribution to <c|d2S/d_dstrain d_right_k|c> =========
+   if (choice==55) then
+     shift=0
+     iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& MAP(to:enlout,gxfac_sij,dgxdt,dgxdtfac_sij,d2gxdt) &
+       !$OMP& PRIVATE(idat,igrad,ia,esum,esumi,mu,nu,mua,mub,mua1,mua2,muu,mut) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat
+       do ia=1,nattyp_i
+!        If cplex=1, dgxdt is real for strain, pure imaginary for k;
+!        If cplex_fac=1, dgxdtfac is pure imaginary for k;
+         if(cplex==2.and.cplex_fac==2) then
+!          First compute 2nd-derivative contribution
+           do mua=1,6 ! strain (lambda,nu)
+             do mub=1,3 ! k (mu)
+               mu=(mua-1)*6+mub*2-1
+               esum=zero; esumi=zero
+               mua1=alpha(mua) ! (nu)
+               mua2=beta(mua)  ! (lambda)
+               muu=3*(gamma(mua1,mub)-1)+mua2
+               mut=3*(gamma(mua2,mub)-1)+mua1
+               !$OMP PARALLEL DO REDUCTION(+:esum,esumi) PRIVATE(ilmn,d2gx)
+               do ilmn=1,nlmn
+                 d2gx(1:cplex)=half*(d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + muu,idat) &
+&                 +d2gxdt(1:cplex,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mut,idat))
+                 esum=esum &
+&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
+&                 +dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
+&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(1)+gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(2)
+                 esumi=esumi &
+&                 +dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
+&                 -dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)*dgxdtfac_sij(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+mub,idat) &
+&                 +gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(2)-gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*d2gx(1)
+               end do
+               enlout(nnlout*(idat-1)+mu)   = enlout(nnlout*(idat-1)+mu)+esum
+               enlout(nnlout*(idat-1)+mu+1) = enlout(nnlout*(idat-1)+mu+1)+esumi
+             end do
+           end do
+!          Then store 1st-derivative contribution
+           do nu=1,3
+             mu=nu*2-1
+             esum=zero; esumi=zero
+             !$OMP PARALLEL DO REDUCTION(+:esum,esumi) PRIVATE(ilmn)
+             do ilmn=1,nlmn
+               esum=esum+gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat) &
+&               +gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat)
+               esumi=esumi+gxfac_sij(1,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(2,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat) &
+&               -gxfac_sij(2,shift+(ia-1)*nlmn+ilmn,idat)*dgxdt(1,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + 6+nu,idat)
+             end do
+             ddkk(mu,idat)  = ddkk(mu,idat)+esum
+             ddkk(mu+1,idat)= ddkk(mu+1,idat)+esumi
+           end do
+!        If cplex=1, dgxdt, d2gxdt and dgxdtfac_sij are real for atm. pos, pure imaginary for k
+         else
+          ! ABI_BUG("Not implemented")
+          ! do ilmn=1,nlmn
+          !   mu=1
+          !   do mua=1,6 ! strain (lambda,nu)
+          !     mua1=alpha(mua) ! (nu)
+          !     mua2=beta(mua)  ! (lambda)
+          !     do mub=1,3 ! k (mu)
+          !       muu=3*(gamma(mua1,mub)-1)+mua2
+          !       mut=3*(gamma(mua2,mub)-1)+mua1
+          !       d2gx(1)=half*(d2gxdt(1,muu,ilmn,ia,idat)+d2gxdt(1,mut,ilmn,ia,idat))
+          !       enljj(mu+1)=enljj(mu+1) &
+          !        +dgxdt(1,mua,ilmn,ia,idat)*dgxdtfac_sij(1,6+mub,ilmn,ia,idat) &
+          !        +gxfac_sij(1,ilmn,ia,idat)*d2gx(1)
+          !       mu=mu+2
+          !     end do
+          !   end do
+!         !   Then store 1st-derivative contribution
+          !   mu=1
+          !   do nu=1,3
+          !     enlj(mu+1)=enlj(mu+1)+gxfac_sij(1,ilmn,ia,idat)*dgxdt(1,6+nu,ilmn,ia,idat)
+          !     mu=mu+2
+          !   end do
+          ! end do
+         end if
+       end do ! ia
+       end do ! idat
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do ! itypat
+   end if
+
+ end if ! paw_opt == 3
 
 end subroutine opernld_ylm_allwf
 !!***
