@@ -89,18 +89,22 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
       ]])], [abi_gpu_cuda_version_10="yes"], [abi_gpu_cuda_version_10="no"])
   AC_MSG_RESULT([${abi_gpu_cuda_version_10}])
 
-  if test "${abi_gpu_cuda_version_10}" = "yes"; then
-    if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
-      # always add link flags to nvtx if available
-      if test "${GPU_LIBS}" = ""; then
-        abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
+  if test "${abi_gpu_markers_enable}" = "yes"; then
+    if test "${abi_gpu_cuda_version_10}" = "yes"; then
+      if test -e "${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext}"; then
+        # always add link flags to nvtx if available
+        if test "${GPU_LIBS}" = ""; then
+          abi_gpu_cuda_libs="-lnvToolsExt ${abi_gpu_cuda_libs}"
+        else
+          abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
+        fi
+        abi_gpu_nvtx_v3="yes"
+        abi_result="${abi_result} nvtx_v3"
       else
-        abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lnvToolsExt"
+        AC_MSG_ERROR([Cuda NVTX: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
       fi
-      abi_gpu_nvtx_v3="yes"
-      abi_result="${abi_result} nvtx_v3"
     else
-      AC_MSG_NOTICE([Cuda Nvtx: ${abi_gpu_cuda_libdir}/libnvToolsExt.${abi_so_ext} not found])
+      AC_MSG_ERROR([Cuda NVTX was requested but is not available for CUDA < v10])
     fi
   fi
 
@@ -357,17 +361,19 @@ AC_DEFUN([_ABI_GPU_CHECK_HIP],[
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
-  if test -e "${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext}"; then
-    # always add link flags to roctx if available
-    if test "${GPU_LIBS}" = ""; then
-      abi_gpu_hip_libs="-lroctx64 ${abi_gpu_hip_libs}"
+  if test "${abi_gpu_markers_enable}" = "yes"; then
+    if test -e "${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext}"; then
+      # always add link flags to roctx if available
+      if test "${GPU_LIBS}" = ""; then
+        abi_gpu_hip_libs="-lroctx64 ${abi_gpu_hip_libs}"
+      else
+        abi_gpu_hip_libs="${abi_gpu_hip_libs} -lroctx64"
+      fi
+      abi_gpu_roctx="yes"
+      abi_result="${abi_result} roctx"
     else
-      abi_gpu_hip_libs="${abi_gpu_hip_libs} -lroctx64"
+      AC_MSG_ERROR([AMD ROCtx: ${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext} not found])
     fi
-    abi_gpu_roctx="yes"
-    abi_result="${abi_result} roctx"
-  else
-    AC_MSG_NOTICE([AMD ROCtx: ${abi_gpu_hip_libdir}/libroctx64.${abi_so_ext} not found])
   fi
 
   # Restore build environment
@@ -551,6 +557,7 @@ AC_DEFUN([ABI_GPU_INIT],[
   # Init
   abi_gpu_complete="unknown"
   abi_gpu_enable="${sd_gpu_enable}"
+  abi_gpu_markers_enable="${sd_gpu_markers_enable}"
   abi_gpu_has_cc="no"
   abi_gpu_has_fft="no"
   abi_gpu_has_incs="no"
