@@ -624,6 +624,7 @@ contains
     fnlk=zero
     ABI_MALLOC(ddkk,(6,ndat))
     ddkk=zero
+    !$OMP TARGET ENTER DATA MAP(to:ddkk)
     ABI_MALLOC(strnlk,(6,ndat))
     strnlk=zero
     !$OMP TARGET ENTER DATA MAP(to:enlk)
@@ -794,7 +795,7 @@ contains
     if(signs==1) then
       if(choice==2 .or. choice==3 .or. choice==23) then
         nld_on_gpu = .true.
-        call opernld_ylm_allwf(choice,cplex,cplex_fac,&
+        call opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
         &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
         &       enlk,enlout,projections,vnl_projections,s_projections,&
         &       ndat,nd2gxdt,ndgxdt,&
@@ -907,6 +908,7 @@ contains
       ! - substract volume contribution
       ! - symetrize strain components
       if (choice==55.and.signs==1.and.paw_opt<=3) then
+        !$OMP TARGET UPDATE FROM(enlout,ddkk) if(nld_on_gpu)
         ABI_MALLOC(work3,(2,3))
         ABI_MALLOC(work4,(2,3))
         ABI_MALLOC(work5,(2,3,6))
@@ -971,6 +973,7 @@ contains
             end do
           end do
         end do !idat
+        !$OMP TARGET UPDATE TO(enlout) if(nld_on_gpu)
         ABI_FREE(work3)
         ABI_FREE(work4)
         ABI_FREE(work5)
@@ -1000,6 +1003,7 @@ contains
     ABI_FREE(enlk)
     ABI_FREE(fnlk)
     ABI_FREE(strnlk)
+    !$OMP TARGET EXIT DATA MAP(delete:ddkk)
     ABI_FREE(ddkk)
     !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
