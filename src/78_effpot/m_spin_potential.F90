@@ -425,7 +425,6 @@ contains
     ! test
     dS(:)=Snew(:)-S(:, ispin)
     S(:, ispin)= S(:, ispin)+ dS
-
        if (.not. self%csr_mat_ready) then
           call spmat_convert(self%coeff_coo, self%bilinear_csr_mat)
           self%csr_mat_ready=.True.
@@ -436,6 +435,7 @@ contains
     if(self%has_external_hfield) then
        deltaE=deltaE - dot_product(self%external_hfield(:, ispin), dS)*self%ms(ispin)
     end if
+
     S(:, ispin)=S(:,ispin)-dS
   end subroutine spin_potential_t_get_delta_E
 
