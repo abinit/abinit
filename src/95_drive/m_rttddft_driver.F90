@@ -132,7 +132,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
  call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
  !Compute current at t
- if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
+ if (dtset%prtcurrent/=0) then
    call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
  end if
 
@@ -160,7 +160,7 @@ subroutine rttddft(codvsn,dtfil,dtset,mpi_enreg,pawang,pawrad,pawtab,psps)
    call rttddft_calc_density(dtset,mpi_enreg,psps,tdks)
 
    !Compute current at t
-   if (dtset%td_ef_type/=0 .or. dtset%prtcurrent/=0) then
+   if (dtset%prtcurrent/=0) then
       call rttddft_calc_current(tdks,dtset,dtfil,psps,mpi_enreg)
    end if
 

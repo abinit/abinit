@@ -270,11 +270,15 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
       end if
       read(tdks%tdrestart_unit,*) tdks%first_step
       tdks%first_step = tdks%first_step + 1
-      read(tdks%tdrestart_unit,*) tdks%fname_tdener
       read(tdks%tdrestart_unit,*) tdks%fname_wfk0
       read(tdks%tdrestart_unit,*) fname_wfk
-      read(tdks%tdrestart_unit,*) tdks%fname_tdef
-      read(tdks%tdrestart_unit,*) tdks%fname_current
+      read(tdks%tdrestart_unit,*) tdks%fname_tdener
+      if (dtset%td_ef_type /= 0) then
+         read(tdks%tdrestart_unit,*) tdks%fname_tdef
+      end if
+      if (dtset%prtcurrent /= 0) then
+         read(tdks%tdrestart_unit,*) tdks%fname_current
+      end if
    end if
    !Send to all procs
    call xmpi_bcast(tdks%first_step,0,mpi_enreg%comm_world,ierr)
@@ -285,7 +289,7 @@ subroutine tdks_init(tdks ,codvsn, dtfil, dtset, mpi_enreg, pawang, pawrad, pawt
    call xmpi_bcast(tdks%fname_current,0,mpi_enreg%comm_world,ierr)
  else
    if (mpi_enreg%me == 0) then
-      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='unknown', form='formatted') /= 0) then
+      if (open_file('TD_RESTART', msg, newunit=tdks%tdrestart_unit, status='replace', form='formatted') /= 0) then
          write(msg,'(a,a,a)') 'Error while trying to open file TD_RESTART.'
          ABI_ERROR(msg)
       end if

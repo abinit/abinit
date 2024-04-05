@@ -186,15 +186,4 @@ inp_files = [
     # Chebfi2
     "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
     "t207.abi",  # same as t206 but with nspinor=2
-
-    # RT-TDDFT
-    "t210.abi",  # GS, Ni 4 atoms, PAW to generate initial WFK for next RT-TDDFT tests
-    "t211.abi",  # RT-TDDFT, Ni 4 atoms, PAW, ER propagator
-    "t212.abi",  # RT-TDDFT, Ni 4 atoms, PAW, EMR propagator
-    "t213.abi",  # GS, Al 4 atoms, NC PSP to generate initial WFK for next RT-TDDFT tests
-    "t214.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator
-    "t215.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, EMR propagator
-    "t216.abi",  # GS, Al 4 atoms, NC PSP to generate initial WFK for next RT-TDDFT tests
-    "t217.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator to test restart
-    "t218.abi",  # RT-TDDFT, Al 4 atoms, NC PSP, ER propagator - restart from last test
 ]
