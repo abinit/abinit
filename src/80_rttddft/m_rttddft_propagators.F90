@@ -303,7 +303,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
                       & psps%qgrid_ff,tdks%rmet,psps%usepaw,psps%useylm,ylm_k,tdks%ylmgr)
       end if
 
-      !!! HERE - FB !!!
       !** Load k-dependent part in the Hamiltonian datastructure
       !**  - Compute 3D phase factors
       !**  - Prepare various tabs in case of band-FFT parallelism

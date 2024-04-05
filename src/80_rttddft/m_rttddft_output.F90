@@ -93,72 +93,53 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  
  !Local variables-------------------------------
  !scalars
- character            :: tmp
  character(len=500)   :: msg
  character(len=100)   :: fmt
- integer              :: stat, i
+ character(len=20)    :: access
+ integer              :: i
  !arrays
 
 ! *************************************************************************
 
  !** Special case of first step
  if (istep == tdks%first_step) then
+   access = "sequential"
+   if (dtset%td_restart>0) access = "append"
+
    ! Open energy file and writes header if needed
-   if (open_file(tdks%fname_tdener, msg, newunit=tdks%tdener_unit, status='unknown', form='formatted') /= 0) then
+   if (open_file(tdks%fname_tdener,msg,newunit=tdks%tdener_unit,status='unknown',form='formatted',access=access) /= 0) then
       write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdener
       ABI_ERROR(msg)
    end if 
-   if (mpi_enreg%me == 0) then
-      if (dtset%td_restart>0) then
-         do
-            read(tdks%tdener_unit,*,iostat=stat) tmp
-            if (stat /= 0) exit
-         end do
-         backspace(tdks%tdener_unit)
-      else
-         write(msg,'(a)') "# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units."
-         call wrtout(tdks%tdener_unit,msg)
-         write(msg,'(a)') "# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald  &
-                         & E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw"
-         call wrtout(tdks%tdener_unit,msg)
-      end if
+   if (dtset%td_restart==0 .and. mpi_enreg%me == 0) then
+      write(msg,'(a)') "# RT-TDDFT -- Energy file. All quantities are in Hartree atomic units."
+      call wrtout(tdks%tdener_unit,msg)
+      write(msg,'(a)') "# step  time  E_total  E_kinetic  E_hartree  E_xc  E_ewald  &
+                      & E_corepsp  E_localpsp  E_nonlocalpsp  E_paw  E_entropy  E_vdw"
+      call wrtout(tdks%tdener_unit,msg)
    end if
- end if
- if (istep == tdks%first_step .and. dtset%td_ef_type /= 0) then
-   ! Open elec field file and writes header if needed
-   if (open_file(tdks%fname_tdef, msg, newunit=tdks%tdef_unit, status='unknown', form='formatted') /= 0) then
-      write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdef
-      ABI_ERROR(msg)
-   end if 
-   if (mpi_enreg%me == 0) then
-      if (dtset%td_restart>0) then
-         do
-            read(tdks%tdef_unit,*,iostat=stat) tmp
-            if (stat /= 0) exit
-         end do
-         backspace(tdks%tdef_unit)
-      else
+
+   ! Open electric field file and writes header if needed
+   if (dtset%td_ef_type /= 0) then
+      if (open_file(tdks%fname_tdef,msg,newunit=tdks%tdef_unit,status='unknown',form='formatted',access=access) /= 0) then
+         write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_tdef
+         ABI_ERROR(msg)
+      end if 
+      if (dtset%td_restart==0 .and. mpi_enreg%me == 0) then
          write(msg,'(a)') "# RT-TDDFT -- Electric field file. All quantities are in Hartree atomic units."
          call wrtout(tdks%tdef_unit,msg)
          write(msg,'(a)') "# step  time  E_x  E_y  E_z  A_x  A_y  A_z"
          call wrtout(tdks%tdef_unit,msg)
       end if
    end if
- end if
- if (istep == tdks%first_step .and. dtset%prtcurrent /= 0) then
+
    ! Open current file and writes header if needed
-   if (open_file(tdks%fname_current, msg, newunit=tdks%current_unit, status='unknown', form='formatted') /= 0) then
-      write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_current
-      ABI_ERROR(msg)
-   end if 
-   if (mpi_enreg%me == 0) then
-      if (dtset%td_restart>0) then
-         do
-            read(tdks%current_unit,*,iostat=stat) tmp
-            if (stat /= 0) exit
-         end do
-         backspace(tdks%current_unit)
-      else
+   if (dtset%prtcurrent /= 0) then
+      if (open_file(tdks%fname_current,msg,newunit=tdks%current_unit,status='unknown',form='formatted',access=access) /= 0) then
+         write(msg,'(a,a)') 'Error while trying to open file ', tdks%fname_current
+         ABI_ERROR(msg)
+      end if 
+      if (dtset%td_restart==0 .and. mpi_enreg%me == 0) then
          write(msg,'(a)') "# RT-TDDFT -- Current density file. All quantities are in Hartree atomic units."
          call wrtout(tdks%current_unit,msg)
          write(msg,'(a)') "# step  time  J_x  J_y  J_z"
@@ -212,16 +193,18 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (mod(istep,dtset%td_prtstr) == 0) then
    call prt_den(dtfil,dtset,istep,mpi_enreg,psps,tdks)
  end if
+
  !Computed at previous step
  if (mod(istep-1,dtset%td_prtstr) == 0) then
     call prt_eig(dtfil,dtset,istep-1,mpi_enreg,tdks)
     call prt_occ(dtfil,dtset,istep-1,mpi_enreg,tdks)
     call prt_dos(dtfil,dtset,istep-1,mpi_enreg,psps,tdks)
  end if
+
  if (mod(istep,dtset%td_prtstr) == 0) then
     if (dtset%prtwf > 0) then
        call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks)
-       call prt_restart(dtfil,istep,mpi_enreg,tdks)
+       call prt_restart(dtfil,dtset,istep,mpi_enreg,tdks)
     end if
  end if
 
@@ -229,9 +212,13 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  if (istep == tdks%first_step+tdks%ntime-1) then
     if (mod(istep,dtset%td_prtstr) /= 0 .or. dtset%prtwf <= 0) then 
       call prt_wfk(dtfil,dtset,istep,mpi_enreg,psps,tdks,force_write=.TRUE.)
-      call prt_restart(dtfil,istep,mpi_enreg,tdks)
+      call prt_restart(dtfil,dtset,istep,mpi_enreg,tdks)
     end if
+    !close all files
     close(tdks%tdener_unit)
+    close(tdks%tdrestart_unit)
+    if (dtset%td_ef_type /= 0) close(tdks%tdef_unit)
+    if (dtset%prtcurrent /= 0) close(tdks%current_unit)
  end if
 
 end subroutine rttddft_output
@@ -739,7 +726,7 @@ end subroutine prt_wfk
 !! OUTPUT
 !!
 !! SOURCE
-subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
+subroutine prt_restart(dtfil, dtset, istep, mpi_enreg, tdks)
 
  implicit none
 
@@ -747,6 +734,7 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
  !scalars
  integer,                    intent(in)    :: istep
  type(datafiles_type),       intent(inout) :: dtfil
+ type(dataset_type),         intent(inout) :: dtset
  type(MPI_type),             intent(inout) :: mpi_enreg
  type(tdks_type),            intent(inout) :: tdks
  !arrays
@@ -765,15 +753,21 @@ subroutine prt_restart(dtfil, istep, mpi_enreg, tdks)
    rewind(tdks%tdrestart_unit)
    write(msg,'(a)') step_nb
    call wrtout(tdks%tdrestart_unit,msg)
-   write(msg,'(a)') tdks%fname_tdener
-   call wrtout(tdks%tdrestart_unit,msg)
    write(msg,'(a)') tdks%fname_wfk0
    call wrtout(tdks%tdrestart_unit,msg)
    fname = trim(dtfil%filnam_ds(4))//'_'//trim(adjustl(step_nb))//'_WFK'
    write(msg,'(a)') fname
    call wrtout(tdks%tdrestart_unit,msg)
-   write(msg,'(a)') tdks%fname_tdef
+   write(msg,'(a)') tdks%fname_tdener
    call wrtout(tdks%tdrestart_unit,msg)
+   if (dtset%td_ef_type /= 0) then
+      write(msg,'(a)') tdks%fname_tdef
+      call wrtout(tdks%tdrestart_unit,msg)
+   end if
+   if (dtset%prtcurrent /= 0) then
+      write(msg,'(a)') tdks%fname_current
+      call wrtout(tdks%tdrestart_unit,msg)
+   end if
  end if
 
 end subroutine prt_restart
