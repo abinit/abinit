@@ -267,6 +267,44 @@ subroutine opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
        iatm = iatm+nattyp(itypat)
      end do
    end if
+
+!  ====== Accumulate the dynamical matrix contributions =========
+   if (choice==4) then
+     shift=0
+     iatm=0
+     do itypat=1, ntypat
+       nlmn=count(indlmn(3,:,itypat)>0)
+       nattyp_i = nattyp(itypat)
+
+       !$OMP TARGET TEAMS DISTRIBUTE &
+       !$OMP& MAP(to:enlout,gxfac,dgxdt,dgxdtfac,d2gxdt) &
+       !$OMP& PRIVATE(idat,ia,esum,mu,mua,mub) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat*nspinor
+       do ia=1,nattyp_i
+         do mu=1,6
+           mua=alpha(mu);mub=beta(mu)
+           esum=zero
+           !$OMP PARALLEL DO REDUCTION(+:esum) PRIVATE(ilmn,ii)
+           do ilmn=1,nlmn
+             do ii=1,cplex
+               esum=esum+gxfac(ii,shift+(ia-1)*nlmn+ilmn,idat)*&
+&                 d2gxdt(ii,nd2gxdt*shift + (ia-1)*nlmn*nd2gxdt + (ilmn-1)*nd2gxdt + mu,idat)&
+&                 +dgxdtfac(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mub,idat)&
+&                 *dgxdt(ii,ndgxdt*shift + (ia-1)*nlmn*ndgxdt + (ilmn-1)*ndgxdt + mua,idat)
+             end do
+           end do
+           enlout((idat-1)*nnlout + (iatm+ia-1)*6 + mu)= &
+           &             enlout((idat-1)*nnlout + (iatm+ia-1)*6 + mu) + two*esum
+         end do
+       end do
+       end do
+
+       shift = shift + nattyp(itypat)*nlmn
+       iatm = iatm+nattyp(itypat)
+     end do
+   end if
+
  end if ! paw_opt < 3
 
  if(paw_opt==3) then
