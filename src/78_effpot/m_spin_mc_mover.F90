@@ -178,7 +178,6 @@
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
-     real(dp), optional, intent(inout) :: bfield(:,:) 
      real(dp) :: r
      ! choose one site
      self%imove = rng%rand_choice(self%nspin)
