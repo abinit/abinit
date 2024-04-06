@@ -174,7 +174,7 @@
    !----------------------------------------------------------------------
    !> @brief define a trail step  using Hinzke_nowak method and calculate energy difference
    !----------------------------------------------------------------------
-   function attempt(self,rng, effpot, bfield) result(r)
+   function attempt(self,rng, effpot) result(r)
      class(spin_mc_t) :: self
      class(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
