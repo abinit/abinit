@@ -20351,7 +20351,7 @@ Variable(
     abivarname="usepotzero",
     varset="dev",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_useful','Verification_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE POTential ZERO",
@@ -20363,7 +20363,7 @@ Fix the convention for the choice of the average value of the Hartree potential,
 
   * [[usepotzero]] = 1, the new convention: the all-electron physical potential is set to zero average value.
 
-  * [[usepotzero]] = 2, the PWscf convention: the potential of equivalent point charges is set to
+  * [[usepotzero]] = 2, the QE/PWscf convention: the potential of equivalent point charges is set to
   zero average value (convention also valid for NC pseudopotentials).
 """,
 ),
