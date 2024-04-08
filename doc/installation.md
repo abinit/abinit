@@ -62,6 +62,8 @@ and [Automatic tests](#how-to-make-the-automatic-tests).
 If you want to have a much better handling on the ABINIT source code than normal users, or if
 you downloaded ABINIT from Gitlab or GitHub anyhow, then consult the section [For developers](#for-developers).
 
+From abinit version 10, there is an experimental support for the [cmake](https://cmake.org/) build system; see [below](#how-to-build-abinit-with-cmake).
+
 ## How to get a version of ABINIT?
 
 We assume that you have a F90 compiler under UNIX/Linux or macOS X and that you want to
@@ -221,6 +223,41 @@ command-line interface), in case more than one possibility is used
   * /etc/abinit/build
 
 When the hostname.ac9 file is ready, you can come back to the configure/make sequence.
+
+## How to build abinit with cmake ?
+
+As an alternative to the autotools, you can use [cmake](https://cmake.org/) to build abinit. You just need to follow step 1 and 2 from the [overview](#Overview) above. No need to write an ac9 file, cmake should be able to figure out where all required software depencencies are installed on your build host.
+
+Here are the steps for building abinit, where all options takes default values:
+
+```bash
+cd $(ABINIT_TOPLEVEL_SOURCE)
+# step 1: cmake configure
+cmake -S . -B _build/cmake
+# step 2: cmake build using 6 threads
+cmake --build _build/cmake -j 6
+```
+
+Then abinit executable will be available in folder `_build/cmake/src/98_main/`. You can use it as if you had built abinit with the autotools build system.
+
+If you want to change cmake build parameters, you can either add optional flags on the cmake configure command line, i.e. modify step 1. For example, let's assume you want abinit to use MKL instead of FFTW library for computing Fast Fourier transforms, use the following modified step 1:
+
+```bash
+cmake -S . -B _build/cmake -DABINIT_FFT_FLAVOR=MKL_DFTI
+```
+
+If you want to browse all available cmake configuration parameters and build flavors, just use `ccmake` for the configuration step:
+
+```bash
+ccmake -S . -B _build/cmake
+```
+
+you will enter a terminal user interface, and using keyboard up and down arrows you will be able to select a cmake parameter, see the available possibilities, and select a new value. If you change a parameter from inside `ccmake` user interface, you will need to press 'c' to tell cmake to take into account the changed parameter, and then 'g' to re-generate all Makefiles. Uusally, you just need to follow instructions from the bottom of the ccmake user interface.
+
+Most of the configuration parameters available in the autotools are also available in the cmake build.
+
+Additionnally, you can also build abinit for using GPU hardware (if available on your host).
+Documentation for this feature will be made available soon.
 
 ## How to run the internal tests
 
