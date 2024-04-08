@@ -81,11 +81,11 @@ contains
 !! SOURCE
 
  subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
-& ntypat,prtvol,rftyp,ucvol,timdisp,xred)
+& ntypat,omegaflag,prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,mpopt,natom,ntypat,prtvol,rftyp,timdisp
+ integer,intent(in) :: mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
  real(dp),intent(in) :: magpen,ucvol
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
@@ -175,7 +175,7 @@ contains
      end if
 
      call local_spinsus(barmagsus,ddb%val,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtopt,prtvol)
 
    end if
 
@@ -218,7 +218,7 @@ contains
 
    if (iblok /= 0 .or. jblok /=0) then
      call magmom(barmmom,ddb%val,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
+   & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield)
    end if
 
    !Now calculate the non-magnetic second-order quantities
@@ -235,7 +235,7 @@ contains
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (iblok /= 0 ) then
      call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
-   & natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
+   & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield)
      
      !Apply ASR
      if (omega(1) < tol12) then
@@ -423,15 +423,16 @@ contains
 !! SOURCE
 
  subroutine local_spinsus(barmagsus,blkval,iblok,invbarmagsus,invmagsus,invhmat,magpen,magsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtopt,prtvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
- real(dp),intent(in) :: magpen
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir
+ integer,intent(in) :: omegaflag,prtopt,prtvol
+ real(dp),intent(in) :: magpen,omega
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
  complex(dpc),intent(out) :: barmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: invhmat(ndim,ndim)
@@ -611,6 +612,40 @@ contains
    end if !magpen>zero
 
  end if !prtopt
+
+!For linear interpolation of Hessians substitute invmagsus into 
+!the ddb object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   ipert2_red= 0
+   do iat2= mpatpol(1), mpatpol(2)
+     ipert2= natom + 11 + iat2
+     ipert2_red= ipert2_red + 1
+     idir2_red= 0
+     do idir2= 1, 3
+       if (mpdir(idir2)==0) cycle
+       idir2_red= idir2_red + 1
+       icol=idir2_red+(ipert2_red-1)*nmdir
+       indexat(icol)=iat2
+       indexdir(icol)=idir2
+       idty(icol,icol)=(one,zero)
+       ipert1_red=0
+       do iat1= mpatpol(1), mpatpol(2)
+         ipert1= natom + 11 + iat1
+         ipert1_red= ipert1_red + 1
+         idir1_red= 0
+         do idir1= 1, 3
+           if (mpdir(idir1)==0) cycle
+           idir1_red=idir1_red+1
+           irow=idir1_red+(ipert1_red-1)*nmdir
+  
+           blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(invmagsus(irow,icol))
+           blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(invmagsus(irow,icol))
+  
+         end do
+       end do
+     end do
+   end do
+ end if
  
  end subroutine local_spinsus
 !!***
@@ -650,14 +685,14 @@ contains
 !! SOURCE
 
  subroutine magmom(barmmom,blkval,invbarmagsus,invhmat,iblok,jblok,magpen,magsus,mmom,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtopt,prtvol
- real(dp),intent(in) :: magpen
+ integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtopt,prtvol
+ real(dp),intent(in) :: omega,magpen
 !arrays
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  integer,intent(in) :: mpatpol(2),mpdir(3)
  complex(dpc),intent(out) :: barmmom(ndim,(natom+2)*3)
@@ -840,6 +875,37 @@ contains
    end if
  end if 
   
+!For linear interpolation of Hessians substitute Zeeman fields into 
+!the ddb object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   do ipert2=1,natom+2
+     do idir2=1,3
+       icol=idir2+(ipert2-1)*3
+       indexat2(icol)=ipert2
+       indexdir2(icol)=idir2
+  
+       ipert1_red= 0
+       do iat1= mpatpol(1), mpatpol(2)
+         ipert1= natom + 11 + iat1
+         ipert1_red= ipert1_red + 1
+         idir1_red= 0
+         do idir1= 1, 3
+           if (mpdir(idir1)==0) cycle
+           idir1_red= idir1_red + 1
+           irow=idir1_red+(ipert1_red-1)*nmdir
+           indexat1(irow)=iat1
+           indexdir1(irow)=idir1
+           
+           if (iblok /=0 .and. ipert2 <= natom) then
+             blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(zfield(irow,icol))
+             blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(zfield(irow,icol))
+           end if
+  
+         end do
+       end do
+     end do
+   end do
+ end if
  end subroutine magmom
 !!***
 
@@ -872,13 +938,14 @@ contains
 !! SOURCE
 
  subroutine mp_ifc(barmagsus,blkval,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
-& natom,nblok,ndim,prtopt,prtvol,qphon,xred,zfield)
+& natom,nblok,ndim,omega,omegaflag,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
+ integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,omegaflag,prtopt,prtvol
+ real(dp),intent(in) :: omega
 !arrays
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: magsus(ndim,ndim)
@@ -991,6 +1058,23 @@ contains
        end do
      end do 
    end if
+ end if
+
+!For linear interpolation of Hessians substitute FM force constants into 
+!the ddb object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol=( ipert2-1)*3 + idir2
+       do ipert1= 1, natom
+         do idir1= 1, 3
+           irow=( ipert1-1)*3 + idir1
+         blkval(1,idir1,ipert1,idir2,ipert2,iblok)=real(ifcmat_fm(irow,icol))
+         blkval(2,idir1,ipert1,idir2,ipert2,iblok)=aimag(ifcmat_fm(irow,icol))
+         end do
+       end do
+     end do
+   end do 
  end if
 
  end subroutine mp_ifc
@@ -2043,7 +2127,7 @@ contains
    nblok= ddb%nblok
    ifound= 0
    do iblok= 1, nblok
-     if (ddb%omega(1,iblok) <= tol12) then
+     if (abs(ddb%omega(1,iblok)) < tol12) then
        w0hessian(:,:)= ddb%val(:,:,iblok)
        ifound= 1
      end if
@@ -2058,7 +2142,7 @@ contains
    nblok= ddb_lw%nblok
    ifound= 0
    do iblok= 1, nblok
-     if (ddb_lw%omega(1,iblok) <= tol12) then
+     if (abs(ddb_lw%omega(1,iblok)) < tol12) then
        w0berry(:,:)= ddb_lw%val(:,:,iblok)
        ifound= 1
      end if
@@ -2096,11 +2180,11 @@ contains
 
    !Calculate the local spin susceptibilities
    call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
- & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol)
+ & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol)
 
    !Calculate the magnetic moments
    call magmom(barmmom(:,:,iw),int_barddb,invbarmagsus(:,:,iw),invhmat(:,:,iw),1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),&
- & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,prtopt,prtvol,qphon,xred,zfield)
+ & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
 
    !Calculate the dielectric susceptibility
    call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
@@ -2108,7 +2192,7 @@ contains
 
    !Calculate the interatomic force constants
    call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,prtopt,prtvol,qphon,xred,zfield)
+ & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
 
    !Apply ASR
    if (omega(1) < tol12) then

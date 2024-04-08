@@ -251,7 +251,7 @@ program anaddb
    ABI_MALLOC(delta_asrw0,(3*natom,3))
    ABI_MALLOC(delta_asrw0_fm,(3*natom,3))
    call ddb_magpen(ddb, ddb_lw, delta_asrw0, delta_asrw0_fm, inp%magpen, inp%mpatpol, & 
- & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
+ & inp%mpdir, mpert, inp%mpopt, natom, ntypat, inp%omegaflag, inp%prtvol, 1, Crystal%ucvol, inp%timdisp, &
  & Crystal%xred)
 
    if (inp%omegaflag/=0) then
