@@ -200,29 +200,17 @@ contains
 
   gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
   if(allocated(gpu_nonlop_current_ikpt%projs)) then
-    current_ikpt_projs   => gpu_nonlop_current_ikpt%projs
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs)
-    nullify(current_ikpt_projs_r)
-    nullify(current_ikpt_projs_i)
+    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs)
   else
-    current_ikpt_projs_r => gpu_nonlop_current_ikpt%projs_r
-    current_ikpt_projs_i => gpu_nonlop_current_ikpt%projs_i
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_r)
-    !$OMP TARGET ENTER DATA MAP(to:current_ikpt_projs_i)
-    nullify(current_ikpt_projs)
+    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs_r)
+    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs_i)
   end if
   if(gpu_nonlop_current_ikpt%ngrads /= -1) then
     if(allocated(gpu_nonlop_current_ikpt%dprojs)) then
-      current_ikpt_dprojs   => gpu_nonlop_current_ikpt%dprojs
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs)
-      nullify(current_ikpt_dprojs_r)
-      nullify(current_ikpt_dprojs_i)
+      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs)
     else
-      current_ikpt_dprojs_r => gpu_nonlop_current_ikpt%dprojs_r
-      current_ikpt_dprojs_i => gpu_nonlop_current_ikpt%dprojs_i
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_i)
-      !$OMP TARGET ENTER DATA MAP(to:current_ikpt_dprojs_r)
-      nullify(current_ikpt_dprojs)
+      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs_i)
+      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs_r)
     end if
   end if
 
@@ -236,28 +224,23 @@ contains
 
   if(current_ikpt_in_gpu == -1) return
 
-  if(associated(current_ikpt_projs)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
-    nullify(current_ikpt_projs)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs)
   end if
-  if(associated(current_ikpt_projs_r)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
-    nullify(current_ikpt_projs_r)
-    nullify(current_ikpt_projs_i)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs_r))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_r)
   end if
-  if(associated(current_ikpt_dprojs)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
-    nullify(current_ikpt_dprojs)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs)
   end if
-  if(associated(current_ikpt_dprojs_i)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
-    nullify(current_ikpt_dprojs_r)
-    nullify(current_ikpt_dprojs_i)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs_i))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_r)
   end if
 
   current_ikpt_in_gpu=-1
+  nullify(gpu_nonlop_current_ikpt)
 
  end subroutine free_gemm_nonlop_kpt_ompgpu
 
@@ -562,8 +545,8 @@ contains
     call refresh_gemm_nonlop_kpt_ompgpu(ikpt)
   end if
 
-  projs_ => current_ikpt_projs(:,:,projs_beg:projs_end)
-  dprojs_ => current_ikpt_dprojs(:,:,dprojs_beg:dprojs_end)
+  projs_ => gpu_nonlop_current_ikpt%projs(:,:,projs_beg:projs_end)
+  dprojs_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
 
   ! If vectproj is provided, use it for further calculations, use static array otherwise
   projections => projections_
