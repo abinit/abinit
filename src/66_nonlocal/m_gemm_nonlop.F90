@@ -177,12 +177,6 @@ module m_gemm_nonlop
 #endif
 
 #ifdef HAVE_OPENMP_OFFLOAD
- real(dp), pointer, save, public :: current_ikpt_projs(:, :, :)
- real(dp), pointer, save, public :: current_ikpt_projs_r(:, :, :)
- real(dp), pointer, save, public :: current_ikpt_projs_i(:, :, :)
- real(dp), pointer, save, public :: current_ikpt_dprojs(:, :, :)
- real(dp), pointer, save, public :: current_ikpt_dprojs_r(:, :, :)
- real(dp), pointer, save, public :: current_ikpt_dprojs_i(:, :, :)
  integer, save, public :: current_ikpt_in_gpu=-1
  type(gemm_nonlop_type), pointer, save, public :: gpu_nonlop_current_ikpt
 #endif
@@ -364,6 +358,7 @@ contains
   call free_ompgpu_current_ikpt_dprojs()
 
   current_ikpt_in_gpu=-1
+  nullify(gpu_nonlop_current_ikpt)
 #endif
  end subroutine free_ompgpu_current_ikpt
 
@@ -375,15 +370,12 @@ contains
 
   if(current_ikpt_in_gpu == -1) return
 
-  if(associated(current_ikpt_projs)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs)
-    nullify(current_ikpt_projs)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs)
   end if
-  if(associated(current_ikpt_projs_r)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_projs_r)
-    nullify(current_ikpt_projs_r)
-    nullify(current_ikpt_projs_i)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs_r))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_r)
   end if
 
 #endif
@@ -396,15 +388,14 @@ contains
 
 #ifdef HAVE_OPENMP_OFFLOAD
 
-  if(associated(current_ikpt_dprojs)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs)
-    nullify(current_ikpt_dprojs)
+  if(current_ikpt_in_gpu == -1) return
+
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs)
   end if
-  if(associated(current_ikpt_dprojs_i)) then
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:current_ikpt_dprojs_r)
-    nullify(current_ikpt_dprojs_r)
-    nullify(current_ikpt_dprojs_i)
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs_i))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_r)
   end if
 
 #endif
@@ -609,7 +600,7 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD
         if((istwf_k==1 .and. .not. xomp_target_is_present(c_loc(gemm_nonlop_kpt(ikpt)%dprojs))) .or. &
         &  (istwf_k==2 .and. .not. xomp_target_is_present(c_loc(gemm_nonlop_kpt(ikpt)%dprojs_r)))) then
-          if (ikpt/=current_ikpt_in_gpu .or. associated(current_ikpt_dprojs) .or. associated(current_ikpt_dprojs_r)) then
+          if (ikpt/=current_ikpt_in_gpu) then
             call free_ompgpu_current_ikpt_dprojs()
           end if
           if(istwf_k <= 1) then
@@ -692,26 +683,6 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD
     current_ikpt_in_gpu = ikpt
     gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
-    if(allocated(gpu_nonlop_current_ikpt%projs)) then
-      current_ikpt_projs   => gpu_nonlop_current_ikpt%projs
-      nullify(current_ikpt_projs_r)
-      nullify(current_ikpt_projs_i)
-    else
-      current_ikpt_projs_r => gpu_nonlop_current_ikpt%projs_r
-      current_ikpt_projs_i => gpu_nonlop_current_ikpt%projs_i
-      nullify(current_ikpt_projs)
-    end if
-    if(ndgxdt > 0) then
-      if(allocated(gpu_nonlop_current_ikpt%dprojs)) then
-        current_ikpt_dprojs   => gpu_nonlop_current_ikpt%dprojs
-        nullify(current_ikpt_dprojs_r)
-        nullify(current_ikpt_dprojs_i)
-      else
-        current_ikpt_dprojs_r => gpu_nonlop_current_ikpt%dprojs_r
-        current_ikpt_dprojs_i => gpu_nonlop_current_ikpt%dprojs_i
-        nullify(current_ikpt_dprojs)
-      end if
-    end if
 #endif
   end if
   gemm_nonlop_choice=choice
