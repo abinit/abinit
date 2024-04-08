@@ -143,6 +143,8 @@ module m_abi_linalg
  public :: abi_linalg_work_allocate ! Allocate work arrays
  !----------------------------------------------------------------------
 
+ public :: gpu_set_to_zero
+
 !BLAS INTERFACE
  !public :: abi_zgemm
  public :: abi_xgemm
