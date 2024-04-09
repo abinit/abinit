@@ -416,7 +416,7 @@ contains
 
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
-  real(dp), allocatable, target :: d2projections(:,:,:), s_d2projections(:,:,:), vnl_d2projections(:,:,:)
+  real(dp), allocatable, target :: d2projections(:,:,:)
   integer :: ipw, iproj, iblock, nprojs_blk, i1, i2, i
   integer :: nprojs_my_blk
   integer :: rank, nprocs
@@ -588,6 +588,57 @@ contains
     d2projs_ => gpu_nonlop_current_ikpt%d2projs_r
   end if
 
+  ndgxdt = ngrads
+  nd2gxdt = ngrads2
+
+  ndgxdtfac = 0; nd2gxdtfac = 0
+  if (choice==2) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==22) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==3) then
+    if (signs==2) ndgxdtfac=1
+  end if
+  if (choice==4) then
+    if(signs==1) ndgxdtfac=3
+  end if
+  if (choice==5) then
+    if(signs==2) ndgxdtfac=1
+  end if
+  if (choice==51) then
+    if(signs==2) ndgxdtfac=1
+  end if
+  if (choice==54) then
+    if(signs==1) ndgxdtfac=6
+    if(signs==2) ndgxdtfac=1
+    if(signs==2) nd2gxdtfac=1
+  end if
+  if (choice==55) then
+    if(signs==1) ndgxdtfac=9
+  end if
+  if (choice==6) then
+    if(signs==1) ndgxdtfac=9
+  end if
+  ABI_CHECK(ndgxdtfac<=ndgxdt,"BUG: ndgxdtfac>ndgxdt!")
+  optder = 0;if (ndgxdtfac>0) optder = 1
+  if (nd2gxdtfac>0) optder=2
+  cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
+  ! When istwf_k > 1, gx derivatives can be real or pure imaginary
+  ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
+  ! cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
+  if(ndgxdt > 0) then
+   if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
+   if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
+   !if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
+   if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
+  end if
+  if(nd2gxdt > 0) then
+    if (choice==54) cplex_d2gxdt(:) = 2
+    if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
+  end if
+
   ! If vectproj is provided, use it for further calculations, use static array otherwise
   projections => projections_
   local_vectproj=.false.
@@ -613,57 +664,40 @@ contains
   if(cpopt < 2) then
     projections=zero
     !$OMP TARGET UPDATE TO(projections)
-    !call gpu_set_to_zero(projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
+    call gpu_set_to_zero(projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
   end if
   call gpu_set_to_zero(s_projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
   call gpu_set_to_zero(vnl_projections, int(cplex_fac,c_size_t)*nprojs*ndat*nspinor)
 
+  ! Working buffers for storing derivative
   if (ngrads>0) then
     ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
-    ! Working buffers for storing derivative (used for response function at least)
-    if (choice > 1) then
-      ABI_MALLOC(s_dprojections,(cplex, ngrads*nprojs,nspinor*ndat))
-      ABI_MALLOC(vnl_dprojections,(cplex_fac, ngrads*nprojs,nspinor*ndat))
-      !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
-    end if
     if(cpopt < 4) then
       call gpu_set_to_zero(dprojections, int(cplex,c_size_t)*ngrads*nprojs*ndat*nspinor)
     end if
-    if(allocated(s_dprojections)) then
-      s_dprojections=zero
-      !$OMP TARGET UPDATE TO(s_dprojections)
-      !call gpu_set_to_zero(s_dprojections,   int(cplex,c_size_t)*ngrads*nprojs*ndat*nspinor)
-    end if
-    if(allocated(vnl_dprojections)) then
-      vnl_dprojections=zero
-      !$OMP TARGET UPDATE TO(vnl_dprojections)
-      !call gpu_set_to_zero(vnl_dprojections, int(cplex_fac,c_size_t)*ngrads*nprojs*ndat*nspinor)
-    end if
+  end if
+  if (ndgxdtfac > 0) then
+    ABI_MALLOC(s_dprojections,(cplex, ndgxdtfac*nprojs,nspinor*ndat))
+    ABI_MALLOC(vnl_dprojections,(cplex_fac, ndgxdtfac*nprojs,nspinor*ndat))
+    !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
+    call gpu_set_to_zero(s_dprojections,   int(cplex,c_size_t)*ndgxdtfac*nprojs*ndat*nspinor)
+    call gpu_set_to_zero(vnl_dprojections, int(cplex_fac,c_size_t)*ndgxdtfac*nprojs*ndat*nspinor)
+  else
+    ABI_MALLOC(s_dprojections,(1,1,1))
+    ABI_MALLOC(vnl_dprojections,(1,1,1))
+    !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
   end if
 
+  ! Working buffers for storing 2nd-derivative
   if (ngrads2>0) then
     ABI_MALLOC(d2projections,(cplex, ngrads2*nprojs, nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:d2projections)
-    ! Working buffers for storing derivative (used for response function at least)
-    if (choice > 1) then
-      ABI_MALLOC(s_d2projections,(cplex, ngrads2*nprojs,nspinor*ndat))
-      ABI_MALLOC(vnl_d2projections,(cplex_fac, ngrads2*nprojs,nspinor*ndat))
-      !$OMP TARGET ENTER DATA MAP(alloc:s_d2projections,vnl_d2projections)
-    end if
     if(cpopt < 4) then
       call gpu_set_to_zero(d2projections, int(cplex,c_size_t)*ngrads2*nprojs*ndat*nspinor)
     end if
-    if(allocated(s_d2projections)) then
-      s_d2projections=zero
-      !$OMP TARGET UPDATE TO(s_d2projections)
-      !call gpu_set_to_zero(s_d2projections,   cplex*ngrads*nprojs*ndat*nspinor)
-    end if
-    if(allocated(vnl_d2projections)) then
-      vnl_d2projections=zero
-      !$OMP TARGET UPDATE TO(vnl_d2projections)
-      !call gpu_set_to_zero(vnl_d2projections, cplex_fac*ngrads*nprojs*ndat*nspinor)
-    end if
+  else
+    ABI_MALLOC(d2projections,(1, 1, 1))
   end if
 
   if(nprojs == 0) then
@@ -692,27 +726,6 @@ contains
     ABI_MALLOC(strnlk,(6,ndat))
     strnlk=zero
     !$OMP TARGET ENTER DATA MAP(to:enlk)
-  end if
-
-  ndgxdt = ngrads
-  ndgxdtfac = ngrads
-  nd2gxdt = ngrads2
-  nd2gxdtfac = ngrads2
-  optder = 0;if (ndgxdtfac>0) optder = 1
-  if (nd2gxdtfac>0) optder=2
-  cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
-  ! When istwf_k > 1, gx derivatives can be real or pure imaginary
-  ! cplex_dgxdt(i)  = 1 if dgxdt(1,i,:,:)  is real, 2 if it is pure imaginary
-  ! cplex_d2gxdt(i) = 1 if d2gxdt(1,i,:,:) is real, 2 if it is pure imaginary
-  if(ndgxdt > 0) then
-   if (choice==5.or.choice==51) cplex_dgxdt(:) = 2
-   if (choice==54.and.signs==1) cplex_dgxdt(4:6) = 2
-   !if (choice==54.and.signs==2) cplex_dgxdt(:)   = 2
-   if (choice==55.and.signs==1) cplex_dgxdt(7:9) = 2
-  end if
-  if(nd2gxdt > 0) then
-    if (choice==54) cplex_d2gxdt(:) = 2
-    if (choice==55.and.signs==1) cplex_d2gxdt(1:18)= 2
   end if
 
   if(cpopt >= 2) then
@@ -804,56 +817,27 @@ contains
     if(choice /= 7) then
       ! opernlc
       iatm = 0
-      shift = 0; dshift = 0; d2shift = 0
-      !$OMP TARGET UPDATE FROM(projections,dprojections,d2projections) if(choice==4.or.choice==54.or.choice==55)
+      shift = 0
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
 
         ibeg = shift+1
         iend = shift+nattyp(itypat)*nlmn
 
-        idbeg = dshift+1
-        idend = dshift+nattyp(itypat)*nlmn*ngrads
-
-        id2beg = d2shift+1
-        id2end = d2shift+nattyp(itypat)*nlmn*ngrads2
-
-        if(choice==4.or.choice==54.or.choice==55) then
-        do idat = 1,ndat
-          call opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
-&         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-&         d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         s_d2projections(:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
-&         dimenl1,dimenl2,dimekbq,enl,&
-&         projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-&         vnl_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         s_projections(:, ibeg:iend,1+nspinor*(idat-1):nspinor*idat),&
-&         iatm,indlmn(:,:,itypat),itypat,lambda(idat),mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-&         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat))
-        end do
-        else
         call opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
   &         dprojections,&
   &         vnl_dprojections,&
   &         s_dprojections,&
-  &         d2gxdt_dum_in,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
+  &         d2projections,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
   &         projections,&
   &         vnl_projections,&
   &         s_projections,&
   &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
   &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ,ndat,ibeg-1,iend,nprojs,ntypat)
-        endif
 
         shift = shift + nattyp(itypat)*nlmn
-        dshift = dshift + nattyp(itypat)*nlmn*ngrads
-        d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2
         iatm = iatm+nattyp(itypat)
       end do
-      !$OMP TARGET UPDATE TO(s_projections,s_dprojections,s_d2projections) if(choice==4.or.choice==54.or.choice==55)
-      !$OMP TARGET UPDATE TO(vnl_projections,vnl_dprojections,vnl_d2projections) if(choice==4.or.choice==54.or.choice==55)
     else
       !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections)
       call copy_gpu_to_gpu(c_loc(s_projections), &
@@ -1125,14 +1109,6 @@ contains
   if (allocated(d2projections)) then
     !$OMP TARGET EXIT DATA MAP(release:d2projections)
     ABI_FREE(d2projections)
-  end if
-  if (allocated(s_d2projections)) then
-    !$OMP TARGET EXIT DATA MAP(release:s_d2projections)
-    ABI_FREE(s_d2projections)
-  end if
-  if (allocated(vnl_d2projections)) then
-    !$OMP TARGET EXIT DATA MAP(release:vnl_d2projections)
-    ABI_FREE(vnl_d2projections)
   end if
 
  end subroutine gemm_nonlop_ompgpu
