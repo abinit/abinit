@@ -423,6 +423,9 @@ contains
   logical :: is_last
   real(dp), allocatable :: projs_recv(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: d2projs_r_(:,:,:),d2projs_i_(:,:,:)
   real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:),gmet2(:,:)
   real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
   integer :: idbeg,idend,dshift,id2beg,id2end,d2shift,enlout_shift
@@ -560,9 +563,30 @@ contains
     call refresh_gemm_nonlop_kpt_ompgpu(ikpt)
   end if
 
-  projs_ => gpu_nonlop_current_ikpt%projs(:,:,projs_beg:projs_end)
-  dprojs_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
-  d2projs_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
+  if(istwf_k==1) then
+    projs_ => gpu_nonlop_current_ikpt%projs(:,:,projs_beg:projs_end)
+    dprojs_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
+    d2projs_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
+    ! Dummy values (undefined behaviour may occur otherwise)
+    projs_r_ => gpu_nonlop_current_ikpt%projs
+    projs_i_ => gpu_nonlop_current_ikpt%projs
+    dprojs_r_ => gpu_nonlop_current_ikpt%dprojs
+    dprojs_i_ => gpu_nonlop_current_ikpt%dprojs
+    d2projs_r_ => gpu_nonlop_current_ikpt%d2projs
+    d2projs_i_ => gpu_nonlop_current_ikpt%d2projs
+  end if
+  if(istwf_k==2) then
+    projs_r_ => gpu_nonlop_current_ikpt%projs_r(:,:,projs_beg:projs_end)
+    projs_i_ => gpu_nonlop_current_ikpt%projs_i(:,:,projs_beg:projs_end)
+    dprojs_r_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
+    dprojs_i_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
+    d2projs_r_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
+    d2projs_i_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
+    ! Dummy values (undefined behaviour may occur otherwise)
+    projs_ => gpu_nonlop_current_ikpt%projs_r
+    dprojs_ => gpu_nonlop_current_ikpt%dprojs_r
+    d2projs_ => gpu_nonlop_current_ikpt%d2projs_r
+  end if
 
   ! If vectproj is provided, use it for further calculations, use static array otherwise
   projections => projections_
@@ -733,9 +757,9 @@ contains
     &       cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
     &       vectin,projs_,dprojs_,d2projs_,&
-    &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
-    &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
-    &       gemm_nonlop_kpt(ikpt)%d2projs_r,gemm_nonlop_kpt(ikpt)%d2projs_i,&
+    &       projs_r_,projs_i_,&
+    &       dprojs_r_,dprojs_i_,&
+    &       d2projs_r_,d2projs_i_,&
     &       temp_realvec_r,&
     &       projs_recv,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
@@ -851,8 +875,8 @@ contains
       &       vectin_,vectout_,svectout_,&
       &       projs_,&
       &       dprojs_,&
-      &       gemm_nonlop_kpt(ikpt)%projs_r,gemm_nonlop_kpt(ikpt)%projs_i,&
-      &       gemm_nonlop_kpt(ikpt)%dprojs_r,gemm_nonlop_kpt(ikpt)%dprojs_i,&
+      &       projs_r_,projs_i_,&
+      &       dprojs_r_,dprojs_i_,&
       &       temp_realvec_r,temp_realvec_i,&
       &       projs_recv,projs_recv,&
       &       gpu_option,gemm_nonlop_is_distributed)
