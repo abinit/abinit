@@ -727,10 +727,6 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
-    print*,"1"; flush(6)
-    print*,size(d2projs_)
-    print*,size(gemm_nonlop_kpt(ikpt)%d2projs)
-    print*,npwin,d2projs_end,nprojs,gemm_nonlop_kpt(ikpt)%ngrads2
     call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2projections,dprojections,projections,&
     &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
     &       npwin,nspinor,signs,ndat,rank,&
@@ -786,7 +782,6 @@ contains
       iatm = 0
       shift = 0; dshift = 0; d2shift = 0
       !$OMP TARGET UPDATE FROM(projections,dprojections,d2projections) if(choice==4.or.choice==54.or.choice==55)
-      print*,"2"; flush(6)
       do itypat=1, ntypat
         nlmn=count(indlmn(3,:,itypat)>0)
 
@@ -845,7 +840,6 @@ contains
 
     ! opernlb
     if(signs==2) then
-      print*,"3"; flush(6)
       call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,&
@@ -866,11 +860,10 @@ contains
 
     ! opernld
     if(signs==1) then
-      print*,"4"; flush(6)
-      if(choice==2 .or. choice==3 .or. choice==23) then
+      if(choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55) then
         nld_on_gpu = .true.
         call opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
-        &       dprojections,vnl_dprojections,s_dprojections,d2gxdt_dum_in,&
+        &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
         &       enlk,enlout,projections,vnl_projections,s_projections,&
         &       ndat,nd2gxdt,ndgxdt,&
         &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
@@ -954,6 +947,7 @@ contains
       !2nd derivative wrt to k wave vector and atomic position (effective charges):
       ! - convert from cartesian to reduced coordinates
       if (choice==54.and.signs==1.and.paw_opt<=3) then
+        !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
         ABI_MALLOC(work1,(3))
         ABI_MALLOC(work2,(3))
         do idat=1,ndat
@@ -973,6 +967,7 @@ contains
         end do !idat
         ABI_FREE(work1)
         ABI_FREE(work2)
+        !$OMP TARGET UPDATE TO(enlout) if(nld_on_gpu)
       end if
 
       !2nd derivative wrt to k wave vector and strain (piezoelectric tensor):
