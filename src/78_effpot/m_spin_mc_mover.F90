@@ -136,15 +136,16 @@
    !> @param[in]  S_in:  the intial spin state
    !> @param[out]  etot:  the final total energy
    !----------------------------------------------------------------------
-   subroutine run_MC(self, rng, effpot, S_in, etot)
+   subroutine run_MC(self, rng, effpot, S_in, etot, bfield)
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
      real(dp), intent(inout) :: S_in(3,self%nspin)
      real(dp), intent(out) ::  etot
+     real(dp), optional, intent(inout) :: bfield(:,:) 
      integer :: i
      self%S(:,:)=S_in(:,:)
-     call effpot%calculate(spin=S_in, energy=self%energy)
+     call effpot%calculate(spin=S_in, energy=self%energy, bfield=bfield)
      do i = 1, self%nstep
         call self%run_one_step(rng, effpot)
      end do
