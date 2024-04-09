@@ -398,6 +398,14 @@ contains
     !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_r)
   end if
 
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%d2projs))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%d2projs)
+  end if
+  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%d2projs_i))) then
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%d2projs_i)
+    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%d2projs_r)
+  end if
+
 #endif
  end subroutine free_ompgpu_current_ikpt_dprojs
 
@@ -553,7 +561,7 @@ contains
 
 
   if(ndgxdt>0) then
-    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ikpt)%ngrads) then
+    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ikpt)%ngrads .or. nd2gxdt /=  gemm_nonlop_kpt(ikpt)%ngrads2) then
       if(gpu_option_ == ABI_GPU_OPENMP) call free_ompgpu_current_ikpt_dprojs()
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
@@ -572,7 +580,7 @@ contains
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (2, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, 1, 1))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, 1, 1))
-          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) IF(gpu_option_==ABI_GPU_OPENMP)
         end if
       else
         ABI_MALLOC(gemm_nonlop_kpt(ikpt)%dprojs_r, (1, npw, nprojs*ndgxdt))
@@ -584,8 +592,8 @@ contains
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_r, (1, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs_i, (1, npw, nprojs*nd2gxdt))
           ABI_MALLOC(gemm_nonlop_kpt(ikpt)%d2projs, (1, 1, 1))
-          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
-          !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) IF(gpu_option_==ABI_GPU_OPENMP)
+          !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) IF(gpu_option_==ABI_GPU_OPENMP)
         end if
       end if
       if(nd2gxdt==0) then
@@ -605,12 +613,12 @@ contains
           end if
           if(istwf_k <= 1) then
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs)
-            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) if(nd2gxdt>0)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs) if(nd2gxdt>0)
           else
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_r)
             !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%dprojs_i)
-            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) if(nd2gxdt>0)
-            !!$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) if(nd2gxdt>0)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_r) if(nd2gxdt>0)
+            !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt(ikpt)%d2projs_i) if(nd2gxdt>0)
           end if
           compute_dprojs = .true.
         end if
