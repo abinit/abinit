@@ -18,7 +18,7 @@ electron-phonon matrix elements, temperature dependence of the electronic gap
 has been cross checked with Quantum Espresso and YAMBO. See [[cite:Ponce2014]].
 
 It is possible to choose the same convention for the definition of the average
-eletrostatic potential, than Quantum Espresso, allowing verification of
+electrostatic potential, than Quantum Espresso, allowing verification of
 results for charged systems. See [[cite:Bruneval2014]].
 
 See the "Validation" section in [[topic:PseudosPAW]].
