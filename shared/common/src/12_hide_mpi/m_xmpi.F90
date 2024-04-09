@@ -5225,8 +5225,11 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #else
- ABI_UNUSED(count)
- ABI_UNUSED(info)
+  ! this macro is being used befor m_errors is compiled, so work around it
+! ABI_UNUSED(count)
+! ABI_UNUSED(info)
+  if (.FALSE.) write(std_out,*) count
+  if (.FALSE.) write(std_out,*) info
 #endif
 #endif
 
