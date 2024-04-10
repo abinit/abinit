@@ -9,9 +9,9 @@ A new user manual for ABINIT on GPU is currently being written and will be made 
 *The previous implementation from 2013 (based on `cuda`/`magma`) is now obsolete. However, it remains available for testing purposes only.*
 
 To use ABINIT with GPUs, two distinct programming models are available:
-- [OpenMP offload](www.openmp.org/specifications/)
+- [OpenMP offload](https://www.openmp.org/specifications/)
   Available for mostly all ground-state properties (DFPT is ongoing). `LOBPCG`and `Chebyshev filtering` iterative eigensolvers available (see [[wfoptalg]]).
--  [cuda](docs.nvidia.com/cuda)+[Kokkos](github.com/kokkos/kokkos)+[YAKL](github.com/mrnorman/YAKL)
+-  [cuda](https://docs.nvidia.com/cuda)+[Kokkos](https://github.com/kokkos/kokkos)+[YAKL](https://github.com/mrnorman/YAKL)
   Available only for the calculation of the ground-state total energy, using the `LOBPCG` algorithm.
 
 To utilize either of these programming models, it is essential to compile ABINIT with specific configurations by enabling the relevant options during the setup stage and selecting the correct value for the input parameter [[gpu_option]].
@@ -19,7 +19,7 @@ To utilize either of these programming models, it is essential to compile ABINIT
 If you wish to conduct tests on a CPU+GPU computing architecture, you can look to the three (at present) example configuration files for inspiration,
 corresponding to three different tested installations. 
 They are available in the directory doc/build of the package, and also available from
-[https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
+<https://github.com/abinit/abinit/tree/master/doc/build> .
 Simply adapt them to suit your specific CPU+GPU hardware/software:
 
 - **Architecture 1**
