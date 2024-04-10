@@ -723,7 +723,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    call make_gemm_nonlop(gemm_nonlop_ikpt_this_proc_being_treated,signs,choice,npwout,&
 &                            hamk%lmnmax,hamk%ntypat,hamk%indlmn,hamk%nattyp,istwf_k,hamk%ucvol, &
-&                            ffnlout,ph3dout,kptout,kgout,kpgout, &
+&                            ffnlout,ph3dout,kptout,kgout,kpgout,select_k_, &
 &                            idir_pert=idir,gpu_option=hamk%gpu_option) ! Optional parameters
    !FIXME Settle this
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
