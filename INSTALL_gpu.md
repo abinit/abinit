@@ -28,7 +28,6 @@ Simply adapt them to suit your specific CPU+GPU hardware/software:
    Programming model: `openMP offload`
    Compilers: Nvidia HPC compilers
    Libraries: MKL, Cuda
-  **ABINIT configuration file** : [[*.ac9]]
     
 - **Architecture 2**
    CPU: AMD Milan EPYC 7543
@@ -36,7 +35,6 @@ Simply adapt them to suit your specific CPU+GPU hardware/software:
    Programming model: `openMP offload`
    Compilers: Nvidia HPC compilers
    Libraries: MKL, Cuda
-  **ABINIT configuration file** : [[*.ac9]]
       
 - **Architecture 3**
    CPU: AMD Trendo EPYC 7A53
@@ -44,4 +42,3 @@ Simply adapt them to suit your specific CPU+GPU hardware/software:
    Programming model: `openMP offload`
    Compilers: CRAY
    Libraries: FTTW3, libSCI, HIP+ROCm
-   **ABINIT configuration file** : [[*.ac9]]
