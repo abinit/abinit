@@ -2162,10 +2162,9 @@ subroutine gwr_read_ugb_from_wfk(gwr, wfk_path)
  !cryst = gwr%wfk_hdr%get_crystal()
  !call cryst%print(header="crystal structure from WFK file")
 
- nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband
- min_nband = minval(wfk_ebands%nband)
-
+ nkibz = wfk_ebands%nkpt; nsppol = wfk_ebands%nsppol; mband = wfk_ebands%mband; min_nband = minval(wfk_ebands%nband)
  nbsum = dtset%nband(1)
+
  if (nbsum > min_nband) then
    ABI_WARNING(sjoin("WFK file contains", itoa(min_nband), "states while you're asking for:", itoa(nbsum)))
    nbsum = min_nband

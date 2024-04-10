@@ -165,7 +165,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, use_diago_fock
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -679,8 +679,9 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
-   ! Build hyb descriptor with hybrid orbitals from WFK file.
-   if (dtset%usefock == 1) then
+   ! TODO: Build hyb descriptor with hybrid orbitals from WFK file.
+   use_diago_fock = .False.
+   if (dtset%usefock == 1 .and. use_diago_fock) then
      call hyb%from_wfk_file(cryst, dtfil, dtset, psps, pawtab, ngfftc, diago_pool, comm)
    end if
 
@@ -700,8 +701,14 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
-
        nband_k = nband_iks(ik_ibz, spin)
+
+if (dtset%usefock == 1 .and. .not. use_diago_fock) then
+       call wrtout(units, "Reading ugb datatype from WFK file")
+       ABI_CHECK(.not. string_in(dtset%gwr_task, "CC4S_FULL"), "CC4S_FULL cannot be used, please specify nband")
+       call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, dtfil, cryst, eig_k, comm)
+
+else
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
        call ugb%from_diago(spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), dtset%ecut, nband_k, ngfftc, nfftf, &
                            dtset, pawtab, pawfgr, ks_paw_ij, cryst, psps, ks_vtrial, eig_k, hyb, diago_pool%comm%value)
@@ -709,6 +716,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
        if (diago_pool%comm%me == 0) diago_info(1, ik_ibz, spin) = diago_wall
        call cwtime(diago_cpu, diago_wall, diago_gflops, "start")
+end if
 
        owfk_ebands%eig(1:nband_k, ik_ibz, spin) = eig_k(1:nband_k)
 

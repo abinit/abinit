@@ -1132,7 +1132,7 @@ pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,intent(out) :: gfft(3,ngfft(1)*ngfft(2)*ngfft(3))
- real(dp),intent(in) :: kpt(3),gmet(3,3)
+ real(dp),intent(in) :: kpt(3), gmet(3,3)
 
 !Local variables-------------------------------
 !scalars

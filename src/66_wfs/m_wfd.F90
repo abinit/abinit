@@ -1177,7 +1177,7 @@ subroutine wfd_free(Wfd)
 
  call destroy_mpi_enreg(Wfd%MPI_enreg)
 
- ! FIXME: I don't why but this causes a SIGSEFV on the test farm.
+ ! FIXME: I don't why but this causes a SIGSEV on the test farm.
  !do is=1,wfd%nsppol
  !  call xmpi_comm_free(wfd%comm_spin(is))
  !end do
