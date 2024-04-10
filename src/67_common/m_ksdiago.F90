@@ -41,7 +41,7 @@ module m_ksdiago
  use m_gwdefs,            only : GW_TOLQ0, GW_Q0_DEFAULT !, cone_gw, czero_gw, j_gw
  use m_dtset,             only : dataset_type
  use m_fstrings,          only : toupper, ktoa, itoa, sjoin, ftoa, ltoa
- use m_io_tools,          only : iomode_from_fname ! file_exists, open_file, get_unit,
+ use m_io_tools,          only : iomode_from_fname, get_unit ! file_exists, open_file,
  use m_yaml,              only : yamldoc_t, yamldoc_open
  use m_numeric_tools,     only : blocked_loop
  use m_time,              only : cwtime, cwtime_report, timab
@@ -121,8 +121,6 @@ module m_ksdiago
    ! Local buffer: (2, npwsp * my_nband)
    ! Global matrix: (npwsp, nband_k)
 
-
-
    integer, allocatable :: kg_k(:,:)
    ! (3, npw_k)
    ! G-vectors in reduced coordinates.
@@ -141,8 +139,8 @@ module m_ksdiago
    procedure :: from_diago  => ugb_from_diago
     ! Build object by direct diagonalization of the KS Hamiltonian
 
-   !procedure :: from_wfk  => ugb_from_wfk
-    ! Build object from WFK file
+   procedure :: from_wfk_file  => ugb_from_wfk_file
+    ! Build object from WFK file.
 
    procedure :: free => ugb_free
     ! Free memory.
@@ -1227,9 +1225,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  end do ! il_g2
 
  ! MG: DEBUG
- call wrtout(std_out, " Setting H_KS to zero for debugging purposes!")
- ghg_mat%buffer_cplx = czero
-
+ !call wrtout(std_out, " WARNING: Setting H_KS to zero for debugging purposes!"); ghg_mat%buffer_cplx = czero
  call cwtime_report(" build H^KS_g1g2", cpu, wall, gflops)
 
  ! Free workspace memory allocated so far.
@@ -1248,9 +1244,9 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
  if (dtset%usefock == 1) then
  !if (.False.) then
    call cwtime(cpu, wall, gflops, "start")
-   call wrtout(std_out, sjoin(" Building Fock with batch_size:", itoa(batch_size)))
+   call wrtout(std_out, sjoin(" Building Fock operator F^k_{g1,g2}  with batch_size:", itoa(batch_size)))
    ABI_CHECK(dtset%usepaw == 0, "DIRECT DIAGO OF FOCK OPERATOR WITH PAW IS NOT CODED!")
-   inv_sqrt_ucvol = one/sqrt(cryst%ucvol)
+   inv_sqrt_ucvol = one / sqrt(cryst%ucvol)
 
    call hyb%wfd%change_ngfft(cryst, psps, ngfftc)
 
@@ -1261,7 +1257,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_MALLOC(vc_sqrt, (nfftc))
    ABI_MALLOC(vcg_qbz, (nfftc, hyb%nqbz))
 
-   ! Set tolerance used to decide if a band is empty
+   ! Set tolerance used to decide if a band is empty.
    tol_empty_in = 0.01_dp
    call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
@@ -1270,8 +1266,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    ABI_MALLOC(gfft, (3, nfftc))
    call get_gfft(ngfftc, kpoint, cryst%gmet, gsq_max, gfft)
 
-   !my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
-   my_gw_qlwl = zero
+   my_gw_qlwl(:) = GW_Q0_DEFAULT; if (dtset%gw_nqlwl > 0) my_gw_qlwl = dtset%gw_qlwl(:,1)
+   !my_gw_qlwl = zero
    do ik_bz=1,hyb%nkbz
      ksum = hyb%kbz(:, ik_bz)
      kgw_m_ksum = kpoint - ksum
@@ -1284,23 +1280,27 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! A non-positive value of rcut activates the recipe of Spencer & Alavi, PRB 77, 193110 (2008) [[cite:Spencer2008]].
      rcut = (cryst%ucvol * hyb%nkbz * 3.d0 / four_pi) ** third
      !vcgen%i_sz = two_pi * rcut**2
-     !if (q_is_gamma) vcg_qbz(1,iq_bz) = two_pi * rcut**2      ! FIXME: This is used in GW
-     if (q_is_gamma) vcg_qbz(1,iq_bz) = two_pi/three * rcut**2 ! FIXME: This is used in m_fock
-     !if (q_is_gamma) vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
-     !if (q_is_gamma) vcg_qbz(1,iq_bz) = zero
-     vcg_qbz(:,iq_bz) = vcg_qbz(:,iq_bz) * (inv_sqrt_ucvol**2)
+     if (q_is_gamma) then
+       !vcg_qbz(1,iq_bz) = two_pi * rcut**2      ! FIXME: This is used in GW
+       !vcg_qbz(1,iq_bz) = hyb%vcgen%i_sz
+       vcg_qbz(1,iq_bz) = two_pi/three * rcut**2 ! FIXME: This is used in m_fock
+       !vcg_qbz(1,iq_bz) = zero
+     end if
      !vcg_qbz(2:,iq_bz) = vcg_qbz(2:,iq_bz) * (inv_sqrt_ucvol**2)
-     !call zerosym(vcg_qbz(:,iq_bz), 1, n1, n2, n3)
+     vcg_qbz(:,iq_bz) = vcg_qbz(:,iq_bz) * (inv_sqrt_ucvol**2)
+     vcg_qbz(:,iq_bz) = one
+     call zerosym(vcg_qbz(:,iq_bz), 1, n1, n2, n3)
    end do ! ik_bz
+   ABI_FREE(gfft)
 
    ! Build plans for (dense, g-sphere) FFTs.
    call box_plan%from_ngfft(ngfftc, nspinor*batch_size, dtset%gpu_option)
    call uplan_k%init(npw_k, nspinor, batch_size, ngfftc, istwf_k, ugb%kg_k, gwpc, dtset%gpu_option)
 
+   ! Blocked loop over the columns of F^k_{g1,g2}.
    do ig2=1, npwsp, batch_size
      ndat = blocked_loop(ig2, npwsp, batch_size)
-
-     ! Fill cbras_box with e^{ig2.r}.
+     ! Fill cbras_box(r) with e^{ig2.r}.
      do idat=1,ndat
        call calc_ceigr(ugb%kg_k(:,ig2+idat-1), nfftc, nspinor, ngfftc, cbras_box(:,idat))
        cbras_box(:,idat) = cbras_box(:,idat) * inv_sqrt_ucvol
@@ -1368,15 +1368,18 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
      ! FFT r --> g_sphere and MPI sum partial contributions.
      call uplan_k%execute_rg(ndat, rfg_box(:,1), cbras_g(:,1))
      call xmpi_sum(cbras_g, hyb%wfd%comm_spin(spin), ierr)
-     cbras_g = - 10000 * cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     cbras_g = - cbras_g * sqrt(cryst%ucvol)
+     !cbras_g = - half * cbras_g * sqrt(cryst%ucvol)
+     !cbras_g = - 10000 * cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
      !cbras_g = - sqrt(cryst%ucvol) * cbras_g ! / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
      !cbras_g = -half * inv_sqrt_ucvol * cbras_g / (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
+     !cbras_g = - cbras_g / (hyb%nkbz * cryst%ucvol) ! * alpha_hyb
      !cbras_g = -half * sqrt(cryst%ucvol) * cbras_g  !/ (hyb%nkbz*cryst%ucvol) ! * alpha_hyb
 
      ! Update my local buffer of ghg_mat.
      do idat=1,ndat
        do ig1=1,npwsp
-         ! From global to local indices
+         ! From global to local indices.
          call ghg_mat%glob2loc(ig1, ig2+idat-1, il_g1, il_g2, haveit); if (.not. haveit) cycle
          !print *, "ig1, idat, cbras_g", ig1, idat, cbras_g(ig1, idat)
          if (istwf_k == 1) then
@@ -1391,7 +1394,6 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
    end do ! ig2
 
-   ABI_FREE(gfft)
    ABI_FREE(vc_sqrt)
    ABI_FREE(vcg_qbz)
    ABI_FREE(cbras_box)
@@ -1457,6 +1459,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
    write(msg, frmt1)(eig_ene(ib)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
    ! HYB DEBUG
+   call wrtout(std_out, "hyb%ebands")
    write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV, ib=1,min(9,hyb%ebands%mband)); call wrtout(std_out, msg)
    if (nband_k > 9 .and. dtset%prtvol > 0) then
      do jj=10,nband_k,9
@@ -1534,9 +1537,204 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call timab(1919, 2, tsec)
 
- !ABI_ERROR("ugb_from_diago OK")
+ ABI_ERROR("ugb_from_diago OK")
 
 end subroutine ugb_from_diago
+!!***
+
+!!****f* m_ksdiago/ugb_from_wfk_file
+!! NAME
+!! ugb_from_wfk_file
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  spin: spin index.
+!!  kpoint(3)
+!!  prtvol=Verbosity level
+!!  mgfftc=maximum size of 1D FFTs (coarse mesh).
+!!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
+!!         (nfftf=nfft for norm-conserving potential runs)
+!!  comm=MPI communicator.
+!!  nfftc=Number of points in the coarse FFT mesh.
+!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
+!!
+!! OUTPUT
+!!  eig_k(1:nband_k)=The calculatated eigenvalues in ascending order.
+!!
+!! SOURCE
+
+subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
+                             dtset, dtfil, cryst, eig_k, comm)
+
+ use m_wfk
+
+!Arguments ------------------------------------
+!scalars
+ class(ugb_t),target,intent(out) :: ugb
+ integer,intent(in) :: ik_ibz, spin, istwf_k
+ real(dp),intent(in) :: kpoint(3)
+ type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
+ integer,intent(in) :: nband_k, comm
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ real(dp),allocatable,intent(out) :: eig_k(:)
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0, formeig0 = 0
+ integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, ierr, bcast_comm, color, min_my_nband
+ integer :: nprocs, my_rank, nbsum, npwsp, bstart, bstop, band_step, nb, npw_k, col_bsize, band, ib, il_b, iloc
+ logical :: have_band
+ type(ebands_t) :: wfk_ebands
+ type(wfk_t) :: wfk
+ type(hdr_type) :: wfk_hdr
+ character(len=fnlen) :: wfk_path
+ character(len=500) :: msg
+ !type(gs_hamiltonian_type) :: gs_hamk
+!arrays
+ integer :: units(2)
+ real(dp),target,allocatable :: cg_work(:,:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: cg_k(:,:)
+
+! *********************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ units(:) = [std_out, ab_out]
+
+ wfk_path = dtfil%fnamewffk
+ if (my_rank == master) then
+   if (nctk_try_fort_or_ncfile(wfk_path, msg) /= 0) then
+     ABI_ERROR(sjoin("Cannot find HYBRYD WFK file:", wfk_path, ". Error:", msg))
+   end if
+   call wrtout(units, sjoin("- Reading HYBRID orbitals from WFK file:", wfk_path), pre_newlines=2)
+ end if
+
+ ! Broadcast filenames (needed because they might have been changed if we are using netcdf files)
+ call xmpi_bcast(wfk_path, master, comm, ierr)
+
+ ! Read energies and performs some basic consistency checks.
+ wfk_ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
+ call wfk_hdr%vs_dtset(dtset)
+ ABI_CHECK_IEQ(dtset%ixc, wfk_hdr%ixc, "dtset%ixc /= wfk_hdr%ixc")
+ ABI_CHECK(all(abs(wfk_hdr%kptns(:,ik_ibz) - kpoint) < tol6), "Different kpoint")
+ ABI_MALLOC(eig_k, (nband_k))
+ eig_k = wfk_ebands%eig(1:nband_k, ik_ibz, spin)
+
+ npw_k = wfk_hdr%npwarr(ik_ibz)
+ npwsp = npw_k * wfk_hdr%nspinor
+ ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
+ ABI_CHECK_IEQ(istwf_k, wfk_hdr%istwfk(ik_ibz), "different istwfk_k")
+
+ call ugb%processor%init(comm, grid_dims=[1, nprocs])
+ ABI_CHECK(block_dist_1d(nband_k, nprocs, col_bsize, msg), msg)
+ call ugb%mat%init(npwsp, nband_k, ugb%processor, istwf_k, size_blocs=[-1, col_bsize])
+
+ ABI_MALLOC(ugb%kg_k, (3, npw_k))
+
+ ! Master reads and broadcasts. Much faster on lumi
+ if (my_rank == master) then
+   call wfk_open_read(wfk, wfk_path, formeig0, iomode_from_fname(wfk_path), get_unit(), xmpi_comm_self)
+ end if
+
+ ! TODO: Optimize this part
+ ! Find band_step that gives good compromise between memory and efficiency.
+ !band_step = memb_limited_step(1, nbsum, 2*npwsp, xmpi_bsize_dp, 1024.0_dp)
+ band_step = 200
+ !band_step = 100
+ nbsum = nband_k
+ do bstart=1, nbsum, band_step
+   bstop = min(bstart + band_step - 1, nbsum); nb = bstop - bstart + 1
+
+   ABI_MALLOC(cg_work, (2, npwsp, nb)) ! This array is always dp
+   if (my_rank == master) then
+     call c_f_pointer(c_loc(cg_work), cg_k, shape=[2, npwsp * nb])
+     call wfk%read_band_block([bstart, bstop], ik_ibz, spin, xmpio_single, kg_k=ugb%kg_k, cg_k=cg_k)
+   end if
+
+   call xmpi_bcast(ugb%kg_k, master, comm, ierr)
+
+   ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
+   color = 0
+   do band=bstart, bstop
+     call ugb%mat%glob2loc(1, band, iloc, il_b, have_band)
+     if (have_band) then
+       color = 1; exit
+     end if
+   end do
+   if (my_rank == master) color = 1
+   call xmpi_comm_split(comm, color, my_rank, bcast_comm, ierr)
+
+   if (color == 1) then
+     call xmpi_bcast(cg_work, master, bcast_comm, ierr)
+   endif
+   call xmpi_comm_free(bcast_comm)
+
+   ! Copy my portion of cg_work to buffer_cplx (here we have dp --> sp conversion).
+   if (color == 1) then
+     do band=bstart, bstop
+       ib = band - bstart + 1
+       call ugb%mat%glob2loc(1, band, iloc, il_b, have_band); if (.not. have_band) cycle
+       ugb%mat%buffer_cplx(:, il_b) = cmplx(cg_work(1,:,ib), cg_work(2,:,ib), kind=gwpc)
+     end do
+   end if
+   ABI_FREE(cg_work)
+ end do ! bstart
+
+ if (my_rank == master) call wfk%close()
+
+ ! =================
+ ! Build ugb object
+ ! =================
+ ugb%istwf_k = istwf_k
+ ugb%nspinor = wfk_hdr%nspinor
+ ugb%npw_k = npw_k
+ ugb%npwsp = npwsp
+ ugb%nband_k = nband_k
+ ugb%comm => ugb%mat%processor%comm
+
+ ugb%my_bstart = ugb%mat%loc2gcol(1)
+ ugb%my_bstop = ugb%mat%loc2gcol(ugb%mat%sizeb_local(2))
+ ugb%my_nband = ugb%my_bstop - ugb%my_bstart + 1
+
+ if (ugb%my_nband > 0) then
+   call c_f_pointer(c_loc(ugb%mat%buffer_cplx), ugb%cg_k, shape=[2, ugb%npwsp, ugb%my_nband])
+ else
+   ugb%my_nband = 0
+   ugb%cg_k => null()
+ end if
+
+ call xmpi_min(ugb%my_nband, min_my_nband, comm, ierr)
+ ugb%has_idle_procs = min_my_nband == 0
+
+ ! TODO
+ !if (psps%usepaw == 1 .and. ugb%my_nband > 0) then
+ !  ABI_ERROR("ugb_from_wfk does not support PAW")
+ !  ! Calculate <Proj_i|Cnk> from output eigenstates. Note array allocated with ugb%my_nband
+ !  ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
+ !  call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
+ !  idir = 0; cprj_choice = 1  ! Only projected wave functions.
+
+ !  do my_ib=1,ugb%my_nband
+ !    ibs1 = nspinor * (my_ib - 1) + 1
+ !    call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
+ !                 gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
+ !                 gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+ !                 gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
+ !                 gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
+ !  end do
+
+ !  !  Reorder the cprj (order is now the same as in the input file)
+ !  call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
+ !end if ! usepaw
+
+ call ugb%print(units, dtset%prtvol)
+
+ call wfk_hdr%free()
+ call ebands_free(wfk_ebands)
+
+end subroutine ugb_from_wfk_file
 !!***
 
 !----------------------------------------------------------------------
@@ -1716,7 +1914,6 @@ subroutine hyb_from_wfk_file(hyb, cryst, dtfil, dtset, psps, pawtab, ngfftc, dia
  ! Construct crystal and hyb%ebands from the GS WFK file.
  hyb%ebands = wfk_read_ebands(wfk_path, comm, out_hdr=wfk_hdr)
  call wfk_hdr%vs_dtset(dtset)
-
  ABI_CHECK_IEQ(dtset%ixc, wfk_hdr%ixc, "dtset%ixc /= wfk_hdr%ixc")
 
  wfk_cryst = wfk_hdr%get_crystal()

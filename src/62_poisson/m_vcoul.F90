@@ -1867,7 +1867,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
 
  q_is_gamma = normv(qpt, cryst%gmet, "G") < GW_TOLQ0
 
- ! Find index of G=0 in gvec.
+ ! Find the index of G=0 in gvec.
  ig0 = -1
  do ig=1,npw
    if (all(gvec(:,ig) == 0)) then
