@@ -111,6 +111,7 @@ of ABINIT relying on KOKKOS. Try :
 
 mkdir build; cd build; cmake ..
 
+More information is available in the ABINIT [[help:../installation|installation guide]]
 Also, the version number of ABINIT is now generated automatically from the git tag information.
 
 By P. Kestener with M. Torrent (MR944, 979))
