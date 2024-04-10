@@ -432,12 +432,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop !, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
- integer :: comm_rpt, osc_npw, nqlwl
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop, sendcount !iatom,
+ integer :: comm_rpt, nqlwl ! osc_npw,
  integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
- real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
+ real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid
  real(dp) :: bz_vol
@@ -465,7 +465,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), rank_band(:), root_bcalc(:) ! osc_indpw(:),
+ integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), rank_band(:), root_bcalc(:) ! osc_indpw(:), osc_gvecq(:,:),
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: recvcounts(:), displs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3) !qpt_cart(3),

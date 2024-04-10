@@ -1584,7 +1584,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, formeig0 = 0
- integer :: mband, min_nband, nkibz, nsppol, my_is, my_iki, ierr, bcast_comm, color, min_my_nband
+ integer :: ierr, bcast_comm, color, min_my_nband
  integer :: nprocs, my_rank, nbsum, npwsp, bstart, bstop, band_step, nb, npw_k, col_bsize, band, ib, il_b, iloc
  logical :: have_band
  type(ebands_t) :: wfk_ebands
