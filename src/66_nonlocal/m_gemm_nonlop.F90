@@ -125,6 +125,7 @@ module m_gemm_nonlop
    ! (1, npw, nprojs*ngrads)
    integer :: idir
    integer :: choice
+   integer :: select_k
 
  end type gemm_nonlop_type
 !!***
@@ -211,6 +212,7 @@ contains
     gemm_nonlop_kpt(ikpt)%ngrads2 = -1
     gemm_nonlop_kpt(ikpt)%choice = -1
     gemm_nonlop_kpt(ikpt)%idir = -1
+    gemm_nonlop_kpt(ikpt)%select_k = -1
   end do
 
   if(gpu_option == ABI_GPU_LEGACY .or. gpu_option == ABI_GPU_KOKKOS) then
@@ -423,11 +425,11 @@ contains
 !!
 !! SOURCE
  subroutine make_gemm_nonlop(ikpt,signs,choice,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol, &
-&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k, &
+&                            ffnl_k,ph3d_k,kpt_k,kg_k,kpg_k,select_k, &
 &                            idir_pert,gpu_option) ! Optional parameters
 
   integer, intent(in) :: ikpt
-  integer, intent(in) :: npw, lmnmax, ntypat
+  integer, intent(in) :: npw, lmnmax, ntypat,select_k
   integer, intent(in) :: indlmn(:,:,:), kg_k(:,:)
   integer, intent(in) :: nattyp(ntypat)
   integer, intent(in) :: istwf_k
@@ -518,7 +520,7 @@ contains
 
 
   compute_dprojs = .false.
-  if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs) then
+  if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. select_k/=gemm_nonlop_kpt(ikpt)%select_k) then
 
     call free_gemm_nonlop_ikpt(ikpt,gpu_option_)
     if(gpu_option_ == ABI_GPU_OPENMP) then
@@ -561,7 +563,7 @@ contains
 
 
   if(ndgxdt>0) then
-    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ikpt)%ngrads .or. nd2gxdt /=  gemm_nonlop_kpt(ikpt)%ngrads2) then
+    if(nprojs/=gemm_nonlop_kpt(ikpt)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ikpt)%ngrads .or. nd2gxdt /=  gemm_nonlop_kpt(ikpt)%ngrads2 .or. select_k/=gemm_nonlop_kpt(ikpt)%select_k) then
       if(gpu_option_ == ABI_GPU_OPENMP) call free_ompgpu_current_ikpt_dprojs()
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs)
         if(allocated(gemm_nonlop_kpt(ikpt)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ikpt)%dprojs_r)
@@ -645,6 +647,7 @@ contains
   if (nd2gxdt>0) gemm_nonlop_kpt(ikpt)%ngrads2 = nd2gxdt
   if (ndgxdt>0) gemm_nonlop_kpt(ikpt)%choice = choice
   if (ndgxdt>0) gemm_nonlop_kpt(ikpt)%idir = idir_pert_
+  if (select_k>0) gemm_nonlop_kpt(ikpt)%select_k = select_k
   !!!!! GPU stuff
 
   if(gpu_option_ == ABI_GPU_LEGACY .or. gpu_option_ == ABI_GPU_KOKKOS) then
