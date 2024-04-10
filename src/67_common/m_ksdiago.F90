@@ -1537,7 +1537,7 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
 
  call timab(1919, 2, tsec)
 
- ABI_ERROR("ugb_from_diago OK")
+ !ABI_ERROR("ugb_from_diago OK")
 
 end subroutine ugb_from_diago
 !!***
