@@ -376,7 +376,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: nband_k,nband_cprj_k,nbuf,neglect_pawhat,nfftot,nkpg,nkpt1,nnn,nnsclo_now
  integer :: nproc_distrb,npw_k,nspden_rhoij,option,prtvol,nblk_gemm_nonlop
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
- integer :: signs,choice
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
  logical :: do_last_ortho,wvlbigdft=.false.
@@ -1003,28 +1002,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if (gemm_nonlop_use_gemm) then
          !set the global variable indicating to gemm_nonlop where to get its data from
          gemm_nonlop_ikpt_this_proc_being_treated = my_ikpt
-         if (istep <= 1) then
-           signs = 2
-           choice = 1
-           if(optforces>0) then
-             choice = 2
-           end if
-           !Init the arrays
-           call make_gemm_nonlop(my_ikpt,signs,choice,gs_hamk%npw_fft_k,gs_hamk%lmnmax, &
-           &    gs_hamk%ntypat, gs_hamk%indlmn, gs_hamk%nattyp, gs_hamk%istwf_k, &
-           &    gs_hamk%ucvol, gs_hamk%ffnl_k,&
-           &    gs_hamk%ph3d_k,gs_hamk%kpt_k,gs_hamk%kg_k,gs_hamk%kpg_k,&
-           &    gpu_option=dtset%gpu_option)
-           if ( dtset%gpu_option == ABI_GPU_OPENMP) then
-             if(mpi_enreg%paral_kgb==0) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp)
-             else if(gs_hamk%istwf_k==1) then
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather)
-             else
-               call ompgpu_load_hamilt_buffers(gs_hamk%kg_k,gs_hamk%kg_kp,kg_k_gather=bandfft_kpt(my_ikpt)%kg_k_gather_sym)
-             end if
-           end if
-         end if
        end if
 
 #if defined HAVE_GPU_CUDA

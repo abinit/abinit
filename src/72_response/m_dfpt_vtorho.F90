@@ -667,10 +667,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
            choice = 3
          end if
          !Init the arrays
-         call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_k,gs_hamkq%lmnmax, &
-         &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_k, &
-         &    gs_hamkq%ucvol, gs_hamkq%ffnl_k,&
-         &    gs_hamkq%ph3d_k,gs_hamkq%kpt_k,gs_hamkq%kg_k,gs_hamkq%kpg_k,&
+         call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_kp,gs_hamkq%lmnmax, &
+         &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_kp, &
+         &    gs_hamkq%ucvol, gs_hamkq%ffnl_kp,&
+         &    gs_hamkq%ph3d_kp,gs_hamkq%kpt_kp,gs_hamkq%kg_kp,gs_hamkq%kpg_kp,K_H_KPRIME,&
          &    idir_pert=idir, gpu_option=dtset%gpu_option)
        end if
      end if ! gemm_nonlop_use_gemm
