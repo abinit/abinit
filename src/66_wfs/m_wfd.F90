@@ -4383,9 +4383,9 @@ subroutine wfdgw_write_wfk(Wfd, Hdr, ebands, wfk_fname, wfknocheck)
          ! Write also kg_k, eig_k and occ_k
          call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
             kg_k=Wfd%Kdata(ik_ibz)%kg_k,cg_k=cg_k, &
-            eig_k=ebands%eig(:,ik_ibz,spin),occ_k=ebands%occ(:,ik_ibz,spin))                   ! occs extracted from Bands (i.e. QP_BSt)
-                                                                                             ! kg_k obtained from Wfd so OK! It is
-                                                                                             ! how Gs are ordered.
+            eig_k=ebands%eig(:,ik_ibz,spin),occ_k=ebands%occ(:,ik_ibz,spin))     ! occs extracted from Bands (i.e. QP_BSt)
+                                                                                 ! kg_k obtained from Wfd so OK! It is
+                                                                                 ! how Gs are ordered.
        else
          ABI_ERROR("band_block(1)>1 should not happen in the present version!")
          !call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,cg_k=cg_k(:,1+icg:))
@@ -4635,17 +4635,18 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       nband_wfd  = Wfd%nband(ik_ibz, spin)
 
       if (nband_wfd > nband_disk) then
-        write(msg,'(2(a, i0))')&
-         "nband_wfd to be read: ", nband_wfd,", cannot be greater than nband_disk: ",nband_disk
+        write(msg,'(2(a, i0))')"nband_wfd to be read: ", nband_wfd,", cannot be greater than nband_disk: ",nband_disk
         ABI_ERROR(msg)
       end if
 
       ! Allocate full array for eigenvalues and G-vectors.
+      !print *, "nband_disk, npw_disk", nband_disk, npw_disk
       ABI_MALLOC(eig_k, ((2*nband_disk)**formeig0*nband_disk))
       ABI_MALLOC(kg_k, (3,optkg1*npw_disk))
 
       ! Allocate array to store my wavefunctions and read data
       mcg = npw_disk * wfd%nspinor * count(my_readmask(:, ik_ibz, spin))
+      !print *, "mcg", mcg
       ABI_MALLOC_OR_DIE(cg_k, (2, mcg), ierr)
 
       if (.not. master_only) then
@@ -4683,6 +4684,8 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
         end if
       end if
 
+      !print *, "Before change_gpshere-1", npw_disk
+
       ! Table with the correspondence btw the k-centered sphere of the WFK file
       ! and the one used in Wfd (possibly smaller due to ecutwfn).
       ! TODO: Here I should treat the case in which istwfk in wfd differs from the one on disk.
@@ -4694,6 +4697,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
       !  write(msg,'(a,2(1x,i0),a,i0)')" For (k,s) ",ik_ibz,spin," the number of missing G is ",nmiss
       !  ABI_WARNING(msg)
       !end if
+      !print *, "Before change_gpshere0"
 
       if (change_gsphere .and. any(my_readmask(:,ik_ibz,spin))) then
         ! Prepare call to ctgk_change_sphere
@@ -4724,6 +4728,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
 
           bcount = bcount + 1
           cg_bpad = npw_disk*Wfd%nspinor*(bcount-1)
+          !print *, "Before change_gpshere"
 
           if (change_gsphere) then
             ! Different istwfk storage.

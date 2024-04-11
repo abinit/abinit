@@ -441,7 +441,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid
  real(dp) :: bz_vol
- !complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx
  logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, use_u1c_cache, intra_band, same_band
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -560,7 +559,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Incore or out-of-core solution?
    mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = qmesh%nibz
 
-   W_info%invalid_freq = Dtset%gw_invalid_freq
+   W_info%invalid_freq = dtset%gw_invalid_freq
    W_info%mat_type = MAT_INV_EPSILON
    W_info%use_mdf = BSp%mdlf_type
    W_info%eps_inf = BSp%eps_inf
@@ -853,16 +852,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_FREE(qselect)
 
- ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{q, ipert)
+ ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{qibz, ipert)
  do my_spin=1,gwpt%my_nspins
    spin = gwpt%my_spins(my_spin)
    do iq_ibz=1,gwpt%nqibz
      do imyp=1,my_npert
         idir = gwpt%my_pinfo(1, imyp); ipert = gwpt%my_pinfo(2, imyp); ipc = gwpt%my_pinfo(3, imyp)
 
+        ! ======================================
         ! Prepare DeltaVscf^{spin}_{q, ipert)(r)
+        ! ======================================
 
         ! NSCF solution of the Sternheimer equation for all the bands included in the sum over states.
+        !do iq_sum=1,nqbz
+        !end do
 
      end do
    end do ! iq_ibz

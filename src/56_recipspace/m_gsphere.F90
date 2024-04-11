@@ -1829,6 +1829,7 @@ subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
  gmax = 2*gmax + 1
  n1 = gmax(1); n2 = gmax(2); n3 = gmax(3)
 
+ !print *, "n1, n2, n3", n1, n2, n3; print *, "kg1:", kg1; print *, "kg2:", kg2
  ABI_MALLOC(iwork, (n1, n2, n3))
 
  ! Insert kg1 into work with extra 0 s around outside:

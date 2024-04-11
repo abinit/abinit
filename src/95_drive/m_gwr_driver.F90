@@ -38,6 +38,7 @@ module m_gwr_driver
  use m_dtfil
  use m_wfk
  use m_distribfft
+ use netcdf
  use m_nctk
  use, intrinsic :: iso_c_binding
 
@@ -161,7 +162,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
- integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm, kg_varid
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
@@ -668,6 +669,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ! Build header with new npwarr and nband.
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
    owfk_ebands%eig = zero
+   owfk_ebands%istwfk = istwfk_ik
+   !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
    call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk taken from dtset.
@@ -739,6 +742,11 @@ end if
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
                                        kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
                                        eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+
+           !NCF_CHECK(nf90_inq_varid(owfk%fh, "reduced_coordinates_of_plane_waves", kg_varid))
+           !NCF_CHECK(nf90_put_var(owfk%fh, kg_varid, ugb%kg_k, start=[1,1,ik_ibz], count=[3,ugb%npw_k,1]))
+           !print *, "ugb%kg_k:", ugb%kg_k; stop
+           !NCF_CHECK(nf90_sync(owfk%fh))
            call owfk%close()
          end if
          call xmpi_comm_free(io_comm)
@@ -781,6 +789,10 @@ end if
    call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
 
    if (my_rank == master) then
+     if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
+       NCF_CHECK(ebands_ncwrite_path(owfk_ebands, cryst, out_path))
+       !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
+     end if
      call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
      call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)

@@ -10,6 +10,7 @@ ndtset      2
 #ndtset      4  # TODO
 timopt 1
 nspinor 2 nspden 4
+iomode 1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1
