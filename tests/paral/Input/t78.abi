@@ -5,6 +5,7 @@
 
 ndtset 3
 timopt 1
+iomode 1
 #ndtset 1; jdtset 3
 #nsym 1 kptopt 3
 

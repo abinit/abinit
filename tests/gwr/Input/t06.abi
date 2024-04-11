@@ -3,6 +3,7 @@
 ndtset 3
 ecut 8     # Cannot go below this else system becomes metallic in HDIAGO!
 timopt 1
+iomode 1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1

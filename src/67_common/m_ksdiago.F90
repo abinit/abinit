@@ -1613,6 +1613,8 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  call wfk_hdr%vs_dtset(dtset)
  ABI_CHECK_IEQ(dtset%ixc, wfk_hdr%ixc, "dtset%ixc /= wfk_hdr%ixc")
  ABI_CHECK(all(abs(wfk_hdr%kptns(:,ik_ibz) - kpoint) < tol6), "Different kpoint")
+ ABI_CHECK_IRANGE(nband_k, 1, wfk_ebands%mband, "nband_k > mband")
+
  ABI_MALLOC(eig_k, (nband_k))
  eig_k = wfk_ebands%eig(1:nband_k, ik_ibz, spin)
 

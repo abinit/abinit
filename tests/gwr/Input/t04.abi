@@ -2,6 +2,7 @@
 # Calculation of the GW corrections with GWR code and energy-only self-consistency
 
 ndtset      5
+iomode 1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1

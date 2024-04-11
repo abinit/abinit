@@ -1,6 +1,7 @@
 # SiC in zinc-blende structure
 
 ndtset 3
+iomode 1
 ecut 12     # Cannot go below 8 else system becomes metallic in HDIAGO!
 
 # This to compute QP without symmetries for debugging purposes
