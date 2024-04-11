@@ -1459,8 +1459,8 @@ subroutine ugb_from_diago(ugb, spin, istwf_k, kpoint, ecut, nband_k, ngfftc, nff
    write(msg, '(2a,3x,a)')' Eigenvalues in eV for kpt: ', trim(ktoa(kpoint)), stag(spin); call wrtout(std_out, msg)
    write(msg, frmt1)(eig_ene(ib)*Ha_eV,ib=1,min(9,nband_k)); call wrtout(std_out, msg)
    ! HYB DEBUG
-   call wrtout(std_out, "hyb%ebands")
-   write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV, ib=1,min(9,hyb%ebands%mband)); call wrtout(std_out, msg)
+   !call wrtout(std_out, "hyb%ebands")
+   !write(msg, frmt1)(hyb%ebands%eig(ib,1,spin)*Ha_eV, ib=1,min(9,hyb%ebands%mband)); call wrtout(std_out, msg)
    if (nband_k > 9 .and. dtset%prtvol > 0) then
      do jj=10,nband_k,9
        write(msg, frmt1) (eig_ene(ib)*Ha_eV,ib=jj,min(jj+8,nband_k)); call wrtout(std_out, msg)
@@ -1551,13 +1551,7 @@ end subroutine ugb_from_diago
 !! INPUTS
 !!  spin: spin index.
 !!  kpoint(3)
-!!  prtvol=Verbosity level
-!!  mgfftc=maximum size of 1D FFTs (coarse mesh).
-!!  nfftf=(effective) number of FFT grid points in the dense FFT mesh (for this processor)
-!!         (nfftf=nfft for norm-conserving potential runs)
 !!  comm=MPI communicator.
-!!  nfftc=Number of points in the coarse FFT mesh.
-!!  ngfftc(18)=Info about 3D FFT for the coarse mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!
 !! OUTPUT
 !!  eig_k(1:nband_k)=The calculatated eigenvalues in ascending order.
