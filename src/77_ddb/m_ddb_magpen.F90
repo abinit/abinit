@@ -296,6 +296,7 @@ contains
    call wrtout([std_out, ab_out], msg)
 
    rffreq(:)=0
+   nblok=ddb_lw%nblok
    do kblok=1,nblok
 
      !Berry curvature of the penalized spin-susceptibility
@@ -328,7 +329,7 @@ contains
 
      if (iblok /= 0) then
        call berrycurv_ss(bc_barmagsus,bc_ss,ddb_lw%val,iblok,invbarmagsus,mpatpol,mpdir,mpert,&
-     & natom,nblok,ndim,nmdir,prtvol)
+     & natom,nblok,ndim,nmdir,omega(1),omegaflag,prtvol)
      end if
 
      !Berry curvature of the induced Zeeman fields
@@ -357,7 +358,7 @@ contains
 
      if (iblok /= 0 .or. jblok /=0) then
        call berrycurv_sp(barmmom,bc_sp,bc_ss,ddb_lw%val,iblok,invbarmagsus,jblok, &
-     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
+     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtvol,qphon,xred)
      end if
 
      !Berry curvature of other second-order quantites
@@ -370,7 +371,7 @@ contains
    & omega=omega,rffreq=rffreq)
      if (iblok /= 0 ) then
        call berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,ddb_lw%val,iblok, &
-     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
+     & mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega(1),omegaflag,prtvol,qphon,xred,zfield)
      end if
    end do 
 
@@ -625,9 +626,6 @@ contains
        if (mpdir(idir2)==0) cycle
        idir2_red= idir2_red + 1
        icol=idir2_red+(ipert2_red-1)*nmdir
-       indexat(icol)=iat2
-       indexdir(icol)=idir2
-       idty(icol,icol)=(one,zero)
        ipert1_red=0
        do iat1= mpatpol(1), mpatpol(2)
          ipert1= natom + 11 + iat1
@@ -1631,14 +1629,15 @@ contains
 !! SOURCE
 
  subroutine berrycurv_ss(bc_barmagsus,bc_ss,blkval,iblok,invbarmagsus,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
+ real(dp),intent(in) :: omega
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  complex(dpc),intent(in) :: invbarmagsus(ndim,ndim)
  complex(dpc),intent(out) :: bc_ss(ndim,ndim)
  complex(dpc),intent(out) :: bc_barmagsus(ndim,ndim)
@@ -1660,9 +1659,9 @@ contains
 
  !Extract the Berry-curvature of the penalized susceptibility
  idty=(zero,zero)
- ipert2_red= 0
  ipert3= natom + 9
  idir3= 1
+ ipert2_red= 0
  do iat2= mpatpol(1), mpatpol(2)
    ipert2= natom + 11 + iat2
    ipert2_red= ipert2_red + 1
@@ -1717,6 +1716,36 @@ contains
  end do
  call wrtout([ab_out,std_out], '   ')
 
+!For linear interpolation of Hessians substitute FM Berry curvature 
+!into the ddb_lw object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   ipert2_red= 0
+   do iat2= mpatpol(1), mpatpol(2)
+     ipert2= natom + 11 + iat2
+     ipert2_red= ipert2_red + 1
+     idir2_red= 0
+     do idir2= 1, 3
+       if (mpdir(idir2)==0) cycle
+       idir2_red= idir2_red + 1
+       icol=idir2_red+(ipert2_red-1)*nmdir
+       ipert1_red=0
+       do iat1= mpatpol(1), mpatpol(2)
+         ipert1= natom + 11 + iat1
+         ipert1_red= ipert1_red + 1
+         idir1_red= 0
+         do idir1= 1, 3
+           if (mpdir(idir1)==0) cycle
+           idir1_red=idir1_red+1
+           irow=idir1_red+(ipert1_red-1)*nmdir
+           blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & real(bc_ss(irow,icol))
+           blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & aimag(bc_ss(irow,icol))
+         end do
+       end do
+     end do
+   end do
+ end if
 
  end subroutine berrycurv_ss
 !!***
@@ -1749,14 +1778,15 @@ contains
 !! SOURCE
 
  subroutine berrycurv_sp(barmmom,bc_sp,bc_ss,blkval,iblok,invbarmagsus,&
-& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred)
+& jblok,mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol,qphon,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,jblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
+ real(dp),intent(in) :: omega
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmmom(ndim,(natom+2)*3)
  complex(dpc),intent(in) :: bc_ss(ndim,ndim)
@@ -1862,6 +1892,38 @@ contains
    call wrtout([ab_out,std_out], '   ')
  end if
 
+!For linear interpolation of Hessians substitute sp  Berry curvature 
+!into the ddb_lw object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   do ipert2=1,natom+2
+     do idir2=1,3
+       icol=idir2+(ipert2-1)*3
+       indexat2(icol)=ipert2
+       indexdir2(icol)=idir2
+  
+       ipert1_red= 0
+       do iat1= mpatpol(1), mpatpol(2)
+         ipert1= natom + 11 + iat1
+         ipert1_red= ipert1_red + 1
+         idir1_red= 0
+         do idir1= 1, 3
+           if (mpdir(idir1)==0) cycle
+           idir1_red= idir1_red + 1
+           irow=idir1_red+(ipert1_red-1)*nmdir
+           
+           if (iblok /=0 .and. ipert2 <= natom) then
+           blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & real(bc_sp(irow,icol))
+           blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & aimag(bc_sp(irow,icol))
+           end if
+  
+         end do
+       end do
+     end do
+   end do
+ end if
+
  end subroutine berrycurv_sp
 !!***
 
@@ -1892,14 +1954,15 @@ contains
 !! SOURCE
 
  subroutine berrycurv_pp(barmagsus,bc_barmagsus,bc_sp,blkval,iblok,&
-& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,prtvol,qphon,xred,zfield)
+& mpatpol,mpdir,mpert,natom,nblok,ndim,nmdir,omega,omegaflag,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,prtvol
+ integer,intent(in) :: iblok,mpert,natom,nblok,ndim,nmdir,omegaflag,prtvol
+ real(dp),intent(in) :: omega
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
+ real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,3,mpert,nblok)
  real(dp),intent(in) :: qphon(3),xred(3,natom)
  complex(dpc),intent(in) :: barmagsus(ndim,ndim)
  complex(dpc),intent(in) :: bc_barmagsus(ndim,ndim)
@@ -1986,6 +2049,26 @@ contains
      call wrtout([ab_out,std_out], '   ')
    end do
  end do 
+
+!For linear interpolation of Hessians substitute pp Berry curvature 
+!into the ddb_lw object.
+ if (omegaflag==2.and.abs(omega)<tol12) then
+   do ipert2= 1, natom
+     do idir2= 1, 3
+       icol=( ipert2-1)*3 + idir2
+       do ipert1= 1, natom
+         do idir1= 1, 3
+           irow=( ipert1-1)*3 + idir1
+           blkval(1,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & real(bc_pp(irow,icol))
+           blkval(2,idir1,ipert1,idir2,ipert2,idir3,ipert3,iblok)= &
+         & aimag(bc_pp(irow,icol))
+         end do
+       end do
+     end do
+   end do 
+
+ end if
 
  end subroutine berrycurv_pp
 
@@ -2171,8 +2254,9 @@ contains
        end if
      end do 
    else if (omegaflag==2) then
-     call lineal_omega_interp(w0hessian,w0berry,mpert,ddb%msize, &
-   & natom,ndim,int_barddb,omega(iw))
+     call lineal_omega_interp(w0hessian,w0berry,eta,ifcmat_fm, &
+   & invmagsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
+   & natom,ndim,nmdir,int_barddb,omega(iw),zfield)
    end if
 
 !To deactivate interpolation
@@ -2759,7 +2843,8 @@ contains
 
 #include "abi_common.h"
 
-subroutine lineal_omega_interp(blkval,blkval_lw,mpert,msize,natom,ndim,int_barddb,omega)
+subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
+& invmagsus,mpatpol,mpdir,mpert,msize,natom,ndim,nmdir,int_barddb,omega,zfield)
 
  use defs_basis
  use m_errors
@@ -2769,16 +2854,21 @@ subroutine lineal_omega_interp(blkval,blkval_lw,mpert,msize,natom,ndim,int_bardd
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in)  :: mpert,msize,natom,ndim 
- real(dp), intent(in) :: omega
+ integer, intent(in)  :: mpert,msize,natom,ndim,nmdir 
+ real(dp), intent(in) :: eta,omega
 !arrays
- real(dp),intent(in) :: blkval(2,3,mpert,3,mpert)
- real(dp),intent(in) :: blkval_lw(2,3,mpert,3,mpert,3,mpert)
+ integer,intent(in) :: mpatpol(2),mpdir(3)
+ real(dp), intent(in) :: blkval(2,3,mpert,3,mpert)
+ real(dp), intent(in) :: blkval_lw(2,3,mpert,3,mpert,3,mpert)
  real(dp), intent(out) :: int_barddb(2,msize,1)
+ complex(dpc), intent(out) :: ifcmat_fm(3*natom,3*natom)
+ complex(dpc), intent(out) :: invmagsus(ndim,ndim)
+ complex(dpc), intent(out) :: zfield(ndim,(natom+2)*3)
  
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3
+ integer :: iat1,iat2,icol,irow,idir1_red,idir2_red,ipert1_red,ipert2_red
  real(dp) :: gsign
 !arrays
  real(dp), allocatable :: lhess(:,:,:,:,:)
@@ -2797,14 +2887,60 @@ subroutine lineal_omega_interp(blkval,blkval_lw,mpert,msize,natom,ndim,int_bardd
          gsign= -one
        end if
        do idir1= 1, 3
-         lhess(:,idir1,ipert1,idir2,ipert2)= blkval(:,idir1,ipert1,idir2,ipert2) + &
-       & gsign*omega*blkval_lw(:,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+         lhess(1,idir1,ipert1,idir2,ipert2)= blkval(1,idir1,ipert1,idir2,ipert2) + &
+       & gsign*(omega*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) - &
+       & eta*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3))
+         lhess(2,idir1,ipert1,idir2,ipert2)= blkval(2,idir1,ipert1,idir2,ipert2) + &
+       & gsign*(omega*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) + &
+       & eta*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3))
        end do
      end do
    end do
  end do
  int_barddb(1,:,1)= reshape( lhess(1,:,:,:,:), shape = (/msize/) )
  int_barddb(2,:,1)= reshape( lhess(2,:,:,:,:), shape = (/msize/) )
+
+!Store the relevant matrices for the magnon-phonon Green's function
+!First phonon-phonon
+ do ipert2= 1, natom
+   do idir2= 1, 3
+     icol=( ipert2-1)*3 + idir2
+     do ipert1= 1, natom
+       do idir1= 1, 3
+         irow=( ipert1-1)*3 + idir1
+         ifcmat_fm(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
+       & lhess(2,idir1,ipert1,idir2,ipert2),16)
+       end do
+     end do
+   end do
+ end do 
+
+!Then, spin-spin
+ ipert2_red= 0
+ invmagsus=cmplx(zero,zero,16)
+ do iat2= mpatpol(1), mpatpol(2)
+   ipert2= natom + 11 + iat2
+   ipert2_red= ipert2_red + 1
+   idir2_red= 0
+   do idir2= 1, 3
+     if (mpdir(idir2)==0) cycle
+     idir2_red= idir2_red + 1
+     icol=idir2_red+(ipert2_red-1)*nmdir
+     ipert1_red=0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red=idir1_red+1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         invmagsus(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
+       & lhess(2,idir1,ipert1,idir2,ipert2),16)
+       end do
+     end do
+   end do
+ end do
 
  ABI_FREE(lhess)
 
