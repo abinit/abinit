@@ -1031,11 +1031,17 @@ has_vectornd = (with_vectornd .EQ. 1)
        ider=0;idir0=0
        dimffnl=0;if (ipert1<=dtset%natom) dimffnl=1
        ABI_MALLOC(ffnlk,(npw_k,dimffnl,psps%lmnmax,psps%ntypat))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:ffnlk) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        if (ipert1<=dtset%natom) then
          call mkffnl(psps%dimekb,dimffnl,psps%ekb,ffnlk,psps%ffspl,gs_hamkq%gmet,gs_hamkq%gprimd,&
 &         ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,&
 &         psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,usepaw,&
 &         psps%useylm,ylm_k,ylmgr_dum)
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET UPDATE TO(ffnlk) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        end if
 
 !      Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
@@ -1052,6 +1058,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 &       ider,idir0,psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,&
 &       psps%mqgrid_ff,nkpg1,npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,usepaw,&
 &       psps%useylm,ylm1_k,ylmgr1_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ffnl1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !      Extract non-local form factors for H^(j1)
        if (ipert1<=dtset%natom) then
@@ -1060,18 +1069,27 @@ has_vectornd = (with_vectornd .EQ. 1)
        else
          dimffnl1_idir1=1+ider
          ABI_MALLOC(ffnl1_idir1,(npw1_k,dimffnl1_idir1,psps%lmnmax,psps%ntypat))
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
          ii=1;if (psps%useylm==0) ii=1+ider
          do itypat=1,psps%ntypat
            do ilmn=1,psps%lmnmax
              ffnl1_idir1(1:npw1_k,1:ii,ilmn,itypat)=ffnl1(1:npw1_k,1:ii,ilmn,itypat)
            end do
          end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(to:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        end if
 
 !      Load k-dependent part in the Hamiltonian datastructure
        ABI_MALLOC(ph3d,(2,npw_k,gs_hamkq%matblk))
        call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &       ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        if (size(ffnlk)>0) then
          call gs_hamkq%load_k(ffnl_k=ffnlk)
        else
@@ -1192,6 +1210,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                  ffnl1_idir1(1:npw1_k,2,ilmn,itypat)=ffnl1(1:npw1_k,1+istr1,ilmn,itypat)
                end do
              end do
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET UPDATE TO(ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
            end if
 
 
@@ -1984,6 +2005,9 @@ has_vectornd = (with_vectornd .EQ. 1)
        end if
        ABI_FREE(dkinpw)
        ABI_FREE(kinpw1)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:ffnlk,ffnl1,ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(ph3d)
        if (allocated(ph3d1)) then
          ABI_FREE(ph3d1)
@@ -1991,6 +2015,9 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(ffnlk)
        ABI_FREE(ffnl1)
        if (ipert1>dtset%natom)  then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET EXIT DATA MAP(delete:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
          ABI_FREE(ffnl1_idir1)
        end if
        nullify(ffnl1_idir1)
