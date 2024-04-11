@@ -705,7 +705,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 
 if (dtset%usefock == 1 .and. .not. use_diago_fock) then
        call wrtout(units, "Reading ugb datatype from WFK file")
-       ABI_CHECK(.not. string_in(dtset%gwr_task, "CC4S_FULL"), "CC4S_FULL cannot be used, please specify nband")
+       ABI_CHECK(.not. string_in(dtset%gwr_task, "CC4S_FULL"), "CC4S_FULL cannot be used with Fock, please specify nband")
        call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, dtfil, cryst, eig_k, comm)
 
 else
