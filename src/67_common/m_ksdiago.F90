@@ -1621,6 +1621,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
  ABI_CHECK_IEQ(istwf_k, wfk_hdr%istwfk(ik_ibz), "different istwfk_k")
 
+ ! Init scalapack matrix
  call ugb%processor%init(comm, grid_dims=[1, nprocs])
  ABI_CHECK(block_dist_1d(nband_k, nprocs, col_bsize, msg), msg)
  call ugb%mat%init(npwsp, nband_k, ugb%processor, istwf_k, size_blocs=[-1, col_bsize])
@@ -1649,7 +1650,7 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
 
    call xmpi_bcast(ugb%kg_k, master, comm, ierr)
 
-   ! Create communicator with master and all procs requiring this (k,s) block (color == 1)
+   ! Create communicator with master and all procs requiring this set of bands block (color == 1)
    color = 0
    do band=bstart, bstop
      call ugb%mat%glob2loc(1, band, iloc, il_b, have_band)
