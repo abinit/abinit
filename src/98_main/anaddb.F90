@@ -259,6 +259,7 @@ program anaddb
    & inp%magpen, inp%mpatpol, inp%mpdir, mpert, inp%mpopt, natom, inp%nomega, ntypat, & 
    & inp%omegaflag, inp%omegamax, inp%omegamin, inp%prtvol, 1, Crystal%typat, Crystal%ucvol, Crystal%xred)
    end if
+
    ABI_FREE(delta_asrw0)
    ABI_FREE(delta_asrw0_fm)
  end if

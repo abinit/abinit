@@ -285,6 +285,7 @@ contains
 
  end do
 
+ ! BERRY CURVATURES
  if (timdisp==1) then
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
@@ -298,6 +299,8 @@ contains
    rffreq(:)=0
    nblok=ddb_lw%nblok
    do kblok=1,nblok
+
+     if (ddb_lw%typ(kblok)/=33) cycle
 
      !Berry curvature of the penalized spin-susceptibility
      qphon=zero
@@ -335,6 +338,7 @@ contains
      !Berry curvature of the induced Zeeman fields
 
      !First atomic-displacement
+     iblok=0
      rfphon(2)=1
      rfmagn(:)=0
      if (magpen<zero) then
@@ -1808,6 +1812,7 @@ contains
 
 ! *********************************************************************
 
+
 !Extract the berry curvature of the penalized moments
  bc_barsp=(zero,zero)
  ipert3= natom + 9
@@ -2144,7 +2149,6 @@ contains
  
 ! *********************************************************************
 
-
 !TMP: Complete magnon basis
  magbasis(1,:)=0.5d0*(/ure,uim,ure,uim/)
  magbasis(2,:)=0.5d0*(/ure,-uim,ure,-uim/)
@@ -2262,21 +2266,28 @@ contains
 !To deactivate interpolation
 !   int_barddb(:,:,1)=ddb%val(:,:,1)
 
-   !Calculate the local spin susceptibilities
-   call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
- & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol)
-
-   !Calculate the magnetic moments
-   call magmom(barmmom(:,:,iw),int_barddb,invbarmagsus(:,:,iw),invhmat(:,:,iw),1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),&
- & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
-
-   !Calculate the dielectric susceptibility
-   call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,prtopt,prtvol,ucvol,zfield)
-
-   !Calculate the interatomic force constants
-   call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
+   if (omegaflag==1) then
+     !Calculate the local spin susceptibilities
+     call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
+   & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol)
+  
+     !Calculate the magnetic moments
+     call magmom(barmmom(:,:,iw),int_barddb,invbarmagsus(:,:,iw),invhmat(:,:,iw),1,1,magpen,magsus(:,:,iw),mmom(:,:,iw),&
+   & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
+  
+     !Calculate the dielectric susceptibility
+     call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
+   & natom,1,ndim,prtopt,prtvol,ucvol,zfield)
+  
+     !Calculate the interatomic force constants
+     call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
+   & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
+  
+     !Calculate the macroscopic magnetic susceptibility
+     call mp_macmagsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),&
+   & macmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
+   & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
+   end if
 
    !Apply ASR
    if (omega(1) < tol12) then
@@ -2287,38 +2298,35 @@ contains
      call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
    end if
 
-   !Calculate the macroscopic magnetic susceptibility
-   call mp_macmagsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),&
- & macmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
- & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
-
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
    call phonon_green(amu,eigvec,eta,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
  & magphongreen,magphonspec(iw),mode_magphonspec(:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,omega(iw),&
  & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield)
 
-!   !Calculate the mode-resolved magnetic moments
-!   call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
+   if (omegaflag==1) then
+!     !Calculate the mode-resolved magnetic moments
+!     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
-!   !Calculate the Born effective charges
-   call mp_zeff(barmagsus(:,:,iw),int_barddb,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
- & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield)
+!     !Calculate the Born effective charges
+     call mp_zeff(barmagsus(:,:,iw),int_barddb,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
+   & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield)
 
-   !Calculate the mode-resolved Born effective charges
-!   call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
-! & typat,zeff(:,:,iw),zeffspec(:,iw))
+     !Calculate the mode-resolved Born effective charges
+!     call mode_zeff(amu,eigvec,mode_phonspec(:,iw),modezeff(:,:,iw),natom,ntypat,&
+!   & typat,zeff(:,:,iw),zeffspec(:,iw))
 
-   !Calculate here the phonons contribution to the spin susceptibility
-   lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(mmom(:,1:natom*3,iw)))))
+     !Calculate here the phonons contribution to the spin susceptibility
+     lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(mmom(:,1:natom*3,iw)))))
 
-   !Calclate here the lattice-mediated magnetic moments induced by an electric field
-   lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
+     !Calclate here the lattice-mediated magnetic moments induced by an electric field
+     lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
 
-   !Convert magnetic susceptibilities to the magnon basis
-!   work(:,:)=magsus(:,:,iw)
-!   magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
-!   work(:,:)=lm_magsus(:,:,iw)
-!   lm_magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
+     !Convert magnetic susceptibilities to the magnon basis
+!     work(:,:)=magsus(:,:,iw)
+!     magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
+!     work(:,:)=lm_magsus(:,:,iw)
+!     lm_magsus(:,:,iw)=matmul(transpose(conjg(magbasis)),matmul(work,magbasis))
+   end if
  end do
 
 !Calculate the norm of the phonon spectral function
@@ -2869,7 +2877,7 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
 !scalars
  integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3
  integer :: iat1,iat2,icol,irow,idir1_red,idir2_red,ipert1_red,ipert2_red
- real(dp) :: gsign
+ real(dp) :: dissip
 !arrays
  real(dp), allocatable :: lhess(:,:,:,:,:)
  
@@ -2881,18 +2889,18 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
  do ipert2= 1, mpert
    do idir2= 1, 3
      do ipert1= 1, mpert
-       if (ipert1 <= natom .and. ipert2 <= natom) then
-         gsign= one
-       else
-         gsign= -one
-       end if
        do idir1= 1, 3
+!         dissip=one
+!         if (ipert1>=natom+11+1.and.ipert1<=2*natom.and.ipert1==ipert2.and.idir1==idir2) dissip=eta**4
+         dissip=eta**2
          lhess(1,idir1,ipert1,idir2,ipert2)= blkval(1,idir1,ipert1,idir2,ipert2) + &
-       & gsign*(omega*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) - &
-       & eta*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3))
+       & omega*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) - &
+       & dissip*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3)
          lhess(2,idir1,ipert1,idir2,ipert2)= blkval(2,idir1,ipert1,idir2,ipert2) + &
-       & gsign*(omega*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) + &
-       & eta*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3))
+       & omega*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) + &
+       & dissip*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+!         lhess(:,idir1,ipert1,idir2,ipert2)= blkval(:,idir1,ipert1,idir2,ipert2) + &
+!       & omega*blkval_lw(:,idir1,ipert1,idir2,ipert2,idir3,ipert3) 
        end do
      end do
    end do
@@ -2936,6 +2944,26 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
          idir1_red=idir1_red+1
          irow=idir1_red+(ipert1_red-1)*nmdir
          invmagsus(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
+       & lhess(2,idir1,ipert1,idir2,ipert2),16)
+       end do
+     end do
+   end do
+ end do
+
+!Finally, the spin-phonon
+ do ipert2=1,natom
+   do idir2=1,3
+     icol=idir2+(ipert2-1)*3
+     ipert1_red= 0
+     do iat1= mpatpol(1), mpatpol(2)
+       ipert1= natom + 11 + iat1
+       ipert1_red= ipert1_red + 1
+       idir1_red= 0
+       do idir1= 1, 3
+         if (mpdir(idir1)==0) cycle
+         idir1_red= idir1_red + 1
+         irow=idir1_red+(ipert1_red-1)*nmdir
+         zfield(irow,icol)= cmplx(lhess(1,idir1,ipert1,idir2,ipert2), &
        & lhess(2,idir1,ipert1,idir2,ipert2),16)
        end do
      end do
