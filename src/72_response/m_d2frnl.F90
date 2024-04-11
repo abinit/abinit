@@ -602,6 +602,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &     gmet,gprimd,ider,idir_ffnl,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
 &     psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,&
 &     psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ffnl) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !    For piezoelectric tensor need additional ffnl derivatives
      if(need_piezofr)then
@@ -614,12 +617,18 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &         kpoint,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,&
 &         psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_k)
        end do
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(to:ffnl_str) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_MALLOC(ph3d,(2,npw_k,gs_ham%matblk))
      call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(to:ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
 
 
      ! Setup gemm_nonlop
@@ -919,6 +928,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ikg=ikg+npw_k
      end if
 
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET EXIT DATA MAP(delete:ffnl,ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
      ABI_FREE(ffnl)
      ABI_FREE(kpg_k)
      ABI_FREE(ph3d)
@@ -930,6 +942,9 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        ABI_FREE(svectout)
      end if
      if (need_piezofr) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:ffnl_str) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
        ABI_FREE(ffnl_str)
      end if
      if (need_efmas) then
