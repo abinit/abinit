@@ -123,8 +123,9 @@ contains
 
     !Local variables-------------------------------
     !scalars
-    integer :: INFO,LDA,LWORK,N,iatom,my_comm_atom
+    integer :: ii,INFO,LDA,LWORK,N,iatom,my_comm_atom
     logical :: my_atmtab_allocated,paral_atom
+    real(dp),parameter :: efg_si = 9.7173624292E21 ! convert EFG in au to SI units V/m2
     real(dp) :: cq,eta,vxx,vyy,vzz
     character(len=500) :: message
     !arrays
@@ -196,60 +197,64 @@ contains
           vxx = eigval(3)
           vyy = eigval(2)
        end if
-       if (abs(quadmom(typat(iatom))) > tol8 ) then ! only relevant when quadmom > 0 for a given atom
-          !    cq = (eQ)*Vzz/h, where Q is the electric quadrupole moment and Vzz is the largest in magnitude
-          !    principal component of the EFG tensor. Q is input in quadmom in barns, and Vzz is computed in atomic
-          !    units. The factor 2349647.81 Ha^{-1}Bohr^2 fm^{-2} sec^-1 converts from atomic units to frequency (see
-          !    http://www.ismar.org/ISMARpedia/index.php/Nuclear_Quadrupole_Resonance for discussion); we divide by
-          !    10^6 to convert to MHz from Hz and multiply by 100 to convert from fm^2 to Barns.
-          cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
-          if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
-             eta = abs(vxx - vyy)/abs(vzz)
-          else
-             eta=zero
-          end if
+       ! Cq = (eq)*(eQ)/h where eq is the efg vzz; Q is the nuclear quad moment in barns (10E-28 m2)
+       ! multiply vzz (in au) by efg_si to get volts/m^2
+       ! multiply quadmom by e_Cb (the electric charge unit) and 1D-28 to get eQ in SI units
+       ! divide by Plancks Constant to get freq
+       ! multiply by 1D-6 to get MHz
+       cq = 1.0D-6*vzz*efg_si*quadmom(typat(iatom))*e_Cb*1.0D-28/6.62607015D-34
+       if (abs(cq) > tol8) then
+         eta = abs(vxx-vyy)/abs(vzz)
        else
-          cq =zero
-          eta =zero
+         cq = zero
+         eta = zero ! if Cq is small then eta is meaningless
        end if
-       !  we always write Cq and eta, these are the NMR observables
-       write(message,'(a,i3,a,i3,a,f13.6,a,f13.6)') ' Atom ',iatom,', typat ',typat(iatom),': Cq = ',cq,' MHz     eta = ',eta
+
+       write(message,'(a,a,i4,a,i4)')ch10,'   atom : ',iatom,'   typat : ',typat(iatom)
        call wrtout(ab_out,message,'COLL')
-       if (nucefg > 1) then ! print detailed results on component EFG's
-          write(message,'(a,a,f13.6,a,a,3f13.6)')ch10,'      efg eigval : ',eigval(1),ch10,&
-               &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      efg eigval : ',eigval(2),ch10,&
-               &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      efg eigval : ',eigval(3),ch10,&
-               &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,3f13.6)')ch10,'      total efg : ',efg(1,1,iatom),efg(1,2,iatom),efg(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      total efg : ',efg(2,1,iatom),efg(2,2,iatom),efg(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      total efg : ',efg(3,1,iatom),efg(3,2,iatom),efg(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,3f13.6)')ch10,'      efg_el : ',efg_el(1,1,iatom),efg_el(1,2,iatom),efg_el(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_el : ',efg_el(2,1,iatom),efg_el(2,2,iatom),efg_el(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_el : ',efg_el(3,1,iatom),efg_el(3,2,iatom),efg_el(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(1,1,iatom),efg_ion(1,2,iatom),efg_ion(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(2,1,iatom),efg_ion(2,2,iatom),efg_ion(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_ion : ',efg_ion(3,1,iatom),efg_ion(3,2,iatom),efg_ion(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(1,1,iatom),efg_paw(1,2,iatom),efg_paw(1,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(2,1,iatom),efg_paw(2,2,iatom),efg_paw(2,3,iatom)
-          call wrtout(ab_out,message,'COLL')
-          write(message,'(a,3f13.6,a)')'      efg_paw : ',efg_paw(3,1,iatom),efg_paw(3,2,iatom),efg_paw(3,3,iatom),ch10
-          call wrtout(ab_out,message,'COLL')
+       if (nucefg > 1) then
+         write(message,'(2a,f9.4,a,f9.4,a,f9.4)') ch10,'   Nuclear quad. mom. (barns) : ',quadmom(typat(iatom)),&
+           & '   Cq (MHz) : ',cq,'   eta : ',eta
+         call wrtout(ab_out,message,'COLL')
        end if
+      
+       ! for printing and test portability, it's better to simply set very small eigvals to zero 
+       do ii=1,3 
+         if (abs(eigval(ii))<tol8) eigval(ii)=zero
+       end do 
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(2),' ; (V/m^2) : ',eigval(2)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      efg eigval (au) : ',eigval(3),' ; (V/m^2) : ',eigval(3)*efg_si,ch10,&
+            &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,a,3f13.6)')ch10,'      total efg : ',efg(1,1,iatom),efg(1,2,iatom),efg(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      total efg : ',efg(2,1,iatom),efg(2,2,iatom),efg(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      total efg : ',efg(3,1,iatom),efg(3,2,iatom),efg(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,a,3f13.6)')ch10,'      efg_el : ',efg_el(1,1,iatom),efg_el(1,2,iatom),efg_el(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_el : ',efg_el(2,1,iatom),efg_el(2,2,iatom),efg_el(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_el : ',efg_el(3,1,iatom),efg_el(3,2,iatom),efg_el(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(1,1,iatom),efg_ion(1,2,iatom),efg_ion(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_ion : ',efg_ion(2,1,iatom),efg_ion(2,2,iatom),efg_ion(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_ion : ',efg_ion(3,1,iatom),efg_ion(3,2,iatom),efg_ion(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(1,1,iatom),efg_paw(1,2,iatom),efg_paw(1,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6)')'      efg_paw : ',efg_paw(2,1,iatom),efg_paw(2,2,iatom),efg_paw(2,3,iatom)
+       call wrtout(ab_out,message,'COLL')
+       write(message,'(a,3f13.6,a)')'      efg_paw : ',efg_paw(3,1,iatom),efg_paw(3,2,iatom),efg_paw(3,3,iatom),ch10
+       call wrtout(ab_out,message,'COLL')
        if (nucefg > 2) then ! write output of pure pointcharge calculation
           matr(:,:) = efg_point_charge(:,:,iatom)
           call dsyev('V','U',N,matr,LDA,eigval,work,LWORK,INFO) ! get eigenvalues and eigenvectors
@@ -263,29 +268,21 @@ contains
              vxx = eigval(3)
              vyy = eigval(2)
           end if
-          if (abs(quadmom(typat(iatom))) > tol8 ) then ! only relevant when quadmom > 0 for a given atom
-             !      cq = e2Qq/h, where Vzz = eq and quadmom = Q; the other factors convert from atomic units to MHz
-             cq = vzz*quadmom(typat(iatom))*2349647.81/1.0E4
-             if(abs(cq) > tol6 )then ! if Cq is non-zero, eta is meaningful, otherwise it s numerical noise
-                eta = abs(vxx - vyy)/abs(vzz)
-             else
-                eta=zero
-             end if
+          cq = 1.0D-6*vzz*efg_si*quadmom(typat(iatom))*e_Cb*1.0D-28/6.62607015D-34
+          if (abs(cq) > tol8) then
+            eta = abs(vxx-vyy)/abs(vzz)
           else
-             cq =zero
-             eta =zero
+            eta = zero ! if Cq is small then eta is meaningless
           end if
-          !    we always write Cq and eta, these are the NMR observables
-          write(message,'(a,i3,a,i3,a,f13.6,a,f13.6)') ' Atom ',iatom,', typat ',typat(iatom),&
-               &     ': Point charge Cq = ',cq,' MHz     eta = ',eta
+          write(message,'(a,f9.4,a,f9.4)') '  Point charge Cq = ',cq,' MHz     eta = ',eta
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,a,f13.6,a,a,3f13.6)')ch10,'      point charge efg eigval : ',eigval(1),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(1),' ; (V/m^2) : ',eigval(1)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,1),matr(2,1),matr(3,1)
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      point charge efg eigval : ',eigval(2),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(2),' ; (V/m^2) : ',eigval(2)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,2),matr(2,2),matr(3,2)
           call wrtout(ab_out,message,'COLL')
-          write(message,'(a,f13.6,a,a,3f13.6)')'      point charge efg eigval : ',eigval(3),ch10,&
+          write(message,'(2a,f13.6,a,es16.8,a,a,3f13.6)')ch10,'      point charge eigval (au) : ',eigval(3),' ; (V/m^2) : ',eigval(3)*efg_si,ch10,&
                &     '-         eigvec : ',matr(1,3),matr(2,3),matr(3,3)
           call wrtout(ab_out,message,'COLL')
           write(message,'(a,a,3f13.6)')ch10,'      point charge efg : ',efg_point_charge(1,1,iatom),&
