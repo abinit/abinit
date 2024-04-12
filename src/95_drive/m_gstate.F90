@@ -442,7 +442,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
+   call init_gemm_nonlop(dtset%gpu_option)
  end if
  gemm_nonlop_is_distributed = .false.
  if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
@@ -1760,7 +1760,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
 !Clean gemm_nonlop work spaces
  if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
+   call destroy_gemm_nonlop(dtset%gpu_option)
    gemm_nonlop_use_gemm = .false.
  end if
 

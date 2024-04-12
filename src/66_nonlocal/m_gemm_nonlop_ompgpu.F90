@@ -59,6 +59,7 @@ module m_gemm_nonlop_ompgpu
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
  use m_gemm_nonlop
+ use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
 
 #if defined HAVE_MPI2
  use mpi
@@ -178,89 +179,6 @@ contains
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
 #ifdef HAVE_OPENMP_OFFLOAD
 
- subroutine refresh_gemm_nonlop_kpt_ompgpu(ikpt)
-  integer,intent(in) :: ikpt
-
-  character(len=500) :: msg
-
-! *************************************************************************
-
-  if(current_ikpt_in_gpu == ikpt) then
-    msg="GPU nonlop arrays are already initialized for K-Point. Redundant call"
-    ABI_ERROR(msg)
-  end if
-  if(gemm_nonlop_kpt(ikpt)%nprojs == -1) then
-    msg="Was asked to work on a K-point index for which arrays aren't built.\n" // &
-&    "Requested K-point index was %d.\n" // &
-&    "Please make sure that make_gemm_nonlop is called for this K-point before reaching this routine."
-    ABI_ERROR(msg)
-  end if
-
-  call free_gemm_nonlop_kpt_ompgpu
-
-  gpu_nonlop_current_ikpt => gemm_nonlop_kpt(ikpt)
-  if(allocated(gpu_nonlop_current_ikpt%projs)) then
-    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs)
-  else
-    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs_r)
-    !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%projs_i)
-  end if
-  if(gpu_nonlop_current_ikpt%ngrads /= -1) then
-    if(allocated(gpu_nonlop_current_ikpt%dprojs)) then
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs)
-    else
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs_i)
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%dprojs_r)
-    end if
-  end if
-  if(gpu_nonlop_current_ikpt%ngrads2 /= -1) then
-    if(allocated(gpu_nonlop_current_ikpt%d2projs)) then
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%d2projs)
-    else
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%d2projs_i)
-      !$OMP TARGET ENTER DATA MAP(to:gpu_nonlop_current_ikpt%d2projs_r)
-    end if
-  end if
-
-  current_ikpt_in_gpu=ikpt
-
- end subroutine refresh_gemm_nonlop_kpt_ompgpu
-
-!----------------------------------------------------------------------
-
- subroutine free_gemm_nonlop_kpt_ompgpu()
-
-  if(current_ikpt_in_gpu == -1) return
-
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs)
-  end if
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%projs_r))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%projs_r)
-  end if
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs)
-  end if
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%dprojs_i))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs_r)
-  end if
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%d2projs))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%dprojs)
-  end if
-  if(xomp_target_is_present(c_loc(gpu_nonlop_current_ikpt%d2projs_i))) then
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%d2projs_i)
-    !$OMP TARGET EXIT DATA MAP(delete:gpu_nonlop_current_ikpt%d2projs_r)
-  end if
-
-  current_ikpt_in_gpu=-1
-  nullify(gpu_nonlop_current_ikpt)
-
- end subroutine free_gemm_nonlop_kpt_ompgpu
-
-!----------------------------------------------------------------------
-
  subroutine alloc_work_buffers(cplex, cplex_fac, ndat, nprojs, ntypat, lmnmax, npw)
 
   integer,intent(in) :: cplex, cplex_fac, ndat, nprojs, ntypat, lmnmax, npw
@@ -372,7 +290,7 @@ contains
 &                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
-&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,&
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,select_k,&
 &                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
@@ -380,7 +298,7 @@ contains
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
-  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k
   integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
@@ -404,7 +322,7 @@ contains
 
   ! locals
   complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt
+  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt, ikin, ikout
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
   integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
   integer :: nnlout_test
@@ -469,15 +387,25 @@ contains
     end if
   end if
 
-  ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+  ikin=1; ikout=1;
+  select case (select_k)
+  case (K_H_K)
+    ikin=1; ikout=1;
+  case (K_H_KPRIME)
+    ikin=2; ikout=1;
+  case (KPRIME_H_K)
+    ikin=1; ikout=2;
+  case (KPRIME_H_KPRIME)
+    ikin=2; ikout=2;
+  end select
   cplex=2;if (istwf_k>1) cplex=1
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
-  ngrads = gemm_nonlop_kpt(ikpt)%ngrads
-  ngrads2 = gemm_nonlop_kpt(ikpt)%ngrads2
-  nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_blk
+  ngrads = gemm_nonlop_kpt(ikout)%ngrads
+  ngrads2 = gemm_nonlop_kpt(ikout)%ngrads2
+  nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
   ! nonlop calls, from computing on all atoms to a select one for
@@ -502,7 +430,7 @@ contains
   if(gemm_nonlop_is_distributed) then
     rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
     is_last = (rank==nprocs-1)
-    if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikpt)%nprojs_last_blk
+    if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_last_blk
   end if
 
   if(choice==1 .or. choice==0 .or. choice==7) ngrads=0
@@ -558,35 +486,6 @@ contains
     end if
   end if
   !$OMP TARGET UPDATE TO(sij_typ)
-
-  if(current_ikpt_in_gpu /= ikpt) then
-    call refresh_gemm_nonlop_kpt_ompgpu(ikpt)
-  end if
-
-  if(istwf_k==1) then
-    projs_ => gpu_nonlop_current_ikpt%projs(:,:,projs_beg:projs_end)
-    dprojs_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
-    d2projs_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
-    ! Dummy values (undefined behaviour may occur otherwise)
-    projs_r_ => gpu_nonlop_current_ikpt%projs
-    projs_i_ => gpu_nonlop_current_ikpt%projs
-    dprojs_r_ => gpu_nonlop_current_ikpt%dprojs
-    dprojs_i_ => gpu_nonlop_current_ikpt%dprojs
-    d2projs_r_ => gpu_nonlop_current_ikpt%d2projs
-    d2projs_i_ => gpu_nonlop_current_ikpt%d2projs
-  end if
-  if(istwf_k==2) then
-    projs_r_ => gpu_nonlop_current_ikpt%projs_r(:,:,projs_beg:projs_end)
-    projs_i_ => gpu_nonlop_current_ikpt%projs_i(:,:,projs_beg:projs_end)
-    dprojs_r_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
-    dprojs_i_ => gpu_nonlop_current_ikpt%dprojs(:,:,dprojs_beg:dprojs_end)
-    d2projs_r_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
-    d2projs_i_ => gpu_nonlop_current_ikpt%d2projs(:,:,d2projs_beg:d2projs_end)
-    ! Dummy values (undefined behaviour may occur otherwise)
-    projs_ => gpu_nonlop_current_ikpt%projs_r
-    dprojs_ => gpu_nonlop_current_ikpt%dprojs_r
-    d2projs_ => gpu_nonlop_current_ikpt%d2projs_r
-  end if
 
   ndgxdt = ngrads
   nd2gxdt = ngrads2
@@ -656,7 +555,7 @@ contains
 #endif
 
   if(gemm_nonlop_is_distributed) then
-    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ngrads,1)*gemm_nonlop_kpt(ikpt)%nprojs_last_blk))
+    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ngrads,1)*gemm_nonlop_kpt(ikout)%nprojs_last_blk))
     !$OMP TARGET ENTER DATA MAP(alloc:projs_recv)
   end if
 
@@ -764,11 +663,36 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
+    if(istwf_k == 1) then
+      projs_ => gemm_nonlop_kpt(ikin)%projs(:,:,projs_beg:projs_end)
+      dprojs_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
+      d2projs_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
+      ! Dummy values (undefined behaviour may occur otherwise)
+      projs_r_ => gemm_nonlop_kpt(ikin)%projs
+      projs_i_ => gemm_nonlop_kpt(ikin)%projs
+      dprojs_r_ => gemm_nonlop_kpt(ikin)%dprojs
+      dprojs_i_ => gemm_nonlop_kpt(ikin)%dprojs
+      d2projs_r_ => gemm_nonlop_kpt(ikin)%d2projs
+      d2projs_i_ => gemm_nonlop_kpt(ikin)%d2projs
+    end if
+    if(istwf_k == 2) then
+      projs_r_ => gemm_nonlop_kpt(ikin)%projs_r(:,:,projs_beg:projs_end)
+      projs_i_ => gemm_nonlop_kpt(ikin)%projs_i(:,:,projs_beg:projs_end)
+      dprojs_r_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
+      dprojs_i_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
+      d2projs_r_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
+      d2projs_i_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
+      ! Dummy values (undefined behaviour may occur otherwise)
+      projs_ => gemm_nonlop_kpt(ikin)%projs_r
+      dprojs_ => gemm_nonlop_kpt(ikin)%dprojs_r
+      d2projs_ => gemm_nonlop_kpt(ikin)%d2projs_r
+    end if
+
     call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2projections,dprojections,projections,&
     &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
     &       npwin,nspinor,signs,ndat,rank,&
     &       cpopt,nprocs,&
-    &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+    &       nprojs,gemm_nonlop_kpt(ikin)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikin)%nprojs_last_blk,&
     &       vectin,projs_,dprojs_,d2projs_,&
     &       projs_r_,projs_i_,&
     &       dprojs_r_,dprojs_i_,&
@@ -848,6 +772,32 @@ contains
 
     ! opernlb
     if(signs==2) then
+
+      if(istwf_k == 1) then
+        projs_ => gemm_nonlop_kpt(ikout)%projs(:,:,projs_beg:projs_end)
+        dprojs_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
+        d2projs_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
+        ! Dummy values (undefined behaviour may occur otherwise)
+        projs_r_ => gemm_nonlop_kpt(ikout)%projs
+        projs_i_ => gemm_nonlop_kpt(ikout)%projs
+        dprojs_r_ => gemm_nonlop_kpt(ikout)%dprojs
+        dprojs_i_ => gemm_nonlop_kpt(ikout)%dprojs
+        d2projs_r_ => gemm_nonlop_kpt(ikout)%d2projs
+        d2projs_i_ => gemm_nonlop_kpt(ikout)%d2projs
+      end if
+      if(istwf_k==2) then
+        projs_r_ => gemm_nonlop_kpt(ikout)%projs_r(:,:,projs_beg:projs_end)
+        projs_i_ => gemm_nonlop_kpt(ikout)%projs_i(:,:,projs_beg:projs_end)
+        dprojs_r_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
+        dprojs_i_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
+        d2projs_r_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
+        d2projs_i_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
+        ! Dummy values (undefined behaviour may occur otherwise)
+        projs_ => gemm_nonlop_kpt(ikout)%projs_r
+        dprojs_ => gemm_nonlop_kpt(ikout)%dprojs_r
+        d2projs_ => gemm_nonlop_kpt(ikout)%d2projs_r
+      end if
+
       call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,&
@@ -855,7 +805,7 @@ contains
       &       idir,istwf_k,mpi_enreg,nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
       &       npwout,nspinor,signs,ndat,rank,&
       &       cpopt,nprocs,paw_opt,&
-      &       nprojs,gemm_nonlop_kpt(ikpt)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikpt)%nprojs_last_blk,&
+      &       nprojs,gemm_nonlop_kpt(ikout)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikout)%nprojs_last_blk,&
       &       vectin_,vectout_,svectout_,&
       &       projs_,&
       &       dprojs_,&
@@ -868,7 +818,7 @@ contains
 
     ! opernld
     if(signs==1) then
-      if(choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55) then
+      if(choice==1 .or. choice==2 .or. choice==3 .or. choice==23 .or. choice==4 .or. choice==54 .or. choice==55) then
         nld_on_gpu = .true.
         call opernld_ylm_allwf(choice,cplex,cplex_fac,ddkk,&
         &       dprojections,vnl_dprojections,s_dprojections,d2projections,&
@@ -879,6 +829,9 @@ contains
       else
         shift=0; dshift=0; d2shift = 0; iatm=1
         nld_on_gpu = .false.
+        !$OMP TARGET UPDATE FROM(dprojections,vnl_dprojections,s_dprojections)
+        !$OMP TARGET UPDATE FROM(d2projections)
+        !$OMP TARGET UPDATE FROM(projections,vnl_projections,s_projections)
         do itypat=1, ntypat
           nlmn=count(indlmn(3,:,itypat)>0)
 
@@ -1126,7 +1079,7 @@ contains
 &                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
 &                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
-&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,&
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,select_k,&
 &                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
@@ -1134,7 +1087,7 @@ contains
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
   integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
-  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k
   integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
