@@ -593,6 +593,7 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
  integer :: bstart_k, nband_k, bstart_kq, nband_kq, ib1, band1, ib2, band2, ii
  logical :: use_adaptive
  real(dp) :: g1, g2, sigma
+ real(dp) :: abc(3)
 
 ! *************************************************************************
 
@@ -610,14 +611,26 @@ subroutine fstab_get_dbldelta_weights(fs, ebands, ik_fs, ik_ibz, ikq_ibz, spin, 
    do ib2=1,nband_k
      band2 = ib2 + bstart_k - 1
      if (use_adaptive) then
-       sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+       !workaround works with both ifort and ifx on oneapi 2024
+       !replace the implicit loop by an explicit one
+       do ii=1,3
+          abc(ii) = abs(dot_product(fs%vk(:, ib2), fs%kmesh_cartvec(:,ii)))
+       end do
+       sigma = max(maxval(abc), fs%min_smear)
        !write(std_out, *)"sigma:", sigma * Ha_eV
      end if
      g2 = gaussian(ebands%eig(band2, ik_ibz, spin) - ebands%fermie, sigma)
      do ib1=1,nband_kq
        band1 = ib1 + bstart_kq - 1
        if (use_adaptive) then
-         sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+         !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+         !replace the implicit loop by an explicit one
+         !workaround works with both ifort and ifx on oneapi 2024
+         do ii=1,3
+           abc(ii) = abs(dot_product(fs%vkq(:, ib1), fs%kmesh_cartvec(:,ii)))
+         end do
+         sigma = max(maxval(abc), fs%min_smear)
        end if
        g1 = gaussian(ebands%eig(band1, ikq_ibz, spin) - ebands%fermie, sigma)
        wtk(ib1, ib2) = (g1 * g2) / fs%nktot
