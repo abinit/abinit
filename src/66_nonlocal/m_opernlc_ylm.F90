@@ -1376,7 +1376,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
       do ispinor=1,nspinor
         do ia=1,nincat
           do ilmn=1,nlmn
-            do mu=1,ndgxdtfac
+            do mu=1,nd2gxdtfac
               d2gxdtfac(1,mu,ilmn,ia,ispinor)=d2gxdtfac(1,mu,ilmn,ia,ispinor)-d2gxdtfac_(2,mu,ilmn,ia,ispinor)
               d2gxdtfac(2,mu,ilmn,ia,ispinor)=d2gxdtfac(2,mu,ilmn,ia,ispinor)+d2gxdtfac_(1,mu,ilmn,ia,ispinor)
             end do
