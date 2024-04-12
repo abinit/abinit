@@ -731,22 +731,22 @@ end if
 
          if (ugb%my_nband > 0) then
            ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
-           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
+           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wrong npw_k")
            call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
            ! Reopen file inside io_comm.
            call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
 
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-           sc_mode = xmpio_collective
+           !sc_mode = xmpio_collective
+           sc_mode = xmpio_single
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
-                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
 
            !NCF_CHECK(nf90_inq_varid(owfk%fh, "reduced_coordinates_of_plane_waves", kg_varid))
            !NCF_CHECK(nf90_put_var(owfk%fh, kg_varid, ugb%kg_k, start=[1,1,ik_ibz], count=[3,ugb%npw_k,1]))
-           !print *, "ugb%kg_k:", ugb%kg_k; stop
            !NCF_CHECK(nf90_sync(owfk%fh))
+           !print *, "ugb%kg_k:", ugb%kg_k; stop
            call owfk%close()
          end if
          call xmpi_comm_free(io_comm)

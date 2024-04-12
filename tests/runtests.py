@@ -155,7 +155,7 @@ def make_abinit(num_threads, touch_patterns=None):
     retcode = os.system("cd %s && make -j%d" % (top, num_threads))
     if retcode == 0 and  platform.system() == "Darwin":
         for binary in ALL_BINARIES:
-            cmd = f"codesign -v --force --deep src/98_main/{binary}"
+            cmd = f"codesign -v --force --deep {top}/src/98_main/{binary}"
             cprint("Executing: %s" % cmd, "yellow")
             os.system(cmd)
 

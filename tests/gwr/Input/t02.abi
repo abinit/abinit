@@ -10,6 +10,7 @@ ndtset      4
 timopt 1
 nsppol      2 spinmagntarget 0.0
 iomode 1
+istwfk *1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1
