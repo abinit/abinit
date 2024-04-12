@@ -1066,7 +1066,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
- complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
+ complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), cwork(:)
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
@@ -1385,27 +1385,27 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  if (my_rank == 0) then
    buf_size = 4
-   call wrtout(units, sjoin(" Writing Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
-   ABI_MALLOC(work, (buf_size))
+   call wrtout(units, sjoin(" Writing norm of Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
+   ABI_MALLOC(cwork, (buf_size))
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
    ierr = 0
    band1_loop: do band1=1, ugb%nband_k
    do band2=1, ugb%nband_k
      ierr = ierr + 1; if (ierr == 6) exit band1_loop
-     !if (ig == 1) work(1) = zero
+     !if (ig == 1) cwork(1) = zero
      offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
-     call MPI_FILE_READ_AT(fh, offset, work, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     call MPI_FILE_READ_AT(fh, offset, cwork, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
      call wrtout(units, sjoin(" For band1:", itoa(band1), ", band2:", itoa(band2)))
-     where (abs(work) < tol8)
-       work = zero
+     where (abs(cwork) < tol8)
+       cwork = zero
      end where
-     write(msg, "(*(1x, es12.5))")work(1:buf_size)
+     write(msg, "(*(1x, es12.5))")abs(cwork(1:buf_size))
      call wrtout(units, msg)
    end do
    end do band1_loop
-   ABI_FREE(work)
+   ABI_FREE(cwork)
  end if
 #endif
 
@@ -1422,24 +1422,24 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 
-   ABI_MALLOC(work, (m_npw))
+   ABI_MALLOC(cwork, (m_npw))
    max_abs_err = zero
    do ig=1, ugb%nband_k**2
      read(test_unt,*) band1, band2, ug12_batch(1:M_,1)
      offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
-     call MPI_FILE_READ_AT(fh, offset, work, m_npw, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     call MPI_FILE_READ_AT(fh, offset, cwork, m_npw, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
 
-     abs_err = maxval(abs(ug12_batch(1:M_,1) - work(1:M_)))
+     abs_err = maxval(abs(ug12_batch(1:M_,1) - cwork(1:M_)))
      max_abs_err = max(max_abs_err, abs_err)
      if (abs_err > zero) write(std_out, *)" For ig:", ig, "/", ugb%nband_k**2, "abs_err", abs_err
-     !write(std_out, *)"1:", ug12_batch(1:M_,1); write(std_out, *)"2:", work(1:M_)
+     !write(std_out, *)"1:", ug12_batch(1:M_,1); write(std_out, *)"2:", cwork(1:M_)
    end do
 
    close(test_unt)
    call MPI_FILE_CLOSE(fh, mpierr)
    ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
-   ABI_FREE(work)
+   ABI_FREE(cwork)
 
    write(std_out,*)" max_abs_err:", max_abs_err
    ABI_CHECK(max_abs_err < tol16, sjoin("max_abs_err:", ftoa(max_abs_err)))
