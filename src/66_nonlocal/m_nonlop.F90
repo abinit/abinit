@@ -574,7 +574,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  use_gemm_nonlop=.false.
  if (gemm_nonlop_use_gemm) then
-   use_gemm_nonlop=gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%nprojs>0
+   use_gemm_nonlop=.true.
    if(signs==2) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. &
 &      ( paw_opt /= 2 .and. &
@@ -585,8 +585,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if(signs==1) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
        ! Forces and stress (forstr)
-&      ( ((choice >= 1 .and. choice <= 3) .or. choice == 23) .and. &
-&        gemm_nonlop_kpt(gemm_nonlop_ikpt_this_proc_being_treated)%ngrads>0 ) .or. &
+&      ( ((choice >= 1 .and. choice <= 3) .or. choice == 23) ) .or. &
        ! Rho ij
 &      choice == 0  .or.&
        ( (choice == 54 .or. choice == 55 .or. choice == 4) ) )
@@ -721,10 +720,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  if(use_gemm_nonlop) then
 
-   call make_gemm_nonlop(gemm_nonlop_ikpt_this_proc_being_treated,signs,choice,npwout,&
+   call make_gemm_nonlop(gemm_nonlop_ikpt_this_proc_being_treated,signs,choice,hamk%npw_k,hamk%npw_kp,&
 &                            hamk%lmnmax,hamk%ntypat,hamk%indlmn,hamk%nattyp,istwf_k,hamk%ucvol, &
-&                            ffnlout,ph3dout,kptout,kgout,kpgout,select_k_, &
-&                            idir_pert=idir,gpu_option=hamk%gpu_option) ! Optional parameters
+&                            hamk%ffnl_k, hamk%ph3d_k, hamk%kpt_k, hamk%kg_k, hamk%kpg_k,&
+&                            hamk%ffnl_kp,hamk%ph3d_kp,hamk%kpt_kp,hamk%kg_kp,hamk%kpg_kp,&
+&                            select_k_,idir_pert=idir,gpu_option=hamk%gpu_option) ! Optional parameters
    !FIXME Settle this
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
 
@@ -735,7 +735,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,&
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,&
          vectproj=vectproj,gpu_option=hamk%gpu_option)
 
    else if (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS) then
@@ -748,7 +748,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
          nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
          sij_, svectout, &
-         hamk%useylm, vectin, vectout, &
+         hamk%useylm, vectin, vectout, select_k_, &
          hamk%gpu_option,vectproj=vectproj)
 #else
    ABI_ERROR("abinit was not compiled with GPU support")
@@ -763,7 +763,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
          nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
          phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,vectproj=vectproj,&
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,vectproj=vectproj,&
          gpu_option=hamk%gpu_option)
 
    end if
