@@ -527,7 +527,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  ! OpenMP GPU offload case (GEMM nonlop used by default)
  if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
-   call init_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
+   call init_gemm_nonlop(dtset%nkpt)
  end if
 
  gemm_nonlop_is_distributed = .false.
@@ -1282,7 +1282,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
  ! Cleaning GEMM nonlop data
  if(gemm_nonlop_use_gemm) then
-   call destroy_gemm_nonlop(dtset%nkpt,dtset%gpu_option)
+   call destroy_gemm_nonlop(dtset%nkpt)
    gemm_nonlop_use_gemm = .false.
  end if
 

@@ -653,26 +653,6 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
      if (gemm_nonlop_use_gemm) then
        !set the global variable indicating to gemm_nonlop where to get its data from
        gemm_nonlop_ikpt_this_proc_being_treated = ikpt
-
-       if (istep <= 1) then
-         signs = 2
-         choice = 1
-         if(ipert<=dtset%natom) then
-           choice = 2
-         else if(ipert<=dtset%natom+1) then
-           choice = 51
-         else if(ipert<=dtset%natom+2) then
-           choice = 5
-         else if(ipert==natom+3.or.ipert==natom+4) then
-           choice = 3
-         end if
-         !Init the arrays
-         call make_gemm_nonlop(ikpt,signs,choice,gs_hamkq%npw_fft_kp,gs_hamkq%lmnmax, &
-         &    gs_hamkq%ntypat, gs_hamkq%indlmn, gs_hamkq%nattyp, gs_hamkq%istwf_kp, &
-         &    gs_hamkq%ucvol, gs_hamkq%ffnl_kp,&
-         &    gs_hamkq%ph3d_kp,gs_hamkq%kpt_kp,gs_hamkq%kg_kp,gs_hamkq%kpg_kp,K_H_KPRIME,&
-         &    idir_pert=idir, gpu_option=dtset%gpu_option)
-       end if
      end if ! gemm_nonlop_use_gemm
 
      ! Free some memory before calling dfpt_vtowfk
