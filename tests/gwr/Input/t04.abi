@@ -3,6 +3,7 @@
 
 ndtset      5
 iomode 1
+istwfk *1
 
 # This to compute QP without symmetries for debugging purposes
 #nsym 1

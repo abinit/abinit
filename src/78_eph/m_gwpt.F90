@@ -425,14 +425,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
  !integer :: u1_master, ip
  integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
- integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
+ integer :: idir,ipert !,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
- integer :: iq_ibz_fine,ikq_ibz_fine,ikq_bz_fine
  integer :: my_spin, spin, istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr
- integer :: mpw,ierr,it,imyq,band, ignore_kq, ignore_ibsum_kq
- integer :: n1,n2,n3,n4,n5,n6,nspden,nu, iang
+ integer :: mpw,ierr,imyq,band, ignore_kq, ignore_ibsum_kq
+ integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop !, restart
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: comm_rpt, nqlwl ! osc_npw,
@@ -445,7 +444,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
- type(gwpt_t) :: gwpt, gwpt_restart
+ type(gwpt_t) :: gwpt !, gwpt_restart
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
  type(crystal_t) :: pot_cryst
