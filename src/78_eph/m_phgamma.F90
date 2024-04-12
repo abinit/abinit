@@ -3162,6 +3162,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  type(fstab_t),target,allocatable :: fstab(:)
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
+ real(dp) :: abc(3)
 #ifdef HAVE_MPI
  integer :: ndims, comm_cart, me_cart
  logical :: reorder
@@ -4086,7 +4087,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_k = ib_k + bstart_k - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             sigma = max(maxval([(abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !ori sigma = max(maxval([(abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !replace the implicit loop by an explicit one
+             !workaround works with both ifort and ifx on oneapi 2024
+             do ii=1,3
+               abc(ii) = abs(dot_product(fs%vk(:, ib_k), fs%kmesh_cartvec(:,ii)))
+             end do
+             sigma = max(maxval(abc), fs%min_smear)
            end if
            wt_ek(:, ib_k) = gaussian(emesh - ebands%eig(band_k, ik_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
@@ -4095,7 +4102,13 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
            band_kq = ib_kq + bstart_kq - 1
            sigma = fs%eph_fsmear
            if (fs%eph_fsmear < zero) then
-             sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !ori sigma = max(maxval([(abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii))), ii=1,3)]), fs%min_smear)
+             !replace the implicit loop by an explicit one
+             !workaround works with both ifort and ifx on oneapi 2024
+             do ii=1,3
+               abc(ii) = abs(dot_product(fs%vkq(:, ib_kq), fs%kmesh_cartvec(:,ii)))
+             end do
+             sigma = max(maxval(abc), fs%min_smear)
            end if
            wt_ekq(:, ib_kq) = gaussian(emesh - ebands%eig(band_kq, ikq_ibz, spin), sigma) / sqrt(one * fs%nktot)
          end do
