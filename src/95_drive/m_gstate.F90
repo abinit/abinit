@@ -457,7 +457,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call init_gemm_nonlop(dtset%nkpt)
    end if
  end if
-
  gemm_nonlop_is_distributed = .false.
  if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
