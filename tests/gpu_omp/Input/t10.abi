@@ -154,5 +154,5 @@ pseudos "u.hpc.paw, o.hpc.paw"
 #%% [extra_info]
 #%% keywords = PAW,HPC
 #%% authors = M. Torrent, M. Sarraute
-#%% description = Uranim oxide (UO2) - 54 atoms (GGA) - HPC test
+#%% description = Uranium oxide (UO2) - 54 atoms (GGA) - HPC test
 #%%<END TEST_INFO>
