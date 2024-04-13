@@ -162,7 +162,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
- integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm, kg_varid
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm !, kg_varid
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
