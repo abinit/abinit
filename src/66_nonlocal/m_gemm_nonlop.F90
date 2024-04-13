@@ -729,9 +729,9 @@ contains
   real(dp), intent(in) :: ucvol
   real(dp), intent(in) :: ffnl_k(:,:,:,:)
   real(dp), intent(in) :: ph3d_k(:,:,:)
-  real(dp),intent(inout), target :: projs(2,npw,nprojs)
-  real(dp),intent(inout), target :: projs_r(1,npw,nprojs)
-  real(dp),intent(inout), target :: projs_i(1,npw,nprojs)
+  real(dp),intent(inout), target ::   projs(:,:,:)
+  real(dp),intent(inout), target :: projs_r(:,:,:)
+  real(dp),intent(inout), target :: projs_i(:,:,:)
 
   logical :: parity
   integer :: il, ipw, idir, idir1, idir2, ffnl_dir, dimffnl
@@ -918,9 +918,9 @@ contains
   real(dp), intent(in) :: ph3d_k(:,:,:)
   real(dp), intent(in) :: kpt_k(:)
   real(dp), intent(in), target :: kpg_k(:,:)
-  real(dp),intent(inout), target :: projs(2,npw,nprojs)  ,dprojs(2,npw,nprojs*ngrads)  ,d2projs(2,npw,nprojs*ngrads2)
-  real(dp),intent(inout), target :: projs_r(1,npw,nprojs),dprojs_r(1,npw,nprojs*ngrads),d2projs_r(1,npw,nprojs*ngrads2)
-  real(dp),intent(inout), target :: projs_i(1,npw,nprojs),dprojs_i(1,npw,nprojs*ngrads),d2projs_i(1,npw,nprojs*ngrads2)
+  real(dp),intent(inout), target :: projs  (:,:,:)  ,dprojs(:,:,:)  ,d2projs(:,:,:)
+  real(dp),intent(inout), target :: projs_r(:,:,:),dprojs_r(:,:,:),d2projs_r(:,:,:)
+  real(dp),intent(inout), target :: projs_i(:,:,:),dprojs_i(:,:,:),d2projs_i(:,:,:)
 
   logical,allocatable :: parity(:)
   logical :: map_ffnl_k,map_ph3d_k
