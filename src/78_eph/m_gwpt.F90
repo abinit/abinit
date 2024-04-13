@@ -354,7 +354,7 @@ module m_gwpt
 !!***
 
  public :: gwpt_run        ! Main entry point to compute GWpt matrix elements
- private :: gwpt_new   ! Creation method (allocates memory, initialize data from input vars).
+ !private :: gwpt_new   ! Creation method (allocates memory, initialize data from input vars).
 
  real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
@@ -537,7 +537,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !end if
 
  ! Construct object to store final results.
- gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
+ !gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
 
  ! Read gsphere and qmesh from SCR file.
  nqlwl = 0; w_fname = ABI_NOFILE
@@ -1692,6 +1692,8 @@ end subroutine gwpt_run
 !!
 !! SOURCE
 
+#if 0
+
 type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(new)
 
 !Arguments ------------------------------------
@@ -2218,6 +2220,8 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
 
 end function gwpt_new
 !!***
+
+#endif
 
 !----------------------------------------------------------------------
 

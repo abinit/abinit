@@ -1706,25 +1706,25 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  ugb%has_idle_procs = min_my_nband == 0
 
  ! TODO
- !if (psps%usepaw == 1 .and. ugb%my_nband > 0) then
- !  ABI_ERROR("ugb_from_wfk does not support PAW")
- !  ! Calculate <Proj_i|Cnk> from output eigenstates. Note array allocated with ugb%my_nband
- !  ABI_MALLOC(ugb%cprj_k, (cryst%natom, nspinor * ugb%my_nband))
- !  call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
- !  idir = 0; cprj_choice = 1  ! Only projected wave functions.
+ if (dtset%usepaw == 1 .and. ugb%my_nband > 0) then
+    ABI_ERROR("ugb_from_wfk does not support PAW")
+    ! Calculate <Proj_i|Cnk> from output eigenstates. Note array allocated with ugb%my_nband
+    ABI_MALLOC(ugb%cprj_k, (cryst%natom, ugb%nspinor * ugb%my_nband))
+    !call pawcprj_alloc(ugb%cprj_k, 0, gs_hamk%dimcprj)
+    !idir = 0; cprj_choice = 1  ! Only projected wave functions.
 
- !  do my_ib=1,ugb%my_nband
- !    ibs1 = nspinor * (my_ib - 1) + 1
- !    call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
- !                 gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
- !                 gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
- !                 gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
- !                 gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
- !  end do
+    !do my_ib=1,ugb%my_nband
+    !  ibs1 = nspinor * (my_ib - 1) + 1
+    !  call getcprj(cprj_choice, 0, ugb%cg_k(:,:,my_ib), ugb%cprj_k(:,ibs1), &
+    !               gs_hamk%ffnl_k, idir, gs_hamk%indlmn, gs_hamk%istwf_k, gs_hamk%kg_k, &
+    !               gs_hamk%kpg_k, gs_hamk%kpt_k, gs_hamk%lmnmax, gs_hamk%mgfft, mpi_enreg_seq, &
+    !               gs_hamk%natom, gs_hamk%nattyp, gs_hamk%ngfft, gs_hamk%nloalg, gs_hamk%npw_k, gs_hamk%nspinor, &
+    !               gs_hamk%ntypat, gs_hamk%phkxred, gs_hamk%ph1d, gs_hamk%ph3d_k, gs_hamk%ucvol, gs_hamk%useylm)
+    !end do
 
- !  !  Reorder the cprj (order is now the same as in the input file)
- !  call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
- !end if ! usepaw
+    !!  Reorder the cprj (order is now the same as in the input file)
+    !call pawcprj_reorder(ugb%cprj_k, gs_hamk%atindx1)
+ end if ! usepaw
 
  call ugb%print(units, dtset%prtvol)
 
