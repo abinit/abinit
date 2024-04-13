@@ -422,13 +422,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: band_me, nband_me
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, qptopt ! = 1
- integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
+ integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band !, ii, jj, iw !ib_kq, ibsum,
  !integer :: u1_master, ip
- integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
+ integer :: mcgq, mgscq !, ig, ispinor !, ifft !nband_kq,
  integer :: idir,ipert !,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
  integer :: my_spin, spin, istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr
- integer :: mpw,ierr,imyq,band, ignore_kq, ignore_ibsum_kq
+ integer :: mpw,ierr,imyq,ignore_kq, ignore_ibsum_kq ! band,
  integer :: n1,n2,n3,n4,n5,n6,nspden,nu
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
@@ -454,8 +454,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(kmesh_t) :: qmesh
  type(gsphere_t) :: gsph_c
  type(hscr_t) :: hscr
- type(screen_t) :: W
- type(screen_info_t) :: W_info
+ !type(screen_t) :: W
+ !type(screen_info_t) :: W_info
  character(len=fnlen) :: w_fname
  character(len=5000) :: msg
 !arrays
@@ -465,7 +465,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), rank_band(:), root_bcalc(:) ! osc_indpw(:), osc_gvecq(:,:),
  integer,allocatable :: ibzspin_2ikcalc(:,:)
- integer, allocatable :: recvcounts(:), displs(:)
+ integer, allocatable :: displs(:), recvcounts(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3) !qpt_cart(3),
  real(dp) :: tsec(2) ! vk(3), vkq(3),
  real(dp) :: vec_natom3(2, 3*cryst%natom)
@@ -491,7 +491,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !logical,allocatable :: osc_mask(:)
  !real(dp),allocatable :: gkq2_lr(:,:,:)
  !complex(dpc),allocatable :: osc_ks(:,:)
- complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
+ !complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:)
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -2633,7 +2633,7 @@ subroutine gwpt_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
  !character(len=5000) :: msg
  integer :: grp_ncid, ncerr
 !arrays
- integer, allocatable :: recvcounts(:), displs(:), nq_rank(:), kq_symtab(:,:), my_kq_symtab(:,:)
+ !integer, allocatable :: recvcounts(:), displs(:), kq_symtab(:,:)
  integer, ABI_CONTIGUOUS pointer :: bids(:)
 
 ! *************************************************************************
@@ -2727,8 +2727,8 @@ subroutine gwpt_print(gwpt, dtset, unt)
  class(gwpt_t),intent(in) :: gwpt
 
 !Local variables-------------------------------
- integer :: ikc, is, ndiv
- character(len=5000) :: msg
+ integer :: ikc, is
+ !character(len=5000) :: msg
 
 ! *************************************************************************
 
