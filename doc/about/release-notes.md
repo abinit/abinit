@@ -28,7 +28,7 @@ Xavier
 **A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced
 by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
 and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
-in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue.
+in the ANADDB utility. Actually, rfasr was used to initialize [[asr]] and [[chneut]] internally. 
 The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
 Thus a large fraction of the reference files of the test have been upgraded to the new default. However, in a sizeable number of reference files
 the old default value has been specified explicitly.
