@@ -1,6 +1,7 @@
-*
-*
-!/abinit-fallbacks-*.tar.gz
+/abinit-fallbacks-*.tar.gz
 !/build-abinit-fallbacks.sh.in
 !/README
 !/INSTALL
+!*
+!.*
+*_ori
