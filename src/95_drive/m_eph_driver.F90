@@ -714,8 +714,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    if (my_rank == master) then
-     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
-       efmasval, ifc)
+     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (11)

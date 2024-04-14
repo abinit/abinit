@@ -10,7 +10,7 @@
 ####                 SECTION: EPH
 ##############################################
  optdriver 7              # Enter EPH driver
- eph_task 4               # Compute e-ph self-energy (real + imag)
+ eph_task 17              # GWPT computation
  getddb_filepath "t01_DDB"
  ddb_ngqpt 4 4 4          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 4x4x4 q-mesh
@@ -21,34 +21,28 @@
 ##############################################
 ####                 SECTION: Sigma_nk
 ##############################################
- #nkptgw 1
- #kptgw
- #   0.0    0.0    0.0
- #bdgw
- #   8 9
  zcut 0.01 eV
 
 # Activate computation of phonon band structure
- #ph_prtbands 0
- ph_ndivsm 10
- ph_nqpath 12
- ph_qpath
-    0.0    0.0    0.0
-    0.5    0.0    0.5
-    0.5    0.25   0.75
-    0.375  0.375  0.75
-    0.0    0.0    0.0
-    0.5    0.5    0.5
-    0.625  0.25   0.625
-    0.5    0.25   0.75
-    0.5    0.5    0.5
-    0.375  0.375  0.75
-    0.625  0.25   0.625
-    0.5    0.0    0.5
+# ph_ndivsm 10
+# ph_nqpath 12
+# ph_qpath
+#    0.0    0.0    0.0
+#    0.5    0.0    0.5
+#    0.5    0.25   0.75
+#    0.375  0.375  0.75
+#    0.0    0.0    0.0
+#    0.5    0.5    0.5
+#    0.625  0.25   0.625
+#    0.5    0.25   0.75
+#    0.5    0.5    0.5
+#    0.375  0.375  0.75
+#    0.625  0.25   0.625
+#    0.5    0.0    0.5
 
 # Phonon DOS with tetrahedron method
- #ph_prtdos 0; ph_intmeth 2; ph_wstep 0.0001 eV
- ph_ngqpt 16 16 16
+# #ph_prtdos 0; ph_intmeth 2; ph_wstep 0.0001 eV
+# ph_ngqpt 16 16 16
 
 # Read crystal structure from DEN.nc file
  structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"

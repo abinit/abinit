@@ -528,6 +528,45 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ecut = dtset%ecut ! dtset%dilatmx
 
+ nqlwl = 0; w_fname = ABI_NOFILE
+ if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
+   w_fname = dtfil%fnameabi_scr
+ end if
+
+ if (w_fname /= ABI_NOFILE) then
+   ! Read gsphere and qmesh from SCR file.
+   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+   call hscr%free()
+   nqlwl = size(qlwl, dim=2)
+   ABI_FREE(qlwl)
+ else
+   NOT_IMPLEMENTED_ERROR()
+   ! Init Qmesh from the K-mesh reported in the WFK file.
+   !call kmesh%init(cryst, hdr_wfk%nkpt, hdr_wfk%kptns, dtset%kptopt)
+   !call find_qmesh(qmesh, cryst, kmesh)
+   !! The G-sphere for W and Sigma_c is initialized from ecuteps.
+   call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+   dtset%npweps = gsph_c%ng
+ end if
+
+#if 0
+ ! Init W.
+ ! Incore or out-of-core solution?
+ mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = qmesh%nibz
+
+ W_info%invalid_freq = dtset%gw_invalid_freq
+ W_info%mat_type = MAT_INV_EPSILON
+ W_info%use_mdf = BSp%mdlf_type
+ W_info%eps_inf = BSp%eps_inf
+
+ call W%init(w_info, cryst, qmesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
+             dtset%iomode, ngfftf, nfftf_tot, nsppol, nspden, qp_aerhor, dtset%prtvol, comm)
+ call W%free()
+#endif
+
+ call gsph_c%free()
+ call qmesh%free()
+
  ! Check if a previous netcdf file is present and restart the calculation
  ! Here we try to read an existing SIGEPH file if eph_restart == 1.
  ! and we compare the variables with the state of the code (i.e. new gwpt generated in gwpt_new)
@@ -538,38 +577,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Construct object to store final results.
  !gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
-
- ! Read gsphere and qmesh from SCR file.
- nqlwl = 0; w_fname = ABI_NOFILE
- if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
-   w_fname = dtfil%fnameabi_scr
- else if (dtset%getsuscep /= 0 .or. dtset%irdsuscep /= 0) then
-   w_fname = dtfil%fnameabi_sus
-   ABI_ERROR("(get|ird)suscep not implemented")
- end if
-
- call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
- call hscr%free()
- nqlwl = size(qlwl, dim=2)
- ABI_FREE(qlwl)
-
-#if 0
-   ! Init W.
-   ! Incore or out-of-core solution?
-   mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = qmesh%nibz
-
-   W_info%invalid_freq = dtset%gw_invalid_freq
-   W_info%mat_type = MAT_INV_EPSILON
-   W_info%use_mdf = BSp%mdlf_type
-   W_info%eps_inf = BSp%eps_inf
-
-   call W%init(w_info, cryst, qmesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
-               dtset%iomode, ngfftf, nfftf_tot, wfd%nsppol, wfd%nspden, qp_aerhor, wfd%prtvol, comm)
-   call W%free()
-#endif
-
- call gsph_c%free()
- call qmesh%free()
+ return
 
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  if (ierr == 0) then
@@ -1796,42 +1804,42 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
  call cwtime_report(" gwpt_new: k-points", cpu, wall, gflops)
 
  ! TODO: nkcalc should be spin dependent (similar piece of code in m_gwr).
- if (dtset%nkptgw /= 0) then
+ !if (dtset%nkptgw /= 0) then
 
-   ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
-   call sigtk_kcalc_from_nkptgw(dtset, mband, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+ !  ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
+ !  call sigtk_kcalc_from_nkptgw(dtset, mband, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
 
- else
+ !else
 
-   if (any(abs(dtset%sigma_erange) > zero)) then
-     ! Use sigma_erange and (optionally) gwpt_ngkpt
-     call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
+ !  if (any(abs(dtset%sigma_erange) > zero)) then
+ !    ! Use sigma_erange and (optionally) gwpt_ngkpt
+ !    call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks, comm)
 
-   else
-     ! Use qp_range to select the interesting k-points and the corresponding bands.
-     !
-     !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
-     ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
-     !          bands above and below the Fermi level.
-     ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
-     !          Include all occupied states and `num` empty states.
+ !  else
+ !    ! Use qp_range to select the interesting k-points and the corresponding bands.
+ !    !
+ !    !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
+ !    ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+ !    !          bands above and below the Fermi level.
+ !    ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+ !    !          Include all occupied states and `num` empty states.
 
-     qprange_ = dtset%gw_qprange
-     if (gap_err /= 0 .and. qprange_ == 0) then
-       ABI_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
-       qprange_ = 1
-     end if
+ !    qprange_ = dtset%gw_qprange
+ !    if (gap_err /= 0 .and. qprange_ == 0) then
+ !      ABI_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
+ !      qprange_ = 1
+ !    end if
 
-     if (qprange_ /= 0) then
-       call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
-     else
-       ! qprange is not specified in the input.
-       ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
-       call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
-     end if
-   end if
+ !    if (qprange_ /= 0) then
+ !      call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+ !    else
+ !      ! qprange is not specified in the input.
+ !      ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+ !      call sigtk_kcalc_from_gaps(dtset, ebands, gaps, new%nkcalc, new%kcalc, new%bstart_ks, new%nbcalc_ks)
+ !    end if
+ !  end if
 
- end if ! nkptgw /= 0
+ !end if ! nkptgw /= 0
 
  ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
  ABI_MALLOC(new%kcalc2ibz, (new%nkcalc, 6))
@@ -1951,37 +1959,8 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
  ABI_MALLOC(new%bstop_ks, (new%nkcalc, new%nsppol))
  new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
 
- ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
- ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
- ! used to symmetrize the wavefunctions in G-space.
- ! Note that we loop over the full BZ instead of the IBZ(k)
- ! This part is slow for very dense meshes, should try to use a geometrical approach...
-
- new%mpw = 0; new%gmax = 0; cnt = 0
- do ik=1,new%nkcalc
-   kk = new%kcalc(:, ik)
-   do i3=-1,1
-     do i2=-1,1
-       do i1=-1,1
-         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
-         kq = kk + half * [i1, i2, i3]
-         ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
-         call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
-         new%mpw = max(new%mpw, onpw)
-         do ipw=1,onpw
-           do ii=1,3
-            new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii, ipw)))
-           end do
-         end do
-         ABI_FREE(gtmp)
-       end do
-     end do
-   end do
- end do
-
- my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
- my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
-
+ ! Compute mpw and gmax
+ call ephtk_get_mpw_gmax(new%nkcalc, new%kcalc, ecut, cryst%gmet, new%mpw, new%gmax, comm)
  call wrtout(std_out, sjoin(' Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
  call cwtime_report(" gwpt_new: mpw", cpu, wall, gflops)
 
