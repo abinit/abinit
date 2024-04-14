@@ -3047,37 +3047,8 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  ABI_MALLOC(new%bstop_ks, (new%nkcalc, new%nsppol))
  new%bstop_ks = new%bstart_ks + new%nbcalc_ks - 1
 
- ! mpw is the maximum number of plane-waves over k and k+q where k and k+q are in the BZ.
- ! we also need the max components of the G-spheres (k, k+q) in order to allocate the workspace array work
- ! used to symmetrize the wavefunctions in G-space.
- ! Note that we loop over the full BZ instead of the IBZ(k)
- ! This part is slow for very dense meshes, should try to use a geometrical approach...
-
- new%mpw = 0; new%gmax = 0; cnt = 0
- do ik=1,new%nkcalc
-   kk = new%kcalc(:, ik)
-   do i3=-1,1
-     do i2=-1,1
-       do i1=-1,1
-         cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism inside comm
-         kq = kk + half * [i1, i2, i3]
-         ! TODO: g0 umklapp here can enter into play gmax may not be large enough!
-         call get_kg(kq, istwfk1, 1.1_dp * ecut, cryst%gmet, onpw, gtmp)
-         new%mpw = max(new%mpw, onpw)
-         do ipw=1,onpw
-           do ii=1,3
-            new%gmax(ii) = max(new%gmax(ii), abs(gtmp(ii, ipw)))
-           end do
-         end do
-         ABI_FREE(gtmp)
-       end do
-     end do
-   end do
- end do
-
- my_mpw = new%mpw; call xmpi_max(my_mpw, new%mpw, comm, ierr)
- my_gmax = new%gmax; call xmpi_max(my_gmax, new%gmax, comm, ierr)
-
+ ! Compute mpw and gmax
+ call ephtk_get_mpw_gmax(new%nkcalc, new%kcalc, ecut, cryst%gmet, new%mpw, new%gmax, comm)
  call wrtout(std_out, sjoin(' Optimal value of mpw:', itoa(new%mpw), "gmax:", ltoa(new%gmax)))
  call cwtime_report(" sigmaph_new: mpw", cpu, wall, gflops)
 
