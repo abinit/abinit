@@ -6,7 +6,7 @@
 
 ndtset      4
 timopt 1
-#iomode 1
+iomode 1
 istwfk *1
 
 # This to compute QP without symmetries for debugging purposes
