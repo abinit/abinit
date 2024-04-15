@@ -5,7 +5,7 @@
 !! FUNCTION
 !!  This module contains the declaration of the wfd_t object.
 !!  The wfd_t is a container of Bloch states (wave_t).
-!!  It provides a high-level API to perform FFT transforms G --> R, compute PAW projections
+!!  It provides a high-level API to perform FFT transforms G --> R, compute PAW projections, etc.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2008-2024 ABINIT group (MG)
@@ -395,7 +395,10 @@ module m_wfd
    ! Compute <u(g)|u(g)> for the same k-point and spin.
 
    procedure :: xdotc => wfd_xdotc
-   ! Compute <u_{b1ks}|u_{b2ks}> in G-space
+   ! Compute <u_{b1ks}|u_{b2ks}> in G-space.
+
+   procedure :: get_gvec_kq => wfd_get_gvec_kq
+   ! Return g-sphere centered on k+q.
 
    procedure :: reset_ur_cprj => wfd_reset_ur_cprj
    ! Reinitialize memory storage of u(r) and <p_i|psi>
@@ -448,7 +451,7 @@ module m_wfd
 
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
-   ! Used in phgamma only, see sigmaph for a more efficient version.
+   ! Used in phgamma only, see m_sigmaph for a more efficient version.
 
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
@@ -1354,19 +1357,15 @@ function wfd_norm2(Wfd,Cryst,Pawtab,band,ik_ibz,spin) result(norm2)
 
    ! Avoid the computation if Cprj are already in memory with the correct order.
    if (wave%has_cprj == WFD_STORED .and. wave%cprj_order == CPR_RANDOM) then
-
        pawovlp = paw_overlap(wave%Cprj, wave%Cprj, Cryst%typat, Pawtab)
        cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
-
    else
      ! Compute Cproj
      ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
      call pawcprj_alloc(Cp1,0,Wfd%nlmn_atm)
-
      call wfd%get_cprj(band,ik_ibz,spin,Cryst,Cp1,sorted=.FALSE.)
      pawovlp = paw_overlap(Cp1,Cp1,Cryst%typat,Pawtab)
      cdum = cdum + CMPLX(pawovlp(1),pawovlp(2), kind=dpc)
-
      call pawcprj_free(Cp1)
      ABI_FREE(Cp1)
    end if
@@ -1443,7 +1442,6 @@ function wfd_xdotc(Wfd,Cryst,Pawtab,band1,band2,ik_ibz,spin)
        pawovlp = paw_overlap(wave1%Cprj, wave2%Cprj,&
                              Cryst%typat,Pawtab,spinor_comm=Wfd%MPI_enreg%comm_spinor)
        wfd_xdotc = wfd_xdotc + CMPLX(pawovlp(1),pawovlp(2), kind=gwpc)
-
    else
      ! Compute Cprj
      ABI_MALLOC(Cp1,(Wfd%natom,Wfd%nspinor))
@@ -1469,6 +1467,55 @@ end function wfd_xdotc
 
 !----------------------------------------------------------------------
 
+!!****f* m_wfd/wfd_get_gvec_kq
+!! NAME
+!! wfd_get_gvec_kq
+!!
+!! FUNCTION
+!! Return g-sphere centered on k+q.
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq)
+
+!Arguments -------------------------------
+ class(wfd_t),intent(in) :: wfd
+ real(dp),intent(in) :: gmet(3,3), ecut, kq(3)
+ integer,intent(in) :: ikq_ibz
+ logical,intent(in) :: isirr_kq
+ integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:)
+
+!Local variables ------------------------------
+ integer :: mpw
+ integer,allocatable :: gtmp(:,:)
+
+! *********************************************************************
+
+ mpw = size(kg_kq, dim=2)
+
+ if (isirr_kq) then
+   ! Copy data
+   istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
+   ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
+   kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
+ else
+   ! Build new g-sphere centered on kq.
+   istwf_kq = 1
+   call get_kg(kq, istwf_kq, ecut, gmet, npw_kq, gtmp)
+   ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
+   kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
+   ABI_FREE(gtmp)
+ end if
+
+end subroutine wfd_get_gvec_kq
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_wfd/wfd_reset_ur_cprj
 !! NAME
 !!  wfd_reset_ur_cprj
@@ -1484,7 +1531,6 @@ subroutine wfd_reset_ur_cprj(Wfd)
  class(wfd_t),intent(inout) :: Wfd
 
 !Local variables ------------------------------
-!scalars
  integer :: ib, ik, is
 !************************************************************************
 
@@ -5217,7 +5263,7 @@ subroutine wfdgw_get_nl_me(Wfd, cryst, psps, pawtab, bks_mask, nl_bks)
 
      ! Load k-dependent part in the Hamiltonian datastructure
      call ham_k%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl_k,&
-&         ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1),compute_gbound=(Wfd%paral_kgb/=1))
+                       ph3d_k=ph3d_k,compute_ph3d=(Wfd%paral_kgb/=1),compute_gbound=(Wfd%paral_kgb/=1))
 
      ! ========================================================
      ! ==== Compute nonlocal form factors ffnl at all (k+G) ====
@@ -5583,7 +5629,7 @@ subroutine wfdgw_mkrho(wfd, cryst, psps, ebands, ngfftf, nfftf, rhor, &
              kg_k_cart= gp2pi1*Wfd%Kdata(ik)%kg_k(1,ipw) + &
                         gp2pi2*Wfd%Kdata(ik)%kg_k(2,ipw) + &
                         gp2pi3*Wfd%Kdata(ik)%kg_k(3,ipw)+kpt_cart
-!             ipwsp=ipw!+(ispinor-1)*Wfd%Kdata(ik)%npw
+             !ipwsp=ipw!+(ispinor-1)*Wfd%Kdata(ik)%npw
              cwftmp=-cwavef(2,ipw)*kg_k_cart
              cwavef(2,ipw)=cwavef(1,ipw)*kg_k_cart
              cwavef(1,ipw)=cwftmp
@@ -5714,7 +5760,7 @@ end subroutine wfdgw_mkrho
 !! SOURCE
 
 subroutine test_charge(nfftf,nelectron_exp,nspden,rhor,ucvol,&
-& usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
+                       usepaw,usexcnhat,usefinegrid,compch_sph,compch_fft,omegaplasma)
 
 !Arguments ------------------------------------
 !scalars
@@ -5741,9 +5787,9 @@ end if
 !if (usepaw==1.and.usexcnhat>0) then ! TODO I still dont understand this if!
    write(msg,'(4a)')ch10,' PAW TEST:',ch10,' ==== Compensation charge inside spheres ============'
    if (compch_sph<greatest_real.and.compch_fft<greatest_real) &
-&    write(msg,'(3a)')TRIM(msg),ch10,' The following values must be close...'
+     write(msg,'(3a)')TRIM(msg),ch10,' The following values must be close...'
    if (compch_sph<greatest_real) &
-&    write(msg,'(3a,f22.15)')TRIM(msg),ch10,' Compensation charge over spherical meshes = ',compch_sph
+     write(msg,'(3a,f22.15)')TRIM(msg),ch10,' Compensation charge over spherical meshes = ',compch_sph
    if (compch_fft<greatest_real) then
      if (usefinegrid==1) then
        write(msg,'(3a,f22.15)')TRIM(msg),ch10,' Compensation charge over fine fft grid    = ',compch_fft
@@ -5901,18 +5947,18 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
           ! Accumulate contribution from (occupied) current band
           !if (locc_test) then
            call pawaccrhoij(Cryst%atindx,cplex,cwaveprj,cwaveprj ,0,spin,Wfd%natom,Wfd%natom,&
-&            Wfd%nspinor,occup,option,pawrhoij,use_timerev,use_zeromag,wtk_k)
+                            Wfd%nspinor,occup,option,pawrhoij,use_timerev,use_zeromag,wtk_k)
           !end if
        end if
      end do !band
 
    end do !ik_ibz
  end do !spin
- !
+
  ! Free temporary cwaveprj storage.
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
- !
+
  !==========================================
  ! MPI: need to exchange arrays between procs
  ! TODO it should be tested.
@@ -5925,17 +5971,12 @@ subroutine wfdgw_pawrhoij(Wfd,Cryst,Bst,kptopt,pawrhoij,pawprtvol)
    call wrtout(std_out, msg)
    do iatom=1,Cryst%natom,natinc
      call pawrhoij_print_rhoij(pawrhoij(iatom)%rhoij_,pawrhoij(iatom)%cplex_rhoij,&
-                  pawrhoij(iatom)%qphase,iatom,Cryst%natom,&
-                  unit=std_out,opt_prtvol=pawprtvol)
-  end do
+                  pawrhoij(iatom)%qphase,iatom,Cryst%natom, unit=std_out,opt_prtvol=pawprtvol)
+   end do
  end if
 
 end subroutine wfdgw_pawrhoij
 !!***
-
-
-
-
 
 subroutine u1cache_store(u1c, qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
  class(u1cache_t),intent(inout) :: u1c

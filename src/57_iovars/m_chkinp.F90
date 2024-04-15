@@ -927,7 +927,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR("When eph_task == 1, the q-path for the linewidth must be specified via ph_nqpath and ph_qpath")
      end if
      if (dt%eph_task == 1 .and. dt%nshiftk <= 0) then
-       ABI_ERROR_NOSTOP('phgamma does not work with multiple k-shifts ', ierr)
+       ABI_ERROR_NOSTOP('phgamma does not work with multiple k-shifts', ierr)
      end if
      if (dt%eph_task == 1 .and. .not. isdiagmat(dt%kptrlatt)) then
        ABI_ERROR_NOSTOP("kptrlatt must be diagonal in phgamma.", ierr)
@@ -967,6 +967,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      if (dt%ibte_prep /= 0 .and. any(dt%sigma_ngkpt /= 0)) then
        ABI_ERROR_NOSTOP("sigma_ngkpt cannot be used to downsample the k-mesh when ibte_prep is used.", ierr)
      end if
+
+     ! Additional checks for GWPT
+     if (dt%eph_task == 17) then
+       call chkdpr(0,0,cond_string,cond_values,ierr,'ecuteps',dt%ecuteps,1,0.0_dp,iout)
+       if (dt%ecuteps <= 0) then
+         ABI_ERROR_NOSTOP("ecuteps must be specified if GWPT is activated", ierr)
+       end if
+     end if
+
    end if ! RUNL_EPH
 
    if (any(dt%eph_np_pqbks /= 0)) then

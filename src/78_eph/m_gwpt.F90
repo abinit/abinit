@@ -61,6 +61,7 @@ module m_gwpt
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
+ use m_gwdefs,         only : GW_Q0_DEFAULT
  use m_time,           only : cwtime, cwtime_report, timab, sec2str
  use m_fstrings,       only : itoa, ftoa, sjoin, ktoa, ltoa, strcat
  use m_numeric_tools,  only : arth, c2r, get_diag, linfit, iseven, simpson_cplx, print_arr, inrange
@@ -83,6 +84,7 @@ module m_gwpt
  use m_dfpt_cgwf,      only : dfpt_cgwf
  use m_phonons,        only : phstore_t, phstore_new
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
+ use m_vcoul,          only : vcoul_t
 
  implicit none
 
@@ -429,7 +431,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
  integer :: my_spin, spin, istwf_k, istwf_kq, istwf_kqirr, npw_k, npw_kq, npw_kqirr
  integer :: mpw,ierr,imyq,ignore_kq, ignore_ibsum_kq ! band,
- integer :: n1,n2,n3,n4,n5,n6,nspden,nu
+ integer :: n1,n2,n3,n4,n5,n6,nspden,nu, mqmem
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
@@ -447,22 +449,23 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gwpt_t) :: gwpt !, gwpt_restart
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
- type(crystal_t) :: pot_cryst
- type(hdr_type) :: pot_hdr
+ type(crystal_t) :: pot_cryst, den_cryst
+ type(hdr_type) :: pot_hdr, den_hdr
  type(phstore_t) :: phstore
  type(u1cache_t) :: u1c
  type(kmesh_t) :: qmesh, kmesh
  type(gsphere_t) :: gsph_c
  type(hscr_t) :: hscr
- !type(screen_t) :: W
- !type(screen_info_t) :: W_info
+ type(vcoul_t) :: vcp
+ type(screen_t) :: W
+ type(screen_info_t) :: W_info
  character(len=fnlen) :: w_fname
  character(len=5000) :: msg
 !arrays
  integer :: g0_k(3),g0_kq(3), units(2), work_ngfft(18), gmax(3)
  integer,allocatable :: bands_treated_now(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
- integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), rank_band(:), root_bcalc(:) ! osc_indpw(:), osc_gvecq(:,:),
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: displs(:), recvcounts(:)
@@ -483,7 +486,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
- real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:)
+ real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), vcar_ibz(:,:,:,:), rhor(:,:)
  real(dp),allocatable :: gs1c(:,:)
  real(dp),allocatable :: gkq_allgather(:,:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
@@ -493,7 +496,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !complex(dpc),allocatable :: osc_ks(:,:)
  !complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
- type(pawrhoij_type),allocatable :: pawrhoij(:)
+ type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
  integer :: me
  real(dp),allocatable :: cgq_buf(:)
@@ -749,7 +752,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Read the GS potential (vtrial) from input POT file
    ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
-   call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
+   call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
                   allow_interp=.True.)
    pot_cryst = pot_hdr%get_crystal()
    if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
@@ -822,6 +825,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ================
  ! HANDLE SCREENING
  ! ================
+ ABI_CALLOC(rhor, (nfftf, nspden))
 
  nqlwl = 0; w_fname = ABI_NOFILE
  if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
@@ -835,7 +839,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
    call hscr%free()
    nqlwl = size(qlwl, dim=2)
-   ABI_FREE(qlwl)
+   w_info%use_mdf = MDL_NONE
  else
    ! Init Qmesh from the K-mesh reported in the WFK file.
    call find_qmesh(qmesh, cryst, kmesh)
@@ -843,26 +847,19 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
    dtset%npweps = gsph_c%ng
 
-   ! We also need the density
-   !ABI_CALLOC(vtrial, (nfftf, nspden))
-   !den_path = dtfil%fildensin
-   !if (my_rank == master) then
-   !  if (nctk_try_fort_or_ncfile(den_path, msg) /= 0) then
-   !    ABI_ERROR(sjoin("Cannot find DEN file:", den_path, ". Error:", msg))
-   !  end if
-   !end if
-   !call xmpi_bcast(den_path, master, comm, ierr)
-   !call wrtout(units, sjoin("- Reading GS density from: ", den_path))
-   !call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, orhor, ohdr, pawrhoij, comm, &
-   !               check_hdr, allow_interp) ! Optional
-   !pot_cryst = pot_hdr%get_crystal()
-   !if (cryst%compare(pot_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
-   !  ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")
-   !end if
-   !call pot_cryst%free(); call pot_hdr%free()
+   ! We also need the density for the model dielectric function
+   call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, rhor, den_hdr, den_pawrhoij, comm, &
+                  allow_interp=.True.)
+   den_cryst = den_hdr%get_crystal()
+   if (cryst%compare(den_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")
+   end if
+   call den_cryst%free(); call pot_hdr%free()
+   w_info%use_mdf = MDL_BECHSTEDT
+   w_info%eps_inf = dtset%mdf_epsinf
+   ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
  end if
 
-#if 0
  if (nqlwl == 0) then
    nqlwl=1
    ABI_MALLOC(qlwl,(3,nqlwl))
@@ -873,33 +870,29 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_COMMENT(msg)
  end if
 
- call vcp%init(Gsph_c, Cryst, Qmesh,Kmesh, Dtset%rcut, Dtset%gw_icutcoul, Dtset%vcutgeo, Dtset%ecutsigx, Gsph_c%ng, &
+ ! TODO: In principle one should have gpsh_x as well.
+ call vcp%init(gsph_c, cryst, qmesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                nqlwl, qlwl, comm)
- call vcp%free()
 
- ! Init W.
+ ! Init Wc.
  ! Incore or out-of-core solution?
  mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = qmesh%nibz
-
- W_info%invalid_freq = dtset%gw_invalid_freq
- W_info%mat_type = MAT_INV_EPSILON
- W_info%use_mdf = BSp%mdlf_type
- W_info%eps_inf = BSp%eps_inf
-
+ w_info%invalid_freq = dtset%gw_invalid_freq
+ w_info%mat_type = MAT_INV_EPSILON
  call W%init(w_info, cryst, qmesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
-             dtset%iomode, ngfftf, nfftf_tot, nsppol, nspden, qp_aerhor, dtset%prtvol, comm)
+             dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
 
- call W%free()
- call qmesh%free()
- call gsph_c%free()
-#endif
-
- call kmesh%free()
+ ABI_FREE(rhor)
+ ABI_FREE(qlwl)
 
  ! Loop over (spin, qbiz, atom_pert) in Sigma^{spin}_{qibz, ipert)
  do my_spin=1,gwpt%my_nspins
    spin = gwpt%my_spins(my_spin)
    do iq_ibz=1,gwpt%nqibz
+     qq_ibz = gwpt%qibz(:, iq_ibz)
+     ! Compute phonons for this qq_ibz
+     call ifc%fourq(cryst, qq_ibz, phfrq, displ_cart, out_displ_red=displ_red)
+
      do imyp=1,my_npert
         idir = gwpt%my_pinfo(1, imyp); ipert = gwpt%my_pinfo(2, imyp); ipc = gwpt%my_pinfo(3, imyp)
 
@@ -911,9 +904,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
         !do iq_sum=1,nqbz
         !end do
 
-     end do
+     end do ! imyp
    end do ! iq_ibz
  end do ! spin
+
+ call vcp%free()
+ call w%free()
+ call qmesh%free()
+ call gsph_c%free()
+ call kmesh%free()
 
  RETURN
 
@@ -1073,19 +1072,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, comm=gwpt%pert_comm%value)
 
        ! Get npw_kq, kg_kq for k+q.
-       if (isirr_kq) then
-         ! Copy u_kq(G)
-         istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
-         ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
-         kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
-       else
-         ! Reconstruct u_kq(G) from the IBZ image.
-         istwf_kq = 1
-         call get_kg(kq, istwf_kq, ecut, cryst%gmet, npw_kq, gtmp)
-         ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
-         kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
-         ABI_FREE(gtmp)
-       end if
+       call wfd%get_gvec_kq(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq)
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
 
@@ -1739,8 +1726,6 @@ end subroutine gwpt_run
 !!
 !! SOURCE
 
-#if 1
-
 type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) result(gwpt)
 
 !Arguments ------------------------------------
@@ -1767,7 +1752,7 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
 !arrays
  integer :: intp_nshiftk
  integer :: intp_kptrlatt(3,3), g0_k(3), units(2), indkk_k(6,1), my_gmax(3), band_block(2), qptrlatt(3,3)
- integer,allocatable :: temp(:,:), gtmp(:,:),degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
+ integer,allocatable :: temp(:,:), degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
  real(dp):: params(4), my_shiftq(3,1), kk(3), kq(3), intp_shiftk(3)
 #ifdef HAVE_MPI
  integer,parameter :: ndims = 5
@@ -2237,8 +2222,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
 
 end function gwpt_new
 !!***
-
-#endif
 
 subroutine gwpt_free(gwpt)
 
