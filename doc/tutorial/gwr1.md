@@ -14,6 +14,8 @@ see the [tutorial home page](/tutorial).
 
 This tutorial should take about 2 hours.
 
+WARNING : THIS TUTORIAL IS WORK IN PROGRESS ! IT IS NOT YET COMPLETE ...
+
 [TUTORIAL_README]
 
 ### Ground-state computation
