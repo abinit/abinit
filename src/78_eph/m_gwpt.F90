@@ -340,7 +340,7 @@ module m_gwpt
     procedure :: setup_kcalc => gwpt_setup_kcalc
      ! Return tables used to perform the sum over q-points for given k-point.
 
-    procedure :: gather_and_write => gwpt_gather_and_write
+    !procedure :: gather_and_write => gwpt_gather_and_write
      ! Compute the QP corrections.
 
     procedure :: print => gwpt_print
@@ -1657,7 +1657,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end if
 
      ! Collect results inside pqb_comm and write results for this (k-point, spin) to NETCDF file.
-     call gwpt%gather_and_write(dtset, ebands, ikcalc, spin, gwpt%pqb_comm%value)
+     !call gwpt%gather_and_write(dtset, ebands, ikcalc, spin, gwpt%pqb_comm%value)
 
      ABI_SFREE(root_bcalc)
    end do ! spin
@@ -2511,6 +2511,8 @@ subroutine gwpt_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
 end subroutine gwpt_setup_kcalc
 !!***
 
+#if 0
+
 !!****f* m_gwpt/gwpt_gather_and_write
 !! NAME
 !!  gwpt_gather_and_write
@@ -2536,7 +2538,7 @@ subroutine gwpt_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, max_ntemp = 50
- integer :: ideg,ib,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ibc,ib_val,ib_cond,jj
+ integer :: ideg,it,ii,iw,nstates,ierr,my_rank,band_ks,ik_ibz,ib_val,ib_cond,jj
  !integer :: nq_ibzk_eff, nelem, imyq, iq_ibz_k, sr_ncid
  logical :: iwrite
  real(dp) :: cpu, wall, gflops, invsig2fmts, tau
@@ -2615,6 +2617,8 @@ subroutine gwpt_gather_and_write(self, dtset, ebands, ikcalc, spin, comm)
 
 end subroutine gwpt_gather_and_write
 !!***
+
+#endif
 
 !!****f* m_gwpt/gwpt_print
 !! NAME
