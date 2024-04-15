@@ -2298,6 +2298,7 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
  integer :: nselect,my_cplex,my_cplex_eff,my_qphase,my_natinc,my_natom,my_nspden,ngrhoijmx,size_rhoij2
  integer :: iomode,ncid,natom_id,cplex_id,qphase_id,nspden_id,nsel56_id
  integer :: buffer_id,ibuffer_id,ncerr,bsize_id,bufsize_id
+ integer :: iq0,itypat,lmn_size
  logical :: paral_atom
  character(len=500) :: msg
 !arrays
@@ -2451,9 +2452,18 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
          pawrhoij(iatom)%rhoijselect(1:nselect)=ibuffer(ii+1:ii+nselect)
          ii=ii+nselect
          do ispden=1,my_nspden
-           pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)= &
-&                          buffer(jj+1:jj+my_cplex*my_qphase*nselect)
-           jj=jj+my_cplex*my_qphase*nselect
+           pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)= &
+                  buffer(jj+1:jj+my_cplex*nselect)
+           jj=jj+my_cplex*nselect
+           if (my_qphase==2) then
+             itypat=typat(iatom)
+             lmn_size=nlmn_type(itypat)
+             lmn2_size=lmn_size*(lmn_size+1)/2
+             iq0 = my_cplex*lmn2_size
+             pawrhoij(iatom)%rhoijp(iq0+1:iq0+my_cplex*nselect,ispden)= &
+                  buffer(jj+1:jj+my_cplex*nselect)
+             jj=jj+my_cplex*nselect
+           end if
          end do
        end do
        LIBPAW_DEALLOCATE(ibuffer)
@@ -2537,9 +2547,15 @@ subroutine pawrhoij_io(pawrhoij,unitfi,nsppol_in,nspinor_in,nspden_in,nlmn_type,
        ibuffer(ii+1:ii+nselect)=pawrhoij(iatom)%rhoijselect(1:nselect)
        ii=ii+nselect
        do ispden=1,my_nspden
-         buffer(jj+1:jj+my_cplex*my_qphase*nselect)= &
-&                      pawrhoij(iatom)%rhoijp(1:my_cplex*my_qphase*nselect,ispden)
-         jj=jj+my_cplex*my_qphase*nselect
+         buffer(jj+1:jj+my_cplex*nselect)=&
+                pawrhoij(iatom)%rhoijp(1:my_cplex*nselect,ispden)
+         jj=jj+my_cplex*nselect
+         if (my_qphase==2) then
+           iq0 = my_cplex*pawrhoij(iatom)%lmn2_size
+           buffer(jj+1:jj+my_cplex*nselect)=&
+                  pawrhoij(iatom)%rhoijp(iq0+1:iq0+my_cplex*nselect,ispden)
+           jj=jj+my_cplex*nselect
+         end if
        end do
      end do
      if (iomode == fort_binary) then
