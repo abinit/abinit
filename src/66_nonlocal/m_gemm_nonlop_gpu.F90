@@ -34,7 +34,7 @@ module m_gemm_nonlop_gpu
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm_allwf_cpu, only : opernlc_ylm_allwf_cpu
  use m_pawcprj, only : pawcprj_type
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
 
 #if defined(HAVE_GPU_CUDA)

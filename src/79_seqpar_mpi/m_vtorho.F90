@@ -34,7 +34,7 @@ module m_vtorho
  use m_wffile
  use m_efield
  use m_cgtools
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_hdr
  use m_dtset
  use m_dtfil

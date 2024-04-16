@@ -31,7 +31,7 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_dtset
  use m_dtfil
  use m_ompgpu_utils

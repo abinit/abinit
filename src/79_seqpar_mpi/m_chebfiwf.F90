@@ -49,7 +49,7 @@ module m_chebfiwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_getghc,      only : multithreaded_getghc
- use m_gemm_nonlop, only : gemm_nonlop_use_gemm
+ use m_gemm_nonlop_projectors , only : gemm_nonlop_use_gemm
 
  use m_xg
  use m_xgTransposer
