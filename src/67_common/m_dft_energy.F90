@@ -27,7 +27,7 @@ module m_dft_energy
  use m_hamiltonian
  use m_errors
  use m_xmpi
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_xcdata
  use m_cgtools
  use m_dtset

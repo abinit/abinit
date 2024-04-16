@@ -39,7 +39,7 @@ module m_gstate
  use m_ddb
  use m_bandfft_kpt
  use m_invovl
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_wfk
  use m_nctk
  use m_hdr

@@ -38,7 +38,7 @@ module m_rttddft_tdks
  use m_energies,         only: energies_type, energies_init
  use m_errors,           only: msg_hndl, assert
  use m_extfpmd,          only: extfpmd_type
- use m_gemm_nonlop,      only: init_gemm_nonlop, destroy_gemm_nonlop
+ use m_gemm_nonlop_projectors, only: init_gemm_nonlop, destroy_gemm_nonlop
  use m_geometry,         only: fixsym
  use m_hdr,              only: hdr_type, hdr_init
  use m_initylmg,         only: initylmg

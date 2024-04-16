@@ -31,6 +31,7 @@ module m_nonlop
  use m_gemm_nonlop
  use m_gemm_nonlop_gpu
  use m_gemm_nonlop_ompgpu
+ use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
@@ -580,7 +581,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &      ( paw_opt /= 2 .and. &
 &        hamk%useylm /= 0 .and.&
 &        ((cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
-&        (choice==1 .or. choice==2  .or. choice==3 .or. choice==5 .or. choice==51))))
+&        (choice==1 .or. choice==2 .or.  choice==3 .or. choice==5 .or. choice==51))))
    end if
    if(signs==1) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
@@ -720,11 +721,6 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
  if(use_gemm_nonlop) then
 
-   call make_gemm_nonlop(gemm_nonlop_ikpt_this_proc_being_treated,signs,choice,hamk%npw_k,hamk%npw_kp,&
-&                            hamk%lmnmax,hamk%ntypat,hamk%indlmn,hamk%nattyp,istwf_k,hamk%ucvol, &
-&                            hamk%ffnl_k, hamk%ph3d_k, hamk%kpt_k, hamk%kg_k, hamk%kpg_k,&
-&                            hamk%ffnl_kp,hamk%ph3d_kp,hamk%kpt_kp,hamk%kg_kp,hamk%kpg_kp,&
-&                            select_k_,idir_pert=idir,gpu_option=hamk%gpu_option) ! Optional parameters
    !FIXME Settle this
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
 
@@ -756,15 +752,15 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
    else
 
-     call gemm_nonlop(atindx1_,choice,cpopt,cprjin_,dimenl1,dimenl2_,dimekbq,&
-         dimffnlin,dimffnlout,enl_,enlout,ffnlin_,ffnlout_,hamk%gmet,hamk%gprimd,&
-         idir,indlmn_,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
-         hamk%lmnmax,matblk_,hamk%mgfft,mpi_enreg,hamk%mpsang,hamk%mpssoang,&
-         natom_,nattyp_,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
-         nnlout,npwin,npwout,my_nspinor,hamk%nspinor,ntypat_,only_SO_,paw_opt,&
-         phkxredin_,phkxredout_,ph1d_,ph3din_,ph3dout_,signs,sij_,svectout,&
-         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,vectproj=vectproj,&
-         gpu_option=hamk%gpu_option)
+     call gemm_nonlop(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
+         dimffnlin,dimffnlout,enl_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
+         idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
+         hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
+         hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
+         nnlout,npwin,npwout,my_nspinor,hamk%nspinor,hamk%ntypat,only_SO_,paw_opt,&
+         ph3din,ph3dout,signs,hamk%sij,svectout,&
+         tim_nonlop,hamk%ucvol,hamk%useylm,vectin,vectout,proj_shift,select_k_,iatom_only_,hamk%typat,hamk%usepaw,&
+         vectproj=vectproj,gpu_option=hamk%gpu_option)
 
    end if
 
