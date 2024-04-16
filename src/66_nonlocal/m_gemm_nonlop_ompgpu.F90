@@ -58,7 +58,7 @@ module m_gemm_nonlop_ompgpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
  use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
 
 #if defined HAVE_MPI2
