@@ -23,6 +23,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced
@@ -36,6 +38,8 @@ the old default value has been specified explicitly.
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
 They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field), 
 but have been superceded by rf2_XXX input variables a long time ago. 
+
+* * *
 
 ### **B.** Most noticeable achievements
 
@@ -186,6 +190,7 @@ See test test:gwr_07
 
 By M. Giantomassi (MR 875, 907)
 
+* * *
 
 ### **C.** Changes for the developers (including information about compilers)
 
@@ -211,7 +216,7 @@ Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP.
 
 By M. Torrent (MR970)
 
-
+* * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
@@ -450,6 +455,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings. 
 
@@ -733,6 +740,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
@@ -1118,6 +1127,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 (nothing to mention for this v9.6)
@@ -1308,6 +1319,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -1524,6 +1537,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -2295,6 +2310,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
@@ -2981,6 +2998,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### A. Warnings and important remarks
 
 A.1 The correct definition of the temperature has been implemented in the isokinetic algorithm [[ionmov]]=12.
@@ -3171,6 +3190,8 @@ and examine the links to help files or test cases ...
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### A. Warnings and important remarks
 
