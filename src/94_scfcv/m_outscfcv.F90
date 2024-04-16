@@ -589,32 +589,14 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
-
    ! Write crystal and band structure energies.
-   !call timab(1190,1,tsec)
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   !call timab(1190,2,tsec)
-
-   !call timab(1191,1,tsec)
    NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
-   !call timab(1191,2,tsec)
-
-   !call timab(1192,1,tsec)
    NCF_CHECK(crystal%ncwrite(ncid))
-   !call timab(1192,2,tsec)
-
-   !call timab(1193,1,tsec)
    NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   !call timab(1193,2,tsec)
-
    ! Add energy, forces, stresses
-   !call timab(1194,1,tsec)
    NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
-   !call timab(1194,2,tsec)
-
-   !call timab(1195,1,tsec)
    NCF_CHECK(nf90_close(ncid))
-   !call timab(1195,2,tsec)
  end if
 #endif
 #endif
@@ -798,7 +780,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fftdatar_write("vtrial",dtfil%fnameabo_app_pot,dtset%iomode,hdr,&
      crystal,ngfft,cplex1,nfft,nspden,vtrial,mpi_enreg,ebands=ebands)
    end if
-   
+
 !  EIG
 #if defined HAVE_NETCDF
    if (dtset%prteig==2 .and. me == master) then
@@ -836,7 +818,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
    if (dtset%prt1dm>0) then
      call out1dm(dtfil%fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,psps%ntypat,&
-&     rhor,rprimd,dtset%typat,ucvol,vtrial,xred,dtset%znucl)
+      rhor,rprimd,dtset%typat,ucvol,vtrial,xred,dtset%znucl)
    end if
 
    call timab(1163,2,tsec)
