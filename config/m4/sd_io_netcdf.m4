@@ -1,4 +1,4 @@
-## Copyright (C) 2020 Yann Pouillon
+## Copyright (C) 2020-2024 Yann Pouillon
 
 #
 # NetCDF I/O library

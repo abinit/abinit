@@ -7,7 +7,7 @@
 !!  used to store results from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (MT)
+!! Copyright (C) 2011-2024 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -823,7 +823,12 @@ subroutine results_gs_yaml_write(results, unit, cryst, info, occopt, with_conv)
  ! Write lattice parameters
  if (present(cryst)) then
   call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
-  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  !ori abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+  !replace the implicit loop by an explicit one
+  !workaround works with both ifort and ifx on oneapi 2024
+  do ii=1,3
+    abc(ii) = sqrt(sum(cryst%rprimd(:, ii) ** 2))
+  end do
   call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
   call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
   call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
