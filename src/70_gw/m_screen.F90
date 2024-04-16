@@ -1143,14 +1143,15 @@ subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
  npw = W%npw; nqibz = W%nqibz; nomega = W%nomega
 
- call qmesh%get_bz_item(iq_bz,qbz,iq_ibz,isym_q,itim_q,isirred=q_isirred)
- !
+ call qmesh%get_bz_item(iq_bz, qbz, iq_ibz, isym_q, itim_q, isirred=q_isirred)
+
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
  ! ========================================================
  if (screen_ihave_fgg(W,iq_ibz,how="Stored")) then
 
-   if (q_isirred) then ! Symmetrization is not needed. Point the data in memory.
+   if (q_isirred) then
+     ! Symmetrization is not needed. Point the data in memory.
      call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Pointer")
      W%Fgg_qbz => W%Fgg(iq_ibz)
    else
@@ -1201,7 +1202,7 @@ subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
    !
    ! Ppmodel calculations with ppm tables in memory.
    ! TODO treat the case in which IBZ tables are stored in memory.
-   if (W%has_ppmodel>0) then
+   if (W%has_ppmodel > 0) then
      ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
      call W%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg_qbz%mat ,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
