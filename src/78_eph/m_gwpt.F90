@@ -1927,20 +1927,19 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
 !Local variables ------------------------------
 !scalars
  integer,parameter :: master = 0, istwfk1 = 1
- integer :: my_rank,ik,my_nshiftq,my_mpw,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
- integer :: onpw, ii, ipw, ierr, spin, gap_err, ikcalc, qprange_, bstop !it,
+ integer :: my_rank,my_nshiftq,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
+ integer :: ii, ierr, spin, gap_err, ikcalc, qprange_, bstop !it, ipw, i1,i2,i3,
  integer :: jj, bstart, natom, natom3
- integer :: isym_k, trev_k, mband, i1,i2,i3, nrest, color
+ integer :: isym_k, trev_k, mband, nrest, color
  character(len=5000) :: msg
- real(dp) :: estep, cpu_all, wall_all, gflops_all, cpu, wall, gflops
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
  logical :: changed, isirr_k
  type(gaps_t) :: gaps
  type(krank_t) :: krank, qrank
 !arrays
- integer :: intp_nshiftk
- integer :: intp_kptrlatt(3,3), g0_k(3), units(2), indkk_k(6,1), my_gmax(3), band_block(2), qptrlatt(3,3)
+ integer :: g0_k(3), units(2), indkk_k(6,1), qptrlatt(3,3)  !band_block(2),
  integer,allocatable :: temp(:,:), degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
- real(dp):: params(4), my_shiftq(3,1), kk(3), kq(3), intp_shiftk(3)
+ real(dp):: my_shiftq(3,1), kk(3) !, kq(3)
 #ifdef HAVE_MPI
  integer,parameter :: ndims = 5
  integer :: comm_cart, me_cart

@@ -3210,9 +3210,10 @@ subroutine macroin2(dtsets, ndtset_alloc)
  integer,intent(in) :: ndtset_alloc
 !arrays
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
- character(len=500) :: msg
+
 !Local variables -------------------------------
 !scalars
+ !character(len=500) :: msg
  integer :: idtset,pawujat
 
 !******************************************************************
