@@ -36,7 +36,7 @@ module m_dfpt_scfcv
  use m_hdr
  use m_dtfil
  use m_hamiltonian
- use m_gemm_nonlop
+ use m_gemm_nonlop_projectors
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
