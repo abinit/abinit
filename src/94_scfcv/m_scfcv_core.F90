@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
+!!  Copyright (C) 1998-2024 ABINIT group (XG, GMR, AR, MKV, MT, FJ, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2136,6 +2136,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 & dtset%userid .EQ. 1 )
 
  if(ANY(ABS(dtset%nucdipmom)>tol8)) recompute_cprj=.TRUE.
+ if(dtset%berryopt == -2 .AND. dtset%orbmag /= 0) recompute_cprj=.TRUE.
 
  if (recompute_cprj) then
    usecprj=1
@@ -2151,6 +2152,9 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      else if (forces_needed == 0 .and. stress_needed /= 0) then
        ncpgr = 6 ; ctocprj_choice = 3
      end if
+   end if
+   if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+     ncpgr=3; ctocprj_choice=5
    end if
    call pawcprj_alloc(cprj_local,ncpgr,dimcprj)
    cprj=> cprj_local
