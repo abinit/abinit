@@ -597,9 +597,11 @@ module m_sigmaph
    integer :: nband_me = -1
    integer :: nline_in = -1
    integer :: nlines_done = -1
+   integer :: usedcwavef
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
+   !type(u1cache_t) :: u1c
 
    integer,allocatable :: bands_treated_now(:), rank_band(:)
 
@@ -607,14 +609,10 @@ module m_sigmaph
 
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
 
-   !type(u1cache_t) :: u1c
-
  contains
 
    procedure :: init => stern_init
     ! Initialize the object.
-
-   !procedure :: load_cgq => stern_load_cgq
 
    procedure :: solve => stern_solve
     ! Solves the NSCF Sternheimer equation. Simplified wrapper around dfpt_cgwf.
@@ -1641,6 +1639,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          nband_me = nbsum
 #endif
 
+         !call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, use_u1c_cache, comm_band)
+
          ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
 
@@ -1756,9 +1756,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            mpi_enreg%me_band = sigma%bsum_comm%me
            mpi_enreg%nproc_band = sigma%bsum_comm%nproc
 #endif
-
-           !call stern%init(npw_k, npw_kq, nspinor, nbsum, dtset, mpi_enreg)
-           !call stern%load_cgq(cgq)
 
            ABI_CALLOC(out_eig1_k, (2*nbsum**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -5736,24 +5733,31 @@ end subroutine qpoints_oracle
 !!
 !! SOURCE
 
-subroutine stern_init(stern, npw_k, npw_kq, nspinor, nbsum, dtset, mpi_enreg)
+subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, use_u1c_cache, comm_band)
 
 !Arguments ------------------------------------
  class(stern_t),intent(out) :: stern
- integer,intent(in) :: npw_k, npw_kq, nspinor, nbsum
  type(dataset_type),target,intent(in) :: dtset
- type(mpi_type),intent(in) :: mpi_enreg
+ integer,intent(in) :: npw_k, npw_kq, nspinor, nbsum, nband_me, comm_band
+ logical,intent(in) :: use_u1c_cache
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: usedcwavef0 = 0
 ! *************************************************************************
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nbsum = nbsum; stern%dtset => dtset
- call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
+ stern%nband_me = nband_me
+ stern%usedcwavef = 0
+ stern%use_u1c_cache = use_u1c_cache
+
+ call init_mpi_enreg(stern%mpi_enreg)
+ !new_comm = xmpi_comm_dup(comm_band)
+ !mpi_enreg%comm_band = sigma%bsum_comm%value
+ !mpi_enreg%me_band = sigma%bsum_comm%me
+ !mpi_enreg%nproc_band = sigma%bsum_comm%nproc
 
  ABI_CALLOC(stern%out_eig1_k, (2*nbsum**2))
- ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*usedcwavef0))
+ ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
  ABI_MALLOC(stern%gh1c_n, (2, npw_kq*nspinor))
  ABI_MALLOC(stern%ghc, (2, npw_kq*nspinor))
  ABI_MALLOC(stern%gsc, (2, npw_kq*nspinor))
@@ -5768,18 +5772,11 @@ subroutine stern_init(stern, npw_k, npw_kq, nspinor, nbsum, dtset, mpi_enreg)
 
  stern%nline_in = min(100, npw_kq); if (dtset%nline > stern%nline_in) stern%nline_in = min(dtset%nline, npw_kq)
 
+ ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
+ ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*dtset%usepaw))
+
 end subroutine stern_init
 !!***
-
-!subroutine stern_load_cgq(stern, cgq)
-! class(stern_t),intent(inout) :: stern
- !mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
- !mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
- !ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
- !ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
-!end subroutine stern_load_cgq
-!!***
-
 
 !!****f* m_dfpt_cgwf/stern_solve
 !! NAME
@@ -5809,7 +5806,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0
  integer :: opt_gvnlx1, mcgq, mgscq, grad_berry_size_mpw1
  real(dp) :: out_resid
  type(rf2_t) :: rf2
@@ -5838,6 +5835,21 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
  mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
 
+ ! Init entry in cg1s_kq, either from cache or with zeros.
+ !if (stern%use_u1c_cache) then
+ !  u1c_ib_k = stern%u1c%find_band(band_ks)
+ !  if (u1c_ib_k /= -1) then
+ !    call cgtk_change_gsphere(nspinor, &
+ !                             stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+ !                             npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
+ !  else
+ !    cg1s_kq(:,:,ipc,ib_k) = zero
+ !  end if
+
+ !else
+ !  cg1s_kq(:,:,ipc,ib_k) = zero
+ !end if
+
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
    stern%cgq, cwavef, cwave0, &  ! Important stuff
@@ -5849,9 +5861,14 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
    mcgq, mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nbsum, stern%nband_me, &
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
-   usedcwavef0, stern%dtset%wfoptalg, stern%nlines_done)
+   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done)
 
  ABI_FREE(grad_berry)
+
+ !if (stern%use_u1c_cache) then
+ ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+ ! call stern%u1c%store(qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+ !end if
 
  ! Handle possible convergence error.
  if (u1_band > 0) then
@@ -5907,6 +5924,10 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
 
+ ! Revert changes in mpi_enreg.
+ !stern%mpi_enreg%comm_band = xmpi_comm_self
+ !stern%mpi_enreg%me_band = 0
+ !stern%mpi_enreg%nproc_band = 1
  call destroy_mpi_enreg(stern%mpi_enreg)
 
 end subroutine stern_free
