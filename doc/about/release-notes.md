@@ -96,7 +96,7 @@ For an expert user of ABINIT on [[GPU]], some additional keywords can be used. S
 Several GPU devices can be detected and used on a node.
 
 GPU regression tests are present in new directories,
-[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], [[test:gpu_omp_10]],
+[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], 
 [[test:hpc_gpu_omp_01]] to [[test:hpc_gpu_omp_13]],
 as well as in the previously existing directory gpu.
 
