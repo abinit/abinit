@@ -642,7 +642,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_k,my_npert ! iq_ibz_frohl,iq_bz_frohl,
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, qptopt ! = 1
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ibsum, ii, jj, iw !ib_kq,
- !integer :: u1_master, ip
+ integer :: u1_master, ip
  integer :: mcgq, mgscq, ig, ispinor, ifft !nband_kq,
  integer :: idir,ipert,ip1,ip2,idir1,ipert1,idir2,ipert2
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq, isym_q, trev_q
@@ -654,7 +654,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom, sendcount
- integer :: comm_rpt, osc_npw
+ integer :: comm_rpt, osc_npw, stern_comm
  integer :: ffnlk_request, ffnl1_request, nelem, cgq_request
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val
@@ -662,7 +662,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: vkk_norm, vkq_norm, osc_ecut, bz_vol
  complex(dpc) :: cfact,dka,dkap,dkpa,dkpap, cnum, sig_cplx, cfact2
  logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, use_u1c_cache, intra_band, same_band
- logical :: zpr_frohl_sphcorr_done
+ logical :: zpr_frohl_sphcorr_done, dev_band_para
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -724,6 +724,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
+
+ dev_band_para = .False.
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -1585,15 +1587,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! The present version is not memory efficient and leads to a big load imbalance if
          ! bsum%comm%nproc > nband_calc_ks
 
-!#define DEV_BAND_PARA
-
-#ifdef DEV_BAND_PARA
+if (dev_band_para) then
          nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-#else
+         stern_comm = sigma%bsum_comm%value
+else
          nband_me = nbsum
-#endif
+         stern_comm = xmpi_comm_self
+endif
 
-         !call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, use_u1c_cache, comm_band)
+         !call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, use_u1c_cache, stern_comm)
 
          ABI_MALLOC(cgq, (2, npw_kq * nspinor, nband_me))
          ABI_MALLOC(gscq, (2, npw_kq * nspinor, nband_me*psps%usepaw))
@@ -1609,17 +1611,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
             end if
 
-#ifdef DEV_BAND_PARA
-            ii = ibsum_kq - sigma%my_bsum_start + 1
-            cgq(:,:,ii) = bra_kq
-#else
-            cgq(:, :, ibsum_kq) = bra_kq
-#endif
+if (dev_band_para) then
+              ii = ibsum_kq - sigma%my_bsum_start + 1
+              cgq(:,:,ii) = bra_kq
+else
+              cgq(:, :, ibsum_kq) = bra_kq
+end if
          end do
 
          cgq_request = xmpi_request_null
 
-#ifndef DEV_BAND_PARA
+if (.not. dev_band_para) then
          if (sigma%bsum_comm%nproc > 1) then
            ! If band parallelism, need to gather all bands nbsum bands.
            ! FIXME: This part is network intensive, one can avoid it by calling dfpt_cgwf in band-para mode.
@@ -1650,7 +1652,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ABI_FREE(recvcounts)
            ABI_FREE(displs)
          end if
-#endif
+end if
          call timab(1908, 2, tsec)
        end if  ! eph_stern
 
@@ -1704,12 +1706,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! Activate Sternheimer. Note that we are still inside the MPI loop over my_npert.
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
 
-#ifdef DEV_BAND_PARA
-           ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
-           mpi_enreg%comm_band = sigma%bsum_comm%value
-           mpi_enreg%me_band = sigma%bsum_comm%me
-           mpi_enreg%nproc_band = sigma%bsum_comm%nproc
-#endif
+if (dev_band_para) then
+             ! Prepare band parallelism in dfpt_cgwf via mpi_enreg.
+             mpi_enreg%comm_band = sigma%bsum_comm%value
+             mpi_enreg%me_band = sigma%bsum_comm%me
+             mpi_enreg%nproc_band = sigma%bsum_comm%nproc
+endif
 
            ABI_CALLOC(out_eig1_k, (2*nbsum**2))
            ABI_MALLOC(dcwavef, (2, npw_kq*nspinor*usedcwavef0))
@@ -1740,16 +1742,16 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
            nline_in = min(100, npw_kq); if (dtset%nline > nline_in) nline_in = min(dtset%nline, npw_kq)
 
-#ifndef DEV_BAND_PARA
-           ! Wait for gatherv operation
-           if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
-#endif
+if (.not. dev_band_para) then
+             ! Wait for gatherv operation
+             if (cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+endif
 
            do ib_k=1,nbcalc_ks
              band_ks = ib_k + bstart_ks - 1
              bands_treated_now(:) = 0; bands_treated_now(band_ks) = 1
 
-#ifdef DEV_BAND_PARA
+if (dev_band_para) then
              ! Init rank_band and band_me from nbsum_rank.
              rank_band = -1; band_me = 1
              do ip=1,sigma%bsum_comm%nproc
@@ -1765,12 +1767,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                band_me = 1
                u1_band = -band_ks
              end if
-#else
+else
              rank_band = 0
              band_me = band_ks
              u1_band  = band_ks
              if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
-#endif
+endif
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
              if (use_u1c_cache) then
@@ -1809,9 +1811,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
              tot_nlines_done = tot_nlines_done + nlines_done
 
-#ifdef DEV_BAND_PARA
+if (dev_band_para) then
              call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
-#endif
+endif
 
              ! Handle possible convergence error.
              if (u1_band > 0) then
@@ -1834,12 +1836,12 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
            end do ! ib_k
 
-#ifdef DEV_BAND_PARA
+if (dev_band_para) then
            ! Revert changes in mpi_enreg.
            mpi_enreg%comm_band = xmpi_comm_self
            mpi_enreg%me_band = 0
            mpi_enreg%nproc_band = 1
-#endif
+endif
 
            ABI_FREE(bands_treated_now)
            ABI_FREE(rank_band)
