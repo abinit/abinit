@@ -1084,7 +1084,6 @@ subroutine xmpi_show_info(unit)
 
 ! *************************************************************************
 
- !@m_xmpi
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
 
 #ifdef HAVE_MPI1
@@ -2804,7 +2803,9 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 
 end subroutine xmpi_largetype_create
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_int
 !! NAME
 !!  largetype_sum_int
@@ -2827,7 +2828,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_real
 !! NAME
 !!  largetype_sum_real
@@ -2850,13 +2853,16 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dble
 !! NAME
 !!  largetype_sum_dble
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for double precision reals
+
  subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
   integer :: len,datatype
   real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2873,7 +2879,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_cplx
 !! NAME
 !!  largetype_sum_cplx
@@ -2896,7 +2904,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dcplx
 !! NAME
 !!  largetype_sum_dcplx
@@ -2919,7 +2929,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_lor_log
 !! NAME
 !!  largetype_lor_log
@@ -2942,10 +2954,12 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
 !!***
+
 !--------------------------------------
-!!****f* m_xmpi/largetype_lang_log
+
+!!****f* m_xmpi/largetype_land_log
 !! NAME
-!!  largetype_lang_log
+!!  largetype_land_log
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LANG for logicals
@@ -4916,8 +4930,8 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
    end do
  end do
 
- write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
- write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
+ !write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
+ !write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
 
  !block_displ (1)=max_displ ! Do not change this value.
  !if (min_displ>0) block_displ (1)=min_displ ! Do not change this value.
