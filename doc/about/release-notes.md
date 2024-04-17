@@ -98,7 +98,10 @@ as well as in the previously existing directory gpu.
 
 The ABINIT test farm has been upgraded to support those tests. The NVHPC compiler is supported. Also, ABINIT works on Adastra cluster with newest Cray version (23.12).
 
-FOR THE TIME BEING (MARCH 2024), THE DOCUMENTATION TO BUILD THE GPU VERSION OF ABINIT REMAINS TO BE WRITTEN. CONTACT MARC TORRENT IF YOU WANT TO BE A BETA TESTER.
+FOR THE TIME BEING (APRIL 2024), THE DOCUMENTATION TO BUILD THE GPU VERSION OF ABINIT REMAINS TO BE WRITTEN. 
+Still, there are three examples *ac9 files in the directory doc/build of the package, that are also available from 
+[https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
+Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent. 
 
 By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
 (MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
@@ -106,23 +109,24 @@ By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent
 
 **B.3** CMake build of ABINIT 
 
-ABINIT can now be build using CMake instead of the standard configure+make. This was needed to build the GPU version
-of ABINIT relying on KOKKOS.
+ABINIT can now be build using CMake instead of the standard configure+make. This is needed to build the GPU version
+of ABINIT relying on KOKKOS. Try :
+
+mkdir build; cd build; cmake ..
+
+More information is available in the ABINIT [[help:../installation|installation guide]]
+Still, the usual build procedure, using autotools is to be preferred by non-experts. CMake is to be considered as experimental.
+
 Also, the version number of ABINIT is now generated automatically from the git tag information.
 
-FOR THE TIME BEING (MARCH 2024), THE DOCUMENTATION TO BUILD ABINIT USING CMAKE REMAINS TO BE WRITTEN. CONTACT MARC TORRENT IF YOU WANT TO BE
- A BETA TESTER.
-
-By P. Kestener with M. Torrent (MR944, 979))
+By P. Kestener with M. Torrent (MR944, 979) 
 
 
 **B.4** Computation of phonon angular momentum
 
-It is now possible to compute of phonon angular momentum in anaddb, following the formula provided in [[cite:Zhang2014]].
-DDB support has been added, a new block type is introduced inside the ddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
-A new type of file (*_PHANGMOM) has been defined. See [[test:rf2_5]].
+It is now possible to compute the angular momentum of phonons in anaddb, following the formula provided in [[cite:Zhang2014]]. A new type of file (*_PHANGMOM) has been defined. The phonon angular momentum is also written to *_PHBST.nc. See [[test:rf2_5]].
 
-By M. Mignolet (MR921, MR984)
+By M. Mignolet (MR921)
 
 
 **B.5** New input "supra"variable write_files
@@ -410,6 +414,13 @@ Reference files redone and updated.
 
 From L. MacEnulty (MR975)
 
+**D.25** Molecular Berry curvature
+
+DDB support has been added for the molecular Berry curvature. A new block type has been introduced inside anaddb (number 85). It represents the molecular Berry curvature and is of kind d2E.
+
+When computing the molecular Berry curvature (eph_task=14), it is now written to a ddb file (*_BERRY_DBB).
+
+From M. Mignolet (MR984)
 
 * * *
 
