@@ -220,6 +220,7 @@ ABI_TOPICS = [
     "GWR",
     "GWls",
     "Hybrids",
+    "Install",
     "k-points",
     "LatticeModel",
     "LatticeWannier",
