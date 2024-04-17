@@ -33,7 +33,7 @@ module m_dfpt_cgwf
  use defs_abitypes, only : MPI_type
  use m_dtset,       only : dataset_type
  use m_time,        only : timab
- use m_mpinfo,      only : init_mpi_enreg, destroy_mpi_enreg
+ use m_mpinfo,      only : init_mpi_enreg, destroy_mpi_enreg, copy_mpi_enreg
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
  use m_getghc,      only : getghc
@@ -1500,13 +1500,14 @@ end subroutine dfpt_cgwf
 !!
 !! SOURCE
 
-subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_u1c_cache, comm_band)
+subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_u1c_cache, mpi_enreg, comm_band)
 
 !Arguments ------------------------------------
  class(stern_t),intent(out) :: stern
  type(dataset_type),target,intent(in) :: dtset
  integer,intent(in) :: npw_k, npw_kq, nspinor, nband, nband_me, comm_band
  logical,intent(in) :: use_u1c_cache
+ type(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
 !scalars
@@ -1518,7 +1519,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use
  stern%usedcwavef = 0
  stern%use_u1c_cache = use_u1c_cache
 
- call init_mpi_enreg(stern%mpi_enreg)
+ call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
  call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
  stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
