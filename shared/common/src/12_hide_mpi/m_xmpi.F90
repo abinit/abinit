@@ -230,6 +230,7 @@ module m_xmpi
  public :: xmpi_comm_rank             ! Hides MPI_COMM_RANK from MPI library.
  public :: xmpi_comm_size             ! Hides MPI_COMM_SIZE from MPI library.
  public :: xmpi_comm_free             ! Hides MPI_COMM_FREE from MPI library.
+ public :: xmpi_comm_dup              ! Hides MPI_COMM_DUP from MPI library.
  public :: xmpi_comm_group            ! Hides MPI_COMM_GROUP from MPI library.
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
  public :: xmpi_comm_translate_rank   ! Translate one rank
@@ -1634,6 +1635,40 @@ subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
  end if
 
 end subroutine xmpi_comm_multiple_of
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_comm_dup
+!! NAME
+!!  xmpi_comm_dup
+!!
+!! FUNCTION
+!!  Hides MPI_COMM_DUP from MPI library.
+!!
+!! INPUTS
+!!  in_comm=input MPI communicator.
+!!
+!! OUTPUT
+!!  mpierr=error code returned
+!!
+!! SOURCE
+
+subroutine xmpi_comm_dup(in_comm, out_comm, mpierr)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: out_comm, mpierr
+
+!----------------------------------------------------------------------
+
+#ifdef HAVE_MPI
+  call MPI_Comm_dup(in_comm, out_comm, mpierr)
+#else
+  out_comm = in_comm
+#endif
+
+end subroutine xmpi_comm_dup
 !!***
 
 !----------------------------------------------------------------------
