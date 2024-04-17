@@ -29,8 +29,11 @@ module m_dfpt_cgwf
  use m_cgtools
  use m_rf2
 
+ use m_fstrings,    only : sjoin, ftoa, itoa
  use defs_abitypes, only : MPI_type
+ use m_dtset,       only : dataset_type
  use m_time,        only : timab
+ use m_mpinfo,      only : init_mpi_enreg, destroy_mpi_enreg
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_set_zero, pawcprj_axpby
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
  use m_getghc,      only : getghc
@@ -39,6 +42,53 @@ module m_dfpt_cgwf
  implicit none
 
  private
+!!***
+
+!!****t* m_sigmaph/stern_t
+!! NAME
+!! stern_t
+!!
+!! FUNCTION
+!!  Simplied interface to the NSCF Sternheimer solver.
+!!  Wrapper around dfpt_cgwf routine
+!!
+!! SOURCE
+
+ type,public :: stern_t
+
+   integer :: npw_k  = -1
+   integer :: npw_kq = -1
+   integer :: nspinor = -1
+   integer :: nband = -1
+   integer :: nband_me = -1
+   integer :: nline_in = -1
+   integer :: nlines_done = -1
+   integer :: usedcwavef
+   logical :: use_u1c_cache
+
+   type(dataset_type),pointer :: dtset => null()
+   type(mpi_type) :: mpi_enreg
+   !type(u1cache_t) :: u1c
+
+   integer,allocatable :: bands_treated_now(:)
+   integer,allocatable :: rank_band(:)
+
+   real(dp),allocatable :: out_eig1_k(:)
+   real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
+   real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
+
+ contains
+
+   procedure :: init => stern_init
+    ! Initialize the object.
+
+   procedure :: solve => stern_solve
+    ! Solves the NSCF Sternheimer equation. Simplified wrapper around dfpt_cgwf.
+
+   procedure :: free => stern_free
+    ! Free dynamic memory.
+
+ end type stern_t
 !!***
 
  public :: dfpt_cgwf
@@ -1435,6 +1485,216 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  DBG_EXIT("COLL")
 
 end subroutine dfpt_cgwf
+!!***
+
+!!****f* m_dfpt_cgwf/stern_init
+!! NAME
+!!  stern_init
+!!
+!! FUNCTION
+!!   Initialize the object.
+!!
+!! INPUT
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_u1c_cache, comm_band)
+
+!Arguments ------------------------------------
+ class(stern_t),intent(out) :: stern
+ type(dataset_type),target,intent(in) :: dtset
+ integer,intent(in) :: npw_k, npw_kq, nspinor, nband, nband_me, comm_band
+ logical,intent(in) :: use_u1c_cache
+
+!Local variables ------------------------------
+!scalars
+ integer :: ierr
+! *************************************************************************
+
+ stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
+ stern%nband_me = nband_me
+ stern%usedcwavef = 0
+ stern%use_u1c_cache = use_u1c_cache
+
+ call init_mpi_enreg(stern%mpi_enreg)
+ call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
+ stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
+ stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
+
+ ABI_CALLOC(stern%out_eig1_k, (2*nband**2))
+ ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
+ ABI_MALLOC(stern%gh1c_n, (2, npw_kq*nspinor))
+ ABI_MALLOC(stern%ghc, (2, npw_kq*nspinor))
+ ABI_MALLOC(stern%gsc, (2, npw_kq*nspinor))
+ ABI_MALLOC(stern%gvnlxc, (2, npw_kq*nspinor))
+ ABI_MALLOC(stern%gvnlx1, (2, npw_kq*nspinor))
+
+ ! TODO: to distribute cgq and kets memory, use mband_mem per core in band comm, but coordinate everyone with
+ ! the following array (as opposed to the distribution of cg1 which is done in the normal dfpt calls
+ ABI_MALLOC(stern%bands_treated_now, (nband))
+ ABI_MALLOC (stern%rank_band, (nband))
+ stern%rank_band = 0
+
+ stern%nline_in = min(100, npw_kq); if (dtset%nline > stern%nline_in) stern%nline_in = min(dtset%nline, npw_kq)
+
+ ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
+ ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*dtset%usepaw))
+
+end subroutine stern_init
+!!***
+
+!!****f* m_dfpt_cgwf/stern_solve
+!! NAME
+!!  stern_solve
+!!
+!! FUNCTION
+!!  Solves the NSCF Sternheimer equation. Simplified wrapper around dfpt_cgwf.
+!!
+!! INPUT
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, cwaveprj0, cwavef, cwaveprj)
+
+!Arguments ------------------------------------
+ class(stern_t),intent(inout) :: stern
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
+ type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
+ integer,intent(in) :: u1_band, band_me, idir, ipert
+!arrays
+ real(dp),intent(in) :: eig0_k(stern%nband), eig0_kq(stern%nband)
+ real(dp),intent(inout) :: cwave0(2, stern%npw_k*stern%nspinor), cwavef(2, stern%npw_kq*stern%nspinor)
+ type(pawcprj_type),intent(inout) :: cwaveprj0(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0
+ integer :: opt_gvnlx1, mcgq, mgscq, grad_berry_size_mpw1
+ real(dp) :: out_resid
+ type(rf2_t) :: rf2
+ character(len=5000) :: msg
+ real(dp),allocatable :: grad_berry(:,:)
+
+! *************************************************************************
+
+ ! TODO: grad_berry is problematic because in dfpt_cgwf, the array is declared with
+ !
+ !  real(dp),intent(in) :: grad_berry(2,mpw1*nspinor,nband)
+ !
+ ! and
+ !
+ !  npw1_k = number of plane waves at this k+q point
+ !
+ ! So in principle we should allocate lot of memory to avoid bound checking error!
+ ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
+ ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
+ !
+ opt_gvnlx1 = 0 ! gvnlx1 is output
+ stern%nlines_done = 0
+ grad_berry_size_mpw1 = 0
+ ABI_MALLOC(grad_berry, (2, stern%nspinor*(berryopt0/4)))
+
+ mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
+ mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
+
+ ! Init entry in cg1s_kq, either from cache or with zeros.
+ !if (stern%use_u1c_cache) then
+ !  u1c_ib_k = stern%u1c%find_band(band_ks)
+ !  if (u1c_ib_k /= -1) then
+ !    call cgtk_change_gsphere(nspinor, &
+ !                             stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+ !                             npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
+ !  else
+ !    cg1s_kq(:,:,ipc,ib_k) = zero
+ !  end if
+
+ !else
+ !  cg1s_kq(:,:,ipc,ib_k) = zero
+ !end if
+
+ call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
+   !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
+   stern%cgq, cwavef, cwave0, &  ! Important stuff
+   cwaveprj, cwaveprj0, rf2, stern%dcwavef, &
+   !ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), stern%out_eig1_k, &
+   eig0_k, eig0_kq, stern%out_eig1_k, &
+   stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
+   gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
+   mcgq, mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
+   nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
+   opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
+   stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done)
+
+ ABI_FREE(grad_berry)
+
+ !if (stern%use_u1c_cache) then
+ ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+ ! call stern%u1c%store(qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+ !end if
+
+ ! Handle possible convergence error.
+ if (u1_band > 0) then
+   if (out_resid > stern%dtset%tolwfr) then
+     write(msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
+       " Sternheimer didn't convergence for band: ", u1_band, ch10, &
+       " resid:", out_resid, " >= tolwfr: ", stern%dtset%tolwfr, ch10, &
+       " after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
+     ABI_ERROR(msg)
+   else if (out_resid < zero) then
+     ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done)))
+   end if
+
+   !if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+   !  write(std_out, "(2(a,es13.5),a,i0)") &
+   !    " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
+   !    " after nlines_done: ", nlines_done
+   !  enough_stern = enough_stern + 1
+   !end if
+ end if
+
+end subroutine stern_solve
+!!***
+
+!!****f* m_dfpt_cgwf/stern_free
+!! NAME
+!!  stern_free
+!!
+!! FUNCTION
+!!  Free dynamic memory
+!!
+!! SOURCE
+
+subroutine stern_free(stern)
+
+!Arguments ------------------------------------
+ class(stern_t),intent(inout) :: stern
+
+!************************************************************************
+
+ ! integer
+ ABI_SFREE(stern%bands_treated_now)
+ ABI_SFREE(stern%rank_band)
+
+ ! real
+ ABI_SFREE(stern%out_eig1_k)
+ ABI_SFREE(stern%dcwavef)
+ ABI_SFREE(stern%gh1c_n)
+ ABI_SFREE(stern%ghc)
+ ABI_SFREE(stern%gsc)
+ ABI_SFREE(stern%gvnlxc)
+ ABI_SFREE(stern%cgq)
+ ABI_SFREE(stern%gscq)
+ ABI_SFREE(stern%gvnlx1)
+
+ !call stern%u1c%free()
+ call destroy_mpi_enreg(stern%mpi_enreg)
+
+end subroutine stern_free
 !!***
 
 end module m_dfpt_cgwf
