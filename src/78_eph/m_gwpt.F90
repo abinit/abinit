@@ -1950,6 +1950,10 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm) res
 
 ! *************************************************************************
 
+ ABI_UNUSED(dtfil%ireadden)
+ ABI_UNUSED(ifc%natom)
+
+
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
@@ -2514,6 +2518,8 @@ subroutine gwpt_setup_kcalc(self, dtset, cryst, ebands, ikcalc, prtvol, comm)
  real(dp),allocatable :: kq_list(:,:)
 
 ! *************************************************************************
+
+ ABI_UNUSED(prtvol)
 
  ABI_SFREE(self%qibz_k)
  ABI_SFREE(self%wtq_k)
