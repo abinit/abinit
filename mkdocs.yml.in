@@ -40,6 +40,7 @@ nav:
         - CentOS: INSTALL_CentOS.md
         - EasyBuild: INSTALL_EasyBuild.md
         - GPUs: INSTALL_gpu.md
+# The topics should be declared both in this file and in abimkdocs/variables.py
 - Topics:
     - Features: topics/features.md
     - Topic List: topics/index.md

@@ -172,6 +172,7 @@ ABI_EXTERNAL_PARAMS = OrderedDict([
 ])
 
 # List of topics
+# The topics should be declared both in this file and in mkdocs.yml.in
 ABI_TOPICS = [
     "Abipy",
     "APPA",
