@@ -156,18 +156,19 @@ contains
 !!
 !! SOURCE
 
-subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
-&  gprimd,hdr,indlmn,kg,lmnmax,mband,mcg,mcprj,&
+subroutine berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,&
+&  gprimd,hdr,indlmn,kg,lmnmax,mband,mcg,mcg13,mcprj,&
 &  mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,nsppol,ntypat,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
-&  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
+&  rprimd,save_cg13,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
 
 !Arguments ------------------------------------
- integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
+ integer, intent(in) :: lmnmax,mband,mcg,mcg13,mcprj,mkmem,mpw,my_natom,natom,nkpt
  integer, intent(in) :: nsppol,ntypat,calc_pol_ddk
  integer, intent(in) :: pwind_alloc,unit_out,usecprj,usepaw
  real(dp), intent(in) :: ucvol
+ logical,intent(in) :: save_cg13
  type(MPI_type), intent(in) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in) :: dtset
@@ -184,6 +185,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
  real(dp), intent(inout) :: xred(3,natom)
  real(dp), intent(out) :: pel(3),pelev(3),pion(3)
  real(dp), intent(out) :: ptot(3),red_ptot(3) !!REC
+ real(dp),intent(out) :: cg13(2,mcg13,3)
  type(pawrhoij_type), intent(in) :: pawrhoij(my_natom*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
  type(pawcprj_type),intent(in) ::  cprj(natom,mcprj*usecprj)
@@ -293,6 +295,21 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 
  if (usepaw == 1 .and. usecprj /= 1) then
    message = ' PAW calculation but cprj datastructure has not been allocated !'
+   ABI_BUG(message)
+ end if
+
+ if (save_cg13 .AND. (ddkflag /= 1) ) then
+   message = ' cg13 output requested but ddkflag not set '
+   ABI_BUG(message)
+ end if
+
+ if (save_cg13 .AND. (mcg13 /= mcg) ) then
+   message = ' cg13 output requested but mcg13 /= mcg '
+   ABI_BUG(message)
+ end if
+
+ if (save_cg13 .AND. (size(cg13) /= 2*mcg13*3 ) ) then
+   message = ' cg13 output requested but cg13 size incorrect '
    ABI_BUG(message)
  end if
 
@@ -1110,6 +1127,10 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &     nkpt,npwarr,nsppol,&
 &     occ_dum,response,dtfil%unwff2,wfs,wvl)
 
+     if (save_cg13) then
+       cg13(1:2,1:mcg13,idir) = cg1(1:2,1:mcg)
+     end if
+
      ABI_FREE(resid)
    end if  ! ddkflag == 1
 ! end of ddk part for this idir
@@ -1820,12 +1841,12 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   !Local variables -------------------------
   !scalars
   character(len=500) :: message
-  integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcprj,my_nspinor,ncpgr
+  integer :: ctocprj_choice,iatom,ii,iorder_cprj,mcg13,mcprj,my_nspinor,ncpgr
   integer :: optberry,usecprj
-  logical :: calc_epaw3_force, calc_epaw3_stress, efield
+  logical :: calc_epaw3_force, calc_epaw3_stress, efield, save_cg13
   !arrays
   real(dp) :: efield_test_cart(3),red_efield1(3)
-  real(dp),allocatable :: ph1d(:,:)
+  real(dp),allocatable :: cg13(:,:,:),ph1d(:,:)
   type(pawcprj_type),allocatable :: cprj(:,:)
 
   ! *************************************************************************
@@ -1881,12 +1902,17 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
   if ( efield ) then ! compute polarization and if necessary store cprj in efield
      optberry=1
      pel_cg(:) = zero;pelev=zero
-     call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
-          &   psps%lmnmax,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
+
+     mcg13 = 0
+     save_cg13 = .FALSE.
+     ABI_MALLOC(cg13,(2,mcg13,3))
+     call berryphase_new(atindx1,cg,cg13,cprj,dtefield,dtfil,dtset,psps,gprimd,hdr,psps%indlmn,kg,&
+          &   psps%lmnmax,dtset%mband,mcg,mcg13,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,&
           &   dtset%natom,npwarr,dtset%nsppol,psps%ntypat,dtset%nkpt,optberry,pawrhoij,pawtab,&
           &   pel_cg,pelev,pion,ptot,red_ptot,pwind,&
-          &   pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
+          &   pwind_alloc,pwnsfac,rprimd,save_cg13,dtset%typat,ucvol,&
           &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+     ABI_FREE(cg13)
 
      dtefield%red_ptot1(:)=red_ptot(:)
 

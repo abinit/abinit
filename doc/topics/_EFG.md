@@ -46,19 +46,20 @@ current approach to be used with more complex electronic and magnetic states
 than just insulators.
 
 Within ABINIT, the electric field gradient computation is invoked with
-the key word [[nucefg]] (for NUClear site EFG), together with the key
-word [[quadmom]], at the end of a normal ground state calculation. The
-PAW formalism is required, and the EFG calculation adds only a
-negligible amount of time to the total. The [[nucefg]] key word takes
-the values 1--3. For value 1, the electric field gradient coupling in
-MHz is reported, where the conversion is made for each atom by
-combining the gradient with the nuclear quadrupole moments supplied by
-[[quadmom]]. When [[nucefg]] is input as 2, the additional breakdown
-of the field gradient in terms of valence and on-site PAW terms is
-reported, in atomic units, along with the eigenvectors of the EFG
-matrix, so that principal directions may be determined with respect to
-the crystal axes. Finally, [[nucefg]] input as 3 allows additional computation
-of a point-charge model of the gradient, for comparison purposes. The
+the key word [[nucefg]] (for NUClear site EFG), optionally together
+with the key word [[quadmom]], at the end of a normal ground state
+calculation. The PAW formalism is required, and the EFG calculation
+adds only a negligible amount of time to the total. The [[nucefg]] key
+word takes the values 1--3. For value 1, the electric field gradient
+in atomic units and SI units (V/m$^2$) is reported, along with the
+eigenvectors showing its orientation in the crystal, and the
+contributions of the planewave density, the PAW on-site terms, and the
+ionic contributions. When [[nucefg]] is input as 2, the electric field
+gradient coupling in MHz and the asymmetry are also reported, where
+the conversion is made for each atom by combining the gradient with
+the nuclear quadrupole moments supplied by [[quadmom]].
+Finally, [[nucefg]] input as 3 allows additional computation of
+a point-charge model of the gradient, for comparison purposes. The
 point charges by atom are supplied through the additional variable
 [[ptcharge]]. Detailed examples of the use of ABINIT to compute EFG's
 can be found in [[cite:Zwanziger2008]], [[cite:Zwanziger2009a]].
