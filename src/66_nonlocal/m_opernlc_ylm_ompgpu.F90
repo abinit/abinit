@@ -29,12 +29,10 @@ module m_opernlc_ylm_ompgpu
  use m_abicore
  use m_xmpi
  use m_abi_linalg
+ use, intrinsic :: iso_c_binding
 
  use defs_abitypes, only : MPI_type
 
-#ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_size_t
-#endif
 
  implicit none
 
@@ -44,8 +42,84 @@ module m_opernlc_ylm_ompgpu
  public :: opernlc_ylm_ompgpu
 !!***
 
+! Work buffers to be used when iphase==2
+ real(dp), allocatable, target :: d2gxdtfac_2ndphase(:,:,:,:)
+ real(dp), allocatable, target :: dgxdtfac_2ndphase(:,:,:,:)
+ real(dp), allocatable, target :: gxfac_2ndphase(:,:,:)
+
+!----------------------------------------------------------------------
+
 contains
 !!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_opernlc_ylm_ompgpu/alloc_work_arrays
+!! NAME
+!! alloc_work_arrays
+!!
+!! FUNCTION
+!! Allocation of work arrays
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine alloc_work_arrays(optder,cplex_fac,ndgxdtfac,nd2gxdtfac,nprojs,ndat)
+
+  integer,intent(in) :: optder,cplex_fac,ndgxdtfac,nd2gxdtfac,nprojs,ndat
+
+! *************************************************************************
+
+   ABI_MALLOC(gxfac_2ndphase,(cplex_fac,nprojs,ndat))
+   !$OMP TARGET ENTER DATA MAP(alloc:gxfac_2ndphase)
+   call gpu_set_to_zero(gxfac_2ndphase, int(cplex_fac,c_size_t)*nprojs*ndat)
+   if (optder>=1) then
+     ABI_MALLOC(dgxdtfac_2ndphase,(cplex_fac,ndgxdtfac,nprojs,ndat))
+     !$OMP TARGET ENTER DATA MAP(alloc:dgxdtfac_2ndphase)
+     call gpu_set_to_zero(dgxdtfac_2ndphase, int(cplex_fac,c_size_t)*ndgxdtfac*nprojs*ndat)
+   end if
+   if (optder>=2) then
+     ABI_MALLOC(d2gxdtfac_2ndphase,(cplex_fac,nd2gxdtfac,nprojs,ndat))
+     !$OMP TARGET ENTER DATA MAP(alloc:dgxdtfac_2ndphase)
+     call gpu_set_to_zero(d2gxdtfac_2ndphase, int(cplex_fac,c_size_t)*nd2gxdtfac*nprojs*ndat)
+   end if
+
+ end subroutine alloc_work_arrays
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_opernlc_ylm_ompgpu/destroy_work_arrays
+!! NAME
+!! destroy_work_arrays
+!!
+!! FUNCTION
+!! Destruction of work arrays
+!!
+!! INPUTS
+!!
+!! SOURCE
+ subroutine destroy_work_arrays()
+
+! *************************************************************************
+
+  if(allocated(gxfac_2ndphase)) then
+    !$OMP TARGET EXIT DATA MAP(delete:gxfac_2ndphase)
+    ABI_FREE(gxfac_2ndphase)
+  end if
+  if(allocated(dgxdtfac_2ndphase)) then
+    !$OMP TARGET EXIT DATA MAP(delete:dgxdtfac_2ndphase)
+    ABI_FREE(dgxdtfac_2ndphase)
+  end if
+  if(allocated(d2gxdtfac_2ndphase)) then
+    !$OMP TARGET EXIT DATA MAP(delete:d2gxdtfac_2ndphase)
+    ABI_FREE(d2gxdtfac_2ndphase)
+  end if
+
+ end subroutine destroy_work_arrays
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* ABINIT/opernlc_ylm_ompgpu
 !! NAME
@@ -140,27 +214,27 @@ contains
 subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
 &          dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,d2gxdtfac,d2gxdtfac_sij,dimenl1,dimenl2,dimekbq,enl,&
 &          gx,gxfac,gxfac_sij,iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,&
-&          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij,ndat,ibeg,iend,nprojs,ntypat)
+&          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij,ndat,ibeg,iend,nprojs,ntypat,gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,cplex_enl,cplex_fac,dimenl1,dimenl2,dimekbq,iatm,itypat
- integer,intent(in) :: natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nspinor,nspinortot,optder,paw_opt
+ integer,intent(in) :: natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,nincat,nspinor,nspinortot,optder,paw_opt,gpu_option
  integer,intent(inout) :: nlmn
  integer,intent(in) :: ndat,ibeg,iend,nprojs,ntypat
  real(dp) :: lambda(ndat)
  type(MPI_type) , intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: atindx1(natom),indlmn(6,nlmn,ntypat),cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
- real(dp),intent(in) :: dgxdt(cplex,ndgxdt,nprojs,nspinor)
- real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor)
+ real(dp),intent(in) :: dgxdt(cplex,ndgxdt,nprojs,nspinor*ndat)
+ real(dp),intent(in) :: d2gxdt(cplex,nd2gxdt,nlmn,nincat,nspinor*ndat)
  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
  real(dp),intent(inout) :: gx(cplex,nprojs,nspinor*ndat)
- real(dp),intent(in) :: sij(:,:)
- real(dp),intent(out),target :: dgxdtfac(cplex_fac,ndgxdtfac,nprojs,nspinor)
- real(dp),intent(out) :: dgxdtfac_sij(cplex,ndgxdtfac,nprojs,nspinor*(paw_opt/3))
- real(dp),intent(out),target :: d2gxdtfac(cplex_fac,nd2gxdtfac,nprojs,nspinor)
- real(dp),intent(out) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nprojs,nspinor*(paw_opt/3))
+ real(dp),intent(in) :: sij(:)
+ real(dp),intent(out),target :: dgxdtfac(cplex_fac,ndgxdtfac,nprojs,nspinor*ndat)
+ real(dp),intent(out) :: dgxdtfac_sij(cplex,ndgxdtfac,nprojs,nspinor*ndat*(paw_opt/3))
+ real(dp),intent(out),target :: d2gxdtfac(cplex_fac,nd2gxdtfac,nprojs,nspinor*ndat)
+ real(dp),intent(out) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nprojs,nspinor*ndat*(paw_opt/3))
  real(dp),intent(out),target :: gxfac(cplex_fac,nprojs,nspinor*ndat)
  real(dp),intent(out) :: gxfac_sij(cplex,nprojs,nspinor*ndat)
 
@@ -180,9 +254,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
  real(dp) :: sijr
 !arrays
  real(dp) :: enl_(2),gxfi(2),gxi(cplex),gxj(cplex),tmp(2)
- real(dp),allocatable :: d2gxdtfac_offdiag(:,:,:,:,:),dgxdtfac_offdiag(:,:,:,:,:)
- real(dp),allocatable :: gxfac_offdiag(:,:,:,:),gxfj(:,:)
- real(dp),pointer :: d2gxdtfac_(:,:,:,:),dgxdtfac_(:,:,:,:),gxfac_(:,:,:)
+ real(dp),allocatable :: gxfj(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: d2gxdtfac_(:,:,:,:),dgxdtfac_(:,:,:,:),gxfac_(:,:,:)
  real(dp),pointer :: enl_ptr(:,:,:)
 
 ! *************************************************************************
@@ -208,19 +281,10 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    gxfac_ => gxfac ; dgxdtfac_ => dgxdtfac ; d2gxdtfac_ => d2gxdtfac
   else
    ABI_CHECK(cplex_fac==2,"BUG: invalid cplex_fac==1 when dimekbq=2!")
-   ABI_MALLOC(gxfac_,(cplex_fac,nprojs,ndat*nspinor))
-   !$OMP TARGET ENTER DATA MAP(alloc:gxfac_)
-   call gpu_set_to_zero(gxfac_, int(cplex_fac,c_size_t)*nprojs*ndat*nspinor)
-   if (optder>=1) then
-    ABI_MALLOC(dgxdtfac_,(cplex_fac,ndgxdtfac,nprojs,ndat*nspinor))
-    !$OMP TARGET ENTER DATA MAP(alloc:dgxdtfac_)
-    call gpu_set_to_zero(dgxdtfac_, int(cplex_fac,c_size_t)*ndgxdtfac*nprojs*ndat*nspinor)
-   end if
-   if (optder>=2) then
-    ABI_MALLOC(d2gxdtfac_,(cplex_fac,nd2gxdtfac,nprojs,ndat*nspinor))
-    !$OMP TARGET ENTER DATA MAP(alloc:d2gxdtfac_)
-    call gpu_set_to_zero(d2gxdtfac_, int(cplex_fac,c_size_t)*nd2gxdtfac*nprojs*ndat*nspinor)
-   end if
+   call alloc_work_arrays(optder,cplex_fac,ndgxdtfac,nd2gxdtfac,nprojs,ndat)
+   gxfac_ => gxfac_2ndphase
+   if(optder>=1) dgxdtfac_ => dgxdtfac_2ndphase
+   if(optder>=2) d2gxdtfac_ => d2gxdtfac_2ndphase
   end if
   enl_ptr => enl(:,:,:,iphase)
 
@@ -235,7 +299,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    ABI_CHECK(cplex_enl/=2,"BUG: invalid cplex_enl=2!")
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
    !$OMP TARGET TEAMS DISTRIBUTE &
-   !$OMP& MAP(to:gxfac_,gx,enl,indlmn) &
+   !$OMP& MAP(to:gxfac_,gx,enl_ptr,indlmn) &
    !$OMP& PRIVATE(idat,ispinor)
    do idat=1,ndat
    do ispinor=1,nspinor
@@ -245,7 +309,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          do ii=1,cplex
            iln=indlmn(5,ilmn,itypat)
            gxfac_(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-           & enl(iln,itypat,ispinor+shift,iphase)*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+           & enl_ptr(iln,itypat,ispinor+shift)*gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
          end do
        end do
      end do
@@ -264,8 +328,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    if (cplex_enl==1) then
      if (paw_opt==2) then
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-       !$OMP& MAP(to:gxfac,enl,atindx1,gx,sij,lambda) &
+       !$OMP& MAP(to:gxfac,enl_ptr,atindx1,gx,sij,lambda) &
        !$OMP& PRIVATE(idat,ispinor)
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do ispinor=1,nspinor
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,ispinor_index,index_enl,j0lmn,i0lmn,ii)
@@ -277,14 +342,14 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do ii=1,cplex
                gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
 &                 gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor) + &
-&                 (enl(j0lmn+jlmn,index_enl,ispinor_index,1)-lambda(idat) * sij(j0lmn+jlmn,itypat)) * &
+&                 (enl_ptr(j0lmn+jlmn,index_enl,ispinor_index)-lambda(idat) * sij(j0lmn+jlmn)) * &
 &                 gx(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
              end do
              do ilmn=1,jlmn-1
                do ii=1,cplex
                  gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
 &                   gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor) + &
-&                   (enl(j0lmn+ilmn,index_enl,ispinor_index,1)-lambda(idat) * sij(j0lmn+ilmn,itypat)) * &
+&                   (enl_ptr(j0lmn+ilmn,index_enl,ispinor_index)-lambda(idat) * sij(j0lmn+ilmn)) * &
 &                   gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
                end do
              end do
@@ -294,7 +359,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                  do ii=1,cplex
                    gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
 &                     gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor) + &
-&                     (enl(i0lmn+jlmn,index_enl,ispinor_index,1)-lambda(idat) * sij(i0lmn+jlmn,itypat)) *&
+&                     (enl_ptr(i0lmn+jlmn,index_enl,ispinor_index)-lambda(idat) * sij(i0lmn+jlmn)) *&
 &                     gx(ii,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
                  end do
                end do
@@ -306,8 +371,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
      else
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-       !$OMP& MAP(to:enl,atindx1,gx,gxfac_) &
+       !$OMP& MAP(to:enl_ptr,atindx1,gx,gxfac_) &
        !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn)
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do ispinor=1,nspinor
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(jlmn,j0lmn,ii,ia,ispinor_index,index_enl)
@@ -319,7 +385,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do ii=1,cplex
                gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
 &                    gxfac_(ii,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor) + &
-&                    enl(jlmn*(jlmn-1)/2+jlmn,index_enl,ispinor+shift,1) * &
+&                    enl_ptr(jlmn*(jlmn-1)/2+jlmn,index_enl,ispinor+shift) * &
 &                    gx(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
              end do
            end do
@@ -327,7 +393,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        end do
        end do
        !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(3) &
-       !$OMP& MAP(to:enl,atindx1,gx,gxfac_) &
+       !$OMP& MAP(to:enl_ptr,atindx1,gx,gxfac_) &
        !$OMP& PRIVATE(idat,ispinor,ia,ispinor_index,index_enl)
        do idat=1,ndat
        do ispinor=1,nspinor
@@ -341,7 +407,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              tmp(2)=0
              do ilmn=1,jlmn-1
                do ii=1,cplex
-                 tmp(ii)=tmp(ii) + enl(j0lmn+ilmn,index_enl,ispinor_index,1) &
+                 tmp(ii)=tmp(ii) + enl_ptr(j0lmn+ilmn,index_enl,ispinor_index) &
 &                      * gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
                end do
              end do
@@ -349,7 +415,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                do ilmn=jlmn+1,nlmn
                  i0lmn=(ilmn*(ilmn-1)/2)
                  do ii=1,cplex
-                   tmp(ii)=tmp(ii) + enl(i0lmn+jlmn,index_enl,ispinor_index,1) &
+                   tmp(ii)=tmp(ii) + enl_ptr(i0lmn+jlmn,index_enl,ispinor_index) &
 &                       *gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
                  end do
                end do
@@ -375,13 +441,14 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          !$OMP& PARALLEL DO COLLAPSE(3) &
          !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
          !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,i0lmn,ijlmn,gxi)
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
          do idat=1,ndat
          do ia=1,nincat
            do jlmn=1,nlmn
              index_enl=atindx1(iatm+ia)
              j0lmn=jlmn*(jlmn-1)/2
              jjlmn=j0lmn+jlmn
-             enl_(1)=enl_ptr(2*jjlmn-1,index_enl,1)-lambda(idat)*sij(jjlmn,itypat)
+             enl_(1)=enl_ptr(2*jjlmn-1,index_enl,1)-lambda(idat)*sij(jjlmn)
              gxj(1:cplex)=gx(1:cplex,jlmn+(ia-1)*nlmn+ibeg,1)
              gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1)) = &
 &               gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1))+enl_(1)*gxj(1)
@@ -392,7 +459,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do ilmn=1,jlmn-1
                ijlmn=j0lmn+ilmn
                enl_(1:2)=enl_ptr(2*ijlmn-1:2*ijlmn,index_enl,1)
-               enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn,itypat)
+               enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
                gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1))
                gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1)) = &
 &                 gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1))+enl_(1)*gxi(1)
@@ -418,7 +485,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                  i0lmn=ilmn*(ilmn-1)/2
                  ijlmn=i0lmn+jlmn
                  enl_(1:2)=enl_ptr(2*ijlmn-1:2*ijlmn,index_enl,1)
-                 enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn,itypat)
+                 enl_(1)=enl_(1)-lambda(idat)*sij(ijlmn)
                  gxi(1:cplex)=gx(1:cplex,ilmn+(ia-1)*nlmn+ibeg,1)
                  gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1)) = &
 &                   gxfac_(1,jlmn+(ia-1)*nlmn+ibeg,1+nspinor*(idat-1))+enl_(1)*gxi(1)
@@ -440,6 +507,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          !$OMP& PARALLEL DO COLLAPSE(3) &
          !$OMP& MAP(to:gxfac_,gx,gxi,atindx1,gxj,enl_ptr) &
          !$OMP& PRIVATE(idat,ia,index_enl,jlmn,j0lmn,jjlmn,enl_,gxj,ilmn,i0lmn,ijlmn,gxi)
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
          do idat=1,ndat
          do ia=1,nincat
            do jlmn=1,nlmn
@@ -528,8 +596,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    ABI_CHECK(cplex_fac==cplex,"BUG: invalid cplex_fac/=cplex!")
    ABI_WARNING("DEBUG: Code section not checked!")
    !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-   !$OMP& MAP(to:dgxdtfac_,enl,atindx1,dgxdt,sij,lambda) &
-   !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn)
+   !$OMP& MAP(to:dgxdtfac_,enl_ptr,atindx1,dgxdt,indlmn) &
+   !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,ijlmn) &
+   !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
    do idat=1,ndat
    do ispinor=1,nspinor
      ispinor_index = ispinor + shift
@@ -538,7 +607,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
        do ilmn=1,nlmn
          do mu=1,ndgxdtfac
            dgxdtfac_(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
-           &    enl(indlmn(5,ilmn,itypat),itypat,ispinor_index,iphase)&
+           &    enl_ptr(indlmn(5,ilmn,itypat),itypat,ispinor_index)&
            &    * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
          end do
        end do
@@ -558,8 +627,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    if (cplex_enl==1) then
      if (paw_opt/=2) then
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-       !$OMP& MAP(to:dgxdtfac_,enl,atindx1,dgxdt,sij,lambda) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
+       !$OMP& MAP(to:dgxdtfac_,enl,atindx1,dgxdt) &
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -602,7 +672,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
      else
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:dgxdtfac_,enl,atindx1,dgxdt,sij,lambda) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do ispinor=1,nspinor
          do ia=1,nincat
@@ -614,7 +685,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do mu=1,ndgxdtfac
                dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
                &    dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-               &    + (enl(jjlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(jjlmn,itypat)) &
+               &    + (enl(jjlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(jjlmn)) &
                &    * dgxdt(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
              end do
              do ilmn=1,jlmn-1
@@ -622,7 +693,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                do mu=1,ndgxdtfac
                  dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
                  &    dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-                 &    + (enl(ijlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(ijlmn,itypat)) &
+                 &    + (enl(ijlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(ijlmn)) &
                  &    * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
                end do
              end do
@@ -633,7 +704,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                  do mu=1,ndgxdtfac
                    dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
                    &    dgxdtfac_(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-                   &    + (enl(ijlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(ijlmn,itypat)) &
+                   &    + (enl(ijlmn,index_enl,ispinor_index,iphase)-lambda(idat)*sij(ijlmn)) &
                    &    * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
                  end do
                end do
@@ -655,8 +726,9 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 
        ABI_MALLOC(gxfj,(cplex,ndgxdtfac))
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& MAP(to:dgxdtfac_,enl,atindx1,dgxdt,sij,lambda,gxfj) &
-       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn)
+       !$OMP& MAP(to:dgxdtfac_,enl_,atindx1,dgxdt,sij,lambda,gxfj,enl,gxfi) &
+       !$OMP& PRIVATE(idat,ispinor,ispinor_index,ia,index_enl,jlmn,j0lmn,jjlmn,ilmn,i0lmn,ijlmn) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do ia=1,nincat
          do jlmn=1,nlmn
@@ -664,7 +736,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
            j0lmn=jlmn*(jlmn-1)/2
            jjlmn=j0lmn+jlmn
            enl_(1)=enl(2*jjlmn-1,index_enl,1,iphase)
-           if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(jjlmn,itypat)
+           if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(jjlmn)
            do mu=1,ndgxdtfac
              if(cplex_dgxdt(mu)==2)then
                cplex_ = 2 ; gxfj(1,mu) = zero ; gxfj(2,mu) = dgxdt(1,mu,jlmn+(ia-1)*nlmn+ibeg,1)
@@ -677,7 +749,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
            do ilmn=1,jlmn-1
              ijlmn=j0lmn+ilmn
              enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1,iphase)
-             if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(ijlmn,itypat)
+             if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(ijlmn)
              do mu=1,ndgxdtfac
                if(cplex_dgxdt(mu)==2)then
                  cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn+(ia-1)*nlmn+ibeg,idat)
@@ -697,7 +769,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
                i0lmn=ilmn*(ilmn-1)/2
                ijlmn=i0lmn+jlmn
                enl_(1:2)=enl(2*ijlmn-1:2*ijlmn,index_enl,1,iphase)
-               if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(ijlmn,itypat)
+               if (paw_opt==2) enl_(1)=enl_(1)-lambda(ndat)*sij(ijlmn)
                do mu=1,ndgxdtfac
                  if(cplex_dgxdt(mu)==2)then
                    cplex_ = 2 ; gxfi(1) = zero ; gxfi(2) = dgxdt(1,mu,ilmn+(ia-1)*nlmn+ibeg,idat)
@@ -744,7 +816,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
 !When iphase=2, we add i.gxfac_ to gxfac
   if (iphase==2) then
     !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-    !$OMP& PRIVATE(idat,ia,ilmn) MAP(to:gxfac,gxfac_)
+    !$OMP& PRIVATE(idat,ia,ilmn) MAP(to:gxfac,gxfac_) &
+    !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
     do idat=1,ndat*nspinor
       do ia=1,nincat
         do ilmn=1,nlmn
@@ -755,11 +828,10 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
         end do
       end do
     end do
-    !$OMP TARGET EXIT DATA MAP(delete:gxfac_)
-    ABI_FREE(gxfac_)
     if (optder>=1) then
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-      !$OMP& PRIVATE(idat,ia,ilmn,mu) MAP(to:dgxdtfac,dgxdtfac_)
+      !$OMP& PRIVATE(idat,ia,ilmn,mu) MAP(to:dgxdtfac,dgxdtfac_) &
+      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
       do idat=1,ndat*nspinor
         do ia=1,nincat
           do ilmn=1,nlmn
@@ -772,12 +844,11 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
           end do
         end do
       end do
-      !$OMP TARGET EXIT DATA MAP(delete:dgxdtfac_)
-      ABI_FREE(dgxdtfac_)
     end if
     if (optder>=2) then
       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-      !$OMP& PRIVATE(idat,ia,ilmn,mu) MAP(to:d2gxdtfac,d2gxdtfac_)
+      !$OMP& PRIVATE(idat,ia,ilmn,mu) MAP(to:d2gxdtfac,d2gxdtfac_) &
+      !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
       do idat=1,ndat*nspinor
         do ia=1,nincat
           do ilmn=1,nlmn
@@ -790,9 +861,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
           end do
         end do
       end do
-      !$OMP TARGET EXIT DATA MAP(delete:d2gxdtfac_)
-      ABI_FREE(d2gxdtfac_)
     end if
+    call destroy_work_arrays()
   end if
 
 !End loop over real/imaginary part of the exp(-iqR) phase
@@ -805,6 +875,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
    !$OMP& MAP(to:sij,gx,gxfac_sij) &
    !$OMP& PRIVATE(idat,ispinor)
+   !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
    do idat=1,ndat
    do ispinor=1,nspinor
      !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn,ii)
@@ -815,14 +886,14 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          do ii=1,cplex
            gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)= &
              gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor) &
-             + sij(jjlmn,itypat) * gx(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
+             + sij(jjlmn) * gx(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
          end do
          do ilmn=1,jlmn-1
            ijlmn=j0lmn+ilmn
            do ii=1,cplex
              gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)= &
                gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor) &
-               + sij(ijlmn,itypat) * gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
+               + sij(ijlmn) * gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
            end do
          end do
          if(jlmn<nlmn) then
@@ -832,7 +903,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do ii=1,cplex
                gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)=&
                  gxfac_sij(ii,ibeg+jlmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor) &
-                 + sij(ijlmn,itypat) * gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
+                 + sij(ijlmn) * gx(ii,ibeg+ilmn+(ia-1)*nlmn,ispinor+(idat-1)*nspinor)
              end do
            end do
          end if
@@ -848,7 +919,8 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
    !$OMP TARGET TEAMS DISTRIBUTE &
    !$OMP& PARALLEL DO COLLAPSE(4) &
    !$OMP& MAP(to:sij,dgxdt,dgxdtfac_sij) &
-   !$OMP PRIVATE(idat,ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn)
+   !$OMP& PRIVATE(idat,ispinor,ia,jlmn,j0lmn,jjlmn,jlm,ilmn,ilm,i0lmn,ijlmn) &
+   !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
    do idat=1,ndat
    do ispinor=1,nspinor
      do ia=1,nincat
@@ -858,14 +930,14 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
          do mu=1,ndgxdtfac
            dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
            &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-           &    + sij(jjlmn,itypat) * dgxdt(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+           &    + sij(jjlmn) * dgxdt(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
          end do
          do ilmn=1,jlmn-1
            ijlmn=j0lmn+ilmn
            do mu=1,ndgxdtfac
              dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
              &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-             &    + sij(ijlmn,itypat) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+             &    + sij(ijlmn) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
            end do
          end do
          if(jlmn<nlmn) then
@@ -875,7 +947,7 @@ subroutine opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,c
              do mu=1,ndgxdtfac
                dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)=&
                &    dgxdtfac_sij(1:cplex,mu,jlmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)&
-               &    + sij(ijlmn,itypat) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
+               &    + sij(ijlmn) * dgxdt(1:cplex,mu,ilmn+(ia-1)*nlmn+ibeg,ispinor+(idat-1)*nspinor)
              end do
            end do
          end if
