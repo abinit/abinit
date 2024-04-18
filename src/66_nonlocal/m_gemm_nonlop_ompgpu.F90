@@ -39,18 +39,10 @@ module m_gemm_nonlop_ompgpu
  use m_xmpi
  use m_xomp
  use m_abi_linalg
-
-#ifdef HAVE_FC_ISO_C_BINDING
- use iso_c_binding
-#endif
-
-#ifdef HAVE_GPU
-  use m_gpu_toolbox
-#endif
+ use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_opernlc_ylm_ompgpu, only : opernlc_ylm_ompgpu
- use m_opernlc_ylm, only : opernlc_ylm
  use m_opernla_gemm, only : opernla_gemm
  use m_opernlb_gemm, only : opernlb_gemm
  use m_opernld_ylm_allwf, only : opernld_ylm_allwf
@@ -58,12 +50,16 @@ module m_gemm_nonlop_ompgpu
  use m_pawcprj, only : pawcprj_type
  use m_geometry, only : strconv
  use m_kg, only : mkkpg
- use m_gemm_nonlop_projectors
  use m_hamiltonian, only : KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
 
-#if defined HAVE_MPI2
- use mpi
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
 #endif
+
+#ifdef HAVE_FC_ISO_C_BINDING
+ use iso_c_binding
+#endif
+
 
  implicit none
 
@@ -287,32 +283,32 @@ contains
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
-&                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
-&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
-&                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
-&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,select_k,&
+&                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
+&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
+&                 ph3din,ph3dout,signs,sij,svectout,&
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,&
+&                 atom_proj_shift,select_k,iatom_only,typat,usepaw,&
 &                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
-  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
+  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
-  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k,iatom_only,usepaw
   integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
-  integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
-  integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
-  real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
-  real(dp),intent(in) :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
-  real(dp),intent(in) :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
-  real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin*useylm)
-  real(dp),intent(in) :: kpgout(npwout,nkpgout*useylm),kptin(3),kptout(3)
-  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom),ph1d(2,*)
-  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
-  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+  integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
+  integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
+  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+  real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
+  real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
+  real(dp),intent(in),target :: kpgin(npwin,nkpgin*useylm),kpgout(npwout,nkpgout*useylm)
+  real(dp),intent(in),target :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp),intent(inout),target :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
   real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
   real(dp),intent(inout) :: enlout(nnlout*ndat)
   real(dp),intent(out),target :: svectout(:,:)
@@ -321,7 +317,6 @@ contains
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
-  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
   integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt, ikin, ikout
   integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
   integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
@@ -351,6 +346,13 @@ contains
   integer :: mu0,ic,nu,mu,jc
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
   integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+  integer          ::  matblk_,natom_,ntypat_,ispden,dimenl2_,ia_beg,ia_end,dimsij,nkpgin_,nkpgout_
+  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
+  real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
+  real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
+  real(dp),pointer :: enl_(:,:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
   logical :: nld_on_gpu
 
   logical :: transfer_vectin,transfer_vectout,transfer_svectout
@@ -361,9 +363,9 @@ contains
 
   ! We keep the same interface as nonlop, but we don't use many of those
   ABI_UNUSED((/ffnlin,ffnlout,gmet,kpgin,kpgout/))
-  ABI_UNUSED((/ph1d(1,1),ph3din,ph3dout/))
-  ABI_UNUSED((/phkxredin,phkxredout,ucvol/))
-  ABI_UNUSED((/mgfft,mpsang,mpssoang/))
+  ABI_UNUSED((/ph3din,ph3dout/))
+  ABI_UNUSED((/ucvol/))
+  ABI_UNUSED((/mgfft/))
   ABI_UNUSED((/kptin,kptout/))
   ABI_UNUSED((/idir,nloalg,ngfft,kgin,kgout,ngfft,only_SO,tim_nonlop,gpu_option/))
 
@@ -403,8 +405,92 @@ contains
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
 
-  ngrads = gemm_nonlop_kpt(ikout)%ngrads
-  ngrads2 = gemm_nonlop_kpt(ikout)%ngrads2
+  ! Processing one atom : set pointers to atom-specific arrays (for opernlc)
+  if(iatom_only > 0) then
+    iatm=atindx1(iatom_only);itypat=typat(iatom_only)
+    ia_beg=iatom_only; ia_end=iatom_only
+    natom_=1 ; ntypat_=1 ; dimenl2_=1 ; matblk_=1
+    ABI_MALLOC(atindx1_,(1))
+    ABI_MALLOC(nattyp_,(1))
+    atindx1_(1)=1 ; nattyp_(1)=1
+    ABI_MALLOC(ph3din_,(2,npwin,1))
+    ABI_MALLOC(ph3dout_,(2,npwout,1))
+    ph3din_(:,1:npwin,1)=ph3din(:,1:npwin,iatm)
+    ph3dout_(:,1:npwout,1)=ph3dout(:,1:npwout,iatm)
+    ABI_MALLOC(ffnlin_,(npwin,dimffnlin,lmnmax,1))
+    ABI_MALLOC(ffnlout_,(npwout,dimffnlout,lmnmax,1))
+    ffnlin_(:,:,:,1)=ffnlin(:,:,:,itypat)
+    ffnlout_(:,:,:,1)=ffnlout(:,:,:,itypat)
+    ABI_MALLOC(indlmn_,(6,lmnmax,1))
+    indlmn_(:,:,1)=indlmn(:,:,itypat)
+    if (size(sij)>0) then
+      dimsij=size(sij,1)
+      ABI_MALLOC(sij_,(dimsij,1))
+      if (size(sij,2)==ntypat) then
+        sij_(:,1)=sij(:,itypat)
+      else if (size(sij)>0) then
+        sij_(:,1)=sij(:,1)
+      end if
+    end if
+    if (size(enl)>0) then
+      ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4)))
+      do ii=1,size(enl,4)
+        do ispden=1,nspinor**2
+          if (dimenl2==natom .and. usepaw==1) then
+            enl_(:,1,ispden,ii)=enl(:,iatom_only,ispden,ii)
+          else if (dimenl2==ntypat) then
+            enl_(:,1,ispden,ii)=enl(:,itypat,ispden,ii)
+          else
+            enl_(:,1,ispden,ii)=enl(:,1,ispden,ii)
+          end if
+        end do
+      end do
+    else
+      ABI_MALLOC(enl_,(0,0,0,0))
+    end if
+
+  ! Usual case : all atoms are processed
+  else
+    natom_  =natom; ntypat_=ntypat
+    ia_beg=1; ia_end=natom
+    dimenl2_=dimenl2   ; matblk_=matblk
+    atindx1_    => atindx1
+    nattyp_     => nattyp
+    ffnlin_     => ffnlin
+    ffnlout_    => ffnlout
+    enl_        => enl
+    sij_        => sij
+    indlmn_     => indlmn
+    ph3din_     => ph3din
+    ph3dout_    => ph3dout
+  end if
+
+  !Eventually re-compute (k+G) vectors (and related data)
+  nkpgin_=0
+  if (choice==2.or.choice==54) nkpgin_=3
+  if (signs==1) then
+    if (choice==4) nkpgin_=9
+    if (choice==3.or.choice==23.or.choice==6) nkpgin_=3
+    if (choice==55) nkpgin_=3
+  end if
+  if (nkpgin<nkpgin_) then
+    ABI_MALLOC(kpgin_,(npwin,nkpgin_))
+    call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
+  else
+    nkpgin_ = nkpgin
+    kpgin_  => kpgin
+  end if
+
+  nkpgout_=0
+  if ((choice==2.or.choice==3.or.choice==54).and.signs==2) nkpgout_=3
+  if (nkpgout<nkpgout_) then
+    ABI_MALLOC(kpgout_,(npwout,nkpgout_))
+    call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
+  else
+    nkpgout_ = nkpgout
+    kpgout_ => kpgout
+  end if
+
   nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
@@ -412,34 +498,14 @@ contains
   ! some perturbations.
   ! In such cases, projs arrays must be recomputed
   nprojs=0
-  do itypat=1,ntypat
-    nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+  do itypat=1,ntypat_
+    nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
   end do
-  projs_beg=1; projs_end=nprojs;
-  dprojs_beg=1; dprojs_end=max(1,nprojs*ngrads)
-  d2projs_beg=1; d2projs_end=max(1,nprojs*ngrads2)
-  if((choice==2 .and. signs==2)) then
-    projs_beg=atom_proj_shift+1
-    projs_end=projs_beg+nprojs-1
-    dprojs_beg=atom_proj_shift*ngrads+1
-    dprojs_end=dprojs_beg+nprojs*ngrads-1
-    d2projs_beg=atom_proj_shift*ngrads2+1
-    d2projs_end=dprojs_beg+nprojs*ngrads2-1
-  end if
 
   if(gemm_nonlop_is_distributed) then
     rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
     is_last = (rank==nprocs-1)
     if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_last_blk
-  end if
-
-  if(choice==1 .or. choice==0 .or. choice==7) ngrads=0
-  if(signs==1) then
-    ABI_CHECK(ngrads>=3.or.choice/=2 ,"Bad allocation in gemm_nonlop (2)!")
-    ABI_CHECK(ngrads>=6.or.choice/=3 ,"Bad allocation in gemm_nonlop (3)!")
-    ABI_CHECK(ngrads>=9.or.choice/=23,"Bad allocation in gemm_nonlop (23)!")
-  else if(signs==2) then
-    ABI_CHECK(ngrads==1.or.(choice==1.or.choice==0.or.choice==7) ,"Bad allocation in gemm_nonlop !")
   end if
 
   ! Allocate and copy GPU buffers if user doesn't manage them
@@ -465,62 +531,87 @@ contains
   !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl)
   if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor .or. nprojs /= mod__nprojs) then
     call alloc_work_buffers(cplex, cplex_fac,&
-&        nspinor*ndat, nprojs, ntypat, lmnmax, MAX(npwin,npwout))
+&        nspinor*ndat, nprojs, ntypat_, lmnmax, MAX(npwin,npwout))
   end if
 
   if(paw_opt>=2 .and. choice > 0 .and. choice /= 7) then
     if (cplex_enl==1) then
-      do itypat=1, ntypat
-        nlmn=count(indlmn(3,:,itypat)>0)
+      do itypat=1, ntypat_
+        nlmn=count(indlmn_(3,:,itypat)>0)
         do ilmn=1,nlmn*(nlmn+1)/2
-          sij_typ(ilmn,itypat)=sij(ilmn,itypat)
+          sij_typ(ilmn,itypat)=sij_(ilmn,itypat)
         end do
       end do
     else
-      do itypat=1, ntypat
-        nlmn=count(indlmn(3,:,itypat)>0)
+      do itypat=1, ntypat_
+        nlmn=count(indlmn_(3,:,itypat)>0)
         do ilmn=1,nlmn*(nlmn+1)/2
-          sij_typ(ilmn,itypat)=sij(2*ilmn-1,itypat)
+          sij_typ(ilmn,itypat)=sij_(2*ilmn-1,itypat)
         end do
       end do
     end if
   end if
   !$OMP TARGET UPDATE TO(sij_typ)
 
-  ndgxdt = ngrads
-  nd2gxdt = ngrads2
+  ndgxdt = -1
+  nd2gxdt = -1
 
   ndgxdtfac = 0; nd2gxdtfac = 0
   if (choice==2) then
+    if (signs==1) ndgxdt=3
+    if (signs==2) ndgxdt=1
     if (signs==2) ndgxdtfac=1
   end if
   if (choice==22) then
     if (signs==2) ndgxdtfac=1
   end if
+  if (choice==23) then
+    if (signs==1) ndgxdt=9
+  end if
   if (choice==3) then
+    if (signs==1) ndgxdt=6
+    if (signs==2) ndgxdt=1
     if (signs==2) ndgxdtfac=1
   end if
   if (choice==4) then
+    if(signs==1) ndgxdt=3
     if(signs==1) ndgxdtfac=3
+    if(signs==1) nd2gxdt=6
   end if
   if (choice==5) then
+    if(signs==1) ndgxdt=3
+    if(signs==2) ndgxdt=1
     if(signs==2) ndgxdtfac=1
   end if
   if (choice==51) then
+    if(signs==1) ndgxdt=3
+    if(signs==2) ndgxdt=1
     if(signs==2) ndgxdtfac=1
   end if
   if (choice==54) then
+    if(signs==1) ndgxdt=6
     if(signs==1) ndgxdtfac=6
+    if(signs==1) nd2gxdt=9
+    if(signs==2) ndgxdt=1
+    if(signs==2) nd2gxdt=1
     if(signs==2) ndgxdtfac=1
     if(signs==2) nd2gxdtfac=1
   end if
   if (choice==55) then
+    if(signs==1) ndgxdt=9
     if(signs==1) ndgxdtfac=9
+    if(signs==1) nd2gxdt=18
   end if
   if (choice==6) then
+    if(signs==1) ndgxdt=9
     if(signs==1) ndgxdtfac=9
+    if(signs==1) nd2gxdt=54
   end if
-  ABI_CHECK(ndgxdtfac<=ndgxdt,"BUG: ndgxdtfac>ndgxdt!")
+  ngrads=0; ngrads2=0
+  if(ndgxdt>0) ngrads=ndgxdt; if(ndgxdt>0) ngrads2=nd2gxdt
+  if(ndgxdt>0) then
+    ABI_CHECK(ndgxdtfac<=ndgxdt,"BUG: ndgxdtfac>ndgxdt!")
+  end if
   optder = 0;if (ndgxdtfac>0) optder = 1
   if (nd2gxdtfac>0) optder=2
   cplex_dgxdt(:) = 1 ; cplex_d2gxdt(:) = 1
@@ -555,48 +646,47 @@ contains
 #endif
 
   if(gemm_nonlop_is_distributed) then
-    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ngrads,1)*gemm_nonlop_kpt(ikout)%nprojs_last_blk))
+    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ndgxdt,1)*gemm_nonlop_kpt(ikout)%nprojs_last_blk))
     !$OMP TARGET ENTER DATA MAP(alloc:projs_recv)
   end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
   if(cpopt < 2) then
-    projections=zero
-    !$OMP TARGET UPDATE TO(projections)
     call gpu_set_to_zero(projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
   end if
   call gpu_set_to_zero(s_projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
   call gpu_set_to_zero(vnl_projections, int(cplex_fac,c_size_t)*nprojs*ndat*nspinor)
 
   ! Working buffers for storing derivative
-  if (ngrads>0) then
-    ABI_MALLOC(dprojections,(cplex, ngrads*nprojs, nspinor*ndat))
+  if (ndgxdt>0) then
+    ABI_MALLOC(dprojections,(cplex, ndgxdt*nprojs,nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:dprojections)
     if(cpopt < 4) then
-      call gpu_set_to_zero(dprojections, int(cplex,c_size_t)*ngrads*nprojs*ndat*nspinor)
+      call gpu_set_to_zero(dprojections, int(cplex,c_size_t)*ndgxdt*nprojs*ndat*nspinor)
     end if
   end if
-  if (ndgxdtfac > 0) then
+
+  if (ndgxdtfac>0) then
     ABI_MALLOC(s_dprojections,(cplex, ndgxdtfac*nprojs,nspinor*ndat))
     ABI_MALLOC(vnl_dprojections,(cplex_fac, ndgxdtfac*nprojs,nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
     call gpu_set_to_zero(s_dprojections,   int(cplex,c_size_t)*ndgxdtfac*nprojs*ndat*nspinor)
     call gpu_set_to_zero(vnl_dprojections, int(cplex_fac,c_size_t)*ndgxdtfac*nprojs*ndat*nspinor)
   else
-    ABI_MALLOC(s_dprojections,(1,1,1))
-    ABI_MALLOC(vnl_dprojections,(1,1,1))
+    ABI_MALLOC(s_dprojections,(1,1,ndat))
+    ABI_MALLOC(vnl_dprojections,(1,1,ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
   end if
 
   ! Working buffers for storing 2nd-derivative
-  if (ngrads2>0) then
-    ABI_MALLOC(d2projections,(cplex, ngrads2*nprojs, nspinor*ndat))
+  if (nd2gxdt>0) then
+    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs, nspinor*ndat))
     !$OMP TARGET ENTER DATA MAP(alloc:d2projections)
     if(cpopt < 4) then
-      call gpu_set_to_zero(d2projections, int(cplex,c_size_t)*ngrads2*nprojs*ndat*nspinor)
+      call gpu_set_to_zero(d2projections, int(cplex,c_size_t)*nd2gxdt*nprojs*ndat*nspinor)
     end if
   else
-    ABI_MALLOC(d2projections,(1, 1, 1))
+    ABI_MALLOC(d2projections,(1, 1, ndat))
   end if
 
   if(nprojs == 0) then
@@ -633,7 +723,7 @@ contains
       !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
       do idat=1, ndat*nspinor
         shift = 0
-        do iatom = 1, natom
+        do iatom = ia_beg, ia_end
           nlmn = cprjin(iatom, idat)%nlmn
           projections(1:cplex, shift+1:shift+nlmn, idat) = cprjin(iatom, idat)%cp(1:cplex, 1:nlmn)
           shift = shift + nlmn
@@ -642,18 +732,18 @@ contains
       !$OMP TARGET UPDATE TO(projections)
     end if
     if(cpopt==4.and.allocated(dprojections)) then
-      ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (1)")
+      ABI_CHECK(cprjin(1,1)%ncpgr>=ndgxdt,"cprjin%ncpgr not correct! (1)")
       !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,igrad,nlmn)
       do idat=1, ndat*nspinor
         shift = 0
-        do iatom = 1, natom
+        do iatom = ia_beg, ia_end
           nlmn  = cprjin(iatom, idat)%nlmn
           do ilmn=1,nlmn
-            do igrad=1,ngrads
+            do igrad=1,ndgxdt
               dprojections(1:cplex, shift + igrad, idat) = &
                 cprjin(iatom, idat)%dcp(1:cplex,igrad,ilmn)
             end do
-            shift = shift + ngrads
+            shift = shift + ndgxdt
           end do
         end do
       end do
@@ -663,40 +753,13 @@ contains
 
   if(cpopt<=1.or.(cpopt<=3.and.(choice==2.or.choice==3.or.choice==5.or.choice==51.or.choice==23.or.choice==54.or.choice==55.or.choice==4))) then
 
-    if(istwf_k == 1) then
-      projs_ => gemm_nonlop_kpt(ikin)%projs(:,:,projs_beg:projs_end)
-      dprojs_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
-      d2projs_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
-      ! Dummy values (undefined behaviour may occur otherwise)
-      projs_r_ => gemm_nonlop_kpt(ikin)%projs
-      projs_i_ => gemm_nonlop_kpt(ikin)%projs
-      dprojs_r_ => gemm_nonlop_kpt(ikin)%dprojs
-      dprojs_i_ => gemm_nonlop_kpt(ikin)%dprojs
-      d2projs_r_ => gemm_nonlop_kpt(ikin)%d2projs
-      d2projs_i_ => gemm_nonlop_kpt(ikin)%d2projs
-    end if
-    if(istwf_k == 2) then
-      projs_r_ => gemm_nonlop_kpt(ikin)%projs_r(:,:,projs_beg:projs_end)
-      projs_i_ => gemm_nonlop_kpt(ikin)%projs_i(:,:,projs_beg:projs_end)
-      dprojs_r_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
-      dprojs_i_ => gemm_nonlop_kpt(ikin)%dprojs(:,:,dprojs_beg:dprojs_end)
-      d2projs_r_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
-      d2projs_i_ => gemm_nonlop_kpt(ikin)%d2projs(:,:,d2projs_beg:d2projs_end)
-      ! Dummy values (undefined behaviour may occur otherwise)
-      projs_ => gemm_nonlop_kpt(ikin)%projs_r
-      dprojs_ => gemm_nonlop_kpt(ikin)%dprojs_r
-      d2projs_ => gemm_nonlop_kpt(ikin)%d2projs_r
-    end if
-
-    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2projections,dprojections,projections,&
-    &       idir,istwf_k,mpi_enreg,nd2gxdt,ngrads,&
-    &       npwin,nspinor,signs,ndat,rank,&
-    &       cpopt,nprocs,&
+    call opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnlin,&
+    &       d2projections,dprojections,ffnlin,projections,&
+    &       idir,indlmn,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpgin_,&
+    &       npwin,nspinor,ph3din,signs,ucvol,ndat,ntypat,lmnmax,nattyp,(ikin==2),&
+    &       iatom_only,atom_proj_shift,rank,cpopt,nprocs,&
     &       nprojs,gemm_nonlop_kpt(ikin)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikin)%nprojs_last_blk,&
-    &       vectin,projs_,dprojs_,d2projs_,&
-    &       projs_r_,projs_i_,&
-    &       dprojs_r_,dprojs_i_,&
-    &       d2projs_r_,d2projs_i_,&
+    &       vectin,&
     &       temp_realvec_r,&
     &       projs_recv,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
@@ -708,7 +771,7 @@ contains
         !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
         do idat=1, ndat*nspinor
           shift = 0
-          do iatom = 1, natom
+          do iatom = ia_beg, ia_end
             nlmn = cprjin(iatom, idat)%nlmn
             cprjin(iatom, idat)%cp(1:cplex, 1:nlmn) = projections(1:cplex, shift+1:shift+nlmn, idat)
             shift = shift + nlmn
@@ -716,19 +779,19 @@ contains
         end do
       end if
       if(cpopt==1 .or. cpopt==3) then
-        ABI_CHECK(cprjin(1,1)%ncpgr>=ngrads,"cprjin%ncpgr not correct! (2)")
+        ABI_CHECK(cprjin(1,1)%ncpgr>=ndgxdt,"cprjin%ncpgr not correct! (2)")
         !$OMP TARGET UPDATE FROM(dprojections)
         !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,igrad,nlmn)
         do idat=1, ndat*nspinor
           shift = 0
-          do iatom = 1, natom
+          do iatom = ia_beg, ia_end
             nlmn = cprjin(iatom, idat)%nlmn
             do ilmn=1,nlmn
-              do igrad=1,ngrads
+              do igrad=1,ndgxdt
                 cprjin(iatom, idat)%dcp(1:cplex,igrad,ilmn) = &
                 &                   dprojections(1:cplex, shift + igrad, idat)
               end do
-              shift = shift + ngrads
+              shift = shift + ndgxdt
             end do
           end do
         end do
@@ -742,25 +805,29 @@ contains
       ! opernlc
       iatm = 0
       shift = 0
-      do itypat=1, ntypat
-        nlmn=count(indlmn(3,:,itypat)>0)
+      do itypat=1, ntypat_
+        nlmn=count(indlmn_(3,:,itypat)>0)
 
         ibeg = shift+1
-        iend = shift+nattyp(itypat)*nlmn
+        iend = shift+nattyp_(itypat)*nlmn
 
-        call opernlc_ylm_ompgpu(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fac,&
-  &         dprojections,&
-  &         vnl_dprojections,&
-  &         s_dprojections,&
-  &         d2projections,d2gxdt_dum_out,d2gxdt_dum_out2,dimenl1,dimenl2,dimekbq,enl,&
-  &         projections,&
-  &         vnl_projections,&
-  &         s_projections,&
-  &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-  &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),ndat,ibeg-1,iend,nprojs,ntypat,gpu_option)
+        call opernlc_ylm_ompgpu(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
+        &         cplex_enl,cplex_fac,&
+        &         dprojections,&
+        &         vnl_dprojections,&
+        &         s_dprojections,&
+        &         d2projections,d2gxdt_dum_out,d2gxdt_dum_out2,&
+        &         dimenl1,dimenl2_,dimekbq,enl_,&
+        &         projections,&
+        &         vnl_projections,&
+        &         s_projections,&
+        &         iatm,indlmn_,itypat,lambda,mpi_enreg,natom_,&
+        &         ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
+        &         nattyp_(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),&
+        &         ndat,ibeg-1,iend,nprojs,ntypat_,gpu_option)
 
-        shift = shift + nattyp(itypat)*nlmn
-        iatm = iatm+nattyp(itypat)
+        shift = shift + nattyp_(itypat)*nlmn
+        iatm = iatm+nattyp_(itypat)
       end do
     else
       !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections)
@@ -773,44 +840,17 @@ contains
     ! opernlb
     if(signs==2) then
 
-      if(istwf_k == 1) then
-        projs_ => gemm_nonlop_kpt(ikout)%projs(:,:,projs_beg:projs_end)
-        dprojs_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
-        d2projs_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
-        ! Dummy values (undefined behaviour may occur otherwise)
-        projs_r_ => gemm_nonlop_kpt(ikout)%projs
-        projs_i_ => gemm_nonlop_kpt(ikout)%projs
-        dprojs_r_ => gemm_nonlop_kpt(ikout)%dprojs
-        dprojs_i_ => gemm_nonlop_kpt(ikout)%dprojs
-        d2projs_r_ => gemm_nonlop_kpt(ikout)%d2projs
-        d2projs_i_ => gemm_nonlop_kpt(ikout)%d2projs
-      end if
-      if(istwf_k==2) then
-        projs_r_ => gemm_nonlop_kpt(ikout)%projs_r(:,:,projs_beg:projs_end)
-        projs_i_ => gemm_nonlop_kpt(ikout)%projs_i(:,:,projs_beg:projs_end)
-        dprojs_r_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
-        dprojs_i_ => gemm_nonlop_kpt(ikout)%dprojs(:,:,dprojs_beg:dprojs_end)
-        d2projs_r_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
-        d2projs_i_ => gemm_nonlop_kpt(ikout)%d2projs(:,:,d2projs_beg:d2projs_end)
-        ! Dummy values (undefined behaviour may occur otherwise)
-        projs_ => gemm_nonlop_kpt(ikout)%projs_r
-        dprojs_ => gemm_nonlop_kpt(ikout)%dprojs_r
-        d2projs_ => gemm_nonlop_kpt(ikout)%d2projs_r
-      end if
-
       call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
-      &       vnl_dprojections,s_dprojections,&
+      &       vnl_dprojections,s_dprojections,dimffnlout,ffnlout,&
       &       vnl_projections,s_projections,&
-      &       idir,istwf_k,mpi_enreg,nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
-      &       npwout,nspinor,signs,ndat,rank,&
-      &       cpopt,nprocs,paw_opt,&
+      &       idir,indlmn,kpgout_,matblk,istwf_k,mpi_enreg,&
+      &       nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
+      &       nkpgout_,npwout,nspinor,signs,ucvol,ndat,&
+      &       ntypat,lmnmax,nattyp,(ikout==2),iatom_only,atom_proj_shift,rank,&
+      &       cpopt,nprocs,paw_opt,ph3dout,&
       &       nprojs,gemm_nonlop_kpt(ikout)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikout)%nprojs_last_blk,&
       &       vectin_,vectout_,svectout_,&
-      &       projs_,&
-      &       dprojs_,&
-      &       projs_r_,projs_i_,&
-      &       dprojs_r_,dprojs_i_,&
       &       temp_realvec_r,temp_realvec_i,&
       &       projs_recv,projs_recv,&
       &       gpu_option,gemm_nonlop_is_distributed)
@@ -1027,6 +1067,21 @@ contains
 #endif
 
 ! Release memory
+
+  if (iatom_only>0) then
+    ABI_FREE(atindx1_)
+    ABI_FREE(nattyp_)
+    ABI_FREE(ph3din_)
+    ABI_FREE(ph3dout_)
+    ABI_FREE(ffnlin_)
+    ABI_FREE(ffnlout_)
+    ABI_FREE(enl_)
+    ABI_FREE(indlmn_)
+    if (size(sij) > 1) then
+      ABI_FREE(sij_)
+    end if
+  end if
+
   if(signs == 1 .and. choice > 0) then
     !$OMP TARGET EXIT DATA MAP(delete:enlk)
     ABI_FREE(enlk)
@@ -1036,6 +1091,13 @@ contains
     ABI_FREE(ddkk)
     !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
+  end if
+
+  if (nkpgin<nkpgin_) then
+    ABI_FREE(kpgin_)
+  end if
+  if (nkpgout<nkpgout_) then
+    ABI_FREE(kpgout_)
   end if
 
   if (allocated(gmet2)) then
@@ -1076,46 +1138,46 @@ contains
  subroutine gemm_nonlop_ompgpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
 &                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
-&                 mpi_enreg,mpsang,mpssoang,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
-&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,phkxredin,&
-&                 phkxredout,ph1d,ph3din,ph3dout,signs,sij,svectout,&
-&                 tim_nonlop,ucvol,useylm,vectin,vectout,atom_proj_shift,select_k,&
+&                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
+&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
+&                 ph3din,ph3dout,signs,sij,svectout,&
+&                 tim_nonlop,ucvol,useylm,vectin,vectout,&
+&                 atom_proj_shift,select_k,iatom_only,typat,usepaw,&
 &                 vectproj,gpu_option)
 
   !Arguments ------------------------------------
   !scalars
   integer,intent(in) :: choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir
-  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin
+  integer,intent(in) :: istwf_k,lmnmax,matblk,mgfft,natom,ndat,nkpgin
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO
-  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k
+  integer,intent(in) :: paw_opt,signs,tim_nonlop,useylm,atom_proj_shift,select_k,iatom_only,usepaw
   integer,optional,intent(in) :: gpu_option
   real(dp),intent(in) :: lambda(ndat),ucvol
   type(MPI_type),intent(in) :: mpi_enreg
   !arrays
-  integer,intent(in) :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
-  integer,intent(in) :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3)
-  real(dp),intent(in) :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
-  real(dp),intent(in) :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
-  real(dp),intent(in) :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
-  real(dp),intent(in) :: gprimd(3,3),kpgin(npwin,nkpgin*useylm)
-  real(dp),intent(in) :: kpgout(npwout,nkpgout*useylm),kptin(3),kptout(3)
-  real(dp),intent(in) :: phkxredin(2,natom),phkxredout(2,natom),ph1d(2,*)
-  real(dp),intent(in) :: sij(dimenl1,ntypat*((paw_opt+1)/3))
-  real(dp),intent(inout) :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+  integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
+  integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
+  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+  real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
+  real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
+  real(dp),intent(in),target :: kpgin(npwin,nkpgin*useylm),kpgout(npwout,nkpgout*useylm)
+  real(dp),intent(in),target :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp),intent(inout),target :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
   real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
   real(dp),intent(inout) :: enlout(nnlout*ndat)
-  real(dp),intent(out),target :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
-  real(dp),intent(inout),target :: vectout(2,npwout*nspinor*ndat) !vz_i
-  real(dp),intent(inout),optional,target :: vectproj(:,:,:)
+  real(dp),intent(out),target :: svectout(:,:)
+  real(dp),intent(inout),target :: vectout(:,:)
+  real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
-  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin/))
+  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,natom,ndat,nkpgin/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
   ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
-  ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout,phkxredin,phkxredout/))
-  ABI_UNUSED((/ucvol,lambda,sij,ph1d(1,1),ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))
+  ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout/))
+  ABI_UNUSED((/ucvol,lambda,sij,ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))
   ABI_UNUSED_A(cprjin)
   ABI_UNUSED_A(mpi_enreg)
   ABI_BUG("Unhandled configuration for OpenMP GPU immplementation")

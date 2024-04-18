@@ -65,7 +65,7 @@ module m_forstr
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
  use m_nonlop,           only : nonlop
- use m_gemm_nonlop_projectors,  only : make_gemm_nonlop,gemm_nonlop_use_gemm, &
+ use m_gemm_nonlop_projectors,  only : gemm_nonlop_use_gemm, &
 &                               gemm_nonlop_ikpt_this_proc_being_treated
  use m_fock_getghc,      only : fock_getghc
  use m_prep_kgb,         only : prep_nonlop
