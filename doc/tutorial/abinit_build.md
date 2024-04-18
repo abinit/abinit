@@ -2,7 +2,7 @@
 authors: MG
 ---
 
-# How to build ABINIT
+# How to build ABINIT using the Autotools
 
 This tutorial explains how to build ABINIT including the external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
