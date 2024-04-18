@@ -14,7 +14,7 @@ The second one is based on CMake.
 Instead of building ABINIT from scratch It is often more convenient to build ABINIT using a distribution, although such installation is not often up-to-date.
 
 For the Autotools methodology, see the detailed tutorial [[tutorial:abinit_build|How to build ABINIT using the Autotools]].
-For the recent (v10.0) CMake methodology, also needed for the installation of ABINIT on a machine with GPU(s), see [the GPU installation notes](/INSTALL_GPU).
+For the recent (v10.0) CMake methodology, also needed for the installation of ABINIT on a machine with GPU(s), see [the GPU installation notes](/INSTALL_gpu).
 For the use of distribution, see the generic [installation notes of ABINIT](/installation).
 
 ## Related Input Variables

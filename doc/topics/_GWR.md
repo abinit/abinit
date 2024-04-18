@@ -1,5 +1,5 @@
 ---
-description: How to perform a GWR calculations
+description: How to perform a GWR calculation 
 authors: MG
 ---
 <!--- This is the source file for this topics. Can be edited. -->
@@ -10,7 +10,7 @@ This page gives hints on how to perform GWR calculations
 
 A cubic scaling real-space imaginary-time algorithm for GW and RPA is available.
 See the theory in [[cite:Liu2016]] and related references. 
-An overview if available in [[tutorial:GWR_intro|An overview of the GWR code]].
+An overview is available in the tutorial [[tutorial:gwr_intro|An overview of the GWR code]].
 
 This implementation relies on the minimax time-frequency grids
 available in the GreenX library [[cite:Azizi2023]].
@@ -32,5 +32,5 @@ NOTE: GWR code is under active development and not yet ready for production runs
 
 ## Tutorials
 
-* [[tutorial:GWR_intro|An overview of the GWR code]]. Covers the motivation, requirements, formalism, workflow.
-* [[tutorial:GWR1|First tutorial on GWR]]. Still under development at the time of writing. Quasi-particle band structure of silicon in the GW approximation.
+* [[tutorial:gwr_intro|An overview of the GWR code]]. Covers the motivation, requirements, formalism, workflow.
+* [[tutorial:gwr1|First tutorial on GWR]]. Still under development at the time of writing. Quasi-particle band structure of silicon in the GW approximation.
