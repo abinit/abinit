@@ -30,7 +30,7 @@ module m_rttddft_propagators
                                 & prep_bandfft_tabs
  use m_dtset,               only: dataset_type
  use m_energies,            only: energies_type, energies_init, energies_copy
- use m_gemm_nonlop_projectors, only: make_gemm_nonlop
+ use m_gemm_nonlop_projectors, only: gemm_nonlop_ikpt_this_proc_being_treated
  use m_hamiltonian,         only: gs_hamiltonian_type, gspot_transgrid_and_pack
  use m_invovl,              only: make_invovl
  use m_kg,                  only: mkkin, mkkpg
@@ -105,7 +105,6 @@ subroutine rttddft_propagator_er(dtset, ham_k, istep, mpi_enreg, psps, tdks, cal
  integer                        :: bdtot_index
  integer                        :: calc_forces
  integer                        :: dimffnl
- integer                        :: gemm_nonlop_ikpt_this_proc_being_treated
  integer                        :: iband
  integer                        :: ibg, icg
  integer                        :: ider, idir

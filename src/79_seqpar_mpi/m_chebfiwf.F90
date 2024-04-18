@@ -194,7 +194,7 @@ subroutine chebfiwf2_blocksize(gs_hamk,ndat,npw,nband,nspinor,paral_kgb,gpu_opti
      write(std_out,*) "Memory requirements of chebfiwf per MPI task (OpenMP GPU)"
      write(std_out,*) "---------------------------------------------------------"
      write(std_out,*) "Static buffers, computed once and permanently on card :"
-     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (make_gemm_nonlop) : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
+     write(std_out,'(A,F10.3,1x,A)') "   gemm_nonlop_ompgpu (projectors)       : ",  real(nonlop_smem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   invovl_ompgpu (mkinvovl)              : ",  real(invovl_smem,dp)/(1024*1024), "MiB"
      write(std_out,'(A,F10.3,1x,A)') "   chebfi2                               : ",          chebfiMem(1)/(1024*1024), "MiB"
      write(std_out,*) "Work buffers, temporary, bandpp sized  :"
