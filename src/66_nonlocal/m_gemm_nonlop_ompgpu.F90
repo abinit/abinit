@@ -833,7 +833,7 @@ contains
   &         vnl_projections,&
   &         s_projections,&
   &         iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,nd2gxdt,nd2gxdtfac,&
-  &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ,ndat,ibeg-1,iend,nprojs,ntypat)
+  &         nattyp(itypat),nlmn,nspinor,nspinortot,optder,paw_opt,sij_typ(:,itypat),ndat,ibeg-1,iend,nprojs,ntypat,gpu_option)
 
         shift = shift + nattyp(itypat)*nlmn
         iatm = iatm+nattyp(itypat)
