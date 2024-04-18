@@ -25,6 +25,7 @@ module m_opernla_gemm
  use m_errors
  use m_xmpi
  use m_abi_linalg
+ use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
@@ -111,6 +112,7 @@ subroutine gemm_nonlop_distributed_gemm_opernla(rank,nprocs,npwin,ndat,nspinor,&
 
   end do
 end subroutine gemm_nonlop_distributed_gemm_opernla
+!!***
 
 !----------------------------------------------------------------------
 
@@ -233,8 +235,8 @@ end subroutine gemm_nonlop_distributed_gemm_opernla
  logical,intent(in) :: use_distrib
  complex(dpc),intent(in) :: alpha,beta
  character(len=1),intent(in) :: transa,transb
- real(dp),target,intent(in) :: a(*),b(*)
- real(dp),target,intent(inout) :: c(*)
+ real(dp),target,intent(in) :: a(cplx*m*k),b(cplx*n*k)
+ real(dp),target,intent(inout) :: c(cplx*m*n)
 
 ! *********************************************************************
 
@@ -259,7 +261,6 @@ end subroutine gemm_nonlop_distributed_gemm_opernla
 
 !----------------------------------------------------------------------
 
-!!***
 !!****f* ABINIT/opernla_gemm
 !! NAME
 !! opernla_gemm
@@ -361,43 +362,109 @@ end subroutine gemm_nonlop_distributed_gemm_opernla
 !!   for a subset of at most nincat atoms.
 !!
 !! SOURCE
-
-subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
-&       idir,istwf_k,mpi_enreg,nd2gxdt,ndgxdt,&
-&       npw,nspinor,signs,ndat,rank,&
-&       cpopt,nprocs,&
+subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
+&       d2gxdt,dgxdt,ffnl,gx,&
+&       idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpg,&
+&       npw,nspinor,ph3d,signs,ucvol,ndat,ntypat,lmnmax,nattyp,is_kprime,&
+&       iatom_only,atom_proj_shift,rank,cpopt,nprocs,&
 &       nprojs,nprojs_blk,nprojs_my_blk,nprojs_last_blk,&
-&       vectin,projs,dprojs,d2projs,&
-&       projs_r,projs_i,dprojs_r,dprojs_i,d2projs_r,d2projs_i,temp_realvec,&
+&       vectin,&
+&       temp_realvec,&
 &       projs_local,projs_recv,&
 &       gpu_option,use_distrib)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: choice,cplex,idir,istwf_k,nd2gxdt
- integer,intent(in) :: ndgxdt,npw,nspinor,signs,ndat,rank
- integer,intent(in) :: cpopt,nprocs
+ integer,intent(in) :: choice,cplex,dimffnl,idir,istwf_k,matblk,nd2gxdt
+ integer,intent(in) :: ndgxdt,nkpg,lmnmax,ntypat,npw,nspinor,signs,ndat,rank
+ integer,intent(in) :: cpopt,nprocs,iatom_only,atom_proj_shift
  integer,intent(in) :: nprojs,nprojs_blk,nprojs_my_blk,nprojs_last_blk
+ real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in) :: gpu_option
- logical,intent(in) :: use_distrib
+ logical,intent(in) :: use_distrib,is_kprime
 !arrays
+ integer,intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
  integer,intent(out) :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
- real(dp),target,intent(in) :: vectin(:,:)
+ real(dp),intent(in) :: ffnl(npw,dimffnl,lmnmax,ntypat),kpg(npw,nkpg)
+ real(dp),intent(in) :: ph3d(2,npw,matblk)
+ real(dp),target,intent(in) :: vectin(2,npw*nspinor*ndat)
  real(dp),target,intent(inout) :: d2gxdt(cplex,nd2gxdt,nprojs,ndat*nspinor)
  real(dp),target,intent(inout) :: dgxdt(cplex,ndgxdt*nprojs,ndat*nspinor)
  real(dp),target,intent(inout) :: gx(cplex,nprojs,ndat*nspinor)
- real(dp),target,intent(inout) :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
- real(dp),target,intent(inout) :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
- real(dp),target,intent(inout) :: d2projs(:,:,:),d2projs_r(:,:,:),d2projs_i(:,:,:)
  real(dp),target,intent(inout) :: projs_local(:,:,:),projs_recv(:,:,:),temp_realvec(:)
 
 !Local variables-------------------------------
- integer :: idat,ierr,i,i1,i2,i3
+ integer :: idat,ierr,i,i1,i2,i3,ik,nprojs_all
+ integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
+ real(dp), ABI_CONTIGUOUS pointer :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: d2projs(:,:,:)
 
- ABI_UNUSED(d2gxdt)
+ ik=1; if(is_kprime) ik=2
+ ABI_UNUSED(cplex_dgxdt)
  ABI_UNUSED(cplex_d2gxdt)
- ABI_UNUSED(idir)
+
+ nprojs_all=nprojs
+ if(iatom_only>0) then
+   nprojs_all=0
+   do i=1,ntypat
+     nprojs_all = nprojs_all + count(indlmn(3,:,i)>0)*nattyp(i)
+   end do
+ end if
+
+ call refresh_projectors(npw,istwf_k,nprojs_all,ndgxdt,nd2gxdt,signs,&
+ &                       is_kprime,gpu_option)
+ if(nprojs_all/=gemm_nonlop_kpt(ik)%nprojs) ABI_BUG("Problem")
+ if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+   call prep_projectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+   &                    ucvol,ffnl,ph3d,dimffnl,matblk,&
+   &                    nprojs_all,choice,is_kprime,gpu_option,&
+   &                    gemm_nonlop_kpt(ik)%projs,&
+   &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i)
+   gemm_nonlop_kpt(ik)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+ end if
+ if(choice>1 .and. ndgxdt>0) then
+   if(     nd2gxdt/=gemm_nonlop_kpt(ik)%ngrads2 &
+   &   .or. ndgxdt/=gemm_nonlop_kpt(ik)%ngrads &
+   &   .or. choice/=gemm_nonlop_kpt(ik)%choice &
+   &   .or.   idir/=gemm_nonlop_kpt(ik)%idir) then
+     call prep_dprojectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+     &                    ucvol,ffnl,ph3d,kpg,nkpg,dimffnl,matblk,&
+     &                    nprojs_all,ndgxdt,nd2gxdt,choice,signs,idir,gpu_option,&
+     &                    gemm_nonlop_kpt(ik)%projs,&
+     &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i,&
+     &                    gemm_nonlop_kpt(ik)%dprojs,&
+     &                    gemm_nonlop_kpt(ik)%dprojs_r,gemm_nonlop_kpt(ik)%dprojs_i,&
+     &                    gemm_nonlop_kpt(ik)%d2projs)
+     gemm_nonlop_kpt(ik)%choice = choice
+     gemm_nonlop_kpt(ik)%idir = idir
+   end if
+ end if
+
+ projs_beg=1; projs_end=nprojs;
+ dprojs_beg=1; dprojs_end=max(1,nprojs*ndgxdt)
+ d2projs_beg=1; d2projs_end=max(1,nprojs*nd2gxdt)
+ if((choice==2 .and. signs==2)) then
+   projs_beg=atom_proj_shift+1
+   projs_end=projs_beg+nprojs-1
+   dprojs_beg=atom_proj_shift*ndgxdt+1
+   dprojs_end=dprojs_beg+nprojs*ndgxdt-1
+   d2projs_beg=atom_proj_shift*nd2gxdt+1
+   d2projs_end=dprojs_beg+nprojs*nd2gxdt-1
+ end if
+
+ if(istwf_k == 1) then
+   projs => gemm_nonlop_kpt(ik)%projs(:,:,projs_beg:projs_end)
+   if(ndgxdt>0)  dprojs => gemm_nonlop_kpt(ik)%dprojs(:,:,dprojs_beg:dprojs_end)
+   if(nd2gxdt>0) d2projs => gemm_nonlop_kpt(ik)%d2projs(:,:,d2projs_beg:d2projs_end)
+ else
+   projs_r  => gemm_nonlop_kpt(ik)%projs_r(:,:,projs_beg:projs_end)
+   projs_i  => gemm_nonlop_kpt(ik)%projs_i(:,:,projs_beg:projs_end)
+   if(ndgxdt>0)  dprojs_r => gemm_nonlop_kpt(ik)%dprojs_r(:,:,dprojs_beg:dprojs_end)
+   if(ndgxdt>0)  dprojs_i => gemm_nonlop_kpt(ik)%dprojs_i(:,:,dprojs_beg:dprojs_end)
+ end if
+
 
  if(cplex == 2) then
    if(.not. use_distrib) then
@@ -627,4 +694,6 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,d2gxdt,dgxdt,gx,&
  end if
 
 end subroutine opernla_gemm
+!!***
 end module m_opernla_gemm
+!!***
