@@ -1650,6 +1650,7 @@ end subroutine xmpi_comm_multiple_of
 !!  in_comm=input MPI communicator.
 !!
 !! OUTPUT
+!!  out_comm=Output MPI communicator.
 !!  mpierr=error code returned
 !!
 !! SOURCE
