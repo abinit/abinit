@@ -25,6 +25,7 @@ module m_opernlb_gemm
  use m_errors
  use m_xmpi
  use m_abi_linalg
+ use m_gemm_nonlop_projectors
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
@@ -374,44 +375,112 @@ contains
 !!
 !! SOURCE
 subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-&       d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,gxfac,gxfac_sij,&
-&       idir,istwf_k,mpi_enreg,nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
-&       npw,nspinor,signs,ndat,rank,&
-&       cpopt,nprocs,paw_opt,&
+&       d2gxdtfac,d2gxdtfac_sij,dgxdtfac,dgxdtfac_sij,&
+&       dimffnl,ffnl,gxfac,gxfac_sij,&
+&       idir,indlmn,kpg,matblk,istwf_k,mpi_enreg,&
+&       nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
+&       nkpg,npw,nspinor,signs,ucvol,ndat,ntypat,lmnmax,nattyp,&
+&       is_kprime,iatom_only,atom_proj_shift,rank,&
+&       cpopt,nprocs,paw_opt,ph3d,&
 &       nprojs,nprojs_blk,nprojs_my_blk,nprojs_last_blk,&
-&       vectin,vectout,svectout,projs,dprojs,&
-&       projs_r,projs_i,dprojs_r,dprojs_i,temp_realvec_r,temp_realvec_i,&
+&       vectin,vectout,svectout,&
+&       temp_realvec_r,temp_realvec_i,&
 &       projs_local,projs_recv,&
 &       gpu_option,use_distrib)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,cplex,cplex_fac,idir,istwf_k,nd2gxdt,nd2gxdtfac
- integer,intent(in) :: ndgxdt,ndgxdtfac,npw,nspinor,signs,ndat,rank
- integer,intent(in) :: cpopt,nprocs,paw_opt
+ integer,intent(in) :: ndgxdt,dimffnl,nkpg,lmnmax,ntypat,ndgxdtfac,matblk,npw,nspinor
+ integer,intent(in) :: cpopt,nprocs,paw_opt,signs,ndat,rank,iatom_only,atom_proj_shift
  integer,intent(in) :: nprojs,nprojs_blk,nprojs_my_blk,nprojs_last_blk
+ real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  integer,intent(in) :: gpu_option
- logical,intent(in) :: use_distrib
+ logical,intent(in) :: use_distrib,is_kprime
 !arrays
+ integer,intent(in)  :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
  integer,intent(in)  :: cplex_dgxdt(ndgxdt),cplex_d2gxdt(nd2gxdt)
+ real(dp),intent(in) :: ffnl(npw,dimffnl,lmnmax,ntypat),kpg(npw,nkpg)
+ real(dp),intent(in) :: ph3d(2,npw,matblk)
  real(dp),target,intent(in)  :: vectin(:,:)
  real(dp),target,intent(inout) :: vectout(:,:),svectout(:,:)
- real(dp),target,intent(in) :: d2gxdtfac(cplex,nd2gxdtfac,nprojs,ndat*nspinor)
- real(dp),target,intent(in) :: d2gxdtfac_sij(cplex_fac,nd2gxdtfac,nprojs,ndat*nspinor)
- real(dp),target,intent(inout) :: dgxdtfac(cplex,ndgxdtfac*nprojs,ndat*nspinor)
- real(dp),target,intent(inout) :: dgxdtfac_sij(cplex_fac,ndgxdtfac*nprojs,ndat*nspinor)
- real(dp),target,intent(in) :: gxfac(cplex,nprojs,ndat*nspinor)
- real(dp),target,intent(in) :: gxfac_sij(cplex_fac,nprojs,ndat*nspinor)
- real(dp),target,intent(inout) :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
- real(dp),target,intent(inout) :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
+ real(dp),target,intent(in) :: d2gxdtfac(cplex_fac,nd2gxdtfac,nprojs,ndat*nspinor)
+ real(dp),target,intent(in) :: d2gxdtfac_sij(cplex,nd2gxdtfac,nprojs,ndat*nspinor)
+ real(dp),target,intent(inout) :: dgxdtfac(cplex_fac,ndgxdtfac*nprojs,ndat*nspinor)
+ real(dp),target,intent(inout) :: dgxdtfac_sij(cplex,ndgxdtfac*nprojs,ndat*nspinor)
+ real(dp),target,intent(in) :: gxfac(cplex_fac,nprojs,ndat*nspinor)
+ real(dp),target,intent(in) :: gxfac_sij(cplex,nprojs,ndat*nspinor)
  real(dp),target,intent(out) :: projs_recv(:,:,:),projs_local(:,:,:)
  real(dp),target,intent(out) :: temp_realvec_r(:),temp_realvec_i(:)
 
 !Local variables-------------------------------
- complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
- integer :: idat,ierr,i
+ integer :: idat,ierr,i,iproj,ik,nprojs_all
+ integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
+ real(dp), ABI_CONTIGUOUS pointer :: projs(:,:,:),projs_r(:,:,:),projs_i(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: dprojs(:,:,:),dprojs_r(:,:,:),dprojs_i(:,:,:)
 
+ ik=1; if(is_kprime) ik=2
+ ABI_UNUSED(cplex_dgxdt)
+ ABI_UNUSED(cplex_d2gxdt)
+ ABI_UNUSED(d2gxdtfac)
+ ABI_UNUSED(d2gxdtfac_sij)
+
+ nprojs_all=nprojs
+ if(iatom_only>0) then
+   nprojs_all=0
+   do i=1,ntypat
+     nprojs_all = nprojs_all + count(indlmn(3,:,i)>0)*nattyp(i)
+   end do
+ end if
+
+ call refresh_projectors(npw,istwf_k,nprojs_all,ndgxdt,nd2gxdt,signs,&
+ &                       is_kprime,gpu_option)
+ if(nprojs_all/=gemm_nonlop_kpt(ik)%nprojs) ABI_BUG("Problem")
+ if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+   call prep_projectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+   &                    ucvol,ffnl,ph3d,dimffnl,matblk,&
+   &                    nprojs_all,choice,is_kprime,gpu_option,&
+   &                    gemm_nonlop_kpt(ik)%projs,&
+   &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i)
+   gemm_nonlop_kpt(ik)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+ end if
+ if(choice>1 .and. ndgxdt>0) then
+   if(     nd2gxdt/=gemm_nonlop_kpt(ik)%ngrads2 &
+   &   .or. ndgxdt/=gemm_nonlop_kpt(ik)%ngrads &
+   &   .or. choice/=gemm_nonlop_kpt(ik)%choice &
+   &   .or.   idir/=gemm_nonlop_kpt(ik)%idir) then
+     call prep_dprojectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+     &                    ucvol,ffnl,ph3d,kpg,nkpg,dimffnl,matblk,&
+     &                    nprojs_all,ndgxdt,nd2gxdt,choice,signs,idir,gpu_option,&
+     &                    gemm_nonlop_kpt(ik)%projs,&
+     &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i,&
+     &                    gemm_nonlop_kpt(ik)%dprojs,&
+     &                    gemm_nonlop_kpt(ik)%dprojs_r,gemm_nonlop_kpt(ik)%dprojs_i,&
+     &                    gemm_nonlop_kpt(ik)%d2projs)
+     gemm_nonlop_kpt(ik)%choice = choice
+     gemm_nonlop_kpt(ik)%idir = idir
+   end if
+ end if
+
+ projs_beg=1; projs_end=nprojs;
+ dprojs_beg=1; dprojs_end=max(1,nprojs*ndgxdt)
+ if((choice==2 .and. signs==2)) then
+   projs_beg=atom_proj_shift+1
+   projs_end=projs_beg+nprojs-1
+   dprojs_beg=atom_proj_shift*ndgxdt+1
+   dprojs_end=dprojs_beg+nprojs*ndgxdt-1
+ end if
+
+ if(istwf_k == 1) then
+   projs => gemm_nonlop_kpt(ik)%projs(:,:,projs_beg:projs_end)
+   if(ndgxdt>0)  dprojs => gemm_nonlop_kpt(ik)%dprojs(:,:,dprojs_beg:dprojs_end)
+ else
+   projs_r  => gemm_nonlop_kpt(ik)%projs_r(:,:,projs_beg:projs_end)
+   projs_i  => gemm_nonlop_kpt(ik)%projs_i(:,:,projs_beg:projs_end)
+   if(ndgxdt>0)  dprojs_r => gemm_nonlop_kpt(ik)%dprojs_r(:,:,dprojs_beg:dprojs_end)
+   if(ndgxdt>0)  dprojs_i => gemm_nonlop_kpt(ik)%dprojs_i(:,:,dprojs_beg:dprojs_end)
+ end if
 
  if(paw_opt == 3 .or. paw_opt == 4) then
 
@@ -439,9 +508,15 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              dgxdtfac_sij(:,:,:) = dgxdtfac_sij(:,:,:) - gxfac_sij(:,:,:)
            else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET MAP(to:dgxdtfac_sij,gxfac_sij)
-             dgxdtfac_sij(:,:,:) = dgxdtfac_sij(:,:,:) - gxfac_sij(:,:,:)
-             !$OMP END TARGET
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+             !$OMP& MAP(to:gxfac_sij,dgxdtfac_sij) PRIVATE(idat,iproj,i)
+             do idat=1,ndat
+               do iproj=1,nprojs
+                 do i=1,cplex
+                   dgxdtfac_sij(i,iproj,idat) = dgxdtfac_sij(i,iproj,idat) - gxfac_sij(i,iproj,idat)
+                 end do
+               end do
+             end do
 #endif
            end if
          end if
@@ -574,16 +649,16 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
    if(cplex_fac == 2) then
      if(.not. use_distrib) then
        if(choice==1 .or. choice==7) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    projs, npw, &
          &    gxfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
        else if(choice==2) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, cone, vectout, npw,&
          &    gpu_option, use_distrib)
@@ -593,31 +668,37 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
              dgxdtfac(:,:,:) = dgxdtfac(:,:,:) - gxfac(:,:,:)
            else if(gpu_option == ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET MAP(to:dgxdtfac,gxfac)
-             dgxdtfac(:,:,:) = dgxdtfac(:,:,:) - gxfac(:,:,:)
-             !$OMP END TARGET
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+             !$OMP& MAP(to:gxfac,dgxdtfac) PRIVATE(idat,iproj,i)
+             do idat=1,ndat
+               do iproj=1,nprojs
+                 do i=1,cplex_fac
+                   dgxdtfac(i,iproj,idat) = dgxdtfac(i,iproj,idat) - gxfac(i,iproj,idat)
+                 end do
+               end do
+             end do
 #endif
            end if
          end if
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, cone, vectout, npw,&
          &    gpu_option, use_distrib)
        else if(choice==5) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    dprojs, npw, &
          &    gxfac, nprojs, cone, vectout, npw,&
          &    gpu_option, use_distrib)
        else if(choice==51) then
-         call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+         call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
          &    projs, npw, &
          &    dgxdtfac, nprojs, czero, vectout, npw,&
          &    gpu_option, use_distrib)
@@ -627,7 +708,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npw,ndat,nspinor,&
          &                                         nprojs_blk,&
          &                                         nprojs_last_blk,&
-         &                                         nprojs_my_blk,cplex,&
+         &                                         nprojs_my_blk,cplex_fac,&
          &                                         projs_local,projs_recv,&
          &                                         projs,&
          &                                         gxfac,vectout)
@@ -637,7 +718,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          &                                         nprojs,&
          &                                         nprojs_blk,&
          &                                         nprojs_last_blk,&
-         &                                         nprojs_my_blk,cplex,&
+         &                                         nprojs_my_blk,cplex_fac,&
          &                                         projs,projs_recv,&
          &                                         gxfac,vectout)
 #endif
@@ -646,12 +727,12 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
    else
 
      if(.not. use_distrib) then
-       call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+       call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
        &        projs_r, npw, &
        &        gxfac, nprojs, czero, temp_realvec_r, npw,&
        &        gpu_option, use_distrib)
        if(gpu_option == ABI_GPU_DISABLED) vectout(1,1:npw*nspinor*ndat) = temp_realvec_r(1:npw*nspinor*ndat)
-       call opernl_xgemm(cplex, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
+       call opernl_xgemm(cplex_fac, 'N', 'N', npw, ndat*nspinor, nprojs, cone, &
        &        projs_i, npw, &
        &        gxfac, nprojs, czero, temp_realvec_i, npw,&
        &        gpu_option, use_distrib)
@@ -661,7 +742,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npw,ndat,nspinor,&
          &                                         nprojs_blk,&
          &                                         nprojs_last_blk,&
-         &                                         nprojs_my_blk,cplex,&
+         &                                         nprojs_my_blk,cplex_fac,&
          &                                         projs_local,projs_recv,&
          &                                         projs_r,&
          &                                         gxfac,temp_realvec_r)
@@ -669,7 +750,7 @@ subroutine opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
          call gemm_nonlop_distributed_gemm_opernlb(rank,nprocs,npw,ndat,nspinor,&
          &                                         nprojs_blk,&
          &                                         nprojs_last_blk,&
-         &                                         nprojs_my_blk,cplex,&
+         &                                         nprojs_my_blk,cplex_fac,&
          &                                         projs_local,projs_recv,&
          &                                         projs_i,&
          &                                         gxfac,temp_realvec_i)
