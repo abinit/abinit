@@ -1746,7 +1746,8 @@ end if
              call timab(1909, 2, tsec)
 
              call stern%solve(u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq, ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
-                              kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj)
+                              kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj, msg, ierr)
+             ABI_CHECK(ierr == 0, msg)
              if (stern_has_band_para) call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
 
            end do ! ib_k

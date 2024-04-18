@@ -431,9 +431,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
        bands_treated_now = 0
        bands_treated_now(iband) = 1
        call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
-       
+
        if (dtset%rf2_dkdk==2 .and. (idir==1 .or. idir==2 .or. idir==3)) then
-         eig1_k = zero 
+         eig1_k = zero
          resid = zero
        else
          call dfpt_cgwf(iband,iband_me,rank_band,bands_treated_now,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
@@ -444,28 +444,28 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &         dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
        end if
        resid_k(iband)=resid
-       
+
      else
        resid_k(iband)=zero
      end if
 
      if (ipert/=natom+10 .and. ipert/= natom+11) then
-!    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
-!    when it is input to dfpt_cgwf). Here, restore the "active space" content
-!    of the first-order wavefunction, to give cwave1.
-!    PAW: note that dcwavef (1st-order change of WF due to overlap change)
-!         remains in the subspace orthogonal to cgq
+       ! At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
+       ! when it is input to dfpt_cgwf). Here, restore the "active space" content
+       ! of the first-order wavefunction, to give cwave1.
+       ! PAW: note that dcwavef (1st-order change of WF due to overlap change)
+       !      remains in the subspace orthogonal to cgq
        call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
        if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
-&         eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
-&         0,gs_hamkq%usepaw)
+           eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
+           0,gs_hamkq%usepaw)
          edocc_k=zero
          tocceig=1
        else
          call corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,edocc_k,eig1_k,fermie1,gh0c1,&
-&         iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
-&         occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
+           iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
+           occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
        end if
        ABI_FREE (cycle_bands)
      else
@@ -784,12 +784,11 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
  real(dp),intent(in) :: eig1(2*nband**2)
  real(dp),intent(out) :: cwave1(2,npw1*nspinor)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq),cwaveprj(natom,nspinor*usepaw)
- type(pawcprj_type),intent(inout) :: cwaveprj1(natom,nspinor*usepaw) !vz_i
+ type(pawcprj_type),intent(inout) :: cwaveprj1(natom,nspinor*usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: ibandkq,index_cgq,index_cprjq,index_eig1,ii
- integer :: ibandkq_me, ierr
+ integer :: ibandkq,index_cgq,index_cprjq,index_eig1,ii,ibandkq_me, ierr
  real(dp) :: facti,factr,eta,delta_E,inv_delta_E,gkkr
 !arrays
  real(dp) :: tsec(2)
@@ -818,14 +817,13 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
  ibandkq_me = 0
  do ibandkq=1,nband
 
-!TODO MJV: here we have an issue - the cgq are no longer present for all bands!
-!   we only have diagonal terms for iband iband1 and ibandq in same set of bands
-! 1) filter with distrb
+   !TODO MJV: here we have an issue - the cgq are no longer present for all bands!
+   !   we only have diagonal terms for iband iband1 and ibandq in same set of bands
+   ! 1) filter with distrb
    if(cycle_bands(ibandkq)) cycle
    ibandkq_me = ibandkq_me + 1
 
-! 2) get contributions for correction factors of cgq from bands present on this cpu
-
+   ! 2) get contributions for correction factors of cgq from bands present on this cpu
    delta_E = eig0nk - eig0_kq(ibandkq)
    inv_delta_E = delta_E / ( delta_E ** 2 + eta ** 2)
 
@@ -840,14 +838,14 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
    factr = inv_delta_E * gkkr
    facti = inv_delta_E * eig1(index_eig1+1)
 
-!  Apply correction to 1st-order WF
+   ! Apply correction to 1st-order WF
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwave1,facti,factr,index_cgq,npw1,nspinor)
    do ii=1,npw1*nspinor
      cwave1(1,ii)=cwave1(1,ii)+(factr*cgq(1,ii+index_cgq)-facti*cgq(2,ii+index_cgq))
      cwave1(2,ii)=cwave1(2,ii)+(facti*cgq(1,ii+index_cgq)+factr*cgq(2,ii+index_cgq))
    end do
 
-!  In the PAW case, also apply correction to projected WF
+   ! In the PAW case, also apply correction to projected WF
    if (usepaw==1) then
      index_cprjq=nspinor*(ibandkq_me-1)+ibgq
      call pawcprj_zaxpby((/factr,facti/),(/one,zero/),cprjq(:,index_cprjq+1:index_cprjq+nspinor),cwaveprj1)
@@ -855,18 +853,18 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
 
  end do ! Loop over k+q subspace
 
-! 3) reduce over bands to get all contributions to correction
-! need MPI reduce over band communicator only
+ ! 3) reduce over bands to get all contributions to correction
+ ! need MPI reduce over band communicator only
  call xmpi_sum(cwave1,mpi_enreg%comm_band,ierr)
  if (usepaw==1) then
    call pawcprj_mpi_sum(cwaveprj1, mpi_enreg%comm_band, ierr)
  end if
 
-! 4) add correction to the cwave1
-!Now add on input WF into output WF
+ ! 4) add correction to the cwave1
+ ! Now add on input WF into output WF
  call cg_zaxpy(npw1*nspinor,(/one,zero/),cwavef,cwave1)
 
-!Idem for cprj
+ ! Idem for cprj
  if (usepaw==1) then
    call pawcprj_zaxpby((/one,zero/),(/one,zero/),cwaveprj,cwaveprj1)
  end if

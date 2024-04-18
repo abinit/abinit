@@ -1559,7 +1559,8 @@ end subroutine stern_init
 !!
 !! SOURCE
 
-subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, cwaveprj0, cwavef, cwaveprj)
+subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
+                              cwaveprj0, cwavef, cwaveprj, err_msg, ierr)
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
@@ -1571,6 +1572,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  real(dp),intent(inout) :: cwave0(2, stern%npw_k*stern%nspinor), cwavef(2, stern%npw_kq*stern%nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj0(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
  type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
+ integer,intent(out) :: ierr
+ character(len=*),intent(out) :: err_msg
 
 !Local variables ------------------------------
 !scalars
@@ -1578,7 +1581,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  integer :: opt_gvnlx1, mcgq, mgscq, grad_berry_size_mpw1
  real(dp) :: out_resid
  type(rf2_t) :: rf2
- character(len=5000) :: msg
+
  real(dp),allocatable :: grad_berry(:,:)
 
 ! *************************************************************************
@@ -1639,24 +1642,31 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  !end if
 
  ! Handle possible convergence error.
+ err_msg = ""; ierr = 0
  if (u1_band > 0) then
    if (out_resid > stern%dtset%tolwfr) then
-     write(msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
+     write(err_msg, "(a,i0,a, 2(a,es13.5), 2a,i0,a)") &
        " Sternheimer didn't convergence for band: ", u1_band, ch10, &
        " resid:", out_resid, " >= tolwfr: ", stern%dtset%tolwfr, ch10, &
        " after nline: ", stern%nlines_done, " iterations. Increase nline and/or tolwfr."
-     ABI_ERROR(msg)
+     ierr = 1
    else if (out_resid < zero) then
-     ABI_ERROR(sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done)))
+     err_msg = sjoin(" resid: ", ftoa(out_resid), ", nlines_done:", itoa(stern%nlines_done))
+     ierr = -1
    end if
 
-   !if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
+   !if (my_rank == master .and. (enough_stern <= 5 .or. stern%dtset%prtvol > 10)) then
    !  write(std_out, "(2(a,es13.5),a,i0)") &
    !    " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
    !    " after nlines_done: ", nlines_done
    !  enough_stern = enough_stern + 1
    !end if
  end if
+ if (ierr /= 0) return
+
+ !call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
+ !                     eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
+ !                     0,gs_hamkq%usepaw)
 
 end subroutine stern_solve
 !!***
