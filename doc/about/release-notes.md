@@ -90,8 +90,7 @@ performance libraries. It also uses NVidia FFT/linear algebra libraries
 The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
 on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
+For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
 
 Several GPU devices can be detected and used on a node.
 
