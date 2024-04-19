@@ -829,7 +829,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    end do
  end if
 
- write(msg,'(3a,f8.5,1a,f8.5)')&
+ write(msg,'(3a,f10.5,1a,f10.5)')&
 & '                                            ... Done.',ch10,&
 & '  max(C6) =', maxval(vdw_c6),' ;  min(C6) =', minval(vdw_c6)
  call wrtout(std_out,msg,'COLL')
