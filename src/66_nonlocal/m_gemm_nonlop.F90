@@ -618,37 +618,41 @@ contains
         &       ndgxdtfac,indlmn,ntypat,lmnmax,nprojs,nnlout,nspinor,paw_opt,&
         &       nattyp,gpu_option)
       else
-        shift=0; dshift=0; d2shift = 0; iatm=1
-        do itypat=1, ntypat
-          nlmn=count(indlmn(3,:,itypat)>0)
+        shift=0; dshift=0; dfshift = 0; d2shift = 0; iatm=1
+        do itypat=1, ntypat_
+          nlmn=count(indlmn_(3,:,itypat)>0)
 
           ibeg = shift+1
-          iend = shift+nattyp(itypat)*nlmn
+          iend = shift+nattyp_(itypat)*nlmn
 
           idbeg = dshift+1
-          idend = dshift+nattyp(itypat)*nlmn*ngrads
+          idend = dshift+nattyp_(itypat)*nlmn*ngrads
+
+          idfbeg = dshift+1
+          idfend = dshift+nattyp_(itypat)*nlmn*ndgxdtfac
 
           id2beg = d2shift+1
-          id2end = d2shift+nattyp(itypat)*nlmn*ngrads2
+          id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
           do idat=1,ndat
             call opernld_ylm             (choice,cplex,cplex_fac,ddkk(:,idat),&
             &       dprojections    (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       vnl_dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       s_dprojections  (:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       vnl_dprojections(:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
+            &       s_dprojections  (:, idfbeg:idfend, 1+nspinor*(idat-1):nspinor*idat),&
             &       d2projections (:, id2beg:id2end, 1+nspinor*(idat-1):nspinor*idat),&
             &       enlk(idat),enlout(nnlout*(idat-1)+1:nnlout*idat),fnlk(:,idat),&
             &       projections    (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
             &       vnl_projections(:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
             &       s_projections  (:, ibeg:iend, 1+nspinor*(idat-1):nspinor*idat),&
-            &       iatm,natom,1,nd2gxdt,ndgxdt,ndgxdtfac,&
-            &       nattyp(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
+            &       iatm,natom_,1,nd2gxdt,ndgxdt,ndgxdtfac,&
+            &       nattyp_(itypat),nlmn,nnlout,nspinor,paw_opt,strnlk(:,idat))
           end do
 
-          shift = shift + nattyp(itypat)*nlmn
-          dshift = dshift + nattyp(itypat)*nlmn*ngrads
-          d2shift = d2shift + nattyp(itypat)*nlmn*ngrads2
-          iatm = iatm+nattyp(itypat)
+          shift = shift + nattyp_(itypat)*nlmn
+          dshift = dshift + nattyp_(itypat)*nlmn*ngrads
+          dfshift = dshift + nattyp_(itypat)*nlmn*ndgxdtfac
+          d2shift = d2shift + nattyp_(itypat)*nlmn*ngrads2
+          iatm = iatm+nattyp_(itypat)
         end do
       end if
 
