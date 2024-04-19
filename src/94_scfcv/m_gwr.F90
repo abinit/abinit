@@ -4098,11 +4098,11 @@ subroutine gwr_build_tchi(gwr)
    ! Perhaps the safest approach would be to generate the plan on the fly.
    max_ndat = gwr%sc_batch_size
    use_mpi_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
-   use_mpi_for_k = .False.
+   !use_mpi_for_k = .False.
 
    use_shmem_for_k = gwr%sc_batch_size == gwr%kpt_comm%nproc .and. gwr%kpt_comm%nproc > 1
    use_shmem_for_k = use_shmem_for_k .and. gwr%kpt_comm%can_use_shmem()
-   !use_shmem_for_k = .False.
+   use_shmem_for_k = .False.
 
    if (use_shmem_for_k) then
      buf_count = 2 * (sc_nfftsp * max_ndat * 2)

@@ -2,6 +2,7 @@
 
 # Number of datasets: 2-step calculation
 ndtset 2
+iomode 1
 
 ngkpt     1 1 1              # Number of grid points for k-point generation
 nshiftk   1

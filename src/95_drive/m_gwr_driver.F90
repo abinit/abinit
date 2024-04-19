@@ -38,6 +38,7 @@ module m_gwr_driver
  use m_dtfil
  use m_wfk
  use m_distribfft
+ use netcdf
  use m_nctk
  use, intrinsic :: iso_c_binding
 
@@ -161,7 +162,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 !scalars
  integer,parameter :: master = 0, cplex1 = 1, ipert0 = 0, idir0 = 0, optrhoij1 = 1
  integer :: ii, comm, nprocs, my_rank, mgfftf, nfftf, omp_ncpus, work_size, nks_per_proc
- integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm
+ integer :: ierr, spin, ik_ibz, nband_k, iomode__, color, io_comm !, kg_varid
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
@@ -668,6 +669,8 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ! Build header with new npwarr and nband.
    owfk_ebands = ebands_from_dtset(dtset, npwarr_ik, nband=nband_iks)
    owfk_ebands%eig = zero
+   owfk_ebands%istwfk = istwfk_ik
+   !print *, "owfk_ebands%npwarr:",  owfk_ebands%npwarr; stop
    call hdr_init(owfk_ebands, codvsn, dtset, owfk_hdr, pawtab, 0, psps, wvl%descr)
 
    ! Change the value of istwfk taken from dtset.
@@ -728,17 +731,22 @@ end if
 
          if (ugb%my_nband > 0) then
            ABI_CHECK(all(shape(ugb%cg_k) == [2, ugb%npwsp, ugb%my_nband]), "Wrong shape")
-           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wronk npw_k")
+           ABI_CHECK_IEQ(ugb%npw_k, owfk_hdr%npwarr(ik_ibz), "Wrong npw_k")
            call c_f_pointer(c_loc(ugb%cg_k), cg_k_ptr, shape=[2, ugb%npwsp * ugb%my_nband])
 
            ! Reopen file inside io_comm.
            call owfk%open_write(owfk_hdr, out_path, 0, iomode__, get_unit(), io_comm, write_hdr=.False., write_frm=.False.)
 
            !sc_mode = merge(xmpio_single, xmpio_collective, ugb%has_idle_procs)
-           sc_mode = xmpio_collective
+           !sc_mode = xmpio_collective
+           sc_mode = xmpio_single
            call owfk%write_band_block([ugb%my_bstart, ugb%my_bstop], ik_ibz, spin, sc_mode, &
-                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, &
-                                       eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+                                       kg_k=ugb%kg_k, cg_k=cg_k_ptr, eig_k=owfk_ebands%eig(:, ik_ibz, spin), occ_k=occ_k)
+
+           !NCF_CHECK(nf90_inq_varid(owfk%fh, "reduced_coordinates_of_plane_waves", kg_varid))
+           !NCF_CHECK(nf90_put_var(owfk%fh, kg_varid, ugb%kg_k, start=[1,1,ik_ibz], count=[3,ugb%npw_k,1]))
+           !NCF_CHECK(nf90_sync(owfk%fh))
+           !print *, "ugb%kg_k:", ugb%kg_k; stop
            call owfk%close()
          end if
          call xmpi_comm_free(io_comm)
@@ -781,6 +789,10 @@ end if
    call ebands_update_occ(owfk_ebands, dtset%spinmagntarget, prtvol=dtset%prtvol, fermie_to_zero=.False.)
 
    if (my_rank == master) then
+     if (write_wfk .and. iomode__ == IO_MODE_ETSF) then
+       NCF_CHECK(ebands_ncwrite_path(owfk_ebands, cryst, out_path))
+       !print *, "owfk_ebands%istwfk", owfk_ebands%istwfk; stop
+     end if
      call ebands_print_gaps(owfk_ebands, ab_out, header="KS gaps after direct diagonalization")
      call ebands_print_gaps(owfk_ebands, std_out, header="KS gaps after direct diagonalization")
      if (cc4s_task) call cc4s_write_eigens(owfk_ebands, dtfil)
@@ -1054,7 +1066,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  integer :: u_ngfft(18), u_nfft, u_mgfft, enforce_sym, method, nlmn_atm(cryst%natom)
  integer,pointer :: gvec_max(:,:)
  integer,allocatable,target :: m_gvec(:,:), sorted_kg_k(:,:)
- complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), work(:)
+ complex(dp),allocatable :: ug1_batch(:,:), ur1_batch(:,:), ur2_batch(:,:), ur12_batch(:,:), ug12_batch(:,:), cwork(:)
  complex(gwpc),allocatable :: sqrt_vc(:), paw_rhotwg(:)
  type(pawpwij_t),allocatable :: pwij(:)
  type(pawcprj_type),allocatable :: cprj1(:,:)
@@ -1379,27 +1391,27 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  !FBru -> gmatteo should you remove the following lines?
  if (my_rank == 0) then
    buf_size = 4
-   call wrtout(units, sjoin(" Reading Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
-   ABI_MALLOC(work, (buf_size))
+   call wrtout(units, sjoin(" Reading norm of Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
+   ABI_MALLOC(cwork, (buf_size))
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
    ierr = 0
    band1_loop: do band1=1, ugb%nband_k
    do band2=1, ugb%nband_k
      ierr = ierr + 1; if (ierr == 6) exit band1_loop
-     !if (ig == 1) work(1) = zero
+     !if (ig == 1) cwork(1) = zero
      offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
-     call MPI_FILE_READ_AT(fh, offset, work, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     call MPI_FILE_READ_AT(fh, offset, cwork, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
      call wrtout(units, sjoin(" For band1:", itoa(band1), ", band2:", itoa(band2)))
-     where (abs(work) < tol8)
-       work = zero
+     where (abs(cwork) < tol8)
+       cwork = zero
      end where
-     write(msg, "(*(1x, es12.5))")work(1:buf_size)
+     write(msg, "(*(1x, es12.5))")abs(cwork(1:buf_size))
      call wrtout(units, msg)
    end do
    end do band1_loop
-   ABI_FREE(work)
+   ABI_FREE(cwork)
  end if
 #endif
 
@@ -1416,24 +1428,24 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
 
-   ABI_MALLOC(work, (m_npw))
+   ABI_MALLOC(cwork, (m_npw))
    max_abs_err = zero
    do ig=1, ugb%nband_k**2
      read(test_unt,*) band1, band2, ug12_batch(1:M_,1)
      offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
-     call MPI_FILE_READ_AT(fh, offset, work, m_npw, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
+     call MPI_FILE_READ_AT(fh, offset, cwork, m_npw, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
 
-     abs_err = maxval(abs(ug12_batch(1:M_,1) - work(1:M_)))
+     abs_err = maxval(abs(ug12_batch(1:M_,1) - cwork(1:M_)))
      max_abs_err = max(max_abs_err, abs_err)
      if (abs_err > zero) write(std_out, *)" For ig:", ig, "/", ugb%nband_k**2, "abs_err", abs_err
-     !write(std_out, *)"1:", ug12_batch(1:M_,1); write(std_out, *)"2:", work(1:M_)
+     !write(std_out, *)"1:", ug12_batch(1:M_,1); write(std_out, *)"2:", cwork(1:M_)
    end do
 
    close(test_unt)
    call MPI_FILE_CLOSE(fh, mpierr)
    ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
-   ABI_FREE(work)
+   ABI_FREE(cwork)
 
    write(std_out,*)" max_abs_err:", max_abs_err
    ABI_CHECK(max_abs_err < tol16, sjoin("max_abs_err:", ftoa(max_abs_err)))

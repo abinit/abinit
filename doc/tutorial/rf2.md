@@ -22,6 +22,10 @@ This tutorial should take about 1 hour.
 
 WARNING : this tutorial is a bit old, and should be updated by removing the use of the ANADDB input variable brav in 
 trf2_4.abi, trf2_5.abi, and trf2_7.abi, with the accompanying modifications in the text of the tutorial.
+Also, due to the change of default values for [[rfdir]] and [[rfatpol]] in ABINITv9.8 with respect to the prior versions of ABINIT, 
+the example input files from this tutorial will not work with such prior versions of ABINIT. 
+Please, use ABINITv9.8 or more recent versions of ABINIT, or adjust the values of [[rfdir]] and [[rfatpol]]. 
+See point A.3 of the [v9.8 release notes](/about/release-notes/#98). 
 
 [TUTORIAL_README]
 

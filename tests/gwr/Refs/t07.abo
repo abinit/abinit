@@ -360,18 +360,18 @@ meta: {optdriver: 6, }
 
  Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
 
- Writing Coulomb vertex for testing purposes with ng: 4
+ Writing norm of Coulomb vertex for testing purposes with ng: 4
 
  For band1: 1 , band2: 1
-  7.60297E-01  2.03224E-33  1.94792E-01 -7.89916E-18  1.94792E-01  7.89916E-18  1.94792E-01  2.18267E-18
+  7.60297E-01  1.94792E-01  1.94792E-01  1.94792E-01
  For band1: 1 , band2: 2
-  0.00000E+00  0.00000E+00  2.39011E-02 -2.09240E-17  2.39011E-02 -5.35205E-17  2.39011E-02 -5.34027E-17
+  0.00000E+00  2.39011E-02  2.39011E-02  2.39011E-02
  For band1: 1 , band2: 3
-  0.00000E+00  0.00000E+00 -5.14930E-03 -1.25362E-09  5.14930E-03  1.25362E-09 -7.34877E-04 -8.11831E-10
+  0.00000E+00  5.14930E-03  5.14930E-03  7.34877E-04
  For band1: 1 , band2: 4
-  0.00000E+00  0.00000E+00 -6.85820E-03  4.35370E-09  6.85820E-03 -4.35370E-09  2.20535E-02 -4.15157E-09
+  0.00000E+00  6.85820E-03  6.85820E-03  2.20535E-02
  For band1: 1 , band2: 5
-  0.00000E+00  0.00000E+00 -2.03443E-02  1.25593E-09  2.03443E-02 -1.25593E-09  7.38160E-04 -3.20532E-09
+  0.00000E+00  2.03443E-02  2.03443E-02  7.38160E-04
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor

@@ -561,7 +561,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcp%mode))
  end select
 
- call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
+ !call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
  vcp%i_sz_resid = vcp%i_sz
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
