@@ -1350,7 +1350,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 #ifdef HAVE_MPI_IO
        ! Write ug12_batch using Stream-IO
        buf_size = m_npw * n2dat
-       offset = ((band2_start-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
+
+       !FBru convert to longer integer before the multiplication
+       offset = INT(m_npw, KIND=XMPI_OFFSET_KIND) &
+               * INT( (band2_start-1) + (band1-1) * ugb%nband_k, KIND=XMPI_OFFSET_KIND) &
+                * INT(xmpi_bsize_dpc, KIND=XMPI_OFFSET_KIND)
+
        call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)
 
@@ -1371,9 +1376,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
  call xmpi_barrier(comm)
 
+ !FBru -> gmatteo should you remove the following lines?
  if (my_rank == 0) then
    buf_size = 4
-   call wrtout(units, sjoin(" Writing Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
+   call wrtout(units, sjoin(" Reading Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
    ABI_MALLOC(work, (buf_size))
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
