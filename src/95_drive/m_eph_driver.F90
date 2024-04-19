@@ -714,8 +714,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
    if (my_rank == master) then
-     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, &
-       efmasval, ifc)
+     call frohlichmodel_polaronmass(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
 
  case (11)
@@ -737,11 +736,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
    call gstore%free()
-
- case (13)
-   ! Compute e-ph matrix elements with GWPT formalism.
-   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
-                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  !case (13)
    ! Variational polaron equations
@@ -810,6 +804,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
      call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if
+
+ case (17)
+   ! Compute e-ph matrix elements with the GWPT formalism.
+   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
+                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case default
    ABI_ERROR(sjoin("Unsupported value of eph_task:", itoa(dtset%eph_task)))

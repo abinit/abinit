@@ -1075,7 +1075,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  integer :: bantot,enforce_sym,ib,ibtot,ik_ibz,isppol,jj,method,iat,ount !ii,
  integer :: mband,io,nfftot_osc,spin,hexc_size,nqlwl,iq
  integer :: timrev,iq_bz,isym,iq_ibz,itim
- integer :: my_rank,nprocs,fform,ierr,my_k1, my_k2,my_nbks
+ integer :: my_rank,nprocs,ierr,my_k1, my_k2,my_nbks
  integer :: first_dig,second_dig,it
  real(dp) :: ucvol,qnorm
  real(dp):: eff,mempercpu_mb,wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -1131,15 +1131,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print()
- !
- ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------
- if (Dtset%chksymbreak==0) then
-   ABI_WARNING("Calling make_mesh")
-   call make_mesh(Kmesh,Cryst,Dtset%kptopt,Dtset%kptrlatt,Dtset%nshiftk,Dtset%shiftk,break_symmetry=.TRUE.)
-   ! TODO
-   !Check if kibz from KSS file corresponds to the one returned by make_mesh.
+
+ ! Setup of the k-point list and symmetry tables in the BZ
+ if (Dtset%chksymbreak == 0) then
+   call make_mesh(Kmesh, Cryst, Dtset%kptopt, Dtset%kptrlatt, Dtset%nshiftk, Dtset%shiftk, break_symmetry=.TRUE.)
  else
-   call Kmesh%init(Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt)
+   call Kmesh%init(Cryst, Hdr_wfk%nkpt, Hdr_wfk%kptns, Dtset%kptopt)
  end if
  BSp%nkibz = Kmesh%nibz  !We might allow for a smaller number of points....
 
@@ -1155,7 +1152,6 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
  end if
 
  if (w_fname /= ABI_NOFILE) then
-   ! GWPT
    call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
    call hscr%free()
    nqlwl = size(qlwl, dim=2)

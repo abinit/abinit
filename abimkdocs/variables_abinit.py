@@ -1614,12 +1614,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
-It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy 
+It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy
 of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
 Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
-when they are booked for a run that cannot use these. 
-Accordingly, the user might blame ABINIT for being slow while the user has simply not activated 
-the relevant parallelism, or activated an irrelevant parallelism. 
+when they are booked for a run that cannot use these.
+Accordingly, the user might blame ABINIT for being slow while the user has simply not activated
+the relevant parallelism, or activated an irrelevant parallelism.
 
 However, if the user correctly understand the parallelism,
 it might be more convenient to leave in the input file irrelevant variables. This is especially the case for high-throughput calculations
@@ -1630,7 +1630,7 @@ thus hopefully preventing some users to loose computing power.
 
 The following relevances and adequacies are checked at present if [[chkparal]]=1 :
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
-the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW). 
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
 The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
 """,
@@ -11050,6 +11050,7 @@ A negative value is interpreted as percentage of [[nband]] (added in v9).
     will give a band structure with the first 8 bands converged within [[tolwfr]].
     For more complex systems and/or GS NSCF calculations with many empty states, one usually needs
     to increase [[nbdbuf]], let's say 10% of [[nband]].
+    This can be easily achieved by using a negative value e.g.: nbdbuf -10 means 10% of nband.
 
 
 This concept is useful in three situations: in non-self-consistent calculations, for the
