@@ -3,19 +3,18 @@
 #
 # CPU: AMD Milan EPYC 7543
 # GPU: Nvidia A100 SXM4 80 Go
-# Compilers: Nvidia HPC compilers
+# Compilers: Nvidia HPC compilers 24.3
 # Libraries: MKL, Cuda
 # ================================================================
 
-#MY_ARCH=GPUB
- prefix=${BENCH_ROOT}/install/${MY_ARCH}/abinit-gpu
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
 
 # Compilers and flags
 # ========================================
  FC=$FC_MPI
  CC=$CC_MPI
  CXX=$CXX_MPI
- FCFLAGS_EXTRA="-tp=zen3 -cudalib=cufft -L${CUDA_ROOT}/math_libs/lib64 -fPIC"
+ FCFLAGS_EXTRA="-tp=zen3 -fast -fPIC"
  CFLAGS_EXTRA="-tp=zen3"
  CXXFLAGS_EXTRA="-tp=zen3"
  with_optim_flavor="standard"
@@ -30,6 +29,7 @@
 
 # CUDA GPU
 # ========================================
+GPU_ARCH=80
 with_gpu="${CUDA_ROOT}"
 with_gpu_flavor="cuda-double"
 NVCC="${CUDA_ROOT}/bin/nvcc"
@@ -39,7 +39,6 @@ GPU_CPPFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
 GPU_CXXFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
 GPU_FCFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
 GPU_LIBS="-L${CUDA_ROOT}/math_libs/lib64 -L${CUDA_ROOT}/lib64 -lcusolver -lcublas -lcublasLt -lcufft -lcudart -lstdc++"
-GPU_ARCH=80
 
 # Linear Algebra library
 # ========================================
@@ -60,9 +59,9 @@ GPU_ARCH=80
  with_netcdf="${NETCDF_C_ROOT}"
  with_netcdf_fortran="${NETCDF_FORTRAN_ROOT}"
 
-# Additional plugins
+# Additional plugins & libs
 # ========================================
- with_libxc="${BENCH_ROOT}/install/${MY_ARCH}/libxc"
+ with_libxc="${ROOT}/install/${MY_ARCH}/libxc"
 
 # Miscellaneous options
 # ========================================
