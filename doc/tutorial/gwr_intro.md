@@ -10,6 +10,8 @@ as well as the pros and cons with respect to the conventional GW implementation 
 in Fourier-space and real-frequency domain, also available in ABINIT, 
 that in what follows will be referred to as conventional or legacy GW code.
 
+WARNING : THIS TUTORIAL IS WORK IN PROGRESS ! IT IS NOT YET COMPLETE ...
+
 ## Why a new GW code?
 
 The conventional GW code has quartic scaling with the number of atoms whereas GWR scales cubically.
