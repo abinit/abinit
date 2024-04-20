@@ -913,8 +913,6 @@ From J.-M. Beuken (MR830).
 
 **C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
 This makes more readable profiling and tracing information when viewed with nsys-ui. 
-Add new parameter use_nvtx (now [[gpu_use_nvtx]]) 
-to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
 From P. Kestener (MR843)
