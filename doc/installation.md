@@ -4,6 +4,7 @@ This page provides an introduction to the installation of the
 ABINIT package and the compilation of the executables.
 It also discusses how to test whether the compilation was successful by running the internal test suite.
 Finally, it gives related complements for the developers.
+The installation using CMake is still to be included in the present installation information. See the v10.0 release notes.
 
 Any comment or suggestion to improve the procedure or this page is welcome!
 Simply contact the ABINIT group on the [discourse forum](https://discourse.abinit.org).
