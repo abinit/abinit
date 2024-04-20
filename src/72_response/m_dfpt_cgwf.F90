@@ -64,7 +64,8 @@ module m_dfpt_cgwf
    integer :: nline_in = -1
    integer :: nlines_done = -1
    integer :: usedcwavef
-   logical :: use_u1c_cache
+   integer :: work_ngfft(18)
+   logical :: use_cache
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
@@ -76,6 +77,7 @@ module m_dfpt_cgwf
    real(dp),allocatable :: out_eig1_k(:)
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
+   real(dp),allocatable :: work(:,:,:,:)
 
  contains
 
@@ -1500,13 +1502,14 @@ end subroutine dfpt_cgwf
 !!
 !! SOURCE
 
-subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_u1c_cache, mpi_enreg, comm_band)
+subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_cache, work_ngfft, mpi_enreg, comm_band)
 
 !Arguments ------------------------------------
  class(stern_t),intent(out) :: stern
  type(dataset_type),target,intent(in) :: dtset
  integer,intent(in) :: npw_k, npw_kq, nspinor, nband, nband_me, comm_band
- logical,intent(in) :: use_u1c_cache
+ integer,intent(in) :: work_ngfft(18)
+ logical,intent(in) :: use_cache
  type(mpi_type),intent(in) :: mpi_enreg
 
 !Local variables ------------------------------
@@ -1517,7 +1520,11 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
  stern%nband_me = nband_me
  stern%usedcwavef = 0
- stern%use_u1c_cache = use_u1c_cache
+ stern%use_cache = use_cache
+ stern%work_ngfft = work_ngfft
+ if (use_cache) then
+   ABI_MALLOC(stern%work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+ end if
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
  call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
@@ -1559,7 +1566,7 @@ end subroutine stern_init
 !!
 !! SOURCE
 
-subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
+subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
                               cwaveprj0, cwavef, cwaveprj, err_msg, ierr)
 
 !Arguments ------------------------------------
@@ -1568,7 +1575,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
  integer,intent(in) :: u1_band, band_me, idir, ipert
 !arrays
- real(dp),intent(in) :: eig0_k(stern%nband), eig0_kq(stern%nband)
+ real(dp),intent(in) :: qpt(3), eig0_k(stern%nband), eig0_kq(stern%nband)
  real(dp),intent(inout) :: cwave0(2, stern%npw_k*stern%nspinor), cwavef(2, stern%npw_kq*stern%nspinor)
  type(pawcprj_type),intent(inout) :: cwaveprj0(gs_hamkq%natom, stern%nspinor*gs_hamkq%usecprj)
  type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
@@ -1577,7 +1584,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1
  integer :: opt_gvnlx1, mcgq, mgscq, grad_berry_size_mpw1
  real(dp) :: out_resid
  type(rf2_t) :: rf2
@@ -1607,19 +1614,20 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
  mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
 
  ! Init entry in cg1s_kq, either from cache or with zeros.
- !if (stern%use_u1c_cache) then
- !  u1c_ib_k = stern%u1c%find_band(band_ks)
- !  if (u1c_ib_k /= -1) then
- !    call cgtk_change_gsphere(nspinor, &
- !                             stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
- !                             npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), work_ngfft, work)
- !  else
- !    cg1s_kq(:,:,ipc,ib_k) = zero
- !  end if
-
- !else
- !  cg1s_kq(:,:,ipc,ib_k) = zero
- !end if
+ if (stern%use_cache) then
+    cwavef = zero
+    !u1c_ib_k = stern%u1c%find_band(band_ks)
+    !if (u1c_ib_k /= -1) then
+    !  call cgtk_change_gsphere(stern%nspinor, &
+    !                           stern%u1c%prev_npw_kq, istwfk1, stern%u1c%prev_kg_kq, stern%u1c%prev_cg1s_kq(1,1,ipc,u1c_ib_k), &
+    !                           stern%npw_kq, istwfk1, kg_kq, cg1s_kq(1,1,ipc,ib_k), stern%work_ngfft, stern%work)
+    !else
+    !  cg1s_kq(:,:,ipc,ib_k) = zero
+    !end if
+ else
+    !cg1s_kq(:,:,ipc,ib_k) = zero
+    cwavef = zero
+ end if
 
  call dfpt_cgwf(u1_band, band_me, stern%rank_band, stern%bands_treated_now, berryopt0, &
    !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
@@ -1636,10 +1644,10 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
 
  ABI_FREE(grad_berry)
 
- !if (stern%use_u1c_cache) then
- ! Store |Psi_1> to init Sternheimer solver for the next q-point.
- ! call stern%u1c%store(qpt, npw_kq, nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
- !end if
+ if (stern%use_cache) then
+    ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+    !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
+ end if
 
  ! Handle possible convergence error.
  err_msg = ""; ierr = 0
@@ -1656,7 +1664,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, gs_hamkq, rf_hamkq,
    end if
 
    !if (my_rank == master .and. (enough_stern <= 5 .or. stern%dtset%prtvol > 10)) then
-   !  write(std_out, "(2(a,es13.5),a,i0)") &
+   !  write(msg, "(2(a,es13.5),a,i0)") &
    !    " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
    !    " after nlines_done: ", nlines_done
    !  enough_stern = enough_stern + 1
@@ -1701,6 +1709,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%cgq)
  ABI_SFREE(stern%gscq)
  ABI_SFREE(stern%gvnlx1)
+ ABI_SFREE(stern%work)
 
  !call stern%u1c%free()
  call destroy_mpi_enreg(stern%mpi_enreg)

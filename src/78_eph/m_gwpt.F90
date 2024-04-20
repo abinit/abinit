@@ -81,7 +81,7 @@ module m_gwpt
  use m_pawtab,         only : pawtab_type
  use m_pawrhoij,       only : pawrhoij_type
  use m_pawfgr,         only : pawfgr_type
- use m_dfpt_cgwf,      only : dfpt_cgwf
+ use m_dfpt_cgwf,      only : stern_t
  use m_phonons,        only : phstore_t, phstore_new
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
@@ -436,7 +436,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid
  real(dp) :: bz_vol
- logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, use_u1c_cache, intra_band, same_band
+ logical :: isirr_k, isirr_kq, gen_eigenpb, q_is_gamma, isirr_q, use_ifc_fourq, stern_use_cache, intra_band, same_band
  type(krank_t) :: krank
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -446,6 +446,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(rf2_t) :: rf2
  type(crystal_t) :: pot_cryst, den_cryst
  type(hdr_type) :: pot_hdr, den_hdr
+ type(stern_t) :: stern
  type(phstore_t) :: phstore
  type(u1cache_t) :: u1c
  type(kmesh_t) :: qmesh, kmesh
@@ -1025,6 +1026,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          end do ! jn
        end do ! jm
 
+       !call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
+       !call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
+       !                 kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj, msg, ierr)
+       !call stern%free()
+
        do imyp=1,gwpt%my_npert
          idir = gwpt%my_pinfo(1, imyp); ipert = gwpt%my_pinfo(2, imyp); ipc = gwpt%my_pinfo(3, imyp)
 
@@ -1174,7 +1180,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (dtset%eph_stern /= 0) then
        ABI_CALLOC(stern_dw, (2, natom3, natom3, nbcalc_ks))
        enough_stern = 0
-       use_u1c_cache = merge(.True., .False., dtset%eph_stern == 1)
+       stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
        tot_nlines_done = 0
      end if
 
@@ -1518,7 +1524,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 #endif
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
-             if (use_u1c_cache) then
+             if (stern_use_cache) then
                u1c_ib_k = u1c%find_band(band_ks)
                if (u1c_ib_k /= -1) then
                  call cgtk_change_gsphere(nspinor, &
