@@ -44,7 +44,7 @@ GPU_LIBS="-L${CUDA_ROOT}/math_libs/lib64 -L${CUDA_ROOT}/lib64 -lcusolver -lcubla
 # ========================================
  with_linalg_flavor="mkl"
  LINALG_FCFLAGS="-I${MKLROOT}/include -I${MKLROOT}/include/intel64/lp64"
- LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_gf_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
+ LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
  LINALG_LDFLAGS="${LINALG_LIBS}"
 
 # FFT
