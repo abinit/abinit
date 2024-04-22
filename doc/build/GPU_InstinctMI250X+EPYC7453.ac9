@@ -1,7 +1,7 @@
 # ================================================================
 # Configuration file for ABINIT 9 compilation
 #
-# CPU: AMD Trendo EPYC 7A53
+# CPU: AMD Trendo EPYC 7453
 # GPU: AMD Instinct MI250X 64 GB
 # Compilers: Cray Compiling Environment 23.12
 # Libraries: FTTW3, libSCI, HIP+ROCm
