@@ -7,7 +7,7 @@ authors: MG
 This page provides a quick introduction to the new GWR driver of ABINIT
 We discuss the technical details related to the implementation, the associated input variables.
 as well as the pros and cons with respect to the conventional GW implementation formulated
-in Fourier-space and real-frequency domain, also available in ABINIT, 
+in Fourier-space and real-frequency domain
 that in what follows will be referred to as conventional or legacy GW code.
 
 WARNING : THIS TUTORIAL IS WORK IN PROGRESS ! IT IS NOT YET COMPLETE ...
@@ -40,8 +40,8 @@ while [[gwr_task]] defines the task to be performed.
 
 ### Requirements
 
-First of all, one should mention that the GWR code requires an ABINIT build with Scalapack support enabled.
-Also, a significant fraction of the computing time is spent in doing FFTs thus we highly recommend to 
+First of all, one should mention that the GWR code requires an ABINIT build with Scalapack enabled.
+Moreover, a significant fraction of the computing time is spent in doing FFTs thus we highly recommend to 
 use optimized external FFT libraries such as MKL-DFTI or FFTW3.
 
 Discuss single and double precision version. 
@@ -51,7 +51,7 @@ To run GWR calculations in double-precision, remember to configure with
 
 ## Formalism
 
-The zero-temperature Green's function in the imaginary-time domain is given by:
+The zero-temperature Green's function in imaginary-time is given by:
 
 \begin{equation}
 G(\rr, \rr', i\tau) = 
@@ -109,7 +109,6 @@ The location of the file can be specified via [[getden_filepath]].
 As concerns the treatment of the long-wavelenght limit, we have the following input variables:
 
 [[inclvkb]], [[gw_qlwl]], [[gwr_max_hwtene]]
-
 
 ## GWR workflow for QP energies
 
