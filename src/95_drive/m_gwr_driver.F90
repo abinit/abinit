@@ -166,7 +166,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  real(dp) :: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore, ecut_eff, ecutdg_eff, cpu, wall, gflops, diago_cpu, diago_wall, diago_gflops
  logical, parameter :: is_dfpt = .false.
- logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, use_diago_fock
+ logical :: read_wfk, write_wfk, cc4s_task, rectangular, rdm_update, call_pawinit, cc4s_from_wfk
  character(len=500) :: msg
  character(len=fnlen) :: wfk_path, den_path, kden_path, out_path
  type(hdr_type) :: wfk_hdr, den_hdr, kden_hdr, owfk_hdr
@@ -677,14 +677,15 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
    ABI_REMALLOC(owfk_hdr%istwfk, (dtset%nkpt))
    owfk_hdr%istwfk(:) = istwfk_ik
 
-   ! Build MPI pools to distribute (kpt, spin). Try to get rectangular grids in each pool to improve efficiency in slk diago.
+   ! Build MPI pools to distribute (kpt, spin).
+   ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
    rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
    call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
    diago_info = zero
 
    ! TODO: Build hyb descriptor with hybrid orbitals from WFK file.
-   use_diago_fock = .False.
-   if (dtset%usefock == 1 .and. use_diago_fock) then
+   cc4s_from_wfk = .False.
+   if (dtset%usefock == 1 .and. cc4s_from_wfk) then
      call hyb%from_wfk_file(cryst, dtfil, dtset, psps, pawtab, ngfftc, diago_pool, comm)
    end if
 
@@ -706,7 +707,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
        nband_k = nband_iks(ik_ibz, spin)
 
-if (dtset%usefock == 1 .and. .not. use_diago_fock) then
+if (dtset%usefock == 1 .and. .not. cc4s_from_wfk) then
        call wrtout(units, "Reading ugb datatype from WFK file")
        ABI_CHECK(.not. string_in(dtset%gwr_task, "CC4S_FULL"), "CC4S_FULL cannot be used with Fock, please specify nband")
        call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, dtfil, cryst, eig_k, comm)
@@ -801,7 +802,31 @@ end if
    ABI_FREE(npwarr_ik)
    ABI_FREE(istwfk_ik)
    ABI_FREE(nband_iks)
-   call owfk_hdr%free(); call ebands_free(owfk_ebands); call diago_pool%free(); call hyb%free()
+   call owfk_hdr%free(); call ebands_free(owfk_ebands); call hyb%free()
+   call diago_pool%free()
+
+ else if (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
+   ! Build MPI pools to distribute (kpt, spin).
+   ! Try to get rectangular grids in each pool to improve efficiency in slk diago.
+   rectangular = .True.; if (dtset%nkpt == 1) rectangular = .False.
+   call diago_pool%from_dims(dtset%nkpt, dtset%nsppol, comm, rectangular=rectangular)
+
+   !ebands = wfk_read_ebands(path, comm, out_hdr=wfd_hdr)
+   !call wfk_hdr%vs_dtset(dtset)
+   !if (my_rank == master) call cc4s_write_eigens(owfk_ebands, dtfil)
+
+   do spin=1,dtset%nsppol
+     do ik_ibz=1,dtset%nkpt
+       if (.not. diago_pool%treats(ik_ibz, spin)) cycle
+       !nband_k = nband_iks(ik_ibz, spin)
+       !call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, dtfil, cryst, eig_k, comm)
+       !call cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, owfk_ebands, psps, pawtab, paw_pwff, ugb)
+       ABI_FREE(eig_k)
+       call ugb%free()
+     end do
+   end do
+   !call owfk_hdr%free(); call ebands_free(owfk_ebands)
+   call diago_pool%free()
 
  else
    ! ====================================================
@@ -1388,7 +1413,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ABI_CHECK_MPI(mpierr, "FILE_CLOSE!")
  call xmpi_barrier(comm)
 
- !FBru -> gmatteo should you remove the following lines?
  if (my_rank == 0) then
    buf_size = 4
    call wrtout(units, sjoin(" Reading norm of Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)

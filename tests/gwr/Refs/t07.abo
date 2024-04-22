@@ -360,7 +360,7 @@ meta: {optdriver: 6, }
 
  Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
 
- Writing norm of Coulomb vertex for testing purposes with ng: 4
+ Reading norm of Coulomb vertex for testing purposes with ng: 4
 
  For band1: 1 , band2: 1
   7.60297E-01  1.94792E-01  1.94792E-01  1.94792E-01
