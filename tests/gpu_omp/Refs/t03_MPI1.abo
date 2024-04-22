@@ -103,7 +103,6 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
            toldfe      1.00000000E-15 Hartree
             typat      1  1
-  use_gemm_nonlop           1
 -          useylm           1
 -        wfoptalg         111
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -542,7 +541,6 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.2200000  0.2200000  0.2200000
            toldfe      1.00000000E-15 Hartree
             typat      1  1
-  use_gemm_nonlop           1
 -          useylm           1
 -        wfoptalg         111
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
