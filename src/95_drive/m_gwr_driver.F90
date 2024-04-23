@@ -710,7 +710,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
 if (dtset%usefock == 1 .and. .not. cc4s_from_wfk) then
        call wrtout(units, "Reading ugb datatype from WFK file")
        ABI_CHECK(.not. string_in(dtset%gwr_task, "CC4S_FULL"), "CC4S_FULL cannot be used with Fock, please specify nband")
-       call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, %
+       call ugb%from_wfk_file(ik_ibz, spin, istwfk_ik(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, &
                               dtfil, cryst, eig_k, diago_pool%comm%value)
 
 else
@@ -1376,12 +1376,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
        ! This to zero the matrix elements for certain (band1, band2) entries.
        ! in this case: band1 = 1, band2 = 1.
-       !if (band1 == 1) then
-       !  do idat2=1,n2dat
-       !    ! This is the condition for band2
-       !    if (band2_start + idat2 - 1 == 1) ug12_batch(:,idat2) = zero
-       !  end do
-       !end do
+       if (band1 == 1) then
+         do idat2=1,n2dat
+           ! This is the condition for band2
+           if (band2_start + idat2 - 1 == 1) ug12_batch(:,idat2) = zero
+         end do
+       end if
 
        if (nspinor == 2) then
          ! Sum over spinors and repack data in the first n2dat positions to prepare IO operation.
