@@ -642,7 +642,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  real(dp),allocatable :: wfraug_up(:,:,:,:),wfraug_down(:,:,:,:)
  real(dp),pointer :: cwavef_sp(:,:),cwavef_up(:,:),cwavef_down(:,:)
  real(dp),pointer :: cwave0_up(:,:),cwave0_down(:,:),cwave1_up(:,:),cwave1_down(:,:)
- real(dp),pointer :: vlocal(:,:,:,:)=>null()
+ real(dp), ABI_CONTIGUOUS pointer :: vlocal(:,:,:,:)=>null()
  type(pawcprj_type),allocatable :: cwaveprj_tmp(:,:)
 
 ! *********************************************************************
@@ -664,6 +664,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    ABI_MALLOC(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:rhoaug1) IF(cplex/=2 .and. gpu_option==ABI_GPU_OPENMP)
 #endif
 
    do ispinor=1,nspinor
@@ -687,26 +688,11 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
      end if
 
-!  Compute contribution of this band to zero-order potential part of the 2nd-order total energy
+!  Compute contribution of bands in ndat to zero-order potential part of the 2nd-order total energy
 !  NB: this is spinor diagonal
      if (option==2.or.option==3) then
-       do idat=1,ndat
-         valuer=zero
-         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
-         !$OMP& MAP(to:wfraug1,vlocal) PRIVATE(i3,i2,i1) &
-         !$OMP& REDUCTION(+:valuer) &
-         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-         do i3=1,n3
-           do i2=1,n2
-             do i1=1,n1
-               valuer=valuer+vlocal(i1,i2,i3,1)*(wfraug1(1,i1,i2,i3+n3*(idat-1))**2+wfraug1(2,i1,i2,i3+n3*(idat-1))**2)
-             end do
-           end do
-         end do
-!    Local potential energy of this band
-         eloc0_k(idat)=eloc0_k(idat)+two*valuer/dble(gs_hamkq%nfft)
-       end do
-
+       call update_potential_contrib(eloc0_k,wfraug1,vlocal,&
+       &    n1,n2,n3,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc,gs_hamkq%nfft,ndat,gpu_option)
      end if ! option
 
 !  Part devoted to the accumulation of the 1st-order density
@@ -748,48 +734,18 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        nullify(cwavef_sp)
 
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET UPDATE FROM(wfraug,wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
-       !!$OMP TARGET ENTER DATA MAP(to:rhoaug1) IF(gpu_option==ABI_GPU_OPENMP)
+       !FIXME Remove this transfer once cplex==2 runs on GPU
+       !$OMP TARGET UPDATE FROM(wfraug,wfraug1) IF(cplex==2 .and. gpu_option==ABI_GPU_OPENMP)
 #endif
+
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
 !    Accumulate 1st-order density
-       if (cplex==2) then
-         do idat=1,ndat
-           weight=two*occ_k(iband+idat-1)*wtk_k/gs_hamkq%ucvol
-           !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-           !!$OMP& MAP(to:wfraug1,wfraug) MAP(to:rhoaug1) PRIVATE(i3,i2,i1) &
-           !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-           do i3=1,n3
-             do i2=1,n2
-               do i1=1,n1
-                 re0=wfraug(1,i1,i2,i3+n3*(idat-1))  ; im0=wfraug(2,i1,i2,i3+n3*(idat-1))
-                 re1=wfraug1(1,i1,i2,i3+n3*(idat-1)) ; im1=wfraug1(2,i1,i2,i3+n3*(idat-1))
-! TODO: check which terms (ispinor ispinorp) enter a given element of rhoaug1
-                 rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0*re1+im0*im1)
-                 rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0*im1-im0*re1)
-               end do
-             end do
-           end do
-         end do
-       else
-         do idat=1,ndat
-           weight=two*occ_k(iband+idat-1)*wtk_k/gs_hamkq%ucvol
-           !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-           !!$OMP& MAP(to:wfraug1,wfraug) MAP(to:rhoaug1) PRIVATE(i3,i2,i1) &
-           !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
-           do i3=1,n3
-             do i2=1,n2
-               do i1=1,n1
-                 rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1) &
-  &               +weight*(wfraug(1,i1,i2,i3+n3*(idat-1))*wfraug1(1,i1,i2,i3+n3*(idat-1)) &
-  &               +wfraug(2,i1,i2,i3+n3*(idat-1))*wfraug1(2,i1,i2,i3+n3*(idat-1)))
-               end do
-             end do
-           end do
-         end do
-       end if
+
+     call accumulate_1st_order_density(rhoaug1,wfraug,wfraug1,&
+     &    cplex,n1,n2,n3,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,gs_hamkq%nvloc,&
+     &    ndat,nband_k,iband,gs_hamkq%ucvol,wtk_k,occ_k,gpu_option)
+
 #ifdef HAVE_OPENMP_OFFLOAD
-       !!$OMP TARGET EXIT DATA MAP(from:rhoaug1)  IF(gpu_option==ABI_GPU_OPENMP)
        !$OMP TARGET EXIT DATA MAP(delete:wfraug) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        ABI_FREE(wfraug)
@@ -800,6 +756,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:rhoaug1)   IF(cplex/=2 .and. gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(wfraug1)
  else ! nvloc = 4
@@ -1023,6 +980,101 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
  ABI_NVTX_END_RANGE()
  DBG_EXIT("COLL")
+ contains
+
+   !  Compute contribution of bands in ndat to zero-order potential part of the 2nd-order total energy
+   !  This routine was separated from main code to accomodate OpenMP offloading with NVHPC
+   subroutine update_potential_contrib(eloc0_k,wfraug1,vlocal,n1,n2,n3,n4,n5,n6,nvloc,nfft,ndat,gpu_option)
+     integer,intent(in) :: n1,n2,n3,n4,n5,n6,nvloc,ndat,nfft,gpu_option
+     real(dp),intent(in) :: wfraug1(2,n4,n5,n6*ndat),vlocal(n4,n5,n6,nvloc)
+     real(dp),intent(inout) :: eloc0_k(ndat)
+     integer :: idat,i1,i2,i3
+     real(dp) :: valuer,nfft_r
+
+     nfft_r=dble(nfft)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET TEAMS DISTRIBUTE &
+     !$OMP& MAP(to:wfraug1,vlocal) MAP(tofrom:eloc0_k) PRIVATE(idat,valuer) &
+     !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     do idat=1,ndat
+       valuer=zero
+       !$OMP PARALLEL DO COLLAPSE(3) PRIVATE(i1,i2,i3) REDUCTION(+:valuer)
+       do i3=1,n3
+         do i2=1,n2
+           do i1=1,n1
+             valuer=valuer+vlocal(i1,i2,i3,1)*(wfraug1(1,i1,i2,i3+n3*(idat-1))**2+wfraug1(2,i1,i2,i3+n3*(idat-1))**2)
+           end do
+         end do
+       end do
+       !    Local potential energy of this band
+       eloc0_k(idat)=eloc0_k(idat)+two*valuer/nfft_r
+     end do
+
+#ifndef HAVE_OPENMP_OFFLOAD
+     ! Make testfarm happy
+     ABI_UNUSED((/gpu_option/))
+#endif
+   end subroutine update_potential_contrib
+
+   !  Accumulate 1st-order density
+   !  This routine was separated from main code to accomodate OpenMP offloading with NVHPC
+   subroutine accumulate_1st_order_density(rhoaug1,wfraug,wfraug1,&
+   &    cplex,n1,n2,n3,n4,n5,n6,nvloc,ndat,nband_k,iband,ucvol,wtk_k,occ_k,gpu_option)
+     integer,intent(in)  :: cplex,n1,n2,n3,n4,n5,n6,nvloc,ndat,nband_k,iband,gpu_option
+     real(dp),intent(in) :: ucvol,wtk_k
+     real(dp),intent(inout) :: rhoaug1(cplex*n4,n5,n6,nvloc)
+     real(dp),intent(in) :: wfraug(2,n4,n5,n6*ndat),wfraug1(2,n4,n5,n6*ndat),occ_k(nband_k)
+
+     integer  :: i1,i2,i3,idat
+     real(dp) :: weight
+
+     if (cplex==2) then
+       do idat=1,ndat
+         weight=two*occ_k(iband+idat-1)*wtk_k/ucvol
+#ifdef HAVE_OPENMP_OFFLOAD
+         !FIXME Enabling this kernel breaks results on both CPU and GPU
+         !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !!$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(idat,i3,i2,i1,re0,re1,im0,im1) &
+         !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
+               re0=wfraug(1,i1,i2,i3+n6*(idat-1))  ; im0=wfraug(2,i1,i2,i3+n6*(idat-1))
+               re1=wfraug1(1,i1,i2,i3+n6*(idat-1)) ; im1=wfraug1(2,i1,i2,i3+n6*(idat-1))
+! TODO: check which terms (ispinor ispinorp) enter a given element of rhoaug1
+               rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0*re1+im0*im1)
+               rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0*im1-im0*re1)
+             end do
+           end do
+         end do
+       end do
+     else
+       do idat=1,ndat
+         weight=two*occ_k(iband+idat-1)*wtk_k/ucvol
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(i3,i2,i1) &
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+         do i3=1,n3
+           do i2=1,n2
+             do i1=1,n1
+               rhoaug1(i1,i2,i3,1)=rhoaug1(i1,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)) &
+&               +wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)))
+             end do
+           end do
+         end do
+       end do
+     end if
+
+#ifndef HAVE_OPENMP_OFFLOAD
+     ! Make testfarm happy
+     ABI_UNUSED((/gpu_option/))
+#endif
+   end subroutine accumulate_1st_order_density
 
 end subroutine dfpt_accrho
 !!***
