@@ -157,6 +157,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  integer :: tim_fourwf,tim_nonlop,usecprj
  logical :: compute_conjugate,has_kin,has_mGGA1,has_nd1,usevnl2
  real(dp) :: weight !, cpu, wall, gflops
+ real(dp),parameter :: threshold=huge(zero)*1.d-11
  !character(len=500) :: msg
 !arrays
  real(dp) :: enlout(ndat),tsec(2),svectout_dum(1,1),vectout_dum(1,1)
@@ -908,7 +909,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      !$OMP PARALLEL DO PRIVATE(ipw,ipws)
      do ipw=1,npw
        ipws=ipw+npw*(ispinor-1)
-       if(kinpw1(ipw)<huge(zero)*1.d-11)then
+       if(kinpw1(ipw)<threshold)then
          gvnlx1_(1,ipws)=gvnlx1_(1,ipws)+dkinpw(ipw)*cwave(1,ipws)
          gvnlx1_(2,ipws)=gvnlx1_(2,ipws)+dkinpw(ipw)*cwave(2,ipws)
        else
@@ -989,7 +990,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      ipws=(ispinor-1)*npw1
      !$OMP PARALLEL DO PRIVATE(ipw)
      do ipw=1+ipws,npw1+ipws
-       if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
+       if(kinpw1(ipw-ipws)<threshold)then
          gh1c(1,ipw)=gh1c(1,ipw)+gvnlx1_(1,ipw)
          gh1c(2,ipw)=gh1c(2,ipw)+gvnlx1_(2,ipw)
        else
@@ -1010,7 +1011,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      ipws=(ispinor-1)*npw1
      !$OMP PARALLEL DO PRIVATE(ipw)
      do ipw=1+ipws,npw1+ipws
-       if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
+       if(kinpw1(ipw-ipws)<threshold)then
          gh1c(1,ipw)=gh1c(1,ipw)+gvnl2(1,ipw)
          gh1c(2,ipw)=gh1c(2,ipw)+gvnl2(2,ipw)
        end if
