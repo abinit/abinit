@@ -1410,8 +1410,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &             gs1,gs_hamkq,&
 &             gvnlx1,&
 &             idir1,ipert1,&
-&             eig_k(iband:iband+ndat-1),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,&
-&             use_gpu=dtset%gpu_option)
+&             eig_k(iband:iband+ndat-1),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) then
              if(dtset%gpu_option==ABI_GPU_DISABLED) then
                do idat=1,ndat
@@ -2700,7 +2699,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
                berryopt=1;optlocal=0;optnl=1;usevnl=0;opt_gvnlx1=0;sij_opt=0
                call getgh1c(berryopt,cwave0,dum_cwaveprj,gvnlx1,dum_grad_berry,&
 &               dum_gs1,gs_hamkq,dum_gvnlx1,idir1,ipert1,(/lambda/),mpi_enreg,1,optlocal,&
-&               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl,use_gpu=ABI_GPU_DISABLED)
+&               optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
 !              ==== Electric field perturbation
              else if( ipert1==dtset%natom+2 )then
