@@ -170,7 +170,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  type(pawcprj_type),allocatable,target :: cwaveprj_tmp(:,:)
  type(pawcprj_type),pointer :: cwaveprj_ptr(:,:)
 #ifdef HAVE_OPENMP_OFFLOAD
- logical :: map_gh1c,map_gs1c,map_cwave
+ logical :: map_gh1c,map_gs1c,map_cwave,map_gvnlx1_
 #endif
 
 ! *********************************************************************
@@ -291,7 +291,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 
    ABI_MALLOC(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(alloc:work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6)
 #endif
 
    if (gs_hamkq%nvloc==1) then
@@ -427,7 +427,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
    end if ! nvloc
 
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(release:work) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(work,2*gs_hamkq%n4*gs_hamkq%n5*gs_hamkq%n6)
 #endif
    ABI_FREE(work)
 
@@ -463,10 +463,13 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  else
    ABI_MALLOC(gvnlx1_,(2,npw1*my_nspinor*ndat))
  end if
+ if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1_) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET UPDATE TO(gvnlx1_) IF(usevnl==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+   map_gvnlx1_ =  .not. ( xomp_target_is_present(c_loc(gvnlx1_)))
+   if(map_gvnlx1_) call ompgpu_enter_map_alloc(gvnlx1_,2*npw1*my_nspinor*ndat)
+   !$OMP TARGET UPDATE TO(gvnlx1_) IF(usevnl==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
 #endif
+ end if
 
 !Phonon perturbation
 !-------------------------------------------
@@ -495,7 +498,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (optnl>=1) then
        ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(nonlop_out,2*npw1*my_nspinor*ndat)
 #endif
        cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
@@ -514,7 +517,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(release:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
 #endif
        ABI_FREE(nonlop_out)
      end if
@@ -524,7 +527,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (optnl==2) then
        ABI_MALLOC(gvnl2,(2,npw1*my_nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:gvnl2) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnl2,2*npw1*my_nspinor*ndat)
 #endif
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,idir,lambda,mpi_enreg,ndat,nnlout,&
@@ -607,7 +610,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
        cpopt=-1 ; choice=1 ; paw_opt=3 ; signs=2
        ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(nonlop_out,2*npw1*my_nspinor*ndat)
 #endif
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,0,lambda,mpi_enreg,ndat,nnlout,&
 &       paw_opt,signs,nonlop_out,tim_nonlop,gvnlx1_,vectout_dum)
@@ -683,7 +686,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 #endif
        end if
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(release:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
 #endif
        ABI_FREE(nonlop_out)
 
@@ -693,7 +696,7 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      if (optnl>=2) then
        ABI_MALLOC(gvnl2,(2,npw1*my_nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:gvnl2) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnl2,2*npw1*my_nspinor*ndat)
 #endif
        cpopt=-1+3*usecprj;if (opt_gvnlx1==2) cpopt=2
        choice=1 ; paw_opt=1 ; signs=2
@@ -774,8 +777,10 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=1) then
        ABI_MALLOC(nonlop_out,(2,npw1*my_nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(nonlop_out,2*npw1*my_nspinor*ndat)
+#endif
        cpopt=1+3*usecprj ; choice=1 ; signs=2 ; paw_opt=1
-       !$OMP TARGET ENTER DATA MAP(alloc:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,lambda,mpi_enreg,ndat,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,nonlop_out,enl=rf_hamkq%e1kbfr)
        if(gs_hamkq%gpu_option/=ABI_GPU_OPENMP) then
@@ -791,7 +796,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
          end do
 #endif
        end if
-       !$OMP TARGET EXIT DATA MAP(release:nonlop_out) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(nonlop_out,2*npw1*my_nspinor*ndat)
+#endif
        ABI_FREE(nonlop_out)
      end if
 
@@ -799,7 +806,9 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
 !    All atoms contribute
      if (optnl>=2) then
        ABI_MALLOC(gvnl2,(2,npw1*my_nspinor*ndat))
-       !$OMP TARGET ENTER DATA MAP(alloc:gvnl2) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+       if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnl2,2*npw1*my_nspinor*ndat)
+#endif
        cpopt=4 ; choice=1 ; signs=2 ; paw_opt=1
        call nonlop(choice,cpopt,cwaveprj_ptr,enlout,gs_hamkq,istr,lambda,mpi_enreg,ndat,nnlout,&
 &       paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl2,enl=rf_hamkq%e1kbsc)
@@ -1018,17 +1027,19 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
      end do
    end do
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(release:gvnl2) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+   if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(gvnl2,2*npw1*my_nspinor*ndat)
 #endif
    ABI_FREE(gvnl2)
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(from:gh1c)  IF(map_gh1c)
- !$OMP TARGET EXIT DATA MAP(from:gs1c)  IF(map_gs1c)
- !$OMP TARGET EXIT DATA MAP(from:cwave) IF(map_cwave)
- !$OMP TARGET UPDATE FROM(gvnlx1_) IF(usevnl==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(release:gvnlx1_) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+ if(gs_hamkq%gpu_option==ABI_GPU_OPENMP) then
+   !$OMP TARGET EXIT DATA MAP(from:gh1c)  IF(map_gh1c)
+   !$OMP TARGET EXIT DATA MAP(from:gs1c)  IF(map_gs1c)
+   !$OMP TARGET EXIT DATA MAP(from:cwave) IF(map_cwave)
+   !$OMP TARGET UPDATE FROM(gvnlx1_) IF(usevnl==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+   if(map_gvnlx1_) call ompgpu_exit_map_delete(gvnlx1_,2*npw1*my_nspinor*ndat)
+ end if
 #endif
  if (usevnl==1) then
    nullify(gvnlx1_)
@@ -1041,6 +1052,36 @@ subroutine getgh1c(berryopt,cwave,cwaveprj,gh1c,grad_berry,gs1c,gs_hamkq,&
  call timab(196+tim_getgh1c,2,tsec)
 
  DBG_EXIT("COLL")
+
+!NOTE: These subroutines were placed here because NVHPC would cause issues when
+!      processing OpenMP directives below by creating artifacts :
+!293, Generating target enter data map(to: kinpw1$sd50(:))
+!     Generating target enter data map(create: work(:,:,:,:))
+!     Generating target enter data map(to: cwave$sd(:),dkinpw$sd46(:),gvnlx1_$sd(:))
+!
+!     Tested with NVHPC 24.3
+!     Issues occured with arrays: work, gvnlx1, gvnl2, nonlop_out
+!     The name 'getgh1c_array' is for debugging purposes.
+#ifdef HAVE_OPENMP_OFFLOAD
+ contains
+
+   subroutine ompgpu_enter_map_alloc(getgh1c_array,size)
+    integer,intent(in)  :: size
+    real(dp),intent(inout) :: getgh1c_array(size)
+
+    !$OMP TARGET ENTER DATA MAP(alloc:getgh1c_array)
+
+   end subroutine ompgpu_enter_map_alloc
+
+   subroutine ompgpu_exit_map_delete(getgh1c_array,size)
+    integer,intent(in)  :: size
+    real(dp),intent(inout) :: getgh1c_array(size)
+
+    !$OMP TARGET EXIT DATA MAP(delete:getgh1c_array)
+
+   end subroutine ompgpu_exit_map_delete
+
+#endif
 
 end subroutine getgh1c
 !!***
