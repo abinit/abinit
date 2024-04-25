@@ -908,7 +908,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
  ! Consistency check
  ierr = 0
- ABI_CHECK_NOSTOP(gstore%kzone == "ibz", "kzone = 'ibz' is required", ierr)
+ ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'ibz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex = 2 is required", ierr)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%kpt_comm%nproc == 1, "varpeq is not &
