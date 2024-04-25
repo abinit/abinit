@@ -47,7 +47,7 @@ module m_gwr_driver
  use m_time,            only : timab
  use m_io_tools,        only : file_exists, open_file, get_unit, iomode_from_fname
  use m_time,            only : cwtime, cwtime_report, sec2str
- use m_fstrings,        only : strcat, sjoin, ftoa, itoa, string_in
+ use m_fstrings,        only : strcat, sjoin, ftoa, itoa, string_in, ltoa
  use m_slk,             only : matrix_scalapack
  use m_fftcore,         only : print_ngfft, get_kg
  use m_fft,             only : fourdp
@@ -306,6 +306,7 @@ subroutine gwr_driver(codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, xred)
  call energies_init(KS_energies)
 
  den_path = dtfil%fildensin; wfk_path = dtfil%fnamewffk; kden_path = dtfil%filkdensin
+ !use_den = f (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
 
  if (my_rank == master) then
    ! Initialize filenames. Accept files in Fortran or in netcdf format.
@@ -806,6 +807,7 @@ end if
    call owfk_hdr%free(); call ebands_free(owfk_ebands); call hyb%free(); call diago_pool%free()
 
  else if (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
+   !print *, "IN CC4S_FROM_WFK"
    ! Read orbitals from an external WFK file and produce output files for CC4S.
 
    ! Construct crystal and ks_ebands from the GS WFK file.
@@ -816,7 +818,6 @@ end if
    if (cryst%compare(wfk_cryst, header=" Comparing input crystal with WFK crystal") /= 0) then
      ABI_ERROR("Crystal structure from input and from WFK file do not agree! Check messages above!")
    end if
-   !call wfk_cryst%print(header="crystal structure from WFK file")
    call wfk_cryst%free()
 
    if (my_rank == master) call cc4s_write_eigens(ks_ebands, dtfil)
@@ -829,7 +830,7 @@ end if
    do spin=1,dtset%nsppol
      do ik_ibz=1,dtset%nkpt
        if (.not. diago_pool%treats(ik_ibz, spin)) cycle
-       nband_k = dtset%nband(ik_ibz * (spin-1)*dtset%nkpt)
+       nband_k = dtset%nband(ik_ibz + (spin-1)*dtset%nkpt)
        call ugb%from_wfk_file(ik_ibz, spin, dtset%istwfk(ik_ibz), dtset%kptns(:,ik_ibz), nband_k, dtset, &
                               dtfil, cryst, eig_k, diago_pool%comm%value)
        ABI_FREE(eig_k)
@@ -1118,10 +1119,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  if (dtset%prtvol > 10) call ugb%print([std_out], dtset%prtvol, header="ugb for CC4S")
 
  ! m_gvec is the g-sphere for the oscillators M computed from ecuteps (half-sphere if wavefunctions have TR).
- ! Setmesh assumes g-vectors sorted by norm so use kin_sorted = True and sort ug%kg_k below.
+ ! setmesh assumes g-vectors sorted by norm so use kin_sorted = True and sort ug%kg_k below.
  kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
- !print *, "ugb%istwf_k:", ugb%istwf_k
  m_istwfk = 1; if (ugb%istwf_k == 2) m_istwfk = 2
+ !print *, "ugb%istwf_k:", ugb%istwf_k, m_istwfk", m_istwfk
  call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.True.)
 
  ! Setup FFT mesh
@@ -1146,10 +1147,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  u_mgfft = maxval(u_ngfft(1:3))
  qpt = zero
-
- ! Get full BZ associated to ebands
- !call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
- !  nkibz, kibz, wtk, nkbz, kbz, bz2ibz=bz2ibz)
 
  nqibz_ = 1; nqbz_ = 1; qbz_ = zero; nkbz_ = 1
  ! TODO: MC technique does not seem to work as expected, even in the legacy code.
@@ -1275,6 +1272,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! Open binary file to store CoulombVertex
  cvx_filepath = trim(dtfil%filnam_ds(4))//'_CoulombVertex.elements'
  if (my_rank == master) write(ab_out, "(3a)")ch10, ' Writing CoulombVertex data to file: ', trim(cvx_filepath)
+
 #ifdef HAVE_MPI_IO
  call MPI_FILE_OPEN(comm, cvx_filepath, MPI_MODE_CREATE + MPI_MODE_WRONLY, xmpio_info, fh, mpierr)
  ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
@@ -1290,8 +1288,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
  ! Define batch sizes and allocate workspace arrays.
  ! Increasing this value improves efficiency (less communication) at the price of more memory.
- !call pstat%from_pid(); call pstat%print([std_out], reload=.True.)
-
  batch1_size = min(48, ugb%nband_k); batch2_size = min(48, ugb%nband_k) !; batch1_size = 1; batch2_size = 1
  call wrtout(std_out, sjoin(" Using batch1_size:", itoa(batch1_size), ", batch2_size:",  itoa(batch2_size)))
 
@@ -1376,12 +1372,12 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
 
        ! This to zero the matrix elements for certain (band1, band2) entries.
        ! in this case: band1 = 1, band2 = 1.
-       if (band1 == 1) then
-         do idat2=1,n2dat
-           ! This is the condition for band2
-           if (band2_start + idat2 - 1 == 1) ug12_batch(:,idat2) = zero
-         end do
-       end if
+       !if (band1 == 1) then
+       !  do idat2=1,n2dat
+       !    ! This is the condition for band2
+       !    if (band2_start + idat2 - 1 == 1) ug12_batch(:,idat2) = zero
+       !  end do
+       !end if
 
        if (nspinor == 2) then
          ! Sum over spinors and repack data in the first n2dat positions to prepare IO operation.
@@ -1407,7 +1403,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        ! Write ug12_batch using Stream-IO
        buf_size = m_npw * n2dat
 
-       !FBru convert to longer integer before the multiplication
+       ! FBru convert to longer integer before the multiplication
        offset = INT(m_npw, KIND=XMPI_OFFSET_KIND) &
                * INT( (band2_start-1) + (band1-1) * ugb%nband_k, KIND=XMPI_OFFSET_KIND) &
                 * INT(xmpi_bsize_dpc, KIND=XMPI_OFFSET_KIND)
@@ -1435,6 +1431,10 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  if (my_rank == 0) then
    buf_size = 4
    call wrtout(units, sjoin(" Reading norm of Coulomb vertex for testing purposes with ng:", itoa(buf_size)), newlines=1, pre_newlines=1)
+   call wrtout(units, " List of g-vectors in the Coulomb vertex:")
+   do ig=1,buf_size
+     call wrtout(units, sjoin(itoa(ig), ":", ltoa(m_gvec(:,ig))))
+   end do
    ABI_MALLOC(cwork, (buf_size))
    call MPI_FILE_OPEN(xmpi_comm_self, cvx_filepath, MPI_MODE_RDONLY, xmpio_info, fh, mpierr)
    ABI_CHECK_MPI(mpierr, "MPI_FILE_OPEN")
@@ -1442,7 +1442,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
    band1_loop: do band1=1, ugb%nband_k
    do band2=1, ugb%nband_k
      ierr = ierr + 1; if (ierr == 6) exit band1_loop
-     !if (ig == 1) cwork(1) = zero
      offset = ((band2-1) * m_npw + (band1-1) * m_npw * ugb%nband_k) * xmpi_bsize_dpc
      call MPI_FILE_READ_AT(fh, offset, cwork, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
      ABI_HANDLE_MPIERR(mpierr)
