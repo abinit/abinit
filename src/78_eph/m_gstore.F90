@@ -930,6 +930,8 @@ subroutine priority_from_eph_task(eph_task, priority)
    priority = "qk"
  case (12, -12)
    priority = "q"
+ case (13)
+   priority = "q"
  case (14)
    priority = "kq"
  case default

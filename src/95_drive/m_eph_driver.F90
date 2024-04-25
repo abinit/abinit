@@ -168,6 +168,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(phdos_t) :: phdos
  type(gstore_t) :: gstore
  type(frohlich_t) :: frohlich
+ type(varpeq_t) :: varpeq
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
  real(dp),parameter :: k0(3)=zero
@@ -738,24 +739,33 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
    call gstore%free()
 
- !case (13)
+ case (13)
    ! Variational polaron equations
-   !if (dtfil%filgstorein /= ABI_NOFILE) then
-   !  call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", dtfil%filgstorein))
-   !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
-   !else
-   !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-   !  call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+   ! TODO: remove
+   if (dtfil%filgstorein /= ABI_NOFILE) then
+     call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", dtfil%filgstorein))
+     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   else
+     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
    ! Customize input vars for this task.
-   !  dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
-   !  call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
-   !  call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-   !                      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-   !  call gstore%free()
-   !  call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
-   !end if
-   !call variational_polaron(gstore, dtset, dtfil)
-   !call gstore%free()
+     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
+     call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+     !call gstore%free()
+     !call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   end if
+
+   call varpeq%init(gstore, dtset)
+   call varpeq%seed_a()
+   call varpeq%b_from_a()
+   call varpeq%get_enterms()
+   call varpeq%get_elgrad()
+   call varpeq%test()
+   call varpeq%free()
+
+   call gstore%free()
 
  case (14)
    ! Molecular Berry Curvature
