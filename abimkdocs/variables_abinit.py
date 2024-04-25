@@ -24004,8 +24004,9 @@ The choice is among:
 * EGW0 -->
 * G0EW -->
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
-* CC4S -->
+* CC4S --> Read density from file, diagonalize the KS Hamiltonian and produce output files required by CC4S.
 * CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
+* CC4S_FROM_WFK --> Same as CC4S but read single particle orbitals from an external WFK file.
 
 !!! important
 

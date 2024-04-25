@@ -88,7 +88,7 @@
 #define ABI_CHECK(expr, msg) if (.not.(expr)) call assert(.FALSE., msg _FILE_LINE_ARGS_)
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
-#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": ", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
 #define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */
@@ -104,7 +104,7 @@
 #define ABI_CHECK_DGEQ(double1, double2, msg) if (double1 < double2) ABI_ERROR(sjoin(msg, ftoa(double1), "vs", ftoa(double2)))
 
 /* Stop execution with message `msg` if int not in [start, stop] */
-#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), itoa(stop), "]"))
+#define ABI_CHECK_IRANGE(int, start, stop, msg) if (int < start .or. int > stop) ABI_ERROR(sjoin(msg, itoa(int), "not in [", itoa(start), ", ", itoa(stop), "]"))
 
 #define ABI_CHECK_NOSTOP(expr, msg, ierr) \
    if (.not. (expr)) then NEWLINE ierr = ierr + 1; call msg_hndl(msg, "ERROR", "PERS", NOSTOP=.TRUE. _FILE_LINE_ARGS_) NEWLINE endif

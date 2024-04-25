@@ -1613,20 +1613,19 @@ subroutine ugb_from_wfk_file(ugb, ik_ibz, spin, istwf_k, kpoint, nband_k, &
  call wfk_hdr%vs_dtset(dtset)
  ABI_CHECK_IEQ(dtset%ixc, wfk_hdr%ixc, "dtset%ixc /= wfk_hdr%ixc")
  ABI_CHECK(all(abs(wfk_hdr%kptns(:,ik_ibz) - kpoint) < tol6), "Different kpoint")
- ABI_CHECK_IRANGE(nband_k, 1, wfk_ebands%mband, "nband_k > mband")
+ ABI_CHECK_IRANGE(nband_k, 1, wfk_ebands%mband, "nband_k > mband.")
 
  ABI_MALLOC(eig_k, (nband_k))
  eig_k = wfk_ebands%eig(1:nband_k, ik_ibz, spin)
 
  npw_k = wfk_hdr%npwarr(ik_ibz)
  npwsp = npw_k * wfk_hdr%nspinor
- ABI_CHECK_IEQ(istwf_k, 1, "istwfk_k should be 1")
  ABI_CHECK_IEQ(istwf_k, wfk_hdr%istwfk(ik_ibz), "different istwfk_k")
 
  ! Init scalapack matrix
  call ugb%processor%init(comm, grid_dims=[1, nprocs])
  ABI_CHECK(block_dist_1d(nband_k, nprocs, col_bsize, msg), msg)
- call ugb%mat%init(npwsp, nband_k, ugb%processor, istwf_k, size_blocs=[-1, col_bsize])
+ call ugb%mat%init(npwsp, nband_k, ugb%processor, 1, size_blocs=[-1, col_bsize])
 
  ABI_MALLOC(ugb%kg_k, (3, npw_k))
 

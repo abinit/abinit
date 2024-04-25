@@ -1595,7 +1595,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
-           if (isirr_kq) then
+            if (isirr_kq) then
               call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
             else
               ! Reconstruct u_kq(G) from the IBZ image.
