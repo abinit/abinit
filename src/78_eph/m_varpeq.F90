@@ -115,7 +115,7 @@ module m_varpeq
    ! Weights of the k-points (normalized to one)
    ! (nkpt)
 
-  real(dp), allocatable :: a(:, :, :)
+  complex(dp), allocatable :: a(:, :, :)
    ! Variational coefficients in the electornic subspace defining the charge
    ! localization process
    ! (nbands, nkpt, nsppol)
@@ -926,8 +926,10 @@ subroutine varpeq_init(self, gstore, dtset)
 
  ! Time-reversal symmetry -> generate k-points using only spatial inversion
  ! no time-reveral symmetry -> k-points in the full BZ
- self%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
- iinv = cryst%idx_spatial_inversion()
+ !! self%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+ !! iinv = cryst%idx_spatial_inversion()
+ ! hack to artificially disable any symmetry except for identity
+ self%timrev = 0
  if (self%timrev /= 0 .and. iinv /= 0)  then
    kptopt = 2; self%nsym = 2
  else
