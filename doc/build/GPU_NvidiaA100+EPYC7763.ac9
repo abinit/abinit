@@ -3,12 +3,11 @@
 #
 # CPU: AMD Milan EPYC 7763
 # GPU: Nvidia A100 SXM4 80 Go
-# Compilers: Nvidia HPC compilers
+# Compilers: Nvidia HPC compilers 23.9
 # Libraries: MKL, Cuda
 # ================================================================
 
-#MY_ARCH=GPUA
- prefix=${BENCH_ROOT}/install/${MY_ARCH}/abinit-gpu
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
 
  CUDA_PREFIX=${CUDA_HOME}
 
@@ -17,7 +16,7 @@
  FC=$FC_MPI
  CC=$CC_MPI
  CXX=$CXX_MPI
- FCFLAGS_EXTRA="-tp=zen3 -cudalib=cufft -L${CUDA_PREFIX}/math_libs/lib64 -fPIC"
+ FCFLAGS_EXTRA="-tp=zen3 --fast -fPIC"
  CFLAGS_EXTRA="-tp=zen3"
  CXXFLAGS_EXTRA="-tp=zen3"
  with_optim_flavor="standard"
@@ -33,6 +32,7 @@
 
 # CUDA GPU
 # ========================================
+ GPU_ARCH=80
  with_gpu="${CUDA_PREFIX}"
  with_gpu_flavor="cuda-double"
  NVCC="${CUDA_PREFIX}/bin/nvcc"
@@ -42,13 +42,12 @@
  GPU_CXXFLAGS="-I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
  GPU_FCFLAGS="-I${CUDA_PREFIX}/include -I${CUDA_PREFIX}/math_libs/include"
  GPU_LIBS="-L${CUDA_PREFIX}/math_libs/lib64 -L${CUDA_PREFIX}/lib64 -lcusolver -lcublas -lcublasLt -lcufft -lcudart -lstdc++"
- GPU_ARCH=80
 
 # Linear Algebra library
 # ========================================
 with_linalg_flavor="mkl"
  LINALG_FCFLAGS="${MKL_FFLAGS}"
- LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_gf_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
+ LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
  LINALG_LDFLAGS="${LINALG_LIBS}"
 
 # FFT
@@ -61,7 +60,7 @@ with_linalg_flavor="mkl"
  with_netcdf="${NETCDFC_ROOT}"
  with_netcdf_fortran="${NETCDFFORTRAN_ROOT}"
 
-# Additional plugins
+# Additional plugins & libs
 # ========================================
  with_libxc="${BENCH_ROOT}/install/${MY_ARCH}/libxc"
 

@@ -137,45 +137,129 @@ implicit none
  logical :: need_dynmat,need_elast,need_forces,need_grad,need_hess,need_stress,newshell
  real(dp),parameter :: alpha6=14.0_dp, alpha8=16.0_dp
  real(dp),parameter:: k1=16.0_dp, k2=15.0_dp, k3=4.0_dp
+
+! s6 parameters (BJ case)
+ real(dp),parameter :: vdwbj_s6_b2gpplyp=0.560_dp, vdwbj_s6_ptpss=0.750_dp
+ real(dp),parameter :: vdwbj_s6_b2plyp=0.640_dp,   vdwbj_s6_dsdblyp=0.500_dp
+ real(dp),parameter :: vdwbj_s6_pwpb95=0.820_dp
 ! s8 parameters (BJ case)
- real(dp),parameter :: vdwbj_s8_b2plyp=1.0860_dp, vdwbj_s8_pw6b95=0.7257_dp
- real(dp),parameter :: vdwbj_s8_b97d=2.2609_dp, vdwbj_s8_revpbe=2.3550_dp
- real(dp),parameter :: vdwbj_s8_b3lyp=1.9889_dp, vdwbj_s8_blyp=2.6996_dp
- real(dp),parameter :: vdwbj_s8_tpss0=1.2576_dp, vdwbj_s8_pbe0=1.2177_dp
- real(dp),parameter :: vdwbj_s8_tpss=1.9435_dp, vdwbj_s8_pbe=0.7875_dp
- real(dp),parameter :: vdwbj_s8_bp86=3.2822_dp
+ real(dp),parameter :: vdwbj_s8_b1b95=1.4507_dp,    vdwbj_s8_b2gpplyp=0.2597_dp
+ real(dp),parameter :: vdwbj_s8_b3pw91=2.8524_dp,   vdwbj_s8_bhlyp=1.0354_dp
+ real(dp),parameter :: vdwbj_s8_bmk=2.0860_dp,      vdwbj_s8_bop=3.295_dp
+ real(dp),parameter :: vdwbj_s8_bpbe=4.0728_dp,     vdwbj_s8_camb3lyp=2.0674_dp
+ real(dp),parameter :: vdwbj_s8_lcwpbe=1.8541_dp,   vdwbj_s8_mpw1b95=1.0508_dp
+ real(dp),parameter :: vdwbj_s8_mpwb1k=0.9499_dp,   vdwbj_s8_mpwlyp=2.0077_dp
+ real(dp),parameter :: vdwbj_s8_olyp=2.6205_dp,     vdwbj_s8_opbe=3.3816_dp
+ real(dp),parameter :: vdwbj_s8_otpss=2.7495_dp,    vdwbj_s8_pbe38=1.4623_dp
+ real(dp),parameter :: vdwbj_s8_pbesol=2.9491_dp,   vdwbj_s8_ptpss=0.2804_dp
+ real(dp),parameter :: vdwbj_s8_pwb6k=0.9383_dp,    vdwbj_s8_revssb=0.4389_dp
+ real(dp),parameter :: vdwbj_s8_ssb=-0.1744_dp,     vdwbj_s8_tpssh=2.2382_dp
+ real(dp),parameter :: vdwbj_s8_hcth120=1.0821_dp,  vdwbj_s8_b2plyp=0.9147_dp
+ real(dp),parameter :: vdwbj_s8_b3lyp=1.9889_dp,    vdwbj_s8_b97d=2.2609_dp
+ real(dp),parameter :: vdwbj_s8_blyp=2.6996_dp,     vdwbj_s8_bp86=3.2822_dp
+ real(dp),parameter :: vdwbj_s8_dsdblyp=0.2130_dp,  vdwbj_s8_pbe0=1.2177_dp
+ real(dp),parameter :: vdwbj_s8_pbe=0.7875_dp,      vdwbj_s8_pw6b95=0.7257_dp
+ real(dp),parameter :: vdwbj_s8_pwpb95=0.2904_dp,   vdwbj_s8_revpbe0=1.7588_dp
+ real(dp),parameter :: vdwbj_s8_revpbe38=1.4760_dp, vdwbj_s8_revpbe=2.3550_dp
+ real(dp),parameter :: vdwbj_s8_rpw86pbe=1.3845_dp, vdwbj_s8_tpss0=1.2576_dp
+ real(dp),parameter :: vdwbj_s8_tpss=1.9435_dp
 ! a1 parameters (BJ only)
- real(dp),parameter :: vdw_a1_b2lyp = 0.3451_dp, vdw_a1_pw6b95= 0.2076_dp
- real(dp),parameter :: vdw_a1_b97d= 0.5545_dp, vdw_a1_revpbe= 0.5238_dp
- real(dp),parameter :: vdw_a1_b3lyp = 0.3981_dp, vdw_a1_blyp = 0.4298_dp
- real(dp),parameter :: vdw_a1_tpss0 = 0.3768_dp, vdw_a1_pbe0 = 0.4145_dp
- real(dp),parameter :: vdw_a1_tpss = 0.4535_dp, vdw_a1_pbe = 0.4289_dp
- real(dp),parameter :: vdw_a1_bp86 = 0.3946_dp
+ real(dp),parameter :: vdwbj_a1_b1b95=0.2092_dp,    vdwbj_a1_b2gpplyp=0.0000_dp
+ real(dp),parameter :: vdwbj_a1_b3pw91=0.4312_dp,   vdwbj_a1_bhlyp=0.2793_dp
+ real(dp),parameter :: vdwbj_a1_bmk=0.1940_dp,      vdwbj_a1_bop=0.4870_dp
+ real(dp),parameter :: vdwbj_a1_bpbe=0.4567_dp,     vdwbj_a1_camb3lyp=0.3708_dp
+ real(dp),parameter :: vdwbj_a1_lcwpbe=0.3919_dp,   vdwbj_a1_mpw1b95=0.1955_dp
+ real(dp),parameter :: vdwbj_a1_mpwb1k=0.1474_dp,   vdwbj_a1_mpwlyp=0.4831_dp
+ real(dp),parameter :: vdwbj_a1_olyp=0.5299_dp,     vdwbj_a1_opbe=0.5512_dp
+ real(dp),parameter :: vdwbj_a1_otpss=0.4634_dp,    vdwbj_a1_pbe38=0.3995_dp
+ real(dp),parameter :: vdwbj_a1_pbesol=0.4466_dp,   vdwbj_a1_ptpss=0.000_dp
+ real(dp),parameter :: vdwbj_a1_pwb6k=0.1805_dp,    vdwbj_a1_revssb=0.4720_dp
+ real(dp),parameter :: vdwbj_a1_ssb=-0.0952_dp,     vdwbj_a1_tpssh=0.4529_dp
+ real(dp),parameter :: vdwbj_a1_hcth120=0.3563_dp,  vdwbj_a1_b2plyp=0.3065_dp
+ real(dp),parameter :: vdwbj_a1_b3lyp=0.3981_dp,    vdwbj_a1_b97d=0.5545_dp
+ real(dp),parameter :: vdwbj_a1_blyp=0.4298_dp,     vdwbj_a1_bp86=0.3946_dp
+ real(dp),parameter :: vdwbj_a1_dsdblyp=0.000_dp,   vdwbj_a1_pbe0=0.4145_dp
+ real(dp),parameter :: vdwbj_a1_pbe=0.4289_dp,      vdwbj_a1_pw6b95=0.2076_dp
+ real(dp),parameter :: vdwbj_a1_pwpb95=0.0000_dp,   vdwbj_a1_revpbe0=0.4679_dp
+ real(dp),parameter :: vdwbj_a1_revpbe38=0.4309_dp, vdwbj_a1_revpbe=0.5238_dp
+ real(dp),parameter :: vdwbj_a1_rpw86pbe=0.4613_dp, vdwbj_a1_tpss0=0.3768_dp
+ real(dp),parameter :: vdwbj_a1_tpss=0.4535_dp
 ! a2 parameters (BJ only)
-  real(dp),parameter :: vdw_a2_b2lyp = 4.7735_dp, vdw_a2_pw6b95= 6.3750_dp
- real(dp),parameter :: vdw_a2_b97d= 3.2287_dp, vdw_a2_revpbe= 3.5016_dp
- real(dp),parameter :: vdw_a2_b3lyp = 4.4211_dp, vdw_a2_blyp = 4.2359_dp
- real(dp),parameter :: vdw_a2_tpss0 = 4.5865_dp, vdw_a2_pbe0 = 4.8593_dp
- real(dp),parameter :: vdw_a2_tpss = 4.4752_dp, vdw_a2_pbe = 4.4407_dp
- real(dp),parameter :: vdw_a2_bp86 = 4.8516_dp
-! s6=1 except for double hybrid functionals
- real(dp),parameter :: vdw_s6_b2plyp=0.5_dp
-! s8 parameters
- real(dp),parameter :: vdw_s8_b2plyp=1.000_dp, vdw_s8_pw6b95=0.862_dp
- real(dp),parameter :: vdw_s8_b97d=0.909_dp, vdw_s8_revpbe=1.010_dp
- real(dp),parameter :: vdw_s8_b3lyp=1.703_dp, vdw_s8_blyp=1.682_dp
- real(dp),parameter :: vdw_s8_tpss0=1.242_dp, vdw_s8_pbe0=0.928_dp
- real(dp),parameter :: vdw_s8_tpss=1.105_dp, vdw_s8_pbe=0.722_dp
- real(dp),parameter :: vdw_s8_bp86=1.683_dp
-! sr6 parameters
- real(dp),parameter :: vdw_sr6_b2plyp=1.332_dp, vdw_sr6_pw6b95=1.532_dp
- real(dp),parameter :: vdw_sr6_b97d=0.892_dp, vdw_sr6_revpbe=0.923_dp
- real(dp),parameter :: vdw_sr6_b3lyp=1.261_dp, vdw_sr6_blyp=1.094_dp
- real(dp),parameter :: vdw_sr6_tpss0=1.252_dp, vdw_sr6_pbe0=1.287_dp
- real(dp),parameter :: vdw_sr6_tpss=1.166_dp, vdw_sr6_pbe=1.217_dp
- real(dp),parameter :: vdw_sr6_bp86=1.139_dp
-! sr8 parameters
- real(dp),parameter :: vdw_sr8=one, vdw_sr9=3.0/4.0
+ real(dp),parameter :: vdwbj_a2_b1b95=5.5545_dp,    vdwbj_a2_b2gpplyp=6.3332_dp
+ real(dp),parameter :: vdwbj_a2_b3pw91=4.4693_dp,   vdwbj_a2_bhlyp=4.9615_dp
+ real(dp),parameter :: vdwbj_a2_bmk=5.9197_dp,      vdwbj_a2_bop=3.5043_dp
+ real(dp),parameter :: vdwbj_a2_bpbe=4.3908_dp,     vdwbj_a2_camb3lyp=5.4743_dp
+ real(dp),parameter :: vdwbj_a2_lcwpbe=5.0897_dp,   vdwbj_a2_mpw1b95=6.4177_dp
+ real(dp),parameter :: vdwbj_a2_mpwb1k=6.6223_dp,   vdwbj_a2_mpwlyp=4.5323_dp
+ real(dp),parameter :: vdwbj_a2_olyp=2.8065_dp,     vdwbj_a2_opbe=2.9444_dp
+ real(dp),parameter :: vdwbj_a2_otpss=4.3153_dp,    vdwbj_a2_pbe38=5.1405_dp
+ real(dp),parameter :: vdwbj_a2_pbesol=6.1742_dp,   vdwbj_a2_ptpss=6.5745_dp
+ real(dp),parameter :: vdwbj_a2_pwb6k=7.7627_dp,    vdwbj_a2_revssb=4.0986_dp
+ real(dp),parameter :: vdwbj_a2_ssb=5.2170_dp,      vdwbj_a2_tpssh=4.6550_dp
+ real(dp),parameter :: vdwbj_a2_hcth120=4.3359_dp,  vdwbj_a2_b2plyp=5.0570_dp
+ real(dp),parameter :: vdwbj_a2_b3lyp=4.4211_dp,    vdwbj_a2_b97d=3.2297_dp
+ real(dp),parameter :: vdwbj_a2_blyp=4.2359_dp,     vdwbj_a2_bp86=4.8516_dp
+ real(dp),parameter :: vdwbj_a2_dsdblyp=6.0519_dp,  vdwbj_a2_pbe0=4.8593_dp
+ real(dp),parameter :: vdwbj_a2_pbe=4.4407_dp,      vdwbj_a2_pw6b95=6.3750_dp
+ real(dp),parameter :: vdwbj_a2_pwpb95=7.3141_dp,   vdwbj_a2_revpbe0=3.7619_dp
+ real(dp),parameter :: vdwbj_a2_revpbe38=3.9446_dp, vdwbj_a2_revpbe=3.5016_dp
+ real(dp),parameter :: vdwbj_a2_rpw86pbe=4.5062_dp, vdwbj_a2_tpss0=4.5865_dp
+ real(dp),parameter :: vdwbj_a2_tpss=4.4752_dp
+! s6 parameters (zero damping)
+ real(dp),parameter :: vdw_s6_b2gpplyp=0.56_dp, vdw_s6_b2plyp=0.64_dp
+ real(dp),parameter :: vdw_s6_dsdblyp=0.50_dp,  vdw_s6_ptpss=0.75_dp
+ real(dp),parameter :: vdw_s6_pwpb95=0.82_dp
+! s8 parameters (zero damping)
+ real(dp),parameter :: vdw_s8_b1b95=1.868_dp,   vdw_s8_b2gpplyp=0.760_dp
+ real(dp),parameter :: vdw_s8_b3lyp=1.703_dp,   vdw_s8_b97d=0.909_dp
+ real(dp),parameter :: vdw_s8_bhlyp=1.442_dp,   vdw_s8_blyp=1.682_dp
+ real(dp),parameter :: vdw_s8_bp86=1.683_dp,    vdw_s8_bpbe=2.033_dp
+ real(dp),parameter :: vdw_s8_mpwlyp=1.098_dp,  vdw_s8_pbe=0.722_dp
+ real(dp),parameter :: vdw_s8_pbe0=0.928_dp,    vdw_s8_pw6b95=0.862_dp
+ real(dp),parameter :: vdw_s8_pwb6k=0.550_dp,   vdw_s8_revpbe=1.010_dp
+ real(dp),parameter :: vdw_s8_tpss=1.105_dp,    vdw_s8_tpss0=1.242_dp
+ real(dp),parameter :: vdw_s8_tpssh=1.219_dp,   vdw_s8_bop=1.975_dp
+ real(dp),parameter :: vdw_s8_mpw1b95=1.118_dp, vdw_s8_mpwb1k=1.061_dp
+ real(dp),parameter :: vdw_s8_olyp=1.764_dp,    vdw_s8_opbe=2.055_dp
+ real(dp),parameter :: vdw_s8_otpss=1.494_dp,   vdw_s8_pbe38=0.998_dp
+ real(dp),parameter :: vdw_s8_pbesol=0.612_dp,  vdw_s8_revssb=0.560_dp
+ real(dp),parameter :: vdw_s8_ssb=0.663_dp,     vdw_s8_b3pw91=1.775_dp
+ real(dp),parameter :: vdw_s8_bmk=2.168_dp,     vdw_s8_camb3lyp=1.217_dp
+ real(dp),parameter :: vdw_s8_lcwpbe=1.279_dp,  vdw_s8_m052x=0.00_dp
+ real(dp),parameter :: vdw_s8_m05=0.595_dp,     vdw_s8_m062x=0.00_dp
+ real(dp),parameter :: vdw_s8_m06hf=0.00_dp,    vdw_s8_m06l=0.00_dp
+ real(dp),parameter :: vdw_s8_m06=0.00_dp,      vdw_s8_hcth120=1.206_dp
+ real(dp),parameter :: vdw_s8_b2plyp=1.022_dp,  vdw_s8_dsdblyp=0.705_dp
+ real(dp),parameter :: vdw_s8_ptpss=0.879_dp,   vdw_s8_pwpb95=0.705_dp
+ real(dp),parameter :: vdw_s8_revpbe0=0.792_dp, vdw_s8_revpbe38=0.862_dp
+ real(dp),parameter :: vdw_s8_rpw86pbe=0.901_dp
+! sr6 parameters (zero damping)
+ real(dp),parameter :: vdw_sr6_b1b95=1.613_dp,   vdw_sr6_b2gpplyp=1.586_dp
+ real(dp),parameter :: vdw_sr6_b3lyp=1.261_dp,   vdw_sr6_b97d=0.892_dp
+ real(dp),parameter :: vdw_sr6_bhlyp=1.370_dp,   vdw_sr6_blyp=1.094_dp
+ real(dp),parameter :: vdw_sr6_bp86=1.139_dp,    vdw_sr6_bpbe=1.087_dp
+ real(dp),parameter :: vdw_sr6_mpwlyp=1.239_dp,  vdw_sr6_pbe=1.217_dp
+ real(dp),parameter :: vdw_sr6_pbe0=1.287_dp,    vdw_sr6_pw6b95=1.532_dp
+ real(dp),parameter :: vdw_sr6_pwb6k=1.660_dp,   vdw_sr6_revpbe=0.923_dp
+ real(dp),parameter :: vdw_sr6_tpss=1.166_dp,    vdw_sr6_tpss0=1.252_dp
+ real(dp),parameter :: vdw_sr6_tpssh=1.223_dp,   vdw_sr6_bop=0.929_dp
+ real(dp),parameter :: vdw_sr6_mpw1b95=1.605_dp, vdw_sr6_mpwb1k=1.671_dp
+ real(dp),parameter :: vdw_sr6_olyp=0.806_dp,    vdw_sr6_opbe=0.837_dp
+ real(dp),parameter :: vdw_sr6_otpss=1.128_dp,   vdw_sr6_pbe38=1.333_dp
+ real(dp),parameter :: vdw_sr6_pbesol=1.345_dp,  vdw_sr6_revssb=1.221_dp
+ real(dp),parameter :: vdw_sr6_ssb=1.215_dp,     vdw_sr6_b3pw91=1.176_dp
+ real(dp),parameter :: vdw_sr6_bmk=1.931_dp,     vdw_sr6_camb3lyp=1.378_dp
+ real(dp),parameter :: vdw_sr6_lcwpbe=1.355_dp,  vdw_sr6_m052x=1.417_dp
+ real(dp),parameter :: vdw_sr6_m05=1.373_dp,     vdw_sr6_m062x=1.619_dp
+ real(dp),parameter :: vdw_sr6_m06hf=1.446_dp,   vdw_sr6_m06l=1.581_dp
+ real(dp),parameter :: vdw_sr6_m06=1.325_dp,     vdw_sr6_hcth120=1.221_dp
+ real(dp),parameter :: vdw_sr6_b2plyp=1.427_dp,  vdw_sr6_dsdblyp=1.569_dp
+ real(dp),parameter :: vdw_sr6_ptpss=1.541_dp,   vdw_sr6_pwpb95=1.557_dp
+ real(dp),parameter :: vdw_sr6_revpbe0=0.949_dp, vdw_sr6_revpbe38=1.021_dp
+ real(dp),parameter :: vdw_sr6_rpw86pbe=1.224_dp
+! sr8 parameters (zero damping) = 1.000_dp
+
+ real(dp),parameter :: vdw_sr9=3.0/4.0
  real(dp),parameter :: vdw_tol_default=tol10
  real(dp) :: ang,arg,cn_dmp,cosa,cosb,cosc,c6,c8
  real(dp) :: dcosa_r3drij,dcosa_r3drjk,dcosa_r3drki
@@ -194,7 +278,7 @@ implicit none
  real(dp) :: sfact6,sfact8,sfact9,sum_dlri,sum_dlrj,sum_dlc6ri,sum_dlc6rj
  real(dp) :: sum_d2lri,sum_d2lrj,sum_d2lrirj,sum_d2lc6ri,sum_d2lc6rj,sum_d2lc6rirj
  real(dp) :: temp,temp2
- real(dp) :: ucvol,vdw_s6,vdw_s8,vdw_sr6,vdw_a1,vdw_a2,vdw_q
+ real(dp) :: ucvol,vdw_s6,vdw_s8,vdw_sr6,vdw_sr8,vdw_a1,vdw_a2,vdw_q
  character(len=500) :: msg
  type(atomdata_t) :: atom1,atom2
 
@@ -329,25 +413,90 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 
 ! Determination of coefficients that depend of the
 ! exchange-correlation functional
- vdw_s6=one
- vdw_s8=one
+ vdw_s6 =one; vdw_s8 =one
+ vdw_sr6=one; vdw_sr8=one
+ vdw_a1 =one; vdw_a2 =one
 ! Case one : DFT-D3
  if (vdw_xc == 6) then
    select case (ixc)
-   case (11,-101130,-130101)
-     vdw_sr6 = vdw_sr6_pbe ; vdw_s8 = vdw_s8*vdw_s8_pbe
-   case (18,-106131,-131106)
-     vdw_sr6=vdw_sr6*vdw_sr6_blyp ; vdw_s8 =vdw_s8*vdw_s8_blyp
-   case (19,-106132,-132106)
-     vdw_sr6=vdw_sr6*vdw_sr6_bp86 ; vdw_s8=vdw_s8*vdw_s8_bp86
-   case (-202231,-231202)
-     vdw_sr6=vdw_sr6*vdw_sr6_tpss ; vdw_s8=vdw_s8*vdw_s8_tpss
-   case (14,-102130,-130102)
-     vdw_sr6=vdw_sr6*vdw_sr6_revpbe ; vdw_s8=vdw_s8*vdw_s8_revpbe
-   case (-170)
-     vdw_sr6=vdw_sr6*vdw_sr6_b97d ; vdw_s8=vdw_s8*vdw_s8_b97d
-   case (41,-406)
-     vdw_sr6=vdw_sr6*vdw_sr6_pbe0 ; vdw_s8=vdw_s8*vdw_s8_pbe0
+   case(11, -130101, -101130)
+     vdw_sr6=vdw_sr6_pbe; vdw_s8=vdw_s8_pbe
+   case(14, -130102, -102130)
+     vdw_sr6=vdw_sr6_revpbe; vdw_s8=vdw_s8_revpbe
+   case(18, -131106, -106131)
+     vdw_sr6=vdw_sr6_blyp; vdw_s8=vdw_s8_blyp
+   case(19, -132106, -106132)
+     vdw_sr6=vdw_sr6_bp86; vdw_s8=vdw_s8_bp86
+   case(41, -406)
+     vdw_sr6=vdw_sr6_pbe0; vdw_s8=vdw_s8_pbe0
+   case(-440)
+     vdw_sr6=vdw_sr6_b1b95; vdw_s8=vdw_s8_b1b95
+   case(-402)
+     vdw_sr6=vdw_sr6_b3lyp; vdw_s8=vdw_s8_b3lyp
+   case(-170)
+     vdw_sr6=vdw_sr6_b97d; vdw_s8=vdw_s8_b97d
+   case(-435)
+     vdw_sr6=vdw_sr6_bhlyp; vdw_s8=vdw_s8_bhlyp
+   case(-130106, -106130)
+     vdw_sr6=vdw_sr6_bpbe; vdw_s8=vdw_s8_bpbe
+   case(-174)
+     vdw_sr6=vdw_sr6_mpwlyp; vdw_s8=vdw_s8_mpwlyp
+   case(-451)
+     vdw_sr6=vdw_sr6_pw6b95; vdw_s8=vdw_s8_pw6b95
+   case(-452)
+     vdw_sr6=vdw_sr6_pwb6k; vdw_s8=vdw_s8_pwb6k
+   case(-231202, -202231)
+     vdw_sr6=vdw_sr6_tpss; vdw_s8=vdw_s8_tpss
+   case(-396)
+     vdw_sr6=vdw_sr6_tpss0; vdw_s8=vdw_s8_tpss0
+   case(-457)
+     vdw_sr6=vdw_sr6_tpssh; vdw_s8=vdw_s8_tpssh
+   case(-636)
+     vdw_sr6=vdw_sr6_bop; vdw_s8=vdw_s8_bop
+   case(-445)
+     vdw_sr6=vdw_sr6_mpw1b95; vdw_s8=vdw_s8_mpw1b95
+   case(-446)
+     vdw_sr6=vdw_sr6_mpwb1k; vdw_s8=vdw_s8_mpwb1k
+   case(-67)
+     vdw_sr6=vdw_sr6_olyp; vdw_s8=vdw_s8_olyp
+   case(-65)
+     vdw_sr6=vdw_sr6_opbe; vdw_s8=vdw_s8_opbe
+   case(-64)
+     vdw_sr6=vdw_sr6_otpss; vdw_s8=vdw_s8_otpss
+   case(-393)
+     vdw_sr6=vdw_sr6_pbe38; vdw_s8=vdw_s8_pbe38
+   case(-133116, -116133)
+     vdw_sr6=vdw_sr6_pbesol; vdw_s8=vdw_s8_pbesol
+   case(-312089, -89312)
+     vdw_sr6=vdw_sr6_revssb; vdw_s8=vdw_s8_revssb
+   case(-91089, -89091)
+     vdw_sr6=vdw_sr6_ssb; vdw_s8=vdw_s8_ssb
+   case(-401)
+     vdw_sr6=vdw_sr6_b3pw91; vdw_s8=vdw_s8_b3pw91
+   case(-280279, -279280)
+     vdw_sr6=vdw_sr6_bmk; vdw_s8=vdw_s8_bmk
+   case(-433)
+     vdw_sr6=vdw_sr6_camb3lyp; vdw_s8=vdw_s8_camb3lyp
+   case(-478)
+     vdw_sr6=vdw_sr6_lcwpbe; vdw_s8=vdw_s8_lcwpbe
+   case(-439238, -238439)
+     vdw_sr6=vdw_sr6_m052x; vdw_s8=vdw_s8_m052x
+   case(-438237, -237438)
+     vdw_sr6=vdw_sr6_m05; vdw_s8=vdw_s8_m05
+   case(-450236, -236450)
+     vdw_sr6=vdw_sr6_m062x; vdw_s8=vdw_s8_m062x
+   case(-444234, -234444)
+     vdw_sr6=vdw_sr6_m06hf; vdw_s8=vdw_s8_m06hf
+   case(-203233, -233203)
+     vdw_sr6=vdw_sr6_m06l; vdw_s8=vdw_s8_m06l
+   case(-449235, -235449)
+     vdw_sr6=vdw_sr6_m06; vdw_s8=vdw_s8_m06
+   case(-162)
+     vdw_sr6=vdw_sr6_hcth120; vdw_s8=vdw_s8_hcth120
+   case(-456)
+     vdw_sr6=vdw_sr6_revpbe0; vdw_s8=vdw_s8_revpbe0
+   case(-30108, -108030)
+     vdw_sr6=vdw_sr6_rpw86pbe; vdw_s8=vdw_s8_rpw86pbe     
    case default
      write(msg,'(a,i8,a)')'  Van der Waals DFT-D3 correction not compatible with ixc=',ixc,' !'
      ABI_ERROR(msg)
@@ -355,22 +504,76 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
 ! Case DFT-D3(BJ)
  elseif (vdw_xc == 7) then
    select case (ixc)
-   case (11,-101130,-130101)
-     vdw_a1 = vdw_a1_pbe ; vdw_a2 = vdw_a2_pbe ; vdw_s8=  vdwbj_s8_pbe
-   case (18,-106131,-131106)
-     vdw_a1=vdw_a1_blyp ; vdw_a2=vdw_a2_blyp ; vdw_s8=vdwbj_s8_blyp
-   case (19,-106132,-132106)
-     vdw_a1=vdw_a1_bp86 ; vdw_a2=vdw_a2_bp86 ; vdw_s8=vdwbj_s8_bp86
-   case (-202231,-231202)
-     vdw_a1=vdw_a1_tpss ; vdw_a2=vdw_a2_tpss ; vdw_s8=vdwbj_s8_tpss
-   case (14,-102130,-130102)
-     vdw_a1=vdw_a1_revpbe ; vdw_a2=vdw_a2_revpbe ; vdw_s8=vdwbj_s8_revpbe
-   case (-170)
-     vdw_a1=vdw_a1_b97d ; vdw_a2=vdw_a2_b97d ; vdw_s8=vdwbj_s8_b97d
-   case (41,-406)
-     vdw_a1=vdw_a1_pbe0 ; vdw_a2=vdw_a2_pbe0 ; vdw_s8=vdwbj_s8_pbe0
+   case(11, -130101, -101130)
+     vdw_s8=vdwbj_s8_pbe; vdw_a1=vdwbj_a1_pbe; vdw_a2=vdwbj_a2_pbe
+   case(14, -130102, -102130)
+     vdw_s8=vdwbj_s8_revpbe; vdw_a1=vdwbj_a1_revpbe; vdw_a2=vdwbj_a2_revpbe
+   case(18, -131106, -106131)
+     vdw_s8=vdwbj_s8_blyp; vdw_a1=vdwbj_a1_blyp; vdw_a2=vdwbj_a2_blyp
+   case(19, -132106, -106132)
+     vdw_s8=vdwbj_s8_bp86; vdw_a1=vdwbj_a1_bp86; vdw_a2=vdwbj_a2_bp86
+   case(41, -406)
+     vdw_s8=vdwbj_s8_pbe0; vdw_a1=vdwbj_a1_pbe0; vdw_a2=vdwbj_a2_pbe0
+   case(-440)
+     vdw_s8=vdwbj_s8_b1b95; vdw_a1=vdwbj_a1_b1b95; vdw_a2=vdwbj_a2_b1b95
+   case(-401)
+     vdw_s8=vdwbj_s8_b3pw91; vdw_a1=vdwbj_a1_b3pw91; vdw_a2=vdwbj_a2_b3pw91
+   case(-435)
+     vdw_s8=vdwbj_s8_bhlyp; vdw_a1=vdwbj_a1_bhlyp; vdw_a2=vdwbj_a2_bhlyp
+   case(-280279, -279280)
+     vdw_s8=vdwbj_s8_bmk; vdw_a1=vdwbj_a1_bmk; vdw_a2=vdwbj_a2_bmk
+   case(-636)
+     vdw_s8=vdwbj_s8_bop; vdw_a1=vdwbj_a1_bop; vdw_a2=vdwbj_a2_bop
+   case(-130106, -106130)
+     vdw_s8=vdwbj_s8_bpbe; vdw_a1=vdwbj_a1_bpbe; vdw_a2=vdwbj_a2_bpbe
+   case(-433)
+     vdw_s8=vdwbj_s8_camb3lyp; vdw_a1=vdwbj_a1_camb3lyp; vdw_a2=vdwbj_a2_camb3lyp
+   case(-478)
+     vdw_s8=vdwbj_s8_lcwpbe; vdw_a1=vdwbj_a1_lcwpbe; vdw_a2=vdwbj_a2_lcwpbe
+   case(-445)
+     vdw_s8=vdwbj_s8_mpw1b95; vdw_a1=vdwbj_a1_mpw1b95; vdw_a2=vdwbj_a2_mpw1b95
+   case(-446)
+     vdw_s8=vdwbj_s8_mpwb1k; vdw_a1=vdwbj_a1_mpwb1k; vdw_a2=vdwbj_a2_mpwb1k
+   case(-174)
+     vdw_s8=vdwbj_s8_mpwlyp; vdw_a1=vdwbj_a1_mpwlyp; vdw_a2=vdwbj_a2_mpwlyp
+   case(-67)
+     vdw_s8=vdwbj_s8_olyp; vdw_a1=vdwbj_a1_olyp; vdw_a2=vdwbj_a2_olyp
+   case(-65)
+     vdw_s8=vdwbj_s8_opbe; vdw_a1=vdwbj_a1_opbe; vdw_a2=vdwbj_a2_opbe
+   case(-64)
+     vdw_s8=vdwbj_s8_otpss; vdw_a1=vdwbj_a1_otpss; vdw_a2=vdwbj_a2_otpss
+   case(-393)
+     vdw_s8=vdwbj_s8_pbe38; vdw_a1=vdwbj_a1_pbe38; vdw_a2=vdwbj_a2_pbe38
+   case(-133116, -116133)
+     vdw_s8=vdwbj_s8_pbesol; vdw_a1=vdwbj_a1_pbesol; vdw_a2=vdwbj_a2_pbesol
+   case(-452)
+     vdw_s8=vdwbj_s8_pwb6k; vdw_a1=vdwbj_a1_pwb6k; vdw_a2=vdwbj_a2_pwb6k
+   case(-312089, -89312)
+     vdw_s8=vdwbj_s8_revssb; vdw_a1=vdwbj_a1_revssb; vdw_a2=vdwbj_a2_revssb
+   case(-91089, -89091)
+     vdw_s8=vdwbj_s8_ssb; vdw_a1=vdwbj_a1_ssb; vdw_a2=vdwbj_a2_ssb
+   case(-457)
+     vdw_s8=vdwbj_s8_tpssh; vdw_a1=vdwbj_a1_tpssh; vdw_a2=vdwbj_a2_tpssh
+   case(-162)
+     vdw_s8=vdwbj_s8_hcth120; vdw_a1=vdwbj_a1_hcth120; vdw_a2=vdwbj_a2_hcth120
+   case(-402)
+     vdw_s8=vdwbj_s8_b3lyp; vdw_a1=vdwbj_a1_b3lyp; vdw_a2=vdwbj_a2_b3lyp
+   case(-170)
+     vdw_s8=vdwbj_s8_b97d; vdw_a1=vdwbj_a1_b97d; vdw_a2=vdwbj_a2_b97d
+   case(-451)
+     vdw_s8=vdwbj_s8_pw6b95; vdw_a1=vdwbj_a1_pw6b95; vdw_a2=vdwbj_a2_pw6b95
+   case(-30108, -108030)
+     vdw_s8=vdwbj_s8_rpw86pbe; vdw_a1=vdwbj_a1_rpw86pbe; vdw_a2=vdwbj_a2_rpw86pbe
+   case(-396)
+     vdw_s8=vdwbj_s8_tpss0; vdw_a1=vdwbj_a1_tpss0; vdw_a2=vdwbj_a2_tpss0
+   case(-231202, -202231)
+     vdw_s8=vdwbj_s8_tpss; vdw_a1=vdwbj_a1_tpss; vdw_a2=vdwbj_a2_tpss
+   case default
+     write(msg,'(a,i8,a)')'  Van der Waals DFT-D3(BJ) correction not compatible with ixc=',ixc,' !'
+     ABI_ERROR(msg)
    end select
  end if
+
 ! --------------------------------------------------------------
 ! Retrieve the data for the referenced c6, cn and r0 coefficients
 !---------------------------------------------------------------
@@ -829,7 +1032,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
    end do
  end if
 
- write(msg,'(3a,f8.5,1a,f8.5)')&
+ write(msg,'(3a,f10.5,1a,f10.5)')&
 & '                                            ... Done.',ch10,&
 & '  max(C6) =', maxval(vdw_c6),' ;  min(C6) =', minval(vdw_c6)
  call wrtout(std_out,msg,'COLL')
