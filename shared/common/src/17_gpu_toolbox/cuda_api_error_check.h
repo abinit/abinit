@@ -37,6 +37,9 @@
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
+#include <cublas_v2.h>
+#include <cufft.h>
+#include <cusolverDn.h>
 #include <string>
 #include <stdio.h> // for fflush
 #include <cassert>
