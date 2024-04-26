@@ -649,6 +649,10 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  DBG_ENTER("COLL")
  ABI_NVTX_START_RANGE(NVTX_DFPT_ACCRHO)
 
+ if (gs_hamkq%nvloc==4 .and. ndat>1) then
+   ABI_ERROR("nvloc==4 isn't supported with ndat~bandpp > 1 !")
+ end if
+
  if (option/=1.and.option/=2.and.option/=3) return
  gpu_option=gs_hamkq%gpu_option
 
@@ -755,7 +759,6 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 #endif
    ABI_FREE(wfraug1)
  else ! nvloc = 4
-       ABI_BUG("toto")
 ! The same lines of code are in 72_response/dfpt_mkrho.F90
 ! TODO merge these lines in a single routine??!!
    ABI_MALLOC(wfraug1_up,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
@@ -955,13 +958,13 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
      end do
    else
        ABI_BUG("toto")
-     ABI_MALLOC(cwaveprj_tmp,(natom,nspinor))
+     ABI_MALLOC(cwaveprj_tmp,(natom,nspinor*ndat))
      call pawcprj_alloc(cwaveprj_tmp,ncpgr,gs_hamkq%dimcprj)
      choice=2
      call getcprj(choice,0,cwave0,cwaveprj_tmp,&
 &     gs_hamkq%ffnl_k,idir,gs_hamkq%indlmn,gs_hamkq%istwf_k,&
 &     gs_hamkq%kg_k,gs_hamkq%kpg_k,gs_hamkq%kpt_k,gs_hamkq%lmnmax,&
-&     gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
+&     gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &     gs_hamkq%nloalg,gs_hamkq%npw_k,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkxred,&
 &     gs_hamkq%ph1d,gs_hamkq%ph3d_k,gs_hamkq%ucvol,gs_hamkq%useylm)
      call pawaccrhoij(gs_hamkq%atindx,cplex_cprj,cwaveprj_tmp,cwaveprj1,ipert,isppol,my_natom,&
