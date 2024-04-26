@@ -9,12 +9,14 @@ We discuss the technical details related to the implementation, the associated i
 as well as the pros and cons with respect to the conventional GW implementation formulated
 in Fourier-space and frequency domain.
 
+WARNING : THIS TUTORIAL IS WORK IN PROGRESS ! IT IS NOT YET COMPLETE ...
+
 ## Why a new GW code?
 
 The conventional GW algorithm has quartic scaling with the number of atoms whereas GWR scales cubically.
 The legacy GW code obtains the matrix elements of self-energy by performing a convolution in frequency domain, 
 usually within the plasmon-pole approximation whereas GWR computes the self-energy elements in 
-imaginary-time 
+imaginary-time.
 
 Select the task to be performed when [[optdriver]] == 6 i.e. GWR code.
 while [[gwr_task]] defines the task

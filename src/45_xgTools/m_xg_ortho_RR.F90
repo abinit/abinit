@@ -134,7 +134,7 @@ module m_xg_ortho_RR
 !! NAME
 !! xg_RayleighRitz
   subroutine xg_RayleighRitz(X,AX,BX,eigenvalues,info,prtvol,timer,gpu_option,&
-    & tolerance,XW,AW,BW,P,AP,BP,WP,AWP,BWP,XWP,solve_ax_bx)
+    & tolerance,XW,AW,BW,P,AP,BP,WP,AWP,BWP,XWP,solve_ax_bx,istwf_k,usepaw,me_g0)
 
     use m_time
     integer        , intent(in   ) :: timer
@@ -146,6 +146,10 @@ module m_xg_ortho_RR
     type(xgBlock_t), intent(inout) :: BX
     integer        , intent(  out) :: info
     double precision, optional, intent(in) :: tolerance
+    ! CHEBFI only
+    integer        , optional, intent(in)  :: istwf_k,me_g0
+    logical        , optional, intent(in)  :: usepaw
+    ! End CHEBFI only
     ! LOBPCG only :
     type(xgBlock_t), intent(inout),optional :: XW
     type(xgBlock_t), intent(inout),optional :: AW
@@ -166,6 +170,7 @@ module m_xg_ortho_RR
     integer :: subdim
     integer :: spacecom
     integer :: eigenSolver
+    integer :: istwf_k_,me_g0_
     double precision :: abstol
 #ifdef HAVE_LINALG_SCALAPACK
     logical :: use_slk
@@ -178,6 +183,11 @@ module m_xg_ortho_RR
     type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
     logical :: solve_ax_bx_
+    logical :: usepaw_
+    type(xgBlock_t) :: X_first_row
+    type(xgBlock_t) :: AX_first_row
+    type(xgBlock_t) :: BX_first_row
+
 
     call timab(timer , 1, tsec)
 
@@ -185,6 +195,10 @@ module m_xg_ortho_RR
     if (present(solve_ax_bx)) then
       solve_ax_bx_ = solve_ax_bx
     end if
+
+    istwf_k_=1; if(present(istwf_k)) istwf_k_=istwf_k
+    usepaw_=.false.; if(present(usepaw)) usepaw_=usepaw
+    me_g0_=1; if(present(me_g0)) me_g0_=me_g0
 
     var = VAR_X
     call xgBlock_check(X,AX)
@@ -284,6 +298,26 @@ module m_xg_ortho_RR
     end if
 
     call timab(tim_RR_gemm_1,2,tsec)
+    if(istwf_k_ == 2) then
+      call xgBlock_scale(X, 1/sqrt2, 1)
+      if (me_g0_ == 1)  then
+        call xgBlock_setBlock(X, X_first_row, 1, 2, subdim) !has to be 2 rows in SPACE_CR
+        call xgBlock_scale(X_first_row, sqrt2, 1)
+      end if
+      call xgBlock_scale(AX, 1/sqrt2, 1)
+      if (me_g0_ == 1)  then
+        call xgBlock_setBlock(AX, AX_first_row, 1, 2, subdim)
+        call xgBlock_scale(AX_first_row, sqrt2, 1)
+      end if
+      if (usepaw_)  then
+        call xgBlock_scale(BX, 1/sqrt2, 1)
+        if (me_g0_ == 1)  then
+          call xgBlock_setBlock(BX, BX_first_row, 1, 2, subdim)
+          call xgBlock_scale(BX_first_row, sqrt2, 1)
+        end if
+      end if
+    end if
+
     ABI_NVTX_END_RANGE()
 
     if ( EIGPACK(eigenSolver) ) then
