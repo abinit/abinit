@@ -6300,31 +6300,7 @@ GPU programming models available in ABINIT:
   The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
   on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
-""",
-),
-
-Variable(
-    abivarname="gpu_use_nvtx",
-    varset="paral",
-    vartype="integer",
-    topics=['parallelism_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="GPU: activate USE of NVTX tracing/profiling",
-    added_in_version="9.7.2",
-    text=r"""
-Only available if ABINIT executable has been linked with the [[NVTX]] (Nvidia) or
-[[ROCTX]] (AMD) library.
-When [[gpu_use_nvtx]] = 1 on Nvidia GPU(s),
-the use of [NVTX](https://github.com/NVIDIA/NVTX)
- tracing/profiling ((NVIDIA Tools eXtension Library) is activated.
- The trace can be used for instance with
- [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
-When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
-the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
- tracing/profiling (ROCm Tools eXtension Library) is activated.
+For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
 """,
 ),
 
@@ -13130,15 +13106,15 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUClear site Electric Field Gradient",
-    requires="[[usepaw]] == 1, [[quadmom]]",
+    requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
 If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
-Using this option requires [[quadmom]] to be set as well.
 Values will be written to the main output file (search for Electric Field Gradient).
-If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
-If nucefg=2, the full electric field gradient tensors in atomic units are also given,
+If nucefg=1, the electric field gradient in both atomic units and SI units is given,
 showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If nucefg=2, the quadrupole couplings to the nuclear electric quadrupole moments are reported as well,
+and are based on the input values of [[quadmom]].
 If nucefg=3, then in addition to the nucefg=2 output, the EFGs are computed using an ionic point charge model.
 This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of nucefg=3 requires that the variable [[ptcharge]] be set as well.
@@ -13842,12 +13818,15 @@ Variable(
 Compute quantities related to orbital magnetic moment. Typically used in the
 presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
 the nuclear magnetic shielding as measured in NMR. [[orbmag]]
-    is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Zwanziger2023]].
-    The computed results are returned in the
-    standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
-    DDK calculation.
+is parallelized over k points only. The implementation follows the
+theory outlined in [[cite:Zwanziger2023]]. The computed results are returned in the
+standard output file, search for "Orbital magnetic moment". This calculation requires
+both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
+preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
+can be called in a ground state calculation if [[berryopt]] -2 has also been called,
+to generate discretized DDK wavefunctions. Note that convergence with kpt mesh is
+*much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
+unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern number
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
@@ -17293,15 +17272,14 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
-    requires="[[usepaw]] == 1 and [[nucefg]]>=1",
+    requires="[[usepaw]] == 1 and [[nucefg]]>1",
     added_in_version="before_v9",
     text=r"""
   * Array of quadrupole moments, in barns, of the nuclei. These values are used
   in conjunction with the electric field gradients computed with [[nucefg]] to
   calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that
   the electric field gradient at a nuclear site is independent of the nuclear
-  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0,
-  and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0.
 """,
 ),
 
@@ -20351,7 +20329,7 @@ Variable(
     abivarname="usepotzero",
     varset="dev",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_useful','Verification_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE POTential ZERO",
@@ -20363,7 +20341,7 @@ Fix the convention for the choice of the average value of the Hartree potential,
 
   * [[usepotzero]] = 1, the new convention: the all-electron physical potential is set to zero average value.
 
-  * [[usepotzero]] = 2, the PWscf convention: the potential of equivalent point charges is set to
+  * [[usepotzero]] = 2, the QE/PWscf convention: the potential of equivalent point charges is set to
   zero average value (convention also valid for NC pseudopotentials).
 """,
 ),
