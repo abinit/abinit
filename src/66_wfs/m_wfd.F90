@@ -1500,13 +1500,13 @@ subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw
  if (isirr_kq) then
    ! Copy data
    istwf_kq = wfd%istwfk(ikq_ibz); npw_kq = wfd%npwarr(ikq_ibz)
-   ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
+   ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
    kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
  else
    ! Build new g-sphere centered on kq.
    istwf_kq = 1
    call get_kg(kq, istwf_kq, ecut, gmet, npw_kq, gtmp)
-   ABI_CHECK(mpw >= npw_kq, "mpw < npw_kq")
+   ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
    kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
    ABI_FREE(gtmp)
  end if
