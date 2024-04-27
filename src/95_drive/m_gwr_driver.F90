@@ -807,7 +807,6 @@ end if
    call owfk_hdr%free(); call ebands_free(owfk_ebands); call hyb%free(); call diago_pool%free()
 
  else if (string_in(dtset%gwr_task, "CC4S_FROM_WFK")) then
-   !print *, "IN CC4S_FROM_WFK"
    ! Read orbitals from an external WFK file and produce output files for CC4S.
 
    ! Construct crystal and ks_ebands from the GS WFK file.
@@ -1122,7 +1121,6 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
  ! setmesh assumes g-vectors sorted by norm so use kin_sorted = True and sort ug%kg_k below.
  kpt = dtset%kptns(:,ik_ibz); k_is_gamma = all(abs(kpt) < tol12)
  m_istwfk = 1; if (ugb%istwf_k == 2) m_istwfk = 2
- !print *, "ugb%istwf_k:", ugb%istwf_k, m_istwfk", m_istwfk
  call get_kg(kpt, m_istwfk, dtset%ecuteps, cryst%gmet, m_npw, m_gvec, kin_sorted=.True.)
 
  ! Setup FFT mesh
@@ -1406,7 +1404,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
        ! FBru convert to longer integer before the multiplication
        offset = INT(m_npw, KIND=XMPI_OFFSET_KIND) &
                * INT( (band2_start-1) + (band1-1) * ugb%nband_k, KIND=XMPI_OFFSET_KIND) &
-                * INT(xmpi_bsize_dpc, KIND=XMPI_OFFSET_KIND)
+               * INT(xmpi_bsize_dpc, KIND=XMPI_OFFSET_KIND)
 
        call MPI_FILE_WRITE_AT(fh, offset, ug12_batch, buf_size, MPI_DOUBLE_COMPLEX, MPI_STATUS_IGNORE, mpierr)
        ABI_HANDLE_MPIERR(mpierr)

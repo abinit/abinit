@@ -1347,7 +1347,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawt
 
  ! FIXME use bs_loband(nsppol)
  Bsp%lomo_spin = Dtset%bs_loband
- write(std_out,*)"bs_loband",Dtset%bs_loband
+ !write(std_out,*)"bs_loband",Dtset%bs_loband
  !if (Bsp%nsppol == 2) Bsp%lomo_spin(2) = Dtset%bs_loband
 
  ! Check lomo correct only for unpolarized semiconductors
@@ -1987,7 +1987,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
    ABI_ERROR(msg)
  end if
 
- ! Setup of the k-point list and symmetry tables in the  BZ
+ ! Setup of the k-point list and symmetry tables in the BZ
  SELECT CASE(BSp%interp_mode)
  CASE (1,2,3,4)
    if(Dtset%chksymbreak == 0) then

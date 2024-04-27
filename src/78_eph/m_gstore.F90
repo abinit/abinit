@@ -270,6 +270,10 @@ type, public :: gqk_t
   type(xcomm_t) :: pert_comm
    ! MPI communicator over atomic perturbations.
 
+  !type(xcomm_t) :: bsum_comm
+   ! MPI communicator over bands summed over. NB: it not used to distribute
+   ! the memory for the g but to distribute a possible sum over bands as done in GWPT.
+
   type(xcomm_t) :: qpt_pert_comm
    ! MPI communicator over the 2d grid (qpt, atomic perturbations)
 
@@ -310,7 +314,7 @@ type, public :: gqk_t
 !! FUNCTION
 !! This object stores:
 !!
-!!    - pointers to the cyrstalline structure, the KS bands, the IFCs.
+!!    - pointers to the crystal structure, the KS bands, the IFCs.
 !!    - arrays that do not depend on the spin such as the IBZ and weights for k/q-points.
 !!    - metadata such as kzone, qzone and kfilter that are needed to interpret
 !!      the storage mode used for the g(k, q)
@@ -346,7 +350,7 @@ type, public :: gstore_t
   ! 2 to compute diagonal and off-diagonal terms
 
   integer :: qptopt = -1
-  !  qptopt=option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
+  ! option for the generation of q points (defines whether spatial symmetries and/or time-reversal can be used)
 
   character(len=fnlen) :: path = " "
   ! Path to the nc file associated to the gstore
@@ -378,7 +382,7 @@ type, public :: gstore_t
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
    ! Indirect table giving the spin indices treated by this MPI rank.
-   ! Used only in the collinear case with nsppol = 2.
+   ! Used only in the collinear case with nsppol = 2 and nspinor == 1
 
   integer,allocatable :: brange_spin(:, :)
   ! (2, nsppol)
@@ -544,7 +548,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  gstore%kibz => ebands%kptns
 
  ! Set metadata.
- gstore%kzone =  dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
+ gstore%kzone = dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
  gstore%with_vk = dtset%gstore_with_vk
 
  ABI_CALLOC(gstore%erange_spin, (2, nsppol))
@@ -728,12 +732,12 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  ! =============================================
  !priority = "qk"
  call priority_from_eph_task(dtset%eph_task, priority)
-
  call gstore%set_mpi_grid__(dtset%gstore_cplex, dtset%eph_np_pqbks, priority, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
  ! At this point, we have the Cartesian grid (one per spin if any)
  ! and we can finally allocate and distribute other arrays.
+ ! Note with_cplex = 0 --> matrix elements are not allocated here
  call gstore%malloc__(0, max_nq, qglob2bz, max_nk, kglob2bz, qbz2ibz, kbz2ibz)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
@@ -929,7 +933,7 @@ subroutine priority_from_eph_task(eph_task, priority)
    priority = "qk"
  case (12, -12)
    priority = "q"
- case (14)
+ case (14, 17)
    priority = "kq"
  case default
    ABI_ERROR(sjoin("Please register default priority for eph_task:", itoa(eph_task)))
@@ -1063,13 +1067,14 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    gqk => gstore%gqk(my_is)
 
    ! Init for sequential execution.
-   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
+   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1 !; gqk%bsum_comm%nproc = 1;
    gqk%my_npert = gqk%natom3
 
    if (any(eph_np_pqbks /= 0)) then
      ! Use parameters from input file. Need to perform sanity check though.
      gqk%pert_comm%nproc = eph_np_pqbks(1)
      gqk%qpt_comm%nproc  = eph_np_pqbks(2)
+     !gqk%bsum_comm%nproc  = eph_np_pqbks(3)
      ABI_CHECK(eph_np_pqbks(3) == 1, "Band parallelism not implemented in gstore")
      gqk%kpt_comm%nproc = eph_np_pqbks(4)
      !gqk%spin_comm%nproc = eph_np_pqbks(5)
@@ -1133,7 +1138,6 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
 #ifdef HAVE_MPI
    call MPI_CART_CREATE(gqk%grid_comm, ndims, dims, periods, reorder, comm_cart, ierr)
-
    ! Find the index and coordinates of the current processor
    call MPI_COMM_RANK(comm_cart, me_cart, ierr)
    call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkp, ierr)
@@ -1149,7 +1153,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call xmpi_comm_free(comm_cart)
 #endif
 
-   ! Distribute perturbations inside per_comm using block distribution.
+   ! Distribute perturbations inside pert_comm using block distribution.
    call xmpi_split_block(gqk%natom3, gqk%pert_comm%value, gqk%my_npert, gqk%my_iperts)
  end do ! my_is
 
