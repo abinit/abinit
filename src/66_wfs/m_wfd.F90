@@ -1480,7 +1480,7 @@ end function wfd_xdotc
 !!
 !! SOURCE
 
-subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq)
+subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
 
 !Arguments -------------------------------
  class(wfd_t),intent(in) :: wfd
@@ -1488,6 +1488,7 @@ subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw
  integer,intent(in) :: ikq_ibz
  logical,intent(in) :: isirr_kq
  integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:)
+ integer,intent(out) :: gbound_kq(2*wfd%mgfft+8,2)
 
 !Local variables ------------------------------
  integer :: mpw
@@ -1503,13 +1504,15 @@ subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw
    ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
    kg_kq(:,1:npw_kq) = wfd%kdata(ikq_ibz)%kg_k
  else
-   ! Build new g-sphere centered on kq.
+   ! Build new g-sphere centered on k+q without TR
    istwf_kq = 1
    call get_kg(kq, istwf_kq, ecut, gmet, npw_kq, gtmp)
    ABI_CHECK_IGEQ(mpw, npw_kq, "mpw should me => npw_kq")
    kg_kq(:,1:npw_kq) = gtmp(:,:npw_kq)
    ABI_FREE(gtmp)
  end if
+
+ call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
 
 end subroutine wfd_get_gvec_kq
 !!***

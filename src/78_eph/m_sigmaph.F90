@@ -1511,7 +1511,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
-       call wfd%get_gvec_kq(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq)
+       call wfd%get_gvec_kq(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1521,10 +1521,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
        if (osc_ecut /= zero) then
-         ! Finds the boundary of the basis sphere of G vectors (for this kq point)
-         ! for use in improved zero padding of ffts in 3 dimensions.
-         call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
-
          ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
          call get_kg(qpt, istw1, abs(osc_ecut), cryst%gmet, osc_npw, osc_gvecq)
          call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
