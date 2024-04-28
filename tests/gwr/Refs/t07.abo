@@ -362,11 +362,11 @@ meta: {optdriver: 6, }
 
  Reading norm of Coulomb vertex for testing purposes with ng: 4
 
-List of G-vectors in Coulomb vertex:
-1 [0, 0, 0]
-2 [1, 0, 0]
-3 [-1, 0, 0]
-4 [0, 1, 0]
+ List of g-vectors in the Coulomb vertex:
+1 : [0, 0, 0]
+2 : [1, 0, 0]
+3 : [-1, 0, 0]
+4 : [0, 1, 0]
  For band1: 1 , band2: 1
   7.60297E-01  1.94792E-01  1.94792E-01  1.94792E-01
  For band1: 1 , band2: 2
