@@ -1591,6 +1591,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          call stern%init(dtset, npw_k, npw_kq, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
+
+#if 0
             if (isirr_kq) then
               call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
             else
@@ -1600,6 +1602,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                                npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                                npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
             end if
+#else
+            call wfd%rotate_waves(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
+                                  cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
+#endif
 
             if (stern_has_band_para) then
               ii = ibsum_kq - sigma%my_bsum_start + 1
@@ -1863,6 +1869,7 @@ end if
            end if
          end if
 
+#if 0
          ! Symmetrize k+q wavefunctions in the BZ from IBZ (if needed).
          if (isirr_kq) then
            ! Copy u_kq(G)
@@ -1876,6 +1883,11 @@ end if
                             npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
                             npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
          end if
+
+#else
+         call wfd%rotate_waves(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
+                               cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
+#endif
 
          ! Get gkk(kcalc, q, idir_ipert) in the atomic representation.
          ! No need to handle istwf_kq because it's always 1.

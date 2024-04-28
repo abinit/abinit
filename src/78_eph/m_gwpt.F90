@@ -440,8 +440,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: nkibz, nkbz
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
- real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid
- real(dp) :: bz_vol
+ real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, q_is_gamma, use_ifc_fourq, stern_use_cache, intra_band, same_band
  type(krank_t) :: krank_ibz
  type(wfd_t) :: wfd
@@ -717,7 +716,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !if (my_rank == master) then
  !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vcar_calc"), gwpt%vcar_calc))
  !end if
-
 
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
@@ -1051,6 +1049,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                             npw_kq, kg_kq, istwf_kq_ibz, istwf_kq, cgwork, bra_kq, work_ngfft, work)
            !call fft_ug(npw_kq, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kq, kg_kq, gbound_kq, bra_kq, ur_kq)
          end if
+         !call wfd%rotate_waves(ikq_m, ndat1, spin, cryst, kq_ibz, npw_kq, istwf_kq, &
+         !                      cryst, indkk_kq, gbound_kq, work_ngfft, work, bra_kq, ur_kq)
 
          do ik_n=1,1
            if (isirr_k) then
@@ -1065,6 +1065,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                               npw_k, kg_k, istwf_k_ibz, istwf_k, cgwork, bra_k, work_ngfft, work)
              !call fft_ug(npw_k, nfft, nspinor, ndat1, mgfft, ngfft, istwf_k, kg_k, gbound_k, bra_k, ur_k)
            end if
+
+          ! indkk_k is missing!
+          !call wfd%rotate_waves(ikq_n, ndat1, spin, cryst, kk_ibz, npw_k, istwf_k,
+          !                      cryst, indkk_k, gbound_k, work_ngfft, work, bra_k, ur_k)
+
          end do ! ik_n
        end do ! ikq_m
 
@@ -1106,10 +1111,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !call sphereboundary(gbound_pp, istwf_pp, kg_pp, wfd%mgfft, npw_pp)
          !call W%symmetrizer(iq_bz, cryst, gsph, qmesh, vcp)
 
-         ! Sum over bands.
+         ! ==========================
+         ! Sum over bands up to nbsum
+         ! ==========================
          !do ib_sum=sigma%my_bsum_start, sigma%my_bsum_stop
          !do ib_sum=1, nbsum
          do ib_sum=1, 1
+           !call wfd%rotate_waves(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, istwk_kmp, &
+           !                       cryst, indkk_kmp, gbound_kmp, work_ngfft, work, ug_kmp, ur_kmp)
+
+           !call wfd%rotate_waves(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, istwk_kqmp, &
+           !                       cryst, indkk_kqmp, gbound_kqmp, work_ngfft, work, ug_kqmp, ur_kqmp)
+
            ! <bsum,k-p| e^{-ip+G'}|n,k>
            !cwork_ur = GWPC_CONJ(ur_kmp) * ur_k
            !call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_r, rhog_bkmp_nk)

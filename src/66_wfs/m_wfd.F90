@@ -449,9 +449,12 @@ module m_wfd
    ! Symmetrize a wave function in real space
    ! This routine is deprecated, see wfd_sym_ug_kg for algo in G-space.
 
+   procedure :: rotate_waves => wfd_rotate_waves
+   ! Symmetrize a set of wave functions in G-space
+
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
-   ! Used in phgamma only, see m_sigmaph for a more efficient version.
+   ! Used in phgamma only, use wfd_rotate_waves for a more efficient version (see m_sigmaph for usage)
 
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
@@ -4172,6 +4175,134 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
 end subroutine wfd_sym_ur
 !!***
 
+!!****f* m_wfd/wfd_rotate_waves
+!! NAME
+!!  wfd_rotate_waves
+!!
+!! FUNCTION
+!!  Use crystalline symmetries and time reversal to reconstruct wavefunctions at kk_bz from the IBZ image
+!!  Return the periodic part in G-space and, optionally, the real-space term.
+!!
+!! INPUTS
+!!  kk_ibz: Symmetrical image of kk_bz in the IBZ.
+!!  band: Initial band index
+!!  ndat: Number of bands to symmetrize.
+!!  spin: Spin index
+!!  npw_kbz: Number of G-vectors in kk_bz G-sphere
+!!  kg_kbz: G-vectors in reduced coordinates.
+!!  istwf_kbz: Time-reversal flag associated to output wavefunctions
+!!  cryst: Crystalline structure and symmetries
+!!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk with the symrel convention.
+!!  gbound_kbz: The boundary of the basis sphere of G vectors centered on the kk in BZ (not on kk_ibz!)
+!!  work_ngfft: Define the size of the workspace array work
+!!  work: Workspace array used to symmetrize wavefunctions
+!!
+!! OUTPUT
+!!  cgs_kbz: Periodic part of wavefunctions at kk_bz
+!!
+!! SOURCE
+
+subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_kbz, &
+                            cryst, indkk, gbound_kbz, &
+                            work_ngfft, work, cgs_kbz, urs_kbz)
+
+!Arguments ------------------------------------
+!scalars
+ class(wfd_t),intent(inout) :: wfd
+ integer,intent(in) :: band, ndat, spin, npw_kbz, istwf_kbz
+ type(crystal_t),intent(in) :: cryst
+!arrays
+ integer :: work_ngfft(18)
+ integer,intent(in) :: indkk(6)
+ integer,intent(in) :: gbound_kbz(2*wfd%mgfft+8, 2)
+ integer,intent(in) :: kg_kbz(3, npw_kbz)
+ real(dp),intent(in) :: kk_ibz(3) ! kk_bz(3),
+ real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
+ real(dp),intent(out) :: cgs_kbz(2, npw_kbz*wfd%nspinor, ndat)
+ complex(gwpc),optional,intent(out) :: urs_kbz(wfd%nfft*wfd%nspinor, ndat)
+
+!Local variables ------------------------------
+!scalars
+ integer,parameter :: ndat1 = 1
+ integer :: ik_ibz, isym_k, trev_k, idat, ib, istwf_kirr, npw_kirr
+ logical :: isirr_k
+!arrays
+ integer :: g0_k(3)
+ real(dp),allocatable :: cg_kirr(:,:) !cgwork(:,:) !
+ !real(dp),allocatable :: bra_k(:,:), bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:)
+
+!************************************************************************
+
+ ! As reported by listkk via symrel
+ ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
+ isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+
+ ABI_CHECK_IEQ(ndat, 1, "ndat > 1 not coded yet")
+ ABI_CHECK(.not.(present(urs_kbz)), "urs_jbz not coded yet")
+
+ if (isirr_k) then
+
+   do idat=1,ndat
+     ! Copy u_k(G)
+     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
+     if (present(urs_kbz)) call wfd%get_ur(band, ik_ibz, spin, urs_kbz(:,idat))
+   end do
+
+ else
+   ! Here be careful with mpw
+   ! Reconstruct u_k(G) from the IBZ image.
+   !ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
+
+   ! Use cg_kirr as workspace array, results stored in cgs_kbz.
+   istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
+   ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
+
+   call wfd%copy_cg(band, ik_ibz, spin, cg_kirr)
+   call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
+                    wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &
+                    npw_kbz, kg_kbz, wfd%istwfk(ik_ibz), istwf_kbz, cg_kirr, cgs_kbz, work_ngfft, work)
+   ABI_FREE(cg_kirr)
+   if (present(urs_kbz)) then
+     !call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, bra_k, ur_k)
+   end if
+ end if
+
+#if 0
+ ! Be careful with time-reversal symmetry.
+ if (isirr_k) then
+   ! Copy u_k(G)
+   istwf_kbz = wfd%istwfk(ik_ibz); npw_kbz = wfd%npwarr(ik_ibz)
+   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   kg_kbz(:,1:npw_kbz) = wfd%kdata(ik_ibz)%kg_k
+   do ib=1,nband
+     band = ib + bstart - 1
+     call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(1,1,ib))
+   end do
+ else
+   ! Reconstruct u_k(G) from the IBZ image.
+   istwf_kbz = 1
+   !call get_kg(kk_bz, istwf_kbz, ecut, cryst%gmet, npw_kbz, gtmp)
+   ABI_CHECK(mpw >= npw_kbz, "mpw < npw_kbz")
+   kg_kbz(:,1:npw_kbz) = gtmp(:,:npw_kbz)
+   ABI_FREE(gtmp)
+
+   ! Use cg_kirr as workspace array, results stored in cgs_kbz.
+   istwf_kirr = wfd%istwfk(ik_ibz); npw_kirr = wfd%npwarr(ik_ibz)
+   ABI_MALLOC(cg_kirr, (2, npw_kirr*wfd%nspinor))
+   do ib=1,nband
+     band = ib + bstart - 1
+     call wfd%copy_cg(band, ik_ibz, spin, cg_kirr)
+     call cgtk_rotate(cryst, kk_ibz, isym_k, trev_k, g0_k, wfd%nspinor, ndat1, &
+                      npw_kirr, wfd%kdata(ik_ibz)%kg_k, &
+                      npw_kbz, kg_kbz, istwf_kirr, istwf_kbz, cg_kirr, cgs_kbz(:,:,ib), work_ngfft, work)
+   end do
+   ABI_FREE(cg_kirr)
+ end if
+#endif
+
+end subroutine wfd_rotate_waves
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_wfd/wfd_sym_ug_kg
@@ -4190,7 +4321,7 @@ end subroutine wfd_sym_ur
 !!  nband: Number of bands to symmetrize.
 !!  spin: Spin index
 !!  mpw: Maximum number of planewaves used to dimension arrays.
-!!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk.
+!!  indkk: Symmetry map kk_bz -> kk_ibz as computed by listkk with the symrel convention.
 !!  cryst: Crystalline structure and symmetries
 !!  work_ngfft: Define the size of the workspace array work
 !!  work: Workspace array used to symmetrize wavefunctions
