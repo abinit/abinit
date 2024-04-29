@@ -611,7 +611,7 @@ subroutine nctk_test_mpiio(print_warning)
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
- if ((.not.nctk_has_mpiio).and.my_print_warning) then
+ if ((.not. nctk_has_mpiio) .and. my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&

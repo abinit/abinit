@@ -1109,7 +1109,7 @@ end subroutine screen_init
 !!   W%Fgg_qbz
 !!
 !! NOTES
-!!  In the present implementation we are not considering a possible umklapp vector G0 in the
+!!  In the present implementation, we are not considering a possible umklapp vector G0 in the
 !!  expression Sq = q+G0. Treating this case would require some changes in the G-sphere
 !!  since we have to consider G-G0. The code however stops in sigma if a nonzero G0 is required
 !!  to reconstruct the BZ.

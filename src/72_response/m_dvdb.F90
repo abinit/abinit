@@ -1421,7 +1421,7 @@ end subroutine dvdb_readsym_allv1
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)=Q-point in BZ.
-!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk.
+!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk using the SYMREC convention.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations.
@@ -3615,7 +3615,7 @@ end subroutine dvdb_ftinterp_qpt
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)= q-point in the BZ in reduced coordinates.
 !!  qibz(3) = Image of qbz in the IBZ. Needed to apply symmetries IBZ --> qbz
-!!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk.
+!!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk using the SYMREC convention.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!

@@ -449,12 +449,12 @@ module m_wfd
    ! Symmetrize a wave function in real space
    ! This routine is deprecated, see wfd_sym_ug_kg for algo in G-space.
 
-   procedure :: rotate_waves => wfd_rotate_waves
+   procedure :: rotate_cg => wfd_rotate_cg
    ! Symmetrize a set of wave functions in G-space
 
    procedure :: sym_ug_kg => wfd_sym_ug_kg
    ! Symmetrize a wave function in G-space
-   ! Used in phgamma only, use wfd_rotate_waves for a more efficient version (see m_sigmaph for usage)
+   ! Used in phgamma only, use wfd_rotate_cg for a more efficient version (see m_sigmaph for usage)
 
    procedure :: paw_get_aeur => wfd_paw_get_aeur
    ! Compute the AE PAW wavefunction in real space.
@@ -4175,9 +4175,9 @@ subroutine wfd_sym_ur(Wfd,Cryst,Kmesh,band,ik_bz,spin,ur_kbz,trans,with_umklp,ur
 end subroutine wfd_sym_ur
 !!***
 
-!!****f* m_wfd/wfd_rotate_waves
+!!****f* m_wfd/wfd_rotate_cg
 !! NAME
-!!  wfd_rotate_waves
+!!  wfd_rotate_cg
 !!
 !! FUNCTION
 !!  Use crystalline symmetries and time reversal to reconstruct wavefunctions at kk_bz from the IBZ image
@@ -4199,12 +4199,12 @@ end subroutine wfd_sym_ur
 !!
 !! OUTPUT
 !!  cgs_kbz: Periodic part of wavefunctions at kk_bz
+!!  [urs_kbz]: wavefunctions at kk_bz in real space.
 !!
 !! SOURCE
 
-subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_kbz, &
-                            cryst, indkk, gbound_kbz, &
-                            work_ngfft, work, cgs_kbz, urs_kbz)
+subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_kbz, &
+                         cryst, indkk, gbound_kbz, work_ngfft, work, cgs_kbz, urs_kbz)
 
 !Arguments ------------------------------------
 !scalars
@@ -4216,20 +4216,21 @@ subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istw
  integer,intent(in) :: indkk(6)
  integer,intent(in) :: gbound_kbz(2*wfd%mgfft+8, 2)
  integer,intent(in) :: kg_kbz(3, npw_kbz)
- real(dp),intent(in) :: kk_ibz(3) ! kk_bz(3),
+ real(dp),intent(in) :: kk_ibz(3)
  real(dp),intent(out) :: work(2, work_ngfft(4), work_ngfft(5), work_ngfft(6))
- real(dp),intent(out) :: cgs_kbz(2, npw_kbz*wfd%nspinor, ndat)
+ real(dp),target,intent(out) :: cgs_kbz(2, npw_kbz*wfd%nspinor, ndat)
  complex(gwpc),optional,intent(out) :: urs_kbz(wfd%nfft*wfd%nspinor, ndat)
 
 !Local variables ------------------------------
 !scalars
  integer,parameter :: ndat1 = 1
- integer :: ik_ibz, isym_k, trev_k, idat, ib, istwf_kirr, npw_kirr
+ integer :: ik_ibz, isym_k, trev_k, idat, istwf_kirr, npw_kirr
  logical :: isirr_k
 !arrays
  integer :: g0_k(3)
- real(dp),allocatable :: cg_kirr(:,:) !cgwork(:,:) !
- !real(dp),allocatable :: bra_k(:,:), bra_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:)
+ real(dp),allocatable :: cg_kirr(:,:)
+ complex(gwpc),allocatable :: cwork_sp(:,:)
+ complex(gwpc),pointer :: ugs_dp_ptr(:,:)
 
 !************************************************************************
 
@@ -4237,11 +4238,7 @@ subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istw
  ik_ibz = indkk(1); isym_k = indkk(2); trev_k = indkk(6); g0_k = indkk(3:5)
  isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
 
- ABI_CHECK_IEQ(ndat, 1, "ndat > 1 not coded yet")
- ABI_CHECK(.not.(present(urs_kbz)), "urs_jbz not coded yet")
-
  if (isirr_k) then
-
    do idat=1,ndat
      ! Copy u_k(G)
      call wfd%copy_cg(band, ik_ibz, spin, cgs_kbz(:,:,idat))
@@ -4249,6 +4246,7 @@ subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istw
    end do
 
  else
+   ABI_CHECK_IEQ(ndat, 1, "ndat > 1 not coded yet")
    ! Here be careful with mpw
    ! Reconstruct u_k(G) from the IBZ image.
    !ABI_MALLOC(cgwork, (2, mpw*wfd%nspinor))
@@ -4262,8 +4260,21 @@ subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istw
                     wfd%npwarr(ik_ibz), wfd%kdata(ik_ibz)%kg_k, &
                     npw_kbz, kg_kbz, wfd%istwfk(ik_ibz), istwf_kbz, cg_kirr, cgs_kbz, work_ngfft, work)
    ABI_FREE(cg_kirr)
+
    if (present(urs_kbz)) then
-     !call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, bra_k, ur_k)
+#ifdef HAVE_GW_DPC
+     ! we are using double precision -> cast dp cgs_kbz to dp complex pointer.
+     call c_f_pointer(c_loc(cgs_kbz), ugs_dp_ptr, [npw_kbz*wfd%nspinor, ndat])
+     call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, &
+                 ugs_dp_ptr(:,1), urs_kbz(:,1))
+#else
+     ! Trasnder cgs_kbz from dp to sp and perform FFT in single precision.
+     ABI_MALLOC(cwork_sp, (npw_kbz*wfd%nspinor, ndat))
+     cwork_sp(:,:) = cgs_kbz(1,:,:) + j_sp * cgs_kbz(2,:,:)
+     call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, &
+                 cwork_sp(:,1), urs_kbz(:,1))
+     ABI_FREE(cwork_sp)
+#endif
    end if
  end if
 
@@ -4300,7 +4311,7 @@ subroutine wfd_rotate_waves(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istw
  end if
 #endif
 
-end subroutine wfd_rotate_waves
+end subroutine wfd_rotate_cg
 !!***
 
 !----------------------------------------------------------------------
