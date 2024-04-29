@@ -1102,8 +1102,6 @@ end subroutine screen_init
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for sample the BZ.
 !!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted.
 !!
-!! OUTPUT
-!!
 !! SIDE EFFECTS
 !!   W%PPm
 !!   W%Fgg_qbz
@@ -1239,7 +1237,6 @@ end subroutine screen_symmetrizer
 !!  Perform the matrix multiplication W x vector in reciprocal space.
 !!
 !! INPUTS
-!!  W<screen_t>=
 !!  in_npw=Number of G vectors in in_ket
 !!  nspinor=Number of spinorial components.
 !!  in_ket(in_npw)= |\phi> in reciprocal space.

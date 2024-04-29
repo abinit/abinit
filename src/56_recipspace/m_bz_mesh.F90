@@ -160,11 +160,6 @@ module m_bz_mesh
   ! wt(nibz)
   ! Weights for each point in the IBZ.
 
-  !%real(dp),allocatable :: vbox(:)
-  ! vbox(nkbz)
-  ! Volume of the small box centered on the k-point in the full BZ.
-  ! Mainly used for inhomogeneous meshes.
-
   complex(dpc),allocatable :: tabp(:)
   ! tabp(nkbz)
   ! For each point in the BZ, this table gives the phase factors associated

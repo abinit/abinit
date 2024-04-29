@@ -1470,6 +1470,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ! ====================================
        ! Get DFPT potentials for this q-point
        ! ====================================
+       ! After this branch we have allocated v1scf(cplex, nfftf, nspden, my_npert))
        if (sigma%use_ftinterp) then
          ! Use Fourier interpolation to get DFPT potentials for this qpt (hopefully in cache).
          db_iqpt = sigma%ind_ibzk2ibz(1, iq_ibz_k)
@@ -1478,7 +1479,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
                              sigma%pert_comm%value)
        else
          ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
-         ! This call allocates v1scf(cplex, nfftf, nspden, my_npert))
          db_iqpt = sigma%ind_q2dvdb_k(1, iq_ibz_k)
          ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file."))
          call dvdb%readsym_qbz(cryst, qpt, sigma%ind_q2dvdb_k(:,iq_ibz_k), cplex, nfftf, ngfftf, v1scf, sigma%pert_comm%value)
@@ -1592,15 +1592,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
-            !if (isirr_kq) then
-            !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
-            !else
-            !  ! Reconstruct u_kq(G) from the IBZ image.
-            !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-            !  call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-            !                   npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
-            !                   npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-            !end if
+            ! Reconstruct u_kq(G) from the IBZ image.
             call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                                cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
 
@@ -1865,20 +1857,7 @@ end if
            end if
          end if
 
-         ! Symmetrize k+q wavefunctions in the BZ from IBZ (if needed).
-         !if (isirr_kq) then
-         !  ! Copy u_kq(G)
-         !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
-         !else
-         !  ! Reconstruct u_kq(G) from the IBZ image.
-         !  ! Use cgwork as workspace array, results stored in bra_kq
-         !  ! g0_kq = g0ibz_kq + g0bz_kq
-         !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-         !  call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-         !                   npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
-         !                   npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-         !end if
-
+         ! Reconstruct u_kq(G) from the IBZ image.
          call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
 
