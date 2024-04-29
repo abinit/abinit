@@ -577,7 +577,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
      if (usedcwavef==2) then
        call getdc1(u1_band,rank_band,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
 &           0,icgq,istwf_k,mcgq,0,&
-&           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c,gpu_option=gs_hamkq%gpu_option)
+&           mpi_enreg,1,natom,nband,nband_me,npw1,nspinor,0,gs1c,gpu_option=ABI_GPU_DISABLED)
      end if
    end if ! gen_eigenpb
 

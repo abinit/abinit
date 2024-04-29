@@ -30,6 +30,7 @@ module m_getgh1c
  use m_dtset
  use m_xmpi
  use m_xomp
+ use m_abi_linalg
 
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
@@ -46,7 +47,7 @@ module m_getgh1c
  use m_fourier_interpol, only : transgrid
 
 #ifdef HAVE_FC_ISO_C_BINDING
- use, intrinsic :: iso_c_binding, only : c_ptr,c_loc
+ use, intrinsic :: iso_c_binding, only : c_ptr,c_loc,c_size_t
 #endif
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
@@ -1498,6 +1499,7 @@ end subroutine getgh1c_setup
 !!  mcgq=second dimension of the cgq array
 !!  mcprjq=second dimension of the cprjq array
 !!  mpi_enreg=information about MPI parallelization
+!!  ndat=number of bands to compute in parallel
 !!  natom= number of atoms in cell
 !!  nband=number of bands
 !!  npw1=number of planewaves in basis sphere at k+Q
@@ -1515,32 +1517,32 @@ end subroutine getgh1c_setup
 
 subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
 &                 ibgq,icgq,istwfk,mcgq,mcprjq,&
-&                 mpi_enreg,natom,nband,nband_me,npw1,nspinor,optcprj,s1cwave0,&
+&                 mpi_enreg,ndat,natom,nband,nband_me,npw1,nspinor,optcprj,s1cwave0,&
 &                 gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibgq,icgq,istwfk,mcgq,mcprjq,natom,nband,npw1,nspinor,optcprj
- integer,intent(in) :: band, nband_me
+ integer,intent(in) :: band, nband_me, ndat
  type(MPI_type),intent(in) :: mpi_enreg
  integer,optional,intent(in) :: gpu_option
 !arrays
- integer,intent(in) :: band_procs(nband),bands_treated_now(nband)
- real(dp),intent(in) :: cgq(2,mcgq),s1cwave0(2,npw1*nspinor)
- real(dp),intent(out) :: dcwavef(2,npw1*nspinor)
+ integer,intent(in) :: band_procs(nband),bands_treated_now(nband,ndat)
+ real(dp),intent(in) :: cgq(2,mcgq),s1cwave0(2,npw1*nspinor*ndat)
+ real(dp),intent(out) :: dcwavef(2,npw1*nspinor*ndat)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
- type(pawcprj_type),intent(inout) :: dcwaveprj(natom,nspinor*optcprj)
+ type(pawcprj_type),intent(inout) :: dcwaveprj(natom,nspinor*ndat*optcprj)
 
 !Local variables-------------------------------
 !scalars
  integer, parameter :: tim_projbd=0
- integer :: ipw
- integer :: band_, ierr
+ integer :: ipw, idat
+ integer :: band_, ierr, nproc_band
  integer :: l_gpu_option
  real(dp),parameter :: scal=-half
 !arrays
  integer, allocatable :: nlmn(:)
- real(dp), allocatable :: dummy(:,:),scprod(:,:)
+ real(dp), allocatable :: dummy(:,:),scprod(:,:,:)
  real(dp), allocatable :: dcwavef_tmp(:,:)
  type(pawcprj_type),allocatable :: dcwaveprj_tmp(:,:)
 
@@ -1549,16 +1551,17 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  DBG_ENTER("COLL")
 
  l_gpu_option = ABI_GPU_DISABLED; if (present(gpu_option))  l_gpu_option  = gpu_option
+ nproc_band=mpi_enreg%nproc_band
 
  ABI_MALLOC(dummy,(0,0))
- ABI_MALLOC(scprod,(2,nband_me))
- ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor))
+ ABI_MALLOC(scprod,(2,nband_me,ndat))
+ ABI_MALLOC(dcwavef_tmp,(2,npw1*nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:dcwavef_tmp,scprod) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
  if (optcprj == 1) then
    ABI_MALLOC(nlmn,(natom))
-   ABI_MALLOC(dcwaveprj_tmp,(natom,nspinor*optcprj))
+   ABI_MALLOC(dcwaveprj_tmp,(natom,nspinor*ndat*optcprj))
    nlmn(:)=dcwaveprj(:,1)%nlmn
    call pawcprj_alloc(dcwaveprj_tmp, 0, nlmn)
    ABI_FREE(nlmn)
@@ -1570,53 +1573,84 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
 !in order to get Sum[<cgq|s1|c>|cgq>]=Sum[<cgq|gs1>|cgq>]
 
 ! run over procs in my pool which have a dcwavef to projbd
- do band_ = 1, nband
-   if (bands_treated_now(band_) == 0) cycle
-   dcwavef_tmp = zero
+ do band_ = 1, nband, ndat
+   if (bands_treated_now(band_, 1) == 0) cycle
+   if(l_gpu_option==ABI_GPU_DISABLED) then
+     dcwavef_tmp = zero
+   else if(l_gpu_option==ABI_GPU_OPENMP) then
+     call gpu_set_to_zero(dcwavef_tmp,int(2,c_size_t)*npw1*nspinor*ndat)
+   end if
 
 ! distribute dcwavef_tmp to my band pool
 ! everyone works on a single band s1cwave0 = <G|S^(1)|C_k>
    if (band_ == band) then
-!$OMP PARALLEL DO
-     do ipw=1,npw1*nspinor
-       dcwavef_tmp(1:2,ipw)=s1cwave0(1:2,ipw)
-     end do
+     if(l_gpu_option==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO
+       do ipw=1,npw1*nspinor*ndat
+         dcwavef_tmp(1:2,ipw)=s1cwave0(1:2,ipw)
+       end do
+     else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET DATA USE_DEVICE_PTR(dcwavef_tmp,s1cwave0)
+       call copy_gpu_to_gpu(c_loc(dcwavef_tmp), c_loc(s1cwave0), int(2,c_size_t)*npw1*nspinor*ndat*dp)
+       !$OMP END TARGET DATA
+#endif
+     end if
    end if
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE FROM (dcwavef_tmp) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
    call xmpi_bcast(dcwavef_tmp,band_procs(band_),mpi_enreg%comm_band,ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET UPDATE TO (dcwavef_tmp) IF(l_gpu_option==ABI_GPU_OPENMP)
+#endif
 
 ! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
 ! dcwavef = <G|S^(1)|C_k> - Sum_{MYj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
 ! scprod  =                            <C_k+q,j|S^(1)|C_k> for {MYj}
+   do idat=1,ndat
+     call projbd(cgq,dcwavef_tmp(:,1+(idat-1)*npw1*nspinor:idat*npw1*nspinor),-1,&
+&       icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
+&       dummy,scprod(:,:,idat),0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft,&
+&       gpu_option=l_gpu_option)
+   end do
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET UPDATE TO (dcwavef_tmp) IF(l_gpu_option==ABI_GPU_OPENMP)
-#endif
-   call projbd(cgq,dcwavef_tmp,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
-&   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=l_gpu_option)
-#ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET UPDATE FROM (scprod,dcwavef_tmp) IF(l_gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET UPDATE FROM (scprod) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
 
 
 ! sum all of the corrections
 ! dcwavef = Nprocband * <G|S^(1)|C_k> - Sum_{ALLj} [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
-   call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr)
+   call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr,use_omp_map=(l_gpu_option==ABI_GPU_OPENMP))
 
 ! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
    if (band_ == band) then
 !=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by substraction
 ! tested this is equivalent to previous coding to within 1.e-18 accumulated error (probably in favor of this coding)
-!$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,dcwavef_tmp,npw1,nspinor)
-     do ipw=1,npw1*nspinor
-       dcwavef(1:2,ipw)= scal*(mpi_enreg%nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
-     end do
+     if(l_gpu_option==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,dcwavef_tmp,npw1,nspinor)
+       do ipw=1,npw1*nspinor*ndat
+         dcwavef(1:2,ipw)= scal*(nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
+       end do
+     else if(l_gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:dcwavef,s1cwave0,dcwavef_tmp)
+       do ipw=1,npw1*nspinor*ndat
+         dcwavef(1:2,ipw)= scal*(nproc_band*s1cwave0(1:2,ipw)-dcwavef_tmp(1:2,ipw))
+       end do
+#endif
+     end if
    end if
+   !print*,"dcwavef ", dcwavef(1,1)
 
 !=== 3- COMPUTE: <P_i|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<P_i|C_k+q,j>]
 ! as above everyone has to operate on each band band_
    if (optcprj==1.and.mcprjq>0) then
 !   cprjq         =                               <P_i|C_k+q,j>  for MYj
 !   dcwaveprj_tmp =  Sum_MYj [<C_k+q,j|S^(1)|C_k>.<P_i|C_k+q,j>]
-     call pawcprj_lincom(scprod,cprjq(:,ibgq+1:ibgq+nspinor*nband_me),dcwaveprj_tmp,nband_me)
+     do idat=1,ndat
+       call pawcprj_lincom(scprod(:,:,idat),cprjq(:,ibgq+1:ibgq+nspinor*nband_me),dcwaveprj_tmp(:,1+(idat-1)*nspinor:idat*nspinor),nband_me)
+     end do
 
 ! still need to mpisum the dcwaveprj to get linear combination of all bands, not just mine
 !   dcwaveprj =  Sum_ALLj [<C_k+q,j|S^(1)|C_k,i>.<P_i|C_k+q,j>]

@@ -1883,23 +1883,25 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
            if (has_drho) then
 #ifdef HAVE_OPENMP_OFFLOAD
+             !FIXME Need to batch and port this on GPU
              !$OMP TARGET UPDATE FROM(gs1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
 !            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET ENTER DATA MAP(alloc:dcwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
              ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor*ndat))
              call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
-             do idat=1,ndat
-  ! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
-               call getdc1(iband+idat-1,band_procs,bands_treated_now_ndat(:,idat),cgq,cprjq,&
-&                 dcwavef(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                 dcwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),&
+! NB: have to call getdc with all band processors to distribute cgq cprjq correctly
+             call getdc1(iband,band_procs,bands_treated_now_ndat,cgq,cprjq,&
+&                 dcwavef,&
+&                 dcwaveprj,&
 &                 ibgq,icgq,istwf_k,mcgq,&
-&                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
-&                 gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),gpu_option=dtset%gpu_option)
+&                 mcprjq,mpi_enreg,ndat,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
+&                 gs1,gpu_option=dtset%gpu_option)
 
-             end do !idat
              option=1;wfcorr=0
              if (abs(occ_k(iband))>tol8) then
 !              Accumulate 1st-order density due to delta_u^(j1)
@@ -1915,6 +1917,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 
              call pawcprj_free(dcwaveprj)
              ABI_FREE(dcwaveprj)
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET EXIT DATA MAP(delete:dcwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
              ABI_FREE(dcwavef)
            end if ! has_drho
          !do idat=1,ndat
