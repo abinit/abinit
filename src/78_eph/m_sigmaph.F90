@@ -1592,22 +1592,19 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          do ibsum_kq=sigma%my_bsum_start, sigma%my_bsum_stop
 
-#if 0
-            if (isirr_kq) then
-              call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
-            else
-              ! Reconstruct u_kq(G) from the IBZ image.
-              call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-              call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-                               npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
-                               npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-            end if
-#else
-            call wfd%rotate_waves(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
-                                  cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
-#endif
+            !if (isirr_kq) then
+            !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
+            !else
+            !  ! Reconstruct u_kq(G) from the IBZ image.
+            !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
+            !  call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
+            !                   npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
+            !                   npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+            !end if
+            call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
+                               cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
 
-            if (stern_has_band_para) then
+            if (stern%has_band_para) then
               ii = ibsum_kq - sigma%my_bsum_start + 1
               stern%cgq(:,:,ii) = bra_kq
             else
@@ -1617,7 +1614,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
          cgq_request = xmpi_request_null
 
-if (.not. stern_has_band_para) then
+if (.not. stern%has_band_para) then
          if (sigma%bsum_comm%nproc > 1) then
            ! If band parallelism, need to gather all bands nbsum bands.
            ! FIXME: This part is network intensive, one can avoid it by calling dfpt_cgwf in band-para mode.
@@ -1703,13 +1700,13 @@ end if
            ! NB: Assume adiabatic AHC expression to compute the contribution of states above nbsum.
 
            ! Wait for gatherv operation
-           if (.not. stern_has_band_para .and. cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
+           if (.not. stern%has_band_para .and. cgq_request /= xmpi_request_null) call xmpi_wait(cgq_request, ierr)
 
            do ib_k=1,nbcalc_ks
              band_ks = ib_k + bstart_ks - 1
              stern%bands_treated_now(:) = 0; stern%bands_treated_now(band_ks) = 1
 
-             if (stern_has_band_para) then
+             if (stern%has_band_para) then
                ! Init rank_band and band_me from nbsum_rank.
                stern%rank_band = -1; band_me = 1
                do ip=1,sigma%bsum_comm%nproc
@@ -1752,8 +1749,7 @@ end if
              call stern%solve(u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, ebands%eig(:,ik_ibz,spin), ebands%eig(:,ikq_ibz,spin), &
                               kets_k(:,:,ib_k), cwaveprj0, cg1s_kq(:,:,ipc,ib_k), cwaveprj, msg, ierr)
              ABI_CHECK(ierr == 0, msg)
-             if (stern_has_band_para) call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
-
+             if (stern%has_band_para) call xmpi_bcast(cg1s_kq(:,:,ipc,ib_k), u1_master, sigma%bsum_comm%value, ierr)
            end do ! ib_k
 
            !call timab(1909, 2, tsec)
@@ -1869,25 +1865,22 @@ end if
            end if
          end if
 
-#if 0
          ! Symmetrize k+q wavefunctions in the BZ from IBZ (if needed).
-         if (isirr_kq) then
-           ! Copy u_kq(G)
-           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
-         else
-           ! Reconstruct u_kq(G) from the IBZ image.
-           ! Use cgwork as workspace array, results stored in bra_kq
-           ! g0_kq = g0ibz_kq + g0bz_kq
-           call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
-           call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
-                            npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
-                            npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
-         end if
+         !if (isirr_kq) then
+         !  ! Copy u_kq(G)
+         !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, bra_kq)
+         !else
+         !  ! Reconstruct u_kq(G) from the IBZ image.
+         !  ! Use cgwork as workspace array, results stored in bra_kq
+         !  ! g0_kq = g0ibz_kq + g0bz_kq
+         !  call wfd%copy_cg(ibsum_kq, ikq_ibz, spin, cgwork)
+         !  call cgtk_rotate(cryst, kq_ibz, isym_kq, trev_kq, g0_kq, nspinor, ndat1, &
+         !                   npw_kqirr, wfd%kdata(ikq_ibz)%kg_k, &
+         !                   npw_kq, kg_kq, istwf_kqirr, istwf_kq, cgwork, bra_kq, work_ngfft, work)
+         !end if
 
-#else
-         call wfd%rotate_waves(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
-                               cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
-#endif
+         call wfd%rotate_cg(ibsum_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
+                            cryst, sigma%indkk_kq(:,iq_ibz_k), gbound_kq, work_ngfft, work, bra_kq)
 
          ! Get gkk(kcalc, q, idir_ipert) in the atomic representation.
          ! No need to handle istwf_kq because it's always 1.

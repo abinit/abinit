@@ -50,7 +50,7 @@ module m_dfpt_cgwf
 !!
 !! FUNCTION
 !!  Simplied interface to the NSCF Sternheimer solver.
-!!  Wrapper around dfpt_cgwf routine
+!!  Wrapper around dfpt_cgwf routine.
 !!
 !! SOURCE
 
@@ -66,6 +66,7 @@ module m_dfpt_cgwf
    integer :: usedcwavef
    integer :: work_ngfft(18)
    logical :: use_cache
+   logical :: has_band_para
 
    type(dataset_type),pointer :: dtset => null()
    type(mpi_type) :: mpi_enreg
@@ -1530,6 +1531,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use
  call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
  stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
+ stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
  ABI_CALLOC(stern%out_eig1_k, (2*nband**2))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
@@ -1567,7 +1569,7 @@ end subroutine stern_init
 !! SOURCE
 
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
-                              cwaveprj0, cwavef, cwaveprj, err_msg, ierr)
+                       cwaveprj0, cwavef, cwaveprj, err_msg, ierr)
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
@@ -1646,6 +1648,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  if (stern%use_cache) then
     ! Store |Psi_1> to init Sternheimer solver for the next q-point.
+    ABI_UNUSED(qpt(1))
     !call stern%u1c%store(qpt, stern%npw_kq, stern%nspinor, natom3, bstart_ks, nbcalc_ks, kg_kq, cg1s_kq)
  end if
 
