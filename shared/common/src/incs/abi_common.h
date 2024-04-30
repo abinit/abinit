@@ -393,9 +393,5 @@ Use if statement instead of Fortran merge. See https://software.intel.com/en-us/
 #  define __slkmat_t slkmat_sp_t
 #endif
 
-#define __HAVE_GREENX
-/* Temporary hack to use GREENX library
-*/
-
 #endif
 /* _ABINIT_COMMON_H */
