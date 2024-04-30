@@ -298,7 +298,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  if (prtvol>=10) then
    !Tell us what is going on:
-   write(msg,'(a,i6,2x,a,i3,a)')' --- dfpt_cgwf is called for band',u1_band,'for',nline,' lines'
+   write(msg,'(a,i0,2x,a,i0,a)')' --- dfpt_cgwf is called for band:', u1_band,' for: ',nline,' lines'
    call wrtout(std_out,msg)
  end if
 
@@ -947,7 +947,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
    ! Check that d2te is decreasing on succeeding lines:
    if (iline/=1) then
      if (d2te>d2teold+tol6 .and. u1_band_ > 0) then
-       write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,' = ',d2te,'is higher than former: ',d2teold
+       write(msg,'(a,i0,a,e14.6,a,e14.6)')'New trial energy at line ',iline,' = ',d2te,' is higher than former: ',d2teold
        ABI_WARNING(msg)
      end if
    end if
@@ -1473,7 +1473,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
 
  ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
  if (xmpi_paral==1 .and. u1_band==nband .and. prtvol>=10) then
-   write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now =',nskip
+   write(msg,'(a,i0)')' dfpt_cgwf: number of one-way 3D ffts skipped in cgwf3 until now: ',nskip
    call wrtout(std_out,msg)
  end if
 
@@ -1569,7 +1569,8 @@ end subroutine stern_init
 !! SOURCE
 
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
-                       cwaveprj0, cwavef, cwaveprj, err_msg, ierr)
+                       cwaveprj0, cwavef, cwaveprj, err_msg, ierr, &
+                       full_c1g) !, full_u1r) ! optional
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
@@ -1583,11 +1584,13 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
+ real(dp),optional,intent(out) :: full_c1g(2, stern%npw_kq*stern%nspinor)
+ !complex(gpwc),optional,intent(out) :: full_u1r(nfft)
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1
- integer :: opt_gvnlx1, mcgq, mgscq, grad_berry_size_mpw1
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1
+ integer :: opt_gvnlx1, mcgq, mgscq, mcprjq, grad_berry_size_mpw1
  real(dp) :: out_resid
  type(rf2_t) :: rf2
 
@@ -1614,6 +1617,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
  mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
+ mcprjq = 0
+ !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
  ! Init entry in cg1s_kq, either from cache or with zeros.
  if (stern%use_cache) then
@@ -1673,11 +1678,21 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    !  enough_stern = enough_stern + 1
    !end if
  end if
+
  if (ierr /= 0) return
 
- !call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
- !                     eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
- !                     0,gs_hamkq%usepaw)
+ if (present(full_c1g)) then
+   ! Compute full first order wavefunction.
+   NOT_IMPLEMENTED_ERROR()
+   !call full_active_wf1(stern%cgq, cprjq, cwavef, full_c1g, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
+   !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
+   !                     ster%dset%natom, nband_k, npw1_k, nspinor, 0, gs_hamkq%usepaw)
+
+   !if (present(full_u1r)) then
+   !  call fft_ug(stern%npw_kq, wfd%nfft, stern%nspinor, ndat1, gs_hamkq%mgfft, gs_hamkq%ngfft, &
+   !              istwfk1, kg_kq, gbound_kq, workq_ug, full_u1r)
+   !end if
+ end if
 
 end subroutine stern_solve
 !!***
