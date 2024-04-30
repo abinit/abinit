@@ -93,6 +93,7 @@ module m_varpeq
 
  type, public :: varpeq_t
 
+
  ! Electroncic subspace -----------------------
 
   integer :: nsppol = -1
@@ -125,7 +126,7 @@ module m_varpeq
    ! (nbands, nkpt, nsppol)
 
 
- ! Vibrational (phonon) subspace
+ ! Vibrational (phonon) subspace --------------
 
   integer :: nqpt = -1
    ! Total number of q-points defining the vibrational coeffeicients B_q\nu
@@ -140,13 +141,14 @@ module m_varpeq
    ! (my_npert, my_nq)
 
 
- ! Electron-phonon subspace
+ ! Electron-phonon subspace -------------------
 
   class(gstore_t), pointer :: gstore => null()
    ! gstore datatype storing MPI-distributed electron-phonon matrix elements
    ! and other related quantities
 
- ! Symmetry tables
+
+ ! Symmetry tables ----------------------------
 
   integer :: nkbz = -1
    ! Size of the BvK supercell (total number of k-points in full BZ)
@@ -174,7 +176,14 @@ module m_varpeq
    ! from IBZ; second array maps an inverse set of k-points
    ! (6, nkpt)
 
- ! Polaronic properties
+
+ ! Optimization variables ---------------------
+
+  real(dp) :: theta
+   ! Line minimization parameter
+
+
+ ! Polaronic properties -----------------------
 
   real(dp) :: eps
    ! Lagrange multiplier of the optimization problem, equal to the energy
@@ -191,6 +200,13 @@ module m_varpeq
 
     procedure :: free => varpeq_free
      ! Free allocated memory
+
+    procedure :: get_mintheta => varpeq_get_mintheta
+     ! Calculatae line minimization parameter theta
+
+    procedure :: orth_elgrad => varpeq_orth_elgrad
+     ! Orthogonalization of the electronic gradient wrt to the electronic
+     ! vector A_nk
 
     procedure :: get_elgrad => varpeq_get_elgrad
      ! Calculate the gradient of polaron energy functional wrt electronic
@@ -243,18 +259,25 @@ subroutine varpeq_test(self)
  integer :: isym_k, trev_k, tsign_k, g0_k(3)
  integer :: my_iq, iq_glob, my_is
  integer :: my_nu
+ integer :: ii
  integer :: is, ib, jb
  integer :: bstart
- real(dp) :: a_from, a_forw, a_back
+ complex(dp) :: a_from, a_forw, a_back
  real(dp) :: wtq, dksqmax
  real(dp) :: anorm2
- real(dp) :: enel
+ real(dp) :: enel, eig
  real(dp) :: phfreq, envib
  real(dp) :: kweight
  real(dp) :: enelph
+ real(dp) :: gradres
+ real(dp) :: costh, sinth
+ real(dp) :: bden
+ complex(dp) :: bnum, beta
  complex(dp) :: g_forw, g_back
  complex(dp) :: tmp
  complex(dp) :: bqnu
+ complex(dp) :: enelph_tmp
+ complex(dp) :: inprod
  logical :: isirr_k
  class(crystal_t), pointer :: cryst
  class(ebands_t), pointer :: ebands
@@ -264,6 +287,8 @@ subroutine varpeq_test(self)
  real(dp) :: qpt(3), my_qpt(3)
  real(dp) :: kpt_from_varpeq(3), kpt_from_gstore(3)
  real(dp) :: qpt_from_varpeq(3), qpt_from_gstore(3)
+ real(dp), allocatable :: pc(:, :, :)
+ complex(dp), allocatable :: prev_a(:, :, :), prev_b(:, :), prev_grad(:, :, :)
 
 ! *************************************************************************
 
@@ -274,48 +299,139 @@ subroutine varpeq_test(self)
  nproc = xmpi_comm_size(comm)
  my_rank = xmpi_comm_rank(comm)
 
- ! Output basic dimensions
- write(ab_out, '(a50, i5)') 'Number of k-points in the effective BZ: ', self%nkpt
- write(ab_out, '(a50, i5)') 'Number of q-points in the full BZ: ', self%nqpt
- write(ab_out, '(a50, i5)') 'Number of spins: ', self%nsppol
- write(ab_out, '(a50, i5)') 'Number of bands: ', self%nb
+ ABI_MALLOC(prev_a, (self%nb, self%nkpt, self%nsppol))
+ ABI_MALLOC(prev_grad, (self%nb, self%nkpt, self%nsppol))
+ ABI_MALLOC(pc, (self%nb, self%nkpt, self%nsppol))
+ ABI_MALLOC(prev_b, (gqk%my_npert, gqk%my_nq))
 
- write(ab_out, '(a50, f14.8)') 'Random A_nk\sigma component ', self%a(2, 4, 1)
+ write(ab_out,'(a4,a13,2a12,a13,a13,a14/)') 'Step', 'E_pol', 'E_el', &
+   'E_ph', 'E_elph', 'epsilon', '|gradient|^2'
 
- ! Checking the A-norm
- anorm2 = zero
- write(ab_out, '(a50)') 'Checking the A-norm...'
- do is=1,self%nsppol
-   do ik=1,self%nkpt
-     do ib=1,self%nb
-       anorm2 = anorm2 + self%a(ib, ik, is)**2 * self%wtk(ik)
+ call self%seed_a()
+ do ii=1,200
+   call self%b_from_a()
+   prev_a(:, :, :) = self%a(:, :, :)
+   prev_b(:, :) = self%b(:, :)
+   call self%get_enterms()
+   call self%get_elgrad()
+   gradres = sum(abs(self%grad_a(:, :, :))**2)
+
+
+   if (mod(ii, 50) == 1) then
+     do is=1,self%nsppol
+       bstart = self%gstore%brange_spin(1, is)
+       do ik=1,self%nkpt
+         ik_ibz = self%map_k_kibz(1, ik)
+         do ib=1,self%nb
+           pc(ib, ik, is) = one/(-ebands%eig(bstart+ib-1, ik_ibz, is) - half*self%eps)
+         enddo
+       enddo
      enddo
-   enddo
+   endif
+
+   write(ab_out,'(i4,es13.5,2es12.4,es13.4,es13.4,es14.4)') ii, &
+     sum(self%enterms(:)), self%enterms(1), self%enterms(2), self%enterms(3), &
+     self%eps, gradres
+
+   self%grad_a(:, :, :) = self%grad_a(:, :, :)*pc(:, :, :)
+   call self%orth_elgrad()
+
+   if (ii > 1) then
+     bnum = sum(self%grad_a(:, :, :)*conjg(self%grad_a(:, :, :) - prev_grad(:, :, :)))
+     bden = sum(abs(prev_grad(:, :, :))**2)
+     beta = bnum/bden
+     self%grad_a(:, :, :) = self%grad_a(:, :, :) + beta*prev_grad(:, :, :)
+     call self%orth_elgrad()
+   endif
+   prev_grad(:, :, :) = self%grad_a(:, :, :)
+
+   call self%get_mintheta()
+   costh = cos(self%theta); sinth = sin(self%theta)
+   self%a(:, :, :) = costh*prev_a(:, :, :) + sinth*self%grad_a(:, :, :)
+
  enddo
- write(ab_out, '(a50, f8.4)') 'A-norm^2/N_p = ', anorm2
 
- ! Checking the energy terms
- write(ab_out, '(a50)') 'Checking the electronic energy...'
- write(ab_out, '(a50, f16.12)') 'E_el = ', self%enterms(1)
- write(ab_out, '(a50)') 'Checking the vibrational energy...'
- write(ab_out, '(a50, f16.12)') 'E_vib = ', self%enterms(2)
- write(ab_out, '(a50)') 'Checking the electron-phonon energy...'
- write(ab_out, '(a50, f16.12)') 'E_elph = ', self%enterms(3)
- write(ab_out, '(a50)') 'Checking the Lagrange multiplier...'
- write(ab_out, '(a50, f16.12)') 'eps = ', self%eps
- write(ab_out, '(a50)') 'Checking the polaron formation energy...'
- write(ab_out, '(a50, f16.12)') 'E_pol = ', sum(self%enterms) - self%eps
+ write(ab_out, '(a, es13.4)') 'vbm max = ', maxval(ebands%eig(3:5, :, :))
 
- ! Checking the electronic gradient
+ ABI_FREE(prev_a)
+ ABI_FREE(prev_grad)
+ ABI_FREE(pc)
+ ABI_FREE(prev_b)
 
- do is=1,self%nsppol
-   do ik=1,self%nkpt
-     do ib=1,self%nb
-       write(ab_out, '(a30, 3f12.8)') '* random grad: RE', real(self%grad_a(ib, ik, is))
-       write(ab_out, '(a30, 3f12.8)') '  random grad: IM', aimag(self%grad_a(ib, ik, is))
-     enddo
-   enddo
- enddo
+
+ !! Output basic dimensions
+ !write(ab_out, '(a50, i5)') 'Number of k-points in the effective BZ: ', self%nkpt
+ !write(ab_out, '(a50, i5)') 'Number of q-points in the full BZ: ', self%nqpt
+ !write(ab_out, '(a50, i5)') 'Number of spins: ', self%nsppol
+ !write(ab_out, '(a50, i5)') 'Number of bands: ', self%nb
+
+ !write(ab_out, '(a50, f14.8)') '* Random A_nk\sigma component: re', real(self%a(3, 6, 1))
+ !write(ab_out, '(a50, f14.8)') 'img', aimag(self%a(3, 6, 1))
+
+ !! Checking the A-norm
+ !anorm2 = zero
+ !write(ab_out, '(a50)') 'Checking the A-norm...'
+ !do is=1,self%nsppol
+ !  do ik=1,self%nkpt
+ !    do ib=1,self%nb
+ !      anorm2 = anorm2 + abs(self%a(ib, ik, is))**2 * self%wtk(ik)
+ !    enddo
+ !  enddo
+ !enddo
+ !write(ab_out, '(a50, f8.4)') 'A-norm^2/N_p = ', anorm2
+
+ !! Checking the energy terms
+ !write(ab_out, '(a50)') 'Checking the electronic energy...'
+ !write(ab_out, '(a50, f16.12)') 'E_el = ', self%enterms(1)
+ !write(ab_out, '(a50)') 'Checking the vibrational energy...'
+ !write(ab_out, '(a50, f16.12)') 'E_vib = ', self%enterms(2)
+ !write(ab_out, '(a50)') 'Checking the electron-phonon energy...'
+ !write(ab_out, '(a50, f16.12)') 'E_elph = ', self%enterms(3)
+ !write(ab_out, '(a50)') 'Checking the Lagrange multiplier...'
+ !write(ab_out, '(a50, f16.12)') 'E_eps = ', self%eps
+ !write(ab_out, '(a50)') 'Checking the polaron formation energy...'
+ !write(ab_out, '(a50, f16.12)') 'E_pol = ', sum(self%enterms) - self%eps
+
+ !! Checking the electronic gradient
+ !write(ab_out, '(a50, f14.8)') '* Random random grad: re', real(self%grad_a(3, 17, 1))
+ !write(ab_out, '(a50, f14.8)') 'img', aimag(self%grad_a(3, 17, 1))
+ !write(ab_out, '(a50, f14.8)') '* Random random grad: re', real(self%grad_a(3, 1, 1))
+ !write(ab_out, '(a50, f14.8)') 'img', aimag(self%grad_a(3, 1, 1))
+ !write(ab_out, '(a50, f14.8)') '* Random random grad: re', real(self%grad_a(3, 9, 1))
+ !write(ab_out, '(a50, f14.8)') 'img', aimag(self%grad_a(3, 9, 1))
+
+ !! Checking the orthonormalization condition A*conjg(grad_A) = 0
+ !!inprod = sum(self%a(:,:,:)*conjg(self%grad_a(:,:,:)))
+ !inprod = sum(conjg(self%a(:,:,:))*self%grad_a(:,:,:))
+ !write(ab_out, '(a50)') 'Chceking the orthonormalization condition...'
+ !write(ab_out, '(a50, f14.8)') 'A_nk*conjg(gradA_nk): re = ', real(inprod)
+ !write(ab_out, '(a50, f14.8)') ' im = ', aimag(inprod)
+
+ !! Checking the line minimization parameter
+ !write(ab_out, '(a50)') 'Checking the line minimization parameter...'
+ !write(ab_out, '(a50, f14.8)') 'theta = ', self%theta
+
+ !! Checking that A*cos(theta) + gradA*sin(theta) conserves the normalizaton
+ !ABI_MALLOC(a_new, (self%nb, self%nkpt, self%nsppol))
+ !write(ab_out, '(a50)') 'Checking that A*cos(theta) + gradA*sin(theta) conserves the normaliztion'
+ !a_new(:, :, :) = cos(self%theta)*self%a(:,:,:) + sin(self%theta)*self%grad_a(:,:,:)
+ !anorm2 = zero
+ !anorm2 = sum(abs(a_new(:,:,:))**2)
+ !write(ab_out, '(a50, f8.4)') 'newA-norm^2/N_p = ', anorm2/self%nkbz
+
+ !self%a(:, :, :) = a_new(:, :, :)
+
+ !ABI_FREE(a_new)
+
+
+ !do is=1,self%nsppol
+ !  do ik=1,self%nkpt
+ !    do ib=1,self%nb
+ !      write(ab_out, '(a30, 3f12.8)') '* random grad: RE', real(self%grad_a(ib, ik, is))
+ !      write(ab_out, '(a30, 3f12.8)') '  random grad: IM', aimag(self%grad_a(ib, ik, is))
+ !    enddo
+ !  enddo
+ !enddo
 
  ! Checking the qpt arrangement
  !write(ab_out, '(a50)') 'Checking the qpt arrangement...'
@@ -335,23 +451,17 @@ subroutine varpeq_test(self)
  ! Checking the kpt arrangement
  !write(ab_out, '(a50)') 'Checking the kpt arrangement...'
 
+ !gqk => self%gstore%gqk(1)
  !do ik=1,self%nkpt
- !  ik_ibz = self%map_k_kibz(1, ik); isym_k = self%map_k_kibz(2, ik)
- !  trev_k = self%map_k_kibz(6, ik); g0_k = self%map_k_kibz(3:5, ik)
- !  isirr_k = (isym_k  == 1 .and. trev_k == 0 .and. all(g0_k == 0))
- !  tsign_k = 1; if (trev_k == 1) tsign_k = -1
 
  !  kpt_from_varpeq(:) = self%kpts(:, ik)
- !  kpt_from_gstore(:) = self%gstore%ebands%kptns(:, ik_ibz)
+ !  kpt_from_gstore(:) = gqk%my_kpts(:, ik)
 
- !  !kpt_from_gstore(:) = tsign_k * matmul(self%gstore%cryst%symrec(:, :, isym_k), &
- !  !  self%gstore%ebands%kptns(:, ik_ibz) + g0_k)
-
- !  write(ab_out, '(a50, 3f8.4)') 'kpt (from varpeq) = ', kpt_from_varpeq(:)
- !  write(ab_out, '(a50, 3f8.4)') 'kpt (from gstore) = ', kpt_from_gstore(:)
+ !  write(ab_out, '(a50, 3f8.4)') 'kpt_gstore - kpt_varpeq = ', kpt_from_varpeq(:) - kpt_from_varpeq(:)
  !enddo
 
- ! Checking scattering process
+
+ !! Checking scattering process
  !ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
  !ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
 
@@ -390,6 +500,188 @@ end subroutine varpeq_test
 !!***
 
 
+!!****f* m_varpeq/varpeq_orth_elgrad
+!! NAME
+!!  varpeq_orth_elgrad
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_orth_elgrad(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(varpeq_t), intent(inout) :: self
+!arrays
+
+!Local variables-------------------------------
+ real(dp) :: normgrad2
+ real(dp) :: nkbzinv
+ real(dp) :: factor
+ complex(dp) :: inprod
+
+! *************************************************************************
+
+ inprod = zero
+ normgrad2 = zero
+ nkbzinv = one/self%nkbz
+
+ inprod = sum(self%a(:,:,:)*conjg(self%grad_a(:,:,:)))
+ factor = inprod*nkbzinv
+ self%grad_a(:, :, :) = self%grad_a(:, :, :) - factor*self%a(:, :, :)
+
+ call norm_a(self%grad_a, self%nsppol, self%nkpt, self%nb, self%nkbz, self%wtk)
+
+end subroutine varpeq_orth_elgrad
+!!***
+
+
+!!****f* m_varpeq/varpeq_get_mintheta
+!! NAME
+!!  varpeq_get_mintheta
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_get_mintheta(self)
+
+!Arguments ------------------------------------
+!scalars
+ class(varpeq_t), intent(inout) :: self
+
+!Local variables-------------------------------
+!scalars
+ integer :: comm, nproc, my_rank, ierr
+ integer :: bstart
+ integer :: is, ik, ib, jb
+ integer :: ik_ibz, imk_ibz
+ integer :: ik_forw, ik_back
+ integer :: my_iq, my_nu, iq_glob, my_is
+ complex(dp) :: a_from, a_forw, a_back
+ complex(dp) :: d_from, d_forw, d_back
+ real(dp) :: kweight, phfreq
+ real(dp) :: dksqmax
+ real(dp) :: eig
+ complex(dp) :: bqnu, g_forw, g_back
+ complex(dp) :: term3_tmp, term4_tmp
+ class(crystal_t), pointer :: cryst
+ class(ebands_t), pointer :: ebands
+ class(gqk_t), pointer :: gqk
+!arrays
+ integer, allocatable :: k_plus_q_map(:, :), k_minus_q_map(:, :)
+ real(dp) :: my_qpt(3)
+ real(dp) :: terms(4)
+
+! *************************************************************************
+
+ comm = self%gstore%comm
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ gqk => self%gstore%gqk(1)
+ cryst => self%gstore%cryst
+ ebands => self%gstore%ebands
+
+ terms(:) = zero
+
+ ! non-scattering dependent terms
+ do is=1,self%nsppol
+   bstart = self%gstore%brange_spin(1, is)
+   do ik=1,self%nkpt
+     ik_ibz = self%map_k_kibz(1, ik)
+     kweight = self%wtk(ik)
+     do ib=1,self%nb
+       eig = -ebands%eig(bstart+ib-1, ik_ibz, is)
+       a_from = self%a(ib, ik, is)
+       d_from = self%grad_a(ib, ik, is)
+       ! sin^2(theta) term
+       terms(1) = terms(1) + kweight*eig*abs(d_from)**2
+       ! sin(theta)cos(theta) term
+       terms(2) = terms(2) + &
+         kweight*eig*real(d_from*conjg(a_from) + conjg(d_from)*a_from)
+     enddo
+   enddo
+ enddo
+
+ ! scattering dependent terms
+ term3_tmp = zero; term4_tmp = zero
+ ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
+ ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
+
+ do is=1,self%nsppol
+   my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
+   gqk => self%gstore%gqk(my_is)
+
+   ! Loop over q-points treated by this processor
+   do my_iq=1,gqk%my_nq
+     iq_glob = my_iq + gqk%my_qstart - 1
+     my_qpt(:) = self%qpts(:, iq_glob)
+
+     ! Forward (k+q) band backward (k-q) scattering mappings
+     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+       cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_qpt)
+
+     ierr = merge(1, 0, dksqmax > tol12)
+     if (ierr /= 0) then
+       ABI_ERROR(sjoin("VarPEq, setting B-coefficients: cannot map k+q or k-q &
+         to the effective IBZ with qpt ", ktoa(my_qpt)))
+     endif
+
+     ! Loop over k-points in the effective BZ
+     do ik=1,self%nkpt
+       kweight = self%wtk(ik)
+       ik_forw = k_plus_q_map(1, ik)
+
+       ! Loop over bands
+       do ib=1,self%nb
+         a_from = self%a(ib, ik, is)
+         d_from = self%grad_a(ib, ik, is)
+
+         do jb=1,self%nb
+           a_forw = self%a(jb, ik_forw, is)
+           d_forw = self%grad_a(jb, ik_forw, is)
+
+           ! Loop over perturbations
+           do my_nu=1,gqk%my_npert
+             bqnu = self%b(my_nu, my_iq)
+             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+             ! sin^2(theta) term
+             term3_tmp = term3_tmp + &
+               kweight*d_from*conjg(bqnu)*g_forw*conjg(d_forw)
+             ! sin(theta)cos(theta) term
+             term4_tmp = term4_tmp + &
+               kweight*conjg(bqnu)*g_forw*(a_from*conjg(d_forw) + &
+               d_from*conjg(a_forw))
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo
+ enddo
+
+ term3_tmp = term3_tmp + conjg(term3_tmp)
+ term4_tmp = term4_tmp + conjg(term4_tmp)
+ call xmpi_sum(term3_tmp, comm, ierr)
+ call xmpi_sum(term4_tmp, comm, ierr)
+ terms(3) = -real(term3_tmp) / (one*self%nqpt)
+ terms(4) = -real(term4_tmp) / (one*self%nqpt)
+
+ self%theta = half*atan2(-(terms(2) + terms(4)), (terms(1) + terms(3) - self%eps))
+
+end subroutine varpeq_get_mintheta
+!!***
+
+
 !!****f* m_varpeq/varpeq_get_elgrad
 !! NAME
 !!  varpeq_get_elgrad
@@ -416,10 +708,11 @@ subroutine varpeq_get_elgrad(self)
  integer :: ik_ibz, ikmq_ibz
  integer :: ik_forw, ik_back
  integer :: my_iq, my_nu, iq_glob, my_is
- real(dp) :: a_forw, a_back
+ real(dp) :: eig
  real(dp) :: dksqmax
  real(dp) :: nkbzinv, nkbz2inv
  complex(dp) grad_tmp
+ complex(dp) :: a_forw, a_back
  complex(dp) :: bqnu, g_forw, g_back
  class(crystal_t), pointer :: cryst
  class(ebands_t), pointer :: ebands
@@ -440,115 +733,57 @@ subroutine varpeq_get_elgrad(self)
  ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
  ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
 
- nkbzinv = one/(one*self%nkpt)
+ nkbzinv = one/(one*self%nkbz)
  nkbz2inv = nkbzinv**2
 
  self%grad_a(:, :, :) = zero
 
- ! Scattering-dependent part
  do is=1,self%nsppol
    my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
    gqk => self%gstore%gqk(my_is)
 
-   ! Loop over k-points in the effective BZ
-   do ik=1,self%nkpt
-     ! Loop over bands
-     do ib=1,self%nb
-       grad_tmp = zero
+   do my_iq=1,gqk%my_nq
+     iq_glob = my_iq + gqk%my_qstart - 1
+     my_qpt(:) = self%qpts(:, iq_glob)
 
-       ! Loop over q-points
-       do my_iq=1,gqk%my_nq
-         iq_glob = my_iq + gqk%my_qstart - 1
-         my_qpt(:) = self%qpts(:, iq_glob)
+     ! Forward (k+q) band backward (k-q) scattering mappings
+     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+       cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_qpt)
 
-         ! Forward (k+q) band backward (k-q) scattering mappings
-         call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-           cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
-           self%timrev, use_symrec=.True., qpt=my_qpt)
+     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+       cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=-my_qpt)
 
-         call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-           cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
-           self%timrev, use_symrec=.True., qpt=-my_qpt)
+     ierr = merge(1, 0, dksqmax > tol12)
+     if (ierr /= 0) then
+       ABI_ERROR(sjoin("VarPEq, setting gradient: cannot map k+q or k-q &
+         to the effective IBZ with qpt ", ktoa(my_qpt)))
+     endif
 
-         ierr = merge(1, 0, dksqmax > tol12)
-         if (ierr /= 0) then
-           ABI_ERROR(sjoin("VarPEq, setting B-coefficients: cannot map k+q or k-q &
-             to the effective IBZ with qpt ", ktoa(my_qpt)))
-         endif
+     do ik=1,self%nkpt
+       ik_forw = k_plus_q_map(1, ik)
+       ik_back = k_minus_q_map(1, ik)
 
-         ik_forw = k_plus_q_map(1, ik)
-         ik_back = k_minus_q_map(1, ik)
-         ik_ibz = self%map_k_kibz(1, ik)
-         ikmq_ibz = self%map_k_kibz(1, ik_back)
+       do ib=1,self%nb
+         do jb=1,self%nb
+           a_forw = self%a(jb, ik_forw, is)
+           a_back = self%a(jb, ik_back, is)
 
-         ! Loop over perturbations
-         do my_nu=1,gqk%my_npert
-           bqnu = self%b(my_nu, my_iq)
+           do my_nu=1,gqk%my_npert
+             bqnu = self%b(my_nu, my_iq)
+             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+             g_back = gqk%my_g(my_nu, ib, my_iq, jb, ik_back)
 
-           do jb=1,self%nb
-             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
-             g_back = gqk%my_g(my_nu, ib, my_iq, jb, ikmq_ibz)
-
-             grad_tmp = grad_tmp - &
+             self%grad_a(ib, ik, is) = self%grad_a(ib, ik, is) - &
                two*nkbz2inv*(a_back*conjg(bqnu)*g_back + a_forw*bqnu*conjg(g_forw))
            enddo
          enddo
        enddo
-
-       self%grad_a(ib, ik, is) = grad_tmp
      enddo
    enddo
  enddo
  call xmpi_sum(self%grad_a, comm, ierr)
-
- !  ! Loop over q-points treated by this processor
- !  do my_iq=1,gqk%my_nq
- !    iq_glob = my_iq + gqk%my_qstart - 1
- !    my_qpt(:) = self%qpts(:, iq_glob)
-
- !    ! Forward (k+q) band backward (k-q) scattering mappings
- !    call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
- !      cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
- !      self%timrev, use_symrec=.True., qpt=my_qpt)
-
- !    call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
- !      cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
- !      self%timrev, use_symrec=.True., qpt=-my_qpt)
-
- !    ierr = merge(1, 0, dksqmax > tol12)
- !    if (ierr /= 0) then
- !      ABI_ERROR(sjoin("VarPEq, setting B-coefficients: cannot map k+q or k-q &
- !        to the effective IBZ with qpt ", ktoa(my_qpt)))
- !    endif
-
- !    ! Loop over k-points in the effective BZ
- !    do ik=1,self%nkpt
- !      ik_forw = k_plus_q_map(1, ik); ik_back = k_minus_q_map(1, ik)
- !      ik_ibz = self%map_k_kibz(1, ik); ikmq_ibz = self%map_k_kibz(1, ik_back)
-
- !      ! Loop over bands
- !      do ib=1,self%nb
- !        do jb=1,self%nb
- !          a_forw = self%a(jb, ik_forw, is); a_back = self%a(jb, ik_back, is)
-
- !          ! Loop over perturbations
- !          do my_nu=1,gqk%my_npert
- !            bqnu = self%b(my_nu, my_iq)
- !            g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
- !            g_back = gqk%my_g(my_nu, ib, my_iq, jb, ikmq_ibz)
- !            self%grad_a(ib, ik, is) = self%grad_a(ib, ik, is) - &
- !              two*nkbz2inv*(a_back*conjg(bqnu)*g_back + &
- !              a_forw*bqnu*conjg(g_forw))
- !          enddo
-
- !        enddo
- !      enddo
- !    enddo
- !  enddo
- !enddo
-
- ! Collect the partial sums
- !call xmpi_sum(self%grad_a, comm, ierr)
 
  ! Scattering-independent part
  do is=1,self%nsppol
@@ -556,9 +791,9 @@ subroutine varpeq_get_elgrad(self)
    do ik=1,self%nkpt
      ik_ibz = self%map_k_kibz(1, ik)
      do ib=1,self%nb
+       eig = -ebands%eig(bstart+ib-1, ik_ibz, is)
        self%grad_a(ib, ik, is) = self%grad_a(ib, ik, is) + &
-         two*nkbzinv*(abs(ebands%eig(bstart+ib-1, ik_ibz, is)) - self%eps)* &
-         self%a(ib, ik, is)
+         two*nkbzinv*(eig - self%eps)*self%a(ib, ik, is)
      enddo
    enddo
  enddo
@@ -595,10 +830,11 @@ subroutine varpeq_get_enterms(self)
  integer :: ik_ibz, imk_ibz
  integer :: ik_forw, ik_back
  integer :: my_iq, my_nu, iq_glob, my_is
- real(dp) :: a_from, a_forw, a_back
+ complex(dp) :: a_from, a_forw, a_back
  real(dp) :: enel, envib, enelph
  real(dp) :: kweight, phfreq
  real(dp) :: dksqmax
+ real(dp) :: eig
  complex(dp) :: enelph_tmp
  complex(dp) :: bqnu, g_forw, g_back
  class(crystal_t), pointer :: cryst
@@ -625,8 +861,8 @@ subroutine varpeq_get_enterms(self)
      ik_ibz = self%map_k_kibz(1, ik)
      kweight = self%wtk(ik)
      do ib=1,self%nb
-       enel = enel + &
-         kweight*abs(ebands%eig(bstart+ib-1, ik_ibz, is))*self%a(ib, ik, is)**2
+       eig = -ebands%eig(bstart+ib-1, ik_ibz, is)
+       enel = enel + kweight*eig*abs(self%a(ib, ik, is))**2
      enddo
    enddo
  enddo
@@ -643,7 +879,7 @@ subroutine varpeq_get_enterms(self)
  envib = envib/(one*self%nqpt)
 
  ! Electron-phonon energy
- enelph_tmp = zero
+ enelph_tmp = (zero, zero)
  ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
  ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
  do is=1,self%nsppol
@@ -660,10 +896,6 @@ subroutine varpeq_get_enterms(self)
        cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
        self%timrev, use_symrec=.True., qpt=my_qpt)
 
-     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-       cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
-       self%timrev, use_symrec=.True., qpt=-my_qpt)
-
      ierr = merge(1, 0, dksqmax > tol12)
      if (ierr /= 0) then
        ABI_ERROR(sjoin("VarPEq, setting B-coefficients: cannot map k+q or k-q &
@@ -673,23 +905,21 @@ subroutine varpeq_get_enterms(self)
      ! Loop over k-points in the effective BZ
      do ik=1,self%nkpt
        kweight = self%wtk(ik)
-       ik_forw = k_plus_q_map(1, ik); ik_back = k_minus_q_map(1, ik)
-       ik_ibz = self%map_k_kibz(1, ik); imk_ibz = self%map_invk_kibz(1, ik)
+       ik_forw = k_plus_q_map(1, ik)
 
        ! Loop over bands
        do ib=1,self%nb
          a_from = self%a(ib, ik, is)
 
          do jb=1,self%nb
-           a_forw = self%a(jb, ik_forw, is); a_back = self%a(jb, ik_back, is)
+           a_forw = self%a(jb, ik_forw, is)
 
            ! Loop over perturbations
            do my_nu=1,gqk%my_npert
              bqnu = self%b(my_nu, my_iq)
-             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
-             g_back = gqk%my_g(my_nu, jb, my_iq, ib, imk_ibz)
+             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
              enelph_tmp = enelph_tmp + &
-               half*kweight*a_from*conjg(bqnu)*(a_forw*g_forw + a_back*g_back)
+               kweight*a_from*conjg(bqnu)*g_forw*conjg(a_forw)
            enddo
 
          enddo
@@ -734,11 +964,13 @@ subroutine varpeq_b_from_a(self)
  integer :: ierr
  integer :: is, ik, ib, jb
  integer :: my_iq, my_nu, my_is
+ integer :: my_nq, my_npert
  integer :: iq_glob
  integer :: ik_forw, ik_back, ik_ibz, imk_ibz
- real(dp) :: a_from, a_forw, a_back
  real(dp) :: my_phfreqinv, kweight
  real(dp) :: dksqmax
+ complex(dp) :: b_tmp
+ complex(dp) :: a_from, a_forw, a_back
  complex(dp) :: g_forw, g_back
  class(crystal_t), pointer :: cryst
  class(gqk_t), pointer :: gqk
@@ -757,58 +989,57 @@ subroutine varpeq_b_from_a(self)
  self%b(:, :) = zero
 
  ! Loop over collinerar spins (if any)
- do is=1,self%nsppol
-   my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
-   gqk => self%gstore%gqk(my_is)
+ gqk => self%gstore%gqk(1)
+ my_nq = gqk%my_nq; my_npert = gqk%my_npert
 
-   ! Loop over q-points treated by this processor
-   do my_iq=1,gqk%my_nq
-     iq_glob = my_iq + gqk%my_qstart - 1
-     my_qpt = self%qpts(:, iq_glob)
+ ! Loop over q-points
+ do my_iq=1,my_nq
+   iq_glob = my_iq + gqk%my_qstart - 1
+   my_qpt = self%qpts(:, iq_glob)
 
-     ! Forward (k+q) and backward (k-q) scattering mappings
-     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-       cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
-       self%timrev, use_symrec=.True., qpt=my_qpt)
+   ! Forward (k+q) scattering mapping
+   call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+     cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
+     self%timrev, use_symrec=.True., qpt=my_qpt)
 
-     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-       cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
-       self%timrev, use_symrec=.True., qpt=-my_qpt)
+   ierr = merge(1, 0, dksqmax > tol12)
+   if (ierr /= 0) then
+     ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
+       to the effective IBZ with qpt ", ktoa(my_qpt)))
+   endif
 
-     ierr = merge(1, 0, dksqmax > tol12)
-     if (ierr /= 0) then
-       ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
-         to the effective IBZ with qpt ", ktoa(my_qpt)))
-     endif
+   do my_nu=1,my_npert
+     b_tmp = (zero, zero)
 
-     ! Loop over k-points in the effective BZ
-     do ik=1,self%nkpt
-       kweight = self%wtk(ik)
-       ik_forw = k_plus_q_map(1, ik); ik_back = k_minus_q_map(1, ik)
-       ik_ibz = self%map_k_kibz(1, ik); imk_ibz = self%map_invk_kibz(1, ik)
+     ! for a (nu,q) collect the mnk\sigma sum
+     do is=1,self%nsppol
+       my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
+       gqk => self%gstore%gqk(my_is)
 
-       ! Loop over bands
-       do ib=1,self%nb
-         a_from = self%a(ib, ik, is)
+       do ik=1,self%nkpt
+         kweight = self%wtk(ik)
+         ik_forw = k_plus_q_map(1, ik)
 
-         do jb=1,self%nb
-           a_forw = self%a(jb, ik_forw, is); a_back = self%a(jb, ik_back, is)
+         do ib=1,self%nb
+           a_from = self%a(ib, ik, is)
 
-           ! Loop over pertrubations
-           do my_nu=1,gqk%my_npert
-             ! skip acoustic modes at Gamma
-             if (gqk%my_wnuq(my_nu, my_iq) == zero) cycle
-             my_phfreqinv = one/gqk%my_wnuq(my_nu, my_iq)
-             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
-             g_back = gqk%my_g(my_nu, jb, my_iq, ib, imk_ibz)
+           do jb=1,self%nb
+             a_forw = self%a(jb, ik_forw, is)
+             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
 
-             self%b(my_nu, my_iq) = self%b(my_nu, my_iq) + &
-               half*my_phfreqinv*kweight*(a_forw*g_forw + a_back*g_back)
+             b_tmp = b_tmp + conjg(a_forw)*g_forw*a_from*kweight
            enddo
 
          enddo
        enddo
      enddo
+
+     if (gqk%my_wnuq(my_nu, my_iq) == 0) then
+       self%b(my_nu, my_iq) = zero
+     else
+       self%b(my_nu, my_iq) = b_tmp/gqk%my_wnuq(my_nu, my_iq)
+     endif
+
    enddo
  enddo
 
@@ -842,6 +1073,7 @@ subroutine varpeq_seed_a(self)
  integer :: is, ik, ib
  integer :: ik_ibz
  integer :: bstart
+ complex(dp) :: imeig
  class(ebands_t), pointer :: ebands
 
 ! *************************************************************************
@@ -853,7 +1085,9 @@ subroutine varpeq_seed_a(self)
    do ik=1,self%nkpt
      ik_ibz = self%map_k_kibz(1, ik)
      do ib=1,self%nb
-       self%a(ib, ik, is) = exp(-abs(ebands%eig(bstart+ib-1, ik_ibz, is)))
+       !imeig = abs(ebands%eig(bstart+ib-1, ik_ibz, is))
+       imeig = -j_dpc*ebands%eig(bstart+ib-1, ik_ibz, is)
+       self%a(ib, ik, is) = exp(-imeig)
      enddo
    enddo
  enddo
@@ -1063,7 +1297,7 @@ subroutine norm_a(a, nsppol, nkpt, nb, nkbz, wtk)
  integer, intent(in) :: nkbz
 !arrays
  real(dp), intent(in) :: wtk(:)
- real(dp), intent(out) :: a(:, :, :)
+ complex(dp), intent(out) :: a(:, :, :)
 
 !Local variables-------------------------------
  integer :: ik, ib, is
@@ -1075,7 +1309,7 @@ subroutine norm_a(a, nsppol, nkpt, nb, nkbz, wtk)
  do is=1,nsppol
    do ik=1,nkpt
      do ib=1,nb
-       anorm2 = anorm2 + wtk(ik)*a(ib, ik, is)**2
+       anorm2 = anorm2 + wtk(ik)*abs(a(ib, ik, is))**2
      enddo
    enddo
  enddo
