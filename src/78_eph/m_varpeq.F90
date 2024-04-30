@@ -115,7 +115,7 @@ module m_varpeq
    ! Weights of the k-points (normalized to one)
    ! (nkpt)
 
-  real(dp), allocatable :: a(:, :, :)
+  complex(dp), allocatable :: a(:, :, :)
    ! Variational coefficients in the electornic subspace defining the charge
    ! localization process
    ! (nbands, nkpt, nsppol)
@@ -245,7 +245,7 @@ subroutine varpeq_test(self)
  integer :: my_nu
  integer :: is, ib, jb
  integer :: bstart
- real(dp) :: a_from, a_forw, a_back
+ complex(dp) :: a_from, a_forw, a_back
  real(dp) :: wtq, dksqmax
  real(dp) :: anorm2
  real(dp) :: enel
@@ -259,12 +259,15 @@ subroutine varpeq_test(self)
  class(crystal_t), pointer :: cryst
  class(ebands_t), pointer :: ebands
  class(gqk_t), pointer :: gqk
+ integer :: nelem_per_item, nitems_per_rank, sendcount
 !arrays
  integer, allocatable :: k_plus_q_map(:, :), k_minus_q_map(:, :)
  real(dp) :: qpt(3), my_qpt(3)
  real(dp) :: kpt_from_varpeq(3), kpt_from_gstore(3)
  real(dp) :: qpt_from_varpeq(3), qpt_from_gstore(3)
-
+ real(dp), allocatable :: qpt_gathered(:, :)
+ real(dp), allocatable :: my_qpts(:, :)
+ integer, allocatable :: recvcounts(:), displs(:)
 ! *************************************************************************
 
  cryst => self%gstore%cryst
@@ -274,13 +277,69 @@ subroutine varpeq_test(self)
  nproc = xmpi_comm_size(comm)
  my_rank = xmpi_comm_rank(comm)
 
+ ! Testing the gather subroutine
+ ABI_MALLOC(qpt_gathered, (3, self%nqpt))
+ ABI_MALLOC(my_qpts, (3, gqk%my_nq))
+ write(ab_out, '(a50)') 'Checking the gathering: '
+
+ nelem_per_item = 3
+ nitems_per_rank = gkq%my_nq
+ ! nelem_per_item = 1
+ ! nitems_per_rank = 3 * gkq%my_nq
+ call gqk%qpt_comm%xcomm_prep_gatherv(nelem_per_item, nitems_per_rank, &
+   sendcount, recvcounts, displs)
+
+ ! need to flat the array
+
+ allocate(qbuff(3*nqpts))
+ cnt = 0
+ do iq=1,my_nq
+   do ii=1,3
+     qbuff(i) = qpt(ii, iq)
+   enddo
+ enddo
+
+ real(dp), target :: qpts(3, myq)
+ real(dp), pointer :: q_float
+ call c_f_pointer(c_loc(qpts), q_flat, [3*gqk%myq])
+
+ do my_iq=1,gqk%my_nq
+   call gqk%myqpt(my_iq, self%gstore, wtq, qpt_from_gstore)
+   my_qpts(:, my_iq) = qpt_from_gstore(:)
+ enddo
+
+ xcomm_prep_gatherv(xcomm, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
+
+ ABI_FREE(revcounts)
+ ABI_FREE(displs)
+
+ nelem_per_item = nb*npert
+ nitems_per_rank = MY_nq
+ ! what do we do in complex?
+ do is=1,nsppol
+  do ik=1,nkpt
+    do n=1,nb
+      call xmpi_allgather -> g(ipert, mband, q)
+
+ call xmpi_allgather(my_qpts(:, :), 3*gqk%my_nq, qpt_gathered(:, :), gqk%qpt_comm, ierr)
+
+ do my_iq=1,self%nqpt
+   write(ab_out, '(a50, 3f8.4)') 'qpt (after gather) = ', qpt_gathered(:, my_iq)
+   write(ab_out, '(a50, 3f8.4)') 'qpt (from glob_iq) = ', self%qpts(:, my_iq)
+ enddo
+
+ ABI_FREE(qpt_gathered)
+ ABI_FREE(my_qpts)
+
+
  ! Output basic dimensions
  write(ab_out, '(a50, i5)') 'Number of k-points in the effective BZ: ', self%nkpt
  write(ab_out, '(a50, i5)') 'Number of q-points in the full BZ: ', self%nqpt
  write(ab_out, '(a50, i5)') 'Number of spins: ', self%nsppol
  write(ab_out, '(a50, i5)') 'Number of bands: ', self%nb
 
- write(ab_out, '(a50, f14.8)') 'Random A_nk\sigma component ', self%a(2, 4, 1)
+ write(ab_out, '(a50, f14.8)') 'Random A_nk\sigma component: re ', real(self%a(2, 4, 1))
+ write(ab_out, '(a50, f14.8)') ' im ', aimag(self%a(2, 4, 1))
 
  ! Checking the A-norm
  anorm2 = zero
@@ -288,7 +347,7 @@ subroutine varpeq_test(self)
  do is=1,self%nsppol
    do ik=1,self%nkpt
      do ib=1,self%nb
-       anorm2 = anorm2 + self%a(ib, ik, is)**2 * self%wtk(ik)
+       anorm2 = anorm2 + abs(self%a(ib, ik, is))**2 * self%wtk(ik)
      enddo
    enddo
  enddo
@@ -306,16 +365,16 @@ subroutine varpeq_test(self)
  write(ab_out, '(a50)') 'Checking the polaron formation energy...'
  write(ab_out, '(a50, f16.12)') 'E_pol = ', sum(self%enterms) - self%eps
 
- ! Checking the electronic gradient
+ !! Checking the electronic gradient
 
- do is=1,self%nsppol
-   do ik=1,self%nkpt
-     do ib=1,self%nb
-       write(ab_out, '(a30, 3f12.8)') '* random grad: RE', real(self%grad_a(ib, ik, is))
-       write(ab_out, '(a30, 3f12.8)') '  random grad: IM', aimag(self%grad_a(ib, ik, is))
-     enddo
-   enddo
- enddo
+ !do is=1,self%nsppol
+ !  do ik=1,self%nkpt
+ !    do ib=1,self%nb
+ !      write(ab_out, '(a30, 3f12.8)') '* random grad: RE', real(self%grad_a(ib, ik, is))
+ !      write(ab_out, '(a30, 3f12.8)') '  random grad: IM', aimag(self%grad_a(ib, ik, is))
+ !    enddo
+ !  enddo
+ !enddo
 
  ! Checking the qpt arrangement
  !write(ab_out, '(a50)') 'Checking the qpt arrangement...'
@@ -416,7 +475,7 @@ subroutine varpeq_get_elgrad(self)
  integer :: ik_ibz, ikmq_ibz
  integer :: ik_forw, ik_back
  integer :: my_iq, my_nu, iq_glob, my_is
- real(dp) :: a_forw, a_back
+ complex(dp) :: a_forw, a_back
  real(dp) :: dksqmax
  real(dp) :: nkbzinv, nkbz2inv
  complex(dp) grad_tmp
@@ -595,7 +654,7 @@ subroutine varpeq_get_enterms(self)
  integer :: ik_ibz, imk_ibz
  integer :: ik_forw, ik_back
  integer :: my_iq, my_nu, iq_glob, my_is
- real(dp) :: a_from, a_forw, a_back
+ complex(dp) :: a_from, a_forw, a_back
  real(dp) :: enel, envib, enelph
  real(dp) :: kweight, phfreq
  real(dp) :: dksqmax
@@ -626,7 +685,7 @@ subroutine varpeq_get_enterms(self)
      kweight = self%wtk(ik)
      do ib=1,self%nb
        enel = enel + &
-         kweight*abs(ebands%eig(bstart+ib-1, ik_ibz, is))*self%a(ib, ik, is)**2
+         kweight*abs(ebands%eig(bstart+ib-1, ik_ibz, is))*abs(self%a(ib, ik, is))**2
      enddo
    enddo
  enddo
@@ -736,7 +795,7 @@ subroutine varpeq_b_from_a(self)
  integer :: my_iq, my_nu, my_is
  integer :: iq_glob
  integer :: ik_forw, ik_back, ik_ibz, imk_ibz
- real(dp) :: a_from, a_forw, a_back
+ complex(dp) :: a_from, a_forw, a_back
  real(dp) :: my_phfreqinv, kweight
  real(dp) :: dksqmax
  complex(dp) :: g_forw, g_back
@@ -842,6 +901,7 @@ subroutine varpeq_seed_a(self)
  integer :: is, ik, ib
  integer :: ik_ibz
  integer :: bstart
+ complex(dp) :: imeig
  class(ebands_t), pointer :: ebands
 
 ! *************************************************************************
@@ -853,7 +913,8 @@ subroutine varpeq_seed_a(self)
    do ik=1,self%nkpt
      ik_ibz = self%map_k_kibz(1, ik)
      do ib=1,self%nb
-       self%a(ib, ik, is) = exp(-abs(ebands%eig(bstart+ib-1, ik_ibz, is)))
+       imeig = -j_dpc*ebands%eig(bstart+ib-1, ik_ibz, is)
+       self%a(ib, ik, is) = exp(imeig)
      enddo
    enddo
  enddo
@@ -1061,7 +1122,7 @@ subroutine norm_a(a, nsppol, nkpt, nb, nkbz, wtk)
  integer, intent(in) :: nkbz
 !arrays
  real(dp), intent(in) :: wtk(:)
- real(dp), intent(out) :: a(:, :, :)
+ complex(dp), intent(out) :: a(:, :, :)
 
 !Local variables-------------------------------
  integer :: ik, ib, is
@@ -1073,7 +1134,7 @@ subroutine norm_a(a, nsppol, nkpt, nb, nkbz, wtk)
  do is=1,nsppol
    do ik=1,nkpt
      do ib=1,nb
-       anorm2 = anorm2 + wtk(ik)*a(ib, ik, is)**2
+       anorm2 = anorm2 + wtk(ik)*abs(a(ib, ik, is))**2
      enddo
    enddo
  enddo
