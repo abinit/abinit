@@ -1715,11 +1715,9 @@ end if
                  u1_band = -band_ks
                end if
              else
-               stern%rank_band = 0
-               band_me = band_ks
-               u1_band  = band_ks
+               stern%rank_band = 0; u1_band = band_ks; band_me = band_ks
                if (sigma%bsum_comm%skip(ib_k)) cycle ! MPI parallelism inside bsum_comm
-            end if
+             end if
 
              ! Init entry in cg1s_kq, either from cache or with zeros.
              if (stern%use_cache) then
@@ -2071,7 +2069,7 @@ end if
                       cfact =  (two * nqnu + one) / (eig0nk - eig0mkq + sigma%ieta)
                    endif
                  endif
-                 !
+
                  if (sigma%imag_only) then
                    simag = gkq2 * aimag(cfact)
                    sigma%vals_e0ks(it, ib_k) = sigma%vals_e0ks(it, ib_k) + j_dpc * simag
