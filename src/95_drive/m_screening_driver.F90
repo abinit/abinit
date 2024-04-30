@@ -90,9 +90,7 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
-!#ifdef __HAVE_GREENX
  use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
-!#endif
 
  implicit none
 
@@ -239,14 +237,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
-#ifdef __HAVE_GREENX
  integer :: gap_err
  real(dp) :: te_min, te_max
  type(gaps_t) :: gaps
  real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
  real(dp),allocatable :: t2w_cos_wgs(:,:), w2t_cos_wgs(:,:), t2w_sin_wgs(:,:)
  real(dp) :: ft_max_error(3), cosft_duality_error
-#endif
 
 !************************************************************************
 

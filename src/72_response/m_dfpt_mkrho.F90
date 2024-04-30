@@ -27,7 +27,6 @@ module m_dfpt_mkrho
  use m_cgtools
  use m_xmpi
 
-
  use defs_abitypes, only : MPI_type
  use m_time,            only : timab
  use m_io_tools,        only : get_unit, iomode_from_fname

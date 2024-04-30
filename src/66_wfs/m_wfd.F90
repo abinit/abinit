@@ -397,8 +397,9 @@ module m_wfd
    procedure :: xdotc => wfd_xdotc
    ! Compute <u_{b1ks}|u_{b2ks}> in G-space.
 
-   procedure :: get_gvec_kq => wfd_get_gvec_kq
-   ! Return g-sphere centered on k+q.
+   procedure :: get_gvec_gbound => wfd_get_gvec_gbound
+   ! Return the g-sphere centered on kk and gbound_kk,
+   ! mainly used when looping over wavevectors in the full BZ
 
    procedure :: reset_ur_cprj => wfd_reset_ur_cprj
    ! Reinitialize memory storage of u(r) and <p_i|psi>
@@ -1475,7 +1476,8 @@ end function wfd_xdotc
 !! wfd_get_gvec_kq
 !!
 !! FUNCTION
-!! Return g-sphere centered on k+q.
+!! Return the g-sphere centered on kq and gbound_kq,
+!! mainly used when looping over wavevectors in the full BZ.
 !!
 !! INPUTS
 !!
@@ -1483,15 +1485,14 @@ end function wfd_xdotc
 !!
 !! SOURCE
 
-subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
+subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
 
 !Arguments -------------------------------
  class(wfd_t),intent(in) :: wfd
  real(dp),intent(in) :: gmet(3,3), ecut, kq(3)
  integer,intent(in) :: ikq_ibz
  logical,intent(in) :: isirr_kq
- integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:)
- integer,intent(out) :: gbound_kq(2*wfd%mgfft+8,2)
+ integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:), gbound_kq(2*wfd%mgfft+8,2)
 
 !Local variables ------------------------------
  integer :: mpw
@@ -1517,7 +1518,7 @@ subroutine wfd_get_gvec_kq(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw
 
  call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
 
-end subroutine wfd_get_gvec_kq
+end subroutine wfd_get_gvec_gbound
 !!***
 
 !----------------------------------------------------------------------
@@ -3744,9 +3745,6 @@ end subroutine wfd_get_cprj
 !!  Cryst<crystal_t>=Info on unit cell.
 !!  Psps<pseudopotential_type>=Pseudopotential info.
 !!  new_ngfft(18)=FFT descriptor for the new FFT mesh.
-!!
-!!  SIDE EFFECTS
-!!  Wfd<wfd_t>=Wavefunction descriptor with new internal tables for FFT defined by new_ngfft.
 !!
 !! SOURCE
 
