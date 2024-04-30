@@ -271,8 +271,8 @@ type, public :: gqk_t
    ! MPI communicator over atomic perturbations.
 
   !type(xcomm_t) :: bsum_comm
-   ! MPI communicator over bands summed over. NB: it not used to distribute
-   ! the memory for the g but to distribute a possible sum over bands as done in GWPT.
+   ! MPI communicator over bands in summation. It not used to distribute
+   ! the memory for the g but to distribute a possible sum of bands as in GWPT
 
   type(xcomm_t) :: qpt_pert_comm
    ! MPI communicator over the 2d grid (qpt, atomic perturbations)

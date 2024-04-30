@@ -22,6 +22,7 @@
 
 module m_dfpt_cgwf
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
  use m_errors
@@ -38,6 +39,7 @@ module m_dfpt_cgwf
  use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type, KPRIME_H_KPRIME
  use m_getghc,      only : getghc
  use m_getgh1c,     only : getgh1c, getdc1
+ use m_fft,         only : fft_ug
 
  implicit none
 
@@ -1570,7 +1572,7 @@ end subroutine stern_init
 
 subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_hamkq, eig0_k, eig0_kq, cwave0, &
                        cwaveprj0, cwavef, cwaveprj, err_msg, ierr, &
-                       full_c1g) !, full_u1r) ! optional
+                       full_cg1, full_ur1) ! optional
 
 !Arguments ------------------------------------
  class(stern_t),intent(inout) :: stern
@@ -1584,8 +1586,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  type(pawcprj_type),intent(inout) :: cwaveprj(gs_hamkq%natom, stern%nspinor)
  integer,intent(out) :: ierr
  character(len=*),intent(out) :: err_msg
- real(dp),optional,intent(out) :: full_c1g(2, stern%npw_kq*stern%nspinor)
- !complex(gpwc),optional,intent(out) :: full_u1r(nfft)
+ real(dp),optional,target,intent(out) :: full_cg1(2, stern%npw_kq*stern%nspinor)
+ complex(gwpc),optional,intent(out) :: full_ur1(gs_hamkq%nfft*stern%nspinor)
 
 !Local variables ------------------------------
 !scalars
@@ -1593,8 +1595,12 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  integer :: opt_gvnlx1, mcgq, mgscq, mcprjq, grad_berry_size_mpw1
  real(dp) :: out_resid
  type(rf2_t) :: rf2
-
  real(dp),allocatable :: grad_berry(:,:)
+ complex(gwpc),allocatable :: cwork_sp(:)
+#ifdef HAVE_GW_DPC
+ complex(gwpc),pointer :: full_ug1_dp_ptr(:)
+#endif
+
 
 ! *************************************************************************
 
@@ -1681,17 +1687,33 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  if (ierr /= 0) return
 
- if (present(full_c1g)) then
-   ! Compute full first order wavefunction.
-   NOT_IMPLEMENTED_ERROR()
-   !call full_active_wf1(stern%cgq, cprjq, cwavef, full_c1g, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
-   !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
-   !                     ster%dset%natom, nband_k, npw1_k, nspinor, 0, gs_hamkq%usepaw)
+ if (present(full_ur1) .and. .not. present(full_cg1)) then
+  ABI_ERROR("full_ur1 requires full_cg1")
+ end if
 
-   !if (present(full_u1r)) then
-   !  call fft_ug(stern%npw_kq, wfd%nfft, stern%nspinor, ndat1, gs_hamkq%mgfft, gs_hamkq%ngfft, &
-   !              istwfk1, kg_kq, gbound_kq, workq_ug, full_u1r)
-   !end if
+ if (present(full_cg1)) then
+   NOT_IMPLEMENTED_ERROR()
+   ! Compute full first order wavefunction.
+   !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
+   !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
+   !                     ster%dset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
+
+   if (present(full_ur1)) then
+     ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
+#ifdef HAVE_GW_DPC
+     ! we are using double precision -> cast full_cg1 to dp complex pointer.
+     call c_f_pointer(c_loc(full_cg1), full_ug1_dp_ptr, [stern%npw_kq * stern%nspinor])
+     call fft_ug(stern%npw_kq, gs_hamkq%nfft, stern%nspinor, ndat1, gs_hamkq%mgfft, gs_hamkq%ngfft, &
+                 istwfk1, gs_hamkq%kg_kp, gs_hamkq%gbound_kp, full_ug1_dp_ptr, full_ur1)
+#else
+     ! Transfer cgs_kbz from dp to sp and perform FFT in single precision.
+     ABI_MALLOC(cwork_sp, (stern%npw_kq * stern%nspinor))
+     cwork_sp(:,:) = full_cg1(1,:) + j_sp * full_cg1(2,:)
+     call fft_ug(stern%npw_kq, gs_hamkq%nfft, stern%nspinor, ndat1, gs_hamkq%mgfft, gs_hamkq%ngfft, &
+                 istwfk1, gs_hamkq%kg_kp, gs_hamkq%gbound_kp, cwork_sp, full_ur1)
+     ABI_FREE(cwork_sp)
+#endif
+   end if
  end if
 
 end subroutine stern_solve

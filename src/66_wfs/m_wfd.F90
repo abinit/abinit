@@ -4269,7 +4269,7 @@ subroutine wfd_rotate_cg(wfd, band, ndat, spin, kk_ibz, npw_kbz, kg_kbz, istwf_k
      call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, &
                  ugs_dp_ptr(:,1), urs_kbz(:,1))
 #else
-     ! Trasnder cgs_kbz from dp to sp and perform FFT in single precision.
+     ! Transfer cgs_kbz from dp to sp and perform FFT in single precision.
      ABI_MALLOC(cwork_sp, (npw_kbz*wfd%nspinor, ndat))
      cwork_sp(:,:) = cgs_kbz(1,:,:) + j_sp * cgs_kbz(2,:,:)
      call fft_ug(npw_kbz, wfd%nfft, wfd%nspinor, ndat, wfd%mgfft, wfd%ngfft, istwf_kbz, kg_kbz, gbound_kbz, &
