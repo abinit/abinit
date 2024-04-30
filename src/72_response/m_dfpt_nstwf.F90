@@ -312,7 +312,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file,has_vectornd
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
- logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist
+ logical :: need_wfk,need_wf1,nmxc,paral_atom,qne0,t_exist,use_ompgpu
  character(len=500) :: msg
  character(len=fnlen) :: fiwfddk(3)
  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
@@ -421,6 +421,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  my_atmtab=>mpi_enreg%my_atmtab
  my_spintab=mpi_enreg%my_isppoltab
  my_nsppol=count(my_spintab==1)
+ use_ompgpu=(dtset%gpu_option==ABI_GPU_OPENMP)
 
 !Fake MPI data to be used in sequential calls to parallel routines
  call initmpi_seq(mpi_enreg_seq)
@@ -1499,14 +1500,7 @@ has_vectornd = (with_vectornd .EQ. 1)
   ! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
                  !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
                  if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
-                   !FIXME GPU-aware collective ?
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET UPDATE FROM(gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-                   call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr)
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET UPDATE TO(gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
+                   call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr,use_omp_map=use_ompgpu)
                  end if
 
                  if (option == 1) then
@@ -1530,14 +1524,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
   !sum over all jband by combining the projbd
                  if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
-                   !FIXME GPU-aware collective ?
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET UPDATE FROM(gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-                   call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr)
-#ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET UPDATE TO(gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
+                   call xmpi_sum(gvnlx1_tmp,mpi_enreg%comm_band,ierr,use_omp_map=use_ompgpu)
                  end if
 
   ! keep my own gvnlx
@@ -1658,14 +1645,7 @@ has_vectornd = (with_vectornd .EQ. 1)
              end do
 
              if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
-               !FIXME GPU-aware collective ?
-#ifdef HAVE_OPENMP_OFFLOAD
-               !$OMP TARGET UPDATE FROM(gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-               call xmpi_sum(gvnlx2, mpi_enreg%comm_band, ierr)
-#ifdef HAVE_OPENMP_OFFLOAD
-               !$OMP TARGET UPDATE TO(gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
+               call xmpi_sum(gvnlx2, mpi_enreg%comm_band, ierr, use_omp_map=use_ompgpu)
              end if
            end if
 
