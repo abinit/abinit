@@ -813,7 +813,6 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  do isym=1,crystal%nsym
    call symredcart(crystal%rprimd,crystal%gprimd,symcart(:,:,isym),crystal%symrel(:,:,isym))
  end do
- my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
 
  natom = crystal%natom
  call phdos_malloc(phdos, crystal, ifc, dosdeltae, dossmear, wminmax, prtdos)
@@ -856,6 +855,8 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
  !my_qptopt = 3 ! This to deactivate the use of symmetries for debugging purposes.
  call kpts_ibz_from_kptrlatt(crystal, in_qptrlatt, my_qptopt, nqshft, dos_qshift, &
    phdos%nqibz, qibz, wtq_ibz, nqbz, qbz, new_kptrlatt=new_qptrlatt, new_shiftk=new_shiftq, bz2ibz=bz2ibz_smap)
+
+ my_nsym = crystal%nsym; if (my_qptopt == 3) my_nsym = 1
 
  phdos%qptrlatt = new_qptrlatt
  phdos%shiftq(:) = new_shiftq(:, 1) ! only one shift in output
