@@ -269,7 +269,7 @@ module m_gwpt
    ! wtq(nqibz)
    ! Weights of the q-points in the IBZ (normalized to one).
 
-  real(dp),allocatable :: vcar_calc(:,:,:,:)
+  !real(dp),allocatable :: vcar_calc(:,:,:,:)
    ! (3, max_nbcalc, nkcalc, nsppol))
    ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
 
@@ -401,7 +401,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, qq_is_gamma, pp_is_gamma
  logical :: stern_use_cache, intra_band, same_band, stern_has_band_para, use_ftinterp
- type(krank_t) :: krank_ibz, qrank_ibz
+ type(krank_t) :: qrank_ibz ! krank_ibz,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
@@ -441,7 +441,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,gkq2,eig0nk,eig0mkq !eig0mk,
  real(dp),allocatable,target :: cgq(:,:,:)
- real(dp),allocatable :: qlwl(:,:)
+ real(dp),allocatable :: qlwl(:,:),vcar_calc(:,:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -454,7 +454,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), rhor(:,:)
  real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
- real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
+ !real(dp),allocatable :: wtk(:), kibz(:,:), kbz(:,:)
  !real(dp),allocatable :: phfreqs_qibz(:,:), pheigvec_qibz(:,:,:,:), eigvec_qpt(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
@@ -655,13 +655,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(gbound_kmp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(gbound_kqmp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(gbound_pp, (2*wfd%mgfft+8, 2))
+ ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
 
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
- ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
- ABI_CALLOC(gwpt%vcar_calc, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
+ ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
 
+ ABI_CALLOC(vcar_calc, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  ! Consider only the nk states in gwpt_nk
@@ -681,17 +682,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-       gwpt%vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
      end do
 
    end do
  end do
- call xmpi_sum(gwpt%vcar_calc, comm, ierr)
-
+ call xmpi_sum(vcar_calc, comm, ierr)
  ! Write v_nk to disk.
  !if (my_rank == master) then
- !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vcar_calc"), gwpt%vcar_calc))
+ !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vcar_calc"), vcar_calc))
  !end if
+ ABI_FREE(vcar_calc)
 
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
@@ -903,21 +904,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! First order change (full term including active space)
  ABI_MALLOC(cg1_kqmp, (2, mpw*nspinor))
 
- ! Build krank_ibz object to find k-points
- krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
-
  ! Find correspondence IBZ_k --> IBZ
  ! Assume qptopt == kptopt unless value is specified in input
- qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- qtimrev = kpts_timrev_from_kptopt(qptopt)
-
- ! Get full BZ associated to ebands
- call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
-   nkibz, kibz, wtk, nkbz, kbz) !, bz2ibz=bz2ibz)
-
- ABI_FREE(wtk)
- ABI_FREE(kibz)
- ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
+ !qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
+ !qtimrev = kpts_timrev_from_kptopt(qptopt)
 
  nbsum = dtset%mband
  nbsum = 1 ! DEBUG
@@ -1023,7 +1013,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !
        kq = kk + qq_ibz
 
-       if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kq, mapl_kq) /= 0) then
+       if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kq, mapl_kq) /= 0) then
          write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q could not be generated from a symmetrical one.",trim(ltoa(kq))
          ABI_ERROR(msg)
        end if
@@ -1071,11 +1061,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
          !print *, "Begin sum over pp: ", trim(ktoa(pp))
-         if (ipp_bz > 3) cycle ! DEBUG
+         if (ipp_bz > 12) cycle ! DEBUG
 
          ! Symmetry tables and g-sphere centered on k-p
          kmp = kk - pp
-         if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kmp, mapl_kmp) /= 0) then
+         if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kmp, mapl_kmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-p could not be generated from a symmetrical one.",trim(ltoa(kmp))
            ABI_ERROR(msg)
          end if
@@ -1088,7 +1078,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Symmetry tables and g-sphere centered on k+q-p
          kqmp = kq - pp
-         if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
+         if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q-p could not be generated from a symmetrical one.",trim(ltoa(kqmp))
            ABI_ERROR(msg)
          end if
@@ -1282,7 +1272,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Free memory
- ABI_FREE(kbz)
  ABI_FREE(kg_k)
  ABI_FREE(kg_kq)
  ABI_FREE(kg_kmp)
@@ -1313,14 +1302,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(gbound_kqmp)
  ABI_FREE(gbound_pp)
 
-
  call gs_ham_kq%free()
  call wfd%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
- call krank_ibz%free()
  call vcp%free()
  call w%free()
  call pp_mesh%free()
@@ -1846,7 +1833,7 @@ subroutine gwpt_free(gwpt)
 
  ! real
  ABI_SFREE(gwpt%kcalc)
- ABI_SFREE(gwpt%vcar_calc)
+
  ABI_SFREE(gwpt%qbz)
  ABI_SFREE(gwpt%qibz)
  ABI_SFREE(gwpt%wtq)
