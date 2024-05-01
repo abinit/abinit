@@ -150,7 +150,7 @@ module m_gwpt
   type(xcomm_t) :: pert_comm
    ! MPI communicator for parallelism over atomic perturbations.
 
-  type(xcomm_t) :: qb_comm
+  !type(xcomm_t) :: qb_comm
    ! MPI communicator used to distribute (band_sum, q-points)
 
   type(xcomm_t) :: qpt_comm
@@ -165,7 +165,7 @@ module m_gwpt
   type(xcomm_t) :: spin_comm
    ! MPI communicator for parallelism over spins (high-level)
 
-  type(xcomm_t) :: pqb_comm
+  !type(xcomm_t) :: pqb_comm
     ! MPI communicator for the (perturbation, band_sum, qpoint_sum)
 
   type(xcomm_t) :: ncwrite_comm
@@ -180,23 +180,15 @@ module m_gwpt
   integer :: nqibz
    ! Number of q-points in the (dense) IBZ for gwpt integration
 
-  integer :: lgk_nsym
-   ! Number of symmetries in the little group of k. Depends on ikcalc.
-
   integer :: ncid = nctk_noid
    ! Netcdf file handle used to save results.
 
-  integer :: mpw
+  !integer :: mpw
    ! Maximum number of PWs for all possible k+q
 
   complex(dpc) :: ieta
    ! Used to shift the poles in the complex plane (Ha units)
    ! Corresponds to `i eta` term in equations.
-
-  logical :: use_ftinterp = .False.
-   ! whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
-
-  integer :: gmax(3)
 
   integer :: ngqpt(3)
    ! Number of divisions in the Q mesh in the BZ.
@@ -254,10 +246,6 @@ module m_gwpt
   integer,allocatable:: ind_qbz2ibz(:,:)
    ! (6, %nqibz)
    ! Mapping qBZ to IBZ
-
-  integer,allocatable :: qibz2dvdb(:)
-   ! (%nqibz))
-   ! Mapping dvdb%ibz --> %ibz
 
   integer,allocatable :: nbsum_rank(:,:)
    ! (%bsum_comm%nproc, 2)
@@ -370,7 +358,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(dataset_type),intent(inout) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(dvdb_t),intent(inout) :: dvdb
+ type(dvdb_t),intent(inout) :: dvdb !, drhodb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
@@ -404,7 +392,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop, sendcount !iatom,
+ integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request
  integer :: nkibz, nkbz, qptopt, qtimrev, my_iq, my_ik
@@ -412,7 +400,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, qq_is_gamma, pp_is_gamma
- logical :: stern_use_cache, intra_band, same_band, stern_has_band_para
+ logical :: stern_use_cache, intra_band, same_band, stern_has_band_para, use_ftinterp
  type(krank_t) :: krank_ibz, qrank_ibz
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
@@ -445,6 +433,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: ibzspin_2ikcalc(:,:)
  integer, allocatable :: displs(:), recvcounts(:)
+ integer,allocatable :: qibz2dvdb(:)
  integer,pointer :: kg_pp(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfrq(3*cryst%natom), dotri(2), qq_ibz(3), qpt(3) !qpt_cart(3),
@@ -503,7 +492,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Check if a previous GSTORE file is present to restart the calculation
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
- ! and we compare the variables with the state of the code (i.e. new gwpt generated in gwpt_new)
+ ! and we compare the variables with the state of the code
  !restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  Read mask
@@ -570,14 +559,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
  call qrank_ibz%free()
 
- if (my_rank == master) then
-   call gwpt%print(dtset, ab_out)
-   call gwpt%print(dtset, std_out)
- end if
+ !if (my_rank == master) then
+ !  call gwpt%print(dtset, ab_out)
+ !  call gwpt%print(dtset, std_out)
+ !end if
 
-
+ ! Compute mpw and gmax
+ ! TODO: here we have the additional pp to be considered !
  ! This is the maximum number of PWs for all possible k+q treated.
- mpw = gwpt%mpw; gmax = gwpt%gmax
+ call gstore%get_mpw_gmax(ecut, mpw, gmax)
 
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
@@ -711,7 +701,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! to reduce the number of calls to ifc%fourq (expensive if dipdip == 1)
 
  ! Radius of sphere with volume equivalent to the micro zone.
- q0rad = two_pi * (three / (four_pi * cryst%ucvol * gwpt%nqbz)) ** third
+ q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
  bz_vol = two_pi**3 / cryst%ucvol
 
  ! Prepare call to getgh1c
@@ -756,26 +746,32 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
+ !call drhodb%open_read(ngfftf, xmpi_comm_self)
 
  my_npert = gwpt%my_npert
  if (gwpt%pert_comm%nproc > 1) then
    !  Activate parallelism over perturbations
    call dvdb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
+   !call drhodb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
  end if
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
+ ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
  ! Activate FT interpolation automatically if required q-points in the IBZ are not found in the DVDB.
- gwpt%use_ftinterp = .False.
- ABI_MALLOC(gwpt%qibz2dvdb, (gwpt%nqibz))
- if (dvdb%find_qpts(gwpt%nqibz, gwpt%qibz, gwpt%qibz2dvdb, comm) /= 0) then
+
+ ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
+ ! TODO: Make sure we have the same ibz in rho1%ibz
+ use_ftinterp = .False.
+ ABI_MALLOC(qibz2dvdb, (gstore%nqibz))
+ if (dvdb%find_qpts(gstore%nqibz, gstore%qibz, qibz2dvdb, comm) /= 0) then
    call wrtout(units, " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
-   gwpt%use_ftinterp = .True.
+   use_ftinterp = .True.
  else
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
-   gwpt%use_ftinterp = .False.
+   use_ftinterp = .False.
  end if
 
- if (gwpt%use_ftinterp) then
+ if (use_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt
    ! Note that when R-points are distributed inside qpt_comm we cannot interpolate potentials on-the-fly
@@ -788,11 +784,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    comm_rpt = xmpi_comm_self
    qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   !call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
-   ABI_MALLOC(qselect, (gwpt%nqibz))
+   ABI_MALLOC(qselect, (gstore%nqibz))
    qselect = 1
-   call dvdb%ftqcache_build(nfftf, ngfftf, gwpt%nqibz, gwpt%qibz, dtset%dvdb_qcache_mb, qselect, gwpt%itreat_qibz, comm)
+   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, gwpt%itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -800,20 +797,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
 
  call dvdb%print(prtvol=dtset%prtvol)
+ !call drhodb%print(prtvol=dtset%prtvol)
 
- if (.not. gwpt%use_ftinterp) then
+ if (.not. use_ftinterp) then
    ! Need to translate itreat_qibz into itreatq_dvdb.
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
-   do iq_ibz=1,gwpt%nqibz
+   do iq_ibz=1,gstore%nqibz
      if (gwpt%itreat_qibz(iq_ibz) == 0) cycle
-     db_iqpt = gwpt%qibz2dvdb(iq_ibz)
-     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gwpt%qibz(:, iq_ibz)), "in the DVDB file."))
+     db_iqpt = qibz2dvdb(iq_ibz)
+     ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
    end do
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
+ ABI_FREE(qibz2dvdb)
  ABI_FREE(qselect)
 
  ! ================
@@ -921,8 +920,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
 
  nbsum = dtset%mband
- ! FIXME
- nbsum = 1
+ nbsum = 1 ! DEBUG
+
+ stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
 
  ! =================================================
  ! Loop over spins and q-points (usually in the IBZ)
@@ -930,33 +930,24 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  do my_spin=1,gstore%my_nspins
    spin = gstore%my_spins(my_spin)
    gqk => gstore%gqk(my_spin)
-   !do iq_ibz=1,gwpt%nqibz
    do my_iq=1,gqk%my_nq
+     if (my_iq > 3) cycle ! DEBUG
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
-     iq_bz = gqk%my_q2bz(my_iq)
+     qq_is_gamma = sum(qpt**2) < tol14
 
+     ! Note symrec conventions here.
+     iq_bz = gqk%my_q2bz(my_iq)
      iq_ibz = gqk%my_q2ibz(1, my_iq) !; isym_q = gqk%my_q2ibz(2, my_iq)
      !trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      !tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
-
-     ! Note symrec conventions here.
      mapc_qq = gqk%my_q2ibz(:, my_iq)
-
-     !qq_ibz = gwpt%qibz(:, iq_ibz)
-     !qpt = qq_ibz
-
-     qq_is_gamma = sum(qpt**2) < tol14
+     !ABI_CHECK(isirr_q, "The q-point is usually in the IBZ!")
 
      !if (done_qbz_spin(iq_bz, spin) == 1) cycle
      call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
      call wrtout(std_out, sjoin(" Computing g^GW(k,q) for q:", ktoa(qpt), "spin:", itoa(spin)))
-
-     ! Note symrec conventions here.
-     !if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, 1, qpt, mapc_qq) /= 0) then
-     !  ABI_ERROR("Cannot map qBZ to qIBZ!")
-     !end if
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
      ! Compute phonons for this qpt.
@@ -969,7 +960,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !   v1scf(cplex, nfftf, nspden, my_npert))
      !   vxc1(cplex, nfft, nspden, my_npert)
 
-     if (gwpt%use_ftinterp) then
+     if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
        !call drhodb%get_rho1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
@@ -996,26 +987,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! ========================================================================
      ! Loop over k-points in the e-ph matrix elements (usually in the full BZ).
      ! ========================================================================
-#if 0
      do my_ik=1,gqk%my_nk
+       if (my_ik > 12) cycle ! DEBUG
+       ! Symmetry indices for kk.
        kk = gqk%my_kpts(:, my_ik)
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
        ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        mapl_k = gqk%my_k2ibz(:, my_ik)
-#else
-
-     do my_ikcalc=1,gwpt%my_nkcalc
-       ! Symmetry indices for kk.
-       ikcalc = gwpt%my_ikcalc(my_ikcalc)
-       kk = gwpt%kcalc(:, ikcalc)
-       ik_ibz = gwpt%kcalc2ibz(ikcalc, 1); isym_k = gwpt%kcalc2ibz(ikcalc, 2)
-       trev_k = gwpt%kcalc2ibz(ikcalc, 6); g0_k = gwpt%kcalc2ibz(ikcalc, 3:5)
-       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-       mapl_k = gwpt%kcalc2ibz(ikcalc, :)
-       !ABI_CHECK(isirr_k, "For the time being the k-point in gwpt_{nk} must be in the IBZ")
-#endif
+       print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
 
        kk_ibz = ebands%kptns(:,ik_ibz)
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
@@ -1090,6 +1071,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
          !print *, "Begin sum over pp: ", trim(ktoa(pp))
+         if (ipp_bz > 3) cycle ! DEBUG
 
          ! Symmetry tables and g-sphere centered on k-p
          kmp = kk - pp
@@ -1143,8 +1125,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            nband_me = nbsum
            stern_comm = xmpi_comm_self
          !end if
-         stern_use_cache = merge(.True., .False., dtset%eph_stern == 1)
 
+#if 0
          call stern_kmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
          ! =========================================================
@@ -1167,6 +1149,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              !print *, "stern_kmp%cgq:", stern_kmp%cgq(:, 1:3, ib_sum)
            end if
          end do
+#endif
 
          ! =========================================================
          ! Get GS wavefunctions at ?? and store them in stern_kqmp.
@@ -1250,6 +1233,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! NSCF Sternheimer
            ! ================
            ! This is just to test stern_kmp%solve for pp == 0, other values of pp won't work.
+#if 0
            if (pp_is_gamma .and. nbsum /= 1) then
            do ib_sum=1, nbsum
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
@@ -1268,6 +1252,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ABI_CHECK(ierr == 0, msg)
            end do ! ibsum
            end if
+#endif
 
            call rf_ham_kq%free()
            ABI_FREE(kinpw1)
@@ -1276,7 +1261,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ABI_SFREE(ph3d1)
          end do ! imyp
 
-         call stern_kmp%free()
+         !call stern_kmp%free()
        end do ! ipp_bz
 
        ABI_FREE(kpg_k)
@@ -1448,8 +1433,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
  if (kpts_map("symrec", qtimrev, cryst, qrank_ibz, gwpt%nqbz, gwpt%qbz, temp) /= 0) then
    ABI_ERROR("Cannot map qBZ to qIBZ!")
  end if
-
- !call qrank_ibz%free()
 
  gwpt%ind_qbz2ibz(1,:) = temp(1,:)
  gwpt%ind_qbz2ibz(2,:) = temp(2,:)
@@ -1630,11 +1613,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
  ABI_MALLOC(gwpt%bstop_ks, (gwpt%nkcalc, gwpt%nsppol))
  gwpt%bstop_ks = gwpt%bstart_ks + gwpt%nbcalc_ks - 1
 
- ! Compute mpw and gmax
- call ephtk_get_mpw_gmax(gwpt%nkcalc, gwpt%kcalc, ecut, cryst%gmet, gwpt%mpw, gwpt%gmax, comm)
- call wrtout(std_out, sjoin(' Optimal value of mpw:', itoa(gwpt%mpw), "gmax:", ltoa(gwpt%gmax)))
- call cwtime_report(" gwpt_new: mpw", cpu, wall, gflops)
-
  ! Define number of bands included in self-energy summation as well as the band range.
  ! This value depends on the kind of calculation as imag_only can take advantage of
  ! the energy window aroud the band edges.
@@ -1730,9 +1708,9 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
  ! Create communicator for spins.
  keepdim = .False.; keepdim(5) = .True.; call gwpt%spin_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for the (band_sum, qpoint_sum) loops
- keepdim = .False.; keepdim(2:3) = .True.; call gwpt%qb_comm%from_cart_sub(comm_cart, keepdim)
+ !keepdim = .False.; keepdim(2:3) = .True.; call gwpt%qb_comm%from_cart_sub(comm_cart, keepdim)
  ! Create communicator for the (perturbation, band_sum, qpoint_sum)
- keepdim = .False.; keepdim(1:3) = .True.; call gwpt%pqb_comm%from_cart_sub(comm_cart, keepdim)
+ !keepdim = .False.; keepdim(1:3) = .True.; call gwpt%pqb_comm%from_cart_sub(comm_cart, keepdim)
 
  call xmpi_comm_free(comm_cart)
 #endif
@@ -1864,7 +1842,6 @@ subroutine gwpt_free(gwpt)
  ABI_SFREE(gwpt%my_pinfo)
  ABI_SFREE(gwpt%pert_table)
  ABI_SFREE(gwpt%ind_qbz2ibz)
- ABI_SFREE(gwpt%qibz2dvdb)
  ABI_SFREE(gwpt%nbsum_rank)
 
  ! real
@@ -1886,10 +1863,10 @@ subroutine gwpt_free(gwpt)
  call gwpt%pert_comm%free()
  call gwpt%qpt_comm%free()
  call gwpt%bsum_comm%free()
- call gwpt%qb_comm%free()
+ !call gwpt%qb_comm%free()
  call gwpt%kcalc_comm%free()
  call gwpt%spin_comm%free()
- call gwpt%pqb_comm%free()
+ !call gwpt%pqb_comm%free()
  call gwpt%ncwrite_comm%free()
 
  ! Close netcdf file.

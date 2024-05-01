@@ -1678,6 +1678,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
  call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
+ !stern%mpi_enreg%comm_band = comm_band
  stern%mpi_enreg%me_band = xmpi_comm_rank(comm_band)
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
  stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
