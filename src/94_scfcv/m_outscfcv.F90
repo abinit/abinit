@@ -1104,7 +1104,7 @@ if (dtset%prt_lorbmag==1) then
  end if
  if (prtnabla<0) then
    ! TODO: This routine is not tested but it's used in production.
-   call optics_vloc(cg,dtfil,gprimd,hdr,kg,&
+   call optics_vloc(cg,dtfil,dtset,eigen,gprimd,hdr,kg,&
 &   mband,mcg,mkmem,mpi_enreg,mpw,nkpt,npwarr,nsppol)
  end if
 

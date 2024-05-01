@@ -2083,12 +2083,12 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
    end if
 
    call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-   &   energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
-   &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
-   &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
-   &   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
-   &   vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
-   &   add_tfw=tfw_activated,vxctau=vxctau)
+&   energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
+&   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
+&   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
+&   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
+&   vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
+&   add_tfw=tfw_activated,vxctau=vxctau)
 
    if (nhatgrdim>0)  then
      ABI_FREE(nhatgr)
