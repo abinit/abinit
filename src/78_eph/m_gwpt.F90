@@ -96,201 +96,7 @@ module m_gwpt
  include 'mpif.h'
 #endif
 
-!----------------------------------------------------------------------
-
-!!****t* m_gwpt/gwpt_t
-!! NAME
-!! gwpt_t
-!!
-!! FUNCTION
-!! Container for the (diagonal) matrix elements of the electron-phonon self-energy
-!! in the KS representation i.e. gwpt_eph(omega, T, band, k, spin).
-!! Provides methods to compute QP corrections, spectral functions, QP linewidths and
-!! save the results to netcdf file.
-!!
-!! SOURCE
-
- type,public :: gwpt_t
-
-  integer :: nkcalc
-   ! Number of k-points computed (inside energy window)
-
-  integer :: max_nbcalc
-   ! Maximum number of bands computed (max over nkcalc and spin).
-
-  integer :: nsppol
-   ! Number of independent spin polarizations.
-
-  integer :: nspinor
-   ! Number of spinor components.
-
-  integer :: symsigma
-   ! 1 if matrix elements should be symmetrized.
-   ! Required when the sum over q in the BZ is replaced by IBZ(k).
-
-  integer :: timrev
-   ! timrev = 1 if the use of time-reversal is allowed; 0 otherwise
-
-  integer :: nbsum
-   ! Total number of bands used in sum over states without taking into account MPI distribution.
-
-  integer :: bsum_start, bsum_stop
-   ! First and last band included in self-energy sum without taking into account MPI distribution inside bsum_comm
-   ! nbsum = bsum_stop - bsum_start + 1
-
-  integer :: my_bsum_start, my_bsum_stop
-   ! Initial and final band index included in self-energy sum
-   ! Processor-dependent if Re-Im calculation.
-   ! Processor-independent and computed at runtime on the basis of the nk states in gwpt_{nk} if imag_only
-
-  integer :: my_npert
-   ! Number of atomic perturbations or phonon modes treated by this MPI rank.
-   ! Note that natom3 are equally distributed. This allows us to use allgather instead of allgatherv
-
-  type(xcomm_t) :: pert_comm
-   ! MPI communicator for parallelism over atomic perturbations.
-
-  !type(xcomm_t) :: qb_comm
-   ! MPI communicator used to distribute (band_sum, q-points)
-
-  type(xcomm_t) :: qpt_comm
-   ! MPI communicator for q-points
-
-  type(xcomm_t) :: bsum_comm
-   ! MPI communicator for bands in self-energy sum
-
-  type(xcomm_t) :: kcalc_comm
-   ! MPI communicator for parallelism over k-points (high-level)
-
-  type(xcomm_t) :: spin_comm
-   ! MPI communicator for parallelism over spins (high-level)
-
-  !type(xcomm_t) :: pqb_comm
-    ! MPI communicator for the (perturbation, band_sum, qpoint_sum)
-
-  type(xcomm_t) :: ncwrite_comm
-   ! MPI communicator for parallel netcdf IO used to write results for the different k-points/spins
-
-  integer :: coords_pqbks(5)
-   ! Cartesian coordinates of this processor in the Cartesian grid.
-
-  integer :: nqbz
-   ! Number of q-points in the (dense) BZ for gwpt integration
-
-  integer :: nqibz
-   ! Number of q-points in the (dense) IBZ for gwpt integration
-
-  integer :: ncid = nctk_noid
-   ! Netcdf file handle used to save results.
-
-  !integer :: mpw
-   ! Maximum number of PWs for all possible k+q
-
-  complex(dpc) :: ieta
-   ! Used to shift the poles in the complex plane (Ha units)
-   ! Corresponds to `i eta` term in equations.
-
-  integer :: ngqpt(3)
-   ! Number of divisions in the Q mesh in the BZ.
-
-  integer,allocatable :: bstart_ks(:,:)
-   ! bstart_ks(nkcalc, nsppol)
-   ! Initial KS band index included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all degenerate states should be included when symmetries are used.
-
-  integer,allocatable :: bstop_ks(:,:)
-   ! bstop_ks(nkcalc, nsppol)
-
-  integer,allocatable :: nbcalc_ks(:,:)
-   ! nbcalc_ks(nkcalc, nsppol)
-   ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
-   ! Depends on spin because all degenerate states should be included when symmetries are used.
-
-  integer,allocatable :: kcalc2ibz(:,:)
-   !kcalc2ibz(nkcalc, 6))
-   ! Mapping ikcalc --> IBZ as reported by listkk.
-
-  integer :: my_nspins
-   ! Number of spins treated by this MPI rank
-
-  integer,allocatable :: my_spins(:)
-   ! my_spins(my_nspins)
-   ! Indirect table giving the spin indices treated by this MPI rank.
-   ! Used only in the collinear case with nsppol = 2 and nspinor == 1
-
-  integer :: my_nkcalc
-   ! Number of k-points treated by this MPI rank
-
-  integer,allocatable :: my_ikcalc(:)
-   ! my_ikcalc(my_nkcalc)
-   ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
-
-  !integer(i1b),allocatable :: itreat_qibz(:)
-   ! itreat_qibz(nqibz)
-   ! Table used to distribute potentials over q-points in the IBZ.
-   ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm according to this table.
-   ! 0 if this IBZ point is not treated by this proc.
-   ! 1 if this IBZ is treated.
-
-  integer,allocatable :: my_pinfo(:,:)
-   ! my_pinfo(3, my_npert)
-   ! my_pinfo(1, ip) gives the `idir` index of the ip-th perturbation.
-   ! my_pinfo(2, ip) gives the `ipert` index of the ip-th perturbation.
-   ! my_pinfo(3, ip) gives `pertcase`=idir + (ipert-1)*3
-
-  integer,allocatable :: pert_table(:,:)
-   ! pert_table(2, natom3)
-   ! pert_table(1, npert): rank of the processor treating this atomic perturbation.
-   ! pert_table(2, npert): imyp index in my_pinfo table, -1 if this rank is not treating ipert.
-
-  integer,allocatable:: ind_qbz2ibz(:,:)
-   ! (6, %nqibz)
-   ! Mapping qBZ to IBZ
-
-  integer,allocatable :: nbsum_rank(:,:)
-   ! (%bsum_comm%nproc, 2)
-   ! (rank+1, 1): Number of bands treated by rank in %bsum_comm.
-   ! (rank+1, 2): bsum_start of MPI rank
-   ! Available only if .not. imag_only
-
-  real(dp),allocatable :: kcalc(:,:)
-   ! kcalc(3, nkcalc)
-   ! List of k-points where the self-energy is computed.
-
-  real(dp),allocatable :: qbz(:,:)
-   ! qbz(3, nqbz)
-   ! Reduced coordinates of the q-points in the full BZ.
-
-  real(dp),allocatable :: qibz(:,:)
-   ! qibz(3, nqibz)
-   ! Reduced coordinates of the q-points in the IBZ (full simmetry of the system).
-
-  real(dp),allocatable :: wtq(:)
-   ! wtq(nqibz)
-   ! Weights of the q-points in the IBZ (normalized to one).
-
-  !real(dp),allocatable :: vcar_calc(:,:,:,:)
-   ! (3, max_nbcalc, nkcalc, nsppol))
-   ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
-
-  type(degtab_t),allocatable :: degtab(:,:)
-   ! (nkcalc, nsppol)
-   ! Table used to average QP results in the degenerate subspace if symsigma == 1
-
-  contains
-
-    procedure :: print => gwpt_print
-     ! Print results to main output file.
-
-    procedure :: free => gwpt_free
-     ! Free gwpt object
-
- end type gwpt_t
-!!***
-
  public :: gwpt_run        ! Main entry point to compute GWpt matrix elements
-
- real(dp),private,parameter :: TOL_EDIFF = 0.001_dp * eV_Ha
 
 !----------------------------------------------------------------------
 
@@ -373,7 +179,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
+ integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm
  integer :: my_rank,nsppol,nkpt,iq_ibz,iq_bz,my_npert
@@ -394,13 +200,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request
- integer :: nkibz, nkbz, qptopt, qtimrev, my_iq, my_ik
+ integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, root_ncid
+ integer :: nkibz, nkbz, qptopt, my_iq, my_ik
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, qq_is_gamma, pp_is_gamma
  logical :: stern_use_cache, intra_band, same_band, stern_has_band_para, use_ftinterp
+ complex(dpc) :: ieta
  type(krank_t) :: qrank_ibz ! krank_ibz,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
@@ -494,6 +301,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
  nspden = dtset%nspden; nkpt = ebands%nkpt
 
+ ieta = +j_dpc * dtset%zcut
+
  ! Check if a previous GSTORE file is present to restart the calculation
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code
@@ -501,41 +310,43 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
     if (file_exists(gstore_filepath)) then
-     !restart = 1
-     !if (any(sigma_restart%qp_done /= 1)) then
-     !  call sigma%compare(sigma_restart)
-     !  ! Get list of QP states that have been computed.
-     !  sigma%qp_done = sigma_restart%qp_done
-     !  restart = 1
-     !  call wrtout(units, "- Restarting from previous SIGEPH.nc file")
-     !  call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
-     !else
-     !  restart = 0; sigma%qp_done = 0
-     !  msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
-     !              "Will overwrite:", sigeph_filepath, ch10, &
-     !              "Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
-     !  call wrtout(ab_out, sjoin("WARNING: ", msg))
-     !  ABI_WARNING(msg)
-     !  ! Keep backup copy
-     !  ABI_CHECK(clib_rename(sigeph_filepath, strcat(sigeph_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
-     !end if
+       !NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
+       !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", gstore%nqbz))
+       !ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+       !NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
+       !NCF_CHECK(nf90_close(root_ncid))
+
+       !restart = 1
+       !if (any(sigma_restart%qp_done /= 1)) then
+       !  restart = 1
+       !  call wrtout(units, "- Restarting from previous SIGEPH.nc file")
+       !  call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
+       !else
+       !  restart = 0; sigma%qp_done = 0
+       !  msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+       !              "Will overwrite:", gstore_filepath, ch10, &
+       !              "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
+       !  call wrtout(ab_out, sjoin("WARNING: ", msg))
+       !  ABI_WARNING(msg)
+       !  ! Keep backup copy
+       !  ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
+       !end if
     end if
  end if
 
- call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
- ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+ call xmpi_bcast(restart, master, comm, ierr)
+ !call xmpi_bcast(gwpt%qp_done, master, comm, ierr)
 
- !NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
- !NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
- !NCF_CHECK(nf90_close(root_ncid))
+ if (restart == 0) then
+   call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
+   ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+ else
+   call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
+   NOT_IMPLEMENTED_ERROR()
+   ! TODO: Read mask
+ end if
 
  !ndone = count(done_qbz_spin == 1)
-
- !  Read mask
- !call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
-
- !call xmpi_bcast(restart, master, comm, ierr)
- !call xmpi_bcast(gwpt%qp_done, master, comm, ierr)
 
  !if (restart == 0) then
  !  call gwpt%write(dtset, cryst, ebands, wfk_hdr, dtfil, comm)
@@ -558,10 +369,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
 
  ecut = dtset%ecut ! dtset%dilatmx
-
- ! Construct object to store final results.
- !gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
- !call qrank_ibz%free()
 
  !if (my_rank == master) then
  !  call gwpt%print(dtset, ab_out)
@@ -677,10 +484,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
 #endif
-
- ! Precompute phonon frequencies and eigenvectors in the IBZ.
- ! These quantities are then used to symmetrize quantities for q in the IBZ(k) in order
- ! to reduce the number of calls to ifc%fourq (expensive if dipdip == 1)
 
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
@@ -909,11 +712,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! First order change (full term including active space)
  ABI_MALLOC(cg1_kqmp, (2, mpw*nspinor))
 
- ! Find correspondence IBZ_k --> IBZ
- ! Assume qptopt == kptopt unless value is specified in input
- !qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- !qtimrev = kpts_timrev_from_kptopt(qptopt)
-
  nbsum = dtset%mband
  nbsum = 1 ! DEBUG
 
@@ -977,7 +775,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
-     print *, "my_npert", my_npert
+     !print *, "my_npert", my_npert
      ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert), ierr)
 
      ! ========================================================================
@@ -992,7 +790,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
        isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
        mapl_k = gqk%my_k2ibz(:, my_ik)
-       print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
+       !print *, "my_ik", my_ik, " of my_nk:", gqk%my_nk
 
        kk_ibz = ebands%kptns(:,ik_ibz)
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
@@ -1063,6 +861,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Be careful here because pp should run over the list of wavevectors in the screening!
        ! as pp_mesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions.
        ! and we have to use ipp_bz to get/symmetrize W(pp_bz).
+       ! TODO: Should oredere nbz in shells so that one can reduce the memory required to store W(pp)
+       ! if we activate pp-parallelism.
        do ipp_bz=1,pp_mesh%nbz
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
@@ -1243,7 +1043,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              end if
              call stern_kmp%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
-                                  cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr) ! , &
+                                  cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr) !, &
                                   !full_cg1=full_cg1_kmpq, full_ur1=full_ur1_kmpq)
              ABI_CHECK(ierr == 0, msg)
            end do ! ibsum
@@ -1264,7 +1064,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_FREE(ffnl_k)
        ABI_FREE(kpg1_k)
        ABI_FREE(ffnl_kq)
-       !
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
      end do ! my_ik
@@ -1318,540 +1117,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call pp_mesh%free()
  call gsph_c%free()
  call gstore%free()
- !call gwpt%free()
 
  ! This to make sure that the parallel output of GSTORE is completed
  call xmpi_barrier(comm)
  call cwtime_report(" gwpt_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 end subroutine gwpt_run
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_gwpt/gwpt_new
-!! NAME
-!!  gwpt_new
-!!
-!! FUNCTION
-!!  Creation method (allocates memory, initialize data from input vars).
-!!
-!! INPUTS
-!!  dtset<dataset_type>=All input variables for this dataset.
-!!  ecut=Cutoff energy for wavefunctions.
-!!  cryst<crystal_t>=Crystalline structure
-!!  ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!!  ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
-!!  dtfil<datafiles_type>=variables related to files.
-!!  comm=MPI communicator
-!!
-!! SOURCE
-
-type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm) result(gwpt)
-
-!Arguments ------------------------------------
- integer,intent(in) :: comm
- real(dp),intent(in) :: ecut
- type(crystal_t),intent(in) :: cryst
- type(dataset_type),intent(in) :: dtset
- type(ebands_t),intent(in) :: ebands
- type(ifc_type),intent(in) :: ifc
- type(datafiles_type),intent(in) :: dtfil
- type(krank_t),intent(out) :: qrank_ibz
-
-!Local variables ------------------------------
-!scalars
- integer,parameter :: master = 0, istwfk1 = 1
- integer :: my_rank,my_nshiftq,cnt,nprocs,ik_ibz,ndeg, iq_ibz, qptopt, qtimrev
- integer :: ii, ierr, spin, gap_err, ikcalc, qprange_, bstop !it, ipw, i1,i2,i3,
- integer :: jj, bstart, natom, natom3
- integer :: isym_k, trev_k, mband, nrest, color
- character(len=5000) :: msg
- real(dp) :: cpu_all, wall_all, gflops_all, cpu, wall, gflops
- logical :: changed, isirr_k
- type(gaps_t) :: gaps
- type(krank_t) :: krank_ibz
-!arrays
- integer :: g0_k(3), units(2), indkk_k(6,1), qptrlatt(3,3)  !band_block(2),
- integer,allocatable :: temp(:,:), degblock(:,:), degblock_all(:,:,:,:), ndeg_all(:,:), iperm(:)
- real(dp):: my_shiftq(3,1), kk(3) !, kq(3)
-#ifdef HAVE_MPI
- integer,parameter :: ndims = 5
- integer :: comm_cart, me_cart
- logical :: reorder
- integer :: dims(ndims)
- logical :: periods(ndims), keepdim(ndims)
-#endif
-
-! *************************************************************************
-
- ABI_UNUSED(dtfil%ireadden)
- ABI_UNUSED(ifc%natom)
-
-
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
-
- call cwtime(cpu_all, wall_all, gflops_all, "start")
- call cwtime(cpu, wall, gflops, "start")
-
- units = [std_out, ab_out]
-
- ! Copy important dimensions.
- gwpt%nsppol = ebands%nsppol; gwpt%nspinor = ebands%nspinor; mband = dtset%mband
- natom = cryst%natom; natom3 = cryst%natom * 3
-
- ! Broadening parameter from zcut
- gwpt%ieta = + j_dpc * dtset%zcut
-
- ! Define q-mesh for integration of the self-energy.
- ! Either q-mesh from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation if q not in DDB)
- gwpt%ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
- if (all(dtset%eph_ngqpt_fine /= 0)) then
-   gwpt%ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
- end if
-
- ! Setup IBZ, weights and BZ.
- ! Assume qptopt == kptopt unless value is specified in input
- qptrlatt = 0; qptrlatt(1, 1) = gwpt%ngqpt(1); qptrlatt(2, 2) = gwpt%ngqpt(2); qptrlatt(3, 3) = gwpt%ngqpt(3)
- qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
- qtimrev = kpts_timrev_from_kptopt(qptopt)
- call kpts_ibz_from_kptrlatt(cryst, qptrlatt, qptopt, my_nshiftq, my_shiftq, &
-                             gwpt%nqibz, gwpt%qibz, gwpt%wtq, gwpt%nqbz, gwpt%qbz, bz2ibz=gwpt%ind_qbz2ibz)
-
- ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
- ABI_MALLOC(temp, (6, gwpt%nqbz))
-
- qrank_ibz = krank_from_kptrlatt(gwpt%nqibz, gwpt%qibz, qptrlatt, compute_invrank=.False.)
- if (kpts_map("symrec", qtimrev, cryst, qrank_ibz, gwpt%nqbz, gwpt%qbz, temp) /= 0) then
-   ABI_ERROR("Cannot map qBZ to qIBZ!")
- end if
-
- gwpt%ind_qbz2ibz(1,:) = temp(1,:)
- gwpt%ind_qbz2ibz(2,:) = temp(2,:)
- gwpt%ind_qbz2ibz(3,:) = temp(6,:)
- gwpt%ind_qbz2ibz(4,:) = temp(3,:)
- gwpt%ind_qbz2ibz(5,:) = temp(4,:)
- gwpt%ind_qbz2ibz(6,:) = temp(5,:)
- ABI_FREE(temp)
-!END DEBUG
-
- gaps = ebands_get_gaps(ebands, gap_err)
-
- ! ======================================================
- ! Select k-point and bands where corrections are wanted
- ! ======================================================
- !
- ! if symsigma == +1, we have to include all degenerate states in the set
- ! because the final QP corrections will be obtained by averaging the results in the degenerate subspace.
- ! We initialize IBZ(k) here so that we have all the basic dimensions of the run and it's possible
- ! to distribuite the calculations among processors.
- gwpt%symsigma = dtset%symsigma; gwpt%timrev = kpts_timrev_from_kptopt(ebands%kptopt)
-
- call cwtime_report(" gwpt_new: k-points", cpu, wall, gflops)
-
- ! TODO: nkcalc should be spin dependent (similar piece of code in m_gwr).
- if (dtset%nkptgw /= 0) then
-
-   ! Treat the k-points and bands specified in the input file via kptgw and bdgw.
-   call sigtk_kcalc_from_nkptgw(dtset, mband, gwpt%nkcalc, gwpt%kcalc, gwpt%bstart_ks, gwpt%nbcalc_ks)
-
- else
-
-   if (any(abs(dtset%sigma_erange) > zero)) then
-     ! Use sigma_erange and (optionally) gwpt_ngkpt
-     call sigtk_kcalc_from_erange(dtset, cryst, ebands, gaps, gwpt%nkcalc, gwpt%kcalc, gwpt%bstart_ks, gwpt%nbcalc_ks, comm)
-
-   else
-     ! Use qp_range to select the interesting k-points and the corresponding bands.
-     !
-     !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
-     ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
-     !          bands above and below the Fermi level.
-     ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
-     !          Include all occupied states and `num` empty states.
-
-     qprange_ = dtset%gw_qprange
-     if (gap_err /= 0 .and. qprange_ == 0) then
-       ABI_WARNING("Cannot compute fundamental and direct gap (likely metal). Will replace qprange 0 with qprange 1")
-       qprange_ = 1
-     end if
-
-     if (qprange_ /= 0) then
-       call sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange_, gwpt%nkcalc, gwpt%kcalc, gwpt%bstart_ks, gwpt%nbcalc_ks)
-     else
-       ! qprange is not specified in the input.
-       ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
-       call sigtk_kcalc_from_gaps(dtset, ebands, gaps, gwpt%nkcalc, gwpt%kcalc, gwpt%bstart_ks, gwpt%nbcalc_ks)
-     end if
-   end if
-
- end if ! nkptgw /= 0
-
- ! The k-point and the symmetries connecting the BZ k-point to the IBZ.
- ABI_MALLOC(gwpt%kcalc2ibz, (gwpt%nkcalc, 6))
- if (abs(gwpt%symsigma) == 1) then
-   ABI_MALLOC(gwpt%degtab, (gwpt%nkcalc, gwpt%nsppol))
- end if
-
- ! Workspace arrays used to compute degeneracy tables.
- ABI_ICALLOC(degblock_all, (2, mband, gwpt%nkcalc, gwpt%nsppol))
- ABI_ICALLOC(ndeg_all, (gwpt%nkcalc, gwpt%nsppol))
-
- krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
- ierr = 0
-
- do ikcalc=1,gwpt%nkcalc
-   if (mod(ikcalc, nprocs) /= my_rank) then
-     gwpt%kcalc2ibz(ikcalc, :) = 0
-     gwpt%bstart_ks(ikcalc, :) = 0
-     gwpt%nbcalc_ks(ikcalc, :) = 0
-     cycle ! MPI parallelism inside comm
-   end if
-
-   ! Note symrel and use_symrel.
-   ! These are the conventions for the symmetrization of the wavefunctions used in cgtk_rotate.
-   kk = gwpt%kcalc(:, ikcalc)
-
-   if (kpts_map("symrel", gwpt%timrev, cryst, krank_ibz, 1, kk, indkk_k) /= 0) then
-      write(msg, '(11a)' )&
-       "The WFK file cannot be used to compute self-energy corrections at k-point: ",trim(ktoa(kk)),ch10,&
-       "The k-point cannot be generated from a symmetrical one.", ch10,&
-       "q-mesh: ",trim(ltoa(gwpt%ngqpt)),", k-mesh (from kptrlatt): ",trim(ltoa(get_diag(dtset%kptrlatt))),ch10, &
-       'Action: check your WFK file and the (k, q) point input variables.'
-      ABI_ERROR(msg)
-   end if
-
-   ! TODO: Invert dims and update abipy
-   gwpt%kcalc2ibz(ikcalc, :) = indkk_k(:, 1)
-
-   ik_ibz = indkk_k(1,1); isym_k = indkk_k(2,1)
-   trev_k = indkk_k(6, 1); g0_k = indkk_k(3:5,1)
-   isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-   !kk_ibz = ebands%kptns(:,ik_ibz)
-   if (.not. isirr_k) then
-     ABI_WARNING(sjoin("The k-point in gwpt_{nk} must be in the IBZ but got:", ktoa(kk)))
-     ierr = ierr + 1
-   end if
-
-   ! We will have to average the QP corrections over degenerate states if symsigma=1 is used.
-   ! Here we make sure that all the degenerate states are included.
-   ! Store also band indices of the degenerate sets, used to average final results.
-   if (abs(gwpt%symsigma) == 1) then
-     cnt = 0
-     do spin=1,gwpt%nsppol
-       bstop = gwpt%bstart_ks(ikcalc, spin) + gwpt%nbcalc_ks(ikcalc, spin) - 1
-       call ebands_enclose_degbands(ebands, ik_ibz, spin, gwpt%bstart_ks(ikcalc, spin), bstop, changed, TOL_EDIFF, &
-                                    degblock=degblock)
-       if (changed) then
-         gwpt%nbcalc_ks(ikcalc, spin) = bstop - gwpt%bstart_ks(ikcalc, spin) + 1
-         cnt = cnt + 1
-         if (cnt < 5) then
-           write(msg,'(2(a,i0),2a,2(1x,i0))') &
-             "Not all the degenerate states for ikcalc: ",ikcalc,", spin: ",spin,ch10, &
-             "were included in the bdgw set. bdgw has been automatically changed to: ",gwpt%bstart_ks(ikcalc, spin), bstop
-           ABI_COMMENT(msg)
-         end if
-         write(msg,'(2(a,i0),2a)') &
-           "The number of included states: ", bstop, &
-           " is larger than the number of bands in the input ",dtset%nband(ik_ibz + (spin-1)*ebands%nkpt),ch10,&
-           "Action: Increase nband."
-         ABI_CHECK(bstop <= dtset%nband(ik_ibz + (spin-1)*ebands%nkpt), msg)
-       end if
-
-       ! Store band indices used for averaging (shifted by bstart_ks)
-       ndeg = size(degblock, dim=2)
-       ndeg_all(ikcalc, spin) = ndeg
-       degblock_all(:, 1:ndeg, ikcalc, spin) = degblock(:, 1:ndeg)
-
-       ABI_FREE(degblock)
-     end do
-   end if ! symsigma
- end do ! ikcalc
-
- call krank_ibz%free()
- ABI_CHECK(ierr == 0, "kptgw wavevectors must be in the IBZ read from the WFK file.")
-
- ! Collect data
- call xmpi_sum(gwpt%kcalc2ibz, comm, ierr)
- call xmpi_sum(gwpt%bstart_ks, comm, ierr)
- call xmpi_sum(gwpt%nbcalc_ks, comm, ierr)
-
- ! Build degtab tables.
- if (abs(gwpt%symsigma) == 1) then
-   call xmpi_sum(ndeg_all, comm, ierr)
-   call xmpi_sum(degblock_all, comm, ierr)
-   do ikcalc=1,gwpt%nkcalc
-     do spin=1,gwpt%nsppol
-       ndeg = ndeg_all(ikcalc, spin)
-       ABI_MALLOC(gwpt%degtab(ikcalc, spin)%bids, (ndeg))
-       do ii=1,ndeg
-         cnt = degblock_all(2, ii, ikcalc, spin) - degblock_all(1, ii, ikcalc, spin) + 1
-         ABI_MALLOC(gwpt%degtab(ikcalc, spin)%bids(ii)%vals, (cnt))
-         gwpt%degtab(ikcalc, spin)%bids(ii)%vals = [(jj, jj= &
-           degblock_all(1, ii, ikcalc, spin) - gwpt%bstart_ks(ikcalc, spin) + 1, &
-           degblock_all(2, ii, ikcalc, spin) - gwpt%bstart_ks(ikcalc, spin) + 1)]
-       end do
-     end do
-   end do
- end if
- ABI_FREE(degblock_all)
- ABI_FREE(ndeg_all)
-
- call cwtime_report(" gwpt_new: kptgw", cpu, wall, gflops)
-
- ! Now we can finally compute max_nbcalc
- gwpt%max_nbcalc = maxval(gwpt%nbcalc_ks)
-
- ABI_MALLOC(gwpt%bstop_ks, (gwpt%nkcalc, gwpt%nsppol))
- gwpt%bstop_ks = gwpt%bstart_ks + gwpt%nbcalc_ks - 1
-
- ! Define number of bands included in self-energy summation as well as the band range.
- ! This value depends on the kind of calculation as imag_only can take advantage of
- ! the energy window aroud the band edges.
- !
- ! Notes about MPI version.
- !
- ! Loops are MPI parallelized over q-points
- ! wavefunctions are NOT distributed but only states between my_bsum_start and my_bsum_stop
- ! are allocated and read from file.
- ! perturbations and q-points in the IBZ can also be distributed.
-
- gwpt%bsum_start = 1; gwpt%bsum_stop = mband
- if (all(dtset%sigma_bsum_range /= 0)) then
-   gwpt%bsum_start = max(dtset%sigma_bsum_range(1), 1)
-   gwpt%bsum_stop = min(dtset%sigma_bsum_range(2), mband)
- end if
- gwpt%nbsum = gwpt%bsum_stop - gwpt%bsum_start + 1
-
- ! ========================
- ! === MPI DISTRIBUTION ===
- ! ========================
- ! Init for sequential execution.
- gwpt%my_npert = natom3
-
- if (any(dtset%eph_np_pqbks /= 0)) then
-   ! Use parameters from input file.
-   gwpt%pert_comm%nproc = dtset%eph_np_pqbks(1)
-   gwpt%qpt_comm%nproc  = dtset%eph_np_pqbks(2)
-   gwpt%bsum_comm%nproc = dtset%eph_np_pqbks(3)
-   gwpt%kcalc_comm%nproc = dtset%eph_np_pqbks(4)
-   gwpt%spin_comm%nproc = dtset%eph_np_pqbks(5)
-   gwpt%my_npert = natom3 / gwpt%pert_comm%nproc
-   ABI_CHECK(gwpt%my_npert > 0, "pert_comm_nproc cannot be greater than 3 * natom.")
-   ABI_CHECK(mod(natom3, gwpt%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
- else
-   ! Automatic grid generation.
-   if (gwpt%pert_comm%nproc == 1) then
-     ! Try again with more procs.
-     do cnt=natom3,2,-1
-       if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-         gwpt%pert_comm%nproc = cnt; gwpt%my_npert = natom3 / cnt; exit
-       end if
-     end do
-   end if
-
-   if (gwpt%my_npert == natom3 .and. nprocs > 1) then
-     ABI_WARNING("The number of MPI procs should be divisible by 3*natom to reduce memory requirements!")
-   end if
-
-   ! Define number of procs for q-points and bands. nprocs is divisible by pert_comm%nproc.
-   ! Try to distribute equally nbsum first.
-   nrest = nprocs / gwpt%pert_comm%nproc
-   do bstop=nrest,1,-1
-     if (mod(gwpt%nbsum, bstop) == 0 .and. mod(nprocs, gwpt%pert_comm%nproc * bstop) == 0) then
-       gwpt%bsum_comm%nproc = bstop; gwpt%qpt_comm%nproc = nrest / gwpt%bsum_comm%nproc
-       exit
-     end if
-   end do
- end if
-
- ! Consistency check.
- if (gwpt%pert_comm%nproc * gwpt%qpt_comm%nproc * gwpt%bsum_comm%nproc * gwpt%kcalc_comm%nproc * gwpt%spin_comm%nproc /= nprocs) then
-   write(msg, "(a,i0,3a, 6(a,1x,i0))") &
-     "Cannot create 5d Cartesian grid with total nprocs: ", nprocs, ch10, &
-     "Idle processes are not supported. The product of the `nprocs_*` vars should be equal to nprocs.", ch10, &
-     "pert_nproc (", gwpt%pert_comm%nproc, ") x qpt_nproc (", gwpt%qpt_comm%nproc, ") x bsum_nproc (", gwpt%bsum_comm%nproc, &
-     ") x kcalc_nproc (", gwpt%kcalc_comm%nproc, ") x spin_nproc (", gwpt%spin_comm%nproc, ") != ", nprocs
-   ABI_ERROR(msg)
- end if
-
- gwpt%coords_pqbks = 0
-#ifdef HAVE_MPI
- ! Create 5d cartesian communicator: 3*natom perturbations, q-points in IBZ, bands in gwpt sum, kpoints in gwpt_k, spins
- ! FIXME: Fix spin
- periods(:) = .False.; reorder = .False.
- dims = [gwpt%pert_comm%nproc, gwpt%qpt_comm%nproc, gwpt%bsum_comm%nproc, gwpt%kcalc_comm%nproc, gwpt%spin_comm%nproc]
- ! Try New distrib ?
- !dims = [gwpt%pert_comm%nproc, gwpt%bsum_comm%nproc, gwpt%qpt_comm%nproc, gwpt%kcalc_comm%nproc, gwpt%spin_comm%nproc]
-
- call MPI_CART_CREATE(comm, ndims, dims, periods, reorder, comm_cart, ierr)
- ! Find the index and coordinates of the current processor
- call MPI_COMM_RANK(comm_cart, me_cart, ierr)
- call MPI_CART_COORDS(comm_cart, me_cart, ndims, gwpt%coords_pqbks, ierr)
-
- ! Create communicator to distribute natom3 perturbations.
- keepdim = .False.; keepdim(1) = .True.; call gwpt%pert_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for qpoints in self-energy integration.
- keepdim = .False.; keepdim(2) = .True.; call gwpt%qpt_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for bands for self-energy summation
- keepdim = .False.; keepdim(3) = .True.; call gwpt%bsum_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for kpoints.
- keepdim = .False.; keepdim(4) = .True.; call gwpt%kcalc_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for spins.
- keepdim = .False.; keepdim(5) = .True.; call gwpt%spin_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (band_sum, qpoint_sum) loops
- !keepdim = .False.; keepdim(2:3) = .True.; call gwpt%qb_comm%from_cart_sub(comm_cart, keepdim)
- ! Create communicator for the (perturbation, band_sum, qpoint_sum)
- !keepdim = .False.; keepdim(1:3) = .True.; call gwpt%pqb_comm%from_cart_sub(comm_cart, keepdim)
-
- call xmpi_comm_free(comm_cart)
-#endif
-
- ! Distribute k-points and create mapping to ikcalc index.
- call xmpi_split_cyclic(gwpt%nkcalc, gwpt%kcalc_comm%value, gwpt%my_nkcalc, gwpt%my_ikcalc)
- ABI_CHECK(gwpt%my_nkcalc > 0, sjoin("nkcalc (", itoa(gwpt%nkcalc), ") < kcalc_comm_nproc (", itoa(gwpt%kcalc_comm%nproc), ")"))
-
- ! Distribute spins and create mapping to spin index.
- if (gwpt%nsppol == 2) then
-   call xmpi_split_block(gwpt%nsppol, gwpt%spin_comm%value, gwpt%my_nspins, gwpt%my_spins)
-   ABI_CHECK(gwpt%my_nspins > 0, sjoin("nsppol (", itoa(gwpt%nsppol), ") < spin_comm_nproc (", itoa(gwpt%spin_comm%nproc), ")"))
- else
-   ! No nsppol parallelism DOH!
-   gwpt%my_nspins = 1
-   ABI_MALLOC(gwpt%my_spins, (gwpt%my_nspins))
-   gwpt%my_spins = 1
- end if
-
- ! Create MPI communicator for parallel netcdf IO used to write results for the different k-points.
- ! This communicator is defined only on the processes that will perform IO.
- call gwpt%ncwrite_comm%set_to_null()
-
- if (gwpt%kcalc_comm%nproc == 1 .and. gwpt%spin_comm%nproc == 1) then
-   ! Easy-peasy: only master in comm_world performs IO.
-   if (my_rank == master) call gwpt%ncwrite_comm%set_to_self()
- else
-    ! Create subcommunicator by selecting one proc per kpoint-spin subgrid.
-    ! Since we write to ab_out in gwpt_gather_and_write, make sure that ab_out is connected!
-    ! This means gwpt_nk resuls will be spread among multiple ab_out files.
-    ! Only SIGPEPH.nc will contain all the results.
-    ! Remember that now all nc define operations must be done inside ncwrite_comm
-    ! Obviously I'm assuming HDF5 + MPI-IO
-    !
-    ! NB: If MPI_UNDEFINED is passed as the colour value, the subgroup in which the calling
-    ! MPI process will be placed is MPI_COMM_NULL
-
-    color = xmpi_undefined; if (all(gwpt%coords_pqbks(1:3) == 0)) color = 1
-    call xmpi_comm_split(comm, color, my_rank, gwpt%ncwrite_comm%value, ierr)
-    if (color == 1) then
-      gwpt%ncwrite_comm%me = xmpi_comm_rank(gwpt%ncwrite_comm%value)
-      gwpt%ncwrite_comm%nproc = xmpi_comm_size(gwpt%ncwrite_comm%value)
-      if (my_rank == master) then
-        call wrtout(units, &
-          sjoin("- Using parallelism over k-points/spins. Cannot write full results to main output", ch10, &
-                "- All procs except master will write to dev_null. Use SIGEPH.nc to analyze results."))
-        !write(std_out, *)"ncwrite_comm_me:", gwpt%ncwrite_comm%me, "ncwrite_comm%nproc:", gwpt%ncwrite_comm%nproc
-      end if
-      if (.not. is_open(ab_out)) then
-        !if (open_file(strcat(dtfil%filnam_ds(2), "_rank_", itoa(gwpt%ncwrite_comm%me)), msg, unit=ab_out, &
-        if (open_file(NULL_FILE, msg, unit=ab_out, form="formatted", action="write", status='unknown') /= 0) then
-          ABI_ERROR(msg)
-        end if
-      end if
-    else
-      call gwpt%ncwrite_comm%set_to_null()
-    end if
- end if
-
- ! Build table with list of perturbations treated by this CPU inside pert_comm
- call ephtk_set_pertables(cryst%natom, gwpt%my_npert, gwpt%pert_table, gwpt%my_pinfo, gwpt%pert_comm%value)
-
- ! Split bands among the procs inside bsum_comm using block distribution.
- call xmpi_split_work(gwpt%nbsum, gwpt%bsum_comm%value, gwpt%my_bsum_start, gwpt%my_bsum_stop)
- if (gwpt%my_bsum_start == gwpt%nbsum + 1) then
-   ABI_ERROR("gwpt code does not support idle processes! Decrease ncpus or increase nband or use eph_np_pqbks input var.")
- end if
- gwpt%my_bsum_start = gwpt%bsum_start + gwpt%my_bsum_start - 1
- gwpt%my_bsum_stop = gwpt%bsum_start + gwpt%my_bsum_stop - 1
- ABI_MALLOC(gwpt%nbsum_rank, (gwpt%bsum_comm%nproc, 3))
- ii = gwpt%my_bsum_stop - gwpt%my_bsum_start + 1
- call xmpi_allgather(ii, gwpt%nbsum_rank(:,1), gwpt%bsum_comm%value, ierr)
- ii = gwpt%my_bsum_start
- call xmpi_allgather(ii, gwpt%nbsum_rank(:,2), gwpt%bsum_comm%value, ierr)
-
- call wrtout(std_out, sjoin(" Global bands for self-energy sum, bsum_start: ", itoa(gwpt%bsum_start), &
-   " bsum_bstop:", itoa(gwpt%bsum_stop)))
- call wrtout(std_out, sjoin(" Allocating and treating bands from my_bsum_start: ", itoa(gwpt%my_bsum_start), &
-   " up to my_bsum_stop:", itoa(gwpt%my_bsum_stop)))
-
- ! ================================================================
- ! Allocate arrays used to store final results and set them to zero
- ! ================================================================
- call cwtime_report(" MPI setup", cpu, wall, gflops)
-
- bstart = gwpt%bsum_start
-
- !if (my_rank == master) then
- !  msg = "Gaps, band edges and relative position wrt Fermi level"
- !  call gaps%print(unit=std_out, kTmesh=gwpt%ktmesh, header=msg)
- !  call gaps%print(unit=ab_out, kTmesh=gwpt%ktmesh, header=msg)
- !end if
- call gaps%free()
-
- call cwtime_report(" gwpt_new: all", cpu_all, wall_all, gflops_all)
-
-end function gwpt_new
-!!***
-
-subroutine gwpt_free(gwpt)
-
-!Arguments ------------------------------------
- class(gwpt_t),intent(inout) :: gwpt
-
-! *************************************************************************
-
- ! integer
- ABI_SFREE(gwpt%bstart_ks)
- ABI_SFREE(gwpt%bstop_ks)
- ABI_SFREE(gwpt%nbcalc_ks)
- ABI_SFREE(gwpt%kcalc2ibz)
- ABI_SFREE(gwpt%my_ikcalc)
- ABI_SFREE(gwpt%my_spins)
- ABI_SFREE(gwpt%my_pinfo)
- ABI_SFREE(gwpt%pert_table)
- ABI_SFREE(gwpt%ind_qbz2ibz)
- ABI_SFREE(gwpt%nbsum_rank)
-
- ! real
- ABI_SFREE(gwpt%kcalc)
-
- ABI_SFREE(gwpt%qbz)
- ABI_SFREE(gwpt%qibz)
- ABI_SFREE(gwpt%wtq)
-
- ! complex
-
- ! datatypes.
- if (allocated(gwpt%degtab)) then
-   call degtab_array_free(gwpt%degtab)
-   ABI_FREE(gwpt%degtab)
- end if
-
- ! Deallocate MPI communicators
- call gwpt%pert_comm%free()
- call gwpt%qpt_comm%free()
- call gwpt%bsum_comm%free()
- !call gwpt%qb_comm%free()
- call gwpt%kcalc_comm%free()
- call gwpt%spin_comm%free()
- !call gwpt%pqb_comm%free()
- call gwpt%ncwrite_comm%free()
-
- ! Close netcdf file.
- if (gwpt%ncid /= nctk_noid) then
-   NCF_CHECK(nf90_close(gwpt%ncid))
- end if
-
-end subroutine gwpt_free
 !!***
 
 !!****f* m_gwpt/gwpt_print
@@ -1867,67 +1138,67 @@ end subroutine gwpt_free
 !!
 !! SOURCE
 
-subroutine gwpt_print(gwpt, dtset, unt)
-
-!Arguments ------------------------------------
- integer,intent(in) :: unt
- type(dataset_type),intent(in) :: dtset
- class(gwpt_t),intent(in) :: gwpt
-
-!Local variables-------------------------------
- integer :: ikc, is
- !character(len=5000) :: msg
-
-! *************************************************************************
-
- if (unt == dev_null) return
-
- ! Write dimensions
- write(unt,"(/,a)")sjoin(" Number of bands in gwpt sum:", itoa(gwpt%nbsum))
- write(unt,"(a)")sjoin(" From bsum_start:", itoa(gwpt%bsum_start), "to bsum_stop:", itoa(gwpt%bsum_stop))
- if (dtset%eph_stern /= 0) then
-   write(unt, "(a)")" Treating high-energy bands with Sternheimer and static gwpt-energy."
-   write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline: ", dtset%nline
- end if
- write(unt,"(a)")sjoin(" Symsigma: ",itoa(gwpt%symsigma), "Timrev:", itoa(gwpt%timrev))
- write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(gwpt%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
- write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
- write(unt,"(a)")sjoin(" Q-mesh used for gwpt-energy integration [ngqpt]:", ltoa(gwpt%ngqpt))
- write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(gwpt%nqibz))
- write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
- write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
-
- write(unt,"(a, i0)")" Number of k-points for gwpt-energy corrections: ", gwpt%nkcalc
- if (any(abs(dtset%sigma_erange) /= zero)) then
-   write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
- end if
- write(unt,"(a)")" List of k-points for gwpt-energy corrections:"
- do ikc=1,gwpt%nkcalc
-   if (ikc > 10) then
-     write(unt, "(2a)")" nkcalc > 10. Stop printing more k-point information.",ch10
-     exit
-   end if
-   do is=1,gwpt%nsppol
-     if (gwpt%nsppol == 2) write(unt,"(a,i1,a)")" For spin: ",is, ", ikcalc, spin, kpt, bstart, bstop"
-     write(unt, "(2(i4,2x),a,2(i4,1x))") &
-       ikc, is, trim(ktoa(gwpt%kcalc(:,ikc))), gwpt%bstart_ks(ikc,is), gwpt%bstart_ks(ikc,is) + gwpt%nbcalc_ks(ikc,is) - 1
-     end do
- end do
-
- write(unt, "(/,a)")" === MPI parallelism ==="
- write(unt, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", gwpt%my_bsum_start, &
-     " up to my_bsum_stop: ", gwpt%my_bsum_stop
- write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", gwpt%pert_comm%nproc
- write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", gwpt%my_npert
- write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", gwpt%qpt_comm%nproc
- !write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
- !    count(gwpt%itreat_qibz == 1), " of ", gwpt%nqibz
- write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", gwpt%bsum_comm%nproc
- write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", gwpt%spin_comm%nproc
- write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gwpt%kcalc_comm%nproc
- write(unt, "(2(a,i0),/)")"P Number of k-point in gwpt_nk treated by this proc: ", gwpt%my_nkcalc, " of ", gwpt%nkcalc
-
-end subroutine gwpt_print
+!!  subroutine gwpt_print(gwpt, dtset, unt)
+!!
+!!  !Arguments ------------------------------------
+!!   integer,intent(in) :: unt
+!!   type(dataset_type),intent(in) :: dtset
+!!   class(gwpt_t),intent(in) :: gwpt
+!!
+!!  !Local variables-------------------------------
+!!   integer :: ikc, is
+!!   !character(len=5000) :: msg
+!!
+!!  ! *************************************************************************
+!!
+!!   if (unt == dev_null) return
+!!
+!!   ! Write dimensions
+!!   write(unt,"(/,a)")sjoin(" Number of bands in gwpt sum:", itoa(gwpt%nbsum))
+!!   write(unt,"(a)")sjoin(" From bsum_start:", itoa(gwpt%bsum_start), "to bsum_stop:", itoa(gwpt%bsum_stop))
+!!   if (dtset%eph_stern /= 0) then
+!!     write(unt, "(a)")" Treating high-energy bands with Sternheimer and static gwpt-energy."
+!!     write(unt, "(a, es16.6, a, i0)")" Tolwfr:", dtset%tolwfr, ", nline: ", dtset%nline
+!!   end if
+!!   write(unt,"(a)")sjoin(" Symsigma: ",itoa(gwpt%symsigma), "Timrev:", itoa(gwpt%timrev))
+!!   write(unt,"(a)")sjoin(" Imaginary shift in the denominator (zcut): ", ftoa(aimag(gwpt%ieta) * Ha_eV, fmt="f5.3"), "[eV]")
+!!   write(unt,"(a)")sjoin(" Ab-initio q-mesh from DDB file:", ltoa(dtset%ddb_ngqpt))
+!!   write(unt,"(a)")sjoin(" Q-mesh used for gwpt-energy integration [ngqpt]:", ltoa(gwpt%ngqpt))
+!!   write(unt,"(a)")sjoin(" Number of q-points in the IBZ:", itoa(gwpt%nqibz))
+!!   write(unt,"(a)")sjoin(" asr:", itoa(dtset%asr), "chneut:", itoa(dtset%chneut))
+!!   write(unt,"(a)")sjoin(" dipdip:", itoa(dtset%dipdip), "symdynmat:", itoa(dtset%symdynmat))
+!!
+!!   write(unt,"(a, i0)")" Number of k-points for gwpt-energy corrections: ", gwpt%nkcalc
+!!   if (any(abs(dtset%sigma_erange) /= zero)) then
+!!     write(unt, "(a, 2(f6.3, 1x), a)")" sigma_erange: ", dtset%sigma_erange(:) * Ha_eV, " (eV)"
+!!   end if
+!!   write(unt,"(a)")" List of k-points for gwpt-energy corrections:"
+!!   do ikc=1,gwpt%nkcalc
+!!     if (ikc > 10) then
+!!       write(unt, "(2a)")" nkcalc > 10. Stop printing more k-point information.",ch10
+!!       exit
+!!     end if
+!!     do is=1,gwpt%nsppol
+!!       if (gwpt%nsppol == 2) write(unt,"(a,i1,a)")" For spin: ",is, ", ikcalc, spin, kpt, bstart, bstop"
+!!       write(unt, "(2(i4,2x),a,2(i4,1x))") &
+!!         ikc, is, trim(ktoa(gwpt%kcalc(:,ikc))), gwpt%bstart_ks(ikc,is), gwpt%bstart_ks(ikc,is) + gwpt%nbcalc_ks(ikc,is) - 1
+!!       end do
+!!   end do
+!!
+!!   write(unt, "(/,a)")" === MPI parallelism ==="
+!!   write(unt, "(2(a,i0))")"P Allocating and summing bands from my_bsum_start: ", gwpt%my_bsum_start, &
+!!       " up to my_bsum_stop: ", gwpt%my_bsum_stop
+!!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", gwpt%pert_comm%nproc
+!!   write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", gwpt%my_npert
+!!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", gwpt%qpt_comm%nproc
+!!   !write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
+!!   !    count(gwpt%itreat_qibz == 1), " of ", gwpt%nqibz
+!!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", gwpt%bsum_comm%nproc
+!!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", gwpt%spin_comm%nproc
+!!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gwpt%kcalc_comm%nproc
+!!   write(unt, "(2(a,i0),/)")"P Number of k-point in gwpt_nk treated by this proc: ", gwpt%my_nkcalc, " of ", gwpt%nkcalc
+!!
+!!  end subroutine gwpt_print
 !!***
 
 end module m_gwpt
