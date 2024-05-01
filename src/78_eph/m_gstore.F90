@@ -476,6 +476,9 @@ contains
   procedure :: init => gstore_init
   ! Build object
 
+  ! Activate parallelism over perturbations at the level of the DVDB file.
+  procedure :: set_perts_distrib => gstore_set_perts_distrib
+
 end type gstore_t
 !!***
 
@@ -2538,6 +2541,50 @@ subroutine gqk_free(gqk)
 end subroutine gqk_free
 !!***
 
+!!****f* m_gstore/gstore_set_perts_distrib
+!! NAME
+!! gstore_set_perts_distrib
+!!
+!! FUNCTION
+!!   Activate parallelism over perturbations at the level of the DVDB file.
+!!
+!! SOURCE
+
+subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
+
+!Arguments ------------------------------------
+ class(gstore_t),target,intent(in) :: gstore
+ type(crystal_t),intent(in) :: cryst
+ type(dvdb_t),intent(inout) :: dvdb
+ integer,intent(out) :: my_npert
+
+!Local variables ------------------------------
+!scalars
+ integer :: my_is, spin
+ type(gqk_t),pointer :: gqk
+!arrays
+ integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
+
+!----------------------------------------------------------------------
+
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   if (gqk%pert_comm%nproc > 1) then
+     ! Activate parallelism over perturbations
+     ! Build table with list of perturbations treated by this CPU inside pert_comm
+     ABI_WARNING("GSTORE with pert_comm%nproc > 1 not tested")
+     call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
+     call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
+     ABI_CHECK(all(my_pinfo(3, :) == gqk%my_iperts), "my_pinfo(3, :) != gqk%my_iperts")
+     ABI_FREE(my_pinfo)
+     ABI_FREE(pert_table)
+   end if
+ end do
+
+end subroutine gstore_set_perts_distrib
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_gstore/gstore_compute
@@ -2663,20 +2710,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
- do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
-   if (gqk%pert_comm%nproc > 1) then
-     ! Activate parallelism over perturbations
-     ! Build table with list of perturbations treated by this CPU inside pert_comm
-     ABI_WARNING("pert_comm%nproc > 1 not tested")
-     call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
-     call dvdb%set_pert_distrib(my_npert, natom3, my_pinfo, pert_table, gqk%pert_comm%value)
-     ABI_CHECK(all(my_pinfo(3, :) == gqk%my_iperts), "my_pinfo(3, :) != gqk%my_iperts")
-     ABI_FREE(my_pinfo)
-     ABI_FREE(pert_table)
-   end if
- end do
+ ! Activate parallelism over perturbations at the level of the DVDB
+ call gstore%set_perts_distrib(cryst, dvdb, my_npert)
 
  !call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
  ! Prepare Fourier interpolation of DFPT potentials.
