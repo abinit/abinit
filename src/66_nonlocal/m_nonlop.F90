@@ -20,7 +20,7 @@
 
 module m_nonlop
 
- use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr
+ use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr, c_associated
 
  use defs_basis
  use m_errors
@@ -425,6 +425,18 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 
 !Select k-dependent objects according to select_k input parameter
  select_k_=1;if (present(select_k)) select_k_=select_k
+ ! If both K-Kprime variant of each attribute of hamiltonian share the same
+ ! address, we can assume select_k==K_H_K.
+ if (        c_associated(c_loc(hamk%ffnl_k), c_loc(hamk%ffnl_kp)) &
+ &    .and. c_associated(c_loc(hamk%kg_k),   c_loc(hamk%kg_kp))) then
+   if (associated(hamk%ph3d_k).and.associated(hamk%ph3d_kp)) then
+     if (c_associated(c_loc(hamk%ph3d_k),   c_loc(hamk%ph3d_kp))) then
+       select_k_=K_H_K
+     end if
+   else
+     select_k_=K_H_K
+   end if
+ end if
  nkpgin=0;nkpgout=0;nullify(kpgin);nullify(kpgout)
  nullify(ph3din);nullify(ph3dout)
  if (select_k_==KPRIME_H_K) then
