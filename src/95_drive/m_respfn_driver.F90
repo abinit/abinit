@@ -753,8 +753,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
       ABI_FREE(rhowfg)
       ABI_FREE(rhowfr)
    else
-    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
-&              rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if
 
  end if ! choice for charge density initialization

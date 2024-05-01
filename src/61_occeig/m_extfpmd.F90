@@ -34,6 +34,7 @@ module m_extfpmd
   use m_special_funcs
   use m_specialmsg
   use m_xmpi
+  use m_dtset,          only : dataset_type
   use m_energies,       only : energies_type
   use m_gsphere,        only : getkpgnorm
   use m_kg,             only : mkkin,kpgio
@@ -57,7 +58,7 @@ module m_extfpmd
   !! SOURCE
   type,public :: extfpmd_type
     logical :: truecg
-    integer :: bcut,nbcut,nbdbuf,nfft,nspden,version
+    integer :: bcut,mband,nbcut,nbdbuf,nfft,nspden,version
     real(dp) :: ebcut,edc_kinetic,e_kinetic,entropy
     real(dp) :: nelect,eshift,ucvol,bandshift
     real(dp),allocatable :: vtrial(:,:)
