@@ -278,7 +278,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  character(len=fnlen) :: dscrpt,filnam,wfkfull_path
  real(dp) :: fatvshift
  type(crystal_t) :: cryst
- type(ebands_t) :: bstruct,extfpmd_bstruct,ebands
+ type(ebands_t) :: bstruct,ebands
  type(efield_type) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(hdr_type) :: hdr, hdr_den, hdr_kfull
@@ -857,9 +857,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
      call extfpmd%init(dtset%mband,hdr%extpw_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
-&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,dtset%ecut,&
-&     dtset%exchn2n3d,dtset%istwfk,dtset%kptns,mpi_enreg,dtset%mkmem,dtset%dilatmx,&
-&     dtset%extfpmd_ecut,dtset%extfpmd_nband,dtset%nspinor,dtset%extfpmd_truecg)
+&     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,mpi_enreg,&
+&     dtset%extfpmd_nband)
    end if
  end if
 
@@ -894,24 +893,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   sum(args_gs%jpawu(:))>tol8).and.dtset%dmft_entropy==0) results_gs%energies%entropy=zero
 
    if(associated(extfpmd)) then
-!    Generate extended plane wave wavefunctions
-     if(extfpmd%version==11) then
-       call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet_for_kg,&
-&       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-&       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
-&       resid)
-       ! Extended plane waves estimation of the full occupations array
-       call newocc(extfpmd%doccde,extfpmd%eigen,results_gs%energies%entropy,results_gs%energies%e_fermie,&
-&       results_gs%energies%e_fermih,dtset%ivalence,dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,&
-&       dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,&
-&       dtset%occopt,dtset%prtvol,dtset%tphysel,dtset%tsmear,dtset%wtk,extfpmd=extfpmd)
-       ! Update Kohn-Sham occ and doccde from extended pw arrays
-       call getnel(doccde,zero,eigen,extfpmd%nelect,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
-&       two/(dtset%nsppol*dtset%nspinor),dtset%mband,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
-&       extfpmd_nbdbuf=extfpmd%nbdbuf)
-     end if
 !    Get nelect to build density
      extfpmd%nelect=zero
      call extfpmd%compute_nelect(results_gs%energies%e_fermie,dtset%nband,extfpmd%nelect,&
@@ -1162,29 +1143,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        if (psps%usepaw==1) then
          ABI_MALLOC(rhowfg,(2,dtset%nfft))
          ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-          ! Make full electron density with extended plane waves basis set
-           call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-                extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-                paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-         else
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-                extfpmd=extfpmd)
-         end if
+         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&             rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
          ABI_FREE(rhowfg)
          ABI_FREE(rhowfr)
        else
-         if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-           call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-                extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-                paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-         else
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-                extfpmd=extfpmd)
-         end if
+         call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&             rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
        end if
 
      else if (dtfil%ireadwf==0.and.dtset%positron/=1) then
@@ -1241,16 +1207,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          if (psps%usepaw==1) then
            ABI_MALLOC(rhowfg,(2,dtset%nfft))
            ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,&
-                wvl%wfs,option=1)
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
            call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
            ABI_FREE(rhowfg)
            ABI_FREE(rhowfr)
          else
-           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-                option=1)
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
          end if
 
        else if(dtfil%ireadwf==0.and.dtset%positron/=1)then
@@ -1491,25 +1455,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
    !SPr: add input variable managing the .vtk file OUTPUT (Please don't remove the next commented line)
    !call printmagvtk(mpi_enreg,cplex1,dtset%nspden,nfftf,ngfftf,rhor,rprimd,'DEN')
-   
-   ! Write extended plane waves wavefunctions
-   if (dtset%useextfpmd==11) then
-     extfpmd_bstruct = ebands_from_dtset(dtset, extfpmd%npwarr, nband=extfpmd%nband)
-     call hdr_init(extfpmd_bstruct,codvsn,dtset,extfpmd%hdr,pawtab,0,psps,wvl%descr,&
-&     comm_atom=extfpmd%mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     extfpmd%hdr%ecut_eff=extfpmd%ecut_eff
-     extfpmd%hdr%ecutdg=extfpmd%ecut_eff
-     
-     call extfpmd%hdr%update(extfpmd%hdr%bantot,results_gs%etotal,results_gs%energies%e_fermie,&
-&     results_gs%energies%e_fermih,residm,rprimd,extfpmd%occ,pawrhoij,xred,dtset%amu_orig(:,1),&
-&     comm_atom=mpi_enreg%comm_atom,extpw_eshift=results_gs%extpw_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
-     extfpmd%hdr%rprimd=rprimd_for_kg
-
-     call outwf(extfpmd%cg,dtset,psps,extfpmd%eigen,dtfil%fnameabo_extpwwfk,extfpmd%hdr,extfpmd%kg,dtset%kptns,&
-&     extfpmd%mband,extfpmd%mcg,dtset%mkmem,extfpmd%mpi_enreg,extfpmd%mpw,dtset%natom,&
-&     extfpmd%nband,dtset%nkpt,extfpmd%npwarr,dtset%nsppol,&
-&     extfpmd%occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
-   end if
  end if
 
  if (dtset%prtwf==2) call outqmc(cg,dtset,eigen,gprimd,hdr,kg,mcg,mpi_enreg,npwarr,occ,psps,results_gs)

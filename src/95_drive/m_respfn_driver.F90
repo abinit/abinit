@@ -741,14 +741,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (psps%usepaw==1) then
      ABI_MALLOC(rhowfg,(2,dtset%nfft))
      ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
       ABI_FREE(rhowfg)
       ABI_FREE(rhowfr)
    else
-     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&              rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if
 
  end if ! choice for charge density initialization
@@ -775,16 +775,14 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      if (psps%usepaw==1) then
        ABI_MALLOC(rhowfg,(2,dtset%nfft))
        ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                  npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,&
-                  wvl%den,wvl%wfs,option=1)
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&                 rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
        call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
        ABI_FREE(rhowfg)
        ABI_FREE(rhowfr)
      else
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                  npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,&
-                  wvl%wfs,option=1)
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&                 taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      end if
 
    end if ! choice for kinetic energy density initialization

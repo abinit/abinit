@@ -195,7 +195,7 @@ contains
 !! SOURCE
 
 subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,dtset,&
-& ecut,eigen,electronpositron,elfr,etotal,extfpmd,gmet,gprimd,grhor,hdr,intgres,kg,&
+& ecut,eigen,electronpositron,elfr,etotal,gmet,gprimd,grhor,hdr,intgres,kg,&
 & lrhor,mband,mcg,mcprj,mgfftc,mkmem,mpi_enreg,mpsang,mpw,my_natom,natom,&
 & nattyp,nfft,ngfft,nhat,nkpt,npwarr,nspden,nsppol,nsym,ntypat,n3xccc,occ,&
 & paw_dmft,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,paw_an,paw_ij,&
@@ -212,7 +212,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(extfpmd_type),pointer,intent(inout) :: extfpmd
  type(hdr_type),intent(inout) :: hdr
  type(paw_dmft_type), intent(inout)  :: paw_dmft
  type(pawang_type),intent(in) :: pawang
@@ -245,7 +244,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,cplex1=1,fform_den=52,rdwr2=2,rdwrpaw0=0
- integer :: bantot,extfpmd_bantot,fform,collect,timrev
+ integer :: bantot,fform,collect,timrev
  integer :: accessfil,coordn
  integer :: ii,ierr,ifft,ikpt,ispden,isppol,itypat
  integer :: me_fft,n1,n2,n3
@@ -259,14 +258,13 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: opt_imagonly
  integer :: indsym(4,dtset%nsym,dtset%natom)
 #ifdef HAVE_NETCDF
- integer :: ncid,extfpmd_ncid
+ integer :: ncid
 #endif
  real(dp) :: norm,occ_norm,unocc_norm
  real(dp) :: rate_dum,rate_dum2
  real(dp) :: yp1, ypn, dr
  character(len=500) :: msg
  character(len=fnlen) :: fname
- type(hdr_type) :: extfpmd_hdr
 !arrays
  integer, allocatable :: isort(:)
  integer, pointer :: my_atmtab(:)
@@ -292,7 +290,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  real(dp) :: e_fermie, e_fermih ! CP added e_fermih
  type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
- type(ebands_t) :: ebands,extfpmd_ebands
+ type(ebands_t) :: ebands
  type(epjdos_t) :: dos
  type(plowannier_type) :: wan
  type(self_type) :: selfr
@@ -633,41 +631,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  call timab(1154,2,tsec)
  call timab(1155,1,tsec)
-
- ! Output extended plane waves ground state results in _EXTPWGSR.nc file
-#ifdef HAVE_NETCDF
- if (associated(extfpmd)) then
-   if (extfpmd%version==11.and.dtset%prtgsr==1) then
-    extfpmd_bantot=extfpmd%mband*dtset%nkpt*dtset%nsppol
-    extfpmd_hdr=hdr
-    extfpmd_hdr%mband=extfpmd%mband
-    extfpmd_hdr%nband=extfpmd%nband
-    extfpmd_hdr%npwarr=extfpmd%npwarr
-    extfpmd_hdr%occ=extfpmd%occ
-    
-    call ebands_init(extfpmd_bantot,extfpmd_ebands,dtset%nelect,dtset%ne_qFD,&
-    & dtset%nh_qFD,dtset%ivalence,extfpmd%doccde,extfpmd%eigen,extfpmd_hdr%istwfk,&
-    & extfpmd_hdr%kptns,extfpmd_hdr%nband,extfpmd_hdr%nkpt,extfpmd_hdr%npwarr,&
-    & extfpmd_hdr%nsppol,extfpmd_hdr%nspinor,extfpmd_hdr%tphysel,&
-    & extfpmd_hdr%tsmear,extfpmd_hdr%occopt,extfpmd%occ,extfpmd_hdr%wtk,&
-    & extfpmd_hdr%cellcharge,extfpmd_hdr%kptopt,extfpmd_hdr%kptrlatt_orig,&
-    & extfpmd_hdr%nshiftk_orig,extfpmd_hdr%shiftk_orig,extfpmd_hdr%kptrlatt,&
-    & extfpmd_hdr%nshiftk,extfpmd_hdr%shiftk)
-    
-    if(me==master) then
-      fname = strcat(dtfil%filnam_ds(4), "_EXTPWGSR.nc")
-      ! Write crystal and band structure energies.
-      NCF_CHECK(nctk_open_create(ncid,fname,xmpi_comm_self))
-      NCF_CHECK(extfpmd_hdr%ncwrite(ncid,fform_den,spinat=dtset%spinat,nc_define=.True.))
-      NCF_CHECK(crystal%ncwrite(ncid))
-      NCF_CHECK(ebands_ncwrite(extfpmd_ebands,ncid))
-      ! Add energy, forces, stresses
-      NCF_CHECK(results_gs_ncwrite(results_gs,ncid,dtset%ecut,dtset%pawecutdg))
-      NCF_CHECK(nf90_close(ncid))
-    end if
-   end if
- end if
-#endif
 
  ! Output of VCLMB file
  ! The PAW correction has to be computed here (all processors contribute)
@@ -1150,8 +1113,8 @@ if (dtset%prt_lorbmag==1) then
  end if
  if (prtnabla<0) then
    ! TODO: This routine is not tested but it's used in production.
-   call optics_vloc(cg,dtset,eigen,dtfil%fnameabo_app_opt,gprimd,hdr,kg,&
-&   mband,mcg,mkmem,mpi_enreg,mpw,dtset%nband,nkpt,npwarr,nsppol)
+   call optics_vloc(cg,dtfil,gprimd,hdr,kg,&
+&   mband,mcg,mkmem,mpi_enreg,mpw,nkpt,npwarr,nsppol)
  end if
 
  call timab(1169,2,tsec)

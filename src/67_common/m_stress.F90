@@ -585,9 +585,7 @@ contains
 
 !Adding the extfpmd continous contribution to stress tensor
  if(associated(extfpmd)) then
-   if(extfpmd%version/=11) then
-     strten(1:3)=strten(1:3)-(2./3.)*extfpmd%e_kinetic/extfpmd%ucvol
-   end if
+   strten(1:3)=strten(1:3)-(2./3.)*extfpmd%e_kinetic/extfpmd%ucvol
  end if
 
 !=======================================================================
