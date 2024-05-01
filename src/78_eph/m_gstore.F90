@@ -376,8 +376,8 @@ type, public :: gstore_t
 
   type(ifc_type), pointer :: ifc => null()
 
-  type(krank_t) :: krank_ibz !, qrank
-  ! Object used to find k-points in the IBZ and map BZ to IBZ.
+  type(krank_t) :: krank_ibz, qrank_ibz
+  ! Object used to find k-points or q-points in the IBZ and map BZ to IBZ.
 
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
@@ -519,7 +519,6 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
  !character(len=5000) :: msg
- type(krank_t) :: qrank
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
  !integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
@@ -597,12 +596,11 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
 
- qrank = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
+ gstore%qrank_ibz = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
 
- if (kpts_map("symrec", qtimrev, cryst, qrank, gstore%nqbz, qbz, qbz2ibz) /= 0) then
+ if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
    ABI_ERROR("Cannot map qBZ to IBZ!")
  end if
- call qrank%free()
 
  ! Order qbz by stars and rearrange entries in qbz2ibz table.
  call kpts_pack_in_stars(gstore%nqbz, qbz, qbz2ibz)
@@ -2214,6 +2212,7 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%erange_spin)
 
  call gstore%krank_ibz%free()
+ call gstore%qrank_ibz%free()
 
 end subroutine gstore_free
 !!***
