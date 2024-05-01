@@ -180,13 +180,6 @@ module m_gwpt
   integer :: nqibz
    ! Number of q-points in the (dense) IBZ for gwpt integration
 
-  integer :: nqibz_k
-   ! Number of q-points in the IBZ(k). Depends on ikcalc.
-
-  integer :: my_nqibz_k
-   ! Number of q-points in the IBZ(k) treated by this MPI proc. Depends on ikcalc.
-   ! Differs from nqibz_k only if imag with tetra because in this case we can introduce a cutoff on the weights
-
   integer :: lgk_nsym
    ! Number of symmetries in the little group of k. Depends on ikcalc.
 
@@ -262,12 +255,6 @@ module m_gwpt
    ! (6, %nqibz)
    ! Mapping qBZ to IBZ
 
-  integer,allocatable:: indkk_kq(:, :)
-   ! (6, %nqibz_k))
-   ! Mapping k+q --> initial IBZ. Depends on ikcalc.
-   ! These table used the conventions for the symmetrization of the wavefunctions expected by cgtk_rotate.
-   ! In this case listkk has been called with symrel and use_symrec=False
-
   integer,allocatable :: qibz2dvdb(:)
    ! (%nqibz))
    ! Mapping dvdb%ibz --> %ibz
@@ -294,21 +281,9 @@ module m_gwpt
    ! wtq(nqibz)
    ! Weights of the q-points in the IBZ (normalized to one).
 
-  real(dp),allocatable :: qibz_k(:,:)
-   ! qibz(3, nqibz_k)
-   ! Reduced coordinates of the q-points in the IBZ(k). Depends on ikcalc.
-
-  real(dp),allocatable :: wtq_k(:)
-   ! wtq(nqibz_k)
-   ! Weights of the q-points in the IBZ(k) (normalized to one). Depends on ikcalc.
-
   real(dp),allocatable :: vcar_calc(:,:,:,:)
    ! (3, max_nbcalc, nkcalc, nsppol))
    ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
-
-  integer, allocatable :: qp_done(:,:)
-   ! qp_done(kcalc, spin)
-   ! Keep track of the QP states already computed for restart of the calculation
 
   type(degtab_t),allocatable :: degtab(:,:)
    ! (nkcalc, nsppol)
@@ -599,7 +574,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call gwpt%print(dtset, ab_out)
    call gwpt%print(dtset, std_out)
  end if
- my_npert = gwpt%my_npert
+
 
  ! This is the maximum number of PWs for all possible k+q treated.
  mpw = gwpt%mpw; gmax = gwpt%gmax
@@ -634,6 +609,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !    ibzspin_2ikcalc(ik_ibz, spin) = ikcalc
  !  end do
  !end do
+ !ABI_FREE(ibzspin_2ikcalc)
 
  bks_mask(gwpt%my_bsum_start:gwpt%my_bsum_stop,:,:) = .True.
 
@@ -781,6 +757,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
 
+ my_npert = gwpt%my_npert
  if (gwpt%pert_comm%nproc > 1) then
    !  Activate parallelism over perturbations
    call dvdb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
@@ -931,8 +908,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
  ! Find correspondence IBZ_k --> IBZ
- !ABI_MALLOC(iqk2dvdb, (6, self%nqibz_k))
-
  ! Assume qptopt == kptopt unless value is specified in input
  qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
  qtimrev = kpts_timrev_from_kptopt(qptopt)
@@ -946,6 +921,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_CHECK(nkibz == ebands%nkpt, "nkibz != ebands%nkpt")
 
  nbsum = dtset%mband
+ ! FIXME
  nbsum = 1
 
  ! =================================================
@@ -995,8 +971,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      if (gwpt%use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
-       call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gwpt%pert_comm%value)
-       !call drhodb%get_rho1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gwpt%pert_comm%value)
+       call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       !call drhodb%get_rho1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
 
      else
        ! Read and reconstruct the dvscf potentials and the densities for this qpt and my_npert perturbations.
@@ -1005,12 +981,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
        ! The other entries in mapc_qq are OK as they refer to symmetries
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
-       call dvdb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gwpt%pert_comm%value)
+       call dvdb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
        !db_iqpt = drhodb%findq(qq_ibz)
        !ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
        !mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
-       !call drhodb%readsym_rho1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gwpt%pert_comm%value)
+       !call drhodb%readsym_rho1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
      !ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
@@ -1057,7 +1033,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
 
        call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
-                        comm=gwpt%pert_comm%value, request=ffnl_k_request)
+                        comm=gqk%pert_comm%value, request=ffnl_k_request)
 
        ! Find k + q in the extended zone and extract symmetry info.
        ! Be careful here because there are two umklapp vectors to be considered as:
@@ -1086,7 +1062,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
        ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
        call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg1_k, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
-                        comm=gwpt%pert_comm%value, request=ffnl_kq_request)
+                        comm=gqk%pert_comm%value, request=ffnl_kq_request)
 
        ! Double loop over the (m, n) bands indices in the <mm_kq,kq|Delta_{q,nu}Sigma|k,nn_k> elements.
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
@@ -1234,8 +1210,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
          if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
 
-         do imyp=1,gwpt%my_npert
-           idir = gwpt%my_pinfo(1, imyp); ipert = gwpt%my_pinfo(2, imyp); ipc = gwpt%my_pinfo(3, imyp)
+         do imyp=1,gqk%my_npert
+           idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
            ! Each CPU prepares its own potentials.
@@ -1299,6 +1275,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ABI_FREE(ph3d)
            ABI_SFREE(ph3d1)
          end do ! imyp
+
          call stern_kmp%free()
        end do ! ipp_bz
 
@@ -1350,7 +1327,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(gbound_kmp)
  ABI_FREE(gbound_kqmp)
  ABI_FREE(gbound_pp)
- !ABI_FREE(ibzspin_2ikcalc)
+
 
  call gs_ham_kq%free()
  call wfd%free()
@@ -1358,14 +1335,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(cwaveprj0)
  call pawcprj_free(cwaveprj)
  ABI_FREE(cwaveprj)
- !call phstore%free()
- call gwpt%free()
  call krank_ibz%free()
  call vcp%free()
  call w%free()
  call pp_mesh%free()
  call gsph_c%free()
  call gstore%free()
+ call gwpt%free()
 
  ! This to make sure that the parallel output of GSTORE is completed
  call xmpi_barrier(comm)
@@ -1695,29 +1671,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
    ABI_CHECK(mod(natom3, gwpt%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
  else
    ! Automatic grid generation.
-
-   ! TODO: Spin
-   ! Automatic grid generation over q-points and spins.
-   !if (gwpt%nsppol == 2 .and. mod(nprocs, 2) == 0) then
-   !  spin_comm%nproc = 2
-   !  gwpt%qpt_comm%nproc = nprocs / 2
-   !else
-   !  gwpt%qpt_comm%nproc = nprocs
-   !end if
-
-   ! Handle parallelism over perturbations first.
-   ! Use MPI communicator to distribute the 3 * natom perturbations to reduce memory requirements for DFPT potentials.
-   ! Ideally, perturbations are equally distributed --> total number of CPUs should be divisible by 3 * natom.
-   ! or at least, divisible by one integer i for i in [2, 3 * natom - 1].
-
-   ! Try to have 3 perts per proc first because the q-point parallelism is more efficient.
-   ! The memory for W(R,r,ipert) will increase though.
-   !do cnt=natom,2,-1
-   !  if (mod(nprocs, cnt) == 0 .and. mod(natom3, cnt) == 0) then
-   !    gwpt%pert_comm%nproc = cnt; gwpt%my_npert = natom3 / cnt; exit
-   !  end if
-   !end do
-
    if (gwpt%pert_comm%nproc == 1) then
      ! Try again with more procs.
      do cnt=natom3,2,-1
@@ -1877,8 +1830,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
  ! ================================================================
- ABI_ICALLOC(gwpt%qp_done, (gwpt%nkcalc, gwpt%nsppol))
-
  call cwtime_report(" MPI setup", cpu, wall, gflops)
 
  bstart = gwpt%bsum_start
@@ -1913,19 +1864,15 @@ subroutine gwpt_free(gwpt)
  ABI_SFREE(gwpt%my_pinfo)
  ABI_SFREE(gwpt%pert_table)
  ABI_SFREE(gwpt%ind_qbz2ibz)
- ABI_SFREE(gwpt%indkk_kq)
  ABI_SFREE(gwpt%qibz2dvdb)
  ABI_SFREE(gwpt%nbsum_rank)
 
  ! real
  ABI_SFREE(gwpt%kcalc)
  ABI_SFREE(gwpt%vcar_calc)
- ABI_SFREE(gwpt%qp_done)
  ABI_SFREE(gwpt%qbz)
  ABI_SFREE(gwpt%qibz)
  ABI_SFREE(gwpt%wtq)
- ABI_SFREE(gwpt%qibz_k)
- ABI_SFREE(gwpt%wtq_k)
 
  ! complex
 

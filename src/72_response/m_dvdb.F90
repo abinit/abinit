@@ -457,6 +457,7 @@ module m_dvdb
    ! Returns the index of a list of q-points.
 
    procedure :: set_pert_distrib => dvdb_set_pert_distrib
+   !  Activate parallelism over perturbations
 
    procedure :: read_onev1 => dvdb_read_onev1
    ! Read and return the DFPT potential for given (idir, ipert, iqpt).
