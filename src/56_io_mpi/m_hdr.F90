@@ -2370,15 +2370,15 @@ subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,x
 ! *************************************************************************
 
  !@hdr_type
- !Update of the "evolving" data
- hdr%etot         = etot
- hdr%fermie       = fermie
- hdr%fermih       = fermih
- hdr%residm       = residm
- hdr%rprimd(:,:)  = rprimd(:,:)
- hdr%occ(:)       = occ(:)
- hdr%xred(:,:)    = xred(:,:)
- hdr%amu(:)       = amu
+!Update of the "evolving" data
+ hdr%etot     =etot
+ hdr%fermie   =fermie
+ hdr%fermih   =fermih
+ hdr%residm   =residm
+ hdr%rprimd(:,:)=rprimd(:,:)
+ hdr%occ(:)   =occ(:)
+ hdr%xred(:,:)=xred(:,:)
+ hdr%amu(:) = amu
  if(present(extpw_eshift)) hdr%extpw_eshift = extpw_eshift
 
  if (hdr%usepaw==1) then
@@ -3068,7 +3068,6 @@ subroutine hdr_ncread(Hdr, ncid, fform)
  NCF_CHECK(nf90_get_var(ncid, vid("date"), hdr%date))
  NCF_CHECK(nf90_get_var(ncid, vid("ecut_eff"), hdr%ecut_eff))
  NCF_CHECK(nf90_get_var(ncid, vid("ecutsm"), hdr%ecutsm))
-!NCF_CHECK(nf90_get_var(ncid, vid("extpw_eshift"), hdr%extpw_eshift))
  NCF_CHECK(nf90_get_var(ncid, vid("etot"), hdr%etot))
  NCF_CHECK(nf90_get_var(ncid, vid("intxc"), hdr%intxc))
  NCF_CHECK(nf90_get_var(ncid, vid("ixc"), hdr%ixc))
