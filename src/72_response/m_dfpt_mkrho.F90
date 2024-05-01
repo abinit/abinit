@@ -632,7 +632,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
  integer :: choice,cplex_cprj,i1,i2,i3,idat,ispinor,my_comm_atom,my_natom,n1,n2,n3,option_rhoij,gpu_option
  logical :: my_atmtab_allocated,paral_atom
  logical :: use_timerev,use_zeromag
- real(dp) :: im0,im1,re0,re1,valuer,diag,offdiag,weight
+ real(dp) :: valuer,diag,offdiag,weight
  real(dp) :: im0_up,im1_up,re0_up,re1_up,im0_down,im1_down,re0_down,re1_down
 !arrays
  integer,pointer :: my_atmtab(:)
@@ -664,7 +664,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
    ABI_MALLOC(wfraug1,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
-   !$OMP TARGET ENTER DATA MAP(to:rhoaug1) IF(cplex/=2 .and. gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:rhoaug1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
    do ispinor=1,nspinor
@@ -733,11 +733,6 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 &       weight,weight,gpu_option=gpu_option)
        nullify(cwavef_sp)
 
-#ifdef HAVE_OPENMP_OFFLOAD
-       !FIXME Remove this transfer once cplex==2 runs on GPU
-       !$OMP TARGET UPDATE FROM(wfraug,wfraug1) IF(cplex==2 .and. gpu_option==ABI_GPU_OPENMP)
-#endif
-
 !    The factor 2 is not the spin factor (see Eq.44 of PRB55,10337 (1997) [[cite:Gonze1997]])
 !    Accumulate 1st-order density
 
@@ -756,7 +751,7 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT DATA MAP(delete:wfraug1) IF(gpu_option==ABI_GPU_OPENMP)
-   !$OMP TARGET EXIT DATA MAP(from:rhoaug1)   IF(cplex/=2 .and. gpu_option==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT DATA MAP(from:rhoaug1)   IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(wfraug1)
  else ! nvloc = 4
@@ -1033,19 +1028,20 @@ subroutine dfpt_accrho(cplex,cwave0,cwave1,cwavef,cwaveprj0,cwaveprj1,&
        do idat=1,ndat
          weight=two*occ_k(iband+idat-1)*wtk_k/ucvol
 #ifdef HAVE_OPENMP_OFFLOAD
-         !FIXME Enabling this kernel breaks results on both CPU and GPU
-         !!$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-         !!$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(idat,i3,i2,i1,re0,re1,im0,im1) &
-         !!$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP& MAP(to:wfraug1,wfraug,rhoaug1) PRIVATE(i3,i2,i1) &
+         !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          do i3=1,n3
            do i2=1,n2
              do i1=1,n1
-               re0=wfraug(1,i1,i2,i3+n6*(idat-1))  ; im0=wfraug(2,i1,i2,i3+n6*(idat-1))
-               re1=wfraug1(1,i1,i2,i3+n6*(idat-1)) ; im1=wfraug1(2,i1,i2,i3+n6*(idat-1))
 ! TODO: check which terms (ispinor ispinorp) enter a given element of rhoaug1
-               rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1)+weight*(re0*re1+im0*im1)
-               rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1)+weight*(re0*im1-im0*re1)
+               rhoaug1(2*i1-1,i2,i3,1)=rhoaug1(2*i1-1,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)) &
+&               +wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)))
+               rhoaug1(2*i1  ,i2,i3,1)=rhoaug1(2*i1  ,i2,i3,1) &
+&               +weight*(wfraug(1,i1,i2,i3+n6*(idat-1))*wfraug1(2,i1,i2,i3+n6*(idat-1)) &
+&               -wfraug(2,i1,i2,i3+n6*(idat-1))*wfraug1(1,i1,i2,i3+n6*(idat-1)))
              end do
            end do
          end do
