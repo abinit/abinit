@@ -271,8 +271,12 @@ type, public :: gqk_t
    ! MPI communicator over atomic perturbations.
 
   !type(xcomm_t) :: bsum_comm
-   ! MPI communicator over bands in summation. It not used to distribute
-   ! the memory for the g but to distribute a possible sum of bands as in GWPT
+   ! MPI communicator over bands in summation. NB: It not used to distribute
+   ! the memory for the g but to distribute a possible sum over bands as done in the GWPT code.
+
+  !type(xcomm_t) :: pp_comm
+   ! MPI communicator over wavevector summation. NB: It not used to distribute
+   ! the memory for the g but to distribute a possible sum over wavevectors as done in the GWPT code.
 
   type(xcomm_t) :: qpt_pert_comm
    ! MPI communicator over the 2d grid (qpt, atomic perturbations)
@@ -2829,6 +2833,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
+
  gstore%wfk0_path = wfk0_path
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
@@ -2851,7 +2856,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
    do ii=1,my_nqibz
      iq_ibz = my_iqibz_inds(ii)
-     !call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), buf_displ_cart(:,:,:,:,ii))
      call ifc%fourq(cryst, gstore%qibz(:, iq_ibz), buf_wqnu(:,ii), displ_cart_qibz, &
                     out_eigvec=buf_eigvec_cart(:,:,:,:,ii))
    end do
@@ -3281,8 +3285,7 @@ subroutine dump_data()
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
                       start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
-                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt] &
-                     )
+                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
@@ -3318,7 +3321,7 @@ end subroutine gstore_compute
 !! gstore_from_ncpath
 !!
 !! FUNCTION
-!!  Reconstruct a gstore object from a GSTORE.nc netcdf file.
+!!  Reconstruct a gstore_t instance from a netcdf file.
 !!
 !! INPUTS
 !!
