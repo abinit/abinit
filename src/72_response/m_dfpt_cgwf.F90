@@ -46,12 +46,12 @@ module m_dfpt_cgwf
  private
 !!***
 
-!!****t* m_sigmaph/stern_t
+!!****t* m_dfpt_cgwf/stern_t
 !! NAME
 !! stern_t
 !!
 !! FUNCTION
-!!  Simplied interface to the NSCF Sternheimer solver.
+!!  Simplied interface to the Sternheimer solver.
 !!  Wrapper around dfpt_cgwf routine.
 !!
 !! SOURCE
@@ -1601,7 +1601,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
 
-
 ! *************************************************************************
 
  ! TODO: grad_berry is problematic because in dfpt_cgwf, the array is declared with
@@ -1687,8 +1686,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  if (ierr /= 0) return
 
- if (present(full_ur1) .and. .not. present(full_cg1)) then
-  ABI_ERROR("full_ur1 requires full_cg1")
+ if (present(full_ur1)) then
+   ABI_CHECK(present(full_cg1), "full_ur1 requires full_cg1")
  end if
 
  if (present(full_cg1)) then
@@ -1696,7 +1695,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ! Compute full first order wavefunction.
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
    !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
-   !                     ster%dset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
+   !                     stern%dset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
