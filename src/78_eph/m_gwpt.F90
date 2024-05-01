@@ -388,7 +388,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
  integer :: mpw,ierr,imyq,ignore_kq, ignore_ibsum_kq ! band,
- integer :: n1,n2,n3,n4,n5,n6,nspden,nu, mqmem, mm_kq, nn_k
+ integer :: n1,n2,n3,n4,n5,n6,nspden,nu, mqmem, mm_kq, nn_k, restart
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
  integer :: tot_nlines_done, nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
@@ -431,9 +431,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_pp(:,:)
  integer,allocatable :: rank_band(:), root_bcalc(:) ! osc_indpw(:), osc_gvecq(:,:),
  integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: ibzspin_2ikcalc(:,:)
- integer, allocatable :: displs(:), recvcounts(:)
- integer,allocatable :: qibz2dvdb(:)
+ integer,allocatable :: ibzspin_2ikcalc(:,:), displs(:), recvcounts(:), qibz2dvdb(:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  integer,pointer :: kg_pp(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfrq(3*cryst%natom), dotri(2), qq_ibz(3), qpt(3) !qpt_cart(3),
@@ -441,7 +440,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,gkq2,eig0nk,eig0mkq !eig0mk,
  real(dp),allocatable,target :: cgq(:,:,:)
- real(dp),allocatable :: qlwl(:,:),vcar_calc(:,:,:,:)
+ real(dp),allocatable :: qlwl(:,:),vk_cart_ibz(:,:,:,:)
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -490,41 +489,49 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  units = [std_out, ab_out]
 
+ ! Copy important dimensions
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
+ nspden = dtset%nspden; nkpt = ebands%nkpt
+
  ! Check if a previous GSTORE file is present to restart the calculation
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code
- !restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
- !if (my_rank == master .and. dtset%eph_restart == 1) then
- !  Read mask
- !end if
 
- gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+ restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+ if (my_rank == master .and. dtset%eph_restart == 1) then
+    if (file_exists(gstore_filepath)) then
+     !restart = 1
+     !if (any(sigma_restart%qp_done /= 1)) then
+     !  call sigma%compare(sigma_restart)
+     !  ! Get list of QP states that have been computed.
+     !  sigma%qp_done = sigma_restart%qp_done
+     !  restart = 1
+     !  call wrtout(units, "- Restarting from previous SIGEPH.nc file")
+     !  call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
+     !else
+     !  restart = 0; sigma%qp_done = 0
+     !  msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+     !              "Will overwrite:", sigeph_filepath, ch10, &
+     !              "Keeping backup copy in:", strcat(sigeph_filepath, ".bkp"))
+     !  call wrtout(ab_out, sjoin("WARNING: ", msg))
+     !  ABI_WARNING(msg)
+     !  ! Keep backup copy
+     !  ABI_CHECK(clib_rename(sigeph_filepath, strcat(sigeph_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
+     !end if
+    end if
+ end if
+
  call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
+ ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
 
+ !NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
+ !NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
+ !NCF_CHECK(nf90_close(root_ncid))
+
+ !ndone = count(done_qbz_spin == 1)
+
+ !  Read mask
  !call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
-
- !if (my_rank == master .and. dtset%eph_restart == 1) then
- !  if (ierr == 0) then
- !    if (any(gwpt_restart%qp_done /= 1)) then
- !      !call gwpt%compare(gwpt_restart)
- !      ! Get list of QP states that have been computed.
- !      gwpt%qp_done = gwpt_restart%qp_done
- !      restart = 1
- !      call wrtout(units, "- Restarting from previous GSTORE.nc file")
- !      call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(gwpt%qp_done == 1)), "/", itoa(gwpt%nkcalc)))
- !    else
- !      restart = 0; gwpt%qp_done = 0
- !      msg = sjoin("Found GSTORE.nc file with all QP entries already computed.", ch10, &
- !                  "Will overwrite:", gstore_filepath, ch10, &
- !                  "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
- !      call wrtout(ab_out, sjoin("WARNING: ", msg))
- !      ABI_WARNING(msg)
- !      ! Keep backup copy
- !      ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
- !    end if
- !  end if
- !  call gwpt_restart%free()
- !end if
 
  !call xmpi_bcast(restart, master, comm, ierr)
  !call xmpi_bcast(gwpt%qp_done, master, comm, ierr)
@@ -538,10 +545,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !    NCF_CHECK(nctk_set_datamode(gwpt%ncid))
  !  end if
  !end if
-
- ! Copy important dimensions
- natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
- nspden = dtset%nspden; nkpt = ebands%nkpt
 
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -662,7 +665,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ============================
  ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
 
- ABI_CALLOC(vcar_calc, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
+ ABI_CALLOC(vk_cart_ibz, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  ! Consider only the nk states in gwpt_nk
@@ -682,17 +685,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
        eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-       vcar_calc(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       vk_cart_ibz(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
      end do
 
    end do
  end do
- call xmpi_sum(vcar_calc, comm, ierr)
+ call xmpi_sum(vk_cart_ibz, comm, ierr)
  ! Write v_nk to disk.
  !if (my_rank == master) then
- !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vcar_calc"), vcar_calc))
+ !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vk_cart_ibz"), vk_cart_ibz))
  !end if
- ABI_FREE(vcar_calc)
+ ABI_FREE(vk_cart_ibz)
 
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
@@ -751,10 +754,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  my_npert = gwpt%my_npert
  if (gwpt%pert_comm%nproc > 1) then
-   !  Activate parallelism over perturbations
+   ! Activate parallelism over perturbations
    call dvdb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
    !call drhodb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
  end if
+
+ ! Activate parallelism over perturbations at the level of the DVDB
+ !call gstore%set_perts_distrib(crys, dvdb, my_npert)
+ !call gstore%set_perts_distrib(crys, drhodb, my_npert)
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
@@ -935,7 +942,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      mapc_qq = gqk%my_q2ibz(:, my_iq)
      !ABI_CHECK(isirr_q, "The q-point is usually in the IBZ!")
 
-     !if (done_qbz_spin(iq_bz, spin) == 1) cycle
+     if (done_qbz_spin(iq_bz, spin) == 1) cycle
      call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
      call wrtout(std_out, sjoin(" Computing g^GW(k,q) for q:", ktoa(qpt), "spin:", itoa(spin)))
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
