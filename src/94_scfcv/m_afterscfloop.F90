@@ -620,12 +620,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(253,2,tsec)
  call timab(254,1,tsec)
 
-!TEMPORARY Orthogonalize extpw wf
-!if (dtset%useextfpmd==11) then
-!  call extfpmd%extpw_orthon(dtset%effmass_free,gmet,dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nkpt,&
-!  & dtset%nsppol,dtset%nspinor,psps%usepaw)
-!end if
-
 !We use routine mkrho with option=1 to compute kinetic energy density taur (and taug)
  if(dtset%usekden==0 .and. dtset%prtelf/=0)then
 !  tauX are reused in outscfcv for output
@@ -645,30 +639,15 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
-     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-       ! Make full electron density with extended plane waves basis set
-       call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-&       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-&       paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       option=1)
-     else
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&       npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       extfpmd=extfpmd,option=1)
-     end if
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
    else
      ABI_MALLOC(tauwfg,(2,dtset%nfft))
      ABI_MALLOC(tauwfr,(dtset%nfft,dtset%nspden))
-     if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-       call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-&       extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-&       paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       option=1)
-     else
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&       npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-&       extfpmd=extfpmd,option=1)
-     end if
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+&     extfpmd=extfpmd,option=1)
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
      ABI_FREE(tauwfg)
      ABI_FREE(tauwfr)

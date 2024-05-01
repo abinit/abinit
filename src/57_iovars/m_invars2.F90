@@ -455,9 +455,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  else
    dtset%gwls_first_seed=dtset%gwls_band_index
  end if
- 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_ecut',tread,'ENE')
- if(tread==1) dtset%extfpmd_ecut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nbcut',tread,'INT')
  if(tread==1) dtset%extfpmd_nbcut=intarr(1)
@@ -467,9 +464,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_nband',tread,'INT')
  if(tread==1) dtset%extfpmd_nband=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'extfpmd_truecg',tread,'INT')
- if(tread==1) dtset%extfpmd_truecg=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rhoqpmix',tread,'DPR')
  if(tread==1) dtset%rhoqpmix=dprarr(1)

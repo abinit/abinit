@@ -1241,16 +1241,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
              ABI_MALLOC(rhowfg,(2,dtset%nfft))
              ABI_MALLOC(rhowfr,(dtset%nfft,dtset%nspden))
 !          1-Compute density from WFs
-             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-               ! Make full electron density with extended plane waves basis set
-               call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-                          extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-                          paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-             else
-               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,npwarr,&
-                          occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-                          extfpmd=extfpmd)
-             end if
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,&
+&                       rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
              call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
 !          2-Compute rhoij
              call pawmkrhoij(atindx,atindx1,cprj,dimcprj,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
@@ -1267,26 +1259,18 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
 &             dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
 !          2-Take care of kinetic energy density
              if(dtset%usekden==1)then
-               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                          npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
-                          option=1)
+               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,&
+&                         rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
                call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
              end if
              ABI_FREE(rhowfg)
              ABI_FREE(rhowfr)
            else
              write(std_out,*)' scfcv_core : recompute the density after the wf mixing '
-             if (dtset%extfpmd_truecg==1.and.dtset%useextfpmd==11) then
-               call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-                          extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-                          paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-             else
-               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&               npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
-             end if
+             call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&             mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,extfpmd=extfpmd)
              if(dtset%usekden==1)then
-               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-                          npwarr,occ,paw_dmft,phnons,taug,taur,&
+               call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,taug,taur,&
 &                         rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
              end if
            end if
@@ -2090,24 +2074,13 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
      ABI_MALLOC(nhatgr,(0,0,0))
    end if
 
-   if (dtset%useextfpmd==11.and.dtset%extfpmd_truecg==1) then
-     call energy(extfpmd%cg,compch_fft,constrained_dft,dtset,electronpositron,&
-&     energies,extfpmd%eigen,etotal,gsqcut,extfpmd,indsym,irrzon,extfpmd%kg,&
-&     extfpmd%mcg,extfpmd%mpi_enreg,extfpmd%mpw,my_natom,&
-&     nfftf,ngfftf,nhat,nhatgr,nhatgrdim,extfpmd%npwarr,n3xccc,&
-&     extfpmd%occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
-&     phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
-&     vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
-&     add_tfw=tfw_activated,vxctau=vxctau)
-   else
-     call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
-&     energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,dtset%mpw,&
-&     my_natom,nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
-&     occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
-&     phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
-&     vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
-&     add_tfw=tfw_activated,vxctau=vxctau)
-   end if
+   call energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
+   &   energies,eigen,etotal,gsqcut,extfpmd,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,&
+   &   nfftf,ngfftf,nhat,nhatgr,nhatgrdim,npwarr,n3xccc,&
+   &   occ,optene,paw_dmft,paw_ij,pawang,pawfgr,pawfgrtab,pawrhoij,pawtab,&
+   &   phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,taug,taur,usexcnhat,&
+   &   vhartr,vtrial,vpsp,vxc,wvl%wfs,wvl%descr,wvl%den,wvl%e,xccc3d,xred,ylm,&
+   &   add_tfw=tfw_activated,vxctau=vxctau)
 
    if (nhatgrdim>0)  then
      ABI_FREE(nhatgr)
@@ -2248,7 +2221,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtpawu
  call timab(1461,1,tsec)
 
  call outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil,&
-& dtset,ecut,eigen,electronpositron,elfr,etotal,extfpmd,&
+& dtset,ecut,eigen,electronpositron,elfr,etotal,&
 & gmet,gprimd,grhor,hdr,intgres,kg,lrhor,dtset%mband,mcg,mcprj,dtset%mgfft,&
 & dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,my_natom,dtset%natom,nattyp,&
 & nfftf,ngfftf,nhat,dtset%nkpt,npwarr,dtset%nspden,&
@@ -2609,7 +2582,7 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
 
 !  Add the contribution of extfpmd to the entropy
    if(associated(extfpmd)) then
-     if(extfpmd%version/=11) energies%entropy=energies%entropy+extfpmd%entropy
+     energies%entropy=energies%entropy+extfpmd%entropy
    end if
 
 !  When the finite-temperature VG broadening scheme is used,
@@ -2745,10 +2718,8 @@ subroutine etotfor(atindx1,deltae,diffor,dtefield,dtset,&
    if (associated(extfpmd)) then
      energies%e_extfpmd=extfpmd%e_kinetic
      energies%edc_extfpmd=extfpmd%edc_kinetic
-     if (dtset%extfpmd_truecg==0) then
-       if (optene==0) etotal=etotal+energies%e_extfpmd
-       if (optene==1) etotal=etotal+energies%edc_extfpmd
-     end if
+     if (optene==0) etotal=etotal+energies%e_extfpmd
+     if (optene==1) etotal=etotal+energies%edc_extfpmd
    end if
 
 !  Compute energy residual

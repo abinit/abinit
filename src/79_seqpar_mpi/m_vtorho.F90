@@ -45,7 +45,7 @@ module m_vtorho
  use m_fstrings,           only : sjoin, itoa
  use m_time,               only : timab
  use m_geometry,           only : xred2xcart
- use m_occ,                only : newocc, getnel
+ use m_occ,                only : newocc
  use m_pawang,             only : pawang_type
  use m_pawtab,             only : pawtab_type
  use m_paw_ij,             only : paw_ij_type
@@ -1199,7 +1199,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,&
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
 &       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
      
@@ -1210,25 +1210,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
 &     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
-     
-!    Generate extended plane wave wavefunctions
-     if(dtset%useextfpmd==11) then
-       call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-&       dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-&       'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&       mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
-&       resid)
-       ! Extended plane waves estimation of the full occupations array
-       call newocc(extfpmd%doccde,extfpmd%eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
-&       dtset%spinmagntarget,extfpmd%mband,extfpmd%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
-&       dtset%nkpt,dtset%nspinor,dtset%nsppol,extfpmd%occ,dtset%occopt,prtvol,dtset%tphysel,&
-&       dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
-       ! Update Kohn-Sham occ and doccde from extended pw arrays
-       call getnel(doccde,zero,eigen,extfpmd%nelect,energies%e_fermie,energies%e_fermih,&
-&       two/(dtset%nsppol*dtset%nspinor),dtset%mband,dtset%nband,extfpmd%nelect,dtset%nkpt,&
-&       dtset%nsppol,occ,dtset%occopt,1,dtset%tphysel,dtset%tsmear,-666,dtset%wtk,&
-&       extfpmd_nbdbuf=extfpmd%nbdbuf)
-     end if
      
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
@@ -1470,11 +1451,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
 &       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
-&       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
-&       energies%e_kinetic,energies%e_eigenvalues)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband,dtset%mband,occ)
+&       dtset%wtk,dtset%nband)
      end if
 
      if(paw_dmft%use_dmft==1) then
@@ -1499,26 +1479,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ABI_NVTX_START_RANGE(NVTX_MKRHO)
 
      if (psps%usepaw==0) then
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&       npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &       extfpmd=extfpmd)
      else
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,&
-&       npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &       extfpmd=extfpmd)
-     end if
-
-     ! Make full electron density with extended plane waves basis set
-     if(dtset%useextfpmd==11.and.dtset%extfpmd_truecg==1) then
-       if(psps%usepaw==0) then
-         call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-&         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-&         paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-       else
-         call mkrho(extfpmd%cg,dtset,gprimd,irrzon,extfpmd%kg,extfpmd%mcg,extfpmd%mband,&
-&         extfpmd%mpi_enreg,extfpmd%mpw,extfpmd%nband,extfpmd%npwarr,extfpmd%occ,&
-&         paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
-       end if
      end if
 
      ABI_NVTX_END_RANGE()
@@ -1618,24 +1585,15 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Compute extended plane waves contributions
      if(associated(extfpmd)) then
-       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,mpi_enreg%me,dtset%nband,&
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
 &       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
-       if(extfpmd%version==11) then
-         ! Get extended plane wave cutoff
-         call extfpmd%generate_extpw(dtset%exchn2n3d,dtset%effmass_free,gmet,&
-&         dtset%istwfk,dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,&
-&         'PERS',mpi_enreg,dtset%nsppol,dtset%dilatmx,dtset%nspinor,cg,&
-&         mcg,npwarr,kg,dtset%mpw,eigen,dtset%mband,dtset%ecut,dtset%ecutsm,&
-&         resid)
-       end if
        extfpmd%nelect=zero
        call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
 &       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%effmass_free,gmet,dtset%kptns,&
-&       dtset%nkpt,dtset%mkmem,dtset%istwfk,dtset%nspinor,dtset%nsppol,dtset%nband,dtset%wtk,&
-&       energies%e_kinetic,energies%e_eigenvalues)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nsppol,dtset%nband,dtset%wtk)
        call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
-&       dtset%wtk,dtset%nband,dtset%mband,occ)
+&       dtset%wtk,dtset%nband)
        ! CHECK number of electrons integrating rhor.
        ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
      end if
@@ -1720,10 +1678,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !  Compute the kinetic energy density
    if(dtset%usekden==1 .and. (iscf > 0 .or. iscf==-3 ) )then
      if (psps%usepaw==0) then
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,npwarr,occ,paw_dmft,phnons,&
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      else
-       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,dtset%mband,mpi_enreg,dtset%mpw,dtset%nband,npwarr,occ,paw_dmft,phnons,&
+       call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &      tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
      end if
    end if
@@ -1746,14 +1704,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &     dtfil%fnameabo_app_eig,ab_out,iscf,dtset%kptns,dtset%kptopt,dtset%mband,&
 &     dtset%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,dtset%nsppol,occ,dtset%occopt,option,&
 &     dtset%prteig,prtvol,resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
-     ! Print extended plane waves eigenvalues
-     if(dtset%useextfpmd==11) then
-       call prteigrs(extfpmd%eigen,enunit,energies%e_fermie,energies%e_fermih,&
-&       dtfil%fnameabo_app_extpweig,ab_out,iscf,dtset%kptns,dtset%kptopt,&
-&       extfpmd%mband,extfpmd%nband,dtset%nbdbuf,dtset%nkpt,nnsclo_now,&
-&       dtset%nsppol,extfpmd%occ,dtset%occopt,option,dtset%prteig,prtvol,&
-&       extfpmd%resid,dtset%tolwfr,vxcavg_dum,dtset%wtk)
-     end if
    end if
 
 !  Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
