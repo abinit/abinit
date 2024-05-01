@@ -1,8 +1,8 @@
 
-.Version 9.11.2 of ABINIT 
+.Version 9.11.6.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,16 +14,16 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 16 Jul 2023.
-- ( at 07h18 )
+.Starting date : Sun 11 Feb 2024.
+- ( at 14h01 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/tutorial_tnuc_4/tnuc_4.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Test_suite/tutorial_tnuc_4/tnuc_4.abi
 - output file    -> tnuc_4.abo
 - root for input  files -> tnuc_4i
 - root for output files -> tnuc_4o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  DATASET    1 : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -162,9 +162,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -386,9 +386,9 @@ meta: {optdriver: 1, rfddk: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/jzwanzig_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Ne.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.80173543
@@ -461,9 +461,9 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   6.89849431E-01 eigvalue=   2.15441497E-01  local=  -3.97151584E-01  nuc. dip.=   1.55112933E-09
+     kin0=   6.89849431E-01 eigvalue=   2.15441497E-01  local=  -3.97151584E-01  nclr dpl0=   1.55112933E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.23644411E-02   enl1=  -3.01165990E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
@@ -495,12 +495,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.71083083977862     -7.108E-01 2.039E-03 0.000E+00
- ETOT  2 -0.71118389438773     -3.531E-04 1.283E-07 0.000E+00
- ETOT  3 -0.71118392236323     -2.798E-08 7.224E-11 0.000E+00
- ETOT  4 -0.71118392237628     -1.305E-11 5.470E-15 0.000E+00
- ETOT  5 -0.71118392237627      5.551E-15 1.384E-18 0.000E+00
- ETOT  6 -0.71118392237628     -3.220E-15 5.842E-21 0.000E+00
+-ETOT  1 -0.71083083959486     -7.108E-01 2.039E-03 0.000E+00
+ ETOT  2 -0.71118389423549     -3.531E-04 1.283E-07 0.000E+00
+ ETOT  3 -0.71118392221213     -2.798E-08 7.224E-11 0.000E+00
+ ETOT  4 -0.71118392222525     -1.313E-11 5.470E-15 0.000E+00
+ ETOT  5 -0.71118392222525      5.218E-15 1.384E-18 0.000E+00
+ ETOT  6 -0.71118392222525     -3.331E-15 5.842E-21 0.000E+00
 
  At SCF step    6   max residual=  5.84E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -518,9 +518,9 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   6.89849463E-01 eigvalue=   2.15441565E-01  local=  -3.97151613E-01  nuc. dip.=   2.97669060E-09
+     kin0=   6.89849463E-01 eigvalue=   2.15441565E-01  local=  -3.97151613E-01  nclr dpl0=   2.97669060E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nuc. dip.=  -1.51026688E-10
+     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -1.51026688E-10
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.23644578E-02   enl1=  -3.01166050E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
@@ -529,7 +529,7 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -9.53400231E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7111839224E+00 Ha. Also 2DEtotal=   -0.193522987068E+02 eV
+ 2DEtotal=   -0.7111839222E+00 Ha. Also 2DEtotal=   -0.193522987027E+02 eV
     (  non-var. 2DEtotal :   -7.1118392208E-01 Ha)
 
 --------------------------------------------------------------------------------
@@ -552,12 +552,12 @@ tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.71083083977245     -7.108E-01 2.039E-03 0.000E+00
- ETOT  2 -0.71118389438162     -3.531E-04 1.283E-07 0.000E+00
- ETOT  3 -0.71118392235713     -2.798E-08 7.224E-11 0.000E+00
- ETOT  4 -0.71118392237016     -1.304E-11 5.470E-15 0.000E+00
- ETOT  5 -0.71118392237017     -3.775E-15 1.384E-18 0.000E+00
- ETOT  6 -0.71118392237017     -2.109E-15 5.842E-21 0.000E+00
+-ETOT  1 -0.71083083958869     -7.108E-01 2.039E-03 0.000E+00
+ ETOT  2 -0.71118389422939     -3.531E-04 1.283E-07 0.000E+00
+ ETOT  3 -0.71118392220602     -2.798E-08 7.224E-11 0.000E+00
+ ETOT  4 -0.71118392221914     -1.311E-11 5.470E-15 0.000E+00
+ ETOT  5 -0.71118392221914     -4.108E-15 1.384E-18 0.000E+00
+ ETOT  6 -0.71118392221914     -2.220E-15 5.842E-21 0.000E+00
 
  At SCF step    6   max residual=  5.84E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
@@ -575,9 +575,9 @@ tolerances: {tolwfr: 1.00E-20, }
 
  Nine components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   6.89849463E-01 eigvalue=   2.15441565E-01  local=  -3.97151613E-01  nuc. dip.=   2.97669059E-09
+     kin0=   6.89849463E-01 eigvalue=   2.15441565E-01  local=  -3.97151613E-01  nclr dpl0=   2.97669059E-09
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nuc. dip.=  -1.51026684E-10
+     kin1=  -9.30521748E-01  Hartree=   0.00000000E+00     xc=   0.00000000E+00  nclr dpl1=  -1.51026684E-10
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.23644578E-02   enl1=  -3.01166050E-01
  10: eventually, PAW "on-site" Hxc contribution: epaw1=   0.00000000E+00
@@ -586,7 +586,7 @@ tolerances: {tolwfr: 1.00E-20, }
  11 Contribution from 1st-order change of wavefunctions overlap
  eovl1 =  -9.53400231E-02
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
- 2DEtotal=   -0.7111839224E+00 Ha. Also 2DEtotal=   -0.193522987067E+02 eV
+ 2DEtotal=   -0.7111839222E+00 Ha. Also 2DEtotal=   -0.193522987026E+02 eV
     (  non-var. 2DEtotal :   -7.1118392207E-01 Ha)
 
 ====================================================
@@ -698,7 +698,7 @@ tolerances: {tolwfr: 1.00E-20, }
               amu      2.01797000E+01
              ecut      1.50000000E+01 Hartree
            etotal1    -3.5105870858E+01
-           etotal2    -7.1118392237E-01
+           etotal2    -7.1118392222E-01
             fcart1     9.9999999999E+99  9.9999999999E+99  9.9999999999E+99
 -          fftalg         312
            getwfk1          0
@@ -859,10 +859,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=         78.5  wall=         78.9
+- Proc.   0 individual time (sec): cpu=         55.7  wall=         55.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  51 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         78.5  wall=         78.9
+.Delivered  51 WARNINGs and   9 COMMENTs to log file.
++Overall time at end (sec) : cpu=         55.7  wall=         55.9

@@ -6,7 +6,7 @@
 !!  Interface with Wannier90
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2022 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
+!!  Copyright (C) 2005-2024 ABINIT group (BAmadon, CEspejo, FJollet, TRangel, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1011,7 +1011,7 @@ contains
            call fourwf(cplex,denpot,cwavef,fofgout,fofr,&
 &           gbound,gbound,dtset%istwfk(ikpt),kg_k,kg_k,mgfft,&
 &           mpi_enreg,1,ngfft,npw_k,npw_k,n4,n5,n6,0,&
-&           tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&           tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 !          do jj3=1,n3,spacing
 !          do jj2=1,n2,spacing
 !          do jj1=1,n1,spacing

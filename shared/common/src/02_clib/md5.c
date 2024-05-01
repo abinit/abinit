@@ -46,7 +46,7 @@
 #include <string.h>
 #ifdef HAVE_MALLOC_MALLOC_H
 #  include <malloc/malloc.h>
-#else
+#elif HAVE_MALLOC_H
 #  include <malloc.h>
 #endif
 

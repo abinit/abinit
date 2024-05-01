@@ -9,7 +9,7 @@
 !!  Procedures to deal with the singularity for q --> 0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2024 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -236,7 +236,7 @@ type, public :: vcgen_t
 contains
   procedure :: init => vcgen_init                  ! Initialize the object
   procedure :: get_vc_sqrt => vcgen_get_vc_sqrt    ! Compute sqrt(vc(q,g))
-  procedure :: free => vcgen_free                  ! Free
+  procedure :: free => vcgen_free                  ! Free memory
   !procedure :: print => vcgen_print
 end type vcgen_t
 !!***
@@ -1900,6 +1900,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
      !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
        vcoul(ig) = normv(q0 + gvec(:,ig), cryst%gmet, "G")
+       !print *, "q_is_gamma with ", q0, "and vcoul:", vcoul(ig); stop
      else
        vcoul(ig) = normv(qpt + gvec(:,ig), cryst%gmet, "G")
      end if

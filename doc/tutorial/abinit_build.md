@@ -2,7 +2,7 @@
 authors: MG
 ---
 
-# How to build ABINIT
+# How to build ABINIT using the Autotools
 
 This tutorial explains how to build ABINIT including the external dependencies
 without relying on pre-compiled libraries, package managers and root privileges.
@@ -1077,19 +1077,19 @@ MPI compilers and the libraries installed previously.
 First of all, download the ABINIT tarball from [this page](https://www.abinit.org/packages) using e.g.
 
 ```sh
-wget https://www.abinit.org/sites/default/files/packages/abinit-9.0.2.tar.gz
+wget https://www.abinit.org/sites/default/files/packages/abinit-9.10.3.tar.gz
 ```
 
-Here we are using version 9.0.2 but you may want to download the
+Here we are using version 9.10.3 but you may want to download the
 latest production version to take advantage of new features and benefit from bug fixes.
 
 Once you got the tarball, uncompress it by typing:
 
 ```sh
-tar -xvzf abinit-9.0.2.tar.gz
+tar -xvzf abinit-9.10.3.tar.gz
 ```
 
-Then `cd` into the newly created *abinit-9.0.2* directory.
+Then `cd` into the newly created *abinit-9.10.3* directory.
 Before actually starting the compilation, type:
 
 ```sh

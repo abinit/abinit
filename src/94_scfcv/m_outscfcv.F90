@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_outscfcv
 !! NAME
 !!  m_outscfcv
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2022 ABINIT group (XG)
+!!  Copyright (C) 2005-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -287,7 +286,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  logical :: paral_atom, paral_fft, my_atmtab_allocated
  real(dp) :: e_zeeman
  real(dp) :: dmatdum(0,0,0,0)
- real(dp) :: e_fermie, e_fermih ! CP added e_fermih
+ real(dp) :: e_fermie, e_fermih
  type(oper_type) :: dft_occup
  type(crystal_t) :: crystal
  type(ebands_t) :: ebands
@@ -361,20 +360,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ebands%fermie  = results_gs%energies%e_fermie
  e_fermie = results_gs%energies%e_fermie
- ! CP added
  ebands%fermih  = results_gs%energies%e_fermih
  e_fermih = results_gs%energies%e_fermih
- ! End CP added
  ebands%entropy = results_gs%energies%entropy
- !write(std_out,*)"ebands%efermi in outscfcv",ebands%fermie
- !write(std_out,*)"results_gs%energies%e_fermie in outscfcv",e_fermie
- !write(std_out,*)"results_gs%fermie in outscfcv",results_gs%fermie
- !write(std_out,*)"hdr%efermi in outscfcv",hdr%fermie
-
- !if (me == master) then !.and. dtset%occopt == 1) then
- !  call ebands_print_gaps(ebands, std_out, "KS gaps estimated from k-sampling")
- !  !call ebands_print_gaps(ebands, ab_out, "KS Gaps")
- !end if
 
  ! YAML output
  if (me == master) then
@@ -597,6 +585,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! Output of the GSR file (except when we are inside mover)
 #ifdef HAVE_NETCDF
+ ! Temporarily disable for CRAY
+#ifndef FC_CRAY
  if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
    !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
    fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
@@ -627,6 +617,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    NCF_CHECK(nf90_close(ncid))
    !call timab(1195,2,tsec)
  end if
+#endif
 #endif
 
  call timab(1154,2,tsec)

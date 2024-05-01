@@ -6,7 +6,7 @@
 !!  Initialization of wavefunctions.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +27,7 @@ module m_inwffil
  use m_wffile
  use m_wfk
  use m_errors
+ use m_xomp
  use m_xmpi
  use m_nctk
  use m_hdr
@@ -1071,6 +1072,7 @@ end subroutine inwffil
 !!   of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
 !!  wff1, structure information for input and output files
+!!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
 !!  if ground state format (formeig=0):
@@ -2009,6 +2011,7 @@ end subroutine initwf
 !!   sphere for each k point being considered (kptns2 set)
 !!  wffinp=structure info of input wf file unit number
 !!  wffout=structure info of output wf file unit number
+!!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
 !!  (see side effects)
@@ -2387,7 +2390,7 @@ subroutine newkpt(ceksp2,cg,debug,ecut1,ecut2,ecut2_eff,eigen,exchn2n3d,fill,&
          do iband=nbd1_rd,1,-1
 !          The factor of two is for complex eigenvalues
            do ii=2*nbd2,2*nbd1_rd+1,-1
-             eig_k(ii+(iband-1)*2*nbd2)=huge(0.0_dp)/10.0_dp
+             eig_k(ii+(iband-1)*2*nbd2)=huge(zero)/10.0_dp
            end do
            do ii=2*nbd1_rd,1,-1
              eig_k(ii+(iband-1)*2*nbd2)=eig_k(ii+(iband-1)*2*nbd1_rd)
@@ -2588,6 +2591,7 @@ end subroutine newkpt
 !!  symrel(3,3,nsym)=symmetry operations in real space in terms
 !!   of primitive translations
 !!  tnons(3,nsym)=nonsymmorphic translations for symmetry operations
+!!  dtset <type(dataset_type)>=all input variables for this dataset
 !!
 !! OUTPUT
 !!  cg2(2,mcg2)=wavefunction array
@@ -3093,7 +3097,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
    if(formeig==0)then
 
 !    Ground state wf and eig case
-     eig_k2((nbd1/nspinor1)*nspinor2+1:nbd2)=huge(0.0_dp)/10.0_dp
+     eig_k2((nbd1/nspinor1)*nspinor2+1:nbd2)=huge(zero)/10.0_dp
      occ_k2((nbd1/nspinor1)*nspinor2+1:nbd2)=0.0_dp
      index=(nbd1/nspinor1)*nspinor2*npw2*nspinor2_this_proc
 
@@ -3190,7 +3194,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !    For response function, put large numbers in the remaining of the
 !    eigenvalue array (part of it was already filled in calling routine)
 !    WARNING : Change of nspinor not yet coded
-     eig_k2(1+2*nbd1*nbd2 : 2*nbd2*nbd2)=huge(0.0_dp)/10.0_dp
+     eig_k2(1+2*nbd1*nbd2 : 2*nbd2*nbd2)=huge(zero)/10.0_dp
 !    Initialisation of wfs with 0 s
      index=npw2*nbd1*nspinor2_this_proc
      do iband=nbd1+1,nbd2
