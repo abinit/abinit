@@ -225,7 +225,7 @@ module m_gwpt
    ! my_ikcalc(my_nkcalc)
    ! List of ikcalc indices treated by this pool if k-point parallelism is activated.
 
-  integer(i1b),allocatable :: itreat_qibz(:)
+  !integer(i1b),allocatable :: itreat_qibz(:)
    ! itreat_qibz(nqibz)
    ! Table used to distribute potentials over q-points in the IBZ.
    ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm according to this table.
@@ -405,7 +405,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
- type(gwpt_t) :: gwpt
+ !type(gwpt_t) :: gwpt
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
  type(crystal_t) :: pot_cryst, den_cryst
@@ -431,8 +431,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_pp(:,:)
  integer,allocatable :: rank_band(:), root_bcalc(:) ! osc_indpw(:), osc_gvecq(:,:),
  integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: ibzspin_2ikcalc(:,:), displs(:), recvcounts(:), qibz2dvdb(:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
+ integer,allocatable :: displs(:), recvcounts(:), qibz2dvdb(:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:), iperm(:)
+ integer(i1b),allocatable :: itreat_qibz(:)
  integer,pointer :: kg_pp(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfrq(3*cryst%natom), dotri(2), qq_ibz(3), qpt(3) !qpt_cart(3),
@@ -447,7 +448,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:)
  real(dp),allocatable :: gscq(:,:,:), out_eig1_k(:), cg1s_kq(:,:,:,:), h1kets_kq_allperts(:,:,:,:)
  real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), stern_ppb(:,:,:,:), stern_dw(:,:,:,:)
- logical,allocatable :: ihave_ikibz_spin(:,:), bks_mask(:,:,:),keep_ur(:,:,:)
+ logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
  real(dp),allocatable :: ug_k(:,:), ug_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cg_work(:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
@@ -559,8 +560,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ecut = dtset%ecut ! dtset%dilatmx
 
  ! Construct object to store final results.
- gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
- call qrank_ibz%free()
+ !gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
+ !call qrank_ibz%free()
 
  !if (my_rank == master) then
  !  call gwpt%print(dtset, ab_out)
@@ -585,43 +586,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
  ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
 
+ ! TODO: Distribute wavefunctions according to k, q and pp
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
-
- ! Mapping gwpt_{k,s} states to IBZ. -1 if not computed
- !ABI_MALLOC(ibzspin_2ikcalc, (nkpt, nsppol))
- !ibzspin_2ikcalc = -1
-
- !! Each node needs the wavefunctions for gwpt_{nk}
- !! TODO: kcalc should depend on the spin!
- !do spin=1,gwpt%nsppol
- !  do ikcalc=1,gwpt%nkcalc
- !    ik_ibz = gwpt%kcalc2ibz(ikcalc, 1)
- !    bstart = gwpt%bstart_ks(ikcalc, spin)
- !    bstop = bstart + gwpt%nbcalc_ks(ikcalc, spin) - 1
- !    bks_mask(bstart:bstop, ik_ibz, spin) = .True.
- !    ibzspin_2ikcalc(ik_ibz, spin) = ikcalc
- !  end do
- !end do
- !ABI_FREE(ibzspin_2ikcalc)
-
- bks_mask(gwpt%my_bsum_start:gwpt%my_bsum_stop,:,:) = .True.
+ !bks_mask(gwpt%my_bsum_start:gwpt%my_bsum_stop,:,:) = .True.
+ bks_mask = .True.
+ !call gstore%fill_bks_mask_with_pp(mband, nkibz, nsppol, bks_mask)
 
  !if (dtset%userie == 124) then
  !  ! Uncomment this line to have all states on each MPI rank.
  !  bks_mask = .True.; call wrtout(std_out, " Storing all bands for debugging purposes.")
  !end if
-
- ! This table is needed when computing the imaginary part:
- ! k+q states outside the energy window are not read hence their contribution won't be included.
- ! Error is small provided calculation is close to convergence.
- ! To reduce the error one should increase the value of phwinfact
- !ABI_MALLOC(ihave_ikibz_spin, (nkpt, nsppol))
- !ihave_ikibz_spin = .False.
- !do spin=1,gwpt%nsppol
- !  do ik_ibz=1,ebands%nkpt
- !    if (any(bks_mask(:, ik_ibz, spin))) ihave_ikibz_spin(ik_ibz, spin) = .True.
- !  end do
- !end do
 
  ! Impose istwfk=1 for all k points. This is also done in respfn (see inkpts)
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
@@ -660,6 +634,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(gbound_pp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
 
+#if 0
+ ! TODO: This part will be reintegrated afterwards if needed.
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
@@ -691,6 +667,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end do
  end do
  call xmpi_sum(vk_cart_ibz, comm, ierr)
+
  ! Write v_nk to disk.
  !if (my_rank == master) then
  !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vk_cart_ibz"), vk_cart_ibz))
@@ -699,6 +676,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
+#endif
 
  ! Precompute phonon frequencies and eigenvectors in the IBZ.
  ! These quantities are then used to symmetrize quantities for q in the IBZ(k) in order
@@ -752,15 +730,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call dvdb%open_read(ngfftf, xmpi_comm_self)
  !call drhodb%open_read(ngfftf, xmpi_comm_self)
 
- my_npert = gwpt%my_npert
- if (gwpt%pert_comm%nproc > 1) then
-   ! Activate parallelism over perturbations
-   call dvdb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
-   !call drhodb%set_pert_distrib(gwpt%my_npert, natom3, gwpt%my_pinfo, gwpt%pert_table, gwpt%pert_comm%value)
- end if
-
  ! Activate parallelism over perturbations at the level of the DVDB
- !call gstore%set_perts_distrib(crys, dvdb, my_npert)
+ call gstore%set_perts_distrib(cryst, dvdb, my_npert)
  !call gstore%set_perts_distrib(crys, drhodb, my_npert)
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
@@ -778,6 +749,32 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
    use_ftinterp = .False.
  end if
+
+ ! Distribute DFPT potentials (IBZ q-points) inside qpt_comm.
+ ! Note that we distribute IBZ instead of the full BZ or the IBZ_k inside the loop over ikcalc.
+ ! This means that the load won't be equally distributed but memory will scale with qpt_comm%nproc.
+ ! To reduce load imbalance, we sort the qibz points by norm and use cyclic distribution inside qpt_comm
+
+ ! itreat_qibz(nqibz)
+ ! Table used to distribute potentials over q-points in the IBZ.
+ ! The loop over qpts in the IBZ(k) is MPI distributed inside qpt_comm according to this table.
+ ! 0 if this IBZ point is not treated by this proc.
+ ! 1 if this IBZ is treated.
+
+ ! TODO: Recheck this part
+ ABI_ICALLOC(itreat_qibz, (gstore%nqibz))
+ itreat_qibz = 1
+ !call sort_rpts(gstore%nqibz, gstore%qibz, cryst%gmet, iperm)
+ !do ii=1,gstore%nqibz
+ !  iq_ibz = iperm(ii)
+ !  do my_spin=1,gstore%my_nspins
+ !    gqk => gstore%gqk(my_spin)
+ !    if (mod(ii, gqk%qpt_comm%nproc) == gqk%qpt_comm%me) itreat_qibz(iq_ibz) = 1
+ !  end do
+ !end do
+ !ABI_FREE(iperm)
+
+ call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(itreat_qibz == 1))))
 
  if (use_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
@@ -797,7 +794,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
    ABI_MALLOC(qselect, (gstore%nqibz))
    qselect = 1
-   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, gwpt%itreat_qibz, comm)
+   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -811,7 +808,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Need to translate itreat_qibz into itreatq_dvdb.
    ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
    do iq_ibz=1,gstore%nqibz
-     if (gwpt%itreat_qibz(iq_ibz) == 0) cycle
+     if (itreat_qibz(iq_ibz) == 0) cycle
      db_iqpt = qibz2dvdb(iq_ibz)
      ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
      itreatq_dvdb(db_iqpt) = 1
@@ -820,6 +817,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_FREE(itreatq_dvdb)
  end if
 
+ ABI_FREE(itreat_qibz)
  ABI_FREE(qibz2dvdb)
  ABI_FREE(qselect)
 
@@ -979,6 +977,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
+     print *, "my_npert", my_npert
      ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert), ierr)
 
      ! ========================================================================
@@ -1295,7 +1294,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(cg_kmp)
  ABI_FREE(cg_kqmp)
  ABI_FREE(cg1_kqmp)
- !ABI_FREE(ihave_ikibz_spin)
  !ABI_FREE(grad_berry)
  ABI_FREE(vtrial)
  ABI_FREE(work)
@@ -1320,7 +1318,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call pp_mesh%free()
  call gsph_c%free()
  call gstore%free()
- call gwpt%free()
+ !call gwpt%free()
 
  ! This to make sure that the parallel output of GSTORE is completed
  call xmpi_barrier(comm)
@@ -1785,20 +1783,6 @@ type(gwpt_t) function gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz
  call wrtout(std_out, sjoin(" Allocating and treating bands from my_bsum_start: ", itoa(gwpt%my_bsum_start), &
    " up to my_bsum_stop:", itoa(gwpt%my_bsum_stop)))
 
- ! Distribute DFPT potentials (IBZ q-points) inside qpt_comm.
- ! Note that we distribute IBZ instead of the full BZ or the IBZ_k inside the loop over ikcalc.
- ! This means that the load won't be equally distributed but memory will scale with qpt_comm%nproc.
- ! To reduce load imbalance, we sort the qibz points by norm and use cyclic distribution inside qpt_comm
- ABI_ICALLOC(gwpt%itreat_qibz, (gwpt%nqibz))
- call sort_rpts(gwpt%nqibz, gwpt%qibz, cryst%gmet, iperm)
- do ii=1,gwpt%nqibz
-   iq_ibz = iperm(ii)
-   if (mod(ii, gwpt%qpt_comm%nproc) == gwpt%qpt_comm%me) gwpt%itreat_qibz(iq_ibz) = 1
- end do
- ABI_FREE(iperm)
-
- call wrtout(std_out, sjoin("P Number of q-points in the IBZ treated by this proc: " ,itoa(count(gwpt%itreat_qibz == 1))))
-
  ! ================================================================
  ! Allocate arrays used to store final results and set them to zero
  ! ================================================================
@@ -1832,7 +1816,6 @@ subroutine gwpt_free(gwpt)
  ABI_SFREE(gwpt%kcalc2ibz)
  ABI_SFREE(gwpt%my_ikcalc)
  ABI_SFREE(gwpt%my_spins)
- ABI_SFREE(gwpt%itreat_qibz)
  ABI_SFREE(gwpt%my_pinfo)
  ABI_SFREE(gwpt%pert_table)
  ABI_SFREE(gwpt%ind_qbz2ibz)
@@ -1937,8 +1920,8 @@ subroutine gwpt_print(gwpt, dtset, unt)
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over perturbations: ", gwpt%pert_comm%nproc
  write(unt, "(a,i0)")"P Number of perturbations treated by this CPU: ", gwpt%my_npert
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over q-points: ", gwpt%qpt_comm%nproc
- write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
-     count(gwpt%itreat_qibz == 1), " of ", gwpt%nqibz
+ !write(unt, "(2(a,i0))")"P Number of q-points in the IBZ treated by this proc: " , &
+ !    count(gwpt%itreat_qibz == 1), " of ", gwpt%nqibz
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", gwpt%bsum_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", gwpt%spin_comm%nproc
  write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gwpt%kcalc_comm%nproc

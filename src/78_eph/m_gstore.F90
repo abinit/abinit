@@ -2567,6 +2567,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
 
 !----------------------------------------------------------------------
 
+ my_npert = cryst%natom * 3
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
