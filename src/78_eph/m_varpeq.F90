@@ -977,7 +977,7 @@ subroutine varpeq_b_from_a(self)
 
 !arrays
  integer, allocatable :: k_plus_q_map(:, :), k_minus_q_map(:, :)
- real(dp) :: my_qpt(3)
+ real(dp) :: my_qpt(3), my_kpt(3)
 
 ! *************************************************************************
 
@@ -987,6 +987,24 @@ subroutine varpeq_b_from_a(self)
  ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
 
  self%b(:, :) = zero
+
+ !! Loop over collinear spins
+ !do is=1,self%nsppol
+ !  my_is = self%gstore%$spin2my_is(is); if (m_is == 0) cycle
+ !  gqk => self%gstore%gqk(my_is)
+
+ !  ! Loop over the effective electronic k-space
+ !  do ik=1,self%nkpt
+ !    my_kpt(:) = self%kpts(:, ik)
+
+ !    ! Forward (k+q) scattering mapping: k+q -> k_{effBZ}
+ !    call self%krank_kpts%get_mapping(self%nqpt, self%qpts, dksqmax, &
+ !      cryst%gmet, k_plus_q_map, self%nsym, self5symafm, self%symrec, &
+ !      self%timrev, use_symrec=.True., qpt=my_kpt)
+
+ !  enddo
+
+ !enddo
 
  ! Loop over collinerar spins (if any)
  gqk => self%gstore%gqk(1)
