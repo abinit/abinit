@@ -455,6 +455,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(screen_t),target :: W
  type(screen_info_t) :: W_info
  type(gstore_t) :: gstore
+ type(gqk_t),pointer :: gqk
  character(len=fnlen) :: w_fname, gstore_filepath
  character(len=5000) :: msg
 !arrays
@@ -494,6 +495,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: ylmgr_dum(1,1,1)
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
  complex(gwpc),allocatable :: crhog_bkmp_nk(:), crhog_mkq_bkqmp(:)
+ !complex(dp),allocatable :: g_xc(:,:), g_ks(:,:), g_sigma(:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:) !, cg1_kqmp(:,:)
  !real(dp),allocatable :: full_cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kqmp(:,:) !, full_cg1_kqmp(:,:)
  !complex(gwpc),allocatable :: full_ur1_kmp(:), full_ur1_kqmp(:,:), full_ur1_kqmp(:,:) !, full_ur1_kqmp(:,:)
@@ -524,32 +526,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  units = [std_out, ab_out]
 
- ! Copy important dimensions
- natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
- nspden = dtset%nspden; nkpt = ebands%nkpt
-
- ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
- nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
- nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
- n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
- n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
-
- ! Get one-dimensional structure factor information on the coarse grid.
- ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
- call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
-
- ecut = dtset%ecut ! dtset%dilatmx
-
- ! Construct object to store final results.
- gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
-
  ! Check if a previous GSTORE file is present to restart the calculation
- ! Here we try to read an existing SIGEPH file if eph_restart == 1.
+ ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code (i.e. new gwpt generated in gwpt_new)
  !restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  Read mask
  !end if
+
+ gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+ call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
+
+ !call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
 
  !if (my_rank == master .and. dtset%eph_restart == 1) then
  !  if (ierr == 0) then
@@ -558,11 +546,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !      ! Get list of QP states that have been computed.
  !      gwpt%qp_done = gwpt_restart%qp_done
  !      restart = 1
- !      call wrtout(units, "- Restarting from previous SIGEPH.nc file")
+ !      call wrtout(units, "- Restarting from previous GSTORE.nc file")
  !      call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(gwpt%qp_done == 1)), "/", itoa(gwpt%nkcalc)))
  !    else
  !      restart = 0; gwpt%qp_done = 0
- !      msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
+ !      msg = sjoin("Found GSTORE.nc file with all QP entries already computed.", ch10, &
  !                  "Will overwrite:", gstore_filepath, ch10, &
  !                  "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
  !      call wrtout(ab_out, sjoin("WARNING: ", msg))
@@ -586,6 +574,25 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !    NCF_CHECK(nctk_set_datamode(gwpt%ncid))
  !  end if
  !end if
+
+ ! Copy important dimensions
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
+ nspden = dtset%nspden; nkpt = ebands%nkpt
+
+ ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
+ nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
+ nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+
+ ! Get one-dimensional structure factor information on the coarse grid.
+ ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
+ call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
+
+ ecut = dtset%ecut ! dtset%dilatmx
+
+ ! Construct object to store final results.
+ gwpt = gwpt_new(dtset, ecut, cryst, ebands, ifc, dtfil, qrank_ibz, comm)
 
  if (my_rank == master) then
    call gwpt%print(dtset, ab_out)
@@ -929,10 +936,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
  qtimrev = kpts_timrev_from_kptopt(qptopt)
 
- gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
- call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
- call gstore%free()
-
  ! Get full BZ associated to ebands
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
    nkibz, kibz, wtk, nkbz, kbz) !, bz2ibz=bz2ibz)
@@ -949,6 +952,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! =================================================
  do my_spin=1,gwpt%my_nspins
    spin = gwpt%my_spins(my_spin)
+   !gqk => gstore%gqk(my_spin)
    do iq_ibz=1,gwpt%nqibz
      call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
      qq_ibz = gwpt%qibz(:, iq_ibz)
@@ -968,7 +972,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! ====================================
      ! Get DFPT potentials for this q-point
      ! ====================================
-     ! After this branch we have allocated
+     ! After this branch we have allocated:
      !  v1scf(cplex, nfftf, nspden, my_npert))
      !  vxc1(cplex, nfft, nspden, my_npert)
 
@@ -1068,6 +1072,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
        end do ! nn_k
+       !if (cplex == 1)
+       !  g_xc(mm_kq, nn_k) = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,ispin, imyip)) / nfftf
+       !else
 
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
@@ -1124,7 +1131,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly we should not duplicate the work when pp = 0.
-         ! Also, one should handle more carefully the integration around pp = Gamma in the case of semiconductors.
+         ! When pp == 0, we also get g_ks via stern_solve
+         ! Also, one should handle more carefully the integration in g_sigma around pp = Gamma in the case of semiconductors.
 
          stern_has_band_para = .False.
          !if (stern_has_band_para) then
@@ -1181,7 +1189,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp, urs_kbz=ur_kqmp)
 
-           cwork_ur = GWPC_CONJG(ur_kqmp) * ur_k
+           cwork_ur = GWPC_CONJG(ur_kqmp) * ur_kqmp
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, crhog_mkq_bkqmp)
            crhog_mkq_bkqmp = GWPC_CONJG(crhog_mkq_bkqmp)
          end do ! ib_sum
@@ -1304,6 +1312,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call w%free()
  call pp_mesh%free()
  call gsph_c%free()
+ call gstore%free()
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
