@@ -6,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,7 +115,11 @@ subroutine outresid(dtset,kptns,mband,nband,nkpt,nsppol,resid)
  do spin=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
-     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     if (dtset%nbdbuf>0) then
+       nband_eff=max(1,nband_k-dtset%nbdbuf)
+     else
+       nband_eff=nband_k
+     end if
      residm=max(residm,maxval(resid(ibdkpt+1:ibdkpt+nband_eff)))
      resims=resims     +  sum(resid(ibdkpt+1:ibdkpt+nband_eff))
      ibdkpt=ibdkpt+nband_k

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2011-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -251,21 +251,21 @@ if ( opts.run_clean ):
   my_name = "abiclean"
   print_header(my_name, "Temporary directories and files")
   run_script(my_name, "Removing Bazaar backup files",
-    "find src -name '*.~[0-9]~' -exec rm -f {} \;")
+    r"find src -name '*.~[0-9]~' -exec rm -f {} \;")
   run_script(my_name, "Removing temporary build dirs",
     "rm -rf tmp*")
   run_script(my_name, "Removing temporary test dirs",
-    "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
+    r"find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
-    "find src -name '*.old' -exec rm -f {} \;")
+    r"find src -name '*.old' -exec rm -f {} \;")
   run_script(my_name, "Removing compiled Python files",
-    "find . -name '*.pyc' -o -name '*.pyo' -exec rm -f {} \;")
+    r"find . -name '*.pyc' -o -name '*.pyo' -exec rm -f {} \;")
   run_script(my_name, "Removing compiled Python cache directories",
-    "find . -depth -name '__pycache__' -exec rm -rf {} \;")
+    r"find . -depth -name '__pycache__' -exec rm -rf {} \;")
   run_script(my_name, "Removing symbolic links in common",
-    "find shared/common/src -type l -exec rm -f {} \;")
+    r"find shared/common/src -type l -exec rm -f {} \;")
   run_script(my_name, "Removing symbolic links in core",
-    "find src -type l -exec rm -f {} \;")
+    r"find src -type l -exec rm -f {} \;")
 
   print_header(my_name, "Abinit scripts outputs")
   run_script(my_name, "Removing file lists",
@@ -280,15 +280,15 @@ if ( opts.run_clean ):
     "rm -rf config/split")
   for block in sorted(abinit_blocks.keys()):
     run_script(my_name, "Removing abinit.dep files in %s" % block,
-      "find %s -name 'abinit.dep' -exec rm {} \;" % abinit_blocks[block])
+      r"find %s -name 'abinit.dep' -exec rm {} \;" % abinit_blocks[block])
     run_script(my_name, "Removing abinit.dir files in %s" % block,
-      "find %s -name 'abinit.dir' -exec rm {} \;" % abinit_blocks[block])
+      r"find %s -name 'abinit.dir' -exec rm {} \;" % abinit_blocks[block])
     run_script(my_name, "Removing abirules logs in %s" % block,
       "rm -f %s/tmp-abirules.log" % abinit_blocks[block])
     run_script(my_name, "Removing abirules outputs in %s" % block,
-      "find %s -name '*.abirules' -exec rm -f {} \;" % abinit_blocks[block])
+      r"find %s -name '*.abirules' -exec rm -f {} \;" % abinit_blocks[block])
     run_script(my_name, "Removing abiauty outputs in %s" % block,
-      "find %s -name '*.abiauty' -exec rm -f {} \;" % abinit_blocks[block])
+      r"find %s -name '*.abiauty' -exec rm -f {} \;" % abinit_blocks[block])
 
   print_header(my_name, "Core-managed documentation")
   run_script(my_name, "Removing certified build examples",
@@ -320,20 +320,26 @@ if ( opts.run_clean ):
       "cd %s && rm -f core config.log config.status stamp-h1" % dcln)
     if ( dcln != "." ):
       run_script(my_name, "Removing .deps dirs in %s/" % dcln,
-        "find %s -depth -name '.deps' -exec rm -rf {} \;" % dcln)
+        r"find %s -depth -name '.deps' -exec rm -rf {} \;" % dcln)
       run_script(my_name, "Removing Makefile.am files in %s/" % dcln,
-        "find %s -name Makefile.am -exec rm -f {} \;" % dcln)
+        r"find %s -name Makefile.am -exec rm -f {} \;" % dcln)
       run_script(my_name, "Removing Makefile.in files in %s/" % dcln,
-        "find %s -name Makefile.in -exec rm -f {} \;" % dcln)
+        r"find %s -name Makefile.in -exec rm -f {} \;" % dcln)
       run_script(my_name, "Removing Makefile files in %s/" % dcln,
-        "find %s -name Makefile -exec rm -f {} \;" % dcln)
-      run_script(my_name, "Removing libraries and object files in %s/" % dcln,
-        "find %s -name '*.a' -o -name '*.o' -exec rm {} \;" % dcln)
+        r"find %s -name Makefile -exec rm -f {} \;" % dcln)
+      run_script(my_name, "Removing CmakeCache.txt files in %s/" % dcln,
+        r"find %s -name CMakeCache.txt -exec rm -rf {} \;" % dcln)
+      run_script(my_name, "Removing CmakeFiles files in %s/" % dcln,
+        r"find %s -name CMakeFiles -type d -exec rm -rf {} \;" % dcln, stop_on_error=False)
+      run_script(my_name, "Removing object files in %s/" % dcln,
+        r"find %s -name '*.o' -exec rm {} \;" % dcln)
+      run_script(my_name, "Removing libraries files in %s/" % dcln,
+        r"find %s -name '*.a' -exec rm {} \;" % dcln)
   for block in sorted(abinit_blocks.keys()):
     run_script(my_name, "Removing binary Fortran modules in %s" % block,
-      "find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
+      r"find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
   run_script(my_name, "Removing Python-generated files in src/",
-    "find src -name '*.pickle' -exec rm {} \;")
+    r"find src -name '*.pickle' -exec rm {} \;")
   abinit_bins = xcnf.sections()
   abinit_bins.sort()
   abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
@@ -343,18 +349,18 @@ if ( opts.run_clean ):
   print_header(my_name, "Script-generated source files")
   if ( opts.run_wipe ):
     run_script(my_name, "Removing Fortran interfaces",
-      "find src -name 'interfaces_*.F90' -exec rm {} \;")
+      r"find src -name 'interfaces_*.F90' -exec rm {} \;")
     run_script(my_name, "Removing CPP options dumper routine",
-      "rm -f shared/common/src/14_hidewrite/m_cppopts_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_cppopts_dumper.F90 shared/common/src/14_hidewrite/m_cppopts_dumper.F90.cmake")
     run_script(my_name, "Removing optimization flags dumper routine",
-      "rm -f shared/common/src/14_hidewrite/m_optim_dumper.F90")
+      "rm -f shared/common/src/14_hidewrite/m_optim_dumper.F90 shared/common/src/14_hidewrite/m_optim_dumper.F90.cmake")
   else:
     print_message(my_name,
       "*** Skipping script-generated source file removal ***")
 
   print_header(my_name, "Files produced by the configure script")
   run_script(my_name, "Removing top config.* files",
-    "rm -f config.dump config.mk config.optim config.pc config.py config.sh")
+    "rm -f abinit.pc config.dump config.mk config.optim config.pc config.py config.sh")
   run_script(my_name, "Removing Fortran modules containing package info",
     "rm -f shared/common/src/14_hidewrite/m_build_info.F90")
 
@@ -377,13 +383,13 @@ if ( opts.run_clean ):
           "rm -f %s/Makefile" % subdir)
 
   run_script(my_name, "Removing byte-compiled ABINIT files",
-    "find . -name 'abinit.srcc' -exec rm {} \;")
+    r"find . -name 'abinit.srcc' -exec rm {} \;")
   run_script(my_name, "Removing byte-compiled Python files",
-    "find . -name '*.py[co]' -exec rm {} \;")
+    r"find . -name '*.py[co]' -exec rm {} \;")
   run_script(my_name, "Removing Python cache dirs",
-    "find . -depth -name '__pycache__' -exec rm -r {} \;")
+    r"find . -depth -name '__pycache__' -exec rm -r {} \;")
   run_script(my_name, "Removing abisrc.py Pickle files",
-    "find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
+    r"find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
   run_script(my_name, "Removing abisrc output files",
     "rm -f abisrc.stderr abisrc.stdout")
 
@@ -424,7 +430,7 @@ else:
 
 if ( ac_ret == 0 ):
   ac_version = ac_version.split("\n")[0]
-  ac_version = re.sub(".*\(GNU Autoconf\) ", "", ac_version)
+  ac_version = re.sub(r".*\(GNU Autoconf\) ", "", ac_version)
   ac_version = re.sub(" .*", "", ac_version)
   ac_version = translate_version(my_name, ac_version)
 else:
@@ -432,7 +438,7 @@ else:
 
 if ( am_ret == 0 ):
   am_version = am_version.split("\n")[0]
-  am_version = re.sub(".*\(GNU automake\) ", "", am_version)
+  am_version = re.sub(r".*\(GNU automake\) ", "", am_version)
   am_version = re.sub(" .*", "", am_version)
   am_version = translate_version(my_name, am_version)
 else:
@@ -440,7 +446,7 @@ else:
 
 if ( lt_ret == 0 ):
   lt_version = lt_version.split("\n")[0]
-  lt_version = re.sub(".*\(GNU libtool\) ", "", lt_version)
+  lt_version = re.sub(r".*\(GNU libtool\) ", "", lt_version)
   lt_version = re.sub(" .*", "", lt_version)
   lt_version = re.sub("-.*", "", lt_version)
   lt_version = translate_version(my_name, lt_version)
@@ -536,7 +542,7 @@ if ( opts.run_source ):
   abisrc_cmdline = "./abisrc.py makemake > abisrc.stdout 2> abisrc.stderr"
   print_message(my_name, "---> running %s" % (abisrc_cmdline))
   abisrc_exitcode = os.system(abisrc_cmdline)
-
+   
   if abisrc_exitcode != 0:
     sys.stderr.write("""
        ****************************************************************

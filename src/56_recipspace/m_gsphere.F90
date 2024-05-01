@@ -11,7 +11,7 @@
 !!  one need the knowledge of several quantities at G-G0.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
+!! Copyright (C) 1999-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,7 +165,7 @@ module m_gsphere
    procedure  :: print       => gsph_print          ! Printout of basic dimensions.
    procedure  :: free        => gsph_free           ! Free memory allocated in the object.
    procedure  :: g_idx       => gsph_g_idx          ! Returns the index of G from its reduced coordinates.
-   procedure  :: gmg_idx     => gsph_gmg_idx        ! Returns the index of G1-G2 from their indeces
+   procedure  :: gmg_idx     => gsph_gmg_idx        ! Returns the index of G1-G2 from their indices
    procedure  :: gmg_fftidx  => gsph_gmg_fftidx     ! Returns the index of G1-G2 in the FFT mesh defined by ngfft.
    procedure  :: extend      => gsph_extend         ! Construct a new gsphere_t with a larger cutoff energy
 

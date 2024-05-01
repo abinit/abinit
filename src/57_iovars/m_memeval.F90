@@ -6,7 +6,7 @@
 !!  Functions to estimate memory requirements from the calculation parameters.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, DC, DW)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, DC, DW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,7 +92,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
  integer :: nfftdiel,nfftf,nkpt,nproc_fft,nptsgvec,npulayit,npwdiel,nspden,nspinor
  integer :: nsppol,nsym,ntypat,occopt,optddk,optforces,optphon,optstress
  integer :: optstrs,paral_fft,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,prtvol,ptgroupma,response
- integer :: spgroup,timrev,usepaw,useylm,use_gpu_cuda,xclevel
+ integer :: spgroup,timrev,usepaw,useylm,gpu_option,xclevel
  real(dp) :: diecut,dilatmx,ecut,ecut_eff,ecutdg_eff,ecutsus,ucvol
 !arrays
  integer :: bravais(11),mkmems(3),ngfftdiel(18)
@@ -148,7 +148,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
    spgroup   =dtsets(idtset)%spgroup
    usepaw=dtsets(idtset)%usepaw
    useylm=dtsets(idtset)%useylm
-   use_gpu_cuda=dtsets(idtset)%use_gpu_cuda
+   gpu_option=dtsets(idtset)%gpu_option
    xclevel=dtsets(idtset)%xclevel
 
    ABI_MALLOC(symrel,(3,3,nsym))
@@ -248,7 +248,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
      call getng(dtsets(idtset)%boxcutmin,dtsets(idtset)%chksymtnons,&
 &     ecut_eff,gmet,k0,me_fft,mgfftdiel,nfftdiel,&
 &     ngfftdiel,nproc_fft,nsym,paral_fft,symrel,dtsets(idtset)%tnons,&
-&     use_gpu_cuda=dtsets(idtset)%use_gpu_cuda)
+&     gpu_option=dtsets(idtset)%gpu_option)
 !    Compute the size of the dielectric matrix : npwdiel
      kpt_diel(1:3)=(/ 0.0_dp, 0.0_dp, 0.0_dp /)
      ecut_eff=diecut*dilatmx**2
@@ -287,7 +287,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &       dtsets(idtset)%ngfft,ngfftdiel,ngfftf,dtsets(idtset)%nimage,nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,&
 &       nsppol,nsym,ntypat,occopt,optforces,mem_test,optstress,pawcpxocc,pawmixdg,&
 &       pawnhatxc,pawspnorb,pawstgylm,prtvol,pspheads,qphon,dtsets(idtset)%tfkinfunc,&
-&       dtsets(idtset)%typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
+&       dtsets(idtset)%typat,ucvol,usepaw,useylm,gpu_option,xclevel)
      else if( dtsets(idtset)%usepaw==0) then
        if (mpi_enregs(idtset)%me == 0) then
          call wvl_memory(dtsets(idtset), idtset, mpi_enregs(idtset), npsp, 1, pspheads)
@@ -315,7 +315,7 @@ subroutine memory_eval(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
 &     iscf,jdtset,lmnmax_eff,lnmax_eff,mband,mffmem,dtsets(idtset)%mgfft,&
 &     mkmems,mpi_enregs(idtset),mpsang,mpssoang,mpw,mqgrid_ff,natom,nband,dtsets(idtset)%nfft,&
 &     dtsets(idtset)%ngfft,nkpt,nloalg,nspden,nspinor,nsppol,nsym,&
-&     ntypat,occopt,optddk,optphon,mem_test,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
+&     ntypat,occopt,optddk,optphon,mem_test,optstrs,prtvol,useylm,gpu_option,xclevel)
    end if
 
 !  Deallocate temporary arrays (when they will really be temporary !)
@@ -409,7 +409,7 @@ end subroutine memory_eval
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  use_gpu_cuda=1 if Cuda (GPU) is on
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xclevel=XC functional level
 !!
 !! OUTPUT
@@ -476,7 +476,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
 & natom,nband,nfft,nfftdiel,nfftf,ngfft,ngfftdiel,ngfftf,nimage,&
 & nkpt,nloalg,npsp,npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat,&
 & occopt,optforces,option,optstress,pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm,&
-& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,use_gpu_cuda,xclevel)
+& prtvol,pspheads,qphon,tfkinfunc,typat,ucvol,usepaw,useylm,gpu_option,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -487,7 +487,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  integer,intent(in) :: npulayit,npwdiel,nspden,nspinor,nsppol,nsym,ntypat
  integer,intent(in) :: occopt,optforces,option,optstress
  integer,intent(in) :: pawcpxocc,pawmixdg,pawnhatxc,pawspnorb,pawstgylm
- integer,intent(in) :: prtvol,tfkinfunc,usepaw,useylm,use_gpu_cuda,xclevel
+ integer,intent(in) :: prtvol,tfkinfunc,usepaw,useylm,gpu_option,xclevel
  real(dp) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
@@ -539,7 +539,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
    ABI_BUG(msg)
  end if
 
-!firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
+!firstchar=' ';if (gpu_option/=0) firstchar='_'
  cmpw(:)=zero ; cfft(:)=zero ; cfftf(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 
@@ -608,7 +608,7 @@ subroutine memory(n1xccc,extrapwf,getcell,idtset,icoulomb,intxc,ionmov,iout,dens
  end if
 
 !Additional information if GPU
- if (use_gpu_cuda==1) then
+ if (gpu_option/=ABI_GPU_DISABLED) then
 !  write(msg, '(a)' )' GPU method is used'
 !  call wrtout(iout,msg)
 !  call wrtout(std_out,msg)
@@ -1858,7 +1858,7 @@ end subroutine memana
 !!  prtvol=control print volume
 !!  useylm=governs the way the nonlocal operator is to be applied:
 !!         1=using Ylm, 0=using Legendre polynomials
-!!  use_gpu_cuda=1 if Cuda (GPU) is on
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xclevel= level of the XC functional
 !!
 !! OUTPUT
@@ -1903,7 +1903,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
 & mkmems,mpi_enreg,mpsang,mpssoang,mpw,mqgrid,&
 & natom,nband,nfft,ngfft,&
 & nkpt,nloalg,nspden,nspinor,nsppol,nsym,ntypat,&
-& occopt,optddk,optphon,option,optstrs,prtvol,useylm,use_gpu_cuda,xclevel)
+& occopt,optddk,optphon,option,optstrs,prtvol,useylm,gpu_option,xclevel)
 
 !Arguments ------------------------------------
 !scalars
@@ -1912,7 +1912,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
  integer,intent(in) :: mpssoang,mpw,mqgrid,n1xccc,natom,nfft,nkpt
  integer,intent(in) :: nspden,nspinor,nsppol,nsym,ntypat,occopt
  integer,intent(in) :: optddk,option,optphon,optstrs,prtvol,useylm
- integer,intent(in) :: use_gpu_cuda,xclevel
+ integer,intent(in) :: gpu_option,xclevel
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: mkmems(3),nband(nkpt*nsppol),ngfft(18)
@@ -1947,7 +1947,7 @@ subroutine memorf(cplex,n1xccc,getcell,idtset,intxc,iout,iprcel,&
    ABI_BUG(msg)
  end if
 
- firstchar=' ';if (use_gpu_cuda==1) firstchar='_'
+ firstchar=' ';if (gpu_option/=ABI_GPU_DISABLED) firstchar='_'
  cmpw(:)=zero ; cfft(:)=zero ; cadd(:)=zero
  dttyp(:)=0
 
