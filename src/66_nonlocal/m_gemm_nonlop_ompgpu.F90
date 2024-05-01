@@ -79,6 +79,8 @@ module m_gemm_nonlop_ompgpu
  integer, save :: gpu_initialised=0
  integer, save :: mod__ndat=0
  integer, save :: mod__nprojs=0
+ integer, save :: mod__cplex=0
+ integer, save :: mod__cplex_fac=0
  real(dp), save, allocatable, target :: projections_(:,:,:), s_projections(:,:,:), vnl_projections(:,:,:), dprojections(:,:,:)
  real(dp), save, allocatable :: temp_realvec_r(:),temp_realvec_i(:)
  real(dp), save, allocatable :: sij_typ(:,:)
@@ -185,6 +187,8 @@ contains
 
   mod__ndat=ndat
   mod__nprojs=nprojs
+  mod__cplex=cplex
+  mod__cplex_fac=cplex_fac
 
   if(cplex == 1) then
     ABI_MALLOC(temp_realvec_r,(npw*ndat))
@@ -529,7 +533,8 @@ contains
   svectout_ => svectout
 
   !$OMP TARGET ENTER DATA MAP(to:atindx1,indlmn,enl)
-  if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor .or. nprojs /= mod__nprojs) then
+  if(gpu_initialised == 0 .or. mod__ndat /= ndat*nspinor .or. nprojs /= mod__nprojs &
+  &    .or. cplex /= mod__cplex .or. cplex_fac /= mod__cplex_fac) then
     call alloc_work_buffers(cplex, cplex_fac,&
 &        nspinor*ndat, nprojs, ntypat_, lmnmax, MAX(npwin,npwout))
   end if
