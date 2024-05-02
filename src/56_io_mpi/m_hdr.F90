@@ -2568,7 +2568,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
 
 !Transmit the double precision scalars and arrays
  list_size = 22+ 3*nkpt+nkpt+bantot + 3*nsym + 3*natom + 2*npsp+ntypat + &
-             4 + 3*hdr%nshiftk_orig + 3*hdr%nshiftk + hdr%ntypat
+             5 + 3*hdr%nshiftk_orig + 3*hdr%nshiftk + hdr%ntypat
  ABI_MALLOC(list_dpr,(list_size))
 
  if (master==me)then

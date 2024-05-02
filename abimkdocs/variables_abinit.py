@@ -23641,11 +23641,11 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXTended FPMD: Number of Bands",
-    added_in_version="10.1.1",
+    added_in_version="10.1.0",
     text=r"""
-Specifies the number of bands to use when extended FPMD contributions when using [[useextfpmd]] = 5.
+Specifies the number of bands to use for extended FPMD contributions when using [[useextfpmd]] = 5.
 This acts like [[nband]] for a conventional calculation. **extfpmd_nband** must be sufficiently high
-so that its occupancy is close to zero.
+so that its occupancy is close to zero. Extended FPMD contributions will be computed from [[nband]] to [[extfpmd_nband]].
 
 **extfpmd_nband** must be greater than [[nband]].
 """,
