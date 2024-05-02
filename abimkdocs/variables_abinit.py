@@ -23624,6 +23624,30 @@ density of states of the Fermi gas.
   * **useextfpmd** = 4, the energy shift will be evaluated
 by making an integration of the trial potential over the real space and the
 contributions will be computed with integrals over the band number.
+
+  * **useextfpmd** = 5, the energy shift will be evaluated
+by making an integration of the trial potential over the real space and the
+contributions will be computed with discrete integer sums over the band indices.
+[[extfpmd_nband]] sets the last band index, which acts like [[nband]] for a
+conventional calculation.
+""",
+),
+
+Variable(
+    abivarname="extfpmd_nband",
+    varset="gstate",
+    vartype="integer",
+    topics=['ExtFPMD_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="EXTended FPMD: Number of Bands",
+    added_in_version="10.1.2",
+    text=r"""
+Specifies the number of bands to use when extended FPMD contributions when using [[useextfpmd]] = 5.
+This acts like [[nband]] for a conventional calculation. **extfpmd_nband** must be sufficiently high
+so that its occupancy is close to zero.
+
+**extfpmd_nband** must be greater than [[nband]].
 """,
 ),
 
