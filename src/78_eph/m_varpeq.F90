@@ -74,6 +74,7 @@ module m_varpeq
  use m_gstore,          only : gstore_t, gqk_t
  use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt
  use m_symkpt,          only : symkpt
+ use m_symtk,           only : mati3inv
 
  implicit none
 
@@ -167,6 +168,9 @@ module m_varpeq
 
   type(krank_t) :: krank_kpts
    ! krank datatype used to obtain k+q->k' & k-q->k'' mappings
+
+  type(krank_t) :: krank_qpts
+   ! krank datatype used to obtain S^{-1}q indices
 
   integer, allocatable :: map_k_kibz(:, :)
   integer, allocatable :: map_invk_kibz(:, :)
@@ -277,59 +281,59 @@ subroutine varpeq_test(self)
  nproc = xmpi_comm_size(comm)
  my_rank = xmpi_comm_rank(comm)
 
- ! Testing the gather subroutine
- ABI_MALLOC(qpt_gathered, (3, self%nqpt))
- ABI_MALLOC(my_qpts, (3, gqk%my_nq))
- write(ab_out, '(a50)') 'Checking the gathering: '
-
- nelem_per_item = 3
- nitems_per_rank = gkq%my_nq
- ! nelem_per_item = 1
- ! nitems_per_rank = 3 * gkq%my_nq
- call gqk%qpt_comm%xcomm_prep_gatherv(nelem_per_item, nitems_per_rank, &
-   sendcount, recvcounts, displs)
-
- ! need to flat the array
-
- allocate(qbuff(3*nqpts))
- cnt = 0
- do iq=1,my_nq
-   do ii=1,3
-     qbuff(i) = qpt(ii, iq)
-   enddo
- enddo
-
- real(dp), target :: qpts(3, myq)
- real(dp), pointer :: q_float
- call c_f_pointer(c_loc(qpts), q_flat, [3*gqk%myq])
-
- do my_iq=1,gqk%my_nq
-   call gqk%myqpt(my_iq, self%gstore, wtq, qpt_from_gstore)
-   my_qpts(:, my_iq) = qpt_from_gstore(:)
- enddo
-
- xcomm_prep_gatherv(xcomm, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
-
- ABI_FREE(revcounts)
- ABI_FREE(displs)
-
- nelem_per_item = nb*npert
- nitems_per_rank = MY_nq
- ! what do we do in complex?
- do is=1,nsppol
-  do ik=1,nkpt
-    do n=1,nb
-      call xmpi_allgather -> g(ipert, mband, q)
-
- call xmpi_allgather(my_qpts(:, :), 3*gqk%my_nq, qpt_gathered(:, :), gqk%qpt_comm, ierr)
-
- do my_iq=1,self%nqpt
-   write(ab_out, '(a50, 3f8.4)') 'qpt (after gather) = ', qpt_gathered(:, my_iq)
-   write(ab_out, '(a50, 3f8.4)') 'qpt (from glob_iq) = ', self%qpts(:, my_iq)
- enddo
-
- ABI_FREE(qpt_gathered)
- ABI_FREE(my_qpts)
+! ! Testing the gather subroutine
+! ABI_MALLOC(qpt_gathered, (3, self%nqpt))
+! ABI_MALLOC(my_qpts, (3, gqk%my_nq))
+! write(ab_out, '(a50)') 'Checking the gathering: '
+!
+! nelem_per_item = 3
+! nitems_per_rank = gkq%my_nq
+! ! nelem_per_item = 1
+! ! nitems_per_rank = 3 * gkq%my_nq
+! call gqk%qpt_comm%xcomm_prep_gatherv(nelem_per_item, nitems_per_rank, &
+!   sendcount, recvcounts, displs)
+!
+! ! need to flat the array
+!
+! allocate(qbuff(3*nqpts))
+! cnt = 0
+! do iq=1,my_nq
+!   do ii=1,3
+!     qbuff(i) = qpt(ii, iq)
+!   enddo
+! enddo
+!
+! real(dp), target :: qpts(3, myq)
+! real(dp), pointer :: q_float
+! call c_f_pointer(c_loc(qpts), q_flat, [3*gqk%myq])
+!
+! do my_iq=1,gqk%my_nq
+!   call gqk%myqpt(my_iq, self%gstore, wtq, qpt_from_gstore)
+!   my_qpts(:, my_iq) = qpt_from_gstore(:)
+! enddo
+!
+! xcomm_prep_gatherv(xcomm, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
+!
+! ABI_FREE(revcounts)
+! ABI_FREE(displs)
+!
+! nelem_per_item = nb*npert
+! nitems_per_rank = MY_nq
+! ! what do we do in complex?
+! do is=1,nsppol
+!  do ik=1,nkpt
+!    do n=1,nb
+!      call xmpi_allgather -> g(ipert, mband, q)
+!
+! call xmpi_allgather(my_qpts(:, :), 3*gqk%my_nq, qpt_gathered(:, :), gqk%qpt_comm, ierr)
+!
+! do my_iq=1,self%nqpt
+!   write(ab_out, '(a50, 3f8.4)') 'qpt (after gather) = ', qpt_gathered(:, my_iq)
+!   write(ab_out, '(a50, 3f8.4)') 'qpt (from glob_iq) = ', self%qpts(:, my_iq)
+! enddo
+!
+! ABI_FREE(qpt_gathered)
+! ABI_FREE(my_qpts)
 
 
  ! Output basic dimensions
@@ -790,11 +794,15 @@ subroutine varpeq_b_from_a(self)
 
 !Local variables-------------------------------
 !scalars
+ integer :: comm, nproc, my_rank
  integer :: ierr
  integer :: is, ik, ib, jb
  integer :: my_iq, my_nu, my_is
  integer :: iq_glob
  integer :: ik_forw, ik_back, ik_ibz, imk_ibz
+ integer :: isym_k, trev_k, tsign_k
+ logical :: isirr_k
+ integer :: iq, imq
  complex(dp) :: a_from, a_forw, a_back
  real(dp) :: my_phfreqinv, kweight
  real(dp) :: dksqmax
@@ -803,76 +811,179 @@ subroutine varpeq_b_from_a(self)
  class(gqk_t), pointer :: gqk
 
 !arrays
+ integer :: g0_k(3)
+ integer :: syminv(3, 3)
  integer, allocatable :: k_plus_q_map(:, :), k_minus_q_map(:, :)
- real(dp) :: my_qpt(3)
+ integer, allocatable :: k_plus_q_map1(:, :), k_minus_q_map1(:, :)
+ complex(dp), allocatable :: g_gathered(:, :, :, :)
+ real(dp) :: my_qpt(3), my_mqpt(3), my_kpt(3), my_kpq(3)
 
 ! *************************************************************************
 
+ comm = self%gstore%comm
+ nproc = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
+
  cryst => self%gstore%cryst
 
- ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
- ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
+ ABI_MALLOC(k_plus_q_map1, (6, self%nqpt))
+ ABI_MALLOC(k_minus_q_map1, (6, self%nqpt))
+ ABI_MALLOC(g_gathered, (self%gstore%gqk(1)%my_npert, self%nb, self%nb, self%nqpt))
 
  self%b(:, :) = zero
 
- ! Loop over collinerar spins (if any)
+ ! Loop over collinerar spins
  do is=1,self%nsppol
    my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
    gqk => self%gstore%gqk(my_is)
 
-   ! Loop over q-points treated by this processor
-   do my_iq=1,gqk%my_nq
-     iq_glob = my_iq + gqk%my_qstart - 1
-     my_qpt = self%qpts(:, iq_glob)
+   ! Loop ove the effective electronic k-space
+   do ik=1,self%nkpt
+     kweight = self%wtk(ik)
 
-     ! Forward (k+q) and backward (k-q) scattering mappings
-     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-       cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
-       self%timrev, use_symrec=.True., qpt=my_qpt)
+     my_kpt(:) = self%kpts(:, ik)
+     ik_ibz = self%map_k_kibz(1, ik); isym_k = self%map_k_kibz(2, ik)
+     trev_k = self%map_k_kibz(6, ik); g0_k = self%map_k_kibz(3:5, ik)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     tsign_k = 1; if (trev_k == 1) tsign_k = -1
+     call mati3inv(self%gstore%cryst%symrec(:, :, isym_k), syminv)
 
-     call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
-       cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
-       self%timrev, use_symrec=.True., qpt=-my_qpt)
+     ! Forward scattering map: k+q -> k_{effBZ}
+     call self%krank_kpts%get_mapping(self%nqpt, self%qpts, dksqmax, &
+       cryst%gmet, k_plus_q_map1, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_kpt)
+
+     ! Forward scattering map: k-q -> k_{effBZ}
+     call self%krank_kpts%get_mapping(self%nqpt, -self%qpts, dksqmax, &
+       cryst%gmet, k_minus_q_map1, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_kpt)
 
      ierr = merge(1, 0, dksqmax > tol12)
      if (ierr /= 0) then
-       ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
-         to the effective IBZ with qpt ", ktoa(my_qpt)))
+       ABI_ERROR(sjoin("VarPEq, setting B-coefficients: can't map k+q or k-q &
+         to the effective IBZ with qpt ", ktoa(my_kpt)))
      endif
 
-     ! Loop over k-points in the effective BZ
-     do ik=1,self%nkpt
-       kweight = self%wtk(ik)
-       ik_forw = k_plus_q_map(1, ik); ik_back = k_minus_q_map(1, ik)
-       ik_ibz = self%map_k_kibz(1, ik); imk_ibz = self%map_invk_kibz(1, ik)
+     ! gathering g_k'
+     g_gathered(:, :, :, :) = zero
+     do my_iq=1,gqk%my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       do ib=1,self%nb
+         do jb=1,self%nb
+           do my_nu=1,gqk%my_npert
+              g_gathered(my_nu, jb, ib, iq_glob) = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
+           enddo
+         enddo
+       enddo
+     enddo
+     call xmpi_sum(g_gathered, comm, ierr)
 
-       ! Loop over bands
+     ! loop over q-space
+     do my_iq=1,gqk%my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       my_qpt(:) = tsign_k * matmul(syminv, self%qpts(:, iq_glob) - g0_k)
+       my_mqpt(:) = tsign_k * matmul(syminv, -self%qpts(:, iq_glob) - g0_k)
+
+       ik_forw = k_plus_q_map1(1, my_iq)
+       ik_back = k_minus_q_map1(1, my_iq)
+
+       iq = self%krank_qpts%get_index(my_qpt)
+       imq = self%krank_qpts%get_index(my_mqpt)
+       ABI_CHECK_NOSTOP(iq /= -1, "problem with S^{-1}q", ierr)
+       ABI_CHECK_NOSTOP(imq /= -1, "problem with S{-1}(-q)", ierr)
+
        do ib=1,self%nb
          a_from = self%a(ib, ik, is)
 
          do jb=1,self%nb
-           a_forw = self%a(jb, ik_forw, is); a_back = self%a(jb, ik_back, is)
+           a_forw = self%a(jb, ik_forw, is)
+           a_back = self%a(jb, ik_back, is)
 
-           ! Loop over pertrubations
            do my_nu=1,gqk%my_npert
              ! skip acoustic modes at Gamma
              if (gqk%my_wnuq(my_nu, my_iq) == zero) cycle
+             g_forw = g_gathered(my_nu, jb, ib, iq)
+             g_back = g_gathered(my_nu, jb, ib, imq)
              my_phfreqinv = one/gqk%my_wnuq(my_nu, my_iq)
-             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
-             g_back = gqk%my_g(my_nu, jb, my_iq, ib, imk_ibz)
 
              self%b(my_nu, my_iq) = self%b(my_nu, my_iq) + &
-               half*my_phfreqinv*kweight*(a_forw*g_forw + a_back*g_back)
-           enddo
+               kweight*half*my_phfreqinv*(a_from*g_forw*conjg(a_forw) + conjg(a_from)*g_back*a_back)
+             !self%b(my_nu, my_iq) = self%b(my_nu, my_iq) + &
+             !  half*my_phfreqinv*kweight*(a_forw*g_forw + a_back*g_back)*a_from
 
+           enddo
          enddo
        enddo
      enddo
    enddo
  enddo
+ call xmpi_sum(self%b, comm, ierr)
 
- ABI_FREE(k_plus_q_map)
- ABI_FREE(k_minus_q_map)
+ !self%b(:, :) = zero
+ !ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
+ !ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
+ !! Loop over collinerar spins (if any)
+ !do is=1,self%nsppol
+ !  my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
+ !  gqk => self%gstore%gqk(my_is)
+
+ !  ! Loop over q-points treated by this processor
+ !  do my_iq=1,gqk%my_nq
+ !    iq_glob = my_iq + gqk%my_qstart - 1
+ !    my_qpt = self%qpts(:, iq_glob)
+
+ !    ! Forward (k+q) and backward (k-q) scattering mappings
+ !    call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+ !      cryst%gmet, k_plus_q_map, self%nsym, self%symafm, self%symrec, &
+ !      self%timrev, use_symrec=.True., qpt=my_qpt)
+
+ !    call self%krank_kpts%get_mapping(self%nkpt, self%kpts, dksqmax, &
+ !      cryst%gmet, k_minus_q_map, self%nsym, self%symafm, self%symrec, &
+ !      self%timrev, use_symrec=.True., qpt=-my_qpt)
+
+ !    ierr = merge(1, 0, dksqmax > tol12)
+ !    if (ierr /= 0) then
+ !      ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
+ !        to the effective IBZ with qpt ", ktoa(my_qpt)))
+ !    endif
+
+ !    ! Loop over k-points in the effective BZ
+ !    do ik=1,self%nkpt
+ !      kweight = self%wtk(ik)
+ !      ik_forw = k_plus_q_map(1, ik); ik_back = k_minus_q_map(1, ik)
+ !      ik_ibz = self%map_k_kibz(1, ik); imk_ibz = self%map_invk_kibz(1, ik)
+
+ !      ! Loop over bands
+ !      do ib=1,self%nb
+ !        a_from = self%a(ib, ik, is)
+
+ !        do jb=1,self%nb
+ !          a_forw = self%a(jb, ik_forw, is); a_back = self%a(jb, ik_back, is)
+
+ !          ! Loop over pertrubations
+ !          do my_nu=1,gqk%my_npert
+ !            ! skip acoustic modes at Gamma
+ !            if (gqk%my_wnuq(my_nu, my_iq) == zero) cycle
+ !            my_phfreqinv = one/gqk%my_wnuq(my_nu, my_iq)
+ !            g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik_ibz)
+ !            g_back = gqk%my_g(my_nu, jb, my_iq, ib, imk_ibz)
+
+ !            self%b(my_nu, my_iq) = self%b(my_nu, my_iq) + &
+ !              half*my_phfreqinv*kweight*(a_forw*g_forw + a_back*g_back)*a_from
+ !          enddo
+
+ !        enddo
+ !      enddo
+ !    enddo
+ !  enddo
+ !enddo
+
+ !ABI_FREE(k_plus_q_map)
+ !ABI_FREE(k_minus_q_map)
+
+ ABI_FREE(k_plus_q_map1)
+ ABI_FREE(k_minus_q_map1)
+ ABI_FREE(g_gathered)
 
 end subroutine varpeq_b_from_a
 !!***
@@ -1049,6 +1160,10 @@ subroutine varpeq_init(self, gstore, dtset)
    self%qpts(:, iq_glob) = my_qpt(:)
  enddo
  call xmpi_sum(self%qpts, comm, ierr)
+
+! krank for qpts
+ self%krank_qpts = krank_from_kptrlatt(self%nqpt, self%qpts, ebands%kptrlatt, &
+   compute_invrank = .True.)
 
  ABI_FREE(kbz)
  call krank_ibz%free()
