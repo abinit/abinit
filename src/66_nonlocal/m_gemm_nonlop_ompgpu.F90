@@ -336,9 +336,7 @@ contains
   real(dp), allocatable, target :: d2projections(:,:,:)
   integer :: ipw, iproj, iblock, nprojs_blk, i1, i2, i
   integer :: nprojs_my_blk
-  integer :: rank, nprocs
   logical :: is_last
-  real(dp), allocatable :: projs_recv(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
@@ -508,12 +506,6 @@ contains
     nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
   end do
 
-  if(gemm_nonlop_is_distributed) then
-    rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
-    is_last = (rank==nprocs-1)
-    if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_last_blk
-  end if
-
   ! Allocate and copy GPU buffers if user doesn't manage them
   transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
       .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
@@ -652,11 +644,6 @@ contains
   end if
 #endif
 
-  if(gemm_nonlop_is_distributed) then
-    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ndgxdt,1)*gemm_nonlop_kpt(ikout)%nprojs_last_blk))
-    !$OMP TARGET ENTER DATA MAP(alloc:projs_recv)
-  end if
-
   ! These will store the non-local factors for vectin, svectout and vectout respectively
   if(cpopt < 2) then
     call gpu_set_to_zero(projections,   int(cplex,c_size_t)*nprojs*ndat*nspinor)
@@ -765,11 +752,10 @@ contains
     &       d2projections,dprojections,ffnlin,projections,&
     &       idir,indlmn,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpgin_,&
     &       npwin,nspinor,ph3din,signs,ucvol,ndat,ntypat,lmnmax,nattyp,(ikin==2),&
-    &       iatom_only,atom_proj_shift,rank,cpopt,nprocs,&
-    &       nprojs,gemm_nonlop_kpt(ikin)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikin)%nprojs_last_blk,&
+    &       iatom_only,atom_proj_shift,cpopt,&
+    &       nprojs,&
     &       vectin,&
     &       temp_realvec_r,&
-    &       projs_recv,projs_recv,&
     &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
@@ -852,15 +838,14 @@ contains
       &       d2gxdt_dum_out,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,dimffnlout,ffnlout,&
       &       vnl_projections,s_projections,&
-      &       idir,indlmn,kpgout_,matblk,istwf_k,mpi_enreg,&
+      &       idir,indlmn,kpgout_,matblk,istwf_k,&
       &       nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
       &       nkpgout_,npwout,nspinor,signs,ucvol,ndat,&
-      &       ntypat,lmnmax,nattyp,(ikout==2),iatom_only,atom_proj_shift,rank,&
-      &       cpopt,nprocs,paw_opt,ph3dout,&
-      &       nprojs,gemm_nonlop_kpt(ikout)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikout)%nprojs_last_blk,&
+      &       ntypat,lmnmax,nattyp,(ikout==2),iatom_only,atom_proj_shift,&
+      &       paw_opt,ph3dout,&
+      &       nprojs,&
       &       vectin_,vectout_,svectout_,&
       &       temp_realvec_r,temp_realvec_i,&
-      &       projs_recv,projs_recv,&
       &       gpu_option,gemm_nonlop_is_distributed)
     end if
 
@@ -1114,10 +1099,6 @@ contains
     ABI_FREE(gmet2)
   end if
 
-  if(gemm_nonlop_is_distributed) then
-    !$OMP TARGET EXIT DATA MAP(delete:projs_recv)
-    ABI_FREE(projs_recv)
-  end if
   !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn,enl)
   if (allocated(dprojections)) then
     !$OMP TARGET EXIT DATA MAP(delete:dprojections) IF(ndgxdt>0)
@@ -1182,10 +1163,10 @@ contains
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
-  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,natom,ndat,nkpgin/))
+  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,natom,ndat,nkpgin,atom_proj_shift/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
-  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
-  ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
+  ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option,usepaw,select_k,iatom_only/))
+  ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg,typat/))
   ABI_UNUSED((/enl,ffnlin,ffnlout,gmet,gprimd,kpgin,kpgout,kptin,kptout/))
   ABI_UNUSED((/ucvol,lambda,sij,ph3din,ph3dout,vectin,enlout,svectout,vectout,vectproj/))
   ABI_UNUSED_A(cprjin)
