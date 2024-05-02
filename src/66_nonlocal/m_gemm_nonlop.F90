@@ -122,33 +122,22 @@ contains
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
-  integer :: ii, ia, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikpt, ikin, ikout
-  integer :: cplex, cplex_enl, cplex_fac, proj_shift, grad_shift
-  integer :: projs_beg,projs_end,dprojs_beg,dprojs_end,d2projs_beg,d2projs_end
+  integer :: ii, idat, igrad, nprojs, ngrads, ngrads2, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
+  integer :: cplex, cplex_enl, cplex_fac
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
   logical :: local_vectproj
-  real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:)
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
   real(dp), allocatable :: s_projections(:,:,:), vnl_projections(:,:,:)
-  real(dp), allocatable :: dprojections(:,:,:), temp_realvec(:)
+  real(dp), allocatable :: dprojections(:,:,:), temp_realvec_r(:), temp_realvec_i(:)
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
   real(dp), allocatable, target :: d2projections(:,:,:)
-  integer :: nprojs_my_blk
-  integer :: rank, nprocs
-  logical :: is_last
-  real(dp), allocatable :: projs_local(:,:,:)
-  real(dp), allocatable :: projs_recv(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: dprojs_r_(:,:,:),dprojs_i_(:,:,:)
-  real(dp), ABI_CONTIGUOUS pointer :: d2projs_r_(:,:,:),d2projs_i_(:,:,:)
   real(dp), allocatable :: enlk(:),fnlk(:,:),ddkk(:,:),strnlk(:,:),gmet2(:,:)
   real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
-  integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift,ipw,i
+  integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift
   real(dp) :: work(6)
   integer :: mu0,ic,nu,mu,jc
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
@@ -293,8 +282,6 @@ contains
     kpgout_ => kpgout
   end if
 
-  nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
-
   ! The number of projectors used for computation may vary among
   ! nonlop calls, from computing on all atoms to a select one for
   ! some perturbations.
@@ -304,12 +291,6 @@ contains
     nprojs = nprojs + count(indlmn_(3,:,itypat)>0)*nattyp_(itypat)
   end do
 
-  if(gemm_nonlop_is_distributed) then
-    rank = xmpi_comm_rank(gemm_nonlop_block_comm); nprocs = xmpi_comm_size(gemm_nonlop_block_comm)
-    is_last = (rank==nprocs-1)
-    if(is_last) nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_last_blk
-  end if
-
   ! If vectproj is provided, use it for further calculations, use allocated array otherwise
   local_vectproj=.false.
   if(PRESENT(vectproj)) then
@@ -317,11 +298,6 @@ contains
   end if
   if (local_vectproj) projections => vectproj
 
-
-  if(gemm_nonlop_is_distributed) then
-    ABI_MALLOC(projs_recv, (cplex, npwin, MAX(ndgxdt,1)*gemm_nonlop_kpt(ikin)%nprojs_last_blk))
-    ABI_MALLOC(projs_local, (cplex, npwin, MAX(ndgxdt,1)*gemm_nonlop_kpt(ikin)%nprojs_last_blk))
-  end if
 
   if(nprojs == 0) then
     ! TODO check if this is correct
@@ -462,14 +438,15 @@ contains
   end if
 
 
-  ! determine precisely when temp_realvec needs to be allocated
+  ! determine precisely when temp_realvec_r~i needs to be allocated
   ! to factorize allocate (resp. deallocate) at the begining (resp. at the end) of subroutine
   ! to avoid multiple allocate/deallocate that can be costly
   if (cplex /= 2) then
     if ( (cpopt < 2) .or. &
       &  (paw_opt == 3 .or. paw_opt == 4) .or. &
       &  (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4)) then
-       ABI_MALLOC(temp_realvec,(MAX(npwout,npwin)*nspinor*ndat))
+       ABI_MALLOC(temp_realvec_r,(MAX(npwout,npwin)*nspinor*ndat))
+       ABI_MALLOC(temp_realvec_i,(MAX(npwout,npwin)*nspinor*ndat))
     end if
   end if
 
@@ -509,11 +486,10 @@ contains
     &       d2projections,dprojections,ffnlin,projections,&
     &       idir,indlmn,istwf_k,kpgin_,matblk,mpi_enreg,nd2gxdt,ndgxdt,nkpgin_,&
     &       npwin,nspinor,ph3din,signs,ucvol,ndat,ntypat,lmnmax,nattyp,(ikin==2),&
-    &       iatom_only,atom_proj_shift,rank,cpopt,nprocs,&
-    &       nprojs,gemm_nonlop_kpt(ikin)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikin)%nprojs_last_blk,&
+    &       iatom_only,atom_proj_shift,cpopt,&
+    &       nprojs,&
     &       vectin,&
-    &       temp_realvec,&
-    &       projs_local,projs_recv,&
+    &       temp_realvec_r,&
     &       gpu_option,gemm_nonlop_is_distributed)
 
     if(cpopt >= 0) then
@@ -612,18 +588,17 @@ contains
     if(signs==2) then
 
       call opernlb_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
-      &       d2gxdt_dum_out,d2gxdt_dum_out,&
+      &       d2gxdt_dum_in,d2gxdt_dum_out,&
       &       vnl_dprojections,s_dprojections,dimffnlout,ffnlout,&
       &       vnl_projections,s_projections,&
-      &       idir,indlmn,kpgout_,matblk,istwf_k,mpi_enreg,&
+      &       idir,indlmn,kpgout_,matblk,istwf_k,&
       &       nd2gxdt,nd2gxdtfac,ndgxdt,ndgxdtfac,&
       &       nkpgout_,npwout,nspinor,signs,ucvol,ndat,&
-      &       ntypat,lmnmax,nattyp,(ikout==2),iatom_only,atom_proj_shift,rank,&
-      &       cpopt,nprocs,paw_opt,ph3dout,&
-      &       nprojs,gemm_nonlop_kpt(ikout)%nprojs_blk,nprojs_my_blk,gemm_nonlop_kpt(ikout)%nprojs_last_blk,&
+      &       ntypat,lmnmax,nattyp,(ikout==2),iatom_only,atom_proj_shift,&
+      &       paw_opt,ph3dout,&
+      &       nprojs,&
       &       vectin,vectout,svectout,&
-      &       temp_realvec,temp_realvec,&
-      &       projs_local,projs_recv,&
+      &       temp_realvec_r,temp_realvec_i,&
       &       gpu_option,gemm_nonlop_is_distributed)
     end if
 
@@ -850,10 +825,6 @@ contains
   end if
   ABI_FREE(s_projections)
   ABI_FREE(vnl_projections)
-  if(gemm_nonlop_is_distributed) then
-    ABI_FREE(projs_local)
-    ABI_FREE(projs_recv)
-  end if
   if (allocated(dprojections)) then
     ABI_FREE(dprojections)
   end if
@@ -866,8 +837,9 @@ contains
   if (allocated(d2projections)) then
     ABI_FREE(d2projections)
   end if
-  if (allocated(temp_realvec)) then
-    ABI_FREE(temp_realvec)
+  if (allocated(temp_realvec_r)) then
+    ABI_FREE(temp_realvec_r)
+    ABI_FREE(temp_realvec_i)
   end if
 
  end subroutine gemm_nonlop

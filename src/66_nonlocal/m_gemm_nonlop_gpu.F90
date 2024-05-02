@@ -259,21 +259,21 @@ module m_gemm_nonlop_gpu
     nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
   end do
 
-  call refresh_projectors(npwin,istwf_k,nprojs,ndgxdt,nd2gxdt,2,(ikin==2),&
+  call refresh_projectors(npwin,istwf_k,nprojs,ndgxdt,nd2gxdt,(ikin==2),&
   &                       gpu_option)
   if(gemm_nonlop_kpt(ikin)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
     call prep_projectors(npwin,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
     &                    ucvol,ffnlin,ph3din,dimffnlin,matblk,&
-    &                    nprojs,choice,(ikin==2),gpu_option)
+    &                    nprojs,(ikin==2),gpu_option,0)
     gemm_nonlop_kpt(ikin)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
   end if
   if(ikin/=ikout .and. choice>0) then
-    call refresh_projectors(npwout,istwf_k,nprojs,ndgxdt,nd2gxdt,2,(ikout==2),&
+    call refresh_projectors(npwout,istwf_k,nprojs,ndgxdt,nd2gxdt,(ikout==2),&
     &                       gpu_option)
     if(gemm_nonlop_kpt(ikout)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
       call prep_projectors(npwout,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
       &                    ucvol,ffnlout,ph3dout,dimffnlout,matblk,&
-      &                    nprojs,choice,(ikout==2),gpu_option)
+      &                    nprojs,(ikout==2),gpu_option,0)
       gemm_nonlop_kpt(ikout)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
     end if
   end if
@@ -771,7 +771,7 @@ module m_gemm_nonlop_gpu
   type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ABI_UNUSED((/choice,cpopt,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,idir/))
-  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin/))
+  ABI_UNUSED((/istwf_k,lmnmax,matblk,mgfft,mpsang,mpssoang,natom,ndat,nkpgin,select_k/))
   ABI_UNUSED((/nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO/))
   ABI_UNUSED((/paw_opt,signs,tim_nonlop,useylm,gpu_option/))
   ABI_UNUSED((/atindx1,indlmn,kgin,kgout,nattyp,ngfft,nloalg/))
