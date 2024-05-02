@@ -23641,7 +23641,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EXTended FPMD: Number of Bands",
-    added_in_version="10.1.2",
+    added_in_version="10.1.1",
     text=r"""
 Specifies the number of bands to use when extended FPMD contributions when using [[useextfpmd]] = 5.
 This acts like [[nband]] for a conventional calculation. **extfpmd_nband** must be sufficiently high
