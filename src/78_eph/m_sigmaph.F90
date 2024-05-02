@@ -766,6 +766,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        call wrtout(units, "- Restarting from previous SIGEPH.nc file")
        call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
      else
+       ! Previous computation completed, keep a backup of the file and start from scratch.
        restart = 0; sigma%qp_done = 0
        msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
                    "Will overwrite:", sigeph_filepath, ch10, &

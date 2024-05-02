@@ -193,12 +193,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
  integer :: mpw,ierr,imyq
- integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart
+ integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, root_ncid, nb
+ integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, nb
  integer :: qptopt, my_iq, my_ik, qbuf_size
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
@@ -300,43 +300,48 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code
 
+ ! usually compute just the q-points in the IBZ.
+
  restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
     if (file_exists(gstore_filepath)) then
-      !NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
-      !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", gstore%nqbz))
-      !ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-      !NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
-      !NCF_CHECK(nf90_close(root_ncid))
+      NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
+      NCF_CHECK(nctk_get_dim(root_ncid, "gstore_nqbz", gstore%nqbz))
+      ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+      NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
+      !print *, done_qbz_spin, done_qbz_spin
+      NCF_CHECK(nf90_close(root_ncid))
 
-      !restart = 1
-      !if (any(sigma_restart%qp_done /= 1)) then
-      !  restart = 1
-      !  call wrtout(units, "- Restarting from previous SIGEPH.nc file")
-      !  call wrtout(units, sjoin("- Number of k-points completed:", itoa(count(sigma%qp_done == 1)), "/", itoa(sigma%nkcalc)))
-      !else
-      !  restart = 0; sigma%qp_done = 0
-      !  msg = sjoin("Found SIGEPH.nc file with all QP entries already computed.", ch10, &
-      !              "Will overwrite:", gstore_filepath, ch10, &
-      !              "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
-      !  call wrtout(ab_out, sjoin("WARNING: ", msg))
-      !  ABI_WARNING(msg)
-      !  ! Keep backup copy
-      !  ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
-      !end if
+      ! NOTE: done_qbz_spin is dimensioned with the q-points in the BZ but we
+      ! FIXME: should set to 1 the q-points in the BZ else we never restart
+      ! Perhaps can use -1 if q = TS q_ibz if q_ibz is done.
+      restart = 1
+      if (any(done_qbz_spin /= 1)) then
+        restart = 1
+        call wrtout(units, "- Restarting from previous GSTORE.nc file")
+        !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
+      else
+        ! Previous computation completed, keep a backup of the file and start from scratch.
+        restart = 0; done_qbz_spin = 0
+        msg = sjoin("Found GSTORE.nc file with all entries already computed.", ch10, &
+                    "Will overwrite:", gstore_filepath, ch10, &
+                    "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
+        call wrtout(ab_out, sjoin("WARNING: ", msg))
+        ABI_WARNING(msg)
+        ! Keep backup copy
+        ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
+      end if
     end if
  end if
 
  call xmpi_bcast(restart, master, comm, ierr)
- !call xmpi_bcast(gwpt%qp_done, master, comm, ierr)
 
  if (restart == 0) then
    call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
    ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
  else
    call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
-   NOT_IMPLEMENTED_ERROR()
-   ! TODO: Read mask
+   call xmpi_bcast(done_qbz_spin, master, comm, ierr)
  end if
 
  !ndone = count(done_qbz_spin == 1)
@@ -715,11 +720,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! but it leads to better performance as the number of IO operations is decreased.
  ! TODO: Should compute it on the basis of my_nkpt and my_nqpt
  qbuf_size = 1
- call wrtout(std_out, sjoin(" Begin computation of e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
+ call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
 
 !#define _DEV_FAST_DEBUG
-
-
  nbsum = dtset%mband
 #ifdef _DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
@@ -761,16 +764,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      if (done_qbz_spin(iq_bz, spin) == 1) cycle
      call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
-     call wrtout(std_out, sjoin(" Computing g^GW(k,q) for q:", ktoa(qpt), "spin:", itoa(spin)))
+     call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)))
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
      ! Compute phonons for this qpt.
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
 
-     ! ====================================
-     ! Get DFPT potentials for this q-point
-     ! ====================================
+     ! ==================================================
+     ! Get DFPT potentials and densities for this q-point
+     ! ==================================================
      ! After this branch we have allocated:
+     !
      !   v1scf(cplex, nfftf, nspden, my_npert))
      !   vxc1(cplex, nfft, nspden, my_npert)
 
@@ -784,7 +788,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        db_iqpt = dvdb%findq(qq_ibz)
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DVDB file."))
        ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
-       ! The other entries in mapc_qq are OK as they refer to symmetries
+       ! The other entries in mapc_qq are OK as they refer to symmetries.
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
        call dvdb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
@@ -883,7 +887,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! =======================================
        ! Be careful here because pp should run over the list of wavevectors in the screening!
        ! as pp_mesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions.
-       ! and we have to use ipp_bz to get/symmetrize W(pp_bz).
+       ! and we have to use ipp_bz to symmetrize W(pp_bz) from W(pp_ibz)
        ! TODO: Should order nbz in shells so that one can reduce the memory required to store W(pp)
        ! if we activate pp-parallelism.
        do ipp_bz=1,pp_mesh%nbz
@@ -976,7 +980,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get GS wavefunctions at ?? and store them in stern_kqmp.
          ! =========================================================
          !call stern_kqmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
-
 
          ! ==========================
          ! Sum over bands up to nbsum
