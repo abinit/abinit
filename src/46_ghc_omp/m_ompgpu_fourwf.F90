@@ -328,9 +328,7 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
        end do
      end do
    else ! cplex==2
-     !$OMP TARGET DATA USE_DEVICE_PTR(fofr,work_gpu)
-     call copy_gpu_to_gpu(c_loc(work_gpu), c_loc(fofr), INT(2,c_size_t)*n1*n2*n3*ndat*dp)
-     !$OMP END TARGET DATA
+     call gpu_copy(work_gpu, fofr, int(2,c_size_t)*n1*n2*n3*ndat)
 
      !!$OMP TARGET TEAMS LOOP &
      !$OMP TARGET TEAMS DISTRIBUTE &

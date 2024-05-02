@@ -1591,9 +1591,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
        end do
      else if(l_gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET DATA USE_DEVICE_PTR(dcwavef_tmp,s1cwave0)
-       call copy_gpu_to_gpu(c_loc(dcwavef_tmp), c_loc(s1cwave0), int(2,c_size_t)*npw1*nspinor*ndat*dp)
-       !$OMP END TARGET DATA
+       call gpu_copy(dcwavef_tmp, s1cwave0, int(2,c_size_t)*npw1*nspinor*ndat)
 #endif
      end if
    end if

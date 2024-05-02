@@ -845,11 +845,7 @@ contains
         iatm = iatm+nattyp_(itypat)
       end do
     else
-      !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections)
-      call copy_gpu_to_gpu(c_loc(s_projections), &
-           &               c_loc(projections), &
-           &               INT(cplex, c_size_t) * nprojs * nspinor * ndat * dp)
-      !$OMP END TARGET DATA
+      call gpu_copy(s_projections, projections, int(cplex,c_size_t) * nprojs * nspinor * ndat)
     end if
 
     ! opernlb

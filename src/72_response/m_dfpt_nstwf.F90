@@ -1453,9 +1453,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  gvnlx1=gh1
                else if(dtset%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,gh1)
-                 call copy_gpu_to_gpu(c_loc(gvnlx1), c_loc(gh1), int(2,c_size_t)*npw1_k*nspinor*ndat*dp)
-                 !$OMP END TARGET DATA
+                 call gpu_copy(gvnlx1, gh1, int(2,c_size_t)*npw1_k*nspinor*ndat)
 #endif
                end if
              else
@@ -1489,10 +1487,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                      gvnlx1_tmp = gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
                    else if(dtset%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                     !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,gvnlx1_tmp)
-                     call copy_gpu_to_gpu(c_loc(gvnlx1_tmp), c_loc(gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)),&
-&                         int(2,c_size_t)*npw1_k*nspinor*dp)
-                     !$OMP END TARGET DATA
+                     call gpu_copy(gvnlx1_tmp,&
+                     &    gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
+                     &    int(2,c_size_t)*npw1_k*nspinor)
 #endif
                    end if
                  end if
@@ -1509,10 +1506,8 @@ has_vectornd = (with_vectornd .EQ. 1)
                      ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
                    else
 #ifdef HAVE_OPENMP_OFFLOAD
-                     !$OMP TARGET DATA USE_DEVICE_PTR(ch1c,ch1c_tmp)
-                     call copy_gpu_to_gpu(c_loc(ch1c_tmp), c_loc(ch1c(:,1:nband_me,iband_,ikpt_me)),&
-&                         int(2,c_size_t)*nband_me*dp)
-                     !$OMP END TARGET DATA
+                     call gpu_copy(ch1c_tmp, ch1c(:,1:nband_me,iband_,ikpt_me),&
+&                         int(2,c_size_t)*nband_me)
 #endif
                    end if
                  end if
@@ -1553,10 +1548,8 @@ has_vectornd = (with_vectornd .EQ. 1)
                      ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
                    else if(dtset%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                     !$OMP TARGET DATA USE_DEVICE_PTR(ch1c,ch1c_tmp)
-                     call copy_gpu_to_gpu(c_loc(ch1c(:,1:nband_me,iband_,ikpt_me)), c_loc(ch1c_tmp), &
-&                         int(2,c_size_t)*nband_me*dp)
-                     !$OMP END TARGET DATA
+                     call gpu_copy(ch1c(:,1:nband_me,iband_,ikpt_me), ch1c_tmp, &
+&                         int(2,c_size_t)*nband_me)
 #endif
                    end if
                  end if
@@ -1633,11 +1626,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                    gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
                  else if(dtset%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                   !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx2,cgq)
-                   call copy_gpu_to_gpu(c_loc(gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor)), &
-&                       c_loc(cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)),&
-&                       int(2,c_size_t)*npw1_k*nspinor*dp)
-                   !$OMP END TARGET DATA
+                   call gpu_copy(gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor), &
+&                       cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq),&
+&                       int(2,c_size_t)*npw1_k*nspinor)
 #endif
                  end if
                end if
@@ -1799,9 +1790,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  gvnlx1(:,1:ndat*npw1_k*nspinor)=cwavef(:,1:ndat*npw1_k*nspinor)
                else if(dtset%gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,cwavef)
-                 call copy_gpu_to_gpu(c_loc(gvnlx1), c_loc(cwavef), int(2,c_size_t)*npw1_k*nspinor*ndat*dp)
-                 !$OMP END TARGET DATA
+                 call gpu_copy(gvnlx1, cwavef, int(2,c_size_t)*npw1_k*nspinor*ndat)
 #endif
                end if
              else
