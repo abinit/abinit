@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (BS)
+!! Copyright (C) 2018-2024 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -300,7 +300,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  l_gs_hamk => gs_hamk
  l_nband_filter = nband
  l_paral_kgb = dtset%paral_kgb
- l_block_sliced = dtset%invol_blk_sliced
+ l_block_sliced = dtset%invovl_blksliced
 
 !Variables
  nline=dtset%nline

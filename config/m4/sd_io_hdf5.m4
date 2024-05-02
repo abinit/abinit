@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # HDF5 I/O support
@@ -620,7 +620,7 @@ AC_DEFUN([_SD_HDF5_CHECK_COMPILERS], [
     unset tmp_hdf5_hl
 
     AC_MSG_CHECKING([for HDF5 extra dependencies])
-    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //' -e 's/m\;dl\;//'`
+    sd_hdf5_libs_extra=`${sd_hdf5_h5cc} -showconfig | grep 'Extra libraries: ' | sed -e 's/.*Extra libraries: //' -e 's/m\;dl\;//' -e 's/m\;dl//'`
     if test "${sd_hdf5_libs_extra}" = ""; then
       AC_MSG_RESULT([none])
     else

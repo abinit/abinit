@@ -57,7 +57,8 @@ kptopt 1
 
 #Parameters for the SCF procedure
 nstep 30
-tolvrs 1.0d-18
+tolvrs 1.0d-18 # This value is much too small for production run (but was chosen to make this tutorial more portable accross platforms).  
+               # A value 1.0d-12 is more reasonable. 
 iprcel 45   # This is to help the SCF procedure, work quite well in this case of a slab.
 
 #Electronic structure

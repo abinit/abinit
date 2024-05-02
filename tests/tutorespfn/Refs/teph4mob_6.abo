@@ -1,8 +1,8 @@
 
-.Version 9.11.0 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.0.2.1 of ABINIT, released Mar 2024.
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 18h36 )
+.Starting date : Wed 20 Mar 2024.
+- ( at 23h24 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/TestBot_MPI1/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_6.abi
 - output file    -> teph4mob_6.abo
 - root for input  files -> teph4mob_6i
 - root for output files -> teph4mob_6o
-
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       6.695 Mbytes of memory.
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       6.695 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       6.695 Mbytes of memory.
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -90,7 +86,6 @@ P This job should need less than                       6.695 Mbytes of memory.
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
 
-
  DATASET    5 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -106,7 +101,6 @@ P This job should need less than                       6.695 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
 
  DATASET    6 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
 ================================================================================
@@ -538,8 +532,8 @@ meta: {optdriver: 7, eph_task: -4, }
 - Writing phonon DOS to netcdf file: teph4mob_6o_DS1_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -551,8 +545,8 @@ meta: {optdriver: 7, eph_task: -4, }
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_serial/antonius_ddbio/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/trunk__sponce/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -641,7 +635,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36509.3    0.000
+   5   3.573    0.000  36510.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1035,7 +1029,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36509.3    0.000
+   5   3.573    0.000  36510.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1429,7 +1423,7 @@ P Number of k-point in Sigma_nk treated by this proc: 3 of 3
  
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  36509.3    0.000
+   5   3.573    0.000  36510.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1849,7 +1843,7 @@ K-point: [ 4.1667E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  35995.2    0.000
+   5   3.573    0.000  35996.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -1970,7 +1964,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.10E+16        0.00E+00            0.00            0.00
            64.00        0.10E+16        0.00E+00           40.08            0.00
-          123.00        0.10E+16        0.00E+00          351.58            0.00
+          123.00        0.10E+16        0.00E+00          351.57            0.00
           182.00        0.10E+16        0.00E+00          430.49            0.00
           241.00        0.10E+16        0.00E+00          431.01            0.00
           300.00        0.10E+16        0.25E+05          381.17            0.00
@@ -1980,7 +1974,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.10E+16        0.00E+00            0.00            0.00
            64.00        0.10E+16        0.00E+00           40.08            0.00
-          123.00        0.10E+16        0.00E+00          351.58            0.00
+          123.00        0.10E+16        0.00E+00          351.57            0.00
           182.00        0.10E+16        0.00E+00          430.49            0.00
           241.00        0.10E+16        0.00E+00          431.01            0.00
           300.00        0.10E+16        0.25E+05          381.17            0.00
@@ -1990,7 +1984,7 @@ K-point: [-4.5833E-01,  5.0000E-01,  4.1667E-02], T:  300.0 [K], mu_e:    3.274
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             5.00        0.10E+16        0.00E+00            0.00            0.00
            64.00        0.10E+16        0.00E+00           40.08            0.00
-          123.00        0.10E+16        0.00E+00          351.58            0.00
+          123.00        0.10E+16        0.00E+00          351.57            0.00
           182.00        0.10E+16        0.00E+00          430.49            0.00
           241.00        0.10E+16        0.00E+00          431.01            0.00
           300.00        0.10E+16        0.25E+05          381.17            0.00
@@ -2310,7 +2304,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     47.9    0.000
+   5   3.677    0.007     48.0    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2318,7 +2312,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  35995.2    0.000
+   5   3.573    0.000  35996.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2779,7 +2773,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  182.0 [K], mu_e:    3.379
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  241.0 [K], mu_e:    3.328
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.677    0.007     47.9    0.000
+   5   3.677    0.007     48.0    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -2787,7 +2781,7 @@ K-point: [ 4.5833E-01,  4.1667E-01,  0.0000E+00], T:  300.0 [K], mu_e:    3.274
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:    5.0 [K], mu_e:    3.521
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   5   3.573    0.000  35995.2    0.000
+   5   3.573    0.000  35996.7    0.000
 ============================================================================================
 K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T:   64.0 [K], mu_e:    3.475
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -3159,44 +3153,10 @@ P           mkmem         413
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         44.6        0.74      0.012
-- Total wall clock time (s,m,h):         44.8        0.75      0.012
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0
--
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           44.6, wall_time =           44.8
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- ifc_fourq                        22.366  50.2        22.405  50.1           6540      -1.00        1.00       1.00
-- invars2                           3.366   7.6         3.369   7.5              6      -1.00        1.00       1.00
-- abinit(2)                         3.162   7.1         3.165   7.1              1      -1.00        1.00       1.00
-- dvdb_get_ftqbz                    1.420   3.2         1.415   3.2            996      -1.00        1.00       1.00
-- fourdp                            0.437   1.0         0.434   1.0          12948      -1.00        1.01       1.01
-- others (147)                      0.467   1.0         0.427   1.0             -1      -1.00        1.09       1.09
--<END_TIMER>
--
-- subtotal                         31.217  70.1        31.215  69.7                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          44.6, wall_time =          44.8
--
-- routine                            cpu     %          wall     %      number of calls Gflops    Speedup Efficacity
--                                                                        (-1=no count)
-- ifc_fourq                        22.366  50.2        22.405  50.1           6540      -1.00        1.00       1.00
-- invars2                           3.366   7.6         3.369   7.5              6      -1.00        1.00       1.00
-- abinit(2)                         3.162   7.1         3.165   7.1              1      -1.00        1.00       1.00
-- dvdb_get_ftqbz                    1.420   3.2         1.415   3.2            996      -1.00        1.00       1.00
-- fourdp                            0.437   1.0         0.434   1.0          12948      -1.00        1.01       1.01
-- others (147)                      0.467   1.0         0.427   1.0             -1      -1.00        1.09       1.09
--<END_TIMER>
 
-- subtotal                         31.217  70.1        31.215  69.7                                  1.00       1.00
 
 ================================================================================
 
@@ -3286,10 +3246,10 @@ P           mkmem         413
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         44.6  wall=         44.8
+- Proc.   0 individual time (sec): cpu=         50.6  wall=         51.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  44 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.6  wall=         44.8
+.Delivered  13 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=         50.6  wall=         51.3

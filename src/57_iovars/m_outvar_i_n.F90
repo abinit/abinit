@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -359,8 +359,8 @@ subroutine outvar_i_n (dtsets,iout,&
  intarr(1,:)=dtsets(:)%intxc
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'intxc','INT',0)
 
- intarr(1,:)=dtsets(:)%invol_blk_sliced
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invol_blk_sliced',&
+ intarr(1,:)=dtsets(:)%invovl_blksliced
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'invovl_blksliced',&
 &             'INT',0,firstchar=firstchar_gpu)
 
  intarr(1,:)=dtsets(:)%ionmov

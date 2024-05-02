@@ -8,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2022 ABINIT group (MS)
+!! Copyright (C) 2014-2024 ABINIT group (MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -575,7 +575,6 @@ contains
    if(rank_prev == -1) rank_prev = nprocs - 1
    do iblock=1,nprocs
 
-     call xmpi_barrier(gemm_nonlop_block_comm)
      if(rank+iblock == nprocs) then
        nprojs_cur_blk = nprojs_last_blk
      else
@@ -631,7 +630,6 @@ contains
 
      call xmpi_waitall(req,ierr)
 
-     call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
@@ -683,7 +681,6 @@ contains
 
    do iblock=1,nprocs
 
-     call xmpi_barrier(gemm_nonlop_block_comm)
      if(rank+iblock == nprocs) then
        nprojs_cur_blk = nprojs_last_blk
      else
@@ -740,7 +737,6 @@ contains
 
      call xmpi_waitall(req,ierr)
 
-     call xmpi_barrier(gemm_nonlop_block_comm)
    end do
 
    if(modulo(iblock,2)==1) then
