@@ -193,12 +193,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
  integer :: mpw,ierr,imyq
- integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp !, restart
- integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
+ integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid, spin_ncid
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nbcalc_ks
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp
+ integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, num_mn_kq, ndone, nmiss, gstore_fform
+ !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, nb
+ integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, nb, gstore_completed
  integer :: qptopt, my_iq, my_ik, qbuf_size
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
@@ -212,7 +213,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(ddkop_t) :: ddkop
  type(rf2_t) :: rf2
  type(crystal_t) :: pot_cryst, den_cryst
- type(hdr_type) :: pot_hdr, den_hdr
+ type(hdr_type) :: pot_hdr, den_hdr, gstore_hdr
  type(stern_t) :: stern_kmp !, stern_kqmp
  type(kmesh_t) :: pp_mesh, kmesh
  type(gsphere_t) :: gsph_c
@@ -278,7 +279,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !      Check if a GSTORE.nc file is already available and read mask telling us the (qpt, spin, kpt)
  !      that have been computed. Use this mask to cycle loops.
  ! 2) Use filtering techniques in (qpt, kpt) and (band1, band2) space. Can use gstore input vars to implement that
- ! 3)
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -293,34 +293,34 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor
  nspden = dtset%nspden; nkpt = ebands%nkpt
-
  ieta = +j_dpc * dtset%zcut
 
  ! Check if a previous GSTORE file is present to restart the calculation
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code
 
- ! usually compute just the q-points in the IBZ.
+ restart = 0; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
 
- restart = 0; ierr = 1; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
     if (file_exists(gstore_filepath)) then
+      ! Use gstore_completed to understand previous GSTORE run completed else we need to restart
       NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
+      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
+      call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
+      ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
+      call gstore_hdr%vs_dtset(dtset)
+      call gstore_hdr%free()
+
       NCF_CHECK(nctk_get_dim(root_ncid, "gstore_nqbz", gstore%nqbz))
       ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-      NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
-      !print *, done_qbz_spin, done_qbz_spin
+      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
       NCF_CHECK(nf90_close(root_ncid))
+      !print *, done_qbz_spin, done_qbz_spin
 
       ! NOTE: done_qbz_spin is dimensioned with the q-points in the BZ but we
       ! FIXME: should set to 1 the q-points in the BZ else we never restart
-      ! Perhaps can use -1 if q = TS q_ibz if q_ibz is done.
-      restart = 1
-      if (any(done_qbz_spin /= 1)) then
-        restart = 1
-        call wrtout(units, "- Restarting from previous GSTORE.nc file")
-        !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
-      else
+      ! Perhaps can can set to -1 if q = TS q_ibz if q_ibz is done.
+      if (gstore_completed /= 0) then
         ! Previous computation completed, keep a backup of the file and start from scratch.
         restart = 0; done_qbz_spin = 0
         msg = sjoin("Found GSTORE.nc file with all entries already computed.", ch10, &
@@ -330,6 +330,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
         ABI_WARNING(msg)
         ! Keep backup copy
         ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
+      else
+        restart = 1
+        call wrtout(units, "- Restarting from previous GSTORE.nc file")
       end if
     end if
  end if
@@ -337,24 +340,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call xmpi_bcast(restart, master, comm, ierr)
 
  if (restart == 0) then
+   ! Build new gstore from input variables.
    call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
-   ABI_ICALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+   ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
+   done_qbz_spin = 0
  else
+   ! Init gstore from pre-existent file and broadcast done_qbz_spin mask.
    call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
    call xmpi_bcast(done_qbz_spin, master, comm, ierr)
  end if
 
- !ndone = count(done_qbz_spin == 1)
+ call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
+ !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
 
- !if (restart == 0) then
- !  call gwpt%write(dtset, cryst, ebands, wfk_hdr, dtfil, comm)
- !else
- !  ! Open file inside ncwrite_comm to perform parallel IO if kpt parallelism.
- !  if (gwpt%ncwrite_comm%value /= xmpi_comm_null) then
- !    NCF_CHECK(nctk_open_modify(gwpt%ncid, gstore_filepath, gwpt%ncwrite_comm%value))
- !    NCF_CHECK(nctk_set_datamode(gwpt%ncid))
- !  end if
- !end if
+ ! Open GSTORE file, and go to data mode.
+ NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
+ NCF_CHECK(nctk_set_datamode(root_ncid))
 
  ! FFT meshes from input file, not necessarly equal to the ones found in the external files.
  nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
@@ -447,6 +448,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ============================
  ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
 
+ ! Use ndone to undertand if velocities have been already compured in a previous run.
+ !if (ndone == 0) then
+
  ABI_CALLOC(vk_cart_ibz, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
@@ -475,9 +479,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call xmpi_sum(vk_cart_ibz, comm, ierr)
 
  ! Write v_nk to disk.
- !if (my_rank == master) then
- !  NCF_CHECK(nf90_put_var(gwpt%ncid, nctk_idname(gwpt%ncid, "vk_cart_ibz"), vk_cart_ibz))
- !end if
  ABI_FREE(vk_cart_ibz)
 
  call ddkop%free()
@@ -722,20 +723,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  qbuf_size = 1
  call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
 
-!#define _DEV_FAST_DEBUG
+#define _DEV_FAST_DEBUG
  nbsum = dtset%mband
 #ifdef _DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
 #endif
 
- ! =================================================
- ! Loop over spins and q-points (usually in the IBZ)
- ! =================================================
+ my_bsum_start = 1; my_bsum_stop = nbsum; my_nbsum = my_bsum_stop - my_bsum_start + 1
+
+ ! ========================================
+ ! Loop over MPI distributed spins in Sigma
+ ! ========================================
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
-   !NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    nb = gqk%nb
    !ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
@@ -745,6 +748,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
    !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
+   ! =================================================
+   ! Loop over MPI distributed q-points in Sigma
+   ! =================================================
+   ! q-points are usually in the IBZ.
    do my_iq=1,gqk%my_nq
 #ifdef _DEV_FAST_DEBUG
      if (my_iq > 3) cycle ! DEBUG
@@ -781,7 +788,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
-       !call drhodb%get_rho1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
+       !call drhodb%get_v1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
 
      else
        ! Read and reconstruct the dvscf potentials and the densities for this qpt and my_npert perturbations.
@@ -866,6 +873,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg1_k, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value, request=ffnl_kq_request)
 
+       ! Define number of (m, n) pairs in g_mn(k,q) and indirect mapping i --> (m, n)
+       !num_mn_kq = 1
+       !ABI_MALLOC(ind_to_mn, (2, num_mn_kq))
+       !do ii=1,num_mn_kq
+       !  ind_to_mn, (2, ii) = [mm, nn]
+       !end do
+       !call gqk%get_ind_to_mn_myqk(my_iq, my_ik, num_mn_kq, ind_to_mn)
+       !ABI_FREE(ind_to_mn)
+
        ! Double loop over the (m, n) bands indices in the <mm_kq,kq|Delta_{q,nu}Sigma|k,nn_k> elements.
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
@@ -879,7 +895,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                             cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
        end do ! nn_k
        !if (cplex == 1)
-       !  g_xc(mm_kq, nn_k) = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,ispin, imyip)) / nfftf
+       !  g_xc(mm_kq, nn_k,imyp) = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,ispin,imyip)) / nfftf
        !else
 
        ! =======================================
@@ -901,7 +917,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Symmetry tables and g-sphere centered on k-p
          kmp = kk - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kmp, mapl_kmp) /= 0) then
-           write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-p could not be generated from a symmetrical one.",trim(ltoa(kmp))
+           write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
+             "k-p could not be generated from a symmetrical one.",trim(ltoa(kmp))
            ABI_ERROR(msg)
          end if
          ikmp_ibz = mapl_kmp(1); isym_kmp = mapl_kmp(2); trev_kmp = mapl_kmp(6); g0_kmp = mapl_kmp(3:5)
@@ -914,7 +931,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Symmetry tables and g-sphere centered on k+q-p
          kqmp = kq - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
-           write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k+q-p could not be generated from a symmetrical one.",trim(ltoa(kqmp))
+           write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
+             "k+q-p could not be generated from a symmetrical one.",trim(ltoa(kqmp))
            ABI_ERROR(msg)
          end if
          ikqmp_ibz = mapl_kqmp(1); isym_kqmp = mapl_kqmp(2); trev_kqmp = mapl_kqmp(6); g0_kqmp = mapl_kqmp(3:5)
@@ -932,11 +950,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(crhog_bkmp_nk, (npw_pp))
          ABI_MALLOC(crhog_mkq_bkqmp, (npw_pp))
 
-         ! Prepare the object for applying W_qbz.
-         ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
-         call W%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
-         !call W%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
-
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly we should not duplicate the work when pp = 0.
          ! When pp == 0, we also get g_ks via stern_solve
@@ -951,15 +964,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            stern_comm = xmpi_comm_self
          !end if
 
-#define _DEV_STERN
-#ifdef _DEV_STERN
          ! =========================================================
          ! Get GS wavefunctions at k+q-p and store them in stern_kmp.
          ! =========================================================
 
-         call stern_kmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
+         call stern_kmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, &
+                             stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
-         !do ib_sum=sigma%my_bsum_start, sigma%my_bsum_stop
+         !do ib_sum=my_bsum_start, my_bsum_stop
          do ib_sum=1, nbsum
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp)
@@ -968,30 +980,42 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            if (stern_kmp%has_band_para) then
              NOT_IMPLEMENTED_ERROR()
              ii = -1
-             !ii = ib_sum - sigma%my_bsum_start + 1
+             !ii = ib_sum - my_bsum_start + 1
              stern_kmp%cgq(:,:,ii) = cg_kqmp(:,1:npw_kqmp*nspinor)
            else
              stern_kmp%cgq(:,:,ib_sum) = cg_kqmp(:,1:npw_kqmp*nspinor)
            end if
          end do
-#endif
 
-         ! =========================================================
-         ! Get GS wavefunctions at ?? and store them in stern_kqmp.
-         ! =========================================================
-         !call stern_kqmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
+         ! ========================================================
+         ! Get GS wavefunctions at ?? and store them in stern_kqmp
+         ! ========================================================
+         !call stern_kqmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, &
+         !                     stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
-         ! ==========================
-         ! Sum over bands up to nbsum
-         ! ==========================
-         !do ib_sum=sigma%my_bsum_start, sigma%my_bsum_stop
-         do ib_sum=1, nbsum
+         ! =====================================
+         ! Precompute oscillator matrix elements
+         ! =====================================
+         ! * These terms do not depend on (idir, ipert) and can be reused in the loop over pertubations below.
+         ! * If the bands in the sum are distributed, one has to transmit the the (m, n) indices.
+
+         !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, my_bsum_start:my_bsum_stop, nw, num_mn_kq))
+         !ABI_FREE(rhotwg_kmp_mn)
+
+         ! Prepare the object for applying W_qbz.
+         ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
+         call W%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
+
+         do ib_sum=my_bsum_start, my_bsum_stop
            ! <bsum,k-p| e^{-ip+G'}|n,k>
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                              cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
 
            cwork_ur = GWPC_CONJG(ur_kmp) * ur_k
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, crhog_bkmp_nk)
+
+           ! Contract immediately with W_gg'
+           !call W%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
@@ -1000,6 +1024,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            cwork_ur = GWPC_CONJG(ur_kqmp) * ur_kqmp
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, crhog_mkq_bkqmp)
            crhog_mkq_bkqmp = GWPC_CONJG(crhog_mkq_bkqmp)
+
+           ! Contract immediately with W_gg'
+           !call W%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
          end do ! ib_sum
 
          ABI_FREE(crhog_bkmp_nk)
@@ -1058,7 +1085,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! NSCF Sternheimer
            ! ================
            ! This is just to test stern_kmp%solve for pp == 0, other values of pp won't work.
-#ifdef _DEV_STERN
            if (pp_is_gamma .and. nbsum /= 1) then
            do ib_sum=1, nbsum
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
@@ -1077,7 +1103,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ABI_CHECK(ierr == 0, msg)
            end do ! ibsum
            end if
-#endif
 
            call rf_ham_kq%free()
            ABI_FREE(kinpw1)
@@ -1086,10 +1111,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ABI_SFREE(ph3d1)
          end do ! imyp
 
-#ifdef _DEV_STERN
          call stern_kmp%free()
          !call stern_kqmp%free()
-#endif
        end do ! ipp_bz
 
        ABI_FREE(kpg_k)
@@ -1141,6 +1164,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
+ !call xmpi_barrier(comm)
+ ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
+ if (my_rank == master) then
+   NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
+ end if
+ NCF_CHECK(nf90_close(root_ncid))
+
  ! Free memory
  ABI_FREE(kg_k)
  ABI_FREE(kg_kq)
@@ -1188,6 +1218,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! This to make sure that the parallel output of GSTORE is completed
  call xmpi_barrier(comm)
  call cwtime_report(" gwpt_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
+
+contains
+
+integer function root_vid(vname)
+  character(len=*),intent(in) :: vname
+  root_vid = nctk_idname(root_ncid, vname)
+end function root_vid
+
+integer function spin_vid(vname)
+  character(len=*),intent(in) :: vname
+  spin_vid = nctk_idname(spin_ncid, vname)
+end function spin_vid
 
 end subroutine gwpt_run
 !!***
