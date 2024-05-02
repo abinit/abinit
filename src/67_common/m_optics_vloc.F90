@@ -67,7 +67,6 @@ contains
 !!  mkmem =number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
 !!  mpw=maximum dimensioned size of npw.
-!!  nband(nkpt*nsppol)=number of bands per k point, for each spin
 !!  nkpt=number of k points.
 !!  npwarr(nkpt)=number of planewaves in basis at this k point
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
@@ -81,8 +80,8 @@ contains
 !!
 !! SOURCE
 
- subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,&
-&                       mpi_enreg,mpw,nkpt,npwarr,nsppol)
+ subroutine optics_vloc(cg,dtfil,dtset,eigen0,gprimd,hdr,kg,mband,mcg,mkmem,mpi_enreg,mpw,&
+&                       nkpt,npwarr,nsppol)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mkmem,mpw,nkpt,nsppol
