@@ -1838,12 +1838,23 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ABI_CHECK(present(full_cg1), "full_ur1 requires full_cg1")
  end if
 
+ ! At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
+ ! when it is input to dfpt_cgwf). Here, restore the "active space" content
+ ! of the first-order wavefunction, to give cwave1.
+ ! PAW: note that dcwavef (1st-order change of WF due to overlap change)
+ !      remains in the subspace orthogonal to cgq
+
+ ! A similar section of code is present in m_dfpt_vtowk when if (dtset%prtfull1wf > 0).
+ ! Also, note that in metals one should include fermie1
+ ! See nneed_fermie1 in m_dfpt_scfcv
+
  if (present(full_cg1)) then
    NOT_IMPLEMENTED_ERROR()
    ! Compute full first order wavefunction.
+   !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
    !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
-   !                     stern%dset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
+   !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.

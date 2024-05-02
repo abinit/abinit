@@ -2673,7 +2673,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:), kinpw1(:), kpg1_k(:,:), kpg_k(:,:), dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:), ffnl1(:,:,:,:), ph3d(:,:,:), ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:), gkk_atm(:,:,:,:),gkq_nu(:,:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:), gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
  real(dp),allocatable :: bras_kq(:,:,:), kets_k(:,:,:), h1kets_kq(:,:,:), cgwork(:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:), ylm_k(:,:), ylmgr_kq(:,:,:)
@@ -2965,7 +2965,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb))
    ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, nb))
-   ABI_MALLOC(gkk_atm, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
    ABI_MALLOC(gkq_nu, (2, nb, nb, natom3))
    ABI_MALLOC(iq_buf, (2, qbuf_size))
 
@@ -3126,8 +3126,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        call mkffnl_objs(cryst, psps, 1, ffnl1, ider0, idir0, kg_kq, kpg1_k, kq_bz, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value) ! request=ffnl1_request)
 
-       ! Loop over my atomic perturbations and compute gkk_atm.
-       gkk_atm = zero
+       ! Loop over my atomic perturbations and compute gkq_atm.
+       gkq_atm = zero
        do my_ip=1,my_npert
          idir = dvdb%my_pinfo(1, my_ip); ipert = dvdb%my_pinfo(2, my_ip); ipc = dvdb%my_pinfo(3, my_ip)
 
@@ -3166,7 +3166,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
          ! No need to handle istwf_kq because it's always 1.
          do ib_k=1,nband_k
            do ib_kq=1,nband_kq
-             gkk_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
+             gkq_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
            end do
          end do
 
@@ -3178,11 +3178,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        ABI_FREE(kpg1_k)
        ABI_FREE(kpg_k)
 
-       ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
-       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkk_atm, gqk%pert_comm%value, ierr)
-
+       ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
        ! Get g in the phonon representation.
-       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkk_atm, phfrq, displ_red_qbz, gkq_nu)
+       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_atm, phfrq, displ_red_qbz, gkq_nu)
 
        ! Save e-ph matrix elements in the buffer.
        select case (gqk%cplex)
@@ -3203,10 +3202,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
        call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      end if
-     !if (my_rank == master) then
-     !  ! Print cache stats.
-     !  !call dvdb%ft_qcache%report_stats()
-     !end if
+     ! Print cache stats.
+     !if (my_rank == master) call dvdb%ft_qcache%report_stats()
    end do ! my_iq
 
    ! Dump the remainder.
@@ -3217,7 +3214,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_FREE(bras_kq)
    ABI_FREE(kets_k)
    ABI_FREE(h1kets_kq)
-   ABI_FREE(gkk_atm)
+   ABI_FREE(gkq_atm)
    ABI_FREE(gkq_nu)
  end do ! my_is
 
