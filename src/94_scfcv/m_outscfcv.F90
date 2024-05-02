@@ -38,7 +38,6 @@ module m_outscfcv
  use m_ebands
  use m_dtset
  use m_dtfil
- use m_extfpmd
 
  use defs_datatypes,     only : pseudopotential_type, ebands_t
  use defs_abitypes,      only : MPI_type
