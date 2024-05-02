@@ -988,7 +988,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            gemm_nonlop_nblocks = nblk_gemm_nonlop
          end if
          gemm_nonlop_is_distributed = .false.
-         if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
+         if(gemm_nonlop_nblocks > 0 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
        end if
 
 !      Build inverse of overlap matrix for chebfi

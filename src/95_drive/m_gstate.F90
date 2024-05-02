@@ -440,12 +440,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! Enabled if using OpenMP GPU offload (only implementation)
  gemm_nonlop_use_gemm = .false.
 
+ gemm_nonlop_is_distributed = .false.
+ if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
+ if(dtset%gpu_nl_splitsize > 0) gemm_nonlop_nblocks = dtset%gpu_nl_splitsize
+
  if(dtset%gpu_option == ABI_GPU_OPENMP .or. dtset%use_gemm_nonlop == 1) then
    gemm_nonlop_use_gemm = .true.
    call init_gemm_nonlop(dtset%gpu_option)
  end if
- gemm_nonlop_is_distributed = .false.
- if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
 !Set up the Ylm for each k point
  if ( dtset%tfkinfunc /= 2) then
