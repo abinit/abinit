@@ -317,6 +317,9 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    nsppol0=hdr0%nsppol
    headform0=hdr0%headform
 
+!  Extended plane waves energy shift is required in order to restart from wave function.
+   hdr%extpw_eshift=hdr0%extpw_eshift
+
    write(message,'(2a)')'-inwffil : will read wavefunctions from disk file ',trim(wff1%fname)
    call wrtout(std_out,message,'COLL')
    call wrtout(ab_out,message,'COLL')
