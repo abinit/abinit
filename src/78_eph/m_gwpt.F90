@@ -85,7 +85,7 @@ module m_gwpt
  use m_phonons,        only : phstore_t, phstore_new
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
- use m_gstore,         only : gstore_t, gqk_t
+ use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
 
  implicit none
 
@@ -192,7 +192,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
- integer :: mpw,ierr,imyq
+ integer :: mpw,ierr,imyq,nqbz
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid, spin_ncid
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nbcalc_ks
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp
@@ -299,55 +299,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Here we try to read an existing GSTORE file if eph_restart == 1.
  ! and we compare the variables with the state of the code
 
- restart = 0; gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-
- if (my_rank == master .and. dtset%eph_restart == 1) then
-    if (file_exists(gstore_filepath)) then
-      ! Use gstore_completed to understand previous GSTORE run completed else we need to restart
-      NCF_CHECK(nctk_open_read(root_ncid, gstore_filepath, xmpi_comm_self))
-      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
-      call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
-      ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
-      call gstore_hdr%vs_dtset(dtset)
-      call gstore_hdr%free()
-
-      NCF_CHECK(nctk_get_dim(root_ncid, "gstore_nqbz", gstore%nqbz))
-      ABI_MALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
-      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
-      NCF_CHECK(nf90_close(root_ncid))
-      !print *, done_qbz_spin, done_qbz_spin
-
-      ! NOTE: done_qbz_spin is dimensioned with the q-points in the BZ but we
-      ! FIXME: should set to 1 the q-points in the BZ else we never restart
-      ! Perhaps can can set to -1 if q = TS q_ibz if q_ibz is done.
-      if (gstore_completed /= 0) then
-        ! Previous computation completed, keep a backup of the file and start from scratch.
-        restart = 0; done_qbz_spin = 0
-        msg = sjoin("Found GSTORE.nc file with all entries already computed.", ch10, &
-                    "Will overwrite:", gstore_filepath, ch10, &
-                    "Keeping backup copy in:", strcat(gstore_filepath, ".bkp"))
-        call wrtout(ab_out, sjoin("WARNING: ", msg))
-        ABI_WARNING(msg)
-        ! Keep backup copy
-        ABI_CHECK(clib_rename(gstore_filepath, strcat(gstore_filepath, ".bkp")) == 0, "Failed to rename SIGPEPH file.")
-      else
-        restart = 1
-        call wrtout(units, "- Restarting from previous GSTORE.nc file")
-      end if
-    end if
- end if
-
- call xmpi_bcast(restart, master, comm, ierr)
+ gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+ call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
  if (restart == 0) then
-   ! Build new gstore from input variables.
+   ! Build new gstore object from input variables.
    call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
  else
-   ! Init gstore from pre-existent file and broadcast done_qbz_spin mask.
+   ! Init gstore from pre-existent file.
    call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
-   call xmpi_bcast(done_qbz_spin, master, comm, ierr)
  end if
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
@@ -1202,6 +1164,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(gbound_kmp)
  ABI_FREE(gbound_kqmp)
  ABI_FREE(gbound_pp)
+ ABI_FREE(done_qbz_spin)
 
  call gs_ham_kq%free()
  call wfd%free()

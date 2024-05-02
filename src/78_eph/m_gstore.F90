@@ -105,6 +105,7 @@ module m_gstore
  use, intrinsic :: iso_c_binding
  use defs_basis
  use m_abicore
+ use m_clib
  use m_xmpi
  use m_errors
  use m_htetra
@@ -132,7 +133,7 @@ module m_gstore
  !use m_yaml,           only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
- use m_io_tools,       only : iomode_from_fname
+ use m_io_tools,       only : iomode_from_fname, file_exists
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -489,6 +490,8 @@ contains
 
 end type gstore_t
 !!***
+
+public :: gstore_check_restart
 
 contains
 !!***
@@ -3763,6 +3766,91 @@ integer function spin_vid(vname)
 end function spin_vid
 
 end subroutine gstore_from_ncpath
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_check_restart
+!! NAME
+!! gstore_check_restart
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, comm)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: filepath
+ type(dataset_type),intent(in) :: dtset
+ integer,intent(out) :: nqbz, restart
+ integer,allocatable,intent(out) :: done_qbz_spin(:,:)
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_rank, root_ncid, ierr, fform, gstore_completed, gstore_fform, units(2)
+ character(len=500) :: msg
+ type(hdr_type) :: gstore_hdr
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
+
+ restart = 0; nqbz = 0
+ if (my_rank == master .and. dtset%eph_restart == 1) then
+    if (file_exists(filepath)) then
+      ! Use gstore_completed to understand if the previous GSTORE run completed else we need to restart
+      NCF_CHECK(nctk_open_read(root_ncid, filepath, xmpi_comm_self))
+      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
+      call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
+      ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
+      call gstore_hdr%vs_dtset(dtset)
+      call gstore_hdr%free()
+
+      NCF_CHECK(nctk_get_dim(root_ncid, "gstore_nqbz", nqbz))
+      ABI_MALLOC(done_qbz_spin, (nqbz, dtset%nsppol))
+      NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
+      NCF_CHECK(nf90_close(root_ncid))
+      !print *, done_qbz_spin, done_qbz_spin
+
+      ! NOTE: done_qbz_spin is dimensioned with the q-points in the BZ but we
+      ! FIXME: should set to 1 the q-points in the BZ else we never restart
+      ! Perhaps can can set to -1 if q = TS q_ibz if q_ibz is done.
+      if (gstore_completed /= 0) then
+        ! Previous computation completed, keep a backup of the file and start from scratch.
+        restart = 0; done_qbz_spin = 0
+        msg = sjoin("Found GSTORE.nc file with all entries already computed.", ch10, &
+                    "Will overwrite:", trim(filepath), ch10, &
+                    "Keeping backup copy in:", strcat(filepath, ".bkp"))
+        call wrtout(ab_out, sjoin("WARNING: ", msg))
+        ABI_WARNING(msg)
+        ! Keep backup copy
+        ABI_CHECK(clib_rename(trim(filepath), strcat(filepath, ".bkp")) == 0, "Failed to rename GSTORE file.")
+      else
+        restart = 1
+        call wrtout(units, "- Restarting from a previous GSTORE.nc file")
+      end if
+    end if
+ end if
+
+ call xmpi_bcast(restart, master, comm, ierr)
+ call xmpi_bcast(nqbz, master, comm, ierr)
+ if (my_rank /= master) then
+   ABI_MALLOC(done_qbz_spin, (nqbz, dtset%nsppol))
+ end if
+ if (nqbz /= 0) call xmpi_bcast(done_qbz_spin, master, comm, ierr)
+
+contains
+integer function root_vid(vname)
+  character(len=*),intent(in) :: vname
+  root_vid = nctk_idname(root_ncid, vname)
+end function root_vid
+
+end subroutine gstore_check_restart
 !!***
 
 end module m_gstore
