@@ -17,5 +17,6 @@ is_multi_parallel = True
 inp_files = [
 "t01.abi",
 "t02.abi",
-"t03.abi",
+"t03.abi", # test CHEBFI (istwfk==1)
+"t04.abi", # test CHEBFI (istwfk==2)
 ]

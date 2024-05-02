@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (XG)
+!!  Copyright (C) 1999-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -812,8 +812,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    if(dtset%cellcharge(iimage) < cellcharge_min)cellcharge_min=dtset%cellcharge(iimage)
  end do
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'invol_blk_sliced',tread,'INT')
- if(tread==1)dtset%invol_blk_sliced=intarr(1)
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'invovl_blksliced',tread,'INT')
+ if(tread==1)dtset%invovl_blksliced=intarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dosdeltae',tread,'ENE')
  if(tread==1) dtset%dosdeltae=dprarr(1)

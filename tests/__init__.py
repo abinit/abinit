@@ -178,6 +178,7 @@ _tsuite_dirs = [
     "v7",
     "v8",
     "v9",
+    "v10",
     "vdwxc",
     "wannier90",
 ]

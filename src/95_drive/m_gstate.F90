@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -457,7 +457,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call init_gemm_nonlop(dtset%nkpt)
    end if
  end if
-
  gemm_nonlop_is_distributed = .false.
  if(dtset%gpu_nl_distrib == 1) gemm_nonlop_is_distributed = .true.
 
@@ -2624,7 +2623,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT group (MB)
+!! Copyright (C) 2003-2024 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

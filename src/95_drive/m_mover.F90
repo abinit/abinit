@@ -6,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, SE, FLambert,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -339,18 +339,20 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
      acell(:)   =hist_prev%acell(:,minIndex)
      rprimd(:,:)=hist_prev%rprimd(:,:,minIndex)
      xred(:,:)  =hist_prev%xred(:,:,minIndex)
+     vel(:, :) = hist_prev%vel(:, :, minIndex)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
        call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
-       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       !xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
        hist%ihist = 1
      end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     vel(:, :) = hist_prev%vel(:, :, hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
