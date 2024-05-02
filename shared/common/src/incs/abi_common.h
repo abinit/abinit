@@ -89,6 +89,7 @@
 
 /* Stop execution with message `msg` if the two integers int1 and int2 are not equal */
 #define ABI_CHECK_IEQ(int1, int2, msg) if (int1 /= int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
+#define ABI_CHECK_INEQ(int1, int2, msg) if (int1 == int2) ABI_ERROR(sjoin(msg, ": while it is", itoa(int1), "vs", itoa(int2)))
 #define ABI_CHECK_IEQ_IERR(int1, int2, msg, ierr) if (int1 /= int2) then NEWLINE ierr = ierr + 1; ABI_WARNING(sjoin(msg, itoa(int1), "vs", itoa(int2))) NEWLINE endif
 
 /* Stop execution with message `msg` if the two doubles double1 and double2 are not equal */

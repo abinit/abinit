@@ -3182,9 +3182,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 !*************************************************************************
 
  ! TODO: Change intent to in. Change pawrhoij_io first!
- !@hdr_type
  ierr = 0
-
  if (present(rewind)) then
    if (rewind) rewind(unit, err=10, iomsg=errmsg)
  end if
@@ -3199,9 +3197,8 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
  major = atoi(hdr%codvsn(:ii-1))
 
-!Writing always use last format version
+ ! Writing always use last format version
  headform = HDR_LATEST_HEADFORM
- !write(std_out,*) 'CP debug = ', headform
 
  if (major > 8) then
    write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform

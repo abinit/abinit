@@ -395,6 +395,7 @@ type, public :: gstore_t
   ! Max number of bands over spin
 
   integer,allocatable :: glob_nk_spin(:), glob_nq_spin(:)
+  ! Total number of k/q points for each spin after filtering (if any)
   ! (nsppol)
 
   real(dp), contiguous, pointer :: kibz(:,:)
@@ -480,8 +481,11 @@ contains
   procedure :: init => gstore_init
   ! Build object
 
-  ! Activate parallelism over perturbations at the level of the DVDB file.
+  procedure :: get_missing_qbz_spin => gstore_get_missing_qbz_spin
+  ! Return the number of (q-points, spin) entries that have been computed
+
   procedure :: set_perts_distrib => gstore_set_perts_distrib
+  ! Activate parallelism over perturbations at the level of the DVDB file.
 
 end type gstore_t
 !!***
@@ -775,7 +779,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ], defmode=.True.)
    NCF_CHECK(ncerr)
 
-   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gstore_with_vk", "gstore_qptopt"])
+   ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: "gstore_with_vk", "gstore_qptopt", "gstore_completed"])
    NCF_CHECK(ncerr)
    !ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: "fermi_energy", "smearing_width"])
    !NCF_CHECK(ncerr)
@@ -803,7 +807,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ])
    NCF_CHECK(ncerr)
 
-   ! internal table used to restart computation. Init with zeros.
+   ! Internal table used to restart computation. Init with zeros.
+   !  0 --> (ib_bz, spin) has not been computed.
+   !  1 --> (iq_bz, spin) has been computed.
+   ! To check if the whole generation is completed, check if "gstore_completed" == 1
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, zero))
 
    ! Optional arrays
@@ -816,6 +823,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_with_vk"), gstore%with_vk))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qptopt"), gstore%qptopt))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_completed"), 0))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), trim(gstore%kfilter)))
@@ -1072,8 +1080,10 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    gqk => gstore%gqk(my_is)
 
    ! Init for sequential execution.
-   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1 !; gqk%bsum_comm%nproc = 1;
    gqk%my_npert = gqk%natom3
+   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
+   ! GWPT communicators
+   !gqk%bsum_comm%nproc = 1; gqk%pp_comm%nproc = 1;
 
    if (any(eph_np_pqbks /= 0)) then
      ! Use parameters from input file. Need to perform sanity check though.
@@ -2545,6 +2555,51 @@ subroutine gqk_free(gqk)
 end subroutine gqk_free
 !!***
 
+!!***
+
+!!****f* m_gstore/gstore_get_missing_qbz_spin
+!! NAME
+!! gstore_get_missing_qbz_spin
+!!
+!! FUNCTION
+!!  Return the number of (q-points, spin) entries that have been computed.
+!!
+!! SOURCE
+
+subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
+
+!Arguments ------------------------------------
+ class(gstore_t),target,intent(in) :: gstore
+ integer,intent(in) :: done_qbz_spin(gstore%nqbz, gstore%nsppol)
+ integer,intent(out) :: ndone, nmiss
+
+!Local variables ------------------------------
+!scalars
+ integer :: my_is, my_iq, iq_bz, spin, ierr, nscale
+ type(gqk_t),pointer :: gqk
+!----------------------------------------------------------------------
+
+ nmiss = 0
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   do my_iq=1,gqk%my_nq
+     iq_bz = gqk%my_q2bz(my_iq)
+     if (done_qbz_spin(iq_bz, spin) == 0) nmiss = nmiss + 1
+     if (done_qbz_spin(iq_bz, spin) == 1) ndone = ndone + 1
+   end do ! my_iq
+   ! Rescale to avoid overcounting in xmpi_summ
+   nscale = (gqk%pert_comm%nproc) ! * gqk%bsum_comm%npert * gqk%pp_comm%npert
+   nmiss = nmiss / nscale
+   ndone = ndone / nscale
+ end do ! my_is
+
+ call xmpi_sum(ndone, gstore%comm, ierr)
+ call xmpi_sum(nmiss, gstore%comm, ierr)
+
+end subroutine gstore_get_missing_qbz_spin
+!!***
+
 !!****f* m_gstore/gstore_set_perts_distrib
 !! NAME
 !! gstore_set_perts_distrib
@@ -3222,6 +3277,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call gstore%print(std_out, header="GSTORE at the end of gstore%compute")
 
  !call xmpi_barrier(gstore%comm)
+ ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
+ if (my_rank == master) then
+   NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
+ end if
  NCF_CHECK(nf90_close(root_ncid))
 
  ! Free memory

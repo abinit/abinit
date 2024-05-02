@@ -1741,7 +1741,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1
  integer :: opt_gvnlx1, mcgq, mgscq, mcprjq, grad_berry_size_mpw1
- real(dp) :: out_resid
+ real(dp) :: out_resid !, eig0nk
  type(rf2_t) :: rf2
  real(dp),allocatable :: grad_berry(:,:)
  complex(gwpc),allocatable :: cwork_sp(:)
@@ -1844,16 +1844,17 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! PAW: note that dcwavef (1st-order change of WF due to overlap change)
  !      remains in the subspace orthogonal to cgq
 
- ! A similar section of code is present in m_dfpt_vtowk when if (dtset%prtfull1wf > 0).
+ ! A similar section of code is present in m_dfpt_vtowfk when if (dtset%prtfull1wf > 0).
  ! Also, note that in metals one should include fermie1
- ! See nneed_fermie1 in m_dfpt_scfcv
+ ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
    NOT_IMPLEMENTED_ERROR()
    ! Compute full first order wavefunction.
-   !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
+   !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
+   !eig0nk = eig0_k(iband)
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
-   !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq, mcgq, mcprjq, stern%mpi_enreg,
+   !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq0, mcgq, mcprjq, stern%mpi_enreg,
    !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
 
    if (present(full_ur1)) then
