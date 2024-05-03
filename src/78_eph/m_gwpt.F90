@@ -183,8 +183,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
- integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop, my_npp
+ integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
+ integer :: my_is, spin, idir,ipert, npw_pp
+ integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
  integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
@@ -283,21 +284,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
- my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
- units = [std_out, ab_out]
+ my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  ecut = dtset%ecut ! dtset%dilatmx
  ieta = +j_dpc * dtset%zcut
 
- ! Check if a previous GSTORE file is present to restart the calculation if eph_restart == 1.
+ ! Check if a previous GSTORE file is present to restart the calculation if dtset%eph_restart == 1,
  ! and use done_qbz_spin to cycle loops if restart /= 0.
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
  if (restart == 0) then
-   ! Build new gstore object from input variables.
+   ! Build new gstore object from dtset input variables.
    call gstore%init(gstore_filepath, dtset, wfk_hdr, cryst, ebands, ifc, comm)
    ABI_REMALLOC(done_qbz_spin, (gstore%nqbz, nsppol))
    done_qbz_spin = 0
@@ -305,6 +305,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Init gstore from pre-existent file.
    call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
  end if
+
+ ! Open GSTORE.nc file, and go to data mode.
+ NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
+ NCF_CHECK(nctk_set_datamode(root_ncid))
 
  !if (my_rank == master) then
  !  call gwpt%print(dtset, ab_out)
@@ -319,10 +323,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! This is the maximum number of PWs for all possible k+q treated.
  call gstore%get_mpw_gmax(ecut, mpw, gmax)
 
- ! Open GSTORE.nc file, and go to data mode.
- NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
- NCF_CHECK(nctk_set_datamode(root_ncid))
-
  ! Init work_ngfft
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
@@ -330,11 +330,64 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
+ ! ================
+ ! HANDLE SCREENING
+ ! ================
+ nqlwl = 0; w_fname = ABI_NOFILE
+ if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
+   w_fname = dtfil%fnameabi_scr
+ end if
+
+ call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
+
+ if (w_fname /= ABI_NOFILE) then
+   ! Read g-sphere and pp_mesh from SCR file.
+   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
+   call hscr%free()
+   nqlwl = size(qlwl, dim=2)
+   w_info%use_mdf = MDL_NONE
+ else
+   ! Init pp_mesh from the K-mesh reported in the WFK file.
+   call find_qmesh(pp_mesh, cryst, kmesh)
+   ! The G-sphere for W and Sigma_c is initialized from ecuteps.
+   call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
+   dtset%npweps = gsph_c%ng
+   w_info%use_mdf = MDL_BECHSTEDT
+   w_info%eps_inf = dtset%mdf_epsinf
+   ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
+ end if
+
+ if (nqlwl == 0) then
+   nqlwl=1
+   ABI_MALLOC(qlwl,(3,nqlwl))
+   qlwl(:,nqlwl)= GW_Q0_DEFAULT
+   write(msg,'(3a,i0,a,3f9.6)')&
+     "The Header of the screening file does not contain the list of q-point for the optical limit ",ch10,&
+     "Using nqlwl= ",nqlwl," and qlwl = ",qlwl(:,1)
+   ABI_COMMENT(msg)
+ end if
+
+ ! TODO: In principle one should have gpsh_x as well.
+ call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
+               nqlwl, qlwl, comm)
+ call kmesh%free()
+
+ ! Distribute the sum over pp wavevectors inside pp_sum_comm using block distribution.
+ my_pp_start_spin = -1; my_pp_stop_spin = 0
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   call xmpi_split_block(pp_mesh%nbz, gqk%pp_sum_comm%value, my_npp(spin), my_pp_inds)
+   if (my_npp(spin) > 0) then
+     my_pp_start_spin(spin) = my_pp_inds(1); my_pp_stop_spin(spin) = my_pp_inds(my_npp(spin))
+   end if
+   ABI_SFREE(my_pp_inds)
+ end do ! my_is
+
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
- ! that will be needed in the loops below and allocate only these wavevectors.
- ! so that memory scales.
+ ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
 #define DEV_FAST_DEBUG
 
@@ -349,13 +402,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  nkpt = wfk_hdr%nkpt
  ABI_MALLOC(nband, (nkpt, nsppol))
  ABI_MALLOC(bks_mask, (dtset%mband, nkpt, nsppol))
- ABI_MALLOC(keep_ur, (dtset%mband, nkpt ,nsppol))
+ ABI_MALLOC(keep_ur, (dtset%mband, nkpt, nsppol))
 
- ! TODO: Distribute wavefunctions according to k, q and pp
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
  !bks_mask(my_bsum_start:my_bsum_stop,:,:) = .True.
  bks_mask = .True.
- !call gstore%fill_bks_mask_with_pp(mband, nkibz, nsppol, bks_mask)
+ ! TODO: Distribute wavefunctions according to k, q and pp
+ call gstore%fill_bks_mask_pp_mesh(dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask)
 
  if (dtset%userie == 124) then
    ! Uncomment this line to have all states on each MPI rank.
@@ -410,7 +463,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
 
 #if 0
- ! TODO: This part will be reintegrated afterwards if needed.
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
@@ -419,35 +471,43 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Use ndone to undertand if velocities have been already compured in a previous run.
  !if (ndone == 0) then
 
- ABI_CALLOC(vk_cart_ibz, (3, gwpt%max_nbcalc, gwpt%nkcalc, nsppol))
+ ! TODO: This part will be reintegrated afterwards if needed.
+ ! Be careful as wavefunctions may be replicated
+
  ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
  ! Consider only the nk states in gwpt_nk
  ! All gwpt_nk states are available on each node so MPI parallelization is easy.
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in gwpt_nk...")
  cnt = 0
- do spin=1,nsppol
-   do ikcalc=1,gwpt%nkcalc
-     kk = gwpt%kcalc(:, ikcalc)
-     bstart_ks = gwpt%bstart_ks(ikcalc, spin)
-     ik_ibz = gwpt%kcalc2ibz(ikcalc, 1)
+ do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   nb = gqk%nb
+   ! (3, nb, nkibz)
+   ABI_CALLOC(vk_cart_ibz, (3, nb, gstore%nkibz))
+   do my_ik=1,gqk%my_nk
+     kk = gqk%my_kpts(:, my_ik)
+     ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
+     trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     if (.not. isirr_k) cycle
      npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+
      call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
 
-     do ib_k=1,gwpt%nbcalc_ks(ikcalc, spin)
-       cnt = cnt + 1; if (mod(cnt, nprocs) /= my_rank) cycle ! MPI parallelism.
-       band_ks = ib_k + bstart_ks - 1
-       call wfd%copy_cg(band_ks, ik_ibz, spin, cg_work)
-       eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-       vk_cart_ibz(:, ib_k, ikcalc, spin) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+     do band=gqk%bstart, gqk%bstop
+       call wfd%copy_cg(band, ik_ibz, spin, cg_work)
+       eig0nk = ebands%eig(band, ik_ibz, spin)
+       ib = band - gqk%bstart + 1
+       vk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
      end do
+   end do ! my_ik
 
-   end do
- end do
- call xmpi_sum(vk_cart_ibz, comm, ierr)
-
- ! Write v_nk to disk.
- ABI_FREE(vk_cart_ibz)
+   call xmpi_sum(vk_cart_ibz, comm, ierr)
+   ! Write v_nk to disk.
+   ABI_FREE(vk_cart_ibz)
+ end do ! my_is
 
  call ddkop%free()
  call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
@@ -606,61 +666,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(qibz2dvdb)
  ABI_FREE(qselect)
 
- ! ================
- ! HANDLE SCREENING
- ! ================
+ ! The density is needed for vxc1 and the model dielectric function
  ABI_CALLOC(rhor, (nfftf, nspden))
-
- nqlwl = 0; w_fname = ABI_NOFILE
- if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
-   w_fname = dtfil%fnameabi_scr
+ call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, rhor, den_hdr, den_pawrhoij, comm, &
+                allow_interp=.True.)
+ den_cryst = den_hdr%get_crystal()
+ if (cryst%compare(den_cryst, header=" Comparing input crystal with DEN crystal") /= 0) then
+   ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")
  end if
+ call den_cryst%free(); call den_hdr%free()
 
- call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
-
- !call wrtout(std_out, "Begin SCR part")
- if (w_fname /= ABI_NOFILE) then
-   ! Read g-sphere and pp_mesh from SCR file.
-   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
-   call hscr%free()
-   nqlwl = size(qlwl, dim=2)
-   w_info%use_mdf = MDL_NONE
- else
-   ! Init pp_mesh from the K-mesh reported in the WFK file.
-   call find_qmesh(pp_mesh, cryst, kmesh)
-   ! The G-sphere for W and Sigma_c is initialized from ecuteps.
-   call gsph_c%init(cryst, 0, ecut=dtset%ecuteps)
-   dtset%npweps = gsph_c%ng
-
-   ! We also need the density for the model dielectric function
-   call read_rhor(dtfil%fildensin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, rhor, den_hdr, den_pawrhoij, comm, &
-                  allow_interp=.True.)
-   den_cryst = den_hdr%get_crystal()
-   if (cryst%compare(den_cryst, header=" Comparing input crystal with POT crystal") /= 0) then
-     ABI_ERROR("Crystal structure from WFK and DEN do not agree! Check messages above!")
-   end if
-   call den_cryst%free(); call pot_hdr%free()
-   w_info%use_mdf = MDL_BECHSTEDT
-   w_info%eps_inf = dtset%mdf_epsinf
-   ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
- end if
-
- if (nqlwl == 0) then
-   nqlwl=1
-   ABI_MALLOC(qlwl,(3,nqlwl))
-   qlwl(:,nqlwl)= GW_Q0_DEFAULT
-   write(msg,'(3a,i0,a,3f9.6)')&
-     "The Header of the screening file does not contain the list of q-point for the optical limit ",ch10,&
-     "Using nqlwl= ",nqlwl," and qlwl = ",qlwl(:,1)
-   ABI_COMMENT(msg)
- end if
-
- ! TODO: In principle one should have gpsh_x as well.
- call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
-               nqlwl, qlwl, comm)
- call kmesh%free()
-
- ! Init Wc.
+ ! Init Wc
  ! In-core or out-of-core solution?
  mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
  w_info%invalid_freq = dtset%gw_invalid_freq
@@ -668,7 +684,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call W%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
              dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
 
- ABI_FREE(rhor)
  ABI_FREE(qlwl)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -727,14 +742,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
    ! Inside the loops we compute gkq_sig_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
-
-   ! Distribute the sum over pp wavevectors inside pp_sum_comm using block distribution.
-   call xmpi_split_block(pp_mesh%nbz, gqk%pp_sum_comm%value, my_npp, my_pp_inds)
-   my_pp_start = -1; my_pp_stop = 0
-   if (my_npp > 0) then
-     my_pp_start = my_pp_inds(1); my_pp_stop = my_pp_inds(my_npp)
-   end if
-   ABI_SFREE(my_pp_inds)
 
    ! ============================================
    ! Loop over MPI distributed q-points in Sigma
@@ -923,7 +930,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        gkq_sig_atm = zero
 
-       do ipp_bz=my_pp_start, my_pp_stop
+       do ipp_bz=my_pp_start_spin(spin), my_pp_stop_spin(spin)
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
          !print *, "Begin sum over pp: ", trim(ktoa(pp))
@@ -1233,6 +1240,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(gbound_kqmp)
  ABI_FREE(gbound_pp)
  ABI_FREE(done_qbz_spin)
+ ABI_FREE(rhor)
 
  call gs_ham_kq%free()
  call wfd%free()
