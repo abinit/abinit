@@ -5118,6 +5118,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    ! Supported fform:
    ! 109  POT1 files without vh1(G=0)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
+   ! 54   RHO1 files (treating DRHODB as DVDB)
+   
    has_rhog1_g0(ii) = .True.
    if (fform == 109) has_rhog1_g0(ii) = .False.
 
@@ -5147,15 +5149,25 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    else
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
-      NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
-      do ispden=1,hdr1%nspden
-        NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
-        write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
-      end do
-      ! Add rhog1(G=0)
-      rhog1_g0 = zero
-      if (has_rhog1_g0(jj)) then
-        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
+      if (fform == 109 .or. fform == 111) then
+        NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
+        do ispden=1,hdr1%nspden
+          NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
+          write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+        end do
+        ! Add rhog1(G=0)
+        rhog1_g0 = zero
+        if (has_rhog1_g0(jj)) then
+          NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
+        end if
+      end if
+      if (fform == 54) then
+        ! v below should read as rho
+        NCF_CHECK(nf90_inq_varid(units(ii), "first_order_density", v1_varid))
+        do ispden=1,hdr1%nspden
+          NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
+          write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+        end do
       end if
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    end if
@@ -5262,6 +5274,11 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
  ! Here I made a mistake because 102 corresponds to GS potentials
  ! as a consequence DVDB files generated with version <= 8.1.6
  ! contain list of potentials with fform = 102.
+ ! 
+ ! In GWPT, one may want to use DRHODB as DVDB. For this, here I 
+ ! also allow merging and reading first order density with fform = 54.
+ !
+ !integer :: fform_rho=54
  !integer :: fform_pot=102
  !integer :: fform_pot=109
  !integer :: fform_pot=111
@@ -5273,13 +5290,13 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
 
  select case (mode)
  case ("merge_dvdb")
-    if (all(fform /= [109, 111])) then
+    if (all(fform /= [54, 109, 111])) then
       errmsg = sjoin("fform:", itoa(fform), "is not supported in `merge_dvdb` mode")
       ierr = 1; return
     end if
 
  case ("read_dvdb")
-    if (all(fform /= [102, 109, 111])) then
+    if (all(fform /= [54, 102, 109, 111])) then
       errmsg = sjoin("fform:", itoa(fform), "is not supported in `read_dvdb` mode")
       ierr = 1; return
     end if

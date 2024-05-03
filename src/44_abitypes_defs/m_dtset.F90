@@ -206,6 +206,7 @@ type, public :: dataset_type
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
+ integer :: getdrhodb = 0
  integer :: getddk = 0
  integer :: getdelfd = 0
  integer :: getdkdk = 0
@@ -322,6 +323,7 @@ type, public :: dataset_type
  integer :: irdchkprdm = 0
  integer :: irdddb = 0
  integer :: irddvdb = 0
+ integer :: irddrhodb = 0
  integer :: irdddk = 0
  integer :: irdden = 0
  integer :: irdefmas = 0
@@ -997,6 +999,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_filepath = ABI_NOFILE
  character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getdrhodb_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
@@ -1577,6 +1580,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
+ dtout%getdrhodb          = dtin%getdrhodb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
  dtout%getdkdk            = dtin%getdkdk
@@ -1591,6 +1595,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
+ dtout%getdrhodb_filepath = dtin%getdrhodb_filepath
  dtout%getpot_filepath    = dtin%getpot_filepath
  dtout%getsigeph_filepath = dtin%getsigeph_filepath
  dtout%getgstore_filepath = dtin%getgstore_filepath
@@ -1702,6 +1707,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irdbscoup          = dtin%irdbscoup
  dtout%irdddb             = dtin%irdddb
  dtout%irddvdb            = dtin%irddvdb
+ dtout%irddrhodb          = dtin%irddrhodb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
@@ -3361,7 +3367,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
- list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
@@ -3392,7 +3398,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
  list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irddrhodb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
