@@ -52,7 +52,6 @@ module m_gwpt
  use m_ephtk
  use netcdf
  use m_nctk
- use m_rf2
  use m_dtset
  use m_dtfil
  use m_clib
@@ -179,7 +178,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 !Local variables ------------------------------
 !scalars
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
- integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1, with_cplex0 = 0
+ integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
@@ -191,15 +190,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
- integer :: mpw,ierr,imyq,nqbz
+ integer :: mpw,ierr,imyq,nqbz,ncerr
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid, spin_ncid
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1, nbcalc_ks
+ integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, num_mn_kq, ndone, nmiss, gstore_fform
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, nb, gstore_completed
- integer :: qptopt, my_iq, my_ik, qbuf_size
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
@@ -210,7 +209,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
  type(ddkop_t) :: ddkop
- type(rf2_t) :: rf2
  type(crystal_t) :: pot_cryst, den_cryst
  type(hdr_type) :: pot_hdr, den_hdr, gstore_hdr
  type(stern_t) :: stern_kmp !, stern_kqmp
@@ -239,18 +237,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer(i1b),allocatable :: itreat_qibz(:)
  integer,pointer :: kg_pp(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
- real(dp) :: phfrq(3*cryst%natom), qq_ibz(3), qpt(3)
+ real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qpt(3)
  real(dp) :: tsec(2) ! vk(3), vkq(3),
- real(dp) :: eig0nk,eig0mkq !eig0mk,
+ !real(dp) :: eig0nk, eig0mkq !eig0mk,
+ complex(gwpc) :: ctmp_gwpc
+!arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  real(dp),allocatable,target :: cgq(:,:,:)
  real(dp),allocatable :: qlwl(:,:),vk_cart_ibz(:,:,:,:)
- real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
+ real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable, target :: vxc1(:,:,:,:)
- real(dp),allocatable :: gkq_atm(:,:,:,:),gkq_nu(:,:,:,:)
- real(dp),allocatable :: ug_k(:,:), ug_kq(:,:),kets_k(:,:,:),h1kets_kq(:,:,:,:),cg_work(:,:)
+ real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
+ real(dp),allocatable :: gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
+ real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:) !,ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:) !, ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
@@ -261,11 +262,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(dp),pointer :: cvxc1_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
  complex(gwpc),allocatable :: crhog_bkmp_nk(:), crhog_mkq_bkqmp(:)
- !complex(dp),allocatable :: g_xc(:,:), g_ks(:,:), g_sigma(:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:) !, cg1_kqmp(:,:)
  !real(dp),allocatable :: full_cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kqmp(:,:) !, full_cg1_kqmp(:,:)
  !complex(gwpc),allocatable :: full_ur1_kmp(:), full_ur1_kqmp(:,:), full_ur1_kqmp(:,:) !, full_ur1_kqmp(:,:)
- !real(dp),allocatable :: my_gbuf(:,:,:,:,:,:), buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
 #if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
@@ -335,7 +335,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
 
-!#define _DEV_FAST_DEBUG
+#define _DEV_FAST_DEBUG
+
  nbsum = dtset%mband
 #ifdef _DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
@@ -398,8 +399,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
  ABI_MALLOC(cwaveprj, (natom, nspinor*usecprj))
- ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(displ_red, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(displ_cart_qq, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(displ_red_qq, (2, 3, cryst%natom, natom3))
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(gbound_kmp, (2*wfd%mgfft+8, 2))
@@ -468,7 +469,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
  ! 2) Perform the setup needed for the non-local factors:
  !
- ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_hamk.
+ ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_ham_kq.
  ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
  call init_hamiltonian(gs_ham_kq, psps, pawtab, nspinor, nsppol, nspden, natom,&
@@ -699,12 +700,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
    nb = gqk%nb
-   !ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
-   !ABI_MALLOC(gkq_nu, (2, nb, nb, natom3))
-   !ABI_MALLOC(iq_buf, (2, qbuf_size))
+   ABI_MALLOC(iq_buf, (2, qbuf_size))
+   ABI_MALLOC(gkq_sig_atm, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_sig_nu, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_ks_atm, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_ks_nu, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_xc_atm, (2, nb, nb, natom3))
+   ABI_MALLOC(gkq_xc_nu, (2, nb, nb, natom3))
 
-   ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
-   !ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
+   ! Inside the loops we compute gkq_sig_nu(2, nb, nb, natom3)
+   ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
    ! ============================================
    ! Loop over MPI distributed q-points in Sigma
@@ -724,6 +729,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      !tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
+
+     iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
+     iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
+
      mapc_qq = gqk%my_q2ibz(:, my_iq)
      !ABI_CHECK(isirr_q, "The q-point is usually in the IBZ!")
 
@@ -733,7 +742,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
      ! Compute phonons for this qpt.
-     call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
+     call ifc%fourq(cryst, qpt, phfr_qq, displ_cart_qq, out_displ_red=displ_red_qq)
 
      ! ==================================================
      ! Get DFPT potentials and densities for this q-point
@@ -742,7 +751,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !
      !   v1scf(cplex, nfftf, nspden, my_npert))
      !   vxc1(cplex, nfft, nspden, my_npert)
-
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
@@ -764,8 +772,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end if
      !ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
-     !cvxc1_ptr => null()
-     !if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert)]
+     ABI_MALLOC(vxc1, (cplex, nfft, nspden, my_npert))
+     vxc1 = zero
+
+     cvxc1_ptr => null()
+     if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
      !print *, "my_npert", my_npert
@@ -775,6 +786,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Loop over k-points in the e-ph matrix elements (usually in the full BZ).
      ! ========================================================================
      do my_ik=1,gqk%my_nk
+       ! Set entry to zero. Important as there are cycle instructions inside these loops
+       ! and we don't want to write random numbers to disk.
+       my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
+
 #ifdef _DEV_FAST_DEBUG
        if (my_ik > 12) cycle ! DEBUG
 #endif
@@ -847,19 +862,35 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
 
+       gkq_xc_atm = czero
+       !do mm_kq=gqk%bstart, gqk%bstop
        do mm_kq=1,1
          call wfd%rotate_cg(mm_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_kq)
+
+         !do nn_k=gqk%bstart, gqk%bstop
+         do nn_k=1,1
+            call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
+                               cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
+
+            do imyp=1,gqk%my_npert
+             if (cplex == 1) then
+               ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,spin,imyp)) / nfftf
+             else
+               ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * cvxc1_ptr(:,spin,imyp)) / nfftf
+             end if
+             gkq_xc_atm(1, mm_kq, nn_k, imyp) = real(ctmp_gwpc)
+             gkq_xc_atm(2, mm_kq, nn_k, imyp) = aimag(ctmp_gwpc)
+            end do ! imyp
+
+         end do ! nn_k
        end do ! mm_kq
-       do nn_k=1,1
-         call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
-                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-       end do ! nn_k
-       !if (cplex == 1)
-       !  g_xc(mm_kq, nn_k,imyp) = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,ispin,imyip)) / nfftf
-       !else
-       !  g_xc(mm_kq, nn_k,imyp) = sum(GWPC_CONJG(ur_kq) * ur_k * cvxc1_ptr(:,ispin,imyip)) / nfftf
-       !end if
+
+       ! TODO: this is an all_Gather but oh well.
+       ! Collect gkq_xc_atm inside pert_comm so that all procs can operate on the data.
+       call xmpi_sum(gkq_xc_atm, gqk%pert_comm%value, ierr)
+       ! Get KS g_xc in the phonon representation.
+       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_xc_atm, phfr_qq, displ_red_qq, gkq_xc_nu)
 
        ! =======================================
        ! Sum over the momenta pp in the full BZ.
@@ -870,6 +901,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! TODO: Should order nbz in shells so that one can reduce the memory required to store W(pp)
        ! if we activate pp-parallelism.
        my_pp_start = 1; my_pp_stop = pp_mesh%nbz
+       gkq_sig_atm = zero
 
        do ipp_bz=my_pp_start, my_pp_stop
          pp = pp_mesh%bz(:,ipp_bz)
@@ -957,7 +989,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Precompute oscillator matrix elements
          ! =====================================
          ! * These terms do not depend on (idir, ipert) and can be reused in the loop over pertubations below.
-         ! * If the bands in the sum are distributed, one has to transmit the the (m, n) indices.
+         ! * If the bands in the sum are distributed, one has to transmit the (m, n) indices.
 
          !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nw, my_bsum_start:my_bsum_stop, num_mn_kq))
          !ABI_FREE(rhotwg_kmp_mn)
@@ -1004,7 +1036,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
          if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
 
-         !gkq_atm = zero
+         !gkq_sig_atm = zero
          do imyp=1,gqk%my_npert
            idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
@@ -1071,6 +1103,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ABI_SFREE(ph3d1)
          end do ! imyp
 
+         ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
+         ! No need to handle istwf_kq because it's always 1.
+         !do ib_k=1,nband_k
+         !  do ib_kq=1,nband_kq
+         !    gkq_sig_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
+         !  end do
+         !end do
+
          call stern_kmp%free() !; call stern_kqmp%free()
        end do ! ipp_bz
 
@@ -1081,18 +1121,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
 
-       ! Collect gkk_atm inside pert_comm so that all procs can operate on the data.
-       !if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkk_atm, gqk%pert_comm%value, ierr)
+       ! Collect gkq_sig_atm inside pert_comm so that all procs can operate on the data.
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_sig_atm, gqk%pert_comm%value, ierr)
        ! Get g in the phonon representation.
-       !call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkk_atm, phfrq, displ_red_qbz, gkq_nu)
+       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_sig_atm, phfr_qq, displ_red_qq, gkq_sig_nu)
 
        ! Save e-ph matrix elements in the buffer.
-       !select case (gqk%cplex)
-       !case (1)
-       !  my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
-       !case (2)
-       !  my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
-       !end select
+       select case (gqk%cplex)
+       case (1)
+         my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu(1,:,:,:) ** 2 + gkq_sig_nu(2,:,:,:) ** 2
+       case (2)
+         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu - gkq_xc_nu ! + gkq_ks_nu
+       end select
 
        ! Dump buffers
        !if (iqbuf_cnt == qbuf_size) call dump_data()
@@ -1108,18 +1148,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      ABI_FREE(vlocal1)
      ABI_FREE(v1scf)
-     !ABI_FREE(vxc1)
+     ABI_FREE(vxc1)
      call cwtime_report(" One q-point", cpu_ks, wall_ks, gflops_ks)
-
    end do ! iq_ibz
 
    ! Dump the remainder.
    !if (iqbuf_cnt /= 0) call dump_data()
 
-   !ABI_FREE(iq_buf)
-   !ABI_FREE(my_gbuf)
-   !ABI_FREE(gkq_atm)
-   !ABI_FREE(gkq_nu)
+   ABI_FREE(iq_buf)
+   ABI_FREE(my_gbuf)
+   ABI_FREE(gkq_sig_atm)
+   ABI_FREE(gkq_sig_nu)
+   ABI_FREE(gkq_ks_atm)
+   ABI_FREE(gkq_ks_nu)
+   ABI_FREE(gkq_xc_atm)
+   ABI_FREE(gkq_xc_nu)
  end do ! my_is
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
@@ -1155,8 +1198,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(work)
  ABI_FREE(ph1d)
  ABI_FREE(vlocal)
- ABI_FREE(displ_cart)
- ABI_FREE(displ_red)
+ ABI_FREE(displ_cart_qq)
+ ABI_FREE(displ_red_qq)
  ABI_FREE(gbound_k)
  ABI_FREE(gbound_kq)
  ABI_FREE(gbound_kmp)
@@ -1181,6 +1224,52 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call cwtime_report(" gwpt_run: MPI barrier before returning.", cpu_all, wall_all, gflops_all, end_str=ch10, comm=comm)
 
 contains
+
+subroutine dump_data()
+
+ ! This function is called inside the double loop over (my_is, my_iq) or when we exit
+ ! from the my_iq loop to dump the remainder that is still in the q-buffer,
+ ! All the MPI procs in the (kpt_comm x pert_comm) grid shall call this contained routine
+ ! as we have side-effects i.e. iqbuf_cnt set to 0.
+
+ ! On disk we have the global arrays:
+ !
+ !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+ !
+ ! while the local MPI buffers are dimensioned as follows:
+ !
+ !      my_gbuf(2, nb, nb, natom3, gqk%my_nk, qbuf_size)
+
+ ! If parallelism over pertubation is activated, only the procs treating the first perturbation
+ ! i.e. the procs treating different k-points for this q are involved in IO
+ ! as all the local buffers store results for all natom3 pertubations.
+
+ integer :: ii, iq_bz, iq_glob, my_iq
+
+ if (gqk%coords_qkp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+
+ !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
+ my_iq = iq_buf(1, 1)
+ iq_glob = my_iq + gqk%my_qstart - 1
+
+ ! NB: this is an individual IO operation
+ ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &
+                      start=[1, 1, 1, 1, gqk%my_kstart, iq_glob], &
+                      count=[gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt])
+ NCF_CHECK(ncerr)
+
+ ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
+ if (all(gqk%coords_qkp(2:3) == [0, 0]))  then
+   do ii=1,iqbuf_cnt
+     iq_bz = iq_buf(2, ii)
+     NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
+   end do
+ end if
+
+ ! Zero the counter before returning
+10 iqbuf_cnt = 0
+
+end subroutine dump_data
 
 integer function root_vid(vname)
   character(len=*),intent(in) :: vname
