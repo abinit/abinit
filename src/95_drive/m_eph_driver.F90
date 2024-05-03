@@ -153,15 +153,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb, use_sigeph
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb, ddb_lw
  type(ddb_hdr_type) :: ddb_hdr
- type(dvdb_t) :: dvdb
+ type(dvdb_t) :: dvdb, drhodb
  type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
@@ -227,6 +227,11 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb_filepath = dtfil%filddbsin; ii = len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
 
+ drhodb_filepath = dtfil%fildrhodbin
+ if (drhodb_filepath == ABI_NOFILE) then
+   drhodb_filepath = dtfil%filddbsin; ii = len_trim(drhodb_filepath); drhodb_filepath(ii-2:ii+1) = "DRHODB"
+ end if
+
  sigeph_filepath = dtfil%filsigephin
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
@@ -244,12 +249,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
  use_sigeph = (dtset%eph_task == 9)
+ use_drhodb = (dtset%eph_task == 17)
 
  if (my_rank == master) then
    ! GA: Let ddb object handle the error at reading time
    !if (.not. file_exists(ddb_filepath)) ABI_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
    if (use_dvdb .and. .not. file_exists(dvdb_filepath)) ABI_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
    if (use_sigeph .and. .not. file_exists(sigeph_filepath)) ABI_ERROR(sjoin("Cannot find SIGEPH file:", sigeph_filepath))
+   if (use_drhodb .and. .not. file_exists(drhodb_filepath)) ABI_ERROR(sjoin("Cannot find DRHODB file:", drhodb_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
@@ -620,6 +627,45 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
+ if (use_drhodb) then
+   ! Store DRHORB as a DVDB object
+   drhodb = dvdb_new(drhodb_filepath, comm)
+
+   ! DVDB cryst comes from DPPT --> no time-reversal if q /= 0
+   ! Change the value so that we use the same as the GS part.
+   drhodb%cryst%timrev = cryst%timrev
+   if (cryst%compare(drhodb%cryst, header=" Comparing WFK crystal with DRHODB crystal") /= 0) then
+     ABI_ERROR("Crystal structure from WFK and DRHODB do not agree! Check messages above!")
+   end if
+   if (dtset%prtvol > 10) drhodb%debug = .True.
+
+   ! This to symmetrize the DFPT densities.
+   drhodb%symv1 = dtset%symv1scf
+
+   ! Copy brav variable
+   drhodb%brav = dtset%brav
+
+   ! Select algorithm for generating the list of R-points and the weigths used to compute W(r,R)
+   drhodb%rspace_cell = dtset%dvdb_rspace_cell
+
+   !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
+
+   ! Set qdamp, quadrupoles and all long-range terms to 0 
+   drhodb%qdamp = 0
+   drhodb%qstar = 0
+   drhodb%has_quadrupoles = .False.
+   drhodb%add_lr = 0
+   drhodb%has_dielt = .False.; drhodb%dielt = 0
+   drhodb%has_zeff = .False.; drhodb%zeff = 0; drhodb%zeff_raw = 0
+
+   if (my_rank == master) then
+     call drhodb%print()
+     call drhodb%list_perts([-1, -1, -1], npert_miss)
+     ABI_CHECK(npert_miss == 0, sjoin(itoa(npert_miss), "independent perturbation(s) are missing in the DVDB file!"))
+   end if
+ end if
+
+
  call pawfgr_init(pawfgr, dtset, mgfftf, nfftf, ecut_eff, ecutdg_eff, ngfftc, ngfftf, &
                   gsqcutc_eff=gsqcutc_eff, gsqcutf_eff=gsqcutf_eff, gmet=cryst%gmet, k0=k0)
 
@@ -819,6 +865,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !=====================
  call cryst%free()
  call dvdb%free()
+ call drhodb%free()
  call ddb%free()
  call ddb_hdr%free()
  call ifc%free()
