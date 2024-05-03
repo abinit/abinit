@@ -699,6 +699,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    & ngfftf,dtset%nspden,dtset%nucdipmom,rprimd,vectornd,xred)
  endif
 
+#ifdef HAVE_OPENMP_OFFLOAD
+ ! Upload cgq array to GPU
+ !$OMP TARGET ENTER DATA MAP(to:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  call timab(154,2,tsec)
 
 !######################################################################
@@ -1518,6 +1523,10 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  end if
 
 !Deallocate arrays
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:cgq) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+
  ABI_FREE(fcart)
  ABI_FREE(vtrial1)
  if (.not.kramers_deg) then

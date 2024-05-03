@@ -305,6 +305,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !TODO MJV: PAW mband_mem
    mgscq=mpw1*nspinor*mband_mem
    ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
 
    ABI_NVTX_START_RANGE(NVTX_GETGSC)
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
@@ -350,9 +353,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  call proc_distrb_band(rank_band,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cgq,gscq)       IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
-#endif
  iband_me = 0
  do iband=1,nband_k
 
@@ -656,9 +656,6 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  END LOOP OVER BANDS ==============================
 !======================================================================
 
-#ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(release:cgq,gscq) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
-#endif
 ! select eig1 matrix for only my slice of bands at present k-point
 ! this enables global xmpi_sum in dfpt_vtorho without double counting
  ii = 0
@@ -705,6 +702,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
    end if
  end if
  ABI_FREE(dcwavef)
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:gscq) IF(gs_hamkq%usepaw==1 .and. gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+#endif
  ABI_FREE(gscq)
  ABI_FREE(gsc)
  ABI_FREE(cwaveprj0)
