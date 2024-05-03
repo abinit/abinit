@@ -116,7 +116,8 @@ contains  !=====================================================
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!! dvdb<dbdb_type>=Database with the DFPT SCF potentials.
+!! dvdb=Database with the DFPT SCF potentials.
+!! drhovdb=Database with the DFPT SCF densities.
 !! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! wfk_hdr=Header of the WFK file.
 !! pawfgr <type(pawfgr_type)>=fine grid parameters and related data
@@ -152,7 +153,7 @@ contains  !=====================================================
 !!
 !! SOURCE
 
-subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk_hdr, &
+subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk_hdr, &
                     pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
 !Arguments ------------------------------------
@@ -163,7 +164,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(dataset_type),intent(inout) :: dtset
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(dvdb_t),intent(inout) :: dvdb !, drhodb
+ type(dvdb_t),intent(inout) :: dvdb, drhodb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
  type(pawfgr_type),intent(in) :: pawfgr
@@ -181,7 +182,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
+ integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ib_sum, ii !, jj, iw !ib_kq
  !integer :: u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop, my_npp
@@ -498,11 +499,23 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Open the DVDB file
  call dvdb%open_read(ngfftf, xmpi_comm_self)
- !call drhodb%open_read(ngfftf, xmpi_comm_self)
+ call drhodb%open_read(ngfftf, xmpi_comm_self)
+
+ ! Make sure that dvdb and drhodb have the same q-points
+ ! TODO: Method of dvdb_t?
+ ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
+ ierr = 0
+ do ii=1,dvdb%nqpt
+   if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
+     ierr = ierr + 1
+     call wrtout(std_out, sjoin(ktoa(dvdb%qpts(:, ii)), " /= ", ktoa(drhodb%qpts(:, ii))))
+   end if
+ end do
+ ABI_CHECK(ierr == 0, "Found different q-points in DVDB and DRHODB. See messages above!")
 
  ! Activate parallelism over perturbations at the level of the DVDB
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
- !call gstore%set_perts_distrib(crys, drhodb, my_npert)
+ call gstore%set_perts_distrib(cryst, drhodb, my_npert)
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
@@ -559,12 +572,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    comm_rpt = xmpi_comm_self
    qptopt = ebands%kptopt; if (dtset%qptopt /= 0) qptopt = dtset%qptopt
    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
-   !call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   call drhodb%ftinterp_setup(dtset%ddb_ngqpt, qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
    ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
    ABI_MALLOC(qselect, (gstore%nqibz))
    qselect = 1
    call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
+   call drhodb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, comm)
 
  else
    ABI_MALLOC(qselect, (dvdb%nqpt))
@@ -572,7 +586,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
 
  call dvdb%print(prtvol=dtset%prtvol)
- !call drhodb%print(prtvol=dtset%prtvol)
+ call drhodb%print(prtvol=dtset%prtvol)
 
  if (.not. use_ftinterp) then
    ! Need to translate itreat_qibz into itreatq_dvdb.
@@ -584,6 +598,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      itreatq_dvdb(db_iqpt) = 1
    end do
    call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
+   call drhodb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
    ABI_FREE(itreatq_dvdb)
  end if
 
@@ -764,6 +779,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+
+       call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
        !call drhodb%get_v1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
 
      else
@@ -775,15 +792,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
        call dvdb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
-       !db_iqpt = drhodb%findq(qq_ibz)
-       !ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
-       !mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
+       db_iqpt = drhodb%findq(qq_ibz)
+       ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
+       mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
+       call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
        !call drhodb%readsym_rho1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
-     !ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
-
-     ABI_MALLOC(vxc1, (cplex, nfft, nspden, my_npert))
-     vxc1 = zero
+     ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
      cvxc1_ptr => null()
      if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
