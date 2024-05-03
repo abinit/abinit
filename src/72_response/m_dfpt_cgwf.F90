@@ -82,6 +82,7 @@ module m_dfpt_cgwf
    integer,allocatable :: bands_treated_now(:)
    integer,allocatable :: rank_band(:)
 
+   real(dp),allocatable :: fermie1_idir_ipert(:,:)
    real(dp),allocatable :: out_eig1_k(:)
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
@@ -1652,12 +1653,14 @@ end subroutine full_active_wf1
 !!
 !! SOURCE
 
-subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use_cache, work_ngfft, mpi_enreg, comm_band)
+subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fermie1_idir_ipert, &
+                      use_cache, work_ngfft, mpi_enreg, comm_band)
 
 !Arguments ------------------------------------
  class(stern_t),intent(out) :: stern
  type(dataset_type),target,intent(in) :: dtset
  integer,intent(in) :: npw_k, npw_kq, nspinor, nband, nband_me, comm_band
+ real(dp),intent(in) :: fermie1_idir_ipert(3, dtset%natom)
  integer,intent(in) :: work_ngfft(18)
  logical,intent(in) :: use_cache
  type(mpi_type),intent(in) :: mpi_enreg
@@ -1669,12 +1672,15 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, use
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
  stern%nband_me = nband_me
- stern%usedcwavef = 0
+stern%usedcwavef = 0
  stern%use_cache = use_cache
  stern%work_ngfft = work_ngfft
  if (use_cache) then
    ABI_MALLOC(stern%work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
  end if
+
+ ABI_MALLOC(stern%fermie1_idir_ipert, (3, stern%dtset%natom))
+ stern%fermie1_idir_ipert = fermie1_idir_ipert
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
  !call xmpi_comm_dup(comm_band, stern%mpi_enreg%comm_band, ierr)
@@ -1853,6 +1859,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    ! Compute full first order wavefunction.
    !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
    !eig0nk = eig0_k(iband)
+   !fermie1 = zero
+   !if (qpt(1)**2+qpt(2)**2+qpt(3)**2 < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
    !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq0, mcgq, mcprjq, stern%mpi_enreg,
    !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
@@ -1899,6 +1907,7 @@ subroutine stern_free(stern)
  ABI_SFREE(stern%rank_band)
 
  ! real
+ ABI_SFREE(stern%fermie1_idir_ipert)
  ABI_SFREE(stern%out_eig1_k)
  ABI_SFREE(stern%dcwavef)
  ABI_SFREE(stern%gh1c_n)

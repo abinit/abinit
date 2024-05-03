@@ -1278,21 +1278,18 @@ subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_
 
 ! *************************************************************************
 
- lda = W%npw
- em1_qbz => W%Fgg_qbz%mat(:,:,1)
+ lda = W%npw; em1_qbz => W%Fgg_qbz%mat(:,:,1)
 
  if (.not.only_diago) then
-   !out_ket = MATMUL(TRANSPOSE(CONJG(em1_qbz(1:in_npw,1:in_npw)),in_ket)
    call xgemv(trans,in_npw,in_npw,alpha,em1_qbz,lda,in_ket,1,beta,out_ket,1)
 
  else
    if (beta /= czero_gw) then
-     !
-     if ( firstchar(trans,(/"C"/)) ) then
+     if (firstchar(trans, (/"C"/))) then
        do ig=1,in_npw
          out_ket(ig) = alpha * CONJG(em1_qbz(ig,ig)) * in_ket(ig) + beta * out_ket(ig)
        end do
-     else if ( firstchar(trans,(/"N","T"/)) ) then
+     else if (firstchar(trans, (/"N","T"/))) then
        do ig=1,in_npw
          out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig) + beta * out_ket(ig)
        end do
@@ -1302,18 +1299,17 @@ subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_
 
    else
      ! beta==0
-     if ( firstchar(trans,(/"C"/)) ) then
+     if (firstchar(trans, (/"C"/)) ) then
        do ig=1,in_npw
          out_ket(ig) = alpha * CONJG(em1_qbz(ig,ig)) * in_ket(ig)
        end do
-     else if ( firstchar(trans,(/"N","T"/)) ) then
+     else if (firstchar(trans, (/"N","T"/))) then
        do ig=1,in_npw
          out_ket(ig) = alpha * em1_qbz(ig,ig) * in_ket(ig)
        end do
      else
        ABI_ERROR(sjoin("Wrong trans:", trans))
      end if
-
    end if
  end if
 
