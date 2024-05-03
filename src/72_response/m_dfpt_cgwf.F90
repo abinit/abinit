@@ -1667,7 +1667,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
 
 !Local variables ------------------------------
 !scalars
- integer :: ierr
+ !integer :: ierr
 ! *************************************************************************
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset

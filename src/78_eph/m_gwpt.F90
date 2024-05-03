@@ -183,7 +183,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ib_sum, ii !, jj, iw !ib_kq
+ integer :: ib_sum, ii u1_band, !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq,
  !integer :: u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop, my_npp
  integer :: isym_q, trev_q
@@ -191,11 +191,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
  integer :: ikmp_ibz, isym_kmp, trev_kmp, npw_kmp, istwf_kmp, npw_kmp_ibz, istwf_kmp_ibz
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
- integer :: mpw,ierr,imyq,nqbz,ncerr
+ integer :: mpw,ierr,nqbz,ncerr
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid, spin_ncid
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,cnt,imyp
- integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, num_mn_kq, ndone, nmiss, gstore_fform
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp ! cnt,
+ integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, nb ! nelem,
@@ -203,7 +203,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks ! cpu,wall,gflops,
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
- logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, qq_is_gamma, pp_is_gamma
+ logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
