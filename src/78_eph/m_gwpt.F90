@@ -197,20 +197,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, num_mn_kq, ndone, nmiss, gstore_fform
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, nelem, cgq_request, nb, gstore_completed
+ integer :: ffnl_k_request, ffnl_kq_request, nb ! nelem,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt
- real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks
- real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
- real(dp) :: ecut,eshift,weight_q,rfact,ediff,q0rad, out_resid, bz_vol
+ real(dp) :: cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks ! cpu,wall,gflops,
+ !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
+ real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, isirr_q, gen_eigenpb, qq_is_gamma, pp_is_gamma
- logical :: stern_use_cache, intra_band, same_band, stern_has_band_para, use_ftinterp
+ logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
- type(ddkop_t) :: ddkop
+ !type(ddkop_t) :: ddkop
  type(crystal_t) :: pot_cryst, den_cryst
- type(hdr_type) :: pot_hdr, den_hdr, gstore_hdr
+ type(hdr_type) :: pot_hdr, den_hdr
  type(stern_t) :: stern_kmp !, stern_kqmp
  type(kmesh_t) :: pp_mesh, kmesh
  type(gsphere_t) :: gsph_c
@@ -227,24 +227,24 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6), mapc_qq2dvdb(6)
  integer :: units(2), work_ngfft(18), gmax(3)
  integer(i1b),allocatable :: itreatq_dvdb(:)
- integer,allocatable :: bands_treated_now(:), my_pp_inds(:)
+ integer,allocatable :: my_pp_inds(:) ! bands_treated_now(:),
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_pp(:,:)
- integer,allocatable :: rank_band(:), root_bcalc(:)
+ !integer,allocatable :: rank_band(:), root_bcalc(:)
  integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:)
- integer,allocatable :: qibz2dvdb(:), displs(:), recvcounts(:)
- integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:), iperm(:)
+ integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
+ integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:) !, my_iqibz_inds(:) !, iperm(:)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer,pointer :: kg_pp(:,:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qpt(3)
- real(dp) :: tsec(2) ! vk(3), vkq(3),
+ !real(dp) :: tsec(2) ! vk(3), vkq(3),
  !real(dp) :: eig0nk, eig0mkq !eig0mk,
  complex(gwpc) :: ctmp_gwpc
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
- real(dp),allocatable,target :: cgq(:,:,:)
- real(dp),allocatable :: qlwl(:,:),vk_cart_ibz(:,:,:,:)
+ !real(dp),allocatable,target :: cgq(:,:,:)
+ real(dp),allocatable :: qlwl(:,:) !,vk_cart_ibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -255,8 +255,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:) !,ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:) !, ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
- real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:), rhor(:,:)
- real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
+ real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
+ !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  complex(dp),pointer :: cvxc1_ptr(:,:,:)
@@ -335,10 +335,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
 
-#define _DEV_FAST_DEBUG
+#define DEV_FAST_DEBUG
 
  nbsum = dtset%mband
-#ifdef _DEV_FAST_DEBUG
+#ifdef DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
 #endif
  my_bsum_start = 1; my_bsum_stop = nbsum; my_nbsum = my_bsum_stop - my_bsum_start + 1
@@ -724,7 +724,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! ============================================
    ! q-points are usually in the IBZ.
    do my_iq=1,gqk%my_nq
-#ifdef _DEV_FAST_DEBUG
+#ifdef DEV_FAST_DEBUG
      if (my_iq > 3) cycle ! DEBUG
 #endif
      call gqk%myqpt(my_iq, gstore, weight_q, qpt)
@@ -800,7 +800,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! and we don't want to write random numbers to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
-#ifdef _DEV_FAST_DEBUG
+#ifdef DEV_FAST_DEBUG
        if (my_ik > 12) cycle ! DEBUG
 #endif
        ! Symmetry indices for kk.
@@ -917,7 +917,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          pp = pp_mesh%bz(:,ipp_bz)
          pp_is_gamma = sum(pp**2) < tol14
          !print *, "Begin sum over pp: ", trim(ktoa(pp))
-#ifdef _DEV_FAST_DEBUG
+#ifdef DEV_FAST_DEBUG
          if (ipp_bz > 12) cycle ! DEBUG
 #endif
 
@@ -1220,15 +1220,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call gs_ham_kq%free()
  call wfd%free()
- call pawcprj_free(cwaveprj0)
- ABI_FREE(cwaveprj0)
- call pawcprj_free(cwaveprj)
- ABI_FREE(cwaveprj)
  call vcp%free()
  call w%free()
  call pp_mesh%free()
  call gsph_c%free()
  call gstore%free()
+ call pawcprj_free(cwaveprj0)
+ ABI_FREE(cwaveprj0)
+ call pawcprj_free(cwaveprj)
+ ABI_FREE(cwaveprj)
 
  ! This to make sure that the parallel output of GSTORE is completed
  call xmpi_barrier(comm)
