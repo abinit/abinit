@@ -183,8 +183,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
- integer :: ib_sum, ii u1_band, !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq,
- !integer :: u1_master, ip
+ integer :: ib_sum, ii, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop, my_npp
  integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
