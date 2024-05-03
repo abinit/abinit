@@ -184,7 +184,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq, ib_k, u1c_ib_k, band_ks, u1_band, ib_sum, ii !, jj, iw !ib_kq
  !integer :: u1_master, ip
- integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop
+ integer :: my_is, spin, idir,ipert, npw_pp, my_pp_start, my_pp_stop, my_npp
  integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
  integer :: ikq_ibz, isym_kq, trev_kq, npw_kq, istwf_kq,  npw_kq_ibz, istwf_kq_ibz
@@ -227,7 +227,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6), mapc_qq2dvdb(6)
  integer :: units(2), work_ngfft(18), gmax(3)
  integer(i1b),allocatable :: itreatq_dvdb(:)
- integer,allocatable :: bands_treated_now(:)
+ integer,allocatable :: bands_treated_now(:), my_pp_inds(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_pp(:,:)
  integer,allocatable :: rank_band(:), root_bcalc(:)
@@ -646,7 +646,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call kmesh%free()
 
  ! Init Wc.
- ! Incore or out-of-core solution?
+ ! In-core or out-of-core solution?
  mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
  w_info%invalid_freq = dtset%gw_invalid_freq
  w_info%mat_type = MAT_INV_EPSILON
@@ -711,6 +711,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Inside the loops we compute gkq_sig_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
+   ! Distribute the sum over pp wavevectors inside pp_sum_comm using block distribution.
+   call xmpi_split_block(pp_mesh%nbz, gqk%pp_sum_comm%value, my_npp, my_pp_inds)
+   my_pp_start = -1; my_pp_stop = 0
+   if (my_npp > 0) then
+     my_pp_start = my_pp_inds(1); my_pp_stop = my_pp_inds(my_npp)
+   end if
+   ABI_SFREE(my_pp_inds)
+
    ! ============================================
    ! Loop over MPI distributed q-points in Sigma
    ! ============================================
@@ -751,6 +759,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !
      !   v1scf(cplex, nfftf, nspden, my_npert))
      !   vxc1(cplex, nfft, nspden, my_npert)
+     !
+     !  Note that vxc1 does not include the contribution due to the model core charge (if any).
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
@@ -859,17 +869,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !ABI_FREE(ind_to_mn)
 
        ! Double loop over the (m, n) bands indices in the <mm_kq,kq|Delta_{q,nu}Sigma|k,nn_k> elements.
+       ! TODO: Can reduce number of FFTs by computing vxc(r) u_r(r) but requires more memory!
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
 
        gkq_xc_atm = czero
-       !do mm_kq=gqk%bstart, gqk%bstop
-       do mm_kq=1,1
+       do mm_kq=gqk%bstart, gqk%bstop
          call wfd%rotate_cg(mm_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_kq)
 
-         !do nn_k=gqk%bstart, gqk%bstop
-         do nn_k=1,1
+         do nn_k=gqk%bstart, gqk%bstop
             call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
@@ -889,6 +898,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! TODO: this is an all_Gather but oh well.
        ! Collect gkq_xc_atm inside pert_comm so that all procs can operate on the data.
        call xmpi_sum(gkq_xc_atm, gqk%pert_comm%value, ierr)
+
        ! Get KS g_xc in the phonon representation.
        call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_xc_atm, phfr_qq, displ_red_qq, gkq_xc_nu)
 
@@ -900,7 +910,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! and we have to use ipp_bz to symmetrize W(pp_bz) from W(pp_ibz)
        ! TODO: Should order nbz in shells so that one can reduce the memory required to store W(pp)
        ! if we activate pp-parallelism.
-       my_pp_start = 1; my_pp_stop = pp_mesh%nbz
+
        gkq_sig_atm = zero
 
        do ipp_bz=my_pp_start, my_pp_stop
@@ -1036,7 +1046,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
          if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
 
-         !gkq_sig_atm = zero
          do imyp=1,gqk%my_npert
            idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
@@ -1121,6 +1130,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
 
+       ! Reduce results inside pp_sum_comm
+       if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_sig_atm, gqk%pp_sum_comm%value, ierr)
+
        ! Collect gkq_sig_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_sig_atm, gqk%pert_comm%value, ierr)
        ! Get g in the phonon representation.
@@ -1137,18 +1149,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Dump buffers
        !if (iqbuf_cnt == qbuf_size) call dump_data()
 
-       !if (print_time) then
-       !  write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
-       !  call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
-       !end if
-       ! Print cache stats.
-       !if (my_rank == master) !call dvdb%ft_qcache%report_stats()
      end do ! my_ik
 
      ABI_FREE(vlocal1)
      ABI_FREE(v1scf)
      ABI_FREE(vxc1)
      call cwtime_report(" One q-point", cpu_ks, wall_ks, gflops_ks)
+     !if (print_time) then
+     !  write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
+     !  call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
+     !end if
+     ! Print cache stats.
+     !if (my_rank == master) !call dvdb%ft_qcache%report_stats()
    end do ! iq_ibz
 
    ! Dump the remainder.

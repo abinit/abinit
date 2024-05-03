@@ -1874,8 +1874,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
                  istwfk1, gs_hamkq%kg_kp, gs_hamkq%gbound_kp, full_ug1_dp_ptr, full_ur1)
 #else
      ! Transfer cgs_kbz from dp to sp and perform FFT in single precision.
-     ABI_MALLOC(cwork_sp, (stern%npw_kq * stern%nspinor))
-     cwork_sp(:,:) = full_cg1(1,:) + j_sp * full_cg1(2,:)
+     ABI_MALLOC(cwork_sp, (stern%npw_kq*stern%nspinor))
+     cwork_sp(:) = full_cg1(1,:) + j_sp * full_cg1(2,:)
      call fft_ug(stern%npw_kq, gs_hamkq%nfft, stern%nspinor, ndat1, gs_hamkq%mgfft, gs_hamkq%ngfft, &
                  istwfk1, gs_hamkq%kg_kp, gs_hamkq%gbound_kp, cwork_sp, full_ur1)
      ABI_FREE(cwork_sp)
