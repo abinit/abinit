@@ -1394,7 +1394,7 @@ subroutine cc4s_gamma(spin, ik_ibz, dtset, dtfil, cryst, ebands, psps, pawtab, p
          ! Multiply by sqrt(vc(g))
          ! This renormalization is needed to make CC4S converge (work done by AlejandroG, FabienB, MatteoG)
          ug12_batch(:,idat2) = ug12_batch(:,idat2) * sqrt_vc(:) / sqrt(cryst%ucvol)
-         if (m_istwfk == 2) ug12_batch(:,idat2) = ug12_batch(:,idat2) /sqrt(2.0)
+         if (m_istwfk == 2) ug12_batch(1,idat2) = real(ug12_batch(1,idat2)) / sqrt(two)
        end do
        !write(std_out,*)" max(abs(ug12_batch)):", maxval(abs(ug12_batch(:,1:n2dat)))
 

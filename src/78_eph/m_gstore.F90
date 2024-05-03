@@ -2743,7 +2743,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1)
  integer(i1b),allocatable :: itreat_qibz(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
- integer,allocatable :: my_pinfo(:,:), pert_table(:,:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
@@ -3813,7 +3812,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, root_ncid, ierr, fform, gstore_completed, gstore_fform, units(2)
+ integer :: my_rank, root_ncid, ierr, gstore_completed, gstore_fform, units(2) ! fform
  character(len=500) :: msg
  type(hdr_type) :: gstore_hdr
 
