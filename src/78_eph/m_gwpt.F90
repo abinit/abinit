@@ -193,7 +193,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: mpw,ierr,imyq,nqbz,ncerr
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, mm_kq, nn_k, restart, root_ncid, spin_ncid
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,cnt,imyp
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,cnt,imyp
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, num_mn_kq, ndone, nmiss, gstore_fform
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
@@ -246,7 +246,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !real(dp),allocatable,target :: cgq(:,:,:)
  real(dp),allocatable :: qlwl(:,:) !,vk_cart_ibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
- real(dp),allocatable :: kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:) ! grad_berry(:,:),
+ real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable, target :: vxc1(:,:,:,:)
  real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
@@ -817,17 +817,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
        ! Get npw_k, kg_k for k
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, istwf_k, npw_k, kg_k, gbound_k)
+       call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
+                                istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)         ! out
 
        ! Compute k+G vectors
-       nkpg = 3*dtset%nloalg(3)
-       ABI_MALLOC(kpg_k, (npw_k, nkpg))
-       if (nkpg > 0) call mkkpg(kg_k, kpg_k, kk, nkpg, npw_k)
+       !nkpg_k = 3*dtset%nloalg(3)
+       !ABI_MALLOC(kpg_k, (npw_k, nkpg_k))
+       !if (nkpg_k > 0) call mkkpg(kg_k, kpg_k, kk, nkpg_k, npw_k)
 
        ! Compute nonlocal form factors ffnl_k at (k+G)
        ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
 
-       call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg, npw_k, ylm_k, ylmgr_dum, &
+       call mkffnl_objs(cryst, psps, 1, ffnl_k, ider0, idir0, kg_k, kpg_k, kk, nkpg_k, npw_k, ylm_k, ylmgr_dum, &
                         comm=gqk%pert_comm%value, request=ffnl_k_request)
 
        ! Find k + q in the extended zone and extract symmetry info.
@@ -847,16 +848,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        istwf_kq_ibz = wfd%istwfk(ikq_ibz); npw_kq_ibz = wfd%npwarr(ikq_ibz)
 
        ! Get npw_kq, kg_kq for k+q.
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
+       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
+                                istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
 
        ! Compute k+q+G vectors
-       nkpg1 = 3*dtset%nloalg(3)
-       ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
-       if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
+       !nkpg_kq = 3*dtset%nloalg(3)
+       !ABI_MALLOC(kpg_kq, (npw_kq, nkpg_kq))
+       !if (nkpg_kq > 0) call mkkpg(kg_kq, kpg_kq, kq, nkpg_kq, npw_kq)
 
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
        ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
-       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg1_k, kq, nkpg1, npw_kq, ylm_kq, ylmgr_kq, &
+       call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value, request=ffnl_kq_request)
 
        ! Define number of (m, n) pairs in g_mn(k,q) and indirect mapping i --> (m, n)
@@ -888,6 +890,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              else
                ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * cvxc1_ptr(:,spin,imyp)) / nfftf
              end if
+             ! FIXME: imyp should be ipert
              gkq_xc_atm(1, mm_kq, nn_k, imyp) = real(ctmp_gwpc)
              gkq_xc_atm(2, mm_kq, nn_k, imyp) = aimag(ctmp_gwpc)
             end do ! imyp
@@ -933,7 +936,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          kmp_ibz = ebands%kptns(:, ikmp_ibz)
          istwf_kmp_ibz = wfd%istwfk(ikmp_ibz); npw_kmp_ibz = wfd%npwarr(ikmp_ibz)
          ! Get npw_kmp, kg_kmp for k-p
-         call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, istwf_kmp, npw_kmp, kg_kmp, gbound_kmp)
+         call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
+                                  istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
 
          ! Symmetry tables and g-sphere centered on k+q-p
          kqmp = kq - pp
@@ -947,7 +951,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          kqmp_ibz = ebands%kptns(:, ikqmp_ibz)
          istwf_kqmp_ibz = wfd%istwfk(ikqmp_ibz); npw_kqmp_ibz = wfd%npwarr(ikqmp_ibz)
          ! Get npw_kqmp, kg_kqmp for k+q-p
-         call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, istwf_kqmp, npw_kqmp, kg_kqmp, gbound_kqmp)
+         call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
+                                  istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)  ! out
 
          ! This is the g-sphere for W_{gg'}(pp).
          ! Note that in this case, the sphere is Gamma-centered i.e. it does not depend on the pp wavevector
@@ -1065,7 +1070,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call getgh1c_setup(gs_ham_kq, rf_ham_kq, dtset, psps, kk, kq, idir, ipert, &  ! In
              cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &               ! In
              npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
-             dkinpw, nkpg, nkpg1, kpg_k, kpg1_k, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+             dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
              reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
 
            ! Compute H(1) applied to GS wavefunction Psi_nk(0)
@@ -1125,7 +1130,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ABI_FREE(kpg_k)
        ABI_FREE(ffnl_k)
-       ABI_FREE(kpg1_k)
+       ABI_FREE(kpg_kq)
        ABI_FREE(ffnl_kq)
        ABI_FREE(ug_k)
        ABI_FREE(ug_kq)
@@ -1187,9 +1192,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Free memory
  ABI_FREE(kg_k)
+ ABI_SFREE(kpg_k)
  ABI_FREE(kg_kq)
+ ABI_SFREE(kpg_kq)
  ABI_FREE(kg_kmp)
+ ABI_SFREE(kpg_kmp)
  ABI_FREE(kg_kqmp)
+ ABI_SFREE(kpg_kqmp)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
  !ABI_FREE(ylm_kmp)

@@ -1485,14 +1485,16 @@ end function wfd_xdotc
 !!
 !! SOURCE
 
-subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
+subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, nloalg, &    ! in
+                               istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq) ! out
 
 !Arguments -------------------------------
  class(wfd_t),intent(in) :: wfd
  real(dp),intent(in) :: gmet(3,3), ecut, kq(3)
- integer,intent(in) :: ikq_ibz
+ integer,intent(in) :: ikq_ibz, nloalg(3)
  logical,intent(in) :: isirr_kq
- integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:), gbound_kq(2*wfd%mgfft+8,2)
+ integer,intent(out) :: istwf_kq, npw_kq, kg_kq(:,:), nkpg_kq, gbound_kq(2*wfd%mgfft+8,2)
+ real(dp),allocatable,intent(out) :: kpg_kq(:,:)
 
 !Local variables ------------------------------
  integer :: mpw
@@ -1517,6 +1519,10 @@ subroutine wfd_get_gvec_gbound(wfd, gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq,
  end if
 
  call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
+
+ nkpg_kq = 3*nloalg(3)
+ ABI_MALLOC(kpg_kq, (npw_kq, nkpg_kq))
+ if (nkpg_kq > 0) call mkkpg(kg_kq, kpg_kq, kq, nkpg_kq, npw_kq)
 
 end subroutine wfd_get_gvec_gbound
 !!***
