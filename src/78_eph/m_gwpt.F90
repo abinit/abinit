@@ -1143,7 +1143,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        !end if
        ! Print cache stats.
        !if (my_rank == master) !call dvdb%ft_qcache%report_stats()
-
      end do ! my_ik
 
      ABI_FREE(vlocal1)
@@ -1246,7 +1245,7 @@ subroutine dump_data()
 
  integer :: ii, iq_bz, iq_glob, my_iq
 
- if (gqk%coords_qkp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ if (gqk%coords_qkp_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)
@@ -1259,7 +1258,7 @@ subroutine dump_data()
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- if (all(gqk%coords_qkp(2:3) == [0, 0]))  then
+ if (all(gqk%coords_qkp_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))

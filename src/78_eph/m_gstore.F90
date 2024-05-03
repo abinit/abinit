@@ -259,7 +259,7 @@ type, public :: gqk_t
   ! (my_npert, nb, my_nq, nb, my_nk)
   ! |g|^2 (local buffer). Allocated if cplex == 1
 
-  integer :: coords_qkp(3)
+  integer :: coords_qkp_sumbp(5)
   ! Coordinates of this processor in the (q, k, pert) Cartesian grid.
 
   type(xcomm_t) :: kpt_comm
@@ -271,11 +271,11 @@ type, public :: gqk_t
   type(xcomm_t) :: pert_comm
    ! MPI communicator over atomic perturbations.
 
-  !type(xcomm_t) :: bsum_comm
-   ! MPI communicator over bands in summation. NB: It not used to distribute
+  type(xcomm_t) :: bsum_comm
+   ! MPI communicator over bands in summation. NB: It is not used to distribute
    ! the memory for the g but to distribute a possible sum over bands as done in the GWPT code.
 
-  !type(xcomm_t) :: pp_comm
+  type(xcomm_t) :: pp_sum_comm
    ! MPI communicator over wavevector summation. NB: It not used to distribute
    ! the memory for the g but to distribute a possible sum over wavevectors as done in the GWPT code.
 
@@ -1050,7 +1050,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0, ndims = 3
+ integer,parameter :: master = 0, ndims = 5
  integer :: spin, my_is, np, my_rank, ierr !, ii
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
@@ -1085,20 +1085,24 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
    gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
-   ! GWPT communicators
-   !gqk%bsum_comm%nproc = 1; gqk%pp_comm%nproc = 1;
+   ! These communicators are used in GWPT
+   gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
 
    if (any(eph_np_pqbks /= 0)) then
      ! Use parameters from input file. Need to perform sanity check though.
      gqk%pert_comm%nproc = eph_np_pqbks(1)
      gqk%qpt_comm%nproc  = eph_np_pqbks(2)
-     !gqk%bsum_comm%nproc  = eph_np_pqbks(3)
+     !gqk%bb_comm%nproc  = eph_np_pqbks(3)
      ABI_CHECK(eph_np_pqbks(3) == 1, "Band parallelism not implemented in gstore")
      gqk%kpt_comm%nproc = eph_np_pqbks(4)
      !gqk%spin_comm%nproc = eph_np_pqbks(5)
      gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
      ABI_CHECK(gqk%my_npert > 0, "pert_comm_nproc cannot be greater than 3 * natom.")
      ABI_CHECK(mod(gqk%natom3, gqk%pert_comm%nproc) == 0, "pert_comm_nproc must divide 3 * natom.")
+
+     ! FIXME: Should be taken from input.
+     gqk%bsum_comm%nproc = 1;
+     gqk%pp_sum_comm%nproc = 1;
 
    else
      ! Automatic grid generation (hopefully smart)
@@ -1131,11 +1135,13 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    end if
 
    ! Consistency check.
-   if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc /= nproc_spin(spin)) then
-     write(msg, "(a,i0,3a, 4(a,1x,i0))") &
-       "Cannot create 3d Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
+   if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc * &
+       gqk%bsum_comm%nproc * gqk%pp_sum_comm%nproc /= nproc_spin(spin)) then
+     write(msg, "(a,i0,3a, 6(a,1x,i0))") &
+       "Cannot create 5d Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
        "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
        "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ")  x kpt_nproc", gqk%pert_comm%nproc, &
+       "bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
        ") != ", nproc_spin(spin)
      ABI_ERROR(msg)
    end if
@@ -1149,7 +1155,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
 
-   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc]
+   ! TODO: Should change order for GWPT
+   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
    ! Note comm_spin(spin)
    gqk%grid_comm = xcomm_from_mpi_int(comm_spin(spin))
@@ -1158,16 +1165,20 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call MPI_CART_CREATE(gqk%grid_comm, ndims, dims, periods, reorder, comm_cart, ierr)
    ! Find the index and coordinates of the current processor
    call MPI_COMM_RANK(comm_cart, me_cart, ierr)
-   call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkp, ierr)
+   call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkp_sumbp, ierr)
 
-   ! Create communicator for q-points
+   ! Communicator for q-points
    keepdim = .False.; keepdim(1) = .True.; call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
-   ! Create communicator for k-points
+   ! Communicator for k-points
    keepdim = .False.; keepdim(2) = .True.; call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
-   ! Create communicator for perturbations.
+   ! Communicator for perturbations.
    keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
-   ! Create communicator for the (qpt, pert) 2D grid
+   ! Communicator for the (qpt, pert) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
+   ! Communicator for bsum.
+   keepdim = .False.; keepdim(4) = .True.; call gqk%bsum_comm%from_cart_sub(comm_cart, keepdim)
+   ! Communicator for pp_sum.
+   keepdim = .False.; keepdim(5) = .True.; call gqk%pp_sum_comm%from_cart_sub(comm_cart, keepdim)
    call xmpi_comm_free(comm_cart)
 #endif
 
@@ -1242,6 +1253,12 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    call wrtout(unit, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
    call wrtout(unit, sjoin("P Number of CPUs for parallelism over q-points: ", itoa(gqk%qpt_comm%nproc)))
    call wrtout(unit, sjoin("P Number of CPUs for parallelism over k-points: ", itoa(gqk%kpt_comm%nproc)))
+   if (gqk%bsum_comm%nproc /= 1) then
+     call wrtout(unit, sjoin("P Number of CPUs for parallelism over band summation: ", itoa(gqk%bsum_comm%nproc)))
+   end if
+   if (gqk%pp_sum_comm%nproc /= 1) then
+     call wrtout(unit, sjoin("P Number of CPUs for parallelism over wavevector summation: ", itoa(gqk%pp_sum_comm%nproc)))
+   end if
    call wrtout(unit, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
    call wrtout(unit, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
    call wrtout(unit, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
@@ -2554,6 +2571,8 @@ subroutine gqk_free(gqk)
  call gqk%pert_comm%free()
  call gqk%qpt_pert_comm%free()
  call gqk%grid_comm%free()
+ call gqk%bsum_comm%free()
+ call gqk%pp_sum_comm%free()
 
 end subroutine gqk_free
 !!***
@@ -2592,7 +2611,7 @@ subroutine gstore_get_missing_qbz_spin(gstore, done_qbz_spin, ndone, nmiss)
      if (done_qbz_spin(iq_bz, spin) == 1) ndone = ndone + 1
    end do ! my_iq
    ! Rescale to avoid overcounting in xmpi_summ
-   nscale = (gqk%pert_comm%nproc) ! * gqk%bsum_comm%npert * gqk%pp_comm%npert
+   nscale = (gqk%pert_comm%nproc * gqk%bsum_comm%nproc * gqk%pp_sum_comm%nproc)
    nmiss = nmiss / nscale
    ndone = ndone / nscale
  end do ! my_is
@@ -3336,7 +3355,7 @@ subroutine dump_data()
 
  integer :: ii, iq_bz, iq_glob, my_iq
 
- if (gqk%coords_qkp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ if (gqk%coords_qkp_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)
@@ -3349,7 +3368,7 @@ subroutine dump_data()
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- if (all(gqk%coords_qkp(2:3) == [0, 0]))  then
+ if (all(gqk%coords_qkp_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
