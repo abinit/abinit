@@ -650,7 +650,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
    !call drhodb%load_ddb(dtset%prtvol, comm, ddb=ddb)
 
-   ! Set qdamp, quadrupoles and all long-range terms to 0 
+   ! Set qdamp, quadrupoles and all long-range terms to 0
    drhodb%qdamp = 0
    drhodb%qstar = 0
    drhodb%has_quadrupoles = .False.
@@ -853,7 +853,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (17)
    ! Compute e-ph matrix elements with the GWPT formalism.
-   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
+   call gwpt_run(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, drhodb, ifc, wfk0_hdr, &
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case default
