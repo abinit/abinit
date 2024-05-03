@@ -189,7 +189,7 @@ type, public :: gqk_t
 
   integer :: bstart = -1, bstop = -1
   ! The first band starts at bstart.
-  ! The last band is bstop (global indices)
+  ! The last band is bstop (NB: These are global indices)
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -3023,9 +3023,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_MALLOC(bras_kq, (2, mpw*nspinor, nb))
    ABI_MALLOC(kets_k, (2, mpw*nspinor, nb))
    ABI_MALLOC(h1kets_kq, (2, mpw*nspinor, nb))
+
+   ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_atm, (2, nb, nb, natom3))
    ABI_MALLOC(gkq_nu, (2, nb, nb, natom3))
-   ABI_MALLOC(iq_buf, (2, qbuf_size))
 
    ! Inside the loops we compute gkq_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
