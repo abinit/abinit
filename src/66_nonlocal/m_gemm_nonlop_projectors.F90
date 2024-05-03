@@ -85,6 +85,7 @@ module m_gemm_nonlop_projectors
 !! SOURCE
  type,public :: gemm_nonlop_type
 
+   integer :: npw
    integer :: nprojs
    integer :: ngrads
    integer :: ngrads2
@@ -194,6 +195,7 @@ contains
 
 ! *************************************************************************
 
+  gemm_nonlop_kpt(:)%npw = -1
   gemm_nonlop_kpt(:)%nprojs = -1
   gemm_nonlop_kpt(:)%ngrads = -1
   gemm_nonlop_kpt(:)%ngrads2 = -1
@@ -272,6 +274,7 @@ contains
        call dealloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs_i)
      end if
      gemm_nonlop_kpt_gpu(ik)%nprojs = -1
+     gemm_nonlop_kpt_gpu(ik)%npw = -1
    end if
 #endif
  end if
@@ -421,7 +424,7 @@ contains
   if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
     call free_gemm_nonlop_ikpt(ik, gpu_option)
   end if
-  if(nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
+  if(npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs) then
     call free_gemm_nonlop_ikpt(ik, gpu_option)
 
     if(istwf_k <= 1) then
@@ -439,8 +442,8 @@ contains
   end if
 
   if(ndgxdt>0) then
-    if(nprojs/=gemm_nonlop_kpt(ik)%nprojs .or. ndgxdt /= gemm_nonlop_kpt(ik)%ngrads &
-    &    .or. nd2gxdt /=  gemm_nonlop_kpt(ik)%ngrads2) then
+    if(npw/=gemm_nonlop_kpt(ik)%npw .or. nprojs/=gemm_nonlop_kpt(ik)%nprojs &
+    &    .or. ndgxdt /= gemm_nonlop_kpt(ik)%ngrads .or. nd2gxdt /=  gemm_nonlop_kpt(ik)%ngrads2) then
       if(gpu_option == ABI_GPU_OPENMP) call free_ompgpu_current_ikpt_dprojs(ik)
         if(allocated(gemm_nonlop_kpt(ik)%dprojs)) ABI_FREE(gemm_nonlop_kpt(ik)%dprojs)
         if(allocated(gemm_nonlop_kpt(ik)%dprojs_r)) ABI_FREE(gemm_nonlop_kpt(ik)%dprojs_r)
@@ -473,6 +476,7 @@ contains
   end if
 
   if (nprojs>0) gemm_nonlop_kpt(ik)%nprojs = nprojs
+  if (nprojs>0) gemm_nonlop_kpt(ik)%npw = npw
   if (ndgxdt>0) gemm_nonlop_kpt(ik)%ngrads = ndgxdt
   if (nd2gxdt>0) gemm_nonlop_kpt(ik)%ngrads2 = nd2gxdt
 
