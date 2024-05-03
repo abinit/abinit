@@ -1513,7 +1513,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, istwf_kq, npw_kq, kg_kq, gbound_kq)
+       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &
+                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg1_k, gbound_kq)
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -1556,9 +1557,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        !end if
 
        ! Compute k+q+G vectors
-       nkpg1 = 3*dtset%nloalg(3)
-       ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
-       if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
+       !nkpg1 = 3*dtset%nloalg(3)
+       !ABI_MALLOC(kpg1_k, (npw_kq, nkpg1))
+       !if (nkpg1 > 0) call mkkpg(kg_kq, kpg1_k, kq, nkpg1, npw_kq)
 
        ! Compute nonlocal form factors ffnl1 at (k+q+G)
        ABI_MALLOC(ffnl1, (npw_kq, 1, psps%lmnmax, psps%ntypat))
@@ -2535,6 +2536,7 @@ end if
 
    ABI_FREE(kg_k)
    ABI_FREE(kg_kq)
+   ABI_SFREE(kpg1_k)
    ABI_FREE(ylm_k)
    ABI_FREE(ylm_kq)
    ABI_FREE(ylmgr_kq)
