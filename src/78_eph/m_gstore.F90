@@ -249,6 +249,7 @@ type, public :: gqk_t
   ! (my_npert)
   ! List of perturbation indices treated by this MPI proc.
   ! Contiguous indices.
+  ! TODO: Change name as it's a bit ambigous: my_pertcase?
 
   complex(dp), allocatable :: my_g(:,:,:,:,:)
   ! (my_npert, nb, my_nq, nb, my_nk)

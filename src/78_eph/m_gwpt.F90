@@ -70,7 +70,7 @@ module m_gwpt
  use m_cgtools,        only : cg_zdotc, cg_real_zdotc, cg_zgemm
  use m_crystal,        only : crystal_t
  use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map
- use m_kg,             only : getph, mkkpg
+ use m_kg,             only : getph
  use m_bz_mesh,        only : isamek, kmesh_t, find_qmesh
  use m_gsphere,        only : gsphere_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
@@ -95,7 +95,7 @@ module m_gwpt
  include 'mpif.h'
 #endif
 
- public :: gwpt_run        ! Main entry point to compute GWpt matrix elements
+ public :: gwpt_run        ! Main entry point to compute GWPT e-ph matrix elements
 
 !----------------------------------------------------------------------
 
@@ -277,8 +277,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 !************************************************************************
 
- ! TODO: List
- ! 2) Use filtering techniques in (qpt, kpt) and (band1, band2) space. Can use gstore input vars to implement that
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  if (psps%usepaw == 1) then
@@ -295,7 +293,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ieta = +j_dpc * dtset%zcut
 
  ! Check if a previous GSTORE file is present to restart the calculation if eph_restart == 1.
- ! and use done_qbz_spin to cycle loops if restart != 0
+ ! and use done_qbz_spin to cycle loops if restart /= 0.
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
@@ -335,6 +333,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
+ ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
+ ! that will be needed in the loops below and allocate only these wavevectors.
+ ! so that memory scales.
 
 #define DEV_FAST_DEBUG
 
@@ -714,6 +715,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    my_npert = gqk%my_npert
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
 
+   ! TODO: Should introduce the possibility of specifying different nb states
+   ! for the incoming and the intermediates states.
    nb = gqk%nb
    ABI_MALLOC(iq_buf, (2, qbuf_size))
    ABI_MALLOC(gkq_sig_atm, (2, nb, nb, natom3))
@@ -804,7 +807,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
-     !print *, "my_npert", my_npert
      ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert), ierr)
 
      ! ========================================================================
@@ -831,14 +833,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        istwf_k_ibz = wfd%istwfk(ik_ibz); npw_k_ibz = wfd%npwarr(ik_ibz)
        !print *, "ik_ibz:", ik_ibz, "kk:", kk, "kk_ibz:", kk_ibz
 
-       ! Get npw_k, kg_k for k
+       ! Get npw_k, kg_k for kk
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kk, ik_ibz, isirr_k, dtset%nloalg, & ! in
                                 istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)         ! out
-
-       ! Compute k+G vectors
-       !nkpg_k = 3*dtset%nloalg(3)
-       !ABI_MALLOC(kpg_k, (npw_k, nkpg_k))
-       !if (nkpg_k > 0) call mkkpg(kg_k, kpg_k, kk, nkpg_k, npw_k)
 
        ! Compute nonlocal form factors ffnl_k at (k+G)
        ABI_MALLOC(ffnl_k, (npw_k, 1, psps%lmnmax, psps%ntypat))
@@ -865,11 +862,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Get npw_kq, kg_kq for k+q.
        call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &  ! in
                                 istwf_kq, npw_kq, kg_kq, nkpg_kq, kpg_kq, gbound_kq)      ! out
-
-       ! Compute k+q+G vectors
-       !nkpg_kq = 3*dtset%nloalg(3)
-       !ABI_MALLOC(kpg_kq, (npw_kq, nkpg_kq))
-       !if (nkpg_kq > 0) call mkkpg(kg_kq, kpg_kq, kq, nkpg_kq, npw_kq)
 
        ! Compute nonlocal form factors ffnl_kq at (k+q+G)
        ABI_MALLOC(ffnl_kq, (npw_kq, 1, psps%lmnmax, psps%ntypat))
@@ -900,20 +892,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
             do imyp=1,gqk%my_npert
-             if (cplex == 1) then
-               ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,spin,imyp)) / nfftf
-             else
-               ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * cvxc1_ptr(:,spin,imyp)) / nfftf
-             end if
-             ! FIXME: imyp should be ipert
-             gkq_xc_atm(1, mm_kq, nn_k, imyp) = real(ctmp_gwpc)
-             gkq_xc_atm(2, mm_kq, nn_k, imyp) = aimag(ctmp_gwpc)
+
+              if (cplex == 1) then
+                ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,spin,imyp)) / nfftf
+              else
+                ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * cvxc1_ptr(:,spin,imyp)) / nfftf
+              end if
+              ipc = gqk%my_iperts(imyp)
+              gkq_xc_atm(1, mm_kq, nn_k, ipc) = real(ctmp_gwpc)
+              gkq_xc_atm(2, mm_kq, nn_k, ipc) = aimag(ctmp_gwpc)
             end do ! imyp
 
          end do ! nn_k
        end do ! mm_kq
 
-       ! TODO: this is an all_Gather but oh well.
+       ! TODO: this is an all_gatherv but oh well.
        ! Collect gkq_xc_atm inside pert_comm so that all procs can operate on the data.
        call xmpi_sum(gkq_xc_atm, gqk%pert_comm%value, ierr)
 
