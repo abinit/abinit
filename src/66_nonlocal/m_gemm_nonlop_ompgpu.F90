@@ -669,6 +669,8 @@ contains
     if(cpopt < 4) then
       call gpu_set_to_zero(dprojections, int(cplex,c_size_t)*ndgxdt*nprojs*ndat*nspinor)
     end if
+  else
+    ABI_MALLOC(dprojections,(1,1,ndat))
   end if
 
   if (ndgxdtfac>0) then
@@ -680,7 +682,6 @@ contains
   else
     ABI_MALLOC(s_dprojections,(1,1,ndat))
     ABI_MALLOC(vnl_dprojections,(1,1,ndat))
-    !$OMP TARGET ENTER DATA MAP(alloc:s_dprojections,vnl_dprojections)
   end if
 
   ! Working buffers for storing 2nd-derivative
@@ -1115,19 +1116,19 @@ contains
   end if
   !$OMP TARGET EXIT DATA MAP(delete:atindx1,indlmn,enl)
   if (allocated(dprojections)) then
-    !$OMP TARGET EXIT DATA MAP(delete:dprojections)
+    !$OMP TARGET EXIT DATA MAP(delete:dprojections) IF(ndgxdt>0)
     ABI_FREE(dprojections)
   end if
   if (allocated(s_dprojections)) then
-    !$OMP TARGET EXIT DATA MAP(release:s_dprojections)
+    !$OMP TARGET EXIT DATA MAP(delete:s_dprojections) IF(ndgxdtfac>0)
     ABI_FREE(s_dprojections)
   end if
   if (allocated(vnl_dprojections)) then
-    !$OMP TARGET EXIT DATA MAP(release:vnl_dprojections)
+    !$OMP TARGET EXIT DATA MAP(delete:vnl_dprojections) IF(ndgxdtfac>0)
     ABI_FREE(vnl_dprojections)
   end if
   if (allocated(d2projections)) then
-    !$OMP TARGET EXIT DATA MAP(release:d2projections)
+    !$OMP TARGET EXIT DATA MAP(delete:d2projections) IF(nd2gxdt>0)
     ABI_FREE(d2projections)
   end if
 
