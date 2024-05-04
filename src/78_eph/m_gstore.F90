@@ -766,7 +766,9 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ! Write the abinit header with metadata, structure and occupancies.
    gstore_fform = fform_from_ext("GSTORE.nc")
    NCF_CHECK(wfk0_hdr%ncwrite(ncid, gstore_fform, spinat=dtset%spinat, nc_define=.True.))
-   !NCF_CHECK(gstore%cryst%ncwrite(ncid))
+
+   ! Add crystalline structure.
+   NCF_CHECK(gstore%cryst%ncwrite(ncid))
 
    ! Add eigenvalues and occupations.
    NCF_CHECK(ebands_ncwrite(gstore%ebands, ncid))
@@ -3356,6 +3358,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        ! Collect gkq_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
+
        ! Get g in the phonon representation.
        call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_atm, phfrq, displ_red_qbz, gkq_nu)
 

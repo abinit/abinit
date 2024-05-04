@@ -181,8 +181,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
+ integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
+ integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -209,7 +209,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kq
  type(rf_hamiltonian_type) :: rf_ham_kq
- !type(ddkop_t) :: ddkop
+ type(ddkop_t) :: ddkop
  type(crystal_t) :: pot_cryst, den_cryst
  type(hdr_type) :: pot_hdr, den_hdr
  type(stern_t) :: stern_kmp !, stern_kqmp
@@ -232,7 +232,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), kg_kmp(:,:), kg_kqmp(:,:)
  integer,allocatable :: gbound_k(:,:), gbound_kq(:,:), gbound_kmp(:,:), gbound_kqmp(:,:), gbound_pp(:,:)
  !integer,allocatable :: rank_band(:), root_bcalc(:)
- integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:)
+ integer,allocatable :: nband(:,:), qselect(:), wfd_istwfk(:), count_bk(:,:)
  integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:) !, my_iqibz_inds(:) !, iperm(:)
  integer(i1b),allocatable :: itreat_qibz(:)
@@ -240,12 +240,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qpt(3)
  !real(dp) :: tsec(2) ! vk(3), vkq(3),
- !real(dp) :: eig0nk, eig0mkq !eig0mk,
+ real(dp) :: eig0nk !, eig0mkq !eig0mk,
  complex(gwpc) :: ctmp_gwpc
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom)
  !real(dp),allocatable,target :: cgq(:,:,:)
- real(dp),allocatable :: qlwl(:,:) !,vk_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:)
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
@@ -462,56 +462,65 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(gbound_pp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
 
-#if 0
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
  ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
-
  ! Use ndone to undertand if velocities have been already compured in a previous run.
- !if (ndone == 0) then
 
- ! TODO: This part will be reintegrated afterwards if needed.
- ! Be careful as wavefunctions may be replicated
+ if (ndone == 0) then
+   ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
 
- ddkop = ddkop_new(dtset, cryst, pawtab, psps, wfd%mpi_enreg, mpw, wfd%ngfft)
+   ! Consider only the nk states in gstore%gqk
+   call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in gwpt_nk...")
+   cnt = 0
+   do my_is=1,gstore%my_nspins
+     spin = gstore%my_spins(my_is)
+     gqk => gstore%gqk(my_is)
+     nb = gqk%nb
 
- ! Consider only the nk states in gwpt_nk
- ! All gwpt_nk states are available on each node so MPI parallelization is easy.
- call cwtime(cpu_ks, wall_ks, gflops_ks, "start", msg=" Computing v_nk matrix elements for all states in gwpt_nk...")
- cnt = 0
- do my_is=1,gstore%my_nspins
-   spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
-   nb = gqk%nb
-   ! (3, nb, nkibz)
-   ABI_CALLOC(vk_cart_ibz, (3, nb, gstore%nkibz))
-   do my_ik=1,gqk%my_nk
-     kk = gqk%my_kpts(:, my_ik)
-     ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
-     trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
-     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
-     if (.not. isirr_k) cycle
-     npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
+     ! Be careful as wavefunctions may be replicated.
+     ! Use count_bk to count how many states has been computed
+     ! in parallel in order to rescale the results.
+     ABI_CALLOC(vk_cart_ibz, (3, nb, gstore%nkibz))
+     ABI_ICALLOC(count_bk, (nb, gstore%nkibz))
 
-     call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+     do my_ik=1,gqk%my_nk
+       kk = gqk%my_kpts(:, my_ik)
+       ik_ibz = gqk%my_k2ibz(1, my_ik) ; isym_k = gqk%my_k2ibz(2, my_ik)
+       trev_k = gqk%my_k2ibz(6, my_ik); g0_k = gqk%my_k2ibz(3:5,my_ik)
+       isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+       if (.not. isirr_k) cycle
+       npw_k = wfd%npwarr(ik_ibz); istwf_k = wfd%istwfk(ik_ibz)
 
-     do band=gqk%bstart, gqk%bstop
-       call wfd%copy_cg(band, ik_ibz, spin, cg_work)
-       eig0nk = ebands%eig(band, ik_ibz, spin)
-       ib = band - gqk%bstart + 1
-       vk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+       call ddkop%setup_spin_kpoint(dtset, cryst, psps, spin, kk, istwf_k, npw_k, wfd%kdata(ik_ibz)%kg_k)
+
+       do band=gqk%bstart, gqk%bstop
+         call wfd%copy_cg(band, ik_ibz, spin, cg_work)
+         eig0nk = ebands%eig(band, ik_ibz, spin)
+         ib = band - gqk%bstart + 1
+         vk_cart_ibz(:, ib, ik_ibz) = ddkop%get_vdiag(eig0nk, istwf_k, npw_k, wfd%nspinor, cg_work, cwaveprj0)
+         count_bk(ib, ik_ibz) = count_bk(ib, ik_ibz) + 1
+       end do
+     end do ! my_ik
+
+     call xmpi_sum(count_bk, comm, ierr)
+     call xmpi_sum(vk_cart_ibz, comm, ierr)
+     do ii=1,3
+       vk_cart_ibz(ii,:,:) = vk_cart_ibz(ii,:,:) / count_bk
      end do
-   end do ! my_ik
 
-   call xmpi_sum(vk_cart_ibz, comm, ierr)
-   ! Write v_nk to disk.
-   ABI_FREE(vk_cart_ibz)
- end do ! my_is
+     ! Write v_nk to disk.
+     if (gqk%grid_comm%me == 0) then
+     end if
 
- call ddkop%free()
- call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
-#endif
+     ABI_FREE(vk_cart_ibz)
+     ABI_FREE(count_bk)
+   end do ! my_is
+
+   call ddkop%free()
+   call cwtime_report(" Velocities", cpu_ks, wall_ks, gflops_ks)
+ end if ! ndone /= 0
 
  ! Radius of sphere with volume equivalent to the micro zone.
  q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
@@ -779,12 +788,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! ==================================================
      ! Get DFPT potentials and densities for this q-point
      ! ==================================================
-     ! After this branch we have allocated:
+     ! After this branch we know cplex and we have allocated:
      !
      !   v1scf(cplex, nfftf, nspden, my_npert))
      !   vxc1(cplex, nfft, nspden, my_npert)
      !
      !  Note that vxc1 does not include the contribution due to the model core charge (if any).
+
      if (use_ftinterp) then
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
@@ -819,7 +829,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ! Loop over k-points in the e-ph matrix elements (usually in the full BZ).
      ! ========================================================================
      do my_ik=1,gqk%my_nk
-       ! Set entry to zero. Important as there are cycle instructions inside these loops
+       ! Set entry to zero. Important as we may have cycle instructions inside these loops
        ! and we don't want to write random numbers to disk.
        my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = zero
 
@@ -898,7 +908,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
             do imyp=1,gqk%my_npert
-
               if (cplex == 1) then
                 ctmp_gwpc = sum(GWPC_CONJG(ur_kq) * ur_k * vxc1(1,:,spin,imyp)) / nfftf
               else
@@ -926,7 +935,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! as pp_mesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions.
        ! and we have to use ipp_bz to symmetrize W(pp_bz) from W(pp_ibz)
        ! TODO: Should order nbz in shells so that one can reduce the memory required to store W(pp)
-       ! if we activate pp-parallelism.
+       ! if pp_parallelism is on.
 
        gkq_sig_atm = zero
 
@@ -977,8 +986,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_MALLOC(crhog_mkq_bkqmp, (npw_pp))
 
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
-         ! Clearly we should not duplicate the work when pp = 0.
-         ! When pp == 0, we also get g_ks via stern_solve
+         ! Clearly, we should not duplicate the work when pp = 0.
+         ! When pp == 0, we also get the g_ks matrix elements after stern_solve.
          ! Also, one should handle more carefully the integration in g_sigma around pp = Gamma in the case of semiconductors.
 
          !if (stern_has_band_para) then
@@ -1014,6 +1023,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !call stern_kqmp%init(dtset, npw_kmp, npw_kqmp, nspinor, nbsum, nband_me, fermie1_idir_ipert, &
          !                     stern_use_cache, work_ngfft, mpi_enreg, stern_comm)
 
+
+         ! Prepare the object for applying W_qbz.
+         ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
+         call W%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
+
          ! =====================================
          ! Precompute oscillator matrix elements
          ! =====================================
@@ -1023,14 +1037,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nw, my_bsum_start:my_bsum_stop, num_mn_kq))
          !ABI_FREE(rhotwg_kmp_mn)
 
-         ! Prepare the object for applying W_qbz.
-         ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
-         call W%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
-
          do ib_sum=my_bsum_start, my_bsum_stop
            ! <bsum,k-p| e^{-ip+G'}|n,k>
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
-                             cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
+                              cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
 
            cwork_ur = GWPC_CONJG(ur_kmp) * ur_k
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, crhog_bkmp_nk)
@@ -1106,7 +1116,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! ================
            ! This is just to test stern_kmp%solve for pp == 0, other values of pp won't work.
            if (pp_is_gamma .and. nbsum /= 1) then
-           do ib_sum=1, nbsum
+           do ib_sum=my_bsum_start, my_bsum_stop
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
 
              call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
@@ -1154,6 +1164,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Collect gkq_sig_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_sig_atm, gqk%pert_comm%value, ierr)
+
        ! Get g in the phonon representation.
        call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_sig_atm, phfr_qq, displ_red_qq, gkq_sig_nu)
 
@@ -1167,7 +1178,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
        ! Dump buffers
        !if (iqbuf_cnt == qbuf_size) call dump_data()
-
      end do ! my_ik
 
      ABI_FREE(vlocal1)
