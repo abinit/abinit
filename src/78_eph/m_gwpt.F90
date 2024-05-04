@@ -198,8 +198,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
- integer :: ffnl_k_request, ffnl_kq_request, nb ! nelem,
- integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt
+ integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
+ integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks ! cpu,wall,gflops,
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
@@ -207,8 +207,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
- type(gs_hamiltonian_type) :: gs_ham_kq
- type(rf_hamiltonian_type) :: rf_ham_kq
+ type(gs_hamiltonian_type) :: gs_ham_kqmp
+ type(rf_hamiltonian_type) :: rf_ham_kqmp
  type(ddkop_t) :: ddkop
  type(crystal_t) :: pot_cryst, den_cryst
  type(hdr_type) :: pot_hdr, den_hdr
@@ -248,14 +248,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:)
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
- real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
+ real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable, target :: vxc1(:,:,:,:)
  real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
  real(dp),allocatable :: gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
- real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:) !,ylm_kmp(:,:), ylm_kqmp(:,:)
- real(dp),allocatable :: ylmgr_kq(:,:,:) !, ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
+ real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
+ real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp) :: ylmgr_dum(1,1,1)
@@ -552,10 +553,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! 1) Allocate all arrays and initialize quantities that do not depend on k and spin.
  ! 2) Perform the setup needed for the non-local factors:
  !
- ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_ham_kq.
+ ! Norm-conserving: Constant kleimann-Bylander energies are copied from psps to gs_ham_kqmp.
  ! PAW: Initialize the overlap coefficients and allocate the Dij coefficients.
 
- call init_hamiltonian(gs_ham_kq, psps, pawtab, nspinor, nsppol, nspden, natom,&
+ call init_hamiltonian(gs_ham_kqmp, psps, pawtab, nspinor, nsppol, nspden, natom,&
    dtset%typat, cryst%xred, nfft, mgfft, ngfft, cryst%rprimd, dtset%nloalg,&
    comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab, mpi_spintab=mpi_enreg%my_isppoltab,&
    usecprj=usecprj, ph1d=ph1d, nucdipmom=dtset%nucdipmom, gpu_option=dtset%gpu_option)
@@ -564,7 +565,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
  ! Note nvloc in vlocal (we will select one/four spin components afterwards)
  ABI_CALLOC(vtrial, (nfftf, nspden))
- ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kq%nvloc))
+ ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kqmp%nvloc))
 
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
@@ -718,9 +719,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Spherical Harmonics for useylm == 1.
  ABI_MALLOC(ylm_k, (mpw, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylm_kq, (mpw, psps%mpsang**2 * psps%useylm))
- !ABI_MALLOC(ylm_kmp, (mpw, psps%mpsang**2 * psps%useylm))
- !ABI_MALLOC(ylm_kqmp, (mpw, psps%mpsang**2 * psps%useylm))
+ ABI_MALLOC(ylm_kmp, (mpw, psps%mpsang**2 * psps%useylm))
+ ABI_MALLOC(ylm_kqmp, (mpw, psps%mpsang**2 * psps%useylm))
  ABI_MALLOC(ylmgr_kq, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+ ABI_MALLOC(ylmgr_kmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
+ ABI_MALLOC(ylmgr_kqmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
  ! GS wavefunctions
  ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
  ABI_MALLOC(ur_kq, (wfd%nfft*nspinor))
@@ -835,7 +838,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      cvxc1_ptr => null();if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
-     ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert), ierr)
+     ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kqmp%nvloc, my_npert), ierr)
 
      ! ========================================================================
      ! Loop over k-points in the e-ph matrix elements (usually in the full BZ).
@@ -974,6 +977,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
 
+
+         ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
+         ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
+
+         call mkffnl_objs(cryst, psps, 1, ffnl_kmp, ider0, idir0, kg_kmp, kpg_kmp, kmp, nkpg_kmp, &
+                          npw_kmp, ylm_kmp, ylmgr_dum, &
+                          comm=gqk%pert_comm%value, request=ffnl_kmp_request)
+
+
+
          ! Symmetry tables and g-sphere centered on k+q-p
          kqmp = kq - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
@@ -988,6 +1001,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get npw_kqmp, kg_kqmp for k+q-p
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)  ! out
+
+
+         ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
+         ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
+
+         call mkffnl_objs(cryst, psps, 1, ffnl_kqmp, ider0, idir0, kg_kqmp, kpg_kqmp, kqmp, nkpg_kqmp, &
+                          npw_kqmp, ylm_kqmp, ylmgr_dum, &
+                          comm=gqk%pert_comm%value, request=ffnl_kqmp_request)
 
          ! This is the g-sphere for W_{gg'}(pp).
          ! Note that in this case, the sphere is Gamma-centered i.e. it does not depend on the pp wavevector
@@ -1082,27 +1103,40 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          if (ffnl_k_request /= xmpi_request_null) call xmpi_wait(ffnl_k_request, ierr)
          if (ffnl_kq_request /= xmpi_request_null) call xmpi_wait(ffnl_kq_request, ierr)
+         if (ffnl_kmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kmp_request, ierr)
+         if (ffnl_kqmp_request /= xmpi_request_null) call xmpi_wait(ffnl_kqmp_request, ierr)
 
          do imyp=1,gqk%my_npert
            idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
            ! Each CPU prepares its own potentials.
-           call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kq%nvloc, &
+           call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kqmp%nvloc, &
                                       pawfgr, mpi_enreg, vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
 
            ! Continue to initialize the Hamiltonian (call it here to support dfpt_cgwf Sternheimer).
-           call gs_ham_kq%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
+           call gs_ham_kqmp%load_spin(spin, vlocal=vlocal, with_nonlocal=.true.)
 
            ! Prepare application of the NL part.
-           call init_rf_hamiltonian(cplex, gs_ham_kq, ipert, rf_ham_kq, has_e1kbsc=.true.)
-           call rf_ham_kq%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
+           call init_rf_hamiltonian(cplex, gs_ham_kqmp, ipert, rf_ham_kqmp, has_e1kbsc=.true.)
+           call rf_ham_kqmp%load_spin(spin, vlocal1=vlocal1(:,:,:,:,imyp), with_nonlocal=.true.)
+
+! This is just to test stern_kmp%solve for pp == 0, other values of pp won't work.
+if (.True.) then
+!if (pp_is_gamma .and. nbsum /= 1) then
+           !print *, "For kk, ", kk, "pp:", pp, "idir, ipert", idir, ipert
 
            ! This call is not optimal because there are quantities in out that do not depend on idir,ipert
-           call getgh1c_setup(gs_ham_kq, rf_ham_kq, dtset, psps, kk, kq, idir, ipert, &  ! In
-             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &               ! In
-             npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
-             dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+           !call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kk, kq, idir, ipert, &  ! In
+           !  cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_k, &               ! In
+           !  npw_k, npw_kq, useylmgr1, kg_k, ylm_k, kg_kq, ylm_kq, ylmgr_kq, &           ! In
+           !  dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
+           !  reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
+
+           call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kmp, kqmp, idir, ipert, &  ! In
+             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &               ! In
+             npw_kmp, npw_kqmp, useylmgr1, kg_kmp, ylm_kmp, kg_kqmp, ylm_kqmp, ylmgr_kqmp, &           ! In
+             dkinpw, nkpg_kmp, nkpg_kqmp, kpg_kmp, kpg_kqmp, kinpw1, ffnl_kmp, ffnl_kqmp, ph3d, ph3d1, & ! Out
              reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
 
            ! Compute H(1) applied to GS wavefunction Psi_nk(0)
@@ -1115,15 +1149,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !  eshift = eig0nk - dtset%dfpt_sciss
            !
            !  call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,imyp, ib_k), &
-           !    grad_berry, gs1c, gs_ham_kq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
-           !    optnl, opt_gvnlx1, rf_ham_kq, sij_opt, tim_getgh1c1, usevnl)
+           !    grad_berry, gs1c, gs_ham_kqmp, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
+           !    optnl, opt_gvnlx1, rf_ham_kqmp, sij_opt, tim_getgh1c1, usevnl)
            !end do
 
            ! ================
            ! NSCF Sternheimer
            ! ================
-           ! This is just to test stern_kmp%solve for pp == 0, other values of pp won't work.
-           if (pp_is_gamma .and. nbsum /= 1) then
+
            do ib_sum=my_bsum_start, my_bsum_stop
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
 
@@ -1134,19 +1167,20 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              if (stern_kmp%has_band_para) then
                NOT_IMPLEMENTED_ERROR()
              end if
-             call stern_kmp%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kq, rf_ham_kq, &
+             call stern_kmp%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kqmp, rf_ham_kqmp, &
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
                                   cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr) !, &
                                   ! full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
              ABI_CHECK(ierr == 0, msg)
            end do ! ibsum
-           end if
 
-           call rf_ham_kq%free()
            ABI_FREE(kinpw1)
            ABI_FREE(dkinpw)
            ABI_FREE(ph3d)
            ABI_SFREE(ph3d1)
+end if
+           call rf_ham_kqmp%free()
+
          end do ! imyp
 
          ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
@@ -1156,6 +1190,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !    gkq_sig_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
          !  end do
          !end do
+
+
+         ABI_FREE(ffnl_kmp)
+         ABI_FREE(ffnl_kqmp)
 
          call stern_kmp%free() !; call stern_kqmp%free()
        end do ! ipp_bz
@@ -1233,9 +1271,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_SFREE(kpg_kqmp)
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
- !ABI_FREE(ylm_kmp)
- !ABI_FREE(ylm_kqmp)
+ ABI_FREE(ylm_kmp)
+ ABI_FREE(ylm_kqmp)
  ABI_FREE(ylmgr_kq)
+ ABI_FREE(ylmgr_kmp)
+ ABI_FREE(ylmgr_kqmp)
  ABI_FREE(cg_work)
  ABI_FREE(ur_k)
  ABI_FREE(ur_kq)
@@ -1260,7 +1300,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(done_qbz_spin)
  ABI_FREE(rhor)
 
- call gs_ham_kq%free()
+ call gs_ham_kqmp%free()
  call wfd%free()
  call vcp%free()
  call w%free()
