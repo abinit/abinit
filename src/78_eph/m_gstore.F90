@@ -3060,8 +3060,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
-   call wrtout(std_out, " Computing and writing velocity operator matrix elements in the IBZ")
-   call wrtout(std_out, " Note that not all the k-points in the IBZ are computed when kfilter is activated!")
+   call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
+   call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
    ! On disk, we have:
@@ -3078,7 +3078,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      if (gstore%with_vk == 1) then
        ABI_CALLOC(vk_cart_ibz, (3, gqk%nb, gstore%nkibz))
      else
-       ABI_ERROR("with_vk 2")
+       ABI_ERROR("with_vk 2 not implemented")
      end if
 
      cnt = 0

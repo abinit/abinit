@@ -1855,7 +1855,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
-   NOT_IMPLEMENTED_ERROR()
+
    ! Compute full first order wavefunction.
    !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
    !eig0nk = eig0_k(iband)
@@ -1864,6 +1864,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
    !                     eig0nk, eig0_kq, dtset%elph2_imagden, iband, ibgq, icgq0, mcgq, mcprjq, stern%mpi_enreg,
    !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, 0, gs_hamkq%usepaw)
+   NOT_IMPLEMENTED_ERROR()
+   full_cg1 = zero
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
