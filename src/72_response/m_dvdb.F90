@@ -3859,7 +3859,6 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  if (db%ft_qcache%maxnq /= 0) then
 
    call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
-
    ! Note that cplex is always set to 2 here
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))

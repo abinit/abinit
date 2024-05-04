@@ -217,8 +217,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gsphere_t) :: gsph_c
  type(hscr_t) :: hscr
  type(vcoul_t) :: vcp
- type(screen_t),target :: W
- type(screen_info_t) :: W_info
+ type(screen_t),target :: screen
+ type(screen_info_t) :: w_info
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
  character(len=fnlen) :: w_fname, gstore_filepath
@@ -265,16 +265,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
  complex(gwpc),allocatable :: crhog_bkmp_nk(:), crhog_mkq_bkqmp(:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:) !, cg1_kqmp(:,:)
- !real(dp),allocatable :: full_cg1_kqmp(:,:), full_cg1_kqmp(:,:), ! full_cg1_kmp(:,:),
- !complex(gwpc),allocatable :: full_ur1_kqmp(:,:), full_ur1_kqmp(:,:) ! full_ur1_kmp(:),
+ real(dp),allocatable :: full_cg1_kqmp(:,:) !, full_cg1_kmp(:,:)
+ complex(gwpc),allocatable :: full_ur1_kqmp(:) !, full_ur1_kmp(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
-!#if defined HAVE_MPI && !defined HAVE_MPI2_INPLACE
-! integer :: me
-! real(dp),allocatable :: cgq_buf(:)
-! real(dp),pointer :: cgq_ptr(:)
-!#endif
 
 !************************************************************************
 
@@ -292,8 +287,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ecut = dtset%ecut ! dtset%dilatmx
  ieta = +j_dpc * dtset%zcut
 
- ! Check if a previous GSTORE file is present to restart the calculation if dtset%eph_restart == 1,
- ! and use done_qbz_spin to cycle loops if restart /= 0.
+ ! Check if a previous GSTORE.nc file is present to restart the calculation if dtset%eph_restart == 1,
+ ! and use done_qbz_spin to cycle the loops below if restart /= 0.
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
@@ -307,7 +302,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call gstore%from_ncpath(gstore_filepath, with_cplex0, dtset, cryst, ebands, ifc, comm)
  end if
 
- ! Open GSTORE.nc file, and go to data mode.
+ ! Open GSTORE.nc file and go to data mode.
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
@@ -358,6 +353,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
  end if
 
+ !call pp_mesh%sort_by_stars()
+
  if (nqlwl == 0) then
    nqlwl=1
    ABI_MALLOC(qlwl,(3,nqlwl))
@@ -407,7 +404,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  nband = dtset%mband; bks_mask = .False.; keep_ur = .False.
  !bks_mask(my_bsum_start:my_bsum_stop,:,:) = .True.
- bks_mask = .True.
  ! Distribute wavefunctions according to the seof kk, qq and pp wavevectors treated by this MPI proc.
  call gstore%fill_bks_mask_pp_mesh(dtset%mband, nkpt, nsppol, my_pp_start_spin, my_pp_stop_spin, pp_mesh, bks_mask)
 
@@ -462,6 +458,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(gbound_kqmp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(gbound_pp, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
+ ABI_MALLOC(full_ur1_kqmp, (nfft*nspinor))
 
  ! ============================
  ! Compute vnk matrix elements
@@ -704,8 +701,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
  w_info%invalid_freq = dtset%gw_invalid_freq
  w_info%mat_type = MAT_INV_EPSILON
- call W%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
-             dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
+ call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
+                  dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
 
  ABI_FREE(qlwl)
 
@@ -985,8 +982,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                           npw_kmp, ylm_kmp, ylmgr_dum, &
                           comm=gqk%pert_comm%value, request=ffnl_kmp_request)
 
-
-
          ! Symmetry tables and g-sphere centered on k+q-p
          kqmp = kq - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
@@ -1005,6 +1000,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
          ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
+         ABI_MALLOC(full_cg1_kqmp, (2, npw_kqmp*nspinor))
 
          call mkffnl_objs(cryst, psps, 1, ffnl_kqmp, ider0, idir0, kg_kqmp, kpg_kqmp, kqmp, nkpg_kqmp, &
                           npw_kqmp, ylm_kqmp, ylmgr_dum, &
@@ -1012,7 +1008,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! This is the g-sphere for W_{gg'}(pp).
          ! Note that in this case, the sphere is Gamma-centered i.e. it does not depend on the pp wavevector
-         npw_pp = W%npw; kg_pp => W%gvec
+         npw_pp = screen%npw; kg_pp => screen%gvec
          call sphereboundary(gbound_pp, istwfk1, kg_pp, wfd%mgfft, npw_pp)
 
          ABI_MALLOC(crhog_bkmp_nk, (npw_pp))
@@ -1055,7 +1051,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Prepare the object for applying W_qbz.
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
-         call W%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
+         call screen%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
 
          ! =====================================
          ! Precompute oscillator matrix elements
@@ -1075,7 +1071,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, crhog_bkmp_nk)
 
            ! Contract immediately over g' with the convolution of W_gg'
-           !call W%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
+           !call screen%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
+
+           !call screen%get_convolution("N", npw_pp, nspinor, cone_gw, czero_gw, in_ket, out_ket)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
@@ -1086,11 +1084,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            crhog_mkq_bkqmp = GWPC_CONJG(crhog_mkq_bkqmp)
 
            ! Contract immediately over g with the convolution of W_gg'
-           !call W%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
+           !call screen%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
          end do ! ib_sum
-
-         ABI_FREE(crhog_bkmp_nk)
-         ABI_FREE(crhog_mkq_bkqmp)
 
          ! ========================================
          ! Loop over my set of atomic perturbations
@@ -1167,11 +1162,18 @@ if (.True.) then
              if (stern_kmp%has_band_para) then
                NOT_IMPLEMENTED_ERROR()
              end if
+
              call stern_kmp%solve(u1_band, band_me, idir, ipert, qpt, gs_ham_kqmp, rf_ham_kqmp, &
                                   ebands%eig(:,ikmp_ibz,spin), ebands%eig(:,ikqmp_ibz,spin), &
-                                  cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr) !, &
-                                  ! full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
+                                  cg_kmp, cwaveprj0, cg1_kqmp, cwaveprj, msg, ierr, &
+                                  full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
              ABI_CHECK(ierr == 0, msg)
+
+             ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
+             cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
+             call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, crhog_mkq_bkqmp)
+             crhog_mkq_bkqmp = GWPC_CONJG(crhog_mkq_bkqmp)
+
            end do ! ibsum
 
            ABI_FREE(kinpw1)
@@ -1191,9 +1193,11 @@ end if
          !  end do
          !end do
 
-
          ABI_FREE(ffnl_kmp)
          ABI_FREE(ffnl_kqmp)
+         ABI_FREE(full_cg1_kqmp)
+         ABI_FREE(crhog_bkmp_nk)
+         ABI_FREE(crhog_mkq_bkqmp)
 
          call stern_kmp%free() !; call stern_kqmp%free()
        end do ! ipp_bz
@@ -1253,12 +1257,14 @@ end if
 
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
- !call xmpi_barrier(comm)
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  end if
  NCF_CHECK(nf90_close(root_ncid))
+ call xmpi_barrier(comm)
+
+ call gstore%print_for_abitests(dtset)
 
  ! Free memory
  ABI_FREE(kg_k)
@@ -1281,6 +1287,7 @@ end if
  ABI_FREE(ur_kq)
  ABI_FREE(ur_kmp)
  ABI_FREE(ur_kqmp)
+ ABI_FREE(full_ur1_kqmp)
  ABI_FREE(cwork_ur)
  ABI_FREE(cg_kmp)
  ABI_FREE(cg_kqmp)
@@ -1303,7 +1310,7 @@ end if
  call gs_ham_kqmp%free()
  call wfd%free()
  call vcp%free()
- call w%free()
+ call screen%free()
  call pp_mesh%free()
  call gsph_c%free()
  call gstore%free()
