@@ -1513,8 +1513,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        end if
 
        ! Get istwf_kq, npw_kq, kg_kq for k+q.
-       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, &
-                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg1_k, gbound_kq)
+       call wfd%get_gvec_gbound(cryst%gmet, ecut, kq, ikq_ibz, isirr_kq, dtset%nloalg, & ! in
+                                istwf_kq, npw_kq, kg_kq, nkpg1, kpg1_k, gbound_kq)       ! out
 
        !call timab(1901, 2, tsec)
        !call timab(1902, 1, tsec)
@@ -3849,9 +3849,9 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
  call cwtime_report(" sigmaph_read", cpu, wall, gflops)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(ncid, vname)
+ integer function vid(var_name)
+   character(len=*),intent(in) :: var_name
+   vid = nctk_idname(ncid, var_name)
 end function vid
 
 end function sigmaph_read

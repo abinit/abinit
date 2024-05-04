@@ -921,13 +921,13 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
 
 contains
- integer function vid(vname)
-   character(len=*),intent(in) :: vname
-   vid = nctk_idname(NCID, vname)
+ integer function vid(var_name)
+   character(len=*),intent(in) :: var_name
+   vid = nctk_idname(NCID, var_name)
  end function vid
- integer function vid_spin(vname)
-   character(len=*),intent(in) :: vname
-   vid_spin = nctk_idname(SPIN_NCID, vname)
+ integer function vid_spin(var_name)
+   character(len=*),intent(in) :: var_name
+   vid_spin = nctk_idname(SPIN_NCID, var_name)
  end function vid_spin
 
 end subroutine gstore_init
@@ -3488,14 +3488,14 @@ subroutine dump_data()
 
 end subroutine dump_data
 
-integer function root_vid(vname)
-  character(len=*),intent(in) :: vname
-  root_vid = nctk_idname(root_ncid, vname)
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
 end function root_vid
 
-integer function spin_vid(vname)
-  character(len=*),intent(in) :: vname
-  spin_vid = nctk_idname(spin_ncid, vname)
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
 end function spin_vid
 
 end subroutine gstore_compute
@@ -3882,14 +3882,14 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 
 contains
-integer function vid(vname)
-  character(len=*),intent(in) :: vname
-  vid = nctk_idname(ncid, vname)
+integer function vid(var_name)
+  character(len=*),intent(in) :: var_name
+  vid = nctk_idname(ncid, var_name)
 end function vid
 
-integer function spin_vid(vname)
-  character(len=*),intent(in) :: vname
-  spin_vid = nctk_idname(spin_ncid, vname)
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
 end function spin_vid
 
 end subroutine gstore_from_ncpath
@@ -3971,9 +3971,9 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
  if (nqbz /= 0) call xmpi_bcast(done_qbz_spin, master, comm, ierr)
 
 contains
-integer function root_vid(vname)
-  character(len=*),intent(in) :: vname
-  root_vid = nctk_idname(root_ncid, vname)
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
 end function root_vid
 
 end subroutine gstore_check_restart
@@ -4026,9 +4026,9 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  NCF_CHECK(nf90_close(root_ncid))
 
 contains
-integer function root_vid(vname)
-  character(len=*),intent(in) :: vname
-  root_vid = nctk_idname(root_ncid, vname)
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
 end function root_vid
 
 end subroutine gstore_print_for_abitests

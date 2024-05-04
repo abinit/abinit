@@ -213,7 +213,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(Energies_type) :: KS_energies
  type(vcoul_t) :: Vcp, Vcp_dense
  type(wfdgw_t) :: Wfd, Wfd_dense
- type(screen_t) :: W
+ type(screen_t) :: screen
  type(screen_info_t) :: W_info
  type(wvl_data) :: wvl
  type(kmesh_t) :: Kmesh_dense,Qmesh_dense
@@ -842,7 +842,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! TODO clean this part and add an option to retrieve a single frequency to save memory.
  call timab(654,1,tsec) ! bse(rdmkeps^-1)
 
- call W%nullify()
+ call screen%nullify()
  if (BSp%use_coulomb_term) then
    ! Init W.
    ! Incore or out-of-core solution?
@@ -853,7 +853,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    W_info%use_mdf = BSp%mdlf_type
    W_info%eps_inf = BSp%eps_inf
 
-   call W%init(W_Info, Cryst, Qmesh, Gsph_c, Vcp, w_fname, mqmem, Dtset%npweps, &
+   call screen%init(W_Info, Cryst, Qmesh, Gsph_c, Vcp, w_fname, mqmem, Dtset%npweps, &
                Dtset%iomode, ngfftf, nfftf_tot, Wfd%nsppol, Wfd%nspden, qp_aerhor, Wfd%prtvol, Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
@@ -864,10 +864,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(656,1,tsec) ! bse(mkexcham)
 
  call exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-                    Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
+                    Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
 
  ! Free W to make room for the full excitonic Hamiltonian.
- call W%free()
+ call screen%free()
 
  call timab(656,2,tsec) ! bse(mkexcham)
  !

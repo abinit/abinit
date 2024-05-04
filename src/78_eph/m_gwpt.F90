@@ -1371,14 +1371,14 @@ subroutine dump_data()
 
 end subroutine dump_data
 
-integer function root_vid(vname)
-  character(len=*),intent(in) :: vname
-  root_vid = nctk_idname(root_ncid, vname)
+integer function root_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  root_vid = nctk_idname(root_ncid, var_name)
 end function root_vid
 
-integer function spin_vid(vname)
-  character(len=*),intent(in) :: vname
-  spin_vid = nctk_idname(spin_ncid, vname)
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
 end function spin_vid
 
 end subroutine gwpt_run
