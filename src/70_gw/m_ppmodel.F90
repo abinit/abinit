@@ -1145,7 +1145,7 @@ end subroutine ppm_get_eigenvalues
 !!
 !! SOURCE
 
-subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
+subroutine cppm1par(npwc, nomega, omega, omegaplasma, epsm1, omegatw, bigomegatwsq)
 
 !Arguments ------------------------------------
 !scalars
@@ -1154,22 +1154,20 @@ subroutine cppm1par(npwc,nomega,omega,omegaplasma,epsm1,omegatw,bigomegatwsq)
 !arrays
  complex(gwpc),intent(in) :: epsm1(npwc,npwc,nomega)
  complex(dpc),intent(in) :: omega(nomega)
- complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc)
- complex(gwpc),intent(out) :: omegatw(npwc,npwc)
+ complex(gwpc),intent(out) :: bigomegatwsq(npwc,npwc), omegatw(npwc,npwc)
 
 !Local variables-------------------------------
 !scalars
  integer :: ig,igp,io,io0,ioe0
  real(dp) :: e0,minomega
  character(len=500) :: msg
- complex(gwpc) :: AA,omegatwsq,diff,ratio
- complex(gwpc) :: epsm1_io0,epsm1_ioe0
+ complex(gwpc) :: AA,omegatwsq,diff,ratio,epsm1_io0,epsm1_ioe0
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
- !
- ! === Find omega=0 and omega=imag (closest to omegaplasma) to fit the ppm parameters ===
+
+ ! Find omega=0 and omega=imag (closest to omegaplasma) to fit the ppm parameters
  minomega=1.0d-3; io0=0
  do io=1,nomega
    if (ABS(omega(io))<minomega) then
@@ -1287,7 +1285,6 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: ig,igp,nimwp,ngfft1,ngfft2,ngfft3,gmgp_idx,ierr
  real(dp) :: lambda,phi,AA
  logical,parameter :: use_symmetrized=.TRUE.,check_imppf=.FALSE.
@@ -1491,7 +1488,6 @@ subroutine cppm3par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 !Local variables-------------------------------
 !TODO these should be dp
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: idx,ierr,ig,igp,ii,jj,ngfft1,ngfft2,ngfft3,gmgp_idx
  real(dp) :: num,qpg_dot_qpgp
  complex(dpc) :: conjg_eig
@@ -1712,7 +1708,7 @@ end subroutine cppm3par
 !!
 !! FUNCTION
 !! Calculate the plasmon-pole parameters using Engel and Farid model (PRB47,15931,1993) [[cite:Engel1993]].
-!! See also Quasiparticle Calculations in Solids [[cite:Aulbur2001]] p. 23
+!! See also Quasiparticle Calculations in Solids [[cite:Aulbur2001]] page. 23
 !!
 !! INPUTS
 !!  qpt(3)=Reduced coordinates of the q-point.
@@ -1743,7 +1739,6 @@ subroutine cppm4par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,bigomegatwsq,om
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: paral_kgb0=0
  integer :: ierr,ig,igp,ii,ngfft1,ngfft2,ngfft3,gmgp_idx
  real(dp) :: qpg_dot_qpgp
  character(len=500) :: msg
@@ -2056,10 +2051,6 @@ end subroutine cqratio
 !!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
 !!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
 !!  PPm<ppmodel_t>=structure gathering info on the Plasmon-pole technique.
-!!     %model=type plasmon pole model
-!!     %dm2_botsq= 1 if model==3, =npwc if model== 4, 1 for all the other cases
-!!     %dm2_otq= 1 if model==3, =1    if model== 4, 1 for all the other cases
-!!     %dm_eig=npwc if model=3, 0 otherwise
 !!  botsq(npwc,dm2_botsq)=Plasmon pole parameters for this q-point.
 !!  eig(dm_eig,dm_eig)=The eigvectors of the symmetrized inverse dielectric matrix for this q point
 !!   (first index for G, second index for bands)
@@ -2076,8 +2067,8 @@ end subroutine cqratio
 !!
 !! SOURCE
 
-subroutine ppm_calc_sic(PPm,nspinor,npwc,nomega,rhotwgp,botsq,otq,&
-                        omegame0i,zcut,theta_mu_minus_e0i,eig,npwx,ket,sigcme)
+subroutine ppm_calc_sic(PPm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
+                        omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, ket, sigcme)
 
 !Arguments ------------------------------------
 !scalars
@@ -2293,10 +2284,8 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  ! ==== Branching for in-core or out-of-core solution ====
  ! =======================================================
  !
- if (PPm%has_q(iq_ibz)==PPM_NOTAB) then
-   ! Allocate the tables for this q_ibz
-   call ppm_mallocq(PPm,iq_ibz)
- end if
+ ! Allocate the tables for this q_ibz
+ if (PPm%has_q(iq_ibz)==PPM_NOTAB) call ppm_mallocq(PPm,iq_ibz)
 
  if (PPm%has_q(iq_ibz)==PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
@@ -2324,6 +2313,7 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
 
    PPm%eigpot_qbz => PPm%eigpot(iq_ibz)
    PPm%eigpot_qbz_stat = PPM_ISPOINTER
+
  else
    ! Allocate memory if not done yet.
    if (PPm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then
@@ -2519,7 +2509,7 @@ end subroutine ppm_new_setup
 !!
 !! SOURCE
 
-subroutine ppm_times_ket(PPm,nspinor,npwc,nomega,rhotwgp,omegame0i,zcut,theta_mu_minus_e0i,npwx,ket,sigcme)
+subroutine ppm_times_ket(PPm, nspinor, npwc, nomega, rhotwgp, omegame0i, zcut, theta_mu_minus_e0i, npwx, ket, sigcme)
 
 !Arguments ------------------------------------
 !scalars

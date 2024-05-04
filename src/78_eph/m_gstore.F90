@@ -492,10 +492,14 @@ contains
   procedure :: set_perts_distrib => gstore_set_perts_distrib
   ! Activate parallelism over perturbations at the level of the DVDB file.
 
+  procedure :: print_for_abitests => gstore_print_for_abitests
+  ! Print subset of results to ab_out for testing purposes.
+
 end type gstore_t
 !!***
 
 public :: gstore_check_restart
+
 
 contains
 !!***
@@ -3078,7 +3082,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      if (gstore%with_vk == 1) then
        ABI_CALLOC(vk_cart_ibz, (3, gqk%nb, gstore%nkibz))
      else
-       ABI_ERROR("with_vk 2 not implemented")
+       ABI_ERROR("gstore%with_vk 2 not implemented")
      end if
 
      cnt = 0
@@ -3400,12 +3404,15 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call cwtime_report(" GSTORE computation done", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10) !, comm=gstore%comm)
  call gstore%print(std_out, header="GSTORE at the end of gstore%compute")
 
- !call xmpi_barrier(gstore%comm)
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  end if
  NCF_CHECK(nf90_close(root_ncid))
+ call xmpi_barrier(gstore%comm)
+
+ ! TODO: Activate this call.
+ !call gstore_print_for_abitests(gstore%path, dtset)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -3699,8 +3706,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
 
  ! Construct crystal and ebands from the GS WFK file.
  !ebands_file = wfk_read_ebands(wfk0_path, comm, out_hdr=wfk0_hdr)
- call wfk0_hdr%vs_dtset(dtset)
- call wfk0_hdr%free()
+ call wfk0_hdr%vs_dtset(dtset); call wfk0_hdr%free()
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
  call gstore%distribute_spins__(ebands%mband, brange_spin, nproc_spin, comm_spin, comm)
@@ -3929,8 +3935,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
       NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
       call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
       ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
-      call gstore_hdr%vs_dtset(dtset)
-      call gstore_hdr%free()
+      call gstore_hdr%vs_dtset(dtset); call gstore_hdr%free()
 
       NCF_CHECK(nctk_get_dim(root_ncid, "gstore_nqbz", nqbz))
       ABI_MALLOC(done_qbz_spin, (nqbz, dtset%nsppol))
@@ -3972,6 +3977,61 @@ integer function root_vid(vname)
 end function root_vid
 
 end subroutine gstore_check_restart
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_print_for_abitests
+!! NAME
+!! gstore_print_for_abitests
+!!
+!! FUNCTION
+!!  Print subset of results to ab_out for testing purposes.
+!!  This routine should be called when the output of the GSTORE.nc file is completed
+!!
+!! INPUTS
+!!
+!! SOURCE
+
+subroutine gstore_print_for_abitests(gstore, dtset)
+
+!Arguments ------------------------------------
+ class(gstore_t),intent(in) :: gstore
+ type(dataset_type),intent(in) :: dtset
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0
+ integer :: my_rank, root_ncid, gstore_completed !, gstore_fform ierr,
+ !character(len=500) :: msg
+ !type(hdr_type) :: gstore_hdr
+!arrays
+ integer,allocatable :: done_qbz_spin(:,:)
+
+! *************************************************************************
+
+ ! Only master rank prints to ab_out
+ if (xmpi_comm_rank(gstore%comm) /= master) return
+
+ NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
+ NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
+ !call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
+ !ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
+ !call gstore_hdr%vs_dtset(dtset); call gstore_hdr%free()
+
+ ABI_MALLOC(done_qbz_spin, (gstore%nqbz, dtset%nsppol))
+ NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
+ ABI_FREE(done_qbz_spin)
+
+ NCF_CHECK(nf90_close(root_ncid))
+
+contains
+integer function root_vid(vname)
+  character(len=*),intent(in) :: vname
+  root_vid = nctk_idname(root_ncid, vname)
+end function root_vid
+
+end subroutine gstore_print_for_abitests
 !!***
 
 end module m_gstore
