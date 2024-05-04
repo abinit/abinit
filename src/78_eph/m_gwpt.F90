@@ -828,12 +828,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
        call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
-       !call drhodb%readsym_rho1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       !call drhodb%readsym_v1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
      end if
      ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
-     cvxc1_ptr => null()
-     if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
+     cvxc1_ptr => null();if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
      ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kq%nvloc, my_npert), ierr)
