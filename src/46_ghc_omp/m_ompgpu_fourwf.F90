@@ -456,7 +456,7 @@ subroutine free_ompgpu_fourwf()
 
  !FIXME Smarter buffer management ?
 #ifdef HAVE_GPU_HIP
- !$OMP TARGET EXIT DATA MAP(release:work_gpu)
+ !$OMP TARGET EXIT DATA MAP(delete:work_gpu)
 #endif
  ABI_FREE(work_gpu)
 

@@ -1533,7 +1533,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  end if
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(release:work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:work,scprod) IF(gs_hamkq%gpu_option==ABI_GPU_OPENMP)
 #endif
  ABI_FREE(work)
  ABI_FREE(gh1c)

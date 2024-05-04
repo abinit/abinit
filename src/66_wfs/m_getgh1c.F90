@@ -1665,7 +1665,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
  end do ! procs in my band pool
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(release:dcwavef_tmp,scprod) IF(l_gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:dcwavef_tmp,scprod) IF(l_gpu_option==ABI_GPU_OPENMP)
 #endif
 
  ABI_FREE(dummy)
