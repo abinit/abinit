@@ -1079,31 +1079,21 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
            cwork_ur = GWPC_CONJG(ur_kmp) * ur_k
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
-
-           ! Multiply by the square root of the Coulomb term
-           ! In 3-D systems, the factor sqrt(4pi) is included)
-           do ii=1,nspinor
-             spad = (ii-1) * npw_pp
-             rhotwg(spad+1:spad+npw_pp) = rhotwg(spad+1:spad+npw_pp) * vc_sqrt_pp(1:npw_pp)
-           end do
+           call times_vc_sqrt("N", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            ! Contract immediately over g' with the convolution of W_gg'
            !call screen%w0gemv("N", in_npw, nspinor, only_diago, cone_gw, czero_gw, in_ket, out_ket)
 
            !call screen%get_convolution("N", npw_pp, nspinor, rhotwg, w_rhotwg)
 
-           ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
+           ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT
+           ! and take the CC in times_vc_sqrt
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp, urs_kbz=ur_kqmp)
 
            cwork_ur = GWPC_CONJG(ur_kqmp) * ur_kqmp
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
-           rhotwg = GWPC_CONJG(rhotwg)
-
-           do ii=1,nspinor
-             spad = (ii-1) * npw_pp
-             rhotwg(spad+1:spad+npw_pp) = rhotwg(spad+1:spad+npw_pp) * vc_sqrt_pp(1:npw_pp)
-           end do
+           call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            ! Contract immediately over g with the convolution of W_gg'
          end do ! ib_sum
@@ -1193,7 +1183,9 @@ if (.True.) then
              ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
              cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
-             rhotwg = GWPC_CONJG(rhotwg)
+             !rhotwg = GWPC_CONJG(rhotwg)
+
+             call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            end do ! ibsum
 
@@ -1405,6 +1397,40 @@ end function spin_vid
 
 end subroutine gwpt_run
 !!***
+
+subroutine times_vc_sqrt(trans, npw_pp, nspinor, vc_sqrt_pp, rhotwg)
+
+ character(len=1),intent(in) :: trans
+ integer,intent(in) :: npw_pp, nspinor
+ complex(gwpc),intent(in) :: vc_sqrt_pp(npw_pp)
+ complex(gwpc),intent(inout) :: rhotwg(npw_pp*nspinor)
+
+!Local variables ------------------------------
+ integer :: ii, spad
+
+!************************************************************************
+
+ ! Multiply by the square root of the Coulomb term
+ ! In 3-D systems, the factor sqrt(4pi) is included)
+ select case (trans)
+ case ("N")
+   do ii=1,nspinor
+     spad = (ii-1) * npw_pp
+     rhotwg(spad+1:spad+npw_pp) = rhotwg(spad+1:spad+npw_pp) * vc_sqrt_pp(1:npw_pp)
+   end do
+
+ case ("C")
+   do ii=1,nspinor
+     spad = (ii-1) * npw_pp
+     rhotwg(spad+1:spad+npw_pp) = GWPC_CONJG(rhotwg(spad+1:spad+npw_pp)) * vc_sqrt_pp(1:npw_pp)
+   end do
+
+ case default
+   ABI_ERROR(sjoin("Invalid trans", trans))
+ end select
+
+end subroutine times_vc_sqrt
+
 
 !!****f* m_gwpt/gwpt_print
 !! NAME
