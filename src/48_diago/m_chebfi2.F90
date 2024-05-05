@@ -8,7 +8,7 @@
 !! It mainly defines a 'chebfi' datatypes and associated methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (BS)
+!! Copyright (C) 2018-2024 ABINIT group (BS)
 !! This file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -707,7 +707,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ABI_NVTX_END_RANGE()
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
- call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,solve_ax_bx=.true.)
+ call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,&
+ &    solve_ax_bx=.true.,istwf_k=chebfi%istwf_k,usepaw=chebfi%paw,me_g0=chebfi%me_g0)
  ABI_NVTX_END_RANGE()
 
  call timab(tim_residu, 1, tsec)

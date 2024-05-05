@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5225,8 +5225,11 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #else
- ABI_UNUSED(count)
- ABI_UNUSED(info)
+  ! this macro is being used befor m_errors is compiled, so work around it
+! ABI_UNUSED(count)
+! ABI_UNUSED(info)
+  if (.FALSE.) write(std_out,*) count
+  if (.FALSE.) write(std_out,*) info
 #endif
 #endif
 

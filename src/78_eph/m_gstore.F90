@@ -87,7 +87,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -985,7 +985,7 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
    end if
 
    call xmpi_comm_split(comm, color, my_rank, comm_spin(spin), ierr)
-   if (comm_spin(spin) /= xmpi_undefined) then
+   if (comm_spin(spin) /= xmpi_comm_null) then
      gstore%my_nspins = gstore%my_nspins + 1
      buff_spin(gstore%my_nspins) = spin
    end if

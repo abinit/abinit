@@ -237,7 +237,7 @@ Variable(
 This parameter provides a fixed shift to all the conduction bands. As
 LDA/GGA are known to underestimate the band-gap by a significant amount in
 some cases, in order to obtain a reasonable optical spectrum and make a realistic
-comparison with experiments one needs to correct for this.
+comparison with experiments one needs to correct for this [[cite:Levine1989]].
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap, and simply shifts the conduction bands. Alternatively, one may
 determine the self energy using the [[tutorial:gw1|GW approach]], in which case

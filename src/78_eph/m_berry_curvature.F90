@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, MMignolet)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, MMignolet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -299,8 +299,8 @@ subroutine berry_curvature(gstore, dtset, dtfil)
  dtset%wtk(:) = one / (one * gstore%nkbz)
  call berry_ddb_hdr%init(dtset,in_ddb_hdr%psps, in_ddb_hdr%pawtab, &
                          dscrpt=' Molecular Berry curvature ', &
-                         nblok=gstore%nqibz, nkpt=in_ddb_hdr%nkpt, kpt=in_ddb_hdr%kpt, &
-                         occ=in_ddb_hdr%occ)
+                         nblok=gstore%nqibz, nkpt=gstore%ebands%nkpt, kpt=gstore%ebands%kptns, &
+                         occ=gstore%ebands%occ)
  ABI_FREE(dtset%wtk)
  call in_ddb_hdr%free()
  call in_ddb%free()
