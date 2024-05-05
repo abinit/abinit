@@ -1134,6 +1134,14 @@ subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
  call qmesh%get_bz_item(iq_bz, qbz, iq_ibz, isym_q, itim_q, isirred=q_isirred)
 
+ ! Get Fourier components of the Coulomb interaction in the BZ
+ ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
+ ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
+
+ !do ig=1,npw_pp
+ !  vc_sqrt_pp(gsph_c%rottb(ig,itim_pp,isym_pp)) = vcp%vc_sqrt(ig,ipp_ibz)
+ !end do
+
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
  ! ========================================================

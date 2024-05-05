@@ -178,6 +178,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 !Local variables ------------------------------
 !scalars
+ integer,parameter :: LOG_MODQ = 1
  integer,parameter :: tim_getgh1c1 = 1, berryopt0 = 0, istw1 = 1, ider0 = 0, idir0 = 0, istwfk1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
@@ -200,7 +201,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
- real(dp) :: cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks ! cpu,wall,gflops,
+ real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
@@ -387,7 +388,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
  ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
-#define DEV_FAST_DEBUG
+!#define DEV_FAST_DEBUG
 
  nbsum = dtset%mband
 #ifdef DEV_FAST_DEBUG
@@ -469,7 +470,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
    call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
-   call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
+   call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
    ! On disk, we have:
    !
@@ -530,7 +531,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end do ! my_is
 
    call ddkop%free()
-   call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu_ks, wall_ks, gflops_ks)
+   call cwtime_report(sjoin(" Computation of v_k group velocities with with_vk:", itoa(gstore%with_vk)), cpu_kk, wall_kk, gflops_kk)
  end if ! ndone /= 0
 
  ! Radius of sphere with volume equivalent to the micro zone.
@@ -791,7 +792,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      !ABI_CHECK(isirr_q, "The q-point is usually in the IBZ!")
 
      if (done_qbz_spin(iq_bz, spin) == 1) cycle
-     call cwtime(cpu_ks, wall_ks, gflops_ks, "start")
+     call cwtime(cpu_qq, wall_qq, gflops_qq, "start")
      call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)))
      !print *, "iq_ibz:", iq_ibz, "qpt:", qpt, "qq_ibz:", qq_ibz
 
@@ -848,6 +849,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 #ifdef DEV_FAST_DEBUG
        if (my_ik > 12) cycle ! DEBUG
 #endif
+
+       !call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
+       !call wrtout(std_out, sjoin(" Computing g^GW(k,q) for qpt:", ktoa(qpt), ", spin:", itoa(spin)))
+
        ! Symmetry indices for kk.
        kk = gqk%my_kpts(:, my_ik)
        ! The k-point and the symmetries relating the BZ k-point to the IBZ.
@@ -911,11 +916,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_MALLOC(ug_kq, (2, npw_kq*nspinor))
 
        gkq_xc_atm = czero
-       do mm_kq=gqk%bstart, gqk%bstop
+       do mm_kq=gqk%bstart, gqk%bstart
+       !do mm_kq=gqk%bstart, gqk%bstop
          call wfd%rotate_cg(mm_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_kq)
 
-         do nn_k=gqk%bstart, gqk%bstop
+         !do nn_k=gqk%bstart, gqk%bstop
+         do nn_k=gqk%bstart, gqk%bstart
             call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
@@ -973,7 +980,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Get npw_kmp, kg_kmp for k-p
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
-
 
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
          ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
@@ -1164,6 +1170,7 @@ if (.True.) then
            ! ================
 
            do ib_sum=my_bsum_start, my_bsum_stop
+             !print *, "Solving Sternheimer for ib_sum: ", ib_sum
              stern_kmp%bands_treated_now(:) = 0; stern_kmp%bands_treated_now(ib_sum) = 1
 
              call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
@@ -1184,7 +1191,6 @@ if (.True.) then
              cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
              !rhotwg = GWPC_CONJG(rhotwg)
-
              call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            end do ! ibsum
@@ -1247,10 +1253,10 @@ end if
      ABI_FREE(vlocal1)
      ABI_FREE(v1scf)
      ABI_FREE(vxc1)
-     call cwtime_report(" One q-point", cpu_ks, wall_ks, gflops_ks)
+     !call cwtime_report(" One q-point", cpu_qq, wall_qq, gflops_qq)
      !if (print_time) then
-     !  write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
-     !  call cwtime_report(msg, cpu_q, wall_q, gflops_q); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
+       write(msg,'(2(a,i0),a)')" My q-point [", my_iq, "/", gqk%my_nq, "]"
+       call cwtime_report(msg, cpu_qq, wall_qq, gflops_qq); if (my_iq == LOG_MODQ) call wrtout(std_out, "...", do_flush=.True.)
      !end if
      ! Print cache stats.
      !if (my_rank == master) !call dvdb%ft_qcache%report_stats()
