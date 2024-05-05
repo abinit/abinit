@@ -676,7 +676,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call wrtout(std_out, msg)
 
      ! Find the corresponding irred q-point.
-     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
      q_is_gamma = normv(qbz, Cryst%gmet, "G") < GW_TOLQ0
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
@@ -860,7 +860,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Multiply by the square root of the Coulomb term
          ! In 3-D systems, the factor sqrt(4pi) is included)
          do ii=1,nspinor
-           spad=(ii-1)*npwc
+           spad = (ii-1) * npwc
            rhotwg_ki(spad+1:spad+npwc,jb) = rhotwg_ki(spad+1:spad+npwc,jb)*vc_sqrt_qbz(1:npwc)
          end do
 

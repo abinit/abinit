@@ -1747,7 +1747,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcout0 = 0
  integer :: opt_gvnlx1, mcgq, mgscq, mcprjq, grad_berry_size_mpw1
- real(dp) :: out_resid, fermie1 !, eig0nk
+ real(dp) :: out_resid, fermie1, eig0nk
  type(rf2_t) :: rf2
  real(dp),allocatable :: grad_berry(:,:)
  complex(gwpc),allocatable :: cwork_sp(:)
@@ -1858,7 +1858,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
    ! Compute full first order wavefunction.
    !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
-   !eig0nk = eig0_k(iband)
+   ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
+   eig0nk = eig0_k(u1_band)
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
    !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
    !                     eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq, icgq0, mcgq, mcprjq, stern%mpi_enreg,
