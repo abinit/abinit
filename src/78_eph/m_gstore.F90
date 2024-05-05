@@ -4002,11 +4002,11 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, root_ncid, gstore_completed !, gstore_fform ierr,
+ integer :: my_rank, root_ncid, gstore_completed !, gstore_fform, ierr
  !character(len=500) :: msg
  !type(hdr_type) :: gstore_hdr
 !arrays
- integer,allocatable :: done_qbz_spin(:,:)
+ integer :: done_qbz_spin(gstore%nqbz, dtset%nsppol)
 
 ! *************************************************************************
 
@@ -4014,14 +4014,37 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  if (xmpi_comm_rank(gstore%comm) /= master) return
 
  NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
- NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
  !call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
  !ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
  !call gstore_hdr%vs_dtset(dtset); call gstore_hdr%free()
 
- ABI_MALLOC(done_qbz_spin, (gstore%nqbz, dtset%nsppol))
+ NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
+ write(ab_out, *)""
+ write(ab_out, "(a,i0)")" gstore_completed: ", gstore_completed
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
- ABI_FREE(done_qbz_spin)
+ write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", done_qbz_spin
+
+ !select case (gstore%with_vk)
+ !case (0)
+ !  continue
+ !case (1)
+ !  continue
+ !case (2)
+ !  NOT_IMPLEMENTED_ERROR()
+ !end select case
+
+ !do spin=1,gstore%nsppol
+ !  NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+ !  NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
+
+ !   ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
+ !   ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
+ !   iq_glob = my_iq + gqk%my_qstart - 1
+ !   ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gwork_q, start=[1, 1, 1, 1, 1, iq_glob]) ! count=[])
+ !   NCF_CHECK(ncerr)
+ !   ABI_FREE(gwork_q)
+ !   ABI_FREE(slice_bb)
+ !end do
 
  NCF_CHECK(nf90_close(root_ncid))
 
