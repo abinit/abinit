@@ -510,7 +510,6 @@ end subroutine fgg_init
 !!  flag that defines its status.
 !!
 !! INPUTS
-!!  W<screen_t>=Object describing the screened interaction.
 !!  iq_bz=Index of the q-point in the BZ.
 !!  nqlwl=Number of wings wanted.
 !!  how= "Pointer" is a true pointer is wanted.
@@ -521,11 +520,11 @@ end subroutine fgg_init
 !!
 !! SOURCE
 
-subroutine screen_fgg_qbz_set(W, iq_bz, nqlwl, how)
+subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
 
 !Arguments ------------------------------------
 !scalars
- class(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: screen
  integer,intent(in) :: iq_bz,nqlwl
  character(len=*),intent(in) :: how
 
@@ -535,42 +534,42 @@ subroutine screen_fgg_qbz_set(W, iq_bz, nqlwl, how)
 
 !************************************************************************
 
- W%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
+ screen%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
 
  if (firstchar(how,(/"P"/)) ) then
    ! We want a pointer.
-   select case (W%fgg_qbz_stat)
+   select case (screen%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
-     call fgg_free_0D(W%Fgg_qbz)
-     ABI_FREE(W%Fgg_qbz)
-     nullify(W%Fgg_qbz)
-     W%fgg_qbz_stat = FGG_QBZ_ISPOINTER
+     call fgg_free_0D(screen%Fgg_qbz)
+     ABI_FREE(screen%Fgg_qbz)
+     nullify(screen%Fgg_qbz)
+     screen%fgg_qbz_stat = FGG_QBZ_ISPOINTER
 
    case (FGG_QBZ_ISPOINTER)
      ! Set it to null().
-     nullify(W%Fgg_qbz)
+     nullify(screen%Fgg_qbz)
 
    case default
-     ABI_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
+     ABI_ERROR(sjoin("Wrong status:", itoa(screen%fgg_qbz_stat)))
    end select
 
  else if (firstchar(how,(/"A"/)) ) then
    ! We want an allocatable array.
 
-   select case (W%fgg_qbz_stat)
+   select case (screen%fgg_qbz_stat)
    case (FGG_QBZ_ISPOINTER)
      ! Allocate memory
-     nullify(W%Fgg_qbz)
-     ABI_MALLOC(W%Fgg_qbz,)
+     nullify(screen%Fgg_qbz)
+     ABI_MALLOC(screen%Fgg_qbz,)
 
-     call fgg_init(W%Fgg_qbz,W%npw,W%nomega,nqlwl)
-     W%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
+     call fgg_init(screen%Fgg_qbz, screen%npw, screen%nomega, nqlwl)
+     screen%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
 
    case (FGG_QBZ_ISALLOCATED)
-     W%Fgg_qbz%has_mat = MAT_ALLOCATED  ! STORED --> ALLOCATED
+     screen%Fgg_qbz%has_mat = MAT_ALLOCATED  ! STORED --> ALLOCATED
 
    case default
-     ABI_ERROR(sjoin("Wrong status:", itoa(W%fgg_qbz_stat)))
+     ABI_ERROR(sjoin("Wrong status:", itoa(screen%fgg_qbz_stat)))
    end select
 
  else
@@ -590,7 +589,6 @@ end subroutine screen_fgg_qbz_set
 !!  Inquire the processor whether it has a particular F_{GG')(q) and with which status.
 !!
 !! INPUTS
-!!  W<screen_t>=Object describing the screened interaction.
 !!  iq_ibz=k-point index
 !!  [how]=string defining which status is checked. By default the function returns
 !!     .TRUE. if the wave is either MAT_ALLOCATED or MAT_STORED.
@@ -602,11 +600,11 @@ end subroutine screen_fgg_qbz_set
 !!
 !! SOURCE
 
-pure function screen_ihave_fgg(W, iq_ibz, how)
+pure function screen_ihave_fgg(screen, iq_ibz, how)
 
 !Arguments ------------------------------------
 !scalars
- class(screen_t),intent(in) :: W
+ class(screen_t),intent(in) :: screen
  integer,intent(in) :: iq_ibz
  logical :: screen_ihave_fgg
  character(len=*),optional,intent(in) :: how
@@ -626,15 +624,15 @@ pure function screen_ihave_fgg(W, iq_ibz, how)
  end if
 
  if (iq_ibz>0) then
-   screen_ihave_fgg = (W%Fgg(iq_ibz)%has_mat==check(1) .or.&
-                       W%Fgg(iq_ibz)%has_mat==check(2) )
+   screen_ihave_fgg = (screen%Fgg(iq_ibz)%has_mat==check(1) .or.&
+                       screen%Fgg(iq_ibz)%has_mat==check(2) )
  else
    ! check the status of the full set of q-tables.
    screen_ihave_fgg=.TRUE.
-   do ii=1,W%nqibz
+   do ii=1,screen%nqibz
      screen_ihave_fgg = screen_ihave_fgg .and. &
-                     (W%Fgg(ii)%has_mat==check(1) .or.&
-                      W%Fgg(ii)%has_mat==check(2) )
+                     (screen%Fgg(ii)%has_mat==check(1) .or.&
+                      screen%Fgg(ii)%has_mat==check(2) )
    end do
  end if
 
@@ -650,21 +648,19 @@ end function screen_ihave_fgg
 !! FUNCTION
 !! Initialize the pointers to null()
 !!
-!! SIDE EFFECTS
-!! W<screen_t>=The data structure to be nullified.
-!!
 !! SOURCE
 
-subroutine screen_nullify(W)
+subroutine screen_nullify(screen)
 
 !Arguments ------------------------------------
- class(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: screen
+
 ! *************************************************************************
 
- nullify(W%Fgg_qbz); W%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Nedded since the initial status is undefined.
- nullify(W%Fgg)
+ nullify(screen%Fgg_qbz); screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Nedded since the initial status is undefined.
+ nullify(screen%Fgg)
 
- call W%PPm%nullify()
+ call screen%PPm%nullify()
 
 end subroutine screen_nullify
 !!***
@@ -680,54 +676,54 @@ end subroutine screen_nullify
 !!
 !! SOURCE
 
-subroutine screen_free(W)
+subroutine screen_free(screen)
 
 !Arguments ------------------------------------
-!scalars
- class(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: screen
 
 ! *************************************************************************
 
  ! integer
- ABI_SFREE(W%gvec)
+ ABI_SFREE(screen%gvec)
  !
  !real
- ABI_SFREE(W%ae_rhor)
- ABI_SFREE(W%qibz)
- ABI_SFREE(W%qlwl)
+ ABI_SFREE(screen%ae_rhor)
+ ABI_SFREE(screen%qibz)
+ ABI_SFREE(screen%qlwl)
  !
  !complex
- ABI_SFREE(W%omega)
+ ABI_SFREE(screen%omega)
 
  ! logical
- ABI_SFREE(W%keep_q)
+ ABI_SFREE(screen%keep_q)
 
  ! types
  ! Here be careful with dangling pointers.
  ! First Fgg_qbz that might point to one of the %Fgg then %Fgg.
- select case (W%fgg_qbz_stat)
+ select case (screen%fgg_qbz_stat)
+
  case (FGG_QBZ_ISALLOCATED)
-   call fgg_free_0D(W%Fgg_qbz)
-   ABI_FREE(W%Fgg_qbz)
-   nullify(W%Fgg_qbz)
-   W%fgg_qbz_stat=FGG_QBZ_ISPOINTER
+   call fgg_free_0D(screen%Fgg_qbz)
+   ABI_FREE(screen%Fgg_qbz)
+   nullify(screen%Fgg_qbz)
+   screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER
 
  case (FGG_QBZ_ISPOINTER)
-   nullify(W%Fgg_qbz)
-   W%fgg_qbz_stat=FGG_QBZ_ISPOINTER
+   nullify(screen%Fgg_qbz)
+   screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER
 
  case default
    continue
  end select
 
  ! Free the Fgg matrices.
- if (associated(W%Fgg)) then
-   call fgg_free(W%Fgg)
-   ABI_FREE(W%Fgg)
+ if (associated(screen%Fgg)) then
+   call fgg_free(screen%Fgg)
+   ABI_FREE(screen%Fgg)
  end if
 
  ! Free the plasmon pole tables.
- call W%PPm%free()
+ call screen%PPm%free()
 
 end subroutine screen_free
 !!***
@@ -739,7 +735,7 @@ end subroutine screen_free
 !!  screen_init
 !!
 !! FUNCTION
-!!  Initialize basic dimensions and the important (small) arrays in an Epsilonm1_results data type
+!!  Initialize basic dimensions and the important (small) arrays
 !!  starting from a file containing either epsilon^{-1} (_SCR) or chi0 (_SUSC).
 !!
 !! INPUTS
@@ -761,17 +757,14 @@ end subroutine screen_free
 !!  prtvol=Verbosity level.
 !!  comm=MPI communicator.
 !!
-!! OUTPUT
-!!  W<screen_t>=The structure initialized with basic dimensions and arrays.
-!!
 !! SOURCE
 
-subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_asked, &
+subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_asked, &
                        iomode, ngfftf, nfftf_tot, nsppol, nspden, ae_rhor, prtvol, comm)
 
 !Arguments ------------------------------------
 !scalars
- class(screen_t),intent(out) :: W
+ class(screen_t),intent(out) :: screen
  integer,intent(in) :: mqmem,iomode,npw_asked,comm,prtvol,nsppol, nfftf_tot,nspden
  character(len=fnlen),intent(in) :: ifname
  type(crystal_t),intent(in) :: Cryst
@@ -806,16 +799,15 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
 ! *********************************************************************
 
  DBG_ENTER("COLL")
-
  ABI_UNUSED(nsppol)
 
  my_rank = xmpi_comm_rank(comm)
 
- call W%nullify()
+ call screen%nullify()
 
  ! Initialize basic parameters
- W%Info = W_info ! Copy basic parameters.
- call W%Info%print(header="W info",unit=std_out)
+ screen%Info = W_info
+ call screen%Info%print(header="W info",unit=std_out)
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
@@ -830,50 +822,50 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
  ! This part must be rationalized.
  remove_dgg = (id_required==MAT_W_M1)
 
- if (W%Info%use_mdf == MDL_NONE) W%fname = ifname
- W%nI = 1; W%nJ = 1
+ if (screen%Info%use_mdf == MDL_NONE) screen%fname = ifname
+ screen%nI = 1; screen%nJ = 1
 
  ! The Q-point sampling is inited from Qmesh.
- W%nqibz = Qmesh%nibz
- ABI_MALLOC(W%qibz, (3, W%nqibz))
- W%qibz= Qmesh%ibz
+ screen%nqibz = Qmesh%nibz
+ ABI_MALLOC(screen%qibz, (3, screen%nqibz))
+ screen%qibz= Qmesh%ibz
 
- W%mqmem = mqmem!;  W%mqmem = 0
- if (W%mqmem/=0) W%mqmem=W%nqibz
+ screen%mqmem = mqmem !; screen%mqmem = 0
+ if (screen%mqmem /= 0) screen%mqmem = screen%nqibz
 
- ABI_MALLOC(W%keep_q, (W%nqibz))
- W%keep_q=.TRUE.; if (W%mqmem == 0) W%keep_q = .False.
+ ABI_MALLOC(screen%keep_q, (screen%nqibz))
+ screen%keep_q=.TRUE.; if (screen%mqmem == 0) screen%keep_q = .False.
 
- if (W%mqmem/=0 .and. W%mqmem < W%nqibz) then
+ if (screen%mqmem /= 0 .and. screen%mqmem < screen%nqibz) then
    ! Keep in memory the most representative q-points.
-   W%keep_q=.FALSE.
+   screen%keep_q = .FALSE.
    wt_list = Qmesh%wt; iperm = (/(ii,ii=1,Qmesh%nibz)/)
    call sort_dp(Qmesh%nibz,wt_list,iperm,tol12)
    do qsort=Qmesh%nibz,Qmesh%nibz-mqmem+1,1
      iq_ibz = iperm(qsort)
-     W%keep_q(iq_ibz) = .TRUE.
+     screen%keep_q(iq_ibz) = .TRUE.
    end do
  end if
- W%fgg_qbz_idx = 0
 
- W%iomode = iomode
- W%prtvol = prtvol
+ screen%fgg_qbz_idx = 0
+ screen%iomode = iomode
+ screen%prtvol = prtvol
 
- W%has_ppmodel = 0; if (W%Info%use_ppm /= PPM_NONE) W%has_ppmodel=1
+ screen%has_ppmodel = 0; if (screen%Info%use_ppm /= PPM_NONE) screen%has_ppmodel=1
 
  ! Copy the AE density for the model dielectric function or for the vertex corrections.
- W%nspden     = nspden
- W%ngfftf     = ngfftf
- W%nfftf_tot  = nfftf_tot
+ screen%nspden     = nspden
+ screen%ngfftf     = ngfftf
+ screen%nfftf_tot  = nfftf_tot
 
- ABI_MALLOC(W%ae_rhor, (nfftf_tot,nspden))
- W%ae_rhor = ae_rhor
+ ABI_MALLOC(screen%ae_rhor, (nfftf_tot, nspden))
+ screen%ae_rhor = ae_rhor
 
  deallocate_Fgg=.FALSE.
 
- W%has_fgg=0; if ( ANY(W%Info%wint_method == (/WINT_CONTOUR, WINT_AC/)) ) W%has_fgg=1
+ screen%has_fgg=0; if ( ANY(screen%Info%wint_method == (/WINT_CONTOUR, WINT_AC/)) ) screen%has_fgg=1
 
- if (W%has_fgg>0 .and. W%has_ppmodel>0) then
+ if (screen%has_fgg > 0 .and. screen%has_ppmodel>0) then
    ABI_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
  end if
 
@@ -883,40 +875,37 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
  !%% deallocate(gvec_p)
 
  ! Default values used if external file is not read.
- nqlwl  = 0
- nomega = 1
- W%npw  = npw_asked
+ nqlwl  = 0; nomega = 1
+ screen%npw  = npw_asked
 
  ! Model dielectric function does not require any external file.
- from_file = (W%Info%use_mdf==MDL_NONE)
+ from_file = (screen%Info%use_mdf == MDL_NONE)
 
  if (from_file) then
    ! Open file and check its content.
-   if (endswith(W%fname, ".nc")) W%iomode = IO_MODE_ETSF
+   if (endswith(screen%fname, ".nc")) screen%iomode = IO_MODE_ETSF
 
-   call hscr%from_file(W%fname, fform, comm)
+   call hscr%from_file(screen%fname, fform, comm)
    ! Echo of the header
-   if (my_rank == master .and. W%prtvol>0) call hscr%print()
+   if (my_rank == master .and. screen%prtvol>0) call hscr%print()
 
-   ! Communicate the header and copy basic parameters.
-   !call hscr_bcast(Hscr,master,my_rank,comm)
    mat_type_read = Hscr%id
    nqlwl         = Hscr%nqlwl
    nomega        = Hscr%nomega
  end if
 
- W%nqlwl  = nqlwl
- W%nomega = nomega
+ screen%nqlwl  = nqlwl
+ screen%nomega = nomega
 
- ABI_MALLOC(W%qlwl, (3,W%nqlwl))
- ABI_MALLOC(W%omega, (W%nomega))
+ ABI_MALLOC(screen%qlwl, (3, screen%nqlwl))
+ ABI_MALLOC(screen%omega, (screen%nomega))
 
  if (from_file) then
-   W%qlwl  = Hscr%qlwl
-   W%omega = Hscr%omega
+   screen%qlwl  = Hscr%qlwl
+   screen%omega = Hscr%omega
    !
    ! G-vectors.
-   W%npw = Hscr%npwe
+   screen%npw = Hscr%npwe
    if (npw_asked > 0) then
      if (npw_asked > Hscr%npwe) then
        write(msg,'(a,i0,2a,i0)')&
@@ -924,108 +913,110 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
         'Calculation will proceed with the Max available npw = ',Hscr%npwe
        ABI_WARNING(msg)
      else
-       W%npw = npw_asked ! Redefine the no. of G"s for W.
+       screen%npw = npw_asked ! Redefine the no. of G"s for W.
        write(msg,'(a,i0,2a,i0)')&
         'The number of G-vectors saved on file is larger than the value required = ',npw_asked,ch10,&
-        'Calculation will proceed with npw = ',W%npw
+        'Calculation will proceed with npw = ',screen%npw
        ABI_COMMENT(msg)
      end if
    end if
 
    ! consistency check on G-vectors and q-points.
-   if (ANY(Hscr%gvec(:,1:W%npw) /= Gsph%gvec(:,1:W%npw))) then
+   if (ANY(Hscr%gvec(:,1:screen%npw) /= Gsph%gvec(:,1:screen%npw))) then
      !write(std_out) W%gvec, Gsph%gvec
      ABI_ERROR("Hscr%gvec /= Gsph%gvec(1:W%npw)")
    end if
    ABI_CHECK(Hscr%nqibz == Qmesh%nibz, "Mismatch in the number of q-points in the IBZ")
-   ierr=0
+   ierr = 0
    do iq_ibz=1,Hscr%nqibz
      if (ANY( ABS(Qmesh%ibz(:,iq_ibz) - Hscr%qibz(:,iq_ibz)) > tol6) ) then
        ierr=ierr+1
        write(std_out,'(i0,2(3f7.3,1x))')iq_ibz,Qmesh%ibz(:,iq_ibz),Hscr%qibz(:,iq_ibz)
      end if
    end do
-   ABI_CHECK(ierr==0, "Wrong ordering in q-point list, aborting now")
+   ABI_CHECK(ierr == 0, "Wrong ordering in q-point list, aborting now")
  end if
 
- ABI_MALLOC(W%gvec, (3, W%npw))
- W%gvec = Gsph%gvec(:,1:W%npw)
+ ABI_MALLOC(screen%gvec, (3, screen%npw))
+ screen%gvec = Gsph%gvec(:,1:screen%npw)
 
  ! Frequency mesh.
- W%nomega_r=1; W%nomega_i=0
- if (W%nomega==2) then
-   W%nomega_r=1; W%nomega_i=1
+ screen%nomega_r = 1; screen%nomega_i = 0
+ if (screen%nomega ==2 ) then
+   screen%nomega_r = 1; screen%nomega_i = 1
  else
    ! Real frequencies are packed in the first locations.
-   W%nomega_r = 1
-   do iw=1,W%nomega
-     if (DBLE(W%omega(iw))>0.001*Ha_eV) W%nomega_r=iw
+   screen%nomega_r = 1
+   do iw=1,screen%nomega
+     if (DBLE(screen%omega(iw))>0.001*Ha_eV) screen%nomega_r=iw
    end do
-   W%nomega_i = W%nomega - W%nomega_r
+   screen%nomega_i = screen%nomega - screen%nomega_r
  end if
  !
  ! ------------------------------ Initialization completed --------------------------------
  !
  ! Just to keep the code readable.
- npw    = W%npw
- nqibz  = W%nqibz
- nomega = W%nomega
- nI     = W%ni
- nJ     = W%nj
- ABI_MALLOC(W%Fgg, (nqibz))
+ npw    = screen%npw
+ nqibz  = screen%nqibz
+ nomega = screen%nomega
+ nI     = screen%ni
+ nJ     = screen%nj
+ ABI_MALLOC(screen%Fgg, (nqibz))
 
  if (from_file) then
 
    ! Read the ab-initio em1 from file.
    select case (mat_type_read)
    case (MAT_INV_EPSILON)
-     call wrtout(std_out,strcat("Em1 will be initialized from SCR file: ",W%fname))
-     !
-   case  (MAT_CHI0)  ! Write new SCR file.
-     ABI_ERROR("Not coded yet")
-     sus_fname = W%fname; scr_fname="TESTING_SUS2SCR"
+     call wrtout(std_out, strcat("Em1 will be initialized from SCR file: ", screen%fname))
 
-     W%fname = scr_fname  ! Change the name of the file associated to W.
-     !
+   case  (MAT_CHI0)
+     ! Should Write new SCR file.
+     ABI_ERROR("Not coded yet")
+     sus_fname = screen%fname; scr_fname="TESTING_SUS2SCR"
+
+     screen%fname = scr_fname  ! Change the name of the file associated to W.
+
    case default
      write(msg,'(a,i0)')" Unsupported conversion from mat_type ",mat_type_read
      ABI_ERROR(msg)
    end select
 
    do iq_ibz=1,nqibz
-     if (.not.W%keep_q(iq_ibz)) then
+     if (.not. screen%keep_q(iq_ibz)) then
         call wrtout(std_out,strcat("Skipping iq_ibz: ",itoa(iq_ibz)))
         CYCLE
      end if
-     !
-     nqlwl=0; is_qeq0=(normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
-     if (is_qeq0) nqlwl=W%nqlwl
-     !
+
+     nqlwl=0; is_qeq0=(normv(screen%qibz(:,iq_ibz),Cryst%gmet,'G') < GW_TOLQ0)
+     if (is_qeq0) nqlwl=screen%nqlwl
+
      ! Allocate F_{GG'}(w)
-     call W%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
-     !
+     call screen%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
+
      ! Read data from file (use MPI-IO if possible)
-     if (W%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
+     if (screen%iomode /= IO_MODE_ETSF .and. xmpi_mpiio==1) then
        !call wrtout(std_out, "read_screening with MPI_IO")
-       call read_screening(varname, W%fname, npw, 1, nomega, W%Fgg(iq_ibz)%mat, IO_MODE_MPI, comm, iqiA=iq_ibz)
+       call read_screening(varname, screen%fname, npw, 1, nomega, screen%Fgg(iq_ibz)%mat, IO_MODE_MPI, comm, iqiA=iq_ibz)
      else
-       call read_screening(varname, W%fname, npw, 1, nomega, W%Fgg(iq_ibz)%mat, W%iomode, comm, iqiA=iq_ibz)
+       call read_screening(varname, screen%fname, npw, 1, nomega, screen%Fgg(iq_ibz)%mat, screen%iomode, comm, iqiA=iq_ibz)
      end if
-     W%Fgg(iq_ibz)%has_mat = MAT_STORED
+
      ! W contains Em1 and is ready to use.
+     screen%Fgg(iq_ibz)%has_mat = MAT_STORED
    end do
 
  else
    !
    ! Model dielectric function. Only epsm-1 is supported here.
    call wrtout(std_out," Calculating model dielectric function... ")
-   ABI_CHECK(W%nomega==1,"Cannot use nomega > 1 in model dielectric function")
+   ABI_CHECK(screen%nomega==1,"Cannot use nomega > 1 in model dielectric function")
 
    do iq_ibz=1,nqibz
-     if (.not.W%keep_q(iq_ibz)) CYCLE
+     if (.not.screen%keep_q(iq_ibz)) CYCLE
 
      ! The wings are not used here.
-     nqlwl=0; is_qeq0= (normv(W%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
+     nqlwl=0; is_qeq0= (normv(screen%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
      !
      ! Calculate the model. Note that mdielf awaits an index in the BZ.
      found = qmesh%has_bz_item(Qmesh%ibz(:,iq_ibz),iq_bz,g0)
@@ -1034,23 +1025,23 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
      end if
      !
      ! Allocate F_{GG'}(w).
-     call W%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
+     call screen%Fgg(iq_ibz)%init(npw, nomega, nqlwl)
 
-     eps_inf  =  W%Info%eps_inf
-     mdf_type =  W%Info%use_mdf
-     !em1_ggw  => W%Fgg(iq_ibz)%mat
+     eps_inf  =  screen%Info%eps_inf
+     mdf_type =  screen%Info%use_mdf
+     !em1_ggw  => screen%Fgg(iq_ibz)%mat
 
      ! Construct W TODO check the new implementation.
      call screen_mdielf(iq_bz,npw,nomega,mdf_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,&
-                        nspden,nfftf_tot,ngfftf,ae_rhor,"EM1",W%Fgg(iq_ibz)%mat,comm)
+                        nspden,nfftf_tot,ngfftf,ae_rhor,"EM1",screen%Fgg(iq_ibz)%mat,comm)
 
-     W%Fgg(iq_ibz)%has_mat = MAT_STORED
+     screen%Fgg(iq_ibz)%has_mat = MAT_STORED
 
-     if (W%prtvol > 0) then
+     if (screen%prtvol > 0) then
        do iw=1,nomega
          write(msg,'(a,i3,a,i4,a)')'  Model symmetrical e^{-1} (q=',iq_ibz,', omega=',iw,', G,G'')'
          call wrtout(std_out,msg)
-         call print_arr(W%Fgg(iq_ibz)%mat(:,:,iw))
+         call print_arr(screen%Fgg(iq_ibz)%mat(:,:,iw))
        end do
      end if
      !
@@ -1059,22 +1050,23 @@ subroutine screen_init(W, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, npw_as
  end if
  !
  ! Init plasmon-pole parameters.
- if (W%has_ppmodel > 0) then
+ if (screen%has_ppmodel > 0) then
    call wrtout(std_out, "Calculating PPmodel parameters")
-   ppmodel = W%Info%use_ppm; drude_plsmf = W%Info%drude_plsmf
-   call W%PPm%init(W%mqmem, W%nqibz, W%npw, ppmodel, drude_plsmf, W%Info%invalid_freq)
+   ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
+   call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
-     if (screen_ihave_fgg(W, iq_ibz, how="Stored")) then
-       call W%PPm%new_setup(iq_ibz,Cryst,Qmesh,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,nfftf_tot,Gsph%gvec,ngfftf,W%ae_rhor(:,1))
+     if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
+       call screen%PPm%new_setup(iq_ibz,Cryst,Qmesh,npw,nomega,screen%omega, &
+                                 screen%Fgg(iq_ibz)%mat,nfftf_tot,Gsph%gvec,ngfftf,screen%ae_rhor(:,1))
      end if
    end do
  end if
 
  ! Deallocate Fgg if the matrices are not needed anymore.
  if (deallocate_Fgg) then
-   call screen_fgg_qbz_set(W,0,0,"Pointer") ! Avoid dangling pointer.
-   call fgg_free(W%Fgg,keep_q=W%keep_q)
+   call screen_fgg_qbz_set(screen, 0, 0, "Pointer") ! Avoid dangling pointer.
+   call fgg_free(screen%Fgg, keep_q=screen%keep_q)
  end if
 
  if (from_file) call Hscr%free()
@@ -1096,15 +1088,14 @@ end subroutine screen_init
 !!  performing any operation that involves the symmetrized component of the two-point function.
 !!
 !! INPUTS
-!!  W<screen_t>=Data structure used to represent the two-point function
 !!  Cryst<crystal_t>=Info on the crystal structure.
 !!  Gsph<gsphere_t>=data related to the G-sphere
 !!  Qmesh<kmesh_t>=Structure defining the q-mesh used for sample the BZ.
 !!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted.
 !!
 !! SIDE EFFECTS
-!!   W%PPm
-!!   W%Fgg_qbz
+!!   screen%PPm
+!!   screen%Fgg_qbz
 !!
 !! NOTES
 !!  In the present implementation, we are not considering a possible umklapp vector G0 in the
@@ -1114,11 +1105,11 @@ end subroutine screen_init
 !!
 !! SOURCE
 
-subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
+subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
 !Arguments ------------------------------------
 !scalars
- class(screen_t),intent(inout) :: W
+ class(screen_t),intent(inout) :: screen
  integer,intent(in) :: iq_bz
  type(crystal_t),intent(in) :: Cryst
  type(gsphere_t),intent(in) :: Gsph
@@ -1139,88 +1130,92 @@ subroutine screen_symmetrizer(W, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
  DBG_ENTER("COLL")
 
- npw = W%npw; nqibz = W%nqibz; nomega = W%nomega
+ npw = screen%npw; nqibz = screen%nqibz; nomega = screen%nomega
 
  call qmesh%get_bz_item(iq_bz, qbz, iq_ibz, isym_q, itim_q, isirred=q_isirred)
 
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
  ! ========================================================
- if (screen_ihave_fgg(W,iq_ibz,how="Stored")) then
+ if (screen_ihave_fgg(screen,iq_ibz,how="Stored")) then
 
    if (q_isirred) then
      ! Symmetrization is not needed. Point the data in memory.
-     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Pointer")
-     W%Fgg_qbz => W%Fgg(iq_ibz)
+     call screen_fgg_qbz_set(screen,iq_bz,nqlwl0,"Pointer")
+     screen%Fgg_qbz => screen%Fgg(iq_ibz)
    else
      ! Allocate space. ! TODO Wings are not symmetrized but oh well
-     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Allocate")  ! Dimensions should not be changed.
+     call screen_fgg_qbz_set(screen, iq_bz, nqlwl0, "Allocate")  ! Dimensions should not be changed.
 
      ! Out-of-place symmetrization.
-     !em1_qibz => W%Fgg(iq_ibz)%mat; em1_qbz  => W%Fgg_qbz%mat
-     call em1_symmetrize_op(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg(iq_ibz)%mat,W%Fgg_qbz%mat)
+     !em1_qibz => screen%Fgg(iq_ibz)%mat; em1_qbz  => screen%Fgg_qbz%mat
+     call em1_symmetrize_op(iq_bz,npw,nomega,Gsph,Qmesh,screen%Fgg(iq_ibz)%mat,screen%Fgg_qbz%mat)
    end if
 
-   if (W%has_ppmodel>0) then
+   if (screen%has_ppmodel > 0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
-     call W%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg(iq_ibz)%mat,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
+     call screen%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega, screen%omega, screen%Fgg(iq_ibz)%mat, &
+                                 screen%nfftf_tot, screen%ngfftf, screen%ae_rhor(:,1))
    end if
 
- else if (screen_ihave_fgg(W,iq_ibz,how="Allocated")) then
+ else if (screen_ihave_fgg(screen, iq_ibz, how="Allocated")) then
    ABI_ERROR("Fgg_iqibz is allocated but not initialized!")
 
  else
-   if (W%fgg_qbz_idx /= iq_bz) then
+   if (screen%fgg_qbz_idx /= iq_bz) then
      ! Must compute em1_qbz here. em1_qbz => W%Fgg_qbz%mat
 
      ! Allocate the BZ buffer.
-     call screen_fgg_qbz_set(W,iq_bz,nqlwl0,"Allocate")
+     call screen_fgg_qbz_set(screen, iq_bz, nqlwl0, "Allocate")
 
-     if (W%Info%use_mdf /= MDL_NONE) then
+     if (screen%Info%use_mdf /= MDL_NONE) then
        ! Compute the model-dielectric function at qbz on-the fly and in sequential
        !call wrtout(std_out,"Will compute MDF on the fly")
-       call screen_mdielf(iq_bz,npw,nomega,W%Info%use_mdf,W%Info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
-                          W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",W%Fgg_qbz%mat,xmpi_comm_self)
+       call screen_mdielf(iq_bz,npw,nomega,screen%Info%use_mdf,screen%Info%eps_inf,Cryst,Qmesh,Vcp,Gsph,&
+                          screen%nspden,screen%nfftf_tot,screen%ngfftf,screen%ae_rhor,"EM1", &
+                          screen%Fgg_qbz%mat,xmpi_comm_self)
 
      else
        ! Read W(q_ibz) and symmetrize it (do this only if we don't have the correct q_bz in memory).
-       call wrtout(std_out,sjoin("Out of core with file: ",W%fname))
-       call read_screening(em1_ncname,W%fname,npw,1,nomega,W%Fgg_qbz%mat,W%iomode,xmpi_comm_self,iqiA=iq_ibz)
+       call wrtout(std_out,sjoin("Out of core with file: ",screen%fname))
+       call read_screening(em1_ncname,screen%fname,npw,1,nomega,screen%Fgg_qbz%mat,&
+                           screen%iomode,xmpi_comm_self,iqiA=iq_ibz)
 
        ! In-place symmetrization to get the q-point in the BZ.
        if (.not.q_isirred) then
-         call em1_symmetrize_ip(iq_bz,npw,nomega,Gsph,Qmesh,W%Fgg_qbz%mat)
+         call em1_symmetrize_ip(iq_bz,npw,nomega,Gsph,Qmesh,screen%Fgg_qbz%mat)
        end if
      end if
 
-     W%Fgg_qbz%has_mat = MAT_STORED
+     screen%Fgg_qbz%has_mat = MAT_STORED
    end if
 
-   ABI_CHECK(W%Fgg_qbz%has_mat == MAT_STORED, "Wrong has_mat")
+   ABI_CHECK(screen%Fgg_qbz%has_mat == MAT_STORED, "Wrong has_mat")
    !
    ! Ppmodel calculations with ppm tables in memory.
    ! TODO treat the case in which IBZ tables are stored in memory.
-   if (W%has_ppmodel > 0) then
+   if (screen%has_ppmodel > 0) then
      ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
-     call W%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,W%omega,W%Fgg_qbz%mat ,W%nfftf_tot,W%ngfftf,W%ae_rhor(:,1))
+     call screen%PPm%symmetrizer(iq_bz,Cryst,Qmesh,Gsph,npw,nomega,screen%omega,&
+                                 screen%Fgg_qbz%mat ,screen%nfftf_tot,screen%ngfftf,screen%ae_rhor(:,1))
    end if
  end if
 
  ! Calculate model dielectric function for this q-point in the BZ.
- eps_inf = W%Info%eps_inf; mdf_type = W%Info%use_mdf
+ eps_inf = screen%Info%eps_inf; mdf_type = screen%Info%use_mdf
 
  ! Model dielectric function. Only epsm-1 is supported here.
  !call wrtout(std_out," Calculating model dielectric function... ")
  !ABI_CHECK(W%nomega==1,"Cannot use nomega>1 in model dielectric function")
 
- ! W%Fgg_qbz%mat
+ ! screen%Fgg_qbz%mat
 
  !%  call screen_mdielf(iq_bz,npw,nomega,mdf_type,eps_inf,Cryst,Qmesh,Vcp,Gsph,&
- !% &  W%nspden,W%nfftf_tot,W%ngfftf,W%ae_rhor,"EM1",em1_qbz,xmpi_comm_self)
+ !% &  screen%nspden,screen%nfftf_tot,screen%ngfftf,screen%ae_rhor,"EM1",em1_qbz,xmpi_comm_self)
 
  ! Store the index of the q-point in the BZ for checking purpose.
- W%fgg_qbz_idx = iq_bz
+ screen%fgg_qbz_idx = iq_bz
 
  DBG_EXIT("COLL")
 
@@ -1257,11 +1252,11 @@ end subroutine screen_symmetrizer
 !!
 !! SOURCE
 
-subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_ket, out_ket)
+subroutine screen_w0gemv(screen, trans, in_npw, nspinor, only_diago, alpha, beta, in_ket, out_ket)
 
 !Arguments ------------------------------------
 !scalars
- class(screen_t),intent(in) :: W
+ class(screen_t),intent(in) :: screen
  integer,intent(in) :: in_npw,nspinor
  complex(gwpc),intent(in) :: alpha,beta
  logical,intent(in) :: only_diago
@@ -1278,7 +1273,7 @@ subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_
 
 ! *************************************************************************
 
- lda = W%npw; em1_qbz => W%Fgg_qbz%mat(:,:,1)
+ lda = screen%npw; em1_qbz => screen%Fgg_qbz%mat(:,:,1)
 
  if (.not.only_diago) then
    call xgemv(trans,in_npw,in_npw,alpha,em1_qbz,lda,in_ket,1,beta,out_ket,1)
@@ -1298,7 +1293,7 @@ subroutine screen_w0gemv(W, trans, in_npw, nspinor, only_diago, alpha, beta, in_
      end if
 
    else
-     ! beta==0
+     ! beta == 0
      if (firstchar(trans, (/"C"/)) ) then
        do ig=1,in_npw
          out_ket(ig) = alpha * CONJG(em1_qbz(ig,ig)) * in_ket(ig)
