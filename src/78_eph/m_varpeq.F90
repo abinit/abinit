@@ -140,6 +140,8 @@ module m_varpeq
    ! deformation potential; treated by this MPI rank
    ! (my_npert, my_nq)
 
+  complex(dp), allocatable :: bfull(:, :)
+
 
  ! Electron-phonon subspace -------------------
 
@@ -290,6 +292,24 @@ subroutine varpeq_test(self)
  real(dp), allocatable :: pc(:, :, :)
  complex(dp), allocatable :: prev_a(:, :, :), prev_b(:, :), prev_grad(:, :, :)
 
+
+ integer :: nkbz
+ integer :: ekptopt
+ integer :: enkpt
+ integer :: etimrev
+ integer :: ik_ebz, ik_sym
+ type(krank_t) :: krank_kebz
+ integer :: nsym
+ integer :: symrec(3,3,2)
+ integer :: symafm(2)
+
+ integer,allocatable :: k2kebz(:,:)
+ real(dp) :: kpt(3), kpt_ebz(3)
+ real(dp),allocatable :: ekpts(:,:), kbz(:,:)
+ real(dp),allocatable :: ewtk(:)
+ complex(dp),allocatable :: aeff(:,:,:)
+
+
 ! *************************************************************************
 
  cryst => self%gstore%cryst
@@ -308,7 +328,7 @@ subroutine varpeq_test(self)
    'E_ph', 'E_elph', 'epsilon', '|gradient|^2'
 
  call self%seed_a()
- do ii=1,200
+ do ii=1,150
    call self%b_from_a()
    prev_a(:, :, :) = self%a(:, :, :)
    prev_b(:, :) = self%b(:, :)
@@ -351,7 +371,86 @@ subroutine varpeq_test(self)
 
  enddo
 
+ !do ik=1,self%nkpt
+ !  write(ab_out, '(a, i3, a, 3f10.6)') '* at k-point ', ik, ' -> ', self%kpts(:, ik)
+ !  write(ab_out, '(a20,3f10.6)') 'ReA: ', real(self%a(:, ik, 1))
+ !  write(ab_out, '(a20,3f10.6/)') 'ImA: ', aimag(self%a(:, ik, 1))
+ !enddo
+
  write(ab_out, '(a, es13.4)') 'vbm max = ', maxval(ebands%eig(3:5, :, :))
+
+ ! DEBUG
+ ! test if A is actually symmetric
+ ! generate k-points in the effetive BZ: ebz
+ etimrev = 1
+ ekptopt = 2
+ nsym = 2
+ symafm(:) = 1
+ symrec(:,:,:) = zero
+ symrec(1,1,1) = 1; symrec(2,2,1) = 1; symrec(3,3,1) = 1
+ symrec(1,1,2) = -1; symrec(2,2,2) = -1; symrec(3,3,2) = -1
+
+ call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ekptopt, ebands%nshiftk, &
+   ebands%shiftk, enkpt, ekpts, ewtk, nkbz, kbz)
+
+ ! krank for ebz
+ krank_kebz = krank_from_kptrlatt(enkpt, ekpts, ebands%kptrlatt, &
+   compute_invrank=.True.)
+
+ ! get mapping k->ebz
+ ABI_MALLOC(k2kebz, (6, self%nkpt))
+ call krank_kebz%get_mapping(self%nkpt, self%kpts, dksqmax, cryst%gmet, &
+   k2kebz, nsym, symafm, symrec, etimrev, use_symrec=.True.)
+
+
+ ABI_MALLOC(aeff, (self%nb, self%nkpt, self%nsppol))
+ aeff(:,:,:) = zero
+ do is=1,self%nsppol
+
+   do ik=1,self%nkpt
+     ik_ebz = k2kebz(1, ik); isym_k = k2kebz(2, ik)
+     trev_k = k2kebz(6, ik); g0_k = k2kebz(3:5, ik)
+     isirr_k = (isym_k ==1 .and. trev_k == 0 .and. all(g0_k == 0))
+     tsign_k = 1; if (trev_k == 1) tsign_k = -1
+
+     kpt(:) = self%kpts(:, ik)
+     kpt_ebz(:) = ekpts(:, ik_ebz)
+     ik_sym = self%krank_kpts%get_index(kpt_ebz)
+
+     !write(ab_out, '(i5,a,3f8.4,a,i5,a,3f8.4)') ik, ' coords ', kpt(:), ' -> ', &
+     !  ik_sym, ' coords ', self%kpts(:, ik_sym)
+
+     do ib=1,self%nb
+       if (all((kpt-kpt_ebz) == 0)) then
+         aeff(ib, ik, is) = self%a(ib, ik, is)
+       else
+         aeff(ib, ik, is) = conjg(self%a(ib, ik_sym, is))
+         !aeff(ib, ik, is) = self%a(ib, ik, is)
+
+       endif
+
+     enddo
+   enddo
+ enddo
+
+
+ self%a(:, :, :) = aeff(:, :, :)
+ call self%b_from_a()
+ call self%get_enterms()
+ call self%get_elgrad()
+ gradres = sum(abs(self%grad_a(:, :, :))**2)
+
+ write(ab_out,'(i4,es13.5,2es12.4,es13.4,es13.4,es14.4)') ii, &
+   sum(self%enterms(:)), self%enterms(1), self%enterms(2), self%enterms(3), &
+   self%eps, gradres
+
+ ABI_FREE(kbz)
+ ABI_FREE(k2kebz)
+ ABI_FREE(ekpts)
+ ABI_FREE(ewtk)
+ ABI_FREE(aeff)
+ ! DEBUG
+
 
  ABI_FREE(prev_a)
  ABI_FREE(prev_grad)
@@ -653,7 +752,8 @@ subroutine varpeq_get_mintheta(self)
 
            ! Loop over perturbations
            do my_nu=1,gqk%my_npert
-             bqnu = self%b(my_nu, my_iq)
+             !bqnu = self%b(my_nu, my_iq)
+             bqnu = self%bfull(my_nu, iq_glob)
              g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
              ! sin^2(theta) term
              term3_tmp = term3_tmp + &
@@ -771,7 +871,8 @@ subroutine varpeq_get_elgrad(self)
            a_back = self%a(jb, ik_back, is)
 
            do my_nu=1,gqk%my_npert
-             bqnu = self%b(my_nu, my_iq)
+             !bqnu = self%b(my_nu, my_iq)
+             bqnu = self%bfull(my_nu, iq_glob)
              g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
              g_back = gqk%my_g(my_nu, ib, my_iq, jb, ik_back)
 
@@ -870,9 +971,11 @@ subroutine varpeq_get_enterms(self)
  ! Vibrational energy
  envib = zero
  do my_iq=1,gqk%my_nq
+   iq_glob = my_iq + gqk%my_qstart - 1
    do my_nu=1,gqk%my_npert
      phfreq = gqk%my_wnuq(my_nu, my_iq)
      envib = envib + phfreq*abs(self%b(my_nu, my_iq))**2
+     !envib = envib + phfreq*abs(self%bfull(my_nu, iq_glob))**2
    enddo
  enddo
  call xmpi_sum(envib, comm, ierr)
@@ -916,7 +1019,8 @@ subroutine varpeq_get_enterms(self)
 
            ! Loop over perturbations
            do my_nu=1,gqk%my_npert
-             bqnu = self%b(my_nu, my_iq)
+             !bqnu = self%b(my_nu, my_iq)
+             bqnu = self%bfull(my_nu, iq_glob)
              g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
              enelph_tmp = enelph_tmp + &
                kweight*a_from*conjg(bqnu)*g_forw*conjg(a_forw)
@@ -961,7 +1065,7 @@ subroutine varpeq_b_from_a(self)
 
 !Local variables-------------------------------
 !scalars
- integer :: ierr
+ integer :: comm, nproc, my_rank, ierr
  integer :: is, ik, ib, jb
  integer :: my_iq, my_nu, my_is
  integer :: my_nq, my_npert
@@ -977,38 +1081,96 @@ subroutine varpeq_b_from_a(self)
 
 !arrays
  integer, allocatable :: k_plus_q_map(:, :), k_minus_q_map(:, :)
+ integer, allocatable :: q_plus_k_map(:, :)
  real(dp) :: my_qpt(3), my_kpt(3)
+ complex(dp), allocatable :: gk_gathered(:, :, :, :)
 
 ! *************************************************************************
+
+ comm = self%gstore%comm
+ nproc = xmpi_comm_size(comm)
+ my_rank = xmpi_comm_rank(comm)
 
  cryst => self%gstore%cryst
 
  ABI_MALLOC(k_plus_q_map, (6, self%nkpt))
  ABI_MALLOC(k_minus_q_map, (6, self%nkpt))
+ ABI_MALLOC(q_plus_k_map, (6, self%nqpt))
 
  self%b(:, :) = zero
+ self%bfull(:, :) = zero
 
- !! Loop over collinear spins
- !do is=1,self%nsppol
- !  my_is = self%gstore%$spin2my_is(is); if (m_is == 0) cycle
- !  gqk => self%gstore%gqk(my_is)
-
- !  ! Loop over the effective electronic k-space
- !  do ik=1,self%nkpt
- !    my_kpt(:) = self%kpts(:, ik)
-
- !    ! Forward (k+q) scattering mapping: k+q -> k_{effBZ}
- !    call self%krank_kpts%get_mapping(self%nqpt, self%qpts, dksqmax, &
- !      cryst%gmet, k_plus_q_map, self%nsym, self5symafm, self%symrec, &
- !      self%timrev, use_symrec=.True., qpt=my_kpt)
-
- !  enddo
-
- !enddo
-
- ! Loop over collinerar spins (if any)
  gqk => self%gstore%gqk(1)
  my_nq = gqk%my_nq; my_npert = gqk%my_npert
+
+ ABI_MALLOC(gk_gathered, (my_npert, self%nb, self%nb, self%nqpt))
+
+ ! TODO:
+ ! Now, I need to test the symmetry relations: g(Sk, q) = g(k, S^{-1}q)
+ ! for this purpose I will need to know
+ ! * irreducible wedge in the BZ: k_BZ
+ ! * mapping of full_BZ to k_BZ
+ ! * at each k I will get ik_forw and ik_ibz
+ ! * then i will collect all the g(k_ibz, :)
+ ! * then i will loop over q and will have to find S^{-1}q and corresponding iq_glob
+ ! * then i will be able to fetch g(k_ibz, iq_glob_transormed)
+
+ do is=1,self%nsppol
+   my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
+   gqk => self%gstore%gqk(my_is)
+
+   do ik=1,self%nkpt
+     kweight = self%wtk(ik)
+     my_kpt = self%kpts(:, ik)
+     ! Forward (k+q) scattering mapping
+     call self%krank_kpts%get_mapping(self%nqpt, self%qpts, dksqmax, &
+       cryst%gmet, q_plus_k_map, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_kpt)
+
+     ierr = merge(1, 0, dksqmax > tol12)
+     if (ierr /= 0) then
+       ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
+         to the effective IBZ with qpt ", ktoa(my_kpt)))
+     endif
+
+     ! for this k, gathering all the matrix elements
+     gk_gathered(:,:,:,:) = zero
+     do my_iq=1,my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       gk_gathered(:, :, :, iq_glob) = gqk%my_g(:, :, my_iq, :, ik)
+     enddo
+     call xmpi_sum(gk_gathered, comm, ierr)
+
+
+     do my_iq=1,my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       my_qpt = self%qpts(:, iq_glob)
+       ik_forw = q_plus_k_map(1, iq_glob)
+
+       do ib=1,self%nb
+         a_from = self%a(ib, ik, is)
+
+         do jb=1,self%nb
+           a_forw = self%a(jb, ik_forw, is)
+
+           do my_nu=1,my_npert
+             g_forw = gk_gathered(my_nu, jb, ib, iq_glob)
+             !g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+
+             if (gqk%my_wnuq(my_nu, my_iq) == 0) then
+               self%bfull(my_nu, iq_glob) = zero
+             else
+               self%bfull(my_nu, iq_glob) = self%bfull(my_nu, iq_glob) + &
+                 conjg(a_forw)*g_forw*a_from*kweight/gqk%my_wnuq(my_nu, my_iq)
+             endif
+
+           enddo
+         enddo
+       enddo
+     enddo
+   enddo
+ enddo
+ call xmpi_sum(self%bfull, comm, ierr)
 
  ! Loop over q-points
  do my_iq=1,my_nq
@@ -1054,8 +1216,10 @@ subroutine varpeq_b_from_a(self)
 
      if (gqk%my_wnuq(my_nu, my_iq) == 0) then
        self%b(my_nu, my_iq) = zero
+       !self%bfull(my_nu, iq_glob) = zero
      else
        self%b(my_nu, my_iq) = b_tmp/gqk%my_wnuq(my_nu, my_iq)
+       !self%bfull(my_nu, iq_glob) = b_tmp/gqk%my_wnuq(my_nu, my_iq)
      endif
 
    enddo
@@ -1063,6 +1227,8 @@ subroutine varpeq_b_from_a(self)
 
  ABI_FREE(k_plus_q_map)
  ABI_FREE(k_minus_q_map)
+ ABI_FREE(q_plus_k_map)
+ ABI_FREE(gk_gathered)
 
 end subroutine varpeq_b_from_a
 !!***
@@ -1103,8 +1269,9 @@ subroutine varpeq_seed_a(self)
    do ik=1,self%nkpt
      ik_ibz = self%map_k_kibz(1, ik)
      do ib=1,self%nb
-       !imeig = abs(ebands%eig(bstart+ib-1, ik_ibz, is))
-       imeig = -j_dpc*ebands%eig(bstart+ib-1, ik_ibz, is)
+       imeig = -one*(ebands%eig(bstart+ib-1, ik_ibz, is))
+       !imeig = -j_dpc*ebands%eig(bstart+ib-1, ik_ibz, is)
+       !imeig = j_dpc*ebands%eig(bstart+ib-1, ik_ibz, is)
        self%a(ib, ik, is) = exp(-imeig)
      enddo
    enddo
@@ -1234,6 +1401,7 @@ subroutine varpeq_init(self, gstore, dtset)
  self%nqpt = gstore%nqbz
  ABI_MALLOC(self%b, (gstore%gqk(1)%my_npert, gstore%gqk(1)%my_nq))
  ABI_MALLOC(self%qpts, (3, self%nqpt))
+ ABI_MALLOC(self%bfull, (gstore%gqk(1)%my_npert, self%nqpt))
  self%qpts(:, :) = zero
 
  do my_iq=1,gqk%my_nq
