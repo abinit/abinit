@@ -309,6 +309,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: do_scprod, do_bcast
  integer :: startband, endband
  integer :: ndat,idat
+ integer :: gpu_option
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file,has_vectornd
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -411,6 +412,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  end if
 
 !Set up parallelism
+ gpu_option=dtset%gpu_option
  ndat=dtset%bandpp
  master=0;me=mpi_enreg%me_kpt
  spaceworld=mpi_enreg%comm_cell
@@ -421,7 +423,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  my_atmtab=>mpi_enreg%my_atmtab
  my_spintab=mpi_enreg%my_isppoltab
  my_nsppol=count(my_spintab==1)
- use_ompgpu=(dtset%gpu_option==ABI_GPU_OPENMP)
+ use_ompgpu=(gpu_option==ABI_GPU_OPENMP)
 
 !Fake MPI data to be used in sequential calls to parallel routines
  call initmpi_seq(mpi_enreg_seq)
@@ -446,7 +448,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  ABI_MALLOC(bands_treated_now_ndat, (maxval(nband_rbz),ndat))
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,cg1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
 !Check ddk files (needed to compute electric field perturbations)
@@ -543,7 +545,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
-& usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
+& usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=gpu_option)
 has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
@@ -560,8 +562,8 @@ has_vectornd = (with_vectornd .EQ. 1)
  ABI_MALLOC(ch1c_tmp,(2,mband_mem_rbz))
  ch1c(:,:,:,:)=zero
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(alloc:ch1c,ch1c_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
- !$OMP TARGET UPDATE TO(ch1c) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(alloc:ch1c,ch1c_tmp) IF(gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET UPDATE TO(ch1c) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
  nzlmopt_ipert=0;nzlmopt_ipert1=0
  if (usepaw==1) then
@@ -903,7 +905,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_MALLOC(vdot2r,(nband_k))
        ABI_MALLOC(vdot2i,(nband_k))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        d2nl_k(:,:)=zero
        d2ovl_k(:,:)=zero
@@ -1038,7 +1040,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &         psps%mqgrid_ff,nkpg,npw_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,usepaw,&
 &         psps%useylm,ylm_k,ylmgr_dum)
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(to:ffnlk) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET ENTER DATA MAP(to:ffnlk) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        end if
 
@@ -1057,7 +1059,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &       psps%mqgrid_ff,nkpg1,npw1_k,psps%ntypat,psps%pspso,psps%qgrid_ff,rmet,usepaw,&
 &       psps%useylm,ylm1_k,ylmgr1_k)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(to:ffnl1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(to:ffnl1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
 !      Extract non-local form factors for H^(j1)
@@ -1067,9 +1069,6 @@ has_vectornd = (with_vectornd .EQ. 1)
        else
          dimffnl1_idir1=1+ider
          ABI_MALLOC(ffnl1_idir1,(npw1_k,dimffnl1_idir1,psps%lmnmax,psps%ntypat))
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
          ii=1;if (psps%useylm==0) ii=1+ider
          do itypat=1,psps%ntypat
            do ilmn=1,psps%lmnmax
@@ -1077,7 +1076,7 @@ has_vectornd = (with_vectornd .EQ. 1)
            end do
          end do
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(to:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET ENTER DATA MAP(to:ffnl1_idir1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        end if
 
@@ -1086,7 +1085,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &       ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(to:ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(to:ph3d) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        if (size(ffnlk)>0) then
          call gs_hamkq%load_k(ffnl_k=ffnlk)
@@ -1116,7 +1115,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        end if
        ABI_MALLOC(gh1,(2,npw1_k*nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(alloc:gh1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        nullify(cwaveprj0_idir1)
        if (usecprj==1) then
@@ -1126,7 +1125,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        if (has_dcwf) then
          ABI_MALLOC(gs1,(2,npw1_k*nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:gs1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET ENTER DATA MAP(alloc:gs1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        else
          ABI_MALLOC(gs1,(1,1))
@@ -1142,13 +1141,13 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_MALLOC(gvnlx1,    (2,npw1_k*nspinor*ndat))
        ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1(1:2,1:npw1_k*nspinor*ndat)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1_tmp(1:2,1:npw1_k*nspinor)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1(1:2,1:npw1_k*nspinor*ndat)) IF(gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1_tmp(1:2,1:npw1_k*nspinor)) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        if (has_dcwf.and.is_metal_or_qne0) then
          ABI_MALLOC(gvnlx2,    (2,npw1_k*nspinor*nband_k))
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET ENTER DATA MAP(alloc:gvnlx2(1:2,1:npw1_k*nspinor*nband_k)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET ENTER DATA MAP(alloc:gvnlx2(1:2,1:npw1_k*nspinor*nband_k)) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        end if
 
@@ -1175,10 +1174,9 @@ has_vectornd = (with_vectornd .EQ. 1)
          end if
          iband_me = iband_me + ndat
 
-         ch1c_tmp(:,:) = zero
-         if(dtset%gpu_option==ABI_GPU_DISABLED) then
+         if(gpu_option==ABI_GPU_DISABLED) then
            ch1c_tmp(:,:) = zero
-         else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+         else if(gpu_option==ABI_GPU_OPENMP) then
            call gpu_set_to_zero(ch1c_tmp,int(2,c_size_t)*mband_mem_rbz)
          end if
 
@@ -1218,9 +1216,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 !          Not able to compute if ipert1=(Elect. field) and no ddk WF file
            if (ipert1==dtset%natom+2.and.ddkfil(idir1)==0) cycle
 
-           if(dtset%gpu_option==ABI_GPU_DISABLED) then
+           if(gpu_option==ABI_GPU_DISABLED) then
              gvnlx1(:,:)=zero
-           else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+           else if(gpu_option==ABI_GPU_OPENMP) then
              call gpu_set_to_zero(gvnlx1,int(2,c_size_t)*npw1_k*nspinor*ndat)
            end if
 
@@ -1232,7 +1230,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                end do
              end do
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET UPDATE TO(ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET UPDATE TO(ffnl1_idir1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
            end if
 
@@ -1274,7 +1272,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
 &                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,&
 &                 gs_hamkq%nloalg,gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,&
-&                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ph1d,gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=gpu_option)
                end if
 
 !            === Wave-vector perturbation
@@ -1308,7 +1306,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kg_kp,gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,&
 &                 gs_hamkq%mgfft,mpi_enreg,ndat,gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,&
 &                 gs_hamkq%npw_kp,gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,&
-&                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ph3d_kp,gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=gpu_option)
                end if
 
 
@@ -1340,7 +1338,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 gs_hamkq%kpg_kp,gs_hamkq%kpt_kp,gs_hamkq%lmnmax,gs_hamkq%mgfft,mpi_enreg,ndat,&
 &                 gs_hamkq%natom,gs_hamkq%nattyp,gs_hamkq%ngfft,gs_hamkq%nloalg,gs_hamkq%npw_kp,&
 &                 gs_hamkq%nspinor,gs_hamkq%ntypat,gs_hamkq%phkpxred,gs_hamkq%ph1d,gs_hamkq%ph3d_kp,&
-&                 gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=dtset%gpu_option)
+&                 gs_hamkq%ucvol,gs_hamkq%useylm,is_kprime=.true.,gpu_option=gpu_option)
                end if
              end if ! ipert
 
@@ -1391,7 +1389,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                gvnlx1=zero
              end if
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET UPDATE TO(gvnlx1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET UPDATE TO(gvnlx1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
            else
              usevnl=0
@@ -1426,12 +1424,12 @@ has_vectornd = (with_vectornd .EQ. 1)
 &             idir1,ipert1,&
 &             eig_k(iband:iband+ndat-1),mpi_enreg,ndat,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
            if (sij_opt==1.and.optnl==1) then
-             if(dtset%gpu_option==ABI_GPU_DISABLED) then
+             if(gpu_option==ABI_GPU_DISABLED) then
                do idat=1,ndat
                  gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor) = &
   &                 gh1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)-eig_k(iband+idat-1) * gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
                end do
-             else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+             else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) PRIVATE(ipw,idat) MAP(to:gs1,gh1,eig_k)
 #endif
@@ -1457,18 +1455,18 @@ has_vectornd = (with_vectornd .EQ. 1)
 !            note: gvnlx1 used as temporary space
              if (ipert==ipert1.and.idir==idir1) then
                option=0;
-               if(dtset%gpu_option==ABI_GPU_DISABLED) then
+               if(gpu_option==ABI_GPU_DISABLED) then
                  gvnlx1=gh1
-               else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+               else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                  call gpu_copy(gvnlx1, gh1, int(2,c_size_t)*npw1_k*nspinor*ndat)
 #endif
                end if
              else
                option=1;
-               if(dtset%gpu_option==ABI_GPU_DISABLED) then
+               if(gpu_option==ABI_GPU_DISABLED) then
                  gvnlx1=zero
-               else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+               else if(gpu_option==ABI_GPU_OPENMP) then
                  call gpu_set_to_zero(gvnlx1,int(2,c_size_t)*npw1_k*nspinor*ndat)
                end if
              end if
@@ -1485,15 +1483,15 @@ has_vectornd = (with_vectornd .EQ. 1)
                  if (bands_treated_now(iband_) == 0) cycle
 
   ! distribute gvnlx1 to my subcomm
-                 if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                 if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1_tmp = zero
-                 else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                 else if(gpu_option==ABI_GPU_OPENMP) then
                    call gpu_set_to_zero(gvnlx1_tmp,int(2,c_size_t)*npw1_k*nspinor)
                  end if
                  if (iband_ == iband+idat-1) then
-                   if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                   if(gpu_option==ABI_GPU_DISABLED) then
                      gvnlx1_tmp = gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
-                   else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                   else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                      call gpu_copy(gvnlx1_tmp,&
                      &    gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
@@ -1510,7 +1508,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
                  if (option == 1) then
   ! in case I need to reuse the ch1c (option 1) then load them here
-                   if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                   if(gpu_option==ABI_GPU_DISABLED) then
                      ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
                    else
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1523,7 +1521,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 
   !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
                  call projbd(cgq,gvnlx1_tmp,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
-  &                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=dtset%gpu_option)
+  &                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option)
 
   !sum over all jband by combining the projbd
                  if(xmpi_comm_size(mpi_enreg%comm_band)>1) then
@@ -1536,10 +1534,10 @@ has_vectornd = (with_vectornd .EQ. 1)
   !   Pc|work>  = |work> - Sum_l <psi_{k+q, l}|work> |psi_{k+q, l}>
   !             = Sum_nproc_band (|work> - Sum_{my l} <psi_{k+q, l}|work> |psi_{k+q, l}>) - (nproc_band-1) |work>
   !TODO: make this a blas call? zaxpy
-                   if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                   if(gpu_option==ABI_GPU_DISABLED) then
                      gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor) = &
                        gvnlx1_tmp - (my_nproc_band-1)*gvnlx1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor)
-                   else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                   else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO PRIVATE(ipw) MAP(to:gvnlx1,gvnlx1_tmp)
                      do ipw=1,npw1_k*nspinor
@@ -1552,9 +1550,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 
                  if (option == 0) then
   ! save ch1c for all of the iband_ on each proc, for later use. First band index only for my nband_me which matches cgq
-                   if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                   if(gpu_option==ABI_GPU_DISABLED) then
                      ch1c(:,1:nband_me,iband_,ikpt_me) = ch1c_tmp(:,1:nband_me)
-                   else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                   else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                      call gpu_copy(ch1c(:,1:nband_me,iband_,ikpt_me), ch1c_tmp, &
 &                         int(2,c_size_t)*nband_me)
@@ -1573,9 +1571,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 !!!!!!!!!!!!!!!!! 8) End of that scary looking loop...
              if (has_dcwf) then
                if (ipert==ipert1.and.idir==idir1) then
-                 if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                 if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1 = gvnlx1-gh1
-                 else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                 else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                    !$OMP TARGET DATA USE_DEVICE_PTR(gvnlx1,gh1)
                    call abi_gpu_xaxpy(1, 2*npw1_k*nspinor*ndat, cminusone, &
@@ -1593,9 +1591,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                  call dotprod_g_batch_full(vdotr,vdoti,istwf_k,npw1_k*nspinor,ndat,2,&
 &                     gs1,&
 &                     gvnlx1,&
-&                     mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                     mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET UPDATE FROM(vdotr,vdoti) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+                 !$OMP TARGET UPDATE FROM(vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 !                Add contribution to DDB
 !                Note: factor 2 (from d2E/dj1dj2=2E^(j1j2)) eliminated by factor 1/2
@@ -1615,9 +1613,9 @@ has_vectornd = (with_vectornd .EQ. 1)
 
            if (has_dcwf.and.is_metal_or_qne0) then
 
-             if(dtset%gpu_option==ABI_GPU_DISABLED) then
+             if(gpu_option==ABI_GPU_DISABLED) then
                gvnlx2 = zero
-             else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+             else if(gpu_option==ABI_GPU_OPENMP) then
                call gpu_set_to_zero(gvnlx2,int(2,c_size_t)*npw1_k*nspinor*nband_k)
              end if
 
@@ -1626,9 +1624,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                if (mpi_enreg%proc_distrb(ikpt,jband,isppol)==me) then
                  jband_me = jband_me + 1
   ! gvnlx1 depends on j only, I have it, and everyone needs it
-                 if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                 if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor)=cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq)
-                 else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                 else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                    call gpu_copy(gvnlx2(:,1+(jband-1)*npw1_k*nspinor:jband*npw1_k*nspinor), &
 &                       cgq(:,1+npw1_k*nspinor*(jband_me-1)+icgq:npw1_k*nspinor*jband_me+icgq),&
@@ -1696,9 +1694,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                if (do_scprod > 0) then
                  call dotprod_g_batch_half(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,nband_k,2,&
 &                     gs1(:,1+(idat-1)*npw1_k*nspinor:idat*npw1_k*nspinor),&
-&                     gvnlx2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                     gvnlx2,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET UPDATE FROM(vdot1r,vdot1i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+                 !$OMP TARGET UPDATE FROM(vdot1r,vdot1i) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
                  if (ipert==ipert1.and.idir==idir1.and.has_dcwf2) then
                    cs1c(1,:,iband_me-(ndat-idat),ikpt_me)=vdot1r(:)
@@ -1760,9 +1758,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                call dotprod_g_batch_full(vdotr,vdoti,istwf_k,npw1_k*nspinor,ndat,2,&
 &                   gh1,&
 &                   cwavef,&
-&                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                   mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-               !$OMP TARGET UPDATE FROM(vdotr,vdoti) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+               !$OMP TARGET UPDATE FROM(vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
              end if
              do idat=1,ndat
@@ -1790,9 +1788,9 @@ has_vectornd = (with_vectornd .EQ. 1)
            else
 !            note: gh1 used as temporary space (to store idir ddk WF)
              if (idir==idir1) then
-               if(dtset%gpu_option==ABI_GPU_DISABLED) then
+               if(gpu_option==ABI_GPU_DISABLED) then
                  gvnlx1(:,1:ndat*npw1_k*nspinor)=cwavef(:,1:ndat*npw1_k*nspinor)
-               else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+               else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
                  call gpu_copy(gvnlx1, cwavef, int(2,c_size_t)*npw1_k*nspinor*ndat)
 #endif
@@ -1804,12 +1802,12 @@ has_vectornd = (with_vectornd .EQ. 1)
                  !call ddks(idir1)%read_bks(iband, ik_ddk, isppol, xmpio_single, cg_bks=gvnlx1_tmp)
                  gvnlx1(:,1:ndat*npw1_k*nspinor) = cg_ddk(:,1+(iband_me-ndat)*npw1_k*nspinor:iband_me*npw1_k*nspinor,idir1)
 #ifdef HAVE_OPENMP_OFFLOAD
-                 !$OMP TARGET UPDATE TO(gvnlx1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+                 !$OMP TARGET UPDATE TO(gvnlx1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
                else
-                 if(dtset%gpu_option==ABI_GPU_DISABLED) then
+                 if(gpu_option==ABI_GPU_DISABLED) then
                    gvnlx1=zero
-                 else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+                 else if(gpu_option==ABI_GPU_OPENMP) then
                    call gpu_set_to_zero(gvnlx1,int(2,c_size_t)*npw1_k*nspinor*ndat)
                  end if
                end if
@@ -1824,17 +1822,17 @@ has_vectornd = (with_vectornd .EQ. 1)
                call dotprod_g_batch_full(vdotr,vdoti,istwf_k,npw1_k*nspinor,ndat,2,&
 &                  gvnlx1,&
 &                  cwavef,&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
                call dotprod_g_batch_full(vdot1r,vdot1i,istwf_k,npw1_k*nspinor,ndat,2,&
 &                  cwave0,&
 &                  gvnlx1,&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
                call dotprod_g_batch_full(vdot2r,vdot2i,istwf_k,npw1_k*nspinor,ndat,2,&
 &                  cwavef,&
 &                  cwave0,&
-&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=dtset%gpu_option)
+&                  mpi_enreg%me_g0,mpi_enreg%comm_spinorfft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-               !$OMP TARGET UPDATE FROM(vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+               !$OMP TARGET UPDATE FROM(vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
                do idat=1,ndat
                  if (abs(occ_k(iband+idat-1))>tol8) then
@@ -1859,7 +1857,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET ENTER DATA MAP(alloc:dcwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET ENTER DATA MAP(alloc:dcwavef) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
              ABI_MALLOC(dcwaveprj,(dtset%natom,nspinor*ndat))
              call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
@@ -1869,7 +1867,7 @@ has_vectornd = (with_vectornd .EQ. 1)
 &                 dcwaveprj,&
 &                 ibgq,icgq,istwf_k,mcgq,&
 &                 mcprjq,mpi_enreg,ndat,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,&
-&                 gs1,gpu_option=dtset%gpu_option)
+&                 gs1,gpu_option=gpu_option)
 
              option=1;wfcorr=0
              if (abs(occ_k(iband))>tol8) then
@@ -1887,7 +1885,7 @@ has_vectornd = (with_vectornd .EQ. 1)
              call pawcprj_free(dcwaveprj)
              ABI_FREE(dcwaveprj)
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET EXIT DATA MAP(delete:dcwavef) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET EXIT DATA MAP(delete:dcwavef) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
              ABI_FREE(dcwavef)
            end if ! has_drho
@@ -1923,14 +1921,14 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 !      Deallocations of arrays used for this k-point
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(delete:gvnlx1,gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gvnlx1,gvnlx1_tmp) IF(gpu_option==ABI_GPU_OPENMP)
 
-       !$OMP TARGET EXIT DATA MAP(delete:gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-       !$OMP TARGET EXIT DATA MAP(delete:gs1) IF(has_dcwf .and. dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gh1) IF(gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:gs1) IF(has_dcwf .and. gpu_option==ABI_GPU_OPENMP)
 #endif
        if (has_dcwf.and.is_metal_or_qne0) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET EXIT DATA MAP(delete:gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:gvnlx2) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          ABI_FREE(gvnlx2)
        end if
@@ -1961,7 +1959,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(eig1_k)
        ABI_FREE(occ_k)
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti,vdot1r,vdot1i,vdot2r,vdot2i) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        ABI_FREE(vdotr)
        ABI_FREE(vdoti)
@@ -1979,9 +1977,10 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(kinpw1)
 #ifdef HAVE_OPENMP_OFFLOAD
        if (ipert1<=dtset%natom) then
-         !$OMP TARGET EXIT DATA MAP(delete:ffnlk) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:ffnlk) IF(gpu_option==ABI_GPU_OPENMP)
        end if
-       !$OMP TARGET EXIT DATA MAP(delete:ffnl1,ph3d) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:ffnl1) IF(gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET EXIT DATA MAP(delete:ph3d) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        ABI_FREE(ph3d)
        if (allocated(ph3d1)) then
@@ -1991,7 +1990,7 @@ has_vectornd = (with_vectornd .EQ. 1)
        ABI_FREE(ffnl1)
        if (ipert1>dtset%natom)  then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET EXIT DATA MAP(delete:ffnl1_idir1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+         !$OMP TARGET EXIT DATA MAP(delete:ffnl1_idir1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
          ABI_FREE(ffnl1_idir1)
        end if
@@ -2172,7 +2171,7 @@ has_vectornd = (with_vectornd .EQ. 1)
  end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:ch1c,ch1c_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:ch1c,ch1c_tmp) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 !Final deallocations
  ABI_FREE(ch1c)
@@ -2324,7 +2323,7 @@ has_vectornd = (with_vectornd .EQ. 1)
  ABI_FREE(bands_treated_now_ndat)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:cg,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,cg1) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
  call destroy_mpi_enreg(mpi_enreg_seq)
