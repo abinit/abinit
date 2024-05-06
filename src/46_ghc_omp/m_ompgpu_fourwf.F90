@@ -158,9 +158,9 @@ subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,ist
    call alloc_ompgpu_fourwf(ngfft,ndat)
  end if !end if "fft size changed"
 
- transfer_fofgin=.not. xomp_target_is_present(c_loc(fofgin))
- transfer_fofgout=.not. xomp_target_is_present(c_loc(fofgout))
- transfer_fofr=.not. xomp_target_is_present(c_loc(fofr))
+ transfer_fofgin= .not. xomp_target_is_present(c_loc(fofgin))  .and. (option/=3)
+ transfer_fofgout=.not. xomp_target_is_present(c_loc(fofgout)) .and. (option==2 .or. option==3)
+ transfer_fofr=   .not. xomp_target_is_present(c_loc(fofr))
 
  !$OMP TARGET ENTER DATA MAP(to:fofgin)     IF(transfer_fofgin)
  !$OMP TARGET ENTER DATA MAP(alloc:fofgout) IF(transfer_fofgout)
