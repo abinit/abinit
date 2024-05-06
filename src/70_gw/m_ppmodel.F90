@@ -2042,28 +2042,29 @@ end subroutine cqratio
 !!  Calculate the contribution to self-energy operator using a plasmon-pole model.
 !!
 !! INPUTS
-!!  nomega=Number of frequencies.
 !!  nspinor=Number of spinorial components.
 !!  npwc=Number of G vectors in the plasmon pole.
-!!  npwx=number of G vectors in rhotwgp, i.e. no. of G-vectors for the exchange part.
-!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
-!!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
-!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
-!!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
-!!  PPm<ppmodel_t>=structure gathering info on the Plasmon-pole technique.
+!!  nomega=Number of frequencies.
+!!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e. $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
 !!  botsq(npwc,dm2_botsq)=Plasmon pole parameters for this q-point.
+!!  otq(npwc,dm2_otq)=Plasmon pole parameters for this q-point.
+!!  omegame0i(nomega)=Frequencies used to evaluate \Sigma_c ($\omega$ - $\epsilon_i)$
+!!  zcut=Small imaginary part to avoid the divergence. (see related input variable)
+!!  theta_mu_minus_e0i= $\theta(\mu-\epsilon_{k-q,b1,s}), defines if the state is occupied or not
 !!  eig(dm_eig,dm_eig)=The eigvectors of the symmetrized inverse dielectric matrix for this q point
-!!   (first index for G, second index for bands)
-!!  rhotwgp(npwx)=oscillator matrix elements divided by |q+G| i.e.
-!!    $\frac{\langle b1 k-q s | e^{-i(q+G)r | b2 k s \rangle}{|q+G|}$
+!!    (first index for G, second index for bands)
+!!  npwx=number of G vectors in rhotwgp, i.e. no. of G-vectors for the exchange part.
 !!
 !! OUTPUT
-!!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!  ket(npwc,nomega):
+!!
 !!  === model==1,2 ====
+!!
 !!    ket(G,omega) = Sum_G2       conjg(rhotw(G)) * Omega(G,G2) * rhotw(G2)
 !!                            ---------------------------------------------------
 !!                             2 omegatw(G,G2) (omega-E_i + omegatw(G,G2)(2f-1))
+!!
+!!  sigcme(nomega) (to be described), only relevant if ppm3 or ppm4
 !!
 !! SOURCE
 
