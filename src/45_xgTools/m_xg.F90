@@ -1496,7 +1496,7 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -1516,7 +1516,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
