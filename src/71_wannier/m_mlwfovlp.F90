@@ -59,7 +59,7 @@ module m_mlwfovlp
  use m_evdw_wannier, only : evdw_wannier
  use m_fft,            only : fourwf
 ! use m_wfd, only: wfd_t, wfd_init, wave_t
- use m_abstract_wf, only: abstract_wf,  wann_ksetting_t
+ use m_abstract_wf, only: abstract_wf,  wann_ksetting_t, cg_cprj, wfd_wf
  use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 
  implicit none
@@ -1629,8 +1629,12 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
        if(nprocs>1) then
           !call mywfc%read_cg(cg_read, ikpt2)
           !call mywfc%read_cg( ikpt2, isppol, cg_read)
-          call mywfc%load_cg( ikpt2, isppol, cg_read)
-         end if
+
+          if ( ABS(MPI_enreg%proc_distrb(ikpt2,1,isppol)-me)  /=0) then
+             lfile=.true.
+             call mywfc%load_cg(ikpt2, isppol, cg_read)
+          endif
+        end if
 ! !
        npw_k=npwarr(ikpt1)
        npw_k2=npwarr(ikpt2)
@@ -1856,6 +1860,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  real(dp),allocatable :: gsum2(:),kpg2(:),radial(:)
  complex(dpc),allocatable :: gf(:,:),gft_lm(:)
  complex(dpc),allocatable :: ylmc_fac(:,:,:),ylmcp(:)
+ integer :: idx
 
 !no_abirules
 !Tables 3.1 & 3.2, User guide
@@ -1999,9 +2004,9 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !
 !      MPI: cycle over kpts not treated by this node
 !
-        if(nprocs>1) then
-       if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
-        end if
+!       if(nprocs>1) then
+        if (ABS(MPI_enreg%proc_distrb(ikpt,1,isppol)-rank)/=0) CYCLE
+!       end if
 !
        write(message, '(a,i6,a,2i6)' ) &
 &       '   processor',rank,' will compute k-point,spin=',ikpt,isppol
@@ -2102,9 +2107,13 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !                so we project to spin up and spin down separately, to have at
 !                the end an amn matrix with nwan projections.
 !
-!                idx=ipw*nspinor - (nspinor-ispinor)
-                 !amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*cmplx(cg(1,idx+icg_shift),-cg(2,idx+icg_shift))
-                 amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*conjg(mywfc%cg_elem_complex( ipw, ispinor, iband, ikpt, isppol))
+                idx=ipw*nspinor - (nspinor-ispinor)
+                 select type(mywfc)
+                 type is (cg_cprj)
+                   amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*cmplx(mywfc%cg(1,idx+icg_shift),-mywfc%cg(2,idx+icg_shift))
+                 type is (wfd_wf)
+                   amn_tmp(ispinor)=amn_tmp(ispinor)+gf(ipw,iproj)*conjg(mywfc%cg_elem_complex(ipw, ispinor, iband, ikpt, isppol))
+                end select
                end do !ipw
              end do !ispinor
              do ispinor=1,nspinor
