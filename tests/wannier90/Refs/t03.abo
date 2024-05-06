@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.2.3 of ABINIT, released Apr 2024.
+.(MPI version, prepared for a x86_64_linux_gnu11.4 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h13 )
+.Starting date : Mon  6 May 2024.
+- ( at 21h05 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/wannier90_t03/t03.abi
+- input  file    -> /home/hexu/projects/abinit_git/abinit_ewann/tests/Test_suite/wannier90_t03/t03.abi
 - output file    -> t03.abo
 - root for input  files -> t03i
 - root for output files -> t03o
-
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -39,7 +38,6 @@ P This job should need less than                       2.515 Mbytes of memory.
 _ WF disk file :      0.124 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
 
-
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,7 +53,6 @@ P This job should need less than                       2.468 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.734 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -73,7 +70,6 @@ P This job should need less than                       2.039 Mbytes of memory.
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,7 +85,6 @@ P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -107,7 +102,6 @@ P This job should need less than                       2.039 Mbytes of memory.
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
 
-
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,7 +117,6 @@ P This job should need less than                       2.039 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.185 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
 
  DATASET    7 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -146,10 +139,10 @@ _ WF disk file :      1.955 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
--  max_nthreads =    0
+-  max_nthreads =    1
 -
  -outvars: echo values of preprocessed input variables --------
             acell      1.0263000000E+01  1.0263000000E+01  1.0263000000E+01 Bohr
@@ -180,7 +173,7 @@ _ WF disk file :      1.955 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
           ecutwfn6     5.00000000E+00 Hartree
           ecutwfn7     0.00000000E+00 Hartree
            enunit           2
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -540,7 +533,7 @@ P           mkmem7         64
 
 ================================================================================
 == DATASET  1 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -574,8 +567,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -611,10 +604,10 @@ tolerances: {toldfe: 1.00E-06, }
  ETOT  3  -8.8581652583818    -1.454E-04 7.317E-06 5.928E-03
  ETOT  4  -8.8581697169143    -4.459E-06 2.754E-07 3.827E-04
  ETOT  5  -8.8581701412699    -4.244E-07 4.308E-08 9.610E-07
- ETOT  6  -8.8581701420486    -7.787E-10 2.928E-09 1.242E-08
+ ETOT  6  -8.8581701420486    -7.788E-10 2.928E-09 1.242E-08
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  7.787E-10 < toldfe=  1.000E-06
+  for the second time, diff in etot=  7.788E-10 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.91770864E-05  sigma(3 2)=  0.00000000E+00
@@ -632,7 +625,7 @@ lattice_vectors:
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7024832E+02
-convergence: {deltae: -7.787E-10, res2:  1.242E-08, residm:  2.928E-09, diffor: null, }
+convergence: {deltae: -7.788E-10, res2:  1.242E-08, residm:  2.928E-09, diffor: null, }
 etotal    :  -8.85817014E+00
 entropy   :   0.00000000E+00
 fermie    :   2.14967337E-01
@@ -699,16 +692,16 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !EnergyTerms
 iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  3.01335351333433E+00
-hartree             :  5.52774952367306E-01
+kinetic             :  3.01335351333432E+00
+hartree             :  5.52774952367295E-01
 xc                  : -3.53505907099221E+00
 Ewald energy        : -8.39800922793230E+00
 psp_core            :  8.48919894711432E-02
-local_psp           : -2.49365546920459E+00
-non_local_psp       :  1.91753317090772E+00
-total_energy        : -8.85817014204860E+00
-total_energy_eV     : -2.41043068032475E+02
-band_energy         :  2.24827382054825E-01
+local_psp           : -2.49365546920458E+00
+non_local_psp       :  1.91753317090771E+00
+total_energy        : -8.85817014204862E+00
+total_energy_eV     : -2.41043068032476E+02
+band_energy         :  2.24827382054839E-01
 ...
 
 
@@ -724,7 +717,7 @@ band_energy         :  2.24827382054825E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -842,7 +835,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -864,7 +857,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using double precision arithmetic ; gwpc =  8
+.Using single precision arithmetic ; gwpc =  4
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
@@ -874,8 +867,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -953,15 +946,15 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000 -11.867  -0.137  -0.176  -0.145   0.000  -0.000  -0.000  -0.000
-       -0.000   0.000   0.000  -0.000   0.000  -5.045  -0.190  -0.229  -0.197
+       -0.000   0.000   0.000  -0.000  -0.000  -5.045  -0.190  -0.229  -0.197
 
   chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000  -3.224   0.070   0.062   0.068   0.000  -0.000  -0.000  -0.000
        -0.000   0.000  -0.000  -0.000  -0.000  -1.121  -0.044  -0.052  -0.046
@@ -976,19 +969,19 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-      0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
+     -0.000   0.004  -0.012   0.012  -0.004   0.004  -0.012   0.012  -0.004
        1       2       3       4       5       6       7       8       9
       0.041   0.004  -0.012   0.012  -0.004  -0.004   0.012  -0.012   0.004
-      0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
+     -0.000  -0.004   0.012  -0.012   0.004  -0.004   0.012  -0.012   0.004
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.5944 [eV]
        1       2       3       4       5       6       7       8       9
       0.490   0.008  -0.022   0.022  -0.008  -0.008   0.022  -0.022   0.008
-      0.000   0.008  -0.022   0.022  -0.008   0.008  -0.022   0.022  -0.008
+     -0.000   0.008  -0.022   0.022  -0.008   0.008  -0.022   0.022  -0.008
        1       2       3       4       5       6       7       8       9
       0.490   0.008  -0.022   0.022  -0.008  -0.008   0.022  -0.022   0.008
-      0.000  -0.008   0.022  -0.022   0.008  -0.008   0.022  -0.022   0.008
+     -0.000  -0.008   0.022  -0.022   0.008  -0.008   0.022  -0.022   0.008
 
 
 
@@ -1046,7 +1039,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -2.123  -0.245  -0.245  -2.123   0.245   2.123   2.123   0.245
 
     2  -2.123 -10.614  -0.436  -0.475  -0.564   0.000  -0.000  -0.000  -0.000
-        2.123   0.000  -0.000  -0.000  -0.000  -3.454   0.262   0.255  -0.221
+        2.123   0.000  -0.000  -0.000   0.000  -3.454   0.262   0.255  -0.221
 
   chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1098,7 +1091,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000   0.177  -0.381  -0.378  -0.469   0.469   0.378   0.381  -0.177
 
     2   0.177  -3.361   0.114   0.100   0.024   0.000  -0.000  -0.000   0.000
-       -0.177  -0.000   0.000   0.000   0.000  -0.832  -0.076  -0.075  -0.186
+       -0.177   0.000   0.000   0.000   0.000  -0.832  -0.076  -0.075  -0.186
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     47.67  [%]
 
@@ -1139,7 +1132,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    2 th omega   0.0000  16.5944 [eV]
        1       2       3       4       5       6       7       8       9
     1  -3.292  -0.165  -0.530  -0.480  -0.502  -0.502  -0.480  -0.530  -0.165
-       -0.000  -0.165  -0.530  -0.480  -0.502   0.502   0.480   0.530   0.165
+        0.000  -0.165  -0.530  -0.480  -0.502   0.502   0.480   0.530   0.165
 
     2  -0.165  -3.280  -0.070   0.159   0.027  -0.000  -0.000  -0.000   0.000
         0.165   0.000   0.000   0.000   0.000  -0.460   0.000  -0.027   0.000
@@ -1148,7 +1141,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1172,7 +1165,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using double precision arithmetic ; gwpc =  8
+.Using single precision arithmetic ; gwpc =  4
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
@@ -1241,8 +1234,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
   Number of electrons    =    7.9979
 
-  QP Band energy    [Ha] =  2.24818896796040E-01
-  QP Hartree energy [Ha] =  5.51167487029685E-01
+  QP Band energy    [Ha] =  2.24818896796036E-01
+  QP Hartree energy [Ha] =  5.51167423167800E-01
 
 --------------------------------------------------------------------------------
 
@@ -1444,7 +1437,7 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.752284E-01 Ha ,    7.489346E+00 eV
+ New Fermi energy :        2.752284E-01 Ha ,    7.489345E+00 eV
  New Exchange energy :    -2.048680E+00 Ha ,   -5.574742E+01 eV
 
  === QP Band Gaps ===
@@ -1468,7 +1461,7 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  5 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1492,7 +1485,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using double precision arithmetic ; gwpc =  8
+.Using single precision arithmetic ; gwpc =  4
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
@@ -1561,15 +1554,15 @@ meta: {optdriver: 3, gwcalctyp: 28, }
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
-    2   0.000 -10.875  -0.030  -0.075  -0.039  -0.002  -0.000  -0.000  -0.000
+    2   0.000 -10.874  -0.030  -0.075  -0.039  -0.002  -0.000  -0.000  -0.000
        -0.000   0.000  -0.000  -0.000  -0.000  -4.472  -0.128  -0.172  -0.137
 
   chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000   0.000  -0.000  -0.000   0.000  -0.000   0.000
-        0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
+       -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000   0.000  -0.000
 
     2   0.000  -3.317   0.048   0.042   0.047  -0.000  -0.000  -0.000  -0.000
        -0.000   0.000  -0.000  -0.000   0.000  -1.168  -0.055  -0.062  -0.057
@@ -1584,10 +1577,10 @@ meta: {optdriver: 3, gwcalctyp: 28, }
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.087   0.006  -0.018   0.018  -0.006  -0.006   0.018  -0.018   0.006
-     -0.000   0.006  -0.018   0.018  -0.006   0.006  -0.018   0.018  -0.006
+      0.000   0.006  -0.018   0.018  -0.006   0.006  -0.018   0.018  -0.006
        1       2       3       4       5       6       7       8       9
       0.087   0.006  -0.018   0.018  -0.006  -0.006   0.018  -0.018   0.006
-     -0.000  -0.006   0.018  -0.018   0.006  -0.006   0.018  -0.018   0.006
+      0.000  -0.006   0.018  -0.018   0.006  -0.006   0.018  -0.018   0.006
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.5945 [eV]
@@ -1609,8 +1602,8 @@ meta: {optdriver: 3, gwcalctyp: 28, }
     1  -6.938  -1.406  -0.731  -0.737  -0.732   2.136  -1.544  -1.522  -1.540
         0.000  -1.406  -0.730  -0.737  -0.732  -2.138   1.544   1.522   1.540
 
-    2  -1.406  -9.089  -0.374  -0.381  -0.375  -0.001  -0.001  -0.001  -0.001
-        1.406   0.000   0.000   0.000   0.000  -3.972   0.151   0.126   0.145
+    2  -1.406  -9.089  -0.374  -0.381  -0.376  -0.001  -0.001  -0.001  -0.001
+        1.406   0.000   0.000   0.000   0.000  -3.972   0.151   0.126   0.146
 
   chi0(G,G') at the    2 th omega   0.0000  16.5945 [eV]
        1       2       3       4       5       6       7       8       9
@@ -1640,7 +1633,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
         0.000  -0.525  -0.409  -0.410  -0.409  -0.580   0.507   0.501   0.506
 
     2  -0.525  -1.959   0.071   0.070   0.071   0.000   0.000   0.000   0.000
-        0.525   0.000  -0.000  -0.000  -0.000  -0.871   0.016   0.012   0.015
+        0.525   0.000  -0.000   0.000  -0.000  -0.871   0.016   0.012   0.015
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     49.59  [%]
 
@@ -1756,7 +1749,7 @@ meta: {optdriver: 3, gwcalctyp: 28, }
 
 ================================================================================
 == DATASET  6 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -1782,7 +1775,7 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
  Based on a program developped by R.W. Godby, V. Olevano, G. Onida, and L. Reining.
  Incorporated in ABINIT by V. Olevano, G.-M. Rignanese, and M. Torrent.
-.Using double precision arithmetic ; gwpc =  8
+.Using single precision arithmetic ; gwpc =  4
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1315000  5.1315000  G(1)= -0.0974374  0.0974374  0.0974374
@@ -1851,8 +1844,8 @@ meta: {optdriver: 4, gwcalctyp: 28, }
 
   Number of electrons    =    7.9979
 
-  QP Band energy    [Ha] =  4.82813480892918E-01
-  QP Hartree energy [Ha] =  5.50803341802971E-01
+  QP Band energy    [Ha] =  4.82813342813119E-01
+  QP Hartree energy [Ha] =  5.50803833018333E-01
 
 --------------------------------------------------------------------------------
 
@@ -1903,7 +1896,7 @@ QP_gap     :    3.572
 Delta_QP_KS:    0.161
 data: !SigmaeeData |
      Band     E_DFT   <VxcDFT>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-        1    -6.162   -10.388    -3.198     4.225   -16.956     6.685     1.000     0.000   -10.271    -2.848    -6.046    -6.046
+        1    -6.162   -10.388    -3.198     4.225   -16.956     6.687     1.000     0.000   -10.269    -2.847    -6.045    -6.045
         2     5.850   -11.210     6.891    17.058   -12.534     2.260     1.000     0.000   -10.274    -0.106     6.785     6.785
         3     5.850   -11.210     6.894    17.058   -12.533     2.263     1.000     0.000   -10.271    -0.106     6.788     6.788
         4     5.850   -11.210     6.895    17.058   -12.533     2.263     1.000     0.000   -10.270    -0.106     6.789     6.789
@@ -1987,7 +1980,7 @@ data: !SigmaeeData |
         2    -0.573   -10.658     0.060    10.067   -14.638     4.432     1.000     0.000   -10.206    -0.199    -0.139    -0.139
         3     2.242   -10.185     2.887    12.454   -12.561     2.906     1.000     0.000    -9.656    -0.089     2.798     2.798
         4     3.596   -10.647     4.322    14.245   -12.753     2.739     1.000     0.000   -10.014    -0.091     4.231     4.231
-        5     7.279    -9.266     9.025    16.549    -5.092    -2.367     1.000     0.000    -7.458     0.066     9.091     9.091
+        5     7.279    -9.266     9.025    16.549    -5.092    -2.366     1.000     0.000    -7.458     0.066     9.091     9.091
         6    10.247    -9.637    12.339    19.870    -4.764    -2.730     1.000     0.000    -7.494     0.037    12.376    12.376
         7    11.488   -10.344    13.851    21.839    -5.044    -2.914     1.000     0.000    -7.958     0.029    13.880    13.881
         8    11.780   -10.079    14.143    21.854    -4.681    -3.004     1.000     0.000    -7.685     0.026    14.170    14.170
@@ -2010,7 +2003,7 @@ data: !SigmaeeData |
         5     8.209    -9.590    10.135    17.784    -5.106    -2.485     1.000     0.000    -7.591     0.057    10.192    10.192
         6    10.603   -10.091    12.793    20.692    -4.883    -2.968     1.000     0.000    -7.850     0.048    12.841    12.841
         7    10.924   -10.189    13.188    21.110    -5.372    -2.530     1.000     0.000    -7.902     0.020    13.208    13.208
-        8    11.813    -9.868    14.181    21.700    -4.370    -3.111     1.000     0.000    -7.482     0.038    14.218    14.219
+        8    11.813    -9.868    14.181    21.700    -4.370    -3.111     1.000     0.000    -7.482     0.038    14.218    14.218
 ...
 
 
@@ -2054,8 +2047,8 @@ data: !SigmaeeData |
 ...
 
 
- New Fermi energy :        2.745855E-01 Ha ,    7.471853E+00 eV
- New Exchange energy :    -2.049800E+00 Ha ,   -5.577790E+01 eV
+ New Fermi energy :        2.745855E-01 Ha ,    7.471852E+00 eV
+ New Exchange energy :    -2.049801E+00 Ha ,   -5.577792E+01 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
@@ -2067,7 +2060,7 @@ data: !SigmaeeData |
 
  Convergence of QP corrections
  >>>>> For spin  1 <<<<<
-.  kptgw no:  1; Maximum DeltaE = (  -2.848   0.069) for band index:  1
+.  kptgw no:  1; Maximum DeltaE = (  -2.847   0.070) for band index:  1
 .  kptgw no:  2; Maximum DeltaE = (  -1.289   0.037) for band index:  1
 .  kptgw no:  3; Maximum DeltaE = (  -0.974  -0.028) for band index:  1
 .  kptgw no:  4; Maximum DeltaE = (  -2.254   0.017) for band index:  1
@@ -2078,7 +2071,7 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  7 ==================================================================
--   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-   mpi_nproc: 1, omp_nthreads: 1 (-1 if OMP is not activated)
 
 
 --- !DatasetInfo
@@ -2118,8 +2111,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspini: atom type   1  psp file is /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
+- pspatm: opening atomic psp file    /home/hexu/projects/abinit_git/abinit_ewann/tests/Psps_for_tests/PseudosTM_pwteter/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2198,30 +2191,30 @@ force_length_stats: {min: null, max: null, mean: null, }
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (  -0.983320  -0.153228 ,  -0.071063  -0.018812 ,   0.000318   0.000298 ,    )
-;   (   0.018028   0.004717 ,  -0.393851  -0.170417 ,   0.721711   0.023564 ,    )
-;   (  -0.017827  -0.005012 ,   0.395007   0.171348 ,   0.371259   0.034651 ,    )
+;   (  -0.983226  -0.153831 ,  -0.071050  -0.018849 ,   0.000315   0.000297 ,    )
+;   (   0.018022   0.004718 ,  -0.393797  -0.170402 ,   0.721747   0.023880 ,    )
+;   (  -0.017823  -0.005019 ,   0.394919   0.171497 ,   0.371103   0.034973 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (  -0.013662   0.820615 ,  -0.000723  -0.000335 ,   0.000156  -0.000163 ,    )
-;   (  -0.000411   0.000071 ,   0.614117   0.758894 ,   0.008984   0.049278 ,    )
-;   (   0.000142   0.000052 ,  -0.037219  -0.033568 ,   0.322869   0.921102 ,    )
+;   (  -0.013834   0.820610 ,  -0.000723  -0.000335 ,   0.000156  -0.000163 ,    )
+;   (  -0.000410   0.000073 ,   0.615013   0.758164 ,   0.009066   0.049320 ,    )
+;   (   0.000142   0.000051 ,  -0.037299  -0.033562 ,   0.324179   0.920639 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.192204   0.944242 ,   0.192207   0.944255 ,   0.192212   0.944233 ,    )
-;   (  -0.000757   0.499920 ,  -0.001489   0.497787 ,   0.001412  -0.497238 ,    )
-;   (  -0.001419   0.497809 ,   0.002107  -0.500508 ,  -0.002096   0.499934 ,    )
+;   (   0.191715   0.944341 ,   0.191719   0.944355 ,   0.191724   0.944332 ,    )
+;   (  -0.000759   0.499985 ,  -0.001481   0.497721 ,   0.001392  -0.497236 ,    )
+;   (  -0.001623   0.497716 ,   0.002290  -0.500483 ,  -0.002143   0.500026 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (  -0.286157   0.191652 ,  -0.286440   0.192027 ,  -0.286425   0.192172 ,    )
-;   (  -0.772680   0.178638 ,   0.393738  -0.116111 ,   0.377433  -0.061428 ,    )
-;   (   0.023661   0.023065 ,   0.649242  -0.197602 ,  -0.672041   0.174255 ,    )
+;   (  -0.286153   0.191664 ,  -0.286436   0.192039 ,  -0.286422   0.192183 ,    )
+;   (  -0.772602   0.178973 ,   0.393642  -0.116280 ,   0.377455  -0.061600 ,    )
+;   (   0.023618   0.023077 ,   0.649191  -0.197862 ,  -0.671950   0.174504 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t03o_DS7_w90.wout for details.
@@ -2306,7 +2299,7 @@ force_length_stats: {min: null, max: null, mean: null, }
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getden1          0
            getden2          1
            getden3          0
@@ -2660,6 +2653,11 @@ P           mkmem7         64
 
 ================================================================================
 
+ The spacegroup number, the magnetic point group, and/or the number of symmetries
+ have changed between the initial recognition based on the input file
+ and a postprocessing based on the final acell, rprim, and xred.
+ More details in the log file.
+
 
 - Timing analysis has been suppressed with timopt=0
 
@@ -2752,10 +2750,10 @@ P           mkmem7         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.3
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  45 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.3
+.Delivered  47 WARNINGs and  27 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.6  wall=          2.6
