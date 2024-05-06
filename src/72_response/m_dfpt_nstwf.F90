@@ -446,7 +446,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  ABI_MALLOC(bands_treated_now_ndat, (maxval(nband_rbz),ndat))
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET ENTER DATA MAP(to:cg,cgq,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:cg,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
 
 !Check ddk files (needed to compute electric field perturbations)
@@ -2326,7 +2326,7 @@ has_vectornd = (with_vectornd .EQ. 1)
  ABI_FREE(bands_treated_now_ndat)
 
 #ifdef HAVE_OPENMP_OFFLOAD
- !$OMP TARGET EXIT DATA MAP(delete:cg,cgq,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:cg,cg1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
 
  call destroy_mpi_enreg(mpi_enreg_seq)
