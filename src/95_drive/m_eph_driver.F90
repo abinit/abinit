@@ -758,13 +758,10 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
    call varpeq%init(gstore, dtset)
-   call varpeq%seed_a()
-   call varpeq%b_from_a()
-   call varpeq%get_enterms()
-   call varpeq%get_elgrad()
-   call varpeq%test()
-   call varpeq%free()
 
+   call varpeq%test()
+
+   call varpeq%free()
    call gstore%free()
 
  case (14)
