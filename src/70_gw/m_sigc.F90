@@ -119,11 +119,6 @@ contains
 !!    %nsym=number of symmetry operations
 !!    %typat(natom)=type of each atom
 !! PPm<ppmodel_t>= Datatype gathering information on the Plasmonpole technique (see also ppm_get_qbz).
-!!    %model=type of ppmodel
-!!    %npwc=number of G-vectors for the correlation part.
-!!    %dm2_otq =size of second dimension of otq array
-!!    %dm2_bots=size of second dimension of botsq arrays
-!!    %dm_eig  =size of second dimension of eig arrays
 !! QP_BSt<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -157,9 +152,9 @@ contains
 !! SOURCE
 
 subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
-& Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
-& PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
-& gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
+                        Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
+                        PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
+                        gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
 !Arguments ------------------------------------
 !scalars
@@ -691,11 +686,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call Gsph_c%fft_tabs(g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
 
      if (ANY(gwc_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
-     ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
-     use_padfft = 0
-#endif
-     if (use_padfft==0) then
+     if (use_padfft == 0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2*use_padfft))
      end if
@@ -944,10 +935,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
            sigc_ket  = czero_gw
-           call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
+           call PPm%calc_sig(nspinor, npwc, nomega_tot, rhotwgp, botsq, otq, &
+                             omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, sigc_ket, sigcme_3)
 
-           if (PPm%model==3.or.PPm%model==4) then
+           if (PPm%model==3 .or. PPm%model==4) then
              sigcme2(:,kb)=sigcme2(:,kb) + (wtqp+wtqm)*DBLE(sigcme_3(:)) + (wtqp-wtqm)*j_gw*AIMAG(sigcme_3(:))
            end if
 

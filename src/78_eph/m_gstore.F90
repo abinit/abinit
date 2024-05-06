@@ -126,6 +126,7 @@ module m_gstore
  use m_wfd
  use m_ephtk
  use m_mkffnl
+ use m_sigtk
 
  use defs_abitypes,    only : mpi_type
  use m_time,           only : cwtime, cwtime_report, sec2str
@@ -466,7 +467,10 @@ contains
   ! Select k-points on the FS using the tetrahedron method
 
   procedure, private :: filter_erange__ => gstore_filter_erange__
-  ! Select k-points inside an energy window
+  ! Select k-points inside an energy window.
+
+  procedure, private :: filter_qprange__ => gstore_filter_qprange__
+  ! Select k-points according to gw_qprange
 
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
@@ -705,6 +709,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  case ("erange")
    call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
                                select_qbz_spin, select_kbz_spin)
+
+ case ("qprange")
+   call gstore%filter_qprange__(dtset, qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
+                                select_qbz_spin, select_kbz_spin)
 
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
@@ -1617,6 +1625,7 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  select_kbz_spin = 0; cnt = 0
 
  do spin=1,nsppol
+   ! Init brange
    gstore%brange_spin(:, spin) = [huge(1), -huge(1)]
    abs_erange1 = abs(gstore%erange_spin(1, spin))
    abs_erange2 = abs(gstore%erange_spin(2, spin))
@@ -1687,6 +1696,105 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
  call gaps%free()
 
 end subroutine gstore_filter_erange__
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gstore_filter_qprange__
+!! NAME
+!! gstore_filter_qprange__
+!!
+!! FUNCTION
+!! Filter k-points and q-points according to qprange
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+                                   select_qbz_spin, select_kbz_spin)
+
+!Arguments ------------------------------------
+!scalars
+ class(gstore_t),target,intent(inout) :: gstore
+ type(dataset_type),intent(in) :: dtset
+ real(dp),intent(in) :: qbz(3, gstore%nqbz)
+ real(dp),target,intent(in) :: kbz(3, gstore%nqbz), kibz(3, gstore%nkibz)
+ integer,intent(in) :: qbz2ibz(6,gstore%nqbz), qibz2bz(gstore%nqibz)
+ integer,intent(in) :: kbz2ibz(6,gstore%nkbz), kibz2bz(gstore%nkibz)
+ integer,intent(out) :: select_qbz_spin(gstore%nqbz, gstore%nsppol)
+ integer,intent(out) :: select_kbz_spin(gstore%nkbz, gstore%nsppol)
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ik_bz, ik_ibz, gap_err, qprange, ik_calc, nkcalc, mapl_kk(6), ebands_timrev, my_rank
+ type(ebands_t),pointer :: ebands
+ type(gaps_t) :: gaps
+!arrays
+ real(dp),allocatable :: kcalc(:,:)
+ integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
+
+!----------------------------------------------------------------------
+
+ my_rank = xmpi_comm_rank(gstore%comm)
+
+ qprange = dtset%gw_qprange
+ call wrtout(std_out, sjoin(" Filtering k-points using qprange:", itoa(qprange)))
+ if (gstore%qzone /= "bz") then
+   ABI_ERROR(sjoin('qprange filtering requires gstore_qzone = "bz" while it is: ', gstore%qzone))
+ end if
+
+ ebands => gstore%ebands
+ ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ gaps = ebands_get_gaps(ebands, gap_err)
+ if (my_rank == 0) call gaps%print()
+ if (gap_err /= 0) then
+   ABI_ERROR("Cannot compute fundamental and direct gap (likely metal).")
+ end if
+
+ ! Use qp_range to select the interesting k-points and the corresponding bands.
+ !
+ !    0 --> Compute the QP corrections only for the fundamental and the direct gap.
+ ! +num --> Compute the QP corrections for all the k-points in the irreducible zone and include `num`
+ !          bands above and below the Fermi level.
+ ! -num --> Compute the QP corrections for all the k-points in the irreducible zone.
+ !          Include all occupied states and `num` empty states.
+
+ ! Compute nkcalc, kcalc, bstart_ks, nbcalc_ks
+ if (qprange /= 0) then
+   call sigtk_kcalc_from_qprange(dtset, gstore%cryst, ebands, qprange, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+ else
+   ! qprange is not specified in the input.
+   ! Include direct and fundamental KS gap or include states depending on the position wrt band edges.
+   call sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, nbcalc_ks)
+ end if
+
+ ! TODO: kcalc should be spin-dependent to handle magnetic semiconductors.
+ select_kbz_spin = 0
+ do spin=1,gstore%nsppol
+   do ik_calc=1,nkcalc
+     if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, 1, kcalc(:,ik_calc), mapl_kk) /= 0) then
+       ABI_ERROR(sjoin("Cannot map kcalc to IBZ with kcalc:", ktoa(kcalc(:,ik_calc))))
+     end if
+     ik_ibz = mapl_kk(1)
+     ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
+   end do
+   ! FIXME: This requires a more careful treatment of (gqk%nb, gqk%nb) matrix that
+   ! should become (nb1, nb2)
+   ! Set brange_spin from bstart_ks and nbcalc_ks
+   !gstore%brange_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
+ end do
+
+ ABI_FREE(kcalc)
+ ABI_FREE(bstart_ks)
+ ABI_FREE(nbcalc_ks)
+
+ call gaps%free()
+
+end subroutine gstore_filter_qprange__
 !!***
 
 !!****f* m_gstore/recompute_select_qbz_spin
@@ -2682,8 +2790,6 @@ subroutine gqk_free(gqk)
 end subroutine gqk_free
 !!***
 
-!!***
-
 !!****f* m_gstore/gstore_get_missing_qbz_spin
 !! NAME
 !! gstore_get_missing_qbz_spin
@@ -2759,7 +2865,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
    gqk => gstore%gqk(my_is)
    if (gqk%pert_comm%nproc > 1) then
      ! Activate parallelism over perturbations
-     ! Build table with list of perturbations treated by this CPU inside pert_comm
+     ! Build table with list of perturbations treated by this MPI rank inside pert_comm.
      ABI_WARNING("GSTORE with pert_comm%nproc > 1 not tested")
      call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
      call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
@@ -4002,7 +4108,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, root_ncid, gstore_completed !, gstore_fform, ierr
+ integer :: root_ncid, gstore_completed !, gstore_fform, ierr, my_rank,
  !character(len=500) :: msg
  !type(hdr_type) :: gstore_hdr
 !arrays

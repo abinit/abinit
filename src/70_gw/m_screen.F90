@@ -311,7 +311,8 @@ contains
   procedure :: init => screen_init
     ! Creation method.
 
-  !procedure :: print => screen_print         ! Print info
+  !procedure :: print => screen_print
+    ! Print info
 
   procedure :: free => screen_free
    ! Free dynamic memory
@@ -321,6 +322,8 @@ contains
 
   procedure :: w0gemv => screen_w0gemv
     ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
+
+  !procedure :: get_convolution => screen_get_convolution
 
   !procedure :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 end type screen_t
