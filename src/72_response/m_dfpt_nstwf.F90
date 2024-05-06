@@ -1139,6 +1139,20 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
 
+       ABI_MALLOC(gvnlx1,    (2,npw1_k*nspinor*ndat))
+       ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1(1:2,1:npw1_k*nspinor*ndat)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+       !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1_tmp(1:2,1:npw1_k*nspinor)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+       if (has_dcwf.and.is_metal_or_qne0) then
+         ABI_MALLOC(gvnlx2,    (2,npw1_k*nspinor*nband_k))
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:gvnlx2(1:2,1:npw1_k*nspinor*nband_k)) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+       end if
+
+
 
 
 
@@ -1203,6 +1217,12 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 !          Not able to compute if ipert1=(Elect. field) and no ddk WF file
            if (ipert1==dtset%natom+2.and.ddkfil(idir1)==0) cycle
+
+           if(dtset%gpu_option==ABI_GPU_DISABLED) then
+             gvnlx1(:,:)=zero
+           else if(dtset%gpu_option==ABI_GPU_OPENMP) then
+             call gpu_set_to_zero(gvnlx1,int(2,c_size_t)*npw1_k*nspinor*ndat)
+           end if
 
 !          Extract 1st-order NL form factors derivatives for this idir1
            if (dimffnl1_idir1>=2.and.psps%useylm==1.and.ipert1>dtset%natom) then
@@ -1347,13 +1367,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
 
-           ABI_MALLOC(gvnlx1,    (2,npw1_k*nspinor*ndat))
-#ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-
-
-
 !!!!!!!!!!!!!!!!! 5) Read DDK file
 !          Read DDK wave function (if ipert1=electric field)
            if (ipert1==dtset%natom+2) then
@@ -1430,11 +1443,6 @@ has_vectornd = (with_vectornd .EQ. 1)
                end do
              end if
            end if
-
-           ABI_MALLOC(gvnlx1_tmp,(2,npw1_k*nspinor))
-#ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET ENTER DATA MAP(alloc:gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
 
 !!!!!!!!!!!!!!!!! 7) Scary looking loop...
 !          If needed, compute here <delta_u^(j1)_k_i|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>
@@ -1606,10 +1614,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 
            if (has_dcwf.and.is_metal_or_qne0) then
-             ABI_MALLOC(gvnlx2,    (2,npw1_k*nspinor*nband_k))
-#ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET ENTER DATA MAP(alloc:gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
 
              if(dtset%gpu_option==ABI_GPU_DISABLED) then
                gvnlx2 = zero
@@ -1851,10 +1855,6 @@ has_vectornd = (with_vectornd .EQ. 1)
 !!!!!!!!!!!!!!!!! 11) Final getdc1
 !          Accumulate here 1st-order density change due to overlap operator changes (if any)
            if (has_drho) then
-#ifdef HAVE_OPENMP_OFFLOAD
-             !FIXME Need to batch and port this on GPU
-             !$OMP TARGET UPDATE FROM(gs1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
 !            Compute here delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !            (see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42))
              ABI_MALLOC(dcwavef,(2,npw1_k*nspinor*ndat))
@@ -1895,19 +1895,6 @@ has_vectornd = (with_vectornd .EQ. 1)
          !  !call pawcprj_output(cwaveprj0_idir1(:,1+(idat-1)*nspinor:idat*nspinor),prtgrads=1)
          !end do
 
-           if (has_dcwf.and.is_metal_or_qne0) then
-#ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET EXIT DATA MAP(delete:gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-             ABI_FREE(gvnlx2)
-           end if
-
-#ifdef HAVE_OPENMP_OFFLOAD
-           !$OMP TARGET EXIT DATA MAP(delete:gvnlx1,gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
-#endif
-           ABI_FREE(gvnlx1)
-           ABI_FREE(gvnlx1_tmp)
-
            if((usecprj==1).and..not.(associated(cwaveprj0_idir1,cwaveprj0)))then
              call pawcprj_free(cwaveprj0_idir1)
              ABI_FREE(cwaveprj0_idir1)
@@ -1936,9 +1923,20 @@ has_vectornd = (with_vectornd .EQ. 1)
 
 !      Deallocations of arrays used for this k-point
 #ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:gvnlx1,gvnlx1_tmp) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+
        !$OMP TARGET EXIT DATA MAP(delete:gh1) IF(dtset%gpu_option==ABI_GPU_OPENMP)
        !$OMP TARGET EXIT DATA MAP(delete:gs1) IF(has_dcwf .and. dtset%gpu_option==ABI_GPU_OPENMP)
 #endif
+       if (has_dcwf.and.is_metal_or_qne0) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET EXIT DATA MAP(delete:gvnlx2) IF(dtset%gpu_option==ABI_GPU_OPENMP)
+#endif
+         ABI_FREE(gvnlx2)
+       end if
+
+       ABI_FREE(gvnlx1)
+       ABI_FREE(gvnlx1_tmp)
        ABI_FREE(gh1)
        ABI_FREE(gs1)
        if (need_wfk)  then
