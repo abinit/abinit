@@ -23,12 +23,14 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced
 by [[asr]] and [[chneut]]. The latter variables have been used already for some time for a more detailed imposition of the acoustic sum rule
 and the charge neutrality sum rule in the electron-phonon part of ABINIT, and even for a longer time
-in the ANADDB utility. Actually, rfasr was used to initialize asr and chneut internally. This change was long overdue.
+in the ANADDB utility. Actually, rfasr was used to initialize [[asr]] and [[chneut]] internally. 
 The default values for [[asr]] and [[chneut]], namely 1, are however not the same as the previous default value of rfasr, namely 0.
 Thus a large fraction of the reference files of the test have been upgraded to the new default. However, in a sizeable number of reference files
 the old default value has been specified explicitly.
@@ -36,6 +38,8 @@ the old default value has been specified explicitly.
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
 They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field), 
 but have been superceded by rf2_XXX input variables a long time ago. 
+
+* * *
 
 ### **B.** Most noticeable achievements
 
@@ -86,13 +90,15 @@ performance libraries. It also uses NVidia FFT/linear algebra libraries
 The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
 on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
+For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+
+Note: the input variable use_gpu_nvtx has been suppressed and replaced by an option to
+be set at configure step: --enable-gpu-nvtx.
 
 Several GPU devices can be detected and used on a node.
 
 GPU regression tests are present in new directories,
-[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], test:gpu_omp_uo3,
+[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], 
 [[test:hpc_gpu_omp_01]] to [[test:hpc_gpu_omp_13]],
 as well as in the previously existing directory gpu.
 
@@ -103,7 +109,7 @@ Still, there are three examples *ac9 files in the directory doc/build of the pac
 [https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
 Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent. 
 
-By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
+By P. Kesterner, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
 (MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
 
 
@@ -114,8 +120,8 @@ of ABINIT relying on KOKKOS. Try :
 
 mkdir build; cd build; cmake ..
 
-More information is available in the ABINIT [[help:../installation|installation guide]]
-Still, the usual build procedure, using autotools is to be preferred by non-experts. CMake is to be considered as experimental.
+More information is available in the ABINIT [[help:../installation|installation guide]].
+Still, the usual build procedure, using autotools is to be preferred by non-experts. CMake is to be considered experimental.
 
 Also, the version number of ABINIT is now generated automatically from the git tag information.
 
@@ -129,13 +135,16 @@ It is now possible to compute the angular momentum of phonons in anaddb, followi
 By M. Mignolet (MR921)
 
 
-**B.5** New input "supra"variable write_files
+**B.5** New input "supra"variable [[write_files]]
 
 It is now possible to govern the printing of files thanks to the "supra"variable [[write_files]],
 instead of using the numerous prt* input variables.
 
 This supravariable is introduced while maintaining the underlying logic of the prt file options inside abinit.
-(Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using //write_files "  "//.
+(Experienced) Users can now trigger the presence or absence of a file in a calculation via a string using 
+
+[[write_files]] ``<list_of_file_suffixes_with_options\>"
+
 When rationalizing the set of prt* variables and their behavior, new ones were introduced : [[prtevk]], [[prthist]] and [[prtddb]].
 
 See [[test:v9_150]].
@@ -160,7 +169,7 @@ There are several new input variables related to metaGGA.
 The new variable [[xc_taupos]] allows one to control positivity of kinetic energy density, regardless the one for the density.
 The new variables [[irdkden]] and [[getkden]] allow one not to read KDEN when reading DEN (and other possible applications).
 There are several other improvements for automatic settings (forces, stresses, self-consistent cycle).
-The computation of c parameter of TB09 functional, compatible with NCPP and PAW, is now implemented in a specific routine
+The computation of c parameter of TB09 functional, compatible with NCPP and PAW, is now implemented in a specific routine.
 
 By the way, mBJ/TB09 is not adapted to forces/stresses computation because it does not solve a variational problem for the energy. This means that it is probably not suitable for DFPT.
 
@@ -183,13 +192,14 @@ See test test:gwr_07
 
 By M. Giantomassi (MR 875, 907)
 
+* * *
 
 ### **C.** Changes for the developers (including information about compilers)
 
 **C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs. 
 Several flavors of the NVHPC compiler are available.
 
-By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterneer (MR949)
+By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterner (MR949)
 
 
 **C.2** New bots have been introduced to replace obsolete ones :
@@ -198,7 +208,7 @@ bob_gnu_13.2_openmp, higgs_gnu_12.3_cov, scope_gnu_13.2_dep.
 By J.-M. Beuken (MR960)
 
 
-**C.3** Support for Py3.12 has been added to ./runtest.py
+**C.3** Support for Py3.12 has been added to ./runtest.py .
 Use importlib if py>3.12, this fixes SyntaxWarning due to invalid escape sequence.
 
 By M. Giantomassi (MR958)
@@ -208,7 +218,7 @@ Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP.
 
 By M. Torrent (MR970)
 
-
+* * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
@@ -221,13 +231,13 @@ In that case, the SCF loop stops if both criteria are satisfied. The documentati
 
 The input variable [[tolwfr_diago]] has been added, to distinguish the criterion used for SCF loop 
 and the one used inside diagonalization algorithms to skip lines. 
-[[tolwfr_diago]] is set to [[tolwfr]] by default. Note that one can define [[tolwfr_diago]] while [[tolwfr]] is not.
+[[tolwfr_diago]] is set to [[tolwfr]] by default. Note that one can define [[tolwfr_diago]] while [[tolwfr]] is not defined.
 
-There is a new use of nbdbuf (=-101), which is kind of an automatic buffering. 
+There is a new use of [[nbdbuf]] (=-101), which is kind of an automatic buffering. 
 In that case, the maximum of residuals is computed as max(res*occ) instead of max(res). 
 Used for both [[tolwfr]] and [[tolwfr_diago]]. This is experimental, so not documented yet.
 
-Apart from LOBPCG (wfoptalg==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
+Apart from LOBPCG ([[wfoptalg]]==114), these developments are new features without altering the previous code behavior, as shown in the testsuite.
 See [[test:mpiio_26]], [[test:mpiio_27]], [[test:mpiio_51]],
 [[test:paral_31]],[[test:paral_63]],
 [[test:paral_66]],[[test:paral_86]] 
@@ -263,13 +273,13 @@ From L. Baguet (MR973 and MR981)
 **D.4**
 Add post comparison of initial [[spgroup]] with final [[spgroup]], with related bug fixes and improvements. Also, information about non-primitive cells.
 
-After echoing all the variables as usual, ABINIT performs a post-analysis of the symmetries and associated spgroup (and spgroupma),
+After echoing all the variables as usual, ABINIT performs a post-analysis of the symmetries and associated [[spgroup]] (and [[spgroupma]]),
 with comparison with the initial assessment. In case the post analysis and the initial one give differences,
 a comment is issued in the output file, and a more detailed analysis is produced in the log file.
 While implementing this feature, several bug fixes and improvements have been done.
 Several errors in the (magnetic) space group generator were uncovered.
 The documentation of [[spgroupma]] has been fixed.
-Unneeded redundant write of spgroup in the log file is avoided.
+Unneeded redundant write of [[spgroup]] in the log file is avoided.
 
 The information about the primitive cell when the input contains a non-primitive cell is now echoed in the log file.
 See [[test:v9_189]].
@@ -290,14 +300,14 @@ By S. Ponce (MR962)
 **D.7** DMFT susceptibility.
 
 Add local charge and magnetic susceptibility for DMFT in CTQMC
-Add two tests, t100 and t101, in paral repository for testing local susceptibility in DMFT
+Add two tests, [[test:paral_100]] and [[test:paral_101]] for testing local susceptibility in DMFT.
 
 By F. Gendron (MR963, MR983)
 
 **D.8**
 Check on consistency of parallelism input variables [[autoparal]] and [[paral_kgb]] with [[optdriver]]. 
 Introduce [[chkparal]]. Can be disabled by non-zero [[expert_user]] input variable (already existed, from 9.2).
-See [[test:v67mbpt_36]]/
+See [[test:v67mbpt_36]].
 
 By X. Gonze (MR982)
 
@@ -316,7 +326,7 @@ By M. Giantomassi (6 April 2023)
 
 **D.10**
 New input variable [[eph_frohl_ntheta]].
-Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4 i.e. computation of the electron-phonon self-energy.
+Only relevant for [[optdriver]] = 7 and [[eph_task]] = 4, i.e. computation of the electron-phonon self-energy.
 This variable defines the angular mesh for the spherical integration of the Frohlich divergence
 in the microzone around the Gamma point to accelerate the convergence with the number of q-points.
 
@@ -340,14 +350,14 @@ See e.g. [[test:atdep_38]].
 By F. Bottin and J. Bouchet (MR496)
 
 **D.13**
-There are significant documentation updates to EFG and NMR topics, as well as for the rf2 tutorial.
+There are significant documentation updates to [[topic:EFG|EFG]] and [[topic:NMR|NMR]] topics, as well as for the [[tutorial:rf2|rf2 tutorial]].
 
 By J. Zwanziger (MR980)
 
 
 **D.14** 
 Introduced a warning in m_respfn_driver.f90 regarding non-colinear dfpt in metals for norm-conserving psps. I compared results obtained by dfpt to results obtained via finite differences on Fe bcc. Everything seems alright.
-There is no paw implementation yet for nspden=4.
+There is no paw implementation yet for [[nspden]]=4.
 
 By M. Mignolet (MR922)
 
@@ -371,7 +381,7 @@ Fixed a typo in 'bs_nstates' docs where direct diago was mapped to 'bs_algorithm
 By F. Goudreault (MR945)
 
 **D.18**
-Fix DFT+U + SOC + nspden=1 case.
+Fix DFT+U + SOC + [[nspden]]=1 case.
 Now local magnetic moment is correctly forced to be zero.
 
 By M Torrent (MR948)
@@ -382,7 +392,7 @@ Fix in posdoppler routine.
 From A. Donkov, through M. Torrent (MR950)
 
 **D.20**
-There was a Bug when doing AHC with dipoles+quadrupoles activated.
+There was a Bug when doing AHC computations with dipoles+quadrupoles activated.
 In that case the DDB block dimension is bigger, from $(3*mpert)^2$ to $(3*mpert)^3$
 and a reshaping is needed in ddb_get_dielt_zeff.
 This has been fixed.
@@ -447,6 +457,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings. 
 
@@ -731,6 +743,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
 **A.1** Warning: the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
@@ -902,8 +916,6 @@ From J.-M. Beuken (MR830).
 
 **C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
 This makes more readable profiling and tracing information when viewed with nsys-ui. 
-Add new parameter use_nvtx (now [[gpu_use_nvtx]]) 
-to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
 From P. Kestener (MR843)
@@ -1115,6 +1127,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 (nothing to mention for this v9.6)
@@ -1305,6 +1319,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -1521,6 +1537,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -2292,6 +2310,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
@@ -2978,6 +2998,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### A. Warnings and important remarks
 
 A.1 The correct definition of the temperature has been implemented in the isokinetic algorithm [[ionmov]]=12.
@@ -3168,6 +3190,8 @@ and examine the links to help files or test cases ...
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### A. Warnings and important remarks
 
