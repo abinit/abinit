@@ -392,6 +392,7 @@ contains
 !     This subroutine writes the overlap matrix in the w90 format
 !     (see w90io.F90 in w90 package)
 !-----------------------------------------------------------------------
+! TODO: this routine is doing much more than writing Mmn!! It also calculates etc. The io module should be segregated and cleaned
   subroutine write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix, &
        &  nkpt, nsppol,  nntot, mband, num_bands,  message, iam_master)
     ! input and output vars
