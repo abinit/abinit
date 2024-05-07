@@ -255,7 +255,7 @@ type, public :: gqk_t
 
   complex(dp), allocatable :: my_g(:,:,:,:,:)
   ! (my_npert, nb, my_nq, nb, my_nk)
-  ! (       p, b1,     q, b2, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
+  ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
   ! e-ph matrix elements g (local buffer). Allocated if cplex == 2
 
   real(dp), allocatable :: my_g2(:,:,:,:,:)
