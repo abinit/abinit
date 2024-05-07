@@ -183,6 +183,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1, with_cplex0 = 0
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
+ !integer :: nomega_braket, nomega_ nomega_tot
  integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, ig
@@ -203,6 +204,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
+ !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
  real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
@@ -261,6 +263,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
+ real(dp),allocatable :: omegame0i(:)
  real(dp) :: ylmgr_dum(1,1,1)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  complex(dp),pointer :: cvxc1_ptr(:,:,:)
@@ -275,14 +278,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 !************************************************************************
 
- call cwtime(cpu_all, wall_all, gflops_all, "start")
-
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
  end if
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm); units = [std_out, ab_out]
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -290,7 +292,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ieta = +j_dpc * dtset%zcut
 
  ! Check if a previous GSTORE.nc file is present to restart the calculation if dtset%eph_restart == 1,
- ! and use done_qbz_spin to cycle the loops below if restart /= 0.
+ ! and use done_qbz_spin mask to cycle the loops below if restart /= 0.
  gstore_filepath = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
  call gstore_check_restart(gstore_filepath, dtset, nqbz, done_qbz_spin, restart, comm)
 
@@ -355,8 +357,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
  end if
 
- !call pp_mesh%sort_by_stars()
-
  if (nqlwl == 0) then
    nqlwl=1
    ABI_MALLOC(qlwl,(3,nqlwl))
@@ -367,10 +367,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_COMMENT(msg)
  end if
 
- ! TODO: In principle one should have gpsh_x as well.
- call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
-               nqlwl, qlwl, comm)
- call kmesh%free()
+ ! TODO:
+ ! Here we sort pp_mesh by stars to that we can split the pp wavevectors in blocks and reduced
+ ! the number of points in the IBZ that must be stored in memory
+ !call pp_mesh%sort_by_stars()
 
  ! Distribute the sum over pp wavevectors inside pp_sum_comm using block distribution.
  my_pp_start_spin = -1; my_pp_stop_spin = 0
@@ -383,6 +383,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end if
    ABI_SFREE(my_pp_inds)
  end do ! my_is
+
+ ! TODO: In principle one should have gpsh_x as well.
+ call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
+               nqlwl, qlwl, comm)
+ call kmesh%free()
 
  ! Initialize the wave function descriptor.
  ! Each node has all k-points and spins and bands between my_bsum_start and my_bsum_stop
@@ -464,7 +469,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
- ! Diagonal elements of velocity operator in cartesian coordinates for all states in gwpt_nk.
+ ! Diagonal elements of velocity operator in cartesian coordinates for all kk in the IBZ.
  ! Use ndone to undertand if velocities have been already compured in a previous run.
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
@@ -484,7 +489,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      gqk => gstore%gqk(my_is)
      nb = gqk%nb
 
-     ! Be careful as wavefunctions may be replicated.
+     ! Be careful as wavefunctions might be replicated.
      ! Use count_bk to count how many states has been computed
      ! in parallel in order to rescale the results.
      if (gstore%with_vk == 1) then
@@ -708,6 +713,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(qlwl)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+
+ ! Define set of frequencies in Sigma(w)
+ !nomega_bracket = 2
+ !nomega_tot = nomega_braket + nomega4sd
+ !ABI_MALLOC(omegame0i, (nomega_tot))
+ !ABI_FREE(omegame0i)
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))

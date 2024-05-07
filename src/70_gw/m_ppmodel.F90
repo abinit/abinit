@@ -2074,13 +2074,13 @@ subroutine ppm_calc_sic(PPm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 !Arguments ------------------------------------
 !scalars
  class(ppmodel_t),intent(in) :: PPm
- integer,intent(in) :: nomega,npwc,npwx,nspinor
- real(dp),intent(in) :: theta_mu_minus_e0i,zcut
+ integer,intent(in) :: nomega, npwc, npwx, nspinor
+ real(dp),intent(in) :: theta_mu_minus_e0i, zcut
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
- complex(gwpc),intent(in) :: botsq(npwc,PPm%dm2_botsq),eig(PPm%dm_eig,PPm%dm_eig),otq(npwc,PPm%dm2_otq)
+ complex(gwpc),intent(in) :: botsq(npwc,PPm%dm2_botsq), eig(PPm%dm_eig,PPm%dm_eig), otq(npwc,PPm%dm2_otq)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: ket(npwc*nspinor,nomega)
+ complex(gwpc),intent(inout) :: ket(npwc*nspinor, nomega)
  complex(gwpc),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
@@ -2246,7 +2246,8 @@ end subroutine ppm_calc_sic
 !!
 !! SOURCE
 
-subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_ggw,nfftf,ngfftf,rhor_tot)
+subroutine ppm_symmetrizer(PPm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, epsm1_ggw, &
+                            nfftf, ngfftf, rhor_tot)
 
 !Arguments ------------------------------------
 !scalars
@@ -2286,11 +2287,12 @@ subroutine ppm_symmetrizer(PPm,iq_bz,Cryst,Qmesh,Gsph,npwe,nomega,omega,epsm1_gg
  ! =======================================================
  !
  ! Allocate the tables for this q_ibz
- if (PPm%has_q(iq_ibz)==PPM_NOTAB) call ppm_mallocq(PPm,iq_ibz)
+ if (PPm%has_q(iq_ibz) == PPM_NOTAB) call ppm_mallocq(PPm,iq_ibz)
 
- if (PPm%has_q(iq_ibz)==PPM_TAB_ALLOCATED) then
+ if (PPm%has_q(iq_ibz) == PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
-   call PPm%new_setup(iq_ibz,Cryst,Qmesh,npwe,nomega,omega,epsm1_ggw,nfftf,Gsph%gvec,ngfftf,rhor_tot) !Optional
+   call PPm%new_setup(iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_ggw, nfftf, &
+                      Gsph%gvec, ngfftf, rhor_tot) !Optional
  end if
 
  if (q_isirred) then
