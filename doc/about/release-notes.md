@@ -90,8 +90,10 @@ performance libraries. It also uses NVidia FFT/linear algebra libraries
 The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
 on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
+For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+
+Note: the input variable use_gpu_nvtx has been suppressed and replaced by an option to
+be set at configure step: --enable-gpu-nvtx.
 
 Several GPU devices can be detected and used on a node.
 
@@ -107,7 +109,7 @@ Still, there are three examples *ac9 files in the directory doc/build of the pac
 [https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
 Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent. 
 
-By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
+By P. Kesterner, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
 (MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
 
 
@@ -197,7 +199,7 @@ By M. Giantomassi (MR 875, 907)
 **C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs. 
 Several flavors of the NVHPC compiler are available.
 
-By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterneer (MR949)
+By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterner (MR949)
 
 
 **C.2** New bots have been introduced to replace obsolete ones :
@@ -914,8 +916,6 @@ From J.-M. Beuken (MR830).
 
 **C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
 This makes more readable profiling and tracing information when viewed with nsys-ui. 
-Add new parameter use_nvtx (now [[gpu_use_nvtx]]) 
-to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
 From P. Kestener (MR843)
