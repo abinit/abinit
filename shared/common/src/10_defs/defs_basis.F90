@@ -173,7 +173,6 @@ module defs_basis
 !real(dp), parameter :: quarter_pi=pi*quarter
 !real(dp), parameter :: two_thirds_pi=two_thirds*pi
 
-
 !Real precision
  real(dp), parameter :: greatest_real = huge(one)
  real(dp), parameter :: smallest_real = -greatest_real
@@ -220,6 +219,7 @@ module defs_basis
  ! This quantity might be used at runtime to determine how to distribute memory.
  ! The default value (2Gb) can be changed at runtime via the command line interface.
  real(dp), protected :: mem_per_cpu_mb = two * 1024_dp
+
 !Real physical constants
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
@@ -449,7 +449,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
+subroutine abi_log_status_state(new_do_write_log,new_do_write_status)
 
 !Arguments ------------------------------------
  logical,optional,intent(in) :: new_do_write_log,new_do_write_status
@@ -459,7 +459,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_do_write_log))    do_write_log   =new_do_write_log
  if (PRESENT(new_do_write_status)) do_write_status=new_do_write_status
 
- end subroutine abi_log_status_state
+end subroutine abi_log_status_state
 !!***
 
 !----------------------------------------------------------------------
@@ -480,7 +480,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
+subroutine abi_io_redirect(new_ab_out,new_std_out,new_io_comm)
 
 !Arguments ------------------------------------
  integer,optional,intent(in) :: new_std_out,new_ab_out,new_io_comm
@@ -491,7 +491,7 @@ CONTAINS  !=====================================================================
  if (PRESENT(new_std_out)) std_out = new_std_out
  if (PRESENT(new_io_comm)) abinit_comm_output = new_io_comm
 
- end subroutine abi_io_redirect
+end subroutine abi_io_redirect
 !!***
 
 !----------------------------------------------------------------------
@@ -508,7 +508,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
- subroutine print_kinds(unit)
+subroutine print_kinds(unit)
 
 !Arguments-------------------------------------
  integer,optional,intent(in) :: unit
@@ -516,11 +516,11 @@ CONTAINS  !=====================================================================
 !Local variables-------------------------------
  integer :: my_unt
 
- ! *********************************************************************
+! *********************************************************************
 
-  my_unt=std_out; if (PRESENT(unit)) my_unt = unit
+ my_unt=std_out; if (PRESENT(unit)) my_unt = unit
 
-  write(my_unt,'(a)')' DATA TYPE INFORMATION: '
+ write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
  write(my_unt,'(a,/,2(a,i6,/),2(a,e16.8e3,/),a,e16.8e3)')&
    ' REAL:      Data type name: REAL(DP) ',&
@@ -530,19 +530,19 @@ CONTAINS  !=====================================================================
    '            Smallest positive number:                      ',TINY(0.0_dp),&
    '            Largest representable number:                  ',HUGE(0.0_dp)
 
-  write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
-    ' INTEGER:   Data type name: INTEGER(default) ', &
-    '            Kind value: ',KIND(0),              &
-    '            Bit size:   ',BIT_SIZE(0),          &
-    '            Largest representable number: ',HUGE(0)
+ write(my_unt,'(a,/,2(a,i0,/),a,i0)')&
+   ' INTEGER:   Data type name: INTEGER(default) ', &
+   '            Kind value: ',KIND(0),              &
+   '            Bit size:   ',BIT_SIZE(0),          &
+   '            Largest representable number: ',HUGE(0)
 
-  write(my_unt,'(a,/,a,i0)')&
-    ' LOGICAL:   Data type name: LOGICAL ',&
-    '            Kind value: ',KIND(.TRUE.)
+ write(my_unt,'(a,/,a,i0)')&
+   ' LOGICAL:   Data type name: LOGICAL ',&
+   '            Kind value: ',KIND(.TRUE.)
 
-  write(my_unt,'(2a,i0)')&
-   ' CHARACTER: Data type name: CHARACTER ',&
-   '            Kind value: ',KIND('C')
+ write(my_unt,'(2a,i0)')&
+  ' CHARACTER: Data type name: CHARACTER ',&
+  '            Kind value: ',KIND('C')
 
 end subroutine print_kinds
 !!***
