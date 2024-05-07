@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 29 Jun 2023.
-- ( at 22h32 )
+.Starting date : Sun 25 Jun 2023.
+- ( at 23h14 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Test_suite/tutoplugs_tw90_7/tw90_7.abi
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/TestBot_MPI1/tutoplugs_tw90_7/tw90_7.abi
 - output file    -> tw90_7.abo
 - root for input  files -> tw90_7i
 - root for output files -> tw90_7o
@@ -169,8 +169,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.12070
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/31ga.pspnc
 -  Troullier-Martins psp for element  Ga        Thu Oct 27 17:36:43 EDT 1994
 - 31.00000   3.00000    940714                znucl, zion, pspdat
     1    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,8 +184,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              1    2.537532
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/xuhe_ewann/tests/Psps_for_tests/PseudosTM_pwteter/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -571,10 +571,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          4.5  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.1
++Overall time at end (sec) : cpu=          4.5  wall=          4.5

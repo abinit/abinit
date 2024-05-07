@@ -4,7 +4,7 @@ README for ABINIT
 ABINIT is an atomic-scale simulation software suite.
 
 Most of the relevant information can be found on the ABINIT [website](https://www.abinit.org)
-and the [Forum](https://forum.abinit.org).
+and the [Forum](https://discourse.abinit.org).
 
 Many documentation files can be found in the doc directory.
 See the file [INSTALL](INSTALL) for generic compilation and installation instructions.
