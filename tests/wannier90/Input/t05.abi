@@ -11,17 +11,18 @@ prtden1 1
 
 # band structure
 iscf2  -2
-tolwfr2  1.0d-20
+tolwfr2  1.0d-16
 ndivsm2  20
 getden2 1
 getwfk2 1
-kptopt2 -7
+kptopt2 -3
 kptbounds2
 0  0  0      #Gam
 1/2 -1/2 1/2 #H
 0 0 1/2      # N
 0  0  0      #Gam
-1/4 1/4 1/4  # P
+
+1/4 1/4 1/4  # P  # removed the following for speed
 1/2 -1/2 1/2 #H
 1/4 1/4 1/4  # P
 0 0 1/2      # N
@@ -38,6 +39,8 @@ spinat
 0.00000000000000 0.00000000000000 4.00000000000000
 accuracy 4   # this sets pawecutdg to 1.5 * ecut
 autoparal 0
+paral_kgb 0
+
 chksymbreak 0
 diemac 4
 diemix 0.7
@@ -54,7 +57,6 @@ nspinor 2
 
 nstep 40
 occopt 7
-paral_kgb 0
 tsmear 1e-3
 prtvol 3
 
