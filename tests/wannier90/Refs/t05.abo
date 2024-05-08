@@ -1,8 +1,8 @@
 
-.Version 9.11.1 of ABINIT 
+.Version 9.11.6.1 of ABINIT, released Apr 2024.
 .(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,23 +14,22 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 29 Jun 2023.
-- ( at 22h25 )
+.Starting date : Wed  8 May 2024.
+- ( at 09h44 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Test_suite/wannier90_t05/t05.abi
+- input  file    -> /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/mverstra_develop/tests/Test_suite/wannier90_t05/t05.abi
 - output file    -> t05.abo
 - root for input  files -> t05i
 - root for output files -> t05o
 
 - inpspheads : Reading pseudopotential header in XML form from 
--   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+-   /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
 
  invars1: COMMENT -
   With nspinor=2 and usepaw=1, pawspnorb=1 has been switched on by default.
-
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group I4 2 2 (# 97); Bravais tI (body-center tetrag.)
  Magnetic point group 42'2' (# 15)
@@ -50,7 +49,6 @@ P This job should need less than                      23.120 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      5.533 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
-
 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group I4 2 2 (# 97); Bravais tI (body-center tetrag.)
@@ -824,9 +822,9 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.91825
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm: opening atomic psp file    /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspini: atom type   1  psp file is /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm: opening atomic psp file    /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/ABINIT3/alps_gnu_9.3_openmpi/mverstra_develop/tests/Psps_for_tests/Pseudodojo_paw_pbe_standard/Fe.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  6 (lmn_size= 18), orbitals=   0   0   1   1   2   2
  Spheres core radius: rc_sph= 2.11531574
@@ -994,30 +992,30 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
    Writing top of the overlap matrix: M_mn(ikb,ik)
    m=n=1:3, ikb=1, ik=1
 
-;   (   0.527535  -0.026031 ,   0.000929  -0.002976 ,   0.066281   0.000128 ,    )
-;   (   0.000000  -0.000012 ,  -0.586581   0.001079 ,  -0.000032   0.013991 ,    )
-;   (  -0.000944  -0.052709 ,   0.010396  -0.018605 ,  -0.006491   0.614136 ,    )
+;   (   0.527535  -0.026030 ,   0.000929  -0.002976 ,   0.066281   0.000128 ,    )
+;   (   0.000000  -0.000000 ,  -0.586581  -0.000000 ,  -0.000032   0.015336 ,    )
+;   (  -0.000944  -0.047997 ,   0.010396  -0.000014 ,  -0.006491   0.612544 ,    )
 
    Writing bottom of the overlap matrix: M_mn(ikb,ik)
    m=n=num_bands-2:num_bands, ikb=nntot, ik=nkpt
 
-;   (   0.004079  -0.050675 ,  -0.096022   0.128717 ,  -0.104723  -0.005512 ,    )
-;   (   0.088503  -0.058476 ,  -0.197043   0.018483 ,   0.088918   0.016325 ,    )
-;   (  -0.000914   0.039712 ,   0.078284  -0.111505 ,  -0.013959  -0.128683 ,    )
+;   (   0.004079  -0.051257 ,  -0.096022   0.112674 ,  -0.104723  -0.002430 ,    )
+;   (   0.088503  -0.057920 ,  -0.197043   0.017799 ,   0.088918   0.027253 ,    )
+;   (  -0.000914   0.036822 ,   0.078284  -0.110854 ,  -0.013959  -0.124995 ,    )
 
    Writing top of the initial projections matrix: A_mn(ik)
    m=1:3, n=1:3, ik=1
 
-;   (   0.398012  -0.000000 ,  -0.000000   0.000000 ,  -0.000000  -0.000000 ,    )
-;   (  -0.000000   0.000000 ,  -0.000000  -0.000000 ,   0.000000   0.000000 ,    )
-;   (  -0.000000  -0.000000 ,  -0.399614   0.000000 ,  -0.000000   0.000000 ,    )
+;   (   0.198540   0.000000 ,   0.090486  -0.000000 ,  -0.000000   0.024914 ,    )
+;   (  -0.024991  -0.000000 ,  -0.031424  -0.000000 ,   0.000000   0.000922 ,    )
+;   (   0.005399  -0.001826 ,   0.005996   0.051233 ,   0.012649   0.013745 ,    )
 
    Writing bottom of the initial projections matrix: A_mn(ik)
    m=num_bands-2:num_bands, n=nwan-2:nwan, ik=nkpt
 
-;   (  -0.099840   0.019004 ,  -0.041886   0.000000 ,   0.058699  -0.044699 ,    )
-;   (  -0.009122   0.011980 ,   0.058699  -0.044699 ,  -0.004030   0.003814 ,    )
-;   (   0.029231  -0.000083 ,  -0.004030   0.003814 ,  -0.034898  -0.002698 ,    )
+;   (  -0.005930   0.002059 ,  -0.002190  -0.000741 ,  -0.005575   0.003478 ,    )
+;   (  -0.015127   0.000040 ,  -0.042122  -0.001653 ,  -0.004454   0.001381 ,    )
+;   (   0.001657  -0.006788 ,  -0.000903  -0.004059 ,   0.001621  -0.007138 ,    )
 
    mlwfovlp :  mlwfovlp_run completed -
 -  see t05o_DS1_w90.wout for details.
@@ -7084,10 +7082,10 @@ P           mkmem2        222
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- Proc.   0 individual time (sec): cpu=        275.7  wall=        276.8
+- Proc.   0 individual time (sec): cpu=        182.5  wall=        182.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   4 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        275.7  wall=        276.8
+.Delivered   4 WARNINGs and  20 COMMENTs to log file.
++Overall time at end (sec) : cpu=        182.5  wall=        182.9
