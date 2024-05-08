@@ -1428,7 +1428,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !Local variables-------------------------------
 !scalars
  integer :: iband1,iband2,ierr,ig,ig1,ig1b,ig2,ig2b
- integer :: ig3,ig3b,igk1,igk2,igks1,igks2,ikg,ikpt,ikpt1,ikpt2,imntot,index,intot
+ integer :: ig3,ig3b,igk1,igk2,ikg,ikpt,ikpt1,ikpt2,imntot,index,intot
  integer :: ispinor,isppol,me,n1,n2,n3,npoint,npoint2,npw_k,npw_k2
  integer :: nprocs,spaceComm
  integer,allocatable::indpwk(:,:),kg_k(:,:)
@@ -1480,8 +1480,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  invpwk=0
  indpwk=0
  kg_k=0
- do isppol=1,1  !invpwk is not spin dependent
-!  so we just do it once
+ do isppol=1,1  !invpwk is not spin dependent so we just do it once
    ikg=0
    do ikpt=1,nkpt
 !
@@ -1678,13 +1677,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                do iband2=1,mband
                  do iband1=1,mband
                    do ispinor=1,nspinor
-!                    igks1= (igk1*nspinor)-(nspinor-ispinor)
-!                    igks2= (igk2*nspinor)-(nspinor-ispinor)
-                     igks1= igk1+ (ispinor-1)*npw_k
-                     igks2= igk2+ (ispinor-1)*npw_k2
-
-!                    Here the igks is to include the spinor component missing in igk
-                     if(lfile) index=igks2+npw_k2*nspinor*(iband2-1) !In case of MPI, see below
+                     if(lfile) index=ispinor + nspinor*(igk2-1) + nspinor*npw_k2*(iband2-1) !In case of MPI, see below
                      ! TODO : Check if the index in the cg_elems are correct. 
 !
 !                    If MPI sometimes the info was read from an unformatted file
@@ -1692,17 +1685,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !
 ! TODO: this filter should be outside, not inside 1000 loops!!!
                      if(lfile) then
-                        ! TODO: hexu: It seems there is only ispinor1=ispinor2.
-                        ! the spinor off-diagonal is not inclucded??
-  
-
-!                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
-! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)&
-! &                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)
-!                        cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
-! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg_read(2,index)&
-! &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg_read(1,index)
-! !
                        cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
                              &   mywfc%cg_elem(1, igk1, ispinor, iband1, ikpt1, isppol) *cg_read(1,index)&
                              & + mywfc%cg_elem(2, igk1, ispinor, iband1, ikpt1, isppol)*cg_read(2,index)
@@ -1711,13 +1693,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                              &- mywfc%cg_elem(2, igk1, ispinor, iband1, ikpt1, isppol)*cg_read(1,index)
 !
                      else
-!                       cm1(1,iband1,iband2,intot,ikpt1,isppol)=cm1(1,iband1,iband2,intot,ikpt1,isppol)+ &
-!&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))&
-!&                       + cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))
-!                       cm1(2,iband1,iband2,intot,ikpt1,isppol)=cm1(2,iband1,iband2,intot,ikpt1,isppol)+ &
-!&                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
-!&                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
-
 ! TODO: Here it is very inefficient.
 ! Could be replaced with the fftbox and dotproduct. 
 ! cgtk_rotate. sphere. 
@@ -1728,19 +1703,12 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                              & *mywfc%cg_elem(1, igk2,  ispinor,iband2, ikpt2, isppol) &
                              & +mywfc%cg_elem(2, igk1,  ispinor,iband1, ikpt1, isppol) &
                              & *mywfc%cg_elem(2,  igk2, ispinor,iband2, ikpt2, isppol)
-                                !& +cg(1,igks1+iwav(iband1,ikpt1,isppol)) &
-                                !& *cg(1,igks2+iwav(iband2,ikpt2,isppol))&
-                                !& + cg(2,igks1+iwav(iband1,ikpt1,isppol)) &
-                                !& *cg(2,igks2+iwav(iband2,ikpt2,isppol))
                         cm1(2,iband1,iband2,intot,ikpt1,isppol)= &
                              & cm1(2,iband1,iband2,intot,ikpt1,isppol) &
                              & + mywfc%cg_elem(1, igk1,  ispinor,iband1, ikpt1, isppol) &
                              & *mywfc%cg_elem( 2, igk2,  ispinor,iband2, ikpt2, isppol) &
                              & -mywfc%cg_elem( 2, igk1,  ispinor,iband1, ikpt1, isppol) &
                              & *mywfc%cg_elem( 1, igk2,  ispinor,iband2, ikpt2, isppol)
-
-                            ! &                       cg(1,igks1+iwav(iband1,ikpt1,isppol))*cg(2,igks2+iwav(iband2,ikpt2,isppol))&
-                            ! &                       - cg(2,igks1+iwav(iband1,ikpt1,isppol))*cg(1,igks2+iwav(iband2,ikpt2,isppol))
                      end if
                    end do !ispinor
                  end do ! iband1
