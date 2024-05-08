@@ -11,7 +11,7 @@ prtden1 1
 
 # band structure
 iscf2  -2
-tolwfr2  1.0d-16
+tolwfr2  1.0d-20
 ndivsm2  20
 getden2 1
 getwfk2 1
@@ -37,7 +37,7 @@ tmpdata_prefix = "t05t"
 # bcc iron : test wannier90 interface with nspinor=2 and nspden=4
 spinat
 0.00000000000000 0.00000000000000 4.00000000000000
-accuracy 4   # this sets pawecutdg to 1.5 * ecut
+accuracy 6   # this sets pawecutdg to 2 * ecut
 autoparal 0
 paral_kgb 0
 
