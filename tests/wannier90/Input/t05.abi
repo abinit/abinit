@@ -36,12 +36,12 @@ tmpdata_prefix = "t05t"
 # bcc iron : test wannier90 interface with nspinor=2 and nspden=4
 spinat
 0.00000000000000 0.00000000000000 4.00000000000000
-accuracy 2
+accuracy 4   # this sets pawecutdg to 1.5 * ecut
 autoparal 0
 chksymbreak 0
 diemac 4
 diemix 0.7
-ecut 15
+ecut 10
 ecutsm 0.5
 istwfk *1
 ixc 11
@@ -55,7 +55,6 @@ nspinor 2
 nstep 40
 occopt 7
 paral_kgb 0
-pawecutdg 20
 tsmear 1e-3
 prtvol 3
 
@@ -67,7 +66,7 @@ rprim
 # -0.33333333177848 0.94280904213179 0.00000000000000
 # -0.33333333441130 -0.47140452114185 0.81649658028510
 #scalecart  
-  1.01  1.0 0.99   # This is to break the symmetry, and improve portability
+#  1.01  1.0 0.99   # This is to break the symmetry, and improve portability
 
 #Definition of the atom types
 ntypat 1
