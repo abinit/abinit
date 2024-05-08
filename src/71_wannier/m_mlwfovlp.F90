@@ -1237,6 +1237,8 @@ end subroutine mlwfovlp_seedname
 #if defined HAVE_WANNIER90
    nwan(:)=0
    num_bands(:)=0
+
+
    do isppol=1,nsppol
 #ifdef HAVE_WANNIER90_V1
        call wannier_setup(seed_name(isppol),ngkpt,nkpt&            !input
