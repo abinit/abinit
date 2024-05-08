@@ -189,7 +189,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  !integer :: nomega_braket, nomega_ nomega_tot
- integer :: cplex,drho_cplex,nkxc,nk3xc,n3xccc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, ig
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -869,15 +869,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
     
      call xcdata_init(xcdata,dtset=dtset)
      non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
-
-     ! If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
-     if (dtset%xc_tb09_c>99._dp) then
-       n3xccc=0
-       call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom,nfftf,ngfftf, &
-       &                     dum_nhat,psps%usepaw,dum_nhat,0,dtset%nspden,dtset%ntypat,n3xccc, &
-       &                     pawang,pawrad,den_pawrhoij,pawtab,dtset%pawxcdev,rhor,cryst%rprimd,psps%usepaw, &
-       &                     dum_xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-     end if
 
      nk3xc=1 ; option=2 ; usexcnhat=0
      call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
