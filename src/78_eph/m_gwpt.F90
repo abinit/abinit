@@ -57,6 +57,7 @@ module m_gwpt
  use m_clib
  use m_mkffnl
  use m_screen
+ use m_xcdata
 
  use defs_abitypes,    only : mpi_type
  use defs_datatypes,   only : ebands_t, pseudopotential_type
@@ -85,6 +86,10 @@ module m_gwpt
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
+ use m_rhotoxc,        only : rhotoxc
+ use m_drivexc,        only : check_kxc
+ use m_dfpt_mkvxc,     only : dfpt_mkvxc
+ use m_xc_tb09,        only : xc_tb09_update_c
 
  implicit none
 
@@ -184,7 +189,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  !integer :: nomega_braket, nomega_ nomega_tot
- integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
+ integer :: cplex,drho_cplex,nkxc,nk3xc,n3xccc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, ig
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -205,10 +210,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
- real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
+ real(dp) :: ecut,weight_q,q0rad, bz_vol, enxc, vxcavg ! ediff, eshift, rfact,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  logical :: print_time_qq, print_time_kk
+ logical :: non_magnetic_xc
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp !, gs_ham_kqmp
@@ -225,6 +231,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(screen_info_t) :: w_info
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
+ type(xcdata_type) :: xcdata
  character(len=fnlen) :: w_fname, gstore_filepath
  character(len=5000) :: msg
 !arrays
@@ -253,8 +260,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
- real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:),rho1(:,:,:,:)
  real(dp),allocatable, target :: vxc1(:,:,:,:)
+ real(dp),allocatable :: vxc(:,:), kxc(:,:)
  real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
  real(dp),allocatable :: gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
@@ -265,6 +273,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp),allocatable :: omegame0i(:)
  real(dp) :: ylmgr_dum(1,1,1)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0), dum_xccc3d(0)
+ real(dp) :: strsxc(6)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  complex(dp),pointer :: cvxc1_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
@@ -830,7 +840,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
-       call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
+       !call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
+       call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, rho1, gqk%pert_comm%value)
        !call drhodb%get_v1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
 
      else
@@ -845,9 +856,39 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        db_iqpt = drhodb%findq(qq_ibz)
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
-       call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
-       !call drhodb%readsym_v1_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+       !call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
+       call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, rho1, gqk%pert_comm%value)
      end if
+
+     ABI_MALLOC(vxc1,(cplex, nfft, nspden, my_npert))
+       
+     nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
+     call check_kxc(dtset%ixc,dtset%optdriver)
+     ABI_MALLOC(kxc,(nfftf,nkxc))
+     ABI_MALLOC(vxc,(nfftf,dtset%nspden))
+    
+     call xcdata_init(xcdata,dtset=dtset)
+     non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
+
+     ! If we use the XC Tran-Blaha 2009 (modified BJ) functional, update the c value
+     if (dtset%xc_tb09_c>99._dp) then
+       n3xccc=0
+       call xc_tb09_update_c(dtset%intxc,dtset%ixc,mpi_enreg,dtset%natom,nfftf,ngfftf, &
+       &                     dum_nhat,psps%usepaw,dum_nhat,0,dtset%nspden,dtset%ntypat,n3xccc, &
+       &                     pawang,pawrad,den_pawrhoij,pawtab,dtset%pawxcdev,rhor,cryst%rprimd,psps%usepaw, &
+       &                     dum_xccc3d,dtset%xc_denpos,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     end if
+
+     nk3xc=1 ; option=2 ; usexcnhat=0
+     call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
+     &            dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,0,option,rhor,&
+     &            cryst%rprimd,strsxc,usexcnhat,vxc,vxcavg,dum_xccc3d,xcdata)
+
+     option=2
+     call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+     &          nkxc,non_magnetic_xc,nspden,0,option,qpt,rho1,cryst%rprimd,usexcnhat,vxc1,dum_xccc3d1)
+
+
      ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
      cvxc1_ptr => null();if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
@@ -1265,6 +1306,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end do ! my_ik
 
      ABI_FREE(vlocal1)
+     ABI_FREE(kxc)
+     ABI_FREE(vxc)
+     ABI_FREE(rho1)
      ABI_FREE(v1scf)
      ABI_FREE(vxc1)
 
