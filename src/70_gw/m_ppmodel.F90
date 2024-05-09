@@ -1325,8 +1325,8 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
    end do
  end do
 
- if (ierr / =0) then
-   write(msg,'(a,i4,3a)')&
+ if (ierr /= 0) then
+   write(msg,'(a,i0,1x,3a)')&
     'Found ',ierr,' G1-G2 vectors falling outside the FFT box. ',ch10,&
     'Enlarge the FFT mesh to get rid of this problem. '
    ABI_WARNING(msg)
