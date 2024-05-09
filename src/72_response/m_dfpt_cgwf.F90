@@ -268,7 +268,7 @@ subroutine dfpt_cgwf(u1_band_,band_me,rank_band,bands_treated_now,berryopt,cgq,c
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
- type(pawcprj_type) :: cprj_dummy(0,0)
+ type(pawcprj_type) :: cprj_dummy(1,1)
 
 ! *********************************************************************
 
