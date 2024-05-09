@@ -2048,7 +2048,7 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
  call new_Gsph%init(Cryst, 0, ecut=new_ecut)
 
  if (new_Gsph%ng > in_Gsph%ng) then
-
+   ! new_gpsh larger than in_gsph
    new_ng = new_Gsph%ng
    in_ng  = in_Gsph%ng
 
@@ -2060,20 +2060,20 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
      end if
    end do
 
-   if (ierr==0) RETURN
+   if (ierr == 0) RETURN
 
    ierr = 0
    do sh=1,in_Gsph%nsh
-     if ( new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. &
-&         ABS(new_Gsph%shlen(sh)-in_Gsph%shlen(sh)) > tol12 ) then
+     if (new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. &
+         ABS(new_Gsph%shlen(sh)-in_Gsph%shlen(sh)) > tol12 ) then
        ierr = ierr + 1
        write(std_out,*)"new_shlim, in_shlim",sh,new_Gsph%shlim(sh),in_Gsph%shlim(sh)
        write(std_out,*)"new_shlen, in_shlen",sh,new_Gsph%shlen(sh),in_Gsph%shlen(sh)
      end if
    end do
-   ABI_CHECK(ierr==0,"Wrong shells")
+   ABI_CHECK(ierr == 0,"Wrong shells")
 
-   ABI_MALLOC(new_gvec,(3,new_ng))
+   ABI_MALLOC(new_gvec,(3, new_ng))
    new_gvec = new_Gsph%gvec
    new_gvec(:,1:in_ng) = in_Gsph%gvec
 
@@ -2082,6 +2082,7 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
    ABI_FREE(new_gvec)
 
  else
+   ! new_gpsh smaller/equal than in_gsph
    ierr = 0
    do ig=1,MIN(new_Gsph%ng,in_Gsph%ng)
      if (ANY(new_Gsph%gvec(:,ig) /= in_Gsph%gvec(:,ig)) ) then

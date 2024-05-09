@@ -434,7 +434,7 @@ module m_dvdb
   ! Assume headers with same headform and same basic dimensions e.g. npsp
 
   type(mpi_type) :: mpi_enreg
-  ! Internal object used to call fourdp
+  ! Internal object used to call fourdp and other GS/DFPT routines
 
  contains
 
