@@ -85,6 +85,8 @@
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
 !!  depends on spin if filters are employed.
 !!
+!! TODO
+!!  Introduce new communicator to distribute (band_1, band_2)
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -156,6 +158,9 @@ module m_gstore
  implicit none
 
  private
+
+ ! Rank of the MPI Cartesian grid
+ integer,private,parameter :: ndims = 6
 !!***
 
 !----------------------------------------------------------------------
@@ -192,6 +197,12 @@ type, public :: gqk_t
   integer :: bstart = -1, bstop = -1
   ! The first band starts at bstart.
   ! The last band is bstop (NB: These are global indices)
+
+  ! These new entries will be used to implement band distribution
+  !integer :: nb1 = -1
+  !integer :: nb2 = -1
+  !integer :: b1_start = -1, b1_stop = -1
+  !integer :: b2_start = -1, b2_stop = -1
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -262,8 +273,8 @@ type, public :: gqk_t
   ! (my_npert, nb, my_nq, nb, my_nk)
   ! |g|^2 (local buffer). Allocated if cplex == 1
 
-  integer :: coords_qkp_sumbp(5)
-  ! Coordinates of this processor in the (q, k, pert) Cartesian grid.
+  integer :: coords_qkpb_sumbp(ndims)
+  ! Coordinates of this processor in the (q, k, pert, band, band_sum, pp_sum) Cartesian grid.
 
   type(xcomm_t) :: kpt_comm
    ! MPI communicator over k-points
@@ -273,6 +284,9 @@ type, public :: gqk_t
 
   type(xcomm_t) :: pert_comm
    ! MPI communicator over atomic perturbations.
+
+  type(xcomm_t) :: band_comm
+   ! MPI communicator for band distribution.
 
   type(xcomm_t) :: bsum_comm
    ! MPI communicator over bands in summation. NB: It is not used to distribute
@@ -660,6 +674,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, gstore%nkbz, kbz, kbz2ibz) /= 0) then
    ABI_ERROR("Cannot map kBZ to IBZ!")
  end if
+
+ ! TODO:
+ ! Order kbz by stars and rearrange entries in kbz2ibz table.
+ !call kpts_pack_in_stars(gstore%nkbz, kbz, kbz2ibz)
 
  call get_ibz2bz(gstore%nkibz, gstore%nkbz, kbz2ibz, kibz2bz, ierr)
  ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
@@ -1068,7 +1086,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0, ndims = 5
+ integer,parameter :: master = 0
  integer :: spin, my_is, np, my_rank, ierr !, ii
  type(gqk_t),pointer :: gqk
  character(len=5000) :: msg
@@ -1102,7 +1120,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
-   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1
+   gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1; gqk%band_comm%nproc = 1
    ! These communicators are used in GWPT
    gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
 
@@ -1110,8 +1128,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
      ! Use parameters from input file. Need to perform sanity check though.
      gqk%pert_comm%nproc = eph_np_pqbks(1)
      gqk%qpt_comm%nproc  = eph_np_pqbks(2)
-     !gqk%bb_comm%nproc  = eph_np_pqbks(3)
-     ABI_CHECK(eph_np_pqbks(3) == 1, "Band parallelism not implemented in gstore")
+     gqk%band_comm%nproc  = eph_np_pqbks(3)
+     ABI_CHECK(eph_np_pqbks(3) == 1, "Band parallelism not yet implemented in gstore")
      gqk%kpt_comm%nproc = eph_np_pqbks(4)
      !gqk%spin_comm%nproc = eph_np_pqbks(5)
      gqk%my_npert = gqk%natom3 / gqk%pert_comm%nproc
@@ -1153,13 +1171,13 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    end if
 
    ! Consistency check.
-   if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc * &
+   if (gqk%pert_comm%nproc * gqk%qpt_comm%nproc * gqk%kpt_comm%nproc * gqk%band_comm%nproc * &
        gqk%bsum_comm%nproc * gqk%pp_sum_comm%nproc /= nproc_spin(spin)) then
-     write(msg, "(a,i0,3a, 6(a,1x,i0))") &
+     write(msg, "(a,i0,3a, 7(a,1x,i0))") &
        "Cannot create 5d Cartesian grid with total nproc: ", nproc_spin(spin), ch10, &
        "Idle processes are not supported. The product of the `nproc_*` vars should be equal to nproc.", ch10, &
        "qpt_nproc (", gqk%qpt_comm%nproc, ") x kpt_nproc (", gqk%kpt_comm%nproc, ")  x kpt_nproc", gqk%pert_comm%nproc, &
-       "bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
+       "x band_nproc (", gqk%band_comm%nproc, "x bsum_nproc (", gqk%bsum_comm%nproc, ") x psum_nproc (", gqk%pp_sum_comm%nproc, &
        ") != ", nproc_spin(spin)
      ABI_ERROR(msg)
    end if
@@ -1174,7 +1192,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    gqk => gstore%gqk(my_is)
 
    ! TODO: Should change order for GWPT
-   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
+   dims = [gqk%qpt_comm%nproc, gqk%kpt_comm%nproc, gqk%pert_comm%nproc, &
+           gqk%band_comm%nproc, gqk%bsum_comm%nproc, gqk%pp_sum_comm%nproc]
 
    ! Note comm_spin(spin)
    gqk%grid_comm = xcomm_from_mpi_int(comm_spin(spin))
@@ -1183,7 +1202,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    call MPI_CART_CREATE(gqk%grid_comm, ndims, dims, periods, reorder, comm_cart, ierr)
    ! Find the index and coordinates of the current processor
    call MPI_COMM_RANK(comm_cart, me_cart, ierr)
-   call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkp_sumbp, ierr)
+   call MPI_CART_COORDS(comm_cart, me_cart, ndims, gqk%coords_qkpb_sumbp, ierr)
 
    ! Communicator for q-points
    keepdim = .False.; keepdim(1) = .True.; call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
@@ -1193,10 +1212,12 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for the (qpt, pert) 2D grid
    keepdim = .False.; keepdim(1) = .True.; keepdim(3) = .True.; call gqk%qpt_pert_comm%from_cart_sub(comm_cart, keepdim)
+   ! Communicator for band.
+   keepdim = .False.; keepdim(4) = .True.; call gqk%band_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for bsum.
-   keepdim = .False.; keepdim(4) = .True.; call gqk%bsum_comm%from_cart_sub(comm_cart, keepdim)
+   keepdim = .False.; keepdim(5) = .True.; call gqk%bsum_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for pp_sum.
-   keepdim = .False.; keepdim(5) = .True.; call gqk%pp_sum_comm%from_cart_sub(comm_cart, keepdim)
+   keepdim = .False.; keepdim(6) = .True.; call gqk%pp_sum_comm%from_cart_sub(comm_cart, keepdim)
    call xmpi_comm_free(comm_cart)
 #endif
 
@@ -1284,10 +1305,19 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    call wrtout(unit, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(unit, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(unit, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
-   !if (gqk%cplex == 1) then
+   !if (allocated(gqk%vk_cart_ibz)) then
+   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%vk_cart_ibz),' [Mb] <<< MEM'
+   !  call wrtout(unit, msg) !; print *, "vk_cart_ibz shape:", shape(gqk%vk_cart_ibz)
+   !end if
+   !if (allocated(gqk%vkmat_cart_ibz)) then
+   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%vkmat_cart_ibz),' [Mb] <<< MEM'
+   !  call wrtout(unit, msg) !; print *, "vkmat_cart_ibz shape:", shape(gqk%vkmat_cart_ibz)
+   !end if
+   !if (allocated(gqk%my_g2)) then
    !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
    !  call wrtout(unit, msg) !; print *, "my_g2 shape:", shape(gqk%my_g2)
-   !else
+   !end if
+   !if if (allocated(gqk%my_g)) then
    !  write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
    !  call wrtout(unit, msg) !; print *, "my_g shape:", shape(gqk%my_g)
    !end if
@@ -1779,6 +1809,7 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
      if (kpts_map("symrel", ebands_timrev, gstore%cryst, gstore%krank_ibz, 1, kcalc(:,ik_calc), mapl_kk) /= 0) then
        ABI_ERROR(sjoin("Cannot map kcalc to IBZ with kcalc:", ktoa(kcalc(:,ik_calc))))
      end if
+     ! Change select_kbz_spin
      ik_ibz = mapl_kk(1)
      ik_bz = kibz2bz(ik_ibz); select_kbz_spin(ik_bz, spin) = 1
    end do
@@ -1787,6 +1818,9 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
    ! Set brange_spin from bstart_ks and nbcalc_ks
    !gstore%brange_spin(:, spin) = [minval(bstart_ks(:,spin)), maxval(bstart_ks(:,spin) + nbcalc_ks(:,spin) - 1)]
  end do
+
+ call recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2ibz, kibz2bz, &
+                                select_kbz_spin, select_qbz_spin)
 
  ABI_FREE(kcalc)
  ABI_FREE(bstart_ks)
@@ -2782,6 +2816,7 @@ subroutine gqk_free(gqk)
  call gqk%kpt_comm%free()
  call gqk%qpt_comm%free()
  call gqk%pert_comm%free()
+ call gqk%band_comm%free()
  call gqk%qpt_pert_comm%free()
  call gqk%grid_comm%free()
  call gqk%bsum_comm%free()
@@ -3568,7 +3603,7 @@ subroutine dump_data()
 
  integer :: ii, iq_bz, iq_glob, my_iq
 
- if (gqk%coords_qkp_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
+ if (gqk%coords_qkpb_sumbp(3) /= 0) goto 10 ! Yes, I'm very proud of this GOTO.
 
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)
@@ -3581,7 +3616,7 @@ subroutine dump_data()
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- if (all(gqk%coords_qkp_sumbp(2:3) == [0, 0]))  then
+ if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
