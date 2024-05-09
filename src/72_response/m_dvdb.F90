@@ -45,6 +45,7 @@ module m_dvdb
  use m_ddb_hdr
  use m_dtset
  use m_krank
+ use m_xcdata
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
@@ -65,6 +66,9 @@ module m_dvdb
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
+ use m_rhotoxc,       only : rhotoxc
+ use m_drivexc,       only : check_kxc
+ use m_dfpt_mkvxc,    only : dfpt_mkvxc
 
  implicit none
 
@@ -491,6 +495,10 @@ module m_dvdb
    procedure :: get_ftqbz => dvdb_get_ftqbz
    ! Retrieve Fourier interpolated potential for a given q-point in the BZ.
    ! Use cache to reduce number of slow FTs.
+
+   procedure :: get_vxc1_from_rho1 => dvdb_get_vxc1_from_rho1
+   ! This function compute the first-order change of exchange-correlation potential
+   ! due to atomic displacement
 
    procedure :: ftqcache_build => dvdb_ftqcache_build
    ! This function initializes the internal q-cache from W(R,r)
@@ -3795,6 +3803,56 @@ subroutine dvdb_get_ftqbz(db, cryst, qbz, qibz, indq2ibz, cplex, nfft, ngfft, v1
  call timab(1809, 2, tsec)
 
 end subroutine dvdb_get_ftqbz
+
+
+subroutine dvdb_get_vxc1_from_rho1(db, dtset, cryst, qbz, cplex, nfft, ngfft, nkxc, npert, rhor, rho1, vxc1, xcdata, non_magnetic_xc, mpi_enreg)
+
+  !Arguments ------------------------------------
+  !scalars
+   integer,intent(in) :: nfft, nkxc, npert
+   integer,intent(in) :: cplex
+   real(dp),intent(in) :: qbz(3)
+   class(dvdb_t),intent(inout) :: db
+   type(dataset_type),intent(in) :: dtset
+   type(crystal_t),intent(in) :: cryst
+   type(xcdata_type) :: xcdata
+   logical :: non_magnetic_xc
+   type(mpi_type),intent(in) :: mpi_enreg
+  !arrays
+   integer,intent(in) :: ngfft(18)
+   real(dp),allocatable,intent(in) :: rhor(:,:), rho1(:,:,:,:)
+   real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
+  
+  !Local variables-------------------------------
+  !scalars
+   integer :: nk3xc,option,usexcnhat
+   real(dp) :: enxc, vxcavg
+  !arrays
+   real(dp),allocatable :: vxc(:,:), kxc(:,:)
+   real(dp) :: dum_nhat(0), dum_xccc3d1(0), dum_xccc3d(0)
+   real(dp) :: strsxc(6)
+  
+  ! *************************************************************************
+
+   ABI_MALLOC(vxc1,(cplex, nfft, dtset%nspden, npert))
+  
+   call check_kxc(dtset%ixc,dtset%optdriver)
+   ABI_MALLOC(kxc,(nfft,nkxc))
+   ABI_MALLOC(vxc,(nfft,dtset%nspden))
+
+   nk3xc=1 ; option=2 ; usexcnhat=0
+   call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+   &            dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,0,option,rhor,&
+   &            cryst%rprimd,strsxc,usexcnhat,vxc,vxcavg,dum_xccc3d,xcdata)
+
+   option=2
+   call dfpt_mkvxc(cplex,dtset%ixc,kxc,mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+   &          nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1,cryst%rprimd,usexcnhat,vxc1,dum_xccc3d1)
+  
+   ABI_FREE(vxc)
+   ABI_FREE(kxc)
+
+  end subroutine dvdb_get_vxc1_from_rho1
 !!***
 
 !----------------------------------------------------------------------
