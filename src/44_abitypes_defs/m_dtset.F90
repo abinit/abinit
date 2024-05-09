@@ -245,6 +245,7 @@ type, public :: dataset_type
  character(len=fnlen) :: gstore_kzone = "ibz"
  character(len=fnlen) :: gstore_qzone = "bz"
  character(len=fnlen) :: gstore_kfilter = "none"
+ character(len=fnlen) :: gstore_gmode = "phonon"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -1627,6 +1628,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
+ dtout%gstore_gmode       = dtin%gstore_gmode
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
 
@@ -3377,7 +3379,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
  list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
+ list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'

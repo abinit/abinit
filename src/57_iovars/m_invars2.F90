@@ -2167,6 +2167,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
  if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_gmode = tolower(key_value)
+
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
  if (tread_brange == 1) then
@@ -2184,7 +2187,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (tread_erange == 1 .and. tread_brange == 1) then
    ABI_ERROR("gstore_erange and gstore_brange are mutually exclusive!")
  end if
-
  if (tread_erange == 1 .and. tread_kfilter == 1) then
    ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
  end if

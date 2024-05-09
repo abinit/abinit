@@ -84,7 +84,7 @@ module m_gwpt
  use m_phonons,        only : phstore_t, phstore_new
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
- use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
+ use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, GSTORE_GMODE_ATOM, GSTORE_GMODE_PHONON
 
  implicit none
 
@@ -946,10 +946,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        gkq_xc_atm = czero
        do mm_kq=gqk%bstart, gqk%bstart
        !do mm_kq=gqk%bstart, gqk%bstop
+       !do mm_kq=gqk%m_start, gqk%m_stop
          call wfd%rotate_cg(mm_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_kq)
 
          !do nn_k=gqk%bstart, gqk%bstop
+         !do nn_k=gqk%n_start, gqk%n_stop
          do nn_k=gqk%bstart, gqk%bstart
             call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
@@ -1253,15 +1255,30 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Collect gkq_sig_atm inside pert_comm so that all procs can operate on the data.
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_sig_atm, gqk%pert_comm%value, ierr)
 
-       ! Get g in the phonon representation.
-       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_sig_atm, phfr_qq, displ_red_qq, gkq_sig_nu)
+       select case (gstore%gmode)
+       case (GSTORE_GMODE_PHONON)
+         ! Get g in the phonon representation.
+         call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_sig_atm, phfr_qq, displ_red_qq, gkq_sig_nu)
 
-       ! Save e-ph matrix elements in the buffer.
-       select case (gqk%cplex)
-       case (1)
-         my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu(1,:,:,:) ** 2 + gkq_sig_nu(2,:,:,:) ** 2
-       case (2)
-         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu - gkq_xc_nu ! + gkq_ks_nu
+         ! Save e-ph matrix elements in the buffer.
+         select case (gqk%cplex)
+         case (1)
+           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu(1,:,:,:) ** 2 + gkq_sig_nu(2,:,:,:) ** 2
+         case (2)
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_nu - gkq_xc_nu ! + gkq_ks_nu
+         end select
+
+       case (GSTORE_GMODE_ATOM)
+         ! Save e-ph matrix elements in the buffer.
+         select case (gqk%cplex)
+         case (1)
+           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_atm(1,:,:,:) ** 2 + gkq_sig_atm(2,:,:,:) ** 2
+         case (2)
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_sig_atm - gkq_xc_atm ! + gkq_ks_atm
+         end select
+
+       case default
+         ABI_ERROR(sjoin("Invalid gstore%gmode:", gstore%gmode))
        end select
 
        ! Dump buffers
