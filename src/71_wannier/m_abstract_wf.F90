@@ -784,14 +784,15 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     integer, intent(in) :: nprocs, rank, comm
 
 
-    self%expanded=(dtset%kptopt==1 .or. dtset%kptopt==2)
 
     self%comm=comm
     self%rank=rank
     self%nprocs=nprocs
     !print *, "set mpi info to wfd_wf", "self%comm", "self%rank", "self%nprocs"
 
+    self%expanded=(dtset%kptopt==1 .or. dtset%kptopt==2)
     if (self%expanded) then
+      ! expand the kpoints to the full BZ
       self%expanded=.True.
       self%ebands_ibz => ebands
       self%wfd_ibz => wfd
@@ -809,7 +810,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       call dtset_expandk()
       call self%abstract_wf%abstract_init(self%ebands_bz, cryst, self%dtset_bz, dtfil, &
         & self%hdr_bz, MPI_enreg, nprocs, psps, pawtab, rank, comm)
-    else
+    else ! the kpoints are already in the full BZ and does not need to be expanded
       self%expanded=.False.
       self%wfd => wfd
       self%ebands => ebands

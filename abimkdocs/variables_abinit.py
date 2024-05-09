@@ -22292,7 +22292,8 @@ Possible values are:
   * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of 
       [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
       the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in 
-      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW. 
+      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
+      is not already in full BZ. 
     
       ABINIT will produce the input files required by Wannier90 and it will run
       Wannier90 to produce the Maximally-locallized Wannier functions (see [
