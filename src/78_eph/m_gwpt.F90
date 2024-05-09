@@ -86,6 +86,8 @@ module m_gwpt
  use m_io_screening,   only : hscr_t, get_hscr_qmesh_gsph
  use m_vcoul,          only : vcoul_t
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart
+ use m_rhotoxc,        only : rhotoxc
+ use m_drivexc,        only : check_kxc
 
  implicit none
 
@@ -185,7 +187,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
  !integer :: nomega_braket, nomega_ nomega_tot
- integer :: cplex,drho_cplex,nkxc,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
+ integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
  integer :: my_is, spin, idir,ipert, npw_pp, ig
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
@@ -206,7 +208,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
- real(dp) :: ecut,weight_q,q0rad, bz_vol ! ediff, eshift, rfact,
+ real(dp) :: ecut,weight_q,q0rad, bz_vol, enxc, vxcavg ! ediff, eshift, rfact,
  logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
  logical :: print_time_qq, print_time_kk
@@ -256,8 +258,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
- real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:),rho1(:,:,:,:)
+ real(dp),allocatable :: ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable, target :: vxc1(:,:,:,:)
+ real(dp),allocatable :: vxc(:,:), kxc(:,:)
  real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
  real(dp),allocatable :: gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
@@ -268,7 +271,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp),allocatable :: omegame0i(:)
  real(dp) :: ylmgr_dum(1,1,1)
- real(dp) :: dum_nhat(0), dum_xccc3d1(0), dum_xccc3d(0)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0), dum_xccc3d(0) 
+ !Cray compiler may dislike the above initialisation of zero-size arrays
  real(dp) :: strsxc(6)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  complex(dp),pointer :: cvxc1_ptr(:,:,:)
@@ -761,13 +765,22 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  qbuf_size = 1
  call wrtout(std_out, sjoin(" Begin computation of GWPT e-ph matrix elements with qbuf_size:", itoa(qbuf_size)))
 
- ! ========================================
- ! Loop over MPI distributed spins in Sigma
- ! ========================================
-
  nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
  call xcdata_init(xcdata,dtset=dtset)
  non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
+
+ call check_kxc(dtset%ixc,dtset%optdriver)
+ ABI_MALLOC(kxc,(nfft,nkxc))
+ ABI_MALLOC(vxc,(nfft,dtset%nspden))
+
+ nk3xc=1 ; option=2 ; usexcnhat=0
+ call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
+ &            dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,0,option,rhor,&
+ &            cryst%rprimd,strsxc,usexcnhat,vxc,vxcavg,dum_xccc3d,xcdata)
+
+ ! ========================================
+ ! Loop over MPI distributed spins in Sigma
+ ! ========================================
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -841,9 +854,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
        !call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
-       call drhodb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, rho1, gqk%pert_comm%value)
-       !call drhodb%get_v1_ftqbz(cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
-
+       call drhodb%get_vxc1_ftqbz(dtset, cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, nkxc, kxc, rhor, vxc1, xcdata, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials and the densities for this qpt and my_npert perturbations.
        db_iqpt = dvdb%findq(qq_ibz)
@@ -857,11 +868,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
        !call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, vxc1, gqk%pert_comm%value)
-       call drhodb%readsym_qbz(cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, rho1, gqk%pert_comm%value)
+       call drhodb%read_vxc1_qbz(dtset, cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, nkxc, kxc, rhor, vxc1, xcdata, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)
      end if
 
-     call drhodb%get_vxc1_from_rho1(dtset, cryst, qpt, drho_cplex, nfftf, ngfftf, nkxc, my_npert, rhor, rho1, vxc1, xcdata, non_magnetic_xc, mpi_enreg)
-     
      ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
      cvxc1_ptr => null();if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
@@ -1279,7 +1288,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end do ! my_ik
 
      ABI_FREE(vlocal1)
-     ABI_FREE(rho1)
      ABI_FREE(v1scf)
      ABI_FREE(vxc1)
 
@@ -1355,6 +1363,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(gbound_pp)
  ABI_FREE(done_qbz_spin)
  ABI_FREE(rhor)
+ ABI_FREE(kxc)
+ ABI_FREE(vxc)
 
  call gs_ham_kqmp%free()
  call wfd%free()
