@@ -218,7 +218,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(hdr_type) :: pot_hdr, den_hdr
  type(stern_t) :: stern_kmp !, stern_kqmp
  type(kmesh_t) :: pp_mesh, kmesh
- type(gsphere_t) :: gsph_c
+ type(gsphere_t) :: gsph_c, gsph_x
  type(hscr_t) :: hscr
  type(vcoul_t) :: vcp
  type(screen_t),target :: screen
@@ -278,6 +278,24 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
 !************************************************************************
 
+ ! Problems to be addressed:
+ !
+ ! Sigma is usually split into Sigma_c(w) and Sigma_x where Sigma_x is the static Fock operator
+ ! evaluted with KS orbitals. The advantage of such partioning is that Sigma_x = iGv
+ ! can be computed by summing over occupied states only. Sigma_x requires more G-vectors to converge
+ ! as the bare Coulomb interaction goes as 1/|q+G|^2 that is not integrable in 3D but this "expensive"
+ ! operations are needed only inside a sum over bands that is restricted to occupied states.
+ ! On the other hand, Sigma_c(w) is way more expensive as we have to sum an infinite number of states
+ ! and have take the w-dependence into account (nomega = 2)
+ ! but all the operations can be restricted to a small G-sphere of kinetic energy ecuteps that can be handled
+ ! with a coarser FFT mesh.
+ ! Another distint advantage of such splitting is that one can handle the divergence in vc(q,g) for |q+g| --> 0
+ ! using well know techniques from GW and the anysotropic behavior of e-1(q) for q --> 0 in low-dimensional systems.
+ ! The disavantage is that one needs to compute the GWPT e-ph matrix in two stepts, first Sig_x and then Sigma_x,
+ ! so cetain operations such as the k-point mapping, the computation of form factors are performed twice
+ ! Note however that MG believes that Sigma_x is a much better approximation than v_xc when one is interested
+ ! in the e-ph matrix elements connecting low-energy states such as band edges to high-energy states.
+
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
    ABI_UNUSED((/pawang%nsym, pawrad(1)%mesh_size/))
@@ -310,29 +328,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
- !if (my_rank == master) then
- !  call gwpt%print(dtset, ab_out)
- !  call gwpt%print(dtset, std_out)
- !end if
+ !if (my_rank == master) call gwpt%print(dtset, std_out)
 
  call gstore%get_missing_qbz_spin(done_qbz_spin, ndone, nmiss)
  !call wrtout(units, sjoin("- Number of q-points/spin completed:", itoa(count(done_qbz_spin == 1)), "/", itoa(sigma%nkcalc)))
 
- ! Compute mpw and gmax
- ! TODO: here we have the additional pp to be considered !
- ! This is the maximum number of PWs for all possible k+q treated.
- call gstore%get_mpw_gmax(ecut, mpw, gmax)
-
- ! Init work_ngfft
- gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
- gmax = 2*gmax + 1
- call ngfft_seq(work_ngfft, gmax)
- !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
- ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
-
  ! ================
  ! HANDLE SCREENING
  ! ================
+ ! Init gpsh_c for the correlated part.
  nqlwl = 0; w_fname = ABI_NOFILE
  if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    w_fname = dtfil%fnameabi_scr
@@ -367,6 +371,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_COMMENT(msg)
  end if
 
+ !print *, "ecutsigx:", dtset%ecutsigx
+ call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
+ call gsph_x%free()
+
  ! TODO:
  ! Here we sort pp_mesh by stars to that we can split the pp wavevectors in blocks and reduced
  ! the number of points in the IBZ that must be stored in memory
@@ -384,6 +392,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_SFREE(my_pp_inds)
  end do ! my_is
 
+ ! Initialize Coulomb term on the IBZ of the pp_mesh.
  ! TODO: In principle one should have gpsh_x as well.
  call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                nqlwl, qlwl, comm)
@@ -394,7 +403,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
  ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
-!#define DEV_FAST_DEBUG
+#define DEV_FAST_DEBUG
  nbsum = dtset%mband
 #ifdef DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
@@ -437,6 +446,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Read wavefunctions.
  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
+ ! Compute mpw and gmax
+ ! TODO: here we have the additional pp to be considered !
+ ! This is the maximum number of PWs for all possible k+q treated.
+ call gstore%get_mpw_gmax(ecut, mpw, gmax)
+
+ ! Init work_ngfft
+ gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
+ gmax = 2*gmax + 1
+ call ngfft_seq(work_ngfft, gmax)
+ !write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+
  ! Set the FFT mesh
  !call wfd%change_ngfft(cryst, psps, ngfft)
 
@@ -445,10 +466,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
  n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
  n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
-
- ! Get one-dimensional structure factor information on the coarse grid.
- ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
- call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
 
  ! if PAW, one has to solve a generalized eigenproblem
  ! Be careful here because I will need sij_opt == -1
@@ -466,6 +483,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(cg_work, (2, mpw*wfd%nspinor))
  ABI_MALLOC(full_ur1_kqmp, (nfft*nspinor))
 
+ ! Get one-dimensional structure factor information on the coarse grid.
+ ABI_MALLOC(ph1d, (2,3*(2*mgfft+1)*natom))
+ call getph(cryst%atindx, natom, n1, n2, n3, ph1d, cryst%xred)
+
  ! ============================
  ! Compute vnk matrix elements
  ! ============================
@@ -478,7 +499,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call cwtime(cpu_kk, wall_kk, gflops_kk, "start")
 
    ! On disk, we have:
-   !
    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
@@ -779,9 +799,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ! Inside the loops we compute gkq_sig_nu(2, nb, nb, natom3)
    ABI_MALLOC_OR_DIE(my_gbuf, (gqk%cplex, nb, nb, natom3, gqk%my_nk, qbuf_size), ierr)
 
-   ! ============================================
-   ! Loop over MPI distributed q-points in Sigma
-   ! ============================================
+   ! =============================================
+   ! Loop over MPI distributed q-points in Sigma_q
+   ! =============================================
    ! q-points are usually in the IBZ.
    do my_iq=1,gqk%my_nq
 #ifdef DEV_FAST_DEBUG
@@ -792,19 +812,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
      ! Note symrec conventions here.
      iq_bz = gqk%my_q2bz(my_iq)
+     if (done_qbz_spin(iq_bz, spin) == 1) cycle
+
      iq_ibz = gqk%my_q2ibz(1, my_iq) !; isym_q = gqk%my_q2ibz(2, my_iq)
      !trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5, my_iq)
      !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
      !tsign_q = 1; if (trev_q == 1) tsign_q = -1
      qq_ibz = gstore%qibz(:, iq_ibz)
+     mapc_qq = gqk%my_q2ibz(:, my_iq)
 
      iqbuf_cnt = 1 + mod(my_iq - 1, qbuf_size)
      iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
-
-     mapc_qq = gqk%my_q2ibz(:, my_iq)
-     !ABI_CHECK(isirr_q, "The q-point is usually in the IBZ!")
-
-     if (done_qbz_spin(iq_bz, spin) == 1) cycle
 
      print_time_qq = my_rank == 0 .and. (my_iq <= LOG_MODQ .or. mod(my_iq, LOG_MODQ) == 0)
      if (print_time_qq) then
@@ -920,15 +938,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        call mkffnl_objs(cryst, psps, 1, ffnl_kq, ider0, idir0, kg_kq, kpg_kq, kq, nkpg_kq, npw_kq, ylm_kq, ylmgr_kq, &
                         comm=gqk%pert_comm%value, request=ffnl_kq_request)
 
-       ! Define number of (m, n) pairs in g_mn(k,q) and indirect mapping i --> (m, n)
-       !num_mn_kq = 1
-       !ABI_MALLOC(ind_to_mn, (2, num_mn_kq))
-       !do ii=1,num_mn_kq
-       !  ind_to_mn, (2, ii) = [mm, nn]
-       !end do
-       !call gqk%get_ind_to_mn_myqk(my_iq, my_ik, num_mn_kq, ind_to_mn)
-       !ABI_FREE(ind_to_mn)
-
        ! Double loop over the (m, n) band indices in the <mm_kq,kq|Delta_{q,nu}Sigma|k,nn_k> elements.
        ! TODO: Can reduce number of FFTs by computing vxc(r) u_r(r) but requires more memory!
        ABI_MALLOC(ug_k, (2, npw_k*nspinor))
@@ -971,9 +980,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! =======================================
        ! Be careful here because pp should run over the list of wavevectors in the screening!
        ! as pp_mesh%bz is not necessarily equivalent to the k-mesh for the wavefunctions.
-       ! and we have to use ipp_bz to symmetrize W(pp_bz) from W(pp_ibz)
-       ! TODO: Should order nbz in shells so that one can reduce the memory required to store W(pp)
-       ! if pp_parallelism is on.
+       ! and we have to use the ipp_bz index to symmetrize W(pp_bz) from W(pp_ibz).
+       ! TODO: Should order nbz in shells so that one can reduce the memory required
+       ! to store W(pp) if pp_parallelism is activated.
 
        gkq_sig_atm = zero
 
@@ -1021,7 +1030,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)  ! out
 
-
          ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
          ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
          ABI_MALLOC(full_cg1_kqmp, (2, npw_kqmp*nspinor))
@@ -1042,15 +1050,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! We need two stern_t objects to compute the first order change of the wavefunctions at k-p and k+q-p.
          ! Clearly, we should not duplicate the work when pp = 0.
          ! When pp == 0, we also get the g_ks matrix elements after stern_solve.
+         ! Alternatively, one solves the Sternheimer in the IBZ(kappa, alpha), store the results on disk
+         ! and then use symmetries to reconstruct delta_u in the full BZ on the fly assuming Spatial inversion or TR.
          ! Also, one should handle more carefully the integration in g_sigma around pp = Gamma in the case of semiconductors.
 
-         !if (stern_has_band_para) then
-         !  nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-         !  stern_comm = sigma%bsum_comm%value
-         !else
-           nband_me = nbsum
-           stern_comm = xmpi_comm_self
-         !end if
+         if (stern_has_band_para) then
+           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
+           !stern_comm = sigma%bsum_comm%value
+           NOT_IMPLEMENTED_ERROR()
+         else
+           nband_me = nbsum; stern_comm = xmpi_comm_self
+         end if
 
          ! =========================================================
          ! Get GS wavefunctions at k+q-p and store them in stern_kmp.
@@ -1081,7 +1091,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2
          ! The same relation holds for 0-D systems, but not in 1-D or 2D systems. It depends on S.
 
-         ! Find the corresponding irred point in pp_mesh
+         ! Find the corresponding irred point in the pp_mesh
          call pp_mesh%get_bz_item(ipp_bz, pp, ipp_ibz, isym_pp, itim_pp)
          do ig=1,npw_pp
            vc_sqrt_pp(gsph_c%rottb(ig,itim_pp,isym_pp)) = Vcp%vc_sqrt(ig,ipp_ibz)
@@ -1093,7 +1103,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! * These terms do not depend on (idir, ipert) and can be reused in the loop over pertubations below.
          ! * If the bands in the sum are distributed, one has to transmit the (m, n) indices.
 
-         !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nw, my_bsum_start:my_bsum_stop, num_mn_kq))
+         !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nomega_tot, nb, nb, my_bsum_start:my_bsum_stop))
          !ABI_FREE(rhotwg_kmp_mn)
 
          do ib_sum=my_bsum_start, my_bsum_stop
@@ -1202,7 +1212,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
              cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
-             !rhotwg = GWPC_CONJG(rhotwg)
              call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
            end do ! ibsum
 
@@ -1450,6 +1459,7 @@ subroutine times_vc_sqrt(trans, npw_pp, nspinor, vc_sqrt_pp, rhotwg)
    end do
 
  case ("C")
+   ! Take the complex conjugate of rhotwg.
    do ii=1,nspinor
      spad = (ii-1) * npw_pp
      rhotwg(spad+1:spad+npw_pp) = GWPC_CONJG(rhotwg(spad+1:spad+npw_pp)) * vc_sqrt_pp(1:npw_pp)

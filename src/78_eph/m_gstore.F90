@@ -701,7 +701,6 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  end select
 
  ! Here we filter the electronic wavevectors k and recompute select_qbz_spin and select_kbz_spin.
-
  select case (gstore%kfilter)
  case ("none")
    continue
@@ -719,6 +718,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ! and define gstore%brange_spin automatically.
    call gstore%filter_fs_tetra__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
                                  select_qbz_spin, select_kbz_spin)
+
  case default
    ABI_ERROR(sjoin("Invalid kfilter:", gstore%kfilter))
  end select
@@ -3175,7 +3175,6 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    call cwtime(cpu, wall, gflops, "start")
 
    ! On disk, we have:
-   !
    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
@@ -4108,11 +4107,13 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, gstore_completed !, gstore_fform, ierr, my_rank,
- !character(len=500) :: msg
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr
+ character(len=500) :: msg
  !type(hdr_type) :: gstore_hdr
 !arrays
  integer :: done_qbz_spin(gstore%nqbz, dtset%nsppol)
+ real(dp),allocatable :: vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
+ real(dp),allocatable :: slice_bb(:,:,:)  ! gwork_q(:,:,:,:,:),
 
 ! *************************************************************************
 
@@ -4130,27 +4131,50 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", done_qbz_spin
 
- !select case (gstore%with_vk)
- !case (0)
- !  continue
- !case (1)
- !  continue
- !case (2)
- !  NOT_IMPLEMENTED_ERROR()
- !end select case
+ do spin=1,gstore%nsppol
+    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+    NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
+    write(ab_out, "(a,i0)")" gqk%nb: ", nb
 
- !do spin=1,gstore%nsppol
- !  NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
- !  NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
+    ! Handle the output of group velocities.
+    ! On disk, we have:
+    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
+    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
- !   ABI_MALLOC_OR_DIE(gwork_q, (gstore_cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%glob_nk), ierr)
- !   ABI_MALLOC(slice_bb, (gstore_cplex, gqk%nb, gqk%nb))
- !   iq_glob = my_iq + gqk%my_qstart - 1
- !   ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gwork_q, start=[1, 1, 1, 1, 1, iq_glob]) ! count=[])
- !   NCF_CHECK(ncerr)
- !   ABI_FREE(gwork_q)
- !   ABI_FREE(slice_bb)
- !end do
+    select case (gstore%with_vk)
+    case (0)
+      continue
+    case (1)
+      continue
+      ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
+      write(ab_out,"(a)") " Group velocites v_nk in Cartesian coordinates:"
+      do ik_ibz=1,gstore%nkibz
+        if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
+        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
+        write(ab_out, "(a)")sjoin(" For k-point", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+        do ib=1,nb
+          write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
+        end do
+      end do
+      ABI_FREE(vk_cart_ibz)
+    case (2)
+      NOT_IMPLEMENTED_ERROR()
+    end select
+
+    ! Handle the output of the e-ph matrix elements
+    ! On disk we have the global arrays:
+    !
+    !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+
+    cplex = dtset%gstore_cplex
+    ABI_MALLOC(slice_bb, (cplex, nb, nb))
+
+    ipc = 1; ik_glob = 1; iq_glob = 1
+    ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), slice_bb, start=[1,1,1,ipc,ik_glob,iq_glob],  count=[cplex,nb,nb,1,1,1 ])
+    NCF_CHECK(ncerr)
+
+    ABI_FREE(slice_bb)
+ end do
 
  NCF_CHECK(nf90_close(root_ncid))
 
@@ -4159,6 +4183,12 @@ integer function root_vid(var_name)
   character(len=*),intent(in) :: var_name
   root_vid = nctk_idname(root_ncid, var_name)
 end function root_vid
+
+integer function spin_vid(var_name)
+  character(len=*),intent(in) :: var_name
+  spin_vid = nctk_idname(spin_ncid, var_name)
+end function spin_vid
+
 
 end subroutine gstore_print_for_abitests
 !!***
