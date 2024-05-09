@@ -159,6 +159,9 @@ module m_gstore
 
  private
 
+ character(len=fnlen),public,parameter :: GSTORE_GMODE_ATOM   = "atom"
+ character(len=fnlen),public,parameter :: GSTORE_GMODE_PHONON = "phonon"
+
  ! Rank of the MPI Cartesian grid
  integer,private,parameter :: ndims = 6
 !!***
@@ -198,11 +201,12 @@ type, public :: gqk_t
   ! The first band starts at bstart.
   ! The last band is bstop (NB: These are global indices)
 
+  ! TODO
   ! These new entries will be used to implement band distribution
-  !integer :: nb1 = -1
-  !integer :: nb2 = -1
-  !integer :: b1_start = -1, b1_stop = -1
-  !integer :: b2_start = -1, b2_stop = -1
+  !integer :: m_nb = -1
+  !integer :: n_nb = -1
+  !integer :: m_start = -1, m_stop = -1
+  !integer :: n_start = -1, n_stop = -1
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -387,6 +391,8 @@ type, public :: gstore_t
   character(len=fnlen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
   ! Possible values: "none", "fs_tetra", "erange".
+
+  character(len=fnlen) :: gmode = "none"
 
   real(dp),allocatable :: erange_spin(:, :)
   ! (2, nsppol)
@@ -588,7 +594,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
  ! Set metadata.
  gstore%kzone = dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
- gstore%with_vk = dtset%gstore_with_vk
+ gstore%with_vk = dtset%gstore_with_vk; gstore%gmode = dtset%gstore_gmode
 
  ABI_CALLOC(gstore%erange_spin, (2, nsppol))
  gstore%erange_spin = dtset%gstore_erange(:, 1:nsppol)
@@ -831,6 +837,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      nctkarr_t("gstore_kzone", "c", "fnlen"), &
      nctkarr_t("gstore_qzone", "c", "fnlen"), &
      nctkarr_t("gstore_kfilter", "c", "fnlen"), &
+     nctkarr_t("gstore_gmode", "c", "fnlen"), &
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
@@ -866,6 +873,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kzone"), trim(gstore%kzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qzone"), trim(gstore%qzone)))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kfilter"), trim(gstore%kfilter)))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_gmode"), trim(gstore%gmode)))
 
    ! Write arrays
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_qibz"), gstore%qibz))
@@ -3504,15 +3512,31 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
        if (gqk%pert_comm%nproc > 1) call xmpi_sum(gkq_atm, gqk%pert_comm%value, ierr)
 
        ! Get g in the phonon representation.
-       call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_atm, phfrq, displ_red_qbz, gkq_nu)
+       select case (gstore%gmode)
+       case (GSTORE_GMODE_PHONON)
+         call ephtk_gkknu_from_atm(nb, nb, 1, natom, gkq_atm, phfrq, displ_red_qbz, gkq_nu)
 
-       ! Save e-ph matrix elements in the buffer.
-       select case (gqk%cplex)
-       case (1)
-         my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
-       case (2)
-         my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
+         ! Save e-ph matrix elements in the buffer.
+         select case (gqk%cplex)
+         case (1)
+           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_nu(1,:,:,:) ** 2 + gkq_nu(2,:,:,:) ** 2
+         case (2)
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_nu
+         end select
+
+       case (GSTORE_GMODE_ATOM)
+         ! Save e-ph matrix elements in the buffer.
+         select case (gqk%cplex)
+         case (1)
+           my_gbuf(1,:,:,:, my_ik, iqbuf_cnt) = gkq_atm(1,:,:,:) ** 2 + gkq_atm(2,:,:,:) ** 2
+         case (2)
+           my_gbuf(:,:,:,:, my_ik, iqbuf_cnt) = gkq_atm
+         end select
+
+       case default
+         ABI_ERROR(sjoin("Invalid gstore%gmode:", gstore%gmode))
        end select
+
      end do ! my_ik
 
      ABI_FREE(v1scf)
@@ -3654,7 +3678,7 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, comm)
+subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, ifc, comm, with_gmode)
 
 !Arguments ------------------------------------
  class(gstore_t),target,intent(out) :: gstore
@@ -3665,15 +3689,17 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
+ character(len=*),optional,intent(in) :: with_gmode
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3
+ integer :: my_rank, ncid, spin, spin_ncid, nproc, ierr, fform, max_nb, ib, natom, natom3, varid
  integer :: max_nq, max_nk, gstore_cplex, ncerr, my_is, my_iq, iq_glob, my_ik, ik_glob, my_ip, ipert
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
+ character(len=fnlen) :: gstore_gmode
  logical :: store_phdispl, isirr_q
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -3742,6 +3768,15 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call replace_ch0(gstore%qzone)
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_kfilter"), gstore%kfilter))
    call replace_ch0(gstore%kfilter)
+
+   ! gstore_gmode was added in Abinit v10.1.2
+   gstore%gmode = GSTORE_GMODE_PHONON
+   ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
+   if (ncerr /= nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
+     call replace_ch0(gstore%gmode)
+   end if
+
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wfk0_path"), gstore%wfk0_path))
    call replace_ch0(gstore%wfk0_path)
 
@@ -3823,6 +3858,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call xmpi_bcast(gstore%kzone, master, comm, ierr)
    call xmpi_bcast(gstore%qzone, master, comm, ierr)
    call xmpi_bcast(gstore%kfilter, master, comm, ierr)
+   call xmpi_bcast(gstore%gmode, master, comm, ierr)
    call xmpi_bcast(gstore%wfk0_path, master, comm, ierr)
    call xmpi_bcast(brange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%erange_spin, master, comm, ierr)
@@ -3941,6 +3977,13 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_SFREE(pheigvec_cart_ibz)
  ABI_SFREE(displ_cart_qbz)
  ABI_FREE(pheigvec_cart_qbz)
+
+ if (present(with_gmode)) then
+   ! Well, the only conversion I can think of is atom --> phonon.
+   if (gstore%gmode /= with_gmode) then
+     ABI_ERROR(sjoin("Conversion from gstore%gmode: ", gstore%gmode, "to:", with_gmode, " is not yet supported"))
+   end if
+ end if
 
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
