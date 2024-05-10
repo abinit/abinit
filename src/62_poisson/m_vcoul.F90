@@ -334,10 +334,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
 ! *************************************************************************
 
- ! === Test if the first q-point is zero ===
- ! FIXME this wont work if nqptdm/=0
- !if (normv(Qmesh%ibz(:,1),gmet,'G') < GW_TOLQ0)) STOP 'vcoul_init, non zero first point '
-
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  nqibz = qmesh%nibz; nqbz = qmesh%nbz

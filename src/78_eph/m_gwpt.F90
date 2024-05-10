@@ -186,7 +186,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !integer :: nomega_braket, nomega_ nomega_tot
  integer :: cplex,drho_cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
- integer :: my_is, spin, idir,ipert, npw_pp, ig
+ integer :: my_is, spin, idir,ipert, npw_pp, ig, max_npwxc, npwx, npwc
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
  !integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
@@ -373,11 +373,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  !print *, "ecutsigx:", dtset%ecutsigx
  call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
- call gsph_x%free()
 
  ! TODO:
- ! Here we sort pp_mesh by stars to that we can split the pp wavevectors in blocks and reduced
- ! the number of points in the IBZ that must be stored in memory
+ ! Here we sort pp_mesh by stars so that we can split the pp wavevectors in blocks and therefore
+ ! reduce the number of wavevectors in the IBZ that must be stored in memory.
  !call pp_mesh%sort_by_stars()
 
  ! Distribute the sum over pp wavevectors inside pp_sum_comm using block distribution.
@@ -392,10 +391,16 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_SFREE(my_pp_inds)
  end do ! my_is
 
- ! Initialize Coulomb term on the IBZ of the pp_mesh.
- ! TODO: In principle one should have gpsh_x as well.
- call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
-               nqlwl, qlwl, comm)
+ ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
+ npwx = gsph_x%ng; npwx = gsph_c%ng; max_npwxc = max(npwx, npwc)
+ if (gsph_x%ng >= gsph_c%ng) then
+   call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
+                 nqlwl, qlwl, comm)
+ else
+   call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
+                 nqlwl, qlwl, comm)
+ end if
+
  call kmesh%free()
 
  ! Initialize the wave function descriptor.
@@ -729,7 +734,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  w_info%mat_type = MAT_INV_EPSILON
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
-
  ABI_FREE(qlwl)
 
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
@@ -868,7 +872,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end if
      ABI_CHECK_IEQ(cplex, drho_cplex, "Different values of cplex for v1 and rho1!")
 
-     cvxc1_ptr => null();if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
+     cvxc1_ptr => null(); if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
      ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kqmp%nvloc, my_npert), ierr)
@@ -1373,6 +1377,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call screen%free()
  call pp_mesh%free()
  call gsph_c%free()
+ call gsph_x%free()
  call gstore%free()
  call pawcprj_free(cwaveprj0)
  ABI_FREE(cwaveprj0)
