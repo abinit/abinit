@@ -1649,7 +1649,8 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, vxc1, non_magnetic_xc, usexcnhat, comm)
+subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, &
+                              vxc1, non_magnetic_xc, usexcnhat, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3911,7 +3912,8 @@ end subroutine dvdb_get_ftqbz
 !!
 !! SOURCE
 
-subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, vxc1, non_magnetic_xc, usexcnhat, comm)
+subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, &
+                               vxc1, non_magnetic_xc, usexcnhat, comm)
 
 !Arguments ------------------------------------
 !scalars
