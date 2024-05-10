@@ -203,10 +203,8 @@ type, public :: gqk_t
 
   ! TODO
   ! These new entries will be used to implement band distribution
-  !integer :: m_nb = -1
-  !integer :: n_nb = -1
-  !integer :: m_start = -1, m_stop = -1
-  !integer :: n_start = -1, n_stop = -1
+  !integer :: m_start = -1, m_stop = -1, m_nb = -1
+  !integer :: n_start = -1, n_stop = -1, n_nb = -1
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
@@ -499,7 +497,7 @@ contains
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
 
   procedure :: get_lambda_iso_iw => gstore_get_lambda_iso_iw
-  ! Compute isotropic lamdda(iw) along the imaginary axis.
+  ! Compute isotropic lambda(iw) along the imaginary axis.
 
   procedure :: get_a2fw => gstore_get_a2fw
   ! Compute Eliashberg function a^2F(w).
@@ -582,15 +580,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
 
  ! Set basic parameters.
- gstore%comm = comm
- gstore%nsppol = nsppol
- gstore%path = path
+ gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
 
  ! Get references to other data structures.
- gstore%cryst => cryst
- gstore%ebands => ebands
- gstore%ifc => ifc
- gstore%kibz => ebands%kptns
+ gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc; gstore%kibz => ebands%kptns
 
  ! Set metadata.
  gstore%kzone = dtset%gstore_kzone; gstore%qzone = dtset%gstore_qzone; gstore%kfilter = dtset%gstore_kfilter
@@ -724,27 +717,24 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ABI_ERROR(sjoin("Invalid qzone:", gstore%qzone))
  end select
 
- ! Here we filter the electronic wavevectors k and recompute select_qbz_spin and select_kbz_spin.
+ ! Here we filter the electronic wavevectors k and recompute select_qbz_spin and select_kbz_spin according to kfilter.
  select case (gstore%kfilter)
  case ("none")
    continue
 
  case ("erange")
-   call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
-                               select_qbz_spin, select_kbz_spin)
+   call gstore%filter_erange__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case ("qprange")
-   call gstore%filter_qprange__(dtset, qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
-                                select_qbz_spin, select_kbz_spin)
+   call gstore%filter_qprange__(dtset, qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case ("fs_tetra")
    ! Use the tetrahedron method to filter k- and k+q points on the FS in metals
    ! and define gstore%brange_spin automatically.
-   call gstore%filter_fs_tetra__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, &
-                                 select_qbz_spin, select_kbz_spin)
+   call gstore%filter_fs_tetra__(qbz, qbz2ibz, qibz2bz, kbz, gstore%kibz, kbz2ibz, kibz2bz, select_qbz_spin, select_kbz_spin)
 
  case default
-   ABI_ERROR(sjoin("Invalid kfilter:", gstore%kfilter))
+   ABI_ERROR(sjoin("Invalid gstore%kfilter:", gstore%kfilter))
  end select
 
  ! Total number of k/q points for each spin after filtering (if any)
@@ -794,7 +784,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 
  ! Initialize GSTORE.nc file i.e. define dimensions and arrays
  ! Entries such as the e-ph matrix elements will be filled afterwards in gstore_compute.
- ! Master node writes basic objects and gstore dimensions
+ ! Master node defines dimensions and variables.
 
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, gstore%path, xmpi_comm_self))
@@ -853,10 +843,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    ])
    NCF_CHECK(ncerr)
 
-   ! Internal table used to restart computation. Init with zeros.
+   ! Internal table used to restart computation. Initialized with zeros.
    !  0 --> (ib_bz, spin) has not been computed.
    !  1 --> (iq_bz, spin) has been computed.
-   ! To check if the whole generation is completed, check if "gstore_completed" == 1
+   ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
    NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, zero))
 
    ! Optional arrays
@@ -1129,7 +1119,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    ! Init for sequential execution.
    gqk%my_npert = gqk%natom3
    gqk%qpt_comm%nproc = 1; gqk%kpt_comm%nproc = 1; gqk%pert_comm%nproc = 1; gqk%band_comm%nproc = 1
-   ! These communicators are used in GWPT
+   ! NB: These communicators are used in GWPT
    gqk%bsum_comm%nproc = 1; gqk%pp_sum_comm%nproc = 1;
 
    if (any(eph_np_pqbks /= 0)) then
@@ -1192,7 +1182,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
  end do ! my_is
 
- ! For each spin treated by this rank, create 3D cartesian communicator: (q-points, k-points, perturbations)
+ ! For each spin treated by this rank, create cartesian communicator of rank ndims.
  periods(:) = .False.; reorder = .False.
 
  do my_is=1,gstore%my_nspins
@@ -1743,7 +1733,7 @@ end subroutine gstore_filter_erange__
 !! gstore_filter_qprange__
 !!
 !! FUNCTION
-!! Filter k-points and q-points according to qprange
+!! Filter k-points according to qprange
 !!
 !! INPUTS
 !!
