@@ -3672,7 +3672,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         'with a non-linear core correction.',ch10,&
 &         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
 &         'Action: either set usekden=0 in input file, or change this pseudopotential file.'
-         ABI_ERROR_NOSTOP(msg, ierr)
+         !ABI_ERROR_NOSTOP(msg, ierr)
+         ABI_WARNING(msg)
        end if
      end do
    end if
