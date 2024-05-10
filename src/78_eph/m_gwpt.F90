@@ -391,8 +391,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_SFREE(my_pp_inds)
  end do ! my_is
 
- ! Initialize Coulomb term on the IBZ of the pp_mesh. Use largest G-sphere.
- npwx = gsph_x%ng; npwx = gsph_c%ng; max_npwxc = max(npwx, npwc)
+ ! Initialize Coulomb term on the IBZ of the pp_mesh. Use the largest G-sphere.
+ npwx = gsph_x%ng; npwc = gsph_c%ng; max_npwxc = max(npwx, npwc)
  if (gsph_x%ng >= gsph_c%ng) then
    call vcp%init(gsph_x, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_x%ng, &
                  nqlwl, qlwl, comm)
