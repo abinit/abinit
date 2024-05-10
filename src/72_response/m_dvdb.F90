@@ -5271,7 +5271,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    ! 54   RHO1 files (treating DRHODB as DVDB)
 
    has_rhog1_g0(ii) = .True.
-   if (fform == 109) has_rhog1_g0(ii) = .False.
+   if (any(fform == [54,109])) has_rhog1_g0(ii) = .False.
 
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
