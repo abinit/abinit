@@ -45,6 +45,7 @@ module m_dvdb
  use m_ddb_hdr
  use m_dtset
  use m_krank
+ use m_xcdata
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
@@ -65,6 +66,7 @@ module m_dvdb
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
+ use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
  implicit none
 
@@ -469,6 +471,10 @@ module m_dvdb
    ! Reconstruct the DFPT potential for a q-point in the BZ starting
    ! from its symmetrical image in the IBZ.
 
+   procedure :: read_vxc1_qbz => dvdb_read_vxc1_qbz
+   ! Compute the first-order change of exchange-correlation potential
+   ! for a q-point in the BZ starting from its symmetrical image in the IBZ.
+
    procedure :: qcache_read => dvdb_qcache_read
    ! Allocate internal cache for potentials.
    ! Read potentials from DVDB file and store them in cache (COLLECTIVE routine)
@@ -491,6 +497,10 @@ module m_dvdb
    procedure :: get_ftqbz => dvdb_get_ftqbz
    ! Retrieve Fourier interpolated potential for a given q-point in the BZ.
    ! Use cache to reduce number of slow FTs.
+
+   procedure :: get_vxc1_ftqbz => dvdb_get_vxc1_ftqbz
+   ! Retrieve Fourier interpolated first-order change of exchange-correlation
+   ! potential v1xc for a given q-point in the BZ.
 
    procedure :: ftqcache_build => dvdb_ftqcache_build
    ! This function initializes the internal q-cache from W(R,r)
@@ -1605,6 +1615,78 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  call timab(1802, 2, tsec)
 
 end subroutine dvdb_readsym_qbz
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_read_vxc1_qbz
+!! NAME
+!!  dvdb_read_vxc1_qbz
+!!
+!! FUNCTION
+!! Compute the first-order change of exchange-correlation potential
+!! for a q-point in the BZ starting from its symmetrical image in the IBZ.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  dtset<dataset_type>=All input variables for this dataset
+!!  qbz(3)=Q-point in BZ.
+!!  mapc_qq2dvdb(6)=Symmetry mapping qbz, see m_kpts.f for a description
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  rhor=ground state electronic density
+!!  xcdata<type(xcdata_type)>=data to calculate exchange-correlation
+!!  non_magnetic_xc=true if density/potential is handled as non-magnetic
+!!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
+!!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
+!!
+!! OUTPUT
+!!  drho_cplex=1 if real, 2 if complex.
+!!  vxc1(drho_cplex, nfft, nspden, db%my_npert)= vxc1 potentials on the real-space FFT mesh
+!!  for the db%my_npert perturbations treated by this MPI rank.
+!!
+!! SOURCE
+
+subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, vxc1, non_magnetic_xc, usexcnhat, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: db
+ integer,intent(in) :: nfft, nkxc, usexcnhat, comm
+ integer,intent(out) :: drho_cplex
+ real(dp),intent(in) :: qbz(3)
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ logical,intent(in) :: non_magnetic_xc
+!arrays
+ integer,intent(in) :: ngfft(18), mapc_qq2dvdb(6)
+ real(dp),allocatable,intent(in) :: rhor(:,:), kxc(:,:)
+ real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: option,imyp
+!arrays
+ real(dp),allocatable :: rho1(:,:,:,:)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0)
+! *************************************************************************
+
+ ! Get rho1(cplex, nfftf, nspden, my_npert))
+ call db%readsym_qbz(cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, rho1, comm)
+
+ option=2 ! if 2, treat only density change
+ ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
+ do imyp=1,db%my_npert
+   call dfpt_mkvxc(drho_cplex,dtset%ixc,kxc,db%mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+                   nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1(:,:,:,imyp), &
+                   cryst%rprimd,usexcnhat,vxc1(:,:,:,imyp),dum_xccc3d1)
+ end do
+
+ ABI_FREE(rho1)
+
+  end subroutine dvdb_read_vxc1_qbz
 !!***
 
 !----------------------------------------------------------------------
@@ -3799,6 +3881,80 @@ end subroutine dvdb_get_ftqbz
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_get_vxc1_ftqbz
+!! NAME
+!!  dvdb_get_vxc1_ftqbz
+!!
+!! FUNCTION
+!! Fourier interpolation of the first-order change of exchange-correlation potential
+!! for a given q-point in the BZ (qbz).
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  dtset<dataset_type>=All input variables for this dataset
+!!  qbz(3)=Q-point in BZ
+!!  qq_ibz(3)=Q-point in IBZ
+!!  mapc_qq(6)=Symmetry mapping qbz, see m_kpts.f for a description
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  rhor=ground state electronic density
+!!  non_magnetic_xc=true if density/potential is handled as non-magnetic
+!!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
+!!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
+!!
+!! OUTPUT
+!!  drho_cplex=1 if real, 2 if complex.
+!!  vxc1(drho_cplex, nfft, nspden, db%my_npert)= vxc1 potentials on the real-space FFT mesh
+!!  for the db%my_npert perturbations treated by this MPI rank.
+!!
+!! SOURCE
+
+subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, vxc1, non_magnetic_xc, usexcnhat, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: db
+ integer,intent(in) :: nfft, nkxc, usexcnhat, comm
+ integer,intent(out) :: drho_cplex
+ real(dp),intent(in) :: qbz(3), qq_ibz(3)
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ logical,intent(in) :: non_magnetic_xc
+!arrays
+ integer,intent(in) :: ngfft(18), mapc_qq(6)
+ real(dp),allocatable,intent(in) :: rhor(:,:), kxc(:,:)
+ real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: option,imyp
+!arrays
+ real(dp),allocatable :: rho1(:,:,:,:)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0)
+
+! *************************************************************************
+
+ ! Get rho1(cplex, nfftf, nspden, my_npert))
+ call db%get_ftqbz(cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, vxc1, comm)
+
+ option=2 ! if 2, treat only density change
+ ABI_MALLOC(vxc1,(drho_cplex, nfft, dtset%nspden, db%my_npert))
+
+ do imyp=1,db%my_npert
+     call dfpt_mkvxc(drho_cplex,dtset%ixc,kxc,db%mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+                    nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1(:,:,:,imyp),&
+                    cryst%rprimd,usexcnhat,vxc1(:,:,:,imyp),dum_xccc3d1)
+ end do
+
+ ABI_FREE(rho1)
+
+end subroutine dvdb_get_vxc1_ftqbz
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/dvdb_ftqcache_build
 !! NAME
 !!  dvdb_ftqcache_build
@@ -5120,7 +5276,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    ! 54   RHO1 files (treating DRHODB as DVDB)
 
    has_rhog1_g0(ii) = .True.
-   if (fform == 109) has_rhog1_g0(ii) = .False.
+   if (any(fform == [54,109])) has_rhog1_g0(ii) = .False.
 
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
