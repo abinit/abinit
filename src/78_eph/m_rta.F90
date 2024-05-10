@@ -1822,7 +1822,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (abs_tol <= zero) then
    rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
    abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
-   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from minimal carrier density over all T")
    call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
    call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
  end if

@@ -249,14 +249,15 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (dtset%icoulomb>0) vloc_method=2
  if (psps%usewvl==1) vloc_method=2
 !Pseudo core charge density:
-! Method 1: PAW, nc_xccc_gspace
-! Method 2: Norm-conserving PP, wavelets
+! Method 1 construct through G space FT: PAW, nc_xccc_gspace==1
+! Method 2 construct in real space     : Norm-conserving PP default, wavelets
  coredens_method=1;if (psps%usepaw==0) coredens_method=2
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+!Pseudo core charge kinetic energy density: same convention as coredens_method
  coretau_method=0
- if (dtset%usekden==1.and.psps%usepaw==1) then
+ if (dtset%usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
  end if
 
@@ -793,7 +794,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
  ABI_FREE(work)
 
-!Determine wether a gaussan atomic density has to be used or not
+!Determine whether a gaussan atomic density has to be used or not
  usegauss=.true.
  if (usepaw==0) usegauss = any(.not.psps%nctab(1:ntypat)%has_tvale)
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)
