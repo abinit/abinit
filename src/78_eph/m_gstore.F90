@@ -3183,6 +3183,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      NCF_CHECK(nctk_set_collective(root_ncid, root_vid("phfreqs_ibz")))
      NCF_CHECK(nctk_set_collective(root_ncid, root_vid("pheigvec_cart_ibz")))
    end if
+   call xmpi_barrier(gstore%comm)
 
    if (my_nqibz > 0) then
      iq_start = my_iqibz_inds(1)
@@ -3689,7 +3690,6 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
- character(len=fnlen) :: gstore_gmode
  logical :: store_phdispl, isirr_q
  type(hdr_type) :: wfk0_hdr
  type(crystal_t) :: gstore_cryst
@@ -4176,7 +4176,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !scalars
  integer,parameter :: master = 0
  integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr
- character(len=500) :: msg
+ !character(len=500) :: msg
  !type(hdr_type) :: gstore_hdr
 !arrays
  integer :: done_qbz_spin(gstore%nqbz, dtset%nsppol)

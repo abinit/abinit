@@ -1636,8 +1636,6 @@ end subroutine dvdb_readsym_qbz
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
 !!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
-!!  rhor=ground state electronic density
-!!  xcdata<type(xcdata_type)>=data to calculate exchange-correlation
 !!  non_magnetic_xc=true if density/potential is handled as non-magnetic
 !!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
@@ -1649,7 +1647,7 @@ end subroutine dvdb_readsym_qbz
 !!
 !! SOURCE
 
-subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, &
+subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, &
                               vxc1, non_magnetic_xc, usexcnhat, comm)
 
 !Arguments ------------------------------------
@@ -1663,7 +1661,7 @@ subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, n
  logical,intent(in) :: non_magnetic_xc
 !arrays
  integer,intent(in) :: ngfft(18), mapc_qq2dvdb(6)
- real(dp),allocatable,intent(in) :: rhor(:,:), kxc(:,:)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
 
 !Local variables-------------------------------
@@ -1684,7 +1682,6 @@ subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, n
                    nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1(:,:,:,imyp), &
                    cryst%rprimd,usexcnhat,vxc1(:,:,:,imyp),dum_xccc3d1)
  end do
-
  ABI_FREE(rho1)
 
   end subroutine dvdb_read_vxc1_qbz
@@ -2770,7 +2767,7 @@ end subroutine v1phq_rotate_myperts
 !!
 !! SOURCE
 
-subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol ,mpi_enreg, v1r)
+subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol, mpi_enreg, v1r)
 
 !Arguments ------------------------------------
 !scalars
@@ -3900,7 +3897,6 @@ end subroutine dvdb_get_ftqbz
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
 !!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
-!!  rhor=ground state electronic density
 !!  non_magnetic_xc=true if density/potential is handled as non-magnetic
 !!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
@@ -3912,7 +3908,7 @@ end subroutine dvdb_get_ftqbz
 !!
 !! SOURCE
 
-subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, rhor, &
+subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, &
                                vxc1, non_magnetic_xc, usexcnhat, comm)
 
 !Arguments ------------------------------------
@@ -3926,7 +3922,7 @@ subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cple
  logical,intent(in) :: non_magnetic_xc
 !arrays
  integer,intent(in) :: ngfft(18), mapc_qq(6)
- real(dp),allocatable,intent(in) :: rhor(:,:), kxc(:,:)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
  real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
 
 !Local variables-------------------------------

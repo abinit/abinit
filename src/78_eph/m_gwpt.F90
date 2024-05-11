@@ -272,7 +272,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  !real(dp),allocatable :: omegame0i(:)
  real(dp) :: ylmgr_dum(1,1,1)
- real(dp) :: dum_nhat(0), dum_xccc3d1(0), dum_xccc3d(0)
+ real(dp) :: dum_nhat(0), dum_xccc3d(0)
  !Cray compiler may dislike the above initialisation of zero-size arrays
  real(dp) :: strsxc(6)
  logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
@@ -410,7 +410,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    call vcp%init(gsph_c, cryst, pp_mesh, kmesh, dtset%rcut, dtset%gw_icutcoul, dtset%vcutgeo, dtset%ecuteps, gsph_c%ng, &
                  nqlwl, qlwl, comm)
  end if
-
  call kmesh%free()
 
  ! Initialize the wave function descriptor.
@@ -793,17 +792,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! A similar piece of code is used in m_respfn_driver.
  ! option 2 for xc and kxc (no paramagnetic part if xcdata%nspden=1)
  ! Note dum_xccc3d
- nkxc=2*min(dtset%nspden,2)-1;if(dtset%xclevel==2)nkxc=12*min(dtset%nspden,2)-5
- call xcdata_init(xcdata,dtset=dtset)
- non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
+ nkxc = 2*min(dtset%nspden,2)-1; if (dtset%xclevel==2) nkxc = 12*min(dtset%nspden,2)-5
+ call xcdata_init(xcdata, dtset=dtset)
+ non_magnetic_xc = (dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
- call check_kxc(dtset%ixc,dtset%optdriver)
- ABI_MALLOC(kxc,(nfft,nkxc))
- ABI_MALLOC(vxc,(nfft,dtset%nspden))
+ call check_kxc(dtset%ixc, dtset%optdriver)
+ ABI_MALLOC(kxc, (nfft, nkxc))
+ ABI_MALLOC(vxc, (nfft, dtset%nspden))
 
  nk3xc=1; option=2; usexcnhat=0
- call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft,&
-              dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,n3xccc0,option,rhor,&
+ call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
+              dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,n3xccc0,option,rhor, &
               cryst%rprimd,strsxc,usexcnhat,vxc,vxcavg,dum_xccc3d,xcdata)
 
  ! ========================================
@@ -879,7 +878,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        ! Use Fourier interpolation to get DFPT potentials and DFPT densities for this qpt.
        call dvdb%get_ftqbz(cryst, qpt, qq_ibz, mapc_qq, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
 
-       call drhodb%get_vxc1_ftqbz(dtset, cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, nkxc, kxc, rhor, &
+       call drhodb%get_vxc1_ftqbz(dtset, cryst, qpt, qq_ibz, mapc_qq, drho_cplex, nfftf, ngfftf, nkxc, kxc, &
                                   vxc1, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)
      else
        ! Read and reconstruct the dvscf potentials and the densities for this qpt and my_npert perturbations.
@@ -893,7 +892,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        db_iqpt = drhodb%findq(qq_ibz)
        ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qpt), "in DRHODB file."))
        mapc_qq2dvdb = mapc_qq; mapc_qq2dvdb(1) = db_iqpt
-       call drhodb%read_vxc1_qbz(dtset, cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, nkxc, kxc, rhor, &
+       call drhodb%read_vxc1_qbz(dtset, cryst, qpt, mapc_qq2dvdb, drho_cplex, nfftf, ngfftf, nkxc, kxc, &
                                  vxc1, non_magnetic_xc, usexcnhat, gqk%pert_comm%value)
      end if
 
@@ -1127,7 +1126,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! Find the corresponding irred point in the pp_mesh
          call pp_mesh%get_bz_item(ipp_bz, pp, ipp_ibz, isym_pp, itim_pp)
          do ig=1,npw_pp
-           vc_sqrt_pp(gsph_c%rottb(ig,itim_pp,isym_pp)) = Vcp%vc_sqrt(ig,ipp_ibz)
+           vc_sqrt_pp(gsph_c%rottb(ig,itim_pp,isym_pp)) = vcp%vc_sqrt(ig,ipp_ibz)
          end do
 
          ! =====================================
@@ -1151,12 +1150,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Contract immediately over g' with the convolution of W_gg'
            !call screen%get_convolution("N", npw_pp, nspinor, rhotwg, w_rhotwg)
 
-           ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT
+           ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
            ! and take the CC in times_vc_sqrt
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp, urs_kbz=ur_kqmp)
 
-           cwork_ur = GWPC_CONJG(ur_kqmp) * ur_kqmp
+           cwork_ur = GWPC_CONJG(ur_kqmp) * ur_kq
            call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
            call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
@@ -1242,7 +1241,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
              ABI_CHECK(ierr == 0, msg)
 
-             ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <k| e^{-i(q+G)}|k+q> with FFT and take the CC.
+             ! <m,k+q|e^{ip+G}|bsum,k+q-p> --> compute <k|e^{-i(q+G)}|k+q> with FFT and take the CC.
              cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
              call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
@@ -1594,7 +1593,7 @@ end subroutine times_vc_sqrt
 !!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over bands: ", gwpt%bsum_comm%nproc
 !!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over spins: ", gwpt%spin_comm%nproc
 !!   write(unt, "(a,i0)")"P Number of CPUs for parallelism over k-points: ", gwpt%kcalc_comm%nproc
-!!   write(unt, "(2(a,i0),/)")"P Number of k-point in gwpt_nk treated by this proc: ", gwpt%my_nkcalc, " of ", gwpt%nkcalc
+!!   write(unt, "(2(a,i0),/)")"P Number of k-points in gwpt_nk treated by this proc: ", gwpt%my_nkcalc, " of ", gwpt%nkcalc
 !!
 !!  end subroutine gwpt_print
 !!***
