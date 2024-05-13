@@ -580,7 +580,7 @@ elec_eval = .FALSE.
 !  MPI BROADCAST the history of the MD
      call abihist_bcast(hist_tes,master,comm)
 !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm, hist_for_map=hist_tes)
+     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
      !  Initialize if to print anharmonic contribution to energy or not
      need_analyze_anh_pot = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.

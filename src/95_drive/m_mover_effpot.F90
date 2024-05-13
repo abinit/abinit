@@ -361,7 +361,6 @@ ABI_FREE(xcart)
       call alloc_copy(tnons,dtset%tnons)
       scfcv_args%indsym => indsym
       call abihist_free(hist_tmp)
-      call abihist_free(hist_map)
       ABI_FREE(symrec)
    else
       dtset%nsym = 1       ! Number of SYMmetry operations
@@ -1115,7 +1114,7 @@ use_inversion = 0
 
   call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
-
+ print *, "is it here 4??"
   call matr3inv(rprimd,gprimd)
   call symfind(gprimd,msym,natom,nptsym,0,nsym,&
 &           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)

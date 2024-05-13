@@ -1519,7 +1519,7 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               xmlFree(key);
               for(i=0; i< size; i++)
                 {
-                  (*uni_amplitude_list)[i]=dtmp[i];
+                  (*uni_amplitude_list)[counter]=dtmp[i];
                 }
             }
             if (!xmlStrcmp(cur3->name, BAD_CAST"direction")) {

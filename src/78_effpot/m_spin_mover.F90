@@ -160,7 +160,7 @@ contains
        endif
     end if
     if(params%spin_dynamics==3) then ! Monte carlo
-       call self%spin_mc%initialize(nspin=nspin, angle=1.0_dp, temperature=params%spin_temperature)
+       call self%spin_mc%initialize(nspin=nspin, angle=0.2_dp, temperature=params%spin_temperature)
     end if
     call xmpi_bcast(self%nspin, master, comm, ierr)
     call xmpi_bcast(self%dt, master, comm, ierr)
@@ -360,7 +360,7 @@ contains
            call self%supercell%supercell_maker%generate_spin_wave_vectorlist(A=Sprim, &
              & kpoint=self%init_qpoint, axis=self%init_rotate_axis, A_sc=self%Stmp)
 
-           ABI_SFREE(SPrim)
+           ABI_FREE(SPrim)
 
          case (4)
           ! read from last step of hist file
@@ -650,7 +650,8 @@ contains
     type(hash_table_t),optional, intent(inout) :: energy_table
     if(present(displacement) .or. present(lwf) .or. present(strain)) then
        ABI_BUG("Monte Carlo only implemented for spin.")
-       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot)
+    else
+       call self%spin_mc%run_MC(self%rng, effpot, S_in, etot, bfield=self%Htmp)
     end if
     call energy_table%put(self%label, etot)
   end subroutine spin_mover_t_run_one_step_MC

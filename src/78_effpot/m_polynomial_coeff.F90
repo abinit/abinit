@@ -3849,6 +3849,7 @@ subroutine generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,ndi
      end if
    end do
    nterm = nterm + 1
+
    call polynomial_term_init(atindx,cells,dir_int,ndisp,nstrain,terms(nterm),power_disps,&
 &                            power_strain,strain,weight,check=.true., index_coeff=index_coeff)
  end do!end do sym
@@ -4788,6 +4789,7 @@ end subroutine get_powers
 
 
 subroutine get_totpower_and_nbody(index_coeff_tmp, ndisp, nbody, totpower)
+  ! get the total power and number of body in the polynomial
   integer, intent(in) :: ndisp
   integer, intent(in) :: index_coeff_tmp(:) ! size ndisp
   integer, intent(inout) :: nbody, totpower

@@ -134,7 +134,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   !if the number of atoms in reference supercell into effpot is not correct,
   !wrt to the number of atom in the hist, we set map the hist and set the good supercell
   if (natom_sc /= eff_pot%supercell%natom) then
-    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE., hist_for_map=hist)
+    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE.)
   end if
 
   !we get the size of the supercell in the hist file
@@ -251,16 +251,12 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,opt_on,opt_factors,comm,
   !  call the fit process routine
   !  This routine solves the linear system proposed
   !  by C.Escorihuela-Sayalero see PRB95,094115(2017) [[cite:Escorihuela-Sayalero2017]]
-  block
-  real(dp) :: weights(ntime)
-  weights=1.0_dp
   call fit_polynomial_coeff_solve(coeff_values(1:opt_ncoeff),fcart_coeffs,fit_data%fcart_diff,&
     &                                  energy_coeffs,fit_data%energy_diff,info,&
     &                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
     &                                  strten_coeffs,fit_data%strten_diff,&
     &                                  fit_data%training_set%sqomega,opt_on,opt_factors, nbound=0, &
-    &                                  min_bound_coeff=-1000.0_dp, ignore_bound=.False., weights=weights)
-  end block
+    &                                  min_bound_coeff=-1000.0_dp, ignore_bound=.False., weights=my_weights)
   if (info /= 0 .and. all(coeff_values < tol16))then
     write(frmt,*) opt_ncoeff
     write(message, '(2a,'//ADJUSTR(frmt)//'I4,8a)' ) ch10,&
@@ -363,7 +359,7 @@ end subroutine opt_effpot
 !!
 !! SOURCE
 
-subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm,print_anh)
+subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm,print_anh, weights)
 
   implicit none
 
@@ -376,6 +372,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !arrays
   integer,intent(in) :: order_ran(2),bound_EFS(3)
   real(dp),intent(in) :: bound_factors(3)
+  read(dp), intent(in), optional :: weights(:)
   !Logicals
   logical,optional,intent(in) :: print_anh
   !Strings
@@ -397,6 +394,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   logical :: any_exists
   type(fit_data_type) :: fit_data
   real(dp) :: GF_arr(2),coeff_opt(2)
+  real(dp), allocatable :: my_weights(:)
   !real(dp), allocatable :: energy_coeffs(:,:),fcart_coeffs(:,:,:,:)
   !real(dp), allocatable :: strten_coeffs(:,:,:)
   !1406 strain_temrs_tmp
@@ -426,6 +424,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
   !Setting/Initializing Variables
   ntime = hist%mxhist
+
+  if (present(weights)) then
+    ABI_MALLOC(my_weights, size(weights))
+    my_weights = weights
+  else
+    ABI_MALLOC(my_weights, ntime)
+    my_weights(:) = 1.0_dp
+  end if
+
   natom_sc = size(hist%xred,2)
   factor   = 1._dp/natom_sc
   nterm =eff_pot%anharmonics_terms%ncoeff
@@ -444,7 +451,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !if the number of atoms in reference supercell into effpot is not correct,
   !wrt to the number of atom in the hist, we set map the hist and set the good supercell
   if (natom_sc /= eff_pot%supercell%natom) then
-    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE., hist_for_map=hist)
+    call effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose=.TRUE.)
   end if
 
   !Check if input of order is correct
@@ -477,8 +484,6 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   !Before adding bound coefficients calculate MSD of initial model
   !MS FOR THE MOMENT PRINT NO FILE
   block 
-  real(dp) :: weights(ntime)
-  weights=1.0_dp
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse_ini,msef_ini,mses_ini,&
     &                                  natom_sc,ntime,fit_data%training_set%sqomega,comm,&
     &                                  compute_anharmonic=.TRUE.,print_file=.FALSE.)
@@ -664,13 +669,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
 
         if(iterm>nterm)then
           ! MS 2006 Decomment for old style optimization
-          block 
-          real(dp) :: weights(ntime)
-          weights=1.0_dp
           call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
                     &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-                    &                                           compute_anharmonic=.TRUE.,print_file=.FALSE., weights=weights)
-          end block
+                    &                                           compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
           i = 0
           write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
           call wrtout(std_out,message,'COLL')
@@ -680,13 +681,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             i = i + 1
             eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &!coeff_ini / 2**i
               &                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient / 2**1
-          block 
-           real(dp) :: weights(ntime)
-           weights=1.0_dp
             call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
               &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
-              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE., weights=weights)
-            end block
+              &                                              compute_anharmonic=.TRUE.,print_file=.FALSE., weights=my_weights)
 
             write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
             call wrtout(std_out,message,'COLL')
@@ -2047,8 +2044,10 @@ function check_to_skip(term) result (to_skip)
 end function check_to_skip
 !!***
 
-
 subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi, my_coeffs, temp_cntr)
+  ! documetation: generate the bounding terms for the symmetry adapted terms
+  ! and add them to the list of coefficients.
+  ! 
   ! check if myterm
   !type(polynomial_coeff_type),target, intent(in) :: terms(:)
 
@@ -2073,10 +2072,12 @@ subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi,
 
   integer :: ncoeff
 
+  ! copy the coefficients to a temporary array my_coeffs_tmp
   ncoeff=size(my_coeffs)
   ABI_MALLOC(my_coeffs_tmp,(ncoeff))
   my_coeffs_tmp=my_coeffs
 
+  ! free the original array and allocate a new one with the correct size
   call polynomial_coeff_list_free(my_coeffs)
   ABI_MALLOC(my_coeffs, (ncoeff))
   my_coeffs(1:nterm_start) = my_coeffs_tmp(1:nterm_start)
