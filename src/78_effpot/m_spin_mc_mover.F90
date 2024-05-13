@@ -56,6 +56,7 @@
        integer :: nstep  ! number of steps
        integer :: imove ! index of spin to be moved
        integer :: naccept  ! number of accepted steps
+       integer :: nattempt ! number of attempted steps
      contains
        procedure :: initialize
        procedure :: finalize
@@ -87,6 +88,8 @@
       self%beta=1.0/temperature ! Kb in a.u. is 1.
       self%Sold(:)=0.0_dp
       self%Snew(:)=0.0_dp
+      self%naccept=0
+      self%nattempt=0
     end subroutine initialize
 
     !----------------------------------------------------------------------
@@ -118,11 +121,14 @@
      ! try to change spin
      r=self%attempt(rng, effpot)
      ! metropolis-hastings
+     self%nattempt = self%nattempt+1
      if(rng%rand_unif_01()< min(1.0_dp, r) ) then
         self%naccept=self%naccept+1
         call self%accept()
+        !print *, "accepted"
      else
         call self%reject()
+        !print *, "rejected"
      end if
    end subroutine run_one_step
 
@@ -136,20 +142,27 @@
    !> @param[in]  S_in:  the intial spin state
    !> @param[out]  etot:  the final total energy
    !----------------------------------------------------------------------
-   subroutine run_MC(self, rng, effpot, S_in, etot)
+   subroutine run_MC(self, rng, effpot, S_in, etot, bfield)
      class(spin_mc_t), intent(inout) :: self
      type(rng_t) :: rng
      class(abstract_potential_t), intent(inout) :: effpot
      real(dp), intent(inout) :: S_in(3,self%nspin)
      real(dp), intent(out) ::  etot
+     real(dp), optional,intent(inout) :: bfield(:,:)
+     real(dp) :: etmp
+
      integer :: i
      self%S(:,:)=S_in(:,:)
-     call effpot%calculate(spin=S_in, energy=self%energy)
+     call effpot%calculate(spin=S_in, energy=self%energy, bfield=bfield)
      do i = 1, self%nstep
         call self%run_one_step(rng, effpot)
      end do
      S_in(:, :)=self%S(:,:)
+     !call effpot%calculate(spin=self%S, energy=self%energy, bfield=bfield)
+     !print *, self%energy
      etot=self%energy
+     call effpot%calculate(spin=S_in, energy=etmp, bfield=bfield)
+     !print *, "energy: ", self%energy, etmp, self%energy-etmp
    end subroutine run_MC
 
    !----------------------------------------------------------------------
@@ -184,6 +197,7 @@
      self%deltaE=0.0
      call move_hinzke_nowak(rng, self%Sold, self%Snew, self%angle)
      call effpot%get_delta_E( self%S, self%imove, self%Snew, self%deltaE)
+     !print *, "delta E", self%deltaE
      r=exp(-self%deltaE *self%beta)
    end function attempt
 

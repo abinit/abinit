@@ -624,6 +624,10 @@ contains
        do idx=1,n, 1
           bivallist(:,:, idx)= (- k1list(idx))*  &
                outer_product(k1dirlist(:,idx), k1dirlist(:, idx))
+       print *, "------"
+       print *, idx
+       print *, bivallist(:, :, idx)
+
        end do
        call self%set_bilinear(n,ilist,ilist,Rlist,bivallist)
     endif
@@ -822,6 +826,10 @@ contains
        end if
        if (usia .and. uni_nnz>0) then
           write(std_out,'(A18)') "Setting SIA terms"
+          print *, "uni_nnz", uni_nnz
+          print *, "uni_ilist", uni_ilist
+          print *, "uni_amplitude_list", uni_amplitude_list
+          print *, reshape(uni_direction_list, [3, uni_nnz])
           call self%set_sia(uni_nnz, uni_ilist, uni_amplitude_list, &
                reshape(uni_direction_list, [3, uni_nnz]) )
        else
