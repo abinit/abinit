@@ -88,6 +88,7 @@ module m_gwpt
  use m_gstore,         only : gstore_t, gqk_t, gstore_check_restart, GSTORE_GMODE_ATOM, GSTORE_GMODE_PHONON
  use m_rhotoxc,        only : rhotoxc
  use m_drivexc,        only : check_kxc
+ use m_occ,            only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -207,6 +208,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
+ real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
  real(dp) :: ecut,weight_q,q0rad, bz_vol, enxc, vxcavg ! ediff, eshift, rfact,
@@ -290,6 +292,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Problems to be addressed:
  !
+ ! 1)
  ! Sigma is usually split into Sigma_c(w) and Sigma_x where Sigma_x is the static Fock operator
  ! evaluted with KS orbitals. The advantage of such partioning is that Sigma_x = iGv
  ! can be computed by summing over occupied states only. Sigma_x requires more G-vectors to converge
@@ -305,6 +308,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! so cetain operations such as the k-point mapping, the computation of form factors are performed twice
  ! Note however that MG believes that Sigma_x is a much better approximation than v_xc when one is interested
  ! in the e-ph matrix elements connecting low-energy states such as band edges to high-energy states.
+ !
+ ! 2) We need to solve the NSCF Sterheimer for q and -q. In principle one can solve the equation only at q
+ !    and then use spatial inversion or TR to get the solution at -q but this requires solving the Sternheimer
+ !    for all pp wavevectors in the BZ (or better the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
+ !    by the parallelism over pp but perhaps one can precompute \Delta psi with all procs and write the results to temporary files.
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -318,6 +326,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
  ecut = dtset%ecut ! dtset%dilatmx
  ieta = +j_dpc * dtset%zcut
+
+ ! Set tolerance used to decide if a band is empty
+ ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
+ tol_empty_in = 0.01
+ call get_fact_spin_tol_empty(wfd%nsppol, wfd%nspinor, tol_empty_in, fact_spin, tol_empty)
+
 
  ! Check if a previous GSTORE.nc file is present to restart the calculation if dtset%eph_restart == 1,
  ! and use done_qbz_spin mask to cycle the loops below if restart /= 0.
@@ -1148,7 +1162,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call times_vc_sqrt("N", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            ! Contract immediately over g' with the convolution of W_gg'
-           !call screen%get_convolution("N", npw_pp, nspinor, rhotwg, w_rhotwg)
+
+           !real(dp),intent(in) :: omegame0i(nomega)
+           !complex(gwpc),intent(inout) :: acc_ket(npwc*nspinor, nomega)
+           !complex(gwpc),intent(out) :: sigcme(nomega)
+           !call screen%calc_ppm_sigc(nomega, omegame0i, theta_mu_minus_e0i, zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
            ! and take the CC in times_vc_sqrt

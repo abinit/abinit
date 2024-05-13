@@ -1755,6 +1755,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 #ifdef HAVE_GW_DPC
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
+!arrays
+ !type(pawcprj_type),allocatable :: cprjq(natom,mcprjq),cwaveprj(natom,nspinor*usepaw), cwaveprj1(natom,nspinor*usepaw)
 
 ! *************************************************************************
 
@@ -1856,7 +1858,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  ! See need_fermie1 in m_dfpt_scfcv
 
  if (present(full_cg1)) then
-
    ! Compute full first order wavefunction.
    !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")

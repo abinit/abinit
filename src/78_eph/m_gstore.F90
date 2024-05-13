@@ -4045,13 +4045,11 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
          gqk%vk_cart_ibz(:, ib, :) = gqk%vkmat_cart_ibz(1, :, ib, ib, :)
        end do
      end if
-
      NCF_CHECK(nf90_close(ncid))
    end if
-
-   call xmpi_barrier(gstore%comm)
  end do ! spin
 
+ call xmpi_barrier(gstore%comm)
  call cwtime_report(" gstore_from_ncpath", cpu, wall, gflops)
 
 contains
