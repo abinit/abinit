@@ -89,6 +89,7 @@ module m_gwpt
  use m_rhotoxc,        only : rhotoxc
  use m_drivexc,        only : check_kxc
  use m_occ,            only : get_fact_spin_tol_empty
+ use m_ppmodel,        only : PPM_HYBERTSEN_LOUIE, PPM_GODBY_NEEDS
 
  implicit none
 
@@ -167,7 +168,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(crystal_t),intent(in) :: cryst
- type(ebands_t),intent(in) :: ebands
+ type(ebands_t),target,intent(in) :: ebands
  type(dvdb_t),intent(inout) :: dvdb, drhodb
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
@@ -188,10 +189,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer,parameter :: n3xccc0 = 0
  integer :: band, band_me, nband_me, stern_comm, nkpt, my_rank, nsppol, iq_ibz, iq_bz, my_npert
- !integer :: nomega_braket, nomega_ nomega_tot
  integer :: cplex,drho_cplex,nkxc,nk3xc,option,usexcnhat,db_iqpt,natom,natom3,ipc,nspinor,nprocs !, cnt
  integer :: ib_sum, ii, ib, u1_band !,u1c_ib_k,  jj, iw !ib_kq, band_ks, ib_k, ibsum_kq, u1_master, ip
- integer :: my_is, spin, idir,ipert, npw_pp, ig, max_npwxc, npwx, npwc
+ integer :: my_is, spin, idir,ipert, npw_pp, ig, max_npwxc, npwx, npwc, nomega
  integer :: my_pp_start_spin(dtset%nsppol), my_pp_stop_spin(dtset%nsppol), my_npp(dtset%nsppol)
  !integer :: isym_q, trev_q
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_k_ibz, istwf_k_ibz
@@ -208,7 +208,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
- real(dp) :: fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in
+ real(dp) :: e0i, fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in, e_mkq, e_nk
+ real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
  real(dp) :: ecut,weight_q,q0rad, bz_vol, enxc, vxcavg ! ediff, eshift, rfact,
@@ -272,7 +273,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
- !real(dp),allocatable :: omegame0i(:)
+ real(dp),allocatable :: omegame0i(:), omegas(:)
  real(dp) :: ylmgr_dum(1,1,1)
  real(dp) :: dum_nhat(0), dum_xccc3d(0)
  !Cray compiler may dislike the above initialisation of zero-size arrays
@@ -284,6 +285,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:) !, cg1_kqmp(:,:)
  real(dp),allocatable :: full_cg1_kqmp(:,:) !, full_cg1_kmp(:,:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:) !, full_ur1_kmp(:)
+ complex(gwpc),allocatable :: acc_ket(:,:), sigcme(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
@@ -330,8 +332,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Set tolerance used to decide if a band is empty
  ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
  tol_empty_in = 0.01
- call get_fact_spin_tol_empty(wfd%nsppol, wfd%nspinor, tol_empty_in, fact_spin, tol_empty)
+ call get_fact_spin_tol_empty(nsppol, nspinor, tol_empty_in, fact_spin, tol_empty)
 
+ qp_ene => ebands%eig; qp_occ => ebands%occ
 
  ! Check if a previous GSTORE.nc file is present to restart the calculation if dtset%eph_restart == 1,
  ! and use done_qbz_spin mask to cycle the loops below if restart /= 0.
@@ -368,6 +371,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
 
+ w_info%use_ppm = dtset%ppmodel
  if (w_fname /= ABI_NOFILE) then
    ! Read g-sphere and pp_mesh from SCR file.
    call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
@@ -382,7 +386,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    dtset%npweps = gsph_c%ng
    w_info%use_mdf = MDL_BECHSTEDT
    w_info%eps_inf = dtset%mdf_epsinf
+   w_info%use_ppm = PPM_HYBERTSEN_LOUIE
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
+   ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with the model dielectric function")
  end if
 
  if (nqlwl == 0) then
@@ -762,10 +768,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
 
  ! Define set of frequencies in Sigma(w)
- !nomega_bracket = 2
- !nomega_tot = nomega_braket + nomega4sd
- !ABI_MALLOC(omegame0i, (nomega_tot))
- !ABI_FREE(omegame0i)
+ nomega = 2
+ ABI_MALLOC(omegame0i, (nomega))
+ ABI_MALLOC(omegas, (nomega))
+ ABI_MALLOC(acc_ket, (npwc*nspinor, nomega))
+ ABI_MALLOC(sigcme, (nomega))
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
  ABI_MALLOC(kg_k, (3, mpw))
@@ -991,12 +998,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
        do mm_kq=gqk%bstart, gqk%bstart
        !do mm_kq=gqk%bstart, gqk%bstop
        !do mm_kq=gqk%m_start, gqk%m_stop
+         e_mkq = qp_ene(mm_kq, ikq_ibz, spin)
          call wfd%rotate_cg(mm_kq, ndat1, spin, kq_ibz, npw_kq, kg_kq, istwf_kq, &
                             cryst, mapl_kq, gbound_kq, work_ngfft, work, ug_kq, urs_kbz=ur_kq)
 
          !do nn_k=gqk%bstart, gqk%bstop
          !do nn_k=gqk%n_start, gqk%n_stop
          do nn_k=gqk%bstart, gqk%bstart
+            e_nk = qp_ene(nn_k, ik_ibz, spin)
             call wfd%rotate_cg(nn_k, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                                cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
@@ -1149,10 +1158,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ! * These terms do not depend on (idir, ipert) and can be reused in the loop over pertubations below.
          ! * If the bands in the sum are distributed, one has to transmit the (m, n) indices.
 
-         !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nomega_tot, nb, nb, my_bsum_start:my_bsum_stop))
+         !ABI_MALLOC(rhotwg_kmp_mn, (npw_pp, nomega, nb, nb, my_bsum_start:my_bsum_stop))
          !ABI_FREE(rhotwg_kmp_mn)
 
          do ib_sum=my_bsum_start, my_bsum_stop
+
            ! <bsum,k-p|e^{-ip+G'}|n,k>
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
@@ -1162,11 +1172,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call times_vc_sqrt("N", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            ! Contract immediately over g' with the convolution of W_gg'
-
-           !real(dp),intent(in) :: omegame0i(nomega)
+           e0i = qp_ene(ib_sum, ikmp_ibz, spin)
+           theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
+           !omegas = [e_mkq, e_nk]
+           !omegame0i = omegas - e0i
            !complex(gwpc),intent(inout) :: acc_ket(npwc*nspinor, nomega)
            !complex(gwpc),intent(out) :: sigcme(nomega)
-           !call screen%calc_ppm_sigc(nomega, omegame0i, theta_mu_minus_e0i, zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+           !call screen%calc_ppm_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
            ! and take the CC in times_vc_sqrt
@@ -1178,6 +1190,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
            ! Contract immediately over g with the convolution of W_gg'
+           e0i = qp_ene(ib_sum, ikqmp_ibz, spin)
+           theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
+           !omegame0i = omegas - e0i
+           !call screen%calc_ppm_sigc("H", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+
          end do ! ib_sum
 
          ! ========================================
@@ -1375,6 +1392,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call gstore%print_for_abitests(dtset)
 
  ! Free memory
+ ABI_FREE(omegas)
+ ABI_FREE(omegame0i)
+ ABI_FREE(acc_ket)
+ ABI_FREE(sigcme)
  ABI_FREE(kg_k)
  ABI_SFREE(kpg_k)
  ABI_FREE(kg_kq)

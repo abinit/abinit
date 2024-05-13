@@ -850,7 +850,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  screen%fgg_qbz_idx = 0
  screen%iomode = iomode
  screen%prtvol = prtvol
- screen%has_ppmodel = 0; if (screen%Info%use_ppm /= PPM_NONE) screen%has_ppmodel=1
+ screen%has_ppmodel = 0; if (screen%Info%use_ppm /= PPM_NONE) screen%has_ppmodel = 1
 
  ! Copy the AE density for the model dielectric function or for the vertex corrections.
  screen%nspden     = nspden
@@ -1009,7 +1009,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    !
    ! Model dielectric function. Only epsm-1 is supported here.
    call wrtout(std_out," Calculating model dielectric function... ")
-   ABI_CHECK(screen%nomega==1,"Cannot use nomega > 1 in model dielectric function")
+   ABI_CHECK(screen%nomega == 1, "Cannot use nomega > 1 in model dielectric function")
 
    do iq_ibz=1,nqibz
      if (.not.screen%keep_q(iq_ibz)) CYCLE
@@ -1048,16 +1048,18 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  ! Init plasmon-pole parameters.
  if (screen%has_ppmodel > 0) then
-   call wrtout(std_out, "Calculating PPmodel parameters")
+   call wrtout(std_out, " Calculating plasmon-pole model parameters...")
    ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
    call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
+     call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
      if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
        call screen%PPm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
    end do
+   stop
  end if
 
  ! Deallocate Fgg if the matrices are not needed anymore.
@@ -1375,7 +1377,6 @@ subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus
               botsq => screen%ppm%bigomegatwsq_qbz%vals, &
               otq   => screen%ppm%omegatw_qbz%vals, &
               eig   => screen%ppm%eigpot_qbz%vals)
-
 
    ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
    botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up

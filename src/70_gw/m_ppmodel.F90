@@ -528,9 +528,7 @@ subroutine ppm_init(PPm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
  call PPm%nullify()
 
- PPm%invalid_freq=invalid_freq
- PPm%nqibz = nqibz
- PPm%mqmem = mqmem
+ PPm%nqibz = nqibz; PPm%mqmem = mqmem; PPm%invalid_freq = invalid_freq
  ltest = (PPm%mqmem==0 .or. PPm%mqmem==PPm%nqibz)
  ! write(std_out,'(a,I0)') ' PPm%mqmem = ',PPm%mqmem; write(std_out,'(a,I0)') ' PPm%nqibz = ',PPm%nqibz
  ! ABI_CHECK(ltest,'Wrong value for mqmem')
@@ -1072,7 +1070,7 @@ subroutine ppm_get_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
      ABI_MALLOC(eigvec,(PPm%npwc,PPm%npwc))
 
      ABI_MALLOC_OR_DIE(Adpp,(PPm%npwc*(PPm%npwc+1)/2), ierr)
-     write(std_out,*) 'in hermitian'
+     !write(std_out,*) 'in hermitian'
 
      idx=0
      do ig2=1,PPm%npwc
@@ -1085,12 +1083,10 @@ subroutine ppm_get_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
      ! For the moment we require also the eigenvectors.
      call ZHPEV('V','U',PPm%npwc,Adpp,ww,eigvec,PPm%npwc,work,rwork,info)
 
-     if (info/=0) then
-       write(msg,'(2a,i10)')' ppm_get_eigenvalues : Error diagonalizing matrix, info = ',info
-       call wrtout(std_out,msg)
-     end if
+     ABI_CHECK(info == 0, sjoin('Error diagonalizing matrix, info: ', itoa(info)))
+
      negw = (COUNT((REAL(ww)<tol6)))
-     if (negw/=0) then
+     if (negw /= 0) then
        write(msg,'(a,i0,a,i0,a,f8.4)')'Found negative eigenvalues. No. ',negw,' at iqibz= ',iqibz,' minval= ',MINVAL(REAL(ww))
         ABI_WARNING(msg)
      end if
@@ -1103,7 +1099,6 @@ subroutine ppm_get_eigenvalues(PPm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
      ABI_FREE(eigvec)
      ABI_FREE(Adpp)
    end if
-   !
  end do !iomega
 
  ABI_FREE(em1q)
@@ -2345,18 +2340,16 @@ end subroutine ppm_symmetrizer
 !!  Just a wrapper around different plasmonpole routines.
 !!
 !! INPUTS
+!!  iq_ibz=Index of the q-point in the BZ.
 !!  Cryst<crystal_t>=Info on the unit cell and crystal symmetries.
 !!  Qmesh<kmesh_t>=the q-mesh used for the inverse dielectric matrix
-!!  iq_ibz=Index of the q-point in the BZ.
 !!  npwe=number of G vectors for the correlation part
 !!  nomega=number of frequencies in $\epsilon^{-1}$
 !!  omega=frequencies in epsm1_ggw
 !!  epsm1_ggw(npwe,npwe,nomega)=the inverse dielctric matrix
-!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
-!!  gprimd(3,3)=dimensional primitive translations for reciprocal space ($\textrm{bohr}^{-1}$)
 !!  nfftf=the number of points in the FFT mesh (for this processor)
+!!  ngfftf(18)=contain all needed information about the 3D fine FFT mesh, see ~abinit/doc/variables/vargs.htm#ngfft
 !!  rhor_tot(nfftf)=the total charge in real space
-!!  PPm<ppmodel_t>:
 !!
 !! SIDE EFFECTS
 !!  PPm<ppmodel_t>:
@@ -2398,7 +2391,8 @@ subroutine ppm_new_setup(PPm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  DBG_ENTER("COLL")
 
  if (PPm%has_qibz(iq_ibz) /= PPM_TAB_ALLOCATED) then
-   ABI_ERROR("ppmodel tables are not allocated")
+   ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated!"))
+   !call ppm%malloc_iqibz(iq_ibz)
  end if
 
  qpt = Qmesh%ibz(:,iq_ibz)
@@ -2413,11 +2407,11 @@ subroutine ppm_new_setup(PPm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
 
  CASE (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
-   call cppm1par(npwe,nomega,omega,PPm%drude_plsmf,epsm1_ggw,PPm%omegatw(iq_ibz)%vals,PPm%bigomegatwsq(iq_ibz)%vals)
+   call cppm1par(npwe, nomega, omega, PPm%drude_plsmf, epsm1_ggw, PPm%omegatw(iq_ibz)%vals, PPm%bigomegatwsq(iq_ibz)%vals)
 
  CASE (PPM_HYBERTSEN_LOUIE)
-   call cppm2par(qpt,npwe,epsm1_ggw(:,:,1),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,Cryst%gmet,&
-                 PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals,PPm%invalid_freq)
+   call cppm2par(qpt, npwe, epsm1_ggw(:,:,1), ngfftf, gvec, Cryst%gprimd, rhor_tot, nfftf, Cryst%gmet, &
+                 PPm%bigomegatwsq(iq_ibz)%vals, PPm%omegatw(iq_ibz)%vals, PPm%invalid_freq)
 
    ! Quick-and-dirty change of the plasma frequency. Never executed in standard runs.
    if (PPm%force_plsmf>tol6) then ! Integrate the real-space density
@@ -2434,14 +2428,14 @@ subroutine ppm_new_setup(PPm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
 
  CASE (PPM_LINDEN_HORSH)
    ! TODO Check better double precision, this routine is in a messy state
-   call cppm3par(qpt,npwe,epsm1_ggw(:,:,1),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,&
-                 PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1),PPm%eigpot(iq_ibz)%vals)
+   call cppm3par(qpt, npwe,epsm1_ggw(:,:,1), ngfftf,gvec, Cryst%gprimd, rhor_tot, nfftf, &
+                 PPm%bigomegatwsq(iq_ibz)%vals, PPm%omegatw(iq_ibz)%vals(:,1), PPm%eigpot(iq_ibz)%vals)
 
  CASE (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
    if ((ALL(ABS(qpt)<1.0e-3))) qpt = GW_Q0_DEFAULT ! FIXME
 
-   call cppm4par(qpt,npwe,epsm1_ggw(:,:,1),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,&
-                 PPm%bigomegatwsq(iq_ibz)%vals,PPm%omegatw(iq_ibz)%vals(:,1))
+   call cppm4par(qpt, npwe,epsm1_ggw(:,:,1), ngfftf, gvec, Cryst%gprimd, rhor_tot, nfftf, &
+                 PPm%bigomegatwsq(iq_ibz)%vals, PPm%omegatw(iq_ibz)%vals(:,1))
 
  CASE DEFAULT
    ABI_BUG(sjoin('Wrong PPm%model:',itoa(PPm%model)))
