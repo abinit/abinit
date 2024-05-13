@@ -51,6 +51,7 @@ module m_sigc
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
  use m_hide_lapack,   only : xheev
+ use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -196,7 +197,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: iwc,ifft
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: e0i,fact_sp,theta_mu_minus_e0i,tol_empty,z2,en_high,gw_gsq,w_localmax,w_max
+ real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg,sigma_type
@@ -349,19 +350,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(npoles_missing,(minbnd:maxbnd))
  npoles_missing=0
 
- ! Normalization of theta_mu_minus_e0i
- ! If nsppol==2, qp_occ $\in [0,1]$
- SELECT CASE (Wfd%nsppol)
- CASE (1)
-   fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
-   if (Wfd%nspinor==2) then
-    fact_sp=one; tol_empty=0.005  ! below this value the state is assumed empty
-   end if
- CASE (2)
-   fact_sp=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                     ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG('Wrong nsppol')
- END SELECT
+ ! Set tolerance used to decide if a band is empty
+ ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
+ tol_empty_in = 0.01
+ call get_fact_spin_tol_empty(wfd%nsppol, wfd%nspinor, tol_empty_in, fact_spin, tol_empty)
 
  ! Allocate arrays used to accumulate the matrix elements of \Sigma_c over
  ! k-points and bands. Note that for AC requires only the imaginary frequencies
@@ -884,7 +876,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_e0i=fact_sp*qp_occ(ib,ik_ibz,spin)
+       theta_mu_minus_e0i=fact_spin*qp_occ(ib,ik_ibz,spin)
 
        ! Starting point to evaluate the derivative of Sigma and the Spectral function
        e0i=qp_ene(ib,ik_ibz,spin)
@@ -1012,8 +1004,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
              otq_transp=TRANSPOSE(otq)
 
-             call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq_conjg_transp,otq_transp,&
-                               omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
+             call PPm%calc_sig(nspinor, npwc, nomega_tot, rhotwgp, botsq_conjg_transp, otq_transp, &
+                               omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket2, sigcme_3)
 
              ABI_FREE(botsq_conjg_transp)
              ABI_FREE(otq_transp)

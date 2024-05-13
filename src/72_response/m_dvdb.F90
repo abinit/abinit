@@ -64,7 +64,7 @@ module m_dvdb
  use m_crystal,       only : crystal_t
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map, kpts_timrev_from_kptopt
  use m_spacepar,      only : symrhg, setsym
- use m_fourier_interpol,only : fourier_interpol
+ use m_fourier_interpol,only : fourier_interpol_seq
  use m_pawrhoij,      only : pawrhoij_type
  use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
@@ -1210,10 +1210,9 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !scalars
  integer,save :: enough = 0
  integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
- type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: ngfft_in(18),ngfft_out(18)
- real(dp),allocatable :: v1r_file(:,:),v1g_in(:,:),v1g_out(:,:)
+ real(dp),allocatable :: v1r_file(:,:)
 
 ! *************************************************************************
 
@@ -1248,7 +1247,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    end do
  else
    ! The FFT mesh used in the caller differ from the one found in the DVDB --> Fourier interpolation
-   ! TODO: Add linear interpolation as well.
    if (enough == 0) ABI_COMMENT("Performing FFT interpolation of DFPT potentials as input ngfft differs from ngfft_file.")
    enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
@@ -1256,33 +1254,14 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
      read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
    end do
 
-   ! Call fourier_interpol to get v1scf on ngfft mesh.
+   ! Call fourier_interpol_seq to get v1scf on the ngfft mesh.
    ngfft_in = ngfft; ngfft_out = ngfft
    ngfft_in(1:3) = db%ngfft3_v1(1:3, iv1); ngfft_out(1:3) = ngfft(1:3)
    ngfft_in(4:6) = ngfft_in(1:3); ngfft_out(4:6) = ngfft_out(1:3)
    ngfft_in(9:18) = 0; ngfft_out(9:18) = 0
    ngfft_in(10) = 1; ngfft_out(10) = 1
 
-   call initmpi_seq(MPI_enreg_seq)
-   ! Which one is coarse? Note that this part is not very robust and can fail!
-   if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_in(2),ngfft_in(3),'all')
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_out(2),ngfft_out(3),'all')
-   else
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_in(2),ngfft_in(3),'all')
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_out(2),ngfft_out(3),'all')
-   end if
-
-   ABI_MALLOC(v1g_in,  (2, nfftot_file))
-   ABI_MALLOC(v1g_out, (2, nfftot_out))
-
-   call fourier_interpol(cplex,db%nspden,0,0,nfftot_file,ngfft_in,nfftot_out,ngfft_out,&
-     MPI_enreg_seq,v1r_file,v1scf,v1g_in,v1g_out)
-
-   ABI_FREE(v1g_in)
-   ABI_FREE(v1g_out)
-   ABI_FREE(v1r_file)
-   call destroy_mpi_enreg(MPI_enreg_seq)
+   call fourier_interpol_seq(cplex, db%nspden, nfftot_file, ngfft_in, nfft, ngfft, v1r_file, v1scf)
  end if
 
  ! Skip record with rhog1_g0 (if present)

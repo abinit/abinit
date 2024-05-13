@@ -323,7 +323,7 @@ contains
   procedure :: w0gemv => screen_w0gemv
     ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
 
-  !procedure :: get_convolution => screen_get_convolution
+  procedure ::  calc_ppm_sigc => screen_calc_ppm_sigc
 
   !procedure :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 end type screen_t
@@ -1318,6 +1318,87 @@ end subroutine screen_w0gemv
 !!***
 
 !----------------------------------------------------------------------
+
+!!****f* m_screen/screen_calc_ppm_sigc
+!! NAME
+!! screen_calc_ppm_sigc
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!  npwc=Number of G vectors in in_ket
+!!  nspinor=Number of spinorial components.
+!!  in_ket(npwc)= |\phi> in reciprocal space.
+!!  trans= On entry, TRANS specifies the operation to be performed as follows:
+!!      TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
+!!      TRANS = 'C' or 'c'   y := alpha*A**H*x + beta*y.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i, zcut, &
+                                nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+
+!Arguments ------------------------------------
+!scalars
+ class(screen_t),intent(in) :: screen
+ character(len=*),intent(in) ::  trans
+ integer,intent(in) :: nomega, nspinor, npwx, npwc
+ real(dp),intent(in) :: theta_mu_minus_e0i, zcut
+!arrays
+ real(dp),intent(in) :: omegame0i(nomega)
+ complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
+ complex(gwpc),intent(inout) :: acc_ket(npwc*nspinor, nomega)
+ complex(gwpc),intent(out) :: sigcme(nomega)
+
+!Local variables-------------------------------
+ complex(gwpc),allocatable :: botsq_conjg_transp(:,:), otq_transp(:,:)
+
+! *************************************************************************
+
+ ABI_CHECK(screen%has_ppmodel > 0, sjoin("has_ppmodel:", itoa(screen%has_ppmodel)))
+
+ select case (trans)
+ case ("N")
+   associate (botsq => screen%ppm%bigomegatwsq_qbz%vals, &
+              otq   => screen%ppm%omegatw_qbz%vals, &
+              eig   => screen%ppm%eigpot_qbz%vals)
+
+     call screen%ppm%calc_sig(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
+                              omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+
+   end associate
+
+ case ("H")
+   associate (ppm => screen%ppm, &
+              botsq => screen%ppm%bigomegatwsq_qbz%vals, &
+              otq   => screen%ppm%omegatw_qbz%vals, &
+              eig   => screen%ppm%eigpot_qbz%vals)
+
+
+   ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
+   botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
+   botsq_conjg_transp=CONJG(botsq_conjg_transp)
+   ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
+   otq_transp=TRANSPOSE(otq)
+
+   call screen%ppm%calc_sig(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
+                            omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+
+   ABI_FREE(botsq_conjg_transp)
+   ABI_FREE(otq_transp)
+   end associate
+
+ case default
+  ABI_ERROR(sjoin("Invalid trans:", trans))
+ end select
+
+end subroutine screen_calc_ppm_sigc
+!!***
+
+!----------------------------------------------------------------------
+
 
 !!****f* m_screen/em1_symmetrize_ip
 !! NAME
