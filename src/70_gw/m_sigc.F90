@@ -39,7 +39,7 @@ module m_sigc
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsilonm1_results, epsm1_rotate_iqbz, epsm1_rotate_iqbz_inplace, get_epsm1
+ use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
@@ -703,7 +703,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      if (Er%mqmem==0) then
        ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
-       call get_epsm1(Er,Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
+       call Er%get_epsm1(Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
        if (sigma_needs_ppm(Sigp)) then
          if (Wfd%usepaw==1.and.PPm%userho==1) then
            ! Use PAW AE rhor.
@@ -734,9 +734,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ! TODO In case of AC we should symmetrize only the imaginary frequencies
        if (mod10==SIG_GW_CD.and.Er%mqmem==0) then
          ! Do in-place symmetrisation
-         call Epsm1_rotate_iqbz_inplace(iq_bz,Er%nomega, npwc,Er,Gsph_c,Qmesh,.TRUE.)
+         call Er%rotate_iqbz_inplace(iq_bz,Er%nomega, npwc, Gsph_c,Qmesh,.TRUE.)
        else
-         call Epsm1_rotate_iqbz(iq_bz,Er%nomega, npwc,Er,Gsph_c,Qmesh,.TRUE.,epsm1_qbz)
+         call Er%rotate_iqbz(iq_bz,Er%nomega, npwc,Gsph_c,Qmesh,.TRUE.,epsm1_qbz)
        end if
 
        if (mod10==SIG_GW_AC) then

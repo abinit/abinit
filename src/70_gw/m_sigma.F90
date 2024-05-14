@@ -23,17 +23,15 @@
 
 MODULE m_sigma
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use m_xmpi
  use m_abicore
  use m_errors
- use, intrinsic :: iso_c_binding
  use m_nctk
  use m_yaml
  use m_melemts
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_wfd
 
  use defs_datatypes,   only : ebands_t
@@ -262,10 +260,10 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 
 !Arguments ------------------------------------
 !scalars
+ class(sigparams_t),intent(in) :: Sigp
  type(kmesh_t),intent(in) :: Kmesh,Qmesh
  type(crystal_t),intent(in) :: Cryst
  type(Epsilonm1_results),intent(in) :: Er
- type(sigparams_t),intent(in) :: Sigp
 
 !Local variables-------------------------------
 !scalars
@@ -416,10 +414,10 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
 !Arguments ------------------------------------
 !scalars
+ class(sigma_t),intent(in) :: Sr
  integer,intent(in) :: ikcalc,ikibz
  type(ebands_t),intent(in) :: KS_BSt
  type(sigparams_t),intent(in) :: Sigp
- type(sigma_t),intent(in) :: Sr
 
 !Local variables-------------------------------
 !scalars
@@ -594,8 +592,8 @@ end subroutine write_sigma_results
 real(dp) pure function gw_spectral_function(Sr, io, ib, ikibz, spin) result(aw)
 
 !Arguments ------------------------------------
+ class(sigma_t),intent(in) :: Sr
  integer,intent(in) :: io,ib,ikibz,spin
- type(sigma_t),intent(in) :: Sr
 
 ! *********************************************************************
 
@@ -625,11 +623,11 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
 
 !Arguments ------------------------------------
 !scalars
+ class(sigma_t),intent(in) :: Sr
  integer,intent(in) :: iband,ik_ibz,isp
  integer,optional,intent(in) :: prtvol,unit
  character(len=*),optional,intent(in) :: mode_paral
  logical,optional,intent(in) :: witheader
- type(sigma_t),intent(in) :: Sr
  type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
@@ -771,10 +769,10 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
 
 !Arguments ------------------------------------
 !scalars
+ class(sigma_t),intent(in) :: Sr
  integer,intent(in) :: iband,ik_ibz,isp
  integer,intent(in),optional :: prtvol,unit
  character(len=*),intent(in),optional :: mode_paral
- type(sigma_t),intent(in) :: Sr
  type(ebands_t),intent(in) :: KS_BSt
  type(yamldoc_t),intent(inout),optional :: ydoc
 
@@ -1254,7 +1252,7 @@ real(dp) pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
 
 !Arguments ------------------------------------
 !scalars
- type(sigma_t),intent(in) :: sigma
+ class(sigma_t),intent(in) :: sigma
  type(kmesh_t),intent(in) :: kmesh
  type(ebands_t),intent(in) :: bands
  type(melements_t),intent(in) :: Mels
@@ -1309,7 +1307,7 @@ subroutine find_wpoles_for_cd(Sigp,Sr,Kmesh,BSt,omega_max)
 
 !Arguments ------------------------------------
 !scalars
- type(sigparams_t),intent(in) :: Sigp
+ class(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
  type(ebands_t),intent(in) :: Bst
  type(kmesh_t),intent(in) :: Kmesh
@@ -1412,8 +1410,8 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
 !Arguments ------------------------------------
 !scalars
+ class(sigparams_t),target,intent(in) :: Sigp
  integer,intent(in) :: ncid
- type(sigparams_t),target,intent(in) :: Sigp
  type(Epsilonm1_results),target,intent(in) :: Er
  type(sigma_t),target,intent(in) :: Sr
 

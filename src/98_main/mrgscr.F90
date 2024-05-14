@@ -67,8 +67,7 @@ program mrgscr
  use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
  use m_ppmodel,             only : ppmodel_t, cqratio
  use m_model_screening,     only : remove_phase
- use m_screening,           only : mkdump_er, em1results_free, em1results_print, decompose_epsm1, &
-                                   init_er_from_file, Epsilonm1_results
+ use m_screening,           only : Epsilonm1_results
  use m_wfd,                 only : test_charge
 
  implicit none
@@ -585,7 +584,7 @@ program mrgscr
      write(std_out,'(a)') ' 3 => Calculation of dielectric function and plasmon-pole model'
 
      npwe_asked=Hscr0%npwe; mqmem=Hscr0%nqibz
-     call init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
+     call Er%init_from_file(fname,mqmem,npwe_asked,comm)
 
      ! Initialize the G-sphere ===
      call Gsphere%init(Cryst,Hscr0%npwe,gvec=Hscr0%gvec)
@@ -668,11 +667,11 @@ program mrgscr
 
      if (is_scr) Er%mqmem=1
      if (is_sus) Er%mqmem=0
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsphere%gvec,dim_kxcg,kxcg,id_required,approx_type,ikxc,option_test,&
-       fname_dump,iomode,nfft,ngfft,comm)
+     call Er%mkdump(Vcp,Er%npwe,Gsphere%gvec,dim_kxcg,kxcg,id_required,approx_type,ikxc,option_test,&
+                   fname_dump,iomode,nfft,ngfft,comm)
      Er%mqmem=1
 
-     call em1results_print(Er)
+     call Er%print()
 
      write(std_out,'(2a)',advance='no') ch10,&
      ' Would you like to calculate the eigenvalues of eps^{-1}_GG''(omega) [Y/N] ? '
@@ -689,7 +688,7 @@ program mrgscr
          if (open_file(fname_eigen,msg,newunit=unt_dump,status='replace',form='formatted') /= 0) then
            ABI_ERROR(msg)
          end if
-         call decompose_epsm1(Er,iqibz,epsm1_eigen)
+         call Er%decompose_epsm1(iqibz,epsm1_eigen)
          write(unt_dump,'(a)')       '# First (max 10) eigenvalues of eps^{-1}(omega)'
          write(unt_dump,'(a,3f12.6)')'# q = ',Hscr0%qibz(:,iqibz)
          write(unt_dump,'(a)')       '# REAL omega [eV]  REAL(eigen(esp^-1(1,w)))  AIMAG(eigen(esp^-1(1,w))  ...'
@@ -1085,7 +1084,7 @@ program mrgscr
      ABI_FREE(nhat)
 
      call Vcp%free()
-     call em1results_free(Er)
+     call Er%free()
      call Gsphere%free()
 
    case(4)
