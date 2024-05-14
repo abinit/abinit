@@ -524,7 +524,7 @@ elec_eval = .FALSE.
     call wrtout(ab_out,message,'COLL')
 
     call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist, inp%bound_EFS,&
-&                       inp%bound_factors,inp%bound_penalty,comm)
+&                       inp%bound_factors,inp%bound_penalty,comm, fit_weight_T=inp%fit_weight_T)
 
     end if
 
@@ -544,7 +544,7 @@ elec_eval = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.
 
     call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,inp%opt_on,&
-&                   inp%opt_factors,comm,print_anh=need_analyze_anh_pot)
+&                   inp%opt_factors,comm,fit_weight_T=inp%fit_weight_T, print_anh=need_analyze_anh_pot)
  end if
 
 

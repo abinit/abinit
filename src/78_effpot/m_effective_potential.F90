@@ -2926,7 +2926,6 @@ subroutine effective_potential_getDisp(displacement,du_delta,natom,rprimd_hist,r
     strain_tmp(2,2) = strain_tmp(2,2) + 1.0
     strain_tmp(3,3) = strain_tmp(3,3) + 1.0
     ! get (1+eta)^-1
-     print *, "is it here 2??" 
     call matr3inv(strain_tmp,strain_inv)
   else if (strain%name == "reference")  then
     strain_inv(:,:) = zero

@@ -87,6 +87,10 @@ module m_polynomial_term
 !     weight of the term
 
    integer,allocatable  ::  index_coeff(:)
+
+   contains
+           procedure :: get_nbody
+           procedure :: get_total_power
  end type polynomial_term_type
 !!***
 
@@ -96,6 +100,20 @@ module m_polynomial_term
 end interface
 
 CONTAINS  !===========================================================================================
+
+
+function get_nbody(self) result(nbody)
+  class(polynomial_term_type), intent(in) :: self
+  integer :: nbody
+  nbody = self%ndisp + self%nstrain
+end function get_nbody
+
+
+function get_total_power(self) result(total_power)
+  class(polynomial_term_type), intent(in) :: self
+  integer :: total_power
+  total_power = sum(self%power_disp) + sum(self%power_strain)
+end function get_total_power
 
 
 !!****f* m_polynomial_term/polynomial_term_init
