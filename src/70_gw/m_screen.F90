@@ -317,7 +317,7 @@ contains
   procedure :: free => screen_free
    ! Free dynamic memory
 
-  procedure :: symmetrizer => screen_symmetrizer
+  procedure :: rotate_iqbz => screen_rotate_iqbz
     ! Prepare the object for applying W_qbz.
 
   procedure :: w0gemv => screen_w0gemv
@@ -1077,9 +1077,9 @@ end subroutine screen_init
 
 !----------------------------------------------------------------------
 
-!!****f* m_screen/screen_symmetrizer
+!!****f* m_screen/screen_rotate_iqbz
 !! NAME
-!!  screen_symmetrizer
+!!  screen_rotate_iqbz
 !!
 !! FUNCTION
 !!  Modify the status of the object so that the symmetrized component F(q_bz)_GG' is calculated
@@ -1104,7 +1104,7 @@ end subroutine screen_init
 !!
 !! SOURCE
 
-subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
+subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
 !Arguments ------------------------------------
 !scalars
@@ -1161,7 +1161,7 @@ subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
    if (screen%has_ppmodel > 0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
-     call screen%PPm%symmetrizer(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, screen%Fgg(iq_ibz)%mat, &
+     call screen%PPm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, screen%Fgg(iq_ibz)%mat, &
                                  screen%nfftf_tot, screen%ngfftf, screen%ae_rhor(:,1))
    end if
 
@@ -1205,7 +1205,7 @@ subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
    if (screen%has_ppmodel > 0) then
      ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
-     call screen%PPm%symmetrizer(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, &
+     call screen%PPm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, &
                                  screen%Fgg_qbz%mat, screen%nfftf_tot, screen%ngfftf, screen%ae_rhor(:,1))
    end if
  end if
@@ -1227,7 +1227,7 @@ subroutine screen_symmetrizer(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
  DBG_EXIT("COLL")
 
-end subroutine screen_symmetrizer
+end subroutine screen_rotate_iqbz
 !!***
 
 !----------------------------------------------------------------------

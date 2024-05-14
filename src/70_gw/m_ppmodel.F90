@@ -186,7 +186,7 @@ contains
    procedure :: calc_sigc => ppm_calc_sigc
      ! Matrix elements of the correlated self-energy with ppmodel.
 
-   procedure :: symmetrizer => ppm_symmetrizer
+   procedure :: rotate_iqbz => ppm_rotate_iqbz
 
    procedure :: malloc_iqibz => ppm_malloc_iqibz
 
@@ -2195,9 +2195,9 @@ end subroutine ppm_calc_sigc
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/ppm_symmetrizer
+!!****f* m_ppmodel/ppm_rotate_iqbz
 !! NAME
-!!  ppm_symmetrizer
+!!  ppm_rotate_iqbz
 !!
 !! FUNCTION
 !!  Symmetrize the plasmonpole matrix elements in the full BZ zone.
@@ -2224,7 +2224,7 @@ end subroutine ppm_calc_sigc
 !!
 !! SOURCE
 
-subroutine ppm_symmetrizer(PPm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, epsm1_ggw, &
+subroutine ppm_rotate_iqbz(PPm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, epsm1_ggw, &
                             nfftf, ngfftf, rhor_tot)
 
 !Arguments ------------------------------------
@@ -2327,7 +2327,7 @@ subroutine ppm_symmetrizer(PPm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
    if (.not. PPm%keep_qibz(iq_ibz)) call PPM%table_free(iq_ibz)
  end if
 
-end subroutine ppm_symmetrizer
+end subroutine ppm_rotate_iqbz
 !!***
 
 !----------------------------------------------------------------------
