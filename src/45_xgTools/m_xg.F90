@@ -226,6 +226,7 @@ module m_xg
 
   public :: xgBlock_zero
   public :: xgBlock_zerotri
+  public :: xgBlock_zero_im_g0
   public :: xgBlock_one
   public :: xgBlock_diagonal
   public :: xgBlock_diagonalOnly
@@ -238,6 +239,7 @@ module m_xg
   public :: xgBlock_reshape_spinor
   public :: xgBlock_print
   public :: xgBlock_getId
+  public :: xgBlock_get_im_g0
   public :: xgBlock_copy_from_gpu
   public :: xgBlock_copy_to_gpu
   public :: xg_finalize
@@ -1501,7 +1503,14 @@ contains
             cbeta, &
             xgBlockW%vecR, xgBlockW%LDim)
           if (xgBlockA%me_g0 == 1) then
-            calpha = dcmplx(-alpha,0.d0)
+            calpha = dcmplx(-2*alpha,0.d0)
+            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2, &
+              calpha, &
+              xgBlockA%vecR, 2*xgBlockA%LDim, &
+              xgBlockB%vecR, 2*xgBlockB%LDim, &
+              cone, &
+              xgBlockW%vecR, xgBlockW%LDim)
+            calpha = dcmplx(alpha,0.d0)
             call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
               calpha, &
               xgBlockA%vecR, 2*xgBlockA%LDim, &
@@ -1522,7 +1531,14 @@ contains
             cbeta, &
             c_loc(xgBlockW__vecR), xgBlockW%LDim)
           if (xgBlockA%me_g0 == 1) then
-            calpha = dcmplx(-alpha,0.d0)
+            calpha = dcmplx(-2*alpha,0.d0)
+            call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 2, &
+              calpha, &
+              c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
+              c_loc(xgBlockB__vecR), 2*xgBlockB%LDim, &
+              cone, &
+              c_loc(xgBlockW__vecR), xgBlockW%LDim)
+            calpha = dcmplx(alpha,0.d0)
             call abi_gpu_xgemm(1, transa, transb, xgBlockW%rows, xgBlockW%cols, 1, &
               calpha, &
               c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
@@ -1540,7 +1556,14 @@ contains
             beta, &
             xgBlockW%vecR, xgBlockW%LDim)
           if (xgBlockA%me_g0 == 1) then
-            alpha_ = - alpha
+            alpha_ = - 2*alpha
+            call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, 2, &
+              alpha_, &
+              xgBlockA%vecR, 2*xgBlockA%LDim, &
+              xgBlockB%vecR, 2*xgBlockB%LDim, &
+              one, &
+              xgBlockW%vecR,xgBlockW%LDim)
+            alpha_ = alpha
             call dgemm(transa,transb,xgBlockW%rows, xgBlockW%cols, 1, &
               alpha_, &
               xgBlockA%vecR, 2*xgBlockA%LDim, &
@@ -1600,8 +1623,28 @@ contains
           ABI_ERROR('space(W) should be SPACE_CR')
         end if
         if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-          ABI_ERROR('Not implemented for GPU')
-        else
+#if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
+          call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
+            calpha, &
+            xgBlockA%vecR, 2*xgBlockA%LDim, &
+            xgBlockB%vecR, xgBlockB%LDim, &
+            cbeta, &
+            xgBlockW%vecR, 2*xgBlockW%LDim)
+#elif defined HAVE_OPENMP_OFFLOAD
+!FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
+          xgBlockA__vecR => xgBlockA%vecR
+          xgBlockB__vecR => xgBlockB%vecR
+          xgBlockW__vecR => xgBlockW%vecR
+          !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR)
+          call abi_gpu_xgemm(1, transa, transb, 2*xgBlockW%rows, xgBlockW%cols, K, &
+            calpha, &
+            c_loc(xgBlockA__vecR), 2*xgBlockA%LDim, &
+            c_loc(xgBlockB__vecR), xgBlockB%LDim, &
+            cbeta, &
+            c_loc(xgBlockW__vecR), 2*xgBlockW%LDim)
+          !$OMP END TARGET DATA
+#endif
+        else ! CPU
           call dgemm(transa,transb,2*xgBlockW%rows, xgBlockW%cols,K, &
             alpha,xgBlockA%vecR, 2*xgBlockA%LDim, &
             xgBlockB%vecR, xgBlockB%LDim, beta,xgBlockW%vecR,2*xgBlockW%LDim)
@@ -2873,7 +2916,7 @@ contains
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
 
-      rows = xgBlockA%rows; cols = xgBlockA%cols
+      rows = fact*xgBlockA%rows; cols = xgBlockA%cols
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
@@ -2883,7 +2926,7 @@ contains
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
         !$OMP& MAP(to:xgBlockA__vecR,xgBlockB__vecR,xgBlockW__vecR,da__vecR)
         do iblock = 1, cols
-          do jblock = 1, fact*rows
+          do jblock = 1, rows
             xgBlockA__vecR(jblock,iblock) = - da__vecR(iblock,1) * xgBlockB__vecR(jblock,iblock) &
                 + xgBlockW__vecR(jblock,iblock)
           end do
@@ -3182,8 +3225,11 @@ contains
       ABI_ERROR('nrows/=ncols')
     end if
 
-    if (xgBlock%gpu_option==ABI_GPU_KOKKOS .or. xgBlock%gpu_option==ABI_GPU_OPENMP) then
-      ABI_ERROR('Not implemented for GPU')
+    if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
+      ABI_ERROR('Not implemented for GPU Kokkos')
+    end if
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_from_gpu(xgBlock) !FIXME Avoid that transfer
     end if
 
     select case(xgBlock%space)
@@ -3194,6 +3240,10 @@ contains
     case (SPACE_C)
       call ZTRTRI(uplo,diag,xgBlock%rows,xgBlock%vecC,xgBlock%LDim,info)
     end select
+
+    if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_to_gpu(xgBlock) !FIXME Avoid that transfer
+    end if
 
     if (info/=0) then
       ABI_ERROR('info/=0 : something bad happened in xtrtri')
@@ -3542,14 +3592,14 @@ contains
     if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
       cols=xgBlockB%cols
-      rows=xgBlockB%rows
+      rows=fact*xgBlockB%rows
       select case(xgBlockA%space)
       case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecR,xgBlockB__vecR)
         do col = 1, cols
-          do row = 1, fact*rows
+          do row = 1, rows
             xgBlockA__vecR(row,col) = xgBlockA__vecR(row,col) + xgBlockB__vecR(row,col)
           end do
         end do
@@ -3559,7 +3609,7 @@ contains
         xgBlockB__vecC => xgBlockB%vecC
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlockA__vecC,xgBlockB__vecC)
         do col = 1, cols
-          do row = 1, fact*rows
+          do row = 1, rows
             xgBlockA__vecC(row,col) = xgBlockA__vecC(row,col) + xgBlockB__vecC(row,col)
           end do
         end do
@@ -3712,7 +3762,8 @@ contains
         if (xgBlock%me_g0==1) then
           !$OMP TARGET TEAMS DISTRIBUTE MAP(to:dot__vecR,xgBlock__vecR) PRIVATE(icol)
           do icol = 1, cols
-            dot__vecR(icol,1) = dot__vecR(icol,1) - xgBlock__vecR(1,icol)*xgBlock__vecR(1,icol)
+            dot__vecR(icol,1) = dot__vecR(icol,1) - xgBlock__vecR(1,icol)*xgBlock__vecR(1,icol) &
+&                                                 - xgBlock__vecR(2,icol)*xgBlock__vecR(2,icol)
           end do
         end if
       case(SPACE_C)
@@ -4816,8 +4867,11 @@ contains
       ABI_ERROR('rows should be equal to cols!')
     end if
 
-    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS.or.xgBlockA%gpu_option==ABI_GPU_OPENMP) then
-      ABI_ERROR('Not implemented for GPU')
+    if (xgBlockA%gpu_option==ABI_GPU_KOKKOS) then
+      ABI_ERROR('Not implemented for GPU Kokkos')
+    end if
+    if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_from_gpu(xgBlockA) !FIXME Avoid that transfer
     end if
 
     select case(uplo)
@@ -4864,7 +4918,63 @@ contains
       ABI_ERROR("Error for zerotri")
     end select
 
+    if (xgBlockA%gpu_option==ABI_GPU_OPENMP) then
+      call xgBlock_copy_to_gpu(xgBlockA) !FIXME Avoid that transfer
+    end if
+
   end subroutine xgBlock_zerotri
+  !!***
+
+  !!****f* m_xg/xgBlock_zero_im_g0
+  !!
+  !! NAME
+  !! xgBlock_zero_im_g0
+
+  subroutine xgBlock_zero_im_g0(xgBlock)
+
+    type(xgBlock_t), intent(inout) :: xgBlock
+
+    integer :: ii,cols
+
+#if defined HAVE_OPENMP_OFFLOAD
+    real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
+#endif
+
+    if (xgBlock%space==SPACE_CR) then
+
+      cols = xgBlock%cols
+
+      if (xgBlock%me_g0<0) then
+        ABI_ERROR("xgBlock me_g0 is not initialized")
+      else if (xgBlock%me_g0==1) then
+
+        if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
+
+          ABI_ERROR('Not implemented')
+
+        else if (xgBlock%gpu_option==ABI_GPU_OPENMP) then
+
+#if defined HAVE_OPENMP_OFFLOAD
+          xgBlock__vecR => xgBlock%vecR
+          !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO MAP(to:xgBlock__vecR)
+          do ii = 1, cols
+            xgBlock__vecR(2,ii) = zero
+          end do
+#endif
+
+        else
+
+          !$omp parallel do
+          do ii = 1, cols
+            xgBlock%vecR(2,ii) = zero
+          end do
+
+        end if ! gpu_option
+
+      end if ! me_g0>=0
+    end if ! SPACE_CR
+
+  end subroutine xgBlock_zero_im_g0
   !!***
 
   !!****f* m_xg/xgBlock_one
@@ -4884,7 +4994,10 @@ contains
         xgBlock%vecR(i,i) = 1.d0
       end do
     case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
+      !$omp parallel do
+      do i = 1, min(2*xgBlock%rows,xgBlock%cols)
+        xgBlock%vecR(2*i-1,i) = 1.d0
+      end do
     case (SPACE_C)
       !$omp parallel do
       do i = 1, min(xgBlock%rows,xgBlock%cols)
@@ -5194,6 +5307,45 @@ contains
     if (xmpi_comm_size(comm_)>1) call xmpi_sum(id,comm_,ierr)
 
   end function xgBlock_getid
+  !!***
+
+  !!****f* m_xg/xgBlock_get_im_g0
+  !!
+  !! NAME
+  !! xgBlock_get_im_g0
+
+  function xgBlock_get_im_g0(xgBlock,comm) result (im_g0)
+
+    type(xgBlock_t), intent(in) :: xgBlock
+    integer, intent(in),optional :: comm
+
+    real(dp) :: im_g0
+    integer :: ierr,comm_
+
+    if (xgBlock%gpu_option/=ABI_GPU_DISABLED) then
+      call xgBlock_copy_from_gpu(xgBlock)
+    end if
+    select case(xgBlock%space)
+      case (SPACE_R)
+        im_g0 = zero
+      case (SPACE_CR)
+        if (xgBlock%me_g0<0) then
+          ABI_ERROR("xgBlock me_g0 is not initialized")
+        end if
+        im_g0 = zero
+        if (xgBlock%me_g0==1) then
+          im_g0 = im_g0 + sum(abs(xgBlock%vecR(2,:)))
+        end if
+      case (SPACE_C)
+        im_g0 = zero
+    end select
+    comm_=xgBlock%spacedim_comm
+    if (present(comm)) then
+      comm_=comm
+    end if
+    if (xmpi_comm_size(comm_)>1) call xmpi_sum(im_g0,comm_,ierr)
+
+  end function xgBlock_get_im_g0
   !!***
 
   !!****f* m_xg/xg_finalize

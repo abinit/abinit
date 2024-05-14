@@ -494,7 +494,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  interface
    subroutine pcond(W)
      use m_xg, only : xgBlock_t
-     type(xgBlock_t), intent(inout)           :: W
+     type(xgBlock_t), intent(inout) :: W
    end subroutine pcond
  end interface
 
@@ -589,6 +589,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call timab(tim_getAX_BX,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
  call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+ call xgBlock_zero_im_g0(chebfi%xBXColsRows)
  ABI_NVTX_END_RANGE()
  call timab(tim_getAX_BX,2,tsec)
 
@@ -674,6 +676,8 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    call timab(tim_getAX_BX,1,tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
    call getAX_BX(chebfi%xXColsRows,chebfi%xAXColsRows,chebfi%xBXColsRows)
+   call xgBlock_zero_im_g0(chebfi%xAXColsRows)
+   call xgBlock_zero_im_g0(chebfi%xBXColsRows)
    ABI_NVTX_END_RANGE()
    call timab(tim_getAX_BX,2,tsec)
 

@@ -461,6 +461,8 @@ module m_lobpcg2
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(lobpcg%XColsRows,lobpcg%AXColsRows,lobpcg%BXColsRows)
+      call xgBlock_zero_im_g0(lobpcg%AXColsRows)
+      call xgBlock_zero_im_g0(lobpcg%BXColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_LINALG)
@@ -536,6 +538,8 @@ module m_lobpcg2
         ! Apply A and B on W
         call timab(tim_ax_bx,1,tsec)
         call getAX_BX(lobpcg%WColsRows,lobpcg%AWColsRows,lobpcg%BWColsRows)
+        call xgBlock_zero_im_g0(lobpcg%AWColsRows)
+        call xgBlock_zero_im_g0(lobpcg%BWColsRows)
         call timab(tim_ax_bx,2,tsec)
         if (lobpcg%paral_kgb == 1) then
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_LINALG)
@@ -675,6 +679,8 @@ module m_lobpcg2
       end if
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows)
+      call xgBlock_zero_im_g0(lobpcg%AllAX0ColsRows)
+      call xgBlock_zero_im_g0(lobpcg%AllBX0ColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)

@@ -130,7 +130,7 @@ module m_xg_ortho_RR
     else ! space(X)==SPACE_CR
       call xgBlock_invert_tri('u','n',buffer%self)
       call xgBlock_zerotri(buffer%self,'u')
-      call xg_init(X_tmp,space(X),rows(X),cols(X),me_g0=me_g0(X))
+      call xg_init(X_tmp,space(X),rows(X),cols(X),me_g0=me_g0(X),gpu_option=gpu_option)
 
       call xgBlock_gemm('n','n',1.d0,X,buffer%self,0.d0,X_tmp%self)
       call xgBlock_copy(X_tmp%self,X)
@@ -271,7 +271,7 @@ module m_xg_ortho_RR
       call xg_setBlock(subA,vec%self,subdim,blockdim)
     endif
 
-     ! Compute subA and subB by part
+    ! Compute subA and subB by part
     !--- begin
     ! |  E  |  XAW  | XAP |  |  I  |  XBW  | XBP |
     ! |  *  |  WAW  | WAP |  |  *  |   I   | WBP |
