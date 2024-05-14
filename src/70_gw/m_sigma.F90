@@ -37,7 +37,7 @@ MODULE m_sigma
  use defs_datatypes,   only : ebands_t
  use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : c2r
- use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc ! MRM
+ use m_gwdefs,         only : unt_gw, unt_sig, unt_sgr, unt_sgm, unt_gwdiag, sigparams_t, sigma_needs_w, unt_sigc
  use m_crystal,        only : crystal_t
  use m_bz_mesh,        only : kmesh_t, littlegroup_t, findqg0
  use m_screening,      only : epsilonm1_results
@@ -215,16 +215,31 @@ MODULE m_sigma
   complex(dpc),allocatable :: omega4sd(:,:,:,:)
   ! (b1gw:b2gw,nkibz,nomega4sd,nsppol).
   ! Frequencies used to evaluate the Derivative of Sigma.
+ contains
+
+   procedure  :: free => sigma_free
+    ! Deallocate memory
+
+   procedure :: get_exene => sigma_get_exene
+    ! Compute exchange energy.
+
+    procedure :: get_excene => sigma_get_excene
+    ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
 
  end type sigma_t
 
- public  :: sigma_init                  ! Initialize the object
- public  :: sigma_free                  ! Deallocate memory
- public  :: sigma_get_exene             ! Compute exchange energy.
- public  :: sigma_get_excene            ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
- public  :: mels_get_haene              ! Compute hartree energy.
- public  :: mels_get_kiene              ! Compute kinetic energy.
- public  :: sigma_ncwrite               ! Write data in netcdf format.
+ public  :: sigma_init
+   ! Initialize the object
+
+ public  :: mels_get_haene
+   ! Compute hartree energy.
+
+ public  :: mels_get_kiene
+   ! Compute kinetic energy.
+
+ public  :: sigma_ncwrite
+   ! Write data in netcdf format.
+
  public  :: write_sigma_header
  public  :: write_sigma_results
  public  :: print_Sigma_perturbative
@@ -410,7 +425,7 @@ end subroutine write_sigma_header
 !! SOURCE
 !!
 
-subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
+subroutine write_sigma_results(ikcalc, ikibz, Sigp, Sr, KS_BSt)
 
 !Arguments ------------------------------------
 !scalars
@@ -887,11 +902,6 @@ end subroutine print_Sigma_QPSC
 !! INPUTS
 !! usepawu= /=0 if we used DFT+U as starting point (only for PAW)
 !!
-!! OUTPUT
-!!
-!! TODO
-!!  Write documentation.
-!!
 !! SOURCE
 
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
@@ -1010,10 +1020,6 @@ end subroutine sigma_init
 !!
 !! FUNCTION
 !!  Deallocate all associated pointers defined in the sigma_t data type.
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 
@@ -1410,10 +1416,10 @@ integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
 
 !Arguments ------------------------------------
 !scalars
+ class(sigma_t),target,intent(in) :: Sr
  class(sigparams_t),target,intent(in) :: Sigp
  integer,intent(in) :: ncid
  type(Epsilonm1_results),target,intent(in) :: Er
- type(sigma_t),target,intent(in) :: Sr
 
 !Local variables ---------------------------------------
 #ifdef HAVE_NETCDF
