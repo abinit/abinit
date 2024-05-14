@@ -244,8 +244,6 @@ MODULE m_sigma
 
  end type sigma_t
 
-
-
  public  :: write_sigma_header
  public  :: sigma_distribute_bks
 !!***
@@ -437,8 +435,7 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, KS_BSt)
 
 !Local variables-------------------------------
 !scalars
- integer :: ib,io,is
- integer :: gwcalctyp,mod10
+ integer :: ib,io,is,gwcalctyp,mod10
  character(len=500) :: msg
  type(yamldoc_t) :: ydoc
 !arrays
