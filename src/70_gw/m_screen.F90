@@ -325,7 +325,6 @@ contains
 
   procedure ::  calc_ppm_sigc => screen_calc_ppm_sigc
 
-  !procedure :: screen_times_ket     ! Compute \Sigma_c(\omega)|\phi> in reciprocal space.
 end type screen_t
 !!***
 
@@ -1053,14 +1052,15 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
 
    do iq_ibz=1,nqibz
-     call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
      if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
+       call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
        call screen%PPm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
    end do
-   stop
+
  end if
+ stop
 
  ! Deallocate Fgg if the matrices are not needed anymore.
  if (deallocate_Fgg) then
@@ -1333,7 +1333,8 @@ end subroutine screen_w0gemv
 !!  in_ket(npwc)= |\phi> in reciprocal space.
 !!  trans= On entry, TRANS specifies the operation to be performed as follows:
 !!      TRANS = 'N' or 'n'   y := alpha*A*x + beta*y.
-!!      TRANS = 'C' or 'c'   y := alpha*A**H*x + beta*y.
+!!      TRANS = 'T' or 't'   y := alpha*A**T*x + beta*y.
+!!      TRANS = 'T' or 't'   y := alpha*A**T*x + beta*y.
 !!
 !! OUTPUT
 !!
@@ -1361,18 +1362,20 @@ subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus
 
  ABI_CHECK(screen%has_ppmodel > 0, sjoin("has_ppmodel:", itoa(screen%has_ppmodel)))
 
+ acc_ket = czero_gw
+
  select case (trans)
  case ("N")
    associate (botsq => screen%ppm%bigomegatwsq_qbz%vals, &
               otq   => screen%ppm%omegatw_qbz%vals, &
               eig   => screen%ppm%eigpot_qbz%vals)
 
-     call screen%ppm%calc_sig(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
-                              omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+     call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
+                               omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
 
    end associate
 
- case ("H")
+ case ("T")
    associate (ppm => screen%ppm, &
               botsq => screen%ppm%bigomegatwsq_qbz%vals, &
               otq   => screen%ppm%omegatw_qbz%vals, &
@@ -1380,12 +1383,12 @@ subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus
 
    ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
    botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
-   botsq_conjg_transp=CONJG(botsq_conjg_transp)
+   !botsq_conjg_transp=CONJG(botsq_conjg_transp)
    ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
    otq_transp=TRANSPOSE(otq)
 
-   call screen%ppm%calc_sig(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
-                            omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+   call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
+                             omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
 
    ABI_FREE(botsq_conjg_transp)
    ABI_FREE(otq_transp)

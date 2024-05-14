@@ -927,8 +927,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
            sigc_ket  = czero_gw
-           call PPm%calc_sig(nspinor, npwc, nomega_tot, rhotwgp, botsq, otq, &
-                             omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, sigc_ket, sigcme_3)
+           call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq, otq, &
+                              omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, sigc_ket, sigcme_3)
 
            if (PPm%model==3 .or. PPm%model==4) then
              sigcme2(:,kb)=sigcme2(:,kb) + (wtqp+wtqm)*DBLE(sigcme_3(:)) + (wtqp-wtqm)*j_gw*AIMAG(sigcme_3(:))
@@ -987,8 +987,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ket1      = czero_gw
            ket2      = czero_gw
 
-           call PPm%calc_sig(nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
+           call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq,otq, &
+                              omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket1, sigcme_new)
 
            if (Sigp%gwcalctyp==28) then
              if (PPm%model/=1.and.PPm%model/=2) then
@@ -1004,8 +1004,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
              otq_transp=TRANSPOSE(otq)
 
-             call PPm%calc_sig(nspinor, npwc, nomega_tot, rhotwgp, botsq_conjg_transp, otq_transp, &
-                               omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket2, sigcme_3)
+             call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq_conjg_transp, otq_transp, &
+                                omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket2, sigcme_3)
 
              ABI_FREE(botsq_conjg_transp)
              ABI_FREE(otq_transp)
