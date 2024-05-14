@@ -31,6 +31,7 @@ module m_screen
  use m_screening
  use m_nctk
  use m_sort
+ use m_yaml
 
  use m_gwdefs,         only : GW_TOLQ0, czero_gw
  use m_fstrings,       only : firstchar, endswith, strcat, itoa, sjoin
@@ -155,7 +156,6 @@ contains
  procedure :: print => screen_info_print
 
 end type screen_info_t
-
 !!***
 
 !----------------------------------------------------------------------
@@ -239,8 +239,6 @@ end type screen_info_t
   integer :: prtvol               ! Verbosity level.
   integer :: has_ppmodel          ! 1 if PPmodel tables are stored.
   integer :: has_fgg              ! 1 if Fgg tables are stored.
-  !%integer :: wmesh_type
-  !%real(dp) :: ecut
   integer :: nfftf_tot
   integer :: nspden
 
@@ -255,22 +253,22 @@ end type screen_info_t
   character(len=fnlen) :: fname=ABI_NOFILE  ! Name of the file used for the out-of-core solution.
 
   real(dp),allocatable :: qibz(:,:)
-  ! qibz(3,nqibz)
+  ! (3,nqibz)
   ! q-points in reduced coordinates
 
   !type(kmesh_t) :: Qmesh
   ! Info the q-point sampling.
 
   real(dp),allocatable :: qlwl(:,:)
-  ! qlwl(3,nqlwl)
+  ! (3,nqlwl)
   ! q-points used for the long wave-length limit treatment.
 
   complex(dpc),allocatable :: omega(:)
-  ! omega(nomega)
+  ! (nomega)
   ! List of frequencies. Real frequencies are packed first.
 
   integer,allocatable :: gvec(:,:)
-  ! gvec(3,npw)
+  ! (3,npw)
   ! G-vectors used to describe the two-point function (r.l.u.).
 
   !type(gsphere_t) :: Gsphere
@@ -279,17 +277,17 @@ end type screen_info_t
   ! See m_gsphere.F90.
 
   logical,allocatable :: keep_q(:)
-   ! keep_q(nqibz)
+   ! (nqibz)
    ! Storage strategy: keep or not keep Em1(q) in memory.
 
   type(fgg_t),pointer :: Fgg(:)
-  ! Fgg(nqibz)
+  ! (nqibz)
   ! F_{G,G'}(q,w) for q in the IBZ.
 
-  integer :: fgg_qbz_stat=FGG_QBZ_ISPOINTER
+  integer :: fgg_qbz_stat = FGG_QBZ_ISPOINTER
   ! Status of Fgg_qbz
 
-  integer :: fgg_qbz_idx=0
+  integer :: fgg_qbz_idx = 0
   ! The index of the q-point in BZ pointed by Fgg_qbz. Used for debugging purpose.
 
   type(fgg_t),pointer :: Fgg_qbz  => null()
@@ -311,8 +309,8 @@ contains
   procedure :: init => screen_init
     ! Creation method.
 
-  !procedure :: print => screen_print
-    ! Print info
+  procedure :: print => screen_print
+    ! Print info on object
 
   procedure :: free => screen_free
    ! Free dynamic memory
@@ -324,6 +322,7 @@ contains
     ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
 
   procedure ::  calc_ppm_sigc => screen_calc_ppm_sigc
+    ! Compute the frequency convolution with the PPM.
 
 end type screen_t
 !!***
@@ -490,8 +489,7 @@ subroutine fgg_init(Fgg, npw, nomega, nqlwl)
 
 ! *************************************************************************
 
- Fgg%nomega = nomega; Fgg%npw = npw
- Fgg%nqlwl = nqlwl
+ Fgg%nomega = nomega; Fgg%npw = npw; Fgg%nqlwl = nqlwl
 
  if (npw > 0 .and. nomega > 0) then
    ABI_MALLOC_OR_DIE(Fgg%mat, (npw, npw, nomega), ierr)
@@ -538,7 +536,7 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
 
  screen%fgg_qbz_idx = iq_bz ! Save the index of the q-point in the BZ.
 
- if (firstchar(how,(/"P"/)) ) then
+ if (firstchar(how, (/"P"/)) ) then
    ! We want a pointer.
    select case (screen%fgg_qbz_stat)
    case (FGG_QBZ_ISALLOCATED)
@@ -555,7 +553,7 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
      ABI_ERROR(sjoin("Wrong status:", itoa(screen%fgg_qbz_stat)))
    end select
 
- else if (firstchar(how,(/"A"/)) ) then
+ else if (firstchar(how, (/"A"/)) ) then
    ! We want an allocatable array.
 
    select case (screen%fgg_qbz_stat)
@@ -619,22 +617,22 @@ pure function screen_ihave_fgg(screen, iq_ibz, how)
 
 !************************************************************************
 
- check = (/MAT_ALLOCATED, MAT_STORED/)
+ check = [MAT_ALLOCATED, MAT_STORED]
  if (PRESENT(how)) then
-   if (firstchar(how,(/"A","a"/))) check = (/MAT_ALLOCATED, MAT_ALLOCATED/)
-   if (firstchar(how,(/"S","s"/))) check = (/MAT_STORED, MAT_STORED/)
+   if (firstchar(how, (/"A","a"/))) check = [MAT_ALLOCATED, MAT_ALLOCATED]
+   if (firstchar(how, (/"S","s"/))) check = [MAT_STORED, MAT_STORED]
  end if
 
- if (iq_ibz>0) then
-   screen_ihave_fgg = (screen%Fgg(iq_ibz)%has_mat==check(1) .or.&
-                       screen%Fgg(iq_ibz)%has_mat==check(2) )
+ if (iq_ibz > 0) then
+   screen_ihave_fgg = (screen%Fgg(iq_ibz)%has_mat == check(1) .or.&
+                       screen%Fgg(iq_ibz)%has_mat == check(2) )
  else
    ! check the status of the full set of q-tables.
    screen_ihave_fgg=.TRUE.
    do ii=1,screen%nqibz
      screen_ihave_fgg = screen_ihave_fgg .and. &
-                     (screen%Fgg(ii)%has_mat==check(1) .or.&
-                      screen%Fgg(ii)%has_mat==check(2) )
+                     (screen%Fgg(ii)%has_mat == check(1) .or.&
+                      screen%Fgg(ii)%has_mat == check(2) )
    end do
  end if
 
@@ -728,6 +726,44 @@ subroutine screen_free(screen)
  call screen%PPm%free()
 
 end subroutine screen_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_screen/screen_print
+!! NAME
+!! screen_print
+!!
+!! FUNCTION
+!! Free the memory allocate in the datatype.
+!!
+!! SOURCE
+
+subroutine screen_print(screen, units, header)
+
+!Arguments ------------------------------------
+ class(screen_t),intent(in) :: screen
+  integer,intent(in) :: units(:)
+  character(len=*),optional,intent(in) :: header
+
+!Local variables-------------------------------
+!scalars
+ character(len=500) :: msg
+ type(yamldoc_t) :: ydoc
+
+! *************************************************************************
+
+ msg = ' ==== Info on the screen_t object ==== '; if (present(header)) msg=' ==== '//trim(adjustl(header))//' ==== '
+ call wrtout(units, msg)
+
+ ydoc = yamldoc_open('screen_params') !, width=11, real_fmt='(3f8.3)')
+ !call ydoc%add_int("dm2_botsq", ppm%dm2_botsq)
+ !call ydoc%add_real("drude_plsmf", ppm%drude_plsmf)
+ !call ydoc%add_int1d("has_qibz", ppm%has_qibz)
+
+ call ydoc%write_units_and_free(units)
+
+end subroutine screen_print
 !!***
 
 !----------------------------------------------------------------------
@@ -1060,7 +1096,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    end do
 
  end if
- stop
+ !stop
 
  ! Deallocate Fgg if the matrices are not needed anymore.
  if (deallocate_Fgg) then

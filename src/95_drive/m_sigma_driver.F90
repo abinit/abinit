@@ -66,8 +66,8 @@ module m_sigma_driver
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
- use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
+ use m_sigma,         only : sigma_init, sigma_ncwrite, sigma_t,  &
+                             mels_get_haene, mels_get_kiene, write_sigma_header, write_sigma_results
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_t, melements_t
@@ -2666,9 +2666,9 @@ endif
        call xmpi_barrier(Wfd%comm)
        call Vcp_full%free()
        ! Save the new total exchange energy Ex = Ex[GW.1RDM]
-       ex_energy=sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh, qp_ebands)
        ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM]
-       exc_mbb_energy=sigma_get_excene(Sr,Kmesh,qp_ebands)
+       exc_mbb_energy = Sr%get_excene(Kmesh,qp_ebands)
 
        ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
        !           <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
@@ -2780,7 +2780,7 @@ endif
      ! if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=MAXVAL(MAXVAL(ks_vbik(:,:),DIM=1))) ) then
      if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=ks_vbik) ) then  ! FIXME here the two arrays use a different indexing.
 
-       ex_energy = sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh,qp_ebands)
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(units, msg)
      end if
@@ -2925,10 +2925,8 @@ endif
  call Gsph_c%free()
  call Vcp%free()
  call cryst%free()
- call sigma_free(Sr)
- if(.not.rdm_update) then
-   call Er%free()
- end if
+ call Sr%free()
+ if (.not.rdm_update) call Er%free()
  call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
