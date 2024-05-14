@@ -226,24 +226,25 @@ MODULE m_sigma
     procedure :: get_excene => sigma_get_excene
     ! Compute exchange-correlation MBB (Nat. Orb. Funct. Approx.) energy.
 
+    procedure :: get_haene => mels_get_haene
+     ! Compute hartree energy.
+
+    procedure :: get_kiene => mels_get_kiene
+   ! Compute kinetic energy.
+
+    procedure :: ncwrite => sigma_ncwrite
+   ! Write data in netcdf format.
+
+    procedure :: write_sigma_results => write_sigma_results
+    procedure :: print_Sigma_perturbative => print_Sigma_perturbative
+    procedure :: print_Sigma_QPSC => print_Sigma_QPSC
+
  end type sigma_t
 
  public  :: sigma_init
    ! Initialize the object
 
- public  :: mels_get_haene
-   ! Compute hartree energy.
-
- public  :: mels_get_kiene
-   ! Compute kinetic energy.
-
- public  :: sigma_ncwrite
-   ! Write data in netcdf format.
-
  public  :: write_sigma_header
- public  :: write_sigma_results
- public  :: print_Sigma_perturbative
- public  :: print_Sigma_QPSC
  public  :: sigma_distribute_bks
 !!***
 
@@ -423,9 +424,8 @@ end subroutine write_sigma_header
 !!  (for writing routines, no output) otherwise, should be described
 !!
 !! SOURCE
-!!
 
-subroutine write_sigma_results(ikcalc, ikibz, Sigp, Sr, KS_BSt)
+subroutine write_sigma_results(Sr, ikcalc, ikibz, Sigp, KS_BSt)
 
 !Arguments ------------------------------------
 !scalars
@@ -499,8 +499,8 @@ subroutine write_sigma_results(ikcalc, ikibz, Sigp, Sr, KS_BSt)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp >= 10) then
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
+       call Sr%print_Sigma_QPSC(ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
+       call Sr%print_Sigma_QPSC(ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                 &
         ib,                                                           &
@@ -512,11 +512,11 @@ subroutine write_sigma_results(ikcalc, ikibz, Sigp, Sr, KS_BSt)
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE(1,2)
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc,prtvol=1)
+         call Sr%print_Sigma_perturbative(ikibz,ib,is,unit=dev_null,ydoc=ydoc,prtvol=1)
        CASE DEFAULT
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc)
+         call Sr%print_Sigma_perturbative(ikibz,ib,is,unit=dev_null,ydoc=ydoc)
        END SELECT
-       call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
+       call Sr%print_Sigma_perturbative(ikibz,ib,is,unit=std_out,prtvol=1)
      end if
 
      write(unt_gw,'(i6,3f9.4)')         &
@@ -634,7 +634,7 @@ end function gw_spectral_function
 !!
 !! SOURCE
 
-subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,witheader,ydoc)
+subroutine print_Sigma_perturbative(Sr, ik_ibz, iband, isp, unit, prtvol, mode_paral, witheader, ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -774,10 +774,6 @@ end subroutine print_Sigma_perturbative
 !! FUNCTION
 !!  Write the results of the GW calculation in case of self-consistency
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,ydoc)
@@ -907,10 +903,10 @@ end subroutine print_Sigma_QPSC
 subroutine sigma_init(Sigp,nkibz,usepawu,Sr)
 
 !Arguments ------------------------------------
+ class(sigma_t),intent(inout) :: Sr
  integer,intent(in) :: nkibz,usepawu
 !scalars
  type(sigparams_t),intent(in) :: Sigp
- type(sigma_t),intent(inout) :: Sr
 
 !Local variables-------------------------------
 !scalars
@@ -1196,7 +1192,7 @@ end function sigma_get_excene
 !!
 !! SOURCE
 
-real(dp) pure function mels_get_haene(sigma,Mels,kmesh,bands) result(eh_energy)
+real(dp) pure function mels_get_haene(sigma, Mels, kmesh, bands) result(eh_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1254,7 +1250,7 @@ end function mels_get_haene
 !!
 !! SOURCE
 
-real(dp) pure function mels_get_kiene(sigma,Mels,kmesh,bands) result(ek_energy)
+real(dp) pure function mels_get_kiene(sigma, Mels, kmesh, bands) result(ek_energy)
 
 !Arguments ------------------------------------
 !scalars
@@ -1412,7 +1408,7 @@ end subroutine find_wpoles_for_cd
 !!
 !! SOURCE
 
-integer function sigma_ncwrite(Sigp,Er,Sr,ncid) result (ncerr)
+integer function sigma_ncwrite(Sr, Sigp, Er, ncid) result (ncerr)
 
 !Arguments ------------------------------------
 !scalars

@@ -42,7 +42,7 @@ module m_screen
  use m_gsphere,        only : gsphere_t
  use m_vcoul,          only : vcoul_t
  use m_io_screening,   only : read_screening, hscr_t, ncname_from_id, em1_ncname
- use m_ppmodel,        only : ppmodel_t, PPM_NONE
+ use m_ppmodel,        only : ppmodel_t, PPM_NONE, PPM_NOTAB
 
  implicit none
 
@@ -321,7 +321,7 @@ contains
   procedure :: w0gemv => screen_w0gemv
     ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
 
-  procedure ::  calc_ppm_sigc => screen_calc_ppm_sigc
+  procedure :: calc_ppm_sigc => screen_calc_ppm_sigc
     ! Compute the frequency convolution with the PPM.
 
 end type screen_t
@@ -1090,6 +1090,8 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    do iq_ibz=1,nqibz
      if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
        call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
+
+       !if (screen%ppm%has_qibz(iq_ibz) == PPM_NOTAB) call screen%ppm%malloc_iqibz(iq_ibz)
        call screen%PPm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if

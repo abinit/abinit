@@ -372,6 +372,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
 
  w_info%use_ppm = dtset%ppmodel
+ w_info%use_ppm = 0
  if (w_fname /= ABI_NOFILE) then
    ! Read g-sphere and pp_mesh from SCR file.
    call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
@@ -389,6 +390,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    w_info%use_ppm = PPM_HYBERTSEN_LOUIE
    ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
    ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with the model dielectric function")
+   w_info%use_ppm = 0
  end if
 
  if (nqlwl == 0) then
