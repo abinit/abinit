@@ -2620,14 +2620,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
        enddo
        call xmpi_gatherv(my_list_combination,size(my_list_combination),list_combination_tmp,buffsize,offsets,master,comm,ierr)
 
-       block
-         integer :: ii
-         do ii = 1, size(list_combination_tmp, 2)
-         end do
-       end block
-
-
-
+       
        !Deallocation of variables inside need_symmetric
        ABI_FREE(buffsize)
        ABI_FREE(my_list_combination)
@@ -4134,12 +4127,17 @@ ABI_MALLOC(strain_terms,(irred_ncoeff))
 icoeff2=0
 icoeff1=0
 do icoeff1=1,ncoeff_out
-        if(.not.same(icoeff1))then
-                icoeff2=icoeff2 + 1
-                call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
-                  &               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name, &
-                  &               isbound=strain_terms_tmp(icoeff1)%isbound,check=.TRUE.)
-        endif
+   block
+     integer:: nbody, npower
+     nbody=strain_terms_tmp(icoeff1)%terms(1)%get_nbody()
+     npower=strain_terms_tmp(icoeff1)%terms(1)%get_total_power()
+  if(.not.same(icoeff1) .and. nbody<= max_nbody(npower))then
+    icoeff2=icoeff2 + 1
+    call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
+         &               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name, &
+         &               isbound=strain_terms_tmp(icoeff1)%isbound,check=.TRUE.)
+  endif
+  end block
 enddo
 
 !TEST MS write coefficients to xml to check
