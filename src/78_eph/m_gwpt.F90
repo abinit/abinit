@@ -1176,9 +1176,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
            !omegas = [e_mkq, e_nk]
            !omegame0i = omegas - e0i
-           !complex(gwpc),intent(inout) :: acc_ket(npwc*nspinor, nomega)
-           !complex(gwpc),intent(out) :: sigcme(nomega)
-           !call screen%calc_ppm_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+           !call screen%calc_ppm_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
            ! and take the CC in times_vc_sqrt
@@ -1193,7 +1191,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            e0i = qp_ene(ib_sum, ikqmp_ibz, spin)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
            !omegame0i = omegas - e0i
-           !call screen%calc_ppm_sigc("H", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+           !call screen%calc_ppm_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
 
          end do ! ib_sum
 
