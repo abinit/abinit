@@ -66,8 +66,7 @@ module m_sigma_driver
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
- use m_sigma,         only : sigma_init, sigma_t,  &
-                             write_sigma_header
+ use m_sigma,         only : sigma_t, write_sigma_header
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_t, melements_t
@@ -1374,7 +1373,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Initialize Sigma results ===
  ! TODO it is better if we use ragged arrays indexed by the k-point
- call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
+ call Sr%init(Sigp, Kmesh%nibz, Dtset%usepawu)
 
  ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  !

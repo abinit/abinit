@@ -2492,7 +2492,7 @@ subroutine ppm_print(ppm, units, header)
  call ydoc%add_real("drude_plsmf", ppm%drude_plsmf)
  call ydoc%add_real("force_plsmf", ppm%force_plsmf)
  !call ydoc%add_int1d("keep_qibz", ppm%kepp_qibz)
- call ydoc%add_int1d("has_qibz", ppm%has_qibz)
+ !call ydoc%add_int1d("has_qibz", ppm%has_qibz)
 
  call ydoc%write_units_and_free(units)
 
