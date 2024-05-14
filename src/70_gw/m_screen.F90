@@ -757,7 +757,8 @@ subroutine screen_print(screen, units, header)
  call wrtout(units, msg)
 
  ydoc = yamldoc_open('screen_params') !, width=11, real_fmt='(3f8.3)')
- !call ydoc%add_int("dm2_botsq", ppm%dm2_botsq)
+ call ydoc%add_int("nomega_r", screen%nomega_r)
+ call ydoc%add_int("nomega_i", screen%nomega_i)
  !call ydoc%add_real("drude_plsmf", ppm%drude_plsmf)
  !call ydoc%add_int1d("has_qibz", ppm%has_qibz)
 
@@ -829,7 +830,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  character(len=nctk_slen) :: varname
  type(hscr_t) :: Hscr
 !arrays
- integer :: g0(3),iperm(Qmesh%nibz)
+ integer :: units(2), g0(3), iperm(Qmesh%nibz)
  real(dp) :: wt_list(Qmesh%nibz)
  !complex(gwpc),ABI_CONTIGUOUS pointer :: em1_ggw(:,:,:)
 
@@ -838,12 +839,12 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  DBG_ENTER("COLL")
  ABI_UNUSED(nsppol)
 
- my_rank = xmpi_comm_rank(comm)
+ my_rank = xmpi_comm_rank(comm); units = [std_out, ab_out]
  call screen%nullify()
 
  ! Initialize basic parameters
  screen%Info = W_info
- call screen%Info%print(header="W info",unit=std_out)
+ call screen%Info%print(header="W info", unit=std_out)
 
  id_required  = W_Info%mat_type
  approx_type  = W_Info%vtx_family
@@ -1086,6 +1087,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    call wrtout(std_out, " Calculating plasmon-pole model parameters...")
    ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
    call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
+   call screen%ppm%print(units)
 
    do iq_ibz=1,nqibz
      if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then

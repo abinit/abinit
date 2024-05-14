@@ -1262,6 +1262,7 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    ngfft_in(10) = 1; ngfft_out(10) = 1
 
    call fourier_interpol_seq(cplex, db%nspden, nfftot_file, ngfft_in, nfft, ngfft, v1r_file, v1scf)
+   ABI_FREE(v1r_file)
  end if
 
  ! Skip record with rhog1_g0 (if present)
