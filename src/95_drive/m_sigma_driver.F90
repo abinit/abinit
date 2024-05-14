@@ -66,8 +66,8 @@ module m_sigma_driver
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
  use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
- use m_sigma,         only : sigma_init, sigma_ncwrite, sigma_t,  &
-                             mels_get_haene, mels_get_kiene, write_sigma_header, write_sigma_results
+ use m_sigma,         only : sigma_init, sigma_t,  &
+                             write_sigma_header
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_t, melements_t
@@ -2684,8 +2684,8 @@ endif
        !
        ! Print the updated total energy and all energy components
        !
-       eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,qp_ebands)
-       ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,qp_ebands)
+       eh_energy = Sr%get_haene(GW1RDM_me,Kmesh,qp_ebands)
+       ekin_energy = Sr%get_kiene(GW1RDM_me,Kmesh,qp_ebands)
        ! SD 2-RDM
        etot_sd=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
        ! MBB 2-RDM
@@ -2746,7 +2746,7 @@ endif
        end if
      end do
 
-     if (wfd%my_rank == master) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,ks_ebands)
+     if (wfd%my_rank == master) call Sr%write_sigma_results(ikcalc, ik_ibz, Sigp, ks_ebands)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2830,7 +2830,7 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
-     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
+     NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)

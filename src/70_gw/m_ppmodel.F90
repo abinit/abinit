@@ -58,9 +58,9 @@ module m_ppmodel
  integer,private,parameter :: PPM_ISALLOCATED = 2 ! The pointer is used as an allocable array.
 
  ! Flags giving the status of the plasmon-pole tables
- integer,private,parameter :: PPM_NOTAB         = 0
- integer,private,parameter :: PPM_TAB_ALLOCATED = 1
- integer,private,parameter :: PPM_TAB_STORED    = 2
+ integer,public,parameter :: PPM_NOTAB         = 0
+ integer,public,parameter :: PPM_TAB_ALLOCATED = 1
+ integer,public,parameter :: PPM_TAB_STORED    = 2
 
 !----------------------------------------------------------------------
 
