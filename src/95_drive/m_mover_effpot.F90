@@ -173,7 +173,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !type(wvl_data) :: wvl
 !type(pawang_type) :: pawang
 !type(scf_history_type) :: scf_history
- type(abihist) :: hist_tmp, hist_map
+ type(abihist) :: hist_tmp
 
 
 !******************************************************************
@@ -330,17 +330,12 @@ ABI_FREE(xcart)
          readOnlyLast = .true.
          call read_md_hist(md_hist_name,hist_tmp,isVused,isARused,readOnlyLast)
 
-         if(trim(inp%latt_mapping_fname)/="") then
-            call read_md_hist(inp%latt_mapping_fname,hist_map,isVused,isARused,readOnlyLast)
-         else
-            call read_md_hist(md_hist_name,hist_map,isVused,isARused,readOnlyLast)
-         end if
+
 
          write(message,'(2a)')&
 &         ' Map external structure to internal ordering of reference structure: ',ch10
          call wrtout(std_out,message,"COLL")
-         call effective_potential_file_mapHistToRef(effective_potential,hist_tmp,comm,verbose=.True., hist_for_map=hist_map) ! Map Hist to Ref to order atoms
-         call abihist_free(hist_map)
+         call effective_potential_file_mapHistToRef(effective_potential,hist_tmp,comm,verbose=.True.) ! Map Hist to Ref to order atoms
       endif
       msym = 96*PRODUCT(sc_size)
       ABI_MALLOC(symrel,(3,3,msym))
@@ -582,8 +577,7 @@ ABI_FREE(xcart)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),efield=inp%efield(:), &
-&     mapping_fname=inp%latt_mapping_fname)
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp,sc_size=sc_size(:),efield=inp%efield(:))
      INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
      if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
@@ -598,8 +592,7 @@ ABI_FREE(xcart)
 !    Try the model
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, &
-&     mapping_fname=inp%latt_mapping_fname)
+&     effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
      write(message, '(a)' ) ' => The model'
      if(effective_potential%anharmonics_terms%bounded)then
@@ -696,8 +689,7 @@ ABI_FREE(xcart)
 !          Run mover to check if the model is bound
            call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &           rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&           effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, &
-&           mapping_fname=inp%latt_mapping_fname)
+&           effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
            if(.not.effective_potential%anharmonics_terms%bounded)then
              write(message, '(2a)' ) ' => The model is not bounded'
            else
@@ -888,8 +880,7 @@ ABI_FREE(xcart)
 !              Run mover
                  call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &                 rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
-&                 effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST, &
-&                 mapping_fname=inp%latt_mapping_fname)
+&                 effective_potential=effective_potential,verbose=verbose,writeHIST=writeHIST)
 
                  if(.not.effective_potential%anharmonics_terms%bounded)then
                    write(message, '(2a)' ) ' => The model is not bounded'
@@ -1114,7 +1105,6 @@ use_inversion = 0
 
   call symlatt(bravais,std_out,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
- print *, "is it here 4??"
   call matr3inv(rprimd,gprimd)
   call symfind(gprimd,msym,natom,nptsym,0,nsym,&
 &           0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)

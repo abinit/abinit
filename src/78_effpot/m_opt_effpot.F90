@@ -1416,7 +1416,6 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm, m
   call wrtout(std_out,message,'COLL')
 
   !1406 get count of high order even anharmonic strain terms and the strain terms itself
-  print *, "getting high order strain terms"
   call polynomial_coeff_getEvenAnhaStrain(strain_terms_tmp,crystal,ncombi,power_strain,comm, max_nbody)
   ! Allocate my_coeffs with ncombi free space to work with
 
@@ -2083,9 +2082,6 @@ end function check_to_skip
 !!***
 
 subroutine generate_bounding_term_and_add_to_list(sympairs, nterm_start, ncombi, my_coeffs, temp_cntr)
-  ! documetation: generate the bounding terms for the symmetry adapted terms
-  ! and add them to the list of coefficients.
-  ! 
   ! check if myterm
   !type(polynomial_coeff_type),target, intent(in) :: terms(:)
 
