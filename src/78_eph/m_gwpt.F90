@@ -1140,7 +1140,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          ! Prepare the object for applying W_qbz.
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
-         call screen%symmetrizer(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
+         call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
 
          ! Get Fourier components of the Coulomb interaction in the BZ
          ! In 3D systems, neglecting umklapp: vc(Sq,sG) = vc(q,G) = 4pi/|q+G|**2

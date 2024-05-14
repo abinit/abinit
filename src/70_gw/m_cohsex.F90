@@ -42,7 +42,7 @@ module m_cohsex
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
+ use m_screening,     only : epsm1_rotate_iqbz, get_epsm1, epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_pawang,        only : pawang_type
@@ -533,7 +533,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
      end if
 
      ! Only omega==0 for SEX or COHSEX
-     call Epsm1_symmetrizer(iq_bz, 1, npwc, Er, Gsph_c, Qmesh, .True., epsm1_qbz)
+     call Epsm1_rotate_iqbz(iq_bz, 1, npwc, Er, Gsph_c, Qmesh, .True., epsm1_qbz)
 
      ! Get Fourier components of the Coulomb interaction in the BZ.
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
