@@ -149,20 +149,37 @@ MODULE m_screening
   ! used during the GW calculation since some parameters might differ, actually they might be smaller.
   ! For example, the number of G-vectors used can be smaller than the number of G"s stored on file.
 
- !contains
+ contains
+
+   procedure :: free => em1results_free
+    ! Free memory
+
+   procedure :: print => em1results_print
+     ! Print basic info
+
+   procedure :: rotate_iqbz => Epsm1_rotate_iqbz
+     ! Symmetrize two-point function at a q-point in the BZ.
+
+   procedure :: rotate_iqbz_inplace => Epsm1_rotate_iqbz_inplace
+     ! In-place version of the above
+
+   procedure :: init_from_file => init_Er_from_file
+     ! Initialize the object from file
+
+   procedure :: mkdump => mkdump_Er
+     ! Dump the object to a file.
+
+   procedure :: get_epsm1 => get_epsm1
+
+   procedure :: decompose_epsm1 => decompose_epsm1
 
  end type Epsilonm1_results
 
- public :: em1results_free                ! Free memory
- public :: em1results_print               ! Print basic info
- public :: Epsm1_rotate_iqbz              ! Symmetrize two-point function at a q-point in the BZ.
- public :: Epsm1_rotate_iqbz_inplace      ! In-place version of the above
- public :: init_Er_from_file              ! Initialize the object from file
- public :: mkdump_Er                      ! Dump the object to a file.
- public :: get_epsm1
- public :: decompose_epsm1
- public :: make_epsm1_driver              !  Calculate the inverse symmetrical dielectric matrix starting from chi0
- public :: mkem1_q0                       ! construct the microscopic dielectric matrix for q-->0
+ public :: make_epsm1_driver              ! Calculate the inverse symmetrical dielectric matrix starting from chi0
+ public :: mkem1_q0                       ! Construct the microscopic dielectric matrix for q-->0
+
+ ! Routines for the model dielectric function
+
  public :: screen_mdielf                  ! Calculates W_{G,G'}(q,w) for a given q-point in the BZ using a model dielectric function.
  public :: rpa_symepsm1
 !!***
@@ -315,7 +332,7 @@ end subroutine em1results_free
 !!
 !! SOURCE
 
-subroutine em1results_print(Er,unit,prtvol,mode_paral)
+subroutine em1results_print(Er, unit, prtvol, mode_paral)
 
 !Arguments ------------------------------------
  class(Epsilonm1_results),intent(in) :: Er
@@ -495,7 +512,7 @@ end subroutine em1results_print
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange,epsm1_qbz)
+subroutine Epsm1_rotate_iqbz(Er, iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange,epsm1_qbz)
 
 !Arguments ------------------------------------
 !scalars
@@ -615,11 +632,11 @@ end subroutine Epsm1_rotate_iqbz
 !!
 !! SOURCE
 
-subroutine Epsm1_rotate_iqbz_inplace(iq_bz,nomega,npwc,Er,Gsph,Qmesh,remove_exchange)
+subroutine Epsm1_rotate_iqbz_inplace(Er,iq_bz,nomega,npwc,Gsph,Qmesh,remove_exchange)
 
 !Arguments ------------------------------------
 !scalars
- type(Epsilonm1_results),intent(inout) :: Er
+ class(Epsilonm1_results),intent(inout) :: Er
  integer,intent(in) :: iq_bz,nomega,npwc
  logical,intent(in) :: remove_exchange
  type(gsphere_t),target,intent(in) :: Gsph
@@ -706,7 +723,7 @@ end subroutine Epsm1_rotate_iqbz_inplace
 !!
 !! SOURCE
 
-subroutine init_Er_from_file(Er,fname,mqmem,npwe_asked,comm)
+subroutine init_Er_from_file(Er, fname, mqmem, npwe_asked, comm)
 
 !Arguments ------------------------------------
  class(Epsilonm1_results),intent(inout) :: Er
@@ -835,8 +852,8 @@ end subroutine init_Er_from_file
 !! SOURCE
 
 subroutine mkdump_Er(Er,Vcp,npwe,gvec,nkxc,kxcg,id_required,approx_type,&
-&                    ikxc_required,option_test,fname_dump,iomode,&
-&                    nfftot,ngfft,comm,fxc_ADA)
+                     ikxc_required,option_test,fname_dump,iomode,&
+                     nfftot,ngfft,comm,fxc_ADA)
 
 !Arguments ------------------------------------
 !scalars

@@ -64,7 +64,7 @@ module m_sigma_driver
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
- use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
+ use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
                              mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
@@ -383,7 +383,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ==== Initialize Sigp, Er and basic objects ====
  ! ===============================================
  ! * Sigp is completetly initialized here.
- ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
+ ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
@@ -1857,11 +1857,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! if(dtset%ucrpa==0) then
    if (Dtset%gwgamma<3) then
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm)
    else
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
@@ -2540,7 +2540,7 @@ endif
 
      ABI_FREE(bdm_mask)       ! The master already used bdm_mask
      ABI_FREE(nat_occs)       ! Occs were already placed in qp_ebands
-     call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
+     call Er%free()           ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
 
      if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then
        ! Compute energies only if all k-points are available
@@ -2927,7 +2927,7 @@ endif
  call cryst%free()
  call sigma_free(Sr)
  if(.not.rdm_update) then
-   call em1results_free(Er)
+   call Er%free()
  end if
  call PPm%free()
  call Hdr_sigma%free()
@@ -3638,7 +3638,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
    end if
 
-   call init_Er_from_file(Er,fname,mqmem,Dtset%npweps,comm)
+   call Er%init_from_file(fname,mqmem,Dtset%npweps,comm)
 
    Sigp%npwc=Er%npwe
    if (Sigp%npwc>Sigp%npwx) then
