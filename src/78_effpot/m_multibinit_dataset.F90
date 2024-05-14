@@ -328,7 +328,6 @@ module m_multibinit_dataset
   character(len=fnlen) :: latt_harm_pot_fname
   character(len=fnlen) :: latt_anharm_pot_fname
   character(len=fnlen) :: latt_training_set_fname
-  character(len=fnlen) :: latt_mapping_fname
   character(len=fnlen) :: latt_test_set_fname
   character(len=fnlen) :: latt_ddb_fnames(12)
 
@@ -506,7 +505,6 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%latt_anharm_pot_fname=""
  multibinit_dtset%latt_training_set_fname=""
  multibinit_dtset%latt_test_set_fname=""
- multibinit_dtset%latt_mapping_fname=""
  multibinit_dtset%latt_ddb_fnames(12)=""
 
 
@@ -1262,17 +1260,17 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=2.and.&
       &   multibinit_dtset%dynamics/=22.and.&
       &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
-      &   multibinit_dtset%dynamics/=1001.and.multibinit_dtset%dynamics/=1002 .and. &
-      &   multibinit_dtset%dynamics/=1003.and.multibinit_dtset%dynamics/=1020    &
+      &   multibinit_dtset%dynamics/=101.and.multibinit_dtset%dynamics/=102 .and. &
+      &   multibinit_dtset%dynamics/=103.and.multibinit_dtset%dynamics/=120    &
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is ',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 1,2,6,7,9,12,13, 22,24,25,1001,1002, 1003 or 1020 (see ionmov in abinit documentation).',ch10,&
+&   'are 1,2,6,7,9,12,13, 22,24,25,101,102, 103 or 120 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    ABI_ERROR(message)
  end if
 
- if(multibinit_dtset%dynamics==1020) then
+ if(multibinit_dtset%dynamics==120) then
     write(message, '(a,i8,a)' )&
          &   'dynamics is ',multibinit_dtset%dynamics,'The atoms will not move. For test only!'
     ABI_WARNING(message)
@@ -1599,11 +1597,6 @@ multibinit_dtset%lwf_temperature_start=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_test_set_fname',tread,'KEY',&
       & key_value=multibinit_dtset%latt_test_set_fname)
  if(.not. tread==1) multibinit_dtset%latt_test_set_fname=""
-
- multibinit_dtset%latt_mapping_fname=""
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_mapping_fname',tread,'KEY',&
-      & key_value=multibinit_dtset%latt_mapping_fname)
- if(.not. tread==1) multibinit_dtset%latt_mapping_fname=""
 
 
  multibinit_dtset%latt_ddb_fnames=""
@@ -3541,24 +3534,24 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
       write(nunit,'(3x,a9,3I10)')'   natfix', natfix
    endif
 
-   if(multibinit_dtset%dynamics==1001)then
+   if(multibinit_dtset%dynamics==101)then
    end if
 
-   if(multibinit_dtset%dynamics==1002)then
+   if(multibinit_dtset%dynamics==102)then
       write(nunit,'(a15,ES15.5)')'latt_friction',multibinit_dtset%latt_friction
    end if
 
-   if(multibinit_dtset%dynamics==1003)then
+   if(multibinit_dtset%dynamics==103)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
    end if
 
-   if(multibinit_dtset%dynamics==1004)then
+   if(multibinit_dtset%dynamics==104)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
 !      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
 !      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility
    end if
 
-   if(multibinit_dtset%dynamics==1005)then
+   if(multibinit_dtset%dynamics==105)then
       write(nunit,'(a15,ES15.5)')'     latt_taut',multibinit_dtset%latt_taut
 !      write(nunit,'(a15,ES15.5)')'     latt_taup',multibinit_dtset%latt_taup
 !      write(nunit,'(a15,ES15.5)')'compressibility',multibinit_dtset%latt_compressibility

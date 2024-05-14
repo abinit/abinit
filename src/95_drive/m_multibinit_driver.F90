@@ -91,7 +91,7 @@ contains
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential, read_effective_potential
-    type(abihist) :: hist, hist_tes, hist_map
+    type(abihist) :: hist, hist_tes
 
     !type(spin_model_t) :: spin_model
     character(len=strlen) :: string, raw_string
@@ -190,7 +190,7 @@ contains
     call invars10(inp,lenstr,natom,string)
     call postfix_fnames(input_path, filnam, inp)
 
-    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 1000
+    need_new_multibinit= inp%spin_dynamics > 0 .or. inp%lwf_dynamics > 0 .or. inp%dynamics >= 100
 
     if (iam_master) then
         if(need_new_multibinit) then
@@ -324,11 +324,7 @@ elec_eval = .FALSE.
           call wrtout(ab_out,message,'COLL')
           if(filnam(5)/=''.and.filnam(5)/='no')then
              call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
-             if(trim(inp%latt_mapping_fname)/="") then
-                call effective_potential_file_readMDfile(inp%latt_mapping_fname,hist_map,option=inp%ts_option)
-             else
-                call effective_potential_file_readMDfile(filnam(5),hist_map,option=inp%ts_option)
-             endif
+
              if (hist%mxhist == 0)then
                 write(message, '(5a)' )&
 &           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
@@ -361,10 +357,8 @@ elec_eval = .FALSE.
      end if
        !  MPI BROADCAST the history of the MD
        call abihist_bcast(hist,master,comm)
-       call abihist_bcast(hist_map,master,comm)
        !  Map the hist in order to be consistent with the supercell into reference_effective_potential
-       call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm, hist_for_map=hist_map)
-       call abihist_free(hist_map)
+       call effective_potential_file_mapHistToRef(reference_effective_potential,hist,comm)
 
     end if
 

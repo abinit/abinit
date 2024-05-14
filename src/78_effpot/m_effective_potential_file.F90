@@ -3373,7 +3373,7 @@ end subroutine effective_potential_file_readMDfile
 !!
 !! SOURCE
 
-subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size, hist_for_map)
+subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbose,sc_size)
 
 !Arguments ------------------------------------
 !scalars
@@ -3381,8 +3381,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  logical,optional,intent(in) :: verbose
 !arrays
  type(effective_potential_type),intent(inout) :: eff_pot
- type(abihist),target, intent(inout) :: hist
- type(abihist), target, optional, intent(in) :: hist_for_map
+ type(abihist),intent(inout) :: hist
  integer,optional,allocatable,intent(inout) :: iatfix(:,:)
  integer,optional,intent(in) :: sc_size(3)
 !Local variables-------------------------------
@@ -3398,7 +3397,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  real(dp),allocatable :: xred_ref(:,:) ! xred_hist(:,:),
  real(dp),allocatable :: list_dist(:),list_reddist(:,:),list_absdist(:,:)
  character(len=500) :: msg
- type(abihist), pointer :: hist_map=>null()
+! type(abihist) :: hist_tmp
 ! *************************************************************************
 
 !Set optional values
@@ -3406,17 +3405,14 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,iatfix,verbos
  need_fixmap = .FALSE.
  if (present(verbose)) need_verbose = verbose
  if (present(iatfix)) need_fixmap = .TRUE.
- hist_map=> hist
- if (present(hist_for_map)) then
-    hist_map => hist_for_map
- endif
+
 
  natom_hist = size(hist%xred,2)
  nstep_hist = size(hist%xred,3)
 
 ! Try to set the supercell according to the hist file
  rprimd_ref(:,:)  = eff_pot%crystal%rprimd
- rprimd_hist(:,:) = hist_map%rprimd(:,:,1)
+ rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
 
  if(present(sc_size))then
@@ -3513,7 +3509,7 @@ do ia=1,natom_hist !Loop over all reference atoms
    shift = 0
    do ib=1,natom_hist !Loop over all atoms of distorted structure
       !Calculate list of reduced distance between reference atom ia and all others
-      list_reddist(:,ib) = hist_map%xred(:,ib,1) - xred_ref(:,ia)
+      list_reddist(:,ib) = hist%xred(:,ib,1) - xred_ref(:,ia)
       !If the distorted atom is further away than half the unit cell shift it.
       if(list_reddist(1,ib) > 0.5)then
          list_reddist(1,ib) = 1 -  list_reddist(1,ib)

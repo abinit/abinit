@@ -879,7 +879,7 @@ end if
    qdrp_cart       = zero
    sumg0           = 0
    acell           = one
-   print *, "Is this here 1??"
+
    call matr3inv(supercell%rprimd,gprimd)
    call xcart2xred(supercell%natom,supercell%rprimd,&
 &                  supercell%xcart,xred)

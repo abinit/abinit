@@ -152,7 +152,6 @@ contains
 !!  eff_pot<type(effective_potential_type)> = optional,effective_potential datatype
 !!  verbose = optional, default is true, flag to disable the verbose mode
 !!  write_HIST = optional, default is true, flag to disble the write of the HIST file
-!!  mapping_fname = optional, default is the restartxf histfile name. 
 !!
 !! NOTES
 !! This subroutine uses the arguments natom, xred, vel, amu_curr,
@@ -187,8 +186,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,&
-& scup_dtset,sc_size,efield, mapping_fname)
+& effective_potential,filename_ddb,itimimage_gstate,verbose,writeHIST,scup_dtset,sc_size,efield)
 
 !Arguments ------------------------------------
 !scalars
@@ -210,14 +208,11 @@ real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,
 real(dp), optional,intent(in):: efield(3)
 type(scup_dtset_type),optional, intent(inout) :: scup_dtset
 integer,optional,intent(in) :: sc_size(3)
-character(len=fnlen),optional, intent(in) :: mapping_fname 
 
 !Local variables-------------------------------
 !scalars
 integer,parameter :: level=102,master=0
-type(abihist),target :: hist,hist_prev, hist_map
-type(abihist),pointer :: hist_map_pointer=>null()
-logical :: has_map
+type(abihist) :: hist,hist_prev
 type(abimover) :: ab_mover
 type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
@@ -318,27 +313,16 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
  filename=trim(ab_mover%filnam_ds(4))//'_HIST.nc'
 
- has_map=.False.
- hist_map_pointer=> hist
+
  if (ab_mover%restartxf<0)then
 !  Read history from file (and broadcast if MPI)
-   if (present(mapping_fname)) then
-       if(trim(mapping_fname)/="") then
-         has_map=.True. 
-       endif
-   endif
    if (me==master) then
      call read_md_hist(filename,hist_prev,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
-     if(has_map) then
-        call read_md_hist(mapping_fname,hist_map,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
-     else
-        call read_md_hist(filename,hist_map,specs%isVused,specs%isARused,ab_mover%restartxf==-3)
      endif
-   end if
+
 
    call abihist_bcast(hist_prev,master,comm)
-   call abihist_bcast(hist_map,master,comm)
-   hist_map_pointer=> hist_map
+
 
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
@@ -365,14 +349,13 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !  If restarxf specifies to start to the last iteration
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
      if(present(effective_potential))then
-       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix, &
-               & need_verbose,sc_size, hist_for_map=hist_map_pointer) ! Map Hist to Ref to order atoms
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose,sc_size) ! Map Hist to Ref to order atoms
        xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
        hist%ihist = 1
      end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
@@ -468,8 +451,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
    ! Fill history with the values of xred, acell and rprimd
    call var2hist(acell,hist,ab_mover%natom,rprimd,xred,DEBUG)
-   print *, acell
-   print *, rprimd
+
 
    ! Fill velocities and ionic kinetic energy
    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
@@ -647,7 +629,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
            name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                if(icycle==1)call effective_potential_file_mapHistToRef(effective_potential,hist,comm,scfcv_args%dtset%iatfix,&
-&                                                                      need_verbose,sc_size=sc_size, hist_for_map=hist_map_pointer)!Map Hist to Ref to order atoms
+&                                                                      need_verbose,sc_size=sc_size)!Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
                hist%ihist = 1
              end if
@@ -771,8 +753,6 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 #if defined HAVE_NETCDF
      if (need_writeHIST.and.me==master) then
        ifirst=merge(0,1,(itime>1.or.icycle>1))
-       print *, hist%rprimd
-       print *, hist%acell
        call write_md_hist(hist,filename,ifirst,itime_hist,ab_mover%natom,scfcv_args%dtset%nctime,&
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
@@ -862,7 +842,6 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
      if (ab_mover%optcell/=0) then
        ! Cell may change
-       print *, "is it here 3??"
        call matr3inv(rprimd,gprimd)
 
 !      If metric has changed since the initialization, update the Ylm's
@@ -999,11 +978,8 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
  call abihist_free(hist)
 
- if (ab_mover%restartxf<0)then
+
    call abihist_free(hist_prev)
-   call abihist_free(hist_map)
-   nullify(hist_map_pointer)
- endif
  call abimover_destroy(ab_mover)
  call abiforstr_fin(preconforstr)
 
