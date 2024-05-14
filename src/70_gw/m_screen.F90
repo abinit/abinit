@@ -1087,12 +1087,11 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    call wrtout(std_out, " Calculating plasmon-pole model parameters...")
    ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
    call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
-   call screen%ppm%print(units)
+   !call screen%ppm%print(units)
 
    do iq_ibz=1,nqibz
      if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
        call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
-
        !if (screen%ppm%has_qibz(iq_ibz) == PPM_NOTAB) call screen%ppm%malloc_iqibz(iq_ibz)
        call screen%PPm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
