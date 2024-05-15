@@ -1105,6 +1105,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%getdvdb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getdvdb','INT',0)
 
+ intarr(1,:)=dtsets(:)%getdrhodb
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getdrhodb','INT',0)
+
  intarr(1,:)=dtsets(:)%getefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getefmas','INT',0)
 
