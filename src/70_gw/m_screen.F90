@@ -119,13 +119,14 @@ type,public :: screen_info_t
   integer :: vtx_family = VTX_FAMILY_NONE
   ! Vertex correction family.
 
-  integer :: invalid_freq=0
-  ! Sets the procedure to follow when a PPM frequency is invalid (negative or imaginary), see input variable gw_invalid_freq
+  integer :: invalid_freq = 0
+  ! Sets the procedure to follow when a ppm frequency is invalid (negative or imaginary),
+  ! see input variable gw_invalid_freq
 
-  integer :: ixc=0
+  integer :: ixc = 0
   ! XC functional used for the TDDFT-based vertex.
 
-  integer :: use_ada=0
+  integer :: use_ada = 0
   ! >0 if ADA vertex is used.
 
   integer :: use_mdf = MDL_NONE
@@ -151,9 +152,9 @@ type,public :: screen_info_t
   real(dp) :: drude_plsmf = zero
   ! Drude plasma frequency used for PPmodel 1.
 
-contains
+  contains
 
- procedure :: print => screen_info_print
+    procedure :: print => screen_info_print
 
 end type screen_info_t
 !!***
@@ -250,7 +251,7 @@ end type screen_info_t
   ! Density in real space used to construct the TDDFT kernel or the model dielectric function.
   ! NOTE that ae_rhor is given on the dense mesh as it contains the PAW onsite contribution.
 
-  character(len=fnlen) :: fname=ABI_NOFILE  ! Name of the file used for the out-of-core solution.
+  character(len=fnlen) :: fname = ABI_NOFILE  ! Name of the file used for the out-of-core solution.
 
   real(dp),allocatable :: qibz(:,:)
   ! (3,nqibz)
@@ -295,7 +296,7 @@ end type screen_info_t
   ! If q_bz is in the IBZ, Fgg_qbz *points* to Fgg(iq_ibz)
   ! If q_bz is not in the IBZ, Fgg_qbz is *allocated* and used to store the symmetrized matrix.
 
-  type(ppmodel_t) :: PPm
+  type(ppmodel_t) :: ppm
   ! Structure storing the plasmon-pole parameters.
 
   type(screen_info_t) :: Info
@@ -321,8 +322,11 @@ contains
   procedure :: w0gemv => screen_w0gemv
     ! Matrix vector multiplication \sum_{G'} F_{G,G') |u(G')>.
 
-  procedure :: calc_ppm_sigc => screen_calc_ppm_sigc
-    ! Compute the frequency convolution with the PPM.
+  procedure :: calc_sigc => screen_calc_sigc
+    ! Compute the frequency convolution.
+
+  procedure :: ihave_fgg => screen_ihave_fgg
+    ! Inquire the processor whether it has a particular F_{GG')(q) and with which status.
 
 end type screen_t
 !!***
@@ -562,7 +566,7 @@ subroutine screen_fgg_qbz_set(screen, iq_bz, nqlwl, how)
      nullify(screen%Fgg_qbz)
      ABI_MALLOC(screen%Fgg_qbz,)
 
-     call fgg_init(screen%Fgg_qbz, screen%npw, screen%nomega, nqlwl)
+     call screen%Fgg_qbz%init(screen%npw, screen%nomega, nqlwl)
      screen%fgg_qbz_stat = FGG_QBZ_ISALLOCATED
 
    case (FGG_QBZ_ISALLOCATED)
@@ -660,7 +664,7 @@ subroutine screen_nullify(screen)
  nullify(screen%Fgg_qbz); screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Nedded since the initial status is undefined.
  nullify(screen%Fgg)
 
- call screen%PPm%nullify()
+ call screen%ppm%nullify()
 
 end subroutine screen_nullify
 !!***
@@ -723,7 +727,7 @@ subroutine screen_free(screen)
  end if
 
  ! Free the plasmon pole tables.
- call screen%PPm%free()
+ call screen%ppm%free()
 
 end subroutine screen_free
 !!***
@@ -898,7 +902,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  deallocate_Fgg = .FALSE.
 
- screen%has_fgg=0; if (ANY(screen%Info%wint_method == [WINT_CONTOUR, WINT_AC])) screen%has_fgg = 1
+ screen%has_fgg = 0; if (ANY(screen%Info%wint_method == [WINT_CONTOUR, WINT_AC])) screen%has_fgg = 1
 
  if (screen%has_fgg > 0 .and. screen%has_ppmodel > 0) then
    ABI_WARNING("Both PPmodel tables and F_(GG')(q,w) are stored in memory")
@@ -1086,14 +1090,14 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  if (screen%has_ppmodel > 0) then
    call wrtout(std_out, " Calculating plasmon-pole model parameters...")
    ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
-   call screen%PPm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
+   call screen%ppm%init(screen%mqmem, screen%nqibz, screen%npw, ppmodel, drude_plsmf, screen%Info%invalid_freq)
    !call screen%ppm%print(units)
 
    do iq_ibz=1,nqibz
-     if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
+     if (screen%ihave_fgg(iq_ibz, how="Stored")) then
        call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
        !if (screen%ppm%has_qibz(iq_ibz) == PPM_NOTAB) call screen%ppm%malloc_iqibz(iq_ibz)
-       call screen%PPm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
+       call screen%ppm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
    end do
@@ -1132,7 +1136,7 @@ end subroutine screen_init
 !!  iq_bz=Index of the q-point in the BZ where F(q_bz)_GG' is wanted.
 !!
 !! SIDE EFFECTS
-!!   screen%PPm
+!!   screen%ppm
 !!   screen%Fgg_qbz
 !!
 !! NOTES
@@ -1183,7 +1187,7 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
  ! ========================================================
  ! ==== Branching for in-core or out-of-core solutions ====
  ! ========================================================
- if (screen_ihave_fgg(screen, iq_ibz, how="Stored")) then
+ if (screen%ihave_fgg(iq_ibz, how="Stored")) then
 
    if (q_isirred) then
      ! Symmetrization is not needed. Target the data in memory.
@@ -1200,11 +1204,11 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
 
    if (screen%has_ppmodel > 0) then
      ! Symmetrize the ppmodel tables: em1_qibz => W%Fgg(iq_ibz)%mat
-     call screen%PPm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, screen%Fgg(iq_ibz)%mat, &
+     call screen%ppm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, screen%Fgg(iq_ibz)%mat, &
                                  screen%nfftf_tot, screen%ngfftf, screen%ae_rhor(:,1))
    end if
 
- else if (screen_ihave_fgg(screen, iq_ibz, how="Allocated")) then
+ else if (screen%ihave_fgg(iq_ibz, how="Allocated")) then
    ABI_ERROR("Fgg_iqibz is allocated but not initialized!")
 
  else
@@ -1244,7 +1248,7 @@ subroutine screen_rotate_iqbz(screen, iq_bz, Cryst, Gsph, Qmesh, Vcp)
    if (screen%has_ppmodel > 0) then
      ABI_ERROR("Not implemented error")
      ! Symmetrize the ppmodel using em1_qibz.
-     call screen%PPm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, &
+     call screen%ppm%rotate_iqbz(iq_bz, Cryst, Qmesh, Gsph, npw, nomega, screen%omega, &
                                  screen%Fgg_qbz%mat, screen%nfftf_tot, screen%ngfftf, screen%ae_rhor(:,1))
    end if
  end if
@@ -1360,9 +1364,9 @@ end subroutine screen_w0gemv
 
 !----------------------------------------------------------------------
 
-!!****f* m_screen/screen_calc_ppm_sigc
+!!****f* m_screen/screen_calc_sigc
 !! NAME
-!! screen_calc_ppm_sigc
+!! screen_calc_sigc
 !!
 !! FUNCTION
 !!
@@ -1379,8 +1383,8 @@ end subroutine screen_w0gemv
 !!
 !! SOURCE
 
-subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i, zcut, &
-                                nspinor, npwx, npwc, rhotwgp, acc_ket, sigcme)
+subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i, zcut, &
+                            nspinor, npwx, npwc, rhotwgp, out_ket, sigcme)
 
 !Arguments ------------------------------------
 !scalars
@@ -1391,7 +1395,7 @@ subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus
 !arrays
  real(dp),intent(in) :: omegame0i(nomega)
  complex(gwpc),intent(in) :: rhotwgp(npwx*nspinor)
- complex(gwpc),intent(inout) :: acc_ket(npwc*nspinor, nomega)
+ complex(gwpc),intent(inout) :: out_ket(npwc*nspinor, nomega)
  complex(gwpc),intent(out) :: sigcme(nomega)
 
 !Local variables-------------------------------
@@ -1399,45 +1403,51 @@ subroutine screen_calc_ppm_sigc(screen, trans, nomega, omegame0i, theta_mu_minus
 
 ! *************************************************************************
 
- ABI_CHECK(screen%has_ppmodel > 0, sjoin("has_ppmodel:", itoa(screen%has_ppmodel)))
+ out_ket = czero_gw
 
- acc_ket = czero_gw
+ select case (screen%info%wint_method)
+ case (WINT_PPMODEL)
+   ABI_CHECK_IGE(screen%has_ppmodel, 0, "has_ppmodel should be > 0")
 
- select case (trans)
- case ("N")
-   associate (botsq => screen%ppm%bigomegatwsq_qbz%vals, &
-              otq   => screen%ppm%omegatw_qbz%vals, &
-              eig   => screen%ppm%eigpot_qbz%vals)
+   select case (trans)
+   case ("N")
+     associate (botsq => screen%ppm%bigomegatwsq_qbz%vals, &
+                otq   => screen%ppm%omegatw_qbz%vals, &
+                eig   => screen%ppm%eigpot_qbz%vals)
 
-     call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
-                               omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+       call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
+                                 omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, out_ket, sigcme)
 
-   end associate
+     end associate
 
- case ("T")
-   associate (ppm => screen%ppm, &
-              botsq => screen%ppm%bigomegatwsq_qbz%vals, &
-              otq   => screen%ppm%omegatw_qbz%vals, &
-              eig   => screen%ppm%eigpot_qbz%vals)
+   case ("T")
+     associate (ppm => screen%ppm, &
+                botsq => screen%ppm%bigomegatwsq_qbz%vals, &
+                otq   => screen%ppm%omegatw_qbz%vals, &
+                eig   => screen%ppm%eigpot_qbz%vals)
 
-   ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
-   botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
-   !botsq_conjg_transp=CONJG(botsq_conjg_transp)
-   ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
-   otq_transp=TRANSPOSE(otq)
+     ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
+     botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up
+     !botsq_conjg_transp=CONJG(botsq_conjg_transp)
+     ABI_MALLOC(otq_transp,(ppm%dm2_otq, ppm%npwc))
+     otq_transp=TRANSPOSE(otq)
 
-   call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
-                             omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, acc_ket, sigcme)
+     call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq_conjg_transp, otq_transp, &
+                               omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, out_ket, sigcme)
 
-   ABI_FREE(botsq_conjg_transp)
-   ABI_FREE(otq_transp)
-   end associate
+     ABI_FREE(botsq_conjg_transp)
+     ABI_FREE(otq_transp)
+     end associate
+
+   case default
+    ABI_ERROR(sjoin("Invalid trans:", trans))
+   end select
 
  case default
-  ABI_ERROR(sjoin("Invalid trans:", trans))
+   ABI_ERROR(sjoin("Unsupported wint_method:", itoa(screen%info%wint_method)))
  end select
 
-end subroutine screen_calc_ppm_sigc
+end subroutine screen_calc_sigc
 !!***
 
 !----------------------------------------------------------------------

@@ -69,8 +69,7 @@ module m_ppmodel
 !! ppmodel_t
 !!
 !! FUNCTION
-!!  This structure datatype gathers all
-!!  the information on the Plasmonpole technique used in the calculations
+!!  This datatype gathers all the information on the Plasmonpole technique used in the calculations
 !!
 !! NOTES
 !!  If you modify this datatype, please check there there is no creation/destruction/copy routine,
@@ -149,15 +148,15 @@ module m_ppmodel
    ! (Points|Stores) the eigvectors of the symmetrized inverse dielectric matrix
 
    type(array2_gwpc_t),allocatable :: bigomegatwsq(:)
-   ! bigomegatwsq(nqibz)%value(npwc,dm2_botsq)
+   ! (nqibz)%value(npwc,dm2_botsq)
    ! Plasmon pole parameters $\tilde\Omega^2_{G Gp}(q)$.
 
    type(array2_gwpc_t),allocatable :: omegatw(:)
-   ! omegatw(nqibz)%value(npwc,dm2_otq)
+   ! (nqibz)%value(npwc,dm2_otq)
    ! Plasmon pole parameters $\tilde\omega_{G Gp}(q)$.
 
    type(array2_gwpc_t),allocatable :: eigpot(:)
-   ! eigpot(nqibz)%value(dm_eig,dm_eig)
+   ! (nqibz)%value(dm_eig,dm_eig)
    ! Eigvectors of the symmetrized inverse dielectric matrix
 
 contains
@@ -231,14 +230,16 @@ contains
 !!  There is however a check in sigma
 !!
 !!  * Remember the symmetry properties of \tilde\espilon^{-1}
+!!
 !!    If q_bz=Sq_ibz+G0:
 !!
-!!    $\epsilon^{-1}_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau}\epsilon^{-1}_{G1,G2)}(q)
+!!      $\epsilon^{-1}_{SG1-G0,SG2-G0}(q_bz) = e^{+iS(G2-G1).\tau}\epsilon^{-1}_{G1,G2)}(q)
 !!
 !!    If time-reversal symmetry can be used then :
-!!    $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau}\epsilon^{-1}_{-S^{-1}(G1+Go),-S^{-1}(G2+G0)}^*(q)
 !!
-!! * Notice that eig is used only if ppm%model==3
+!!       $\epsilon^{-1}_{G1,G2}(-q_bz) = e^{+i(G1-G2).\tau}\epsilon^{-1}_{-S^{-1}(G1+Go),-S^{-1}(G2+G0)}^*(q)
+!!
+!! * Note that eig is used only if ppm%model==3
 !!
 !! SOURCE
 
@@ -276,8 +277,8 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
  omegatw      => ppm%omegatw(iq_curr)%vals
 
  ! Symmetrize the PPM parameters
- SELECT CASE (ppm%model)
- CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
+ select case (ppm%model)
+ case (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
    ! Plasmon pole frequencies otq are invariant under symmetry
 !$omp parallel do private(isg1, isg2)
    do jj=1,ppm%npwc
@@ -289,7 +290,7 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
      end do
    end do
 
- CASE (PPM_LINDEN_HORSH)
+ case (PPM_LINDEN_HORSH)
    ! For notations see page 22 of Quasiparticle Calculations in solid (Aulbur et al)
    !  If q_bz = Sq_ibz + G0 then:
    !
@@ -306,7 +307,7 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
    end do
    if (itim_q==2) eig=CONJG(eig) ! Time-reversal
 
- CASE (PPM_ENGEL_FARID)
+ case (PPM_ENGEL_FARID)
    ! For notations see page 23 of Quasiparticle Calculations in solid (Aulbur et al)
    ! If q_bz = Sq_ibz + G0 then:
    !
@@ -320,9 +321,9 @@ subroutine ppm_get_qbz(ppm, Gsph, Qmesh, iq_bz, botsq, otq, eig)
      end do
    end do
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
- END SELECT
+ end select
 
  ! Take into account time-reversal symmetry.
  if (itim_q == 2) then
@@ -341,7 +342,7 @@ end subroutine ppm_get_qbz
 !!  ppm_nullify
 !!
 !! FUNCTION
-!!  Nullify dynamic entities in a ppmodel_t object.
+!!  Nullify pointers in a ppmodel_t object.
 !!
 !! SOURCE
 
@@ -462,9 +463,19 @@ subroutine ppm_malloc_iqibz(ppm, iq_ibz)
 
 ! *********************************************************************
 
+ ABI_CHECK(allocated(ppm%bigomegatwsq), "bigomegatwsq is not allocated")
+ ABI_CHECK(allocated(ppm%omegatw), "omegatwsq is not allocated")
+ ABI_CHECK(allocated(ppm%eigpot), "eigpot is not allocated")
+
+ ABI_CHECK_IGEQ(size(ppm%bigomegatwsq), iq_ibz, "bigomegatwsq too small")
+ ABI_CHECK_IGEQ(size(ppm%omegatw), iq_ibz, "omegatwsq too small")
+ ABI_CHECK_IGEQ(size(ppm%eigpot), iq_ibz, "eigpot too small")
+
+ !print *, "ppm%npwc, ppm%dm2_botsq, ppm%dm2_otq, ppm%dm_eig:", ppm%npwc, ppm%dm2_botsq, ppm%dm2_otq, ppm%dm_eig
  ABI_MALLOC_OR_DIE(ppm%bigomegatwsq(iq_ibz)%vals, (ppm%npwc, ppm%dm2_botsq), ierr)
  ABI_MALLOC_OR_DIE(ppm%omegatw(iq_ibz)%vals, (ppm%npwc, ppm%dm2_otq), ierr)
  ABI_MALLOC_OR_DIE(ppm%eigpot(iq_ibz)%vals, (ppm%dm_eig, ppm%dm_eig), ierr)
+
  ppm%has_qibz(iq_ibz) = PPM_TAB_ALLOCATED
 
 end subroutine ppm_malloc_iqibz
@@ -520,7 +531,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
 !Arguments ------------------------------------
  class(ppmodel_t),intent(out) :: ppm
- integer,intent(in) :: mqmem,nqibz,npwe,ppmodel,invalid_freq
+ integer,intent(in) :: mqmem, nqibz, npwe, ppmodel, invalid_freq
  real(dp),intent(in) :: drude_plsmf
 
 !Local variables-------------------------------
@@ -543,7 +554,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  ppm%model       = ppmodel
  ppm%drude_plsmf = drude_plsmf
  ppm%userho      = 0
- if (ANY(ppmodel == [PPM_HYBERTSEN_LOUIE, PPM_LINDEN_HORSH, PPM_ENGEL_FARID])) ppm%userho = 1
+ if (any(ppmodel == [PPM_HYBERTSEN_LOUIE, PPM_LINDEN_HORSH, PPM_ENGEL_FARID])) ppm%userho = 1
 
  ABI_MALLOC(ppm%keep_qibz, (nqibz))
  ppm%keep_qibz = .FALSE.; if (ppm%mqmem > 0) ppm%keep_qibz = .TRUE.
@@ -559,7 +570,6 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
  ABI_MALLOC(ppm%eigpot, (dim_q))
 
  select case (ppm%model)
-
  case (PPM_NONE)
    ABI_WARNING("Called with ppmodel == 0")
    ppm%dm2_botsq = 0
@@ -583,7 +593,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
    ppm%dm_eig    = 1 ! Should be set to 0, but g95 doesnt like zero-sized arrays
 
  case default
-   ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
+   ABI_BUG(sjoin('Wrong ppm%model:', itoa(ppm%model)))
  end select
 
  ! Allocate tables depending on the value of keep_qibz.
@@ -680,19 +690,19 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
 
  ! Allocate plasmonpole parameters
  ! TODO ppmodel==1 by default, should be set to 0 if AC and CD
- SELECT CASE (ppm%model)
+ select case (ppm%model)
 
- CASE (PPM_NONE)
+ case (PPM_NONE)
    ABI_COMMENT(' Skipping Plasmompole model calculation')
 
- CASE (PPM_GODBY_NEEDS)
+ case (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
    do iq_ibz=1,nqiA
      call cppm1par(npwe,nomega,omega,ppm%drude_plsmf,&
                    epsm1(:,:,:,iq_ibz),ppm%omegatw(iq_ibz)%vals,ppm%bigomegatwsq(iq_ibz)%vals)
    end do
 
- CASE (PPM_HYBERTSEN_LOUIE)
+ case (PPM_HYBERTSEN_LOUIE)
    do iq_ibz=1,nqiA
      qpt = Qmesh%ibz(:,iq_ibz); if (single_q) qpt=Qmesh%ibz(:,iqiA)
 
@@ -715,14 +725,14 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
       ABI_WARNING(msg)
    end if
 
- CASE (PPM_LINDEN_HORSH) ! TODO Check better double precision, this routine is in a messy state
+ case (PPM_LINDEN_HORSH) ! TODO Check better double precision, this routine is in a messy state
    do iq_ibz=1,nqiA
      qpt = Qmesh%ibz(:,iq_ibz); if (single_q) qpt=Qmesh%ibz(:,iqiA)
      call cppm3par(qpt,npwe,epsm1(:,:,1,iq_ibz),ngfftf,gvec,Cryst%gprimd,rhor_tot,nfftf,&
                    ppm%bigomegatwsq(iq_ibz)%vals,ppm%omegatw(iq_ibz)%vals(:,1),ppm%eigpot(iq_ibz)%vals)
    end do
 
- CASE (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
+ case (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
    do iq_ibz=1,nqiA
      qpt = Qmesh%ibz(:,iq_ibz); if (single_q) qpt=Qmesh%ibz(:,iqiA)
      if ((ALL(ABS(qpt)<1.0e-3))) qpt = GW_Q0_DEFAULT ! FIXME
@@ -730,9 +740,9 @@ subroutine ppm_setup(ppm, Cryst, Qmesh, npwe, nomega, omega, epsm1, nfftf, gvec,
                    ppm%bigomegatwsq(iq_ibz)%vals,ppm%omegatw(iq_ibz)%vals(:,1))
    end do
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
- END SELECT
+ end select
 
  DBG_EXIT("COLL")
 
@@ -2071,8 +2081,8 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 
 !*************************************************************************
 
- SELECT CASE (ppm%model)
- CASE (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
+ select case (ppm%model)
+ case (PPM_GODBY_NEEDS, PPM_HYBERTSEN_LOUIE)
    fully_occupied = (ABS(theta_mu_minus_e0i-one) < 0.001)
    totally_empty  = (ABS(theta_mu_minus_e0i    ) < 0.001)
 
@@ -2129,7 +2139,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 
    ket=ket*half
 
- CASE (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
+ case (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
    ABI_CHECK(nspinor == 1, "nspinor/=1 not allowed")
 
    ! rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
@@ -2146,8 +2156,8 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
      do ii=1,npwc ! Loop over the DM bands
        num=czero_gw
 
-       SELECT CASE (ppm%model)
-       CASE (PPM_LINDEN_HORSH)
+       select case (ppm%model)
+       case (PPM_LINDEN_HORSH)
          ! Calculate \beta (eq. 106 pag 47)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*eig(ig,ii)
@@ -2155,15 +2165,15 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
          numf=num*CONJG(num) !MG this means that we cannot do SCGW
          numf=numf*botsq(ii,1)
 
-       CASE (PPM_ENGEL_FARID)
+       case (PPM_ENGEL_FARID)
          do ig=1,npwc
            num=num+rhotwgdpcc(ig)*botsq(ig,ii)
          end do
          numf=num*CONJG(num) !MG this means that we cannot do SCGW
 
-       CASE DEFAULT
+       case default
          ABI_ERROR("Wrong ppm%model")
-       END SELECT
+       end select
 
        !numf=num*CONJG(num) !MG this means that we cannot do SCGW
        !if (ppm%model==3) numf=numf*botsq(ii,1)
@@ -2184,9 +2194,9 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
    end do !ios
    ABI_FREE(rhotwgdpcc)
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
- END SELECT
+ end select
 
 end subroutine ppm_calc_sigc
 !!***
@@ -2391,8 +2401,8 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  DBG_ENTER("COLL")
 
  if (ppm%has_qibz(iq_ibz) /= PPM_TAB_ALLOCATED) then
-   ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
-   !call ppm%malloc_iqibz(iq_ibz)
+   !ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
+   call ppm%malloc_iqibz(iq_ibz)
  end if
 
  qpt = Qmesh%ibz(:,iq_ibz)
@@ -2400,16 +2410,16 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
 
  ! Calculate plasmonpole parameters
  ! TODO ppmodel==1 by default, should be set to 0 if AC and CD
- SELECT CASE (ppm%model)
+ select case (ppm%model)
 
- CASE (PPM_NONE)
+ case (PPM_NONE)
    ABI_COMMENT('Skipping Plasmonpole model calculation')
 
- CASE (PPM_GODBY_NEEDS)
+ case (PPM_GODBY_NEEDS)
    ! Note: the q-dependency enters only through epsilon^-1.
    call cppm1par(npwe, nomega, omega, ppm%drude_plsmf, epsm1_ggw, ppm%omegatw(iq_ibz)%vals, ppm%bigomegatwsq(iq_ibz)%vals)
 
- CASE (PPM_HYBERTSEN_LOUIE)
+ case (PPM_HYBERTSEN_LOUIE)
    call cppm2par(qpt, npwe, epsm1_ggw(:,:,1), ngfftf, gvec, Cryst%gprimd, rhor_tot, nfftf, Cryst%gmet, &
                  ppm%bigomegatwsq(iq_ibz)%vals, ppm%omegatw(iq_ibz)%vals, ppm%invalid_freq)
 
@@ -2426,20 +2436,20 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
       ABI_WARNING(msg)
    end if
 
- CASE (PPM_LINDEN_HORSH)
+ case (PPM_LINDEN_HORSH)
    ! TODO Check better double precision, this routine is in a messy state
    call cppm3par(qpt, npwe,epsm1_ggw(:,:,1), ngfftf,gvec, Cryst%gprimd, rhor_tot, nfftf, &
                  ppm%bigomegatwsq(iq_ibz)%vals, ppm%omegatw(iq_ibz)%vals(:,1), ppm%eigpot(iq_ibz)%vals)
 
- CASE (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
+ case (PPM_ENGEL_FARID)  ! TODO Check better double precision, this routine is in a messy state
    if ((ALL(ABS(qpt)<1.0e-3))) qpt = GW_Q0_DEFAULT ! FIXME
 
    call cppm4par(qpt, npwe,epsm1_ggw(:,:,1), ngfftf, gvec, Cryst%gprimd, rhor_tot, nfftf, &
                  ppm%bigomegatwsq(iq_ibz)%vals, ppm%omegatw(iq_ibz)%vals(:,1))
 
- CASE DEFAULT
+ case default
    ABI_BUG(sjoin('Wrong ppm%model:',itoa(ppm%model)))
- END SELECT
+ end select
 
  DBG_EXIT("COLL")
 

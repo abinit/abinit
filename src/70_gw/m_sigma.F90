@@ -233,10 +233,10 @@ MODULE m_sigma
      ! Compute hartree energy.
 
     procedure :: get_kiene => mels_get_kiene
-   ! Compute kinetic energy.
+     ! Compute kinetic energy.
 
     procedure :: ncwrite => sigma_ncwrite
-   ! Write data in netcdf format.
+     ! Write data in netcdf format.
 
     procedure :: write_sigma_results => write_sigma_results
     procedure :: print_Sigma_perturbative => print_Sigma_perturbative
@@ -272,7 +272,7 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
+subroutine write_sigma_header(Sigp, Er, Cryst, Kmesh, Qmesh)
 
 !Arguments ------------------------------------
 !scalars
@@ -285,10 +285,12 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
 !scalars
  integer :: gwcalctyp,mod10
  character(len=500) :: msg
+ integer :: units(2)
 
 ! *************************************************************************
 
- call wrtout([std_out, ab_out], ' SIGMA fundamental parameters:')
+ units = [std_out, ab_out]
+ call wrtout(units, ' SIGMA fundamental parameters:')
 
  gwcalctyp=Sigp%gwcalctyp
  mod10=MOD(Sigp%gwcalctyp,10)
@@ -314,81 +316,81 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    write(msg,'(a,i3)')' Wrong value for Sigp%gwcalctyp = ',Sigp%gwcalctyp
    ABI_BUG(msg)
  END SELECT
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
  write(msg,'(a,i12)')' number of plane-waves for SigmaX         ',Sigp%npwx
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of plane-waves for SigmaC and W   ',Sigp%npwc
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',Sigp%npwwfn
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of bands                          ',Sigp%nbnds
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of independent spin polarizations ',Sigp%nsppol
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of spinorial components           ',Sigp%nspinor
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of k-points in IBZ                ',Kmesh%nibz
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of q-points in IBZ                ',Qmesh%nibz
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of symmetry operations            ',Cryst%nsym
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of k-points in BZ                 ',Kmesh%nbz
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of q-points in BZ                 ',Qmesh%nbz
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of frequencies for dSigma/dE      ',Sigp%nomegasrd
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,f12.2)')' frequency step for dSigma/dE [eV]        ',Sigp%deltae*Ha_eV
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,i12)')' number of omega for Sigma on real axis   ',Sigp%nomegasr
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,f12.2)')' max omega for Sigma on real axis  [eV]   ',Sigp%maxomega_r*Ha_eV
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
  write(msg,'(a,f12.2)')' zcut for avoiding poles [eV]             ',Sigp%zcut*Ha_eV
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
  if (Sigp%mbpt_sciss>0.1d-4) then
    write(msg,'(a,f12.2)')' scissor energy [eV]                      ',Sigp%mbpt_sciss*Ha_eV
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
  end if
 
  if (mod10==1) then
    write(msg,'(a,i12)')' number of imaginary frequencies for Sigma',Sigp%nomegasi
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    ! MRM not needed for GW 1RDM
    if(gwcalctyp/=21) then
-    write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
-    call wrtout([std_out, ab_out], msg)
+     write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
+     call wrtout(units, msg)
    endif
  end if
 
  if (sigma_needs_w(Sigp)) then
    write(msg,'(2a)')ch10,' EPSILON^-1 parameters (SCR file):'
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' dimension of the eps^-1 matrix on file   ',Er%Hscr%npwe
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' dimension of the eps^-1 matrix used      ',Er%npwe
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of plane-waves for wavefunctions  ',Er%Hscr%npwwfn_used
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of bands                          ',Er%Hscr%nbnds_used
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of q-points in IBZ                ',Qmesh%nibz
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of frequencies                    ',Er%nomega
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of real frequencies               ',Er%nomega_r
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
    write(msg,'(a,i12)')' number of imag frequencies               ',Er%nomega_i
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
  end if
 
 ! MRM not needed for GW 1RDM
-  if(gwcalctyp/=21) then
-   write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
-   call wrtout([std_out, ab_out], msg)
+  if (gwcalctyp/=21) then
+    write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
+    call wrtout(units, msg)
   endif
 
  if (gwcalctyp<10) then
@@ -398,7 +400,7 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  else
    write(msg,'(a)')' Self-Consistent on Energies and Wavefunctions'
  end if
- call wrtout([std_out, ab_out], msg)
+ call wrtout(units, msg)
 
 end subroutine write_sigma_header
 !!***
@@ -413,8 +415,7 @@ end subroutine write_sigma_header
 !!  Write the final results of the GW calculation.
 !!
 !! INPUTS
-!!  KS_BSt<ebands_t>=Info on the KS band structure energies.
-!!     %eig(mband,nkibz,nsppol)= KS energies
+!!  ks_ebands<ebands_t>=Info on the KS band structure energies.
 !!  ikibz= index of the k-point in the array kibz, where GW corrections are calculated
 !!  ikcalc= index of the k-point in the array Sigp%kptgw2bz
 !!  Sigp=sigparams_t datatype
@@ -424,13 +425,13 @@ end subroutine write_sigma_header
 !!
 !! SOURCE
 
-subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, KS_BSt)
+subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, ks_ebands)
 
 !Arguments ------------------------------------
 !scalars
  class(sigma_t),intent(in) :: sigma
  integer,intent(in) :: ikcalc,ikibz
- type(ebands_t),intent(in) :: KS_BSt
+ type(ebands_t),intent(in) :: ks_ebands
  type(sigparams_t),intent(in) :: Sigp
 
 !Local variables-------------------------------
@@ -497,13 +498,13 @@ subroutine write_sigma_results(sigma, ikcalc, ikibz, Sigp, KS_BSt)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp >= 10) then
-       call sigma%print_Sigma_QPSC(ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
-       call sigma%print_Sigma_QPSC(ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
+       call sigma%print_Sigma_QPSC(ikibz,ib,is,ks_ebands,unit=dev_null, ydoc=ydoc)
+       call sigma%print_Sigma_QPSC(ikibz,ib,is,ks_ebands,unit=std_out,prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                 &
         ib,                                                           &
         sigma%en_qp_diago(ib,ikibz,is)*Ha_eV,                            &
-        (sigma%en_qp_diago(ib,ikibz,is) - KS_BSt%eig(ib,ikibz,is))*Ha_eV,&
+        (sigma%en_qp_diago(ib,ikibz,is) - ks_ebands%eig(ib,ikibz,is))*Ha_eV,&
         zero
 
      else
@@ -773,7 +774,7 @@ end subroutine print_Sigma_perturbative
 !!
 !! SOURCE
 
-subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,ydoc)
+subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,ks_ebands,unit,prtvol,mode_paral,ydoc)
 
 !Arguments ------------------------------------
 !scalars
@@ -781,7 +782,7 @@ subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral
  integer,intent(in) :: iband,ik_ibz,isp
  integer,intent(in),optional :: prtvol,unit
  character(len=*),intent(in),optional :: mode_paral
- type(ebands_t),intent(in) :: KS_BSt
+ type(ebands_t),intent(in) :: ks_ebands
  type(yamldoc_t),intent(inout),optional :: ydoc
 
 !Local variables-------------------------------
@@ -804,7 +805,7 @@ subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral
    if (sigma%nsig_ab/=1) then
      write(msg,'(i5,12(2x,f8.3))')                       &
            iband,                                        &
-           KS_BSt%eig     (iband,ik_ibz,1)*Ha_eV,        &
+           ks_ebands%eig     (iband,ik_ibz,1)*Ha_eV,        &
            SUM(sigma%vxcme   (iband,ik_ibz,:))*Ha_eV,       &
            sigma%e0          (iband,ik_ibz,1)*Ha_eV,        &
       REAL(SUM(sigma%hhartree(iband,iband,ik_ibz,:)))*Ha_eV,&
@@ -840,7 +841,7 @@ subroutine print_Sigma_QPSC(sigma,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral
    else
      write(msg,'(i5,12(2x,f8.3))')                       &
            iband,                                        &
-           KS_BSt%eig    (iband,ik_ibz,isp)*Ha_eV,       &
+           ks_ebands%eig    (iband,ik_ibz,isp)*Ha_eV,       &
            sigma%vxcme      (iband,ik_ibz,isp)*Ha_eV,       &
            sigma%e0         (iband,ik_ibz,isp)*Ha_eV,       &
       REAL(sigma%hhartree   (iband,iband,ik_ibz,isp))*Ha_eV,&
