@@ -518,7 +518,7 @@ elec_eval = .FALSE.
     call wrtout(ab_out,message,'COLL')
 
     call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist, inp%bound_EFS,&
-&                       inp%bound_factors,inp%bound_penalty,comm, fit_weight_T=inp%fit_weight_T)
+&                       inp%bound_factors,inp%bound_penalty,comm, fit_weight_T=inp%fit_weight_T, bound_option=inp%bound_option)
 
     end if
 
