@@ -12,4 +12,6 @@ keywords = [
 inp_files = [
     # Fake test t01.abi, to initiate the tests/v10 directory . SHOULD BE REPLACED BY THE TEST OF A REAL NEW DEVELOPMENT.
     "t01.abi" ,  # test post treatment of an increase of symmetry due to geometry optimization
+    "t02.abi",  # same as v9[206] but with istwfk>1
+    "t03.abi",  # same as v10[02] but with norm-conserving pseudos
 ]
