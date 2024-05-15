@@ -307,14 +307,13 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
 
  DBG_ENTER("COLL")
 
- !@gsphere_t
- ! === Copy info on symmetries ===
+ ! Copy info on symmetries
  nsym   =  Cryst%nsym
  timrev =  Cryst%timrev
  symrec => Cryst%symrec
  tnons  => Cryst%tnons
- !
- ! === Initialize the object ===
+
+ ! Initialize the object
  Gsph%istwfk = 1           ! Time reversal is not used here.
  Gsph%nsym   = nsym
  Gsph%timrev = timrev
@@ -337,7 +336,7 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
      g2=gvec(2,ig)
      g3=gvec(3,ig)
      gsq=       Cryst%gmet(1,1)*g1**2+Cryst%gmet(2,2)*g2**2+Cryst%gmet(3,3)*g3**2+ &
-&          two*(Cryst%gmet(1,2)*g1*g2+Cryst%gmet(1,3)*g1*g3+Cryst%gmet(2,3)*g2*g3)
+           two*(Cryst%gmet(1,2)*g1*g2+Cryst%gmet(1,3)*g1*g3+Cryst%gmet(2,3)*g2*g3)
      max_ecut=MAX(max_ecut,gsq)
    end do
    max_ecut=two*max_ecut*pi**2
@@ -345,7 +344,7 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
 
  else
    ! To be consistent with the previous implementation.
-   ABI_WARNING("Init from ecut has to be tested")
+   !ABI_WARNING("Init from ecut has to be tested")
    !call setshells(ecut,npw,nsh,nsym,Cryst%gmet,Cryst%gprimd,Cryst%symrel,tag,Cryst%ucvol)
    Gsph%ecut = ecut
    pinv=+1; kptns1(:,1)=k_gamma
@@ -355,9 +354,9 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
    Gsph%gvec = gvec_ptr
    ABI_FREE(gvec_ptr)
  end if
- !
+
  ! Calculate phase exp{-i2\pi G.\tau}
- ABI_MALLOC(Gsph%phmGt, (Gsph%ng,nsym))
+ ABI_MALLOC(Gsph%phmGt, (Gsph%ng, nsym))
  do isym=1,nsym
    do ig=1,Gsph%ng
     Gsph%phmGt(ig, isym) = EXP(-j_dpc*two_pi*DOT_PRODUCT(Gsph%gvec(:,ig), tnons(:,isym)))
@@ -378,7 +377,7 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  ! * Shells are useful to speed up search algorithms see e.g setup_G_rotation.
  ! * The last shell ends at ng+1, thus gvec is supposed to be closed.
 
- ABI_CHECK(ALL(Gsph%gvec(1:3,1)==0),'First G must be 0')
+ ABI_CHECK(ALL(Gsph%gvec(1:3,1)==0), 'First G must be 0')
 
  ABI_MALLOC(Gsph%g2sh,(Gsph%ng))
  Gsph%g2sh(1)=1 ! This table is useful if we dont loop over shell
@@ -404,12 +403,12 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  end do
  shlim(nsh+1)=Gsph%ng+1
 
- ! === Save info on the shells ===
- Gsph%nsh=nsh
- ABI_MALLOC(Gsph%shlim,(nsh+1))
- Gsph%shlim=shlim(1:nsh+1)
- ABI_MALLOC(Gsph%shlen,(nsh  ))
- Gsph%shlen=shlen(1:nsh)
+ ! Save info on the shells
+ Gsph%nsh = nsh
+ ABI_MALLOC(Gsph%shlim, (nsh+1))
+ Gsph%shlim = shlim(1:nsh+1)
+ ABI_MALLOC(Gsph%shlen, (nsh  ))
+ Gsph%shlen = shlen(1:nsh)
  ABI_FREE(shlim)
  ABI_FREE(shlen)
 
@@ -440,7 +439,6 @@ subroutine gsph_init(Gsph, Cryst, ng, gvec, ecut)
  end do
 
  !call Gsph%print(unit=std_out,prtvol=1)
-
  DBG_EXIT("COLL")
 
 end subroutine gsph_init
@@ -1829,6 +1827,7 @@ subroutine kg_map(npw1, kg1, npw2, kg2, g2g1, nmiss)
  gmax = 2*gmax + 1
  n1 = gmax(1); n2 = gmax(2); n3 = gmax(3)
 
+ !print *, "n1, n2, n3", n1, n2, n3; print *, "kg1:", kg1; print *, "kg2:", kg2
  ABI_MALLOC(iwork, (n1, n2, n3))
 
  ! Insert kg1 into work with extra 0 s around outside:
@@ -2049,7 +2048,7 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
  call new_Gsph%init(Cryst, 0, ecut=new_ecut)
 
  if (new_Gsph%ng > in_Gsph%ng) then
-
+   ! new_gpsh larger than in_gsph
    new_ng = new_Gsph%ng
    in_ng  = in_Gsph%ng
 
@@ -2061,20 +2060,20 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
      end if
    end do
 
-   if (ierr==0) RETURN
+   if (ierr == 0) RETURN
 
    ierr = 0
    do sh=1,in_Gsph%nsh
-     if ( new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. &
-&         ABS(new_Gsph%shlen(sh)-in_Gsph%shlen(sh)) > tol12 ) then
+     if (new_Gsph%shlim(sh) /= in_Gsph%shlim(sh) .or. &
+         ABS(new_Gsph%shlen(sh)-in_Gsph%shlen(sh)) > tol12 ) then
        ierr = ierr + 1
        write(std_out,*)"new_shlim, in_shlim",sh,new_Gsph%shlim(sh),in_Gsph%shlim(sh)
        write(std_out,*)"new_shlen, in_shlen",sh,new_Gsph%shlen(sh),in_Gsph%shlen(sh)
      end if
    end do
-   ABI_CHECK(ierr==0,"Wrong shells")
+   ABI_CHECK(ierr == 0,"Wrong shells")
 
-   ABI_MALLOC(new_gvec,(3,new_ng))
+   ABI_MALLOC(new_gvec,(3, new_ng))
    new_gvec = new_Gsph%gvec
    new_gvec(:,1:in_ng) = in_Gsph%gvec
 
@@ -2083,6 +2082,7 @@ subroutine gsph_extend(in_Gsph, Cryst, new_ecut, new_Gsph)
    ABI_FREE(new_gvec)
 
  else
+   ! new_gpsh smaller/equal than in_gsph
    ierr = 0
    do ig=1,MIN(new_Gsph%ng,in_Gsph%ng)
      if (ANY(new_Gsph%gvec(:,ig) /= in_Gsph%gvec(:,ig)) ) then

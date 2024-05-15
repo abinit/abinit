@@ -1478,7 +1478,7 @@ end subroutine hartrestr
 !! put total density in first half of rhor array and spin up in second half
 !! If (nspden=2 and nsppol=2) the density is transformed as  (up,down) => (up+down,up)
 !! If (nspden=2 and nsppol=1) anti-ferromagnetic symmetry operations
-!!  must be used, such as to transform (2*up) => (up+down,up)
+!! must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
 !!

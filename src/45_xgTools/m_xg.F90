@@ -3104,7 +3104,7 @@ contains
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock%vecR,&
-            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
+            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE,MPI_SUM,comm_,ierr)
             !$OMP END TARGET DATA
 # else
             ABI_MALLOC(vecR_buf,(fact*xgBlock%rows,xgBlock%cols))
@@ -3122,14 +3122,14 @@ contains
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecR)
             call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecR,&
-            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
+            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE,MPI_SUM,comm_,ierr)
             !$OMP END TARGET DATA
 # else
             ABI_MALLOC(vecR_buf,(fact*xgBlock%rows,xgBlock%cols))
             !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecR,vecR_buf)
             call MPI_ALLREDUCE(xgBlock__vecR, vecR_buf,&
-            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
+            &    xgBlock%cols*fact*xgBlock%rows,MPI_DOUBLE,MPI_SUM,comm_,ierr)
             xgBlock%vecR(1:xgBlock%cols,1:fact*xgBlock%rows)=vecR_buf(1:xgBlock%cols,1:fact*xgBlock%rows)
             !$OMP END TARGET DATA
             !$OMP TARGET EXIT DATA MAP(delete:vecR_buf)
@@ -3157,7 +3157,7 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock%vecC)
-            call MPI_ALLREDUCE(xmpi_in_place,xgBlock%vecC,&
+            call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock%vecC,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             !$OMP END TARGET DATA
 # else
@@ -3175,7 +3175,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
             !$OMP TARGET DATA USE_DEVICE_PTR(xgBlock__vecC)
-            call MPI_ALLREDUCE(xmpi_in_place,xgBlock__vecC,&
+            call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlock__vecC,&
             &    xgBlock%cols*xgBlock%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,comm_,ierr)
             !$OMP END TARGET DATA
 # else

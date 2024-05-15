@@ -340,7 +340,7 @@ module m_xg_ortho_RR
         call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
-        call xgScalapack_heev(scalapack,subA%self,eigenvalues) ! work with GPU
+        call xgScalapack_heev(scalapack,subA%self,eigenvalues,gpu_option=gpu_option) ! work with GPU
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEEV")
@@ -371,7 +371,7 @@ module m_xg_ortho_RR
         call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
       case (EIGENSLK)
         if ( prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
-        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues) ! work with GPU
+        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues,gpu_option=gpu_option) ! work with GPU
         info = 0 ! No error code returned for the moment
       case default
         ABI_ERROR("Error for Eigen Solver HEGV")
