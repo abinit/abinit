@@ -356,6 +356,10 @@ end subroutine opt_effpot
 !! bound_EFS:
 !! bound_factors:
 !! bound_penalty:
+!! comm: MPI communicator
+!! fit_weight_T: ?
+!! print_anh: ?
+!! bound_option: 1 or 2. Whether the bounding term should be the same nbody with the term to be bounded. 1. Yes (default), 2. No 
 !!
 !!
 !! OUTPUT
@@ -364,7 +368,7 @@ end subroutine opt_effpot
 !!
 !! SOURCE
 
-subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm, fit_weight_T,print_anh)
+subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_penalty,comm, fit_weight_T,bound_option, print_anh)
 
   implicit none
 
@@ -376,6 +380,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
   real(dp) :: bound_penalty
   !arrays
   integer,intent(in) :: order_ran(2),bound_EFS(3)
+  integer, intent(in) :: bound_option
   real(dp),intent(in) :: bound_factors(3)
   real(dp), intent(in) :: fit_weight_T
   !Logicals
@@ -553,17 +558,19 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
         my_coeffs=eff_pot%anharmonics_terms%coefficients
 
         ! then add the single disp terms.
-        if (ncombi1>0) then
-          do icombi3=1,ncombi1
-            !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
-            if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term) then
-              call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)  
-              print *, "appending single disp term"
-              ncombi1_real = ncombi1_real + 1
+        !if (bound_option==1) then
+            if (ncombi1>0) then
+              do icombi3=1,ncombi1
+                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
+                if (HOsingledisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+                  call coeffs_list_append(my_coeffs,HOsingledisp_terms(icombi3), check=.TRUE.)  
+                  ncombi1_real = ncombi1_real + 1
+                endif
+              end do
             endif
-          end do
-        endif
-        !call coeffs_list_conc_onsite(my_coeffs, HOsingledisp_terms)
+        !else
+        !    if (ncombi1>0) call coeffs_list_conc_onsite(my_coeffs, HOsingledisp_terms)
+        !endif
 
         if(allocated(HOsingledisp_terms)) call polynomial_coeff_list_free(HOsingledisp_terms)
 
@@ -576,17 +583,21 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
             call opt_getHOcrossdisp(HOcrossdisp_terms,ncombi2,eff_pot%anharmonics_terms%coefficients(iterm),order_ran)
         endif
         ! then add the crossdisp terms.
-        if(ncombi2 > 0)then
-          do icombi3=1,ncombi2
-            !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
-            if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term) then
-              print *, "appending crossdisp term"
-              call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)  
-              ncombi2_real = ncombi2_real + 1
+        !if(bound_option==1)then
+            if(ncombi2 > 0)then
+              do icombi3=1,ncombi2
+                !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms(icombi3))
+                if (HOcrossdisp_terms(icombi3)%terms(1)%get_nbody() == nbody_term .or. bound_option/=1) then
+                  call coeffs_list_append(my_coeffs,HOcrossdisp_terms(icombi3), check=.TRUE.)  
+                  ncombi2_real = ncombi2_real + 1
+                endif
+              end do
             endif
-          end do
-          !call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms)
-        endif
+        !else
+        !    if(ncombi2 > 0)then
+        !     call coeffs_list_conc_onsite(my_coeffs, HOcrossdisp_terms)
+        !    endif  
+        !endif
         if(allocated(HOcrossdisp_terms)) call polynomial_coeff_list_free(HOcrossdisp_terms)
        end associate
       end block
@@ -598,12 +609,14 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,bound_EFS,bound_factors,bound_
       endif
       ncombi =  ncombi1_real + ncombi2_real
       nterm_start = eff_pot%anharmonics_terms%ncoeff
-      print *, "ncobi", ncombi
-      print *, "nterm_start", nterm_start
     else ! if iterm = nterm + 1 => Take care about strain
         block
         integer :: max_nbody_tmp(order_ran(2))
-        max_nbody_tmp(:) = 2
+        if (bound_option==1) then
+            max_nbody_tmp(:) = 1
+        else
+            max_nbody_tmp(:) = 888
+        endif
          call opt_getHOstrain(my_coeffs,ncombi,nterm_start,eff_pot,order_ran,comm, max_nbody=max_nbody_tmp)
         end block
     endif !

@@ -913,6 +913,26 @@ Number of maximum additional coefficients for the bound process
 ),
 
 Variable(
+        abivarname="bound_option@multibinit",
+        varset="multibinit",
+        vartype="integer",
+        topics=['BoundingProcess_basic'],
+        dimensions="scalar",
+        defaultval=1,
+        mnemonics="BOUND OPTION",
+        added_in_version="v10",
+        text=r"""
+Type of bounding terms.
+Bounding terms are needed if the polynomial with all even terms are negative, or the polynomial contains odd terms. There are two strategies to generate bounding terms:
+
+* 1 -->  The bounding term should include all the types of displacement in the term to be bounded. 
+* 2 -->  The bounding term can inlude the terms with only part of the displacement types.
+
+For example, for a polynomial term x^2y^1, the bounding terms of order 4 will include $x^4$ with option 2, but not with option 1.
+""",
+
+
+Variable(
     abivarname="bound_penalty@multibinit",
     varset="multibinit",
     vartype="real",

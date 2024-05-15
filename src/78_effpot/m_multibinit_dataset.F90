@@ -76,6 +76,7 @@ module m_multibinit_dataset
   integer :: bound_SPCoupling
   integer :: bound_AnhaStrain
   integer :: bound_step
+  integer :: bound_option
   integer :: fit_anhaStrain
   integer :: fit_dispterms
   integer :: fit_SPCoupling
@@ -2734,6 +2735,19 @@ multibinit_dtset%dipdip_range(:)=[0,0,0]
    ABI_ERROR(message)
  end if
 
+  multibinit_dtset%bound_option=1
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_option',tread,'INT')
+ if(tread==1) multibinit_dtset%bound_option=intarr(1)
+ if(multibinit_dtset%bound_option<1.and.multibinit_dtset%bound_option>3)then
+   write(message, '(a,i8,a,a,a,a,a)' )&
+&   'bound_option is',multibinit_dtset%bound_option,', but the only allowed values',ch10,&
+&   'are 1,2,3 for multibinit.',ch10,&
+&   'Action: correct bound_option in your input file.'
+   ABI_ERROR(message)
+ end if
+
+
+
   multibinit_dtset%bound_temp=325
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'bound_temp',tread,'DPR')
  if(tread==1) multibinit_dtset%bound_temp=dprarr(1)
@@ -3710,6 +3724,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
    write(nunit,'(1x,a16,es16.8)')'    bound_cutoff',multibinit_dtset%bound_cutoff
    write(nunit,'(1x,a16,1x,3I3)')   '      bound_cell',multibinit_dtset%bound_cell
    write(nunit,'(1x,a16,1x,I3)')    '  bound_maxCoeff',multibinit_dtset%bound_maxCoeff
+   write(nunit,'(1x,a16,1x,I3)')    '  bound_option',multibinit_dtset%bound_option
    write(nunit,'(1x,a16,es16.8)') '      bound_temp',multibinit_dtset%bound_temp
    write(nunit,'(1x,a16,I7)')   '      bound_step',multibinit_dtset%bound_step
    write(nunit,'(1x,a16,2I3.1)')'bound_rangePower',multibinit_dtset%bound_rangePower
