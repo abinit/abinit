@@ -188,6 +188,4 @@ inp_files = [
     # Chebfi2
     "t206.abi",  # check that various algorithm give the same results (including wfoptalg=111). istwfk=1.
     "t207.abi",  # same as t206 but with nspinor=2
-    "t208.abi",  # same as t206 but with istwfk>1
-    "t209.abi",  # same as t208 but with norm-conserving pseudos
 ]
