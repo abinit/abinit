@@ -459,6 +459,9 @@ contains
   ! keeping into account the distribution of the e-ph matrix elements.
 
   procedure :: fill_bks_mask_pp_mesh => gstore_fill_bks_mask_pp_mesh
+  ! Fill the table used to read (b, k, s) wavefunctions from the WFK file
+  ! keeping into account the distribution of the e-ph matrix elements in the GWPT code
+  ! and the parallel distribution of pp momenta.
 
   procedure :: get_mpw_gmax => gstore_get_mpw_gmax
 
@@ -947,11 +950,11 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
 contains
  integer function vid(var_name)
    character(len=*),intent(in) :: var_name
-   vid = nctk_idname(NCID, var_name)
+   vid = nctk_idname(ncid, var_name)
  end function vid
  integer function vid_spin(var_name)
    character(len=*),intent(in) :: var_name
-   vid_spin = nctk_idname(SPIN_NCID, var_name)
+   vid_spin = nctk_idname(spin_ncid, var_name)
  end function vid_spin
 
 end subroutine gstore_init

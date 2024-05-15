@@ -372,8 +372,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
 
  w_info%use_ppm = dtset%ppmodel
- ! FIXME
- w_info%use_ppm = 0
  if (w_fname /= ABI_NOFILE) then
    ! Read g-sphere and pp_mesh from SCR file.
    call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
@@ -388,11 +386,13 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    dtset%npweps = gsph_c%ng
    w_info%use_mdf = MDL_BECHSTEDT
    w_info%eps_inf = dtset%mdf_epsinf
-   !w_info%use_ppm = PPM_HYBERTSEN_LOUIE
-   !ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
-   !ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with the model dielectric function")
+   w_info%use_ppm = PPM_HYBERTSEN_LOUIE
+   ABI_CHECK(w_info%eps_inf > zero, "Model dielectric function requires the specification of mdf_epsinf")
+   ABI_CHECK(w_info%use_ppm /= PPM_GODBY_NEEDS, "Godby needs PPM is not compatible with the model dielectric function")
    !w_info%use_ppm = 0
  end if
+ ! FIXME
+ w_info%use_ppm = 0
  !call screen%ppm%print(units)
 
  if (nqlwl == 0) then
@@ -409,7 +409,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
 
  ! TODO:
- ! Here we sort pp_mesh by stars so that we can split the pp wavevectors in blocks and therefore
+ ! Here we sort the pp_mesh by stars so that we can split the pp wavevectors in blocks and therefore
  ! reduce the number of wavevectors in the IBZ that must be stored in memory.
  !call pp_mesh%sort_by_stars()
 
@@ -762,9 +762,12 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! Init Wc
  ! In-core or out-of-core solution?
- mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
+ !mqmem = 0; if (dtset%gwmem /10 == 1) mqmem = pp_mesh%nibz
+ mqmem = pp_mesh%nibz
  w_info%invalid_freq = dtset%gw_invalid_freq
  w_info%mat_type = MAT_INV_EPSILON
+ w_info%wint_method = WINT_PPMODEL
+
  call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
@@ -1178,9 +1181,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Contract immediately over g' with the convolution of W_gg'
            e0i = qp_ene(ib_sum, ikmp_ibz, spin)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
-           !omegas = [e_mkq, e_nk]
-           !omegame0i = omegas - e0i
-           !call screen%calc_ppm_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
+           omegas = [e_mkq, e_nk]
+           omegame0i = omegas - e0i
+           !call screen%calc_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
 
            ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
            ! and take the CC in times_vc_sqrt
@@ -1195,7 +1198,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            e0i = qp_ene(ib_sum, ikqmp_ibz, spin)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
            !omegame0i = omegas - e0i
-           !call screen%calc_ppm_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
+           !call screen%calc_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
 
          end do ! ib_sum
 
