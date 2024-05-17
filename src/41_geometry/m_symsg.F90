@@ -563,7 +563,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !Local variables -----------------------------
 !scalars
  integer :: ii,nogen,sporder
- real(dp),parameter :: fivesixth=5.0d0/6.0d0,twothird=2.0d0/3.0d0
+ real(dp),parameter :: fivesixth=5.0d0/6.0d0,onethird=1.d0/3.d0,twothird=2.0d0/3.0d0
  character(len=1) :: brvsb
  character(len=15) :: intsb,ptintsb,ptschsb,schsb
  character(len=35) :: intsbl
@@ -610,6 +610,11 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 
 !    This matrix is common to ALL trigonal spatial groups in this orientation
 !    (Note : this is the 3- symmetry operation)
+!    JZwanziger: this matrix does not correspond to 3- as given in Bilbao tables and consistent 
+!    I believe with IUCR. The Bilbao version for 3- is
+!    symrel(:,:,2)=0 ; symrel(1,1,2)=-1 ; symrel(1,2,2)=1 ; symrel(2,1,2)=-1 ; symrel(3,3,2)=-1
+!    note that the 33 element is -1, not +1
+!    I think this makes more sense as it is a rotoinversion
      symrel(:,:,2)=0 ; symrel(1,1,2)=-1 ; symrel(1,2,2)=1 ; symrel(2,1,2)=-1 ; symrel(3,3,2)=1
 !    reshape((/-1,1,0,-1,0,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
 
@@ -638,8 +643,21 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
        symrel(:,:,3) = genswm(:,:)
        nogen=3
      case (151)                !P3112
-       tnons(:,2)=(/0.d0,0.d0,twothird/)
-       symrel(:,:,3) = genswmmm(:,:)
+       ! original code
+       !tnons(:,2)=(/0.d0,0.d0,twothird/)
+       !symrel(:,:,2)=0 ; symrel(1,1,2)=-1 ; symrel(1,2,2)=1 ; symrel(2,1,2)=-1 ; symrel(3,3,2)=1
+       !symrel(:,:,3) = genswmmm(:,:)
+
+       ! 3+_{001}|(0,0,1/3)
+       tnons(:,2)=(/0.d0,0.d0,onethird/)
+       symrel(:,:,2)=0
+       symrel(2,1,2)=1;symrel(1,2,2)=-1;symrel(2,2,2)=-1;symrel(3,3,2)=1
+
+       ! 2_{1-10}|(0 0 2/3) 
+       tnons(:,3)=(/0.d0,0.d0,twothird/)
+       symrel(:,:,3)=0
+       symrel(2,1,3)=-1;symrel(1,2,3)=-1;symrel(3,3,3)=-1
+
        nogen=3
      case (152)                !P3121
        tnons(:,2)=(/0.d0,0.d0,twothird/)
