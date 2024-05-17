@@ -420,7 +420,7 @@ case (WFK_TASK_WANNIER)
   !end if
   !call xmpi_barrier(comm)
 
-   if (.True.) then
+!   if (.True.) then
       ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
       ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
       keep_ur = .False.; bks_mask = .True.
@@ -445,11 +445,11 @@ case (WFK_TASK_WANNIER)
            & dtset=dtset, dtfil=dtfil,  &
            & pawang=pawang, pawrad=pawrad, &
            & pawtab=pawtab, psps=psps )
-   else
-      call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
-           & ngfftc, ngfftf,  dtset, dtfil,  &
-           & pawang,  pawrad, pawtab, psps, comm, my_rank,nprocs )
-   endif
+!   else
+!      call wfd_mlwfovlp(cryst, ebands, wfk0_hdr, mpi_enreg, &
+!           & ngfftc, ngfftf,  dtset, dtfil,  &
+!           & pawang,  pawrad, pawtab, psps, comm, my_rank,nprocs )
+!   endif
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
