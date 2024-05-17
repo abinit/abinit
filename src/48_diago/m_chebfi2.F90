@@ -476,6 +476,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  type(xgBlock_t), intent(inout) :: X0
  type(xgBlock_t), intent(inout) :: eigen
  type(xgBlock_t), intent(inout) :: residu
+ type(xgBlock_t), intent(in)    :: pcond
  interface
    subroutine getAX_BX(X,AX,BX)
      use m_xg, only : xgBlock_t
@@ -490,12 +491,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
      type(xgBlock_t), intent(inout) :: X
      type(xgBlock_t), intent(inout) :: Bm1X
    end subroutine getBm1X
- end interface
- interface
-   subroutine pcond(W)
-     use m_xg, only : xgBlock_t
-     type(xgBlock_t), intent(inout) :: W
-   end subroutine pcond
  end interface
 
 !Local variables-------------------------------
@@ -728,7 +723,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  end if
 
 ! call timab(tim_pcond,1,tsec)
- call pcond(chebfi%AX%self)
+ call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
 ! call timab(tim_pcond,2,tsec)
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)

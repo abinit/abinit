@@ -325,6 +325,7 @@ module m_lobpcg2
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: occ
     type(xgBlock_t), intent(inout) :: residu
+    type(xgBlock_t), intent(in)    :: pcond
     integer        , intent(in   ) :: prtvol
     integer        , intent(in   ) :: nspinor
     integer        , intent(in   ) :: isppol,ikpt,inonsc,istep,nbdbuf
@@ -356,12 +357,6 @@ module m_lobpcg2
         type(xgBlock_t), intent(inout) :: AX
         type(xgBlock_t), intent(inout) :: BX
       end subroutine getAX_BX
-    end interface
-    interface
-      subroutine pcond(W)
-        use m_xg, only : xgBlock_t
-        type(xgBlock_t), intent(inout) :: W
-      end subroutine pcond
     end interface
 
 !    call timab(tim_run,1,tsec)
@@ -493,7 +488,7 @@ module m_lobpcg2
 
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
-        call pcond(lobpcg%W)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
         call timab(tim_pcond,2,tsec)
 
         ! Compute residu norm here !
@@ -515,7 +510,7 @@ module m_lobpcg2
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
-          call xgBlock_apply_diag_nospin(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
           call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
         else
           ABI_ERROR('Bad value of nbdbuf')
@@ -605,7 +600,7 @@ module m_lobpcg2
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
         ! Apply preconditioner
-        call pcond(lobpcg%W)
+        call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
         ! Recompute residu norm here !
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
@@ -622,7 +617,7 @@ module m_lobpcg2
             maxResidu = 0.0
           end if
         else if (nbdbuf==-101) then
-          call xgBlock_apply_diag_nospin(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
           call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
         else
           ABI_ERROR('Bad value of nbdbuf')
