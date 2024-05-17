@@ -411,6 +411,11 @@ if test "${abi_openmp_offload_enable}" = "yes"; then
     FC_LDFLAGS_EXTRA="${FCFLAGS_OPENMP_OFFLOAD} ${FC_LDFLAGS_EXTRA}"
     FCFLAGS_OPENMP_OFFLOAD=""
   fi
+
+  #FIXME With Cray CPE 23.12, it seems that "-lcraymp" isn't always added to LDFLAGS, so we add it here
+  if test "${abi_fc_vendor}" == "cray" -a "${abi_gpu_flavor}" == "hip-double"; then
+    FC_LDFLAGS_EXTRA="-lcraymp ${FC_LDFLAGS_EXTRA}"
+  fi
 else
   FCFLAGS_OPENMP_OFFLOAD=""
 fi

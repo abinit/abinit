@@ -1,4 +1,4 @@
-# bcc ion : test wannier90 interface with nsppol=2 and nspden=2
+# bcc iron : test wannier90 interface with nsppol=2 and nspden=2
 spinat
 0.00000000000000 0.00000000000000 4.00000000000000
 accuracy 2

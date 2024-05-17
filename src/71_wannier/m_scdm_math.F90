@@ -30,6 +30,8 @@ module m_scdm_math
   real(dp), parameter, public:: tpi = 2*PI
   complex(dp), parameter, public:: tpi_im = cmplx(0.0_dp, tpi, kind = dp)
 
+
+! wrapper for LAPACK routine ZGEEV
   type, public:: eigensolver
      integer:: ndim = -1, lwork = 0
      complex(dp), allocatable  :: work(:)
@@ -51,6 +53,7 @@ module m_scdm_math
 
 contains
 
+  !
   subroutine complex_QRCP_Piv_only(A, Piv)
     complex(dp), intent(in):: A(:, :)
     integer, intent(inout):: Piv(:)
@@ -86,6 +89,11 @@ contains
 
 
 
+ ! wrapper for LAPACK routine DGESVD
+ ! A = U*S*VT
+ ! Note: A is overwritten by U
+ ! S is the singular values
+ ! VT is the transpose of V
   subroutine real_svd(A,  U, S, VT)
     real(dp), intent(in):: A(:, :)
     real(dp), intent(inout):: U(:, :), S(:), VT(:,:)
@@ -117,6 +125,13 @@ contains
     ABI_SFREE(work)
   end subroutine real_svd
 
+! wrapper for LAPACK routine ZGESVD
+! A = U*S*VT
+! Note: A is overwritten by U
+! S is the singular values
+! VT is the transpose of V
+! mode: A, or S, or N or O, see
+! https://netlib.org/lapack/explore-html/d3/da8/group__complex16_g_esing_gad6f0c85f3cca2968e1ef901d2b6014ee.html
   subroutine complex_svd(A,  U, S, VT, mode)
     complex(dp), intent(in):: A(:, :)
     complex(dp), intent(inout):: U(:, :),  VT(:,:)
@@ -185,6 +200,9 @@ contains
     y = 0.5*erfc((x-mu) / sigma)
   end function fermi
 
+! wrapper for LAPACK routine ZHEEV
+! evecs are used as the input matrix which will be overwritten
+! evals are the eigenvalues
   subroutine eigensolver_run(self, evals, evecs)
     class(eigensolver), intent(inout):: self
     real(dp), intent(inout):: evals(:)
@@ -206,6 +224,7 @@ contains
     call ZHEEV('V', 'U', self%ndim, evecs, self%ndim, evals, self%work, self%lwork, self%rwork, info)
   end subroutine eigensolver_run
 
+! free the memory used by eigensolver
   subroutine eigensolver_finalize(self)
     class(eigensolver), intent(inout):: self
     self%ndim = -1
@@ -259,6 +278,8 @@ contains
     endif
   end function div2
 
+! build the Rlist for the given kmesh
+! Rlist is a 3*n array, where n is the number of R vectors
   subroutine build_Rgrid(kmesh, Rlist)
     integer, intent(in):: kmesh(3)
     integer, allocatable, intent(inout):: Rlist(:,:)

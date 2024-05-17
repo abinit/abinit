@@ -1614,12 +1614,12 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Not all parallelism types or level are allowed or simply relevant for the different [[optdriver]] values in ABINIT.
-It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy 
+It has been observed that some users do not understand well their relation. In particular, their expectation of the adequacy
 of some parallelism for some [[optdriver]] value was not correct, with a large loss of computing resources.
 Indeed, if the user does not sufficiently understand the parallelism in ABINIT, huge amount of ressources might be spend
-when they are booked for a run that cannot use these. 
-Accordingly, the user might blame ABINIT for being slow while the user has simply not activated 
-the relevant parallelism, or activated an irrelevant parallelism. 
+when they are booked for a run that cannot use these.
+Accordingly, the user might blame ABINIT for being slow while the user has simply not activated
+the relevant parallelism, or activated an irrelevant parallelism.
 
 However, if the user correctly understand the parallelism,
 it might be more convenient to leave in the input file irrelevant variables. This is especially the case for high-throughput calculations
@@ -1630,7 +1630,7 @@ thus hopefully preventing some users to loose computing power.
 
 The following relevances and adequacies are checked at present if [[chkparal]]=1 :
 the input variable [[autoparal]] is relevant only for [[optdriver]]=1 calculations (ground-state);
-the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW). 
+the input variable [[paral_kgb]] is relevant only for [[optdriver]]=1 calculations (ground-state) or for [[optdriver]]=66 (Laczos-Sternheimer GW).
 
 The relevance of [[paral_atom]] or [[paral_rf]] or [[gwpara]] is not checked at present. The default values should not yield loss of computing power.
 """,
@@ -2508,7 +2508,7 @@ Variable(
     characteristics=['[[ENERGY]]'],
     added_in_version="before_v9",
     text=r"""
-It is the value of the "scissors operator", the shift of conduction band
+It is the value of the "scissors operator" [[cite:Levine1989]], the shift of conduction band
 eigenvalues, used in response function calculations.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
 [[ENERGY]] characteristics (1 Ha = 27.2113845 eV).
@@ -6163,7 +6163,7 @@ MPI process 2 uses GPU card 2.
 MPI processes 0, 2 and 4 use GPU card 0, MPI processes 1 and 3 use GPU card 1;
 the 3rd GPU card is not used.
 
-GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia): 
+GPU card are numbered starting from 0; to get the GPU devices list, type f.i. (Nvidia):
 "nvidia-smi" or "lspci | grep -i nvidia".
 """,
 ),
@@ -6300,31 +6300,7 @@ GPU programming models available in ABINIT:
   The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
   on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
-""",
-),
-
-Variable(
-    abivarname="gpu_use_nvtx",
-    varset="paral",
-    vartype="integer",
-    topics=['parallelism_expert'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="GPU: activate USE of NVTX tracing/profiling",
-    added_in_version="9.7.2",
-    text=r"""
-Only available if ABINIT executable has been linked with the [[NVTX]] (Nvidia) or
-[[ROCTX]] (AMD) library.
-When [[gpu_use_nvtx]] = 1 on Nvidia GPU(s),
-the use of [NVTX](https://github.com/NVIDIA/NVTX)
- tracing/profiling ((NVIDIA Tools eXtension Library) is activated.
- The trace can be used for instance with
- [NVidia NSight System](https://developer.nvidia.com/nsight-systems)
-When [[gpu_use_nvtx]] = 1 on AMD GPU(s),
-the use of [ROCTX](https://rocm.docs.amd.com/projects/roctracer/en/latest/roctracer_spec.html)
- tracing/profiling (ROCm Tools eXtension Library) is activated.
+For an expert use of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
 """,
 ),
 
@@ -10393,7 +10369,7 @@ Variable(
     requires="[[optdriver]] in [3,4,7,99]",
     added_in_version="before_v9",
     text=r"""
-The scissor operator energy added to the conductions states. In some cases,
+The scissor operator energy added to the conductions states [[cite:Levine1989]]. In some cases,
 it mimics a second iteration self-consistent GW calculation.
 """,
 ),
@@ -11050,6 +11026,7 @@ A negative value is interpreted as percentage of [[nband]] (added in v9).
     will give a band structure with the first 8 bands converged within [[tolwfr]].
     For more complex systems and/or GS NSCF calculations with many empty states, one usually needs
     to increase [[nbdbuf]], let's say 10% of [[nband]].
+    This can be easily achieved by using a negative value e.g.: nbdbuf -10 means 10% of nband.
 
 
 This concept is useful in three situations: in non-self-consistent calculations, for the
@@ -13130,15 +13107,15 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUClear site Electric Field Gradient",
-    requires="[[usepaw]] == 1, [[quadmom]]",
+    requires="[[usepaw]] == 1",
     added_in_version="before_v9",
     text=r"""
 If nonzero, calculate the electric field gradient at each atomic site in the unit cell.
-Using this option requires [[quadmom]] to be set as well.
 Values will be written to the main output file (search for Electric Field Gradient).
-If nucefg=1, only the quadrupole coupling in MHz and asymmetry are reported.
-If nucefg=2, the full electric field gradient tensors in atomic units are also given,
+If nucefg=1, the electric field gradient in both atomic units and SI units is given,
 showing separate contributions from the valence electrons, the ion cores, and the PAW reconstruction.
+If nucefg=2, the quadrupole couplings to the nuclear electric quadrupole moments are reported as well,
+and are based on the input values of [[quadmom]].
 If nucefg=3, then in addition to the nucefg=2 output, the EFGs are computed using an ionic point charge model.
 This is useful for comparing the accurate PAW-based results to those of simple ion-only models.
 Use of nucefg=3 requires that the variable [[ptcharge]] be set as well.
@@ -13842,12 +13819,15 @@ Variable(
 Compute quantities related to orbital magnetic moment. Typically used in the
 presence of a nonzero nuclear magnetic dipole moment, see [[nucdipmom]], to compute
 the nuclear magnetic shielding as measured in NMR. [[orbmag]]
-    is parallelized over k points only. The implementation follows the
-    theory outlined in [[cite:Zwanziger2023]].
-    The computed results are returned in the
-    standard output file, search for "Orbital magnetic moment". This calculation requires
-    both the ground state and DDK wavefunctions (see [[rfddk]]), and is triggered at the end of a
-    DDK calculation.
+is parallelized over k points only. The implementation follows the
+theory outlined in [[cite:Zwanziger2023]]. The computed results are returned in the
+standard output file, search for "Orbital magnetic moment". This calculation requires
+both the ground state and DDK wavefunctions (see [[rfddk]] or [[berryopt]]). The
+preferred way to use [[orbmag]] is at the end of a DFPT DDK calculation. Alternatively, it
+can be called in a ground state calculation if [[berryopt]] -2 has also been called,
+to generate discretized DDK wavefunctions. Note that convergence with kpt mesh is
+*much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
+unless a very specific ground state feature is also needed.
 
 * [[orbmag]] = 1: Compute orbital magnetization and Chern number
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
@@ -17293,15 +17273,14 @@ Variable(
     dimensions=['[[ntypat]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="QUADrupole MOMents",
-    requires="[[usepaw]] == 1 and [[nucefg]]>=1",
+    requires="[[usepaw]] == 1 and [[nucefg]]>1",
     added_in_version="before_v9",
     text=r"""
   * Array of quadrupole moments, in barns, of the nuclei. These values are used
   in conjunction with the electric field gradients computed with [[nucefg]] to
   calculate the quadrupole couplings in MHz, as well as the asymmetries. Note that
   the electric field gradient at a nuclear site is independent of the nuclear
-  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0,
-  and the option [[nucefg]] = 2 used to determine the electric field gradient at the site.
+  quadrupole moment, thus the quadrupole moment of a nucleus can be input as 0.
 """,
 ),
 
@@ -17894,7 +17873,7 @@ with respect to k, independently of the electric field perturbation itself.
     electric field are different, one often does the calculation of derivatives in
     a separate dataset, followed by calculation of electric field response as well as phonon.
     The options 2 and 3 proves useful in that context; also, in case a scissor
-    shift is to be used, it is usually not applied for the $\,d / \,d k$ response).
+    shift is to be used, it is usually not applied for the $\,d / \,d k$ response [[cite:Levine1989]]).
 """,
 ),
 
@@ -19708,9 +19687,8 @@ Variable(
     vartype="real",
     topics=['SCFControl_basic'],
     dimensions="scalar",
+    mnemonics="TOLerance on the Wavefunction Residuals",
     defaultval=0.0,
-    mnemonics="TOLerance on WaveFunction squared Residual",
-    commentdefault="The default value implies that this stopping condition is ignored.",
     added_in_version="before_v9",
     text=r"""
 The signification of this tolerance depends on the basis set. In plane waves,
@@ -20351,7 +20329,7 @@ Variable(
     abivarname="usepotzero",
     varset="dev",
     vartype="integer",
-    topics=['Coulomb_useful'],
+    topics=['Coulomb_useful','Verification_useful'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE POTential ZERO",
@@ -20363,7 +20341,7 @@ Fix the convention for the choice of the average value of the Hartree potential,
 
   * [[usepotzero]] = 1, the new convention: the all-electron physical potential is set to zero average value.
 
-  * [[usepotzero]] = 2, the PWscf convention: the potential of equivalent point charges is set to
+  * [[usepotzero]] = 2, the QE/PWscf convention: the potential of equivalent point charges is set to
   zero average value (convention also valid for NC pseudopotentials).
 """,
 ),
@@ -22310,6 +22288,22 @@ Possible values are:
      Find k-points inside (electron/hole) pockets according to the values specified by [[sigma_erange]].
      Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
      inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
+
+  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of 
+      [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
+      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in 
+      the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
+      is not already in full BZ. 
+    
+      ABINIT will produce the input files required by Wannier90 and it will run
+      Wannier90 to produce the Maximally-locallized Wannier functions (see [
+      http://www.wannier.org ](http://www.wannier.org) ).
+      !!! Notes
+      
+          * The files that are created can also be used by Wannier90 in stand-alone mode.
+          * In order to use Wannier90 as a post-processing program for ABINIT you might have to
+            compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
+          * There are some other variables related to the interface of Wannier90 and ABINIT. See [[varset:w90]].
 """,
 ),
 
@@ -23857,6 +23851,26 @@ the CBM/VBM or the position wrt to the Fermi level via [[gstore_erange]].
 ),
 
 Variable(
+    abivarname="gstore_gmode",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="phonon",
+    mnemonics=r"GSTORE GMODE",
+    requires="[[optdriver]] == 7",
+    added_in_version="10.1.2",
+    text=r"""
+This input variable specifies the representation used to store the e-ph matrix elements in the GSTORE.nc file
+
+Possible values are:
+
+    "phonon" --> Store e-ph matrix elements in the phonon representation (collective displacement)
+    "atom" -->  Store e-ph matrix elements in the atom representation (displacement of a single atom along one of the reduced directions)
+""",
+),
+
+Variable(
     abivarname="gstore_brange",
     varset="eph",
     vartype="int",
@@ -24002,8 +24016,9 @@ The choice is among:
 * EGW0 -->
 * G0EW -->
 * RPA_ENERGY --> Compute RPA correlation energy within the ACFDT framework.
-* CC4S -->
+* CC4S --> Read density from file, diagonalize the KS Hamiltonian and produce output files required by CC4S.
 * CC4S_FULL --> Same as CC4S but compute maximum number of eigenvectors according to [[ecut]]
+* CC4S_FROM_WFK --> Same as CC4S but read single particle orbitals from an external WFK file.
 
 !!! important
 

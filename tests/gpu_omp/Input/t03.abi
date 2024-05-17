@@ -32,7 +32,6 @@
 
  paral_kgb 1
  iomode 0    # Only for testing purposes 
- use_gemm_nonlop 1 # test nonlop with BLAS
  fftalg 402
 
  pp_dirpath "$ABI_PSPDIR"
