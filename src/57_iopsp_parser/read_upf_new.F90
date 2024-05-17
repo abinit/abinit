@@ -80,6 +80,7 @@ CONTAINS
     ! compatibility
     upf%is_gth = .false.
     upf%is_multiproj = .true.
+    upf%with_metagga_info = .false.
     !
     ! From here on the format of v2 and schema do not differ much:
     ! the most frequent difference is capitalization of tags
@@ -119,6 +120,14 @@ CONTAINS
     allocate( upf%rho_at(1:upf%mesh) )
     CALL xmlr_readtag( capitalize_if_v2('pp_rhoatom'), &
          upf%rho_at(1:upf%mesh) )
+    !
+    allocate( upf%tau_at(1:upf%mesh) )
+    CALL xmlr_readtag( capitalize_if_v2('pp_tauatom'), &
+         upf%tau_at(1:upf%mesh) )
+    !
+    allocate( upf%tau_mod(1:upf%mesh) )
+    CALL xmlr_readtag( capitalize_if_v2('pp_taumod'), &
+         upf%tau_mod(1:upf%mesh) )
     !
     CALL read_pp_spinorb ( upf )
     !
@@ -175,6 +184,7 @@ CONTAINS
     CALL xmlr_readtag( 'is_ultrasoft', upf%tvanp )
     CALL xmlr_readtag( 'is_paw', upf%tpawp )
     CALL xmlr_readtag( 'is_coulomb', upf%tcoulombp )
+    CALL xmlr_readtag( 'with_metagga_info', upf%with_metagga_info )
     CALL xmlr_readtag( 'has_so', upf%has_so )
     CALL xmlr_readtag( 'has_wfc', upf%has_wfc )
     CALL xmlr_readtag( 'has_gipaw', upf%has_gipaw )
@@ -214,6 +224,7 @@ CONTAINS
     CALL get_attr ('is_ultrasoft', upf%tvanp)
     CALL get_attr ('is_paw', upf%tpawp)
     CALL get_attr ('is_coulomb', upf%tcoulombp)
+    CALL get_attr ('with_metagga_info', upf%with_metagga_info)
     CALL get_attr ('has_so', upf%has_so)
     CALL get_attr ('has_wfc', upf%has_wfc)
     CALL get_attr ('has_gipaw', upf%has_gipaw)

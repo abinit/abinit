@@ -305,13 +305,13 @@ end subroutine gw_icutcoul_to_mode
 !!
 !! SOURCE
 
-subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, ecut, ng, nqlwl, qlwl, comm)
+subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo, vc_ecut, ng, nqlwl, qlwl, comm)
 
 !Arguments ------------------------------------
 !scalars
  class(vcoul_t),intent(out) :: vcp
  integer,intent(in) :: ng,nqlwl, gw_icutcoul, comm
- real(dp),intent(in) :: rcut, ecut
+ real(dp),intent(in) :: rcut, vc_ecut
  type(kmesh_t),target,intent(in) :: Kmesh, Qmesh
  type(gsphere_t),target,intent(in) :: Gsph
  type(crystal_t),intent(in) :: Cryst
@@ -333,10 +333,6 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
  real(dp),contiguous, pointer :: qibz(:,:), qbz(:,:)
 
 ! *************************************************************************
-
- ! === Test if the first q-point is zero ===
- ! FIXME this wont work if nqptdm/=0
- !if (normv(Qmesh%ibz(:,1),gmet,'G') < GW_TOLQ0)) STOP 'vcoul_init, non zero first point '
 
  my_rank = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
@@ -499,7 +495,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
 
    else if (vcp%mode == "AUX_GB") then
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
-     vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec)
+     vcp%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec)
 
    else
      ABI_ERROR(sjoin("Need treatment of 1/q^2 singularity! for mode", vcp%mode))
@@ -561,7 +557,7 @@ subroutine vcoul_init(vcp, Gsph, Cryst, Qmesh, Kmesh, rcut, gw_icutcoul, vcutgeo
    ABI_BUG(sjoin('Unsupported cutoff mode:', vcp%mode))
  end select
 
- call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
+ !call wrtout(std_out, sjoin("vcp%i_sz", ftoa(vcp%i_sz)))
  vcp%i_sz_resid = vcp%i_sz
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
@@ -1211,8 +1207,7 @@ subroutine mc_init(mc, rprimd, ucvol, gprimd, gmet, kptrlatt)
  integer,parameter :: ncell=3
  integer :: nseed, i1,i2,i3,imc
  real(dp) :: lmin,vlength, ucvol_sc
- real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3)
- real(dp) :: qtmp(3),qmin(3),qmin_cart(3)
+ real(dp) :: rprimd_sc(3,3),gprimd_sc(3,3),gmet_sc(3,3),rmet_sc(3,3), qcart2red(3,3), qtmp(3),qmin(3),qmin_cart(3)
  integer, allocatable :: seed(:)
 
 ! *************************************************************************
@@ -1321,7 +1316,7 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
  ig0 = -1
  do ig=1,ng
    if (all(gvec(:, ig) == 0)) then
-      ig0 = ig; exit
+     ig0 = ig; exit
    end if
  end do
  ABI_CHECK(ig0 /= -1, "Cannot find G=0 in gvec!")
@@ -1329,8 +1324,8 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
  vcoul = zero
 
  select case (trim(mode))
- case('MINIBZ')
 
+ case('MINIBZ')
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1355,7 +1350,6 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
    end if
 
  case('MINIBZ-ERFC')
-
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1383,7 +1377,6 @@ subroutine mc_integrate(mc, mode, qibz, ng, gvec, rcut2, nkbz, vcoul, comm)
    end if
 
  case('MINIBZ-ERF')
-
    do ig=1,ng
      if (mod(ig, nprocs) /= my_rank) cycle ! MPI parallelism.
      if (q_is_gamma .and. ig == ig0) cycle
@@ -1667,12 +1660,12 @@ end function carrier_isz
 !!
 !! SOURCE
 
-real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(i_sz)
+real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec) result(i_sz)
 
 !Arguments ------------------------------------
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: nqbz, ng
- real(dp), intent(in) :: qbz(3, nqbz), ecut
+ real(dp), intent(in) :: qbz(3, nqbz), vc_ecut
  integer,intent(in) :: gvec(3,ng)
 
 !Local variables-------------------------------
@@ -1682,7 +1675,7 @@ real(dp) function gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec) result(
 !************************************************************************
 
  ! the choice of alfa (the width of the gaussian) is somehow empirical
- alfa = 150.0 / ecut
+ alfa = 150.0 / vc_ecut
 
  bz_geometry_factor=zero
  do iq_bz=1,nqbz
@@ -1711,13 +1704,13 @@ end function gygi_baldereschi_isz
 !!
 !! SOURCE
 
-subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, ecut, comm)
+subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_icutcoul, vcutgeo, vc_ecut, comm)
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(out) :: vcgen
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: kptrlatt(3,3), nkbz, nqibz, nqbz, gw_icutcoul
- real(dp),intent(in) :: qbz(3,nqbz), rcut, ecut, vcutgeo(3)
+ real(dp),intent(in) :: qbz(3,nqbz), rcut, vc_ecut, vcutgeo(3)
  integer,intent(in) :: comm
 
 !Local variables-------------------------------
@@ -1730,7 +1723,7 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
 ! *************************************************************************
 
- ABI_UNUSED([ecut])
+ ABI_UNUSED([vc_ecut])
 
  ! Save dimension and other useful quantities in Vcp
  vcgen%rcut      = rcut                 ! Cutoff radius for cylinder.
@@ -1811,9 +1804,10 @@ subroutine vcgen_init(vcgen, cryst, kptrlatt, nkbz, nqibz, nqbz, qbz, rcut, gw_i
 
    else if (vcgen%mode == "AUX_GB") then
      ! We use the auxiliary function of a Gygi-Baldereschi variant [[cite:Gigy1986]]
+     ! TODO:
      ABI_ERROR("AUX_GB not implemented in vcgen_init")
-     !call get_kg(kk_bz, istwfk1, ecut, cryst%gmet, npw_, gvec_)
-     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, ecut, ng, gvec_)
+     !call get_kg(kk_bz, istwfk1, vc_ecut, cryst%gmet, npw_, gvec_)
+     !vcgen%i_sz = gygi_baldereschi_isz(cryst, nqbz, qbz, vc_ecut, ng, gvec_)
      !ABI_FREE(gvec_)
 
    else
@@ -1848,7 +1842,8 @@ end subroutine vcgen_init
 !!
 !! SOURCE
 
-subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
+subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm, &
+                             vc) ! optional
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(in) :: vcgen
@@ -1856,6 +1851,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  integer,intent(in) :: npw, gvec(3,npw), comm
  type(crystal_t),intent(in) :: cryst
  complex(gwpc),intent(out) :: vc_sqrt(npw)
+ real(dp),optional,intent(out) :: vc(npw)
 
 !Local variables-------------------------------
  integer :: ig, ig0
@@ -1867,7 +1863,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
 
  q_is_gamma = normv(qpt, cryst%gmet, "G") < GW_TOLQ0
 
- ! Find index of G=0 in gvec.
+ ! Find the index of G=0 in gvec.
  ig0 = -1
  do ig=1,npw
    if (all(gvec(:,ig) == 0)) then
@@ -1897,7 +1893,6 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  case ('CRYSTAL', 'AUXILIARY_FUNCTION', "AUX_GB", "ERF", "ERFC")
    ! Compute |q+G| with special treatment of (q=0, g=0).
    do ig=1,npw
-     !if (q_is_gamma) then
      if (q_is_gamma .and. ig == ig0) then
        vcoul(ig) = normv(q0 + gvec(:,ig), cryst%gmet, "G")
        !print *, "q_is_gamma with ", q0, "and vcoul:", vcoul(ig); stop
@@ -1907,7 +1902,7 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
    end do
 
    if (vcgen%mode == "ERF") then
-     vcoul(:)  = four_pi/(vcoul(:)**2) *  EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 )
+     vcoul(:) = four_pi/(vcoul(:)**2) *  EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 )
    else if (vcgen%mode == "ERFC") then
      vcoul(:) = four_pi/(vcoul(:)**2) * ( one - EXP( -0.25d0 * (vcgen%rcut*vcoul(:))**2 ) )
    else
@@ -1919,7 +1914,9 @@ subroutine vcgen_get_vc_sqrt(vcgen, qpt, npw, gvec, q0, cryst, vc_sqrt, comm)
  end select
 
  ! Store final results in complex array as Rozzi's cutoff can give real negative values
- vc_sqrt = SQRT(CMPLX(vcoul, zero))
+ vc_sqrt = sqrt(cmplx(vcoul, zero))
+
+ if (present(vc)) vc = vcoul
  ABI_FREE(vcoul)
 
 end subroutine vcgen_get_vc_sqrt
@@ -1940,7 +1937,6 @@ subroutine vcgen_free(vcgen)
 
 !Arguments ------------------------------------
  class(vcgen_t),intent(inout) :: vcgen
-
 ! *************************************************************************
 
  call vcgen%mc%free()

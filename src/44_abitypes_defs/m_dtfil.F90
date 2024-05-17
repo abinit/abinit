@@ -152,6 +152,11 @@ module m_dtfil
    ! if dataset mode, and getdvdb==0 : abi//'_DS'//trim(jdtset)//'DVDB'
    ! if dataset mode, and getdvdb/=0 : abo//'_DS'//trim(jgetdvdb)//'DVDB'
 
+  character(len=fnlen) :: fildrhodbin
+  ! if no dataset mode              : abi//'DRHODB'
+  ! if dataset mode, and getdrhodb==0 : abi//'_DS'//trim(jdtset)//'DRHODB'
+  ! if dataset mode, and getdrhodb/=0 : abo//'_DS'//trim(jgetdrhodb)//'DRHODB'
+
   character(len=fnlen) :: filpotin
    ! Filename used to read POT file.
    ! Initialize via getpot_filepath
@@ -607,6 +612,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
                   getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
+
+ ! According to getdrhodb, build _DRHODB file name
+ stringfile='_DRHODB'; stringvar='drhodb'
+ call mkfilename(filnam,dtfil%fildrhodbin,dtset%getdrhodb,idtset,dtset%irddrhodb,jdtset_,ndtset,stringfile,stringvar,will_read, &
+                  getpath=dtset%getdrhodb_filepath)
+ if (will_read == 0) dtfil%fildrhodbin = ABI_NOFILE
 
  ! According to getsigeph_filepath, build _SIGEPH file name
  stringfile='_SIGEPH.nc'; stringvar='sigeph'
