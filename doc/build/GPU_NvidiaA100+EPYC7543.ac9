@@ -1,0 +1,69 @@
+# ================================================================
+# Configuration file for ABINIT 9 compilation
+#
+# CPU: AMD Milan EPYC 7543
+# GPU: Nvidia A100 SXM4 80 Go
+# Compilers: Nvidia HPC compilers 24.3
+# Libraries: MKL, Cuda
+# ================================================================
+
+#prefix=${ROOT}/install/${MY_ARCH}/abinit-gpu
+
+# Compilers and flags
+# ========================================
+ FC=$FC_MPI
+ CC=$CC_MPI
+ CXX=$CXX_MPI
+ FCFLAGS_EXTRA="-tp=zen3 -fast -fPIC"
+ CFLAGS_EXTRA="-tp=zen3"
+ CXXFLAGS_EXTRA="-tp=zen3"
+ with_optim_flavor="standard"
+ fcflags_opt_80_tdep="-O1 -g -fPIC"  #  NVFORTRAN has difficulties to compile 80_tdep directory 
+ 
+# Parallel compilation
+# ========================================
+ with_mpi="yes"
+ enable_mpi_io="yes"
+ enable_openmp="yes"
+ enable_openmp_offload="yes"
+
+# CUDA GPU
+# ========================================
+GPU_ARCH=80
+with_gpu="${CUDA_ROOT}"
+with_gpu_flavor="cuda-double"
+NVCC="${CUDA_ROOT}/bin/nvcc"
+NVCC_CFLAGS="-O3 -arch=sm_80 -Xptxas=-v -g --use_fast_math --compiler-options -O3,-fPIC,-DHAVE_CONFIG_H -I${OPENMPI_ROOT}/include"
+GPU_CFLAGS=" -I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
+GPU_CPPFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
+GPU_CXXFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
+GPU_FCFLAGS="-I${CUDA_ROOT}/include -I${CUDA_ROOT}/math_libs/include"
+GPU_LIBS="-L${CUDA_ROOT}/math_libs/lib64 -L${CUDA_ROOT}/lib64 -lcusolver -lcublas -lcublasLt -lcufft -lcudart -lstdc++"
+
+# Linear Algebra library
+# ========================================
+ with_linalg_flavor="mkl"
+ LINALG_FCFLAGS="-I${MKLROOT}/include -I${MKLROOT}/include/intel64/lp64"
+ LINALG_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_scalapack_lp64 -lmkl_blacs_openmpi_lp64 -lmkl_core -lmkl_pgi_thread -lpthread -lm"
+ LINALG_LDFLAGS="${LINALG_LIBS}"
+
+# FFT
+# ========================================
+ with_fft_flavor="dfti"
+ FFT_FCFLAGS="-I${MKLROOT}/include -I${MKLROOT}/include/intel64/lp64"
+ FFT_LIBS="-L${MKLROOT}/lib/intel64 -lmkl_rt -lpthread -lm -ldl"
+
+# NetCDF library
+# ========================================
+ with_hdf5="${HDF5_ROOT}"
+ with_netcdf="${NETCDF_C_ROOT}"
+ with_netcdf_fortran="${NETCDF_FORTRAN_ROOT}"
+
+# Additional plugins & libs
+# ========================================
+ with_libxc="${ROOT}/install/${MY_ARCH}/libxc"
+
+# Miscellaneous options
+# ========================================
+ enable_zdot_bugfix="no"
+ enable_gw_dpc="yes"
