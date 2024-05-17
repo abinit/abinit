@@ -611,7 +611,7 @@ subroutine nctk_test_mpiio(print_warning)
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
- if ((.not.nctk_has_mpiio).and.my_print_warning) then
+ if ((.not. nctk_has_mpiio) .and. my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
@@ -800,15 +800,14 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
-   ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
-     comm=comm, info=xmpio_info)
+   ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, comm=comm, info=xmpio_info)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create

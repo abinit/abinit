@@ -143,6 +143,7 @@ subroutine upf1_to_abinit(filpsp, znucl, zion, pspxc, lmax_, lloc, mmax, &
  !  r(ndm,npsx) = radial mesh
  !  rab(ndm,npsx) = dr / di for radial mesh
  !  rho_atc(ndm,npsx) = NLCC pseudocharge density
+ !  rho_at(ndm,npsx) = pseudocharge density
  !  vloc0(ndm,npsx) = local pseudopotential
  !  betar(ndm, nbrx, npsx) = projector functions in real space mesh
  !  lll(nbrx,npsx) = angular momentum channel for each projector
@@ -320,6 +321,8 @@ end subroutine upf1_to_abinit
 !!  nproj= number of projectors for each channel
 !!  xccc1d(n1xccc*(1-usepaw),6)=1D core charge function and five derivatives,
 !!                              from psp file (used in NC only)
+!!  xcctau1d(n1xccc*(1-usepaw),6)=1D core charge kinetic energy density function and five derivatives,
+!!                              from psp file (used in NC only)
 !!  nctab<nctab_t>=NC tables
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
@@ -327,7 +330,7 @@ end subroutine upf1_to_abinit
 !! SOURCE
 
 subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, lloc, mmax, &
-                          psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, nctab, maxrad)
+                          psps, epsatm, xcccrc, indlmn, ekb, ffspl, nproj_l, vlspl, xccc1d, xcctau1d, nctab, maxrad)
 
  use pseudo_types,        only : pseudo_upf, deallocate_pseudo_upf !, pseudo_config
  use read_upf_new_module, only : read_upf_new
@@ -349,6 +352,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
  real(dp), intent(inout) :: ffspl(psps%mqgrid_ff,2,psps%lnmax)
  real(dp), intent(out) :: vlspl(psps%mqgrid_vl,2)
  real(dp), intent(inout) :: xccc1d(psps%n1xccc,6)
+ real(dp), intent(inout) :: xcctau1d(psps%n1xccc,6)
 
 !Local variables -------------------------
  integer :: ierr, ir, irad, iprj, il, ll, smooth_niter, nso, nn, iln, kk, mm, pspindex, iwfc !, iq
@@ -615,10 +619,6 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
    !ABI_WARNING("upf2_to_abinit: UPF2 with SOC")
  end if
 
- ! if we find a core density, do something about it
- ! rho_atc contains the nlcc density
- ! rho_at contains the total density
-
  ! In Abinit, at least for the Troullier-Martins pseudopotential,
  ! the pseudocore charge density and its derivatives (xccc1d)
  ! are introduced in a linear grid.
@@ -626,7 +626,7 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
  ! from 0 and 1 (from 0 to xcccrc, where xcccrc is the radius
  ! where the pseudo-core becomes zero).
 
- xcccrc = zero; xccc1d = zero
+ xcccrc = zero; xccc1d = zero; xcctau1d = zero
 
  if (upf%nlcc) then
    ABI_MALLOC(ff, (mmax))
@@ -663,10 +663,39 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
    call cc_derivatives(rad_cc, ff, ff1, ff2, mmax, psps%n1xccc, xcccrc, xccc1d)
    !call psp8cc(mmax, psps%n1xccc, xcccrc, xccc1d)
 
-   ABI_FREE(rad_cc)
    ABI_FREE(ff)
    ABI_FREE(ff1)
    ABI_FREE(ff2)
+
+! Add corresponding splines for tau_mod, and flag to test for its presence before calculation
+!  NB: there are no r**2 or 4 pi factors in the tau quantities from Don Hamann in oncvpsp metagga
+   ABI_MALLOC(ff, (mmax))
+   ABI_MALLOC(ff1, (mmax))
+   ABI_MALLOC(ff2, (mmax))
+   ff(1:mmax) = upf%tau_mod(1:mmax) ! model core charge without derivative factor
+   !smooth_niter = 15 ! run 15 iterations of smoothing?
+   smooth_niter = 0   ! Don't smooth core charges to be consistent with the treatment done in psp8in
+
+   ff1 = zero
+   call nderiv(one, ff, ff1, mmax, 1) ! first derivative
+   ff1(1:mmax) = ff1(1:mmax) / upf%rab(1:mmax)
+   call smooth(ff1, mmax, smooth_niter)
+
+   ff2 = zero
+   call nderiv(one, ff1, ff2, mmax, 1) ! second derivative
+   ff2(1:mmax) = ff2(1:mmax) / upf%rab(1:mmax)
+   call smooth(ff2, mmax, smooth_niter)
+
+   ! use same xcccrc and rad_cc as for density above ??
+
+   call cc_derivatives(rad_cc, ff, ff1, ff2, mmax, psps%n1xccc, xcccrc, xcctau1d)
+
+   ABI_FREE(ff)
+   ABI_FREE(ff1)
+   ABI_FREE(ff2)
+
+   ABI_FREE(rad_cc)
+
  end if ! nlcc present
 
  ! Read pseudo valence charge in real space on the linear mesh
@@ -679,6 +708,11 @@ subroutine upf2_to_abinit(ipsp, filpsp, vloc_rcut, znucl, zion, pspxc, lmax, llo
  else where
    ff = zero
  end where
+
+ ! TODO: use the tau_at pseudo atomic kinetic energy density as well, in upf%tau_at
+ ! would also need to be splined as below for the atomic pseudo charge
+ !  NB: there are no r**2 or 4 pi factors in the tau quantities from Don Hamann in oncvpsp metagga
+ ! TODO: as well, nctab contents with the form factors of xccc1d and xcctau1d could be calculated here instead of in m_pspini
 
  ! Evaluate spline-fit of the atomic pseudo valence charge in reciprocal space.
  call pawrad_init(mesh, mesh_size=mmax, mesh_type=1, rstep=amesh)
@@ -806,7 +840,7 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bessorder = 0 ! never calculate derivatives of bessel functions
+ integer,parameter :: bessorder0 = 0 ! never calculate derivatives of bessel functions
  integer :: iproj, nr, ll, llold, ipsang, i_indlmn
  integer :: iproj_1l, ir, iq, mm
  real(dp) :: res, arg, besfact, dummy, dummy2
@@ -859,7 +893,7 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
      ! FIXME: add semianalytic form for integral from 0 to first point
      do ir=1,nr
-       call jbessel(besfact, dummy, dummy2, ll, bessorder, arg*r(ir))
+       call jbessel(besfact, dummy, dummy2, ll, bessorder0, arg*r(ir))
        work(ir) = drdi(ir) * besfact * proj(ir, iproj) * r(ir) !* r(ir)
      end do
      call ctrap (nr, work, one, res)

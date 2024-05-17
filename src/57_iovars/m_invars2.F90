@@ -1316,6 +1316,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb',tread,'INT')
  if(tread==1) dtset%getdvdb=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdrhodb',tread,'INT')
+ if(tread==1) dtset%getdrhodb=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getden',tread,'INT')
  if(tread==1) dtset%getden=intarr(1)
 
@@ -1330,6 +1333,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getdvdb_filepath = key_value
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdrhodb_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getdrhodb_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpot_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getpot_filepath = key_value
@@ -1680,6 +1686,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddvdb',tread,'INT')
  if(tread==1) dtset%irddvdb = intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irddrhodb',tread,'INT')
+ if(tread==1) dtset%irddrhodb = intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'irdpawden',tread,'INT')
  if(tread==1) dtset%irdpawden=intarr(1)
 
@@ -1737,7 +1746,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (ixc_here<0) then
    call libxc_functionals_init(ixc_here,dtset%nspden,xc_functionals=xcfunc,xc_tb09_c=dtset%xc_tb09_c)
  end if
- call get_xclevel(ixc_here,dtset%xclevel,dtset%usefock)
+ call get_xclevel(ixc_here, dtset%xclevel, usefock=dtset%usefock)
  xc_has_kxc=has_kxc(ixc_here,xc_funcs=xcfunc)
  ! Meta-GGA
  if (ixc_here<0) then
@@ -2158,6 +2167,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_kfilter', tread_kfilter, 'KEY', key_value=key_value)
  if (tread_kfilter == 1) dtset%gstore_kfilter = tolower(key_value)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'gstore_gmode', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%gstore_gmode = tolower(key_value)
+
  narr = 2 * nsppol
  call intagm(dprarr, intarr, jdtset, marr, narr, string(1:lenstr), 'gstore_brange', tread_brange, 'INT')
  if (tread_brange == 1) then
@@ -2175,7 +2187,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if (tread_erange == 1 .and. tread_brange == 1) then
    ABI_ERROR("gstore_erange and gstore_brange are mutually exclusive!")
  end if
-
  if (tread_erange == 1 .and. tread_kfilter == 1) then
    ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
  end if
@@ -3980,7 +3991,7 @@ if (dtset%usekden==1) then
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "wfk_task", tread, 'KEY', key_value=key_value)
  if (tread==1) dtset%wfk_task = str2wfktask(tolower(key_value))
  if (dtset%optdriver == RUNL_WFK .and. dtset%wfk_task == WFK_TASK_NONE) then
-   ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
+    ABI_ERROR(sjoin("A valid wfk_task must be specified when optdriver= ", itoa(dtset%optdriver), ", Received:", key_value))
  end if
 
  ABI_FREE(intarr)

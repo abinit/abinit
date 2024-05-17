@@ -34,7 +34,7 @@ module m_parser
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
-                         endswith, char_count, find_digit !, startswith,
+                         endswith, char_count, find_digit, replace !, startswith,
  use m_geometry,  only : xcart2xred, det3r, mkrdim
 
  implicit none
@@ -241,6 +241,9 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
+
+   ! Make sure double quotation marks are used to enclose strings.
+   !string = replace(string(1:lenstr), "'", '"')
 
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
