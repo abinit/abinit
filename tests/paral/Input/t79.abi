@@ -1,6 +1,8 @@
 # SiC in zinc-blende structure
 
 ndtset 3
+iomode 1
+istwfk *1
 ecut 12     # Cannot go below 8 else system becomes metallic in HDIAGO!
 
 # This to compute QP without symmetries for debugging purposes
@@ -88,6 +90,7 @@ gw_qprange3 0        # Compute Fundamental and direct gap only
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = HAVE_LINALG_SCALAPACK
+#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
 #%% [paral_info]
 #%% nprocs_to_test = 8
 #%% max_nprocs = 8

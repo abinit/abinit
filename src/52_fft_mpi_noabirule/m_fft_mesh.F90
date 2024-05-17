@@ -49,7 +49,7 @@ MODULE m_fft_mesh
  public :: cigfft              ! Calculate the FFT index of G-G0.
  public :: ig2gfft             ! Returns the component of a G in the FFT Box from its sequential index.
  public :: g2ifft              ! Returns the index of the G in the FFT box from its reduced coordinates.
- public :: get_gftt            ! Calculate the G"s in the FFT box from ngfft
+ public :: get_gfft            ! Calculate the G-vectors in the FFT box from ngfft.
  public :: calc_ceigr          ! e^{iG.r} on the FFT mesh (complex valued).
  public :: calc_eigr           ! e^{iG.r} on the FFT mesh (version for real array with RE,IM).
  public :: calc_ceikr          ! e^{ik.r} on the FFT mesh (complex valued).
@@ -1106,9 +1106,9 @@ end function g2ifft
 
 !----------------------------------------------------------------------
 
-!!****f* m_fft_mesh/get_gftt
+!!****f* m_fft_mesh/get_gfft
 !! NAME
-!!  get_gftt
+!!  get_gfft
 !!
 !! FUNCTION
 !!  Returns the set of G-vectors in the FFT mesh and the maximal kinetic energy of k+G.
@@ -1124,7 +1124,7 @@ end function g2ifft
 !!
 !! SOURCE
 
-pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
+pure subroutine get_gfft(ngfft, kpt, gmet, gsq_max, gfft)
 
 !Arguments ------------------------------------
 !scalars
@@ -1132,7 +1132,7 @@ pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
 !arrays
  integer,intent(in) :: ngfft(18)
  integer,intent(out) :: gfft(3,ngfft(1)*ngfft(2)*ngfft(3))
- real(dp),intent(in) :: kpt(3),gmet(3,3)
+ real(dp),intent(in) :: kpt(3), gmet(3,3)
 
 !Local variables-------------------------------
 !scalars
@@ -1163,7 +1163,7 @@ pure subroutine get_gftt(ngfft, kpt, gmet, gsq_max, gfft)
    end do
  end do
 
-end subroutine get_gftt
+end subroutine get_gfft
 !!***
 
 !----------------------------------------------------------------------
