@@ -840,7 +840,7 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: bessorder = 0 ! never calculate derivatives of bessel functions
+ integer,parameter :: bessorder0 = 0 ! never calculate derivatives of bessel functions
  integer :: iproj, nr, ll, llold, ipsang, i_indlmn
  integer :: iproj_1l, ir, iq, mm
  real(dp) :: res, arg, besfact, dummy, dummy2
@@ -893,7 +893,7 @@ subroutine psp11nl(ffspl,indlmn, mmax, lnmax, lmnmax, mqgrid, n_proj, &
 
      ! FIXME: add semianalytic form for integral from 0 to first point
      do ir=1,nr
-       call jbessel(besfact, dummy, dummy2, ll, bessorder, arg*r(ir))
+       call jbessel(besfact, dummy, dummy2, ll, bessorder0, arg*r(ir))
        work(ir) = drdi(ir) * besfact * proj(ir, iproj) * r(ir) !* r(ir)
      end do
      call ctrap (nr, work, one, res)

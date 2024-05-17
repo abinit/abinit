@@ -22,7 +22,7 @@ def is_git_repo(path):
     Do not require to have git installed
     '''
     # Check whether "path/.git" exists and is a directory
-    git_dir = os.path.join(path,".git")
+    git_dir = os.path.join(path, ".git")
     return os.path.isdir(git_dir)
 
 
