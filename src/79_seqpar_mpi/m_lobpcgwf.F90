@@ -63,15 +63,12 @@ module m_lobpcgwf
 
  ! For use in getghc_gsc1
  integer,save  :: l_cpopt
- integer,save  :: l_icplx
- integer,save  :: l_istwf
  integer,save  :: l_npw
  integer,save  :: l_nspinor
  logical,save  :: l_paw
  integer, save :: l_paral_kgb
  integer,save  :: l_prtvol
  integer,save  :: l_sij_opt
- real(dp), allocatable,save ::  l_pcon(:)
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -103,19 +100,14 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgocc
+ type(xgBlock_t) :: precond
  type(lobpcg_t) :: lobpcg
 
- integer :: space, blockdim,  nline
- integer :: ipw
+ integer :: space, blockdim
 
  integer, parameter :: tim_lobpcgwf2 = 1640
  double precision :: cputime, walltime
  double precision :: tsec(2)
-
- type(c_ptr) :: cptr
- real(dp), pointer :: eig_ptr(:,:) => NULL()
- real(dp), pointer :: resid_ptr(:,:) => NULL()
- real(dp), pointer :: occ_ptr(:,:) => NULL()
 
  ! Important things for NC
  integer,parameter :: choice=1, paw_opt=0, signs=1
@@ -123,6 +115,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  integer :: iband, shift, me_g0, me_g0_fft
  real(dp) :: gsc_dummy(0,0)
  real(dp), allocatable :: l_gvnlxc(:,:)
+ real(dp), allocatable ::  pcon(:)
 
 ! *********************************************************************
 
@@ -138,7 +131,6 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ! Set module variables
  l_paw = (gs_hamk%usepaw==1)
  l_cpopt=-1;l_sij_opt=0;if (l_paw) l_sij_opt=1
- l_istwf=gs_hamk%istwf_k
  l_npw = npw
  l_nspinor = nspinor
  l_prtvol = prtvol
@@ -147,34 +139,19 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  l_paral_kgb = dtset%paral_kgb
 
 !Variables
- nline=dtset%nline
  blockdim=nband/dtset%nblock_lobpcg !=l_mpi_enreg%nproc_band*l_mpi_enreg%bandpp
 
 !Depends on istwfk
- if ( l_istwf > 1 ) then ! Real only
+ if ( gs_hamk%istwf_k > 1 ) then ! Real only
    ! SPACE_CR mean that we have complex numbers but no re*im terms only re*re
    ! and im*im so that a vector of complex is consider as a long vector of real
    ! therefore the number of data is (2*npw*nspinor)*nband
    ! This space is completely equivalent to SPACE_R but will correctly set and
    ! get the array data into the xgBlock
    space = SPACE_CR
-   l_icplx = 2
  else ! complex
    space = SPACE_C
-   l_icplx = 1
  end if
-
- !For preconditionning
- ABI_MALLOC(l_pcon,(1:l_icplx*npw))
- !$omp parallel do schedule(static), shared(l_pcon,kinpw)
- do ipw=1-1,l_icplx*npw-1
-   if(kinpw(ipw/l_icplx+1)>huge(zero)*1.d-11) then
-     l_pcon(ipw+1)=0.d0
-   else
-     l_pcon(ipw+1) = (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1)))) &
-&    / (27+kinpw(ipw/l_icplx+1)*(18+kinpw(ipw/l_icplx+1)*(12+8*kinpw(ipw/l_icplx+1))) + 16*kinpw(ipw/l_icplx+1)**4)
-   end if
- end do
 
 #ifdef HAVE_OPENMP_OFFLOAD
  if(gs_hamk%gpu_option==ABI_GPU_OPENMP) then
@@ -182,13 +159,17 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  end if
 #endif
 
+ !For preconditionning
+ ABI_MALLOC(pcon,(npw))
+ call build_pcon(pcon,kinpw,npw)
+
  ! Local variables for lobpcg
  me_g0 = -1
  me_g0_fft = -1
  if (space==SPACE_CR) then
    me_g0 = 0
    me_g0_fft = 0
-   if (l_istwf == 2) then
+   if (gs_hamk%istwf_k == 2) then
      if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
@@ -196,24 +177,15 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
- ! Trick the with C to change rank of arrays (:) to (:,:)
- cptr = c_loc(eig)
- call c_f_pointer(cptr,eig_ptr,(/ nband,1 /))
- call xgBlock_map(xgeigen,eig_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
+ call xgBlock_map_1d(precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
 
- !call xg_init(xgresidu,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
- ! Trick the with C to change rank of arrays (:) to (:,:)
- cptr = c_loc(resid)
- call c_f_pointer(cptr,resid_ptr,(/ nband,1 /))
- call xgBlock_map(xgresidu,resid_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
+ call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- !call xg_init(xgeigen,SPACE_R,nband,1,l_mpi_enreg%comm_bandspinorfft)
- ! Trick the with C to change rank of arrays (:) to (:,:)
- cptr = c_loc(occ)
- call c_f_pointer(cptr,occ_ptr,(/ nband,1 /))
- call xgBlock_map(xgocc,occ_ptr,SPACE_R,nband,1,gpu_option=dtset%gpu_option)
+ call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr,nline,&
+ call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+
+ call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr,dtset%nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
    me_g0,me_g0_fft,gs_hamk%gpu_option)
 
@@ -225,7 +197,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call lobpcg_run(lobpcg,xgx0,getghc_gsc1,precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
  ! Free preconditionning since not needed anymore
- ABI_FREE(l_pcon)
+ ABI_FREE(pcon)
 
  if ( .not. l_paw ) then
 #ifdef FC_CRAY
@@ -321,17 +293,27 @@ subroutine getghc_gsc1(X,AX,BX)
 
 end subroutine getghc_gsc1
 
- subroutine precond(W)
-   use m_xg, only : xg_t, xgBlock_colwiseMul
-   type(xgBlock_t), intent(inout) :: W
-   integer :: ispinor
+subroutine build_pcon(pcon,kinpw,npw)
 
-   ! precondition resid_vec
-   do ispinor = 1,l_nspinor
-     call xgBlock_colwiseMul(W,l_pcon,l_npw*(ispinor-1))
-   end do
+  implicit none
 
- end subroutine precond
+  integer,intent(in) :: npw
+  real(dp),intent(in) :: kinpw(:)
+  real(dp),intent(out) :: pcon(:)
+
+  integer :: ipw
+
+  !$omp parallel do schedule(static), shared(pcon,kinpw)
+  do ipw=1,npw
+    if(kinpw(ipw)>huge(0.0_dp)*1.d-11) then
+      pcon(ipw)=0.d0
+    else
+      pcon(ipw) = (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw)))) &
+&     / (27+kinpw(ipw)*(18+kinpw(ipw)*(12+8*kinpw(ipw))) + 16*kinpw(ipw)**4)
+    end if
+  end do
+
+end subroutine build_pcon
 
  end module m_lobpcgwf
 !!***

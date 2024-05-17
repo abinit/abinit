@@ -152,6 +152,16 @@ module m_xg
     module procedure xgBlock_scaleC
   end interface xgBlock_scale
 
+  interface xgBlock_reverseMap
+    module procedure xgBlock_reverseMapR
+    module procedure xgBlock_reverseMapC
+  end interface xgBlock_reverseMap
+
+  interface xgBlock_reverseMap_1d
+    module procedure xgBlock_reverseMap_1dR
+    module procedure xgBlock_reverseMap_1dC
+  end interface xgBlock_reverseMap_1d
+
   interface checkResize
     module procedure checkResizeI
     module procedure checkResizeR
@@ -180,7 +190,9 @@ module m_xg
   public :: xgBlock_setBlock
   public :: xgBlock_set ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xgBlock_map
+  public :: xgBlock_map_1d
   public :: xgBlock_reverseMap
+  public :: xgBlock_reverseMap_1d
   public :: xgBlock_prefetch_async
   public :: xgBlock_get ! LB-06/03/24: Be careful, this routine is not used (so not tested)
   public :: xgBlock_copy
@@ -218,7 +230,7 @@ module m_xg
   public :: xgBlock_colwiseMul
   public :: xgBlock_scale
 
-  public :: xgBlock_apply_diag_nospin
+  public :: xgBlock_apply_diag
 
   public :: xgBlock_mpi_sum
 
@@ -323,7 +335,7 @@ contains
     use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
-    double precision, target, intent(inout) :: array(rows,cols)
+    double precision, target, intent(in) :: array(rows,cols)
     type(c_ptr) :: cptr
     cptr = c_loc(array)
   end function getClocR
@@ -338,7 +350,7 @@ contains
     use, intrinsic :: iso_c_binding
     integer, intent(in) :: rows
     integer, intent(in) :: cols
-    complex(kind=8), target, intent(inout) :: array(rows,cols)
+    complex(kind=8), target, intent(in) :: array(rows,cols)
     type(c_ptr) :: cptr
     cptr = c_loc(array)
   end function getClocC
@@ -669,7 +681,7 @@ contains
   subroutine xgBlock_map(xgBlock,array,space,rows,cols,comm,me_g0,gpu_option)
     use, intrinsic :: iso_c_binding
     type(xgBlock_t) , intent(inout) :: xgBlock
-    double precision, target, intent(inout) :: array(:,:)
+    double precision, target, intent(in) :: array(:,:)
     integer   , intent(in   ) :: space
     integer   , intent(in   ) :: rows
     integer   , intent(in   ) :: cols
@@ -733,14 +745,57 @@ contains
   end subroutine xgBlock_map
   !!***
 
-  !!****f* m_xg/xgBlock_reverseMap
+  !!****f* m_xg/xgBlock_map_1d
   !!
   !! NAME
-  !! xgBlock_reverseMap
+  !! xgBlock_map_1d
 
-  subroutine xgBlock_reverseMap(xgBlock,array,rows,cols)
+    subroutine xgBlock_map_1d(xgBlock,array,space,rows,comm,me_g0,gpu_option)
+      use iso_c_binding
+      type(xgBlock_t) , intent(inout) :: xgBlock
+      double precision, intent(in), target :: array(:)
+      integer   , intent(in   ) :: space
+      integer   , intent(in   ) :: rows
+      integer   , optional, intent(in) :: comm
+      integer   , optional, intent(in) :: me_g0
+      integer   , optional, intent(in) :: gpu_option
+
+      integer :: comm_,me_g0_,gpu_option_
+      type(c_ptr) :: cptr
+      real(dp), pointer :: array_ptr(:,:) => NULL()
+
+      ! Trick the with C to change rank of arrays (:) to (:,:)
+      cptr = c_loc(array)
+      call c_f_pointer(cptr,array_ptr,(/ rows,1 /))
+
+      comm_ =xmpi_comm_null
+      if (present(comm)) then
+        comm_=comm
+      end if
+
+      me_g0_=-1
+      if (present(me_g0)) then
+        me_g0_=me_g0
+      end if
+
+      gpu_option_=ABI_GPU_DISABLED
+      if (present(gpu_option)) then
+        gpu_option_=gpu_option
+      end if
+
+      call xgBlock_map(xgBlock,array_ptr,space,rows,1,comm=comm_,me_g0=me_g0_,gpu_option=gpu_option_)
+
+    end subroutine xgBlock_map_1d
+  !!***
+
+  !!****f* m_xg/xgBlock_reverseMapR
+  !!
+  !! NAME
+  !! xgBlock_reverseMapR
+
+  subroutine xgBlock_reverseMapR(xgBlock,array,rows,cols)
     use, intrinsic :: iso_c_binding
-    type(xgBlock_t) , intent(inout) :: xgBlock
+    type(xgBlock_t) , intent(in) :: xgBlock
     double precision, pointer, intent(inout) :: array(:,:)
     integer,optional,intent(in) :: rows
     integer,optional,intent(in) :: cols
@@ -771,7 +826,106 @@ contains
       call c_f_pointer(cptr,array,(/ 2*rows_, cols_ /))
     end select
 
-  end subroutine xgBlock_reverseMap
+  end subroutine xgBlock_reverseMapR
+  !!***
+
+  !!****f* m_xg/xgBlock_reverseMap_1dR
+  !!
+  !! NAME
+  !! xgBlock_reverseMap_1dR
+
+  subroutine xgBlock_reverseMap_1dR(xgBlock,array,array_dim)
+    use, intrinsic :: iso_c_binding
+    type(xgBlock_t) , intent(in) :: xgBlock
+    double precision, pointer, intent(inout) :: array(:)
+    integer,optional,intent(in) :: array_dim
+    type(c_ptr) :: cptr
+
+    integer :: dim_,fact
+
+    dim_ = xgBlock%ldim*xgBlock%cols
+    if (present(array_dim)) dim_=array_dim
+
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+    select case (xgBlock%space)
+    case ( SPACE_R,SPACE_CR )
+      if ( xgBlock%cols*xgBlock%Ldim < dim_ ) then
+        write(std_out,*) xgBlock%cols,xgBlock%Ldim,dim_
+        write(std_out,*) xgBlock%cols*xgBlock%Ldim,dim_
+        ABI_ERROR("Bad reverseMapping")
+      end if
+      cptr = getClocR(fact*xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
+      call c_f_pointer(cptr,array,(/ fact*dim_ /))
+    case ( SPACE_C )
+      if ( xgBlock%cols*xgBlock%Ldim < dim_ ) then
+        ABI_ERROR("Bad complex reverseMapping")
+      end if
+      cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
+      call c_f_pointer(cptr,array,(/ 2*dim_ /))
+    end select
+
+  end subroutine xgBlock_reverseMap_1dR
+  !!***
+
+  !!****f* m_xg/xgBlock_reverseMapC
+  !!
+  !! NAME
+  !! xgBlock_reverseMapC
+
+  subroutine xgBlock_reverseMapC(xgBlock,array,rows,cols)
+    use, intrinsic :: iso_c_binding
+    type(xgBlock_t) , intent(in) :: xgBlock
+    complex(dpc), pointer, intent(inout) :: array(:,:)
+    integer,optional,intent(in) :: rows
+    integer,optional,intent(in) :: cols
+    type(c_ptr) :: cptr
+
+    integer :: rows_,cols_
+
+    if (xgBlock%space/=SPACE_C) then
+      ABI_ERROR('space(xgBlock) should be SPACE_C')
+    end if
+    rows_ = xgBlock%ldim
+    cols_ = xgBlock%cols
+    if (present(rows)) rows_=rows
+    if (present(cols)) cols_=cols
+
+    if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
+      ABI_ERROR("Bad complex reverseMapping")
+    end if
+    cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
+    call c_f_pointer(cptr,array,(/ rows_, cols_ /))
+
+  end subroutine xgBlock_reverseMapC
+  !!***
+
+  !!****f* m_xg/xgBlock_reverseMap_1dC
+  !!
+  !! NAME
+  !! xgBlock_reverseMap_1dC
+
+  subroutine xgBlock_reverseMap_1dC(xgBlock,array,array_dim)
+    use, intrinsic :: iso_c_binding
+    type(xgBlock_t) , intent(in) :: xgBlock
+    complex(dpc), pointer, intent(inout) :: array(:)
+    integer,optional,intent(in) :: array_dim
+    type(c_ptr) :: cptr
+
+    integer :: dim_
+
+    if (xgBlock%space/=SPACE_C) then
+      ABI_ERROR('space(xgBlock) should be SPACE_C')
+    end if
+    dim_ = xgBlock%ldim*xgBlock%cols
+    if (present(array_dim)) dim_=array_dim
+
+    if ( xgBlock%cols*xgBlock%Ldim < dim_ ) then
+      ABI_ERROR("Bad complex reverseMapping")
+    end if
+    cptr = getClocC(xgBlock%Ldim,xgBlock%cols,xgBlock%vecC(:,:))
+    call c_f_pointer(cptr,array,(/ dim_ /))
+
+  end subroutine xgBlock_reverseMap_1dC
   !!***
 
   !!****f* m_xg/xgBlock_prefetch_async
@@ -2972,12 +3126,12 @@ contains
   end subroutine xgBlock_colwiseCymax
   !!***
 
-  !!****f* m_xg/xgBlock_apply_diag_nospin
+  !!****f* m_xg/xgBlock_apply_diag
   !!
   !! NAME
-  !! xgBlock_apply_diag_nospin
+  !! xgBlock_apply_diag
 
-  subroutine xgBlock_apply_diag_nospin(X, diag, nspinor, Y)
+  subroutine xgBlock_apply_diag(X, diag, nspinor, Y)
 
     type(xgBlock_t) , intent(inout) :: X
     type(xgBlock_t) , intent(in)    :: diag
@@ -2986,14 +3140,16 @@ contains
 
     integer :: iblock,rows,cols
     type(xgBlock_t) :: X_spinor, Y_spinor
+    real(dp)    , pointer :: array(:)
+    complex(dpc), pointer :: arrayc(:)
 
     if (X%rows/=nspinor*diag%rows) then
       ABI_ERROR('xgBlock%rows/=nspinor*xgBlock_diag%rows')
     end if
     if (diag%cols/=1) then
-      ABI_ERROR('xgBlock_diag should have one column')
+      ABI_ERROR('diag should have one column')
     end if
-    if (diag%space==SPACE_CR) then
+    if (diag%space/=SPACE_R.and.diag%space/=SPACE_C) then
       ABI_ERROR('space(diag) should be SPACE_C or SPACE_R')
     end if
     if (X%space==SPACE_R) then
@@ -3002,55 +3158,24 @@ contains
       end if
     end if
 
-    call xgBlock_reshape_spinor(X,X_spinor,nspinor,ROWS2COLS)
-
     if (present(Y)) then
       call xgBlock_check(Y,X)
+      call xgBlock_copy(X,Y)
       call xgBlock_reshape_spinor(Y,Y_spinor,nspinor,ROWS2COLS)
     else
+      call xgBlock_reshape_spinor(X,X_spinor,nspinor,ROWS2COLS)
       Y_spinor = X_spinor
     end if
 
-    rows = X_spinor%rows
-    cols = X_spinor%cols
+    if (space(diag)==SPACE_R) then
+      call xgBlock_reverseMap_1dR(diag,array)
+      call xgBlock_colwiseMulR(Y_spinor,array)
+    else if (space(diag)==SPACE_C) then
+      call xgBlock_reverseMap_1dC(diag,arrayc)
+      call xgBlock_colwiseMulC(Y_spinor,arrayc)
+    end if
 
-    select case(X%space)
-    case (SPACE_R)
-      !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-      !$omp& schedule(static)
-      do iblock = 1, cols
-        Y_spinor%vecR(1:rows,iblock) = X_spinor%vecR(1:rows,iblock) * diag%vecR(1:rows,1)
-      end do
-    case (SPACE_CR)
-      if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
-        do iblock = 1, cols
-          Y_spinor%vecR(1:2*rows:2,iblock) = X_spinor%vecR(1:2*rows:2,iblock) * diag%vecR(1:rows,1)
-          Y_spinor%vecR(2:2*rows:2,iblock) = X_spinor%vecR(2:2*rows:2,iblock) * diag%vecR(1:rows,1)
-        end do
-      else
-        ABI_ERROR('Not implemented')
-      end if
-    case (SPACE_C)
-      if (diag%space==SPACE_C) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
-        do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = X_spinor%vecC(1:rows,iblock) * diag%vecC(1:rows,1)
-        end do
-      else if (diag%space==SPACE_R) then
-        !$omp parallel do shared(X_spinor,Y_spinor,diag), &
-        !$omp& schedule(static)
-        do iblock = 1, cols
-          Y_spinor%vecC(1:rows,iblock) = X_spinor%vecC(1:rows,iblock) * diag%vecR(1:rows,1)
-        end do
-      else
-        ABI_ERROR('Not implemented')
-      end if
-    end select
-
-  end subroutine xgBlock_apply_diag_nospin
+  end subroutine xgBlock_apply_diag
   !!***
 
   !!****f* m_xg/xgBlock_mpi_sum
@@ -3259,13 +3384,12 @@ contains
   !! NAME
   !! xgBlock_colwiseMulR
 
-  subroutine xgBlock_colwiseMulR(xgBlock, vec, shift)
+  subroutine xgBlock_colwiseMulR(xgBlock, vec)
 
     type(xgBlock_t) , intent(inout)           :: xgBlock
     double precision, intent(in   ), target   :: vec(:)
-    integer,          intent(in   )           :: shift
 
-    integer :: rows,fact,min_rows
+    integer :: rows
     integer :: iblock,irow
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
@@ -3277,22 +3401,24 @@ contains
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
 
-    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
-
-    min_rows=fact*min(xgBlock%rows,shift+rows)
+    if (xgBlock%rows/=rows) then
+      ABI_ERROR('dim(vec)/=xgBlock%rows')
+    end if
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_KOKKOS) && defined(HAVE_YAKL)
 
       select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
+      case (SPACE_R)
         call compute_colwiseMul_scalar_scalar(c_loc(xgBlock%vecR), c_loc(vec), &
-          &                                   shift, fact*xgBlock%rows, xgBlock%cols, &
-          &                                   xgBlock%ldim, fact*rows)
+          &                                   0, xgBlock%rows, xgBlock%cols, &
+          &                                   xgBlock%ldim, rows)
+      case (SPACE_CR)
+         ABI_ERROR('Not implemented')
       case (SPACE_C)
         call compute_colwiseMul_cplx_scalar(c_loc(xgBlock%vecC), c_loc(vec), &
-          &                                 shift, xgBlock%rows, xgBlock%cols, &
+          &                                 0, xgBlock%rows, xgBlock%cols, &
           &                                 xgBlock%ldim, rows)
       end select
 
@@ -3305,19 +3431,28 @@ contains
       !$OMP TARGET ENTER DATA MAP(to:vec)
       cols=xgBlock%cols
       select case(xgBlock%space)
-      case (SPACE_R,SPACE_CR)
+      case (SPACE_R)
         xgBlock__vecR => xgBlock%vecR
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR) MAP(to:vec) PRIVATE(iblock,irow)
         do iblock = 1, cols
-          do irow = shift+1, min_rows
+          do irow = 1, rows
             xgBlock__vecR(irow,iblock) = xgBlock__vecR(irow,iblock) * vec(irow)
+          end do
+        end do
+      case (SPACE_CR)
+        xgBlock__vecR => xgBlock%vecR
+        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecR) MAP(to:vec) PRIVATE(iblock,irow)
+        do iblock = 1, cols
+          do irow = 1, rows
+            xgBlock__vecR(2*irow-1,iblock) = xgBlock__vecR(2*irow-1,iblock) * vec(irow)
+            xgBlock__vecR(2*irow  ,iblock) = xgBlock__vecR(2*irow  ,iblock) * vec(irow)
           end do
         end do
       case (SPACE_C)
         xgBlock__vecC => xgBlock%vecC
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC) MAP(to:vec) PRIVATE(iblock,irow)
         do iblock = 1, cols
-          do irow = shift+1, min_rows
+          do irow = 1, rows
             xgBlock__vecC(irow,iblock) = xgBlock__vecC(irow,iblock) * vec(irow)
           end do
         end do
@@ -3332,22 +3467,20 @@ contains
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-          xgBlock%vecR(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+          xgBlock%vecR(1:rows,iblock) = xgBlock%vecR(1:rows,iblock) * vec(1:rows)
         end do
       case (SPACE_CR)
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecR(shift+1:min(2*xgBlock%rows,shift+2*rows),iblock) = &
-          xgBlock%vecR(shift+1:min(2*xgBlock%rows,shift+2*rows),iblock) * vec(1:min(2*xgBlock%rows-shift,2*rows))
+          xgBlock%vecR(1:2*rows:2,iblock) = xgBlock%vecR(1:2*rows:2,iblock) * vec(1:rows)
+          xgBlock%vecR(2:2*rows:2,iblock) = xgBlock%vecR(2:2*rows:2,iblock) * vec(1:rows)
         end do
       case (SPACE_C)
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+          xgBlock%vecC(1:rows,iblock) = xgBlock%vecC(1:rows,iblock) * vec(1:rows)
         end do
       end select
 
@@ -3361,22 +3494,25 @@ contains
   !! NAME
   !! xgBlock_colwiseMulC
 
-  subroutine xgBlock_colwiseMulC(xgBlock, vec, shift)
+  subroutine xgBlock_colwiseMulC(xgBlock, vec)
 
     type(xgBlock_t), intent(inout)           :: xgBlock
     complex(kind=8), intent(in   ), target   :: vec(:)
-    integer,         intent(in   )           :: shift
 
     integer :: rows
     integer :: iblock,irow
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
-    integer :: cols,min_rows
+    integer :: cols
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
 #endif
 
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
+
+    if (xgBlock%rows/=rows) then
+      ABI_ERROR('dim(vec)/=xgBlock%rows')
+    end if
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
@@ -3387,7 +3523,7 @@ contains
         ABI_ERROR("Error colwiseMulC")
       case (SPACE_C)
         call compute_colwiseMul_cplx_cplx(c_loc(xgBlock%vecC), c_loc(vec), &
-          &                               shift, xgBlock%rows, xgBlock%cols, &
+          &                               0, xgBlock%rows, xgBlock%cols, &
           &                               xgBlock%ldim, rows)
       end select
 
@@ -3401,12 +3537,12 @@ contains
       case (SPACE_R,SPACE_CR)
         ABI_ERROR("Error colwiseMulC")
       case (SPACE_C)
-        min_rows=min(xgBlock%rows,shift+rows); cols = xgBlock%cols
+        cols = xgBlock%cols
         xgBlock__vecC => xgBlock%vecC
         !$OMP TARGET ENTER DATA MAP(to:vec)
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) MAP(to:xgBlock__vecC) MAP(to:vec) PRIVATE(iblock,irow)
         do iblock = 1, cols
-          do irow = shift+1, min_rows
+          do irow = 1, rows
             xgBlock__vecC(irow,iblock) = xgBlock__vecC(irow,iblock) * vec(irow)
           end do
         end do
@@ -3424,8 +3560,8 @@ contains
         !$omp parallel do shared(xgBlock,vec), &
         !$omp& schedule(static)
         do iblock = 1, xgBlock%cols
-          xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) = &
-            xgBlock%vecC(shift+1:min(xgBlock%rows,shift+rows),iblock) * vec(1:min(xgBlock%rows-shift,rows))
+          xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) = &
+            xgBlock%vecC(1:min(xgBlock%rows,rows),iblock) * vec(1:min(xgBlock%rows,rows))
         end do
       end select
 
