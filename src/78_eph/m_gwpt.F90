@@ -42,10 +42,7 @@ module m_gwpt
  use m_hamiltonian
  use m_pawcprj
  use m_wfd
- use m_skw
  use m_krank
- use m_lgroup
- use m_ephwg
  use m_sort
  use m_hdr
  use m_sigtk
@@ -234,7 +231,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  type(gstore_t),target :: gstore
  type(gqk_t),pointer :: gqk
  type(xcdata_type) :: xcdata
- character(len=fnlen) :: w_fname, gstore_filepath
+ character(len=fnlen) :: screen_filepath, gstore_filepath
  character(len=5000) :: msg
 !arrays
  integer :: g0_k(3), g0_kq(3), g0_kmp(3), g0_kqmp(3)
@@ -285,7 +282,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:) !, cg1_kqmp(:,:)
  real(dp),allocatable :: full_cg1_kqmp(:,:) !, full_cg1_kmp(:,:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:) !, full_ur1_kmp(:)
- complex(gwpc),allocatable :: acc_ket(:,:), sigcme(:)
+ complex(gwpc),allocatable :: out_ket(:,:), sigcme(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
@@ -311,10 +308,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Note however that MG believes that Sigma_x is a much better approximation than v_xc when one is interested
  ! in the e-ph matrix elements connecting low-energy states such as band edges to high-energy states.
  !
- ! 2) We need to solve the NSCF Sterheimer for q and -q. In principle one can solve the equation only at q
- !    and then use spatial inversion or TR to get the solution at -q but this requires solving the Sternheimer
- !    for all pp wavevectors in the BZ (or better the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
- !    by the parallelism over pp but perhaps one can precompute \Delta psi with all procs and write the results to temporary files.
+ ! 2)
+ ! We need to solve the NSCF Sternheimer for q and -q. In principle one can solve the equation only at q
+ ! and then use spatial inversion or TR to get the solution at -q but this requires solving the Sternheimer
+ ! for all pp wavevectors in the BZ (or better the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
+ ! by the parallelism over pp but perhaps one can precompute \Delta psi with all procs and write the results to temporary files.
 
  if (psps%usepaw == 1) then
    ABI_ERROR("PAW not implemented")
@@ -364,17 +362,17 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! HANDLE SCREENING
  ! ================
  ! Init gpsh_c for the correlated part.
- nqlwl = 0; w_fname = ABI_NOFILE
+ nqlwl = 0; screen_filepath = ABI_NOFILE
  if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
-   w_fname = dtfil%fnameabi_scr
+   screen_filepath = dtfil%fnameabi_scr
  end if
 
  call kmesh%init(cryst, wfk_hdr%nkpt, wfk_hdr%kptns, dtset%kptopt)
 
  w_info%use_ppm = dtset%ppmodel
- if (w_fname /= ABI_NOFILE) then
+ if (screen_filepath /= ABI_NOFILE) then
    ! Read g-sphere and pp_mesh from SCR file.
-   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
+   call get_hscr_qmesh_gsph(screen_filepath, dtset, cryst, hscr, pp_mesh, gsph_c, qlwl, comm)
    call hscr%free()
    nqlwl = size(qlwl, dim=2)
    w_info%use_mdf = MDL_NONE
@@ -392,7 +390,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    !w_info%use_ppm = 0
  end if
  ! FIXME
- w_info%use_ppm = 0
+ !w_info%use_ppm = 0
  !call screen%ppm%print(units)
 
  if (nqlwl == 0) then
@@ -768,7 +766,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  w_info%mat_type = MAT_INV_EPSILON
  w_info%wint_method = WINT_PPMODEL
 
- call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, w_fname, mqmem, dtset%npweps, &
+ call screen%init(w_info, cryst, pp_mesh, gsph_c, vcp, screen_filepath, mqmem, dtset%npweps, &
                   dtset%iomode, ngfftf, nfftf, nsppol, nspden, rhor, dtset%prtvol, comm)
  ABI_FREE(qlwl)
 
@@ -778,7 +776,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  nomega = 2
  ABI_MALLOC(omegame0i, (nomega))
  ABI_MALLOC(omegas, (nomega))
- ABI_MALLOC(acc_ket, (npwc*nspinor, nomega))
+ ABI_MALLOC(out_ket, (npwc*nspinor, nomega))
  ABI_MALLOC(sigcme, (nomega))
 
  ! Allocate g-vectors centered on k, k+q, k-p, and k+q-p
@@ -829,9 +827,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(vxc, (nfft, dtset%nspden))
 
  nk3xc=1; option=2; usexcnhat=0
- call rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
-              dum_nhat,0,dum_nhat,0,nkxc,nk3xc,non_magnetic_xc,n3xccc0,option,rhor, &
-              cryst%rprimd,strsxc,usexcnhat,vxc,vxcavg,dum_xccc3d,xcdata)
+ call rhotoxc(enxc, kxc, mpi_enreg, nfft, ngfft, &
+              dum_nhat, 0, dum_nhat, 0, nkxc, nk3xc, non_magnetic_xc, n3xccc0, option, rhor, &
+              cryst%rprimd, strsxc, usexcnhat, vxc, vxcavg, dum_xccc3d, xcdata)
 
  ! ========================================
  ! Loop over MPI distributed spins in Sigma
@@ -1170,7 +1168,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          do ib_sum=my_bsum_start, my_bsum_stop
 
-           ! <bsum,k-p|e^{-ip+G'}|n,k>
+           ! <bsum,k-p|e^{-ip+G'}r|n,k>
            call wfd%rotate_cg(ib_sum, ndat1, spin, kmp_ibz, npw_kmp, kg_kmp, istwf_kmp, &
                               cryst, mapl_kmp, gbound_kmp, work_ngfft, work, cg_kmp, urs_kbz=ur_kmp)
 
@@ -1183,10 +1181,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
            omegas = [e_mkq, e_nk]
            omegame0i = omegas - e0i
-           !call screen%calc_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
+           !call screen%calc_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
 
-           ! <m,k+q| e^{ip+G}|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT
-           ! and take the CC in times_vc_sqrt
+           ! <m,k+q| e^{ip+G}r|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT and take the CC in times_vc_sqrt
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                               cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp, urs_kbz=ur_kqmp)
 
@@ -1197,9 +1194,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! Contract immediately over g with the convolution of W_gg'
            e0i = qp_ene(ib_sum, ikqmp_ibz, spin)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
-           !omegame0i = omegas - e0i
-           !call screen%calc_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, acc_ket, sigcme)
-
+           omegame0i = omegas - e0i
+           !call screen%calc_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
          end do ! ib_sum
 
          ! ========================================
@@ -1281,7 +1277,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                                   full_cg1=full_cg1_kqmp, full_ur1=full_ur1_kqmp)
              ABI_CHECK(ierr == 0, msg)
 
-             ! <m,k+q|e^{ip+G}|bsum,k+q-p> --> compute <k|e^{-i(q+G)}|k+q> with FFT and take the CC.
+             ! <m,k+q|e^{ip+G}r|bsum,k+q-p> --> compute <k|e^{-i(q+G)}r|k+q> with FFT and take the CC in times_vc_sqrt
              cwork_ur = GWPC_CONJG(ur_kqmp) * full_ur1_kqmp
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
              call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
@@ -1351,7 +1347,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          ABI_ERROR(sjoin("Invalid gstore%gmode:", gstore%gmode))
        end select
 
-       ! Dump buffers
+       ! Dump buffer
        !if (iqbuf_cnt == qbuf_size) call dump_data()
 
        if (print_time_kk) then
@@ -1399,7 +1395,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Free memory
  ABI_FREE(omegas)
  ABI_FREE(omegame0i)
- ABI_FREE(acc_ket)
+ ABI_FREE(out_ket)
  ABI_FREE(sigcme)
  ABI_FREE(kg_k)
  ABI_SFREE(kpg_k)

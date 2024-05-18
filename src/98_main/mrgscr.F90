@@ -49,6 +49,7 @@ program mrgscr
 
  use defs_abitypes,         only : MPI_type
  use m_build_info,          only : abinit_version
+ use m_argparse,            only : get_arg, get_arg_list
  use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
@@ -75,14 +76,14 @@ program mrgscr
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0,paral_kgb0=0,rdwr2=2,prtvol=0,cplex1=1
- integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles
+ integer :: iomode,fform1,ifile,ierr,ii,ios,iqibz,iqf,nfiles, abimem_level
  integer :: unt_dump,idx,ig1,ig2,iomega,ppmodel,npwe_asked,mqmem,io,unt_dump2
  integer :: id_required,ikxc,approx_type,option_test,dim_kxcg,usexcnhat,usefinegrid
  integer :: mgfft,nqlwl,nfft,igmax,comm,nq_selected,kptopt
  integer :: choice,nfreq_tot,nfreqre,nfreqim,nfreqc,ifrq,imax
  integer :: ig1_start,ig1_end,ig2_start,ig2_end,gmgp_idx,orig_npwe
  real(dp) :: ucvol,boxcutmin,ecut,drude_plsmf,compch_fft,compch_sph
- real(dp) :: nelectron_exp,freqremax,eps_diff,eps_norm,eps_ppm_norm
+ real(dp) :: nelectron_exp,freqremax,eps_diff,eps_norm,eps_ppm_norm, abimem_limit_mb
  real(dp) :: value1,value2,factor,GN_drude_plsmf
  real(dp) :: tcpu,tcpui,twall,twalli
  real(gwp) :: phase
@@ -130,8 +131,10 @@ program mrgscr
  ! Initialize memory profiling if it is activated
  ! if a full abimem.mocc report is desired, set the argument of abimem_init to "2" instead of "0"
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
+ ABI_CHECK(get_arg("abimem-level", abimem_level, msg, default=0) == 0, msg)
+ ABI_CHECK(get_arg("abimem-limit-mb", abimem_limit_mb, msg, default=20.0_dp) == 0, msg)
 #ifdef HAVE_MEM_PROFILING
- call abimem_init(0)
+ call abimem_init(abimem_level, limit_mb=abimem_limit_mb)
 #endif
 
  call timein(tcpui,twalli)

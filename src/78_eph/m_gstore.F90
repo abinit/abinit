@@ -3536,7 +3536,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ABI_FREE(v1scf)
      ABI_FREE(vlocal1)
 
-     ! Dump buffers
+     ! Dump buffer
      if (iqbuf_cnt == qbuf_size) call dump_data()
 
      if (print_time) then

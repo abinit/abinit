@@ -30,7 +30,7 @@ module m_ppmodel
  use m_yaml
 
  use defs_abitypes,    only : MPI_type
- use m_fstrings,       only : sjoin, itoa
+ use m_fstrings,       only : sjoin, itoa, ktoa
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw
  use m_crystal,        only : crystal_t
@@ -138,13 +138,13 @@ module m_ppmodel
    integer,allocatable :: has_qibz(:)
    ! Flag defining the status of the tables for the different q. See the PPM_TAB flags.
 
-   type(array2_gwpc_t),pointer :: bigomegatwsq_qbz   => null()
+   type(array2_gwpc_t),pointer :: bigomegatwsq_qbz => null()
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\Omega^2_{G Gp}(q_bz)$.
 
-   type(array2_gwpc_t),pointer :: omegatw_qbz  => null()
+   type(array2_gwpc_t),pointer :: omegatw_qbz => null()
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\omega_{G Gp}(q_bz)$.
 
-   type(array2_gwpc_t),pointer :: eigpot_qbz   => null()
+   type(array2_gwpc_t),pointer :: eigpot_qbz => null()
    ! (Points|Stores) the eigvectors of the symmetrized inverse dielectric matrix
 
    type(array2_gwpc_t),allocatable :: bigomegatwsq(:)
@@ -189,7 +189,7 @@ contains
 
    procedure :: malloc_iqibz => ppm_malloc_iqibz
 
-   procedure :: table_free => ppm_table_free
+   procedure :: table_free_iqibz => ppm_table_free_iqibz
 
    procedure :: get_eigenvalues => ppm_get_eigenvalues
 
@@ -472,6 +472,10 @@ subroutine ppm_malloc_iqibz(ppm, iq_ibz)
  ABI_CHECK_IGEQ(size(ppm%eigpot), iq_ibz, "eigpot too small")
 
  !print *, "ppm%npwc, ppm%dm2_botsq, ppm%dm2_otq, ppm%dm_eig:", ppm%npwc, ppm%dm2_botsq, ppm%dm2_otq, ppm%dm_eig
+ !print *, "allocated(ppm%bigomegatwsq(iq_ibz)%vals)", allocated(ppm%bigomegatwsq(iq_ibz)%vals)
+ !print *, "allocated(ppm%omegatw(iq_ibz)%vals)", allocated(ppm%omegatw(iq_ibz)%vals)
+ !print *, "allocated(ppm%eigpot(iq_ibz)%vals)", allocated(ppm%eigpot(iq_ibz)%vals)
+
  ABI_MALLOC_OR_DIE(ppm%bigomegatwsq(iq_ibz)%vals, (ppm%npwc, ppm%dm2_botsq), ierr)
  ABI_MALLOC_OR_DIE(ppm%omegatw(iq_ibz)%vals, (ppm%npwc, ppm%dm2_otq), ierr)
  ABI_MALLOC_OR_DIE(ppm%eigpot(iq_ibz)%vals, (ppm%dm_eig, ppm%dm_eig), ierr)
@@ -483,9 +487,9 @@ end subroutine ppm_malloc_iqibz
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/ppm_table_free
+!!****f* m_ppmodel/ppm_table_free_iqibz
 !! NAME
-!!  ppm_table_free
+!!  ppm_table_free_iqibz
 !!
 !! FUNCTION
 !!  Free the ppmodel tables for the selected q-point in the IBZ.
@@ -495,7 +499,7 @@ end subroutine ppm_malloc_iqibz
 !!
 !! SOURCE
 
-subroutine ppm_table_free(ppm, iq_ibz)
+subroutine ppm_table_free_iqibz(ppm, iq_ibz)
 
 !Arguments ------------------------------------
  class(ppmodel_t),intent(inout) :: ppm
@@ -509,7 +513,7 @@ subroutine ppm_table_free(ppm, iq_ibz)
 
  ppm%has_qibz(iq_ibz) = PPM_NOTAB
 
-end subroutine ppm_table_free
+end subroutine ppm_table_free_iqibz
 !!***
 
 !----------------------------------------------------------------------
@@ -924,7 +928,7 @@ subroutine ppm_getem1_one_ggp(ppm, iqibz, zcut, nomega, omega, Vcp, em1q, ig1, i
 
 ! *************************************************************************
 
- ABI_CHECK(ppm%mqmem/=0,'mqmem==0 not implemented')
+ ABI_CHECK(ppm%mqmem /= 0, 'mqmem==0 not implemented')
 
  !TODO zcut should be an entry in ppm
  delta=CMPLX(zero,zcut)
@@ -1041,9 +1045,7 @@ subroutine ppm_get_eigenvalues(ppm, iqibz, zcut, nomega, omega, Vcp, eigenvalues
  call ppm%getem1(ppm%npwc,iqibz,zcut,nomega,omega,Vcp,em1q)
 
  do iomega=1,nomega
-   !
    if (ABS(REAL(omega(iomega)))>0.00001) then
-     !if (.TRUE.) then
      ! === Eigenvalues for a generic complex matrix ===
 
      lwork=4*2*ppm%npwc
@@ -1420,9 +1422,7 @@ subroutine cppm2par(qpt,npwc,epsm1,ngfftf,gvec,gprimd,rhor,nfftf,gmet,bigomegatw
    end do
  end do
 
- write(msg,'(a,3f12.6,a,i8,a,i8)')&
-  ' at q-point : ',qpt,&
-  ' number of imaginary plasmonpole frequencies = ',nimwp,' / ',npwc**2
+ write(msg,'(3a,i0,a,i0)')' at q-point : ',trim(ktoa(qpt)), ' # imaginary plasmonpole frequencies: ',nimwp,' / ',npwc**2
  call wrtout(std_out,msg)
 
  write(msg,'(2a,f12.8,2a,3i5)')ch10,&
@@ -2139,7 +2139,7 @@ subroutine ppm_calc_sigc(ppm, nspinor, npwc, nomega, rhotwgp, botsq, otq, &
 
    ket=ket*half
 
- case (PPM_LINDEN_HORSH,PPM_ENGEL_FARID)
+ case (PPM_LINDEN_HORSH, PPM_ENGEL_FARID)
    ABI_CHECK(nspinor == 1, "nspinor/=1 not allowed")
 
    ! rho-twiddle(G) is formed, introduce rhotwgdpcc, for speed reason
@@ -2273,7 +2273,8 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
  ! =======================================================
 
  ! Allocate the tables for this q_ibz
- if (ppm%has_qibz(iq_ibz) == PPM_NOTAB) call PPM%malloc_iqibz(iq_ibz)
+ print *, "ppm%has_qibz(iq_ibz)", ppm%has_qibz(iq_ibz), "q_isirred:", q_isirred
+ if (ppm%has_qibz(iq_ibz) == PPM_NOTAB) call ppm%malloc_iqibz(iq_ibz)
 
  if (ppm%has_qibz(iq_ibz) == PPM_TAB_ALLOCATED) then
    ! Calculate the ppmodel tables for this q_ibz
@@ -2283,13 +2284,13 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
 
  if (q_isirred) then
    ! Symmetrization is not needed.
-   if (ppm%bigomegatwsq_qbz_stat==PPM_ISALLOCATED) then
+   if (ppm%bigomegatwsq_qbz_stat == PPM_ISALLOCATED) then
      ABI_FREE(ppm%bigomegatwsq_qbz%vals)
    end if
-   if (ppm%omegatw_qbz_stat==PPM_ISALLOCATED) then
+   if (ppm%omegatw_qbz_stat == PPM_ISALLOCATED) then
      ABI_FREE(ppm%omegatw_qbz%vals)
    end if
-   if (ppm%eigpot_qbz_stat==PPM_ISALLOCATED) then
+   if (ppm%eigpot_qbz_stat == PPM_ISALLOCATED) then
      ABI_FREE(ppm%eigpot_qbz%vals)
    end if
 
@@ -2304,23 +2305,24 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
    ppm%eigpot_qbz_stat = PPM_ISPOINTER
 
  else
-   ! Allocate memory if not done yet.
-   if (ppm%bigomegatwsq_qbz_stat==PPM_ISPOINTER) then
+   ! q-point in the BZ. Allocate memory if not done yet.
+   if (ppm%bigomegatwsq_qbz_stat == PPM_ISPOINTER) then
+      !print *, "ppm%npwc, ppm%dm2_botsq:", ppm%npwc, ppm%dm2_botsq
       nullify(ppm%bigomegatwsq_qbz)
-      ABI_MALLOC_OR_DIE(ppm%bigomegatwsq_qbz%vals, (ppm%npwc,ppm%dm2_botsq), ierr)
-      ppm%bigomegatwsq_qbz_stat=PPM_ISALLOCATED
+      ABI_MALLOC_OR_DIE(ppm%bigomegatwsq_qbz%vals, (ppm%npwc, ppm%dm2_botsq), ierr)
+      ppm%bigomegatwsq_qbz_stat = PPM_ISALLOCATED
    end if
 
-   if (ppm%omegatw_qbz_stat==PPM_ISPOINTER) then
+   if (ppm%omegatw_qbz_stat == PPM_ISPOINTER) then
       nullify(ppm%omegatw_qbz)
-      ABI_MALLOC_OR_DIE(ppm%omegatw_qbz%vals,(ppm%npwc,ppm%dm2_otq), ierr)
-      ppm%omegatw_qbz_stat=PPM_ISALLOCATED
+      ABI_MALLOC_OR_DIE(ppm%omegatw_qbz%vals, (ppm%npwc, ppm%dm2_otq), ierr)
+      ppm%omegatw_qbz_stat = PPM_ISALLOCATED
    end if
 
-   if (ppm%eigpot_qbz_stat==PPM_ISPOINTER) then
+   if (ppm%eigpot_qbz_stat == PPM_ISPOINTER) then
      nullify(ppm%eigpot_qbz)
-     ABI_MALLOC_OR_DIE(ppm%eigpot_qbz%vals,(ppm%dm_eig,ppm%dm_eig), ierr)
-     ppm%eigpot_qbz_stat=PPM_ISALLOCATED
+     ABI_MALLOC_OR_DIE(ppm%eigpot_qbz%vals, (ppm%dm_eig, ppm%dm_eig), ierr)
+     ppm%eigpot_qbz_stat = PPM_ISALLOCATED
    end if
 
    ! Calculate new table for this q-point in the BZ.
@@ -2332,7 +2334,7 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
    call ppm%get_qbz(Gsph, Qmesh, iq_bz, ppm%bigomegatwsq_qbz%vals, ppm%omegatw_qbz%vals, ppm%eigpot_qbz%vals)
 
    ! Release the table in the IBZ if required.
-   if (.not. ppm%keep_qibz(iq_ibz)) call PPM%table_free(iq_ibz)
+   if (.not. ppm%keep_qibz(iq_ibz)) call ppm%table_free_iqibz(iq_ibz)
  end if
 
 end subroutine ppm_rotate_iqbz
@@ -2401,8 +2403,8 @@ subroutine ppm_new_setup(ppm, iq_ibz, Cryst, Qmesh, npwe, nomega, omega, epsm1_g
  DBG_ENTER("COLL")
 
  if (ppm%has_qibz(iq_ibz) /= PPM_TAB_ALLOCATED) then
-   !ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
-   call ppm%malloc_iqibz(iq_ibz)
+   ABI_ERROR(sjoin("ppmodel tables for iq_ibz:", itoa(iq_ibz), "are not allocated! has_qibz=", itoa(ppm%has_qibz(iq_ibz))))
+   !call ppm%malloc_iqibz(iq_ibz)
  end if
 
  qpt = Qmesh%ibz(:,iq_ibz)
