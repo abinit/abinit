@@ -53,10 +53,6 @@ module m_ppmodel
  integer,public,parameter :: PPM_LINDEN_HORSH    = 3
  integer,public,parameter :: PPM_ENGEL_FARID     = 4
 
- ! Flags giving the status of the pointers defined in ppmodel_t
- integer,private,parameter :: PPM_ISPOINTER   = 1 ! The pointer is used to store the address in memory.
- integer,private,parameter :: PPM_ISALLOCATED = 2 ! The pointer is used as an allocable array.
-
  ! Flags giving the status of the plasmon-pole tables
  integer,public,parameter :: PPM_NOTAB         = 0
  integer,public,parameter :: PPM_TAB_ALLOCATED = 1
@@ -115,15 +111,6 @@ module m_ppmodel
    ! The index of the q-point in the BZ that is referenced by the internal pointer.
    ! when we perform a symmetrization from the IBZ to the BZ.
 
-   integer :: bigomegatwsq_qbz_stat = PPM_ISPOINTER
-   ! Status of bigomegatwsq.
-
-   integer :: omegatw_qbz_stat = PPM_ISPOINTER
-   ! Status of omegatw_qbz.
-
-   integer :: eigpot_qbz_stat = PPM_ISPOINTER
-   ! Status of new_eigpot_qbz_stat.
-
    real(dp) :: drude_plsmf
    ! Drude plasma frequency
 
@@ -138,13 +125,16 @@ module m_ppmodel
    integer,allocatable :: has_qibz(:)
    ! Flag defining the status of the tables for the different q. See the PPM_TAB flags.
 
-   type(array2_gwpc_t),pointer :: bigomegatwsq_qbz => null()
+   !type(array2_gwpc_t),pointer :: bigomegatwsq_qbz => null()
+   complex(gwpc),allocatable :: bigomegatwsq_qbz_vals(:,:)
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\Omega^2_{G Gp}(q_bz)$.
 
-   type(array2_gwpc_t),pointer :: omegatw_qbz => null()
+   !type(array2_gwpc_t),pointer :: omegatw_qbz => null()
+   complex(gwpc),allocatable :: omegatw_qbz_vals(:,:)
    ! (Points|Stores) the symmetrized plasmon pole parameters $\tilde\omega_{G Gp}(q_bz)$.
 
-   type(array2_gwpc_t),pointer :: eigpot_qbz => null()
+   !type(array2_gwpc_t),pointer :: eigpot_qbz => null()
+   complex(gwpc),allocatable :: eigpot_qbz_vals(:,:)
    ! (Points|Stores) the eigvectors of the symmetrized inverse dielectric matrix
 
    type(array2_gwpc_t),allocatable :: bigomegatwsq(:)
@@ -163,9 +153,6 @@ contains
 
    procedure :: get_qbz => ppm_get_qbz
      ! Symmetrize the ppm parameters in the BZ.
-
-   procedure :: nullify => ppm_nullify
-     ! Nullify all pointers
 
    procedure :: init => ppm_init
      ! Initialize dimensions and pointers
@@ -337,32 +324,6 @@ end subroutine ppm_get_qbz
 
 !----------------------------------------------------------------------
 
-!!****f* m_ppmodel/ppm_nullify
-!! NAME
-!!  ppm_nullify
-!!
-!! FUNCTION
-!!  Nullify pointers in a ppmodel_t object.
-!!
-!! SOURCE
-
-subroutine ppm_nullify(ppm)
-
-!Arguments ------------------------------------
- class(ppmodel_t),intent(inout) :: ppm
-! *********************************************************************
-
- !@ppmodel_t
- ! types
- nullify(ppm%bigomegatwsq_qbz)
- nullify(ppm%omegatw_qbz)
- nullify(ppm%eigpot_qbz)
-
-end subroutine ppm_nullify
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_ppmodel/ppm_free
 !! NAME
 !!  ppm_free
@@ -382,33 +343,9 @@ subroutine ppm_free(ppm)
 
 ! *********************************************************************
 
- ! Be careful here to avoid dangling pointers.
- if (associated(ppm%bigomegatwsq_qbz)) then
-   select case (ppm%bigomegatwsq_qbz_stat)
-   case (PPM_ISALLOCATED)
-     call array_free(ppm%bigomegatwsq_qbz)
-   case (PPM_ISPOINTER)
-     nullify(ppm%bigomegatwsq_qbz)
-   end select
- end if
-
- if (associated(ppm%omegatw_qbz)) then
-   select case (ppm%omegatw_qbz_stat)
-   case (PPM_ISALLOCATED)
-     call array_free(ppm%omegatw_qbz)
-   case (PPM_ISPOINTER)
-     nullify(ppm%omegatw_qbz)
-   end select
- end if
-
- if (associated(ppm%eigpot_qbz)) then
-   select case (ppm%eigpot_qbz_stat)
-   case (PPM_ISALLOCATED)
-     call array_free(ppm%eigpot_qbz)
-   case (PPM_ISPOINTER)
-     nullify(ppm%eigpot_qbz)
-   end select
- end if
+ ABI_SFREE(ppm%bigomegatwsq_qbz_vals)
+ ABI_SFREE(ppm%omegatw_qbz_vals)
+ ABI_SFREE(ppm%eigpot_qbz_vals)
 
  dim_q = ppm%nqibz; if (ppm%mqmem==0) dim_q=1
 
@@ -547,8 +484,6 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
  DBG_ENTER("COLL")
 
- call ppm%nullify()
-
  ppm%nqibz = nqibz; ppm%mqmem = mqmem; ppm%invalid_freq = invalid_freq
  !call wrtout(std_out, sjoin(' ppm%mqmem:', itoa(ppm%mqmem), 'ppm%nqibz:', itoa(ppm%nqibz)))
  ltest = (ppm%mqmem == 0 .or. ppm%mqmem == ppm%nqibz)
@@ -602,7 +537,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
  ! Allocate tables depending on the value of keep_qibz.
  do iq_ibz=1,dim_q
-#if 1
+#if 0
    ABI_MALLOC_OR_DIE(ppm%bigomegatwsq(iq_ibz)%vals, (ppm%npwc,ppm%dm2_botsq), ierr)
    ABI_MALLOC_OR_DIE(ppm%omegatw(iq_ibz)%vals, (ppm%npwc,ppm%dm2_otq), ierr)
    ABI_MALLOC_OR_DIE(ppm%eigpot(iq_ibz)%vals, (ppm%dm_eig,ppm%dm_eig), ierr)
@@ -2273,7 +2208,7 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
  ! =======================================================
 
  ! Allocate the tables for this q_ibz
- print *, "ppm%has_qibz(iq_ibz)", ppm%has_qibz(iq_ibz), "q_isirred:", q_isirred
+ !print *, "ppm%has_qibz(iq_ibz)", ppm%has_qibz(iq_ibz), "q_isirred:", q_isirred
  if (ppm%has_qibz(iq_ibz) == PPM_NOTAB) call ppm%malloc_iqibz(iq_ibz)
 
  if (ppm%has_qibz(iq_ibz) == PPM_TAB_ALLOCATED) then
@@ -2282,56 +2217,22 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
                       Gsph%gvec, ngfftf, rhor_tot) !Optional
  end if
 
+  ! Allocate memory if not done yet.
+  ABI_REMALLOC(ppm%bigomegatwsq_qbz_vals, (ppm%npwc, ppm%dm2_botsq))
+  ABI_REMALLOC(ppm%omegatw_qbz_vals, (ppm%npwc, ppm%dm2_otq))
+  ABI_REMALLOC(ppm%eigpot_qbz_vals, (ppm%dm_eig, ppm%dm_eig))
+
  if (q_isirred) then
    ! Symmetrization is not needed.
-   if (ppm%bigomegatwsq_qbz_stat == PPM_ISALLOCATED) then
-     ABI_FREE(ppm%bigomegatwsq_qbz%vals)
-   end if
-   if (ppm%omegatw_qbz_stat == PPM_ISALLOCATED) then
-     ABI_FREE(ppm%omegatw_qbz%vals)
-   end if
-   if (ppm%eigpot_qbz_stat == PPM_ISALLOCATED) then
-     ABI_FREE(ppm%eigpot_qbz%vals)
-   end if
-
-   ! Point the data in memory and change the status.
-   ppm%bigomegatwsq_qbz => ppm%bigomegatwsq(iq_ibz)
-   ppm%bigomegatwsq_qbz_stat = PPM_ISPOINTER
-
-   ppm%omegatw_qbz => ppm%omegatw(iq_ibz)
-   ppm%omegatw_qbz_stat = PPM_ISPOINTER
-
-   ppm%eigpot_qbz => ppm%eigpot(iq_ibz)
-   ppm%eigpot_qbz_stat = PPM_ISPOINTER
+   ! Copy the data in memory and change the status.
+   ppm%bigomegatwsq_qbz_vals = ppm%bigomegatwsq(iq_ibz)%vals
+   ppm%omegatw_qbz_vals = ppm%omegatw(iq_ibz)%vals
+   ppm%eigpot_qbz_vals = ppm%eigpot(iq_ibz)%vals
 
  else
-   ! q-point in the BZ. Allocate memory if not done yet.
-   if (ppm%bigomegatwsq_qbz_stat == PPM_ISPOINTER) then
-      !print *, "ppm%npwc, ppm%dm2_botsq:", ppm%npwc, ppm%dm2_botsq
-      nullify(ppm%bigomegatwsq_qbz)
-      ABI_MALLOC_OR_DIE(ppm%bigomegatwsq_qbz%vals, (ppm%npwc, ppm%dm2_botsq), ierr)
-      ppm%bigomegatwsq_qbz_stat = PPM_ISALLOCATED
-   end if
-
-   if (ppm%omegatw_qbz_stat == PPM_ISPOINTER) then
-      nullify(ppm%omegatw_qbz)
-      ABI_MALLOC_OR_DIE(ppm%omegatw_qbz%vals, (ppm%npwc, ppm%dm2_otq), ierr)
-      ppm%omegatw_qbz_stat = PPM_ISALLOCATED
-   end if
-
-   if (ppm%eigpot_qbz_stat == PPM_ISPOINTER) then
-     nullify(ppm%eigpot_qbz)
-     ABI_MALLOC_OR_DIE(ppm%eigpot_qbz%vals, (ppm%dm_eig, ppm%dm_eig), ierr)
-     ppm%eigpot_qbz_stat = PPM_ISALLOCATED
-   end if
-
-   ! Calculate new table for this q-point in the BZ.
+   ! q-point in the BZ. Calculate new table for this q-point in the BZ.
    ! Beware: Dimensions should not change.
-   !botsq => ppm%bigomegatwsq_qbz%vals
-   !otq   => ppm%omegatw_qbz%vals
-   !eig   => ppm%eigpot_qbz%vals
-
-   call ppm%get_qbz(Gsph, Qmesh, iq_bz, ppm%bigomegatwsq_qbz%vals, ppm%omegatw_qbz%vals, ppm%eigpot_qbz%vals)
+   call ppm%get_qbz(Gsph, Qmesh, iq_bz, ppm%bigomegatwsq_qbz_vals, ppm%omegatw_qbz_vals, ppm%eigpot_qbz_vals)
 
    ! Release the table in the IBZ if required.
    if (.not. ppm%keep_qibz(iq_ibz)) call ppm%table_free_iqibz(iq_ibz)
@@ -2496,9 +2397,6 @@ subroutine ppm_print(ppm, units, header)
  call ydoc%add_int("npwc", ppm%npwc)
  call ydoc%add_int("userho", ppm%userho)
  call ydoc%add_int("iq_bz", ppm%iq_bz)
- call ydoc%add_int("bigomegatwsq_qbz_stat", ppm%bigomegatwsq_qbz_stat)
- call ydoc%add_int("omegatw_qbz_stat", ppm%omegatw_qbz_stat)
- call ydoc%add_int("eigpot_qbz_stat", ppm%eigpot_qbz_stat)
  call ydoc%add_real("drude_plsmf", ppm%drude_plsmf)
  call ydoc%add_real("force_plsmf", ppm%force_plsmf)
  !call ydoc%add_int1d("keep_qibz", ppm%kepp_qibz)

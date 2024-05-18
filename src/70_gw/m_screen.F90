@@ -656,8 +656,6 @@ subroutine screen_nullify(screen)
  nullify(screen%Fgg_qbz); screen%fgg_qbz_stat=FGG_QBZ_ISPOINTER ! Needed since the initial status is undefined.
  nullify(screen%Fgg)
 
- call screen%ppm%nullify()
-
 end subroutine screen_nullify
 !!***
 
@@ -817,7 +815,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  integer :: fform,my_rank,mat_type_read, nqibz,nomega,iq_ibz,npw,nqlwl
  integer :: nI,nJ,iq_bz,mdf_type,ppmodel,ierr, iw,qsort,ii
  real(dp) :: eps_inf,drude_plsmf
- logical :: deallocate_Fgg,found,from_file,is_qeq0,remove_dgg !only_one_kpt,
+ logical :: free_Fgg,found,from_file,is_qeq0,remove_dgg !only_one_kpt,
  character(len=500) :: msg
  character(len=fnlen) :: sus_fname,scr_fname
  character(len=nctk_slen) :: varname
@@ -889,7 +887,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  ABI_MALLOC(screen%ae_rhor, (nfftf_tot, nspden))
  screen%ae_rhor = ae_rhor
 
- deallocate_Fgg = .FALSE.
+ free_Fgg = .FALSE.
 
  screen%has_fgg = 0; if (ANY(screen%Info%wint_method == [WINT_CONTOUR, WINT_AC])) screen%has_fgg = 1
 
@@ -987,7 +985,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  if (from_file) then
 
-   ! Read the ab-initio em1 from file.
+   ! Read ab-initio em1 from file.
    select case (mat_type_read)
    case (MAT_INV_EPSILON)
      call wrtout(std_out, strcat("Em1 will be initialized from SCR file: ", screen%fname))
@@ -1070,7 +1068,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    end do ! iq_ibz
  end if
 
- ! Init plasmon-pole parameters.
+ ! Init plasmon-pole parameters from em1.
  if (screen%has_ppmodel > 0) then
    call wrtout(std_out, " Calling ppm_init ...")
    ppmodel = screen%Info%use_ppm; drude_plsmf = screen%Info%drude_plsmf
@@ -1079,7 +1077,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
    do iq_ibz=1,nqibz
      if (screen%ihave_fgg(iq_ibz, how="Stored")) then
-       !call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
+       call wrtout(std_out, sjoin(" Calling ppm%new_setup for iq_ibz:", itoa(iq_ibz)))
        call screen%ppm%new_setup(iq_ibz, Cryst, Qmesh, npw, nomega, screen%omega, &
                                  screen%Fgg(iq_ibz)%mat, nfftf_tot, Gsph%gvec, ngfftf, screen%ae_rhor(:,1))
      end if
@@ -1089,7 +1087,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  !stop
 
  ! Deallocate Fgg if the matrices are not needed anymore.
- if (deallocate_Fgg) then
+ if (free_Fgg) then
    call screen_fgg_qbz_set(screen, 0, 0, "Pointer") ! Avoid dangling pointer.
    call fgg_free(screen%Fgg, keep_q=screen%keep_q)
  end if
@@ -1388,9 +1386,9 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
 
    select case (trans)
    case ("N")
-     associate (botsq => screen%ppm%bigomegatwsq_qbz%vals, &
-                otq   => screen%ppm%omegatw_qbz%vals, &
-                eig   => screen%ppm%eigpot_qbz%vals)
+     associate (botsq => screen%ppm%bigomegatwsq_qbz_vals, &
+                otq   => screen%ppm%omegatw_qbz_vals, &
+                eig   => screen%ppm%eigpot_qbz_vals)
 
        call screen%ppm%calc_sigc(nspinor, npwc, nomega, rhotwgp, botsq, otq, &
                                  omegame0i, zcut, theta_mu_minus_e0i, eig, npwx, out_ket, sigcme)
@@ -1399,9 +1397,9 @@ subroutine screen_calc_sigc(screen, trans, nomega, omegame0i, theta_mu_minus_e0i
 
    case ("T")
      associate (ppm => screen%ppm, &
-                botsq => screen%ppm%bigomegatwsq_qbz%vals, &
-                otq   => screen%ppm%omegatw_qbz%vals, &
-                eig   => screen%ppm%eigpot_qbz%vals)
+                botsq => screen%ppm%bigomegatwsq_qbz_vals, &
+                otq   => screen%ppm%omegatw_qbz_vals, &
+                eig   => screen%ppm%eigpot_qbz_vals)
 
      ABI_MALLOC(botsq_conjg_transp,(PPm%dm2_botsq,npwc))
      botsq_conjg_transp=TRANSPOSE(botsq) ! Keep these two lines separated, otherwise gfortran messes up

@@ -439,7 +439,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
  ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
-#define DEV_FAST_DEBUG
+!#define DEV_FAST_DEBUG
  nbsum = dtset%mband
 #ifdef DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
@@ -1181,7 +1181,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
            omegas = [e_mkq, e_nk]
            omegame0i = omegas - e0i
-           !call screen%calc_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
+           call screen%calc_sigc("N", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
 
            ! <m,k+q| e^{ip+G}r|bsum,k+q-p> --> compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT and take the CC in times_vc_sqrt
            call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
@@ -1195,7 +1195,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            e0i = qp_ene(ib_sum, ikqmp_ibz, spin)
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikqmp_ibz, spin)
            omegame0i = omegas - e0i
-           !call screen%calc_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
+           call screen%calc_sigc("T", nomega, omegame0i, theta_mu_minus_e0i, dtset%zcut, nspinor, npwx, npwc, rhotwg, out_ket, sigcme)
          end do ! ib_sum
 
          ! ========================================
