@@ -198,8 +198,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ikqmp_ibz, isym_kqmp, trev_kqmp, npw_kqmp, istwf_kqmp, npw_kqmp_ibz, istwf_kqmp_ibz
  integer :: mpw,ierr,nqbz,ncerr !,spad
  integer :: n1,n2,n3,n4,n5,n6,nspden, mqmem, m_kq, n_k, restart, root_ncid, spin_ncid
- integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
- integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt
+ integer :: usecprj !,sij_opt,usevnl,optlocal,optnl,opt_gvnlx1
+ integer :: nfft,nfftf,mgfft,mgfftf,nkpg_k,nkpg_kq,nkpg_kqmp,nkpg_kmp,imyp, cnt, nvloc
  integer :: nbsum,my_bsum_start, my_bsum_stop, my_nbsum, ndone, nmiss ! num_mn_kq,
  !integer :: bstart_ks,ikcalc,bstart,bstop, sendcount !iatom,
  integer :: ipp_bz, ipp_ibz, isym_pp, itim_pp, comm_rpt, nqlwl, ebands_timrev ! osc_npw,
@@ -210,11 +210,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  !real(dp),intent(in) :: theta_mu_minus_e0i, zcut
- real(dp) :: ecut,weight_q,q0rad, bz_vol, enxc, vxcavg ! ediff, eshift, rfact,
- logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, gen_eigenpb, qq_is_gamma, pp_is_gamma ! isirr_q,
+ real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, rfact, q0rad, bz_vol,
+ logical :: isirr_k, isirr_kq, isirr_kmp, isirr_kqmp, qq_is_gamma, pp_is_gamma ! isirr_q, gen_eigenpb,
  logical :: stern_use_cache, stern_has_band_para, use_ftinterp ! intra_band, same_band,
- logical :: print_time_qq, print_time_kk
- logical :: non_magnetic_xc
+ logical :: print_time_qq, print_time_kk, non_magnetic_xc
  complex(dpc) :: ieta
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_ham_kqmp !, gs_ham_kqmp
@@ -440,7 +439,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! TODO: One can exploit qq, kk and pp parallelism to find the wavevectors in the IBZ
  ! that will be needed in the loops below and allocate only these wavevectors so that memory scales.
 
-!#define DEV_FAST_DEBUG
+#define DEV_FAST_DEBUG
  nbsum = dtset%mband
 #ifdef DEV_FAST_DEBUG
  nbsum = 1 ! DEBUG
@@ -506,7 +505,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  ! if PAW, one has to solve a generalized eigenproblem
  ! Be careful here because I will need sij_opt == -1
- usecprj = 0; gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
+ usecprj = 0 !; gen_eigenpb = psps%usepaw == 1; sij_opt = 0; if (gen_eigenpb) sij_opt = 1
 
  ABI_MALLOC(cwaveprj0, (natom, nspinor*usecprj))
  ABI_MALLOC(cwaveprj, (natom, nspinor*usecprj))
@@ -597,14 +596,34 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if ! ndone /= 0
 
  ! Radius of sphere with volume equivalent to the micro zone.
- q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
- bz_vol = two_pi**3 / cryst%ucvol
+ !q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
+ !bz_vol = two_pi**3 / cryst%ucvol
+
+ ! Open the DVDB file
+ call dvdb%open_read(ngfftf, xmpi_comm_self)
+ call drhodb%open_read(ngfftf, xmpi_comm_self)
+
+ ! Make sure that dvdb and drhodb have the same q-points
+ ! TODO: Method of dvdb_t?
+ ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
+ ierr = 0
+ do ii=1,dvdb%nqpt
+   if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
+     ierr = ierr + 1
+     call wrtout(std_out, sjoin(ktoa(dvdb%qpts(:, ii)), " /= ", ktoa(drhodb%qpts(:, ii))))
+   end if
+ end do
+ ABI_CHECK(ierr == 0, "Found different q-points in DVDB and DRHODB. See messages above!")
+
+ ! Activate parallelism over perturbations at the level of the DVDB, my_npert is output
+ call gstore%set_perts_distrib(cryst, dvdb, my_npert)
+ call gstore%set_perts_distrib(cryst, drhodb, my_npert)
 
  ! Prepare call to getgh1c
- usevnl = 0
- optlocal = 1   ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
- optnl = 2      ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
- opt_gvnlx1 = 0 ! gvnlx1 is output
+ !usevnl = 0
+ !optlocal = 1   ! local part of H^(1) is computed in gh1c=<G|H^(1)|C>
+ !optnl = 2      ! non-local part of H^(1) is totally computed in gh1c=<G|H^(1)|C>
+ !opt_gvnlx1 = 0 ! gvnlx1 is output
 
  !ABI_MALLOC(grad_berry, (2, nspinor*(berryopt0/4)))
 
@@ -624,8 +643,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! Allocate work space arrays.
  ! vtrial and vlocal are required for Sternheimer (H0). DFPT routines do not need it.
  ! Note nvloc in vlocal (we will select one/four spin components afterwards)
+ nvloc = gs_ham_kqmp%nvloc
  ABI_CALLOC(vtrial, (nfftf, nspden))
- ABI_CALLOC(vlocal, (n4, n5, n6, gs_ham_kqmp%nvloc))
+ ABI_CALLOC(vlocal, (n4, n5, n6, nvloc))
 
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
@@ -639,26 +659,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    end if
    call pot_cryst%free(); call pot_hdr%free()
  end if
-
- ! Open the DVDB file
- call dvdb%open_read(ngfftf, xmpi_comm_self)
- call drhodb%open_read(ngfftf, xmpi_comm_self)
-
- ! Make sure that dvdb and drhodb have the same q-points
- ! TODO: Method of dvdb_t?
- ABI_CHECK_IEQ(dvdb%nqpt, drhodb%nqpt, "Different number of q-points in DVDB and DRHODB")
- ierr = 0
- do ii=1,dvdb%nqpt
-   if (any(dvdb%qpts(:, ii) /= drhodb%qpts(:, ii))) then
-     ierr = ierr + 1
-     call wrtout(std_out, sjoin(ktoa(dvdb%qpts(:, ii)), " /= ", ktoa(drhodb%qpts(:, ii))))
-   end if
- end do
- ABI_CHECK(ierr == 0, "Found different q-points in DVDB and DRHODB. See messages above!")
-
- ! Activate parallelism over perturbations at the level of the DVDB
- call gstore%set_perts_distrib(cryst, dvdb, my_npert)
- call gstore%set_perts_distrib(cryst, drhodb, my_npert)
 
  ! Find correspondence IBZ --> set of q-points in DVDB.
  ! use_ftinterp selects whether DFPT potentials should be read from the DVDB or Fourier-interpolated on the fly.
@@ -933,7 +933,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      cvxc1_ptr => null(); if (cplex == 2) call c_f_pointer(c_loc(vxc1), cvxc1_ptr, [nfft, nspden, my_npert])
 
      ! Allocate vlocal1 with correct cplex. Note nvloc
-     ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, gs_ham_kqmp%nvloc, my_npert), ierr)
+     ABI_MALLOC_OR_DIE(vlocal1, (cplex*n4, n5, n6, nvloc, my_npert), ierr)
 
      ! ===============================================
      ! Loop over k-points in the e-ph matrix elements
@@ -1238,13 +1238,15 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          !    For each band in band_sum:
          !        - Solve the Sternheimer non-self-consistently and get the KS e-ph matrix elements
          !        - Build the full first-order wavefunction including the active subspace.
+         ! TODO: Should create array of gs_ham(my_npert) and rf_ham(my_npert) but I'm not sure the GPU version supports
+         !       multiple instances.
 
          do imyp=1,gqk%my_npert
            idir = dvdb%my_pinfo(1, imyp); ipert = dvdb%my_pinfo(2, imyp); ipc = dvdb%my_pinfo(3, imyp)
 
            ! Set up local potential vlocal1 with proper dimensioning, from vtrial1 taking into account the spin.
            ! Each CPU prepares its own potentials.
-           call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_ham_kqmp%nvloc, &
+           call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, nvloc, &
                                       pawfgr, mpi_enreg, vtrial, v1scf(:,:,:,imyp), vlocal, vlocal1(:,:,:,:,imyp))
 
            ! Continue to initialize the Hamiltonian (call it here to support dfpt_cgwf Sternheimer).
@@ -1263,11 +1265,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            !  dkinpw, nkpg_k, nkpg_kq, kpg_k, kpg_kq, kinpw1, ffnl_k, ffnl_kq, ph3d, ph3d1, & ! Out
            !  reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
 
-           call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kmp, kqmp, idir, ipert, &  ! In
-             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &               ! In
-             npw_kmp, npw_kqmp, useylmgr1, kg_kmp, ylm_kmp, kg_kqmp, ylm_kqmp, ylmgr_kqmp, &           ! In
-             dkinpw, nkpg_kmp, nkpg_kqmp, kpg_kmp, kpg_kqmp, kinpw1, ffnl_kmp, ffnl_kqmp, ph3d, ph3d1, & ! Out
-             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                ! Reuse some arrays
+           call getgh1c_setup(gs_ham_kqmp, rf_ham_kqmp, dtset, psps, kmp, kqmp, idir, ipert, &           ! In
+             cryst%natom, cryst%rmet, cryst%gprimd, cryst%gmet, istwf_kmp, &                             ! In
+             npw_kmp, npw_kqmp, useylmgr1, kg_kmp, ylm_kmp, kg_kqmp, ylm_kqmp, ylmgr_kqmp, &             ! In
+             dkinpw, nkpg_kmp, nkpg_kqmp, kpg_kmp, kpg_kqmp, kinpw1, ffnl_kmp, ffnl_kqmp, ph3d, ph3d1, & ! InOut
+             reuse_kpg_k=1, reuse_kpg1_k=1, reuse_ffnlk=1, reuse_ffnl1=1)                                ! Reuse some arrays
 
            ! Compute H(1) applied to GS wavefunction Psi_nk(0)
            !do ib_k=1,nbcalc_ks
@@ -1472,6 +1474,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(vxc)
 
  call gs_ham_kqmp%free()
+ !call rf_ham_kqmp%free()
  call wfd%free()
  call vcp%free()
  call screen%free()
