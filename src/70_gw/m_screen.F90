@@ -277,7 +277,7 @@ end type screen_info_t
   ! The G-vectors are ordered in shells to facilitate the application of symmetry operations.
   ! See m_gsphere.F90.
 
-  logical,allocatable :: keep_q(:)
+  logical,allocatable :: keep_qibz(:)
    ! (nqibz)
    ! Storage strategy: keep or not keep Em1(q) in memory.
 
@@ -437,16 +437,16 @@ end subroutine fgg_free_0D
 !! Deallocate all the pointers in the structure that result to be associated.
 !!
 !! INPUT
-!!  [keep_q(:)]=Optional logical mask used to select the q-points that are deallocated.
+!!  [keep_qibz(:)]=Optional logical mask used to select the q-points that are deallocated.
 !!
 !! SOURCE
 
-subroutine fgg_free_1D(Fgg, keep_q)
+subroutine fgg_free_1D(Fgg, keep_qibz)
 
 !Arguments ------------------------------------
 !scalars
  type(fgg_t),intent(inout) :: Fgg(:)
- logical,optional,intent(in) :: keep_q(:)
+ logical,optional,intent(in) :: keep_qibz(:)
 
 !Local variables ------------------------------
 !scalars
@@ -455,7 +455,7 @@ subroutine fgg_free_1D(Fgg, keep_q)
 ! *************************************************************************
 
  do iq_ibz=LBOUND(Fgg,DIM=1),UBOUND(Fgg,DIM=1)
-   keep_it = .FALSE.; if (PRESENT(keep_q)) keep_it = keep_q(iq_ibz)
+   keep_it = .FALSE.; if (PRESENT(keep_qibz)) keep_it = keep_qibz(iq_ibz)
    if (.not. keep_it) call fgg_free_0D(Fgg(iq_ibz))
  end do
 
@@ -689,7 +689,7 @@ subroutine screen_free(screen)
  ABI_SFREE(screen%omega)
 
  ! logical
- ABI_SFREE(screen%keep_q)
+ ABI_SFREE(screen%keep_qibz)
 
  ! types
  ! Here be careful with dangling pointers.
@@ -848,7 +848,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  end if
 
  ! This part must be rationalized.
- remove_dgg = (id_required==MAT_W_M1)
+ remove_dgg = (id_required == MAT_W_M1)
 
  if (screen%Info%use_mdf == MDL_NONE) screen%fname = ifname
  screen%nI = 1; screen%nJ = 1
@@ -860,17 +860,17 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
  screen%mqmem = mqmem; if (screen%mqmem /= 0) screen%mqmem = screen%nqibz !; screen%mqmem = 0
 
- ABI_MALLOC(screen%keep_q, (screen%nqibz))
- screen%keep_q = .TRUE.; if (screen%mqmem == 0) screen%keep_q = .False.
+ ABI_MALLOC(screen%keep_qibz, (screen%nqibz))
+ screen%keep_qibz = .TRUE.; if (screen%mqmem == 0) screen%keep_qibz = .False.
 
  if (screen%mqmem /= 0 .and. screen%mqmem < screen%nqibz) then
    ! Keep in memory the most representative q-points.
-   screen%keep_q = .FALSE.
+   screen%keep_qibz = .FALSE.
    wt_list = Qmesh%wt; iperm = (/(ii,ii=1,Qmesh%nibz)/)
    call sort_dp(Qmesh%nibz, wt_list, iperm, tol12)
    do qsort=Qmesh%nibz,Qmesh%nibz-mqmem+1,1
      iq_ibz = iperm(qsort)
-     screen%keep_q(iq_ibz) = .TRUE.
+     screen%keep_qibz(iq_ibz) = .TRUE.
    end do
  end if
 
@@ -1004,7 +1004,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
 
    ! Begin reading.
    do iq_ibz=1,nqibz
-     if (.not. screen%keep_q(iq_ibz)) then
+     if (.not. screen%keep_qibz(iq_ibz)) then
        !call wrtout(std_out, strcat("Skipping iq_ibz: ",itoa(iq_ibz)))
        CYCLE
      end if
@@ -1034,7 +1034,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
    ABI_CHECK(screen%nomega == 1, "Cannot use nomega > 1 in model dielectric function")
 
    do iq_ibz=1,nqibz
-     if (.not.screen%keep_q(iq_ibz)) CYCLE
+     if (.not.screen%keep_qibz(iq_ibz)) CYCLE
 
      ! The wings are not used here.
      nqlwl=0; is_qeq0= (normv(screen%qibz(:,iq_ibz),Cryst%gmet,'G')<GW_TOLQ0)
@@ -1089,7 +1089,7 @@ subroutine screen_init(screen, W_Info, Cryst, Qmesh, Gsph, Vcp, ifname, mqmem, n
  ! Deallocate Fgg if the matrices are not needed anymore.
  if (free_Fgg) then
    call screen_fgg_qbz_set(screen, 0, 0, "Pointer") ! Avoid dangling pointer.
-   call fgg_free(screen%Fgg, keep_q=screen%keep_q)
+   call fgg_free(screen%Fgg, keep_qibz=screen%keep_qibz)
  end if
 
  if (from_file) call Hscr%free()
