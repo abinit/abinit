@@ -477,7 +477,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
 !Local variables-------------------------------
 !scalars
- integer :: dim_q,iq_ibz,ierr
+ integer :: dim_q,iq_ibz
  logical :: ltest
  !character(len=500) :: msg
 ! *********************************************************************
@@ -537,13 +537,7 @@ subroutine ppm_init(ppm, mqmem, nqibz, npwe, ppmodel, drude_plsmf, invalid_freq)
 
  ! Allocate tables depending on the value of keep_qibz.
  do iq_ibz=1,dim_q
-#if 0
-   ABI_MALLOC_OR_DIE(ppm%bigomegatwsq(iq_ibz)%vals, (ppm%npwc,ppm%dm2_botsq), ierr)
-   ABI_MALLOC_OR_DIE(ppm%omegatw(iq_ibz)%vals, (ppm%npwc,ppm%dm2_otq), ierr)
-   ABI_MALLOC_OR_DIE(ppm%eigpot(iq_ibz)%vals, (ppm%dm_eig,ppm%dm_eig), ierr)
-#else
    call ppm%malloc_iqibz(iq_ibz)
-#endif
  end do
 
  DBG_EXIT("COLL")
@@ -2185,7 +2179,7 @@ subroutine ppm_rotate_iqbz(ppm, iq_bz, Cryst, Qmesh, Gsph, npwe, nomega, omega, 
 
 !Local variables-------------------------------
 !scalars
- integer :: iq_ibz,itim_q,isym_q,iq_curr,ierr
+ integer :: iq_ibz,itim_q,isym_q,iq_curr
  logical :: q_isirred
  !character(len=500) :: msg
 !arrays
@@ -2399,7 +2393,7 @@ subroutine ppm_print(ppm, units, header)
  call ydoc%add_int("iq_bz", ppm%iq_bz)
  call ydoc%add_real("drude_plsmf", ppm%drude_plsmf)
  call ydoc%add_real("force_plsmf", ppm%force_plsmf)
- !call ydoc%add_int1d("keep_qibz", ppm%kepp_qibz)
+ !call ydoc%add_int1d("keep_qibz", ppm%keep_qibz)
  !call ydoc%add_int1d("has_qibz", ppm%has_qibz)
 
  call ydoc%write_units_and_free(units)
