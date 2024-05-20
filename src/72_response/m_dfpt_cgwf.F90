@@ -66,6 +66,9 @@ module m_dfpt_cgwf
    integer :: npw_k  = -1
    integer :: npw_kq = -1
    integer :: nspinor = -1
+   integer :: mcgq = -1
+   integer :: mgscq = -1
+   integer :: mcprjq = -1
    integer :: nband = -1
    integer :: nband_me = -1
    integer :: nline_in = -1
@@ -87,6 +90,12 @@ module m_dfpt_cgwf
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
    real(dp),allocatable :: work(:,:,:,:)
+
+   type(pawcprj_type),allocatable :: cprjq(:,:)
+   ! (natom, mcprjq)
+
+   type(pawcprj_type),allocatable :: cwaveprj1(:,:)
+   ! (natom, nspinor*usepaw)
 
  contains
 
@@ -1668,19 +1677,21 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
 
 !Local variables ------------------------------
 !scalars
- !integer :: ierr
+ integer :: natom, usepaw
 ! *************************************************************************
+
+ natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
  stern%nband_me = nband_me
-stern%usedcwavef = 0
+ stern%usedcwavef = 0
  stern%use_cache = use_cache
  stern%work_ngfft = work_ngfft
  if (use_cache) then
    ABI_MALLOC(stern%work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
  end if
 
- ABI_MALLOC(stern%fermie1_idir_ipert, (3, stern%dtset%natom))
+ ABI_MALLOC(stern%fermie1_idir_ipert, (3, natom))
  stern%fermie1_idir_ipert = fermie1_idir_ipert
 
  call copy_mpi_enreg(mpi_enreg, stern%mpi_enreg)
@@ -1707,7 +1718,16 @@ stern%usedcwavef = 0
  stern%nline_in = min(100, npw_kq); if (dtset%nline > stern%nline_in) stern%nline_in = min(dtset%nline, npw_kq)
 
  ABI_MALLOC(stern%cgq, (2, npw_kq * nspinor, stern%nband_me))
- ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*dtset%usepaw))
+ ABI_MALLOC(stern%gscq, (2, npw_kq * nspinor, nband_me*usepaw))
+
+ stern%mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
+ stern%mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * usepaw
+
+ ! PAW wave functions at k+q projected with non-local projectors
+ stern%mcprjq = 0
+ ABI_MALLOC(stern%cprjq, (natom, stern%mcprjq))
+
+ ABI_MALLOC(stern%cwaveprj1, (natom, nspinor*usepaw))
 
 end subroutine stern_init
 !!***
@@ -1746,8 +1766,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcout0 = 0
- integer :: opt_gvnlx1, mcgq, mgscq, mcprjq, grad_berry_size_mpw1
+ integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
+ integer :: opt_gvnlx1, mcgq, grad_berry_size_mpw1
  real(dp) :: out_resid, fermie1, eig0nk
  type(rf2_t) :: rf2
  real(dp),allocatable :: grad_berry(:,:)
@@ -1756,7 +1776,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
 !arrays
- !type(pawcprj_type),allocatable :: cprjq(natom,mcprjq),cwaveprj(natom,nspinor*usepaw), cwaveprj1(natom,nspinor*usepaw)
 
 ! *************************************************************************
 
@@ -1777,9 +1796,6 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
  grad_berry_size_mpw1 = 0
  ABI_MALLOC(grad_berry, (2, stern%nspinor*(berryopt0/4)))
 
- mcgq = stern%npw_kq * stern%nspinor * stern%nband_me
- mgscq = stern%npw_kq * stern%nspinor * stern%nband_me * stern%dtset%usepaw
- mcprjq = 0
  !if (psps%usepaw==1) mcprjq = stern%nspinor*mband_mem*mkqmem*nsppol*usecprj
 
  ! Init entry in cg1s_kq, either from cache or with zeros.
@@ -1806,7 +1822,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    eig0_k, eig0_kq, stern%out_eig1_k, &
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
    gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
-   mcgq, mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
+   stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
    nbdbuf0, stern%nline_in, stern%npw_k, stern%npw_kq, stern%nspinor, &
    opt_gvnlx1, stern%dtset%prtvol, quit0, out_resid, rf_hamkq, stern%dtset%dfpt_sciss, -one, stern%dtset%tolwfr, &
    stern%usedcwavef, stern%dtset%wfoptalg, stern%nlines_done)
@@ -1859,15 +1875,15 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  if (present(full_cg1)) then
    ! Compute full first order wavefunction.
-   !call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb, ikpt, isppol, me)
+   !call proc_distrb_cycle_bands(cycle_bands, stern%mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
    eig0nk = eig0_k(u1_band)
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
-   !call full_active_wf1(stern%cgq, cprjq, cwavef, full_cg1, cwaveprj, cwaveprj1, cycle_bands, eig1_k, fermie1, &
-   !                     eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq, icgq0, mcgq, mcprjq, stern%mpi_enreg,
-   !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, timcount0, gs_hamkq%usepaw)
-   !NOT_IMPLEMENTED_ERROR()
+
    full_cg1 = zero
+   !call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, eig1_k, fermie1, &
+   !                     eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
+   !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, timcount0, gs_hamkq%usepaw)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
@@ -1926,6 +1942,12 @@ subroutine stern_free(stern)
  !call stern%u1c%free()
  call destroy_mpi_enreg(stern%mpi_enreg)
  !call xmpi_comm_free(stern%mpi_enreg%comm_band)
+
+ call pawcprj_free(stern%cprjq)
+ ABI_SFREE(stern%cprjq)
+
+ call pawcprj_free(stern%cwaveprj1)
+ ABI_SFREE(stern%cwaveprj1)
 
 end subroutine stern_free
 !!***
