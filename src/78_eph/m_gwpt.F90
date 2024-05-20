@@ -250,8 +250,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: eig0nk !, eig0mkq !eig0mk,
  complex(gwpc) :: ctmp_gwpc
 !arrays
- real(dp) :: fermie1_idir_ipert(3,cryst%natom)
- !real(dp),allocatable,target :: cgq(:,:,:)
+ real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), strsxc(6)
  real(dp),allocatable :: qlwl(:,:), vk_cart_ibz(:,:,:), displ_cart_qq(:,:,:,:),displ_red_qq(:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg_kq(:,:),kpg_kmp(:,:),kpg_kqmp(:,:), dkinpw(:) ! grad_berry(:,:),
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
@@ -267,19 +266,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
- real(dp) :: ylmgr_dum(1,1,1)
- real(dp) :: dum_nhat(0), dum_xccc3d(0)
- !Cray compiler may dislike the above initialisation of zero-size arrays
- real(dp) :: strsxc(6)
- logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
+ real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp),pointer :: cvxc1_qq_ptr(:,:,:)
  complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
  complex(gwpc),allocatable :: rhotwg(:), vc_sqrt_pp(:) !, rhotwgp(:)
- real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:)
- real(dp),allocatable :: full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:)
  complex(gwpc),allocatable :: vec_gw_nk(:,:,:), vec_gw_mkq(:,:,:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
- real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
+ logical,allocatable :: bks_mask(:,:,:), keep_ur(:,:,:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
  type(pawrhoij_type),allocatable :: pot_pawrhoij(:), den_pawrhoij(:)
 
@@ -1546,8 +1540,6 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  call gs_ham_kqmp%free()
  call gs_ham_kmp%free()
- !call rf_ham_kqmp%free()
- !call rf_ham_kmp%free()
  call wfd%free()
  call vcp%free()
  call screen%free()
