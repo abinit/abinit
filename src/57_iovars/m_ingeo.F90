@@ -409,7 +409,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,field_red,&
      if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
-   ! Might initialize xred from getxred/xcart: NOT POSSIBLE YET. NEEDS INTER DTSET COMMUNICATION AT INVARS1 TIME
+   !TODO: Might initialize xred from getxred/xcart: NOT POSSIBLE YET. NEEDS INTER DTSET COMMUNICATION AT INVARS1 TIME
 !   if (txred+txcart+txrandom==0) then
 !     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxred',txred,'INT')
 !     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = 
