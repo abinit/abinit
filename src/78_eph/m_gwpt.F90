@@ -1211,13 +1211,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            theta_mu_minus_e0i = fact_spin * qp_occ(ib_sum, ikmp_ibz, spin)
 
            do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
-             ! <bsum,k-p|e^{-ip+G'}r|n,k> * vc_sqrt(q,G')
+             ! <bsum,k-p|e^{-i(p+G')}r|n,k> * vc_sqrt(p,G')
              cwork_ur = ur_kmp * ur_nk(:,n_k)
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
              call times_vc_sqrt("N", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
              ! FIXME: npwx should be npwc here
 
-             ! Contract immediately over g' with the frequency convolution of Wc_gg'(omega')
+             ! Contract immediately over g' with the frequency convolution of
+             ! \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
              ! Prepare list of frequencies in Sigma(w)
              omegas_nk(1) = qp_ene(n_k, ik_ibz, spin)
              cnt = 1
@@ -1238,13 +1239,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            omegame0i_mkq = omegas_mkq - qp_ene(ib_sum, ikqmp_ibz, spin)
 
            do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
-             ! <m,k+q|e^{ip+G}r|bsum,k+q-p> * vc_sqrt(q,G)
-             ! NB: compute <bsum,k+q-p|e^{-i(q+G)}|k+q> with FFT and take the CC in times_vc_sqrt
+             ! <m,k+q|e^{i(p+G)}r|bsum,k+q-p> * vc_sqrt(p,G)
+             ! NB: compute <bsum,k+q-p|e^{-i(q+G)}|m,k+q> with FFT and take the CC in times_vc_sqrt
              cwork_ur = ur_kqmp * ur_mkq(:,m_kq)
              call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
              call times_vc_sqrt("C", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
 
-             ! Contract immediately over g with the convolution of Wc_gg'(omega')
+             ! Contract immediately over g with the frequency convolution of
+             ! \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
              ! Prepare list of frequencies in Sigma(w)
              omegas_mkq(1) = qp_ene(m_kq, ikq_ibz, spin)
              cnt = 1
@@ -1298,6 +1300,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            ! =====================
            ! NSCF Sternheimer at q
            ! =====================
+           ! Compute Delta_{q,idir,ipert} \psi_{bsum, k-p}
 !do ib_sum=my_bsum_start, my_bsum_stop
              !call wrtout(std_out, sjoin("Solving Sternheimer for ib_sum: ", itoa(ib_sum)))
 
@@ -1321,10 +1324,11 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ABI_FREE(ph3d_kmp)
              ABI_SFREE(ph3d1_kqmp)
 
-             ! <m,k+q|e^{ip+G}r|bsum,k+q-p> --> compute <k|e^{-i(q+G)}r|k+q> with FFT and take the CC.
+             ! <m,k+q|e^{i(p+G)r}|Delta_q psi_{bsum,k-p}> --> exchange bra and ket and take the CC of the FFT
+             full_ur1_kqmp = GWPC_CONJG(full_ur1_kqmp)
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
-               cwork_ur = full_ur1_kqmp * GWPC_CONJG(ur_mkq(:,m_kq))
-               call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwf_kqmp, kg_pp, gbound_pp, cwork_ur, rhotwg)
+               cwork_ur = full_ur1_kqmp * ur_mkq(:,m_kq)
+               call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
                rhotwg = GWPC_CONJG(rhotwg)
 
                do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
@@ -1340,6 +1344,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
                end do ! n_k
              end do ! m_kq
 
+!if (.not qq_is_gamma) then
              ! ===========================
              ! Same operations but for -qq
              ! ===========================
@@ -1356,6 +1361,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ! ======================
              ! NSCF Sternheimer at -q
              ! ======================
+             ! Compute Delta_{-q,idir,ipert} \psi_{bsum, k+q-p}
              call wfd%rotate_cg(ib_sum, ndat1, spin, kqmp_ibz, npw_kqmp, kg_kqmp, istwf_kqmp, &
                                 cryst, mapl_kqmp, gbound_kqmp, work_ngfft, work, cg_kqmp)
 
@@ -1375,6 +1381,27 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              ABI_FREE(dkinpw)
              ABI_FREE(ph3d_kqmp)
              ABI_SFREE(ph3d1_kmp)
+
+             full_ur1_kmp = GWPC_CONJG(full_ur1_kmp)
+
+             ! <Delta_{-q} psi_{bsum,k+q-p}| e^{-i(p+G')r}|n,k>
+             do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%m_start, gqk%m_stop
+               cwork_ur = full_ur1_kqmp * ur_nk(:,n_k)
+               call fft_ur(npw_pp, nfft, nspinor, ndat1, mgfft, ngfft, istwfk1, kg_pp, gbound_pp, cwork_ur, rhotwg)
+
+               do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%n_start, gqk%n_stop
+                 if (m_kq == n_k) then
+                   ctmp_gwpc = sum(rhotwg(:) * vec_gw_mkq(:,1,m_kq))
+                 else
+                   ! Take the average
+                   iw_nk = n_k - gqk%bstart + 2
+                   ctmp_gwpc = half * sum(rhotwg(:) * (vec_gw_mkq(:,1,m_kq) + vec_gw_mkq(:,iw_nk,m_kq)))
+                 end if
+                 gkq_sig_atm(1, m_kq, n_k, ipc) = gkq_sig_atm(1, m_kq, n_k, ipc) + real(ctmp_gwpc)
+                 gkq_sig_atm(2, m_kq, n_k, ipc) = gkq_sig_atm(2, m_kq, n_k, ipc) + aimag(ctmp_gwpc)
+               end do ! n_k
+             end do ! m_kq
+
            end do  ! imyp
 
            call rf_ham_kqmp%free()
