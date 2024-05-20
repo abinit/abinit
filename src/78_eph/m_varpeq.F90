@@ -759,8 +759,8 @@ subroutine varpeq_get_enterms(self)
    iq_glob = my_iq + gqk%my_qstart - 1
    do my_nu=1,gqk%my_npert
      phfreq = gqk%my_wnuq(my_nu, my_iq)
-     envib = envib + phfreq*abs(self%b(my_nu, my_iq))**2
-     !envib = envib + phfreq*abs(self%bfull(my_nu, iq_glob))**2
+     !envib = envib + phfreq*abs(self%b(my_nu, my_iq))**2
+     envib = envib + phfreq*abs(self%bfull(my_nu, iq_glob))**2
    enddo
  enddo
  call xmpi_sum(envib, comm, ierr)
@@ -874,7 +874,6 @@ subroutine varpeq_b_from_a(self)
  integer :: sym(3,3), syminv(3,3)
  real(dp) :: my_qpt(3), my_kpt(3), my_kpt_ibz(3), new_qpt(3)
  complex(dp), allocatable :: gq_gathered(:, :, :, :)
- complex(dp), allocatable :: gq_symgathered(:, :, :, :)
 
 ! *************************************************************************
 
@@ -895,8 +894,68 @@ subroutine varpeq_b_from_a(self)
  gqk => self%gstore%gqk(1)
  my_nq = gqk%my_nq; my_npert = gqk%my_npert
 
- ABI_MALLOC(gq_gathered, (my_npert, self%nb, self%nb, self%nkpt))
- ABI_MALLOC(gq_symgathered, (my_npert, self%nb, self%nb, self%nkpt))
+
+ do is=1,self%nsppol
+   my_is = self%gstore%spin2my_is(is); if (my_is == 0) cycle
+   gqk => self%gstore%gqk(my_is)
+
+   do ik=1,self%nkpt
+     kweight = self%wtk(ik)
+     my_kpt = self%kpts(:, ik)
+     ! Forward (k+q) scattering mapping
+     call self%krank_kpts%get_mapping(self%nqpt, self%qpts, dksqmax, &
+       cryst%gmet, q_plus_k_map, self%nsym, self%symafm, self%symrec, &
+       self%timrev, use_symrec=.True., qpt=my_kpt)
+
+     ierr = merge(1, 0, dksqmax > tol12)
+     if (ierr /= 0) then
+       ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
+         to the effective IBZ with qpt ", ktoa(my_kpt)))
+     endif
+
+     call gqk%gather("k", ik, gq_gathered)
+     !! for this k, gathering all the matrix elements
+     !ABI_MALLOC(gq_gathered, (my_npert, self%nb, self%nb, self%nqpt))
+     !gq_gathered(:,:,:,:) = zero
+     !do my_iq=1,my_nq
+     !  iq_glob = my_iq + gqk%my_qstart - 1
+     !  gq_gathered(:, :, :, iq_glob) = gqk%my_g(:, :, my_iq, :, ik)
+     !enddo
+     !call xmpi_sum(gq_gathered, comm, ierr)
+
+
+     do my_iq=1,my_nq
+       iq_glob = my_iq + gqk%my_qstart - 1
+       my_qpt = self%qpts(:, iq_glob)
+       ik_forw = q_plus_k_map(1, iq_glob)
+
+       do ib=1,self%nb
+         a_from = self%a(ib, ik, is)
+
+         do jb=1,self%nb
+           a_forw = self%a(jb, ik_forw, is)
+
+           do my_nu=1,my_npert
+             g_forw = gq_gathered(my_nu, jb, ib, iq_glob)
+             !g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+
+             if (gqk%my_wnuq(my_nu, my_iq) == 0) then
+               self%bfull(my_nu, iq_glob) = zero
+             else
+               self%bfull(my_nu, iq_glob) = self%bfull(my_nu, iq_glob) + &
+                 conjg(a_forw)*g_forw*a_from*kweight/gqk%my_wnuq(my_nu, my_iq)
+             endif
+
+           enddo
+         enddo
+       enddo
+     enddo
+     ABI_FREE(gq_gathered)
+   enddo
+ enddo
+ call xmpi_sum(self%bfull, comm, ierr)
+
+
 
  ! Loop over q-points
  do my_iq=1,my_nq
@@ -913,6 +972,8 @@ subroutine varpeq_b_from_a(self)
      ABI_ERROR(sjoin("VarPEq, setting B-coeffeicient: cannot map k+q or k-q &
        to the effective IBZ with qpt ", ktoa(my_qpt)))
    endif
+
+   call gqk%gather("q", my_iq, gq_gathered)
 
    do my_nu=1,my_npert
      b_tmp = (zero, zero)
@@ -931,7 +992,8 @@ subroutine varpeq_b_from_a(self)
 
            do jb=1,self%nb
              a_forw = self%a(jb, ik_forw, is)
-             g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+             !g_forw = gqk%my_g(my_nu, jb, my_iq, ib, ik)
+             g_forw = gq_gathered(my_nu, jb, ib, ik)
 
              b_tmp = b_tmp + conjg(a_forw)*g_forw*a_from*kweight
            enddo
@@ -949,13 +1011,12 @@ subroutine varpeq_b_from_a(self)
      endif
 
    enddo
+   ABI_FREE(gq_gathered)
  enddo
 
  ABI_FREE(k_plus_q_map)
  ABI_FREE(k_minus_q_map)
  ABI_FREE(q_plus_k_map)
- ABI_FREE(gq_gathered)
- ABI_FREE(gq_symgathered)
 
 end subroutine varpeq_b_from_a
 !!***
