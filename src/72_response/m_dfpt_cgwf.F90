@@ -86,7 +86,7 @@ module m_dfpt_cgwf
    integer,allocatable :: rank_band(:)
 
    real(dp),allocatable :: fermie1_idir_ipert(:,:)
-   real(dp),allocatable :: out_eig1_k(:)
+   real(dp),allocatable :: eig1_k(:)
    real(dp),allocatable :: dcwavef(:, :), gh1c_n(:, :), ghc(:,:), gsc(:,:), gvnlxc(:,:), gvnlx1(:,:)
    real(dp),allocatable :: cgq(:,:,:), gscq(:,:,:)
    real(dp),allocatable :: work(:,:,:,:)
@@ -1701,7 +1701,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  stern%mpi_enreg%nproc_band = xmpi_comm_size(comm_band)
  stern%has_band_para = stern%mpi_enreg%nproc_band /= 1
 
- ABI_CALLOC(stern%out_eig1_k, (2*nband**2))
+ ABI_CALLOC(stern%eig1_k, (2*nband**2))
  ABI_MALLOC(stern%dcwavef, (2, npw_kq*nspinor*stern%usedcwavef))
  ABI_MALLOC(stern%gh1c_n, (2, npw_kq*nspinor))
  ABI_MALLOC(stern%ghc, (2, npw_kq*nspinor))
@@ -1767,15 +1767,16 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !Local variables ------------------------------
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
- integer :: opt_gvnlx1, mcgq, grad_berry_size_mpw1
+ integer :: opt_gvnlx1, mcgq, grad_berry_size_mpw1, iband
  real(dp) :: out_resid, fermie1, eig0nk
  type(rf2_t) :: rf2
+!arrays
  real(dp),allocatable :: grad_berry(:,:)
  complex(gwpc),allocatable :: cwork_sp(:)
+ logical  :: cycle_bands(stern%nband)
 #ifdef HAVE_GW_DPC
  complex(gwpc),pointer :: full_ug1_dp_ptr(:)
 #endif
-!arrays
 
 ! *************************************************************************
 
@@ -1818,8 +1819,8 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
    !stern%cgq, cg1s_kq(:,:,ipc,ib_k), kets_k(:,:,ib_k), &  ! Important stuff
    stern%cgq, cwavef, cwave0, &  ! Important stuff
    cwaveprj, cwaveprj0, rf2, stern%dcwavef, &
-   !ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), stern%out_eig1_k, &
-   eig0_k, eig0_kq, stern%out_eig1_k, &
+   !ebands%eig(:, ik_ibz, spin), ebands%eig(:, ikq_ibz, spin), stern%eig1_k, &
+   eig0_k, eig0_kq, stern%eig1_k, &
    stern%ghc, stern%gh1c_n, grad_berry, stern%gsc, stern%gscq, &
    gs_hamkq, stern%gvnlxc, stern%gvnlx1, icgq0, idir, ipert, igscq0, &
    stern%mcgq, stern%mgscq, stern%mpi_enreg, grad_berry_size_mpw1, stern%dtset%natom, stern%nband, stern%nband_me, &
@@ -1875,15 +1876,18 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 
  if (present(full_cg1)) then
    ! Compute full first order wavefunction.
+
+   ! WARNING: Assuming all bands are on this cpu.
+   cycle_bands(:) = .False.
    !call proc_distrb_cycle_bands(cycle_bands, stern%mpi_enreg%proc_distrb, ikpt, isppol, me)
    ABI_CHECK_IGEQ(u1_band, 1, "u1_band")
    eig0nk = eig0_k(u1_band)
    fermie1 = zero; if (sum(qpt**2) < tol14) fermie1 = stern%fermie1_idir_ipert(idir, ipert)
 
-   full_cg1 = zero
-   !call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, eig1_k, fermie1, &
-   !                     eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
-   !                     stern%dtset%natom, nband_k, npw1_k, stern%nspinor, timcount0, gs_hamkq%usepaw)
+   iband = u1_band
+   call full_active_wf1(stern%cgq, stern%cprjq, cwavef, full_cg1, cwaveprj, stern%cwaveprj1, cycle_bands, stern%eig1_k, fermie1, &
+                        eig0nk, eig0_kq, stern%dtset%elph2_imagden, iband, ibgq0, icgq0, stern%mcgq, stern%mcprjq, stern%mpi_enreg, &
+                        stern%dtset%natom, stern%nband, stern%npw_kq, stern%nspinor, timcount0, gs_hamkq%usepaw)
 
    if (present(full_ur1)) then
      ! Note the use use of _kp pointers in gs_hamkq as full_ug1 is given on the k+q g-sphere.
@@ -1928,7 +1932,7 @@ subroutine stern_free(stern)
 
  ! real
  ABI_SFREE(stern%fermie1_idir_ipert)
- ABI_SFREE(stern%out_eig1_k)
+ ABI_SFREE(stern%eig1_k)
  ABI_SFREE(stern%dcwavef)
  ABI_SFREE(stern%gh1c_n)
  ABI_SFREE(stern%ghc)
