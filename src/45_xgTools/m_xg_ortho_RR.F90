@@ -104,6 +104,13 @@ module m_xg_ortho_RR
     end if
     call xg_init(buffer,space_buf,cols(X),cols(X),comm(X),gpu_option=gpu_option)
 
+    ! If space(X)==SPACE_CR : set imaginary part of G=0 component to zero to improve numerical stability
+    call xgBlock_zero_im_g0(X)
+    call xgBlock_zero_im_g0(BX)
+    if (present(AX)) then
+      call xgBlock_zero_im_g0(AX)
+    end if
+
     ! Compute X^TBX
     call xgBlock_gemm('t','n',1.d0,X,BX,0.d0,buffer%self,comm=comm(X))
 
@@ -262,6 +269,13 @@ module m_xg_ortho_RR
     call timab(tim_RR_gemm_1,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_RR_GEMM_1)
 
+    ! If space(X)==SPACE_CR : set imaginary part of G=0 component to zero to improve numerical stability
+    if (var == VAR_X)   call xgBlock_zero_im_g0(X)
+    if (var == VAR_XW)  call xgBlock_zero_im_g0(XW)
+    if (var == VAR_XWP) call xgBlock_zero_im_g0(XWP)
+    call xgBlock_zero_im_g0(AX)
+    call xgBlock_zero_im_g0(BX)
+
     call xg_setBlock(subA,subsub,blockdim,blockdim)
     call xgBlock_gemm('t','n',1.0d0,X,AX,0.d0,subsub,comm=spacecom)
 
@@ -271,6 +285,11 @@ module m_xg_ortho_RR
     endif
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
+
+      ! If space(X)==SPACE_CR : set imaginary part of G=0 component to zero to improve numerical stability
+      call xgBlock_zero_im_g0(AW)
+      call xgBlock_zero_im_g0(BW)
+
       ! subA
       call xg_setBlock(subA,subsub,2*blockdim,blockdim,fcol=blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XW,AW,0.d0,subsub,comm=spacecom)
@@ -282,6 +301,11 @@ module m_xg_ortho_RR
     end if
 
     if ( var == VAR_XWP ) then
+
+      ! If space(X)==SPACE_CR : set imaginary part of G=0 component to zero to improve numerical stability
+      call xgBlock_zero_im_g0(AP)
+      call xgBlock_zero_im_g0(BP)
+
       ! subA
       call xg_setBlock(subA,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XWP,AP,0.d0,subsub,comm=spacecom)
