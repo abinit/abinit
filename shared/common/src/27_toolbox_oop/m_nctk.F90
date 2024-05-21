@@ -890,8 +890,8 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
 
 !Arguments ------------------------------------
  integer,intent(out) :: ncid
- integer,intent(in) :: comm
  character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
 
 ! *********************************************************************
 
@@ -903,7 +903,7 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    call wrtout(std_out, sjoin("- Opening HDf5 file with MPI-IO support:", path))
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
-     comm=comm, info=xmpio_info, ncid=ncid)
+                         comm=comm, info=xmpio_info, ncid=ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open_par: ", path))
 #else
    ABI_ERROR("nprocs > 1 but netcdf does not support MPI-IO")

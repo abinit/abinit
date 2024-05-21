@@ -851,7 +851,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    !  0 --> (ib_bz, spin) has not been computed.
    !  1 --> (iq_bz, spin) has been computed.
    ! In order to check if the whole generation is completed, one should test if "gstore_completed" == 1
-   NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, zero))
+   !NCF_CHECK(nf90_def_var_fill(ncid, vid("gstore_done_qbz_spin"), NF90_FILL, 0))
 
    ! Optional arrays
    if (allocated(gstore%delta_ef_kibz_spin)) then
@@ -932,6 +932,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    NCF_CHECK(nf90_close(ncid))
  end if ! master
 
+ ! Make sure GSTORE.nc has been written by master
  call xmpi_barrier(gstore%comm)
 
  ABI_FREE(wtk)
@@ -3567,8 +3568,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
  end if
- NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
+ NCF_CHECK(nf90_close(root_ncid))
 
  ! TODO: Activate this call.
  !call gstore_print_for_abitests(gstore%path, dtset)

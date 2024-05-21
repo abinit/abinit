@@ -338,7 +338,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  end if
 
  ! Open GSTORE.nc file and go to data mode.
- NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, gstore%comm))
+ NCF_CHECK(nctk_open_modify(root_ncid, gstore%path, comm))
  NCF_CHECK(nctk_set_datamode(root_ncid))
 
  !if (my_rank == master) call gwpt%print(dtset, std_out)
