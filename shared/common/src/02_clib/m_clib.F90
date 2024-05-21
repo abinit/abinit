@@ -33,6 +33,7 @@ MODULE m_clib
  public :: clib_print_mallinfo
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
  public :: clib_getpid
+ public :: clib_setenv
  !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
 
 
@@ -126,6 +127,14 @@ MODULE m_clib
    end subroutine
  end interface
 
+ interface
+   integer(C_INT) function setenv(name, value, overwrite) bind(C, name="setenv")
+     import
+     character(kind=c_char),intent(in) :: name(*), value(*)
+     integer(c_int),intent(in) :: overwrite
+   end function
+ end interface
+
   !interface
   !  ! suspend calling thread for microseconds of clock time
   !  ! uses unistd.h for Fortran standard compliant sleep.
@@ -215,10 +224,6 @@ end subroutine clib_print_mallinfo
 !! FUNCTION
 !!  Rename a file with a new name using the rename function from C stdlib
 !!
-!! INPUTS
-!!
-!! OUTPUT
-!!
 !! SOURCE
 
 integer function clib_rename(old_fname, new_fname) result(ierr)
@@ -231,6 +236,33 @@ integer function clib_rename(old_fname, new_fname) result(ierr)
  ierr = c_rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)
 
 end function clib_rename
+!!***
+
+!!****f* m_clib/clib_setenv
+!! NAME
+!!  clib_setenv
+!!
+!! FUNCTION
+!!       The setenv() function adds the variable name to the environment
+!!       with the value value, if name does not already exist.  If name
+!!       does exist in the environment, then its value is changed to value
+!!       if overwrite is nonzero; if overwrite is zero, then the value of
+!!       name is not changed (and setenv() returns a success status).
+!!       This function makes copies of the strings pointed to by name and
+!!       value (by contrast with putenv(3)).
+!!
+!! SOURCE
+
+integer function clib_setenv(name, value, overwrite) result(ierr)
+
+!Arguments ------------------------------------
+ character(len=*) ,intent(in) :: name, value
+ integer(C_INT), intent(in) :: overwrite
+! *********************************************************************
+
+ ierr = setenv(trim(name)//C_NULL_CHAR, trim(value)//C_NULL_CHAR, overwrite)
+
+end function clib_setenv
 !!***
 
 END MODULE m_clib
