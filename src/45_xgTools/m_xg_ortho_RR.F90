@@ -116,33 +116,15 @@ module m_xg_ortho_RR
       return
     end if
 
-    if (space(X)/=SPACE_CR) then
-      ! Solve YU=X
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
+    ! Solve YU=X
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X)
   
-      ! Solve BYU=BX
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
+    ! Solve BYU=BX
+    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX)
   
-      if (present(AX)) then
-        ! Solve AYU=AX
-        call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
-      end if
-    else ! space(X)==SPACE_CR
-      call xgBlock_invert_tri('u','n',buffer%self)
-      call xgBlock_zerotri(buffer%self,'u')
-      call xg_init(X_tmp,space(X),rows(X),cols(X),me_g0=me_g0(X),gpu_option=gpu_option)
-
-      call xgBlock_gemm('n','n',1.d0,X,buffer%self,0.d0,X_tmp%self)
-      call xgBlock_copy(X_tmp%self,X)
-
-      call xgBlock_gemm('n','n',1.d0,BX,buffer%self,0.d0,X_tmp%self)
-      call xgBlock_copy(X_tmp%self,BX)
-
-      if (present(AX)) then
-        call xgBlock_gemm('n','n',1.d0,AX,buffer%self,0.d0,X_tmp%self)
-        call xgBlock_copy(X_tmp%self,AX)
-      end if
-      call xg_free(X_tmp)
+    if (present(AX)) then
+      ! Solve AYU=AX
+      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX)
     end if
 
     call xg_free(buffer)

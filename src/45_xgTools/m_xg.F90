@@ -2889,6 +2889,7 @@ contains
     type(xgBlock_t) , intent(inout) :: xgBlockB
     complex(kind=8) :: calpha
     double precision :: tsec(2)
+    integer :: fact
 
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:)
@@ -2896,35 +2897,41 @@ contains
 #endif
 
     call timab(tim_trsm,1,tsec)
-    if ( xgBlockA%space /= xgBlockB%space ) then
-      ABI_ERROR("Not same space")
+    if ( xgBlockB%space/=SPACE_CR ) then
+      if ( xgBlockA%space /= xgBlockB%space ) then
+        ABI_ERROR("Not same space")
+      end if
+    else
+      if ( xgBlockA%space /= SPACE_R ) then
+        ABI_ERROR("If space(B)=SPACE_CR, space(A) should be space(R)")
+      end if
     end if
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
 
     calpha = dcmplx(alpha,0.d0)
 
+    fact = 1 ; if (xgBlockB%space==SPACE_CR) fact = 2
+
     if (xgBlockA%gpu_option==ABI_GPU_KOKKOS .or. xgBlockA%gpu_option==ABI_GPU_OPENMP) then
 #if defined HAVE_KOKKOS || defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
       select case(xgBlockA%space)
-      case (SPACE_R)
-        call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-          calpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
+      case (SPACE_R,SPACE_CR)
+        call abi_gpu_xtrsm(1,side,uplo,transa,diag,fact*xgBlockB%rows,xgBlockB%cols, &
+          calpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,fact*xgBlockB%LDim)
       case (SPACE_C)
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 #elif defined HAVE_OPENMP_OFFLOAD
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
       select case(xgBlockA%space)
-      case (SPACE_R)
+      case (SPACE_R,SPACE_CR)
         xgBlockA__vecR => xgBlockA%vecR
         xgBlockB__vecR => xgBlockB%vecR
         !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockA__vecR,xgBlockB__vecR)
-        call abi_gpu_xtrsm(1,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-          calpha,c_loc(xgBlockA__vecR),xgBlockA%LDim,c_loc(xgBlockB__vecR),xgBlockB%LDim)
+        call abi_gpu_xtrsm(1,side,uplo,transa,diag,fact*xgBlockB%rows,xgBlockB%cols, &
+          calpha,c_loc(xgBlockA__vecR),xgBlockA%LDim,c_loc(xgBlockB__vecR),fact*xgBlockB%LDim)
         !$OMP END TARGET DATA
       case (SPACE_C)
         xgBlockA__vecC => xgBlockA%vecC
@@ -2933,22 +2940,18 @@ contains
         call abi_gpu_xtrsm(2,side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,c_loc(xgBlockA__vecC),xgBlockA%LDim,c_loc(xgBlockB__vecC),xgBlockB%LDim)
         !$OMP END TARGET DATA
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 #endif
 
     else
       select case(xgBlockA%space)
-      case (SPACE_R)
-        call dtrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
-          alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,xgBlockB%LDim)
+      case (SPACE_R,SPACE_CR)
+        call dtrsm(side,uplo,transa,diag,fact*xgBlockB%rows,xgBlockB%cols, &
+          alpha,xgBlockA%vecR,xgBlockA%LDim,xgBlockB%vecR,fact*xgBlockB%LDim)
       case (SPACE_C)
         calpha = dcmplx(alpha,0.d0)
         call ztrsm(side,uplo,transa,diag,xgBlockB%rows,xgBlockB%cols, &
           calpha,xgBlockA%vecC,xgBlockA%LDim,xgBlockB%vecC,xgBlockB%LDim)
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 
     end if
