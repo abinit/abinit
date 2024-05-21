@@ -3159,9 +3159,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  NCF_CHECK(nf90_get_var(root_ncid, nctk_idname(root_ncid, "gstore_done_qbz_spin"), done_qbz_spin))
 
  gstore%wfk0_path = wfk0_path
- if (my_rank == master) then
+ !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_wfk0_path"), trim(gstore%wfk0_path)))
- end if
+ !end if
 
  if (my_rank == master) call gstore%print(std_out)
 
@@ -3266,10 +3266,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      end do ! my_ik
 
      call xmpi_sum_master(vk_cart_ibz, master, gqk%grid_comm%value, ierr)
-     if (gqk%grid_comm%me == master) then
+     !if (gqk%grid_comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
-     end if
+     !end if
      ABI_SFREE(vk_cart_ibz)
    end do ! my_is
 
@@ -3564,9 +3564,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call gstore%print(std_out, header="GSTORE at the end of gstore%compute")
 
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
- if (my_rank == master) then
+ !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
- end if
+ !end if
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(gstore%comm)
 
@@ -3635,12 +3635,12 @@ subroutine dump_data()
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
+ !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
    end do
- end if
+ !end if
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
