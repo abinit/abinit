@@ -803,21 +803,22 @@ contains
 
     integer :: rows_,cols_,fact
 
-    rows_ = xgBlock%ldim
+    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    rows_ = fact*xgBlock%ldim
     cols_ = xgBlock%cols
-    if (present(rows)) rows_=rows
+    if (present(rows)) rows_=fact*rows
     if (present(cols)) cols_=cols
 
-    fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
-      if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
+      if ( xgBlock%cols*fact*xgBlock%Ldim < cols_*rows_ ) then
         write(std_out,*) xgBlock%cols,xgBlock%Ldim,cols,rows
         write(std_out,*) xgBlock%cols*xgBlock%Ldim,cols*rows
         ABI_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(fact*xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
-      call c_f_pointer(cptr,array,(/ fact*rows_, cols_ /))
+      call c_f_pointer(cptr,array,(/ rows_, cols_ /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < cols_*rows_ ) then
         ABI_ERROR("Bad complex reverseMapping")
@@ -843,19 +844,20 @@ contains
 
     integer :: dim_,fact
 
-    dim_ = xgBlock%ldim*xgBlock%cols
-    if (present(array_dim)) dim_=array_dim
-
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
+
+    dim_ = fact*xgBlock%ldim*xgBlock%cols
+    if (present(array_dim)) dim_=fact*array_dim
+
     select case (xgBlock%space)
     case ( SPACE_R,SPACE_CR )
-      if ( xgBlock%cols*xgBlock%Ldim < dim_ ) then
+      if ( xgBlock%cols*fact*xgBlock%Ldim < dim_ ) then
         write(std_out,*) xgBlock%cols,xgBlock%Ldim,dim_
         write(std_out,*) xgBlock%cols*xgBlock%Ldim,dim_
         ABI_ERROR("Bad reverseMapping")
       end if
       cptr = getClocR(fact*xgBlock%Ldim,xgBlock%cols,xgBlock%vecR(:,:))
-      call c_f_pointer(cptr,array,(/ fact*dim_ /))
+      call c_f_pointer(cptr,array,(/ dim_ /))
     case ( SPACE_C )
       if ( xgBlock%cols*xgBlock%Ldim < dim_ ) then
         ABI_ERROR("Bad complex reverseMapping")
