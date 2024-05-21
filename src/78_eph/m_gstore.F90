@@ -205,6 +205,7 @@ type, public :: gqk_t
   ! These new entries will be used to implement band distribution
   !integer :: m_start = -1, m_stop = -1, m_nb = -1
   !integer :: n_start = -1, n_stop = -1, n_nb = -1
+  !integer :: nb_kq, nb_k
 
   integer :: my_npert = -1
   ! Number of perturbations treated by this MPI rank.
