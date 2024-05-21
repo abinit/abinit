@@ -204,7 +204,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  integer :: ffnl_k_request, ffnl_kq_request, ffnl_kmp_request, ffnl_kqmp_request
  integer :: qptopt, my_iq, my_ik, qbuf_size, iqbuf_cnt, nb ! nelem,
  real(dp) :: cpu_all, wall_all, gflops_all, cpu_qq, wall_qq, gflops_qq, cpu_kk, wall_kk, gflops_kk
- real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in, e_mkq, e_nk ! e0i,
+ real(dp) :: fact_spin, theta_mu_minus_e0i, tol_empty, tol_empty_in !, e_mkq, e_nk ! e0i,
  real(dp),ABI_CONTIGUOUS pointer :: qp_ene(:,:,:),qp_occ(:,:,:)
  !real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop
  real(dp) :: ecut,weight_q,enxc, vxcavg ! ediff, eshift, rfact, q0rad, bz_vol,
@@ -247,7 +247,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3), kqmp(3), kmp(3), pp(3), kmp_ibz(3), kqmp_ibz(3)
  real(dp) :: phfr_qq(3*cryst%natom), qq_ibz(3), qpt(3)
  !real(dp) :: tsec(2) ! vk(3), vkq(3),
- real(dp) :: eig0nk !, eig0mkq !eig0mk,
+ real(dp) :: eig0nk !,eig0mkq !eig0mk,
  complex(gwpc) :: ctmp_gwpc
 !arrays
  real(dp) :: fermie1_idir_ipert(3,cryst%natom), ylmgr_dum(1,1,1), dum_nhat(0), dum_xccc3d(0), strsxc(6)
@@ -256,20 +256,18 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  real(dp),allocatable :: ffnl_k(:,:,:,:),ffnl_kq(:,:,:,:), ffnl_kmp(:,:,:,:),ffnl_kqmp(:,:,:,:)
  real(dp),allocatable :: ph3d_kmp(:,:,:), ph3d1_kqmp(:,:,:), ph3d_kqmp(:,:,:), ph3d1_kmp(:,:,:)
  real(dp),allocatable, target :: vxc1_qq(:,:,:,:)
- real(dp),allocatable :: vxc(:,:), kxc(:,:)
- real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:)
- real(dp),allocatable :: gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
+ real(dp),allocatable :: gkq_sig_atm(:,:,:,:),gkq_sig_nu(:,:,:,:),gkq_xc_atm(:,:,:,:), gkq_xc_nu(:,:,:,:), gkq_ks_atm(:,:,:,:),gkq_ks_nu(:,:,:,:)
  real(dp),allocatable :: cg_work(:,:), ug_k(:,:), ug_kq(:,:) !,kets_k(:,:,:),h1kets_kq(:,:,:,:)
  real(dp),allocatable :: ph1d(:,:), vlocal(:,:,:,:), vlocal1_qq(:,:,:,:,:), v1scf_qq(:,:,:,:), vlocal1_mq(:,:,:,:,:), v1scf_mq(:,:,:,:)
  real(dp),allocatable :: ylm_k(:,:), ylm_kq(:,:), ylm_kmp(:,:), ylm_kqmp(:,:)
  real(dp),allocatable :: ylmgr_kq(:,:,:), ylmgr_kmp(:,:,:), ylmgr_kqmp(:,:,:)
- real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
+ real(dp),allocatable :: vtrial(:,:), work(:,:,:,:), rhor(:,:), vxc(:,:), kxc(:,:) ! ,gvnlx1(:,:),gvnlxc(:,:),
  !real(dp),allocatable :: gs1c(:,:), gkq_allgather(:,:,:)
  real(dp),allocatable :: omegame0i_nk(:), omegame0i_mkq(:), omegas_nk(:), omegas_mkq(:)
  real(dp),allocatable :: my_gbuf(:,:,:,:,:,:) !, buf_wqnu(:,:), buf_eigvec_cart(:,:,:,:,:)
  real(dp),allocatable :: cg_kmp(:,:), cg_kqmp(:,:), cg1_kqmp(:,:), cg1_kmp(:,:), full_cg1_kqmp(:,:), full_cg1_kmp(:,:)
  complex(dp),pointer :: cvxc1_qq_ptr(:,:,:)
- complex(gwpc),allocatable :: ur_k(:), ur_kq(:), ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, workq_ug(:)
+ complex(gwpc),allocatable :: ur_kmp(:), ur_kqmp(:), cwork_ur(:) !, ur_k(:), ur_kq(:), workq_ug(:)
  complex(gwpc),allocatable :: rhotwg(:), vc_sqrt_pp(:) !, rhotwgp(:)
  complex(gwpc),allocatable :: full_ur1_kqmp(:), full_ur1_kmp(:)
  complex(gwpc),allocatable :: vec_gw_nk(:,:,:), vec_gw_mkq(:,:,:), sigcme_nk(:), sigcme_mkq(:), ur_nk(:,:), ur_mkq(:,:)
@@ -301,7 +299,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ! 2)
  ! We need to solve the NSCF Sternheimer for q and -q. In principle one can solve the equation only at q
  ! and then use spatial inversion or TR to get the solution at -q but this requires solving the Sternheimer
- ! for all pp wavevectors in the BZ (or better the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
+ ! for all pp wavevectors in the BZ (or better in the IBZ_{q,k,alpha). The use of symmetries is rendered complicated
  ! by the parallelism over pp but perhaps one can precompute \Delta psi with all procs and write the results to temporary files.
 
  if (psps%usepaw == 1) then
@@ -780,8 +778,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_MALLOC(ylmgr_kmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
  ABI_MALLOC(ylmgr_kqmp, (mpw, 3, psps%mpsang**2 * psps%useylm * useylmgr1))
  ! GS wavefunctions
- ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
- ABI_MALLOC(ur_kq, (wfd%nfft*nspinor))
+ !ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
+ !ABI_MALLOC(ur_kq, (wfd%nfft*nspinor))
  ABI_MALLOC(ur_kmp, (wfd%nfft*nspinor))
  ABI_MALLOC(ur_kqmp, (wfd%nfft*nspinor))
  ABI_MALLOC(cwork_ur, (wfd%nfft*nspinor))
@@ -934,8 +932,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      ABI_MALLOC_OR_DIE(vlocal1_mq, (cplex*n4, n5, n6, nvloc, my_npert), ierr)
 
      ! Build DFPT potential at -qq
-     v1scf_mq = v1scf_qq
-     if (cplex == 2) v1scf_mq(2,:,:,:) = -v1scf_mq(2,:,:,:)
+     v1scf_mq = v1scf_qq; if (cplex == 2) v1scf_mq(2,:,:,:) = -v1scf_mq(2,:,:,:)
 
      ! ===============================================
      ! Loop over k-points in the e-ph matrix elements
@@ -1060,7 +1057,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          if (ipp_bz > 12) cycle ! DEBUG
 #endif
 
-         ! Symmetry tables and g-sphere centered on k-p
+         ! Symmetry tables and g-sphere centered on k-p.
          kmp = kk - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kmp, mapl_kmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
@@ -1075,14 +1072,14 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kmp, ikmp_ibz, isirr_kmp, dtset%nloalg, &  ! in
                                   istwf_kmp, npw_kmp, kg_kmp, nkpg_kmp, kpg_kmp, gbound_kmp)   ! out
 
-         ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
+         ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
          ABI_MALLOC(ffnl_kmp, (npw_kmp, 1, psps%lmnmax, psps%ntypat))
 
          call mkffnl_objs(cryst, psps, 1, ffnl_kmp, ider0, idir0, kg_kmp, kpg_kmp, kmp, nkpg_kmp, &
                           npw_kmp, ylm_kmp, ylmgr_dum, &
                           comm=gqk%pert_comm%value, request=ffnl_kmp_request)
 
-         ! Symmetry tables and g-sphere centered on k+q-p
+         ! Symmetry tables and g-sphere centered on k+q-p.
          kqmp = kq - pp
          if (kpts_map("symrel", ebands_timrev, cryst, gstore%krank_ibz, 1, kqmp, mapl_kqmp) /= 0) then
            write(msg, '(4a)' )"k-mesh is not closed!",ch10, &
@@ -1097,7 +1094,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
          call wfd%get_gvec_gbound(cryst%gmet, ecut, kqmp, ikqmp_ibz, isirr_kqmp, dtset%nloalg, &    ! in
                                   istwf_kqmp, npw_kqmp, kg_kqmp, nkpg_kqmp, kpg_kqmp, gbound_kqmp)  ! out
 
-         ! Compute nonlocal form factors ffnl_kmp at (k-p+G)
+         ! Compute nonlocal form factors ffnl_kmp at (k-p+G).
          ABI_MALLOC(ffnl_kqmp, (npw_kqmp, 1, psps%lmnmax, psps%ntypat))
          ABI_MALLOC(full_cg1_kqmp, (2, npw_kqmp*nspinor))
          ABI_MALLOC(full_cg1_kmp, (2, npw_kmp*nspinor))
@@ -1123,8 +1120,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
          nband_me = nbsum; stern_comm = xmpi_comm_self
          if (stern_has_band_para) then
-           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1
-           !stern_comm = sigma%bsum_comm%value
+           !nband_me = sigma%my_bsum_stop - sigma%my_bsum_start + 1; stern_comm = sigma%bsum_comm%value
            NOT_IMPLEMENTED_ERROR()
          end if
 
@@ -1205,9 +1201,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
              call times_vc_sqrt("N", npw_pp, nspinor, vc_sqrt_pp, rhotwg)
              ! FIXME: npwx should be npwc here
 
-             ! Contract immediately over g' with the frequency convolution of
-             ! \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
-             ! Prepare list of frequencies in Sigma(w)
+             ! Contract immediately over g' with the frequency convolution:
+             !  \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kmp) - e')
+             ! Prepare list of omegas: first e_nk then e_mkq for for all m indices.
              omegas_nk(1) = qp_ene(n_k, ik_ibz, spin); cnt = 1
              do m_kq=gqk%bstart, gqk%bstop ! do m_kq=gqk%m_start, gqk%m_stop
                cnt = cnt + 1; omegas_nk(cnt) = qp_ene(m_kq, ikq_ibz, spin)
@@ -1235,7 +1231,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
              ! Contract immediately over g with the frequency convolution of
              ! \int de' Wc_{gg'}(pp, e') / (omega - e_{bsum, kqmp) - e')
-             ! Prepare list of frequencies in Sigma(w)
+             ! Prepare list of omegas: first e_mkq then e_nk for for all n indices.
              omegas_mkq(1) = qp_ene(m_kq, ikq_ibz, spin); cnt = 1
              do n_k=gqk%bstart, gqk%bstop ! do n_k=gqk%n_start, gqk%n_stop
                cnt = cnt + 1; omegas_mkq(cnt) = qp_ene(n_k, ik_ibz, spin)
@@ -1510,8 +1506,8 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  ABI_FREE(ylmgr_kmp)
  ABI_FREE(ylmgr_kqmp)
  ABI_FREE(cg_work)
- ABI_FREE(ur_k)
- ABI_FREE(ur_kq)
+ !ABI_FREE(ur_k)
+ !ABI_FREE(ur_kq)
  ABI_FREE(ur_kmp)
  ABI_FREE(ur_kqmp)
  ABI_FREE(full_ur1_kqmp)

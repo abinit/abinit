@@ -1767,7 +1767,7 @@ subroutine stern_solve(stern, u1_band, band_me, idir, ipert, qpt, gs_hamkq, rf_h
 !Local variables ------------------------------
 !scalars
  integer,parameter :: berryopt0 = 0, igscq0 = 0, icgq0 = 0, ibgq0 = 0, nbdbuf0 = 0, quit0 = 0, istwfk1 = 1, ndat1 = 1, timcount0 = 0
- integer :: opt_gvnlx1, mcgq, grad_berry_size_mpw1, iband
+ integer :: opt_gvnlx1, grad_berry_size_mpw1, iband
  real(dp) :: out_resid, fermie1, eig0nk
  type(rf2_t) :: rf2
 !arrays
@@ -1947,10 +1947,11 @@ subroutine stern_free(stern)
  call destroy_mpi_enreg(stern%mpi_enreg)
  !call xmpi_comm_free(stern%mpi_enreg%comm_band)
 
- call pawcprj_free(stern%cprjq)
+ if (stern%dtset%usepaw == 1) then
+   call pawcprj_free(stern%cprjq)
+   call pawcprj_free(stern%cwaveprj1)
+ end if
  ABI_SFREE(stern%cprjq)
-
- call pawcprj_free(stern%cwaveprj1)
  ABI_SFREE(stern%cwaveprj1)
 
 end subroutine stern_free
