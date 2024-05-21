@@ -135,25 +135,6 @@ MODULE m_clib
    end function
  end interface
 
-  !interface
-  !  ! suspend calling thread for microseconds of clock time
-  !  ! uses unistd.h for Fortran standard compliant sleep.
-  !  ! sleep() is a GNU extension, not standard Fortran
-  !  subroutine usleep(us) bind(C)
-  !    import
-  !    integer(c_int), value :: us
-  !  end subroutine usleep
-  !end interface
-
-  !interface
-  !  ! int usleep(useconds_t useconds)
-  !  function clib_usleep(useconds) bind(c, name='usleep')
-  !    import
-  !    integer(kind=c_int32_t), value :: useconds
-  !    integer(kind=c_int)            :: c_usleep
-  !  end function clib_usleep
-  !end interface
-
 ! ==========================================
 ! ==== Fortran-bindings for file_lock.c ====
 ! ==========================================
