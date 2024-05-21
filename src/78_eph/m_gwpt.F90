@@ -568,10 +568,10 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
      end do
 
      ! Write v_nk to disk.
-     if (gqk%grid_comm%me == master) then
+     !if (gqk%grid_comm%me == master) then
        NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
        NCF_CHECK(nf90_put_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz))
-     end if
+     !end if
 
      ABI_FREE(vk_cart_ibz)
      ABI_FREE(count_bk)
@@ -1481,9 +1481,9 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  call cwtime_report(" gwpt_eph full calculation", cpu_all, wall_all, gflops_all, end_str=ch10)
 
  ! Set gstore_completed to 1 so that we can easily check if restarted is needed.
- if (my_rank == master) then
+ !if (my_rank == master) then
    NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_completed"), 1))
- end if
+ !end if
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(comm)
 
@@ -1588,12 +1588,12 @@ subroutine dump_data()
  NCF_CHECK(ncerr)
 
  ! Only one proc sets the entry in done_qbz_spin to 1 for all the q-points in the buffer.
- if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
+ !if (all(gqk%coords_qkpb_sumbp(2:3) == [0, 0]))  then
    do ii=1,iqbuf_cnt
      iq_bz = iq_buf(2, ii)
      NCF_CHECK(nf90_put_var(root_ncid, root_vid("gstore_done_qbz_spin"), 1, start=[iq_bz, spin]))
    end do
- end if
+ !end if
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
