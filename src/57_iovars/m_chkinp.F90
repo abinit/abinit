@@ -1528,6 +1528,24 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'Action: set istwfk to 1 for all k-points or change gpu_option.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: set istwfk to 1 for all k-points or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) == 2 ) .and. dt%npband>1 ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is 2, and istwfk==2, npband must be 1... (to be corrected).',ch10,&
+      'Action: set istwfk to 1 for all k-points, or npband to 1, or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) == 2 ) .and. dt%wfoptalg==111 ) then
+     write(msg,'(3a)' )&
+      'When gpu_option is 2, and istwfk==2, wfoptalg cannot be 111... (to be corrected).',ch10,&
+      'Action: set istwfk to 1 for all k-points, or wfoptalg to 114, or change gpu_option.'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
