@@ -861,6 +861,7 @@ end subroutine xmpi_init
 
 subroutine set_num_threads_if_undef()
 
+#ifdef HAVE_OPENMP
 !Local variables-------------------
  integer :: ierr
  character(len=100) :: omp_num_threads
@@ -873,13 +874,14 @@ subroutine set_num_threads_if_undef()
  if (ierr /= 0) then
    ierr = clib_setenv('OMP_NUM_THREADS', '1', 1)
    if (ierr == 0) then
-     write(std_out,"(a)")'OMP_NUM_THREADS was not defined. It has been set to 1.'
+     write(std_out,"(a)")'- OMP_NUM_THREADS was not defined. It has been set to 1.'
    else
-     write(std_out,"(a)")'WARNING: Failed to set OMP_NUM_THREADS.'
+     write(std_out,"(a)")'- WARNING: Failed to set OMP_NUM_THREADS.'
    end if
  else
-   !write(std_out,*)'OMP_NUM_THREADS is already set to: ', trim(omp_num_threads)
+   !write(std_out,*)'- OMP_NUM_THREADS is already set to: ', trim(omp_num_threads)
  end if
+#endif
 
 end subroutine set_num_threads_if_undef
 !!***
