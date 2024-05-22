@@ -388,7 +388,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
    ABI_COMMENT(msg)
  end if
 
- !print *, "ecutsigx:", dtset%ecutsigx
+ ! Init g-sphere for the exchange part from ecutsigx
  call gsph_c%extend(cryst, dtset%ecutsigx, gsph_x)
 
  ! TODO:
@@ -585,7 +585,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  !q0rad = two_pi * (three / (four_pi * cryst%ucvol * gstore%nqbz)) ** third
  !bz_vol = two_pi**3 / cryst%ucvol
 
- ! Open the DVDB file
+ ! Open the DVDB file with first-order potentials and drhodb with the first-order densities.
  call dvdb%open_read(ngfftf, xmpi_comm_self)
  call drhodb%open_read(ngfftf, xmpi_comm_self)
 
@@ -640,7 +640,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
 
  if (dtset%eph_stern /= 0) then
    ! Read the GS potential (vtrial) from input POT file
-   ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
+   ! In principle one may store GS vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout(units, sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pot_pawrhoij, comm, &
                   allow_interp=.True.)
@@ -1154,7 +1154,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
            stern_kqmp%cgq(:,:,ii) = cg_kmp(:,1:npw_kmp*nspinor)
          end do ! ib_sum
 
-         ! Prepare the object for applying W_qbz.
+         ! Prepare the object for applying W(pp_bz).
          ! FIXME: Sq = q+G0 with non-zero G0 is not supported.
          call screen%rotate_iqbz(ipp_bz, cryst, gsph_c, pp_mesh, vcp)
 
