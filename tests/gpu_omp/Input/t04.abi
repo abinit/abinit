@@ -1,7 +1,8 @@
 #Test chebfi
 
  ndtset 1
- wfoptalg 111  npband 1 npfft 1
+# wfoptalg 111  npband 1 npfft 1
+ wfoptalg 114  npband 1 npfft 1 # for now only LOBPCG seems to work with istwfk=2
  gpu_option 2
 
  np_spkpt 1
