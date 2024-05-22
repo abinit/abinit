@@ -74,6 +74,7 @@ module m_dfpt_cgwf
    integer :: nline_in = -1
    integer :: nlines_done = -1
    integer :: usedcwavef
+   integer :: usepaw
    integer :: work_ngfft(18)
    logical :: use_cache
    logical :: has_band_para
@@ -1683,6 +1684,7 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  natom = dtset%natom; usepaw = dtset%usepaw
 
  stern%npw_k = npw_k; stern%npw_kq = npw_kq; stern%nspinor = nspinor; stern%nband = nband; stern%dtset => dtset
+ stern%usepaw = usepaw
  stern%nband_me = nband_me
  stern%usedcwavef = 0
  stern%use_cache = use_cache
@@ -1947,7 +1949,7 @@ subroutine stern_free(stern)
  call destroy_mpi_enreg(stern%mpi_enreg)
  !call xmpi_comm_free(stern%mpi_enreg%comm_band)
 
- if (stern%dtset%usepaw == 1) then
+ if (stern%usepaw == 1) then
    call pawcprj_free(stern%cprjq)
    call pawcprj_free(stern%cwaveprj1)
  end if
