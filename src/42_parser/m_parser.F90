@@ -1234,8 +1234,9 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i1)')dozens
+     write(appen,'(i0)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
+     cslen=toklen+len(trim(appen))+2
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
