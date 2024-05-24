@@ -3188,9 +3188,7 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 !*************************************************************************
 
  ! TODO: Change intent to in. Change pawrhoij_io first!
- !@hdr_type
  ierr = 0
-
  if (present(rewind)) then
    if (rewind) rewind(unit, err=10, iomsg=errmsg)
  end if
@@ -3205,9 +3203,8 @@ subroutine hdr_fort_write(Hdr,unit,fform,ierr,rewind)
 
  major = atoi(hdr%codvsn(:ii-1))
 
-!Writing always use last format version
+ ! Writing always use last format version
  headform = HDR_LATEST_HEADFORM
- !write(std_out,*) 'CP debug = ', headform
 
  if (major > 8) then
    write(unit, err=10, iomsg=errmsg) hdr%codvsn, headform, fform
@@ -4701,11 +4698,11 @@ end function hdr_compare
 !!
 !! SOURCE
 
-subroutine hdr_vs_dtset(Hdr,Dtset)
+subroutine hdr_vs_dtset(hdr, dtset)
 
 !Arguments ------------------------------------
- class(Hdr_type),intent(in) :: Hdr
- type(Dataset_type),intent(in) :: Dtset
+ class(Hdr_type),intent(in) :: hdr
+ type(Dataset_type),intent(in) :: dtset
 
 !Local variables-------------------------------
  integer :: ik, jj, ierr
@@ -4715,36 +4712,37 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
 
  ! Check basic dimensions
  ierr = 0
- call compare_int('natom',  Hdr%natom,  Dtset%natom,  ierr)
- call compare_int('nkpt',   Hdr%nkpt,   Dtset%nkpt,   ierr)
- call compare_int('npsp',   Hdr%npsp,   Dtset%npsp,   ierr)
- call compare_int('nspden', Hdr%nspden, Dtset%nspden, ierr)
- call compare_int('nspinor',Hdr%nspinor,Dtset%nspinor,ierr)
- call compare_int('nsppol', Hdr%nsppol, Dtset%nsppol, ierr)
- call compare_int('nsym',   Hdr%nsym,   Dtset%nsym,   ierr)
- call compare_int('ntypat', Hdr%ntypat, Dtset%ntypat, ierr)
- call compare_int('usepaw', Hdr%usepaw, Dtset%usepaw, ierr)
- call compare_int('usewvl', Hdr%usewvl, Dtset%usewvl, ierr)
- call compare_int('kptopt', Hdr%kptopt, Dtset%kptopt, ierr)
- call compare_int('pawcpxocc', Hdr%pawcpxocc, Dtset%pawcpxocc, ierr)
- call compare_int('nshiftk_orig', Hdr%nshiftk_orig, Dtset%nshiftk_orig, ierr)
- call compare_int('nshiftk', Hdr%nshiftk, Dtset%nshiftk, ierr)
+ call compare_int('natom',  hdr%natom,  dtset%natom,  ierr)
+ call compare_int('nkpt',   hdr%nkpt,   dtset%nkpt,   ierr)
+ call compare_int('npsp',   hdr%npsp,   dtset%npsp,   ierr)
+ call compare_int('nspden', hdr%nspden, dtset%nspden, ierr)
+ call compare_int('nspinor',hdr%nspinor,dtset%nspinor,ierr)
+ call compare_int('nsppol', hdr%nsppol, dtset%nsppol, ierr)
+ call compare_int('nsym',   hdr%nsym,   dtset%nsym,   ierr)
+ call compare_int('ntypat', hdr%ntypat, dtset%ntypat, ierr)
+ call compare_int('usepaw', hdr%usepaw, dtset%usepaw, ierr)
+ call compare_int('usewvl', hdr%usewvl, dtset%usewvl, ierr)
+ call compare_int('kptopt', hdr%kptopt, dtset%kptopt, ierr)
+ call compare_int('pawcpxocc', hdr%pawcpxocc, dtset%pawcpxocc, ierr)
+ call compare_int('nshiftk_orig', hdr%nshiftk_orig, dtset%nshiftk_orig, ierr)
+ call compare_int('nshiftk', hdr%nshiftk, dtset%nshiftk, ierr)
+ !call compare_int("ixc", hdr%ixc, dtset%ixc, ierr)
 
  ! The number of fatal errors must be zero.
- if (ierr/=0) then
+ if (ierr /= 0) then
    write(msg,'(3a)')&
-   'Cannot continue, basic dimensions reported in the header do not agree with input file. ',ch10,&
-   'Check consistency between the content of the external file and the input file.'
+   'Cannot continue, basic dimensions/parameters reported in the header do not agree with input file. ',ch10,&
+   'Check consistency between the content of the WFK external file and the input file.'
    ABI_ERROR(msg)
  end if
 
- test=ALL(ABS(Hdr%xred-Dtset%xred_orig(:,1:Dtset%natom,1)) < tol3)
- ABI_CHECK(test,'Mismatch in xred')
+ test = ALL(ABS(Hdr%xred - Dtset%xred_orig(:,1:Dtset%natom,1)) < tol3)
+ ABI_CHECK(test, 'Mismatch in xred')
 
- test=ALL(Hdr%typat==Dtset%typat(1:Dtset%natom))
+ test=ALL(Hdr%typat == Dtset%typat(1:Dtset%natom))
  ABI_CHECK(test,'Mismatch in typat')
 
- ! Check if the lattice from the input file agrees with that read from the KSS file
+ ! Check if the lattice from the input file agrees with the one read from the WFK file
  if ( (ANY(ABS(Hdr%rprimd - Dtset%rprimd_orig(1:3,1:3,1)) > tol6)) ) then
    write(msg,'(5a,3(3es16.6),3a,3(3es16.6),3a)')ch10,&
    ' real lattice vectors read from Header differ from the values specified in the input file', ch10, &
@@ -4782,7 +4780,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    tsymafm=.FALSE.
  end if
 
- if (.not.(tsymrel.and.ttnons.and.tsymafm)) then
+ if (.not. (tsymrel.and.ttnons.and.tsymafm)) then
    write(msg,'(a)')' Header '
    call wrtout(std_out,msg)
    call print_symmetries(Hdr%nsym,Hdr%symrel,Hdr%tnons,Hdr%symafm)
@@ -4897,7 +4895,7 @@ subroutine hdr_vs_dtset(Hdr,Dtset)
    end if
  end if
 
- CONTAINS
+ contains
 !!***
 
 !!****f* hdr_vs_dtset/compare_int
