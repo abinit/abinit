@@ -2890,14 +2890,14 @@ end subroutine write_var_netcdf
 !! SOURCE
 
 subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
-& extpw_eshift) ! Optional arguments
+& extfpmd_eshift) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
  real(dp),intent(in) :: fermie
- real(dp),optional,intent(in) :: extpw_eshift
+ real(dp),optional,intent(in) :: extfpmd_eshift
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -2964,9 +2964,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  call ab_define_var(ncid, dimNBK, nbk_id, NF90_INT,"NBandK",&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
- if(present(extpw_eshift)) then
+ if(present(extfpmd_eshift)) then
     call ab_define_var(ncid,dim0,extpw_eshift_id,NF90_DOUBLE,&
-&    "extpw_eshift","Extended FPMD shiftfactor","Hartree")
+&    "extfpmd_eshift","Extended FPMD energy shift","Hartree")
  end if
 
 !4. End define mode
@@ -2989,9 +2989,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  NCF_CHECK_MSG(ncerr," write variable fermie")
 
 !6.2 Write extfpmd shiftfactor
- if(present(extpw_eshift)) then
-   ncerr = nf90_put_var(ncid, extpw_eshift_id, extpw_eshift)
-   NCF_CHECK_MSG(ncerr," write variable extpw_eshift")
+ if(present(extfpmd_eshift)) then
+   ncerr = nf90_put_var(ncid, extpw_eshift_id, extfpmd_eshift)
+   NCF_CHECK_MSG(ncerr," write variable extfpmd_eshift")
  end if
 
 !6.3 Write eigenvalues
