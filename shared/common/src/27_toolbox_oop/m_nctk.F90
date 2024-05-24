@@ -2908,7 +2908,7 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
  integer :: eig_id,fermie_id,kpt_id,nbk_id,nbk
- integer :: extpw_eshift_id
+ integer :: extfpmd_eshift_id
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
@@ -2965,7 +2965,7 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
  if(present(extfpmd_eshift)) then
-    call ab_define_var(ncid,dim0,extpw_eshift_id,NF90_DOUBLE,&
+    call ab_define_var(ncid,dim0,extfpmd_eshift_id,NF90_DOUBLE,&
 &    "extfpmd_eshift","Extended FPMD energy shift","Hartree")
  end if
 
@@ -2990,7 +2990,7 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
 
 !6.2 Write extfpmd shiftfactor
  if(present(extfpmd_eshift)) then
-   ncerr = nf90_put_var(ncid, extpw_eshift_id, extfpmd_eshift)
+   ncerr = nf90_put_var(ncid, extfpmd_eshift_id, extfpmd_eshift)
    NCF_CHECK_MSG(ncerr," write variable extfpmd_eshift")
  end if
 
