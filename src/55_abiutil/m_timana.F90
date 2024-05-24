@@ -1013,7 +1013,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
 
- ! xg_t
+ ! xg_t (1st part)
  names(1662) = 'xgTransposer_transpose@ColsRows'
  names(1663) = 'xgTransposer_transpose@Linalg  '
  names(1664) = 'xgTransposer_*@all2all         '
@@ -1022,11 +1022,12 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1667) = 'xgTransposer_init              '
  names(1668) = 'xgTransposer_free              '
  names(1669) = 'xgTransposer_transpose         '
+
  names(1670) = 'xgBlock_gemm(blas)             '
  names(1671) = 'xgBlock_trsm                   '
  names(1672) = 'xgBlock_potrf                  '
- names(1673) = 'xgBlock_set                    '
- names(1674) = 'xgBlock_get                    '
+ names(1673) = 'xgBlock_zero                   '
+ names(1674) = 'xgBlock_zero_im_g0             '
  names(1675) = 'xgBlock_heev                   '
  names(1676) = 'xgBlock_heevd                  '
  names(1677) = 'xgBlock_hpev                   '
@@ -1041,6 +1042,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1686) = 'xgBlock_cshift                 '
  names(1687) = 'xgBlock_pack                   '
  names(1688) = 'xgBlock_gemm(mpi)              '
+ names(1689) = 'xgBlock_apply_diag             '
+
  names(1690) = 'xgScalapack_init               '
  names(1691) = 'xgScalapack_free               '
  names(1692) = 'xgScalapack_heev               '
@@ -1180,7 +1183,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  !names(1930)='gwr_wcq_to_scbox               '; basic(1930) = 1
  !names(1931)='gsph2box                       '; basic(1931) = 1
 
- ! TIMER_SIZE is 1999. See m_time
+ ! xg_t (2nd part)
+ names(2000)='xgBlock_scale                   '
+ names(2001)='xgBlock_colwiseDotProduct       '
+ names(2002)='xgBlock_colwiseMul              '
+ names(2003)='xgBlock_colwiseCymax            '
+ names(2004)='xgBlock_colwiseDivision         '
+ names(2005)='xgBlock_colwiseNorm2            '
+ names(2006)='xgBlock_saxpy                   '
+ names(2007)='xgBlock_minmax                  '
+
+ ! TIMER_SIZE is 2099. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================
@@ -1832,7 +1845,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
+         list(:28)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2007,1) /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
