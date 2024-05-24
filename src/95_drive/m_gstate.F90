@@ -890,7 +890,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  if(dtset%useextfpmd>=1.and.dtset%occopt==3) then
    if(extfpmd_chkinp(dtset)) then
      ABI_MALLOC(extfpmd,)
-     call extfpmd%init(dtset%mband,hdr%extpw_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
+     call extfpmd%init(dtset%mband,hdr%extfpmd_eshift,dtset%extfpmd_nbcut,dtset%extfpmd_nbdbuf,&
 &     dtset%nfft,dtset%nspden,dtset%nsppol,dtset%nkpt,rprimd,dtset%useextfpmd,mpi_enreg,&
 &     dtset%extfpmd_nband)
    end if
@@ -1434,7 +1434,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Update the header, before using it
  call hdr%update(bantot,results_gs%etotal,results_gs%energies%e_fermie,results_gs%energies%e_fermih,&
    results_gs%residm,rprimd,occ,pawrhoij,xred,args_gs%amu,&
-   comm_atom=mpi_enreg%comm_atom,extpw_eshift=results_gs%extpw_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
+   comm_atom=mpi_enreg%comm_atom,extfpmd_eshift=results_gs%extfpmd_eshift,mpi_atmtab=mpi_enreg%my_atmtab)
 
  ABI_MALLOC(doccde,(dtset%mband*dtset%nkpt*dtset%nsppol))
  doccde=zero

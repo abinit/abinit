@@ -128,7 +128,7 @@ module m_hdr
   real(dp) :: ne_qFD=zero  ! CP number of excited electrons (input variable)
   real(dp) :: nh_qFD=zero  ! CP number of excited holes (input variable)
   real(dp) :: cellcharge   ! input variable (for the first image if more than one)
-  real(dp) :: extpw_eshift=zero ! Energy shift of the extended for high temperature
+  real(dp) :: extfpmd_eshift=zero ! Energy shift of the extended for high temperature
 
   ! This record is not a part of the hdr_type, although it is present in the
   ! header of the files. This is because it depends on the kind of file
@@ -1128,7 +1128,7 @@ subroutine hdr_copy(Hdr_in,Hdr_cp)
  hdr_cp%ne_qFD      = hdr_in%ne_qFD
  hdr_cp%nh_qFD      = hdr_in%nh_qFD
  hdr_cp%cellcharge  = hdr_in%cellcharge
- Hdr_cp%extpw_eshift = Hdr_in%extpw_eshift
+ Hdr_cp%extfpmd_eshift = Hdr_in%extfpmd_eshift
 
  Hdr_cp%qptn(:)     = Hdr_in%qptn(:)
  Hdr_cp%rprimd(:,:) = Hdr_in%rprimd(:,:)
@@ -2353,14 +2353,14 @@ end subroutine hdr_skip_wfftype
 !!
 !! SOURCE
 subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,xred,amu, &
-                      comm_atom,extpw_eshift,mpi_atmtab) ! optional arguments (parallelism and extfpmd)
+                      comm_atom,extfpmd_eshift,mpi_atmtab) ! optional arguments (parallelism and extfpmd)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bantot
  integer,optional,intent(in) :: comm_atom
  real(dp),intent(in) :: etot,fermie,fermih,residm
- real(dp),optional,intent(in) :: extpw_eshift
+ real(dp),optional,intent(in) :: extfpmd_eshift
  class(hdr_type),intent(inout) :: hdr
 !arrays
  integer,optional,target,intent(in) :: mpi_atmtab(:)
@@ -2379,7 +2379,7 @@ subroutine hdr_update(hdr,bantot,etot,fermie,fermih,residm,rprimd,occ,pawrhoij,x
  hdr%occ(:)   =occ(:)
  hdr%xred(:,:)=xred(:,:)
  hdr%amu(:) = amu
- if(present(extpw_eshift)) hdr%extpw_eshift = extpw_eshift
+ if(present(extfpmd_eshift)) hdr%extfpmd_eshift = extfpmd_eshift
 
  if (hdr%usepaw==1) then
    if (present(comm_atom)) then
@@ -2596,7 +2596,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    list_dpr(1+index)=hdr%ne_qFD; index=index+1
    list_dpr(1+index)=hdr%nh_qFD; index=index+1
    list_dpr(1+index)=hdr%cellcharge; index=index+1
-   list_dpr(1+index)=hdr%extpw_eshift; index=index+1
+   list_dpr(1+index)=hdr%extfpmd_eshift; index=index+1
    list_dpr(1+index:index+3*hdr%nshiftk_orig) = reshape(hdr%shiftk_orig, [3*hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    list_dpr(1+index:index+3*hdr%nshiftk) = reshape(hdr%shiftk, [3*hdr%nshiftk])
@@ -2631,7 +2631,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
    hdr%ne_qFD = list_dpr(1+index); index=index+1
    hdr%nh_qFD = list_dpr(1+index); index=index+1
    hdr%cellcharge = list_dpr(1+index); index=index+1
-   hdr%extpw_eshift = list_dpr(1+index); index=index+1
+   hdr%extfpmd_eshift = list_dpr(1+index); index=index+1
    hdr%shiftk_orig = reshape(list_dpr(1+index:index+3*hdr%nshiftk_orig), [3, hdr%nshiftk_orig])
    index=index+3*hdr%nshiftk_orig
    hdr%shiftk = reshape(list_dpr(1+index:index+3*hdr%nshiftk), [3, hdr%nshiftk])
@@ -3452,7 +3452,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-    "ecut_eff", "ecutdg", "ecutsm", "etot", "extpw_eshift", "residm", "stmbias", "tphysel", "tsmear"])
+    "ecut_eff", "ecutdg", "ecutsm", "etot", "extfpmd_eshift", "residm", "stmbias", "tphysel", "tsmear"])
    NCF_CHECK(ncerr)
 
    ! Multi-dimensional variables.
@@ -3586,8 +3586,8 @@ integer function hdr_ncwrite(hdr, ncid, fform, spinat, nc_define) result(ncerr)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-&  "ecut_eff", "ecutdg", "ecutsm", "etot", "extpw_eshift", "residm", "stmbias", "tphysel", "tsmear"],&
-&  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%extpw_eshift, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
+&  "ecut_eff", "ecutdg", "ecutsm", "etot", "extfpmd_eshift", "residm", "stmbias", "tphysel", "tsmear"],&
+&  [hdr%ecut_eff, hdr%ecutdg, hdr%ecutsm, hdr%etot, hdr%extfpmd_eshift, hdr%residm, hdr%stmbias, hdr%tphysel, hdr%tsmear])
  NCF_CHECK(ncerr)
 
  ! Write Abinit array variables.
