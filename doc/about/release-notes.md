@@ -23,6 +23,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** The input variable rfasr, used in DFPT, in case of phonon perturbations and electric field perturbations has been replaced
@@ -36,6 +38,8 @@ the old default value has been specified explicitly.
 **A.2** The input variables rf1atpol, rf1dir, rf1elfd and rf1phon (and similar input variables for perturbations 2 and 3) have been suppressed.
 They were used in the case of Raman calculations (one derivative with respect to an atomic displacement, and two displacements with respect to an electric field), 
 but have been superceded by rf2_XXX input variables a long time ago. 
+
+* * *
 
 ### **B.** Most noticeable achievements
 
@@ -86,13 +90,15 @@ performance libraries. It also uses NVidia FFT/linear algebra libraries
 The [[KOKKOS]] GPU implementation can be used in conjuction with openMP threads
 on CPU (see [[gpu_kokkos_nthrd]]).
 
-For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See
-[[gpu_use_nvtx]],[[gpu_nl_distrib]],[[gpu_nl_splitsize]].
+For an expert user of ABINIT on [[GPU]], some additional keywords can be used. See [[gpu_nl_distrib]], [[gpu_nl_splitsize]].
+
+Note: the input variable use_gpu_nvtx has been suppressed and replaced by an option to
+be set at configure step: --enable-gpu-nvtx.
 
 Several GPU devices can be detected and used on a node.
 
 GPU regression tests are present in new directories,
-[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], [[test:gpu_omp_10]],
+[[test:gpu_omp_01]], [[test:gpu_omp_02]], [[test:gpu_omp_03]], 
 [[test:hpc_gpu_omp_01]] to [[test:hpc_gpu_omp_13]],
 as well as in the previously existing directory gpu.
 
@@ -103,7 +109,7 @@ Still, there are three examples *ac9 files in the directory doc/build of the pac
 [https://github.com/abinit/abinit/tree/master/doc/build](https://github.com/abinit/abinit/tree/master/doc/build) .
 Moreover, if you want to be a beta tester and collaborate on this topic, please contact Marc Torrent. 
 
-By P. Kesterneer, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
+By P. Kesterner, M. Sarraute, J.-M. Beuken, L. Baguet and M. Torrent 
 (MR942, 943, 951, 954, 955, 961, 965, 966, 967, 968, 969, 974, 978)
 
 
@@ -186,13 +192,14 @@ See test test:gwr_07
 
 By M. Giantomassi (MR 875, 907)
 
+* * *
 
 ### **C.** Changes for the developers (including information about compilers)
 
 **C.1** A new bot called EOS has been included in the test farm, in order to test ABINIT on GPUs. 
 Several flavors of the NVHPC compiler are available.
 
-By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterneer (MR949)
+By J.-M. Beuken, M. Torrent, M. Sarraute, P. Kesterner (MR949)
 
 
 **C.2** New bots have been introduced to replace obsolete ones :
@@ -211,7 +218,7 @@ Fixes to make Abinit compile when fft_flavor=fftw3-threads and openMP.
 
 By M. Torrent (MR970)
 
-
+* * *
 
 ### **D.**  Other changes (or on-going developments, not yet finalized, as well as miscellaneous bug fixes)
 
@@ -450,6 +457,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings. 
 
@@ -734,6 +743,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings. Also, hotfixes for v9.8.3 (A.4 to A.10).
 
 **A.1** Warning: the input variables prtefg and prtfc have been renamed [[nucefg]] and [[nucfc]].
@@ -905,8 +916,6 @@ From J.-M. Beuken (MR830).
 
 **C.2** Update build system to allow the use of NVTX library, providing profiling annotations (only when gpu is enabled). 
 This makes more readable profiling and tracing information when viewed with nsys-ui. 
-Add new parameter use_nvtx (now [[gpu_use_nvtx]]) 
-to enable/disable nvtx annotations at runtime. Is it a 'parameter' or an input variable. Documented, but not tested ...
 If abinit is built without gpu, annotations completely vanish at compile time.
 
 From P. Kestener (MR843)
@@ -1118,6 +1127,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 (nothing to mention for this v9.6)
@@ -1308,6 +1319,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -1524,6 +1537,8 @@ and examine the links to help files or test cases.
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### **A.** Important remarks and warnings.
 
@@ -2295,6 +2310,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### **A.** Important remarks and warnings.
 
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
@@ -2981,6 +2998,8 @@ This might take some time ...
 
 Xavier
 
+* * *
+
 ### A. Warnings and important remarks
 
 A.1 The correct definition of the temperature has been implemented in the isokinetic algorithm [[ionmov]]=12.
@@ -3171,6 +3190,8 @@ and examine the links to help files or test cases ...
 This might take some time ...
 
 Xavier
+
+* * *
 
 ### A. Warnings and important remarks
 
