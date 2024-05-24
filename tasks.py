@@ -51,11 +51,13 @@ ALL_BINARIES = [
     "mrgscr",
     "multibinit",
     "optic",
-    "tdep",
+    "atdep",
     "testtransposer",
     "lruj",
 ]
 
+import platform
+SYSTEM = platform.system()
 
 @contextmanager
 def cd(path):
@@ -112,10 +114,15 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
+        if SYSTEM == "Darwin":
+            for binary in ALL_BINARIES:
+                cmd = f"codesign -v --force --deep src/98_main/{binary}"
+                cprint("Executing: %s" % cmd, "yellow")
+                ctx.run(cmd, pty=True)
 
 @task
 def clean(ctx):
-    """Remove object files in src and shared. Do not object files in fallbacks"""
+    """Remove object files in src and shared. Do not remove object files in fallbacks"""
     top = find_top_build_tree(".", with_abinit=False)
     with cd(top):
         ctx.run("cd src && make clean && cd ..", pty=True)
@@ -155,7 +162,7 @@ def makemake(ctx):
 def makedeep(ctx, jobs="auto"):
     """Execute `makemake && make clean && make`"""
     makemake(ctx)
-    make(ctk, jobs=jobs, clean=True)
+    make(ctx, jobs=jobs, clean=True)
 
 
 @task

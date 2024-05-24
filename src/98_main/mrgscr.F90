@@ -65,8 +65,7 @@ program mrgscr
  use m_vcoul,               only : vcoul_t
  use m_ioarr,               only : read_rhor
  use m_io_screening,        only : read_screening, hscr_t, ioscr_qmerge, ioscr_qrecover, ioscr_wmerge, ioscr_wremove
- use m_ppmodel,             only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm_one_ggp, &
-                                   get_PPm_eigenvalues, ppmodel_t, cqratio
+ use m_ppmodel,             only : ppmodel_t, cqratio
  use m_model_screening,     only : remove_phase
  use m_screening,           only : mkdump_er, em1results_free, em1results_print, decompose_epsm1, &
                                    init_er_from_file, Epsilonm1_results
@@ -739,15 +738,15 @@ program mrgscr
                ABI_ERROR(msg)
              end if
 
-             call ppm_free(PPm)
+             call PPm%free()
              if (ppmodel==1) then
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
              else
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
              end if
-             call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
+             call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
-             call get_PPm_eigenvalues(PPm,iqibz,Er%Hscr%zcut,Er%nomega,Er%omega,Vcp,ppm_eigen)
+             call PPm%get_eigenvalues(iqibz,Er%Hscr%zcut,Er%nomega,Er%omega,Vcp,ppm_eigen)
 
              write(unt_dump,'(a)')       '# First (max 10) eigenvalues of eps^{-1}(omega) from Plasmon-pole model'
              write(unt_dump,'(a,3f12.6)')'# q = ',Hscr0%qibz(:,iqibz)
@@ -812,14 +811,13 @@ program mrgscr
            ! TODO: Check the results from the others
            do ppmodel=1,2
 
-             call ppm_free(PPm)
+             call PPm%free()
              if (ppmodel==1) then
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
              else
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
              end if
-             call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,&
-               nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
+             call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
              ! Prepare file for data on real omega axis
              if (ppmodel==1) fname_dump=TRIM(prefix)//'_PPM_w_GN_Q'//TRIM(tagq)
@@ -858,7 +856,7 @@ program mrgscr
                if (ig2<0.OR.ig2>Er%npwe) ABI_ERROR(' index out of bounds')
 
                ! Generate the PPM representation of epsilon^-1
-               call getem1_from_PPm_one_ggp(PPm,iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
+               call PPM%getem1_one_ggp(iqibz,Er%Hscr%zcut,nfreq_tot,omega,Vcp,em1_ppm,ig1,ig2)
 
                write(unt_dump,'(a,I1)') '# epsilon^-1_GG''(omega) from ppmodel = ',ppmodel
                write(unt_dump,'(2(a,i8),/,a,3f12.6,/,a,3i6,a,3i6,/,a,3F9.4,a,3F9.4,a,/a,f9.4,a,f9.4,a,/,a,/)')&
@@ -928,14 +926,13 @@ program mrgscr
              qtmp(:)=Er%qibz(:,iqibz)
              if (normv(qtmp,Cryst%gmet,'G')<GW_TOLQ0) qtmp(:)=zero
 
-             call ppm_free(PPm)
+             call PPm%free()
              if (ppmodel==1) then
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,GN_drude_plsmf,Dtset%gw_invalid_freq)
              else
-               call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
+               call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,ppmodel,drude_plsmf,Dtset%gw_invalid_freq)
              end if
-             call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,&
-             nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
+             call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfft,Gsphere%gvec,ngfft,rhor(:,1),iqibz)
 
              ! Prepare ratios and density for the f-sum rule
              ABI_MALLOC_OR_DIE(qratio,(orig_npwe,orig_npwe), ierr)
@@ -1006,7 +1003,7 @@ program mrgscr
                write(std_out,'(2(a,I0))') ' ig1= ',ig1, ' of ',Er%npwe
                do ig2=1,Er%npwe
                  !ig2 = ig1
-                 call getem1_from_PPm_one_ggp(PPm,iqibz,Er%Hscr%zcut,nfreq_tot,Er%omega,Vcp,em1_ppm,ig1,ig2)
+                 call PPm%getem1_one_ggp(iqibz,Er%Hscr%zcut,nfreq_tot,Er%omega,Vcp,em1_ppm,ig1,ig2)
 
                  ! Calculate norms in real
                  eps_diff=0; eps_norm=0; eps_ppm_norm=0
@@ -1080,7 +1077,7 @@ program mrgscr
          ABI_FREE(real_omega)
        end if ! Output statistics
 
-       call ppm_free(PPm)
+       call PPm%free()
      end if ! If ppmodel>0
 
      ABI_FREE(rhor)
