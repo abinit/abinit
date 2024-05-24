@@ -61,17 +61,19 @@ module m_chebfi2
 
  integer, parameter :: tim_init         = 1751
  integer, parameter :: tim_free         = 1752
-! integer, parameter :: tim_run          = 1753
+ !                                        1753 is used by chebfi2_nonlop
  integer, parameter :: tim_getAX_BX     = 1754
  integer, parameter :: tim_invovl       = 1755
  integer, parameter :: tim_residu       = 1756
  integer, parameter :: tim_RR           = 1757
-! integer, parameter :: tim_pcond        = 1758
+ integer, parameter :: tim_transpose    = 1758
  integer, parameter :: tim_RR_q         = 1759
- integer, parameter :: tim_next_p       = 1760
+ integer, parameter :: tim_postinvovl   = 1760
  integer, parameter :: tim_swap         = 1761
  integer, parameter :: tim_amp_f        = 1762
- integer, parameter :: tim_alltoall     = 1763
+ integer, parameter :: tim_oracle       = 1763
+ integer, parameter :: tim_barrier      = 1764
+ integer, parameter :: tim_copy         = 1765
  integer, parameter :: tim_X_NP_init    = 1769
  integer, parameter :: tim_AX_BX_init   = 1770
 
@@ -549,6 +551,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ! Transpose
  if (chebfi%paral_kgb == 1) then
 
+   call timab(tim_transpose,1,tsec)
    call xgTransposer_constructor(chebfi%xgTransposerX,chebfi%X,chebfi%xXColsRows,nspinor,&
      STATE_LINALG,TRANS_ALL2ALL,chebfi%comm_rows,chebfi%comm_cols,0,0,chebfi%me_g0_fft,gpu_option=chebfi%gpu_option)
 
@@ -575,6 +578,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    !call xgTransposer_transpose(chebfi%xgTransposerAX,STATE_COLSROWS)
    !call xgTransposer_transpose(chebfi%xgTransposerBX,STATE_COLSROWS)
    ABI_NVTX_END_RANGE()
+   call timab(tim_transpose,2,tsec)
  else
    call xgBlock_setBlock(chebfi%X, chebfi%xXColsRows, spacedim, neigenpairs)   !use xXColsRows instead of X notion
    call xgBlock_setBlock(chebfi%AX%self, chebfi%xAXColsRows, spacedim, neigenpairs)   !use xAXColsRows instead of AX notion
@@ -590,7 +594,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call timab(tim_getAX_BX,2,tsec)
 
  if (chebfi%paral_kgb == 1) then
+   call timab(tim_barrier,1,tsec)
    call xmpi_barrier(chebfi%spacecom)
+   call timab(tim_barrier,2,tsec)
  end if
 
 !********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
@@ -610,7 +616,6 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
 
  call timab(tim_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
- call timab(tim_RR_q, 2, tsec)
 
  if (chebfi%paral_kgb == 1) then
    call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
@@ -619,10 +624,12 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    maxeig_global = maxeig
    mineig_global = mineig
  end if
+ call timab(tim_RR_q, 2, tsec)
  ABI_NVTX_END_RANGE()
 
  lambda_minus = maxeig_global
 
+ call timab(tim_oracle,1,tsec)
  nline_max = cheb_oracle1(mineig_global, lambda_minus, lambda_plus, 1D-16, 40)
 
  if (chebfi%paral_kgb == 0) then
@@ -641,6 +648,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
      nline_bands(iband) = nline ! fiddle with this to use locking
    end do
  end if
+ call timab(tim_oracle,2,tsec)
 
  center = (lambda_plus + lambda_minus)*0.5
  radius = (lambda_plus - lambda_minus)*0.5
@@ -651,11 +659,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
  do iline = 0, nline - 1
 
-   call timab(tim_next_p,1,tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
    call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r, getBm1X)
    ABI_NVTX_END_RANGE()
-   call timab(tim_next_p,2,tsec)
 
    call timab(tim_swap,1,tsec)
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
@@ -680,7 +686,9 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  ABI_NVTX_END_RANGE()
 
  if (chebfi%paral_kgb == 1) then
+   call timab(tim_barrier,1,tsec)
    call xmpi_barrier(chebfi%spacecom)
+   call timab(tim_barrier,2,tsec)
  end if
 
  call timab(tim_amp_f,1,tsec)
@@ -690,6 +698,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
  call xg_free(DivResults)
  ABI_FREE(nline_bands)
 
+ call timab(tim_transpose,1,tsec)
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_TRANSPOSE)
  if (chebfi%paral_kgb == 1) then
    call xmpi_barrier(chebfi%spacecom)
@@ -709,6 +718,7 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    call xgBlock_setBlock(chebfi%xBXColsRows, chebfi%BX%self, spacedim, neigenpairs)
  end if
  ABI_NVTX_END_RANGE()
+ call timab(tim_transpose,2,tsec)
 
  ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
  call xg_RayleighRitz(chebfi%X,chebfi%AX%self,chebfi%BX%self,chebfi%eigenvalues,ierr,0,tim_RR,chebfi%gpu_option,&
@@ -722,14 +732,14 @@ subroutine chebfi_run(chebfi,X0,getAX_BX,getBm1X,pcond,eigen,residu,nspinor)
    call xgBlock_colwiseCymax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X,chebfi%AX%self)
  end if
 
-! call timab(tim_pcond,1,tsec)
  call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
-! call timab(tim_pcond,2,tsec)
 
  call xgBlock_colwiseNorm2(chebfi%AX%self, residu)
  call timab(tim_residu, 2, tsec)
 
+ call timab(tim_copy, 1, tsec)
  call xgBlock_copy(chebfi%X,X0)
+ call timab(tim_copy, 2, tsec)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
@@ -877,9 +887,12 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
    ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  else
+   call timab(tim_copy, 1, tsec)
    call xgBlock_copy(chebfi%xAXColsRows,chebfi%X_next)
+   call timab(tim_copy, 2, tsec)
  end if
 
+ call timab(tim_postinvovl, 1, tsec)
  ABI_NVTX_START_RANGE(NVTX_INVOVL_POST3)
  call xgBlock_scale(chebfi%xXColsRows, center, 1) !scale by center
 
@@ -903,6 +916,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  end if
 #endif
  ABI_NVTX_END_RANGE()
+ call timab(tim_postinvovl, 2, tsec)
 
 end subroutine chebfi_computeNextOrderChebfiPolynom
 !!***

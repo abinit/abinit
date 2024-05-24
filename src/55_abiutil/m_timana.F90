@@ -1117,17 +1117,20 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1750) = 'chebfiwf2                     '; basic(1750) = 1
  names(1751) = 'chebfi2_init                  '
  names(1752) = 'chebfi2_free                  '
-! names(1753) = 'chebfi2_run                   '
+ names(1753) = 'chebfi2_nonlop                '
  names(1754) = 'chebfi2_getAX_BX              '
  names(1755) = 'chebfi2_invovl                '
  names(1756) = 'chebfi2_residu                '
  names(1757) = 'chebfi2_RayleighRitz          '
-! names(1758) = 'chebfi2_pcond                 '
+ names(1758) = 'chebfi2_transpose             '
  names(1759) = 'chebfi2_RR_q                  '
- names(1760) = 'chebfi2_next_p                '
+ names(1760) = 'chebfi2_postinvovl            '
  names(1761) = 'chebfi2_swap                  '
  names(1762) = 'chebfi2_amp_f                 '
- names(1763) = 'chebfi2_alltoall              '
+ names(1763) = 'chebfi2_oracle                '
+ names(1764) = 'chebfi2_barrier               '
+ names(1765) = 'chebfi2_copy                  '
+
  names(1769) = 'chebfi2_X_NP@init             '
  names(1770) = 'chebfi2_AX_BX@init            '
 
@@ -1813,7 +1816,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(75)
          list(:20)=(/ (ii,ii=1640,1649,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:12)=(/1750,1751,1752,1754,1755,1756,1757,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
+         list(:16)=(/ (ii,ii=1750,1765,1) /) ; msg='chebfiwf2 core engine '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
