@@ -73,8 +73,10 @@ module m_xg
   integer, parameter :: tim_gemm_blas  = 1670
   integer, parameter :: tim_trsm       = 1671
   integer, parameter :: tim_potrf      = 1672
-  integer, parameter :: tim_set        = 1673
-  integer, parameter :: tim_get        = 1674
+  integer, parameter :: tim_zero       = 1673
+  integer, parameter :: tim_zero_im_g0 = 1674
+!  integer, parameter :: tim_set        = 1673
+!  integer, parameter :: tim_get        = 1674
   integer, parameter :: tim_heev       = 1675
   integer, parameter :: tim_heevd      = 1676
   integer, parameter :: tim_hpev       = 1677
@@ -89,7 +91,17 @@ module m_xg
   integer, parameter :: tim_cshift     = 1686
   integer, parameter :: tim_pack       = 1687
   integer, parameter :: tim_gemm_mpi   = 1688
+  integer, parameter :: tim_apply_diag = 1689
   integer, parameter :: tim_invertri   = 1696
+
+  integer, parameter :: tim_scale      = 2000
+  integer, parameter :: tim_colw_dot   = 2001
+  integer, parameter :: tim_colw_mul   = 2002
+  integer, parameter :: tim_colw_cymax = 2003
+  integer, parameter :: tim_colw_div   = 2004
+  integer, parameter :: tim_colw_norm2 = 2005
+  integer, parameter :: tim_saxpy      = 2006
+  integer, parameter :: tim_minmax     = 2007
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -521,7 +533,7 @@ contains
     real(dp), pointer :: xg__vecR(:,:)
 #endif
 
-    call timab(tim_set,1,tsec)
+!    call timab(tim_set,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
       ABI_ERROR("First dim must be 2")
@@ -584,7 +596,7 @@ contains
       end select
     end if
 
-    call timab(tim_set,2,tsec)
+!    call timab(tim_set,2,tsec)
 
   end subroutine xg_set
   !!***
@@ -605,7 +617,7 @@ contains
     integer :: col
     double precision :: tsec(2)
 
-    call timab(tim_set,1,tsec)
+!    call timab(tim_set,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
       ABI_ERROR("First dim must be 2")
@@ -668,7 +680,7 @@ contains
       end select
     end if
 
-    call timab(tim_set,2,tsec)
+!    call timab(tim_set,2,tsec)
 
   end subroutine xgBlock_set
   !!***
@@ -997,7 +1009,7 @@ contains
     integer :: col
     double precision :: tsec(2)
 
-    call timab(tim_get,1,tsec)
+!    call timab(tim_get,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
       ABI_ERROR("First dim must be 2")
@@ -1032,7 +1044,7 @@ contains
       end do
     end select
 
-    call timab(tim_get,2,tsec)
+!    call timab(tim_get,2,tsec)
 
   end subroutine xg_get
   !!***
@@ -1053,7 +1065,7 @@ contains
     integer :: col
     double precision :: tsec(2)
 
-    call timab(tim_get,1,tsec)
+!    call timab(tim_get,1,tsec)
 
     if ( size(array,dim=1) /= 2 ) then
       ABI_ERROR("First dim must be 2")
@@ -1085,7 +1097,7 @@ contains
       end do
     end select
 
-    call timab(tim_get,2,tsec)
+!    call timab(tim_get,2,tsec)
 
   end subroutine xgBlock_get
   !!***
@@ -3034,6 +3046,9 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),xgBlockW__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),xgBlockW__vecR(:,:),da__vecR(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_cymax,1,tsec)
 
     if ( xgBlockA%space /= xgBlockB%space .or. xgBlockA%space /= xgBlockW%space ) then
       ABI_ERROR("Must be same space for caxmy")
@@ -3128,6 +3143,8 @@ contains
 
     end if
 
+    call timab(tim_colw_cymax,2,tsec)
+
   end subroutine xgBlock_colwiseCymax
   !!***
 
@@ -3146,6 +3163,9 @@ contains
     type(xgBlock_t) :: X_spinor, Y_spinor
     real(dp)    , pointer :: array(:)
     complex(dpc), pointer :: arrayc(:)
+    double precision :: tsec(2)
+
+    call timab(tim_apply_diag,1,tsec)
 
     if (X%rows/=nspinor*diag%rows) then
       ABI_ERROR('xgBlock%rows/=nspinor*xgBlock_diag%rows')
@@ -3178,6 +3198,8 @@ contains
       call xgBlock_reverseMap_1dC(diag,arrayc)
       call xgBlock_colwiseMulC(Y_spinor,arrayc)
     end if
+
+    call timab(tim_apply_diag,2,tsec)
 
   end subroutine xgBlock_apply_diag
   !!***
@@ -3401,6 +3423,9 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_mul,1,tsec)
 
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
@@ -3490,6 +3515,8 @@ contains
 
     end if
 
+    call timab(tim_colw_mul,2,tsec)
+
   end subroutine xgBlock_colwiseMulR
   !!***
 
@@ -3510,6 +3537,9 @@ contains
     integer :: cols
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_mul,1,tsec)
 
     ABI_UNUSED((/irow/)) ! Use in OpenMP GPU
     rows = size(vec,dim=1)
@@ -3571,6 +3601,8 @@ contains
 
     end if
 
+    call timab(tim_colw_mul,2,tsec)
+
   end subroutine xgBlock_colwiseMulC
   !!***
 
@@ -3591,6 +3623,9 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock1__vecR(:,:),xgBlock2__vecR(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_saxpy,1,tsec)
 
     da_cplx = dcmplx(da,0.0_dp)
 
@@ -3644,6 +3679,8 @@ contains
 
     end if
 
+    call timab(tim_saxpy,2,tsec)
+
   end subroutine xgBlock_saxpyR
   !!***
 
@@ -3661,6 +3698,9 @@ contains
 #if defined HAVE_OPENMP_OFFLOAD && !defined HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock1__vecC(:,:),xgBlock2__vecC(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_saxpy,1,tsec)
 
     if ( xgBlock1%space /= xgBlock2%space ) then
       ABI_ERROR("Must be same space for Saxpy")
@@ -3692,6 +3732,8 @@ contains
     else
       call zaxpy(xgBlock1%cols*xgBlock1%LDim, da, xgBlock2%vecC, 1, xgBlock1%vecC, 1)
     end if
+
+    call timab(tim_saxpy,2,tsec)
 
   end subroutine xgBlock_saxpyC
   !!***
@@ -3832,6 +3874,9 @@ contains
     integer :: ii
     double precision :: tmp
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_norm2,1,tsec)
 
     if ( dot%space /= SPACE_R ) then
       ABI_ERROR("space(dot) should be SPACE_R")
@@ -4000,6 +4045,8 @@ contains
 
     end if ! if gpu_option==ABI_GPU_KOKKOS
 
+    call timab(tim_colw_norm2,2,tsec)
+
   end subroutine xgBlock_colwiseNorm2
   !!***
 
@@ -4027,6 +4074,9 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlockA__vecC(:,:),xgBlockB__vecC(:,:),dot__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),dot__vecR(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_dot,1,tsec)
 
     call xgBlock_check(xgBlockA,xgBlockB)
     if (comm(xgBlockA)/=comm(xgBlockB)) then
@@ -4289,6 +4339,8 @@ contains
 
     call xgBlock_mpi_sum(dot,comm=comm(xgBlockA))
 
+    call timab(tim_colw_dot,2,tsec)
+
   end subroutine xgBlock_colwiseDotProduct
   !!***
 
@@ -4320,6 +4372,9 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlockA__vecR(:,:),xgBlockB__vecR(:,:),divResult__vecR(:,:)
 #endif
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_colw_div,1,tsec)
 
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,divResult)
@@ -4502,6 +4557,8 @@ contains
 
     end if ! gpu_option
 
+    call timab(tim_colw_div,2,tsec)
+
   end subroutine xgBlock_colwiseDivision
   !!***
 
@@ -4523,6 +4580,9 @@ contains
     complex(dpc), ABI_CONTIGUOUS pointer :: xgBlock__vecC(:,:)
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
+    double precision :: tsec(2)
+
+    call timab(tim_scale,1,tsec)
 
     valc = dcmplx(val,0.0_dp)
 
@@ -4614,6 +4674,8 @@ contains
 
     end if
 
+    call timab(tim_scale,2,tsec)
+
   end subroutine xgBlock_scaleR
   !!***
 
@@ -4629,6 +4691,9 @@ contains
     integer        , intent(in   )           :: inc
 
     integer :: i
+    double precision :: tsec(2)
+
+    call timab(tim_scale,1,tsec)
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
 
@@ -4686,6 +4751,8 @@ contains
       end if
 
     end if
+
+    call timab(tim_scale,2,tsec)
 
   end subroutine xgBlock_scaleC
   !!***
@@ -4913,7 +4980,10 @@ contains
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
     integer :: rows,cols,iblock,jblock
 #endif
+    double precision :: tsec(2)
 
+    call timab(tim_zero,1,tsec)
+    
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
@@ -4984,6 +5054,8 @@ contains
         end do
       end select
     end if
+
+    call timab(tim_zero,2,tsec)
 
   end subroutine xgBlock_zero
   !!***
@@ -5079,7 +5151,9 @@ contains
 #if defined HAVE_OPENMP_OFFLOAD
     real(dp), ABI_CONTIGUOUS pointer :: xgBlock__vecR(:,:)
 #endif
+    double precision :: tsec(2)
 
+    call timab(tim_zero_im_g0,1,tsec)
     if (xgBlock%space==SPACE_CR) then
 
       cols = xgBlock%cols
@@ -5113,6 +5187,7 @@ contains
 
       end if ! me_g0>=0
     end if ! SPACE_CR
+    call timab(tim_zero_im_g0,2,tsec)
 
   end subroutine xgBlock_zero_im_g0
   !!***
@@ -5250,6 +5325,9 @@ contains
     integer,optional, intent(in)  :: row_bound
 
     integer :: row_bound_,fact
+    double precision :: tsec(2)
+
+    call timab(tim_minmax,1,tsec)
 
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
@@ -5270,6 +5348,8 @@ contains
       minimum = minval(abs(xgBlock%vecC(:row_bound_,:)))
       maximum = maxval(abs(xgBlock%vecC(:row_bound_,:)))
     end select
+
+    call timab(tim_minmax,2,tsec)
 
   end subroutine xgBlock_minmax
   !!***
