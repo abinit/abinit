@@ -260,6 +260,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Local variables-------------------------------
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
+ integer, parameter :: tim_nonlop = 1753
  integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
@@ -407,6 +408,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 !  quick and dirty trick to compute this part in NC. gvnlc cannot be part of
 !  chebfi algorithm
  if ( .not. l_paw ) then
+   call timab(tim_nonlop,1,tsec)
 #ifdef FC_CRAY
    ABI_MALLOC(l_gvnlxc,(1,1))
 #else
@@ -436,6 +438,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
    end if
    ABI_NVTX_END_RANGE()
    ABI_FREE(l_gvnlxc)
+   call timab(tim_nonlop,2,tsec)
  end if
 
 !Free chebfi
