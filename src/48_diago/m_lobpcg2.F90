@@ -57,10 +57,10 @@ module m_lobpcg2
 
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
-!  integer, parameter :: tim_run      = 1653
+  integer, parameter :: tim_copy     = 1653
   integer, parameter :: tim_getAX_BX = 1654
   integer, parameter :: tim_ortho    = 1655
-!  integer, parameter :: tim_Bortho   = 1656
+  integer, parameter :: tim_nbdbuf   = 1656
 !  integer, parameter :: tim_RR       = 1657
   integer, parameter :: tim_maxres   = 1658
   integer, parameter :: tim_ax_bx    = 1659
@@ -75,6 +75,8 @@ module m_lobpcg2
   integer, parameter :: tim_RR_XW       = 1646
   integer, parameter :: tim_RR_XWP      = 1647
   integer, parameter :: tim_RR_Xall     = 1648
+
+  integer, parameter :: tim_transpose   = 1649
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -409,6 +411,7 @@ module m_lobpcg2
     call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=ABI_GPU_DISABLED)
 
     if ( lobpcg%paral_kgb == 1 ) then
+      call timab(tim_transpose,1,tsec)
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft,&
         gpu_option=lobpcg%gpu_option)
@@ -423,6 +426,7 @@ module m_lobpcg2
         lobpcg%AW,lobpcg%AWColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBW,lobpcg%xgTransposerX,&
         lobpcg%BW,lobpcg%BWColsRows,STATE_LINALG)
+      call timab(tim_transpose,2,tsec)
     else
       call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, spacedim, blockdim)
       call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, spacedim, blockdim)
@@ -449,9 +453,11 @@ module m_lobpcg2
       end if
 
       if (lobpcg%paral_kgb == 1) then
+        call timab(tim_transpose,1,tsec)
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_COLSROWS)
         lobpcg%xgTransposerAX%state=STATE_COLSROWS
         lobpcg%xgTransposerBX%state=STATE_COLSROWS
+        call timab(tim_transpose,2,tsec)
       end if
       ! Initialize some quantitites (AX and BX)
       call timab(tim_ax_bx,1,tsec)
@@ -460,9 +466,11 @@ module m_lobpcg2
       call xgBlock_zero_im_g0(lobpcg%BXColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
+        call timab(tim_transpose,1,tsec)
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_LINALG)
         call xgTransposer_transpose(lobpcg%xgTransposerAX,STATE_LINALG)
         call xgTransposer_transpose(lobpcg%xgTransposerBX,STATE_LINALG)
+        call timab(tim_transpose,2,tsec)
       end if
 
       ! B-orthonormalize X, BX and AX
@@ -496,6 +504,7 @@ module m_lobpcg2
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
 
+        call timab(tim_nbdbuf,1,tsec)
         if (nbdbuf>=0) then
           ! There is a transfer from GPU to CPU in this copy
           call xgBlock_copy(residuBlock,residu_eff%self)
@@ -515,6 +524,7 @@ module m_lobpcg2
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
+        call timab(tim_nbdbuf,2,tsec)
         if ( maxResidu < lobpcg%tolerance ) then
           compute_residu = .false.
           exit
@@ -526,9 +536,11 @@ module m_lobpcg2
         end if
 
         if (lobpcg%paral_kgb == 1) then
+          call timab(tim_transpose,1,tsec)
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_COLSROWS)
           lobpcg%xgTransposerAW%state=STATE_COLSROWS
           lobpcg%xgTransposerBW%state=STATE_COLSROWS
+          call timab(tim_transpose,2,tsec)
         end if
         ! Apply A and B on W
         call timab(tim_ax_bx,1,tsec)
@@ -537,9 +549,11 @@ module m_lobpcg2
         call xgBlock_zero_im_g0(lobpcg%BWColsRows)
         call timab(tim_ax_bx,2,tsec)
         if (lobpcg%paral_kgb == 1) then
+          call timab(tim_transpose,1,tsec)
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_LINALG)
           call xgTransposer_transpose(lobpcg%xgTransposerAW,STATE_LINALG)
           call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_LINALG)
+          call timab(tim_transpose,2,tsec)
         end if
 
         ! DO RR in the correct subspace
@@ -600,9 +614,15 @@ module m_lobpcg2
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
         ! Apply preconditioner
+        call timab(tim_pcond,1,tsec)
         call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
+        call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
+        call timab(tim_maxres,2,tsec)
+
+        call timab(tim_nbdbuf,1,tsec)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
           call xgBlock_copy(residuBlock,residu_eff%self)
@@ -622,6 +642,7 @@ module m_lobpcg2
         else
           ABI_ERROR('Bad value of nbdbuf')
         end if
+        call timab(tim_nbdbuf,2,tsec)
       end if
 
       if (prtvol==5.and.xmpi_comm_rank(lobpcg%spacecom)==0) then
@@ -631,8 +652,10 @@ module m_lobpcg2
       end if
 
       ! Save eigenvalues
+      call timab(tim_copy,1,tsec)
       call xgBlock_setBlock(eigen,eigenBlock,blockdim,1,fcol=iblock)
       call xgBlock_copy(eigenvaluesN,eigenBlock)
+      call timab(tim_copy,2,tsec)
 
       ! Save new X in X0
       call lobpcg_setX0(lobpcg,iblock)
@@ -668,9 +691,11 @@ module m_lobpcg2
         call xgBlock_setBlock(lobpcg%AllBX0%self, lobpcg%AllBX0ColsRows, spacedim, lobpcg%neigenpairs)
       end if
       if (lobpcg%paral_kgb == 1) then
+        call timab(tim_transpose,1,tsec)
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_COLSROWS)
         lobpcg%xgTransposerAllAX0%state=STATE_COLSROWS
         lobpcg%xgTransposerAllBX0%state=STATE_COLSROWS
+        call timab(tim_transpose,2,tsec)
       end if
       call timab(tim_ax_bx,1,tsec)
       call getAX_BX(lobpcg%AllX0ColsRows,lobpcg%AllAX0ColsRows,lobpcg%AllBX0ColsRows)
@@ -678,9 +703,11 @@ module m_lobpcg2
       call xgBlock_zero_im_g0(lobpcg%AllBX0ColsRows)
       call timab(tim_ax_bx,2,tsec)
       if (lobpcg%paral_kgb == 1) then
+        call timab(tim_transpose,1,tsec)
         call xgTransposer_transpose(lobpcg%xgTransposerAllX0,STATE_LINALG)
         call xgTransposer_transpose(lobpcg%xgTransposerAllAX0,STATE_LINALG)
         call xgTransposer_transpose(lobpcg%xgTransposerAllBX0,STATE_LINALG)
+        call timab(tim_transpose,2,tsec)
       end if
       call xgTransposer_free(lobpcg%xgTransposerAllX0)
       call xgTransposer_free(lobpcg%xgTransposerAllAX0)
@@ -715,6 +742,9 @@ module m_lobpcg2
     integer       , intent(in   ) :: iblock
     integer :: blockdim
     integer :: spacedim
+    double precision :: tsec(2)
+
+    call timab(tim_copy,1,tsec)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -722,6 +752,8 @@ module m_lobpcg2
     !lobpcg%XWP(:,X+1:X+blockdim) = lobpcg%X0(:,(iblock-1)*blockdim+1:iblock*blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,spacedim,blockdim,fcol=(iblock-1)*blockdim+1)
     call xgBlock_copy(lobpcg%X0,lobpcg%X)
+
+    call timab(tim_copy,2,tsec)
 
   end subroutine lobpcg_getX0
 
@@ -795,13 +827,17 @@ module m_lobpcg2
     type(xgBlock_t) :: Xtmp
     integer :: blockdim
     integer :: spacedim
+    double precision :: tsec(2)
 
+    call timab(tim_copy,1,tsec)
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
 
     !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,Xtmp,spacedim,blockdim,fcol=(iblock-1)*blockdim+1)
     call xgBlock_copy(lobpcg%X,Xtmp)
+    call timab(tim_copy,2,tsec)
+
   end subroutine lobpcg_setX0
 
 
@@ -811,6 +847,10 @@ module m_lobpcg2
     integer       , intent(in   ) :: jblock
     type(xgBlock_t) :: CXtmp
     integer :: firstcol
+    double precision :: tsec(2)
+
+    call timab(tim_copy,1,tsec)
+
     ! jblock goes from 1 to nblock-1 included
     firstcol = (jblock-1)*lobpcg%blockdim+1  ! Start of each block
 
@@ -821,6 +861,9 @@ module m_lobpcg2
     ! AX
     call xg_setBlock(lobpcg%AllAX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)
     call xgBlock_copy(lobpcg%AX,CXtmp)
+
+    call timab(tim_copy,2,tsec)
+
   end subroutine lobpcg_transferAX_BX
 
   subroutine lobpcg_free(lobpcg)
