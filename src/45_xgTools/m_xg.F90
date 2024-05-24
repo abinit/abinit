@@ -1398,7 +1398,7 @@ contains
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 # else
@@ -1406,7 +1406,7 @@ contains
           !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
           call MPI_ALLREDUCE(xgBlockW%vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
           !$OMP END TARGET DATA
@@ -1418,7 +1418,7 @@ contains
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 # else
@@ -1426,7 +1426,7 @@ contains
           !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
           call MPI_ALLREDUCE(xgBlockW__vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
           !$OMP END TARGET DATA
@@ -1496,7 +1496,7 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -1516,7 +1516,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
