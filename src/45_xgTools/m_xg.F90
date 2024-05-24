@@ -3143,7 +3143,6 @@ contains
     integer,          intent(in)    :: nspinor
     type(xgBlock_t) , optional, intent(inout) :: Y
 
-    integer :: iblock,rows,cols
     type(xgBlock_t) :: X_spinor, Y_spinor
     real(dp)    , pointer :: array(:)
     complex(dpc), pointer :: arrayc(:)

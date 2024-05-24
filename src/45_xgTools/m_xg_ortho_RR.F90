@@ -85,7 +85,7 @@ module m_xg_ortho_RR
     type(xgBlock_t), intent(inout),optional :: AX
     integer       , intent(  out) :: info
     integer :: space_buf
-    type(xg_t) :: buffer,X_tmp
+    type(xg_t) :: buffer
     double precision :: tsec(2)
 
     ABI_NVTX_START_RANGE(NVTX_B_ORTHO)
