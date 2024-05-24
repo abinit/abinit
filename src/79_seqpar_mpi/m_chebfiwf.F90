@@ -260,7 +260,7 @@ subroutine chebfiwf2(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
  ! Local variables-------------------------------
  ! scalars
  integer, parameter :: tim_chebfiwf2 = 1750
- integer :: iband,shift,ipw,space,blockdim,total_spacedim,ierr
+ integer :: iband,shift,space,blockdim,total_spacedim,ierr
  integer :: me_g0,me_g0_fft
  real(dp) :: localmem
  type(chebfi_t) :: chebfi
