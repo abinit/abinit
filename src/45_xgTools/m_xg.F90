@@ -526,7 +526,7 @@ contains
     integer, intent(in) :: rows
     integer :: cols
     integer :: col
-    double precision :: tsec(2)
+!    double precision :: tsec(2)
 
 #if defined HAVE_GPU && defined HAVE_OPENMP_OFFLOAD
     complex(dpc), pointer :: xg__vecC(:,:)
@@ -615,7 +615,7 @@ contains
     integer, intent(in) :: rows
     integer :: cols
     integer :: col
-    double precision :: tsec(2)
+!    double precision :: tsec(2)
 
 !    call timab(tim_set,1,tsec)
 
@@ -1007,7 +1007,7 @@ contains
     integer, intent(in) :: rows
     integer :: cols
     integer :: col
-    double precision :: tsec(2)
+!    double precision :: tsec(2)
 
 !    call timab(tim_get,1,tsec)
 
@@ -1063,7 +1063,7 @@ contains
     integer, intent(in) :: rows
     integer :: cols
     integer :: col
-    double precision :: tsec(2)
+!    double precision :: tsec(2)
 
 !    call timab(tim_get,1,tsec)
 
