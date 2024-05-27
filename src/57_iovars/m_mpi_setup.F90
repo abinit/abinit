@@ -400,9 +400,6 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
      cycle
    end if
 
-   ! Set cprj_in_memory to zero if paral_kgb has been activated by autoparal
-   if (dtsets(idtset)%paral_kgb/=0) dtsets(idtset)%cprj_in_memory = 0
-
    response=0
    if (dtsets(idtset)%rfddk/=0 .or. dtsets(idtset)%rf2_dkdk/=0 .or. dtsets(idtset)%rf2_dkde/=0 .or. &
 &   dtsets(idtset)%rfelfd/=0 .or. dtsets(idtset)%rfphon/=0 .or. dtsets(idtset)%rfstrs/=0 .or. &
