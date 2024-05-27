@@ -143,6 +143,11 @@ contains
 !call flush(std_out)
 !ENDDEBUG
 
+ ABI_MALLOC(local_nucdipmom,(3,3,natom))
+ local_nucdipmom(:,:,:) = zero
+ if(present(nucdipmom)) then
+    local_nucdipmom(1:3,1,:) = nucdipmom(1:3,:)
+ end if
 !DEBUG
 ! if (prtvol>1) msg="remove me later"
 ! write(std_out,*)' symfind : enter'
@@ -157,6 +162,9 @@ contains
 ! write(std_out,*)'   typat   =',typat(iatom)
 ! write(std_out,*)'   spinat  =',spinat(:,iatom)
 ! write(std_out,*)'   xred    =',xred(:,iatom)
+! if (ANY(ABS(local_nucdipmom)>tol8)) then
+! write(std_out,*)'   nucdipmom = ',local_nucdipmom(:,1,iatom)
+! end if
 ! end do
 ! write(std_out,*)' '
 ! call flush(6)
@@ -179,7 +187,6 @@ contains
  ABI_MALLOC(chrgat_,(natom))
  ABI_MALLOC(chrgatcl,(natom))
  ABI_MALLOC(spinatcl,(3,natom))
- ABI_MALLOC(local_nucdipmom,(3,3,natom))
  ABI_MALLOC(nucdipmomcl,(3,natom))
 
  tolsym2=tolsym**2
@@ -189,10 +196,6 @@ contains
    chrgat_(:)=chrgat(:)
  endif
 
- local_nucdipmom(:,:,:) = zero
- if(present(nucdipmom)) then
-    local_nucdipmom(1:3,1,:) = nucdipmom(1:3,:)
- end if
  ! for each nuclear dipole we need a local right handed coord system, so we can
  ! test later for whether a symmetry operation preserves the circulation induced
  ! by the dipole
@@ -535,6 +538,7 @@ contains
 !        DEBUG
 !        write(std_out,'(a,i4,a,3f8.4,a,3f8.4,a,3f8.4)')&
 !&          ' Test iatom2=',iatom2,' at xred=',xred(:,iatom2),'. Is sent to',symxred2(:),' with symspinat2=',symspinat2(:)
+!        write(std_out,'(a,3f8.4)')' and nucdipmom2=',symnucdipmom2cart(:,1)
 !        ENDDEBUG
 
 !        Check whether there exists an atom of the same class at the
@@ -580,6 +584,9 @@ contains
 
            diff(:)=hand3(:)-hand2(:)
            if( any(abs(diff)>tolsym) )found3=0
+
+           !diff(:)=symnucdipmom2cart(:,1) - local_nucdipmom(:,1,iatom3)
+           !if ( any(abs(diff)>tolsym) ) found3=0
 
            if(found3==1)exit
          end do ! End loop over iatom3
