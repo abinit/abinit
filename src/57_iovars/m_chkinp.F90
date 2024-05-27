@@ -95,7 +95,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: nproc,nspden,nspinor,nsppol,optdriver,mismatch_fft_tnons,response
  integer :: fftalg,usepaw,usewvl
  integer :: ttoldfe,ttoldff,ttolrff,ttolvrs,ttolwfr
- logical :: twvl,allowed,berryflag
+ logical :: test,twvl,allowed,berryflag
  logical :: wvlbigdft=.false.
  logical :: xc_is_lda,xc_is_gga,xc_is_mgga,xc_is_hybrid,xc_is_tb09,xc_need_kden
  real(dp) :: dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
@@ -520,6 +520,22 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      endif
 
    enddo
+
+!  cprj_in_memory
+   if (dt%cprj_in_memory/=0) then
+     if (dt%optdriver/=RUNL_GSTATE) then
+       dt%cprj_in_memory=0
+       ABI_WARNING('cprj_in_memory/=0 is implemented only for ground state (optdriver=0). cprj_in_memory is set to 0.')
+     else
+       test = dt%wfoptalg==10 .or. dt%wfoptalg==114 .or. dt%wfoptalg==111
+       ABI_CHECK(test, "With cprj_in_memory/=0, only wfoptalg==10,114 or 111 are implemented. Change cprj_in_memory or wfoptalg.")
+       ABI_CHECK(dt%rmm_diis==0, "With cprj_in_memory/=0, rmm_diis/=0 is not implemented. Change cprj_in_memory or rmm_diis.")
+       ABI_CHECK(dt%berryopt==0, "With cprj_in_memory/=0, berryopt/=0 is not implemented. Change cprj_in_memory or berryopt.")
+       ABI_CHECK(dt%usefock==0, "With cprj_in_memory/=0, usefock/=0 is not implemented. Change cprj_in_memory or usefock.")
+       test = sum(abs(dt%nucdipmom))<tol16
+       ABI_CHECK(test,"With cprj_in_memory/=0, nuclear dipolar moments are not implemented. Change cprj_in_memory or nucdipmom.")
+     end if
+   end if
 
 !  d3e_pert1_atpol
    call chkint_ge(0,0,cond_string,cond_values,ierr,'d3e_pert1_atpol(1)',dt%d3e_pert1_atpol(1),1,iout)

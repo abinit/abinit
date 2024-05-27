@@ -1881,13 +1881,13 @@ Incidentally, [[ionmov]]==4 is not allowed in the present implementation of cons
 
 Variable(
     abivarname="cprj_in_memory",
-    varset="internal",
+    varset="gstate",
     vartype="integer",
     topics=['TuningSpeedMem_expert'],
     dimensions="scalar",
     defaultval="None",
     mnemonics="C-PRoJectors IN MEMORY",
-    characteristics=['[[INTERNAL_ONLY]]'],
+    characteristics=['[[DEVELOP]]'],
     added_in_version="",
     text=r"""
 For systems with many atoms, non-local operations are the most time-consuming part of the computation.
@@ -1919,13 +1919,9 @@ If [[cprj_in_memory]] = 1 (or any non-zero value), "cprj" coefficients are store
 Some algorithms can take advantage of this feature and reduce the computational time.
 For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
-* [[optdriver]] = 0 : ground-state computation
+* [[optdriver]] = 0 : ground-state computation. If optdriver/=0, [[cprj_in_memory]] is set to 0 automatically.
 
-* [[usepaw]] = 1 : with PAW formalism (so [[useylm]] = 1)
-
-* [[wfoptalg]] = 10 : using Congugate Gradient algorithm
-
-* [[paral_kgb]] = 0 : with simple parallelization over k-points only
+* [[wfoptalg]] = 10,114 or 111 : using Congugate Gradient algorithm (PAW only), LOBPCG (PAW or NC) or Chebyshev filtering (PAW or NC)
 
 * [[rmm_diis]] = 0 : without the use of rmm_diis algorithm
 
@@ -1935,8 +1931,7 @@ For now, [[cprj_in_memory]] = 1 is implemented only in the following context:
 
 * [[nucdipmom]] = 0 : without nuclear dipolar moments
 
-If these conditions are met and [[cprj_update_lvl]] is non-zero, [[cprj_in_memory]] is set to 1.
-This way [[cprj_update_lvl]] = 0 forces the code to use the native implementation, where "cprj" coefficients are computed on-the-fly.
+See [[cprj_update_lvl]] for a fine tuning of "cprj" updates (i.e. when they are computed directly from wavefunctions).
 
 """,
 ),
@@ -1952,15 +1947,14 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="",
     text=r"""
-This variable is used to control the [[cprj_in_memory]] implementation, in which "cprj" coefficients are kept in memory during the computation:
+This variable is used to control the updates of "cprj" coefficients, which are kept in memory during the computation:
 
 $$ cprj(a,i) = <p_{a,i}|\psi> $$
 
 Read the [[cprj_in_memory]] documentation for details about the notations.
-If [[cprj_update_lvl]] is set to 0, the [[cprj_in_memory]] implementation is disabled.
-Otherwise, "cprj" coefficients are computed at the beginning of the run and evolves as the wave-function do.
+"cprj" coefficients are computed at the beginning of the run and evolves as the wave-function do.
 In principle, there is no need to compute "cprj" coefficients directly from the wave-functions again after they are initialized.
-However, numerical errors can accumulate and lead to a significant differences between "cprj" coefficients and wave-functions.
+However, numerical errors can accumulate and lead to a significant difference between "cprj" coefficients and wave-functions.
 One can update the "cprj" coefficients from time to time, computing them directly from the wave-functions, in different places in the code:
 
 * A : at the beginning of the run, or after the move of atoms
