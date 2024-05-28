@@ -389,7 +389,7 @@ type, public :: gstore_t
 
   character(len=fnlen) :: kfilter = "none"
   ! Specifies the tecnique used to filter k-points.
-  ! Possible values: "none", "fs_tetra", "erange".
+  ! Possible values: "none", "fs_tetra", "erange", "qprange"
 
   character(len=fnlen) :: gmode = "none"
 
@@ -1681,11 +1681,13 @@ subroutine gstore_filter_erange__(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, kbz2
        iflag = 0
 
        if (abs_erange1 > zero) then
+         ! Filter valence states.
          if (ee <= vmax .and. vmax - ee <= abs_erange1) then
            iflag = 1 !; write(std_out, *), "Adding valence band", band, " with ee [eV]: ", ee * Ha_eV
          end if
        end if
        if (abs_erange2 > zero) then
+         ! Filter conduction states.
          if (ee >= cmin .and. ee - cmin <= abs_erange2) then
            iflag = 1 !; write(std_out, *)"Adding conduction band", band, " with ee [eV]: ", ee * Ha_eV
          end if
@@ -3210,7 +3212,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
    call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
-   call wrtout(std_out, " note that not all the k-points in the ibz are computed when kfilter is activated!")
+   call wrtout(std_out, " note that not all the k-points in the IBZ are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
    ! On disk, we have:

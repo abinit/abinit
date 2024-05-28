@@ -1728,7 +1728,6 @@ subroutine stern_init(stern, dtset, npw_k, npw_kq, nspinor, nband, nband_me, fer
  ! PAW wave functions at k+q projected with non-local projectors
  stern%mcprjq = 0
  ABI_MALLOC(stern%cprjq, (natom, stern%mcprjq))
-
  ABI_MALLOC(stern%cwaveprj1, (natom, nspinor*usepaw))
 
 end subroutine stern_init
@@ -1949,10 +1948,10 @@ subroutine stern_free(stern)
  call destroy_mpi_enreg(stern%mpi_enreg)
  !call xmpi_comm_free(stern%mpi_enreg%comm_band)
 
- if (stern%usepaw == 1) then
-   call pawcprj_free(stern%cprjq)
-   call pawcprj_free(stern%cwaveprj1)
- end if
+ !if (stern%usepaw == 1) then
+ !  call pawcprj_free(stern%cprjq)
+ !  call pawcprj_free(stern%cwaveprj1)
+ !end if
  ABI_SFREE(stern%cprjq)
  ABI_SFREE(stern%cwaveprj1)
 
