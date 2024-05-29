@@ -217,11 +217,11 @@ elseif(CMAKE_C_COMPILER_ID MATCHES "GNU")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-march=native>"
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:C>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-march=native>"
       )
   endif()
 
@@ -321,11 +321,11 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "standard")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O2;-march=native>"
       )
   elseif (ABI_OPTIM_FLAVOR MATCHES "aggressive")
     add_compile_options(
-      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-mtune=native;-march=native>"
+      "$<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CONFIG:Release>>:-fno-backtrace;-Wno-maybe-uninitialized;-O3;-march=native>"
       )
   endif()
 
