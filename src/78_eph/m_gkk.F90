@@ -35,9 +35,7 @@ module m_gkk
  use m_wfk
  use m_nctk
  use m_dtfil
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,    only : MPI_type
  use m_time,           only : cwtime, sec2str
@@ -343,7 +341,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    if (i_am_master) then
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
      fname = strcat(dtfil%filnam_ds(4), "_GKQ.nc")
-#ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
      NCF_CHECK(cryst%ncwrite(ncid))
      ! Write bands on k mesh.
@@ -398,7 +395,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
-#endif
    end if
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
@@ -525,11 +521,9 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        call xmpi_sum_master(gkq_atm, master, comm, ierr)
        if (i_am_master) then
          ! Write the netCDF file.
-#ifdef HAVE_NETCDF
          ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gkq"), gkq_atm, &
            start=[1, 1, 1, ipc, 1, 1], count=[2, mband, mband, 1, nkpt, spin])
          NCF_CHECK(ncerr)
-#endif
        end if
      end if
    end do ! spin
@@ -542,7 +536,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! Write the netCDF file.
      call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
      fname = strcat(gkkfilnam, ".nc")
-#ifdef HAVE_NETCDF
      if (i_am_master) then
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
        NCF_CHECK(cryst%ncwrite(ncid))
@@ -550,7 +543,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        call gkk_ncwrite(gkk2d, qpt, 1.0_dp,  ncid)
        NCF_CHECK(nf90_close(ncid))
      end if
-#endif
      ! Free memory
      call gkk_free(gkk2d)
    end if
@@ -562,9 +554,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call wrtout(std_out, sjoin("cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)), do_flush=.True.)
 
  if (dtset%eph_task == -2 .and. i_am_master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  ! ===========
@@ -634,9 +624,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  integer,parameter :: master = 0, qptopt1 = 1
  integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
  logical :: with_lr_model
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr
-#endif
 !arrays
  integer :: ngfft(18)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
@@ -736,7 +724,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  with_lr_model = .True.
 
  ! Create netcdf file.
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, comm))
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
@@ -764,7 +751,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpt"), qpt))
  end if
-#endif
 
  ABI_MALLOC(v1_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
  if (with_lr_model) then
@@ -811,23 +797,19 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
  end if
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1_qnu"), v1_qnu))
  if (with_lr_model) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1lr_qnu"), v1lr_qnu))
  end if
-#endif
 
  ABI_FREE(v1scf)
  ABI_FREE(v1_qnu)
  ABI_SFREE(v1lr_atm)
  ABI_SFREE(v1lr_qnu)
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
-#endif
  call dvdb%close()
 
  call wrtout(std_out, "dvqnu file written", do_flush=.True.)
