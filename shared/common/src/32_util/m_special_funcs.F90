@@ -1428,7 +1428,7 @@ function dip12(gamma)
    end if
  else
    d=1./gamma
-   dy=gamma*sqrt(gamma)/1.329340388
+   dy=gamma*dsqrt(gamma)/1.329340388
    dip12=dy*(1.-d*(9.354E-07-d*(1.2338391-d*(6.77931E-03-d*&
    & 1.17871643))))
  end if
@@ -1465,7 +1465,7 @@ function dip32(gamma)
 ! *********************************************************************
 
  if (gamma.GT.1.75) then
-   dval=gamma*gamma*SQRT(gamma)
+   dval=gamma*gamma*dsqrt(gamma)
    if (gamma.LT.4.5) then
      d=gamma-3.125
      dip32=(1.27623+0.596065*gamma+0.3*dval)*&
