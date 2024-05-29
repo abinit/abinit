@@ -53,6 +53,8 @@ module m_vtowfk
  use m_lobpcgwf_old,only : lobpcgwf
  use m_lobpcgwf,    only : lobpcgwf2
  use m_chebfiwf,    only : chebfiwf2
+ use m_chebfiwf_cprj,only : chebfiwf2_cprj
+ use m_lobpcgwf_cprj,only : lobpcgwf2_cprj
  use m_spacepar,    only : meanvalue_g
  use m_chebfi,      only : chebfi
  use m_rmm_diis,    only : rmm_diis
@@ -207,7 +209,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  type(xg_nonlop_t),intent(in) :: xg_nonlop
 
 !Local variables-------------------------------
- logical :: has_cprj_in_memory,has_fock,newchebfi,newlobpcg,update_cprj
+ logical :: has_fock,xg_diago,update_cprj
  logical :: do_subdiago,do_ortho,rotate_subvnlx,use_rmm_diis
  integer,parameter :: level=112,tim_fourwf=2,tim_nonlop_prep=11,enough=3,tim_getcprj=5
  integer,save :: nskip=0
@@ -271,8 +273,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  nkpt_max=50; if(xmpi_paral==1)nkpt_max=-1
 
  wfoptalg=mod(dtset%wfoptalg,100); wfopta10=mod(wfoptalg,10)
- newlobpcg = (dtset%wfoptalg == 114)
- newchebfi = (dtset%wfoptalg == 111)
+ xg_diago = dtset%wfoptalg == 114 .or. dtset%wfoptalg == 111
  istwf_k=gs_hamk%istwf_k
  has_fock=(associated(gs_hamk%fockcommon))
  quit=0
@@ -320,8 +321,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  mgsc=0
  igsc=0
- has_cprj_in_memory=dtset%cprj_in_memory/=0
- if ((.not. newlobpcg .and. .not.has_cprj_in_memory) .or. dtset%rmm_diis /= 0) then
+ if ((.not. xg_diago .and. dtset%cprj_in_memory==0) .or. dtset%rmm_diis /= 0) then
    mgsc=nband_k*npw_k*my_nspinor*gs_hamk%usepaw
    ABI_MALLOC_OR_DIE(gsc,(2,mgsc), ierr)
    gsc=zero
@@ -329,7 +329,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_MALLOC(gsc,(0,0))
  end if
 
- if(wfopta10 /= 1 .and. .not. newlobpcg ) then
+ if(wfopta10 /= 1 .and. .not. xg_diago) then
    !chebfi already does this stuff inside
    ABI_MALLOC(evec,(2*nband_k,nband_k))
    ABI_MALLOC(subham,(nband_k*(nband_k+1)))
@@ -368,8 +368,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,msg,'PERS')
  end if
 
- if (has_cprj_in_memory) then
-   if(ikpt==1) then
+ if (dtset%cprj_in_memory/=0) then
+   if (dtset%cprj_in_memory==2.and.ikpt==1) then
      write(msg,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
      call wrtout(std_out,msg,'COLL')
    end if
@@ -397,7 +397,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
 
    ! This initialisation is needed for the MPI-parallelisation (gathering using sum)
-   if(wfopta10 /= 1 .and. .not. newlobpcg .and. .not. newchebfi) then
+   if(wfopta10 /= 1 .and. .not. xg_diago) then
      subham(:)=zero
      if (gs_hamk%usepaw==0) then
        if (wfopta10==4) then
@@ -429,7 +429,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
          end if
        end do
      end do
-     if (has_cprj_in_memory.and.update_cprj) then
+     if (dtset%cprj_in_memory==2.and.update_cprj) then
        cprj_cwavef => cprj_cwavef_bands(:,my_nspinor*(iband-1)+1:my_nspinor*iband)
        call cprj_update_oneband(cwavef_iband,cprj_cwavef,gs_hamk,mpi_enreg,tim_getcprj)
      end if
@@ -459,7 +459,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
                          mpi_enreg, nband_k, npw_k, my_nspinor, resid_k, rmm_diis_status)
          else
 
-            if ( .not. newlobpcg ) then
+            if ( .not. xg_diago ) then
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG1)
              call lobpcgwf(cg,dtset,gs_hamk,gsc,icg,igsc,kinpw,mcg,mgsc,mpi_enreg,&
@@ -480,8 +480,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
           else
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
-             call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
-&             nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
+             if (dtset%cprj_in_memory==1) then
+               call lobpcgwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+                 mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+             else
+               call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
+&               nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)
+             end if
              ABI_NVTX_END_RANGE()
 
           end if
@@ -492,17 +497,20 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    ============ MINIMIZATION OF BANDS: CHEBYSHEV FILTERING =================
 !    =========================================================================
        else if (wfopta10 == 1) then
-         if ( .not. newchebfi) then
+         if ( .not. xg_diago) then
            ABI_NVTX_START_RANGE(NVTX_CHEBFI1)
            call chebfi(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,gsc,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
-        else
+         else if (dtset%cprj_in_memory==1) then
+           call chebfiwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+             mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+         else
            ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
            call chebfiwf2(cg(:, icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
-        end if
+         end if
        end if
 
 !      =========================================================================
@@ -521,7 +529,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
            end if
          end if
 
-         if (has_cprj_in_memory) then
+         if (dtset%cprj_in_memory==2) then
            call cgwf_cprj(cg,cprj_cwavef_bands,dtset%cprj_update_lvl,eig_k,&
 &             gs_hamk,icg,mcg,mpi_enreg,nband_k,dtset%nline,&
 &             dtset%ortalg,prtvol,quit,resid_k,subham,dtset%tolrde,dtset%tolwfr_diago,wfoptalg)
@@ -572,14 +580,14 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !  =========================================================================
 !  ========== DIAGONALIZATION OF HAMILTONIAN IN WFs SUBSPACE ===============
 !  =========================================================================
-   do_subdiago = .not. wfopta10 == 1 .and. .not. newlobpcg
+   do_subdiago = .not. wfopta10 == 1 .and. .not. xg_diago
    if (use_rmm_diis) do_subdiago = .False.  ! subdiago is already performed before RMM-DIIS.
 
    ABI_NVTX_START_RANGE(NVTX_SUB_SPC_DIAGO)
    if (do_subdiago) then
      if (prtvol > 1) call wrtout(std_out, " Performing subspace diagonalization.")
      call timab(585,1,tsec) !"vtowfk(subdiago)"
-     if (has_cprj_in_memory) then
+     if (dtset%cprj_in_memory==2) then
        call subdiago_low_memory(cg,eig_k,evec,icg,istwf_k,&
 &       mcg,nband_k,npw_k,my_nspinor,dtset%paral_kgb,subham)
        call timab(585,2,tsec)
@@ -630,6 +638,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ! The orthogonalization is completely disabled with ortalg<=-10.
    ! This option is usefull for testing only and is not documented.
    do_ortho = (wfoptalg/=14 .and. wfoptalg /= 1 .and. wfoptalg /= 11 .and. dtset%ortalg>-10) .or. dtset%ortalg > 0
+   if (xg_diago) do_ortho = .false.
    if (use_rmm_diis) do_ortho = .False.
 
    if (do_ortho) then
@@ -637,7 +646,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      ABI_NVTX_START_RANGE(NVTX_ORTHO_WF)
 
      if (prtvol > 0) call wrtout(std_out, " Calling pw_orthon to orthonormalize bands.")
-     if (has_cprj_in_memory.and.ortalgo==0) then
+     if (dtset%cprj_in_memory==2) then
        ABI_FREE(subovl)
        ABI_MALLOC(subovl,(nband_k*(nband_k+1)))
        call mksubovl(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,subovl,mpi_enreg)
@@ -657,13 +666,13 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ! Fix phases of all bands
    if (xmpi_paral/=1 .or. mpi_enreg%paral_kgb/=1) then
      !call wrtout(std_out, "Calling cgtk_fixphase")
-      if ( (.not.newlobpcg) .and. (.not.newchebfi) .and. (.not.has_cprj_in_memory) ) then
+     if ( (.not.xg_diago) .and. dtset%cprj_in_memory==0 ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
-     else if ( (newlobpcg .or. newchebfi) .and. (.not.has_cprj_in_memory) ) then
+     else if ( xg_diago ) then
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)
-     else ! has_cprj_in_memory
+     else ! dtset%cprj_in_memory/=0 .and. .not.xg_diago
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0,&
          & cprj=cprj_cwavef_bands,nspinor=dtset%nspinor)
      end if
@@ -698,7 +707,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    end if
  end do ! inonsc (NON SELF-CONSISTENT LOOP)
 
- if (has_cprj_in_memory) then
+ if (dtset%cprj_in_memory==2) then
    update_cprj=dtset%cprj_update_lvl<=3.and.dtset%cprj_update_lvl/=2
    if (update_cprj) call cprj_update(cg,cprj_cwavef_bands,gs_hamk,icg,nband_k,mpi_enreg,tim_getcprj)
  end if
@@ -734,7 +743,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  else
    choice=2*optforces
    paw_opt=2;cpopt=0;tim_nonlop=10-8*optforces
-   if (has_cprj_in_memory) cpopt=2 ! cprj are in memory (but not the derivatives)
+   if (dtset%cprj_in_memory==2) cpopt=2 ! cprj are in memory (but not the derivatives)
    if (dtset%usefock==1) then
 !     if (dtset%optforces/= 0) then
      if (optforces/= 0) then
@@ -754,7 +763,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    ABI_MALLOC(cwavef, (2,npw_k*my_nspinor*blocksize))
  end if
 
- if (.not.has_cprj_in_memory) then
+ if (dtset%cprj_in_memory/=2) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
      iorder_cprj=0
      nband_k_cprj=nband_k*(mband_cprj/dtset%mband)
@@ -1065,7 +1074,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 !    - Compute nonlocal forces from most recent wfs
 !    - PAW: compute projections of WF onto NL projectors (cprj)
    ABI_NVTX_START_RANGE(NVTX_VTOWFK_NONLOP)
-   if (has_cprj_in_memory) then
+   if (dtset%cprj_in_memory==2) then
      if (optforces>0) then
 !      Treat all wavefunctions in case of PAW
        cwaveprj => cprj(:,1+(iblock-1)*my_nspinor*blocksize+ibg:iblock*my_nspinor*blocksize+ibg)
@@ -1145,7 +1154,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ABI_FREE(enlout)
 
- if (.not.has_cprj_in_memory) then
+ if (dtset%cprj_in_memory==2) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
      call pawcprj_free(cwaveprj)
    end if
@@ -1175,7 +1184,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! returns results in packed form.
  ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS do not need this
  !
- rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. .not. newlobpcg
+ rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. xg_diago
  if (use_rmm_diis) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then
@@ -1240,9 +1249,9 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call build_H(dtset,mpi_enreg,cpopt,cg,gs_hamk,kg_k,kinpw)
  end if
 
- if (has_cprj_in_memory) nullify(cprj_cwavef_bands)
+ if (dtset%cprj_in_memory==2) nullify(cprj_cwavef_bands)
 
- if(wfopta10 /= 1 .and. .not. newlobpcg) then
+ if(wfopta10 /= 1 .and. .not. xg_diago) then
    ABI_FREE(evec)
    ABI_FREE(subham)
    ABI_FREE(totvnlx)
