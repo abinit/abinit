@@ -36,6 +36,7 @@ module m_vtowfk
  use m_dtset
  use m_dtfil
  use m_xomp
+ use m_xg_nonlop
 
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab, cwtime, cwtime_report, sec2str
@@ -176,7 +177,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 & eig_k,ek_k,ek_k_nd,end_k,enlx_k,fixed_occ,grnl_k,gs_hamk,&
 & ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj,mkgq,mpi_enreg,&
 & mpw,natom,nband_k,nbdbuf,nkpt,istep,nnsclo_now,npw_k,npwarr,occ_k,optforces,prtvol,&
-& pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,zshift, rmm_diis_status)
+& pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,rhoaug,paw_dmft,wtk,xg_nonlop,zshift,rmm_diis_status)
 
 !Arguments ------------------------------------
  integer, intent(in) :: ibg,icg,ikpt,iscf,isppol,mband_cprj,mcg,mcgq,mcprj,mkgq,mpw
@@ -203,6 +204,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  real(dp), intent(inout),target :: cg(2,mcg)
  real(dp), intent(inout) :: rhoaug(gs_hamk%n4,gs_hamk%n5,gs_hamk%n6,gs_hamk%nvloc)
  type(pawcprj_type),intent(inout),target :: cprj(natom,mcprj*gs_hamk%usecprj)
+ type(xg_nonlop_t),intent(in) :: xg_nonlop
 
 !Local variables-------------------------------
  logical :: has_cprj_in_memory,has_fock,newchebfi,newlobpcg,update_cprj

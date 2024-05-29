@@ -1192,6 +1192,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2005)='xgBlock_colwiseNorm2            '
  names(2006)='xgBlock_saxpy                   '
  names(2007)='xgBlock_minmax                  '
+ names(2008)='xgBlock_partialcopy             '
+ names(2009)='xgBlock_gemmcyclic              '
+ names(2010)='xgBlock_yxmax                   '
+ names(2011)='xgBlock_ymax                    '
+ names(2012)='xgBlock_add                     '
 
  ! TIMER_SIZE is 2099. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
@@ -1845,7 +1850,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-         list(:28)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2007,1) /) ; msg='low-level xgBlock type '
+         list(:33)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2012,1) /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 

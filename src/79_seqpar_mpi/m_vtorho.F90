@@ -42,6 +42,7 @@ module m_vtorho
  use m_dtfil
  use m_extfpmd
  use m_ompgpu_utils
+ use m_xg_nonlop
 
  use defs_datatypes,       only : pseudopotential_type
  use defs_abitypes,        only : MPI_type
@@ -303,7 +304,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &           phnons,phnonsdiel,ph1d,ph1ddiel,psps,fock,&
 &           pwind,pwind_alloc,pwnsfac,resid,residm,rhog,rhor,&
 &           rmet,rprimd,susmat,symrec,taug,taur,tauresid,&
-&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xred,&
+&           ucvol,usecprj,wffnew,with_vectornd,vectornd,vtrial,vxctau,wvl,xg_nonlop,xred,&
 &           ylm,ylmgr,ylmdiel, rmm_diis_status)
 
 !Arguments -------------------------------
@@ -328,6 +329,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  type(fock_type),pointer, intent(inout) :: fock
  type(wffile_type), intent(inout) :: wffnew
  type(wvl_data), intent(inout) :: wvl
+ type(xg_nonlop_t),intent(inout) :: xg_nonlop
 !arrays
  integer, intent(in) :: atindx(natom),atindx1(natom),gbound_diel(2*mgfftdiel+8,2)
  integer, intent(in) :: indsym(4,dtset%nsym,natom)
@@ -380,7 +382,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer :: spaceComm_distrb,usecprj_local,usefock_ACE,usetimerev
  logical :: berryflag,computesusmat,fixed_occ,has_vectornd
  logical :: locc_test,paral_atom,remove_inv,usefock,with_vxctau
- logical :: do_last_ortho,wvlbigdft=.false.
+ logical :: do_last_ortho,wvlbigdft=.false.,do_invS
  real(dp) :: dmft_dftocc
  real(dp) :: edmft,ebandlda,ebanddmft,ebandldatot,ekindmft,ekindmft2,ekinlda
  real(dp) :: min_occ,vxcavg_dum,strsxc(6)
@@ -745,13 +747,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
       vectornd_pac=zero
    end if
 
-  nbdbuf_eff = dtset%nbdbuf
-  ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
-  if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
-    write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
-    call wrtout(std_out,msg,'COLL')
-    nbdbuf_eff = 0
-  end if
+   nbdbuf_eff = dtset%nbdbuf
+   ! In metallic case, at first iteration, occupations could be 0. So residm should be computed as usual
+   if (dtset%nbdbuf==-101.and..not.fixed_occ.and.istep==1.and.minval(occ)<tol10) then
+     write(msg,*) 'vtorho: nbdbuf is set to 0 for this step'
+     call wrtout(std_out,msg,'COLL')
+     nbdbuf_eff = 0
+   end if
 
 !  LOOP OVER SPINS
    do isppol=1,dtset%nsppol
@@ -759,6 +761,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      ikpt_loc = 0
      ikg=0
+
+     if (dtset%cprj_in_memory==1) then
+       call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
+     end if
 
      ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
      ! Also, continue to initialize the Hamiltonian.
@@ -1058,6 +1064,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
          if ((fock%fock_common%optfor).and.(usefock_ACE==0)) fock%fock_common%forces_ikpt=zero
        end if
 
+       if (dtset%cprj_in_memory==1) then
+         do_invS=dtset%wfoptalg==111
+         call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,npw_k,ffnl,ph3d,istep<=1,&
+           & compute_invS_approx=do_invS,compute_gram=do_invS)
+       end if
+
        ! Here we initialize the wavefunctions with atomic orbitals at the first GS iteration of the first
        ! relaxation step (if any).
        ! NB: Not all the cases are presently supported.
@@ -1078,7 +1090,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       ibg,icg,ikpt,iscf,isppol,kg_k,kinpw,mband_cprj,mcg,mcgq,mcprj_local,mkgq,&
 &       mpi_enreg,dtset%mpw,natom,nband_k,nbdbuf_eff,dtset%nkpt,istep,nnsclo_now,npw_k,npwarr,&
 &       occ_k,optforces,prtvol,pwind,pwind_alloc,pwnsfac,pwnsfacq,resid_k,&
-&       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
+&       rhoaug,paw_dmft,dtset%wtk(ikpt),xg_nonlop,zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
 ! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
@@ -1225,6 +1237,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            end do
          end if
        end if
+     end if
+
+     if (dtset%cprj_in_memory==1) then
+       call xg_nonlop_destroy_Dij(xg_nonlop)
      end if
 
      call timab(986,2,tsec)
