@@ -558,9 +558,6 @@ contains
 
     if(istwf_k <= 1) then
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs, (2, npw, nprojs))
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_r, (1,1,1))
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_i, (1,1,1))
-
 #ifdef HAVE_OPENMP_OFFLOAD
       gemm_nonlop_kpt_projs_ompptr => gemm_nonlop_kpt(ik)%projs
       !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_projs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
@@ -568,7 +565,6 @@ contains
     else
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_r, (1, npw, nprojs))
       ABI_MALLOC(gemm_nonlop_kpt(ik)%projs_i, (1, npw, nprojs))
-      ABI_MALLOC(gemm_nonlop_kpt(ik)%projs, (1, 1, 1))
 #ifdef HAVE_OPENMP_OFFLOAD
       gemm_nonlop_kpt_projs_r_ompptr => gemm_nonlop_kpt(ik)%projs_r
       gemm_nonlop_kpt_projs_i_ompptr => gemm_nonlop_kpt(ik)%projs_i
@@ -590,8 +586,6 @@ contains
       gemm_nonlop_kpt(ik)%ngrads2 = -1
       if(istwf_k <= 1) then
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs, (2, npw, nprojs*ndgxdt))
-        ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_r, (1, 1, 1))
-        ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_i, (1, 1, 1))
 #ifdef HAVE_OPENMP_OFFLOAD
         gemm_nonlop_kpt_dprojs_ompptr => gemm_nonlop_kpt(ik)%dprojs
         !$OMP TARGET ENTER DATA MAP(alloc:gemm_nonlop_kpt_dprojs_ompptr) IF(gpu_option==ABI_GPU_OPENMP)
@@ -606,7 +600,6 @@ contains
       else
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_r, (1, npw, nprojs*ndgxdt))
         ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs_i, (1, npw, nprojs*ndgxdt))
-        ABI_MALLOC(gemm_nonlop_kpt(ik)%dprojs, (1, 1, 1))
 #ifdef HAVE_OPENMP_OFFLOAD
         gemm_nonlop_kpt_dprojs_r_ompptr => gemm_nonlop_kpt(ik)%dprojs_r
         gemm_nonlop_kpt_dprojs_i_ompptr => gemm_nonlop_kpt(ik)%dprojs_i
@@ -676,8 +669,7 @@ contains
 !! SOURCE
  subroutine prep_projectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
  &                          ucvol,ffnl,ph3d,dimffnl,matblk,&
- &                          nprojs,choice,is_kprime,gpu_option,&
- &                          projs,projs_r,projs_i)
+ &                          nprojs,choice,is_kprime,gpu_option)
 
   integer, intent(in) :: npw,lmnmax,ntypat,dimffnl,matblk
   integer, intent(in) :: istwf_k
@@ -688,21 +680,27 @@ contains
   integer, intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
   real(dp),intent(in),target :: ffnl(npw,dimffnl,lmnmax,ntypat)
   real(dp),intent(in),target :: ph3d(2,npw,matblk)
-  real(dp),intent(inout), target ::   projs(:,:,:)
-  real(dp),intent(inout), target :: projs_r(:,:,:)
-  real(dp),intent(inout), target :: projs_i(:,:,:)
 
   logical :: map_ffnl,map_ph3d
   integer :: il, ipw, ik
   integer :: itypat, ilmn, nlmn, ia, iaph3d, shift
   integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
   real(dp):: wt,tmp
+  real(dp), ABI_CONTIGUOUS pointer ::   projs(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_r(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_i(:,:,:)
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
        call nvtxStartRange("prep_projectors")
 #endif
 
   ik=1; if(is_kprime) ik=2
+  if(istwf_k <= 1) then
+    projs => gemm_nonlop_kpt(ik)%projs
+  else
+    projs_r => gemm_nonlop_kpt(ik)%projs_r
+    projs_i => gemm_nonlop_kpt(ik)%projs_i
+  end if
 
   if(gpu_option==ABI_GPU_OPENMP) then
 
@@ -903,36 +901,49 @@ contains
 !! SOURCE
  subroutine prep_dprojectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
  &                          ucvol,ffnl,ph3d,kpg,nkpg,dimffnl,matblk,&
- &                          nprojs,ngrads,ngrads2,choice,signs,idir_pert,gpu_option,&
- &                          projs,projs_r,projs_i,&
- &                          dprojs,dprojs_r,dprojs_i,&
- &                          d2projs)
+ &                          nprojs,ngrads,ngrads2,choice,signs,idir_pert,&
+ &                          is_kprime,gpu_option)
 
   integer, intent(in) :: npw,lmnmax,ntypat,nkpg,dimffnl,matblk
   integer, intent(in) :: istwf_k
   integer, intent(in) :: nprojs,ngrads,ngrads2,choice,signs,idir_pert,gpu_option
+  logical, intent(in) :: is_kprime
   real(dp), intent(in) :: ucvol
   ! arrays
   integer, intent(in) :: indlmn(6,lmnmax,ntypat),nattyp(ntypat)
   real(dp), intent(in), target :: ffnl(npw,dimffnl,lmnmax,ntypat)
   real(dp), intent(in), target :: ph3d(2,npw,matblk)
   real(dp), intent(in), target :: kpg(npw,nkpg)
-  real(dp),intent(inout), target :: projs  (:,:,:)  ,dprojs(:,:,:)  ,d2projs(:,:,:)
-  real(dp),intent(inout), target :: projs_r(:,:,:),dprojs_r(:,:,:)
-  real(dp),intent(inout), target :: projs_i(:,:,:),dprojs_i(:,:,:)
 
   logical :: map_ffnl,map_ph3d
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
   integer :: ndprojs, nd2projs
-  integer :: il, ipw, idir, idir1, idir2, ffnl_dir
+  integer :: il, ipw, ik, idir, idir1, idir2, ffnl_dir
   integer :: itypat, ilmn, nlmn, ia, iaph3d, igrad, shift, shift_grad, shift_grad2
   integer :: lmn_beg,ibeg,iend,shift_do,nlmn_o,lmn_grad_beg
   real(dp), parameter :: two_pi2=two_pi*two_pi
   real(dp):: wt,tmp
+  real(dp), ABI_CONTIGUOUS pointer :: projs  (:,:,:)  ,dprojs(:,:,:)  ,d2projs(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_r(:,:,:),dprojs_r(:,:,:)
+  real(dp), ABI_CONTIGUOUS pointer :: projs_i(:,:,:),dprojs_i(:,:,:)
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
        call nvtxStartRange("prep_dprojectors2")
 #endif
+
+  ik=1; if(is_kprime) ik=2
+  if(istwf_k <= 1) then
+    projs => gemm_nonlop_kpt(ik)%projs
+    dprojs => gemm_nonlop_kpt(ik)%dprojs
+    if(ngrads2 > 0) then
+      d2projs => gemm_nonlop_kpt(ik)%d2projs
+    end if
+  else
+    projs_r => gemm_nonlop_kpt(ik)%projs_r
+    projs_i => gemm_nonlop_kpt(ik)%projs_i
+    dprojs_r => gemm_nonlop_kpt(ik)%dprojs_r
+    dprojs_i => gemm_nonlop_kpt(ik)%dprojs_i
+  end if
 
   if(gpu_option==ABI_GPU_OPENMP) then
 
