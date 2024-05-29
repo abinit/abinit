@@ -5,15 +5,15 @@
 
   ndtset 12
 
-  cprj_in_memory1  3
-  cprj_in_memory2  3
-  cprj_in_memory3  3
-  cprj_in_memory4  3
-  cprj_in_memory5  3
-  cprj_in_memory6  3
-  cprj_in_memory7  3
-  cprj_in_memory8  3
-  cprj_in_memory9  3
+  cprj_in_memory1  2
+  cprj_in_memory2  2
+  cprj_in_memory3  2
+  cprj_in_memory4  2
+  cprj_in_memory5  2
+  cprj_in_memory6  2
+  cprj_in_memory7  2
+  cprj_in_memory8  2
+  cprj_in_memory9  2
 
   nloc_alg1  2
   nloc_alg2  3

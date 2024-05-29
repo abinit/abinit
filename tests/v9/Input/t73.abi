@@ -17,7 +17,7 @@
   cprj_update_lvl3 -1 # A + B + C + D (for debugging only, poor performance)
   cprj_update_lvl2 -2 # A + B + C + D + E (for debugging only, poor performance)
 
-  cprj_in_memory 1
+  cprj_in_memory 2
 
   cprj_in_memory1   0 # "cprj in memory" implementation is disabled, use of the native implementation instead
 
