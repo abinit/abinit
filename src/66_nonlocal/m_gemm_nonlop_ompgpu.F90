@@ -495,6 +495,8 @@ contains
     kpgout_ => kpgout
   end if
 
+  !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
+
   nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
@@ -1098,6 +1100,8 @@ contains
     !$OMP TARGET UPDATE FROM(enlout) if(nld_on_gpu)
     !$OMP TARGET EXIT DATA MAP(delete:enlout)
   end if
+
+  !$OMP TARGET EXIT DATA MAP(delete:kpgin_,kpgout_)
 
   if (nkpgin<nkpgin_) then
     ABI_FREE(kpgin_)
