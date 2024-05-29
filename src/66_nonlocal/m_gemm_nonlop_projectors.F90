@@ -629,31 +629,33 @@ contains
   !!!!! CUDA stuff
   if(gpu_option == ABI_GPU_LEGACY .or. gpu_option == ABI_GPU_KOKKOS) then
 #ifdef HAVE_GPU_CUDA
-    gemm_nonlop_kpt_gpu%npw    = npw
-    gemm_nonlop_kpt_gpu%nprojs = nprojs
+    if(gemm_nonlop_kpt_gpu(ik)%nprojs==-1) then
+      gemm_nonlop_kpt_gpu(ik)%npw    = npw
+      gemm_nonlop_kpt_gpu(ik)%nprojs = nprojs
 
 #ifdef DEBUG_VERBOSE_GPU
-    if(xmpi_comm_rank(xmpi_world) == 0) then
-      call check_gpu_mem("refresh_projectors begin")
-      call wrtout(std_out,sjoin(" npw    .......", itoa(npw)),    'COLL')
-      call wrtout(std_out,sjoin(" nprojs .......", itoa(nprojs)), 'COLL')
-    end if
+      if(xmpi_comm_rank(xmpi_world) == 0) then
+        call check_gpu_mem("refresh_projectors begin")
+        call wrtout(std_out,sjoin(" npw    .......", itoa(npw)),    'COLL')
+        call wrtout(std_out,sjoin(" nprojs .......", itoa(nprojs)), 'COLL')
+      end if
 #endif
 
-    if(istwf_k <= 1) then
-      call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs, INT(2,c_size_t)*npw*nprojs*dp)
-      ! TODO : gradients
-    else
-      call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs_r, INT(1, c_size_t)*npw*nprojs*dp)
-      call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs_i, INT(1, c_size_t)*npw*nprojs*dp)
-      ! TODO : gradients
-    end if
+      if(istwf_k <= 1) then
+        call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs, INT(2,c_size_t)*npw*nprojs*dp)
+        ! TODO : gradients
+      else
+        call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs_r, INT(1, c_size_t)*npw*nprojs*dp)
+        call alloc_on_gpu(gemm_nonlop_kpt_gpu(ik)%projs_i, INT(1, c_size_t)*npw*nprojs*dp)
+        ! TODO : gradients
+      end if
 
 #ifdef DEBUG_VERBOSE_GPU
-    if(xmpi_comm_rank(xmpi_world) == 0) then
-      call check_gpu_mem("refresh_projectors end  ")
-    end if
+      if(xmpi_comm_rank(xmpi_world) == 0) then
+        call check_gpu_mem("refresh_projectors end  ")
+      end if
 #endif
+    end if
 
 #endif
   end if
