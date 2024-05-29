@@ -594,6 +594,8 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 &        hamk%useylm /= 0 .and.&
 &        ((cpopt < 3 .and. (choice < 1 .or. choice == 7)) .or.&
 &        (choice==1 .or. choice==2 .or.  choice==3 .or. choice==5 .or. choice==51))))
+     !FIXME Derivatives of any kind not handled in CUDA GEMM nonlop
+     if(choice > 1 .and. choice/=7 .and. (hamk%gpu_option==ABI_GPU_LEGACY .or. hamk%gpu_option==ABI_GPU_KOKKOS)) use_gemm_nonlop=.false.
    end if
    if(signs==1) then
      use_gemm_nonlop= ( use_gemm_nonlop .and. hamk%useylm/=0 .and. &
@@ -752,15 +754,13 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 #if defined HAVE_GPU_CUDA
      call gemm_nonlop_gpu(atindx1_, choice, cpopt, cprjin_, dimenl1, dimenl2_, dimekbq, &
          dimffnlin, dimffnlout, &
-         enl_, indlmn_, istwf_k, &
+         enl_ptr, ffnlin, ffnlout, indlmn_, istwf_k, &
          lambda, hamk%lmnmax, matblk_, &
          mpi_enreg, natom_, nattyp_, ndat, nkpgin, nkpgout, &
          nnlout, npwin, npwout, my_nspinor, hamk%nspinor, ntypat_, paw_opt, &
-         sij_, svectout, &
-         hamk%useylm, vectin, vectout, select_k_, &
+         ph3din, ph3dout, sij_, svectout, &
+         hamk%ucvol, hamk%useylm, vectin, vectout, select_k_, &
          hamk%gpu_option,vectproj=vectproj)
-#else
-   ABI_ERROR("abinit was not compiled with GPU support")
 #endif
 
    else

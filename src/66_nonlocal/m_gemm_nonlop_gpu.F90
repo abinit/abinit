@@ -143,13 +143,13 @@ module m_gemm_nonlop_gpu
 !!
 !! SOURCE
  subroutine gemm_nonlop_gpu(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                        enl,indlmn,istwf_k,&
-&                        lambda,lmnmax,matblk,&
-&                        mpi_enreg,natom,nattyp,ndat,nkpgin,nkpgout,&
-&                        nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
-&                        sij,svectout,&
-&                        useylm,vectin,vectout,select_k,&
-&                        gpu_option,vectproj)
+&                 enl,ffnlin,ffnlout,indlmn,istwf_k,&
+&                 lambda,lmnmax,matblk,&
+&                 mpi_enreg,natom,nattyp,ndat,nkpgin,nkpgout,&
+&                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,&
+&                 ph3din,ph3dout,sij,svectout,&
+&                 ucvol,useylm,vectin,vectout,select_k,&
+&                 gpu_option,vectproj)
 
   !Arguments ------------------------------------
   !scalars
@@ -158,34 +158,35 @@ module m_gemm_nonlop_gpu
   integer,intent(in) :: nkpgout,nnlout,npwin,npwout,nspinor,nspinortot,ntypat
   integer,intent(in) :: paw_opt,useylm,select_k
   integer,intent(in) :: gpu_option
-  real(dp), target, intent(in)     :: lambda(ndat)
-  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
-  type(MPI_type),   intent(in)     :: mpi_enreg
-
+  real(dp),intent(in) :: ucvol
+  real(dp),target, intent(in)     :: lambda(ndat)
+  type(MPI_type),intent(in) :: mpi_enreg
   !arrays
-  integer,  target, intent(in)     :: atindx1(natom)
-  integer,  target, intent(in)     :: indlmn(6,lmnmax,ntypat)
-  integer,          intent(in)     :: nattyp(ntypat)
-  real(dp), target, intent(in)     :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
-  real(dp), target, intent(in)     :: sij(dimenl1,ntypat*((paw_opt+1)/3))
-  real(dp), target, intent(inout)  ::  vectin (2,npwin*nspinor*ndat)
-  real(dp), target, intent(out)    :: svectout(2,npwout*nspinor*(paw_opt/3)*ndat)
-  real(dp), target, intent(inout)  ::  vectout(2,npwout*nspinor*ndat) !vz_i
-  real(dp), target, intent(inout), ABI_CONTIGUOUS optional :: vectproj(:,:,:)
+  integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat)
+  integer,intent(in),target :: nattyp(ntypat)
+  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
+  real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat)
+  real(dp),intent(in),target :: sij(dimenl1,ntypat*((paw_opt+1)/3))
+  real(dp),intent(inout),target :: ph3din(2,npwin,matblk),ph3dout(2,npwout,matblk)
+  real(dp),intent(inout),target :: vectin(2,npwin*nspinor*ndat)
+  real(dp),intent(out),target :: svectout(:,:)
+  real(dp),intent(inout),target :: vectout(:,:)
+  real(dp),intent(inout),optional, ABI_CONTIGUOUS target :: vectproj(:,:,:)
+  type(pawcprj_type),intent(inout) :: cprjin(natom,nspinor*((cpopt+5)/5)*ndat)
 
   ! locals
   integer :: idat, nprojs, shift, iatom, nlmn, ierr, ibeg, iend, ikin, ikout
   integer :: cplex, cplex_enl, cplex_fac
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(1), cplex_d2gxdt(1)
+  logical :: local_vectproj
   real(dp) :: dgxdt_dum_in(1,1,1,1,1), dgxdt_dum_out(1,1,1,1,1),dgxdt_dum_out2(1,1,1,1,1)
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
+  real(dp), allocatable, target :: sij_typ(:)
   integer :: npw_max
   integer :: nattyp_max
 
-  logical :: local_vectproj
-
-  real(dp), allocatable, target :: sij_typ(:)
 
   !type(c_ptr)                      :: projections_gpu,        s_projections_gpu,        vnl_projections_gpu
   real(dp), ABI_CONTIGUOUS pointer :: projections_cpu(:,:,:)
@@ -245,12 +246,41 @@ module m_gemm_nonlop_gpu
   case (KPRIME_H_KPRIME)
     ikin=2; ikout=2;
   end select
-  cplex = 2; if (istwf_k>1) cplex=1
-  cplex_enl = 1; if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
-  cplex_fac = max(cplex,dimekbq)
+  cplex=2;if (istwf_k>1) cplex=1
+  cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
+  cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  ndgxdt=0; nd2gxdt=0
 
-  nprojs = gemm_nonlop_kpt_gpu(ikout)%nprojs
+  ! Compute projectors if need be
+  ! FIXME Would be nice to rely on opernl(ab)_gemm instead but some refacto is needed
+  nprojs=0
+  do itypat=1,ntypat
+    nprojs = nprojs + count(indlmn(3,:,itypat)>0)*nattyp(itypat)
+  end do
+
+  call refresh_projectors(npwin,istwf_k,nprojs,ndgxdt,nd2gxdt,2,(ikin==2),&
+  &                       gpu_option)
+  if(gemm_nonlop_kpt(ikin)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+    call prep_projectors(npwin,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+    &                    ucvol,ffnlin,ph3din,dimffnlin,matblk,&
+    &                    nprojs,choice,(ikin==2),gpu_option,&
+    &                    gemm_nonlop_kpt(ikin)%projs,&
+    &                    gemm_nonlop_kpt(ikin)%projs_r,gemm_nonlop_kpt(ikin)%projs_i)
+    gemm_nonlop_kpt(ikin)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+  end if
+  if(ikin/=ikout .and. choice>0) then
+    call refresh_projectors(npwout,istwf_k,nprojs,ndgxdt,nd2gxdt,2,(ikout==2),&
+    &                       gpu_option)
+    if(gemm_nonlop_kpt(ikout)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
+      call prep_projectors(npwout,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
+      &                    ucvol,ffnlout,ph3dout,dimffnlout,matblk,&
+      &                    nprojs,choice,(ikout==2),gpu_option,&
+      &                    gemm_nonlop_kpt(ikout)%projs,&
+      &                    gemm_nonlop_kpt(ikout)%projs_r,gemm_nonlop_kpt(ikout)%projs_i)
+      gemm_nonlop_kpt(ikout)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
+    end if
+  end if
 
   ! These will store the non-local factors for vectin, svectout and vectout respectively
   call gpu_memset(gemm_nonlop_gpu_data%    projections_gpu, izero, INT(cplex,     c_size_t) * nprojs * nspinor*ndat * dp)
