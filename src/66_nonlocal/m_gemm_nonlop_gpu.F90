@@ -264,9 +264,7 @@ module m_gemm_nonlop_gpu
   if(gemm_nonlop_kpt(ikin)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
     call prep_projectors(npwin,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
     &                    ucvol,ffnlin,ph3din,dimffnlin,matblk,&
-    &                    nprojs,choice,(ikin==2),gpu_option,&
-    &                    gemm_nonlop_kpt(ikin)%projs,&
-    &                    gemm_nonlop_kpt(ikin)%projs_r,gemm_nonlop_kpt(ikin)%projs_i)
+    &                    nprojs,choice,(ikin==2),gpu_option)
     gemm_nonlop_kpt(ikin)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
   end if
   if(ikin/=ikout .and. choice>0) then
@@ -275,9 +273,7 @@ module m_gemm_nonlop_gpu
     if(gemm_nonlop_kpt(ikout)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
       call prep_projectors(npwout,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
       &                    ucvol,ffnlout,ph3dout,dimffnlout,matblk,&
-      &                    nprojs,choice,(ikout==2),gpu_option,&
-      &                    gemm_nonlop_kpt(ikout)%projs,&
-      &                    gemm_nonlop_kpt(ikout)%projs_r,gemm_nonlop_kpt(ikout)%projs_i)
+      &                    nprojs,choice,(ikout==2),gpu_option)
       gemm_nonlop_kpt(ikout)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
     end if
   end if

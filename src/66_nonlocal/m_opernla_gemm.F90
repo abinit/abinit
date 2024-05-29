@@ -419,9 +419,7 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
  if(gemm_nonlop_kpt(ik)%ikpt/=gemm_nonlop_ikpt_this_proc_being_treated) then
    call prep_projectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
    &                    ucvol,ffnl,ph3d,dimffnl,matblk,&
-   &                    nprojs_all,choice,is_kprime,gpu_option,&
-   &                    gemm_nonlop_kpt(ik)%projs,&
-   &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i)
+   &                    nprojs_all,choice,is_kprime,gpu_option)
    gemm_nonlop_kpt(ik)%ikpt=gemm_nonlop_ikpt_this_proc_being_treated
  end if
  if(choice>1 .and. ndgxdt>0) then
@@ -431,12 +429,8 @@ subroutine opernla_gemm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,&
    &   .or.   idir/=gemm_nonlop_kpt(ik)%idir) then
      call prep_dprojectors(npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,&
      &                    ucvol,ffnl,ph3d,kpg,nkpg,dimffnl,matblk,&
-     &                    nprojs_all,ndgxdt,nd2gxdt,choice,signs,idir,gpu_option,&
-     &                    gemm_nonlop_kpt(ik)%projs,&
-     &                    gemm_nonlop_kpt(ik)%projs_r,gemm_nonlop_kpt(ik)%projs_i,&
-     &                    gemm_nonlop_kpt(ik)%dprojs,&
-     &                    gemm_nonlop_kpt(ik)%dprojs_r,gemm_nonlop_kpt(ik)%dprojs_i,&
-     &                    gemm_nonlop_kpt(ik)%d2projs)
+     &                    nprojs_all,ndgxdt,nd2gxdt,choice,signs,idir,&
+     &                    is_kprime,gpu_option)
      gemm_nonlop_kpt(ik)%choice = choice
      gemm_nonlop_kpt(ik)%idir = idir
    end if
