@@ -13084,7 +13084,7 @@ Variable(
     dimensions=[3, '[[natom]]'],
     defaultval=0.0,
     mnemonics="NUClear DIPole MOMents",
-    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[kptopt]] = 0 or 3",
+    requires="[[usepaw]] = 1; [[pawcpxocc]] = 2; [[optforces]] = 0; [[optstress]] = 0; [[kptopt]] = 0, 4, or 3",
     added_in_version="before_v9",
     text=r"""
 Places an array of nuclear magnetic dipole moments on the atomic
@@ -13811,6 +13811,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     requires="""[[usepaw]] == 1;
 [[usexcnhat]] == 0;
+[[pawxcdev]] == 0;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
 ([[kptopt]] == 3 or [[kptopt]] == 0) """,
@@ -13829,7 +13830,7 @@ to generate discretized DDK wavefunctions. Note that convergence with kpt mesh i
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
 unless a very specific ground state feature is also needed.
 
-* [[orbmag]] = 1: Compute orbital magnetization and Chern number
+* [[orbmag]] = 1: Compute orbital magnetization and Chern vector 
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
 orbital magnetic moment and a band-by-band decomposition.
 """,
