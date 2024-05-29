@@ -5684,7 +5684,7 @@ contains
     double precision :: tsec(2)
 
     call timab(tim_zero,1,tsec)
-    
+
     fact = 1 ; if (xgBlock%space==SPACE_CR) fact = 2
 
     if (xgBlock%gpu_option==ABI_GPU_KOKKOS) then
