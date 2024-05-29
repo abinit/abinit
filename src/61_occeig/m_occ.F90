@@ -492,19 +492,19 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  DBG_ENTER("COLL")
 
  call timab(74,1,tsec)
-
+ 
  ! Here treat the case where occopt does not correspond to a metallic occupation scheme
  if (occopt < 3 .or. occopt > 9) then
    ABI_BUG(sjoin(' occopt= ',itoa(occopt),', a value not allowed in newocc.'))
  end if
-
+ 
  ! Check whether nband is a constant for all k point and spin-pol
  do isppol=1,nsppol
    do ikpt=1,nkpt
-     if(nband(ikpt+(isppol-1)*nkpt)/=nband(1))then
+     if(nband(ikpt+(isppol-1)*nkpt)/=nband(1)) then
        write(msg,'(3a,i0,a,i0,a,i0,a)')&
-        'The number of bands must be the same for all k-points ',ch10,&
-        'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
+       'The number of bands must be the same for all k-points ',ch10,&
+       'but nband(1)= ',nband(1),' is different of nband(',ikpt+(isppol-1)*nkpt,') = ',nband(ikpt+(isppol-1)*nkpt),'.'
        ABI_BUG(msg)
      end if
    end do
@@ -519,12 +519,12 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
 
  ! Check whether the number of holes and electrons if positive
  if (occopt == 9) then
-    if ( (ne_qFD < zero) .or. (nh_qFD < zero) ) then
-       write(msg,'(3a,es16.8,a,es16.8,a)')&
-&   'ne_qFD or nh_qFD must be positive numbers, while ',ch10,&
-&   'the calling routine asks ne_qFD= ',ne_qFD,' and nh_qFD= ',nh_qFD, '.'
-   ABI_BUG(msg)
-    end if
+   if ( (ne_qFD < zero) .or. (nh_qFD < zero) ) then
+     write(msg,'(3a,es16.8,a,es16.8,a)')&
+     &   'ne_qFD or nh_qFD must be positive numbers, while ',ch10,&
+     &   'the calling routine asks ne_qFD= ',ne_qFD,' and nh_qFD= ',nh_qFD, '.'
+     ABI_BUG(msg)
+   end if
  end if
 
  maxocc = two / (nsppol * nspinor)
@@ -609,8 +609,8 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  ! potential and add to nelect bounds.
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     call extfpmd%compute_nelect(fermie_lo,nelectlo,tsmear)
-     call extfpmd%compute_nelect(fermie_hi,nelecthi,tsmear)
+     call extfpmd%compute_nelect(fermie_lo,nband,nelectlo,nkpt,nspinor,nsppol,tsmear,wtk)
+     call extfpmd%compute_nelect(fermie_hi,nband,nelecthi,nkpt,nspinor,nsppol,tsmear,wtk)
    end if
  end if
 
@@ -690,7 +690,7 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
        ! with corresponding chemical potential and add to nelect bounds.
        if(present(extfpmd)) then
          if(associated(extfpmd)) then
-           call extfpmd%compute_nelect(fermie_mid,nelectmid,tsmear)
+           call extfpmd%compute_nelect(fermie_mid,nband,nelectmid,nkpt,nspinor,nsppol,tsmear,wtk)
          end if
        end if
 
@@ -988,7 +988,6 @@ subroutine newocc(doccde, eigen, entropy, fermie, fermih, ivalence, spinmagntarg
  call timab(74,2,tsec)
 
  DBG_EXIT("COLL")
-
 end subroutine newocc
 !!***
 
