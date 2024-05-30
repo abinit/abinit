@@ -57,6 +57,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   # openBLAS BLAS extensions?
   _SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS
 
+  # NVPL BLAS/LAPACK extensions?
+  _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS
+
   # LAPACK?
   if test "${sd_linalg_has_blas}" = "yes"; then
     _SD_LINALG_CHECK_LAPACK
@@ -592,9 +595,15 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_blas_libs="-lacml -lacml_mv"
       ;;
 
-    aocl)
-      sd_linalg_vendor_provided="blas lapack blacs scalapack"
-      sd_linalg_vendor_blas_libs="-lblis -lflame"
+    aocl|AOCL)
+      abi_linalg_vendor_provided="blas lapack scalapack"
+      if test "${abi_openmp_enable}" = "yes"; then
+        abi_linalg_vendor_blas_libs="-lblis-mt"
+      else
+        abi_linalg_vendor_blas_libs="-lblis"
+      fi
+      abi_linalg_vendor_lapack_libs="-lflame"
+      abi_linalg_vendor_scalapack_libs="-lscalapack"
       ;;
 
     asl)
@@ -687,6 +696,13 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       sd_linalg_vendor_lapacke_libs="-llapacke"
       sd_linalg_vendor_blacs_libs="-lblacs -lblacsCinit -lblacsF77init"
       sd_linalg_vendor_scalapack_libs="-lscalapack"
+      ;;
+
+    nvpl)
+      abi_linalg_vendor_provided="blas lapack scalapack"
+      abi_linalg_vendor_blas_libs="-Mnvpl=blas"
+      abi_linalg_vendor_lapack_libs="-Mnvpl=lapack"
+      abi_linalg_vendor_scalapack_libs="-Mscalapack"
       ;;
 
     openblas)

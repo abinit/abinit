@@ -206,6 +206,35 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_OPENBLAS_EXTS], [
                     # ------------------------------------ #
 
 
+# _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS()
+# --------------------------------
+#
+# Check whether the specified openBLAS implementation provides BLAS extensions.
+#
+AC_DEFUN([_SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS], [
+
+  # NVPL support functions
+  AC_MSG_CHECKING([for NVPL_[set/get]_threads in the specified libraries])
+  AC_LANG_PUSH([Fortran])
+  AC_LINK_IFELSE([AC_LANG_PROGRAM([],
+    [[
+      integer :: a
+      call nvpl_blas_set_num_threads
+      a = nvpl_blas_get_max_threads()
+    ]])], [sd_linalg_nvpl_has_threads="yes"], [sd_linalg_nvpl_has_threads="no"])
+  AC_LANG_POP([Fortran])
+  AC_MSG_RESULT([${sd_linalg_nvpl_has_threads}])
+
+  if test "${sd_linalg_nvpl_has_threads}" = "yes"; then
+    AC_DEFINE([HAVE_LINALG_NVPL_THREADS], 1,
+      [Define to 1 if you have nvpl_*threads extensions.])
+  fi
+]) # _SD_LINALG_CHECK_BLAS_LAPACK_NVPL_EXTS
+
+
+                    # ------------------------------------ #
+
+
 # _SD_LINALG_CHECK_LAPACK()
 # -------------------------
 #
