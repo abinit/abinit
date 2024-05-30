@@ -3723,6 +3723,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nq
    my_ptstart = gqk%my_qstart
    my_g => gqk%my_g(:,:,:,:,fixed_pt)
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
 
  case ("q")
    comm = gqk%kpt_comm%value
@@ -3730,13 +3731,13 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    my_ngather = gqk%my_nk
    my_ptstart = gqk%my_kstart
    my_g => gqk%my_g(:,:,fixed_pt,:,:)
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
 
  case default
    ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, &
      unsupported mode: ", mode))
  end select
 
- ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
 
  g_gathered(:,:,:,:) = zero
  do my_ipt=1,my_ngather
