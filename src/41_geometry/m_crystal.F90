@@ -223,6 +223,9 @@ module m_crystal
    procedure :: new_without_symmetries => crystal_without_symmetries
    ! Return new object without symmetries (actually nsym = 1 and identity operation)
 
+   procedure :: new_inversion_only => crystal_inversion_only
+   ! Return new object with identity and inversion operations (if present)
+
    procedure :: get_point_group => crystal_point_group
    ! Return the symmetries of the point group of the crystal.
 
@@ -408,6 +411,8 @@ subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typa
 end subroutine crystal_init
 !!***
 
+!----------------------------------------------------------------------
+
 !!****f* m_crystal/crystal_without_symmetries
 !! NAME
 !!  crystal_without_symmetries
@@ -436,6 +441,48 @@ type(crystal_t) function crystal_without_symmetries(self) result(new)
   symrel=identity_3d, tnons=new_tnons, symafm=new_symafm)
 
 end function crystal_without_symmetries
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_crystal/crystal_inversion_only
+!! NAME
+!!  crystal_inversion_only
+!!
+!! FUNCTION
+!!  Return new crystal_t object with identity and inversion operations (if present)
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+type(crystal_t) function crystal_inversion_only(self) result(new)
+
+!Arguments ------------------------------------
+ class(crystal_t), intent(in) :: self
+
+!Local variables-------------------------------
+ integer,parameter :: timrev1 = 1
+ integer :: inv_idx
+ integer :: new_symafm(2) = 1, new_symrel(3,3,2)
+ real(dp),parameter :: new_tnons(3,2) = zero
+! *************************************************************************
+
+ new_symrel(:,:,1) = identity_3d; new_symrel(:,:,2) = inversion_3d
+
+ inv_idx = self%idx_spatial_inversion()
+ if (inv_idx /= 0) then
+   new_symafm(2) = self%symafm(inv_idx)
+   call crystal_init(self%amu, new, 1, self%natom, self%npsp, self%ntypat, 1, self%rprimd, self%typat, &
+     self%xred, self%zion, self%znucl, timrev1, .False., .False., self%title, &
+     symrel=new_symrel, tnons=new_tnons, symafm=new_symafm)
+ else
+   new = self%new_without_symmetries()
+ endif
+
+end function crystal_inversion_only
 !!***
 
 !----------------------------------------------------------------------
