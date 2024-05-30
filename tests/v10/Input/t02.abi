@@ -1,0 +1,209 @@
+# Fake H crystal.
+# Test Wyckoff positions of trigonal spacegroups (143-167)
+
+spgroup1 143 xred1 0 0 0.11 natom1 1 brvltt1 -1 spgaxor1 1 acell1 8 8 9 angdeg1 90 90 120 chkprim1 1 #P3
+spgroup2 143 xred2 1/3 2/3 0.11 natom2 1 brvltt2 -1 spgaxor2 1 acell2 8 8 9 angdeg2 90 90 120 chkprim2 1 #P3
+spgroup3 143 xred3 2/3 1/3 0.11 natom3 1 brvltt3 -1 spgaxor3 1 acell3 8 8 9 angdeg3 90 90 120 chkprim3 1 #P3
+spgroup4 143 xred4 0.12 0.34 0.56 natom4 3 brvltt4 -1 spgaxor4 1 acell4 8 8 9 angdeg4 90 90 120 chkprim4 1 #P3
+spgroup5 144 xred5 0.12 0.34 0.56 natom5 3 brvltt5 -1 spgaxor5 1 acell5 8 8 9 angdeg5 90 90 120 chkprim5 1 # P3_1
+spgroup6 145 xred6 0.12 0.34 0.56 natom6 3 brvltt6 -1 spgaxor6 1 acell6 8 8 9 angdeg6 90 90 120 chkprim6 1 #P3_2
+spgroup7 146 xred7 0 0 0.56 natom7 3 brvltt7 7 spgaxor7 1 acell7 8 8 9 angdeg7 90 90 120 chkprim7 0 #R3
+spgroup8 146 xred8 0.12 0.34 0.56 natom8 9 brvltt8 7 spgaxor8 1 acell8 8 8 9 angdeg8 90 90 120 chkprim8 0 #R3
+spgroup9 146 xred9 0.11 0.11 0.11 natom9 1 brvltt9 -1 spgaxor9 2 acell9 8 8 8 angdeg9 57 57 57 chkprim9 1 #R3
+spgroup10 146 xred10 0.12 0.34 0.56 natom10 3 brvltt10 -1 spgaxor10 2 acell10 8 8 8 angdeg10 57 57 57 chkprim10 1 #R3
+spgroup11 147 xred11 0 0 0 natom11 1 brvltt11 -1 spgaxor11 1 acell11 8 8 9 angdeg11 90 90 120 chkprim11 1 #P-3
+spgroup12 147 xred12 0 0 1/2 natom12 1 brvltt12 -1 spgaxor12 1 acell12 8 8 9 angdeg12 90 90 120 chkprim12 1 #P-3
+spgroup13 147 xred13 0 0 0.11 natom13 2 brvltt13 -1 spgaxor13 1 acell13 8 8 9 angdeg13 90 90 120 chkprim13 1 #P-3
+spgroup14 147 xred14 1/3 2/3 0.11 natom14 2 brvltt14 -1 spgaxor14 1 acell14 8 8 9 angdeg14 90 90 120 chkprim14 1 #P-3
+spgroup15 147 xred15 1/2 0 0 natom15 3 brvltt15 -1 spgaxor15 1 acell15 8 8 9 angdeg15 90 90 120 chkprim15 1 #P-3
+spgroup16 147 xred16 1/2 0 1/2 natom16 3 brvltt16 -1 spgaxor16 1 acell16 8 8 9 angdeg16 90 90 120 chkprim16 1 #P-3
+spgroup17 147 xred17 0.12 0.34 0.56 natom17 6 brvltt17 -1 spgaxor17 1 acell17 8 8 9 angdeg17 90 90 120 chkprim17 1 #P-3
+spgroup18 148 xred18 0 0 0 natom18 3 brvltt18 7 spgaxor18 1 acell18 8 8 9 angdeg18 90 90 120 chkprim18 0 #R-3
+spgroup19 148 xred19 0 0 1/2 natom19 3 brvltt19 7 spgaxor19 1 acell19 8 8 9 angdeg19 90 90 120 chkprim19 0 #R-3
+spgroup20 148 xred20 0 0 0.11 natom20 6 brvltt20 7 spgaxor20 1 acell20 8 8 9 angdeg20 90 90 120 chkprim20 0 #R-3
+spgroup21 148 xred21 1/2 0 1/2 natom21 9 brvltt21 7 spgaxor21 1 acell21 8 8 9 angdeg21 90 90 120 chkprim21 0 #R-3
+spgroup22 148 xred22 1/2 0 0 natom22 9 brvltt22 7 spgaxor22 1 acell22 8 8 9 angdeg22 90 90 120 chkprim22 0 #R-3
+spgroup23 148 xred23 0.12 0.34 0.56 natom23 18 brvltt23 7 spgaxor23 1 acell23 8 8 9 angdeg23 90 90 120 chkprim23 0 #R-3
+spgroup24 148 xred24 0 0 0 natom24 1 brvltt24 -1 spgaxor24 2 acell24 8 8 8 angdeg24 57 57 57 chkprim24 1 #R-3
+spgroup25 148 xred25 1/2 1/2 1/2 natom25 1 brvltt25 -1 spgaxor25 2 acell25 8 8 8 angdeg25 57 57 57 chkprim25 1 #R-3
+spgroup26 148 xred26 0.11 0.11 0.11 natom26 2 brvltt26 -1 spgaxor26 2 acell26 8 8 8 angdeg26 57 57 57 chkprim26 1 #R-3
+spgroup27 148 xred27 1/2 0 0 natom27 3 brvltt27 -1 spgaxor27 2 acell27 8 8 8 angdeg27 57 57 57 chkprim27 1 #R-3
+spgroup28 148 xred28 0 1/2 1/2 natom28 3 brvltt28 -1 spgaxor28 2 acell28 8 8 8 angdeg28 57 57 57 chkprim28 1 #R-3
+spgroup29 148 xred29 0.12 0.34 0.56 natom29 6 brvltt29 -1 spgaxor29 2 acell29 8 8 8 angdeg29 57 57 57 chkprim29 1 #R-3
+spgroup30 149 xred30 0 0 0 natom30 1 brvltt30 -1 spgaxor30 1 acell30 8 8 9 angdeg30 90 90 120 chkprim30 1 #P312
+spgroup31 149 xred31 0 0 1/2 natom31 1 brvltt31 -1 spgaxor31 1 acell31 8 8 9 angdeg31 90 90 120 chkprim31 1 #P312
+spgroup32 149 xred32 1/3 2/3 0 natom32 1 brvltt32 -1 spgaxor32 1 acell32 8 8 9 angdeg32 90 90 120 chkprim32 1 #P312
+spgroup33 149 xred33 1/3 2/3 1/2 natom33 1 brvltt33 -1 spgaxor33 1 acell33 8 8 9 angdeg33 90 90 120 chkprim33 1 #P312
+spgroup34 149 xred34 2/3 1/3 0 natom34 1 brvltt34 -1 spgaxor34 1 acell34 8 8 9 angdeg34 90 90 120 chkprim34 1 #P312
+spgroup35 149 xred35 2/3 1/3 1/2 natom35 1 brvltt35 -1 spgaxor35 1 acell35 8 8 9 angdeg35 90 90 120 chkprim35 1 #P312
+spgroup36 149 xred36 0 0 0.11 natom36 2 brvltt36 -1 spgaxor36 1 acell36 8 8 9 angdeg36 90 90 120 chkprim36 1 #P312
+spgroup37 149 xred37 1/3 2/3 0.11 natom37 2 brvltt37 -1 spgaxor37 1 acell37 8 8 9 angdeg37 90 90 120 chkprim37 1 #P312
+spgroup38 149 xred38 2/3 1/3 0.11 natom38 2 brvltt38 -1 spgaxor38 1 acell38 8 8 9 angdeg38 90 90 120 chkprim38 1 #P312
+spgroup39 149 xred39 0.11 0.89 0 natom39 3 brvltt39 -1 spgaxor39 1 acell39 8 8 9 angdeg39 90 90 120 chkprim39 1 #P312
+spgroup40 149 xred40 0.11 0.89 1/2 natom40 3 brvltt40 -1 spgaxor40 1 acell40 8 8 9 angdeg40 90 90 120 chkprim40 1 #P312
+spgroup41 149 xred41 0.12 0.34 0.56 natom41 6 brvltt41 -1 spgaxor41 1 acell41 8 8 9 angdeg41 90 90 120 chkprim41 1 #P312
+spgroup42 150 xred42 0 0 0 natom42 1 brvltt42 -1 spgaxor42 1 acell42 8 8 9 angdeg42 90 90 120 chkprim42 1 #P321
+spgroup43 150 xred43 0 0 1/2 natom43 1 brvltt43 -1 spgaxor43 1 acell43 8 8 9 angdeg43 90 90 120 chkprim43 1 #P321
+spgroup44 150 xred44 0 0 0.11 natom44 2 brvltt44 -1 spgaxor44 1 acell44 8 8 9 angdeg44 90 90 120 chkprim44 1 #P321
+spgroup45 150 xred45 1/3 2/3 0.11 natom45 2 brvltt45 -1 spgaxor45 1 acell45 8 8 9 angdeg45 90 90 120 chkprim45 1 #P321
+spgroup46 150 xred46 0.11 0 0 natom46 3 brvltt46 -1 spgaxor46 1 acell46 8 8 9 angdeg46 90 90 120 chkprim46 1 #P321
+spgroup47 150 xred47 0.11 0 1/2 natom47 3 brvltt47 -1 spgaxor47 1 acell47 8 8 9 angdeg47 90 90 120 chkprim47 1 #P321
+spgroup48 150 xred48 0.12 0.34 0.56 natom48 6 brvltt48 -1 spgaxor48 1 acell48 8 8 9 angdeg48 90 90 120 chkprim48 1 #P321
+spgroup49 151 xred49 0.11 0.89 1/3 natom49 3 brvltt49 -1 spgaxor49 1 acell49 8 8 9 angdeg49 90 90 120 chkprim49 1 #P3_112
+spgroup50 151 xred50 0.11 0.89 5/6 natom50 3 brvltt50 -1 spgaxor50 1 acell50 8 8 9 angdeg50 90 90 120 chkprim50 1 #P3_112
+spgroup51 151 xred51 0.12 0.34 0.56 natom51 6 brvltt51 -1 spgaxor51 1 acell51 8 8 9 angdeg51 90 90 120 chkprim51 1 #P3_112
+spgroup52 152 xred52 0.11 0 1/3 natom52 3 brvltt52 -1 spgaxor52 1 acell52 8 8 9 angdeg52 90 90 120 chkprim52 1 #P3_121
+spgroup53 152 xred53 0.11 0 5/6 natom53 3 brvltt53 -1 spgaxor53 1 acell53 8 8 9 angdeg53 90 90 120 chkprim53 1 #P3_121
+spgroup54 152 xred54 0.12 0.34 0.56 natom54 6 brvltt54 -1 spgaxor54 1 acell54 8 8 9 angdeg54 90 90 120 chkprim54 1 #P3_121
+spgroup55 153 xred55 0.11 0.89 2/3 natom55 3 brvltt55 -1 spgaxor55 1 acell55 8 8 9 angdeg55 90 90 120 chkprim55 1 #P3_212
+spgroup56 153 xred56 0.11 0.89 1/6 natom56 3 brvltt56 -1 spgaxor56 1 acell56 8 8 9 angdeg56 90 90 120 chkprim56 1 #P3_212
+spgroup57 153 xred57 0.12 0.34 0.56 natom57 6 brvltt57 -1 spgaxor57 1 acell57 8 8 9 angdeg57 90 90 120 chkprim57 1 #P3_212
+spgroup58 154 xred58 0.11 0 2/3 natom58 3 brvltt58 -1 spgaxor58 1 acell58 8 8 9 angdeg58 90 90 120 chkprim58 1 #P3_221
+spgroup59 154 xred59 0.11 0 1/6 natom59 3 brvltt59 -1 spgaxor59 1 acell59 8 8 9 angdeg59 90 90 120 chkprim59 1 #P3_221
+spgroup60 154 xred60 0.12 0.34 0.56 natom60 6 brvltt60 -1 spgaxor60 1 acell60 8 8 9 angdeg60 90 90 120 chkprim60 1 #P3_221
+spgroup61 155 xred61 0 0 0 natom61 3 brvltt61 7 spgaxor61 1 acell61 8 8 9 angdeg61 90 90 120 chkprim61 0 #R32
+spgroup62 155 xred62 0 0 1/2 natom62 3 brvltt62 7 spgaxor62 1 acell62 8 8 9 angdeg62 90 90 120 chkprim62 0 #R32
+spgroup63 155 xred63 0 0 0.11 natom63 6 brvltt63 7 spgaxor63 1 acell63 8 8 9 angdeg63 90 90 120 chkprim63 0 #R32
+spgroup64 155 xred64 0.11 0 0 natom64 9 brvltt64 7 spgaxor64 1 acell64 8 8 9 angdeg64 90 90 120 chkprim64 0 #R32
+spgroup65 155 xred65 0.11 0 1/2 natom65 9 brvltt65 7 spgaxor65 1 acell65 8 8 9 angdeg65 90 90 120 chkprim65 0 #R32
+spgroup66 155 xred66 0.12 0.34 0.56 natom66 18 brvltt66 7 spgaxor66 1 acell66 8 8 9 angdeg66 90 90 120 chkprim66 0 #R32
+spgroup67 155 xred67 0 0 0 natom67 1 brvltt67 -1 spgaxor67 2 acell67 8 8 8 angdeg67 57 57 57 chkprim67 1 #R32
+spgroup68 155 xred68 1/2 1/2 1/2 natom68 1 brvltt68 -1 spgaxor68 2 acell68 8 8 8 angdeg68 57 57 57 chkprim68 1 #R32
+spgroup69 155 xred69 0.11 0.11 0.11 natom69 2 brvltt69 -1 spgaxor69 2 acell69 8 8 8 angdeg69 57 57 57 chkprim69 1 #R32
+spgroup70 155 xred70 0 0.11 0.89 natom70 3 brvltt70 -1 spgaxor70 2 acell70 8 8 8 angdeg70 57 57 57 chkprim70 1 #R32
+spgroup71 155 xred71 1/2 0.11 0.89 natom71 3 brvltt71 -1 spgaxor71 2 acell71 8 8 8 angdeg71 57 57 57 chkprim71 1 #R32
+spgroup72 155 xred72 0.12 0.34 0.56 natom72 6 brvltt72 -1 spgaxor72 2 acell72 8 8 8 angdeg72 57 57 57 chkprim72 1 #R32
+spgroup73 156 xred73 0 0 0.11 natom73 1 brvltt73 -1 spgaxor73 1 acell73 8 8 9 angdeg73 90 90 120 chkprim73 1 #P3m1
+spgroup74 156 xred74 1/3 2/3 0.11 natom74 1 brvltt74 -1 spgaxor74 1 acell74 8 8 9 angdeg74 90 90 120 chkprim74 1 #P3m1
+spgroup75 156 xred75 2/3 1/3 0.11 natom75 1 brvltt75 -1 spgaxor75 1 acell75 8 8 9 angdeg75 90 90 120 chkprim75 1 #P3m1
+spgroup76 156 xred76 0.11 0.89 0.56 natom76 3 brvltt76 -1 spgaxor76 1 acell76 8 8 9 angdeg76 90 90 120 chkprim76 1 #P3m1
+spgroup77 156 xred77 0.12 0.34 0.56 natom77 6 brvltt77 -1 spgaxor77 1 acell77 8 8 9 angdeg77 90 90 120 chkprim77 1 #P3m1
+spgroup78 157 xred78 0 0 0.11 natom78 1 brvltt78 -1 spgaxor78 1 acell78 8 8 9 angdeg78 90 90 120 chkprim78 1 #P31m
+spgroup79 157 xred79 1/3 2/3 0.11 natom79 2 brvltt79 -1 spgaxor79 1 acell79 8 8 9 angdeg79 90 90 120 chkprim79 1 #P31m
+spgroup80 157 xred80 0.12 0 0.56 natom80 3 brvltt80 -1 spgaxor80 1 acell80 8 8 9 angdeg80 90 90 120 chkprim80 1 #P31m
+spgroup81 157 xred81 0.12 0.34 0.56 natom81 6 brvltt81 -1 spgaxor81 1 acell81 8 8 9 angdeg81 90 90 120 chkprim81 1 #P31m
+spgroup82 158 xred82 0 0 0.11 natom82 2 brvltt82 -1 spgaxor82 1 acell82 8 8 9 angdeg82 90 90 120 chkprim82 1 #P3c1
+spgroup83 158 xred83 1/3 2/3 0.11 natom83 2 brvltt83 -1 spgaxor83 1 acell83 8 8 9 angdeg83 90 90 120 chkprim83 1 #P3c1
+spgroup84 158 xred84 2/3 1/3 0.11 natom84 2 brvltt84 -1 spgaxor84 1 acell84 8 8 9 angdeg84 90 90 120 chkprim84 1 #P3c1
+spgroup85 158 xred85 0.12 0.34 0.56 natom85 6 brvltt85 -1 spgaxor85 1 acell85 8 8 9 angdeg85 90 90 120 chkprim85 1 #P3c1
+spgroup86 159 xred86 0 0 0.11 natom86 2 brvltt86 -1 spgaxor86 1 acell86 8 8 9 angdeg86 90 90 120 chkprim86 1 #P31c
+spgroup87 159 xred87 1/3 2/3 0.11 natom87 2 brvltt87 -1 spgaxor87 1 acell87 8 8 9 angdeg87 90 90 120 chkprim87 1 #P31c
+spgroup88 159 xred88 0.12 0.34 0.56 natom88 6 brvltt88 -1 spgaxor88 1 acell88 8 8 9 angdeg88 90 90 120 chkprim88 1 #P31c
+spgroup89 160 xred89 0 0 0.11 natom89 3 brvltt89 7 spgaxor89 1 acell89 8 8 9 angdeg89 90 90 120 chkprim89 0 #R3m
+spgroup90 160 xred90 0.11 0.89 0.34 natom90 9 brvltt90 7 spgaxor90 1 acell90 8 8 9 angdeg90 90 90 120 chkprim90 0 #R3m
+spgroup91 160 xred91 0.12 0.34 0.56 natom91 18 brvltt91 7 spgaxor91 1 acell91 8 8 9 angdeg91 90 90 120 chkprim91 0 #R3m
+spgroup92 160 xred92 0.11 0.11 0.11 natom92 1 brvltt92 -1 spgaxor92 2 acell92 8 8 8 angdeg92 57 57 57 chkprim92 1 #R3m
+spgroup93 160 xred93 0.11 0.11 0.56 natom93 3 brvltt93 -1 spgaxor93 2 acell93 8 8 8 angdeg93 57 57 57 chkprim93 1 #R3m
+spgroup94 160 xred94 0.12 0.34 0.56 natom94 6 brvltt94 -1 spgaxor94 2 acell94 8 8 8 angdeg94 57 57 57 chkprim94 1 #R3m
+spgroup95 161 xred95 0 0 0.11 natom95 6 brvltt95 7 spgaxor95 1 acell95 8 8 9 angdeg95 90 90 120 chkprim95 0 #R3c
+spgroup96 161 xred96 0.12 0.34 0.56 natom96 18 brvltt96 7 spgaxor96 1 acell96 8 8 9 angdeg96 90 90 120 chkprim96 0 #R3c
+spgroup97 161 xred97 0.11 0.11 0.11 natom97 2 brvltt97 -1 spgaxor97 2 acell97 8 8 8 angdeg97 57 57 57 chkprim97 1 #R3c
+spgroup98 161 xred98 0.12 0.34 0.56 natom98 6 brvltt98 -1 spgaxor98 2 acell98 8 8 8 angdeg98 57 57 57 chkprim98 1 #R3c
+spgroup99 162 xred99 0 0 0 natom99 1 brvltt99 -1 spgaxor99 1 acell99 8 8 9 angdeg99 90 90 120 chkprim99 1 #P-31m
+spgroup100 162 xred100 0 0 1/2 natom100 1 brvltt100 -1 spgaxor100 1 acell100 8 8 9 angdeg100 90 90 120 chkprim100 1 #P-31m
+spgroup101 162 xred101 1/3 2/3 0 natom101 2 brvltt101 -1 spgaxor101 1 acell101 8 8 9 angdeg101 90 90 120 chkprim101 1 #P-31m
+spgroup102 162 xred102 1/3 2/3 1/2 natom102 2 brvltt102 -1 spgaxor102 1 acell102 8 8 9 angdeg102 90 90 120 chkprim102 1 #P-31m
+spgroup103 162 xred103 0 0 0.11 natom103 2 brvltt103 -1 spgaxor103 1 acell103 8 8 9 angdeg103 90 90 120 chkprim103 1 #P-31m
+spgroup104 162 xred104 1/2 0 0 natom104 3 brvltt104 -1 spgaxor104 1 acell104 8 8 9 angdeg104 90 90 120 chkprim104 1 #P-31m
+spgroup105 162 xred105 1/2 0 1/2 natom105 3 brvltt105 -1 spgaxor105 1 acell105 8 8 9 angdeg105 90 90 120 chkprim105 1 #P-31m
+spgroup106 162 xred106 1/3 2/3 0.11 natom106 4 brvltt106 -1 spgaxor106 1 acell106 8 8 9 angdeg106 90 90 120 chkprim106 1 #P-31m
+spgroup107 162 xred107 0.11 0.89 0 natom107 6 brvltt107 -1 spgaxor107 1 acell107 8 8 9 angdeg107 90 90 120 chkprim107 1 #P-31m
+spgroup108 162 xred108 0.11 0.89 1/2 natom108 6 brvltt108 -1 spgaxor108 1 acell108 8 8 9 angdeg108 90 90 120 chkprim108 1 #P-31m
+spgroup109 162 xred109 0.12 0 0.56 natom109 6 brvltt109 -1 spgaxor109 1 acell109 8 8 9 angdeg109 90 90 120 chkprim109 1 #P-31m
+spgroup110 162 xred110 0.12 0.34 0.56 natom110 12 brvltt110 -1 spgaxor110 1 acell110 8 8 9 angdeg110 90 90 120 chkprim110 1 #P-31m
+spgroup111 163 xred111 0 0 1/2 natom111 2 brvltt111 -1 spgaxor111 1 acell111 8 8 9 angdeg111 90 90 120 chkprim111 1 #P-31c
+spgroup112 163 xred112 0 0 0. natom112 2 brvltt112 -1 spgaxor112 1 acell112 8 8 9 angdeg112 90 90 120 chkprim112 1 #P-31c
+spgroup113 163 xred113 1/3 2/3 1/4 natom113 2 brvltt113 -1 spgaxor113 1 acell113 8 8 9 angdeg113 90 90 120 chkprim113 1 #P-31c
+spgroup114 163 xred114 2/3 1/3 1/4 natom114 2 brvltt114 -1 spgaxor114 1 acell114 8 8 9 angdeg114 90 90 120 chkprim114 1 #P-31c
+spgroup115 163 xred115 0 0 0.11 natom115 4 brvltt115 -1 spgaxor115 1 acell115 8 8 9 angdeg115 90 90 120 chkprim115 1 #P-31c
+spgroup116 163 xred116 1/3 2/3 0.11 natom116 4 brvltt116 -1 spgaxor116 1 acell116 8 8 9 angdeg116 90 90 120 chkprim116 1 #P-31c
+spgroup117 163 xred117 1/2 0 0. natom117 6 brvltt117 -1 spgaxor117 1 acell117 8 8 9 angdeg117 90 90 120 chkprim117 1 #P-31c
+spgroup118 163 xred118 0.11 0.89 1/4 natom118 6 brvltt118 -1 spgaxor118 1 acell118 8 8 9 angdeg118 90 90 120 chkprim118 1 #P-31c
+spgroup119 163 xred119 0.12 0.34 0.56 natom119 12 brvltt119 -1 spgaxor119 1 acell119 8 8 9 angdeg119 90 90 120 chkprim119 1 #P-31c
+spgroup120 164 xred120 0 0 0. natom120 1 brvltt120 -1 spgaxor120 1 acell120 8 8 9 angdeg120 90 90 120 chkprim120 1 #P-3m1
+spgroup121 164 xred121 0 0 1/2 natom121 1 brvltt121 -1 spgaxor121 1 acell121 8 8 9 angdeg121 90 90 120 chkprim121 1 #P-3m1
+spgroup122 164 xred122 0 0 0.11 natom122 2 brvltt122 -1 spgaxor122 1 acell122 8 8 9 angdeg122 90 90 120 chkprim122 1 #P-3m1
+spgroup123 164 xred123 1/3 2/3 0.11 natom123 2 brvltt123 -1 spgaxor123 1 acell123 8 8 9 angdeg123 90 90 120 chkprim123 1 #P-3m1
+spgroup124 164 xred124 1/2 0 0. natom124 3 brvltt124 -1 spgaxor124 1 acell124 8 8 9 angdeg124 90 90 120 chkprim124 1 #P-3m1
+spgroup125 164 xred125 1/2 0 1/2 natom125 3 brvltt125 -1 spgaxor125 1 acell125 8 8 9 angdeg125 90 90 120 chkprim125 1 #P-3m1
+spgroup126 164 xred126 0.11 0 0. natom126 6 brvltt126 -1 spgaxor126 1 acell126 8 8 9 angdeg126 90 90 120 chkprim126 1 #P-3m1
+spgroup127 164 xred127 0.11 0 1/2 natom127 6 brvltt127 -1 spgaxor127 1 acell127 8 8 9 angdeg127 90 90 120 chkprim127 1 #P-3m1
+spgroup128 164 xred128 0.11 0.89 0.56 natom128 6 brvltt128 -1 spgaxor128 1 acell128 8 8 9 angdeg128 90 90 120 chkprim128 1 #P-3m1
+spgroup129 164 xred129 0.12 0.34 0.56 natom129 12 brvltt129 -1 spgaxor129 1 acell129 8 8 9 angdeg129 90 90 120 chkprim129 1 #P-3m1
+spgroup130 165 xred130 0 0 1/4 natom130 2 brvltt130 -1 spgaxor130 1 acell130 8 8 9 angdeg130 90 90 120 chkprim130 1 #P-3c1
+spgroup131 165 xred131 0 0 0. natom131 2 brvltt131 -1 spgaxor131 1 acell131 8 8 9 angdeg131 90 90 120 chkprim131 1 #P-3c1
+spgroup132 165 xred132 0 0 0.11 natom132 4 brvltt132 -1 spgaxor132 1 acell132 8 8 9 angdeg132 90 90 120 chkprim132 1 #P-3c1
+spgroup133 165 xred133 1/3 2/3 1/4 natom133 4 brvltt133 -1 spgaxor133 1 acell133 8 8 9 angdeg133 90 90 120 chkprim133 1 #P-3c1
+spgroup134 165 xred134 1/2 0 0. natom134 6 brvltt134 -1 spgaxor134 1 acell134 8 8 9 angdeg134 90 90 120 chkprim134 1 #P-3c1
+spgroup135 165 xred135 0.11 0 1/4 natom135 6 brvltt135 -1 spgaxor135 1 acell135 8 8 9 angdeg135 90 90 120 chkprim135 1 #P-3c1
+spgroup136 165 xred136 0.12 0.34 0.56 natom136 12 brvltt136 -1 spgaxor136 1 acell136 8 8 9 angdeg136 90 90 120 chkprim136 1 #P-3c1
+spgroup137 166 xred137 0 0 0 natom137 3 brvltt137 7 spgaxor137 1 acell137 8 8 9 angdeg137 90 90 120 chkprim137 0 #R-3m
+spgroup138 166 xred138 0 0 1/2 natom138 3 brvltt138 7 spgaxor138 1 acell138 8 8 9 angdeg138 90 90 120 chkprim138 0 #R-3m
+spgroup139 166 xred139 0 0 0.11 natom139 6 brvltt139 7 spgaxor139 1 acell139 8 8 9 angdeg139 90 90 120 chkprim139 0 #R-3m
+spgroup140 166 xred140 1/2 0 1/2 natom140 9 brvltt140 7 spgaxor140 1 acell140 8 8 9 angdeg140 90 90 120 chkprim140 0 #R-3m
+spgroup141 166 xred141 1/2 0 0 natom141 9 brvltt141 7 spgaxor141 1 acell141 8 8 9 angdeg141 90 90 120 chkprim141 0 #R-3m
+spgroup142 166 xred142 0.11 0 0 natom142 18 brvltt142 7 spgaxor142 1 acell142 8 8 9 angdeg142 90 90 120 chkprim142 0 #R-3m
+spgroup143 166 xred143 0.11 0 1/2 natom143 18 brvltt143 7 spgaxor143 1 acell143 8 8 9 angdeg143 90 90 120 chkprim143 0 #R-3m
+spgroup144 166 xred144 0.11 0.89 0.56 natom144 18 brvltt144 7 spgaxor144 1 acell144 8 8 9 angdeg144 90 90 120 chkprim144 0 #R-3m
+spgroup145 166 xred145 0.12 0.34 0.56 natom145 36 brvltt145 7 spgaxor145 1 acell145 8 8 9 angdeg145 90 90 120 chkprim145 0 #R-3m
+spgroup146 166 xred146 0 0 0 natom146 1 brvltt146 -1 spgaxor146 2 acell146 8 8 8 angdeg146 57 57 57 chkprim146 1 #R-3m
+spgroup147 166 xred147 1/2 1/2 1/2 natom147 1 brvltt147 -1 spgaxor147 2 acell147 8 8 8 angdeg147 57 57 57 chkprim147 1 #R-3m
+spgroup148 166 xred148 0.11 0.11 0.11 natom148 2 brvltt148 -1 spgaxor148 2 acell148 8 8 8 angdeg148 57 57 57 chkprim148 1 #R-3m
+spgroup149 166 xred149 1/2 0 0 natom149 3 brvltt149 -1 spgaxor149 2 acell149 8 8 8 angdeg149 57 57 57 chkprim149 1 #R-3m
+spgroup150 166 xred150 0 1/2 1/2 natom150 3 brvltt150 -1 spgaxor150 2 acell150 8 8 8 angdeg150 57 57 57 chkprim150 1 #R-3m
+spgroup151 166 xred151 0.11 0.89 0 natom151 6 brvltt151 -1 spgaxor151 2 acell151 8 8 8 angdeg151 57 57 57 chkprim151 1 #R-3m
+spgroup152 166 xred152 0.11 0.89 1/2 natom152 6 brvltt152 -1 spgaxor152 2 acell152 8 8 8 angdeg152 57 57 57 chkprim152 1 #R-3m
+spgroup153 166 xred153 0.11 0.11 0.56 natom153 6 brvltt153 -1 spgaxor153 2 acell153 8 8 8 angdeg153 57 57 57 chkprim153 1 #R-3m
+spgroup154 166 xred154 0.12 0.34 0.56 natom154 12 brvltt154 -1 spgaxor154 2 acell154 8 8 8 angdeg154 57 57 57 chkprim154 1 #R-3m
+spgroup155 167 xred155 0 0 1/4 natom155 6 brvltt155 7 spgaxor155 1 acell155 8 8 9 angdeg155 90 90 120 chkprim155 0 #R-3c
+spgroup156 167 xred156 0 0 0. natom156 6 brvltt156 7 spgaxor156 1 acell156 8 8 9 angdeg156 90 90 120 chkprim156 0 #R-3c
+spgroup157 167 xred157 0 0 0.11 natom157 12 brvltt157 7 spgaxor157 1 acell157 8 8 9 angdeg157 90 90 120 chkprim157 0 #R-3c
+spgroup158 167 xred158 1/2 0 0. natom158 18 brvltt158 7 spgaxor158 1 acell158 8 8 9 angdeg158 90 90 120 chkprim158 0 #R-3c
+spgroup159 167 xred159 0.11 0 1/4 natom159 18 brvltt159 7 spgaxor159 1 acell159 8 8 9 angdeg159 90 90 120 chkprim159 0 #R-3c
+spgroup160 167 xred160 0.12 0.34 0.56 natom160 36 brvltt160 7 spgaxor160 1 acell160 8 8 9 angdeg160 90 90 120 chkprim160 0 #R-3c
+spgroup161 167 xred161 1/4 1/4 1/4 natom161 2 brvltt161 -1 spgaxor161 2 acell161 8 8 8 angdeg161 57 57 57 chkprim161 1 #R-3c
+spgroup162 167 xred162 0  0 0. natom162 2 brvltt162 -1 spgaxor162 2 acell162 8 8 8 angdeg162 57 57 57 chkprim162 1 #R-3c
+spgroup163 167 xred163 0.11 0.11 0.11 natom163 4 brvltt163 -1 spgaxor163 2 acell163 8 8 8 angdeg163 57 57 57 chkprim163 1 #R-3c
+spgroup164 167 xred164 1/2 0 0. natom164 6 brvltt164 -1 spgaxor164 2 acell164 8 8 8 angdeg164 57 57 57 chkprim164 1 #R-3c
+spgroup165 167 xred165 0.11 0.39 1/4 natom165 6 brvltt165 -1 spgaxor165 2 acell165 8 8 8 angdeg165 57 57 57 chkprim165 1 #R-3c
+spgroup166 167 xred166 0.12 0.34 0.56 natom166 12 brvltt166 -1 spgaxor166 2 acell166 8 8 8 angdeg166 57 57 57 chkprim166 1 #R-3c
+
+ndtset 166
+
+ntypat 1
+typat 1
+znucl 1
+natrd 1
+ecut 1
+kptopt 0   nkpt 1
+nline 1    nstep 1
+toldfe 1.0d-6
+
+pp_dirpath "$ABI_PSPDIR"
+pseudos "01h.bare"
+
+acell 8 8 9
+angdeg  90 90 120
+
+# Common data
+prtvol -1          # stop in abinit (main program), before call driver.
+brvltt -1          # important to reduce the conventional cell to primitive,
+# and allow the recognition of space groupi
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t02.abo, tolnlines=  0, tolabs=  0.0e0, tolrel= 0.0e0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = 
+#%% description = Test Wyckoff positions of trigonal group
+#%% topics = 
+#%%<END TEST_INFO>
