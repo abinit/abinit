@@ -677,7 +677,7 @@
 
 # Supported libraries:
 #
-#   * AOCL      : AMD Optimizing CPU Libraries
+#   * aocl      : AMD Optimizing CPU Libraries
 #                 https://developer.amd.com/amd-aocl/
 #
 #   * atlas     : Automatically Tuned Linear Algebra Software
@@ -705,6 +705,11 @@
 #
 #   * none      : just check user-specified libraries, do not try to
 #                 detect their type
+#
+#
+#   * nvpl      : Nvidia Performance Library (NVPL)
+#                 (only for ARM processors)
+#                 https://docs.nvidia.com/nvpl/
 #
 #   * openblas  : OpenBLAS - An Optimized BLAS Library
 #                 https://www.openblas.net/
@@ -786,6 +791,7 @@
 #   * dfti          : native MKL FFT library
 #   * fftw3         : serial FFTW3 library
 #   * fftw3-threads : threaded FFTW3 library
+#   * nvpl          : NVPL: Nvidia Performance Library (only for ARM)
 #   * pfft          : MPI-parallel PFFT library (for maintainers only)
 #   * goedecker     : Abinit internal FFT
 #
