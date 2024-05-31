@@ -1090,7 +1090,7 @@ contains
       do i=1, npwin*nspinor*ndat
         temp_realvec_r(i) = vectin(1,i)
       end do
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
         !!$OMP TARGET LOOP &
         !$OMP& MAP(to:temp_realvec_r) PRIVATE(idat)
@@ -1117,7 +1117,7 @@ contains
       do i=1, npwin*nspinor*ndat
         temp_realvec_i(i) = vectin(2,i)
       end do
-      if(istwf_k == 2 .and. mpi_enreg%me_g0 == 1) then
+      if(istwf_k == 2 .and. mpi_enreg%me_g0_fft == 1) then
         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
         !!$OMP TARGET LOOP &
         !$OMP& MAP(to:temp_realvec_i) PRIVATE(idat)
