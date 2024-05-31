@@ -1355,9 +1355,10 @@ contains
     type(xgBlock_t), intent(in) :: xgBlock
     integer :: rows
     rows = xgBlock%rows
-    if ( rows /= xgBlock%ldim ) then
-      ABI_WARNING("rows/ldim ! Be very careful at what you are doing")
-    end if
+    !LB-31/05/24 : this warning is too verbose when activated... (even with correct coding!)
+    !if ( rows /= xgBlock%ldim ) then
+    !  ABI_WARNING("rows/ldim ! Be very careful at what you are doing")
+    !end if
   end function rows
   !!***
 

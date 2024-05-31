@@ -190,9 +190,7 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
    me_g0,me_g0_fft)
 
  ! Run lobpcg
- if (nline>0) then
-   call lobpcg_run_cprj(lobpcg,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,prtvol,nspinor)
- end if
+ call lobpcg_run_cprj(lobpcg,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,prtvol,nspinor)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)

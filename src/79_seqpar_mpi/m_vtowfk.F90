@@ -373,7 +373,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      write(msg,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
      call wrtout(std_out,msg,'COLL')
    end if
-   cprj_cwavef_bands => cprj(:,1+ibg:nband_k*my_nspinor+ibg)
+   cprj_cwavef_bands => cprj(:,1+ibg:nband_k/mpi_enreg%nproc_band*my_nspinor+ibg)
  end if
 
 !Electric field: initialize dphase_k
