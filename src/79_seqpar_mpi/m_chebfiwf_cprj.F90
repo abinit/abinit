@@ -238,9 +238,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
 
  ! Run chebfi
- if (nline>0) then
-   call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,nspinor)
- end if
+ call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,nspinor)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
