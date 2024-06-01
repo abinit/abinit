@@ -2361,6 +2361,11 @@ subroutine fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
  gpu_option_=ABI_GPU_DISABLED
  if (PRESENT(gpu_option)) gpu_option_=gpu_option
 
+ !If processing gamma-point, disable GPU, except OpenMP (not supported on other variants)
+ if(me_g0==1 .and. istwf_k>1 .and. gpu_option_/=ABI_GPU_OPENMP) then
+   gpu_option_=ABI_GPU_DISABLED
+ end if
+
  if(gpu_option_/=ABI_GPU_DISABLED) then
    if (present(weight_array_r)) then
      weight_ptr_r => weight_array_r
