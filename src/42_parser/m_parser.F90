@@ -1237,17 +1237,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i1)')dozens
+     write(appen,'(i0)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
+     cs1len=toklen+len(trim(appen))+3
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
-     itoken1=index(string,cs1(1:cslen))
+     itoken1=index(string,cs1(1:cs1len))
      ! Look for another occurence of the same token in string, if so, leaves:
-     itoken2=index(string,cs1(1:cslen), BACK=.true. )
+     itoken2=index(string,cs1(1:cs1len), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
+       'There are two occurences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
        ABI_ERROR(msg)
@@ -1255,7 +1256,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cs1len),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        ABI_ERROR(msg)
@@ -1265,6 +1266,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        opttoken=1
        itoken=itoken1
        cs=cs1
+       cslen=cs1len
        ds_input_=jdtset
      end if
 
