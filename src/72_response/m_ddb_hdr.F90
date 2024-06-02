@@ -2984,7 +2984,10 @@ subroutine psddb8 (choice,dimekb,ekb,with_psps,indlmn,lmnmax,&
      read(nunit, '(32x,i6)' )vrspsp8
      if (vrspsp8==vrsio8_old.or.vrspsp8==vrsio8_old_old) then
        usepaw0=0
-       read(nunit, '(10x,i3,14x,i3,11x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
+       ! this format statement is inconsistent with test v2[13]
+       ! JWZ 31 May 2024
+       !read(nunit, '(10x,i3,14x,i3,11x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
+       read(nunit, '(10x,i3,14x,i3,14x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
        if(ios/=0)then
          backspace(nunit)
          read (nunit, '(10x,i3,14x,i3)' )dimekb0,lmnmax0
@@ -4375,7 +4378,10 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
    read (unddb,*)
    if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
-     read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
+     ! this format statement is inconsistent with the ddb for test v2[13] 
+     ! JWZ 31 May 2024
+     !read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
+     read (unddb, '(10x,i3,14x,i3,14x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      if(ios/=0)then
        backspace(unddb)
        read (unddb, '(10x,i3,14x,i3)')dimekb,lmnmax

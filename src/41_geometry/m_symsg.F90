@@ -570,6 +570,7 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !arrays
  integer :: genm(3,3),genmmp(3,3),genswm(3,3),genswmmm(3,3),genswmmp(3,3)
  integer :: genswp(3,3)
+ integer :: genswmmm_r(3,3), genswp_r(3,3)
 
 !*************************************************************************
 
@@ -581,15 +582,22 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
  symrel(:,:,1)=0 ; symrel(1,1,1)=1 ; symrel(2,2,1)=1 ; symrel(3,3,1)=1
 
 !Predefine some generators
- genswm(:,:)=0 ; genswm(2,1)=1 ; genswm(1,2)=1 ; genswm(3,3)=-1 !reshape((/0,1,0,1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )
- genswmmm(:,:)=0 ; genswmmm(2,1)=-1 ; genswmmm(1,2)=-1 ; genswmmm(3,3)=-1
-!reshape((/0,-1,0,-1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )
- genswmmp(:,:)=0 ; genswmmp(2,1)=-1 ; genswmmp(1,2)=-1 ; genswmmp(3,3)=1
-!reshape((/0,-1,0,-1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
- genswp(:,:)=0 ; genswp(2,1)=1 ; genswp(1,2)=1 ; genswp(3,3)=1
-!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
- genmmp(:,:)=0 ; genmmp(1,1)=-1 ; genmmp(2,2)=-1 ; genmmp(3,3)=1
-!reshape((/-1,0,0,0,-1,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )
+ genswm(:,:)=0 ; genswm(2,1)=1 ; genswm(1,2)=1 ; genswm(3,3)=-1           ! 2 fold axis along x+y, hex setting
+!reshape((/0,1,0,1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) )   ! x -> +y; y -> +x; z -> -z
+
+ genswmmm(:,:)=0 ; genswmmm(2,1)=-1 ; genswmmm(1,2)=-1 ; genswmmm(3,3)=-1 ! 2 fold axis along x-y, hex setting
+!reshape((/0,-1,0,-1,0,0,0,0,-1/),(/3,3/),(/0,0/),(/2,1/) ) ! x -> -y; y -> -x; z -> -z
+ genswmmm_r(:,:)=0 ; genswmmm_r(3,1)=-1 ; genswmmm_r(2,2)=-1 ; genswmmm_r(1,3)=-1 ! 2 fold axis along z-x, rhombo setting
+
+ genswmmp(:,:)=0 ; genswmmp(2,1)=-1 ; genswmmp(1,2)=-1 ; genswmmp(3,3)=1  ! mirror plane perpendicular to x+y
+!reshape((/0,-1,0,-1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )  ! x -> -y; y -> -x; z -> +z
+
+ genswp(:,:)=0 ; genswp(2,1)=1 ; genswp(1,2)=1 ; genswp(3,3)=1            ! mirror plane perpendicular to x-y, hex setting
+!reshape((/0,1,0,1,0,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )    ! x -> +y; y -> +x; z -> +z 
+ genswp_r(:,:)=0 ; genswp_r(1,3)=1 ; genswp_r(2,2)=1 ; genswp_r(3,1)=1    ! mirror plane perpendicular to z-x, rhombo setting
+
+ genmmp(:,:)=0 ; genmmp(1,1)=-1 ; genmmp(2,2)=-1 ; genmmp(3,3)=1          ! 2 fold axis along z
+!reshape((/-1,0,0,0,-1,0,0,0,1/),(/3,3/),(/0,0/),(/2,1/) )  ! x-> -x; y -> -y; z -> z
 
 !Initialize the associated translations matrix to 0
  do ii=1,nsym
@@ -615,58 +623,70 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 
 !    Assigns the generators to each space group
      select case (spgroup)
-     case (143,146,147,148)        !P3, R3, PB3, RB3
+     case (143,146,147,148)            !P3, R3, PB3, RB3
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
-       nogen=0 ! All symmetries have been generated
-     case (144)                !P31
+       nogen=0 ! All symmetries have been generated:
+               !??? for 146 147 need to complete with inversion or translation sym inside hex cell or both
+     case (144)                        !P31
        tnons(:,2)=(/0.d0,0.d0,twothird/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,third/)
        nogen=0 ! All symmetries have been generated
-     case (145)                !P32
+     case (145)                        !P32
        tnons(:,2)=(/0.d0,0.d0,third/)
        symrel(:,:,3)=0 ; symrel(1,2,3)=-1 ; symrel(2,1,3)=1 ; symrel(2,2,3)=-1 ; symrel(3,3,3)=1
 !        reshape((/0,-1,0,1,-1,0,0,0,1/), (/3,3/), (/0,0/), (/2,1/) )
        tnons(:,3)=(/0.d0,0.d0,twothird/)
        nogen=0 ! All symmetries have been generated
-     case (149)                !P312
-       symrel(:,:,3) = genswmmm(:,:)
+     case (149)                        !P312
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
        nogen=3
-     case (150,155)                !P321, R32
-       symrel(:,:,3) = genswm(:,:)
+     case (150,155)                    !P321, R32
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (151)                !P3112
+       ! 155 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (151)                        !P3112
        tnons(:,2)=(/0.d0,0.d0,twothird/)
-       symrel(:,:,3) = genswmmm(:,:)
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
+       tnons(:,3)=(/0.d0,0.d0,twothird/)
        nogen=3
-     case (152)                !P3121
+     case (152)                        !P3121
        tnons(:,2)=(/0.d0,0.d0,twothird/)
-       symrel(:,:,3) = genswm(:,:)
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (153)                !P3212
+     case (153)                        !P3212
        tnons(:,2)=(/0.d0,0.d0,third/)
-       symrel(:,:,3) = genswmmm(:,:)
+       symrel(:,:,3) = genswmmm(:,:)   ! 2 fold axis along x-y
+       tnons(:,3)=(/0.d0,0.d0,third/)
        nogen=3
-     case (154)                !P3221
+     case (154)                        !P3221
        tnons(:,2)=(/0.d0,0.d0,third/)
-       symrel(:,:,3) = genswm(:,:)
+       symrel(:,:,3) = genswm(:,:)     ! 2 fold axis along x+y
        nogen=3
-     case (156,160,164,166)        !P3m1, R3m, PB3m1, RB3m
-       symrel(:,:,3) = genswmmp(:,:)
+     case (156,160,164,166)            !P3m1, R3m, PB3m1, RB3m
+       symrel(:,:,3) = genswmmp(:,:)   ! mirror plane perpendicular to x+y
        nogen=3
-     case (157,162)                !P31m, PB31m
-       symrel(:,:,3) = genswp(:,:)
+       ! 160 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+       ! 164 also has 2 and -3 axes
+       ! 166 also has 2 and -3 axes and sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (157,162)                    !P31m, PB31m
+       symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        nogen=3
-     case (158,161,165,167)        !P3c1, R3c, PB3c1, RB3c
-       symrel(:,:,3) = genswmmp(:,:)
+       ! 162 also has 2 and -3 axes 
+     case (158,161,165,167)            !P3c1, R3c, PB3c1, RB3c
+       symrel(:,:,3) = genswmmp(:,:)   ! mirror plane perpendicular to x+y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
        nogen=3
-     case (159,163)                !P31c, PB31c
-       symrel(:,:,3) = genswp(:,:)
+       ! 161 add sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+       ! 165 also has 2 and -3 axes
+       ! 167 also has 2 and -3 axes and sets at 2/3 1/3 1/3 and 1/3 2/3 2/3
+     case (159,163)                    !P31c, PB31c
+       symrel(:,:,3) = genswp(:,:)     ! mirror plane perpendicular to x-y
        tnons(:,3)=(/0.d0,0.d0,0.5d0/)
        nogen=3
+       ! 163 also has 2 and -3 axes 
      end select
 
      select case (spgroup)
@@ -689,19 +709,20 @@ subroutine symsghexa(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupm
 !    Assignment of common three-fold rotation
      symrel(:,:,2)=0 ; symrel(1,3,2)=1 ; symrel(3,2,2)=1 ; symrel(2,1,2)=1
 !    reshape((/0,0,1,1,0,0,0,1,0/),(/3,3/),(/0,0/),(/2,1/) )
+!    Inverse of same operation, but this is not a generator!
      symrel(:,:,3)=0 ; symrel(3,1,3)=1 ; symrel(2,3,3)=1 ; symrel(1,2,3)=1
 !    reshape((/0,1,0,0,0,1,1,0,0/), (/3,3/), (/0,0/), (/2,1/) )
 
      select case (spgroup)
      case (146,148)       !R3
      case (155,166)       !R32, RB3m
-       symrel(:,:,4) = genswmmm(:,:)
+       symrel(:,:,4) = genswmmm_r(:,:) ! 2 fold axis along x-y
        nogen=4
      case (160)           !R3m
-       symrel(:,:,4) = genswp(:,:)
+       symrel(:,:,4) = genswp_r(:,:)   ! mirror plane perpendicular to z-x
        nogen=4
      case (161,167)       !R3c, RB3c
-       symrel(:,:,4) = genswp(:,:)
+       symrel(:,:,4) = genswp_r(:,:)   ! mirror plane perpendicular to z-x
        tnons(:,4)=(/0.5d0,0.5d0,0.5d0/)
        nogen=4
      end select

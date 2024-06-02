@@ -732,10 +732,12 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
 !  Set search range (density cuts off perfectly beyond range)
    range=xcccrc(itypat);if (usepaw==1) range=pawtab(itypat)%rcore
-   range2=range**2 ; rangem1=one/range
 
 !  Skip loop if this type has no core charge
    if (abs(range)<1.d-16) cycle
+
+   range2=range**2 ; rangem1=one/range
+
 
 !  PAW: select core density type and create mesh
    if (usepaw==1) then

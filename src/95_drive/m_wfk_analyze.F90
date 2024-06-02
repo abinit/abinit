@@ -420,30 +420,30 @@ case (WFK_TASK_WANNIER)
   !end if
   !call xmpi_barrier(comm)
 
-      ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
-      ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
-      keep_ur = .False.; bks_mask = .True.
-      call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
-        dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
-        dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
+  ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
+  ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
+  keep_ur = .False.; bks_mask = .True.
+  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+    dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
+    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
 
-      ABI_FREE(keep_ur)
-      ABI_FREE(bks_mask)
-      iomode= iomode_from_fname(wfk0_path)
-      call wfd%read_wfk(wfk0_path, iomode)
+  ABI_FREE(keep_ur)
+  ABI_FREE(bks_mask)
+  iomode= iomode_from_fname(wfk0_path)
+  call wfd%read_wfk(wfk0_path, iomode)
 
 
-      call destroy_mpi_enreg(mpi_enreg)
-      call init_mpi_enreg(mpi_enreg)
-      call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
-      call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+  call destroy_mpi_enreg(mpi_enreg)
+  call init_mpi_enreg(mpi_enreg)
+  call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
+  call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
-      call wfd_run_wannier(cryst=cryst, ebands=ebands,&
-           & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
-           & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
-           & dtset=dtset, dtfil=dtfil,  &
-           & pawang=pawang, pawrad=pawrad, &
-           & pawtab=pawtab, psps=psps )
+  call wfd_run_wannier(cryst=cryst, ebands=ebands,&
+       & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
+       & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
+       & dtset=dtset, dtfil=dtfil,  &
+       & pawang=pawang, pawrad=pawrad, &
+       & pawtab=pawtab, psps=psps )
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
