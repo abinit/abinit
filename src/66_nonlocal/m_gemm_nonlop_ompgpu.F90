@@ -1226,15 +1226,11 @@ contains
         iatm = iatm+nattyp(itypat)
       end do
     else
-      !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
-      !!$OMP TARGET LOOP &
-      !$OMP& MAP(to:projections_ptr,s_projections) PRIVATE(i1,i2)
-      do i2=1, nspinor*ndat
-        do i1=1, nprojs
-          s_projections(1,i1,i2) = projections_ptr(1,i1,i2)
-          s_projections(2,i1,i2) = projections_ptr(2,i1,i2)
-        end do
-      end do
+      !$OMP TARGET DATA USE_DEVICE_PTR(s_projections,projections_ptr)
+      call copy_gpu_to_gpu(c_loc(s_projections), &
+           &               c_loc(projections_ptr), &
+           &               INT(cplex, c_size_t) * nprojs * nspinor * ndat * dp)
+      !$OMP END TARGET DATA
     end if
 
     ! opernlb (only choice=1)
