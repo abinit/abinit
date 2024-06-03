@@ -642,8 +642,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  logical,optional,intent(in)            :: already_transposed
  integer,optional,intent(in)            :: gpu_option
  real(dp),        intent(in)            :: lambdablock(blocksize)
- real(dp),        intent(out)           :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
- real(dp),        intent(inout)         :: cwavef(:,:)
+ real(dp),        intent(out)  , target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
+ real(dp),        intent(inout), target :: cwavef(:,:)
  real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(in)              :: mpi_enreg

@@ -160,6 +160,7 @@ _tsuite_dirs = [
     # "hpc",
     "hpc_gpu_omp",
     "gpu_omp",
+    "gpu_kokkos",
     # "physics",
     "seq",
     "tutoatdep",
