@@ -1,6 +1,6 @@
 
-.Version 9.11.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+.Version 10.1.2.3 of ABINIT, released Apr 2024.
+.(MPI version, prepared for a x86_64_linux_intel2021.10 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,14 +14,14 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Jul 2023.
-- ( at 12h00 )
+.Starting date : Sat  1 Jun 2024.
+- ( at 10h08 )
   
-- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze3/tests/TestBot_MPI1/v4_t28/t28.abi
+- input  file    -> /media/jzwanzig/jzwanzig/abinit/abinit-develop/tmp-build/tests/Test_suite/v4_t28/t28.abi
 - output file    -> t28.abo
 - root for input  files -> t28i
 - root for output files -> t28o
-
+ 
  DATASET    1 : magnetic group, Shubnikov type III
  Fedorov space group P-3 (#147); Bravais hP (primitive hexag.)
  Magnetic point group -3' (# 37)
@@ -39,7 +39,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    2 : magnetic group, Shubnikov type III
  Fedorov space group R-3 (#148); Bravais hR (rhombohedral)
  Magnetic point group -3' (# 37)
@@ -57,7 +57,7 @@ P This job should need less than                       0.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET    3 : magnetic group, Shubnikov type III
  Fedorov space group P3 1 2 (#149); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -75,7 +75,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    4 : magnetic group, Shubnikov type III
  Fedorov space group P3 2 1 (#150); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -93,7 +93,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    5 : magnetic group, Shubnikov type III
  Fedorov space group P3_1 1 2 (#151); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -111,7 +111,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    6 : magnetic group, Shubnikov type III
  Fedorov space group P3_1 2 1 (#152); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -129,7 +129,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    7 : magnetic group, Shubnikov type III
  Fedorov space group P3_2 1 2 (#153); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -147,7 +147,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    8 : magnetic group, Shubnikov type III
  Fedorov space group P3_2 2 1 (#154); Bravais hP (primitive hexag.)
  Magnetic point group 32' (# 30)
@@ -165,7 +165,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET    9 : magnetic group, Shubnikov type III
  Fedorov space group R3 2 (#155); Bravais hR (rhombohedral)
  Magnetic point group 32' (# 30)
@@ -183,7 +183,7 @@ P This job should need less than                       0.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   10 : magnetic group, Shubnikov type III
  Fedorov space group P3 m 1 (#156); Bravais hP (primitive hexag.)
  Magnetic point group 3m' (# 31)
@@ -201,7 +201,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   11 : magnetic group, Shubnikov type III
  Fedorov space group P3 1 m (#157); Bravais hP (primitive hexag.)
  Magnetic point group 3m' (# 31)
@@ -219,7 +219,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   12 : magnetic group, Shubnikov type III
  Fedorov space group P3 c 1 (#158); Bravais hP (primitive hexag.)
  Magnetic point group 3m' (# 31)
@@ -237,7 +237,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   13 : magnetic group, Shubnikov type III
  Fedorov space group P3 1 c (#159); Bravais hP (primitive hexag.)
  Magnetic point group 3m' (# 31)
@@ -255,7 +255,7 @@ P This job should need less than                       0.648 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   14 : magnetic group, Shubnikov type III
  Fedorov space group R3 m (#160); Bravais hR (rhombohedral)
  Magnetic point group 3m' (# 31)
@@ -273,7 +273,7 @@ P This job should need less than                       0.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   15 : magnetic group, Shubnikov type III
  Fedorov space group R3 c (#161); Bravais hR (rhombohedral)
  Magnetic point group 3m' (# 31)
@@ -291,7 +291,7 @@ P This job should need less than                       0.613 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   16 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 m (#162); Bravais hP (primitive hexag.)
  Magnetic point group -3'm (# 39)
@@ -309,7 +309,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   17 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 m (#162); Bravais hP (primitive hexag.)
  Magnetic point group -3'm' (# 40)
@@ -327,7 +327,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   18 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 m (#162); Bravais hP (primitive hexag.)
  Magnetic point group -3m' (# 38)
@@ -345,7 +345,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   19 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 c (#163); Bravais hP (primitive hexag.)
  Magnetic point group -3'm (# 39)
@@ -363,7 +363,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   20 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 c (#163); Bravais hP (primitive hexag.)
  Magnetic point group -3'm' (# 40)
@@ -381,7 +381,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   21 : magnetic group, Shubnikov type III
  Fedorov space group P-3 1 c (#163); Bravais hP (primitive hexag.)
  Magnetic point group -3m' (# 38)
@@ -399,7 +399,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   22 : magnetic group, Shubnikov type III
  Fedorov space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
  Magnetic point group -3'm (# 39)
@@ -417,7 +417,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   23 : magnetic group, Shubnikov type III
  Fedorov space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
  Magnetic point group -3'm' (# 40)
@@ -435,7 +435,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   24 : magnetic group, Shubnikov type III
  Fedorov space group P-3 m 1 (#164); Bravais hP (primitive hexag.)
  Magnetic point group -3m' (# 38)
@@ -453,7 +453,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   25 : magnetic group, Shubnikov type III
  Fedorov space group P-3 c 1 (#165); Bravais hP (primitive hexag.)
  Magnetic point group -3'm (# 39)
@@ -471,7 +471,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   26 : magnetic group, Shubnikov type III
  Fedorov space group P-3 c 1 (#165); Bravais hP (primitive hexag.)
  Magnetic point group -3'm' (# 40)
@@ -489,7 +489,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   27 : magnetic group, Shubnikov type III
  Fedorov space group P-3 c 1 (#165); Bravais hP (primitive hexag.)
  Magnetic point group -3m' (# 38)
@@ -507,7 +507,7 @@ P This job should need less than                       0.700 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.007 Mbytes.
 ================================================================================
-
+ 
  DATASET   28 : magnetic group, Shubnikov type III
  Fedorov space group R-3 m (#166); Bravais hR (rhombohedral)
  Magnetic point group -3'm (# 39)
@@ -525,7 +525,7 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   29 : magnetic group, Shubnikov type III
  Fedorov space group R-3 m (#166); Bravais hR (rhombohedral)
  Magnetic point group -3'm' (# 40)
@@ -543,7 +543,7 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   30 : magnetic group, Shubnikov type III
  Fedorov space group R-3 m (#166); Bravais hR (rhombohedral)
  Magnetic point group -3m' (# 38)
@@ -561,7 +561,7 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   31 : magnetic group, Shubnikov type III
  Fedorov space group R-3 c (#167); Bravais hR (rhombohedral)
  Magnetic point group -3'm (# 39)
@@ -579,7 +579,7 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   32 : magnetic group, Shubnikov type III
  Fedorov space group R-3 c (#167); Bravais hR (rhombohedral)
  Magnetic point group -3'm' (# 40)
@@ -597,7 +597,7 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
  DATASET   33 : magnetic group, Shubnikov type III
  Fedorov space group R-3 c (#167); Bravais hR (rhombohedral)
  Magnetic point group -3m' (# 38)
@@ -615,13 +615,13 @@ P This job should need less than                       0.663 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  3 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -662,7 +662,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
             acell33    8.0000000000E+00  8.0000000000E+00  8.0000000000E+00 Bohr
               amu      1.00794000E+00
              ecut      1.00000000E+00 Hartree
--          fftalg         312
+-          fftalg         512
            istwfk        2
            jdtset        1    2    3    4    5    6    7    8    9   10
                         11   12   13   14   15   16   17   18   19   20
@@ -1027,246 +1027,246 @@ P           mkmem           1
            spinat1     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat2     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat3     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat4     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat5     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat6     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat7     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat8     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat9     0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat10    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat11    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat12    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat13    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat14    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat15    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat16    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat17    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat18    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat19    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat20    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat21    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat22    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat23    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat24    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat25    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat26    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat27    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat28    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
@@ -1276,60 +1276,60 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat30    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat31    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            spinat32    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
            spinat33    0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
-                      -0.0000000000E+00 -0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
+                       0.0000000000E+00  0.0000000000E+00 -1.0000000000E+00
            symafm1       1    1    1   -1   -1   -1
            symafm2       1    1    1   -1   -1   -1
            symafm3       1    1   -1    1   -1   -1
@@ -1406,8 +1406,8 @@ P           mkmem           1
                        0  1  0   1  0  0   0  0 -1       0  1  0  -1 -1  0   0  0  1
                        1  0  0  -1 -1  0   0  0 -1      -1 -1  0   0  1  0   0  0 -1
            symrel9     1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
            symrel10    1  0  0   0  1  0   0  0  1      -1 -1  0   1  0  0   0  0  1
                        0 -1  0  -1  0  0   0  0  1       0  1  0  -1 -1  0   0  0  1
                       -1  0  0   1  1  0   0  0  1       1  1  0   0 -1  0   0  0  1
@@ -1421,11 +1421,11 @@ P           mkmem           1
                        0  1  0   1  0  0   0  0  1       0  1  0  -1 -1  0   0  0  1
                        1  0  0  -1 -1  0   0  0  1      -1 -1  0   0  1  0   0  0  1
            symrel14    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
            symrel15    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
            symrel16    1  0  0   0  1  0   0  0  1      -1 -1  0   1  0  0   0  0  1
                        0  1  0   1  0  0   0  0  1       0  1  0  -1 -1  0   0  0  1
                        1  0  0  -1 -1  0   0  0  1      -1 -1  0   0  1  0   0  0  1
@@ -1499,47 +1499,47 @@ P           mkmem           1
                        0  1  0   1  0  0   0  0 -1       0 -1  0   1  1  0   0  0 -1
                        1  0  0  -1 -1  0   0  0 -1      -1 -1  0   0  1  0   0  0 -1
            symrel28    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
            symrel29    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
            symrel30    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0  1   1  0  0   0  1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
            symrel31    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
            symrel32    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
            symrel33    1  0  0   0  1  0   0  0  1       0  1  0   0  0  1   1  0  0
-                       0  0  1   1  0  0   0  1  0       0  1  0   1  0  0   0  0  1
-                       0  0  1   0  1  0   1  0  0       1  0  0   0  0  1   0  1  0
+                       0  0  1   1  0  0   0  1  0       0  0  1   0  1  0   1  0  0
+                       1  0  0   0  0  1   0  1  0       0  1  0   1  0  0   0  0  1
                       -1  0  0   0 -1  0   0  0 -1       0 -1  0   0  0 -1  -1  0  0
-                       0  0 -1  -1  0  0   0 -1  0       0 -1  0  -1  0  0   0  0 -1
-                       0  0 -1   0 -1  0  -1  0  0      -1  0  0   0  0 -1   0 -1  0
+                       0  0 -1  -1  0  0   0 -1  0       0  0 -1   0 -1  0  -1  0  0
+                      -1  0  0   0  0 -1   0 -1  0       0 -1  0  -1  0  0   0  0 -1
             tnons1     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons2     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                       0.0000000  0.0000000  0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons3     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
@@ -1547,14 +1547,14 @@ P           mkmem           1
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons5     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000 -0.3333333
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.3333333
                        0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000  0.3333333
+                       0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.0000000
             tnons6     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.3333333
                        0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000  0.3333333
             tnons7     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.3333333
-                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000 -0.3333333
+                       0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000  0.0000000
             tnons8     0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.3333333
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000 -0.3333333
@@ -1582,110 +1582,110 @@ P           mkmem           1
             tnons16    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons17    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons18    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons19    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons20    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons21    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons22    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons23    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons24    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons25    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons26    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons27    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000  0.5000000    -0.0000000 -0.0000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.5000000     0.0000000  0.0000000  0.5000000
             tnons28    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons29    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons30    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
             tnons31    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000     0.5000000  0.5000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
             tnons32    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000     0.5000000  0.5000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
             tnons33    0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
                        0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
-                      -0.0000000 -0.0000000 -0.0000000    -0.0000000 -0.0000000 -0.0000000
-                      -0.0000000 -0.0000000 -0.0000000     0.5000000  0.5000000  0.5000000
+                       0.0000000  0.0000000  0.0000000     0.0000000  0.0000000  0.0000000
+                       0.0000000  0.0000000  0.0000000     0.5000000  0.5000000  0.5000000
                        0.5000000  0.5000000  0.5000000     0.5000000  0.5000000  0.5000000
            toldfe      1.00000000E-06 Hartree
             typat1     1  1  1  1  1  1
@@ -1747,10 +1747,10 @@ P           mkmem           1
                        1.4393620074E+00  3.5929223010E+00  4.2387094408E+00
            xangst5     4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  3.6989486880E+00
-                       1.8415366859E+00  3.0429852141E+00  4.2387094408E+00
+                       1.8415366859E+00  3.0429852141E+00  2.6511778150E+00
                        3.5560708417E+00  7.3324944919E-02  2.1114170623E+00
-                       3.8312429902E+00  5.4993708689E-01  2.6511778150E+00
-                       6.7734682700E-01  7.3324944919E-02  1.0636461893E+00
+                       3.8312429902E+00  5.4993708689E-01  1.0636461893E+00
+                       6.7734682700E-01  7.3324944919E-02  4.2387094408E+00
            xangst6     4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  3.6989486880E+00
                        2.7517214847E-01  6.2326203181E-01  4.2387094408E+00
@@ -1759,10 +1759,10 @@ P           mkmem           1
                        1.4393620074E+00  3.5929223010E+00  1.0636461893E+00
            xangst7     4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  2.1114170623E+00
-                       1.8415366859E+00  3.0429852141E+00  4.2387094408E+00
+                       1.8415366859E+00  3.0429852141E+00  1.0636461893E+00
                        3.5560708417E+00  7.3324944919E-02  3.6989486880E+00
-                       3.8312429902E+00  5.4993708689E-01  1.0636461893E+00
-                       6.7734682700E-01  7.3324944919E-02  2.6511778150E+00
+                       3.8312429902E+00  5.4993708689E-01  2.6511778150E+00
+                       6.7734682700E-01  7.3324944919E-02  4.2387094408E+00
            xangst8     4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  2.1114170623E+00
                        2.7517214847E-01  6.2326203181E-01  4.2387094408E+00
@@ -1772,9 +1772,9 @@ P           mkmem           1
            xangst9     1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                        1.6512538254E-01  5.7201110435E-02  6.8069924407E+00
                       -1.3210030603E-01  1.1440222087E-01  6.8069924407E+00
+                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
            xangst10    4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  5.2388543650E-01
                        1.8415366859E+00  3.0429852141E+00  5.2388543650E-01
@@ -1802,15 +1802,15 @@ P           mkmem           1
            xangst14    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
                       -1.6512538254E-01 -5.7201110435E-02  1.1389131321E+00
                        1.3210030603E-01 -1.1440222087E-01  1.1389131321E+00
+                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
            xangst15    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.6512538254E-01 -5.7201110435E-02  5.1118659185E+00
                        1.3210030603E-01 -1.1440222087E-01  5.1118659185E+00
+                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
            xangst16    4.0217467853E-01  5.4993708689E-01  5.2388543650E-01
                        2.3918809828E+00  3.0429852141E+00  5.2388543650E-01
                        2.7517214847E-01  6.2326203181E-01  5.2388543650E-01
@@ -1958,75 +1958,75 @@ P           mkmem           1
            xangst28    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                        1.6512538254E-01  5.7201110435E-02  6.8069924407E+00
                       -1.3210030603E-01  1.1440222087E-01  6.8069924407E+00
+                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
                       -1.6512538254E-01 -5.7201110435E-02  1.1389131321E+00
                        1.3210030603E-01 -1.1440222087E-01  1.1389131321E+00
+                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
            xangst29    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                        1.6512538254E-01  5.7201110435E-02  6.8069924407E+00
                       -1.3210030603E-01  1.1440222087E-01  6.8069924407E+00
+                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
                       -1.6512538254E-01 -5.7201110435E-02  1.1389131321E+00
                        1.3210030603E-01 -1.1440222087E-01  1.1389131321E+00
+                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
            xangst30    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                        1.6512538254E-01  5.7201110435E-02  6.8069924407E+00
                       -1.3210030603E-01  1.1440222087E-01  6.8069924407E+00
+                      -3.3025076507E-02 -1.7160333130E-01  6.8069924407E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
                       -1.6512538254E-01 -5.7201110435E-02  1.1389131321E+00
                        1.3210030603E-01 -1.1440222087E-01  1.1389131321E+00
+                       3.3025076507E-02  1.7160333130E-01  1.1389131321E+00
            xangst31    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.6512538254E-01 -5.7201110435E-02  5.1118659185E+00
                        1.3210030603E-01 -1.1440222087E-01  5.1118659185E+00
+                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
                        1.6512538254E-01  5.7201110435E-02  2.8340396543E+00
                       -1.3210030603E-01  1.1440222087E-01  2.8340396543E+00
+                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
            xangst32    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.6512538254E-01 -5.7201110435E-02  5.1118659185E+00
                        1.3210030603E-01 -1.1440222087E-01  5.1118659185E+00
+                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
                        1.6512538254E-01  5.7201110435E-02  2.8340396543E+00
                       -1.3210030603E-01  1.1440222087E-01  2.8340396543E+00
+                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
            xangst33    1.3210030603E-01  1.1440222087E-01  1.1389131321E+00
                       -1.6512538254E-01  5.7201110435E-02  1.1389131321E+00
                        3.3025076507E-02 -1.7160333130E-01  1.1389131321E+00
-                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.6512538254E-01 -5.7201110435E-02  5.1118659185E+00
                        1.3210030603E-01 -1.1440222087E-01  5.1118659185E+00
+                       3.3025076507E-02  1.7160333130E-01  5.1118659185E+00
                       -1.3210030603E-01 -1.1440222087E-01  6.8069924407E+00
                        1.6512538254E-01 -5.7201110435E-02  6.8069924407E+00
                       -3.3025076507E-02  1.7160333130E-01  6.8069924407E+00
-                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
                        1.6512538254E-01  5.7201110435E-02  2.8340396543E+00
                       -1.3210030603E-01  1.1440222087E-01  2.8340396543E+00
+                      -3.3025076507E-02 -1.7160333130E-01  2.8340396543E+00
             xcart1     7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  9.9000000000E-01
                        6.7200000000E+00  1.3856406461E-01  9.9000000000E-01
@@ -2053,10 +2053,10 @@ P           mkmem           1
                        2.7200000000E+00  6.7896391657E+00  8.0100000000E+00
             xcart5     7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  6.9900000000E+00
-                       3.4800000000E+00  5.7504086811E+00  8.0100000000E+00
+                       3.4800000000E+00  5.7504086811E+00  5.0100000000E+00
                        6.7200000000E+00  1.3856406461E-01  3.9900000000E+00
-                       7.2400000000E+00  1.0392304845E+00  5.0100000000E+00
-                       1.2800000000E+00  1.3856406461E-01  2.0100000000E+00
+                       7.2400000000E+00  1.0392304845E+00  2.0100000000E+00
+                       1.2800000000E+00  1.3856406461E-01  8.0100000000E+00
             xcart6     7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  6.9900000000E+00
                        5.2000000000E-01  1.1777945491E+00  8.0100000000E+00
@@ -2065,10 +2065,10 @@ P           mkmem           1
                        2.7200000000E+00  6.7896391657E+00  2.0100000000E+00
             xcart7     7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  3.9900000000E+00
-                       3.4800000000E+00  5.7504086811E+00  8.0100000000E+00
+                       3.4800000000E+00  5.7504086811E+00  2.0100000000E+00
                        6.7200000000E+00  1.3856406461E-01  6.9900000000E+00
-                       7.2400000000E+00  1.0392304845E+00  2.0100000000E+00
-                       1.2800000000E+00  1.3856406461E-01  5.0100000000E+00
+                       7.2400000000E+00  1.0392304845E+00  5.0100000000E+00
+                       1.2800000000E+00  1.3856406461E-01  8.0100000000E+00
             xcart8     7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  3.9900000000E+00
                        5.2000000000E-01  1.1777945491E+00  8.0100000000E+00
@@ -2078,9 +2078,9 @@ P           mkmem           1
             xcart9     2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                        3.1204175058E-01  1.0809443322E-01  1.2863351502E+01
                       -2.4963340047E-01  2.1618886644E-01  1.2863351502E+01
+                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
             xcart10    7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  9.9000000000E-01
                        3.4800000000E+00  5.7504086811E+00  9.9000000000E-01
@@ -2108,15 +2108,15 @@ P           mkmem           1
             xcart14    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
                       -3.1204175058E-01 -1.0809443322E-01  2.1522339088E+00
                        2.4963340047E-01 -2.1618886644E-01  2.1522339088E+00
+                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
             xcart15    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -3.1204175058E-01 -1.0809443322E-01  9.6600266140E+00
                        2.4963340047E-01 -2.1618886644E-01  9.6600266140E+00
+                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
             xcart16    7.6000000000E-01  1.0392304845E+00  9.9000000000E-01
                        4.5200000000E+00  5.7504086811E+00  9.9000000000E-01
                        5.2000000000E-01  1.1777945491E+00  9.9000000000E-01
@@ -2264,75 +2264,75 @@ P           mkmem           1
             xcart28    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                        3.1204175058E-01  1.0809443322E-01  1.2863351502E+01
                       -2.4963340047E-01  2.1618886644E-01  1.2863351502E+01
+                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
                       -3.1204175058E-01 -1.0809443322E-01  2.1522339088E+00
                        2.4963340047E-01 -2.1618886644E-01  2.1522339088E+00
+                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
             xcart29    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                        3.1204175058E-01  1.0809443322E-01  1.2863351502E+01
                       -2.4963340047E-01  2.1618886644E-01  1.2863351502E+01
+                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
                       -3.1204175058E-01 -1.0809443322E-01  2.1522339088E+00
                        2.4963340047E-01 -2.1618886644E-01  2.1522339088E+00
+                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
             xcart30    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                        3.1204175058E-01  1.0809443322E-01  1.2863351502E+01
                       -2.4963340047E-01  2.1618886644E-01  1.2863351502E+01
+                      -6.2408350117E-02 -3.2428329966E-01  1.2863351502E+01
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
                       -3.1204175058E-01 -1.0809443322E-01  2.1522339088E+00
                        2.4963340047E-01 -2.1618886644E-01  2.1522339088E+00
+                       6.2408350117E-02  3.2428329966E-01  2.1522339088E+00
             xcart31    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -3.1204175058E-01 -1.0809443322E-01  9.6600266140E+00
                        2.4963340047E-01 -2.1618886644E-01  9.6600266140E+00
+                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
                        3.1204175058E-01  1.0809443322E-01  5.3555587964E+00
                       -2.4963340047E-01  2.1618886644E-01  5.3555587964E+00
+                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
             xcart32    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -3.1204175058E-01 -1.0809443322E-01  9.6600266140E+00
                        2.4963340047E-01 -2.1618886644E-01  9.6600266140E+00
+                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
                        3.1204175058E-01  1.0809443322E-01  5.3555587964E+00
                       -2.4963340047E-01  2.1618886644E-01  5.3555587964E+00
+                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
             xcart33    2.4963340047E-01  2.1618886644E-01  2.1522339088E+00
                       -3.1204175058E-01  1.0809443322E-01  2.1522339088E+00
                        6.2408350117E-02 -3.2428329966E-01  2.1522339088E+00
-                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -3.1204175058E-01 -1.0809443322E-01  9.6600266140E+00
                        2.4963340047E-01 -2.1618886644E-01  9.6600266140E+00
+                       6.2408350117E-02  3.2428329966E-01  9.6600266140E+00
                       -2.4963340047E-01 -2.1618886644E-01  1.2863351502E+01
                        3.1204175058E-01 -1.0809443322E-01  1.2863351502E+01
                       -6.2408350117E-02  3.2428329966E-01  1.2863351502E+01
-                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
                        3.1204175058E-01  1.0809443322E-01  5.3555587964E+00
                       -2.4963340047E-01  2.1618886644E-01  5.3555587964E+00
+                      -6.2408350117E-02 -3.2428329966E-01  5.3555587964E+00
              xred1     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  1.1000000000E-01
                        8.5000000000E-01  2.0000000000E-02  1.1000000000E-01
@@ -2359,10 +2359,10 @@ P           mkmem           1
                        8.3000000000E-01  9.8000000000E-01  8.9000000000E-01
              xred5     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  7.7666666667E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  5.5666666667E-01
                        8.5000000000E-01  2.0000000000E-02  4.4333333333E-01
-                       9.8000000000E-01  1.5000000000E-01  5.5666666667E-01
-                       1.7000000000E-01  2.0000000000E-02  2.2333333333E-01
+                       9.8000000000E-01  1.5000000000E-01  2.2333333333E-01
+                       1.7000000000E-01  2.0000000000E-02  8.9000000000E-01
              xred6     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  7.7666666667E-01
                        1.5000000000E-01  1.7000000000E-01  8.9000000000E-01
@@ -2371,10 +2371,10 @@ P           mkmem           1
                        8.3000000000E-01  9.8000000000E-01  2.2333333333E-01
              xred7     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  4.4333333333E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  2.2333333333E-01
                        8.5000000000E-01  2.0000000000E-02  7.7666666667E-01
-                       9.8000000000E-01  1.5000000000E-01  2.2333333333E-01
-                       1.7000000000E-01  2.0000000000E-02  5.5666666667E-01
+                       9.8000000000E-01  1.5000000000E-01  5.5666666667E-01
+                       1.7000000000E-01  2.0000000000E-02  8.9000000000E-01
              xred8     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  4.4333333333E-01
                        1.5000000000E-01  1.7000000000E-01  8.9000000000E-01
@@ -2384,9 +2384,9 @@ P           mkmem           1
              xred9     1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.5000000000E-01  8.3000000000E-01
                        8.3000000000E-01  8.9000000000E-01  8.5000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
              xred10    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  1.1000000000E-01
                        8.5000000000E-01  8.3000000000E-01  1.1000000000E-01
@@ -2414,15 +2414,15 @@ P           mkmem           1
              xred14    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.5000000000E-01  1.7000000000E-01
                        1.7000000000E-01  1.1000000000E-01  1.5000000000E-01
+                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
              xred15    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        6.1000000000E-01  6.5000000000E-01  6.7000000000E-01
                        6.7000000000E-01  6.1000000000E-01  6.5000000000E-01
+                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
              xred16    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        9.8000000000E-01  8.3000000000E-01  1.1000000000E-01
                        1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
@@ -2570,163 +2570,163 @@ P           mkmem           1
              xred28    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.5000000000E-01  8.3000000000E-01
                        8.3000000000E-01  8.9000000000E-01  8.5000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.5000000000E-01  1.7000000000E-01
                        1.7000000000E-01  1.1000000000E-01  1.5000000000E-01
+                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
              xred29    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.5000000000E-01  8.3000000000E-01
                        8.3000000000E-01  8.9000000000E-01  8.5000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.5000000000E-01  1.7000000000E-01
                        1.7000000000E-01  1.1000000000E-01  1.5000000000E-01
+                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
              xred30    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.5000000000E-01  8.3000000000E-01
                        8.3000000000E-01  8.9000000000E-01  8.5000000000E-01
+                       8.5000000000E-01  8.3000000000E-01  8.9000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.5000000000E-01  1.7000000000E-01
                        1.7000000000E-01  1.1000000000E-01  1.5000000000E-01
+                       1.5000000000E-01  1.7000000000E-01  1.1000000000E-01
              xred31    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        6.1000000000E-01  6.5000000000E-01  6.7000000000E-01
                        6.7000000000E-01  6.1000000000E-01  6.5000000000E-01
+                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
                        3.9000000000E-01  3.5000000000E-01  3.3000000000E-01
                        3.3000000000E-01  3.9000000000E-01  3.5000000000E-01
+                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
              xred32    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        6.1000000000E-01  6.5000000000E-01  6.7000000000E-01
                        6.7000000000E-01  6.1000000000E-01  6.5000000000E-01
+                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
                        3.9000000000E-01  3.5000000000E-01  3.3000000000E-01
                        3.3000000000E-01  3.9000000000E-01  3.5000000000E-01
+                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
              xred33    1.7000000000E-01  1.5000000000E-01  1.1000000000E-01
                        1.1000000000E-01  1.7000000000E-01  1.5000000000E-01
                        1.5000000000E-01  1.1000000000E-01  1.7000000000E-01
-                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        6.1000000000E-01  6.5000000000E-01  6.7000000000E-01
                        6.7000000000E-01  6.1000000000E-01  6.5000000000E-01
+                       6.5000000000E-01  6.7000000000E-01  6.1000000000E-01
                        8.3000000000E-01  8.5000000000E-01  8.9000000000E-01
                        8.9000000000E-01  8.3000000000E-01  8.5000000000E-01
                        8.5000000000E-01  8.9000000000E-01  8.3000000000E-01
-                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
                        3.9000000000E-01  3.5000000000E-01  3.3000000000E-01
                        3.3000000000E-01  3.9000000000E-01  3.5000000000E-01
+                       3.5000000000E-01  3.3000000000E-01  3.9000000000E-01
             znucl        1.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   5.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   7.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   9.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  10.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  11.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  12.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  13.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  14.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  15.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  16.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  17.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  18.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  19.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  20.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  21.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  22.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  23.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  24.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  25.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  26.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  27.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  28.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  29.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  30.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  31.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  32.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  33.
-
+ 
  abinit : before driver, prtvol=-1, debugging mode => will skip driver
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
-
+ 
  abinit : before driver, prtvol=-1, debugging mode => will skip outvars
 
 
 - Timing analysis has been suppressed with timopt=0
 
 
-
+ 
  abinit : before driver, prtvol=-1, debugging mode => will skip acknowledgments
 -
-- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.1
-
+- Proc.   0 individual time (sec): cpu=          4.9  wall=          4.9
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered   0 WARNINGs and  35 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.1  wall=          4.1
++Overall time at end (sec) : cpu=          4.9  wall=          4.9
