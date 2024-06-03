@@ -522,7 +522,7 @@ and the following input file:
     particular $\qq$-point. The *pertcase* index is computed as:
 
     ```fortran
-    pertcase = idir + ipert
+    pertcase = idir + 3 * (ipert-1)
     ```
 
     where *idir* gives the direction ([1, 2, 3]) and *ipert* specifies the perturbation type:
