@@ -63,6 +63,7 @@ MODULE pseudo_types
      LOGICAL :: nlcc               ! Non linear core corrections
      LOGICAL :: is_gth             ! .true. if Goedecker-Teter-Hutter
      LOGICAL :: is_multiproj       ! .true. if multiple projectors per l
+     LOGICAL :: with_metagga_info  ! .true. if NC pseudo file contains metagga (model)core information
      ! (for NC PP only; US-PP and PAW are assumed to be multi-projector)
      CHARACTER(LEN=25) :: dft      ! Exch-Corr type
      REAL(DP) :: zp                ! z valence
@@ -99,6 +100,8 @@ MODULE pseudo_types
      ! Chi and rho_at are only used for initial density and initial wfcs:
      REAL(DP), ALLOCATABLE :: chi(:,:)   ! chi(mesh,nwfc) atomic wavefcts
      REAL(DP), ALLOCATABLE :: rho_at(:)  ! rho_at(mesh) atomic charge
+     REAL(DP), ALLOCATABLE :: tau_at(:)  ! tau_at(mesh) atomic kinetic energy density
+     REAL(DP), ALLOCATABLE :: tau_mod(:)  ! tau_mod(mesh) model kinetic energy density
      ! Minimal radial grid:
      INTEGER :: mesh               ! number of points in the radial mesh
      REAL(DP) :: xmin              ! the minimum x of the linear mesh
@@ -256,6 +259,8 @@ CONTAINS
     IF( ALLOCATED( upf%qfcoef ) )  DEALLOCATE( upf%qfcoef )
     IF( ALLOCATED( upf%chi ) )     DEALLOCATE( upf%chi )
     IF( ALLOCATED( upf%rho_at ) )  DEALLOCATE( upf%rho_at )
+    IF( ALLOCATED( upf%tau_at ) )  DEALLOCATE( upf%tau_at )
+    IF( ALLOCATED( upf%tau_mod ) )  DEALLOCATE( upf%tau_mod )
     IF ( ALLOCATED ( upf%gipaw_core_orbital_n ) ) &
          DEALLOCATE ( upf%gipaw_core_orbital_n )
     IF ( ALLOCATED ( upf%gipaw_core_orbital_l ) ) &

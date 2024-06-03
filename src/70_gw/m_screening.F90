@@ -1129,9 +1129,7 @@ subroutine get_epsm1(Er,Vcp,approx_type,option_test,iomode,comm,iqibzA)
  select case (Er%mqmem)
  case (0)
    !  Out-of-core solution
-   if (allocated(Er%epsm1))  then
-     ABI_FREE(Er%epsm1)
-   end if
+   ABI_SFREE(Er%epsm1)
    ABI_MALLOC_OR_DIE(Er%epsm1,(Er%npwe,Er%npwe,Er%nomega,1), ierr)
 
    ! FIXME there's a problem with SUSC files and MPI-IO
@@ -3013,9 +3011,7 @@ subroutine screen_mdielf(iq_bz,npw,nomega,model_type,eps_inf,Cryst,Qmesh,Vcp,Gsp
  call destroy_mpi_enreg(MPI_enreg_seq)
 
  ABI_FREE(vc_qbz)
- if (allocated(ctmp)) then
-   ABI_FREE(ctmp)
- end if
+ ABI_SFREE(ctmp)
 
 end subroutine screen_mdielf
 !!***
@@ -3074,18 +3070,10 @@ subroutine chi_free(chi)
 
 ! *************************************************************************
 
- if (allocated(chi%mat)) then
-   ABI_FREE(chi%mat)
- end if
- if (allocated(chi%head)) then
-   ABI_FREE(chi%head)
- end if
- if (allocated(chi%lwing)) then
-   ABI_FREE(chi%lwing)
- end if
- if (allocated(chi%uwing)) then
-   ABI_FREE(chi%uwing)
- end if
+ ABI_SFREE(chi%mat)
+ ABI_SFREE(chi%head)
+ ABI_SFREE(chi%lwing)
+ ABI_SFREE(chi%uwing)
 
 end subroutine chi_free
 !!***
@@ -3338,18 +3326,10 @@ subroutine lwl_free(lwl)
 
 ! *************************************************************************
 
- if (allocated(lwl%head)) then
-   ABI_FREE(lwl%head)
- end if
- if (allocated(lwl%lwing)) then
-   ABI_FREE(lwl%lwing)
- end if
- if (allocated(lwl%uwing)) then
-   ABI_FREE(lwl%uwing)
- end if
- if (allocated(lwl%body)) then
-   ABI_FREE(lwl%body)
- end if
+ ABI_SFREE(lwl%head)
+ ABI_SFREE(lwl%lwing)
+ ABI_SFREE(lwl%uwing)
+ ABI_SFREE(lwl%body)
 
 end subroutine lwl_free
 !!***

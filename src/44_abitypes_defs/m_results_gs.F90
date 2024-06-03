@@ -192,7 +192,7 @@ MODULE m_results_gs
   real(dp) :: pion(3)
    ! ucvol times the ionic polarization in reduced coordinates
 
-  real(dp) :: shiftfactor_extfpmd
+  real(dp) :: extfpmd_eshift
    ! Energy shift factor of the Extended FPMD model for high temperature simulations
 
   real(dp) :: strten(6)
@@ -283,7 +283,7 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%nelect_extfpmd=zero
  results_gs%residm =zero
  results_gs%res2   =zero
- results_gs%shiftfactor_extfpmd=zero
+ results_gs%extfpmd_eshift=zero
  results_gs%vxcavg =zero
 
  call energies_init(results_gs%energies)
@@ -387,7 +387,7 @@ subroutine init_results_gs_array(natom,nspden,nsppol,results_gs,only_part)
        results_gs(jj,ii)%nelect_extfpmd=zero
        results_gs(jj,ii)%residm =zero
        results_gs(jj,ii)%res2   =zero
-       results_gs(jj,ii)%shiftfactor_extfpmd=zero
+       results_gs(jj,ii)%extfpmd_eshift=zero
        results_gs(jj,ii)%vxcavg =zero
 
        call energies_init(results_gs(jj,ii)%energies)
@@ -649,7 +649,7 @@ subroutine copy_results_gs(results_gs_in,results_gs_out)
  results_gs_out%nelect_extfpmd=results_gs_in%nelect_extfpmd
  results_gs_out%residm =results_gs_in%residm
  results_gs_out%res2   =results_gs_in%res2
- results_gs_out%shiftfactor_extfpmd=results_gs_in%shiftfactor_extfpmd
+ results_gs_out%extfpmd_eshift=results_gs_in%extfpmd_eshift
  results_gs_out%vxcavg =results_gs_in%vxcavg
 
  call energies_copy(results_gs_in%energies,results_gs_out%energies)
@@ -718,7 +718,7 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! scalars passed in input (not belonging to results_gs) as well as scalars defined in results_gs
  ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
    "ecut", "pawecutdg", "deltae", "diffor", "entropy", "entropy_extfpmd", "etotal", "fermie", "fermih",&
-&  "nelect_extfpmd", "residm", "res2", "shiftfactor_extfpmd"])
+&  "nelect_extfpmd", "residm", "res2", "extfpmd_eshift"])
  NCF_CHECK(ncerr)
 
  ! arrays
@@ -743,9 +743,9 @@ integer function results_gs_ncwrite(res, ncid, ecut, pawecutdg) result(ncerr)
 ! Write variables
  ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
 &  'ecut', 'pawecutdg', 'deltae', 'diffor', 'entropy', 'entropy_extfpmd', 'etotal', 'fermie', 'fermih',&
-&  'nelect_extfpmd', 'residm', 'res2', 'shiftfactor_extfpmd'],&
+&  'nelect_extfpmd', 'residm', 'res2', 'extfpmd_eshift'],&
 &  [ecut, pawecutdg, res%deltae, res%diffor, res%entropy, res%entropy_extfpmd, res%etotal, res%fermie, res%fermih,&
-&  res%nelect_extfpmd, res%residm, res%res2, res%shiftfactor_extfpmd],&
+&  res%nelect_extfpmd, res%residm, res%res2, res%extfpmd_eshift],&
 &  datamode=.True.)
  NCF_CHECK(ncerr)
 
