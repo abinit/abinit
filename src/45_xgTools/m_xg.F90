@@ -3890,7 +3890,7 @@ contains
       end if
 
       call xg_init(xg_mpi_work,xgBlockA%space,xgBlockA%rows,xgBlockA%cols,xmpi_comm_null)
-      call xg_init(subB_mpi,xgBlockB%space,xgBlockA%cols,xgBlockA%cols,xmpi_comm_null)
+      call xg_init(subB_mpi,xgBlockB%space,xgBlockB%rows/nblocks_mpi,xgBlockB%cols/nblocks_mpi,xmpi_comm_null)
       if (multiblock) then
         call xg_init(subB,xgBlockB%space,blocksize,blocksize,xmpi_comm_null)
       end if
