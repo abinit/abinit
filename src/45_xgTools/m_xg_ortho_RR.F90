@@ -558,7 +558,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
 
     call timab(tim_RR_gemm_2,2,tsec)
 
-    ! Doing free on an already free object does not doe anything
+    ! Doing free on an already free object does not do anything
     call xg_free(vec)
     call xg_free(subA)
     call xg_free(subB)
@@ -939,7 +939,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
     end if
 
-    ! Doing free on an already free object does not doe anything
+    ! Doing free on an already free object does not do anything
     call xg_free(vec)
     call xg_free(Xwork)
     call xg_free(cprjXwork)
