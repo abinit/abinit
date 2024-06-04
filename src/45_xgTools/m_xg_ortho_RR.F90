@@ -202,39 +202,21 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
       return
     end if
 
-    if (space(X)/=SPACE_CR) then
-      ! Solve YU=X
-      call xgBlock_trsm('r','u','n','n',1.d0,buffer%self,X)
+    ! Solve YU=X
+    call xgBlock_trsm('r','u','n','n',1.d0,buffer%self,X)
 
-      if (present(AX)) then
-        ! Solve AYU=AX
-        call xgBlock_trsm('r','u','n','n',1.d0,buffer%self,AX)
-      end if
-    else ! space(X)==SPACE_CR
-      call xgBlock_invert_tri('u','n',buffer%self)
-      call xgBlock_zerotri(buffer%self,'u')
-
-      call xg_init(X_tmp,space(X),rows(X),cols(X),me_g0=me_g0(X))
-
-      call xgBlock_gemm('n','n',1.d0,X,buffer%self,0.d0,X_tmp%self)
-      call xgBlock_copy(X_tmp%self,X)
-
-      if (present(AX)) then
-        call xgBlock_gemm('n','n',1.d0,AX,buffer%self,0.d0,X_tmp%self)
-        call xgBlock_copy(X_tmp%self,AX)
-      end if
-      call xg_free(X_tmp)
+    if (present(AX)) then
+      ! Solve AYU=AX
+      call xgBlock_trsm('r','u','n','n',1.d0,buffer%self,AX)
     end if
 
     ! Solve (cprjY)U=(cprjX)
     call xgBlock_reshape_spinor(cprjX,cprjX_spinor,nspinor,COLS2ROWS)
-    if (space(X)/=SPACE_CR.and.ncols_cprj==nspinor*nn) then ! Don't know why SPACE_CR should be excluded (LB:13/09/23)
+    if (ncols_cprj==nspinor*nn) then
       call xgBlock_trsm('r','u','n','n',1.d0,buffer%self,cprjX_spinor)
     else
-      if (space(X)/=SPACE_CR) then ! otherwise it's already done
-        call xgBlock_invert_tri('u','n',buffer%self)
-        call xgBlock_zerotri(buffer%self,'u')
-      end if
+      call xgBlock_invert_tri('u','n',buffer%self)
+      call xgBlock_zerotri(buffer%self,'u')
       call xgBlock_zero(cprj_work%self)
       call xgBlock_reshape_spinor(cprj_work%self,cprj_work_spinor,nspinor,COLS2ROWS)
       call xgBlock_gemm_mpi_cyclic_permutation(cprjX_spinor,buffer%self,cprj_work_spinor,&
