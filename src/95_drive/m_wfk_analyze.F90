@@ -409,8 +409,8 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  !case ("paw_aeden")
 
-case (WFK_TASK_WANNIER)
-   ! Construct Wannier function.
+ case (WFK_TASK_WANNIER)
+  ! Construct Wannier function.
 
   ! TODO: only when kpoint in IBZ
   ! First generate WFK for fullBZ

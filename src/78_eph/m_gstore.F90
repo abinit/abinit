@@ -59,6 +59,7 @@
 !!
 !!                 k-axis (kpt_comm)
 !!              |--------------------
+!!  2) A
 !!              |         |         |
 !!              |   P00   |   P01   |
 !!              |         |         |
@@ -86,7 +87,9 @@
 !!  depends on spin if filters are employed.
 !!
 !! TODO
-!!  Introduce new communicator to distribute (band_1, band_2)
+!!  1) Introduce new communicator to distribute (band_1, band_2)
+!!
+!!  2) Implement possibility of reading a subset of data from a larger gstore.
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2008-2024 ABINIT group (MG)
@@ -182,8 +185,8 @@ module m_gstore
 type, public :: gqk_t
 
   integer :: cplex = -1
-  ! 1 if |g|^2 should be stored
-  ! 2 if complex valued g (mind the gauge)
+  ! 1 if |g|^2 os stored
+  ! 2 if complex-valued g are stored (mind the gauge)
 
   integer :: spin = -1
   ! Spin index.
@@ -224,7 +227,7 @@ type, public :: gqk_t
 
   integer,allocatable :: my_k2ibz(:,:)
   ! (6, my_nk)
-  ! Mapping my_kpoints --> kibz
+  ! Mapping my_kpoints --> kibz (symrel conventions)
 
   !integer,allocatable :: my_k2bz(:,:)
   ! (my_nk)
@@ -236,7 +239,7 @@ type, public :: gqk_t
 
   real(dp),allocatable :: my_wtk(:)
   ! (my_nkpt)
-  ! k-point weights
+  ! Weights for the k-points treated by this MPI proc.
 
   integer,allocatable :: my_q2ibz(:,:)
   ! (6, my_nq)
@@ -303,7 +306,7 @@ type, public :: gqk_t
    ! MPI communicator over the 2d grid (qpt, atomic perturbations)
 
   type(xcomm_t) :: grid_comm
-   ! MPI communicator for full (q,k,pert) grid.
+   ! MPI communicator for full grid of procs treating this spin.
 
   real(dp),allocatable :: my_wnuq(:,:)
   ! (my_npert, my_nq)
@@ -398,10 +401,13 @@ type, public :: gstore_t
   ! Energy window. zero if not used. Requires kfilter == "erange"
 
   type(crystal_t), pointer :: cryst => null()
+  ! Crystalline structure
 
   type(ebands_t), pointer :: ebands => null()
+  ! Electron bands
 
   type(ifc_type), pointer :: ifc => null()
+  ! interatomic force constants.
 
   type(krank_t) :: krank_ibz, qrank_ibz
   ! Object used to find k-points or q-points in the IBZ and map BZ to IBZ.
@@ -431,7 +437,7 @@ type, public :: gstore_t
 
   real(dp), allocatable :: qibz(:,:)
   ! (3, nqibz)
-  ! q-points in the IBZ
+  ! q-points in the IBZ in reduced coordinates.
 
   real(dp), allocatable :: wtq(:)
   ! (nqibz)
@@ -445,7 +451,7 @@ type, public :: gstore_t
 
   type(gqk_t), allocatable :: gqk(:)
   ! (my_nspins)
-  ! Datastructure storing e-ph matrix elements.
+  ! Datastructure storing e-ph matrix elements for the collinear spins treated by this MPI proc.
 
   !type(htetra_t) :: ktetra
   ! Used to evaluate integrals in k-space with the tetrahedron method.
@@ -465,6 +471,7 @@ contains
   ! and the parallel distribution of pp momenta.
 
   procedure :: get_mpw_gmax => gstore_get_mpw_gmax
+  ! Compute the maximum number of PWs for all possible k+q treated.
 
   procedure :: spin2my_is => gstore_spin2my_is
   !  Return the local spin index from the global spin index.
@@ -1336,7 +1343,7 @@ end subroutine gstore_print
 !! gstore_malloc__
 !!
 !! FUNCTION
-!! Allocate memory.
+!! Allocate local buffers once the MPI grid has been initialized.
 !!
 !! INPUTS
 !!
@@ -1412,7 +1419,7 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
      tsign_k = 1; if (trev_k == 1) tsign_k = -1
 
-     !! symrel^T convention for k
+     ! Note symrel^T convention for k
      gqk%my_kpts(:, my_ik) = tsign_k * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
 
      select case(gstore%kzone)
@@ -2317,7 +2324,7 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
  real(dp),intent(out) :: lambda(nw)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, ib_k, ib_kq, ierr
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
  real(dp) :: g2, w_nuq, weight_k, weight_q
  type(gqk_t), pointer :: gqk
 !arrays
@@ -2349,14 +2356,14 @@ subroutine gstore_get_lambda_iso_iw(gstore, dtset, nw, imag_w, lambda)
      do my_ik=1,gqk%my_nk
        !weight_k = gqk%my_kweight(my_ik, gstore)
        weight_k = gqk%my_wtk(my_ik)
-       do ib_k=1,gqk%nb
-         do ib_kq=1,gqk%nb
+       do in_k=1,gqk%nb
+         do im_kq=1,gqk%nb
            do my_ip=1,gqk%my_npert
-             g2 = g2_pmnk(my_ip, ib_kq, ib_k, my_ik)
+             g2 = g2_pmnk(my_ip, im_kq, in_k, my_ik)
              ! TODO: handle w_nuq ~ 0
              w_nuq = gqk%my_wnuq(my_ip, my_iq)
              lambda(:) = lambda(:) + &
-               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * weight_q * dbldelta_q(ib_kq, ib_k, my_ik)
+               two * w_nuq / (imag_w(:) ** 2 + w_nuq ** 2) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
@@ -2400,7 +2407,7 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
  real(dp),intent(out) :: a2fw(nw)
 
 !Local variables-------------------------------
- integer :: my_is, my_ik, my_iq, my_ip, ib_k, ib_kq, ierr
+ integer :: my_is, my_ik, my_iq, my_ip, in_k, im_kq, ierr
  real(dp) :: g2, w_nuq, weight_k, weight_q, cpu, wall, gflops
  type(gqk_t), pointer :: gqk
 !arrays
@@ -2441,10 +2448,10 @@ subroutine gstore_get_a2fw(gstore, dtset, nw, wmesh, a2fw)
        do my_ik=1,gqk%my_nk
          !weight_k = gqk%my_kweight(my_ik, gstore)
          weight_k = gqk%my_wtk(my_ik)
-         do ib_k=1,gqk%nb
-           do ib_kq=1,gqk%nb
-             g2 = g2_mnkp(ib_kq, ib_k, my_ik, my_ip)
-             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbldelta_q(ib_kq, ib_k, my_ik)
+         do in_k=1,gqk%nb
+           do im_kq=1,gqk%nb
+             g2 = g2_mnkp(im_kq, in_k, my_ik, my_ip)
+             a2fw(:) = a2fw(:) + deltaw_nuq(:) * g2 * weight_k * weight_q * dbldelta_q(im_kq, in_k, my_ik)
            end do
          end do
        end do
@@ -2973,7 +2980,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer,parameter :: useylmgr = 0, useylmgr1 = 0, master = 0, ndat1 = 1
  integer :: my_rank,nproc,mband,nsppol,nkibz,idir,ipert,ebands_timrev, iq_bz
  integer :: cplex,natom,natom3,ipc,nspinor, nskip_tetra_kq
- integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, ib_k, ib_kq !ib1,ib2, band_kq,
+ integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
  integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone
@@ -3253,17 +3260,17 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
        select case (gstore%with_vk)
        case (1)
-         do ib_k=1,gqk%nb
-           band_k = ib_k + gqk%bstart - 1
+         do in_k=1,gqk%nb
+           band_k = in_k + gqk%bstart - 1
            call wfd%copy_cg(band_k, ik_ibz, spin, cgwork)
            vk = ddkop%get_vdiag(ebands%eig(band_k, ik_ibz, spin), istwf_k, npw_k, wfd%nspinor, cgwork, cwaveprj0)
-           vk_cart_ibz(:, ib_k, ik_ibz) = vk
+           vk_cart_ibz(:, in_k, ik_ibz) = vk
          end do
 
        case (2)
          ABI_ERROR("with_vk 2")
-         !do ib_k=1,nband_k
-         !  band_k = ib_k + bstart_k - 1
+         !do in_k=1,nband_k
+         !  band_k = in_k + bstart_k - 1
          !end do
        end select
      end do ! my_ik
@@ -3473,13 +3480,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate dvscf * psi_k, results stored in h1kets_kq on the k+q sphere.
          ! Compute H(1) applied to GS wavefunction Psi(0)
-         do ib_k=1,nband_k
-           band_k = ib_k + bstart_k - 1
+         do in_k=1,nband_k
+           band_k = in_k + bstart_k - 1
            eig0nk = ebands%eig(band_k, ik_ibz, spin)
            ! Use scissor shift on 0-order eigenvalue
            eshift = eig0nk - dtset%dfpt_sciss
 
-           call getgh1c(berryopt0, kets_k(:,:,ib_k), cwaveprj0, h1kets_kq(:,:,ib_k), &
+           call getgh1c(berryopt0, kets_k(:,:,in_k), cwaveprj0, h1kets_kq(:,:,in_k), &
                         grad_berry, gs1c, gs_hamkq, gvnlx1, idir, ipert, eshift, mpi_enreg, optlocal, &
                         optnl, opt_gvnlx1, rf_hamkq, sij_opt, tim_getgh1c, usevnl)
          end do
@@ -3492,9 +3499,9 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
 
          ! Calculate elphmat(j,i) = <psi_{k+q,j}|dvscf_q*psi_{k,i}> for this perturbation.
          ! No need to handle istwf_kq because it's always 1.
-         do ib_k=1,nband_k
-           do ib_kq=1,nband_kq
-             gkq_atm(:, ib_kq, ib_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,ib_kq), h1kets_kq(1,1,ib_k))
+         do in_k=1,nband_k
+           do im_kq=1,nband_kq
+             gkq_atm(:, im_kq, in_k, ipc) = cg_zdotc(npw_kq*nspinor, bras_kq(1,1,im_kq), h1kets_kq(1,1,in_k))
            end do
          end do
 
@@ -4180,18 +4187,22 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr
+ integer :: root_ncid, spin_ncid, gstore_completed, spin, ib, nb, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: glob_nq, glob_nk, im_kq, in_k
+ real(dp) :: g2
  !character(len=500) :: msg
  !type(hdr_type) :: gstore_hdr
 !arrays
  integer :: done_qbz_spin(gstore%nqbz, dtset%nsppol)
  real(dp),allocatable :: vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
- real(dp),allocatable :: slice_bb(:,:,:)  ! gwork_q(:,:,:,:,:),
+ real(dp),allocatable :: gslice_mn(:,:,:)  ! gwork_q(:,:,:,:,:),
 
 ! *************************************************************************
 
  ! Only master rank prints to ab_out
  if (xmpi_comm_rank(gstore%comm) /= master) return
+
+ natom3 = dtset%natom * 3
 
  NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
  !call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
@@ -4207,21 +4218,30 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  do spin=1,gstore%nsppol
     NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
     NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
+    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
+    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
+
     write(ab_out, "(a,i0)")" gqk%nb: ", nb
+    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
+    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
     ! Handle the output of group velocities.
     ! On disk, we have:
     !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
+    !
+    ! or
+    !
     !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
     select case (gstore%with_vk)
     case (0)
       continue
+
     case (1)
-      continue
       ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
-      write(ab_out,"(a)") " Group velocites v_nk in Cartesian coordinates:"
+      write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates:"
       do ik_ibz=1,gstore%nkibz
+        ! Only the first and the last k-points are written.
         if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
         NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
         write(ab_out, "(a)")sjoin(" For k-point", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
@@ -4230,23 +4250,41 @@ subroutine gstore_print_for_abitests(gstore, dtset)
         end do
       end do
       ABI_FREE(vk_cart_ibz)
+
     case (2)
       NOT_IMPLEMENTED_ERROR()
     end select
 
     ! Handle the output of the e-ph matrix elements
-    ! On disk we have the global arrays:
+    ! On disk we have the global array:
     !
     !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
 
     cplex = dtset%gstore_cplex
-    ABI_MALLOC(slice_bb, (cplex, nb, nb))
+    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
 
-    ipc = 1; ik_glob = 1; iq_glob = 1
-    ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), slice_bb, start=[1,1,1,ipc,ik_glob,iq_glob],  count=[cplex,nb,nb,1,1,1 ])
-    NCF_CHECK(ncerr)
+    write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+    do iq_glob=1,glob_nq
+      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
+      do ik_glob=1,glob_nk
+        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
+        do ipc=1,natom3
+          if (ipc /= 1 .and. ipc /= natom3) cycle ! Write first and the last pertubation.
+          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
+          NCF_CHECK(ncerr)
+          write(ab_out, "(3(a,i0))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
+          do im_kq=1,nb
+            do in_k=1,nb
+              if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
+              if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+              write(ab_out, "(1x,5(i5,1x),es16.6)")iq_glob, ik_glob, ipc, im_kq, in_k, g2
+            end do
+          end do
+        end do
+      end do
+    end do
 
-    ABI_FREE(slice_bb)
+    ABI_FREE(gslice_mn)
  end do
 
  NCF_CHECK(nf90_close(root_ncid))
