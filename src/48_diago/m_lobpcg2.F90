@@ -336,8 +336,8 @@ module m_lobpcg2
     type(xg_t) :: residu_eff
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvalues2N   ! eigen values for Rayleight-Ritz
+    logical :: skip,compute_residu
     integer :: blockdim, blockdim3, blockdim2
-!    integer :: comm_fft_save,comm_band_save
     integer :: spacedim
     integer :: iblock, nblock
     integer :: iline, nline
@@ -349,7 +349,6 @@ module m_lobpcg2
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
-    logical :: compute_residu
     character(len=500) :: msg
 
     interface
@@ -675,6 +674,7 @@ module m_lobpcg2
     call xg_free(eigenvalues3N)
     call xg_free(residu_eff)
 
+    skip = .false.
     if ( ierr /= 0 ) then
       ABI_COMMENT("Some errors happened, so H|Psi> and S|Psi> are computed before leaving")
       if ( lobpcg%paral_kgb == 1 ) then
@@ -712,10 +712,10 @@ module m_lobpcg2
       call xgTransposer_free(lobpcg%xgTransposerAllX0)
       call xgTransposer_free(lobpcg%xgTransposerAllAX0)
       call xgTransposer_free(lobpcg%xgTransposerAllBX0)
-      nblock = 1 ! Avoid the next RR
+      skip = .true.
     end if
 
-    if ( nblock > 1 ) then
+    if (.not.skip) then
       call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,&
         & lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
       call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
@@ -762,6 +762,10 @@ module m_lobpcg2
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     integer        , intent(in   ) :: iblock
+
+    if (iblock<2) then
+      ABI_ERROR("iblock<2")
+    end if
     call xg_setBlock(lobpcg%AllBX0,lobpcg%BX0,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,lobpcg%spacedim,(iblock-1)*lobpcg%blockdim)
   end subroutine lobpcg_setPreviousX0_BX0
@@ -841,18 +845,22 @@ module m_lobpcg2
   end subroutine lobpcg_setX0
 
 
-  subroutine lobpcg_transferAX_BX(lobpcg,jblock)
+  subroutine lobpcg_transferAX_BX(lobpcg,iblock)
 
     type(lobpcg_t), intent(inout) :: lobpcg
-    integer       , intent(in   ) :: jblock
+    integer       , intent(in   ) :: iblock
     type(xgBlock_t) :: CXtmp
     integer :: firstcol
     double precision :: tsec(2)
 
     call timab(tim_copy,1,tsec)
 
-    ! jblock goes from 1 to nblock-1 included
-    firstcol = (jblock-1)*lobpcg%blockdim+1  ! Start of each block
+    if (iblock<1) then
+      ABI_ERROR("iblock<1")
+    end if
+
+    ! iblock goes from 1 to nblock-1 included
+    firstcol = (iblock-1)*lobpcg%blockdim+1  ! Start of each block
 
     ! BX
     call xg_setBlock(lobpcg%AllBX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)

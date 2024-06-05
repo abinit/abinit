@@ -230,7 +230,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
    & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
 
- call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr,dtset%ecut, &
+ call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
 &                 mpi_enreg%bandpp, &
 &                 nline, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
@@ -267,7 +267,6 @@ end subroutine chebfiwf2_cprj
 !! SIDE EFFECTS
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  AX <type(xgBlock_t)>= memory block containing H|C>
-!!  BX <type(xgBlock_t)>= memory block containing S|C>
 !!
 !! PARENTS
 !!
@@ -277,42 +276,32 @@ end subroutine chebfiwf2_cprj
 !!
 !! SOURCE
 !
-subroutine xg_getghc(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
+subroutine xg_getghc(X,AX)
 
  use iso_c_binding
  implicit none
 
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X
- type(xgBlock_t), intent(inout) :: cprjX
  type(xgBlock_t), intent(inout) :: AX
- type(xgBlock_t), intent(inout) :: eig
- integer, intent(in) :: sij_opt,type_calc
- type(xg_nonlop_t), intent(in) :: xg_nonlop
- integer         :: blockdim
- integer         :: spacedim
- type(pawcprj_type), allocatable :: cprjs(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cpopt
- integer :: iatom,iband,ispinor,cprj_index,cprj_rows,cprj_cols,ncpgr,nlmn
- type(c_ptr) :: cptr
+ integer         :: blockdim
+ integer         :: spacedim
+ integer,parameter :: sij_opt=0,cpopt=-1,type_calc=1 ! Compute local part only
+! integer :: iatom,iband,ispinor,cprj_index,cprj_rows,cprj_cols,ncpgr,nlmn
  real(dp) :: eval
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 !arrays
- real(dp), pointer :: cg(:,:),eig_(:,:)
- real(dp), pointer :: ghc(:,:),cprjX_array(:,:)
+ real(dp), pointer :: cg(:,:)
+ real(dp), pointer :: ghc(:,:)
  real(dp), allocatable :: gsc(:,:),gvnlxc(:,:)
 
 ! *********************************************************************
 
  call xgBlock_getSize(X,spacedim,blockdim)
-
- if (sij_opt>0) then
-   ABI_ERROR("only sij_opt=0 or -1 is possible here")
- end if
-
- spacedim = spacedim
+ call xgBlock_check(X,AX)
 
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
@@ -320,42 +309,9 @@ subroutine xg_getghc(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
  ABI_MALLOC(gvnlxc,(0,0))
  ABI_MALLOC(gsc,(0,0))
 
- ! Apply only local and kinetic parts of the Hamiltonian
- if (type_calc==1.or.type_calc==3) then ! no non-local part
-   cpopt=-1 ! no use of cprj here
- else
-   cpopt=l_cpopt
-   call xgBlock_reverseMap(eig,eig_,rows=1,cols=blockdim)
-   cptr = c_loc(eig_)
-   if (cpopt==2) then
-     !LB : How to deal with ncpgr=3?
-     ncpgr=0
-     call xgBlock_getSize(cprjX,cprj_rows,cprj_cols)
-     call xgBlock_reverseMap(cprjX,cprjX_array,rows=1,cols=cprj_rows*cprj_cols)
-     ABI_MALLOC(cprjs,(l_gs_hamk%natom,l_gs_hamk%nspinor*cprj_cols))
-     call pawcprj_alloc(cprjs,ncpgr,xg_nonlop%nlmn_natom)
-     cprj_index = 1
-     do iband=1,cprj_cols
-       do iatom=1,l_gs_hamk%natom
-         nlmn=xg_nonlop%nlmn_natom(iatom)
-         do ispinor=1,l_gs_hamk%nspinor
-           cprjs(iatom,ispinor+l_gs_hamk%nspinor*(iband-1))%cp(:,:) = cprjX_array(:,cprj_index:cprj_index+nlmn-1)
-           cprj_index = cprj_index + nlmn
-         end do
-       end do
-     end do
-   end if
- end if
- call multithreaded_getghc(cpopt,cg,cprjs,ghc,gsc,&
+ ! Apply only local part of the Hamiltonian
+ call multithreaded_getghc(cpopt,cg,cprj_dum,ghc,gsc,&
    l_gs_hamk,gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,sij_opt,l_tim_getghc,type_calc)
-
- ABI_FREE(gvnlxc)
- ABI_FREE(gsc)
-
- if (type_calc/=1.and.type_calc/=3) then ! so there is a non-local part
-   call pawcprj_free(cprjs)
-   ABI_FREE(cprjs)
- end if
 
 end subroutine xg_getghc
 !!***
