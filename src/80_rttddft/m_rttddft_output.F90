@@ -153,7 +153,7 @@ subroutine rttddft_output(dtfil, dtset, istep, mpi_enreg, psps, tdks)
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
 
- write(msg,'(a,f14.6,a)') 'Integrated density (ie. total nb of electrons) = ', &
+ write(msg,'(a,f18.10,a)') 'Integrated density (ie. total nb of electrons) = ', &
                           & sum(tdks%rhor(:,1))*tdks%ucvol/tdks%nfftf, ch10
  call wrtout(ab_out,msg)
  if (do_write_log) call wrtout(std_out,msg)
