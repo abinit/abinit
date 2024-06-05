@@ -14,4 +14,8 @@ inp_files = [
     "t01.abi" ,  # test post treatment of an increase of symmetry due to geometry optimization
     "t03.abi",  # same as v10[04] but with norm-conserving pseudos
     "t04.abi",  # same as v9[206] but with istwfk>1
+    "t10.abi",  # compare cprj_in_memory=1 with cprj_in_memory=0. PAW, istwfk=1.
+    "t11.abi",  # same as v10[10], with nsppol=2.
+    "t12.abi",  # same as v10[10], with nspinor=2.
+    "t13.abi",  # same as v10[10], with istwfk>1.
 ]
