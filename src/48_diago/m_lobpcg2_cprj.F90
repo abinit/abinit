@@ -54,8 +54,8 @@ module m_lobpcg2_cprj
   integer, parameter :: tim_RR_XWP      = 1647
   integer, parameter :: tim_RR_Xall     = 1648
 
-  integer, parameter :: tim_copy     = 9999 ! TO CHANGE
-  integer, parameter :: tim_nbdbuf   = 9999 ! TO CHANGE
+  integer, parameter :: tim_copy     = 2090 ! TO CHANGE
+  integer, parameter :: tim_nbdbuf   = 2091 ! TO CHANGE
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -171,12 +171,6 @@ module m_lobpcg2_cprj
     integer          , intent(in   ) :: me_g0
     integer          , intent(in   ) :: me_g0_fft
     double precision :: tsec(2)
-    double precision :: advice
-    double precision :: advice_target
-    integer :: iadvice, nthread
-#ifdef HAVE_LINALG_MKL_THREADS
-    integer :: mkl_get_max_threads
-#endif
 
     call timab(tim_init,1,tsec)
     lobpcg%neigenpairs   = neigenpairs
@@ -315,7 +309,8 @@ module m_lobpcg2_cprj
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, occ, residu, prtvol, nspinor, isppol, ikpt, inonsc, istep, nbdbuf)
+  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, occ, residu, prtvol, nspinor, &
+      isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: X0      ! Full initial vectors
@@ -345,7 +340,6 @@ module m_lobpcg2_cprj
     type(xg_t):: cprj_work_all
     double precision :: maxResidu, minResidu
     double precision :: dlamch,tolerance
-    integer :: eigResiduMax, eigResiduMin
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
