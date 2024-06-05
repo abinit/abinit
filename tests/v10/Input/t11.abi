@@ -81,6 +81,6 @@ pseudos="P.xml, Al.xml"
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
-#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). Should give same results than v10[04]. PAW,istwfk=1,nsppol=2.
+#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). PAW,istwfk=1,nsppol=2.
 #%%<END TEST_INFO>
  

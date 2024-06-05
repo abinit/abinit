@@ -38,6 +38,9 @@ inp_files = [
 "t43.abi", # test chebfi2 (paw+soc)
 "t44.abi", # test chebfi2 (istwfk>1,paw)
 "t45.abi", # test chebfi2 (istwfk>1,norm conserving)
+"t46.abi", # test cprj_in_memory=1 (istwfk=1,npkpt>1)
+"t47.abi", # test cprj_in_memory=1 (nspinor=1)
+"t48.abi", # test cprj_in_memory=1 (istwfk>1)
 "t51.abi",
 "t52.abi",
 "t53.abi",

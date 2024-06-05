@@ -17,6 +17,9 @@ wfoptalg2 114
 wfoptalg3 111
 wfoptalg4 111
 
+nblock_lobpcg1 4
+nblock_lobpcg2 4
+
 # unconverged
 ecut 5
 pawecutdg 10
