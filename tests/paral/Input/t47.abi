@@ -1,11 +1,11 @@
-# Inspired from v9[141]
+# parallel version of v10[12]
 # AlP solid
 
 ndtset 4
 #ndtset 3
 #jdtset 2 3 4
 
-#npband 4
+npband 4
 
 cprj_in_memory1 0
 cprj_in_memory2 1
@@ -25,8 +25,9 @@ nstep 15
 nline  8
 
 # bands and spinors
-nband  8
-nbdbuf 2
+nband  16
+nbdbuf  4
+nspinor 2
 
 tolvrs 1.0D-20
 
@@ -36,6 +37,8 @@ kptopt 3
 ngkpt 3*2 
 nshiftk 1
 shiftk 3*0
+
+istwfk *1
 
 prtwf 0
 prteig 0
@@ -70,12 +73,16 @@ pseudos="P.xml, Al.xml"
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t13.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
+#%%   t47.abo, tolnlines=  0, tolabs=  0, tolrel= 0, fld_options = -ridiculous
 #%% [paral_info]
-#%% max_nprocs = 1
+#%% nprocs_to_test = 4
+#%% max_nprocs = 4
+#%% [NCPU_4]
+#%% files_to_test = 
+#%%   t47_MPI4.abo, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -ridiculous
 #%% [extra_info]
 #%% authors = L. Baguet
 #%% keywords = PAW,CPRJ
-#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). PAW,istwfk>1
+#%% description = Compare cprj_in_memory=1 with cprj_in_memory=0 (lobpcg2 and chebfi2). PAW,nspinor=2,npband=4
 #%%<END TEST_INFO>
  
