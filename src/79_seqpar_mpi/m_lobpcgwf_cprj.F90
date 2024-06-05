@@ -34,7 +34,6 @@ module m_lobpcgwf_cprj
  use defs_basis
  use m_abicore
  use m_lobpcg
- use m_xmpi
  use m_errors
  use m_time
  use m_xomp
@@ -43,16 +42,12 @@ module m_lobpcgwf_cprj
  use m_xg_nonlop
  use m_xgTransposer
  use m_lobpcg2_cprj
-! use m_lobpcg2
  use m_dtset
 
  use defs_abitypes, only : mpi_type
  use m_hamiltonian, only : gs_hamiltonian_type
- use m_nonlop,      only : nonlop
- use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
- use m_cgprj,       only : getcprj
+ use m_pawcprj,     only : pawcprj_type
 
  private
 
@@ -61,9 +56,8 @@ module m_lobpcgwf_cprj
  integer, parameter :: CPRJ_ALLOC=1
  integer, parameter :: CPRJ_FREE=2
 
- ! For use in getghc_gsc1
- integer,save  :: l_cpopt
- integer,save  :: l_prtvol
+! For use in getghc_gsc1
+ integer, save :: l_prtvol
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
 
@@ -107,8 +101,6 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
  integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
  integer :: me_g0, me_g0_fft
 
- logical :: paw
-
  integer, parameter :: tim_lobpcgwf2 = 1640
  real(dp) :: tsec(2)
 
@@ -121,12 +113,6 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
  call timab(tim_lobpcgwf2,1,tsec)
 
  ! Set module variables
- paw = (gs_hamk%usepaw==1)
- l_cpopt=-1!;l_sij_opt=0
- if (paw) then
-!   l_sij_opt=-1 ! getghc compute (H-eS)|psi>
-   l_cpopt=2    ! use of cprj as input in getghc
- end if
  !LTEST
  if (cprj_cwavef_bands(1,1)%ncpgr==3) then
    ABI_ERROR('lobpcg with cprj not implemented with cprj%ncpgr==3')
@@ -140,8 +126,8 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
  cprjdim = xg_nonlop%cprjdim
 
 !Variables
- blockdim=l_mpi_enreg%nproc_band*mpi_enreg%bandpp
- nband_cprj=nband/l_mpi_enreg%nproc_band
+ blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
+ nband_cprj=nband/mpi_enreg%nproc_band
 
 !Depends on istwfk
  if ( gs_hamk%istwf_k > 1 ) then ! Real only
@@ -214,9 +200,9 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
 
 end subroutine lobpcgwf2_cprj
 
-!!****f* m_lobpcg/getghc_KV
+!!****f* m_lobpcg/xg_getghc
 !! NAME
-!! getghc_gsc1
+!! xg_getghc
 !!
 !! FUNCTION
 !! This routine computes H|C> and possibly S|C> for a given wave function C.
@@ -254,7 +240,7 @@ subroutine xg_getghc(X,AX)
 !arrays
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
- real(dp), allocatable :: gsc(:,:),gvnlxc(:,:)
+ real(dp) :: gsc(1,1),gvnlxc(1,1)
 
 ! *********************************************************************
 
@@ -263,9 +249,6 @@ subroutine xg_getghc(X,AX)
 
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
-
- ABI_MALLOC(gvnlxc,(0,0))
- ABI_MALLOC(gsc,(0,0))
 
  ! Apply only local part of the Hamiltonian
  call multithreaded_getghc(cpopt,cg,cprj_dum,ghc,gsc,&

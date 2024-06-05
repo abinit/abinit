@@ -1075,16 +1075,17 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call init_electronpositron(dtfil%ireadwf,dtset,electronpositron,mpi_enreg,nfftf,pawrhoij,pawtab)
  end if
 
+!###########################################################
+! Initialisation of cprj
+
  ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
  ! cprj_in_memory=2 is used for Congugate Gradient
  if (dtset%cprj_in_memory==1) then
    call xg_nonlop_init(xg_nonlop,psps%indlmn,mpi_enreg%my_atmtab,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
 &                    dtset%nspinor,ucvol,mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
-   call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+   if (dtset%usepaw==1) call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
  end if
 
-!###########################################################
-! Initialisation of cprj
  usecprj=0; mcprj=0;mband_cprj=0
  compute_cprj=.false.
  ! PAW keeping cprj in memory : some cases are excluded for now...

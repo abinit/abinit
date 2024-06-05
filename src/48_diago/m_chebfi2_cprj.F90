@@ -22,9 +22,6 @@
 
 #include "abi_common.h"
 
-! nvtx related macro definition
-#include "nvtx_macros.h"
-
 module m_chebfi2_cprj
 
  use defs_basis
@@ -47,10 +44,6 @@ module m_chebfi2_cprj
  use omp_lib
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
-#endif
-
  implicit none
 
  private
@@ -62,13 +55,6 @@ module m_chebfi2_cprj
  integer, parameter :: EIGENVD = 2
  integer, parameter :: DEBUG_ROWS = 5
  integer, parameter :: DEBUG_COLUMNS = 5
-
-!Type of eigen solver to use
-#ifdef HAVE_OPENMP
- integer, save :: eigenSolver = EIGENVD
-#else
- integer, save :: eigenSolver = EIGENV
-#endif
 
  integer, parameter :: tim_init         = 1751
  integer, parameter :: tim_free         = 1752
@@ -600,14 +586,12 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  call xmpi_barrier(chebfi%spacecom)
 
 !********************* Compute Rayleigh quotients for every band, and set lambda equal to the largest one *****
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RRQ)
  call timab(tim_RR_q, 1, tsec)
  call chebfi_rayleighRitzQuotients(chebfi, maxeig, mineig, DivResults%self) !OK
  call timab(tim_RR_q, 2, tsec)
 
  call xmpi_max(maxeig,maxeig_global,chebfi%spacecom,ierr)
  call xmpi_min(mineig,mineig_global,chebfi%spacecom,ierr)
- ABI_NVTX_END_RANGE()
 
  lambda_minus = maxeig_global
 
@@ -636,28 +620,22 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  one_over_r = 1/radius
  two_over_r = 2/radius
 
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_CORE)
  do iline = 0, nline - 1
 
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_NEXT_ORDER)
    call timab(tim_getcprj,1,tsec)
    call xg_nonlop_getcprj(xg_nonlop,chebfi%xAXcolsrows,chebfi%cprjX,chebfi%proj_work%self)
    call timab(tim_getcprj,2,tsec)
    call chebfi_computeNextOrderChebfiPolynom(chebfi, iline, center, one_over_r, two_over_r)
-   ABI_NVTX_END_RANGE()
 
    call timab(tim_swap,1,tsec)
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_SWAP_BUF)
    !if (chebfi%paral_kgb == 0) then
    !  call chebfi_swapInnerBuffers(chebfi, spacedim, neigenpairs)
    !else
    call chebfi_swapInnerBuffers(chebfi, chebfi%total_spacedim, chebfi%bandpp)
    !end if
-   ABI_NVTX_END_RANGE()
    call timab(tim_swap,2,tsec)
 
    !A * Psi
-   ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
    call timab(tim_AX_v,1,tsec)
    call getAX(chebfi%xXColsRows,chebfi%xAXColsRows)
    call timab(tim_AX_v,2,tsec)
@@ -670,10 +648,8 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
    call timab(tim_AX_nl,1,tsec)
    call xg_nonlop_getHX(xg_nonlop,chebfi%xAXcolsRows,chebfi%cprjX,chebfi%cprj_work%self,chebfi%proj_work%self)
    call timab(tim_AX_nl,2,tsec)
-   ABI_NVTX_END_RANGE()
 
  end do
- ABI_NVTX_END_RANGE()
 
  !if (chebfi%paral_kgb == 1) then
  call xmpi_barrier(chebfi%spacecom)
@@ -707,13 +683,11 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  call timab(tim_transpose,2,tsec)
 
 !NEW VERSION
- ABI_NVTX_START_RANGE(NVTX_CHEBFI2_RR)
  call timab(tim_getcprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_getcprj,2,tsec)
- call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,tim_RR,&
-   & ABI_GPU_DISABLED,solve_ax_bx=.true.,full_A=.true.)
- ABI_NVTX_END_RANGE()
+ call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
+   tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.,full_A=.true.)
 
  call timab(tim_AX_nl,1,tsec)
  call xg_nonlop_getHmeSX(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%cprj_work%self,&
@@ -863,10 +837,8 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
 
  if (chebfi%paw) then
    call timab(tim_invovl, 1, tsec)
-   ABI_NVTX_START_RANGE(NVTX_INVOVL)
    call xg_nonlop_getSm1X(chebfi%xg_nonlop,chebfi%X_next,chebfi%cprjX,&
      & chebfi%cprj_work%self,chebfi%cprj_work2%self,chebfi%proj_work%self)
-   ABI_NVTX_END_RANGE()
    call timab(tim_invovl, 2, tsec)
  end if
 

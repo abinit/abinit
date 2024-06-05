@@ -37,8 +37,6 @@ module m_chebfiwf_cprj
  use m_errors
  use m_fstrings
  use m_time
- use m_xomp
- use m_fstrings
  use m_xg
  use m_xg_nonlop
  use m_chebfi2_cprj
@@ -51,17 +49,10 @@ module m_chebfiwf_cprj
 
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
- use m_nonlop,      only : nonlop
- use m_prep_kgb,    only : prep_getghc, prep_nonlop
- use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free
  use m_getghc,      only : multithreaded_getghc
 
  use m_xg
  use m_xgTransposer
-
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
- use m_nvtx_data
-#endif
 
  use iso_c_binding, only: c_associated,c_loc,c_ptr,c_f_pointer
 
@@ -81,7 +72,6 @@ module m_chebfiwf_cprj
  integer, parameter :: CPRJ_FREE=2
 
 ! For use in getghc_gsc1
- integer, save :: l_cpopt
  integer, save :: l_prtvol
  type(mpi_type),pointer,save :: l_mpi_enreg
  type(gs_hamiltonian_type),pointer,save :: l_gs_hamk
@@ -129,7 +119,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(in)    :: mpi_enreg
  type(pawcprj_type)       ,target,intent(inout) :: cprj_cwavef_bands(:,:)
- real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)!,gsc(2,nspinor*nband*npw)
+ real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)
  real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
@@ -145,14 +135,13 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  type(xgBlock_t) :: xg_precond,xg_kin
  type(chebfi_t) :: chebfi
 
- integer :: space, space_cprj, blockdim, cprjdim, nband_cprj, nline
- integer :: me_g0,me_g0_fft
+ logical :: paw
 
+ integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
+ integer :: me_g0,me_g0_fft
 
  integer, parameter :: tim_chebfiwf2 = 1750
  double precision :: tsec(2)
-
- logical :: paw
 
  ! Important things for NC
  real(dp), allocatable :: pcon(:),kin(:)
@@ -163,26 +152,21 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  call timab(tim_chebfiwf2,1,tsec)
 
  ! Set module variables
- paw = (gs_hamk%usepaw==1)
- l_cpopt=-1!;l_sij_opt=0
- if (paw) then
-!   l_sij_opt=-1 ! getghc compute (H-eS)|psi>
-   l_cpopt=2    ! use of cprj as input in getghc
- end if
  !LTEST
  if (cprj_cwavef_bands(1,1)%ncpgr==3) then
    ABI_ERROR('chebfi with cprj not implemented with cprj%ncpgr==3')
  end if
  !LTEST
 
+ paw = gs_hamk%usepaw==1
+
  l_prtvol = prtvol
- l_gs_hamk => gs_hamk
  l_mpi_enreg => mpi_enreg
+ l_gs_hamk => gs_hamk
 
  cprjdim = xg_nonlop%cprjdim
 
 !Variables
- nline=dtset%nline
  blockdim=mpi_enreg%nproc_band*mpi_enreg%bandpp
  nband_cprj=nband/mpi_enreg%nproc_band
 
@@ -208,7 +192,6 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  !For preconditionning
  ABI_MALLOC(pcon,(npw))
  call build_pcon(pcon,kinpw,npw)
- call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
 
  ! Local variables for chebfi
  me_g0 = -1
@@ -216,12 +199,14 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  if (space==SPACE_CR) then
    me_g0 = 0
    me_g0_fft = 0
-   if ( gs_hamk%istwf_k == 2) then
+   if (gs_hamk%istwf_k == 2) then
      if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
  end if
  call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,l_mpi_enreg%comm_band,me_g0=me_g0)
+
+ call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband)
 
@@ -232,7 +217,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
 &                 mpi_enreg%bandpp, &
-&                 nline, space,space_cprj,1, &
+&                 dtset%nline, space,space_cprj,1, &
 &                 l_mpi_enreg%comm_band,me_g0,paw,&
 &                 xg_nonlop,me_g0_fft)
 
@@ -256,9 +241,9 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
 end subroutine chebfiwf2_cprj
 
-!!****f* m_chebfi/getghc_KV
+!!****f* m_chebfi/xg_getghc
 !! NAME
-!! getghc_gsc1
+!! xg_getghc
 !!
 !! FUNCTION
 !! This routine computes H|C> and possibly S|C> for a given wave function C.
@@ -296,7 +281,7 @@ subroutine xg_getghc(X,AX)
 !arrays
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
- real(dp), allocatable :: gsc(:,:),gvnlxc(:,:)
+ real(dp) :: gsc(1,1),gvnlxc(1,1)
 
 ! *********************************************************************
 
@@ -305,9 +290,6 @@ subroutine xg_getghc(X,AX)
 
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
-
- ABI_MALLOC(gvnlxc,(0,0))
- ABI_MALLOC(gsc,(0,0))
 
  ! Apply only local part of the Hamiltonian
  call multithreaded_getghc(cpopt,cg,cprj_dum,ghc,gsc,&

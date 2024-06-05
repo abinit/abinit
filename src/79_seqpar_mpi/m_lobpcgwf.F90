@@ -46,9 +46,8 @@ module m_lobpcgwf
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop
- use m_prep_kgb,    only : prep_getghc, prep_nonlop
+ use m_prep_kgb,    only : prep_nonlop
  use m_getghc,      only : multithreaded_getghc
- use m_cgtools,     only : dotprod_g
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
@@ -87,7 +86,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(in)    :: mpi_enreg
- real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)!,gsc(2,nspinor*nband*npw)
+ real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)
  real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
