@@ -481,8 +481,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
-               call lobpcgwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
-                 mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
+               call lobpcgwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,&
+                 kinpw,mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf,xg_nonlop)
              else
                call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &               nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf)

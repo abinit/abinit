@@ -100,14 +100,13 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
  type(xgBlock_t) :: xgocc
- type(xgBlock_t) :: precond
+ type(xgBlock_t) :: xg_precond
  type(lobpcg_t) :: lobpcg
 
  integer :: space, blockdim
 
  integer, parameter :: tim_lobpcgwf2 = 1640
  integer, parameter :: tim_nonlop = 1657
- double precision :: cputime, walltime
  double precision :: tsec(2)
 
  ! Important things for NC
@@ -120,14 +119,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
 ! *********************************************************************
 
-
-!###########################################################################
-!################ INITIALISATION  ##########################################
-!###########################################################################
-
  call timab(tim_lobpcgwf2,1,tsec)
- cputime = abi_cpu_time()
- walltime = abi_wtime()
 
  ! Set module variables
  l_paw = (gs_hamk%usepaw==1)
@@ -178,7 +170,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  call xgBlock_map(xgx0,cg,space,l_npw*l_nspinor,nband,comm=l_mpi_enreg%comm_bandspinorfft,me_g0=me_g0,&
    & gpu_option=dtset%gpu_option)
 
- call xgBlock_map_1d(precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
+ call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw,gpu_option=dtset%gpu_option)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
@@ -186,16 +178,12 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
 
  call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
 
- call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr,dtset%nline,&
+ call lobpcg_init(lobpcg,nband,l_npw*l_nspinor,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,l_mpi_enreg%comm_bandspinorfft,l_paral_kgb,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
    me_g0,me_g0_fft,gs_hamk%gpu_option)
 
-!###########################################################################
-!################    RUUUUUUUN    ##########################################
-!###########################################################################
-
  ! Run lobpcg
- call lobpcg_run(lobpcg,xgx0,getghc_gsc1,precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
+ call lobpcg_run(lobpcg,xgx0,getghc_gsc1,xg_precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,isppol,ikpt,inonsc,istep,nbdbuf)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
@@ -239,10 +227,6 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
    !$OMP TARGET EXIT DATA MAP(from:cg,eig,resid)
  end if
 #endif
-!###########################################################################
-!################    SORRY IT'S ALREADY FINISHED : )  ######################
-!###########################################################################
-
 
  call timab(tim_lobpcgwf2,2,tsec)
 
@@ -258,13 +242,13 @@ subroutine getghc_gsc1(X,AX,BX)
  type(xgBlock_t), intent(inout) :: X
  type(xgBlock_t), intent(inout) :: AX
  type(xgBlock_t), intent(inout) :: BX
- integer         :: blockdim
- integer         :: spacedim
- type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 
 !Local variables-------------------------------
 !scalars
+ integer         :: blockdim
+ integer         :: spacedim
  real(dp) :: eval
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 !arrays
  real(dp), pointer :: cg(:,:)
  real(dp), pointer :: ghc(:,:)
@@ -318,5 +302,5 @@ subroutine build_pcon(pcon,kinpw,npw)
 
 end subroutine build_pcon
 
- end module m_lobpcgwf
+end module m_lobpcgwf
 !!***

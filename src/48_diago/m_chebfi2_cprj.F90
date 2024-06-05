@@ -496,15 +496,10 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  type(xgBlock_t), intent(in   ) :: kin
  type(xgBlock_t), intent(in   ) :: pcond
  interface
-   subroutine getAX(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
+   subroutine getAX(X,AX)
      use m_xg, only : xgBlock_t
-     use m_xg_nonlop, only : xg_nonlop_t
      type(xgBlock_t), intent(inout) :: X
-     type(xgBlock_t), intent(inout) :: cprjX
      type(xgBlock_t), intent(inout) :: AX
-     type(xgBlock_t), intent(inout) :: eig
-     integer, intent(in) :: sij_opt,type_calc
-     type(xg_nonlop_t), intent(in) :: xg_nonlop
    end subroutine getAX
  end interface
 
@@ -593,8 +588,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  call xg_nonlop_getcprj(xg_nonlop,chebfi%xXColsRows,chebfi%cprjX,chebfi%proj_work%self)
  call timab(tim_getcprj,2,tsec)
  call timab(tim_AX_v,1,tsec)
- !call getAX(chebfi%xXColsRows,chebfi%cprjX,chebfi%xAXColsRows,eigen,0,3)
- call getAX(chebfi%xXColsRows,chebfi%cprjX,chebfi%xAXColsRows,eigen,0,1,chebfi%xg_nonlop)
+ call getAX(chebfi%xXColsRows,chebfi%xAXColsRows)
  call timab(tim_AX_v,2,tsec)
  call timab(tim_AX_k,1,tsec)
  call xgBlock_add_diag(chebfi%xXColsRows,kin,nspinor,chebfi%xAXColsRows)
@@ -665,8 +659,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
    !A * Psi
    ABI_NVTX_START_RANGE(NVTX_CHEBFI2_GET_AX_BX)
    call timab(tim_AX_v,1,tsec)
-   !call getAX(chebfi%xXColsRows,chebfi%cprjX,chebfi%xAXColsRows,eigen,0,3)
-   call getAX(chebfi%xXColsRows,chebfi%cprjX,chebfi%xAXColsRows,eigen,0,1,chebfi%xg_nonlop)
+   call getAX(chebfi%xXColsRows,chebfi%xAXColsRows)
    call timab(tim_AX_v,2,tsec)
    call timab(tim_AX_k,1,tsec)
    call xgBlock_add_diag(chebfi%xXColsRows,kin,nspinor,chebfi%xAXColsRows)

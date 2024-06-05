@@ -13,7 +13,7 @@ module m_lobpcg2_cprj
   use m_xg_ortho_RR
   use m_xgTransposer
   use m_xgScalapack
-  use defs_basis, only : std_err, std_out
+  use defs_basis
   use m_abicore
   use m_errors
   use m_xomp
@@ -53,6 +53,9 @@ module m_lobpcg2_cprj
   integer, parameter :: tim_RR_XW       = 1646
   integer, parameter :: tim_RR_XWP      = 1647
   integer, parameter :: tim_RR_Xall     = 1648
+
+  integer, parameter :: tim_copy     = 9999 ! TO CHANGE
+  integer, parameter :: tim_nbdbuf   = 9999 ! TO CHANGE
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -198,40 +201,9 @@ module m_lobpcg2_cprj
     lobpcg%me_g0         = me_g0
     lobpcg%me_g0_fft     = me_g0_fft
 
-    nthread = 1
-#ifdef HAVE_LINALG_MKL_THREADS
-    nthread = mkl_get_max_threads()
-#else
-    nthread = xomp_get_num_threads(open_parallel=.true.)
-    if ( nthread == 0 ) nthread = 1
-#endif
-
-    advice_target = 2.5d6*dble(nthread)
-    advice = advice_target/dble(spacedim) ! assume npband*npfft = cst and we adjust bandpp obtain the correct blocksize
-    iadvice = 1+int(dble(neigenpairs)/advice) ! get the int so that advice is a divisor or neigenpairs
-    do while (iadvice >= 1)
-      if ( mod(neigenpairs,iadvice) == 0 ) then
-        exit
-      end if
-      iadvice = iadvice - 1
-    end do
-
-!LTEST
-!    if ( abs(dble(spacedim * blockdim)/advice_target-1.d0) > 0.5 ) then
-!      if ( neigenpairs /= blockdim*iadvice ) then
-!        write(std_out,'(1x,A,i5)') "You should try to get npband*bandpp=", neigenpairs/iadvice
-!        write(std_out,'(1x,A,i8)',advance="no") "For information matrix size is ", spacedim*blockdim
-!        if ( nthread > 1 ) then
-!          write(std_out,'(1x,A,i3,1x,A)') "and linalg will use", nthread, "threads"
-!        else
-!          write(std_out,*)
-!        end if
-!      end if
-!    end if
-!LTEST
-
     call lobpcg_allocateAll(lobpcg)
     call timab(tim_init,2,tsec)
+
   end subroutine lobpcg_init
 
 
@@ -343,19 +315,22 @@ module m_lobpcg2_cprj
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, residu, prtvol, nspinor)
+  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, occ, residu, prtvol, nspinor, isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
     type(xgBlock_t), intent(inout) :: X0      ! Full initial vectors
     type(xgBlock_t), intent(inout) :: cprjX0  ! Full initial cprj
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
+    type(xgBlock_t), intent(inout) :: occ
     type(xgBlock_t), intent(inout) :: residu
     type(xgBlock_t), intent(in   ) :: kin
     type(xgBlock_t), intent(in   ) :: pcond
     integer        , intent(in   ) :: prtvol
     integer        , intent(in   ) :: nspinor
+    integer        , intent(in   ) :: isppol,ikpt,inonsc,istep,nbdbuf
 
     type(xg_t) :: eigenvalues3N   ! eigen values for Rayleight-Ritz
+    type(xg_t) :: residu_eff
     type(xgBlock_t) :: eigenvaluesN   ! eigen values for Rayleight-Ritz
     type(xgBlock_t) :: eigenvalues2N   ! eigen values for Rayleight-Ritz
     logical :: skip,compute_residu
@@ -363,30 +338,24 @@ module m_lobpcg2_cprj
     integer :: spacedim
     integer :: iblock, nblock
     integer :: iline, nline
-    integer :: rows_tmp, cols_tmp
+    integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
     integer,parameter :: gpu_option=ABI_GPU_DISABLED
     type(xgBlock_t) :: eigenBlock   !
-    type(xgBlock_t) :: residuBlock
-    type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
+    type(xgBlock_t) :: residuBlock,occBlock
     type(xg_t):: cprj_work_all
-    double precision :: maxResidu, minResidu, average, deviation
-    double precision :: prevMaxResidu
+    double precision :: maxResidu, minResidu
     double precision :: dlamch,tolerance
     integer :: eigResiduMax, eigResiduMin
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
+    character(len=500) :: msg
 
     interface
-      subroutine getAX(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
+      subroutine getAX(X,AX)
         use m_xg, only : xgBlock_t
-        use m_xg_nonlop, only : xg_nonlop_t
         type(xgBlock_t), intent(inout) :: X
-        type(xgBlock_t), intent(inout) :: cprjX
         type(xgBlock_t), intent(inout) :: AX
-        type(xgBlock_t), intent(inout) :: eig
-        integer, intent(in) :: sij_opt,type_calc
-        type(xg_nonlop_t), intent(in) :: xg_nonlop
       end subroutine getAX
     end interface
 
@@ -404,7 +373,12 @@ module m_lobpcg2_cprj
 
     nblock = lobpcg%nblock
     nline = lobpcg%nline
-    prevMaxResidu = huge(1d0)/1000.d0 ! Divide by 1000 to avoid 10*huge at the first iteration  which is a FPE
+
+    if (nbdbuf>0) then
+       nband_eff = lobpcg%neigenpairs - nbdbuf
+    else
+       nband_eff = lobpcg%neigenpairs
+    end if
 
     call xgBlock_getSize(eigen,rows_tmp, cols_tmp)
     if ( rows_tmp /= lobpcg%neigenpairs .and. cols_tmp /= 1 ) then
@@ -418,17 +392,26 @@ module m_lobpcg2_cprj
       ABI_ERROR("Error X0 npairs")
     endif
 
+    if (isppol==1.and.ikpt==1.and.inonsc==1.and.istep==1) then
+      write(msg,'(a,es16.6)') ' lobpcg%tolerance(tolwfr_diago)=',lobpcg%tolerance
+      call wrtout(std_out,msg,'COLL')
+    end if
+
     call xg_init(eigenvalues3N,SPACE_R,blockdim3,1)
     call xg_setBlock(eigenvalues3N,eigenvaluesN,blockdim,1)
     call xg_setBlock(eigenvalues3N,eigenvalues2N,blockdim2,1)
 
-    call xgBlock_reshape(eigen,(/blockdim,nblock/) )
-    call xgBlock_reshape(residu,(/blockdim,nblock/) )
+    call xgBlock_reshape(eigen,(/ blockdim, nblock /))
+    call xgBlock_reshape(residu,(/ blockdim, nblock /))
+    call xgBlock_reshape(occ,(/ blockdim, nblock /))
 
     lobpcg%AllX0     = X0
     lobpcg%AllcprjX0 = cprjX0
 
+    call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=ABI_GPU_DISABLED)
+
     if ( lobpcg%paral_kgb == 1 ) then
+      call timab(tim_transpose,1,tsec)
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
         STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,lobpcg%me_g0_fft)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
@@ -437,6 +420,7 @@ module m_lobpcg2_cprj
         lobpcg%W,lobpcg%WColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAW,lobpcg%xgTransposerX,&
         lobpcg%AW,lobpcg%AWColsRows,STATE_LINALG)
+      call timab(tim_transpose,2,tsec)
     else
       call xgBlock_setBlock(lobpcg%X, lobpcg%XColsRows, spacedim, blockdim)
       call xgBlock_setBlock(lobpcg%AX, lobpcg%AXColsRows, spacedim, blockdim)
@@ -446,12 +430,11 @@ module m_lobpcg2_cprj
 
     !! Start big loop over blocks
     do iblock = 1, nblock
-      if ( prtvol == 4 ) write(std_out,*) "  -- Block ", iblock
       nrestart = 0
-      compute_residu = .true.
 
       call lobpcg_getX0(lobpcg,iblock)
       call xgBlock_setBlock(residu,residuBlock,blockdim,1,fcol=iblock)
+      call xgBlock_setBlock(occ,   occBlock,   blockdim,1,fcol=iblock)
 
       call timab(tim_cprj,1,tsec)
       call xg_nonlop_getcprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%cprj_work%self)
@@ -472,7 +455,8 @@ module m_lobpcg2_cprj
 
       ! Initialize some quantitites (AX)
       call timab(tim_ax_v,1,tsec)
-      call getAX(lobpcg%XColsRows,lobpcg%cprjX,lobpcg%AXColsRows,eigenvaluesN,0,1,lobpcg%xg_nonlop)
+      call getAX(lobpcg%XColsRows,lobpcg%AXColsRows)
+      call xgBlock_zero_im_g0(lobpcg%AXColsRows)
       call timab(tim_ax_v,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call timab(tim_transpose,1,tsec)
@@ -493,6 +477,8 @@ module m_lobpcg2_cprj
       call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
         & lobpcg%prtvol,tim_RR_X,gpu_option)
 
+      compute_residu = .true.
+
       do iline = 1, nline
 
         if ( ierr /= 0 ) then
@@ -501,7 +487,9 @@ module m_lobpcg2_cprj
         end if
 
         ! Compute AX-Lambda*BX
+        call timab(tim_copy,1,tsec)
         call xgBlock_copy(lobpcg%AX,lobpcg%W)
+        call timab(tim_copy,2,tsec)
         ! Add the non-local part: (A_nl - Lambda*B)X
         call timab(tim_ax_nl,1,tsec)
         call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
@@ -510,34 +498,37 @@ module m_lobpcg2_cprj
 
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
-        !call pcond(lobpcg%W)
         call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
         call timab(tim_pcond,2,tsec)
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,max_val=maxResidu,max_elt=eigResiduMax,&
-                                                       min_val=minResidu,min_elt=eigResiduMin)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
-        if ( prtvol == 4 ) then
-          write(std_out,'(2x,a1,es10.3,a1,es10.3,a,i4,a,i4,a)') &
-            "(",minResidu,",",maxResidu, ") for eigen vectors (", &
-            eigResiduMin,",",eigResiduMax,")"
-          call xgBlock_average(residuBlock,average)
-          call xgBlock_deviation(residuBlock,deviation)
-          write(std_out,'(a,es21.14,a,es21.14)') "Average : ", average, " +/-", deviation
-          if ( maxResidu < lobpcg%tolerance ) then
-            write(std_out,*) "Block ", iblock, "converged at iline =", iline
-            exit
-          else if ( 10.d0*prevMaxResidu < maxResidu .and. iline > 1) then
-            write(std_out,*) "Block ", iblock, "stopped at iline =", iline
-            exit
-          endif
+
+        call timab(tim_nbdbuf,1,tsec)
+        if (nbdbuf>=0) then
+          ! There is a transfer from GPU to CPU in this copy
+          call xgBlock_copy(residuBlock,residu_eff%self)
+          iband_min = 1 + blockdim*(iblock-1)
+          iband_max = blockdim*iblock
+          if (iband_max<=nband_eff) then ! all bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          else if (iband_min<=nband_eff) then ! some bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu,row_bound=(nband_eff-iband_min+1))
+          else ! all bands of this block are above nband_eff
+            minResidu = 0.0
+            maxResidu = 0.0
+          end if
+        else if (nbdbuf==-101) then
+          call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+        else
+          ABI_ERROR('Bad value of nbdbuf')
         end if
-        prevMaxResidu = maxResidu
+        call timab(tim_nbdbuf,2,tsec)
         if ( maxResidu < lobpcg%tolerance ) then
           compute_residu = .false.
-          !write(std_out,*) "Block ", iblock, "max residu = ",maxResidu," converged at iline =", iline-1
           exit
         end if
 
@@ -558,7 +549,8 @@ module m_lobpcg2_cprj
         end if
         ! Apply A and B on W
         call timab(tim_ax_v,1,tsec)
-        call getAX(lobpcg%WColsRows,lobpcg%cprjW,lobpcg%AWColsRows,eigenvaluesN,0,1,lobpcg%xg_nonlop)
+        call getAX(lobpcg%WColsRows,lobpcg%AWColsRows)
+        call xgBlock_zero_im_g0(lobpcg%AWColsRows)
         call timab(tim_ax_v,2,tsec)
         if (lobpcg%paral_kgb == 1) then
           call timab(tim_transpose,1,tsec)
@@ -581,7 +573,6 @@ module m_lobpcg2_cprj
           call xgBlock_zero(lobpcg%P)
           call xgBlock_zero(lobpcg%AP)
           call xgBlock_zero(lobpcg%cprjP)
-          RR_eig = eigenvalues2N
           if ( ierr /= 0 ) then
             ABI_COMMENT("B-orthonormalization (XW) did not work.")
           end if
@@ -634,25 +625,57 @@ module m_lobpcg2_cprj
 
       end do
 
-      if (compute_residu) then
+      if ( compute_residu ) then
         ! Recompute AX-Lambda*BX for the last time
+        call timab(tim_copy,1,tsec)
         call xgBlock_copy(lobpcg%AX,lobpcg%W)
+        call timab(tim_copy,2,tsec)
         call timab(tim_ax_nl,1,tsec)
         call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
           lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
         call timab(tim_ax_nl,2,tsec)
         ! Apply preconditioner
-        !call pcond(lobpcg%W)
+        call timab(tim_pcond,1,tsec)
         call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
+        call timab(tim_pcond,2,tsec)
         ! Recompute residu norm here !
         call timab(tim_maxres,1,tsec)
         call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
+
+        call timab(tim_nbdbuf,1,tsec)
+        if (nbdbuf>=0) then
+          call xgBlock_copy(residuBlock,residu_eff%self)
+          iband_min = 1 + blockdim*(iblock-1)
+          iband_max = blockdim*iblock
+          if (iband_max<=nband_eff) then ! all bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+          else if (iband_min<=nband_eff) then ! some bands of this block are below nband_eff
+            call xgBlock_minmax(residu_eff%self,minResidu,maxResidu,row_bound=(nband_eff-iband_min+1))
+          else ! all bands of this block are above nband_eff
+            minResidu = 0.0
+            maxResidu = 0.0
+          end if
+        else if (nbdbuf==-101) then
+          call xgBlock_apply_diag(residuBlock,occBlock,1,Y=residu_eff%self)
+          call xgBlock_minmax(residu_eff%self,minResidu,maxResidu)
+        else
+          ABI_ERROR('Bad value of nbdbuf')
+        end if
+        call timab(tim_nbdbuf,2,tsec)
+      end if
+
+      if (prtvol==5.and.xmpi_comm_rank(lobpcg%spacecom)==0) then
+        write(msg,'(6(a,i4),2(a,es16.6))') 'lobpcg | istep=',istep,'| isppol=',isppol,'| ikpt=',ikpt,&
+          & '| inonsc=',inonsc,'| iblock=',iblock,'| nline_done=',iline-1,'| minRes=',minResidu,'| maxRes=',maxResidu
+        call wrtout(std_out,msg,'PERS')
       end if
 
       ! Save eigenvalues
+      call timab(tim_copy,1,tsec)
       call xgBlock_setBlock(eigen,eigenBlock,blockdim,1,fcol=iblock)
       call xgBlock_copy(eigenvaluesN,eigenBlock)
+      call timab(tim_copy,2,tsec)
 
       ! Save new X in X0
       call lobpcg_setX0(lobpcg,iblock)
@@ -664,10 +687,12 @@ module m_lobpcg2_cprj
 
     end do !! End iblock loop
 
-    call xgBlock_reshape(eigen,(/blockdim*nblock,1/))
-    call xgBlock_reshape(residu,(/blockdim*nblock,1/))
+    call xgBlock_reshape(eigen,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(residu,(/ blockdim*nblock, 1 /))
+    call xgBlock_reshape(occ,(/ blockdim*nblock, 1 /))
 
     call xg_free(eigenvalues3N)
+    call xg_free(residu_eff)
 
     skip = .false.
     if ( ierr /= 0 ) then
@@ -688,7 +713,8 @@ module m_lobpcg2_cprj
         call timab(tim_transpose,2,tsec)
       end if
       call timab(tim_ax_v,1,tsec)
-      call getAX(lobpcg%AllX0,lobpcg%AllcprjX0,lobpcg%AllAX0%self,eigenvalues3N%self,0,1,lobpcg%xg_nonlop)
+      call getAX(lobpcg%AllX0,lobpcg%AllAX0%self)
+      call xgBlock_zero_im_g0(lobpcg%AllAX0%self)
       call timab(tim_ax_v,2,tsec)
       if (lobpcg%paral_kgb == 1) then
         call timab(tim_transpose,1,tsec)
@@ -723,9 +749,6 @@ module m_lobpcg2_cprj
           & lobpcg%prtvol,tim_RR_Xall,gpu_option)
       end if
 
-      call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,X0,cprjX0,&
-          & ierr,tim_Bortho_Xall,gpu_option,AX=lobpcg%AllAX0%self)
-
       if ( lobpcg%paral_kgb == 1 ) then
         call xgTransposer_free(lobpcg%xgTransposerX)
         call xgTransposer_free(lobpcg%xgTransposerAX)
@@ -748,6 +771,9 @@ module m_lobpcg2_cprj
     integer :: spacedim
     integer :: cprjdim
     integer :: blockdim_cprj
+    double precision :: tsec(2)
+
+    call timab(tim_copy,1,tsec)
 
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
@@ -760,6 +786,8 @@ module m_lobpcg2_cprj
 
     call xgBlock_setBlock(lobpcg%AllcprjX0,cprjXtmp,cprjdim,blockdim_cprj,fcol=(iblock-1)*blockdim_cprj+1)
     call xgBlock_copy(cprjXtmp,lobpcg%cprjX)
+
+    call timab(tim_copy,2,tsec)
 
   end subroutine lobpcg_getX0
 
@@ -846,7 +874,9 @@ module m_lobpcg2_cprj
     integer :: spacedim
     integer :: cprjdim
     integer :: blockdim_cprj
+    double precision :: tsec(2)
 
+    call timab(tim_copy,1,tsec)
     blockdim = lobpcg%blockdim
     spacedim = lobpcg%spacedim
 
@@ -859,6 +889,7 @@ module m_lobpcg2_cprj
 
     call xgBlock_setBlock(lobpcg%AllcprjX0,cprjXtmp,cprjdim,blockdim_cprj,fcol=(iblock-1)*blockdim_cprj+1)
     call xgBlock_copy(lobpcg%cprjX,cprjXtmp)
+    call timab(tim_copy,2,tsec)
 
   end subroutine lobpcg_setX0
 
@@ -868,17 +899,22 @@ module m_lobpcg2_cprj
     integer       , intent(in   ) :: iblock
     type(xgBlock_t) :: CXtmp
     integer :: firstcol
+    double precision :: tsec(2)
+
+    call timab(tim_copy,1,tsec)
 
     if (iblock<1) then
       ABI_ERROR("iblock<1")
     end if
 
-    ! iblock goes from 2 to nblock-1 included
+    ! iblock goes from 1 to nblock-1 included
     firstcol = (iblock-1)*lobpcg%blockdim+1  ! Start of each block
 
     ! AX
     call xg_setBlock(lobpcg%AllAX0,CXtmp,lobpcg%spacedim,lobpcg%blockdim,fcol=firstcol)
     call xgBlock_copy(lobpcg%AX,CXtmp)
+
+    call timab(tim_copy,2,tsec)
 
   end subroutine lobpcg_transferAX_BX
 
@@ -896,3 +932,4 @@ module m_lobpcg2_cprj
   end subroutine lobpcg_free
 
 end module m_lobpcg2_cprj
+!!***

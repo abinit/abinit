@@ -71,8 +71,8 @@ module m_lobpcgwf_cprj
 
  contains
 
-subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
-&                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
+subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
+&                   nband,npw,nspinor,prtvol,resid,nbdbuf,xg_nonlop)
 
 
  use m_cgtools, only : dotprod_g
@@ -81,6 +81,7 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
 !Arguments ------------------------------------
  integer,intent(in) :: nband,npw,prtvol,nspinor
+ integer,intent(in) :: isppol,ikpt,inonsc,istep,nbdbuf
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(in)    :: mpi_enreg
@@ -90,6 +91,7 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  real(dp)                 ,target,intent(  out) :: resid(nband)
  real(dp)                        ,intent(  out) :: enl_out(nband)
  real(dp)                 ,target,intent(  out) :: eig(nband)
+ real(dp)                 ,target,intent(in   ) :: occ(nband)
  type(xg_nonlop_t)        ,target,intent(in   ) :: xg_nonlop
 
 !Local variables-------------------------------
@@ -98,10 +100,11 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  type(xgBlock_t) :: cprj_xgx0
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
+ type(xgBlock_t) :: xgocc
  type(xgBlock_t) :: xg_precond,xg_kin
  type(lobpcg_t) :: lobpcg
 
- integer :: space, space_cprj, blockdim, cprjdim, nband_cprj, nline
+ integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
  integer :: me_g0, me_g0_fft
 
  logical :: paw
@@ -137,7 +140,6 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  cprjdim = xg_nonlop%cprjdim
 
 !Variables
- nline=dtset%nline
  blockdim=l_mpi_enreg%nproc_band*mpi_enreg%bandpp
  nband_cprj=nband/l_mpi_enreg%nproc_band
 
@@ -163,7 +165,6 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  !For preconditionning
  ABI_MALLOC(pcon,(npw))
  call build_pcon(pcon,kinpw,npw)
- call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
 
  ! Local variables for lobpcg
  me_g0 = -1
@@ -171,12 +172,14 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  if (space==SPACE_CR) then
    me_g0 = 0
    me_g0_fft = 0
-   if ( gs_hamk%istwf_k == 2) then
+   if (gs_hamk%istwf_k == 2) then
      if (l_mpi_enreg%me_g0 == 1) me_g0 = 1
      if (l_mpi_enreg%me_g0_fft == 1) me_g0_fft = 1
    end if
  end if
  call xgBlock_map(xgx0,cg,space,npw*nspinor,nband,l_mpi_enreg%comm_band,me_g0=me_g0)
+
+ call xgBlock_map_1d(xg_precond,pcon,SPACE_R,npw)
 
  call xgBlock_map_1d(xgeigen,eig,SPACE_R,nband)
 
@@ -185,12 +188,15 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
    & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
 
- call lobpcg_init(lobpcg,mpi_enreg%bandpp,nband,npw*nspinor,cprjdim,blockdim,dtset%tolwfr,nline,&
+ call xgBlock_map_1d(xgocc,occ,SPACE_R,nband,gpu_option=dtset%gpu_option)
+
+ call lobpcg_init(lobpcg,mpi_enreg%bandpp,nband,npw*nspinor,cprjdim,blockdim,dtset%tolwfr_diago,dtset%nline,&
    space,space_cprj,l_mpi_enreg%comm_band,dtset%paral_kgb,xg_nonlop,l_mpi_enreg%comm_spinorfft,l_mpi_enreg%comm_band,&
    me_g0,me_g0_fft)
 
  ! Run lobpcg
- call lobpcg_run_cprj(lobpcg,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,prtvol,nspinor)
+ call lobpcg_run_cprj(lobpcg,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgocc,xgresidu,prtvol,nspinor,&
+   isppol,ikpt,inonsc,istep,nbdbuf)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
@@ -219,53 +225,41 @@ end subroutine lobpcgwf2_cprj
 !! SIDE EFFECTS
 !!  X  <type(xgBlock_t)>= memory block containing |C>
 !!  AX <type(xgBlock_t)>= memory block containing H|C>
-!!  BX <type(xgBlock_t)>= memory block containing S|C>
-!!  transposer <type(xgTransposer_t)>= data used for array transpositions
 !!
 !! PARENTS
 !!
 !! CHILDREN
-!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy,xgTransposer_getRank
+!!      xgBlock_getSize,xgBlock_reverseMap,xgBlock_scale,xgBlock_copy
 !!      multithreaded_getghc
 !!
 !! SOURCE
 !
-subroutine xg_getghc(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
+subroutine xg_getghc(X,AX)
 
  use iso_c_binding
  implicit none
 
 !Arguments ------------------------------------
  type(xgBlock_t), intent(inout) :: X
- type(xgBlock_t), intent(inout) :: cprjX
  type(xgBlock_t), intent(inout) :: AX
- type(xgBlock_t), intent(inout) :: eig
- integer, intent(in) :: sij_opt,type_calc
- type(xg_nonlop_t), intent(in) :: xg_nonlop
- integer         :: blockdim
- integer         :: spacedim
- type(pawcprj_type), allocatable :: cprjs(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: cpopt
- integer :: iatom,iband,ispinor,cprj_index,cprj_rows,cprj_cols,ncpgr,nlmn
- type(c_ptr) :: cptr
+ integer         :: blockdim
+ integer         :: spacedim
+ integer,parameter :: sij_opt=0,cpopt=-1,type_calc=1 ! Compute local part only
+! integer :: iatom,iband,ispinor,cprj_index,cprj_rows,cprj_cols,ncpgr,nlmn
  real(dp) :: eval
+ type(pawcprj_type) :: cprj_dum(l_gs_hamk%natom,1)
 !arrays
- real(dp), pointer :: cg(:,:),eig_(:,:)
- real(dp), pointer :: ghc(:,:),cprjX_array(:,:)
+ real(dp), pointer :: cg(:,:)
+ real(dp), pointer :: ghc(:,:)
  real(dp), allocatable :: gsc(:,:),gvnlxc(:,:)
 
 ! *********************************************************************
 
  call xgBlock_getSize(X,spacedim,blockdim)
-
- if (sij_opt>0) then
-   ABI_ERROR("only sij_opt=0 or -1 is possible here")
- end if
-
- spacedim = spacedim
+ call xgBlock_check(X,AX)
 
  call xgBlock_reverseMap(X,cg,rows=1,cols=spacedim*blockdim)
  call xgBlock_reverseMap(AX,ghc,rows=1,cols=spacedim*blockdim)
@@ -273,42 +267,9 @@ subroutine xg_getghc(X,cprjX,AX,eig,sij_opt,type_calc,xg_nonlop)
  ABI_MALLOC(gvnlxc,(0,0))
  ABI_MALLOC(gsc,(0,0))
 
- ! Apply only local and kinetic parts of the Hamiltonian
- if (type_calc==1.or.type_calc==3) then ! no non-local part
-   cpopt=-1 ! no use of cprj here
- else
-   cpopt=l_cpopt
-   call xgBlock_reverseMap(eig,eig_,rows=1,cols=blockdim)
-   cptr = c_loc(eig_)
-   if (cpopt==2) then
-     !LB : How to deal with ncpgr=3?
-     ncpgr=0
-     call xgBlock_getSize(cprjX,cprj_rows,cprj_cols)
-     call xgBlock_reverseMap(cprjX,cprjX_array,rows=1,cols=cprj_rows*cprj_cols)
-     ABI_MALLOC(cprjs,(l_gs_hamk%natom,l_gs_hamk%nspinor*cprj_cols))
-     call pawcprj_alloc(cprjs,ncpgr,xg_nonlop%nlmn_natom)
-     cprj_index = 1
-     do iband=1,cprj_cols
-       do iatom=1,l_gs_hamk%natom
-         nlmn=xg_nonlop%nlmn_natom(iatom)
-         do ispinor=1,l_gs_hamk%nspinor
-           cprjs(iatom,ispinor+l_gs_hamk%nspinor*(iband-1))%cp(:,:) = cprjX_array(:,cprj_index:cprj_index+nlmn-1)
-           cprj_index = cprj_index + nlmn
-         end do
-       end do
-     end do
-   end if
- end if
- call multithreaded_getghc(cpopt,cg,cprjs,ghc,gsc,&
+ ! Apply only local part of the Hamiltonian
+ call multithreaded_getghc(cpopt,cg,cprj_dum,ghc,gsc,&
    l_gs_hamk,gvnlxc,eval,l_mpi_enreg,blockdim,l_prtvol,sij_opt,l_tim_getghc,type_calc)
-
- ABI_FREE(gvnlxc)
- ABI_FREE(gsc)
-
- if (type_calc/=1.and.type_calc/=3) then ! so there is a non-local part
-   call pawcprj_free(cprjs)
-   ABI_FREE(cprjs)
- end if
 
 end subroutine xg_getghc
 !!***
