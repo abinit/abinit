@@ -275,9 +275,9 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -302,8 +302,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(efield_type),intent(inout) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -1079,7 +1079,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (associated(extfpmd)) then
    results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
-   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+   results_gs%extfpmd_eshift=extfpmd%eshift
  end if
 
  results_gs%intgres(:,:)=zero
