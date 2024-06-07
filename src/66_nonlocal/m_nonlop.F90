@@ -23,8 +23,6 @@
 
 module m_nonlop
 
- use, intrinsic :: iso_c_binding, only: c_loc, c_double, c_double_complex, c_int32_t, c_size_t, c_ptr, c_associated
-
  use defs_basis
  use m_errors
  use m_abicore
@@ -44,7 +42,7 @@ module m_nonlop
  use m_nonlop_pl,   only : nonlop_pl
  use m_nonlop_ylm,  only : nonlop_ylm
 
- use, intrinsic :: iso_c_binding, only: c_loc
+ use, intrinsic :: iso_c_binding, only: c_loc, c_associated
 
 #if defined HAVE_GPU_CUDA
  use m_manage_cuda
@@ -536,6 +534,16 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  if(signs==2) then
    if (size(ffnlout,1)/=npwout.or.size(ffnlout,3)/=hamk%lmnmax) then
      ABI_BUG('Incorrect size for ffnlout!')
+   end if
+ end if
+ if (associated(kpgin)) then
+   if (size(kpgin) > 0 .and. size(kpgin,1)/=npwin) then
+     ABI_BUG('Incorrect size for kpgin')
+   end if
+ end if
+ if (associated(kpgout)) then
+   if (size(kpgout) > 0 .and. size(kpgout,1)/=npwout) then
+     ABI_BUG('Incorrect size for kpgout')
    end if
  end if
 !This test is OK only because explicit sizes are passed to nonlop_* routines
