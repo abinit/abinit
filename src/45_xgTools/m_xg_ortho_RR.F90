@@ -159,7 +159,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
     type(xgBlock_t)  , intent(inout) :: cprjX
     type(xgBlock_t)  , intent(inout),optional :: AX
 
-    type(xg_t) :: buffer,cprj_work,X_tmp
+    type(xg_t) :: buffer,cprj_work
     type(xgBlock_t) :: cprjX_spinor,cprj_work_spinor
     integer :: space_buf
     integer :: spacecom,ncols_cprj,nn,nspinor

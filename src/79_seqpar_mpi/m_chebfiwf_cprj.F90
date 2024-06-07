@@ -79,13 +79,11 @@ module m_chebfiwf_cprj
  public :: chebfiwf2_cprj
 
  contains
+!!***
 
-subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
-&                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
-
-!!****f* m_chebfiwf/chebfiwf2
+!!****f* m_chebfiwf/chebfiwf2_cprj
 !! NAME
-!! chebfiwf2
+!! chebfiwf2_cprj
 !!
 !! FUNCTION
 !! This routine updates the whole wave functions set at a given k-point,
@@ -110,6 +108,9 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 !!  gs_hamk <type(gs_hamiltonian_type)>=all data for the hamiltonian at k
 !!
 !! SOURCE
+
+subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+&                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
 
  implicit none
 
@@ -240,6 +241,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  DBG_EXIT("COLL")
 
 end subroutine chebfiwf2_cprj
+!!***
 
 !!****f* m_chebfi/xg_getghc
 !! NAME

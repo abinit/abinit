@@ -242,8 +242,6 @@ subroutine chebfi_allocateAll(chebfi)
  integer  :: spacedim
  integer  :: total_spacedim, ierr
  integer  :: nspinor
- ! arrays
- real(dp) :: tsec(2)
 
 ! *********************************************************************
 
@@ -466,7 +464,6 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  real(dp) :: mineig, mineig_global
  real(dp) :: lambda_minus
  real(dp) :: lambda_plus
- real(dp) :: maximum
  real(dp) :: one_over_r
  real(dp) :: two_over_r
  real(dp) :: center
@@ -789,7 +786,7 @@ subroutine chebfi_computeNextOrderChebfiPolynom(chebfi,iline,center,one_over_r,t
  call timab(tim_postinvovl, 2, tsec)
 
 end subroutine chebfi_computeNextOrderChebfiPolynom
-!***
+!!***
 
 !----------------------------------------------------------------------
 
@@ -870,7 +867,6 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
   real(dp)        :: eig_per_band
   type(xgBlock_t) :: X_part
   type(xgBlock_t) :: AX_part
-  type(xgBlock_t) :: BX_part
 
   ! *********************************************************************
 
