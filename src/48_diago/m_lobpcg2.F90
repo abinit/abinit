@@ -716,10 +716,12 @@ module m_lobpcg2
     end if
 
     if (.not.skip) then
-      call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,&
-        & lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
-      call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
-        & lobpcg%gpu_option,tolerance=tolerance)
+      if ( nblock > 1 ) then
+        call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,&
+          & lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
+        call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
+          & lobpcg%gpu_option,tolerance=tolerance)
+      end if
     end if
 
     if ( lobpcg%paral_kgb == 1 ) then
