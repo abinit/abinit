@@ -28,34 +28,28 @@ module m_lobpcg2_cprj
 
   private
 
-  integer, parameter :: tim_init     = 1651
-  integer, parameter :: tim_free     = 1652
-!  integer, parameter :: tim_run      = 1653
-!  integer, parameter :: tim_getAX_BX = 1654
-  integer, parameter :: tim_cprj     = 1654
-  integer, parameter :: tim_ortho    = 1655
-  integer, parameter :: tim_transpose = 1656
-!  integer, parameter :: tim_Bortho   = 1656
-!  integer, parameter :: tim_RR       = 1657
-  integer, parameter :: tim_maxres   = 1658
-!  integer, parameter :: tim_ax_bx    = 1659
-  integer, parameter :: tim_ax_k     = 1653
-  integer, parameter :: tim_ax_v     = 1649
-  integer, parameter :: tim_ax_nl    = 1650
-  integer, parameter :: tim_pcond    = 1660
-  integer, parameter :: tim_hegv     = 1661
+  integer, parameter :: tim_init     = 2040
+  integer, parameter :: tim_free     = 2041
+  integer, parameter :: tim_cprj     = 2043
+  integer, parameter :: tim_ortho    = 2044
+  integer, parameter :: tim_transpose = 2039
+  integer, parameter :: tim_maxres   = 2046
+  integer, parameter :: tim_ax_k     = 2048
+  integer, parameter :: tim_ax_v     = 2049
+  integer, parameter :: tim_ax_nl    = 2050
+  integer, parameter :: tim_pcond    = 2047
 
-  integer, parameter :: tim_Bortho_X    = 1641
-  integer, parameter :: tim_Bortho_XW   = 1642
-  integer, parameter :: tim_Bortho_XWP  = 1643
-  integer, parameter :: tim_Bortho_Xall = 1644
-  integer, parameter :: tim_RR_X        = 1645
-  integer, parameter :: tim_RR_XW       = 1646
-  integer, parameter :: tim_RR_XWP      = 1647
-  integer, parameter :: tim_RR_Xall     = 1648
+  integer, parameter :: tim_Bortho_X    = 2031
+  integer, parameter :: tim_Bortho_XW   = 2032
+  integer, parameter :: tim_Bortho_XWP  = 2033
+  integer, parameter :: tim_Bortho_Xall = 2034
+  integer, parameter :: tim_RR_X        = 2035
+  integer, parameter :: tim_RR_XW       = 2036
+  integer, parameter :: tim_RR_XWP      = 2037
+  integer, parameter :: tim_RR_Xall     = 2038
 
-  integer, parameter :: tim_copy     = 2090 ! TO CHANGE
-  integer, parameter :: tim_nbdbuf   = 2091 ! TO CHANGE
+  integer, parameter :: tim_copy     = 2042
+  integer, parameter :: tim_nbdbuf   = 2045
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -743,13 +737,13 @@ module m_lobpcg2_cprj
           & lobpcg%prtvol,tim_RR_Xall,gpu_option)
       end if
 
-      if ( lobpcg%paral_kgb == 1 ) then
-        call xgTransposer_free(lobpcg%xgTransposerX)
-        call xgTransposer_free(lobpcg%xgTransposerAX)
-        call xgTransposer_free(lobpcg%xgTransposerW)
-        call xgTransposer_free(lobpcg%xgTransposerAW)
-      end if
+    end if
 
+    if ( lobpcg%paral_kgb == 1 ) then
+      call xgTransposer_free(lobpcg%xgTransposerX)
+      call xgTransposer_free(lobpcg%xgTransposerAX)
+      call xgTransposer_free(lobpcg%xgTransposerW)
+      call xgTransposer_free(lobpcg%xgTransposerAW)
     end if
 
 !    call timab(tim_run,2,tsec)

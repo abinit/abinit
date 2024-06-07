@@ -101,7 +101,7 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
  integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
  integer :: me_g0, me_g0_fft
 
- integer, parameter :: tim_lobpcgwf2 = 1640
+ integer, parameter :: tim_lobpcgwf2 = 2030
  real(dp) :: tsec(2)
 
  ! Important things for NC
