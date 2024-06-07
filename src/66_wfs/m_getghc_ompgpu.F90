@@ -36,6 +36,7 @@ module m_getghc_ompgpu
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_hamiltonian, only : gs_hamiltonian_type, KPRIME_H_K, K_H_KPRIME, K_H_K, KPRIME_H_KPRIME
  use m_fock,        only : fock_common_type, fock_get_getghc_call
+ use m_fock_getghc, only : fock_getghc, fock_ACE_getghc
  use m_nonlop,      only : nonlop
  use m_fft,         only : fourwf
 
@@ -422,13 +423,8 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
 
 has_fock=.false.
 !Do we add Fock exchange term ?
- if (associated(gs_ham%fockcommon)) then
-   ABI_BUG("Fock exchange term calculation not supported in GPU mode")
- end if
-
- if (gs_ham%gpu_option/=ABI_GPU_OPENMP) then
-   ABI_BUG('Unexpected value for gs_ham%gpu_option (debugging) ! ')
- end if
+ has_fock = associated(gs_ham%fockcommon)
+ if (has_fock) fock => gs_ham%fockcommon
 
 !Parallelization over spinors management
  if (mpi_enreg%paral_spinor==0) then
@@ -780,19 +776,74 @@ has_fock=.false.
 !============================================================
 
    ABI_NVTX_START_RANGE(NVTX_GETGHC_NLOCPOT)
+
    if (type_calc==0 .or. type_calc==2) then
      signs=2 ; choice=1 ; nnlout=1 ; idir=0 ; tim_nonlop=1
      cpopt_here=-1;if (gs_ham%usepaw==1) cpopt_here=cpopt
-     cwaveprj_nonlop=>cwaveprj
+     if (has_fock) then
+       if (gs_ham%usepaw==1) then
+         cpopt_here=max(cpopt,0)
+         if (cpopt<2) then
+           ABI_MALLOC(cwaveprj_fock,(gs_ham%natom,my_nspinor*ndat))
+           ABI_MALLOC(dimcprj,(gs_ham%natom))
+           call pawcprj_getdim(dimcprj,gs_ham%natom,gs_ham%nattyp,gs_ham%ntypat,&
+&           gs_ham%typat,fock%pawtab,'O')
+           call pawcprj_alloc(cwaveprj_fock,0,dimcprj)
+           ABI_FREE(dimcprj)
+         else
+           cwaveprj_fock=>cwaveprj
+         end if
+         cwaveprj_nonlop=>cwaveprj_fock
+       else
+         cwaveprj_nonlop=>cwaveprj
+         cwaveprj_fock=>cwaveprj
+       end if
+     else
+       cwaveprj_nonlop=>cwaveprj
+     end if
+     paw_opt=gs_ham%usepaw ; if (sij_opt/=0) paw_opt=sij_opt+3
      lambda_ndat = lambda
 
      call nonlop(choice,cpopt_here,cwaveprj_nonlop,enlout,gs_ham,idir,lambda_ndat,mpi_enreg,ndat,&
 &     nnlout,paw_opt,signs,gsc_ptr,tim_nonlop,cwavef,gvnlxc_,select_k=select_k_)
 
+     if (gs_ham%usepaw==1 .and. has_fock)then
+       if (fock_get_getghc_call(fock)==1) then
+         ABI_MALLOC(gvnlc, (2,npw_k2*my_nspinor*ndat))
+         !$OMP TARGET UPDATE FROM(gvnlxc_)
+         gvnlc=gvnlxc_
+         !$OMP TARGET ENTER DATA MAP(to:gvnlc)
+       endif
+     endif
+
+!    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
+     if (has_fock) then
+       !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_)
+       if (fock_get_getghc_call(fock)==1) then
+         if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
+         if (fock%use_ACE==0) then
+           call timab(360,1,tsec)
+           do idat=1,ndat
+             if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
+             call fock_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),cwaveprj_idat,&
+&             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           end do ! idat
+           call timab(360,2,tsec)
+         else
+           do idat=1,ndat
+             call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
+&             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
+           end do ! idat
+         end if
+       end if
+       !$OMP TARGET UPDATE TO(cwavef,gvnlxc_)
+     end if
+
    else if (type_calc == 3) then
      ! for kinetic and local only, nonlocal and vfock should be zero
      gvnlxc_(:,:) = zero
    end if ! if(type_calc...
+
    ABI_NVTX_END_RANGE()
 
 !============================================================
@@ -904,7 +955,10 @@ has_fock=.false.
 
 !  Special case of PAW + Fock : only return Fock operator contribution in gvnlxc_
    if (gs_ham%usepaw==1 .and. has_fock) then
+     !$OMP TARGET UPDATE FROM(gvnlxc_,gvnlc)
      gvnlxc_=gvnlxc_-gvnlc
+     !$OMP TARGET UPDATE TO(gvnlxc_) if(.not. local_gvnlxc)
+     !$OMP TARGET EXIT DATA MAP(delete:gvnlc)
      ABI_FREE(gvnlc)
    endif
 
