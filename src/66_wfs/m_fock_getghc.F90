@@ -278,7 +278,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* Load k^prime hamiltonian in the gs_ham datastructure
 !  Note: ffnl_kp / ph3d_kp / gbound_kp are not used
 
-   if (associated(gs_ham%ph3d_kp)) then
+   if (.not. associated(gs_ham%ph3d_kp)) then
      ABI_MALLOC(gs_ham%ph3d_kp,(2,npwj,gs_ham%matblk))
    end if
 
