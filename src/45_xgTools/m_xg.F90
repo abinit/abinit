@@ -110,6 +110,9 @@ module m_xg
   integer, parameter :: tim_yxmax       = 2010
   integer, parameter :: tim_ymax        = 2011
   integer, parameter :: tim_add         = 2012
+  integer, parameter :: tim_add_diag    = 2013
+  integer, parameter :: tim_invert      = 2014
+  integer, parameter :: tim_invert_sy   = 2015
 
   integer, save, private :: lrwork = 0
   integer, save, private :: lcwork = 0
@@ -3510,6 +3513,9 @@ contains
 
     integer :: iblock,rows,cols
     type(xgBlock_t) :: X_spinor, Y_spinor
+    double precision :: tsec(2)
+
+    call timab(tim_add_diag,1,tsec)
 
     if (X%gpu_option/=ABI_GPU_DISABLED) then
       ABI_ERROR('Not implemented for GPU')
@@ -3580,6 +3586,8 @@ contains
         ABI_ERROR('Not implemented')
       end if
     end select
+
+    call timab(tim_add_diag,2,tsec)
 
   end subroutine xgBlock_add_diag
 !!***
@@ -5906,6 +5914,9 @@ contains
 
     integer :: nn,nrows,info,ldim
     integer,allocatable :: ipiv(:)
+    double precision :: tsec(2)
+
+    call timab(tim_invert,1,tsec)
 
     if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
       ABI_ERROR('Not implemented for GPU')
@@ -5969,6 +5980,8 @@ contains
       ABI_ERROR('info/=0 : something bad happened in xgetri')
     end if
 
+    call timab(tim_invert,2,tsec)
+
   end subroutine xgBlock_invert
   !!***
 
@@ -5985,6 +5998,9 @@ contains
     integer :: nn,nrows,ldim,info
     integer :: ii,jj
     integer,allocatable :: ipiv(:)
+    double precision :: tsec(2)
+
+    call timab(tim_invert_sy,1,tsec)
 
     if (xgBlockA%gpu_option/=ABI_GPU_DISABLED) then
       ABI_ERROR('Not implemented for GPU')
@@ -6055,6 +6071,8 @@ contains
     end select
 
     ABI_FREE(ipiv)
+
+    call timab(tim_invert_sy,2,tsec)
 
   end subroutine xgBlock_invert_sy
   !!***

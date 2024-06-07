@@ -140,7 +140,7 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  integer :: space, space_cprj, blockdim, cprjdim, nband_cprj
  integer :: me_g0,me_g0_fft
 
- integer, parameter :: tim_chebfiwf2 = 1750
+ integer, parameter :: tim_chebfiwf2 = 2060
  double precision :: tsec(2)
 
  ! Important things for NC
