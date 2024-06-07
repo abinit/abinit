@@ -1184,7 +1184,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
  ! returns results in packed form.
  ! CHEBYSHEV, NEW LOBPCG and RMM-DIIS do not need this
  !
- rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. xg_diago
+ rotate_subvnlx = gs_hamk%usepaw == 0 .and. wfopta10 /= 1 .and. .not. xg_diago
  if (use_rmm_diis) rotate_subvnlx = .False.
 
  if (rotate_subvnlx) then

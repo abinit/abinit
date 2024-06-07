@@ -339,8 +339,6 @@ subroutine chebfi_free(chebfi)
  call xg_free(chebfi%AX)
  call xg_free(chebfi%BX)
 
-!call xg_finalize()
-
 end subroutine chebfi_free
 !!***
 
