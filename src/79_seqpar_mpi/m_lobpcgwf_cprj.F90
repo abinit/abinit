@@ -64,6 +64,7 @@ module m_lobpcgwf_cprj
  public :: lobpcgwf2_cprj
 
  contains
+!!***
 
 subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,nbdbuf,xg_nonlop)
@@ -199,6 +200,7 @@ subroutine lobpcgwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,occ,enl_out,gs_hamk,isp
  DBG_EXIT("COLL")
 
 end subroutine lobpcgwf2_cprj
+!!***
 
 !!****f* m_lobpcg/xg_getghc
 !! NAME

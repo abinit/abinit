@@ -1,6 +1,6 @@
 !!****m* ABINIT/m_xg_nonlop
 !! NAME
-!! m_gemm_nonlop
+!! m_xg_nonlop
 !!
 !! FUNCTION
 !!  This module provides functions to compute the nonlocal operator by means of the BLAS GEMM
@@ -77,9 +77,9 @@ module m_xg_nonlop
  integer, parameter :: tim_mult_cprj_copy   = 1046
  integer, parameter :: tim_mult_cprj_mpi    = 1047
 
-!!****t* m_gemm_nonlop/gemm_nonlop_type
+!!****t* m_xg_nonlop/xg_nonlop_t
 !! NAME
-!! gemm_nonlop_type
+!! xg_nonlop_t
 !!
 !! FUNCTION
 !! Contains information needed to apply the nonlocal operator
@@ -140,7 +140,6 @@ module m_xg_nonlop
   public :: xg_nonlop_init
   public :: xg_nonlop_make_k
   public :: xg_nonlop_destroy
-!  public :: xg_nonlop_destroy_k
   public :: xg_nonlop_make_Dij
   public :: xg_nonlop_make_Sij
   public :: xg_nonlop_destroy_Dij
@@ -237,23 +236,6 @@ contains
  end subroutine xg_nonlop_init
 !!***
 
-!!****f* m_gemm_nonlop/destroy_gemm_nonlop
-!! NAME
-!! destroy_gemm_nonlop
-!!
-!! FUNCTION
-!! Initalization of the gemm_nonlop_kpt array
-!!
-!! INPUTS
-!! nkpt= number of k-points
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
-!! SOURCE
  subroutine xg_nonlop_destroy(xg_nonlop)
 
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
@@ -279,22 +261,12 @@ contains
   end do
   ABI_FREE(xg_nonlop%projectors)
   ABI_FREE(xg_nonlop%gram_proj)
-  if (allocated(xg_nonlop%invSij_approx)) ABI_FREE(xg_nonlop%invSij_approx)
+  if (allocated(xg_nonlop%invSij_approx)) then
+    ABI_FREE(xg_nonlop%invSij_approx)
+  end if
   call xg_free(xg_nonlop%invSij_approx_all)
 
  end subroutine xg_nonlop_destroy
-!!***
-
-! subroutine xg_nonlop_destroy_k(xg_nonlop)
-!
-!  type(xg_nonlop_t),intent(inout) :: xg_nonlop
-!
-!  call xg_free(xg_nonlop%projectors_k)
-!  call xg_free(xg_nonlop%gram_proj_k)
-!  if (allocated(xg_nonlop%invSij_approx)) ABI_FREE(xg_nonlop%invSij_approx)
-!  call xg_free(xg_nonlop%invSij_approx_all)
-!
-! end subroutine xg_nonlop_destroy_k
 !!***
 
  subroutine xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
@@ -488,7 +460,9 @@ contains
 
 ! *************************************************************************
 
-  if (allocated(xg_nonlop%Dij)) ABI_FREE(xg_nonlop%Dij)
+  if (allocated(xg_nonlop%Dij)) then
+    ABI_FREE(xg_nonlop%Dij)
+  end if
   call xg_free(xg_nonlop%Dij_all)
 
  end subroutine xg_nonlop_destroy_Dij
@@ -500,30 +474,17 @@ contains
 
 ! *************************************************************************
 
-  if (allocated(xg_nonlop%Sij)) ABI_FREE(xg_nonlop%Sij)
+  if (allocated(xg_nonlop%Sij)) then
+    ABI_FREE(xg_nonlop%Sij)
+  end if
   call xg_free(xg_nonlop%Sij_all)
-  if (allocated(xg_nonlop%Sijm1)) ABI_FREE(xg_nonlop%Sijm1)
+  if (allocated(xg_nonlop%Sijm1)) then
+    ABI_FREE(xg_nonlop%Sijm1)
+  end if
   call xg_free(xg_nonlop%Sijm1_all)
 
  end subroutine xg_nonlop_destroy_Sij
 !!***
-
-!!****f* m_gemm_nonlop/make_gemm_nonlop
-!! NAME
-!! make_gemm_nonlop
-!!
-!! FUNCTION
-!! Build the gemm_nonlop array
-!!
-!! INPUTS
-!!
-!! PARENTS
-!!      m_dft_energy,m_vtorho
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,dgemm,opernlc_ylm,xmpi_sum
-!!
-!! SOURCE
 
  subroutine xg_nonlop_make_k(xg_nonlop,ikpt,istwf_k,me_g0,npw_k,ffnl_k,ph3d_k,compute_proj,compute_invS_approx,compute_gram)
 
@@ -785,11 +746,6 @@ end subroutine xg_nonlop_set_nmpi
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
 subroutine xg_nonlop_getcprj(xg_nonlop,X,cprjX,work_mpi)
 
    type(xg_nonlop_t), intent(in)    :: xg_nonlop
