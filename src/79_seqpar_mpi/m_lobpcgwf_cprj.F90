@@ -1,6 +1,6 @@
-!!****f* ABINIT/m_lobpcgwf
+!!****f* ABINIT/m_lobpcgwf_cprj
 !! NAME
-!! m_lobpcgwf
+!! m_lobpcgwf_cprj
 !!
 !! FUNCTION
 !! This routine updates the whole wave functions at a given k-point,

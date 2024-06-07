@@ -159,6 +159,7 @@ module m_xg_nonlop
   public :: xg_nonlop_getHmeSX
 
 contains
+!!***
 
 !!****f* m_xg_nonlop/init_xg_nonlop
 !! NAME
