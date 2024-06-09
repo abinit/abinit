@@ -68,7 +68,7 @@ Indeed, only the matrix elements between explicitly computed (unperturbed) state
 This also is why [[prtwf]]=3 is used.
 Using a larger [[nstep]] would lead to a full computation of the derivative of the wavefunction with respect to
 the wavevector, while in Optic, only the matrix elements between unperturbed states are needed.
-Thus a value of [[nstep]] larger than one would not only lead to erroneous matrix elements, but would be a waste of time.
+Thus a value of [[nstep]] larger than one would be a waste of time.
 
 In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely dense.
 Instead of a $4\times 4\times 4$
