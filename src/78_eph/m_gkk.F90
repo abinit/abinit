@@ -395,7 +395,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
-   end if
+   end if ! master
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
@@ -522,10 +522,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        if (i_am_master) then
          ! Write the netCDF file.
          ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gkq"), gkq_atm, &
-           start=[1, 1, 1, ipc, 1, 1], count=[2, mband, mband, 1, nkpt, spin])
+           start=[1, 1, 1, ipc, 1, spin], count=[2, mband, mband, 1, nkpt, 1])
          NCF_CHECK(ncerr)
        end if
      end if
+
    end do ! spin
 
    if (dtset%eph_task == 2) then
