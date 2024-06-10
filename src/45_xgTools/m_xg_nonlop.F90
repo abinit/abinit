@@ -77,14 +77,6 @@ module m_xg_nonlop
  integer, parameter :: tim_mult_cprj_copy   = 1046
  integer, parameter :: tim_mult_cprj_mpi    = 1047
 
-!!****t* m_xg_nonlop/xg_nonlop_t
-!! NAME
-!! xg_nonlop_t
-!!
-!! FUNCTION
-!! Contains information needed to apply the nonlocal operator
-!!
-!! SOURCE
  type,public :: xg_nonlop_t
 
    integer :: cplex
