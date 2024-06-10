@@ -291,7 +291,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  (that is, nonsymmorphic symmetries do not work yet
 !  Update MT 2017-05-31: nonsymmorphic symmetries seem also to be an issue for NCPP
    if (usepaw==1.and.dt%berryopt/=0.and.dt%kptopt/=3) then
-  !if (dt%berryopt/=0.and.dt%kptopt/=3) then
+  !if (clldt%berryopt/=0.and.dt%kptopt/=3) then
      cond_string(1)='usepaw'; cond_values(1)=usepaw
      cond_string(2)='berryopt'; cond_values(2)=dt%berryopt
      cond_string(3)='kptopt'; cond_values(3)=dt%kptopt
@@ -937,6 +937,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      end if
      if (any(dt%eph_task == [-5])) then
        ABI_CHECK(dt%ph_nqpath > 0, "ph_nqpath must be specified when eph_task in [-5]")
+     end if
+     if (dt%eph_task == 13) then
+       msg = "electron, hole"
+       if (.not. string_in(dt%varpeq_pkind, msg)) then
+         ABI_ERROR_NOSTOP(sjoin("Invalid varpeq_pkind: `", dt%varpeq_pkind, "`, must be among:", msg), ierr)
+       end if
      end if
      !if (dt%eph_task == -4 .and. dt%occopt /= 3) then
      !  ABI_ERROR_NOSTOP("eph_task -4 requires occopt 3 in the input file (Fermi-Dirac with physical Temperature!", ierr)

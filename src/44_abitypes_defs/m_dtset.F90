@@ -650,6 +650,11 @@ type, public :: dataset_type
  integer :: use_oldchi = 1
 !V
  integer :: vacnum
+
+ character(len=fnlen) :: varpeq_pkind = "none"
+ integer :: varpeq_nstep = 30
+ real(dp) :: varpeq_tolgrs = tol8
+
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
  integer :: vdw_df_ngpts
@@ -2012,6 +2017,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%usexcnhat_orig     = dtin%usexcnhat_orig
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
+
+ dtout%varpeq_pkind       = dtin%varpeq_pkind
+ dtout%varpeq_nstep       = dtin%varpeq_nstep
+ dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
+
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
  dtout%vdw_df_damax       = dtin%vdw_df_damax
@@ -3533,6 +3543,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
+ list_vars=trim(list_vars)//' varpeq_nstep varpeq_pkind varpeq_tolgrs'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
