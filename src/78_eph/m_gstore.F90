@@ -986,15 +986,9 @@ subroutine priority_from_eph_task(eph_task, priority)
    priority = "qk"
  case (12, -12)
    priority = "q"
-<<<<<<< HEAD
  case (13)
    priority = "q"
- case (14)
-||||||| cb7b376b95
- case (14)
-=======
  case (14, 17)
->>>>>>> upstream/develop
    priority = "kq"
  case default
    ABI_ERROR(sjoin("Please register default priority for eph_task:", itoa(eph_task)))
