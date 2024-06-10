@@ -17,7 +17,7 @@
 !!  3) Gaussian adaptive smearing for double delta (tetra version from libtetrabz really slow!)
 !!  4) Automatic detections of energy window, improve filtering techniques.
 !!  5) Interface with KERANGE trick
-!!  6) More examples and tutorials (using precomputed Netcd files)
+!!  6) More examples and tutorials (using precomputed Netcdf files)
 !!  7) SKW interpolation for ph linewidths and/or linear interpolation (I don't trust plain Fourier interpolation).
 !!  8) Perform more benchmarks with dense meshes to detect hotspots and memory bottlenecks
 !!  9) Test spin and SOC

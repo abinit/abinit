@@ -45,6 +45,7 @@ module m_dvdb
  use m_ddb_hdr
  use m_dtset
  use m_krank
+ use m_xcdata
 
  use defs_abitypes,   only : mpi_type
  use m_fstrings,      only : strcat, sjoin, itoa, ktoa, ltoa, ftoa, yesno, endswith
@@ -58,13 +59,14 @@ module m_dvdb
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_ioarr,         only : read_rhor
  use m_fftcore,       only : ngfft_seq
- use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gftt, calc_ceikr, calc_eigr
+ use m_fft_mesh,      only : rotate_fft_mesh, times_eigr, times_eikr, ig2gfft, get_gfft, calc_ceikr, calc_eigr
  use m_fft,           only : fourdp, zerosym
  use m_crystal,       only : crystal_t
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map, kpts_timrev_from_kptopt
  use m_spacepar,      only : symrhg, setsym
  use m_fourier_interpol,only : fourier_interpol
  use m_pawrhoij,      only : pawrhoij_type
+ use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
  implicit none
 
@@ -434,7 +436,7 @@ module m_dvdb
   ! Assume headers with same headform and same basic dimensions e.g. npsp
 
   type(mpi_type) :: mpi_enreg
-  ! Internal object used to call fourdp
+  ! Internal object used to call fourdp and other GS/DFPT routines
 
  contains
 
@@ -457,6 +459,7 @@ module m_dvdb
    ! Returns the index of a list of q-points.
 
    procedure :: set_pert_distrib => dvdb_set_pert_distrib
+   !  Activate parallelism over perturbations
 
    procedure :: read_onev1 => dvdb_read_onev1
    ! Read and return the DFPT potential for given (idir, ipert, iqpt).
@@ -467,6 +470,10 @@ module m_dvdb
    procedure :: readsym_qbz => dvdb_readsym_qbz
    ! Reconstruct the DFPT potential for a q-point in the BZ starting
    ! from its symmetrical image in the IBZ.
+
+   procedure :: read_vxc1_qbz => dvdb_read_vxc1_qbz
+   ! Compute the first-order change of exchange-correlation potential
+   ! for a q-point in the BZ starting from its symmetrical image in the IBZ.
 
    procedure :: qcache_read => dvdb_qcache_read
    ! Allocate internal cache for potentials.
@@ -490,6 +497,10 @@ module m_dvdb
    procedure :: get_ftqbz => dvdb_get_ftqbz
    ! Retrieve Fourier interpolated potential for a given q-point in the BZ.
    ! Use cache to reduce number of slow FTs.
+
+   procedure :: get_vxc1_ftqbz => dvdb_get_vxc1_ftqbz
+   ! Retrieve Fourier interpolated first-order change of exchange-correlation
+   ! potential v1xc for a given q-point in the BZ.
 
    procedure :: ftqcache_build => dvdb_ftqcache_build
    ! This function initializes the internal q-cache from W(R,r)
@@ -1421,7 +1432,9 @@ end subroutine dvdb_readsym_allv1
 !! INPUTS
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)=Q-point in BZ.
-!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoint produced by listkk.
+!!  indq2db(6)=Symmetry mapping qbz --> DVDB qpoints produced by listkk using the SYMREC convention.
+!!    Note that indq2db(1) should give the index in the set of q-points in the DVDB
+!!    that is not necessarly ORDERED as the IBZ computed by the Abinit routines.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations.
@@ -1602,6 +1615,76 @@ subroutine dvdb_readsym_qbz(db, cryst, qbz, indq2db, cplex, nfft, ngfft, v1scf, 
  call timab(1802, 2, tsec)
 
 end subroutine dvdb_readsym_qbz
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_dvdb/dvdb_read_vxc1_qbz
+!! NAME
+!!  dvdb_read_vxc1_qbz
+!!
+!! FUNCTION
+!! Compute the first-order change of exchange-correlation potential
+!! for a q-point in the BZ starting from its symmetrical image in the IBZ.
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  dtset<dataset_type>=All input variables for this dataset
+!!  qbz(3)=Q-point in BZ.
+!!  mapc_qq2dvdb(6)=Symmetry mapping qbz, see m_kpts.f for a description
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  non_magnetic_xc=true if density/potential is handled as non-magnetic
+!!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
+!!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
+!!
+!! OUTPUT
+!!  drho_cplex=1 if real, 2 if complex.
+!!  vxc1(drho_cplex, nfft, nspden, db%my_npert)= vxc1 potentials on the real-space FFT mesh
+!!  for the db%my_npert perturbations treated by this MPI rank.
+!!
+!! SOURCE
+
+subroutine dvdb_read_vxc1_qbz(db, dtset, cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, nkxc, kxc, &
+                              vxc1, non_magnetic_xc, usexcnhat, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: db
+ integer,intent(in) :: nfft, nkxc, usexcnhat, comm
+ integer,intent(out) :: drho_cplex
+ real(dp),intent(in) :: qbz(3)
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ logical,intent(in) :: non_magnetic_xc
+!arrays
+ integer,intent(in) :: ngfft(18), mapc_qq2dvdb(6)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: option,imyp
+!arrays
+ real(dp),allocatable :: rho1(:,:,:,:)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0)
+! *************************************************************************
+
+ ! Get rho1(cplex, nfftf, nspden, my_npert))
+ call db%readsym_qbz(cryst, qbz, mapc_qq2dvdb, drho_cplex, nfft, ngfft, rho1, comm)
+
+ option=2 ! if 2, treat only density change
+ ABI_MALLOC(vxc1, (drho_cplex, nfft, dtset%nspden, db%my_npert))
+ do imyp=1,db%my_npert
+   call dfpt_mkvxc(drho_cplex,dtset%ixc,kxc,db%mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+                   nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1(:,:,:,imyp), &
+                   cryst%rprimd,usexcnhat,vxc1(:,:,:,imyp),dum_xccc3d1)
+ end do
+ ABI_FREE(rho1)
+
+  end subroutine dvdb_read_vxc1_qbz
 !!***
 
 !----------------------------------------------------------------------
@@ -2684,7 +2767,7 @@ end subroutine v1phq_rotate_myperts
 !!
 !! SOURCE
 
-subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol ,mpi_enreg, v1r)
+subroutine v1phq_symmetrize(cryst, idir, ipert, symq, ngfft, cplex, nfft, nspden, nsppol, mpi_enreg, v1r)
 
 !Arguments ------------------------------------
 !scalars
@@ -3615,7 +3698,7 @@ end subroutine dvdb_ftinterp_qpt
 !!  cryst<crystal_t>=crystal structure parameters
 !!  qbz(3)= q-point in the BZ in reduced coordinates.
 !!  qibz(3) = Image of qbz in the IBZ. Needed to apply symmetries IBZ --> qbz
-!!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk.
+!!  indq2ibz(6)=Symmetry mapping qbz --> IBZ qpoint produced by listkk using the SYMREC convention.
 !!  nfft=Number of fft-points treated by this processors
 !!  ngfft(18)=contain all needed information about 3D FFT
 !!
@@ -3796,6 +3879,80 @@ end subroutine dvdb_get_ftqbz
 
 !----------------------------------------------------------------------
 
+!!****f* m_dvdb/dvdb_get_vxc1_ftqbz
+!! NAME
+!!  dvdb_get_vxc1_ftqbz
+!!
+!! FUNCTION
+!! Fourier interpolation of the first-order change of exchange-correlation potential
+!! for a given q-point in the BZ (qbz).
+!!
+!! INPUTS
+!!  cryst<crystal_t>=crystal structure parameters
+!!  dtset<dataset_type>=All input variables for this dataset
+!!  qbz(3)=Q-point in BZ
+!!  qq_ibz(3)=Q-point in IBZ
+!!  mapc_qq(6)=Symmetry mapping qbz, see m_kpts.f for a description
+!!  nfft=Number of fft-points treated by this processors
+!!  ngfft(18)=contain all needed information about 3D FFT
+!!  nkxc=second dimension of the array kxc, see rhohxc.f for a description
+!!  kxc(nfftf,nkxc)=second derivative of the exchange-correlation functionnal
+!!  non_magnetic_xc=true if density/potential is handled as non-magnetic
+!!  usexcnhat=0, the exchange-correlation potential does not include the compensation charge density
+!!  comm=MPI communicator (either xmpi_comm_self or comm for perturbations
+!!
+!! OUTPUT
+!!  drho_cplex=1 if real, 2 if complex.
+!!  vxc1(drho_cplex, nfft, nspden, db%my_npert)= vxc1 potentials on the real-space FFT mesh
+!!  for the db%my_npert perturbations treated by this MPI rank.
+!!
+!! SOURCE
+
+subroutine dvdb_get_vxc1_ftqbz(db, dtset, cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, nkxc, kxc, &
+                               vxc1, non_magnetic_xc, usexcnhat, comm)
+
+!Arguments ------------------------------------
+!scalars
+ class(dvdb_t),intent(inout) :: db
+ integer,intent(in) :: nfft, nkxc, usexcnhat, comm
+ integer,intent(out) :: drho_cplex
+ real(dp),intent(in) :: qbz(3), qq_ibz(3)
+ type(dataset_type),intent(in) :: dtset
+ type(crystal_t),intent(in) :: cryst
+ logical,intent(in) :: non_magnetic_xc
+!arrays
+ integer,intent(in) :: ngfft(18), mapc_qq(6)
+ real(dp),intent(in) :: kxc(nfft,nkxc)
+ real(dp),allocatable,intent(out) :: vxc1(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: option,imyp
+!arrays
+ real(dp),allocatable :: rho1(:,:,:,:)
+ real(dp) :: dum_nhat(0), dum_xccc3d1(0)
+
+! *************************************************************************
+
+ ! Get rho1(cplex, nfftf, nspden, my_npert))
+ call db%get_ftqbz(cryst, qbz, qq_ibz, mapc_qq, drho_cplex, nfft, ngfft, vxc1, comm)
+
+ option=2 ! if 2, treat only density change
+ ABI_MALLOC(vxc1,(drho_cplex, nfft, dtset%nspden, db%my_npert))
+
+ do imyp=1,db%my_npert
+     call dfpt_mkvxc(drho_cplex,dtset%ixc,kxc,db%mpi_enreg,nfft,ngfft,dum_nhat,0,dum_nhat,0,&
+                    nkxc,non_magnetic_xc,dtset%nspden,0,option,qbz,rho1(:,:,:,imyp),&
+                    cryst%rprimd,usexcnhat,vxc1(:,:,:,imyp),dum_xccc3d1)
+ end do
+
+ ABI_FREE(rho1)
+
+end subroutine dvdb_get_vxc1_ftqbz
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_dvdb/dvdb_ftqcache_build
 !! NAME
 !!  dvdb_ftqcache_build
@@ -3856,7 +4013,6 @@ subroutine dvdb_ftqcache_build(db, nfft, ngfft, nqibz, qibz, mbsize, qselect_ibz
  if (db%ft_qcache%maxnq /= 0) then
 
    call wrtout(std_out, ch10//" Precomputing Vscf(q) from W(R,r) and building qcache...", do_flush=.True.)
-
    ! Note that cplex is always set to 2 here
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfft, db%nspden, db%my_npert))
@@ -5115,8 +5271,10 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    ! Supported fform:
    ! 109  POT1 files without vh1(G=0)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
+   ! 54   RHO1 files (treating DRHODB as DVDB)
+
    has_rhog1_g0(ii) = .True.
-   if (fform == 109) has_rhog1_g0(ii) = .False.
+   if (any(fform == [54,109])) has_rhog1_g0(ii) = .False.
 
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
@@ -5144,15 +5302,26 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    else
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
-      NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
-      do ispden=1,hdr1%nspden
-        NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
-        write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
-      end do
-      ! Add rhog1(G=0)
-      rhog1_g0 = zero
-      if (has_rhog1_g0(jj)) then
-        NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
+      if (any(fform == [109, 111])) then
+        NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
+        do ispden=1,hdr1%nspden
+          NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
+          write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+        end do
+        ! Add rhog1(G=0)
+        rhog1_g0 = zero
+        if (has_rhog1_g0(jj)) then
+          NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
+        end if
+      else if (fform == 54) then
+        ! v below should read as rho
+        NCF_CHECK(nf90_inq_varid(units(ii), "first_order_density", v1_varid))
+        do ispden=1,hdr1%nspden
+          NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
+          write(ount, err=10, iomsg=msg) (v1(ifft), ifft=1,cplex*nfft)
+        end do
+      else
+        ABI_ERROR(sjoin("Don't know how to handle fform:", itoa(fform)))
       end if
       if (dvdb_last_version > 1) write(ount, err=10, iomsg=msg) rhog1_g0
    end if
@@ -5259,6 +5428,11 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
  ! Here I made a mistake because 102 corresponds to GS potentials
  ! as a consequence DVDB files generated with version <= 8.1.6
  ! contain list of potentials with fform = 102.
+ !
+ ! In GWPT, one may want to use DRHODB as DVDB. For this, here I
+ ! also allow merging and reading first order density with fform = 54.
+ !
+ !integer :: fform_rho=54
  !integer :: fform_pot=102
  !integer :: fform_pot=109
  !integer :: fform_pot=111
@@ -5270,13 +5444,13 @@ integer function dvdb_check_fform(fform, mode, errmsg) result(ierr)
 
  select case (mode)
  case ("merge_dvdb")
-    if (all(fform /= [109, 111])) then
+    if (all(fform /= [54, 109, 111])) then
       errmsg = sjoin("fform:", itoa(fform), "is not supported in `merge_dvdb` mode")
       ierr = 1; return
     end if
 
  case ("read_dvdb")
-    if (all(fform /= [102, 109, 111])) then
+    if (all(fform /= [54, 102, 109, 111])) then
       errmsg = sjoin("fform:", itoa(fform), "is not supported in `read_dvdb` mode")
       ierr = 1; return
     end if
@@ -5713,7 +5887,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
 
  ! Get list of G-vectors in FFT mesh.
  ABI_MALLOC(gfft, (3, nfft))
- call get_gftt(ngfft, [zero, zero, zero], dvdb%cryst%gmet, gsq_max, gfft)
+ call get_gfft(ngfft, [zero, zero, zero], dvdb%cryst%gmet, gsq_max, gfft)
  ABI_MALLOC(workg, (2, nfft))
 
  ! Select G-vectors in small sphere (ratio of gsq_max)
@@ -5723,7 +5897,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    end if
    ngsmall = 0
    do ig=1,nfft
-     ! Don't include (2pi)**2 to be consistent with get_gftt
+     ! Don't include (2pi)**2 to be consistent with get_gfft
      g2 = dot_product(gfft(:,ig), matmul(dvdb%cryst%gmet, gfft(:, ig)))
      if (g2 <= gsq_max * 0.01_dp) ngsmall = ngsmall + 1
      if (ii == 2) ig2ifft(ngsmall) = ig
@@ -6340,7 +6514,7 @@ subroutine dvdb_get_v1r_long_range(db, qpt, idir, iatom, nfft, ngfft, v1r_lr, ad
 
  ! Get the set of G vectors
  ! TODO: May use zero-padded FFT with small G-sphere
- call get_gftt(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
+ call get_gfft(ngfft, qpt, db%cryst%gmet, gsq_max, gfft)
 
  ! Compute the long-range potential in G-space due to Z* and Q* (if present)
  v1G_lr = zero
