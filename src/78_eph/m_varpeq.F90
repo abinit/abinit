@@ -231,6 +231,7 @@ subroutine varpeq_solve(self)
 
      ! Save the necessary data at each iterations
      call self%record(ii, my_is)
+     write(ab_out, '(a,es13.4)') "E_pol = ", self%iter_rec(1, ii, my_is)
 
      if (polstate%gradres < self%tolgrs) exit
 
