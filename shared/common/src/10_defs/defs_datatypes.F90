@@ -247,6 +247,15 @@ module defs_datatypes
     ! \int{(16/15)*pi^5*n(r)*r^6* dr}
     ! (tNcore(q) = FT of pseudo core density)
 
+   real(dp) :: dtaucdq0 = zero
+    ! Gives 1/q d(tau_core(q))/dq for q=0
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
+   real(dp) :: d2taucdq0 = zero
+    ! Gives contribution of d2(tau_core(q))/d2q for q=0
+    ! \int{(16/15)*pi^5*n(r)*r^6* dr}
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
    real(dp) :: dnvdq0 = zero
     ! Gives 1/q d(tNvale(q))/dq for q=0
     ! (tNvale(q) = FT of pseudo valence density)
@@ -261,6 +270,11 @@ module defs_datatypes
     ! Gives the pseudo core density in reciprocal space on a regular grid.
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
+
+   real(dp), allocatable :: ttaucorespl(:,:)
+    ! ttaucorespl(mqgrid_vl,2)
+    ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
+    ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
 
    integer :: num_tphi = 0
    ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
@@ -478,6 +492,14 @@ module defs_datatypes
    ! for each type of atom, on the radial grid. The components
    ! xccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge with respect to the radial distance.
+
+  real(dp), allocatable :: xcctau1d(:,:,:)
+   ! xcctau1d(n1xccc*(1-usepaw),6,ntypat)
+   ! Norm-conserving psps only
+   ! The component xcctau1d(n1xccc,1,ntypat) is the pseudo-core charge kinetic energy density
+   ! for each type of atom, on the radial grid. The components
+   ! xcctau1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
+   ! pseudo-core charge kinetic energy density with respect to the radial distance.
 
   real(dp), allocatable :: zionpsp(:)
    ! zionpsp(npsp)

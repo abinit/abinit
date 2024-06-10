@@ -235,7 +235,7 @@ end subroutine destroy_mpi_enreg
 !!
 !! SOURCE
 
-subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
+subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars

@@ -715,6 +715,7 @@ subroutine wfk_close(Wfk, delete)
 #endif
 
    case (IO_MODE_ETSF)
+     !NCF_CHECK(nf90_sync(wfk%fh))
      NCF_CHECK(nf90_close(wfk%fh))
 
    case default
@@ -2088,6 +2089,7 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
      end if
      ncerr = nf90_put_var(wfk%fh, kg_varid, kg_k, start=[1,1,ik_ibz], count=[3,npw_disk,1])
      NCF_CHECK_MSG(ncerr, "putting kg_k")
+     !NCF_CHECK(nf90_sync(wfk%fh))
    end if
 
    ! Write eigenvalues and occupation factors.
@@ -2098,8 +2100,10 @@ subroutine wfk_write_band_block(Wfk, band_block, ik_ibz, spin, sc_mode, kg_k, cg
        if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
          NCF_CHECK(nctk_set_collective(wfk%fh, eig_varid))
        end if
+       !print *, "Putting eigenvalues for ik_ibz,spin, nband_disk", ik_ibz,spin, nband_disk
        ncerr = nf90_put_var(wfk%fh, eig_varid, eig_k, start=[1,ik_ibz,spin], count=[nband_disk,1,1])
        NCF_CHECK_MSG(ncerr, "putting eig_k")
+       !NCF_CHECK(nf90_sync(wfk%fh))
      end if
 
      if (present(occ_k)) then
