@@ -1154,7 +1154,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
  ABI_FREE(enlout)
 
- if (dtset%cprj_in_memory==2) then
+ if (dtset%cprj_in_memory/=2) then
    if (gs_hamk%usepaw==1.and.(iscf>0.or.gs_hamk%usecprj==1)) then
      call pawcprj_free(cwaveprj)
    end if
