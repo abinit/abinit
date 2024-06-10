@@ -767,8 +767,9 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  end if
 #endif
 
- write(message,*) 'Invovl built'
- call wrtout(std_out,message,'COLL')
+! LB-10/06/24: This message is too verbose on some cases (for example many k-points)
+! write(message,*) 'Invovl built'
+! call wrtout(std_out,message,'COLL')
 
 end subroutine make_invovl
 !!***

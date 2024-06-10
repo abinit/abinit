@@ -2484,6 +2484,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%useylm=1
    dtset%userec=1
  end if
+ if (dtset%cprj_in_memory/=0) dtset%useylm=1
 
  ionmov=dtset%ionmov ; densfor_pred=dtset%densfor_pred ; iscf=dtset%iscf ; nqpt=dtset%nqpt
  kptopt=dtset%kptopt; nberry=dtset%nberry ; berryopt=dtset%berryopt

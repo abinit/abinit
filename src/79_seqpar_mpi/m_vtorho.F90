@@ -763,7 +763,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ikg=0
 
      if (dtset%cprj_in_memory==1) then
-       call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
+       if (xg_nonlop%paw) call xg_nonlop_make_Dij(xg_nonlop,paw_ij,isppol,atindx)
      end if
 
      ! Set up local potential vlocal on the coarse FFT mesh from vtrial taking into account the spin.
@@ -1067,7 +1067,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end if
 
        if (dtset%cprj_in_memory==1) then
-         do_invS=dtset%wfoptalg==111
+         do_invS=xg_nonlop%paw.and.dtset%wfoptalg==111
          call xg_nonlop_make_k(xg_nonlop,my_ikpt,istwf_k,mpi_enreg%me_g0,npw_k,ffnl,ph3d,istep<=1,&
            & compute_invS_approx=do_invS,compute_gram=do_invS)
        end if
@@ -1242,7 +1242,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      if (dtset%cprj_in_memory==1) then
-       call xg_nonlop_destroy_Dij(xg_nonlop)
+       if (xg_nonlop%paw) call xg_nonlop_destroy_Dij(xg_nonlop)
      end if
 
      call timab(986,2,tsec)

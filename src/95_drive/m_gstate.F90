@@ -1081,9 +1081,12 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ! xg_nonlop available only for cprj_in_memory=1 and (LOBPCG or Chebfi)
  ! cprj_in_memory=2 is used for Congugate Gradient
  if (dtset%cprj_in_memory==1) then
+   if (dtset%useylm/=1) then
+     ABI_ERROR('xg_nonlop cannot be used with useylm/=1')
+   end if
    call xg_nonlop_init(xg_nonlop,psps%indlmn,mpi_enreg%my_atmtab,my_natom,nattyp,dtset%mkmem,dtset%ntypat,&
-&                    dtset%nspinor,ucvol,mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
-   if (dtset%usepaw==1) call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
+&                    dtset%nspinor,ucvol,dtset%usepaw,mpi_enreg%me_band,mpi_enreg%comm_band,mpi_enreg%comm_atom)
+   if (xg_nonlop%paw) call xg_nonlop_make_Sij(xg_nonlop,pawtab,inv_sij=dtset%wfoptalg==111)
  end if
 
  usecprj=0; mcprj=0;mband_cprj=0
@@ -1672,7 +1675,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  ABI_FREE(ab_xfh%xfhist)
  call pawfgr_destroy(pawfgr)
  if (dtset%cprj_in_memory==1) then
-   call xg_nonlop_destroy_Sij(xg_nonlop)
+   if (xg_nonlop%paw) call xg_nonlop_destroy_Sij(xg_nonlop)
    call xg_nonlop_destroy(xg_nonlop)
  end if
 
