@@ -2180,6 +2180,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ABI_ERROR("gstore_erange and gstore_kfilter are mutually exclusive!")
  end if
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pkind', tread, 'KEY', key_value=key_value)
+ if (tread == 1) dtset%varpeq_pkind = tolower(trim(key_value))
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep', tread, 'INT')
+ if (tread == 1) dtset%varpeq_nstep = intarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
+ if(tread==1) dtset%varpeq_tolgrs=dprarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,ntypat,string(1:lenstr),'lambsig',tread,'DPR')
  if(tread==1) dtset%lambsig(1:ntypat)=dprarr(1:ntypat)
 
