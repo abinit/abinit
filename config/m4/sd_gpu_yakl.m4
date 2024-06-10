@@ -78,6 +78,8 @@ AC_DEFUN([SD_YAKL_INIT], [
       else
         sd_yakl_enable="yes"
         sd_yakl_init="dir"
+        test -d "${withval}/lib" && sd_yakl_libdir="${withval}/lib"
+        test -d "${withval}/lib64" && sd_yakl_libdir="${withval}/lib64"
       fi],
     [ sd_yakl_enable="${sd_yakl_enable_def}"; sd_yakl_init="def"])
 
@@ -118,7 +120,7 @@ AC_DEFUN([SD_YAKL_INIT], [
         sd_yakl_cppflags="-I${with_yakl}/include"
         sd_yakl_fcflags="${sd_yakl_fcflags_def} -I${with_yakl}/include"
         sd_yakl_ldflags="${sd_yakl_ldflags_def}"
-        sd_yakl_libs="-L${with_yakl}/lib64 ${sd_yakl_libs_def} -lstdc++ -ldl -L${with_gpu}/lib64 -lcudart"
+        sd_yakl_libs="-L${sd_yakl_libdir} ${sd_yakl_libs_def} -lstdc++ -ldl -L${with_gpu}/lib64 -lcudart"
         ;;
 
       env)

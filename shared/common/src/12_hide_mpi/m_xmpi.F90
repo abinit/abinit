@@ -192,7 +192,7 @@ module m_xmpi
 !! xmpi_pool2d_t
 !!
 !! FUNCTION
-!!  Pool of MPI processors operating a 2D problem of shape (n1, n2).
+!!  Pool of MPI processors operating on a 2D problem of shape (n1, n2).
 !!  Each item in the (n1, n2) matrix is assigned to a single pool.
 !!  Note that differerent pools do not necessarily have the same number of procs,
 !!  thus a pool is more flexibile than a Cartesian grid although inter-pool communication becomes more complex.
@@ -205,7 +205,7 @@ module m_xmpi
    ! Dimensions of the 2d problem
 
    type(xcomm_t) :: comm
-   ! MPI communicator
+   ! MPI communicator.
 
    logical,allocatable :: treats(:,:)
    ! (n1, n2)
@@ -230,6 +230,7 @@ module m_xmpi
  public :: xmpi_comm_rank             ! Hides MPI_COMM_RANK from MPI library.
  public :: xmpi_comm_size             ! Hides MPI_COMM_SIZE from MPI library.
  public :: xmpi_comm_free             ! Hides MPI_COMM_FREE from MPI library.
+ public :: xmpi_comm_dup              ! Hides MPI_COMM_DUP from MPI library.
  public :: xmpi_comm_group            ! Hides MPI_COMM_GROUP from MPI library.
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
  public :: xmpi_comm_translate_rank   ! Translate one rank
@@ -1084,7 +1085,6 @@ subroutine xmpi_show_info(unit)
 
 ! *************************************************************************
 
- !@m_xmpi
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
 
 #ifdef HAVE_MPI1
@@ -1635,6 +1635,41 @@ subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
  end if
 
 end subroutine xmpi_comm_multiple_of
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_comm_dup
+!! NAME
+!!  xmpi_comm_dup
+!!
+!! FUNCTION
+!!  Hides MPI_COMM_DUP from MPI library.
+!!
+!! INPUTS
+!!  in_comm=input MPI communicator.
+!!
+!! OUTPUT
+!!  out_comm=Output MPI communicator.
+!!  mpierr=error code returned
+!!
+!! SOURCE
+
+subroutine xmpi_comm_dup(in_comm, out_comm, mpierr)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: out_comm, mpierr
+
+!----------------------------------------------------------------------
+
+#ifdef HAVE_MPI
+  call MPI_Comm_dup(in_comm, out_comm, mpierr)
+#else
+  out_comm = in_comm
+#endif
+
+end subroutine xmpi_comm_dup
 !!***
 
 !----------------------------------------------------------------------
@@ -2804,7 +2839,9 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 
 end subroutine xmpi_largetype_create
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_int
 !! NAME
 !!  largetype_sum_int
@@ -2827,7 +2864,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_real
 !! NAME
 !!  largetype_sum_real
@@ -2850,13 +2889,16 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dble
 !! NAME
 !!  largetype_sum_dble
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for double precision reals
+
  subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
   integer :: len,datatype
   real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2873,7 +2915,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_cplx
 !! NAME
 !!  largetype_sum_cplx
@@ -2896,7 +2940,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dcplx
 !! NAME
 !!  largetype_sum_dcplx
@@ -2919,7 +2965,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_lor_log
 !! NAME
 !!  largetype_lor_log
@@ -2942,10 +2990,12 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
 !!***
+
 !--------------------------------------
-!!****f* m_xmpi/largetype_lang_log
+
+!!****f* m_xmpi/largetype_land_log
 !! NAME
-!!  largetype_lang_log
+!!  largetype_land_log
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LANG for logicals
@@ -4916,8 +4966,8 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
    end do
  end do
 
- write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
- write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
+ !write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
+ !write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
 
  !block_displ (1)=max_displ ! Do not change this value.
  !if (min_displ>0) block_displ (1)=min_displ ! Do not change this value.
@@ -5294,18 +5344,18 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
    end do i2_loop
  end if
 
-!DEBUG
-! where (pool%treats)
-!   check = 1
-! else where
-!   check = 0
-! end where
-! call xmpi_sum(check, input_comm, mpierr)
-! if (any(check == 0)) then
-!   write(std_out, *) check
-!   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
-! end if
-!END_DEBUG
+ !DEBUG
+ ! where (pool%treats)
+ !   check = 1
+ ! else where
+ !   check = 0
+ ! end where
+ ! call xmpi_sum(check, input_comm, mpierr)
+ ! if (any(check == 0)) then
+ !   write(std_out, *) check
+ !   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
+ ! end if
+ !END_DEBUG
 
  call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)
  pool%comm = xcomm_from_mpi_int(new_comm)
@@ -5334,6 +5384,7 @@ contains
 logical function is_rectangular_grid(nproc, grid_dims) result (ans)
  integer,intent(in) :: nproc
  integer,intent(out) :: grid_dims(2)
+
 !----------------------------------------------------------------------
  integer :: i
  ! Search for a rectangular grid of processors

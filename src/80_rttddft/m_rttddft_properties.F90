@@ -166,6 +166,7 @@ subroutine rttddft_calc_density(dtset, mpi_enreg, psps, tdks)
      call mkrho(tdks%cg,dtset,tdks%gprimd,tdks%irrzon,tdks%kg,tdks%mcg,mpi_enreg, &
               & tdks%npwarr,tdks%occ0,tdks%paw_dmft,tdks%phnons,rhowfg,rhowfr,     &
               & tdks%rprimd,tim_mkrho,tdks%ucvol,tdks%wvl%den,tdks%wvl%wfs,option=1)
+
      !FB: Useful?
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,tdks%pawfgr, &
                   & rhowfg,tdks%taug,rhowfr,tdks%taur)

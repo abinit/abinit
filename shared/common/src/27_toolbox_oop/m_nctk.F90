@@ -611,7 +611,7 @@ subroutine nctk_test_mpiio(print_warning)
  ! Master broadcast nctk_has_mpiio
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
- if ((.not.nctk_has_mpiio).and.my_print_warning) then
+ if ((.not. nctk_has_mpiio) .and. my_print_warning) then
    write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
@@ -800,15 +800,14 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
-   ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
-     comm=comm, info=xmpio_info)
+   ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, comm=comm, info=xmpio_info)
 #endif
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
-   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",path
+   write(my_string,'(2a)') "- Creating HDf5 file with MPI-IO support: ",trim(path)
    call wrtout(std_out,my_string)
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    cmode = def_cmode_for_seq_create
@@ -2891,14 +2890,14 @@ end subroutine write_var_netcdf
 !! SOURCE
 
 subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
-& shiftfactor_extfpmd) ! Optional arguments
+& extfpmd_eshift) ! Optional arguments
 
 !Arguments ------------------------------------
 !scalars
  character(len=fnlen),intent(in) :: filename
  integer,intent(in) :: nkpt,nsppol,mband
  real(dp),intent(in) :: fermie
- real(dp),optional,intent(in) :: shiftfactor_extfpmd
+ real(dp),optional,intent(in) :: extfpmd_eshift
 !arrays
  integer,intent(in) :: nband(nkpt*nsppol)
  real(dp),intent(in) :: eigen(mband*nkpt*nsppol)
@@ -2909,7 +2908,7 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
  integer :: eig_id,fermie_id,kpt_id,nbk_id,nbk
- integer :: shiftfactor_extfpmd_id
+ integer :: extfpmd_eshift_id
  integer :: ikpt,isppol,nband_k,band_index
  real(dp):: convrt
 !arrays
@@ -2965,9 +2964,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  call ab_define_var(ncid, dimNBK, nbk_id, NF90_INT,"NBandK",&
 & "Number of bands per kpoint and Spin",&
 & "Dimensionless")
- if(present(shiftfactor_extfpmd)) then
-    call ab_define_var(ncid,dim0,shiftfactor_extfpmd_id,NF90_DOUBLE,&
-&    "shiftfactor_extfpmd","Extended FPMD shiftfactor","Hartree")
+ if(present(extfpmd_eshift)) then
+    call ab_define_var(ncid,dim0,extfpmd_eshift_id,NF90_DOUBLE,&
+&    "extfpmd_eshift","Extended FPMD energy shift","Hartree")
  end if
 
 !4. End define mode
@@ -2990,9 +2989,9 @@ subroutine write_eig(eigen,fermie,filename,kptns,mband,nband,nkpt,nsppol,&
  NCF_CHECK_MSG(ncerr," write variable fermie")
 
 !6.2 Write extfpmd shiftfactor
- if(present(shiftfactor_extfpmd)) then
-   ncerr = nf90_put_var(ncid, shiftfactor_extfpmd_id, shiftfactor_extfpmd)
-   NCF_CHECK_MSG(ncerr," write variable shiftfactor_extfpmd")
+ if(present(extfpmd_eshift)) then
+   ncerr = nf90_put_var(ncid, extfpmd_eshift_id, extfpmd_eshift)
+   NCF_CHECK_MSG(ncerr," write variable extfpmd_eshift")
  end if
 
 !6.3 Write eigenvalues

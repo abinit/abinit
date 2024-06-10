@@ -33,6 +33,7 @@ module m_symtk
  private
 !!***
 
+!TODO: the following 4 routines should not be in this module! They are very general math. Move to m_matrix? Or numeric_noabirules directory?
  public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
  public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
  public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
