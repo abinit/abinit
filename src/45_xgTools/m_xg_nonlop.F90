@@ -95,6 +95,7 @@ module m_xg_nonlop
    integer :: nspinor
    integer :: space_pw
    integer :: space_Dij
+   logical :: paw
    real(dp) :: weight
 
    integer, pointer :: mpi_atmtab(:)
@@ -112,6 +113,7 @@ module m_xg_nonlop
    type(xg_t),pointer :: projectors(:)
    type(xg_t),pointer :: projectors_k
 
+   ! paw only:
    type(xg_t),pointer :: gram_proj(:)
    type(xg_t),pointer :: gram_proj_k
 
@@ -124,6 +126,7 @@ module m_xg_nonlop
    type(xg_t) :: invSij_approx_all
    type(xgBlock_t),allocatable :: Sijm1(:)
    type(xgBlock_t),allocatable :: invSij_approx(:)
+   ! end paw only
 
  end type xg_nonlop_t
 !!***
@@ -132,23 +135,23 @@ module m_xg_nonlop
   public :: xg_nonlop_init
   public :: xg_nonlop_make_k
   public :: xg_nonlop_destroy
-  public :: xg_nonlop_make_Dij
-  public :: xg_nonlop_make_Sij
-  public :: xg_nonlop_destroy_Dij
-  public :: xg_nonlop_destroy_Sij
+  public :: xg_nonlop_make_Dij    ! paw only
+  public :: xg_nonlop_make_Sij    ! paw only
+  public :: xg_nonlop_destroy_Dij ! paw only
+  public :: xg_nonlop_destroy_Sij ! paw only
   public :: xg_nonlop_apply_Aij
   public :: xg_nonlop_precond_iterative_refinement
   public :: xg_nonlop_mult_cprj
   public :: xg_nonlop_apply_prj
   public :: xg_nonlop_colwiseXAX
   public :: xg_nonlop_getXAX
-  public :: xg_nonlop_getXSX
+  public :: xg_nonlop_getXSX ! paw only
   public :: xg_nonlop_getXHX
   public :: xg_nonlop_getAX
   public :: xg_nonlop_getHX
-  public :: xg_nonlop_getSX
-  public :: xg_nonlop_getSm1X
-  public :: xg_nonlop_getHmeSX
+  public :: xg_nonlop_getSX   ! paw only
+  public :: xg_nonlop_getSm1X ! paw only
+  public :: xg_nonlop_getHmeSX ! paw only
 
 contains
 !!***
@@ -167,13 +170,15 @@ contains
 !! CHILDREN
 !!
 !! SOURCE
- subroutine xg_nonlop_init(xg_nonlop,indlmn,mpi_atmtab,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,me_band,comm_band,comm_atom)
+ subroutine xg_nonlop_init(xg_nonlop,indlmn,mpi_atmtab,my_natom,nattyp,mkmem,ntypat,nspinor,ucvol,usepaw,&
+     me_band,comm_band,comm_atom)
 
    integer ,intent(in) :: me_band,comm_band,comm_atom
    integer ,intent(in) :: my_natom
    integer ,intent(in) :: mkmem
    integer ,intent(in) :: ntypat
    integer ,intent(in) :: nspinor
+   integer ,intent(in) :: usepaw
    real(dp),intent(in) :: ucvol
    type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
@@ -189,6 +194,8 @@ contains
    xg_nonlop%my_natom=my_natom
    xg_nonlop%me_band=me_band
    xg_nonlop%comm_band=comm_band
+
+   xg_nonlop%paw=usepaw==1
 
    xg_nonlop%space_pw=0
    xg_nonlop%space_Dij=0
@@ -224,7 +231,7 @@ contains
    xg_nonlop%cprjdim = cprjdim
 
    ABI_MALLOC(xg_nonlop%projectors,(mkmem))
-   ABI_MALLOC(xg_nonlop%gram_proj,(mkmem))
+   if (xg_nonlop%paw) ABI_MALLOC(xg_nonlop%gram_proj,(mkmem))
 
  end subroutine xg_nonlop_init
 !!***
@@ -235,8 +242,10 @@ contains
 
   integer :: ikpt
 
-  call xg_nonlop_destroy_Sij(xg_nonlop) ! Can be destroyed before
-  call xg_nonlop_destroy_Dij(xg_nonlop) ! Can be destroyed before
+  if (xg_nonlop%paw) then
+    call xg_nonlop_destroy_Sij(xg_nonlop) ! Can be destroyed before
+    call xg_nonlop_destroy_Dij(xg_nonlop) ! Can be destroyed before
+  end if
 
   ABI_FREE(xg_nonlop%nlmn_ntypat)
   ABI_FREE(xg_nonlop%nlmn_natom)
@@ -250,14 +259,17 @@ contains
 
   do ikpt=1,size(xg_nonlop%projectors)
     call xg_free(xg_nonlop%projectors(ikpt))
-    call xg_free(xg_nonlop%gram_proj(ikpt))
+    if (xg_nonlop%paw) call xg_free(xg_nonlop%gram_proj(ikpt))
   end do
   ABI_FREE(xg_nonlop%projectors)
-  ABI_FREE(xg_nonlop%gram_proj)
-  if (allocated(xg_nonlop%invSij_approx)) then
-    ABI_FREE(xg_nonlop%invSij_approx)
+
+  if (xg_nonlop%paw) then
+    ABI_FREE(xg_nonlop%gram_proj)
+    if (allocated(xg_nonlop%invSij_approx)) then
+      ABI_FREE(xg_nonlop%invSij_approx)
+    end if
+    call xg_free(xg_nonlop%invSij_approx_all)
   end if
-  call xg_free(xg_nonlop%invSij_approx_all)
 
  end subroutine xg_nonlop_destroy
 !!***
@@ -280,6 +292,10 @@ contains
 ! *************************************************************************
 
   call timab(tim_make_Dij,1,tsec)
+
+  if (.not.xg_nonlop%paw) then
+    ABI_ERROR('Not implemented with paw=False.')
+  end if
 
   if (isppol/=1) then ! isppol must be 1 or 2 if nspinor==1, and must be 1 of nspinor==2
     if (isppol/=2.or.xg_nonlop%nspinor/=1) then
@@ -403,6 +419,10 @@ contains
 
   call timab(tim_make_Sij,1,tsec)
 
+  if (.not.xg_nonlop%paw) then
+    ABI_ERROR('Not implemented with paw=False.')
+  end if
+
   ntypat   = xg_nonlop%ntypat
   nlmn_max = xg_nonlop%nlmn_max
 
@@ -453,6 +473,10 @@ contains
 
 ! *************************************************************************
 
+  if (.not.xg_nonlop%paw) then
+    ABI_ERROR('Not implemented with paw=False.')
+  end if
+
   if (allocated(xg_nonlop%Dij)) then
     ABI_FREE(xg_nonlop%Dij)
   end if
@@ -466,6 +490,10 @@ contains
   type(xg_nonlop_t),intent(inout) :: xg_nonlop
 
 ! *************************************************************************
+
+  if (.not.xg_nonlop%paw) then
+    ABI_ERROR('Not implemented with paw=False.')
+  end if
 
   if (allocated(xg_nonlop%Sij)) then
     ABI_FREE(xg_nonlop%Sij)
@@ -539,7 +567,7 @@ contains
   end do
 
   xg_nonlop%projectors_k => xg_nonlop%projectors(ikpt)
-  xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
+  if (xg_nonlop%paw) xg_nonlop%gram_proj_k => xg_nonlop%gram_proj(ikpt)
 
   if (compute_proj) then
 
@@ -583,6 +611,9 @@ contains
     if (present(compute_invS_approx)) compute_invS_approx_ = compute_invS_approx
     if (compute_invS_approx_) then
 
+      if (.not.xg_nonlop%paw) then
+        ABI_ERROR('Not implemented with paw=False.')
+      end if
       if (.not.allocated(xg_nonlop%invSij_approx)) then
         nlmn_max=xg_nonlop%nlmn_max
         if (xg_nonlop%space_pw==SPACE_CR) then
@@ -622,6 +653,9 @@ contains
     if (present(compute_gram)) compute_gram_ = compute_gram
     if (compute_gram_) then
 
+      if (.not.xg_nonlop%paw) then
+        ABI_ERROR('Not implemented with paw=False.')
+      end if
       nlmn_max=xg_nonlop%nlmn_max
       if (xg_nonlop%space_pw==SPACE_CR) then
         cplex=1
@@ -1491,6 +1525,10 @@ subroutine xg_nonlop_getXSX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
 
    call timab(tim_getXSX,1,tsec)
 
+   if (.not.xg_nonlop%paw) then
+     ABI_ERROR('Not implemented with paw=False.')
+   end if
+
    call xg_nonlop_getXAX(xg_nonlop,xg_nonlop%Sij,cprj_left,cprj_right,cprj_work,res,blocksize)
 
    call timab(tim_getXSX,2,tsec)
@@ -1576,6 +1614,10 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    type(xgBlock_t), intent(inout) :: Xin,cprj_work,work_mpi
    type(xgBlock_t), optional, intent(inout) :: Xout
 
+   if (.not.xg_nonlop%paw) then
+     ABI_ERROR('Not implemented with paw=False.')
+   end if
+
    call xg_nonlop_getAX(xg_nonlop,xg_nonlop%Sij,Xin,cprjin,cprj_work,work_mpi,Xout)
 
  end subroutine xg_nonlop_getSX
@@ -1592,6 +1634,10 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    integer :: nblocks,nspinor
    integer :: nrows,nrows_cprj
    integer :: ncols,ncols_cprj
+
+   if (.not.xg_nonlop%paw) then
+     ABI_ERROR('Not implemented with paw=False.')
+   end if
 
    nblocks = xmpi_comm_size(comm(cprjin))
 
@@ -1644,6 +1690,10 @@ subroutine xg_nonlop_getXHX(xg_nonlop,cprj_left,cprj_right,cprj_work,res,blocksi
    logical :: no_H_
 
    call timab(tim_getHmeSX,1,tsec)
+
+   if (.not.xg_nonlop%paw) then
+     ABI_ERROR('Not implemented with paw=False.')
+   end if
 
    nblocks = xmpi_comm_size(comm(cprjin))
 
