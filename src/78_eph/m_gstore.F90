@@ -3362,7 +3362,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      ! Set up local potential vlocal1 with proper dimensioning from vtrial1 taking into account the spin.
      do my_ip=1,my_npert
        call rf_transgrid_and_pack(spin, nspden, psps%usepaw, cplex, nfftf, nfft, ngfft, gs_hamkq%nvloc,&
-                 pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1(:,:,:,:,my_ip))
+                                  pawfgr, mpi_enreg, dummy_vtrial, v1scf(:,:,:,my_ip), vlocal, vlocal1(:,:,:,:,my_ip))
      end do
 
      ! Continue to initialize the GS Hamiltonian
@@ -3983,7 +3983,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  ABI_FREE(pheigvec_cart_qbz)
 
  if (present(with_gmode)) then
-   ! Well, the only conversion I can think of is atom --> phonon.
+   ! Well, the only conversion I can think of is: atom --> phonon.
    if (gstore%gmode /= with_gmode) then
      ABI_ERROR(sjoin("Conversion from gstore%gmode: ", gstore%gmode, "to:", with_gmode, " is not yet supported"))
    end if
@@ -4216,75 +4216,75 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", done_qbz_spin
 
  do spin=1,gstore%nsppol
-    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
-    NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
-    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
-    NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "nb", nb))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nq", glob_nq))
+   NCF_CHECK(nctk_get_dim(spin_ncid, "glob_nk", glob_nk))
 
-    write(ab_out, "(a,i0)")" gqk%nb: ", nb
-    write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
-    write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
+   write(ab_out, "(a,i0)")" gqk%nb: ", nb
+   write(ab_out, "(a,i0)")" gqk%glob_nq: ", glob_nq
+   write(ab_out, "(a,i0)")" gqk%glob_nk: ", glob_nk
 
-    ! Handle the output of group velocities.
-    ! On disk, we have:
-    !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
-    !
-    ! or
-    !
-    !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
+   ! Handle the output of group velocities.
+   ! On disk, we have:
+   !    nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz"))
+   !
+   ! or
+   !
+   !    nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
 
-    select case (gstore%with_vk)
-    case (0)
-      continue
+   select case (gstore%with_vk)
+   case (0)
+     continue
 
-    case (1)
-      ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
-      write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates:"
-      do ik_ibz=1,gstore%nkibz
-        ! Only the first and the last k-points are written.
-        if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
-        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
-        write(ab_out, "(a)")sjoin(" For k-point", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
-        do ib=1,nb
-          write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
-        end do
-      end do
-      ABI_FREE(vk_cart_ibz)
+   case (1)
+     ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
+     write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates:"
+     do ik_ibz=1,gstore%nkibz
+       ! Only the first and the last k-points are written.
+       if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
+       NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
+       write(ab_out, "(a)")sjoin(" For k-point", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+       do ib=1,nb
+         write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
+       end do
+     end do
+     ABI_FREE(vk_cart_ibz)
 
-    case (2)
-      NOT_IMPLEMENTED_ERROR()
-    end select
+   case (2)
+     NOT_IMPLEMENTED_ERROR()
+   end select
 
-    ! Handle the output of the e-ph matrix elements
-    ! On disk we have the global array:
-    !
-    !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
+   ! Handle the output of the e-ph matrix elements
+   ! On disk we have the global array:
+   !
+   !      nctkarr_t("gvals", "dp", "gstore_cplex, nb, nb, natom3, glob_nk, glob_nq")
 
-    cplex = dtset%gstore_cplex
-    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
+   cplex = dtset%gstore_cplex
+   ABI_MALLOC(gslice_mn, (cplex, nb, nb))
 
-    write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
-    do iq_glob=1,glob_nq
-      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
-      do ik_glob=1,glob_nk
-        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
-        do ipc=1,natom3
-          if (ipc /= 1 .and. ipc /= natom3) cycle ! Write first and the last pertubation.
-          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
-          NCF_CHECK(ncerr)
-          write(ab_out, "(3(a,i0))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
-          do im_kq=1,nb
-            do in_k=1,nb
-              if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
-              if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-              write(ab_out, "(1x,5(i5,1x),es16.6)")iq_glob, ik_glob, ipc, im_kq, in_k, g2
-            end do
-          end do
-        end do
-      end do
-    end do
+   write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+   do iq_glob=1,glob_nq
+     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
+     do ik_glob=1,glob_nk
+       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
+       do ipc=1,natom3
+         if (ipc /= 1 .and. ipc /= natom3) cycle ! Write first and the last pertubation.
+         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
+         NCF_CHECK(ncerr)
+         write(ab_out, "(3(a,i0))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
+         do im_kq=1,nb
+           do in_k=1,nb
+             if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
+             if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
+             write(ab_out, "(1x,5(i5,1x),es16.6)")iq_glob, ik_glob, ipc, im_kq, in_k, g2
+           end do
+         end do
+       end do
+     end do
+   end do
 
-    ABI_FREE(gslice_mn)
+   ABI_FREE(gslice_mn)
  end do
 
  NCF_CHECK(nf90_close(root_ncid))

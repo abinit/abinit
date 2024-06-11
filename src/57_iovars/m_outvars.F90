@@ -28,9 +28,7 @@ module m_outvars
  use m_errors
  use m_xomp
  use m_xmpi
-#if defined HAVE_NETCDF
  use netcdf
-#endif
  use m_outvar_a_h
  use m_outvar_i_n
  use m_outvar_o_z
@@ -167,11 +165,9 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 01. First line indicating outvars
 
  if(choice==1)then
-   write(iout, '(a)' )&
-&   ' -outvars: echo values of preprocessed input variables --------'
+   write(iout, '(a)' )' -outvars: echo values of preprocessed input variables --------'
  else
-   write(iout, '(a)' )&
-&   ' -outvars: echo values of variables after computation  --------'
+   write(iout, '(a)' )' -outvars: echo values of variables after computation  --------'
  end if
 
 !###########################################################
@@ -180,7 +176,6 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !Wrap the netcdf OUT.nc into conditional for flexible output writing
  if ( dtsets(1)%ncout == 1 ) then
 
-#ifdef HAVE_NETCDF
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess:
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
@@ -204,9 +199,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    else
      ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
    end if
-#endif
  !ncid = 0
- 
+
   else if ( dtsets(1)%ncout == 0 ) then
    ABI_COMMENT("ncout set to 0. No OUT.nc will be printed.")
   else
@@ -273,10 +267,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    end do
  end if
 
-!DEBUG
-! write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
-! write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
-!ENDDEBUG
+ !write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+ !write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
 
  nshiftk=1
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
@@ -310,9 +302,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    rf2_dkdk=dtsets(idtset)%rf2_dkdk
    rf2_dkde=dtsets(idtset)%rf2_dkde
    if(rfddk/=0 .or. rfelfd/=0 .or. rfphon/=0 .or. rfstrs/=0 .or. &
-&   rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfmagn/=0)then
-     response_(idtset)=1
-   end if
+      rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfmagn/=0) response_(idtset)=1
  end do
 
 !###########################################################
@@ -367,15 +357,14 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 08. Print variables, for different ranges of names
 
  call outvar_a_h(choice,dmatpuflag,dtsets,iout,jdtset_,marr,multivals,mxvals,&
-& ncid,ndtset,ndtset_alloc,results_out,strimg)
+                 ncid,ndtset,ndtset_alloc,results_out,strimg)
 
  call outvar_i_n(dtsets,iout,jdtset_,marr,multivals,mxvals,&
-& ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,response_,results_out,strimg)
+                 ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,response_,results_out,strimg)
 
  call outvar_o_z(choice,dtsets,iout,&
-& jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
-& results_out,strimg,timopt)
-
+                 jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
+                 results_out,strimg,timopt)
 
 !###########################################################
 !## Deallocations and cleaning
@@ -385,9 +374,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ABI_FREE(strimg)
 
  write(message,'(a,80a)')ch10,('=',mu=1,80)
- call wrtout(iout,message,'COLL')
+ call wrtout(iout,message)
 
-#ifdef HAVE_NETCDF
  if (ncid /= 0 .and. dtsets(1)%ncout == 1) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
@@ -395,10 +383,6 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
      ABI_ERROR(message)
    end if
  end if
-#endif
- if (.false.) write(std_out,*) ncerr
-
-!**************************************************************************
 
 end subroutine outvars
 !!***
