@@ -288,7 +288,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    if (fockcommon%usepaw==1) then
      ABI_MALLOC(vectin_dum,(2,npwj*nspinor))
      vectin_dum=zero
-     ABI_MALLOC(ffnl_kp_dum,(npwj,0,gs_ham%lmnmax,gs_ham%ntypat))
+     ABI_MALLOC(ffnl_kp_dum,(npwj,1,gs_ham%lmnmax,gs_ham%ntypat))
      call gs_ham%load_kprime(ffnl_kp=ffnl_kp_dum)
    end if
 
