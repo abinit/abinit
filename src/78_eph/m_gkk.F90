@@ -509,7 +509,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        if (i_am_master) then
          ! Write the netCDF file.
          ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gkq"), gkq_atm, &
-           start=[1, 1, 1, ipc, 1, spin], count=[2, mband, mband, 1, nkpt, 1])
+                              start=[1, 1, 1, ipc, 1, spin], count=[2, mband, mband, 1, nkpt, 1])
          NCF_CHECK(ncerr)
        end if
      end if
