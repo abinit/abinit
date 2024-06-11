@@ -612,12 +612,11 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  end if
  call timab(tim_transpose,2,tsec)
 
-!NEW VERSION
  call timab(tim_cprj,1,tsec)
  call xg_nonlop_getcprj(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%cprj_work%self)
  call timab(tim_cprj,2,tsec)
  call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
-   tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.,full_A=.true.)
+   tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
  call timab(tim_AX_nl,1,tsec)
  call xg_nonlop_getHmeSX(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%cprj_work%self,&

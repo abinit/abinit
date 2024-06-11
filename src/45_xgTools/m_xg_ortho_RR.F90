@@ -191,7 +191,9 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
     ! Compute X^TX
     call xgBlock_gemm('t','n',1.d0,X,X,0.d0,buffer%self,comm=spacecom)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),ncols_cprj,spacecom)
-    call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blockdim)
+    if (xg_nonlop%paw) then
+      call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,buffer%self,blockdim)
+    end if
 
     ! Compute Cholesky decomposition (Upper part)
     call xgBlock_potrf(buffer%self,'u',info)
@@ -562,7 +564,7 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
 !! NAME
 !! xg_RayleighRitz_cprj
 subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,info,prtvol,timer,gpu_option,&
-     tolerance,XW,W,cprjXW,cprjW,AW,P,cprjP,AP,WP,cprjWP,AWP,XWP,cprjXWP,solve_ax_bx,full_A)
+     tolerance,XW,W,cprjXW,cprjW,AW,P,cprjP,AP,WP,cprjWP,AWP,XWP,cprjXWP,solve_ax_bx,add_Anl)
 
     integer          , intent(in   ) :: timer,gpu_option
     integer          , intent(in   ) :: prtvol
@@ -590,7 +592,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     type(xgBlock_t), intent(inout),optional :: cprjXWP
     ! End LOBPCG only
     logical, intent(in),optional :: solve_ax_bx
-    logical, intent(in),optional :: full_A
+    logical, intent(in),optional :: add_Anl
     integer :: var
     integer :: spacedim
     integer :: blockdim
@@ -621,7 +623,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 #ifdef HAVE_LINALG_OPENBLAS_THREADS
     integer :: openblas_get_num_threads
 #endif
-    logical :: solve_ax_bx_,full_A_
+    logical :: solve_ax_bx_,add_Anl_
 
     call timab(timer , 1, tsec)
 
@@ -635,9 +637,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     if (present(solve_ax_bx)) then
       solve_ax_bx_ = solve_ax_bx
     end if
-    full_A_ = .false.
-    if (present(full_A)) then
-      full_A_ = full_A
+    add_Anl_ = .false.
+    if (present(add_Anl)) then
+      add_Anl_ = add_Anl
     end if
 
     call timab(timer , 1, tsec)
@@ -645,15 +647,20 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     var = VAR_X
     call xgBlock_check(X,AX)
     if (.not.solve_ax_bx_) then
-      eigenSolver = EIGENEV
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
-#elif HAVE_LINALG_OPENBLAS_THREADS
-      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
-#endif
+      eigenSolver = EIGENEVD
     else
       eigenSolver = EIGENVD
     end if
+!    if (.not.solve_ax_bx_) then
+!      eigenSolver = EIGENEV
+!#ifdef HAVE_LINALG_MKL_THREADS
+!      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
+!#elif HAVE_LINALG_OPENBLAS_THREADS
+!      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
+!#endif
+!    else
+!      eigenSolver = EIGENVD
+!    end if
     spacedim  = rows(X)
     blockdim  = cols(X)
     space_buf = space(X)
@@ -729,7 +736,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
 
     ! Add the nonlocal part (H)
     call xg_init(cprj_work,space(cprjX),rows(cprjX),cols(cprjX),spacecom)
-    if (.not.full_A_) then
+    if (add_Anl_) then
       call xg_nonlop_getXHX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blockdim_cprj)
     end if
 
@@ -748,7 +755,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xgBlock_gemm('t','n',1.0d0,XW,AW,0.d0,subsub,comm=spacecom)
 
       ! Add the nonlocal part (H)
-      if (.not.full_A_) then
+      if (add_Anl_) then
         call xg_nonlop_getXHX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blockdim_cprj)
       end if
 
@@ -766,7 +773,7 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xgBlock_gemm('t','n',1.0d0,XWP,AP,0.d0,subsub,comm=spacecom)
 
       ! Add the nonlocal part (H)
-      if (.not.full_A_) then
+      if (add_Anl_) then
         call xg_nonlop_getXHX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blockdim_cprj)
       end if
 
