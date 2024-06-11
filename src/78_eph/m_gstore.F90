@@ -3776,7 +3776,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! gstore_gmode was added in Abinit v10.1.2
    gstore%gmode = GSTORE_GMODE_PHONON
    ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
-   if (ncerr /= nf90_noerr) then
+   if (ncerr == nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
      call replace_ch0(gstore%gmode)
    end if
