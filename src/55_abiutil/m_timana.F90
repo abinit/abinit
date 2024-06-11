@@ -1244,7 +1244,39 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2077) = 'chebfi2_AX(loc)               '
  names(2078) = 'chebfi2_AX(nl)                '
 
- ! TIMER_SIZE is 2099. See m_time
+ ! xg_nonlop
+ names(2100)='xg_nonlop                       '
+ names(2101)='xg_nonlop%getcprj               '
+ names(2102)='xg_nonlop%apply_prj             '
+ names(2103)='xg_nonlop%apply_Aij             '
+ names(2104)='xg_nonlop%mult_cprj             '
+ names(2105)='xg_nonlop%make_k                '
+ names(2106)='xg_nonlop%make_Dij              '
+ names(2107)='xg_nonlop%make_Sij              '
+ names(2108)='xg_nonlop%make_ekb              '
+ names(2109)='xg_nonlop%apply_diag            '
+
+ names(2120)='xg_nonlop%getXSX                '
+ names(2121)='xg_nonlop%getXHX                '
+ names(2122)='xg_nonlop%getHmeSX              '
+ names(2123)='xg_nonlop%inv_AXeB              '
+
+ names(2130)='xg_nl%getcprj(gemm)             '
+ names(2131)='xg_nl%getcprj(copy)             '
+ names(2132)='xg_nl%getcprj(mpi)              '
+ names(2133)='xg_nl%getcprj(other)            '
+
+ names(2135)='xg_nl%apply_prj(gemm)           '
+ names(2136)='xg_nl%apply_prj(copy)           '
+ names(2137)='xg_nl%apply_prj(mpi)            '
+ names(2138)='xg_nl%apply_prj(other)          '
+
+ names(2140)='xg_nl%multcprj(gemm)            '
+ names(2141)='xg_nl%multcprj(copy)            '
+ names(2142)='xg_nl%multcprj(mpi)             '
+ names(2143)='xg_nl%multcprj(other)           '
+
+ ! TIMER_SIZE is 2199. See m_time
  names(TIMER_SIZE)='(other)                         ' ! This is a generic slot, to compute a complement
 
 !==================================================================================
@@ -1496,6 +1528,18 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(51)
 !      Estimate the complement of getchc
      tslots(:5)=(/1375,1370,-235,-1371,-1372/)
+   case(52)
+!      Total of xg_nonlop
+     tslots(:10)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109/)
+   case(53)
+!      Estimate the complement of xg_nonlop%getcprj
+     tslots(:5)=(/2133,2101,-2130,-2131,-2132/)
+   case(54)
+!      Estimate the complement of xg_nonlop%apply_prj
+     tslots(:5)=(/2138,2102,-2135,-2136,-2137/)
+   case(55)
+!      Estimate the complement of xg_nonlop%multcprj
+     tslots(:5)=(/2143,2104,-2140,-2141,-2142/)
 
    case default
      cycle
@@ -1891,8 +1935,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(81)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
-!       case(80)
-!         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(82)
          list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(83)
@@ -1900,6 +1942,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(84)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(85)
+         list(:14)=(/2100,2101,2102,2103,2104,2105,2106,2107,2108,2109,2120,2121,2122,2123/) ; msg='xg_nonlop'
+       case(86)
+         list(:5)=(/2101,2130,2131,2132,2133/) ; msg='xg_nonlop%getcprj'
+       case(87)
+         list(:5)=(/2102,2135,2136,2137,2138/) ; msg='xg_nonlop%apply_prj'
+       case(88)
+         list(:5)=(/2104,2140,2141,2142,2143/) ; msg='xg_nonlop%multcprj'
+       case(89)
          list(:36)=(/ (ii,ii=1670,1689,1),(ii,ii=2000,2015,1) /) ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings

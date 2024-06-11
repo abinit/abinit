@@ -463,7 +463,7 @@ module m_lobpcg2_cprj
 
       ! Do first RR on X to get the first eigen values
       call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
-        & lobpcg%prtvol,tim_RR_X,gpu_option)
+        & lobpcg%prtvol,tim_RR_X,gpu_option,add_Anl=.True.)
 
       compute_residu = .true.
 
@@ -480,8 +480,14 @@ module m_lobpcg2_cprj
         call timab(tim_copy,2,tsec)
         ! Add the non-local part: (A_nl - Lambda*B)X
         call timab(tim_ax_nl,1,tsec)
-        call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
-          lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
+        if (lobpcg%xg_nonlop%paw) then
+          call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
+        else
+          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self,lobpcg%W)
+          call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
+        end if
         call timab(tim_ax_nl,2,tsec)
 
         ! Apply preconditioner
@@ -568,7 +574,7 @@ module m_lobpcg2_cprj
            & lobpcg%prtvol,tim_RR_XW,gpu_option,tolerance=tolerance,&
            & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
            & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-           & AWP=lobpcg%AWP)
+           & AWP=lobpcg%AWP,add_Anl=.True.)
           if ( ierr /= 0 ) then
             ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
             exit
@@ -583,7 +589,7 @@ module m_lobpcg2_cprj
              & lobpcg%prtvol,tim_RR_XWP,gpu_option,tolerance=tolerance,&
              & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
              & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-             & AWP=lobpcg%AWP,XWP=lobpcg%XWP%self,cprjXWP=lobpcg%cprjXWP%self)
+             & AWP=lobpcg%AWP,XWP=lobpcg%XWP%self,cprjXWP=lobpcg%cprjXWP%self,add_Anl=.True.)
              if ( ierr /= 0 ) then
                ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
                exit
@@ -603,7 +609,7 @@ module m_lobpcg2_cprj
              & lobpcg%prtvol,tim_RR_XW,gpu_option,tolerance=tolerance,&
              & XW=lobpcg%XW,W=lobpcg%W,cprjXW=lobpcg%cprjXW,cprjW=lobpcg%cprjW,AW=lobpcg%AW,&
              & P=lobpcg%P,cprjP=lobpcg%cprjP,AP=lobpcg%AP,WP=lobpcg%WP,cprjWP=lobpcg%cprjWP,&
-             & AWP=lobpcg%AWP)
+             & AWP=lobpcg%AWP,add_Anl=.True.)
              if ( ierr /= 0 ) then
                ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
                exit
@@ -619,8 +625,14 @@ module m_lobpcg2_cprj
         call xgBlock_copy(lobpcg%AX,lobpcg%W)
         call timab(tim_copy,2,tsec)
         call timab(tim_ax_nl,1,tsec)
-        call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
-          lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
+        if (lobpcg%xg_nonlop%paw) then
+          call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
+        else
+          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self,lobpcg%W)
+          call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
+        end if
         call timab(tim_ax_nl,2,tsec)
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
@@ -734,7 +746,7 @@ module m_lobpcg2_cprj
         call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,X0,cprjX0,&
           & ierr,tim_Bortho_Xall,gpu_option,AX=lobpcg%AllAX0%self)
         call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,X0,cprjX0,lobpcg%AllAX0%self,eigen,blockdim_cprj,ierr,&
-          & lobpcg%prtvol,tim_RR_Xall,gpu_option)
+          & lobpcg%prtvol,tim_RR_Xall,gpu_option,add_Anl=.True.)
       end if
 
     end if
@@ -833,8 +845,10 @@ module m_lobpcg2_cprj
     ! buffer = X0^T*X
     call xgBlock_gemm('t','n',1.0d0,lobpcg%X0,var,0.d0,buffer%self,comm=lobpcg%spacecom)
 
-    ! Add the nonlocal part
-    call xg_nonlop_getXSX(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self,lobpcg%blockdim_cprj)
+    ! Add the nonlocal part if paw
+    if (lobpcg%xg_nonlop%paw) then
+      call xg_nonlop_getXSX(lobpcg%xg_nonlop,lobpcg%cprjX0,cprjvar,cprj_work,buffer%self,lobpcg%blockdim_cprj)
+    end if
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
