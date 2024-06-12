@@ -335,7 +335,6 @@ contains
   real(dp), allocatable, target :: s_dprojections(:,:,:), vnl_dprojections(:,:,:)
   real(dp), allocatable, target :: d2projections(:,:,:)
   integer :: ipw, iproj, iblock, nprojs_blk, i1, i2, i
-  integer :: nprojs_my_blk
   logical :: is_last
   real(dp), ABI_CONTIGUOUS pointer :: projs_(:,:,:),dprojs_(:,:,:),d2projs_(:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: projs_r_(:,:,:),projs_i_(:,:,:)
@@ -495,8 +494,6 @@ contains
   end if
 
   !$OMP TARGET ENTER DATA MAP(to:kpgin_,kpgout_)
-
-  nprojs_my_blk = gemm_nonlop_kpt(ikout)%nprojs_blk
 
   ! The number of projectors used for computation may vary among
   ! nonlop calls, from computing on all atoms to a select one for
