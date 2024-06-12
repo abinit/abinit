@@ -487,16 +487,16 @@ subroutine varpeq_collect(self)
    ! electronic vector & k-points
    do my_ik=1,gqk%my_nk
      ik_glob = gqk%my_kstart + my_ik - 1
-     self%a_spin(1, ik_glob, :, spin) = real(polstate%my_a(:, my_ik))  ! real part
-     self%a_spin(2, ik_glob, :, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
+     self%a_spin(1, :, ik_glob, spin) = real(polstate%my_a(:, my_ik))  ! real part
+     self%a_spin(2, :, ik_glob, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
      self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
    enddo
 
    ! phonon vector & q-points
    do my_iq=1,gqk%my_nq
      iq_glob = gqk%my_qstart + my_iq - 1
-     self%b_spin(1, iq_glob, :, spin) = real(polstate%my_b(:, my_iq))  ! real part
-     self%b_spin(2, iq_glob, :, spin) = aimag(polstate%my_b(:, my_iq)) ! imaginary part
+     self%b_spin(1, :, iq_glob, spin) = real(polstate%my_b(:, my_iq))  ! real part
+     self%b_spin(2, :, iq_glob, spin) = aimag(polstate%my_b(:, my_iq)) ! imaginary part
      self%qpts_spin(:, iq_glob, spin) = polstate%my_qpts(:, my_iq)
    enddo
 
