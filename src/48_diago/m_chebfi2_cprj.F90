@@ -707,9 +707,9 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
  call xg_init(Results1, space_res, chebfi%bandpp, 1)
  call xg_init(Results2, space_res, chebfi%bandpp, 1)
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self,comm_loc=xmpi_comm_null)
 
- call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xXColsRows,Results2%self)
+ call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xXColsRows,Results2%self,comm_loc=xmpi_comm_null)
  if (chebfi%xg_nonlop%paw) then
    call xg_init(Results_work, space_res, chebfi%bandpp, 1)
    call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)

@@ -4611,16 +4611,17 @@ contains
   !! NAME
   !! xgBlock_colwiseDotProduct
 
-  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt)
+  subroutine xgBlock_colwiseDotProduct(xgBlockA,xgBlockB,dot,max_val,max_elt,min_val,min_elt,comm_loc)
 
     type(xgBlock_t)  , intent(in   ) :: xgBlockA
     type(xgBlock_t)  , intent(in   ) :: xgBlockB
     type(xgBlock_t)  , intent(inout) :: dot
+    integer, intent(in), optional :: comm_loc
     double precision , intent(  out), optional :: max_val
     integer          , intent(  out), optional :: max_elt
     double precision , intent(  out), optional :: min_val
     integer          , intent(  out), optional :: min_elt
-    integer :: icol,fact
+    integer :: icol,fact,comm_
     double precision,external :: ddot
     double complex,external :: zdotc !conjugated dot product
 
@@ -4635,8 +4636,14 @@ contains
     call timab(tim_colw_dot,1,tsec)
 
     call xgBlock_check(xgBlockA,xgBlockB)
-    if (comm(xgBlockA)/=comm(xgBlockB)) then
-      ABI_ERROR('xgBlockA and xgBlockB should have the same comm')
+
+    comm_=comm(xgBlockA)
+    if (present(comm_loc)) then
+      comm_ = comm_loc
+    else
+      if (comm(xgBlockA)/=comm(xgBlockB)) then
+        ABI_ERROR('xgBlockA and xgBlockB should have the same comm')
+      end if
     end if
     call xgBlock_check_gpu_option(xgBlockA,xgBlockB)
     call xgBlock_check_gpu_option(xgBlockA,dot)
@@ -4893,7 +4900,7 @@ contains
 
     end if ! gpu_option
 
-    call xgBlock_mpi_sum(dot,comm=comm(xgBlockA))
+    call xgBlock_mpi_sum(dot,comm=comm_)
 
     call timab(tim_colw_dot,2,tsec)
 
