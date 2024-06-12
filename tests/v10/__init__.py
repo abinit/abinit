@@ -18,4 +18,7 @@ inp_files = [
     "t11.abi",  # same as v10[10], with nsppol=2.
     "t12.abi",  # same as v10[10], with nspinor=2.
     "t13.abi",  # same as v10[10], with istwfk>1.
+    "t14.abi",  # same as v10[10] but with NC pseudos
+#    "t15.abi",  # same as v10[10] but with NC pseudos, nspinor=2 ! not working yet
+    "t16.abi",  # same as v10[10] but with NC pseudos, istwfk>1
 ]
