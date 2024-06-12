@@ -318,6 +318,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
+   ! FIXME: correct a_spin/b_spin representation based on Matteo's advice
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("nstep2cv", "int", "nsppol"), &
      nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
@@ -326,8 +327,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("nb_spin", "int", "nsppol"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
-     nctkarr_t("a_spin", "dp", "max_nb, max_nq, two, nsppol"), &
-     nctkarr_t("b_spin", "dp", "natom3, max_nq, two, nsppol") &
+     nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nsppol"), &
+     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -486,16 +487,16 @@ subroutine varpeq_collect(self)
    ! electronic vector & k-points
    do my_ik=1,gqk%my_nk
      ik_glob = gqk%my_kstart + my_ik - 1
-     self%a_spin(:, ik_glob, 1, spin) = real(polstate%my_a(:, my_ik))  ! real part
-     self%a_spin(:, ik_glob, 2, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
+     self%a_spin(1, ik_glob, :, spin) = real(polstate%my_a(:, my_ik))  ! real part
+     self%a_spin(2, ik_glob, :, spin) = aimag(polstate%my_a(:, my_ik)) ! imaginary part
      self%kpts_spin(:, ik_glob, spin) = polstate%my_kpts(:, my_ik)
    enddo
 
    ! phonon vector & q-points
    do my_iq=1,gqk%my_nq
      iq_glob = gqk%my_qstart + my_iq - 1
-     self%b_spin(:, iq_glob, 1, spin) = real(polstate%my_b(:, my_iq))  ! real part
-     self%b_spin(:, iq_glob, 2, spin) = aimag(polstate%my_b(:, my_iq)) ! imaginary part
+     self%b_spin(1, iq_glob, :, spin) = real(polstate%my_b(:, my_iq))  ! real part
+     self%b_spin(2, iq_glob, :, spin) = aimag(polstate%my_b(:, my_iq)) ! imaginary part
      self%qpts_spin(:, iq_glob, spin) = polstate%my_qpts(:, my_iq)
    enddo
 
@@ -739,8 +740,8 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
  ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
 
- ABI_MALLOC(self%a_spin, (self%max_nb, self%max_nk, 2, gstore%nsppol))
- ABI_MALLOC(self%b_spin, (3*gstore%cryst%natom, self%max_nq, 2, gstore%nsppol))
+ ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
 
 end subroutine varpeq_init
 !!***
