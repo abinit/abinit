@@ -309,6 +309,9 @@ subroutine xg_Borthonormalize_cprj(xg_nonlop,blockdim,X,cprjX,info,timer,gpu_opt
     subdim   = blockdim
 
     if (present(XW)) then
+      if (solve_ax_bx_) then
+        ABI_ERROR('solve_ax_bx is not implemented in that case')
+      end if
       var = VAR_XW
       eigenSolver = EIGENVD
       call xgBlock_check(X,AW)
@@ -617,12 +620,6 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     type(xgBlock_t) :: Cwp
     type(xgScalapack_t) :: scalapack
     double precision :: tsec(2)
-#ifdef HAVE_LINALG_MKL_THREADS
-    integer :: mkl_get_max_threads
-#endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-    integer :: openblas_get_num_threads
-#endif
     logical :: solve_ax_bx_,add_Anl_
 
     call timab(timer , 1, tsec)
@@ -651,16 +648,6 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     else
       eigenSolver = EIGENVD
     end if
-!    if (.not.solve_ax_bx_) then
-!      eigenSolver = EIGENEV
-!#ifdef HAVE_LINALG_MKL_THREADS
-!      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
-!#elif HAVE_LINALG_OPENBLAS_THREADS
-!      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
-!#endif
-!    else
-!      eigenSolver = EIGENVD
-!    end if
     spacedim  = rows(X)
     blockdim  = cols(X)
     space_buf = space(X)
@@ -673,13 +660,11 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
     cprjdim  = xg_nonlop%cprjdim
 
     if (present(XW)) then
+      if (solve_ax_bx_) then
+        ABI_ERROR('solve_ax_bx is not implemented in that case')
+      end if
       var = VAR_XW
-      eigenSolver = EIGENVX
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
-#elif HAVE_LINALG_OPENBLAS_THREADS
-      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
-#endif
+      eigenSolver = EIGENVD
       !TODO Do checks on other optional arguments
       call xgBlock_check(X,AW)
       call xgBlock_check_gpu_option(X,AW)
@@ -745,7 +730,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xg_setBlock(subB,subsub,blockdim,blockdim)
       call xgBlock_gemm('t','n',1.0d0,X,X,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
-      call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blockdim_cprj)
+      if (xg_nonlop%paw) then
+        call xg_nonlop_getXSX(xg_nonlop,cprjX,cprjX,cprj_work%self,subsub,blockdim_cprj)
+      end if
     end if
 
     if ( var == VAR_XW .or. var == VAR_XWP ) then
@@ -763,7 +750,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xg_setBlock(subB,subsub,2*blockdim,blockdim,fcol=blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XW,W,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
-      call xg_nonlop_getXSX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blockdim_cprj)
+      if (xg_nonlop%paw) then
+        call xg_nonlop_getXSX(xg_nonlop,cprjXW,cprjW,cprj_work%self,subsub,blockdim_cprj)
+      end if
 
     end if
 
@@ -780,7 +769,9 @@ subroutine xg_RayleighRitz_cprj(xg_nonlop,X,cprjX,AX,eigenvalues,blockdim_cprj,i
       call xg_setBlock(subB,subsub,3*blockdim,blockdim,fcol=2*blockdim+1)
       call xgBlock_gemm('t','n',1.0d0,XWP,P,0.d0,subsub,comm=spacecom)
       ! Add the nonlocal part (S)
-      call xg_nonlop_getXSX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blockdim_cprj)
+      if (xg_nonlop%paw) then
+        call xg_nonlop_getXSX(xg_nonlop,cprjXWP,cprjP,cprj_work%self,subsub,blockdim_cprj)
+      end if
     end if
 
     call xg_free(cprj_work)

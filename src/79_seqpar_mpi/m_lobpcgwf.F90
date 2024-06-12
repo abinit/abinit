@@ -105,7 +105,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  integer :: space, blockdim
 
  integer, parameter :: tim_lobpcgwf2 = 1640
- integer, parameter :: tim_nonlop = 1657
+ integer, parameter :: tim_enl = 1657
  double precision :: tsec(2)
 
  ! Important things for NC
@@ -188,7 +188,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
  ABI_FREE(pcon)
 
  if ( .not. l_paw ) then
-   call timab(tim_nonlop,1,tsec)
+   call timab(tim_enl,1,tsec)
 #ifdef FC_CRAY
    ABI_MALLOC(l_gvnlxc,(1,1))
 #else
@@ -215,7 +215,7 @@ subroutine lobpcgwf2(cg,dtset,eig,occ,enl_out,gs_hamk,isppol,ikpt,inonsc,istep,k
      end do
    end if
    ABI_FREE(l_gvnlxc)
-   call timab(tim_nonlop,2,tsec)
+   call timab(tim_enl,2,tsec)
  end if
 
  ! Free lobpcg

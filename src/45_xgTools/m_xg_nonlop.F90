@@ -155,6 +155,7 @@ module m_xg_nonlop
   public :: xg_nonlop_mult_cprj
   public :: xg_nonlop_apply_prj
   public :: xg_nonlop_colwiseXAX
+  public :: xg_nonlop_colwiseXDX
   public :: xg_nonlop_getXAX
   public :: xg_nonlop_getXDX
   public :: xg_nonlop_getAX
@@ -162,6 +163,7 @@ module m_xg_nonlop
   ! Specific operations (using Sij/Dij or ekb arrays)
   public :: xg_nonlop_getXHX
   public :: xg_nonlop_getHX
+  public :: xg_nonlop_colwiseXHX
   public :: xg_nonlop_getXSX   ! paw only
   public :: xg_nonlop_getSX    ! paw only
   public :: xg_nonlop_getSm1X  ! paw only
@@ -1668,6 +1670,65 @@ subroutine xg_nonlop_colwiseXAX(xg_nonlop,Aij,cprj,cprj_work,res)
    call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res)
 
 end subroutine xg_nonlop_colwiseXAX
+!!***
+
+subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
+
+   type(xg_nonlop_t), intent(in) :: xg_nonlop
+   type(xgBlock_t), intent(in) :: cprj,diag(:)
+   type(xgBlock_t), intent(inout) :: cprj_work,res
+
+   integer :: ncols,space_diag,space_res
+   type(xgBlock_t) :: cprj_spinor,cprj_work_spinor
+   type(xg_t) :: res_complex
+
+   call xgBlock_check(cprj,cprj_work)
+   ncols = cols(cprj)
+   if (ncols/=xg_nonlop%nspinor*rows(res)) then
+     ABI_ERROR('Wrong cols for cprj or res.')
+   end if
+   space_diag = space(diag(1))
+   space_res = space(res)
+   if (space_diag==SPACE_C) then
+     if (space_res/=SPACE_C) then
+       ABI_ERROR('space(res) should be SPACE_C.')
+     end if
+   else if (space_diag/=SPACE_R) then
+     ABI_ERROR('space(diag) should be SPACE_C or SPACE_R.')
+   end if
+
+   call xgBlock_zero(cprj_work)
+   call xg_nonlop_apply_diag(xg_nonlop,diag,cprj,cprj_work)
+
+   call xgBlock_reshape_spinor(cprj     ,cprj_spinor     ,xg_nonlop%nspinor,COLS2ROWS)
+   call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,xg_nonlop%nspinor,COLS2ROWS)
+
+   ! If space_diag==SPACE_R, the result is actually real and can be stored in a xgBlock with SPACE_R
+   if ( space_diag==SPACE_R .and. space_res==SPACE_R .and. space(cprj)==SPACE_C) then
+     call xg_init(res_complex,SPACE_C,rows(res),cols(res))
+     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res_complex%self)
+     call xgBlock_c2r(res_complex%self,res)
+     call xg_free(res_complex)
+   else
+     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res)
+   end if
+
+end subroutine xg_nonlop_colwiseXDX
+!!***
+
+subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
+
+   type(xg_nonlop_t), intent(in) :: xg_nonlop
+   type(xgBlock_t), intent(in) :: cprj
+   type(xgBlock_t), intent(inout) :: cprj_work,res
+
+   if (xg_nonlop%paw) then
+     call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res)
+   else
+     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res)
+   end if
+
+end subroutine xg_nonlop_colwiseXHX
 !!***
 
 subroutine xg_nonlop_getXAX(xg_nonlop,Aij,cprj_left,cprj_right,cprj_work,res,blocksize)

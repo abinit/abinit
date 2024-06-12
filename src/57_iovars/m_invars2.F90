@@ -2471,6 +2471,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
+ if(tread==1) dtset%cprj_in_memory=intarr(1)
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
+ if(tread==1) dtset%cprj_update_lvl=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useylm',tread,'INT')
  if(tread==1) dtset%useylm=intarr(1)
 
@@ -2562,12 +2568,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%nloalg(2)=1 ; if(intarr(1)<0)dtset%nloalg(2)=-1
    dtset%nloalg(3)=abs(intarr(1))-1
  end if
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_in_memory',tread,'INT')
- if(tread==1) dtset%cprj_in_memory=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'cprj_update_lvl',tread,'INT')
- if(tread==1) dtset%cprj_update_lvl=intarr(1)
 
  ! LOOP variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nline',tread,'INT')

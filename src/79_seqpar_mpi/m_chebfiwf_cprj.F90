@@ -109,7 +109,7 @@ module m_chebfiwf_cprj
 !!
 !! SOURCE
 
-subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
+subroutine chebfiwf2_cprj(cg,dtset,eig,enl_out,gs_hamk,kinpw,mpi_enreg,&
 &                   nband,npw,nspinor,prtvol,resid,xg_nonlop)
 
  implicit none
@@ -119,7 +119,6 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
  type(gs_hamiltonian_type),target,intent(inout) :: gs_hamk
  type(dataset_type)              ,intent(in   ) :: dtset
  type(mpi_type)           ,target,intent(in)    :: mpi_enreg
- type(pawcprj_type)       ,target,intent(inout) :: cprj_cwavef_bands(:,:)
  real(dp)                 ,target,intent(inout) :: cg(2,nspinor*nband*npw)
  real(dp)                        ,intent(in   ) :: kinpw(npw)
  real(dp)                 ,target,intent(  out) :: resid(nband)
@@ -130,9 +129,10 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 !Local variables-------------------------------
 
  type(xgBlock_t) :: xgx0
- type(xgBlock_t) :: cprj_xgx0
+ type(xg_t) :: cprj_xgx0
  type(xgBlock_t) :: xgeigen
  type(xgBlock_t) :: xgresidu
+ type(xgBlock_t) :: xgenl
  type(xgBlock_t) :: xg_precond,xg_kin
  type(chebfi_t) :: chebfi
 
@@ -146,21 +146,14 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
  ! Important things for NC
  real(dp), allocatable :: pcon(:),kin(:)
- real(dp), allocatable :: cprj_contiguous(:,:)
 
 ! *********************************************************************
 
  call timab(tim_chebfiwf2,1,tsec)
 
- ! Set module variables
- !LTEST
- if (cprj_cwavef_bands(1,1)%ncpgr==3) then
-   ABI_ERROR('chebfi with cprj not implemented with cprj%ncpgr==3')
- end if
- !LTEST
-
  paw = gs_hamk%usepaw==1
 
+ ! Set module variables
  l_prtvol = prtvol
  l_mpi_enreg => mpi_enreg
  l_gs_hamk => gs_hamk
@@ -213,8 +206,11 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
  call xgBlock_map_1d(xgresidu,resid,SPACE_R,nband)
 
- call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
-   & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
+ call xgBlock_map_1d(xgenl,enl_out,SPACE_R,nband)
+
+ !call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
+ !  & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_ALLOC)
+ call xg_init(cprj_xgx0,space_cprj,xg_nonlop%cprjdim,nband_cprj*nspinor,comm=l_mpi_enreg%comm_band)
 
  call chebfi_init(chebfi,nband,npw*nspinor,cprjdim,dtset%tolwfr_diago,dtset%ecut, &
 &                 mpi_enreg%bandpp, &
@@ -224,14 +220,15 @@ subroutine chebfiwf2_cprj(cg,cprj_cwavef_bands,dtset,eig,enl_out,gs_hamk,kinpw,m
 
 
  ! Run chebfi
- call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,nspinor)
+ call chebfi_run_cprj(chebfi,xgx0,cprj_xgx0%self,xg_getghc,xg_kin,xg_precond,xgeigen,xgresidu,xgenl,nspinor)
 
  ! Free preconditionning since not needed anymore
  ABI_FREE(pcon)
  ABI_FREE(kin)
 
- call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
-   & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_FREE)
+! call xg_cprj_copy(cprj_cwavef_bands,cprj_contiguous,space_cprj,nband_cprj,cprj_xgx0,&
+!   & xg_nonlop,l_mpi_enreg%comm_band,CPRJ_FREE)
+ call xg_free(cprj_xgx0)
 
  ! Free chebfi
  call chebfi_free(chebfi)

@@ -51,6 +51,8 @@ module m_lobpcg2_cprj
   integer, parameter :: tim_copy     = 2042
   integer, parameter :: tim_nbdbuf   = 2045
 
+  integer, parameter :: tim_enl = 2051
+
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
     integer :: spacedim                      ! Space dimension for one vector (WFs)
@@ -303,7 +305,7 @@ module m_lobpcg2_cprj
   end function lobpcg_memInfo
 
 
-  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, occ, residu, prtvol, nspinor, &
+  subroutine lobpcg_run_cprj(lobpcg, X0, cprjX0, getAX, kin, pcond, eigen, occ, residu, enl, prtvol, nspinor, &
       isppol, ikpt, inonsc, istep, nbdbuf)
 
     type(lobpcg_t) , intent(inout) :: lobpcg
@@ -312,6 +314,7 @@ module m_lobpcg2_cprj
     type(xgBlock_t), intent(inout) :: eigen   ! Full initial eigen values
     type(xgBlock_t), intent(inout) :: occ
     type(xgBlock_t), intent(inout) :: residu
+    type(xgBlock_t), intent(inout) :: enl
     type(xgBlock_t), intent(in   ) :: kin
     type(xgBlock_t), intent(in   ) :: pcond
     integer        , intent(in   ) :: prtvol
@@ -346,8 +349,6 @@ module m_lobpcg2_cprj
         type(xgBlock_t), intent(inout) :: AX
       end subroutine getAX
     end interface
-
-!   call timab(tim_run,1,tsec)
 
     lobpcg%prtvol = prtvol
 
@@ -416,6 +417,10 @@ module m_lobpcg2_cprj
       call xgBlock_setBlock(lobpcg%AW, lobpcg%AWColsRows, spacedim, blockdim)
     end if
 
+    !LTEST
+    !write(901,'(a)') 'In LOBPCG2:'
+    !write(901,'(a,f24.14)') 'X   :',xgBlock_getId(X0)
+    !LTEST
     !! Start big loop over blocks
     do iblock = 1, nblock
       nrestart = 0
@@ -428,11 +433,20 @@ module m_lobpcg2_cprj
       call xg_nonlop_getcprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%cprj_work%self)
       call timab(tim_cprj,2,tsec)
 
+      !LTEST
+      !write(901,'(a,i2)') 'iblock=',iblock
+      !write(901,'(a,f24.14)') '0X   :',xgBlock_getId(lobpcg%X)
+      !flush(901)
+      !LTEST
       if ( iblock > 1 ) then
         call lobpcg_setPreviousX0(lobpcg,iblock)
         ! Orthogonalize current iblock X block With Respect To previous Blocks in B-basis
         call lobpcg_orthoXwrtBlocks(lobpcg,lobpcg%X,lobpcg%cprjX,iblock,lobpcg%cprj_work%self)
       end if
+      !LTEST
+      !write(901,'(a,f24.14)') '1X   :',xgBlock_getId(lobpcg%X)
+      !flush(901)
+      !LTEST
 
       if (lobpcg%paral_kgb == 1) then
         call timab(tim_transpose,1,tsec)
@@ -460,10 +474,18 @@ module m_lobpcg2_cprj
       ! B-orthonormalize X, BX and AX
       call xg_Borthonormalize_cprj(lobpcg%xg_nonlop,blockdim_cprj,lobpcg%X,lobpcg%cprjX,ierr,tim_Bortho_X,&
         gpu_option,AX=lobpcg%AX)
+      !LTEST
+      !write(901,'(a,f24.14)') '2X   :',xgBlock_getId(lobpcg%X)
+      !flush(901)
+      !LTEST
 
       ! Do first RR on X to get the first eigen values
       call xg_RayleighRitz_cprj(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%AX,eigenvaluesN,blockdim_cprj,ierr,&
         & lobpcg%prtvol,tim_RR_X,gpu_option,add_Anl=.True.)
+      !LTEST
+      !write(901,'(a,f24.14)') '3X   :',xgBlock_getId(lobpcg%X)
+      !flush(901)
+      !LTEST
 
       compute_residu = .true.
 
@@ -484,8 +506,8 @@ module m_lobpcg2_cprj
           call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
             lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
         else
-          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,&
-            lobpcg%cprj_work%self,lobpcg%cprj_work2%self,lobpcg%W)
+          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%W,lobpcg%cprjX,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
           call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
         end if
         call timab(tim_ax_nl,2,tsec)
@@ -494,6 +516,11 @@ module m_lobpcg2_cprj
         call timab(tim_pcond,1,tsec)
         call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
         call timab(tim_pcond,2,tsec)
+        !LTEST
+        !write(901,'(a,i2)') 'iline=',iline
+        !write(901,'(a,f24.14)') '0W   :',xgBlock_getId(lobpcg%W)
+        !flush(901)
+        !LTEST
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
@@ -629,8 +656,8 @@ module m_lobpcg2_cprj
           call xg_nonlop_getHmeSX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,lobpcg%W,eigenvaluesN,&
             lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
         else
-          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%X,lobpcg%cprjX,&
-            lobpcg%cprj_work%self,lobpcg%cprj_work2%self,lobpcg%W)
+          call xg_nonlop_getHX(lobpcg%xg_nonlop,lobpcg%W,lobpcg%cprjX,&
+            lobpcg%cprj_work%self,lobpcg%cprj_work2%self)
           call xgBlock_yxmax(lobpcg%W,eigenvaluesN,lobpcg%X)
         end if
         call timab(tim_ax_nl,2,tsec)
@@ -758,7 +785,13 @@ module m_lobpcg2_cprj
       call xgTransposer_free(lobpcg%xgTransposerAW)
     end if
 
-!    call timab(tim_run,2,tsec)
+    if (.not.lobpcg%xg_nonlop%paw) then
+      call timab(tim_enl,1,tsec)
+      call xg_init(cprj_work_all,space(cprjX0),rows(cprjX0),cols(cprjX0),comm(cprjX0))
+      call xg_nonlop_colwiseXHX(lobpcg%xg_nonlop,cprjX0,cprj_work_all%self,enl)
+      call xg_free(cprj_work_all)
+      call timab(tim_enl,2,tsec)
+    end if
 
   end subroutine lobpcg_run_cprj
 

@@ -435,6 +435,10 @@ module m_lobpcg2
       call xgBlock_setBlock(lobpcg%BW, lobpcg%BWColsRows, spacedim, blockdim)
     end if
 
+    !LTEST
+    write(900,'(a)') 'In LOBPCG2:'
+    write(900,'(a,f24.14)') 'X   :',xgBlock_getId(X0)
+    !LTEST
     !! Start big loop over blocks
     do iblock = 1, nblock
       ABI_NVTX_START_RANGE(NVTX_LOBPCG2_BLOCK)
@@ -444,12 +448,21 @@ module m_lobpcg2
       call xgBlock_setBlock(residu,residuBlock,blockdim,1,fcol=iblock)
       call xgBlock_setBlock(occ,   occBlock,   blockdim,1,fcol=iblock)
 
+      !LTEST
+      write(900,'(a,i2)') 'iblock=',iblock
+      write(900,'(a,f24.14)') '0X   :',xgBlock_getId(lobpcg%X)
+      flush(900)
+      !LTEST
       if ( iblock > 1 ) then
         call lobpcg_setPreviousX0_BX0(lobpcg,iblock)
 
         ! Orthogonalize current iblock X block With Respect To previous Blocks in B-basis
         call lobpcg_orthoXwrtBlocks(lobpcg,lobpcg%X,iblock)
       end if
+      !LTEST
+      write(900,'(a,f24.14)') '1X   :',xgBlock_getId(lobpcg%X)
+      flush(900)
+      !LTEST
 
       if (lobpcg%paral_kgb == 1) then
         call timab(tim_transpose,1,tsec)
@@ -474,9 +487,17 @@ module m_lobpcg2
 
       ! B-orthonormalize X, BX and AX
       call xg_Borthonormalize(lobpcg%X,lobpcg%BX,ierr,tim_Bortho_X,lobpcg%gpu_option,AX=lobpcg%AX)
+      !LTEST
+      write(900,'(a,f24.14)') '2X   :',xgBlock_getId(lobpcg%X)
+      flush(900)
+      !LTEST
 
       ! Do first RR on X to get the first eigen values
       call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvaluesN,ierr,lobpcg%prtvol,tim_RR_X,lobpcg%gpu_option)
+      !LTEST
+      write(900,'(a,f24.14)') '3X   :',xgBlock_getId(lobpcg%X)
+      flush(900)
+      !LTEST
 
       compute_residu = .true.
 
@@ -497,6 +518,11 @@ module m_lobpcg2
         call timab(tim_pcond,1,tsec)
         call xgBlock_apply_diag(lobpcg%W,pcond,nspinor)
         call timab(tim_pcond,2,tsec)
+        !LTEST
+        write(900,'(a,i2)') 'iline=',iline
+        write(900,'(a,f24.14)') '0W   :',xgBlock_getId(lobpcg%W)
+        flush(900)
+        !LTEST
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)

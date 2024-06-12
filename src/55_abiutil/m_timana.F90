@@ -1008,7 +1008,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1654) = 'lobpcg_getAX_BX                '
  names(1655) = 'lobpcg_orthoWrtPrev            '
  names(1656) = 'lobpcg_nbdbuf                  '
- names(1657) = 'lobpcg_nonlop                  '
+ names(1657) = 'lobpcg_enl                     '
  names(1658) = 'lobpcg_maxResidu               '
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
@@ -1120,7 +1120,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1750) = 'chebfiwf2                     '
  names(1751) = 'chebfi2_init                  '
  names(1752) = 'chebfi2_free                  '
- names(1753) = 'chebfi2_nonlop                '
+ names(1753) = 'chebfi2_enl                   '
  names(1754) = 'chebfi2_getAX_BX              '
  names(1755) = 'chebfi2_invovl                '
  names(1756) = 'chebfi2_residu                '
@@ -1223,6 +1223,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2048) = 'lobpcg_AX(kin)                 '
  names(2049) = 'lobpcg_AX(loc)                 '
  names(2050) = 'lobpcg_AX(nl)                  '
+ names(2051) = 'lobpcg_enl                     '
 
  ! chebfi2_cprj
  names(2060) = 'chebfiwf2_cprj                '
@@ -1243,6 +1244,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(2076) = 'chebfi2_AX(kin)               '
  names(2077) = 'chebfi2_AX(loc)               '
  names(2078) = 'chebfi2_AX(nl)                '
+ names(2079) = 'chebfi2_enl                   '
 
  ! xg_nonlop
  names(2100)='xg_nonlop                       '
@@ -1924,11 +1926,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(75)
          list(:20)=(/ (ii,ii=1640,1649,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:21)=(/ (ii,ii=2030,2050,1)/)     ; msg='lobpcgwf2_cprj core engine '
+         list(:22)=(/ (ii,ii=2030,2051,1)/)     ; msg='lobpcgwf2_cprj core engine '
        case(77)
          list(:16)=(/ (ii,ii=1750,1765,1) /) ; msg='chebfiwf2 core engine '
        case(78)
-         list(:19)=(/ (ii,ii=2060,2078,1) /) ; msg='chebfiwf2_cprj core engine '
+         list(:20)=(/ (ii,ii=2060,2079,1) /) ; msg='chebfiwf2_cprj core engine '
        case(79)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(80)

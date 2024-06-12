@@ -527,6 +527,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        dt%cprj_in_memory=0
        ABI_WARNING('cprj_in_memory/=0 is implemented only for ground state (optdriver=0). cprj_in_memory is set to 0.')
      else
+       if (dt%useylm /= 1) then
+         ABI_ERROR_NOSTOP('cprj_in_memory/=0 requires the input variable "useylm" to be 1',ierr)
+       end if
        ABI_CHECK(dt%gpu_option==0,"cprj_in_memory/=0 is not implemented for GPUs. Change cprj_in_memory or gpu_option.")
        write(msg,'(a)') "cprj_in_memory/=0 is not compatible with use_gemm_nonlop/=0. Change cprj_in_memory or use_gemm_nonlop."
        ABI_CHECK(dt%use_gemm_nonlop==0,msg)
