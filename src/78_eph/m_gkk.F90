@@ -324,7 +324,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  else if (dtset%eph_task == -2) then
    ! Write GKQ file with all perturbations. gkq are given in the atom representation.
-   ! TODO: mband_kq == mband
+   ! TODO: Assuming mband_kq == mband
    ABI_MALLOC(gkq_atm, (2, mband_kq, mband, nkpt))
    if (i_am_master) then
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
@@ -377,12 +377,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(eigens_kq)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfrq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart'), displ_cart))
-     ! Add phonon displacement for qvers
-     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, nanaqdir="reduced")
-     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
    end if ! master
+
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
@@ -391,7 +389,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  do ipc=1,natom3
    idir = mod(ipc-1, 3) + 1
    ipert = (ipc - idir) / 3 + 1
-   write(msg, '(a,2i4)') " Treating ipert, idir = ", ipert, idir
+   write(msg, '(a,2(i0,1x))') " Treating ipert, idir = ", ipert, idir
    call wrtout(std_out, msg, do_flush=.True.)
    if (dtset%eph_task == 2) gkk = zero
 
@@ -485,16 +483,14 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
                           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            band = 2*ib2-1 + (spin-1) * 2 * mband
-
            if (dtset%eph_task == 2) then
              gkk(band,ik,1,1,ib1) = dotr
              gkk(band+1,ik,1,1,ib1) = doti
            else
              gkq_atm(:, ib1, ib2, ik) = [dotr, doti]
            end if
-
-         end do
-       end do
+         end do ! ib1
+       end do ! ib2
 
      end do ! ikpt
 
