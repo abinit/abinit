@@ -66,6 +66,7 @@ module m_chebfi2_cprj
  integer, parameter :: tim_ax_k         = 2076
  integer, parameter :: tim_ax_v         = 2077
  integer, parameter :: tim_ax_nl        = 2078
+ integer, parameter :: tim_enl          = 2079
 
 !Public 'chebfi' datatype
 !-------------------------------------------------
@@ -430,7 +431,7 @@ end function chebfi_memInfo
 !!
 !! SOURCE
 
-subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor)
+subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,enl,nspinor)
 
  implicit none
 
@@ -441,6 +442,7 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  type(xgBlock_t), intent(inout) :: cprjX0
  type(xgBlock_t), intent(inout) :: eigen
  type(xgBlock_t), intent(inout) :: residu
+ type(xgBlock_t), intent(inout) :: enl
  type(xgBlock_t), intent(in   ) :: kin
  type(xgBlock_t), intent(in   ) :: pcond
  interface
@@ -618,12 +620,18 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
  call xg_RayleighRitz_cprj(chebfi%xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%blockdim_cprj,ierr,0,&
    tim_RR,ABI_GPU_DISABLED,solve_ax_bx=.true.)
 
- call timab(tim_AX_nl,1,tsec)
- call xg_nonlop_getHmeSX(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%cprj_work%self,&
+ if (chebfi%paw) then
+   call timab(tim_AX_nl,1,tsec)
+   call xg_nonlop_getHmeSX(xg_nonlop,chebfi%X,chebfi%cprjX,chebfi%AX%self,chebfi%eigenvalues,chebfi%cprj_work%self,&
    & chebfi%cprj_work2%self,no_H=.True.)
- call timab(tim_AX_nl,2,tsec)
+   call timab(tim_AX_nl,2,tsec)
+ end if
 
  call timab(tim_residu, 1, tsec)
+
+ if (.not.chebfi%paw) then
+   call xgBlock_yxmax(chebfi%AX%self,chebfi%eigenvalues,chebfi%X)
+ end if
 
  call xgBlock_apply_diag(chebfi%AX%self,pcond,nspinor)
 
@@ -636,6 +644,12 @@ subroutine chebfi_run_cprj(chebfi,X0,cprjX0,getAX,kin,pcond,eigen,residu,nspinor
 
  call xgTransposer_free(chebfi%xgTransposerX)
  call xgTransposer_free(chebfi%xgTransposerAX)
+
+ if (.not.chebfi%paw) then
+   call timab(tim_enl,1,tsec)
+   call xg_nonlop_colwiseXHX(chebfi%xg_nonlop,chebfi%cprjX,chebfi%cprj_work%self,enl)
+   call timab(tim_enl,2,tsec)
+ end if
 
 end subroutine chebfi_run_cprj
 !!***
@@ -692,20 +706,21 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
  end if
  call xg_init(Results1, space_res, chebfi%bandpp, 1)
  call xg_init(Results2, space_res, chebfi%bandpp, 1)
- call xg_init(Results_work, space_res, chebfi%bandpp, 1)
 
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xAXColsRows,Results1%self)
 
-!PAW
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows,chebfi%xXColsRows,Results2%self)
- call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)
- call xgBlock_add(Results2%self,Results_work%self)
+ if (chebfi%xg_nonlop%paw) then
+   call xg_init(Results_work, space_res, chebfi%bandpp, 1)
+   call xg_nonlop_colwiseXAX(chebfi%xg_nonlop,chebfi%xg_nonlop%Sij,chebfi%cprjX,chebfi%cprj_work%self,Results_work%self)
+   call xgBlock_add(Results2%self,Results_work%self)
+   call xg_free(Results_work)
+ end if
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, maxeig, maxeig_pos, mineig, mineig_pos)
 
  call xg_free(Results1)
  call xg_free(Results2)
- call xg_free(Results_work)
 
 end subroutine chebfi_rayleighRitzQuotients
 !!***

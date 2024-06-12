@@ -258,6 +258,7 @@ module m_xg
   public :: xgBlock_scale
   public :: xgBlock_transpose
   public :: xgBlock_r2c
+  public :: xgBlock_c2r
 
   public :: xgBlock_apply_diag
   public :: xgBlock_add_diag
@@ -3487,10 +3488,10 @@ contains
     end if
 
     if (space(diag)==SPACE_R) then
-      call xgBlock_reverseMap_1dR(diag,array)
+      call xgBlock_reverseMap_1dR(diag,array,array_dim=diag%rows)
       call xgBlock_colwiseMulR(Y_spinor,array)
     else if (space(diag)==SPACE_C) then
-      call xgBlock_reverseMap_1dC(diag,arrayc)
+      call xgBlock_reverseMap_1dC(diag,arrayc,array_dim=diag%rows)
       call xgBlock_colwiseMulC(Y_spinor,arrayc)
     end if
 
@@ -5405,6 +5406,51 @@ contains
     end if
 
   end subroutine xgBlock_r2c
+  !!***
+
+  !!****f* m_xg/xgBlock_c2r
+  !!
+  !! NAME
+  !! xgBlock_c2r
+
+  subroutine xgBlock_c2r(xgBlockC,xgBlockR)
+
+    type(xgBlock_t) , intent(in) :: xgBlockC
+    type(xgBlock_t) , intent(inout) :: xgBlockR
+    integer :: nrows,ncols,col
+
+    if (xgBlockR%gpu_option/=ABI_GPU_DISABLED) then
+      ABI_ERROR('Not implemented for GPU')
+    end if
+    call xgBlock_check_gpu_option(xgBlockR,xgBlockC)
+
+    if (space(xgBlockR)/=SPACE_R) then
+      ABI_ERROR('space(xgBlockR)/=SPACE_R')
+    end if
+    if (space(xgBlockC)/=SPACE_C .and. space(xgBLockC)/=SPACE_CR) then
+      ABI_ERROR('space(xgBlockC)/=SPACE_C')
+    end if
+
+    nrows = xgBlockR%rows
+    ncols = xgBlockR%cols
+    if (nrows/=xgBlockC%rows) then
+      ABI_ERROR('nrowsR/=nrowsC')
+    end if
+    if (ncols/=xgBlockC%cols) then
+      ABI_ERROR('ncolsR/=ncolsC')
+    end if
+
+    if (space(xgBlockC)==SPACE_C) then
+      do col = 1,ncols
+        xgBlockR%vecR(1:nrows,col) = dble(xgBlockC%vecC(1:nrows,col))
+      end do
+    else ! space(C)==SPACE_CR
+      do col = 1,ncols
+        xgBlockR%vecR(1:nrows,col) = xgBlockC%vecR(1:2*nrows-1:2,col)
+      end do
+    end if
+
+  end subroutine xgBlock_c2r
   !!***
 
   !!****f* m_xg/xgBlock_getSize

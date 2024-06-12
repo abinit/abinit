@@ -1095,9 +1095,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  usecprj=0; mcprj=0;mband_cprj=0
  compute_cprj=.false.
- ! PAW keeping cprj in memory : some cases are excluded for now...
- if (dtset%cprj_in_memory/=0) then
-   if (dtset%wfoptalg==10) compute_cprj=.true. ! We don't compute cprj here for LOBPCG or Chebfi
+ if (dtset%cprj_in_memory==2) then
+   compute_cprj=.true.
    usecprj=1
  else
    if (dtset%usepaw==1) then

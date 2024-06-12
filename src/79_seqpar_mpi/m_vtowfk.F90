@@ -368,8 +368,8 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
    call wrtout(std_out,msg,'PERS')
  end if
 
- if (dtset%cprj_in_memory/=0) then
-   if (dtset%cprj_in_memory==2.and.ikpt==1) then
+ if (dtset%cprj_in_memory==2) then
+   if (ikpt==1) then
      write(msg,'(a,i3)') ' In vtowfk : use of cprj in memory with cprj_update_lvl=',dtset%cprj_update_lvl
      call wrtout(std_out,msg,'COLL')
    end if
@@ -481,7 +481,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 
              ABI_NVTX_START_RANGE(NVTX_LOBPCG2)
              if (dtset%cprj_in_memory==1) then
-               call lobpcgwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,&
+               call lobpcgwf2_cprj(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,&
                  kinpw,mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,nbdbuf,xg_nonlop)
              else
                call lobpcgwf2(cg(:,icg+1:),dtset,eig_k,occ_k,enlx_k,gs_hamk,isppol,ikpt,inonsc,istep,kinpw,mpi_enreg,&
@@ -503,7 +503,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
 &           mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k)
            ABI_NVTX_END_RANGE()
          else if (dtset%cprj_in_memory==1) then
-           call chebfiwf2_cprj(cg(:,icg+1:),cprj_cwavef_bands,dtset,eig_k,enlx_k,gs_hamk,kinpw,&
+           call chebfiwf2_cprj(cg(:,icg+1:),dtset,eig_k,enlx_k,gs_hamk,kinpw,&
              mpi_enreg,nband_k,npw_k,my_nspinor,prtvol,resid_k,xg_nonlop)
          else
            ABI_NVTX_START_RANGE(NVTX_CHEBFI2)
