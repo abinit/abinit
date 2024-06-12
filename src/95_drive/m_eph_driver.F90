@@ -71,7 +71,7 @@ module m_eph_driver
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
- use m_varpeq
+ use m_varpeq,          only : varpeq
 
  implicit none
 
@@ -169,7 +169,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(phdos_t) :: phdos
  type(gstore_t) :: gstore
  type(frohlich_t) :: frohlich
- type(varpeq_t) :: varpeq
 !arrays
  integer :: ngfftc(18), ngfftf(18), count_wminmax(2), units(2)
  real(dp),parameter :: k0(3)=zero
@@ -803,10 +802,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      !call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
-   call varpeq%init(gstore, dtset)
-   call varpeq%solve()
-   call varpeq%free()
-
+   call varpeq(gstore, dtset, dtfil)
    call gstore%free()
 
  case (14)

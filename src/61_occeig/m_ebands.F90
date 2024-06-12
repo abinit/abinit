@@ -288,13 +288,13 @@ MODULE m_ebands
     ! Number of electrons taken from ebands.
 
    integer,allocatable :: ierr(:)
-    ! ierr(nsppol
+    ! ierr(nsppol)
     !   0 if the gap has been computed.
     !   1 if the system (or spin-channel) is metallic.
     !   2 if gaps were not computed (because there are only valence bands).
 
    real(dp),allocatable :: fo_values(:,:)
-     ! fo_values(2,nsppol)]
+     ! fo_values(2,nsppol)
      ! Fundamental and direct gaps (in Hartree) for each spin.
 
    real(dp),allocatable :: vb_max(:), cb_min(:)
