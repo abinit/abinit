@@ -324,7 +324,7 @@ contains
     call xgBlock_reverseMap_1D(xg_nonlop%ekb(itypat),ekb_)
     do ilmn=1,nlmn
       iln=xg_nonlop%indlmn(5,ilmn,itypat)
-      ekb_(ilmn) = ekb(iln,itypat) 
+      ekb_(ilmn) = ekb(iln,itypat)
     end do
 
   end do
@@ -1667,7 +1667,7 @@ subroutine xg_nonlop_colwiseXAX(xg_nonlop,Aij,cprj,cprj_work,res)
 
    call xgBlock_reshape_spinor(cprj     ,cprj_spinor     ,xg_nonlop%nspinor,COLS2ROWS)
    call xgBlock_reshape_spinor(cprj_work,cprj_work_spinor,xg_nonlop%nspinor,COLS2ROWS)
-   call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res)
+   call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res,comm_loc=xmpi_comm_null)
 
 end subroutine xg_nonlop_colwiseXAX
 !!***
@@ -1706,11 +1706,11 @@ subroutine xg_nonlop_colwiseXDX(xg_nonlop,diag,cprj,cprj_work,res)
    ! If space_diag==SPACE_R, the result is actually real and can be stored in a xgBlock with SPACE_R
    if ( space_diag==SPACE_R .and. space_res==SPACE_R .and. space(cprj)==SPACE_C) then
      call xg_init(res_complex,SPACE_C,rows(res),cols(res))
-     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res_complex%self)
+     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res_complex%self,comm_loc=xmpi_comm_null)
      call xgBlock_c2r(res_complex%self,res)
      call xg_free(res_complex)
    else
-     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res)
+     call xgBlock_colwiseDotProduct(cprj_spinor,cprj_work_spinor,res,comm_loc=xmpi_comm_null)
    end if
 
 end subroutine xg_nonlop_colwiseXDX
@@ -1722,11 +1722,39 @@ subroutine xg_nonlop_colwiseXHX(xg_nonlop,cprj,cprj_work,res)
    type(xgBlock_t), intent(in) :: cprj
    type(xgBlock_t), intent(inout) :: cprj_work,res
 
-   if (xg_nonlop%paw) then
-     call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res)
-   else
-     call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res)
+   integer :: nmpi,ncols,nres,shift
+!   type(xg_t) :: res_mpi
+   type(xgBlock_t) :: res_mpi,res_tmp
+
+   if (cols(res)/=1) then
+     ABI_ERROR('cols(res)/=1')
    end if
+   nmpi = xmpi_comm_size(comm(cprj))
+   ncols = cols(cprj)
+   nres = rows(res)
+   if (nres/=nmpi*ncols) then
+     ABI_ERROR('rows(res)/=nmpi*cols(cprj))')
+   end if
+
+   call xgBlock_zero(res)
+
+   if (nmpi==1) then
+     res_mpi = res
+   else
+     call xgBlock_setBlock(res,res_tmp,nres,1)
+     call xgBlock_reshape(res_tmp,(/1,nres/))
+     shift = xg_nonlop%me_band*ncols
+     call xgBlock_setBlock(res_tmp,res_mpi,1,ncols,fcol=1+shift)
+     call xgBlock_reshape(res_mpi,(/ncols,1/))
+   end if
+
+   if (xg_nonlop%paw) then
+     call xg_nonlop_colwiseXAX(xg_nonlop,xg_nonlop%Dij,cprj,cprj_work,res_mpi)
+   else
+    call xg_nonlop_colwiseXDX(xg_nonlop,xg_nonlop%ekb,cprj,cprj_work,res_mpi)
+   end if
+
+   call xgBlock_mpi_sum(res,comm=xg_nonlop%comm_band)
 
 end subroutine xg_nonlop_colwiseXHX
 !!***
