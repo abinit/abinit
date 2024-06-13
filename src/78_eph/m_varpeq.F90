@@ -335,7 +335,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nsppol"), &
      nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol"), &
      nctkarr_t("cb_min_spin", "dp", "nsppol"), &
-     nctkarr_t("vb_max_spin", "dp", "nsppol") &
+     nctkarr_t("vb_max_spin", "dp", "nsppol"), &
+     nctkarr_t("gstore_ngqpt", "i", "three") &
    ])
    NCF_CHECK(ncerr)
 
@@ -362,6 +363,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), self%a_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), self%gstore%ngqpt))
 
  end if ! master
 

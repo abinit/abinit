@@ -408,6 +408,9 @@ type, public :: gstore_t
   type(krank_t) :: krank_ibz, qrank_ibz
   ! Object used to find k-points or q-points in the IBZ and map BZ to IBZ.
 
+  integer :: ngqpt(3)
+  ! Number of grid points for q-points (either from ddb_ngqpt or eph_ngqpt_fine)
+
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
    ! Indirect table giving the spin indices treated by this MPI rank.
@@ -619,6 +622,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  if (all(dtset%eph_ngqpt_fine /= 0)) then
    ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
+ gstore%ngqpt(:) = ngqpt(:)
 
  ! TODO: Should fix bz2ibz to use the same conventions as krank and listkk
  ! NB: only sigmaph seems to be using this optional argument
@@ -834,6 +838,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
+     nctkarr_t("gstore_ngqpt", "i", "three"), &
      nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz"), &
      nctkarr_t("pheigvec_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz"), &
      nctkarr_t("gstore_glob_nq_spin", "i", "number_of_spins"), &
@@ -875,6 +880,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz"), kbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), gstore%glob_nq_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nk_spin"), gstore%glob_nk_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz2ibz"), kbz2ibz))
@@ -3767,7 +3773,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ! gstore_gmode was added in Abinit v10.1.2
    gstore%gmode = GSTORE_GMODE_PHONON
    ncerr = nf90_inq_varid(ncid, "gstore_gmode", varid)
-   if (ncerr == nf90_noerr) then
+   if (ncerr /= nf90_noerr) then
      NCF_CHECK(nf90_get_var(ncid, vid("gstore_gmode"), gstore%gmode))
      call replace_ch0(gstore%gmode)
    end if
@@ -3779,6 +3785,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    ABI_MALLOC(gstore%wtq, (gstore%nqibz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_brange_spin"), brange_spin))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), gstore%qibz))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wtq"), gstore%wtq))
 
