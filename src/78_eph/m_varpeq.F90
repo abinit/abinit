@@ -72,7 +72,6 @@ module m_varpeq
 
    real(dp) :: tolgrs
 
-   integer, allocatable :: nb_spin(:)
    real(dp), allocatable :: kpts_spin(:,:,:)
    real(dp), allocatable :: qpts_spin(:,:,:)
    real(dp), allocatable :: a_spin(:,:,:,:)
@@ -82,8 +81,9 @@ module m_varpeq
    real(dp), allocatable :: iter_rec_spin(:,:,:)
 
    class(gstore_t), pointer :: gstore => null()
-   type(polstate_t), allocatable :: polstate(:)
    type(gaps_t) :: gaps
+   type(crystal_t) :: cryst_trinv
+   type(polstate_t), allocatable :: polstate(:)
 
  contains
 
@@ -241,7 +241,6 @@ subroutine varpeq_free(self)
 
  ABI_SFREE(self%iter_rec_spin)
  ABI_SFREE(self%nstep2cv_spin)
- ABI_SFREE(self%nb_spin)
  ABI_SFREE(self%kpts_spin)
  ABI_SFREE(self%qpts_spin)
  ABI_SFREE(self%a_spin)
@@ -299,6 +298,10 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nctk_open_create(self%ncid, path, xmpi_comm_self))
    ncid = self%ncid
 
+   ! Write the crystal (TR & invsersion symmetry only) & ebands dataset_type
+   NCF_CHECK(self%cryst_trinv%ncwrite(ncid))
+   NCF_CHECK(ebands_ncwrite(self%gstore%ebands, ncid))
+
    ! Add varpeq dimensions.
    ncerr = nctk_def_dims(ncid, [ &
      nctkdim_t("max_nk", self%max_nk), nctkdim_t("max_nq", self%max_nq), &
@@ -326,11 +329,13 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
      nctkarr_t("nq_spin", "int", "nsppol"), &
-     nctkarr_t("nb_spin", "int", "nsppol"), &
+     nctkarr_t("brange_spin", "int", "two, nsppol"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
      nctkarr_t("a_spin", "dp", "two, max_nb, max_nk, nsppol"), &
-     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol") &
+     nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol"), &
+     nctkarr_t("cb_min_spin", "dp", "nsppol"), &
+     nctkarr_t("vb_max_spin", "dp", "nsppol") &
    ])
    NCF_CHECK(ncerr)
 
@@ -351,11 +356,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "iter_rec"), self%iter_rec_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%gstore%glob_nk_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%gstore%glob_nq_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nb_spin"), self%nb_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), self%a_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "b_spin"), self%b_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
 
  end if ! master
 
@@ -685,13 +691,20 @@ subroutine varpeq_init(self, gstore, dtset)
  self%tolgrs = dtset%varpeq_tolgrs
  self%pkind = dtset%varpeq_pkind
  self%gaps = ebands_get_gaps(gstore%ebands, ierr)
+ self%cryst_trinv = gstore%cryst%new_trinv_only()
+
+ self%max_nk = maxval(gstore%glob_nk_spin)
+ self%max_nq = maxval(gstore%glob_nq_spin)
+ self%max_nb = maxval(gstore%brange_spin(2,:) - gstore%brange_spin(1,:)) + 1
 
  ABI_MALLOC(self%polstate, (gstore%my_nspins))
  ABI_MALLOC(self%iter_rec_spin, (6, self%nstep, gstore%nsppol))
  ABI_MALLOC(self%nstep2cv_spin, (gstore%nsppol))
- ABI_MALLOC(self%nb_spin, (gstore%nsppol))
+ ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
+ ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
+ ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
 
- self%nb_spin(:) = zero
  ! Loop over my spins and initialize polaronic states
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -742,26 +755,7 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%krank_kpts = polstate%get_krank_glob("k", gstore%ebands%kptrlatt)
    polstate%krank_qpts = polstate%get_krank_glob("q", gstore%ebands%kptrlatt)
 
-   ! basic varpeq dimensions
-   self%nb_spin(spin) = gqk%nb
  enddo
-
- ! FIXME: generalize in varpeq%gather or find a better way to mimic the spin communicator
- call xmpi_sum(self%nb_spin, self%gstore%comm, ierr)
- do my_is=1,self%gstore%my_nspins
-   spin = self%gstore%my_spins(my_is)
-   gqk => self%gstore%gqk(my_is)
-   self%nb_spin(spin) = self%nb_spin(spin) / gqk%grid_comm%nproc
- enddo
-
- self%max_nk = maxval(gstore%glob_nk_spin)
- self%max_nq = maxval(gstore%glob_nq_spin)
- self%max_nb = maxval(self%nb_spin)
-
- ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
- ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
- ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
- ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
 
 end subroutine varpeq_init
 !!***
