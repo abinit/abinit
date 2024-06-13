@@ -87,10 +87,11 @@ contains
 !!
 !! SOURCE
 
-subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
+subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 !Arguments ------------------------------------
 ! Scalars
+ integer,intent(in)     :: ndat
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
@@ -100,16 +101,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !Local variables-------------------------------
 ! Scalars
- integer,parameter :: tim_fourwf_fock_getghc=10,tim_fourdp_fock_getghc=10,ndat1=1
- integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom
+ integer,parameter :: tim_fourwf_fock_getghc=10,tim_fourdp_fock_getghc=10
+ integer :: bdtot_jindex,choice,cplex_fock,cplex_dij,cpopt,i1,i2,i3,ia,iatom,idat,idat_occ
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
- integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6
+ integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
  integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
- real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,occ,wtk
+ real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
@@ -117,12 +118,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
- real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:), kpg_kp(:,:)
- real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:),grnhat_12(:,:,:,:,:),forikpt(:,:)
- real(dp), allocatable :: rho12(:,:,:),rhog_munu(:,:),rhor_munu(:,:),vlocpsi_r(:)
- real(dp), allocatable :: vfock(:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
+ real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
+ real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
+ real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:)
+ real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:)
- real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
  real(dp) :: rprimd(3,3),for12(3)
@@ -142,7 +143,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  ABI_CHECK(gs_ham%nspinor==1,"only allowed for nspinor=1!")
  ABI_CHECK(gs_ham%npw_k==gs_ham%npw_kp,"only allowed for npw_k=npw_kp (ground state)!")
  if (fockcommon%usepaw==1) then
-   ABI_CHECK((size(cwaveprj,1)==gs_ham%natom.and.size(cwaveprj,2)==gs_ham%nspinor),"error on cwaveprj dims")
+   ABI_CHECK((size(cwaveprj,1)==gs_ham%natom.and.size(cwaveprj,2)==gs_ham%nspinor*ndat),"error on cwaveprj dims")
  end if
  need_ghc=(size(ghc,2)>0)
 
@@ -178,27 +179,21 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !*Initialization of local pointers
 !*Initialization of the array cwavef_r
 !*cwavef_r = current wavefunction in r-space
- ABI_MALLOC(cwavef_r,(2,n4f,n5f,n6f))
-!*rhormunu = overlap matrix between cwavef and (jkpt,mu) in R-space
- ABI_MALLOC(rhor_munu,(cplex_fock,nfftf))
-!*rhogmunu = overlap matrix between cwavef and (jkpt,mu) in G-space
- ABI_MALLOC(rhog_munu,(2,nfftf))
+ ABI_MALLOC(cwavef_r,(2,n4f,n5f,n6f*ndat))
 !*dummytab = variables for fourwf
- ABI_MALLOC(dummytab,(2,nfft))
-!*vfock = Fock potential
- ABI_MALLOC(vfock,(cplex_fock*nfftf))
+ ABI_MALLOC(dummytab,(2,nfft*ndat))
 !*vqg = 4pi/(G+q)**2
  ABI_MALLOC(vqg,(nfftf))
 
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
- ABI_MALLOC(ghc1,(2,npw))
- ABI_MALLOC(ghc2,(2,npw))
+ ABI_MALLOC(ghc1,(2,npw*ndat))
+ ABI_MALLOC(ghc2,(2,npw*ndat))
  ghc1=zero
  ghc2=zero
 !*Initialization of the array vlocpsi_r
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
- ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf))
+ ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf,ndat))
  vlocpsi_r=zero
 
 !*Additional arrays in case of paw
@@ -214,9 +209,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      ABI_MALLOC(forikpt,(3,natom))
      forikpt=zero
    end if
-   ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3)))
-   ABI_MALLOC(gvnlxc,(2,npw*nspinor))
-   ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim))
  end if
 
  if (fockcommon%usepaw==1.or.fockcommon%optstr) then
@@ -231,7 +223,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  cwavef_r=zero
  call timab(1515,2,tsec) ; call timab(1541,-2,tsec) ; call timab(1512,-1,tsec)
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
-& mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,&
+& mgfftf,mpi_enreg,ndat,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,&
 & gpu_option=gs_ham%gpu_option)
  call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
  cwavef_r=cwavef_r*invucvol
@@ -264,6 +256,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 !* nband_k = number of bands at point k_j
    nband_k=fockbz%nbandocc_bz(jkpt,my_jsppol)
+   ndat_occ=nband_k
 !* wtk = weight in BZ of this k point
    wtk=fockbz%wtk_bz(jkpt) !*sqrt(gs_ham%ucvol)
 !* jstwfk= how is stored the wavefunction
@@ -275,6 +268,22 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      gbound_kp => fockbz%gbound_bz(:,:,jkpt)
      kg_occ => fockbz%kg_bz(:,1+jkg:npwj+jkg)
    end if
+
+  !*rhormunu = overlap matrix between cwavef and (jkpt,mu) in R-space
+   ABI_MALLOC(rhor_munu,(cplex_fock,nfftf,ndat_occ,ndat))
+  !*rhogmunu = overlap matrix between cwavef and (jkpt,mu) in G-space
+   ABI_MALLOC(rhog_munu,(2,nfftf,ndat_occ,ndat))
+  !*vfock = Fock potential
+   ABI_MALLOC(vfock,(cplex_fock*nfftf,ndat_occ,ndat))
+   ABI_MALLOC(occ,(ndat_occ))
+
+  !*Additional arrays in case of paw
+   if (fockcommon%usepaw==1) then
+     ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
+     ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat))
+     ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
+   end if
+
 !* Load k^prime hamiltonian in the gs_ham datastructure
 !  Note: ffnl_kp / ph3d_kp / gbound_kp are not used
 
@@ -314,11 +323,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! =================================================
 ! === Loop on the band indices jband of cgocc_k ===
 ! =================================================
-   do jband=1,nband_k
+   do jband=1,nband_k,ndat_occ
 
 !*   occ = occupancy of jband at this k point
-     occ=fockbz%occ_bz(jband+bdtot_jindex,my_jsppol)
-     if(occ<tol8) cycle
+     occ(1:ndat_occ)=fockbz%occ_bz(jband+bdtot_jindex:jband+ndat_occ-1+bdtot_jindex,my_jsppol)
+     if(occ(1)<tol8) cycle
 
 !    This timing is placed after the cycle ...
      call timab(1522,1,tsec) ; call timab(1542,-1,tsec)
@@ -327,13 +336,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Get cwaveocc_r in real space using FFT ===
 ! ==============================================
      if (allocated(fockbz%cwaveocc_bz)) then
-       cwaveocc_r => fockbz%cwaveocc_bz(:,:,:,:,jband+jbg,my_jsppol)
+       cwaveocc_r => fockbz%cwaveocc_bz(:,:,:,:,jband+jbg:jband+jbg+ndat_occ-1,my_jsppol)
      else
-       ABI_MALLOC(cwaveocc_r,(2,n4f,n5f,n6f))
+       ABI_MALLOC(cwaveocc_r,(2,n4f,n5f,n6f,ndat_occ))
        cwaveocc_r=zero
        call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1542,-2,tsec)
-       call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
-&       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
+       call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+(jband+ndat_occ-1)*npwj,my_jsppol),rhodum,cwaveocc_r, &
+&       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat_occ,ngfftf,&
 &       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,gpu_option=gs_ham%gpu_option)
        call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1542,-1,tsec)
        cwaveocc_r=cwaveocc_r*invucvol
@@ -348,18 +357,24 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
      call timab(1522,2,tsec) ; call timab(1542,-2,tsec) ; call timab(1523,-1,tsec)
 
-     ind=0
-     do i3=1,n3f
-       do i2=1,n2f
-         do i1=1,n1f
-           ind=ind+1
-           recwf  =cwavef_r(1,i1,i2,i3)   ; imcwf  =cwavef_r(2,i1,i2,i3)
-           recwocc=cwaveocc_r(1,i1,i2,i3) ; imcwocc=cwaveocc_r(2,i1,i2,i3)
-           rhor_munu(1,ind)= recwocc*recwf+imcwocc*imcwf
-           rhor_munu(2,ind)= recwocc*imcwf-imcwocc*recwf
-         end do ! i1
-       end do ! i2
-     end do ! i3
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
+       ind=0
+       do i3=1,n3f
+         do i2=1,n2f
+           do i1=1,n1f
+             ind=ind+1
+             recwf  =cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
+             imcwf  =cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
+             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+             rhor_munu(1,ind,idat_occ,idat)= recwocc*recwf+imcwocc*imcwf
+             rhor_munu(2,ind,idat_occ,idat)= recwocc*imcwf-imcwocc*recwf
+           end do ! i1
+         end do ! i2
+       end do ! i3
+     end do ! idat_occ
+     end do ! idat
 
      call timab(1523,2,tsec)
 
@@ -370,28 +385,48 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      call timab(1524,-1,tsec) ; call timab(1544,-1,tsec)
 
      if (fockcommon%usepaw==1) then
+
+       ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
+
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
+       cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+ndat_occ*nspinor-1)
 
-       ABI_MALLOC(rho12,(2,nfftf,nspinor**2))
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+         call pawmknhat_psipsi(cwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),&
+  &       ider,izero,natom,natom,nfftf,ngfftf,&
+  &       nhat12_grdim,nspinor,fockcommon%ntypat,fockbz%pawang,fockcommon%pawfgrtab,grnhat12(:,:,:,:,idat_occ,idat),&
+  &       rho12(:,:,:,idat_occ,idat),&
+  &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,idat_occ,idat),qphon=qvec_j,&
+  &       xred=gs_ham%xred,atindx=gs_ham%atindx)
 
-       cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+nspinor-1)
-
-       call pawmknhat_psipsi(cwaveprj,cwaveocc_prj,ider,izero,natom,natom,nfftf,ngfftf,&
-&       nhat12_grdim,nspinor,fockcommon%ntypat,fockbz%pawang,fockcommon%pawfgrtab,grnhat12,rho12,&
-&       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,xred=gs_ham%xred,atindx=gs_ham%atindx)
-
-       rhor_munu(1,:)=rhor_munu(1,:)+rho12(1,:,nspinor)
-       rhor_munu(2,:)=rhor_munu(2,:)-rho12(2,:,nspinor)
+         rhor_munu(1,:,idat_occ,idat)=rhor_munu(1,:,idat_occ,idat)+rho12(1,:,nspinor,idat_occ,idat)
+         rhor_munu(2,:,idat_occ,idat)=rhor_munu(2,:,idat_occ,idat)-rho12(2,:,nspinor,idat_occ,idat)
+       end do ! idat_occ
+       end do ! idat
      end if
+
+
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1544,-2,tsec)
-     ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
-     call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
+       ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
+       call fourdp(cplex_fock,rhog_munu(:,:,idat_occ,idat),rhor_munu(:,:,idat_occ,idat),-1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
+     end do ! idat_occ
+     end do ! idat
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1544,-1,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
-&       fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu,gs_ham%ucvol,qvec_j)
-       fockcommon%stress_ikpt(:,fockcommon%ieigen)=fockcommon%stress_ikpt(:,fockcommon%ieigen)+fockstr(:)*occ*wtk
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE FROM(rhog_munu) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+         call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
+  &       fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu(:,:,idat_occ,idat),gs_ham%ucvol,qvec_j)
+         fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)+fockstr(:)*occ(idat_occ)*wtk
+       end do ! idat_occ
+       end do ! idat
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
            ABI_FREE(cwaveocc_r)
@@ -410,23 +445,29 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* vfock will contain the local Fock potential, the result of hartre routine.
 !* vfock = FFT( rhog_munu/|g+qvec|^2 )
      call timab(1525,-1,tsec) ; call timab(1545,-1,tsec)
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
 #if 0
 
      call timab(1515,-2,tsec) ; call timab(1513,-1,tsec)
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
-&     mpi_enreg%paral_kgb,rhog_munu,rprimd,vfock,divgq0=fock%divgq0,qpt=qvec_j)
+&     mpi_enreg%paral_kgb,rhog_munu(:,:,idat_occ,idat),rprimd,vfock(:,idat_occ,idat),divgq0=fock%divgq0,qpt=qvec_j)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec)
 
 #else
      do ifft=1,nfftf
-       rhog_munu(1,ifft) = rhog_munu(1,ifft) * vqg(ifft)
-       rhog_munu(2,ifft) = rhog_munu(2,ifft) * vqg(ifft)
+     end do
+     do ifft=1,nfftf
+       rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
+       rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
      end do
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
-     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
+     call fourdp(cplex_fock,rhog_munu(:,:,idat_occ,idat),vfock(:,idat_occ,idat),+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
 #endif
+     end do ! idat_occ
+     end do ! idat
      call timab(1525,-2,tsec) ; call timab(1545,-2,tsec)
 
 !===============================================================
@@ -440,8 +481,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        ndij=nspden_fock
        ! dimekb1 is dimensioned as cplex_dij*lmnmax*(lmnmax+1)/2
        cplex_dij=2*gs_ham%dimekb1/(gs_ham%lmnmax*(gs_ham%lmnmax+1))
-       ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,cplex_fock))
+       ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,cplex_fock,ndat_occ,ndat))
        dijhat=zero
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
        do iatom=1,natom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
@@ -449,50 +492,61 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          dijhat_tmp=zero
          call pawdijhat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
-&         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
+&         fockcommon%pawtab(itypat),vfock(:,idat_occ,idat),qphon,gs_ham%ucvol,gs_ham%xred)
          do ii=1,cplex_fock
            ind=(ii-1)*lmn2_size*cplex_dij
-           dijhat(1:cplex_dij*lmn2_size,iatom,:,ii)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
+           dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
          end do
          ABI_FREE(dijhat_tmp)
        end do
+       end do ! idat_occ
+       end do ! idat
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=17
        
        if(need_ghc) then
          choice=1
          call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
-         call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&         ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,gvnlxc,enl=dijhat,&
-&         select_k=K_H_KPRIME)
+         do idat_occ=1,ndat_occ
+         do idat=1,ndat
+           call nonlop(choice,cpopt,cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
+  &         1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
+  &         gvnlxc(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor),enl=dijhat(:,:,:,:,idat_occ,idat),&
+  &         select_k=K_H_KPRIME)
+         end do
+         ghc2=ghc2-gvnlxc*occ(idat_occ)*wtk
+         end do ! idat_occ
          call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
-         ghc2=ghc2-gvnlxc*occ*wtk       
        end if
 
 ! Forces calculation
 
        if (fockcommon%optfor.and.(fockcommon%ieigen/=0)) then
          choice=2; dotr=zero;doti=zero;cpopt=4;tim_nonlop=17
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
          do iatom=1,natom
            do idir=1,3
              call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
-             call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&             ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
-&             forout,enl=dijhat,iatom_only=iatom,&
+             call nonlop(choice,cpopt,cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
+&             1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
+&             forout,enl=dijhat(:,:,:,:,idat_occ,idat),iatom_only=iatom,&
 &             select_k=K_H_KPRIME)
              call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
              call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,forout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              for1(idir)=zero
              do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
                ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
-               for1(idir)=for1(idir)+vfock(2*ind-1)*grnhat_12(1,ind,1,idir,iatom)-&
-&               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
+               for1(idir)=for1(idir)+vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+&               vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat)
              end do
            end do
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
-             forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
+             forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ(idat_occ)*wtk
            end do
          end do
+         end do ! idat_occ
+         end do ! idat
        end if
 
 ! Stresses calculation
@@ -501,29 +555,37 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
        ! first contribution
          dotr=zero
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
          do idir=1,6
            call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
-           call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&           ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
-&           strout,enl=dijhat,select_k=K_H_KPRIME)
+           call nonlop(choice,cpopt,cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
+&           1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
+&           strout,enl=dijhat(:,:,:,:,idat_occ,idat),select_k=K_H_KPRIME)
            call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
            call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
-&           dotr(idir)*occ*wtk/gs_ham%ucvol
+&           dotr(idir)*occ(idat_occ)*wtk/gs_ham%ucvol
          end do
+         end do ! idat_occ
+         end do ! idat
        ! second contribution
          str=zero
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
          do iatom=1,natom
            do idir=1,3
              do idir1=1,3
                do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
                  ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
-                 str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1)*grnhat_12(1,ind,1,idir,iatom)-&
-&                 vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom))*fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
+                 str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+&                 vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
                end do
              end do
            end do
          end do
+         end do ! idat_occ
+         end do ! idat
          do idir=1,3
            fockstr(idir)=str(idir,idir)
          end do
@@ -531,15 +593,21 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          fockstr(5)=(str(3,1)+str(1,3))*half
          fockstr(6)=(str(1,2)+str(2,1))*half
          do idir=1,6
+         do idat_occ=1,ndat_occ
            fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
-&           fockstr(idir)/nfftf*occ*wtk
+&           fockstr(idir)/nfftf*occ(idat_occ)*wtk
+         end do ! idat_occ
          end do
 
        ! third contribution
          doti=zero
-         do ifft=1,nfftf
-           doti=doti+vfock(2*ifft-1)*rho12(1,ifft,nspinor)-vfock(2*ifft)*rho12(2,ifft,nspinor)
-         end do
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
+           do ifft=1,nfftf
+             doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
+           end do
+         end do ! idat_occ
+         end do ! idat
          fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)-doti/nfftf*occ*wtk
 !         doti=zero
 !         do ifft=1,nfftf
@@ -557,19 +625,24 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
      call timab(1527,-1,tsec)
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
      ind=0
      do i3=1,ngfftf(3)
        do i2=1,ngfftf(2)
          do i1=1,ngfftf(1)
            ind=ind+1
 !          ind=i1+ngfftf(1)*(i2-1+ngfftf(2)*(i3-1))
-           revloc=vfock(2*ind-1) ; imvloc=vfock(2*ind)
-           recwocc=cwaveocc_r(1,i1,i2,i3) ; imcwocc=cwaveocc_r(2,i1,i2,i3)
-           vlocpsi_r(2*ind-1)=vlocpsi_r(2*ind-1)-(revloc*recwocc-imvloc*imcwocc)*occ*wtk
-           vlocpsi_r(2*ind  )=vlocpsi_r(2*ind  )-(revloc*imcwocc+imvloc*recwocc)*occ*wtk
+           revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
+           recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+           imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+           vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
+           vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
          end do
        end do
      end do
+     end do ! idat_occ
+     end do ! idat
      if (allocated(fockbz%cgocc)) then
        ABI_FREE(cwaveocc_r)
      end if
@@ -594,6 +667,17 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    if (associated(gs_ham%ph3d_kp)) then
      ABI_FREE(gs_ham%ph3d_kp)
    end if
+   ABI_FREE(rhor_munu)
+   ABI_FREE(rhog_munu)
+   ABI_FREE(vfock)
+   ABI_FREE(occ)
+  !*Additional arrays in case of paw
+   if (fockcommon%usepaw==1) then
+     ABI_FREE(grnhat_12)
+     ABI_FREE(gvnlxc)
+     ABI_FREE(grnhat12)
+   end if
+
    call timab(1528,2,tsec)
 
  end do ! jkpt
@@ -629,15 +713,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
-   ABI_FREE(rhor_munu)
-   ABI_FREE(rhog_munu)
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
-   ABI_FREE(vfock)
    ABI_FREE(vqg)
    if (fockcommon%usepaw==1) then
-     ABI_FREE(gvnlxc)
-     ABI_FREE(grnhat12)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
        ABI_FREE(forikpt)
        ABI_FREE(forout)
@@ -645,7 +724,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
        ABI_FREE(strout)
      end if
-     ABI_FREE(grnhat_12)
    end if
    if(fockcommon%usepaw==1.or.fockcommon%optstr) then
      ABI_FREE(gboundf)
@@ -671,12 +749,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !  * Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
-   ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f))
-   call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r,psilocal,2)
+   ABI_MALLOC(psilocal,(cplex_fock*n4f,n5f,n6f*ndat))
+   do idat=1,ndat
+     call fftpac(1,mpi_enreg,nspden_fock,cplex_fock*n1f,n2f,n3f,&
+       cplex_fock*n4f,n5f,n6f,ngfft,vlocpsi_r(:,idat),psilocal(:,:,1+(idat-1)*n6f:idat*n6f),2)
+   end do ! idat
 
    call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1547,-2,tsec)
    call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
-&   mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
+&   mgfftf,mpi_enreg,ndat,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
 &   gpu_option=gs_ham%gpu_option)
    call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-1,tsec)
    ABI_FREE(psilocal)
@@ -694,8 +775,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !   === Deallocate local PAW arrays ===
 !   ===============================
    if (fockcommon%usepaw==1) then
-     ABI_FREE(gvnlxc)
-     ABI_FREE(grnhat12)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
        ABI_FREE(forikpt)
        ABI_FREE(forout)
@@ -703,7 +782,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
        ABI_FREE(strout)
      end if
-     ABI_FREE(grnhat_12)
    end if
    if(fockcommon%usepaw==1.or.fockcommon%optstr) then
      ABI_FREE(gboundf)
@@ -714,23 +792,25 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !  * Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
 !  * at each convergence step. (consistent definition with the definition of hartree energy)
    if (fockcommon%ieigen/=0) then
-     eigen=zero
-!  * Dot product of cwavef and ghc
-!  * inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
-     if(gs_ham%istwf_k==2) then
-       eigen=half*cwavef(1,1)*ghc1(1,1)
-     else
-       eigen=cwavef(1,1)*ghc1(1,1)+cwavef(2,1)*ghc1(2,1)
-     end if
-     do ipw=2,npw
-       eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
-     end do
-     if(gs_ham%istwf_k>=2) eigen=two*eigen
-     call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
-     call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
-     call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
-     fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
-     if(fockcommon%use_ACE==0) fockcommon%ieigen = 0
+     do idat=1,ndat
+       eigen=zero
+  !  * Dot product of cwavef and ghc
+  !  * inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
+       if(gs_ham%istwf_k==2) then
+         eigen=half*cwavef(1,1+(idat-1)*npw)*ghc1(1,1+(idat-1)*npw)
+       else
+         eigen=cwavef(1,1+(idat-1)*npw)*ghc1(1,1+(idat-1)*npw)+cwavef(2,1+(idat-1)*npw)*ghc1(2,1+(idat-1)*npw)
+       end if
+       do ipw=2,npw
+         eigen=eigen+cwavef(1,ipw+(idat-1)*npw)*ghc1(1,ipw+(idat-1)*npw)+cwavef(2,ipw+(idat-1)*npw)*ghc1(2,ipw+(idat-1)*npw)
+       end do
+       if(gs_ham%istwf_k>=2) eigen=two*eigen
+       call timab(1547,2,tsec) ; call timab(1548,-1,tsec)
+       call xmpi_sum(eigen,mpi_enreg%comm_hf,ier)
+       call timab(1548,2,tsec) ; call timab(1547,-1,tsec)
+       fockcommon%eigen_ikpt(fockcommon%ieigen+idat-1)= eigen
+       if(fockcommon%use_ACE==0) fockcommon%ieigen = 0
+     end do ! idat
    end if
 
 !   ===============================
@@ -739,11 +819,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
-   ABI_FREE(rhor_munu)
-   ABI_FREE(rhog_munu)
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
-   ABI_FREE(vfock)
    ABI_FREE(vqg)
  
  endif
@@ -856,7 +933,6 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  real(dp),allocatable,target :: ffnl(:,:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
- type(pawcprj_type),pointer :: cwaveprj_idat(:,:)
 
 !*************************************************************************
 
@@ -1044,23 +1120,22 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
          msg='fock2ACE: Paral_kgb is not yet implemented for fock calculations'
          ABI_BUG(msg)
        end if
-       ndat=mpi_enreg%bandpp
-       if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
 
+       fockcommon%ieigen=(iblock-1)*blocksize+1
+       fockcommon%iband=(iblock-1)*blocksize+1
+       call timab(1562,2,tsec) ; call timab(1563,-1,tsec)
+       call fock_getghc(cwavef,&
+             cwaveprj,&
+             wi(:,:,iblock),&
+             gs_hamk,mpi_enreg,blocksize)
+
+
+       call timab(1563,2,tsec) ; call timab(1562,-1,tsec)
        do iblocksize=1,blocksize
-         fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-         fockcommon%iband=(iblock-1)*blocksize+iblocksize
-         if (gs_hamk%usepaw==1) then
-           cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-         end if
-         call timab(1562,2,tsec) ; call timab(1563,-1,tsec)
-         call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
-&         wi(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor,iblock),gs_hamk,mpi_enreg)
-         mkl(1,fockcommon%ieigen,fockcommon%ieigen)=fockcommon%eigen_ikpt(fockcommon%ieigen)
-         call timab(1563,2,tsec) ; call timab(1562,-1,tsec)
-         fockcommon%e_fock0=fockcommon%e_fock0+half*weight(iblocksize)*fockcommon%eigen_ikpt(fockcommon%ieigen)
+         mkl(1,fockcommon%ieigen+iblocksize-1,fockcommon%ieigen+iblocksize-1)=fockcommon%eigen_ikpt(fockcommon%ieigen+iblocksize-1)
+         fockcommon%e_fock0=fockcommon%e_fock0+half*weight(iblocksize)*fockcommon%eigen_ikpt(fockcommon%ieigen+iblocksize-1)
          if (fockcommon%optfor) then
-           fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
+           fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen+iblocksize-1)
          end if
        end do
 
