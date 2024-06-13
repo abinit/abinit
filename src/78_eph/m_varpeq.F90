@@ -83,6 +83,7 @@ module m_varpeq
 
    class(gstore_t), pointer :: gstore => null()
    type(polstate_t), allocatable :: polstate(:)
+   type(gaps_t) :: gaps
 
  contains
 
@@ -320,6 +321,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    ! Define arrays with results
    ! FIXME: correct a_spin/b_spin representation based on Matteo's advice
    ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t("varpeq_pkind", "c", "fnlen"), &
      nctkarr_t("nstep2cv", "int", "nsppol"), &
      nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
@@ -344,6 +346,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      [self%tolgrs])
    NCF_CHECK(ncerr)
    ! arrays
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_pkind"), self%pkind))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv"), self%nstep2cv_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "iter_rec"), self%iter_rec_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%gstore%glob_nk_spin))
@@ -604,19 +607,28 @@ subroutine varpeq_record(self, iter, my_is)
  integer, intent(in) :: iter, my_is
 
 !Local variables-------------------------------
- integer :: spin
  class(polstate_t), pointer :: polstate
+ integer :: spin, psign
+ real(dp) :: shift
 
 !----------------------------------------------------------------------
 
  spin = self%gstore%my_spins(my_is)
  polstate => self%polstate(my_is)
 
- self%iter_rec_spin(1, iter, spin) = polstate%enel + polstate%enph + polstate%enelph
- self%iter_rec_spin(2, iter, spin) = polstate%enel
- self%iter_rec_spin(3, iter, spin) = polstate%enph
- self%iter_rec_spin(4, iter, spin) = polstate%enelph
- self%iter_rec_spin(5, iter, spin) = polstate%eps
+ select case(self%pkind)
+ case ("electron")
+   psign = 1; shift = self%gaps%cb_min(spin)
+ case ("hole")
+   psign = -1; shift = -self%gaps%vb_max(spin)
+ end select
+
+ self%iter_rec_spin(1, iter, spin) = &
+   psign*(polstate%enel + polstate%enph + polstate%enelph - shift)
+ self%iter_rec_spin(2, iter, spin) = psign*(polstate%enel - shift)
+ self%iter_rec_spin(3, iter, spin) = psign*polstate%enph
+ self%iter_rec_spin(4, iter, spin) = psign*polstate%enelph
+ self%iter_rec_spin(5, iter, spin) = psign*(polstate%eps - shift)
  self%iter_rec_spin(6, iter, spin) = polstate%gradres
  self%nstep2cv_spin(spin) = iter
 
@@ -648,6 +660,7 @@ subroutine varpeq_init(self, gstore, dtset)
 !scalars
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
+ type(gaps_t) :: gaps
  integer :: ierr
  integer :: my_is, spin, bstart
  integer :: my_ik, my_iq, ik_glob, iq_glob
@@ -667,9 +680,11 @@ subroutine varpeq_init(self, gstore, dtset)
    See messages above.")
 
  self%gstore => gstore
+
  self%nstep = dtset%varpeq_nstep
  self%tolgrs = dtset%varpeq_tolgrs
  self%pkind = dtset%varpeq_pkind
+ self%gaps = ebands_get_gaps(gstore%ebands, ierr)
 
  ABI_MALLOC(self%polstate, (gstore%my_nspins))
  ABI_MALLOC(self%iter_rec_spin, (6, self%nstep, gstore%nsppol))
@@ -702,11 +717,15 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ! Bands taking part in the polaron formation process
    ! TODO: shift the bands wrt vbm/cbm?
+   ABI_CHECK(self%gaps%ierr(spin) == 0, sjoin(self%gaps%errmsg_spin(spin), ". VarPEq is &
+     incompatible with metals & needs CBM/VBM for electron/hole polaron calculations."))
+
    bstart = self%gstore%brange_spin(1, spin)
    select case(self%pkind)
    case ("electron")
      polstate%eig = gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    case ("hole")
+     ! here we flip the valence bands to deal with the minimization process later on
      polstate%eig = -gstore%ebands%eig(bstart:bstart+gqk%nb-1, :, spin)
    end select
 
@@ -737,9 +756,9 @@ subroutine varpeq_init(self, gstore, dtset)
  self%max_nk = maxval(gstore%glob_nk_spin)
  self%max_nq = maxval(gstore%glob_nq_spin)
  self%max_nb = maxval(self%nb_spin)
+
  ABI_MALLOC(self%kpts_spin, (3, self%max_nk, gstore%nsppol))
  ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
-
  ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
  ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
 
