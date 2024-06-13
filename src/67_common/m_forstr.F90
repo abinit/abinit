@@ -1195,19 +1195,19 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
              ndat=mpi_enreg%bandpp
              if (gs_hamk%usepaw==0) cwaveprj_idat => cwaveprj
              ABI_MALLOC(ghc_dum,(0,0))
+             fockcommon%ieigen=(iblock-1)*blocksize+1
+             fockcommon%iband=(iblock-1)*blocksize+1
+             if (gs_hamk%usepaw==1) then
+               cwaveprj_idat => cwaveprj(:,1+blocksize*(my_nspinor-1):blocksize*my_nspinor)
+             end if
+             call fock_getghc(cwavef(:,1+blocksize*npw_k*(my_nspinor-1):blocksize*npw_k*my_nspinor),cwaveprj_idat,&
+&             ghc_dum,gs_hamk,mpi_enreg,blocksize)
              do iblocksize=1,blocksize
-               fockcommon%ieigen=(iblock-1)*blocksize+iblocksize
-               fockcommon%iband=(iblock-1)*blocksize+iblocksize
-               if (gs_hamk%usepaw==1) then
-                 cwaveprj_idat => cwaveprj(:,(iblocksize-1)*my_nspinor+1:iblocksize*my_nspinor)
-               end if
-               call fock_getghc(cwavef(:,1+(iblocksize-1)*npw_k*my_nspinor:iblocksize*npw_k*my_nspinor),cwaveprj_idat,&
-&               ghc_dum,gs_hamk,mpi_enreg)
                if (fockcommon%optstr) then
-                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen)
+                 fockcommon%stress(:)=fockcommon%stress(:)+weight(iblocksize)*fockcommon%stress_ikpt(:,fockcommon%ieigen+iblocksize-1)
                end if
                if (fockcommon%optfor) then
-                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen)
+                 fockcommon%forces(:,:)=fockcommon%forces(:,:)+weight(iblocksize)*fockcommon%forces_ikpt(:,:,fockcommon%ieigen+iblocksize-1)
                end if
              end do
              ABI_FREE(ghc_dum)
