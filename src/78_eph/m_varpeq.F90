@@ -658,6 +658,7 @@ subroutine varpeq_init(self, gstore, dtset)
 
 !Local variables-------------------------------
 !scalars
+ character(len=5000) :: msg
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
  type(gaps_t) :: gaps
@@ -676,8 +677,7 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex = 2 is required", ierr)
- ABI_CHECK(ierr == 0, "The gstore object is incosistent with varpeq. &
-   See messages above.")
+ ABI_CHECK(ierr == 0, "The gstore object is incosistent with varpeq. See messages above.")
 
  self%gstore => gstore
 
@@ -717,8 +717,9 @@ subroutine varpeq_init(self, gstore, dtset)
 
    ! Bands taking part in the polaron formation process
    ! TODO: shift the bands wrt vbm/cbm?
-   ABI_CHECK(self%gaps%ierr(spin) == 0, sjoin(self%gaps%errmsg_spin(spin), ". VarPEq is &
-     incompatible with metals & needs CBM/VBM for electron/hole polaron calculations."))
+   msg = sjoin(self%gaps%errmsg_spin(spin), ". VarPEq is incompatible with metals &
+     and needs CBM/VBM for electron/hole polaron calculations.")
+   ABI_CHECK(self%gaps%ierr(spin) == 0, msg)
 
    bstart = self%gstore%brange_spin(1, spin)
    select case(self%pkind)
@@ -1625,8 +1626,7 @@ subroutine polstate_get_mapping(self, mode, kpt, map)
     map, qpt=kpt)
 
   if (ierr /= 0) then
-     ABI_ERROR(sjoin("polstate_get_mapping: cannot map ", mode, "with &
-       point ", ktoa(kpt)))
+     ABI_ERROR(sjoin("polstate_get_mapping: cannot map ", mode, "with point ", ktoa(kpt)))
    endif
 
  end subroutine get_mapping_
