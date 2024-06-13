@@ -718,7 +718,7 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
    !write(msg, "((2(a, f9.3)))")" Fermi level:", gaps%fermie * Ha_eV, " (eV) with nelect:", gaps%nelect
    !call wrtout(unt, msg)
 
-   if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
+   !if (present(mu_e) .and. present(kTmesh) .and. all(gaps%ierr == 0)) then
      ntemp = size(mu_e)
      call wrtout(unt, " Position of CBM/VBM with respect to the Fermi level:", pre_newlines=1)
      call wrtout(unt, " Notations: mu_e = Fermi level, D_v = (mu_e - VBM), D_c = (CBM - mu_e)")
@@ -731,7 +731,7 @@ subroutine gaps_print(gaps, unit, header, kTmesh, mu_e)
        call wrtout(unt, msg)
      end do
      call wrtout(unt, "")
-   end if
+   !end if
 
  end do ! spin
 

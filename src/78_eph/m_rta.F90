@@ -210,6 +210,10 @@ type,public :: rta_t
    ! (3, 3, nw, nsppol, ntemp, nrta)
    ! Onsager coeficients in Cartesian coordinates
 
+   real(dp),allocatable :: l11_mu(:,:,:,:,:), l12_mu(:,:,:,:,:), l22_mu(:,:,:,:,:)
+   ! (3, 3, nsppol, ntemp, nrta)
+   ! Onsager coeficients in Cartesian coordinates, calculated at the correct mu (at the exact temperature)
+
    real(dp),allocatable :: sigma(:,:,:,:,:,:)
    real(dp),allocatable :: seebeck(:,:,:,:,:,:)
    real(dp),allocatable :: kappa(:,:,:,:,:,:)
@@ -243,6 +247,8 @@ type,public :: rta_t
    ! Conductivity in Siemens * cm-1
    ! computed by summing over k-points rather that by performing an energy integration).
 
+
+   
  contains
 
    procedure :: compute_rta
@@ -907,6 +913,38 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
 
  ABI_FREE(l0inv_33nw)
 
+ !Here are computed the transport tensors at exact mu (exact temperature and not based on a grid)
+
+!  do irta=1,self%nrta
+!   do spin=1,nsppol
+!     do itemp=1,self%ntemp
+!
+!       TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+!
+!       ! S = -1/T L11^-1 L12 = -1/T sigma^-1 L12
+!         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+!        ! l0inv_33nw(:,:) = work_33
+!         self%seebeck_mu(:,:,spin,itemp,irta) = - (volt_SI / TKelv) * matmul(work_33, self%l12_mu(:,:,spin,itemp,irta))
+!       
+!
+!       ! kappa = 1/T [L22 - L21 L11^-1 L12] (in RTA L12=L21) 
+!         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+!         work_33 = matmul(work_33,self%l12_mu(:, :, spin, itemp, irta))
+!         work_33 = self%l22_mu(:, :, spin, itemp, irta) - matmul(self%l12_mu(:, :, spin, itemp, irta), work_33)
+!         self%kappa_mu(:,:,spin,itemp,irta) = + (volt_SI**2 * fact0 / TKelv) * work_33
+!       
+!
+!         ! Peltier pi = -L12 L11^-1 (in RTA and only in RTA, if TR sym. is not broken)
+!       
+!         call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+!         self%pi_mu(:,:,spin,itemp,irta) = - volt_SI * matmul(self%l12_mu(:, :, spin, itemp, irta), work_33)
+!
+!     end do ! itemp
+!   end do !spin
+! end do  !irta
+
+
+
  ! Compute the index of the Fermi level and handle possible out of range condition.
  ifermi = bisect(self%edos%mesh, self%ebands%fermie)
  if (ifermi == 0 .or. ifermi == self%nw) then
@@ -937,6 +975,8 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
     self%resistivity(:, :, itemp, irta) = mat33
   end do
  end do
+
+
 
  ! Mobility
  ABI_MALLOC(self%n, (self%nw, self%ntemp, 2))
@@ -1109,7 +1149,13 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
-
+ ABI_CALLOC(self%l11_mu, (3, 3, nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%l12_mu, (3, 3, nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%l22_mu, (3, 3, nsppol, self%ntemp, self%nrta))
+ ABI_CALLOC(self%resistivity_mu, (3, 3, self%ntemp, self%nrta))
+! ABI_CALLOC(self%seebeck_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
+! ABI_CALLOC(self%kappa_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
+! ABI_CALLOC(self%peltier_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ! Compute (e/h) carriers per unit cell at the different temperatures.
  ABI_CALLOC(self%n_ehst, (2, self%nsppol, self%ntemp))
  call ebands_get_carriers(self%ebands, self%ntemp, self%kTmesh, self%transport_mu_e, self%n_ehst)
@@ -1162,6 +1208,12 @@ subroutine compute_rta_mobility(self, cryst, comm)
            call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw)
            self%conductivity_mu(:, :, ieh, spin, itemp, irta) = self%conductivity_mu(:, :, ieh, spin, itemp, irta) &
              + vv_tenslw(:, :)
+           self%l11_mu(:, :, spin, itemp, irta) = sum(self%conductivity_mu(:,:,:, spin, itemp, irta), dim=3) !sum over ieh (holes and e-)
+        !Here I implement the other onsager coefficients at the correct mu
+           call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e)*(eig_nk-mu_e), two * linewidth, zero, vv_tenslw)
+           self%l12_mu(:, :, spin, itemp, irta)=self%l12_mu(:, :, spin, itemp, irta)+vv_tenslw(:, :)
+           call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e)*(eig_nk-mu_e)**2, two * linewidth, zero, vv_tenslw)
+           self%l22_mu(:, :, spin, itemp, irta)=self%l22_mu(:, :, spin, itemp, irta)+vv_tenslw(:, :)
          end do
        end do
      end do
@@ -1175,6 +1227,22 @@ subroutine compute_rta_mobility(self, cryst, comm)
  max_occ = two / (self%nspinor * self%nsppol)
  fact0 = max_occ * (siemens_SI / Bohr_meter / cryst%ucvol) / 100
  self%conductivity_mu = fact0 * self%conductivity_mu  ! siemens cm^-1
+ self%l11_mu = max_occ * self%l11_mu
+ self%l12_mu = max_occ * self%l12_mu
+ self%l22_mu = max_occ * self%l22_mu
+
+!Same for resistivity_mu (at correct mu)
+
+ !ABI_MALLOC(self%resistivity_mu, (3, 3, self%ntemp, self%nrta))
+ do irta=1,self%nrta
+  do itemp=1,self%ntemp
+
+    work_33 = sum(self%l11_mu(:,:,:,itemp,irta), dim=3) !sum over spins
+    work_33 = work_33*fact0
+    call inv33(work_33, mat33); mat33 = 1e+6_dp * mat33
+    self%resistivity_mu(:, :, itemp, irta) = mat33
+  end do
+ end do
 
  ! Scale by the carrier concentration
  fact = 100**3 / e_Cb
@@ -1352,7 +1420,7 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
  character(len=500) :: msg, pre, rta_type
  integer :: unts(2)
  character(len=2) :: components(3)
- real(dp) :: mat33(3,3) ! work33(3,3),
+ real(dp) :: mat33(3,3),  work33(3,3)
 
 !************************************************************************
 
@@ -1411,7 +1479,87 @@ subroutine print_rta_txt_files(self, cryst, dtset, dtfil)
        end do !spin
        call wrtout(unts, ch10)
      end do
+        
+     !For coefficients calculated at exact mu (i.e for mu calculated at exact temp.): 
+     !TODO: do the same for SM and thus mobility
+
+     do ii=1,2
+       if (ii == 1) msg = sjoin(" Conductivity_mu [Siemens cm^-1] using ", rta_type, "approximation")
+       if (ii == 2) msg = sjoin(" Resistivity_mu [micro-Ohm cm] using ", rta_type, "approximation")
+       call wrtout(unts, msg)
+
+       do itemp=1, self%ntemp
+         nsp = self%nsppol; if (ii == 2) nsp = 1
+         do spin=1,nsp
+           if (nsp == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+           call wrtout(unts, msg)
+         
+           if (ii == 1) then
+             mat33 = sum(self%conductivity_mu(:,:,:,spin, itemp, irta), dim=3)
+           else
+             mat33 = self%resistivity_mu(:,:,itemp,irta)
+           end if
+           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+           call wrtout(unts, msg)
+         end do !spin
+       end do !itemp
+       call wrtout(unts, ch10)
+     end do
    end if
+     
+   msg = " Seebeck_mu [Volts / Kelvin] (at correct mu)"
+   call wrtout(unts, msg)
+   do itemp=1, self%ntemp
+         TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+         nsp = self%nsppol;
+         do spin=1,nsp
+           if (nsp == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+           call wrtout(unts, msg)
+             call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+             mat33 = - (volt_SI / TKelv) * matmul(work_33, self%l12_mu(:,:,spin,itemp,irta))
+           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+           call wrtout(unts, msg)
+         end do !spin
+       end do !itemp
+       call wrtout(unts, ch10)
+
+   msg = " Kappa_mu [W/m*K] (at correct mu)"
+   call wrtout(unts, msg)
+   do itemp=1, self%ntemp
+         TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+         nsp = self%nsppol;
+         do spin=1,nsp
+           if (nsp == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+           call wrtout(unts, msg)
+             call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+             mat33 = + (volt_SI**2 * (siemens_SI / Bohr_meter / cryst%ucvol) / TKelv) * (self%l22_mu(:,:,spin,itemp,irta) - matmul(self%l12_mu(:,:,spin,itemp,irta),matmul(work_33,self%l12_mu(:,:,spin,itemp,irta))))
+           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+           call wrtout(unts, msg)
+         end do !spin
+       end do !itemp
+       call wrtout(unts, ch10)
+   
+   msg = " Peltier [Volts] (at correct mu)"
+   call wrtout(unts, msg)
+   do itemp=1, self%ntemp
+         TKelv = self%kTmesh(itemp) / kb_HaK; if (TKelv < one) Tkelv = one
+         nsp = self%nsppol;
+         do spin=1,nsp
+           if (nsp == 2) call wrtout(unts, sjoin(" For spin:", stoa(spin)), newlines=1)
+           write(msg, "(4a16)") 'Temperature (K)', 'xx', 'yy', 'zz'
+           call wrtout(unts, msg)
+             call inv33(self%l11_mu(:, :, spin, itemp, irta), work_33)
+             mat33 = - (volt_SI / TKelv) * matmul(work_33, self%l12_mu(:,:,spin,itemp,irta))
+           write(msg,"(f16.2,3e16.6)") self%kTmesh(itemp) / kb_HaK, mat33(1,1), mat33(2,2), mat33(3,3)
+           call wrtout(unts, msg)
+         end do !spin
+       end do !itemp
+       call wrtout(unts, ch10)
+ 
+
 
  end do ! irta
 
@@ -1559,6 +1707,9 @@ subroutine rta_free(self)
  ABI_SFREE(self%pi)
  ABI_SFREE(self%mobility_mu)
  ABI_SFREE(self%conductivity_mu)
+ ABI_SFREE(self%l11_mu)
+ ABI_SFREE(self%l12_mu)
+ ABI_SFREE(self%l22_mu)
  ABI_SFREE(self%n_ehst)
 
  call ebands_free(self%ebands)
@@ -1879,7 +2030,7 @@ call wrtout(std_out," Value of kT: ", pre_newlines=1, newlines=1)
    ! iter = 0 --> Compute SERTA transport tensors just for initial reference.
    call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_serta, onsager, sig_p, mob_p, fsum_eh, comm, iet)
 
-   !TODO fix dtset here ans use maxocc
+   !TODO fix dtset here ans use maxocc, CAREFUL, it has to be included in all L coeff. I think
 !max_occ = two / (self%nspinor * self%nsppol)
 ! fact_sigma = max_occ * (siemens_SI / Bohr_meter) / 100.  ! Siemens / cm
 ! fact_mob   = fact_sigma * 100.**3 / e_Cb * Bohr_meter**3 ! cm^2 / V / s
@@ -2075,8 +2226,6 @@ mob_22=sig_gen
            write(msg, "(i5,1x,es9.1,*(1x, es16.6))") &
                iter, max_adiff_spin(spin), mat33(1,1), mat33(2,2), mat33(3,3), sum(fsum_eh(:,:,spin))
            sbk_p (:,:,spin) = mat33
-           pi_p(:,:,spin)=mat33*kT !WARNING: this expression is valid only if time reversal symmetry is not broken
-           !TODO: implement with broken TRS
          end do
          call wrtout(std_out, msg)
        end if
@@ -2117,7 +2266,9 @@ mob_22=sig_gen
                 call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_efield, onsager, sig_l21, mob_21, fsum_eh, comm, 3)
                 call ibte_calc_tensors(ibte, cryst, itemp, kT, mu_e, fkn_out, onsager, sig_l22, mob_22, fsum_eh, comm, 3)
                 do spin=1, nsppol
+                call inv33(sum(sig_p(:,:,:,spin),dim=3), inv_sig_p)
                 kappa_p(:,:,spin)=(1/kT)*(sum(sig_l22(:,:,:,spin), dim=3)-matmul(sum(sig_l21(:,:,:,spin),dim=3),sbk_p(:,:,spin)*kT))                  
+                pi_p(:,:,spin)= matmul (sum(sig_l21(:,:,:,spin),dim=3), inv_sig_p) ! PI=L21/L11 in IBTE
                 end do
         end if
    end do electherm_loop
