@@ -27,7 +27,6 @@ tolvrs 1.0D-20
 
 kptopt 3
 
-#istwfk *1
 
 # severely unconverged
 ngkpt 3*2 

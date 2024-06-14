@@ -3319,8 +3319,6 @@ contains
       case (SPACE_C)
         call compute_colwiseCymax_cplx  (c_loc(xgBlockA%vecC), c_loc(da%vecR), c_loc(xgBlockB%vecC), &
           &                              c_loc(xgBlockW%vecC), xgBlockA%rows, xgBlockA%cols, xgBlockA%ldim)
-      case (SPACE_CR)
-        ABI_ERROR('Not implemented for SPACE_CR')
       end select
 
 #endif
