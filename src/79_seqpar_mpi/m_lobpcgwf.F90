@@ -49,6 +49,10 @@ module m_lobpcgwf
  use m_prep_kgb,    only : prep_nonlop
  use m_getghc,      only : multithreaded_getghc
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif

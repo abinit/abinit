@@ -1569,18 +1569,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
       'Action: set istwfk to 1 for all k-points or change gpu_option.'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
-   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) == 2 ) .and. dt%npband>1 ) then
-     write(msg,'(3a)' )&
-      'When gpu_option is 2, and istwfk==2, npband must be 1... (to be corrected).',ch10,&
-      'Action: set istwfk to 1 for all k-points, or npband to 1, or change gpu_option.'
-     ABI_ERROR_NOSTOP(msg, ierr)
-   end if
-   if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) == 2 ) .and. dt%wfoptalg==111 ) then
-     write(msg,'(3a)' )&
-      'When gpu_option is 2, and istwfk==2, wfoptalg cannot be 111... (to be corrected).',ch10,&
-      'Action: set istwfk to 1 for all k-points, or wfoptalg to 114, or change gpu_option.'
-     ABI_ERROR_NOSTOP(msg, ierr)
-   end if
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
@@ -2367,13 +2355,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 
-!    nucdipmom requires kptopt 3 or zero
+!    nucdipmom requires kptopt 0, 3, or 4 (no time reversal symmetry allowed)
      ! if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
      if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
-       'Action: re-run with kptopt of 3 or 0 '
+       'Action: re-run with kptopt of 0, 3 or 4'
        ABI_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -2724,11 +2712,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
   !  orbmag
   ! only values of 0,1,2 are allowed. 0 is the default.
   call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,3,(/0,1,2/),iout)
-  ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
-  !  only kptopt 3 or 0 are allowed
+  !  only kptopt 3 or 0 are allowed, because ddk cannot use spatial symmetries and
+  !  nucdipmom breaks time reversal symmetry
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/0,3/),iout)
   !  only kpt parallelism is allowed at present
      call chkint_eq(1,1,cond_string,cond_values,ierr,'paral_atom',dt%paral_atom,1,(/0/),iout)
