@@ -4340,8 +4340,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
 
  case default
-   ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, &
-     unsupported mode: ", mode))
+   ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, unsupported mode: ", mode))
  end select
 
 
