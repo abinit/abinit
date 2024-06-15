@@ -252,6 +252,11 @@ subroutine varpeq_free(self)
 
  self%gstore => null()
 
+ ! Close netcdf file.
+ if (self%ncid /= nctk_noid) then
+   NCF_CHECK(nf90_close(self%ncid))
+ end if
+
 end subroutine varpeq_free
 !!***
 

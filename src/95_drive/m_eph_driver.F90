@@ -786,13 +786,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations
-   ! TODO: remove
    if (dtfil%filgstorein /= ABI_NOFILE) then
-     call wrtout(units, sjoin(" Cottolgrsng variational polaron from pre-existent GSTORE file:", dtfil%filgstorein))
+     call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", dtfil%filgstorein))
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein))
+     call wrtout(units, sjoin(" Computing GSTORE file:", path))
    ! Customize input vars for this task.
      dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
      call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
