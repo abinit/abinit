@@ -1327,15 +1327,15 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    end if
    if (allocated(gqk%vkmat_cart_ibz)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for vkmat_cart_ibz: ',ABI_MEM_MB(gqk%vkmat_cart_ibz),' [Mb] <<< MEM'
-     call wrtout(unit, msg) !; print *, "vkmat_cart_ibz shape:", shape(gqk%vkmat_cart_ibz)
+     call wrtout(unit, msg)
    end if
    if (allocated(gqk%my_g2)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
-     call wrtout(unit, msg) !; print *, "my_g2 shape:", shape(gqk%my_g2)
+     call wrtout(unit, msg)
    end if
    if  (allocated(gqk%my_g)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
-     call wrtout(unit, msg) !; print *, "my_g shape:", shape(gqk%my_g)
+     call wrtout(unit, msg)
    end if
  end do
 
