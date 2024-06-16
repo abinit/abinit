@@ -50,7 +50,8 @@
 !!
 !!  In a typical scenario, one uses eph_task 11 to generate GSTORE.nc i.e. steps 1) and 2).
 !!  Then one introduces a new value of eph_task in which we read the object from file and call
-!!  a specialized routine that implements the "post-processing" steps needed to compute the physical properties of interest.
+!!  a specialized routine that implements the "post-processing" steps needed
+!!  to compute the physical properties of interest.
 !!
 !!  Now, let's discuss the MPI-distribution.
 !!
@@ -59,7 +60,7 @@
 !!
 !!                 k-axis (kpt_comm)
 !!              |--------------------
-!!  2) A
+!!              !         !         !
 !!              |         |         |
 !!              |   P00   |   P01   |
 !!              |         |         |
@@ -4270,7 +4271,8 @@ subroutine gstore_print_for_abitests(gstore, dtset)
        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
        do ipc=1,natom3
          if (ipc /= 1 .and. ipc /= natom3) cycle ! Write first and the last pertubation.
-         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
+         ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
+                              start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)
          write(ab_out, "(3(a,i0))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
          do im_kq=1,nb
