@@ -168,6 +168,10 @@ module m_gstore
 
  ! Rank of the MPI Cartesian grid
  integer,private,parameter :: ndims = 6
+
+ ! Default value for entries in gvals, vk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
+ ! This can happen only if we have filtered wavevectors.
+ real(dp),private,parameter :: GSTORE_FILL_DP = -huge(one) * 0.1_dp
 !!***
 
 !----------------------------------------------------------------------
@@ -919,17 +923,17 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      NCF_CHECK(ncerr)
 
      ! IMPORTANT: Init with zeros.
-     NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, zero))
+     NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("gvals"), NF90_FILL, GSTORE_FILL_DP))
 
      select case(gstore%with_vk)
      case (1)
        ! Diagonal terms only
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vk_cart_ibz", "dp", "three, nb, gstore_nkibz")))
-       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, zero))
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vk_cart_ibz"), NF90_FILL, GSTORE_FILL_DP))
      case (2)
        ! Full (nb x nb) matrix.
        NCF_CHECK(nctk_def_arrays(spin_ncid, nctkarr_t("vkmat_cart_ibz", "dp", "two, three, nb, nb, gstore_nkibz")))
-       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, zero))
+       NCF_CHECK(nf90_def_var_fill(spin_ncid, vid_spin("vkmat_cart_ibz"), NF90_FILL, GSTORE_FILL_DP))
      end select
 
      ! Write (small) data
@@ -1270,7 +1274,7 @@ subroutine gstore_print(gstore, unit, header, prtvol)
 !Local variables ------------------------------
  integer :: my_is, spin, my_prtvol
  type(gqk_t),pointer :: gqk
- !character(len=500) :: msg
+ character(len=500) :: msg
  !type(yamldoc_t) :: ydoc
 !----------------------------------------------------------------------
 
@@ -1316,22 +1320,23 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    call wrtout(unit, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
    call wrtout(unit, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
    call wrtout(unit, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
-   !if (allocated(gqk%vk_cart_ibz)) then
-   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%vk_cart_ibz),' [Mb] <<< MEM'
-   !  call wrtout(unit, msg) !; print *, "vk_cart_ibz shape:", shape(gqk%vk_cart_ibz)
-   !end if
-   !if (allocated(gqk%vkmat_cart_ibz)) then
-   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%vkmat_cart_ibz),' [Mb] <<< MEM'
-   !  call wrtout(unit, msg) !; print *, "vkmat_cart_ibz shape:", shape(gqk%vkmat_cart_ibz)
-   !end if
-   !if (allocated(gqk%my_g2)) then
-   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
-   !  call wrtout(unit, msg) !; print *, "my_g2 shape:", shape(gqk%my_g2)
-   !end if
-   !if if (allocated(gqk%my_g)) then
-   !  write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
-   !  call wrtout(unit, msg) !; print *, "my_g shape:", shape(gqk%my_g)
-   !end if
+
+   if (allocated(gqk%vk_cart_ibz)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_cart_ibz: ',ABI_MEM_MB(gqk%vk_cart_ibz),' [Mb] <<< MEM'
+     call wrtout(unit, msg)
+   end if
+   if (allocated(gqk%vkmat_cart_ibz)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for vkmat_cart_ibz: ',ABI_MEM_MB(gqk%vkmat_cart_ibz),' [Mb] <<< MEM'
+     call wrtout(unit, msg) !; print *, "vkmat_cart_ibz shape:", shape(gqk%vkmat_cart_ibz)
+   end if
+   if (allocated(gqk%my_g2)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for |g|^2 array: ',ABI_MEM_MB(gqk%my_g2),' [Mb] <<< MEM'
+     call wrtout(unit, msg) !; print *, "my_g2 shape:", shape(gqk%my_g2)
+   end if
+   if  (allocated(gqk%my_g)) then
+     write(msg,'(a,f8.1,a)')'- Local memory allocated for g array: ',ABI_MEM_MB(gqk%my_g),' [Mb] <<< MEM'
+     call wrtout(unit, msg) !; print *, "my_g shape:", shape(gqk%my_g)
+   end if
  end do
 
 end subroutine gstore_print
@@ -3581,8 +3586,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  call xmpi_barrier(gstore%comm)
  NCF_CHECK(nf90_close(root_ncid))
 
- ! TODO: Activate this call.
- !call gstore_print_for_abitests(gstore%path, dtset)
+ ! Output some of the results to ab_out for testing purposes
+ call gstore%print_for_abitests(dtset)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -3655,6 +3660,9 @@ subroutine dump_data()
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
+
+ NCF_CHECK(nf90_sync(spin_ncid))
+ NCF_CHECK(nf90_sync(root_ncid))
 
 end subroutine dump_data
 
@@ -4192,11 +4200,9 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  integer :: glob_nq, glob_nk, im_kq, in_k
  real(dp) :: g2
  !character(len=500) :: msg
- !type(hdr_type) :: gstore_hdr
 !arrays
- integer :: done_qbz_spin(gstore%nqbz, dtset%nsppol)
- real(dp),allocatable :: vk_cart_ibz(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
- real(dp),allocatable :: gslice_mn(:,:,:)  ! gwork_q(:,:,:,:,:),
+ integer,allocatable :: done_qbz_spin(:,:)
+ real(dp),allocatable :: vk_cart_ibz(:,:,:), gslice_mn(:,:,:) !, vkmat_cart_ibz(:,:,:,:)
 
 ! *************************************************************************
 
@@ -4206,15 +4212,15 @@ subroutine gstore_print_for_abitests(gstore, dtset)
  natom3 = dtset%natom * 3
 
  NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
- !call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
- !ABI_CHECK_INEQ(gstore_fform, 0, "Wrong gstore_fform")
- !call gstore_hdr%vs_dtset(dtset); call gstore_hdr%free()
 
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
  write(ab_out, *)""
  write(ab_out, "(a,i0)")" gstore_completed: ", gstore_completed
+
+ ABI_MALLOC(done_qbz_spin, (gstore%nqbz, dtset%nsppol))
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_done_qbz_spin"), done_qbz_spin))
  write(ab_out, "(a,*(i0,1x))")" gstore_done_qbz_spin: ", done_qbz_spin
+ ABI_FREE(done_qbz_spin)
 
  do spin=1,gstore%nsppol
    NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gqk", "_spin", itoa(spin)), spin_ncid))
@@ -4240,20 +4246,21 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 
    case (1)
      ABI_MALLOC(vk_cart_ibz, (2, 3, nb))
-     write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates:"
+     write(ab_out,"(a)") " Group velocities v_nk in Cartesian coordinates and atomic units:"
      do ik_ibz=1,gstore%nkibz
        ! Only the first and the last k-points are written.
        if (ik_ibz /= 1 .and. ik_ibz /= gstore%nkibz) cycle
        NCF_CHECK(nf90_get_var(spin_ncid, spin_vid("vk_cart_ibz"), vk_cart_ibz, start=[1,1,ik_ibz], count=[3,nb,1]))
-       write(ab_out, "(a)")sjoin(" For k-point", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
+       write(ab_out, "(a)")sjoin(" For k-point:", ktoa(gstore%kibz(:,ik_ibz)), ", spin", itoa(spin))
        do ib=1,nb
          write(ab_out, "(6es16.6)") vk_cart_ibz(:,:,ib)
        end do
      end do
+     write(ab_out, "(a)")" "
      ABI_FREE(vk_cart_ibz)
 
    case (2)
-     NOT_IMPLEMENTED_ERROR()
+     write(ab_out, "(a)")" TXT Output of vkmat is not coded yet!"
    end select
 
    ! Handle the output of the e-ph matrix elements
@@ -4264,17 +4271,19 @@ subroutine gstore_print_for_abitests(gstore, dtset)
    cplex = dtset%gstore_cplex
    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
 
+   write(ab_out,"(a)") " E-PH matrix elements:"
    write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
    do iq_glob=1,glob_nq
      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
      do ik_glob=1,glob_nk
        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
        do ipc=1,natom3
-         if (ipc /= 1 .and. ipc /= natom3) cycle ! Write first and the last pertubation.
+         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write 4th and the last pertubation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)
-         write(ab_out, "(3(a,i0))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
+         write(ab_out, "(3(a,1x,i0,1x))")" |g(k,q)|^2 in Ha^2 for iq:", iq_glob, "ik:", ik_glob, "mode:", ipc
+         write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
          do im_kq=1,nb
            do in_k=1,nb
              if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
