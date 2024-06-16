@@ -24,7 +24,8 @@ module m_anaddb_dataset
  use m_abicore
  use m_errors
 
- use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa
+ use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa, itoa, basename
+ use m_clib,      only : clib_mkdir_if_needed
  use m_symtk,     only : mati3det
  use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
@@ -181,7 +182,7 @@ module m_anaddb_dataset
   ! iatfix(natom)
 
   integer, allocatable:: iatprj_bs(:)
-  
+
   integer, allocatable:: lwf_anchor_iband(:)
   integer, allocatable:: lwf_projector(:)
 
@@ -296,8 +297,7 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
 !scalars
  integer, parameter:: vrsddb = 100401  ! Set routine version number here:
  integer, parameter:: jdtset = 1
- integer:: ii, iph1, iph2, marr, tread, start
- integer:: idet
+ integer:: ii, iph1, iph2, marr, tread, start, idet
  character(len = 500):: message
  character(len = fnlen):: path
 !arrays
@@ -2225,16 +2225,13 @@ end subroutine outvars_anaddb
 
 subroutine anaddb_init(input_path, filnam)
 
-  use m_fstrings
-
 !Arguments-------------------------------
-!arrays
  character(len=*), intent(in):: input_path
  character(len=*), intent(out):: filnam(8)
 
 !Local variables-------------------------
 !scalars
- integer:: lenstr, marr, jdtset, tread, i1
+ integer:: lenstr, marr, jdtset, tread, i1, ierr
  character(len = strlen):: string, raw_string, fname
 !arrays
  integer, allocatable:: intarr(:)
@@ -2289,32 +2286,30 @@ subroutine anaddb_init(input_path, filnam)
    jdtset = 0
 
    ! Allow user to override default values
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value = filnam(2))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
    write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value = filnam(3))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value=filnam(3))
    ABI_CHECK(tread == 1, "ddb_filepath variable must be specified in the input file")
    write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
 
    ! Nobody knows the scope of this line in the files file.
-   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value = filnam(4))
+   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
 
    ! GA: This variable name is confusing, because filnam(5) is also for EIG2D files.
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value = filnam(5))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value = filnam(6))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value = filnam(7))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value = filnam(8))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(8))
    if (tread == 1) then
      write(std_out, "(2a)")'- Root name for output files: ', trim(filnam(8))
-   endif
-
-
+   end if
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
@@ -2330,6 +2325,10 @@ subroutine anaddb_init(input_path, filnam)
    end if
    write(std_out, "(2a)")'- Root name for output files set to: ', trim(filnam(8))
  endif
+
+ i1 = index(filnam(8), "/")
+ call clib_mkdir_if_needed(filnam(8)(1:i1-1), ierr)
+ ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", filnam(8)(1:i1-1)))
 
 end subroutine anaddb_init
 !!***

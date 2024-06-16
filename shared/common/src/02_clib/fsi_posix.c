@@ -44,6 +44,7 @@ int _directory_exist(const char *dirpath) {
     }
 }
 
+/* Create directory dirpath if it does not exist */
 void c_mkdir_if_needed(char *dirpath, int *ierr)
 {
    *ierr = _directory_exist(dirpath);
