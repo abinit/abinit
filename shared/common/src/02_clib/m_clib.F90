@@ -34,7 +34,7 @@ MODULE m_clib
  public :: clib_ulimit_stack    ! Set stack size limit to maximum allowed value.
  public :: clib_getpid
  public :: clib_setenv
- !public :: clib_usleep         ! Suspend calling thread for microseconds of clock time
+ public :: clib_mkdir_if_needed
 
 
 !FIXME the interfaces below have been commented out since abilint
@@ -43,14 +43,14 @@ MODULE m_clib
 ! ===================================================
 ! ==== Fortran-bindings declared in fsi_posix.c ====
 ! ===================================================
-! interface
-!   subroutine clib_mkdir(path, ierr)
-!     import
-!     character(len=*),intent(in) :: path
-!     integer(c_int),intent(out) :: ierr
-!   end subroutine clib_mkdir
-! end interface
-!
+
+ interface
+    subroutine c_mkdir_if_needed(path, ierr) bind(C, name="c_mkdir_if_needed")
+      import
+      character(kind=c_char), dimension(*), intent(in) :: path
+      integer(c_int),intent(out) :: ierr
+    end subroutine c_mkdir_if_needed
+ end interface
 
  interface
    integer(c_int) function c_rename(oldname, newname) bind(C, name='rename')
@@ -75,7 +75,6 @@ MODULE m_clib
  end interface
 
  interface
-   ! pid_t getpid().
    ! The type of pid_t data is a signed integer type (signed int or we can say int).
    function clib_getpid() bind(C, name='getpid')
      import
@@ -140,10 +139,10 @@ MODULE m_clib
 ! ==========================================
 
  !interface
- !  function lock_file(path) bind(C)
+ !  function lock_file(filepath) bind(C)
  !    import
  !    implicit none
- !    character(kind=c_char),intent(in) :: path(*)
+ !    character(kind=c_char),intent(in) :: filepath(*)
  !    integer(c_int) :: lock_file
  !  end function lock_file
  !end interface
@@ -156,7 +155,6 @@ MODULE m_clib
  !    integer(c_int) unlock_fd
  !  end function unlock_fd
  !end interface
-
 
 contains
 !!***
@@ -211,12 +209,32 @@ integer function clib_rename(old_fname, new_fname) result(ierr)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: old_fname, new_fname
-
 ! *********************************************************************
 
  ierr = c_rename(trim(old_fname)//c_null_char, trim(new_fname)//c_null_char)
 
 end function clib_rename
+!!***
+
+!!****f* m_clib/clib_mkdir
+!! NAME
+!!  clib_mkdir
+!!
+!! FUNCTION
+!!  Create a directory if it does not exist. Return 0 on success.
+!!
+!! SOURCE
+
+subroutine clib_mkdir_if_needed(dirpath, ierr)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: dirpath
+ integer,intent(out) :: ierr
+! *********************************************************************
+
+ call c_mkdir_if_needed(trim(dirpath)//c_null_char, ierr)
+
+end subroutine clib_mkdir_if_needed
 !!***
 
 !!****f* m_clib/clib_setenv
