@@ -1563,6 +1563,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
  character(len=10) :: tag
  character(len=500) :: msg, errmsg
  character(len=strlen) :: string
+ character(len=fnlen) :: dirpath
 !arrays
  integer,allocatable :: intarr(:)
  real(dp),allocatable :: dprarr(:)
@@ -1760,8 +1761,9 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      ! Create input/output/temporary directories if they don't exist yet.
      ii = index(filnam(i1), "/")
      if (ii > 0) then
-       call clib_mkdir_if_needed(filnam(i1)(1:ii-1), ierr)
-       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", filnam(i1)(1:ii-1)))
+       dirpath = filnam(i1)(1:ii-1)
+       call clib_mkdir_if_needed(dirpath, ierr)
+       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
      end if
    end do
  end if ! master only
