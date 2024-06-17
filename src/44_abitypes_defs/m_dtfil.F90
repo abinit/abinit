@@ -1763,7 +1763,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
      if (ii > 0) then
        dirpath = filnam(i1)(1:ii-1)
        call clib_mkdir_if_needed(dirpath, ierr)
-       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
+       ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory:", dirpath))
      end if
    end do
  end if ! master only

@@ -2230,7 +2230,7 @@ subroutine anaddb_init(input_path, filnam)
 !scalars
  integer:: lenstr, marr, jdtset, tread, i1, ierr
  character(len=strlen):: string, raw_string, fname
- character(len=fnlen) :: dirpath
+ !character(len=fnlen) :: dirpath
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
@@ -2324,12 +2324,12 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out, "(2a)")'- Root name for output files set to: ', trim(filnam(8))
  endif
 
- i1 = index(filnam(8), "/")
- if (i1 > 0) then
-   dirpath = filnam(8)(1:i1-1)
-   call clib_mkdir_if_needed(dirpath, ierr)
-   ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
- end if
+ !i1 = index(filnam(8), "/")
+ !if (i1 > 0) then
+ !  dirpath = filnam(8)(1:i1-1)
+ !  call clib_mkdir_if_needed(dirpath, ierr)
+ !  ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
+ !end if
 
 end subroutine anaddb_init
 !!***
