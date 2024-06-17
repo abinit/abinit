@@ -660,7 +660,7 @@ type, public :: dataset_type
  integer :: varpeq_nstep = 30
  integer :: varpeq_pc_nupdate = 20
  real(dp) :: varpeq_tolgrs = tol6
- real(dp) :: varpeq_pc_factor = half
+ real(dp) :: varpeq_pc_factor = eighth
  real(dp) :: varpeq_gau_params(2) = [zero, one]
 
  integer :: vdw_nfrag

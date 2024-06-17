@@ -598,6 +598,7 @@ subroutine varpeq_solve(self)
 
      ! TODO: add more control for this feature
      ! After some iterations update the preconditioner depending on the value of eps
+     if (self%pc_nupdate == 1) call polstate%update_pcond(self%pc_factor)
      if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor)
 
      call polstate%get_conjgrad_a()
@@ -1586,7 +1587,7 @@ subroutine polstate_gather(self, mode)
  contains
  subroutine gather_(my_arr, my_nk, my_kstart, glob_arr, comm)
 
-  integer, intent(in) :: comm, my_nk, my_kstar
+  integer, intent(in) :: comm, my_nk, my_kstart
   complex(dp), intent(in) :: my_arr(:, :)
   complex(dp), intent(out) :: glob_arr(:, :)
 
