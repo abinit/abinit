@@ -3185,7 +3185,7 @@ subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspino
  ABI_MALLOC(cut_pws,(npw))
 
 !Run through G vectors in basis
-!$OMP PARALLEL DO PRIVATE(gs)
+!$OMP PARALLEL DO PRIVATE(gs,i1,i2,i3)
  do ig=1,npw
    i1=kg(1,ig) ; i2=kg(2,ig) ; i3=kg(3,ig)
 !(k+G)^2 evaluated using metric and kpoint
