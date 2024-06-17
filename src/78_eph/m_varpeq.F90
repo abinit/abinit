@@ -143,12 +143,14 @@ module m_varpeq
    character(len=fnlen) :: aseed = " "
 
    integer :: nstep = -1
+   integer :: pc_nupdate = -1
    integer :: ncid = nctk_noid
 
    integer :: max_nk
    integer :: max_nq
    integer :: max_nb
 
+   real(dp) :: pc_factor
    real(dp) :: tolgrs
 
    real(dp) :: gau_params(2)
@@ -596,7 +598,7 @@ subroutine varpeq_solve(self)
 
      ! TODO: add more control for this feature
      ! After some iterations update the preconditioner depending on the value of eps
-     if (mod(ii, 20) == 1) call polstate%update_pcond()
+     if (mod(ii, self%pc_nupdate) == 1) call polstate%update_pcond(self%pc_factor)
 
      call polstate%get_conjgrad_a()
      call polstate%update_a()
@@ -702,6 +704,8 @@ subroutine varpeq_init(self, gstore, dtset)
 
  self%nstep = dtset%varpeq_nstep
  self%tolgrs = dtset%varpeq_tolgrs
+ self%pc_nupdate = dtset%varpeq_pc_nupdate
+ self%pc_factor = dtset%varpeq_pc_factor
  self%aseed = dtset%varpeq_aseed
  self%pkind = dtset%varpeq_pkind
  self%gau_params = dtset%varpeq_gau_params
@@ -864,10 +868,11 @@ end subroutine polstate_update_a
 !!
 !! SOURCE
 
-subroutine polstate_update_pcond(self)
+subroutine polstate_update_pcond(self, factor)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
+ real(dp) :: factor
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
@@ -880,7 +885,7 @@ subroutine polstate_update_pcond(self)
  do my_ik=1,gqk%my_nk
    ik_ibz = gqk%my_k2ibz(1, my_ik)
    do ib=1,gqk%nb
-     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz) - half*self%eps)
+     self%my_pcond(ib, my_ik) = one/(self%eig(ib, ik_ibz) - factor*self%eps)
    enddo
  enddo
 
@@ -920,7 +925,7 @@ subroutine polstate_get_conjgrad_a(self)
  self%my_grad_a(:,:) = self%my_pcond(:,:)*self%my_grad_a(:,:)
  call orthonorm_to_a_()
 
- ! If previous gradient is known, get conjugate gradient using Polak-Ribière formula
+ ! If previous gradient is known, get conjugate gradient using Polak-Ribi'ere formula
  if (self%has_prev_grad) then
    beta_num = &
      sum(self%my_grad_a(:,:)*conjg(self%my_grad_a(:,:) - self%my_prevgrad_a(:,:)))
@@ -1567,14 +1572,11 @@ subroutine polstate_gather(self, mode)
  gqk => self%gqk
  select case(mode)
  case ("a")
-   call gather_(self%my_a, gqk%my_nk, gqk%my_kstart, gqk%glob_nk, &
-     self%a_glob, gqk%kpt_comm%value)
+   call gather_(self%my_a, gqk%my_nk, gqk%my_kstart, self%a_glob, gqk%kpt_comm%value)
  case ("grad_a")
-   call gather_(self%my_grad_a, gqk%my_nk, gqk%my_kstart, gqk%glob_nk, &
-     self%grad_a_glob, gqk%kpt_comm%value)
+   call gather_(self%my_grad_a, gqk%my_nk, gqk%my_kstart, self%grad_a_glob, gqk%kpt_comm%value)
  case ("b")
-   call gather_(self%my_b, gqk%my_nq, gqk%my_qstart, gqk%glob_nq, &
-     self%b_glob, gqk%qpt_comm%value)
+   call gather_(self%my_b, gqk%my_nq, gqk%my_qstart, self%b_glob, gqk%qpt_comm%value)
  case default
    ABI_ERROR(sjoin("polstate_gather, unsuported mode: ", mode))
  end select
@@ -1582,9 +1584,9 @@ subroutine polstate_gather(self, mode)
 !----------------------------------------------------------------------
 
  contains
- subroutine gather_(my_arr, my_nk, my_kstart, glob_nk, glob_arr, comm)
+ subroutine gather_(my_arr, my_nk, my_kstart, glob_arr, comm)
 
-  integer, intent(in) :: comm, my_nk, my_kstart, glob_nk
+  integer, intent(in) :: comm, my_nk, my_kstar
   complex(dp), intent(in) :: my_arr(:, :)
   complex(dp), intent(out) :: glob_arr(:, :)
 

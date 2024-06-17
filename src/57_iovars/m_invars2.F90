@@ -2203,8 +2203,14 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_nstep', tread, 'INT')
  if (tread == 1) dtset%varpeq_nstep = intarr(1)
 
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_nupdate', tread, 'INT')
+ if (tread == 1) dtset%varpeq_pc_nupdate = intarr(1)
+
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_tolgrs', tread, 'DPR')
- if(tread==1) dtset%varpeq_tolgrs=dprarr(1)
+ if(tread==1) dtset%varpeq_tolgrs = dprarr(1)
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'varpeq_pc_factor', tread, 'DPR')
+ if(tread==1) dtset%varpeq_pc_factor = dprarr(1)
 
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'varpeq_gau_params', tread, 'DPR')
  if (tread == 1) dtset%varpeq_gau_params = dprarr(1:2)
