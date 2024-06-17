@@ -36,7 +36,7 @@ module m_varpeq
  use m_xmpi
 
  use defs_datatypes,    only : ebands_t
- use m_fstrings,        only : sjoin, ktoa, strcat
+ use m_fstrings,        only : sjoin, ktoa, ftoa, strcat
  use m_gstore,          only : gstore_t, gqk_t
  use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt
  use m_symkpt,          only : symkpt
@@ -140,6 +140,7 @@ module m_varpeq
  type, public :: varpeq_t
 
    character(len=fnlen) :: pkind = " "
+   character(len=fnlen) :: aseed = " "
 
    integer :: nstep = -1
    integer :: ncid = nctk_noid
@@ -149,6 +150,8 @@ module m_varpeq
    integer :: max_nb
 
    real(dp) :: tolgrs
+
+   real(dp) :: gau_params(2)
 
    real(dp), allocatable :: kpts_spin(:,:,:)
    real(dp), allocatable :: qpts_spin(:,:,:)
@@ -324,13 +327,15 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(ncerr)
    ! real(dp)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "tolgrs"])
+     "varpeq_tolgrs"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
    ! FIXME: correct a_spin/b_spin representation based on Matteo's advice
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t("varpeq_pkind", "c", "fnlen"), &
+     nctkarr_t("varpeq_aseed", "c", "fnlen"), &
+     nctkarr_t("varpeq_gau_params", "dp", "two"), &
      nctkarr_t("nstep2cv", "int", "nsppol"), &
      nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
@@ -354,11 +359,13 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      [dtset%eph_task, self%nstep, self%gstore%nkbz, self%gstore%nqbz])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "tolgrs"], &
+     "varpeq_tolgrs"], &
      [self%tolgrs])
    NCF_CHECK(ncerr)
    ! arrays
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_pkind"), self%pkind))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_aseed"), self%aseed))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_gau_params"), self%gau_params))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv"), self%nstep2cv_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "iter_rec"), self%iter_rec_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%gstore%glob_nk_spin))
@@ -577,7 +584,8 @@ subroutine varpeq_solve(self)
    spin = self%gstore%my_spins(my_is)
    polstate => self%polstate(my_is)
 
-   call polstate%seed_a()
+   call polstate%seed_a(self%aseed, gau_params=self%gau_params)
+
    do ii=1,self%nstep
      call polstate%localize()
 
@@ -698,7 +706,9 @@ subroutine varpeq_init(self, gstore, dtset)
 
  self%nstep = dtset%varpeq_nstep
  self%tolgrs = dtset%varpeq_tolgrs
+ self%aseed = dtset%varpeq_aseed
  self%pkind = dtset%varpeq_pkind
+ self%gau_params = dtset%varpeq_gau_params
  self%gaps = ebands_get_gaps(gstore%ebands, ierr)
  self%cryst_trinv = gstore%cryst%new_trinv_only()
 
@@ -1415,32 +1425,62 @@ end subroutine polstate_get_b_from_a
 !!
 !! SOURCE
 
-subroutine polstate_seed_a(self)
+subroutine polstate_seed_a(self, mode, gau_params)
 
 !Arguments ------------------------------------
+!scalars
  class(polstate_t), intent(inout) :: self
+ character(len=*), intent(in) :: mode
+!arrays
+ real(dp), optional, intent(in) :: gau_params(2)
 
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr, my_ik, ik_ibz, ib
-!arrays
  real(dp) :: anorm
 
 !----------------------------------------------------------------------
 
  gqk => self%gqk
- do my_ik=1,gqk%my_nk
-   ik_ibz = gqk%my_k2ibz(1, my_ik)
-   do ib=1,gqk%nb
-     self%my_a(ib, my_ik) = exp(-self%eig(ib, ik_ibz))
-   enddo
- enddo
+
+ select case(mode)
+ case ("gaussian")
+   ABI_CHECK(present(gau_params), "polstate_seed_a: missing gau_params argument")
+   call gaussian_(gau_params(1), gau_params(2))
+ case default
+   ABI_ERROR(sjoin("polstate_seed_a, unsuported mode: ", mode))
+ end select
 
  anorm = self%get_norm('a')
  self%my_a(:, :) = self%my_a(:, :)*sqrt(one*self%nkbz)/anorm
 
  call self%gather('a')
+
+!----------------------------------------------------------------------
+
+ contains
+ subroutine gaussian_(mu, sigma2)
+
+  real(dp), intent(in) :: mu, sigma2
+  character(len=5000) :: msg
+  integer :: my_ik, ik_ibz, ib
+  real(dp) :: eig
+
+ !----------------------------------------------------------------------
+
+  msg = sjoin("Seeding initial electronic vector with gaussian: &
+    variance parameter sigma^2 has to be > 0, but got ", ftoa(sigma2))
+  ABI_CHECK(sigma2 > 0, msg)
+
+  do my_ik=1,gqk%my_nk
+    ik_ibz = gqk%my_k2ibz(1, my_ik)
+    do ib=1,gqk%nb
+      eig = self%eig(ib, ik_ibz)
+      self%my_a(ib, my_ik) = exp(-(eig - mu)**2/(2*sigma2))
+    enddo
+  enddo
+
+ end subroutine gaussian_
 
 end subroutine polstate_seed_a
 !!***
