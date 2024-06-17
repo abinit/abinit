@@ -2188,7 +2188,6 @@ subroutine outvars_anaddb(anaddb_dtset, nunit)
 
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
-
 end subroutine outvars_anaddb
 !!***
 
@@ -2203,7 +2202,7 @@ end subroutine outvars_anaddb
 !! Initialize the code ppddb9: write heading and make the first i/os
 !!
 !! INPUTS
-!!  input_path: String with input file path. Empty string activates files file legacy mode.
+!!  input_path: String with input file path. Empty string activates files file in legacy mode.
 !!
 !! OUTPUT
 !! character(len = fnlen) filnam(7)=character strings giving file names
@@ -2230,7 +2229,8 @@ subroutine anaddb_init(input_path, filnam)
 !Local variables-------------------------
 !scalars
  integer:: lenstr, marr, jdtset, tread, i1, ierr
- character(len = strlen):: string, raw_string, fname
+ character(len=strlen):: string, raw_string, fname
+ character(len=fnlen) :: dirpath
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
@@ -2325,8 +2325,11 @@ subroutine anaddb_init(input_path, filnam)
  endif
 
  i1 = index(filnam(8), "/")
- call clib_mkdir_if_needed(filnam(8)(1:i1-1), ierr)
- ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", filnam(8)(1:i1-1)))
+ if (i1 > 0) then
+   dirpath = filnam(8)(1:i1-1)
+   call clib_mkdir_if_needed(dirpath, ierr)
+   ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
+ end if
 
 end subroutine anaddb_init
 !!***
