@@ -21,7 +21,7 @@
 !!          g(q, k) = <k + q, m, spin| \Delta_{q, \nu} V^{spin}_{scf} | k, n, spin>
 !!
 !!  There are lots of technical details that should be discussed but, roughly speaking,
-!!  the gqk API allows one to:
+!!  the gstore API allows one to:
 !!
 !!   - select whether q or k should be in the IBZ or in the BZ.
 !!     NB: It is not possible to use the IBZ both for q and k as g(Sk, q) = g(k, S^{-1}q)
@@ -56,11 +56,10 @@
 !!  Now, let's discuss the MPI-distribution.
 !!
 !!  The (q, k) matrix is distributed inside a 2D cartesian grid using block distribution.
-!!  This is schematic representation for 4 procs with 2 procs for k and 2 procs for q:
+!!  This is schematic representation for MPI 4 procs with 2 procs for k and 2 procs for q:
 !!
 !!                 k-axis (kpt_comm)
 !!              |--------------------
-!!              !         !         !
 !!              |         |         |
 !!              |   P00   |   P01   |
 !!              |         |         |
@@ -81,7 +80,7 @@
 !!  hence the parallelism over q-points is the most efficient one in terms of wall-time.
 !!  Keep in mind, however, that the k-point parallelism allows one to reduce the memory allocated for the
 !!  wavefunctions. Using some procs for k-point is also beneficial in terms of performance
-!!  as we reduce load imbalance with the number of procs in qpt_comm does not divide nqbz.
+!!  as we can reduce load imbalance with the number of procs in qpt_comm does not divide nqbz.
 !!
 !!  NB: If nsppol == 2, we create two gqk objects, one for each spin.
 !!  The reason is that dimensions such as the number of effective bands/q-points/k-points
@@ -1878,11 +1877,10 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
 
 !Local variables-------------------------------
 !scalars
- integer :: all_nproc, my_rank, ierr
- integer :: ii, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
+ integer :: all_nproc, my_rank, ierr, ii, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
 !arrays
  integer,allocatable :: map_kq(:,:)
- real(dp):: qpt(3)
+ real(dp) :: qpt(3)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
 
 ! *************************************************************************
@@ -2543,7 +2541,6 @@ pure subroutine gqk_myqpt(gqk, my_iq, gstore, weight, qpt)
  real(dp),intent(out) :: weight, qpt(3)
 
 !Local variables ------------------------------
-!scalars
  integer :: iq_ibz, isym_q, trev_q, tsign_q, g0_q(3)
  logical :: isirr_q
 
@@ -2596,8 +2593,7 @@ subroutine gqk_dbldelta_qpt(gqk, my_iq, gstore, eph_intmeth, eph_fsmear, qpt, we
  real(dp), parameter :: min_smear = tol9
  integer :: nb, nkbz, spin, my_ik, ib, ib1, ib2, band1, band2, nesting, ebands_timrev
  integer :: ik_ibz, isym_k, trev_k, tsign_k, g0_k(3)
- integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3)
- integer :: ii, i1, i2, i3, cnt, ik_bz, ltetra
+ integer :: ikq_ibz, isym_kq, trev_kq, tsign_kq, g0_kq(3), ii, i1, i2, i3, cnt, ik_bz, ltetra
  real(dp) :: g1, g2, sigma !, weight_k !, cpu, wall, gflops
  logical :: isirr_k, isirr_kq, use_adaptive
  type(ebands_t), pointer :: ebands
@@ -3587,7 +3583,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  NCF_CHECK(nf90_close(root_ncid))
 
  ! Output some of the results to ab_out for testing purposes
- call gstore%print_for_abitests(dtset)
+ !call gstore%print_for_abitests(dtset)
 
  ! Free memory
  ABI_FREE(gvnlx1)
@@ -4124,7 +4120,7 @@ subroutine gstore_check_restart(filepath, dtset, nqbz, done_qbz_spin, restart, c
  restart = 0; nqbz = 0
  if (my_rank == master .and. dtset%eph_restart == 1) then
     if (file_exists(filepath)) then
-      ! Use gstore_completed to understand if the previous GSTORE run completed else we need to restart
+      ! Use gstore_completed to understand if the previous GSTORE run completed else we need to restart.
       NCF_CHECK(nctk_open_read(root_ncid, filepath, xmpi_comm_self))
       NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
       call hdr_ncread(gstore_hdr, root_ncid, gstore_fform)
@@ -4206,11 +4202,10 @@ subroutine gstore_print_for_abitests(gstore, dtset)
 
 ! *************************************************************************
 
- ! Only master rank prints to ab_out
+ ! Only master MPI proc prints to ab_out
  if (xmpi_comm_rank(gstore%comm) /= master) return
 
  natom3 = dtset%natom * 3
-
  NCF_CHECK(nctk_open_read(root_ncid, gstore%path, xmpi_comm_self))
 
  NCF_CHECK(nf90_get_var(root_ncid, root_vid("gstore_completed"), gstore_completed))
@@ -4260,7 +4255,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
      ABI_FREE(vk_cart_ibz)
 
    case (2)
-     write(ab_out, "(a)")" TXT Output of vkmat is not coded yet!"
+     write(ab_out, "(a)")" TEXT Output of vkmat is not coded yet!"
    end select
 
    ! Handle the output of the e-ph matrix elements
@@ -4272,13 +4267,13 @@ subroutine gstore_print_for_abitests(gstore, dtset)
    ABI_MALLOC(gslice_mn, (cplex, nb, nb))
 
    write(ab_out,"(a)") " E-PH matrix elements:"
-   write(ab_out, "(1x,5(a5,1x),a16)")"iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
+   write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
    do iq_glob=1,glob_nq
      if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
      do ik_glob=1,glob_nk
        if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
        do ipc=1,natom3
-         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write 4th and the last pertubation.
+         if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last pertubation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
                               start=[1,1,1,ipc,ik_glob,iq_glob], count=[cplex,nb,nb,1,1,1])
          NCF_CHECK(ncerr)
@@ -4288,7 +4283,7 @@ subroutine gstore_print_for_abitests(gstore, dtset)
            do in_k=1,nb
              if (cplex == 1) g2 = gslice_mn(1, im_kq, in_k)
              if (cplex == 2) g2 = gslice_mn(1, im_kq, in_k)**2 + gslice_mn(2, im_kq, in_k)**2
-             write(ab_out, "(1x,5(i5,1x),es16.6)")iq_glob, ik_glob, ipc, im_kq, in_k, g2
+             write(ab_out, "(1x,5(i5,1x),es16.6)") iq_glob, ik_glob, ipc, im_kq, in_k, g2
            end do
          end do
        end do

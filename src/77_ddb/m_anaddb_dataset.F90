@@ -225,8 +225,6 @@ contains
 !! INPUTS
 !!  anaddb_dtset = anaddb datastructure
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine anaddb_dtset_free(anaddb_dtset)
@@ -285,7 +283,7 @@ end subroutine anaddb_dtset_free
 !!
 !! SOURCE
 
-subroutine invars9 (anaddb_dtset, lenstr, natom, string)
+subroutine invars9(anaddb_dtset, lenstr, natom, string)
 
 !Arguments-------------------------------
 !scalars
@@ -1891,7 +1889,7 @@ end subroutine invars9
 !!
 !! SOURCE
 
-subroutine outvars_anaddb (anaddb_dtset, nunit)
+subroutine outvars_anaddb(anaddb_dtset, nunit)
 
 !Arguments-------------------------------
 !scalars
