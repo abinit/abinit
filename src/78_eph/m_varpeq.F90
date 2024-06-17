@@ -50,56 +50,6 @@ module m_varpeq
 
 !----------------------------------------------------------------------
 
-!!****t* m_varpeq/varpeq_t
-!! NAME
-!!  varpeq_t
-!!
-!! FUNCTION
-!!  Description
-!!
-!! SOURCE
-
- type, public :: varpeq_t
-
-   character(len=fnlen) :: pkind = " "
-
-   integer :: nstep = -1
-   integer :: ncid = nctk_noid
-
-   integer :: max_nk
-   integer :: max_nq
-   integer :: max_nb
-
-   real(dp) :: tolgrs
-
-   real(dp), allocatable :: kpts_spin(:,:,:)
-   real(dp), allocatable :: qpts_spin(:,:,:)
-   real(dp), allocatable :: a_spin(:,:,:,:)
-   real(dp), allocatable :: b_spin(:,:,:,:)
-
-   integer, allocatable :: nstep2cv_spin(:)
-   real(dp), allocatable :: iter_rec_spin(:,:,:)
-
-   class(gstore_t), pointer :: gstore => null()
-   type(gaps_t) :: gaps
-   type(crystal_t) :: cryst_trinv
-   type(polstate_t), allocatable :: polstate(:)
-
- contains
-
-    procedure :: init => varpeq_init
-    procedure :: free => varpeq_free
-    procedure :: solve => varpeq_solve
-    procedure :: record => varpeq_record
-    procedure :: collect => varpeq_collect
-    procedure :: print => varpeq_print
-    procedure :: ncwrite => varpeq_ncwrite
-    !procedure :: ncread => ncread
-
- end type varpeq_t
-!!***
-
-
 !!****t* m_varpeq/polstate_t
 !! NAME
 !!  polstate_t
@@ -174,6 +124,57 @@ module m_varpeq
     procedure :: get_mapping => polstate_get_mapping
 
  end type polstate_t
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_varpeq/varpeq_t
+!! NAME
+!!  varpeq_t
+!!
+!! FUNCTION
+!!  Description
+!!
+!! SOURCE
+
+ type, public :: varpeq_t
+
+   character(len=fnlen) :: pkind = " "
+
+   integer :: nstep = -1
+   integer :: ncid = nctk_noid
+
+   integer :: max_nk
+   integer :: max_nq
+   integer :: max_nb
+
+   real(dp) :: tolgrs
+
+   real(dp), allocatable :: kpts_spin(:,:,:)
+   real(dp), allocatable :: qpts_spin(:,:,:)
+   real(dp), allocatable :: a_spin(:,:,:,:)
+   real(dp), allocatable :: b_spin(:,:,:,:)
+
+   integer, allocatable :: nstep2cv_spin(:)
+   real(dp), allocatable :: iter_rec_spin(:,:,:)
+
+   class(gstore_t), pointer :: gstore => null()
+   type(gaps_t) :: gaps
+   type(crystal_t) :: cryst_trinv
+   type(polstate_t), allocatable :: polstate(:)
+
+ contains
+
+    procedure :: init => varpeq_init
+    procedure :: free => varpeq_free
+    procedure :: solve => varpeq_solve
+    procedure :: record => varpeq_record
+    procedure :: collect => varpeq_collect
+    procedure :: print => varpeq_print
+    procedure :: ncwrite => varpeq_ncwrite
+    !procedure :: ncread => ncread
+
+ end type varpeq_t
 !!***
 
  public :: varpeq ! Main entry point
@@ -1326,7 +1327,7 @@ real(dp) function polstate_get_enel(self) result(enel)
  enel = enel/self%nkbz
 
 end function polstate_get_enel
-!!!***
+!!***
 
 !----------------------------------------------------------------------
 
