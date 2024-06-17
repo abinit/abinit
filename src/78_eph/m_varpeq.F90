@@ -410,7 +410,7 @@ subroutine varpeq_print(self)
 !scalars
  character(len=5000) :: msg
  integer, parameter :: master = 0
- integer :: comm, nproc, my_rank, ierr
+ integer :: comm, nproc, my_rank
  integer :: my_is, spin
  integer :: ii
  real(dp) :: enpol, enel, enph, enelph, eps, grs
@@ -484,7 +484,7 @@ subroutine varpeq_collect(self)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: my_rank, ierr
+ integer :: ierr
  integer :: my_is, spin
  integer :: my_ik, ik_glob
  integer :: my_iq, iq_glob
@@ -684,14 +684,10 @@ subroutine varpeq_init(self, gstore, dtset)
  character(len=5000) :: msg
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- type(gaps_t) :: gaps
  integer :: ierr
  integer :: my_is, spin, bstart
- integer :: my_ik, my_iq, ik_glob, iq_glob
- integer :: max_nk, max_nq, max_nb
+ integer :: my_iq
  real(dp) :: wtq
-!arrays
- real(dp) :: qpt(3)
 
 !----------------------------------------------------------------------
 
@@ -1089,7 +1085,6 @@ subroutine polstate_get_grad_a(self)
  complex(dp) :: a_forw, a_back
  complex(dp) :: g_forw, g_back
  complex(dp) :: b
- real(dp) :: norm
 !arrays
  integer, allocatable :: qpk_map(:, :), qmk_map(:, :)
  real(dp) :: qpt(3)
@@ -1636,7 +1631,6 @@ subroutine polstate_get_mapping(self, mode, kpt, map)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr
 
 !----------------------------------------------------------------------
 
