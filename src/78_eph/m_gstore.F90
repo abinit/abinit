@@ -170,7 +170,8 @@ module m_gstore
 
  ! Default value for entries in gvals, vk_cart_ibz and vkmat_cart_ibz arrays that have not been written.
  ! This can happen only if we have filtered wavevectors.
- real(dp),private,parameter :: GSTORE_FILL_DP = -huge(one) * 0.1_dp
+ !real(dp),private,parameter :: GSTORE_FILL_DP = -huge(one) * 0.1_dp
+ real(dp),private,parameter :: GSTORE_FILL_DP = zero
 !!***
 
 !----------------------------------------------------------------------
