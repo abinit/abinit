@@ -154,9 +154,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
- logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb
+ logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
@@ -233,6 +233,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    drhodb_filepath = dtfil%filddbsin; ii = len_trim(drhodb_filepath); drhodb_filepath(ii-2:ii+1) = "DRHODB"
  end if
 
+ gstore_filepath = dtfil%filgstorein
  sigeph_filepath = dtfil%filsigephin
 
  use_wfk = all(dtset%eph_task /= [0, 5, -5, 6, +15, -15, -16, 16])
@@ -248,8 +249,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ABI_COMMENT(msg)
  end if
 
- use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7)
+ use_dvdb = (dtset%eph_task /= 0 .and. dtset%eph_frohlichm /= 1 .and. abs(dtset%eph_task) /= 7 .and. dtset%eph_task /= 13)
  use_sigeph = (dtset%eph_task == 9)
+ use_gstore = (dtset%eph_task == 13)
  use_drhodb = (dtset%eph_task == 17)
 
  if (my_rank == master) then
@@ -786,23 +788,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (13)
    ! Variational polaron equations
-   if (dtfil%filgstorein /= ABI_NOFILE) then
-     call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", dtfil%filgstorein))
-     call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+   if (gstore_filepath /= ABI_NOFILE) then
+     call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", gstore_filepath))
+     call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
+     call varpeq(gstore, dtset, dtfil)
+     call gstore%free()
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Computing GSTORE file:", path))
-   ! Customize input vars for this task.
-     dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
-     call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
-     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
-     !call gstore%free()
-     !call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+     ABI_ERROR(sjoin("Cannot find GSTORE file:", path))
    end if
-
-   call varpeq(gstore, dtset, dtfil)
-   call gstore%free()
 
  case (14)
    ! Molecular Berry Curvature
