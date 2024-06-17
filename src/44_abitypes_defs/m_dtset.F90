@@ -34,7 +34,7 @@ module m_dtset
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
  use m_crystal,      only : crystal_t, crystal_init
- 
+
  implicit none
 
  private
@@ -655,9 +655,11 @@ type, public :: dataset_type
 !V
  integer :: vacnum
 
+ character(len=fnlen) :: varpeq_aseed = "gaussian"
  character(len=fnlen) :: varpeq_pkind = "none"
  integer :: varpeq_nstep = 30
- real(dp) :: varpeq_tolgrs = tol8
+ real(dp) :: varpeq_tolgrs = tol6
+ real(dp) :: varpeq_gau_params(2) = [zero, one]
 
  integer :: vdw_nfrag
  integer :: vdw_df_ndpts
@@ -2028,9 +2030,11 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%useylm             = dtin%useylm
  dtout%vacnum             = dtin%vacnum
 
+ dtout%varpeq_aseed       = dtin%varpeq_aseed
  dtout%varpeq_pkind       = dtin%varpeq_pkind
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
+ dtout%varpeq_gau_params  = dtin%varpeq_gau_params
 
  dtout%vdw_df_acutmin     = dtin%vdw_df_acutmin
  dtout%vdw_df_aratio      = dtin%vdw_df_aratio
@@ -3554,7 +3558,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_nstep varpeq_pkind varpeq_tolgrs'
+ list_vars=trim(list_vars)//' varpeq_aseed varpeq_gau_params varpeq_nstep varpeq_pkind varpeq_tolgrs'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'
