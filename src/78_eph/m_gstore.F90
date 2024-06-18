@@ -323,6 +323,9 @@ type, public :: gqk_t
 
  contains
 
+  procedure :: gather => gqk_gather
+  ! Gather the MPI-distributed matrix elements for a given k/q-point index
+
   procedure :: myqpt => gqk_myqpt
   ! Return the q-point and the weight from my local index my_iq
 
@@ -416,6 +419,9 @@ type, public :: gstore_t
 
   type(krank_t) :: krank_ibz, qrank_ibz
   ! Object used to find k-points or q-points in the IBZ and map BZ to IBZ.
+
+  integer :: ngqpt(3)
+  ! Number of grid points for q-points (either from ddb_ngqpt or eph_ngqpt_fine)
 
   integer,allocatable :: my_spins(:)
    ! (%my_nspins)
@@ -632,6 +638,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  if (all(dtset%eph_ngqpt_fine /= 0)) then
    ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
  end if
+ gstore%ngqpt(:) = ngqpt(:)
 
  ! TODO: Should fix bz2ibz to use the same conventions as krank and listkk
  ! NB: only sigmaph seems to be using this optional argument
@@ -847,6 +854,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
      nctkarr_t("gstore_wfk0_path", "c", "fnlen"), &
      nctkarr_t("gstore_brange_spin", "i", "two, number_of_spins"), &
      nctkarr_t("gstore_erange_spin", "dp", "two, number_of_spins"), &
+     nctkarr_t("gstore_ngqpt", "i", "three"), &
      nctkarr_t("phfreqs_ibz", "dp", "natom3, gstore_nqibz"), &
      nctkarr_t("pheigvec_cart_ibz", "dp", "two, three, natom, natom3, gstore_nqibz"), &
      nctkarr_t("gstore_glob_nq_spin", "i", "number_of_spins"), &
@@ -888,6 +896,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz"), kbz))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_brange_spin"), gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_erange_spin"), gstore%erange_spin))
+   NCF_CHECK(nf90_put_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nq_spin"), gstore%glob_nq_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_glob_nk_spin"), gstore%glob_nk_spin))
    NCF_CHECK(nf90_put_var(ncid, vid("gstore_kbz2ibz"), kbz2ibz))
@@ -999,6 +1008,8 @@ subroutine priority_from_eph_task(eph_task, priority)
  case (11)
    priority = "qk"
  case (12, -12)
+   priority = "q"
+ case (13)
    priority = "q"
  case (14, 17)
    priority = "kq"
@@ -3787,6 +3798,13 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      call replace_ch0(gstore%gmode)
    end if
 
+   ! gstore_gmode was added during the 78_eph/m_varpeq.f90 module development
+   gstore%ngqpt(:) = 0
+   ncerr = nf90_inq_varid(ncid, "gstore_ngqpt", varid)
+   if (ncerr == nf90_noerr) then
+     NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), gstore%ngqpt))
+   endif
+
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_wfk0_path"), gstore%wfk0_path))
    call replace_ch0(gstore%wfk0_path)
 
@@ -4309,6 +4327,98 @@ end function spin_vid
 
 
 end subroutine gstore_print_for_abitests
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_gstore/gqk_gather
+!! NAME
+!!  gqk_gather
+!!
+!! FUNCTION
+!!  Gather the MPI-distributed matrix elements for a given k/q-point index.
+!! Once one reciprocal dimension is fixed, the gathering is performed across
+!! the other one.
+!!
+!! INPUTS
+!!  mode = String controlling the choice of the fixed dimension ("k" or "q")
+!!  fixed_pt = Index of the fixed k/q-point
+!!
+!! OUTPUT
+!!  g_gathered(:,:,:,:) = Matrix elements for the given k/q-point, ordered as
+!! (my_npert, nb, nb, glob_nq) - k-point is fixed
+!! (my_npert, nb, nb, glob_nk) - q-point is fixed
+!!
+!! SOURCE
+
+subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
+
+!Arguments ------------------------------------
+!scalars
+ class(gqk_t), target, intent(in) :: gqk
+ character(len=*),intent(in) :: mode
+ integer, intent(in) :: fixed_pt
+!arrays
+ complex(dp), allocatable, intent(out) :: g_gathered(:,:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: comm, ierr
+ integer :: ipt_glob, ngather
+ integer :: my_ipt, my_ngather, my_ptstart
+ integer :: my_pert, ib, jb
+!arrays
+ complex(dp), pointer :: my_g(:,:,:,:)
+
+!----------------------------------------------------------------------
+
+ select case(mode)
+ case ("k")
+   comm = gqk%qpt_comm%value
+   ngather = gqk%glob_nq
+   my_ngather = gqk%my_nq
+   my_ptstart = gqk%my_qstart
+   my_g => gqk%my_g(:,:,:,:,fixed_pt)
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
+
+ case ("q")
+   comm = gqk%kpt_comm%value
+   ngather = gqk%glob_nk
+   my_ngather = gqk%my_nk
+   my_ptstart = gqk%my_kstart
+   my_g => gqk%my_g(:,:,fixed_pt,:,:)
+   ABI_MALLOC(g_gathered, (gqk%my_npert, gqk%nb, gqk%nb, ngather))
+
+ case default
+   ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, unsupported mode: ", mode))
+ end select
+
+
+ g_gathered(:,:,:,:) = zero
+ do my_ipt=1,my_ngather
+   ipt_glob = my_ipt + my_ptstart - 1
+
+   ! FIXME: can the rearrangement be done in the select case statement?
+   do ib=1,gqk%nb
+     do jb=1,gqk%nb
+       do my_pert=1,gqk%my_npert
+
+         if (mode == "k") then
+           g_gathered(my_pert, jb, ib, ipt_glob) = &
+             my_g(my_pert, jb, my_ipt, ib)
+         else
+           g_gathered(my_pert, jb, ib, ipt_glob) = &
+             my_g(my_pert, jb, ib, my_ipt)
+         endif
+
+       enddo
+     enddo
+   enddo
+ enddo
+
+ call xmpi_sum(g_gathered, comm, ierr)
+
+end subroutine gqk_gather
 !!***
 
 end module m_gstore
