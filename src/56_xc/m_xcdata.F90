@@ -138,8 +138,6 @@ contains
 !! OUTPUT
 !!  xcdata <type(xcdata_type)>= the data to calculate exchange-correlation are initialized
 !!
-!! SIDE EFFECTS
-!!
 !! SOURCE
 
 subroutine xcdata_init(xcdata,auxc_ixc,dtset,hyb_mixing,intxc,ixc,nelect,nspden,tphysel,&

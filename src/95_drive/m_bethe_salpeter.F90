@@ -61,7 +61,7 @@ module m_bethe_salpeter
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
- use m_io_screening,    only : hscr_t, hscr_io, get_hscr_qmesh_gsph
+ use m_io_screening,    only : hscr_t, get_hscr_qmesh_gsph
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
  use m_exc_analyze,     only : exc_den
@@ -73,7 +73,7 @@ module m_bethe_salpeter
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free,&
-&                              pawrhoij_inquire_dim, pawrhoij_symrhoij
+                               pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
@@ -253,7 +253,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(650,1,tsec) ! bse(Total)
  call timab(651,1,tsec) ! bse(Init1)
 
- comm = xmpi_world; nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  wfk_fname = dtfil%fnamewffk
 
@@ -854,7 +854,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    W_info%eps_inf = BSp%eps_inf
 
    call screen%init(W_Info, Cryst, Qmesh, Gsph_c, Vcp, w_fname, mqmem, Dtset%npweps, &
-               Dtset%iomode, ngfftf, nfftf_tot, Wfd%nsppol, Wfd%nspden, qp_aerhor, Wfd%prtvol, Wfd%comm)
+                    Dtset%iomode, ngfftf, nfftf_tot, Wfd%nsppol, Wfd%nspden, qp_aerhor, Wfd%prtvol, Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
 
