@@ -33,6 +33,10 @@ module m_xg_ortho_RR
   use m_xg
   use m_xgScalapack
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
@@ -457,7 +461,7 @@ module m_xg_ortho_RR
     call xg_free(subB)
 
 #if defined(HAVE_GPU_CUDA) && defined(HAVE_YAKL)
-    if (chebfi%gpu_option==ABI_GPU_KOKKOS) then
+    if (gpu_option==ABI_GPU_KOKKOS) then
       call gpu_device_synchronize()
     end if
 #endif
