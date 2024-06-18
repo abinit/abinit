@@ -1,7 +1,7 @@
-#Test chebfi with OpenMP GPU
+#Test lobpcg with OpenMP GPU
 
  ndtset 1
- wfoptalg 111  npband 1 npfft 1
+ wfoptalg 114  npband 1 npfft 1
  gpu_option 2
 
  np_spkpt 1
@@ -28,9 +28,9 @@
  znucl 6
  nband 12 occ 4*2 8*0
  ntypat 1 typat 1 1  natom 2
- istwfk *2
+ istwfk *1
 
- paral_kgb 1
+ paral_kgb 0
  iomode 0    # Only for testing purposes 
  fftalg 402
 
@@ -46,11 +46,11 @@
 #%% nprocs_to_test = 1
 #%% max_nprocs = 1
 #%% [NCPU_1]
-#%% files_to_test = t04_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
+#%% files_to_test = t13_MPI1.abo, tolnlines=   16,   tolabs=  5.0e-8,      tolrel= 2.0e-2
 #%% [extra_info]
 #%% keywords = PAW
 #%% authors = M. Sarraute
 #%% description = 
-#%%    Chebyshev, C-diamond, Bulk, 2 atoms, paral_kgb, mono-GPU, istwfk==2, with PAW.
+#%%    LOBPCG, C-diamond, Bulk, 2 atoms, mono-GPU, istwfk==1, with PAW.
 #%% topics = parallelism
 #%%<END TEST_INFO>
