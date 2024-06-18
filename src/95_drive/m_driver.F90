@@ -35,6 +35,7 @@ module m_driver
  use m_dtfil
  use m_fftcore
  use libxc_functionals
+ use m_longwave
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
@@ -73,8 +74,6 @@ module m_driver
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
-
- use m_longwave
 
  implicit none
 

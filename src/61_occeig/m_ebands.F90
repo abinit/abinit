@@ -280,6 +280,7 @@ MODULE m_ebands
     ! fo_kpos(3,nsppol)
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
+    ! NB: f stands for fundamental, o for "optical" gap.
 
    real(dp) :: fermie
     ! Fermi energy taken from ebands.
