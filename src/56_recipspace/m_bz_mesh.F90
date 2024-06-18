@@ -123,7 +123,7 @@ module m_bz_mesh
 
   integer,allocatable :: tab(:)
   ! (nbz)
-  ! For each point in the BZ, it gives the index of the symmetric irreducible point in the array ibz.
+  ! For each point in the BZ, it gives the index of the symmetric irreducible point in the ibz.
 
   integer,allocatable :: tabi(:)
   ! (nbz)
@@ -186,6 +186,7 @@ module m_bz_mesh
 
  public :: make_mesh             ! Initialize the mesh starting from kptrlatt and shiftk.
  public :: find_qmesh            ! Find the Q-mesh defined as the set of all possible k1-k2 differences.
+
  public :: isamek                ! Check whether two points are equal within an umklapp G0.
  public :: isequalk              ! Check whether two points are equal within an umklapp G0 (does not report G0)
  public :: findqg0               ! Identify q + G0 = k1-k2.
@@ -427,15 +428,15 @@ subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
  end if
 
  Kmesh%kptopt = kptopt
- nsym   = Cryst%nsym; timrev = Cryst%timrev
+ nsym = Cryst%nsym; timrev = Cryst%timrev
 
  ! Find BZ from IBZ and fill tables ===
- nkbzX=nkibz*nsym*timrev ! Maximum possible number
- ABI_MALLOC(kbz,(3,nkbzX))
- ABI_MALLOC(wtk,(nkibz))
- ABI_MALLOC(ktab,(nkbzX))
- ABI_MALLOC(ktabi,(nkbzX))
- ABI_MALLOC(ktabo,(nkbzX))
+ nkbzX = nkibz*nsym*timrev ! Maximum possible number
+ ABI_MALLOC(kbz, (3,nkbzX))
+ ABI_MALLOC(wtk, (nkibz))
+ ABI_MALLOC(ktab, (nkbzX))
+ ABI_MALLOC(ktabi, (nkbzX))
+ ABI_MALLOC(ktabo, (nkbzX))
 
  if (present(ref_bz)) then
    call identk(kibz,nkibz,nkbzX,nsym,timrev,cryst%symrec,cryst%symafm,kbz,ktab,ktabi,ktabo,nkbz,wtk,ref_bz=ref_bz)
@@ -462,10 +463,10 @@ subroutine kmesh_init(Kmesh, Cryst, nkibz, kibz, kptopt, &
  ! ================================================================
  !
  ! Dimensions.
- Kmesh%nbz   =nkbz      ! Number of points in the full BZ
- Kmesh%nibz  =nkibz     ! Number of points in the IBZ
- Kmesh%nsym  =nsym      ! Number of operations
- Kmesh%timrev=timrev    ! 2 if time-reversal is used, 1 otherwise
+ Kmesh%nbz   = nkbz      ! Number of points in the full BZ
+ Kmesh%nibz  = nkibz     ! Number of points in the IBZ
+ Kmesh%nsym  = nsym      ! Number of operations
+ Kmesh%timrev= timrev    ! 2 if time-reversal is used, 1 otherwise
 
  ! Arrays.
  Kmesh%gmet   = Cryst%gmet
@@ -1032,7 +1033,7 @@ logical function isamek(k1, k2, g0)
 
 ! *************************************************************************
 
- isamek = isinteger(k1-k2, TOL_KDIFF)
+ isamek = isinteger(k1 - k2, TOL_KDIFF)
 
  if (isamek) then
    g0 = NINT(k1-k2)
@@ -1255,13 +1256,13 @@ end function bz_mesh_isirred
 !! SOURCE
 
 subroutine make_mesh(Kmesh, Cryst, kptopt, kptrlatt, nshiftk, shiftk,&
-                     vacuum,break_symmetry)  ! Optional
+                     vacuum, break_symmetry)  ! Optional
 
 !Arguments -------------------------------
 !scalars
+ type(kmesh_t),intent(inout) :: Kmesh
  integer,intent(in) :: nshiftk,kptopt
  logical,optional,intent(in) :: break_symmetry
- type(kmesh_t),intent(inout) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
 !arrays
  integer,intent(inout) :: kptrlatt(3,3)
@@ -1332,7 +1333,7 @@ subroutine make_mesh(Kmesh, Cryst, kptopt, kptrlatt, nshiftk, shiftk,&
  ! kmesh_init will reconstruct the BZ from kibz but pruning the k-points not in ref_bz
  ! TODO: solve problem with timrev
  my_break_symmetry=.FALSE.; if (PRESENT(break_symmetry)) my_break_symmetry=break_symmetry
- call kmesh_init(Kmesh,Cryst,nkibz,kibz,kptopt,ref_bz=ref_kbz,break_symmetry=my_break_symmetry)
+ call Kmesh%init(Cryst, nkibz, kibz, kptopt, ref_bz=ref_kbz, break_symmetry=my_break_symmetry)
 
  ABI_FREE(ref_kbz)
  ABI_FREE(kibz)
@@ -1858,7 +1859,6 @@ end subroutine make_path
 subroutine find_qmesh(Qmesh, Cryst, Kmesh)
 
 !Arguments ------------------------------------
-!scalars
  type(kmesh_t),intent(inout) :: Qmesh
  type(kmesh_t),intent(in) :: Kmesh
  type(crystal_t),intent(in) :: Cryst
