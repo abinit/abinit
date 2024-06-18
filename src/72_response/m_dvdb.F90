@@ -64,7 +64,7 @@ module m_dvdb
  use m_crystal,       only : crystal_t
  use m_kpts,          only : kpts_ibz_from_kptrlatt, listkk, kpts_map, kpts_timrev_from_kptopt
  use m_spacepar,      only : symrhg, setsym
- use m_fourier_interpol,only : fourier_interpol
+ use m_fourier_interpol,only : fourier_interpol_seq
  use m_pawrhoij,      only : pawrhoij_type
  use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
@@ -203,6 +203,9 @@ module m_dvdb
    ! file handle
    ! Fortran unit number if iomode==IO_MODE_FORTRAN
    ! MPI file handler if iomode==IO_MODE_MPI
+
+  integer :: fform
+  ! File format
 
   integer :: comm
   ! Global MPI communicator used for IO.
@@ -433,7 +436,7 @@ module m_dvdb
   type(hdr_type) :: hdr_ref
   ! Header associated to the first potential in the DVDB. Used to backspace.
   ! Gives the number of Fortran records required to backspace the header
-  ! Assume headers with same headform and same basic dimensions e.g. npsp
+  ! Assume all headers with same fform and same basic dimensions e.g. npsp
 
   type(mpi_type) :: mpi_enreg
   ! Internal object used to call fourdp and other GS/DFPT routines
@@ -448,6 +451,9 @@ module m_dvdb
 
    procedure :: free => dvdb_free
    ! Release the memory allocated and close the file.
+
+   procedure :: has_fields => dvdb_has_fields
+   ! Check whether the DVDB database stores first-order potentials or first-order densities
 
    procedure :: print => dvdb_print
    ! Print info on object.
@@ -566,6 +572,8 @@ module m_dvdb
  !  ! star(nstars)
  !end type stars_t
 
+ integer,private,parameter :: pot1_fforms(2) = [109, 111], den1_fforms(1) = [54]
+
 contains
 !!***
 
@@ -626,11 +634,11 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
    read(unt, err=10, iomsg=msg) new%numv1
 
    ! Get important dimensions from the first header and rewind the file.
-   call hdr_fort_read(new%hdr_ref, unt, fform)
-   if (dvdb_check_fform(fform, "read_dvdb", msg) /= 0) then
+   call hdr_fort_read(new%hdr_ref, unt, new%fform)
+   if (dvdb_check_fform(new%fform, "read_dvdb", msg) /= 0) then
      ABI_ERROR(sjoin("While reading:", path, ch10, msg))
    end if
-   if (new%debug) call new%hdr_ref%echo(fform, 4, unit=std_out)
+   if (new%debug) call new%hdr_ref%echo(new%fform, 4, unit=std_out)
 
    rewind(unt)
    read(unt, err=10, iomsg=msg)
@@ -719,6 +727,7 @@ type(dvdb_t) function dvdb_new(path, comm) result(new)
  ! Master broadcasts data.
  if (xmpi_comm_size(comm) > 1) then
    call xmpi_bcast(new%version, master, comm, ierr)
+   call xmpi_bcast(new%fform, master, comm, ierr)
    call xmpi_bcast(new%numv1, master, comm, ierr)
    call xmpi_bcast(new%nqpt, master, comm, ierr)
    call new%hdr_ref%bcast(master, my_rank, comm)
@@ -925,7 +934,6 @@ end subroutine dvdb_close
 subroutine dvdb_free(db)
 
 !Arguments ------------------------------------
-!scalars
  class(dvdb_t),intent(inout) :: db
 
 !************************************************************************
@@ -965,6 +973,40 @@ subroutine dvdb_free(db)
  call db%close()
 
 end subroutine dvdb_free
+!!***
+
+!!****f* m_dvdb/dvdb_has_fields
+!! NAME
+!!  dvdb_has_fields
+!!
+!! FUNCTION
+!!  Check whether the database stores first-order potentials (pot1) or first-order densities (den1)
+!!
+!! SOURCE
+
+logical function dvdb_has_fields(db, choice, msg) result(ok)
+
+!Arguments ------------------------------------
+ class(dvdb_t),intent(in) :: db
+ character(len=*),intent(in) :: choice
+ character(len=*),intent(out) :: msg
+
+!************************************************************************
+
+ ! See m_hdr, more specifically all_abifiles for the correspondence between data and fform.
+ msg = ""
+ select case (choice)
+ case ("pot1")
+   ok = any(db%fform == pot1_fforms)
+   if (.not. ok) msg = sjoin("expecting first order potentials with headform in", ltoa(pot1_fforms), "but got", itoa(db%fform))
+ case ("den1")
+   ok = any(db%fform == den1_fforms)
+   if (.not. ok) msg = sjoin("expecting first order densities with headform in", ltoa(den1_fforms), "but got", itoa(db%fform))
+ case default
+   ABI_ERROR(sjoin("Invalid choice:", choice))
+ end select
+
+end function dvdb_has_fields
 !!***
 
 !----------------------------------------------------------------------
@@ -1210,10 +1252,9 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
 !scalars
  integer,save :: enough = 0
  integer :: iv1,ispden,nfftot_file,nfftot_out,ifft
- type(MPI_type) :: MPI_enreg_seq
 !arrays
  integer :: ngfft_in(18),ngfft_out(18)
- real(dp),allocatable :: v1r_file(:,:),v1g_in(:,:),v1g_out(:,:)
+ real(dp),allocatable :: v1r_file(:,:)
 
 ! *************************************************************************
 
@@ -1248,7 +1289,6 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
    end do
  else
    ! The FFT mesh used in the caller differ from the one found in the DVDB --> Fourier interpolation
-   ! TODO: Add linear interpolation as well.
    if (enough == 0) ABI_COMMENT("Performing FFT interpolation of DFPT potentials as input ngfft differs from ngfft_file.")
    enough = enough + 1
    ABI_MALLOC(v1r_file, (cplex*nfftot_file, db%nspden))
@@ -1256,33 +1296,15 @@ integer function dvdb_read_onev1(db, idir, ipert, iqpt, cplex, nfft, ngfft, v1sc
      read(db%fh, err=10, iomsg=msg) (v1r_file(ifft, ispden), ifft=1,cplex*nfftot_file)
    end do
 
-   ! Call fourier_interpol to get v1scf on ngfft mesh.
+   ! Call fourier_interpol_seq to get v1scf on the ngfft mesh.
    ngfft_in = ngfft; ngfft_out = ngfft
    ngfft_in(1:3) = db%ngfft3_v1(1:3, iv1); ngfft_out(1:3) = ngfft(1:3)
    ngfft_in(4:6) = ngfft_in(1:3); ngfft_out(4:6) = ngfft_out(1:3)
    ngfft_in(9:18) = 0; ngfft_out(9:18) = 0
    ngfft_in(10) = 1; ngfft_out(10) = 1
 
-   call initmpi_seq(MPI_enreg_seq)
-   ! Which one is coarse? Note that this part is not very robust and can fail!
-   if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_in(2),ngfft_in(3),'all')
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_out(2),ngfft_out(3),'all')
-   else
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'f',ngfft_in(2),ngfft_in(3),'all')
-     call init_distribfft_seq(MPI_enreg_seq%distribfft,'c',ngfft_out(2),ngfft_out(3),'all')
-   end if
-
-   ABI_MALLOC(v1g_in,  (2, nfftot_file))
-   ABI_MALLOC(v1g_out, (2, nfftot_out))
-
-   call fourier_interpol(cplex,db%nspden,0,0,nfftot_file,ngfft_in,nfftot_out,ngfft_out,&
-     MPI_enreg_seq,v1r_file,v1scf,v1g_in,v1g_out)
-
-   ABI_FREE(v1g_in)
-   ABI_FREE(v1g_out)
+   call fourier_interpol_seq(cplex, db%nspden, nfftot_file, ngfft_in, nfft, ngfft, v1r_file, v1scf)
    ABI_FREE(v1r_file)
-   call destroy_mpi_enreg(MPI_enreg_seq)
  end if
 
  ! Skip record with rhog1_g0 (if present)
@@ -5176,7 +5198,7 @@ end subroutine dvdb_list_perts
 !!  dvdb_merge_files
 !!
 !! FUNCTION
-!!  Merge a list of POT1 files.
+!!  Merge a list of POT1 or DEN1 files.
 !!
 !! INPUT
 !!  nfiles=Number of files to be merged.
@@ -5204,7 +5226,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
  !integer :: fform_pot=102
  integer :: fform_pot=111
  integer :: ii,jj,fform,ount,cplex,nfft,ifft,ispden,nperts
- integer :: n1,n2,n3,v1_varid,ierr, npert_miss
+ integer :: n1,n2,n3,v1_varid,ierr, npert_miss, first_fform
  logical :: qeq0
  character(len=500) :: msg
  type(hdr_type),pointer :: hdr1
@@ -5251,7 +5273,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
    if (endswith(v1files(ii), ".nc")) then
       NCF_CHECK(nctk_open_read(units(ii), v1files(ii), xmpi_comm_self))
-      call hdr_ncread(hdr1_list(ii),units(ii),fform)
+      call hdr_ncread(hdr1_list(ii), units(ii), fform)
    else
      if (open_file(v1files(ii), msg, newunit=units(ii), form="unformatted", action="read", status="old") /= 0) then
        ABI_ERROR(msg)
@@ -5268,13 +5290,19 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    end if
    !write(std_out,*)"done", trim(v1files(ii))
 
+   if (ii == 1) then
+     first_fform = fform
+   else
+     ABI_CHECK_IEQ(fform, first_fform, "Trying to merge files with different quantities")
+   end if
+
    ! Supported fform:
    ! 109  POT1 files without vh1(G=0)
    ! 111  POT1 files with extra record with vh1(G=0) after FFT data.
    ! 54   RHO1 files (treating DRHODB as DVDB)
 
    has_rhog1_g0(ii) = .True.
-   if (any(fform == [54,109])) has_rhog1_g0(ii) = .False.
+   if (any(fform == [54, 109])) has_rhog1_g0(ii) = .False.
 
    write(std_out,"(a,i0,2a)")"- Merging file [",ii,"]: ",trim(v1files(ii))
    jj = ii
@@ -5302,7 +5330,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    else
       ! Netcdf IO
       ! netcdf array has shape [cplex, n1, n2, n3, nspden]
-      if (any(fform == [109, 111])) then
+      if (any(fform == pot1_fforms)) then
         NCF_CHECK(nf90_inq_varid(units(ii), "first_order_potential", v1_varid))
         do ispden=1,hdr1%nspden
           NCF_CHECK(nf90_get_var(units(ii), v1_varid, v1, start=[1,1,1,1,ispden], count=[cplex, n1, n2, n3, 1]))
@@ -5313,7 +5341,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
         if (has_rhog1_g0(jj)) then
           NCF_CHECK(nf90_get_var(units(ii), nctk_idname(units(ii), "rhog1_g0"), rhog1_g0))
         end if
-      else if (fform == 54) then
+      else if (any(fform == den1_fforms)) then
         ! v below should read as rho
         NCF_CHECK(nf90_inq_varid(units(ii), "first_order_density", v1_varid))
         do ispden=1,hdr1%nspden
