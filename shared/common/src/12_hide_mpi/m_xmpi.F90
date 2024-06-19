@@ -38,7 +38,7 @@ module m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : clib_ulimit_stack !, clib_getpid !, clib_usleep
+ use m_clib
 
  implicit none
 
@@ -758,9 +758,6 @@ CONTAINS  !===========================================================
 !!  Hides MPI_INIT from MPI library. Perform the initialization of some basic variables
 !!  used by the MPI routines employed in abinit.
 !!
-!! INPUTS
-!!  None
-!!
 !! SOURCE
 
 subroutine xmpi_init()
@@ -778,6 +775,8 @@ subroutine xmpi_init()
 #endif
 
 ! *************************************************************************
+
+ call set_num_threads_if_undef()
 
  mpierr=0
 #ifdef HAVE_MPI
@@ -851,6 +850,44 @@ end subroutine xmpi_init
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/set_num_threads_if_undef
+!! NAME
+!!  set_num_threads_if_undef
+!!
+!! FUNCTION
+!!  sets OMP_NUM_THREADS to 1 is the env variable is undefined.
+!!
+!! SOURCE
+
+subroutine set_num_threads_if_undef()
+
+#ifdef HAVE_OPENMP
+!Local variables-------------------
+ integer :: ierr
+ character(len=100) :: omp_num_threads
+! *************************************************************************
+
+ ! Get the value of OMP_NUM_THREADS environment variable
+ call get_environment_variable('OMP_NUM_THREADS', omp_num_threads, status=ierr)
+
+ ! If OMP_NUM_THREADS is not defined (ierr != 0), set it to 1
+ if (ierr /= 0) then
+   ierr = clib_setenv('OMP_NUM_THREADS', '1', 1)
+   if (ierr == 0) then
+     write(std_out,"(a)")'- OMP_NUM_THREADS was not defined. It has been set to 1.'
+   else
+     write(std_out,"(a)")'- WARNING: Failed to set OMP_NUM_THREADS.'
+   end if
+ else
+   !write(std_out,*)'- OMP_NUM_THREADS is already set to: ', trim(omp_num_threads)
+ end if
+#endif
+
+end subroutine set_num_threads_if_undef
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_set_inplace_operations
 !! NAME
 !!  xmpi_set_inplace_operations
@@ -863,7 +900,7 @@ end subroutine xmpi_init
 subroutine xmpi_set_inplace_operations(bool)
 
 !Local variables-------------------
- logical :: bool
+ logical,intent(in) :: bool
 
 ! *************************************************************************
 
@@ -1134,15 +1171,13 @@ end subroutine xmpi_show_info
 !!
 !! SOURCE
 
-function xmpi_comm_rank(comm)
+integer function xmpi_comm_rank(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_rank
 
 !Local variables-------------------
  integer :: mpierr
-
 ! *************************************************************************
 
  mpierr=0
@@ -1175,14 +1210,12 @@ end function xmpi_comm_rank
 !!
 !! SOURCE
 
-function xmpi_comm_size(comm)
+integer function xmpi_comm_size(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_size
 
 !Local variables-------------------------------
-!scalars
  integer :: mpierr
 
 ! *************************************************************************
@@ -1541,13 +1574,12 @@ end subroutine xmpi_comm_create
 !!
 !! SOURCE
 
-function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
+integer function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
 
 !Arguments-------------------------
 !scalars
  integer,intent(in) :: comm,nranks
  integer,intent(out),optional :: my_rank_in_group
- integer :: xmpi_subcomm
 !arrays
  integer,intent(in) :: ranks(nranks)
 
