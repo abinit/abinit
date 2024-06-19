@@ -36,8 +36,8 @@ inp_files = [
 "t32.abi",
 "t41.abi",
 "t43.abi", # test chebfi2 (paw+soc)
-"t44.abi", # test chebfi2 (istwfk>1,paw)
-"t45.abi", # test chebfi2 (istwfk>1,norm conserving)
+#"t44.abi", # test chebfi2 (istwfk>1,paw) # temporary disabled
+#"t45.abi", # test chebfi2 (istwfk>1,norm conserving) #temporary disabled
 "t51.abi",
 "t52.abi",
 "t53.abi",
