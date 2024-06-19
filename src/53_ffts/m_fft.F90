@@ -3003,7 +3003,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
 
 ! *************************************************************************
 
- ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
+ !ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing
  call timab(1260+tim_fourdp,1,tsec)

@@ -408,12 +408,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1544,-2,tsec)
-     do idat=1,ndat
-     do idat_occ=1,ndat_occ
        ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
-       call fourdp(cplex_fock,rhog_munu(:,:,idat_occ,idat),rhor_munu(:,:,idat_occ,idat),-1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
-     end do ! idat_occ
-     end do ! idat
+       call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1544,-1,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
@@ -445,29 +441,31 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !* vfock will contain the local Fock potential, the result of hartre routine.
 !* vfock = FFT( rhog_munu/|g+qvec|^2 )
      call timab(1525,-1,tsec) ; call timab(1545,-1,tsec)
-     do idat=1,ndat
-     do idat_occ=1,ndat_occ
 #if 0
 
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
      call timab(1515,-2,tsec) ; call timab(1513,-1,tsec)
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
 &     mpi_enreg%paral_kgb,rhog_munu(:,:,idat_occ,idat),rprimd,vfock(:,idat_occ,idat),divgq0=fock%divgq0,qpt=qvec_j)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec)
+     end do ! idat_occ
+     end do ! idat
 
 #else
-     do ifft=1,nfftf
-     end do
+     do idat=1,ndat
+     do idat_occ=1,ndat_occ
      do ifft=1,nfftf
        rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
        rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
      end do
-
-     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
-     call fourdp(cplex_fock,rhog_munu(:,:,idat_occ,idat),vfock(:,idat_occ,idat),+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp_fock_getghc)
-     call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
-#endif
      end do ! idat_occ
      end do ! idat
+
+     call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
+     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc)
+     call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
+#endif
      call timab(1525,-2,tsec) ; call timab(1545,-2,tsec)
 
 !===============================================================
