@@ -106,7 +106,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer :: iband_cprj,ider,idir,idir1,ier,ii,ind,ipw,ifft,itypat,izero,jband,jbg,jcg,jkg
  integer :: jkpt,my_jsppol,jstwfk,lmn2_size,mgfftf,mpw,n1,n2,n3,n4,n5,n6,ndat_occ
  integer :: n1f,n2f,n3f,n4f,n5f,n6f,natom,nband_k,ndij,nfft,nfftf,nfftotf,nhat12_grdim,nnlout
- integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop
+ integer :: npw,npwj,nspden_fock,nspinor,nkpg,paw_opt,signs,tim_nonlop,gpu_option
  integer, save :: ncount=0
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
@@ -155,6 +155,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  nspinor=gs_ham%nspinor
  mpw=maxval(fockbz%npwarr)
  npw=gs_ham%npw_k
+ gpu_option=gs_ham%gpu_option
  ider=0;izero=0
  if (fockcommon%usepaw==1) then
    nfft =fockcommon%pawfgr%nfftc ; ngfft =fockcommon%pawfgr%ngfftc
@@ -357,24 +358,49 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
      call timab(1522,2,tsec) ; call timab(1542,-2,tsec) ; call timab(1523,-1,tsec)
 
-     do idat=1,ndat
-     do idat_occ=1,ndat_occ
-       ind=0
-       do i3=1,n3f
-         do i2=1,n2f
-           do i1=1,n1f
-             ind=ind+1
-             recwf  =cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
-             imcwf  =cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
-             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
-             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
-             rhor_munu(1,ind,idat_occ,idat)= recwocc*recwf+imcwocc*imcwf
-             rhor_munu(2,ind,idat_occ,idat)= recwocc*imcwf-imcwocc*recwf
-           end do ! i1
-         end do ! i2
-       end do ! i3
-     end do ! idat_occ
-     end do ! idat
+     if(gpu_option==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO COLLAPSE(2) &
+       !$OMP& PRIVATE(ind,imcwf,recwf,recwocc,imcwocc)
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+         do i3=1,n3f
+           do i2=1,n2f
+             do i1=1,n1f
+               ind=i1+(i2-1)*n1f+(i3-1)*n2f*n3f
+               recwf  =cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
+               imcwf  =cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
+               recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+               imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+               rhor_munu(1,ind,idat_occ,idat)= recwocc*recwf+imcwocc*imcwf
+               rhor_munu(2,ind,idat_occ,idat)= recwocc*imcwf-imcwocc*recwf
+             end do ! i1
+           end do ! i2
+         end do ! i3
+       end do ! idat_occ
+       end do ! idat
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(5) &
+       !$OMP& MAP(tofrom:rhor_munu) MAP(to:cwavef_r,cwaveocc_r) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc)
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+         do i3=1,n3f
+           do i2=1,n2f
+             do i1=1,n1f
+               ind=i1+(i2-1)*n1f+(i3-1)*n2f*n3f
+               recwf  =cwavef_r(1,i1,i2,(idat-1)*n3f+i3)
+               imcwf  =cwavef_r(2,i1,i2,(idat-1)*n3f+i3)
+               recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+               imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+               rhor_munu(1,ind,idat_occ,idat)= recwocc*recwf+imcwocc*imcwf
+               rhor_munu(2,ind,idat_occ,idat)= recwocc*imcwf-imcwocc*recwf
+             end do ! i1
+           end do ! i2
+         end do ! i3
+       end do ! idat_occ
+       end do ! idat
+#endif
+     end if ! gpu_option
 
      call timab(1523,2,tsec)
 
@@ -453,14 +479,30 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end do ! idat
 
 #else
-     do idat=1,ndat
-     do idat_occ=1,ndat_occ
-     do ifft=1,nfftf
-       rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
-       rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
-     end do
-     end do ! idat_occ
-     end do ! idat
+     if(gpu_option==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO COLLAPSE(2)
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+       do ifft=1,nfftf
+         rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
+         rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
+       end do
+       end do ! idat_occ
+       end do ! idat
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+       !$OMP& MAP(tofrom:rhog_munu) MAP(to:vqg)
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+       do ifft=1,nfftf
+         rhog_munu(1,ifft,idat_occ,idat) = rhog_munu(1,ifft,idat_occ,idat) * vqg(ifft)
+         rhog_munu(2,ifft,idat_occ,idat) = rhog_munu(2,ifft,idat_occ,idat) * vqg(ifft)
+       end do
+       end do ! idat_occ
+       end do ! idat
+#endif
+     end if ! gpu_option
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
      call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc)
@@ -623,24 +665,48 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
      call timab(1527,-1,tsec)
-     do idat=1,ndat
-     do idat_occ=1,ndat_occ
-     ind=0
-     do i3=1,ngfftf(3)
-       do i2=1,ngfftf(2)
-         do i1=1,ngfftf(1)
-           ind=ind+1
-!          ind=i1+ngfftf(1)*(i2-1+ngfftf(2)*(i3-1))
-           revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
-           recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
-           imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
-           vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
-           vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
+     if(gpu_option==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO &
+       !$OMP& PRIVATE(ind,imcwf,recwf,recwocc,imcwocc,revloc,imvloc)
+       do idat=1,ndat
+       do idat_occ=1,ndat_occ
+       do i3=1,ngfftf(3)
+         do i2=1,ngfftf(2)
+           do i1=1,ngfftf(1)
+             ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(3)
+             revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
+             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+             vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
+             vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
+           end do
          end do
        end do
-     end do
-     end do ! idat_occ
-     end do ! idat
+       end do ! idat_occ
+       end do ! idat
+     else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       do idat_occ=1,ndat_occ
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
+       !$OMP& MAP(tofrom:vlocpsi_r) MAP(to:cwavef_r,cwaveocc_r,occ,vfock) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc,revloc,imvloc) &
+       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       do idat=1,ndat
+       do i3=1,ngfftf(3)
+         do i2=1,ngfftf(2)
+           do i1=1,ngfftf(1)
+             ind=i1+(i2-1)*ngfftf(1)+(i3-1)*ngfftf(2)*ngfftf(3)
+             revloc=vfock(2*ind-1,idat_occ,idat) ; imvloc=vfock(2*ind,idat_occ,idat)
+             recwocc=cwaveocc_r(1,i1,i2,i3,idat_occ)
+             imcwocc=cwaveocc_r(2,i1,i2,i3,idat_occ)
+             vlocpsi_r(2*ind-1,idat)=vlocpsi_r(2*ind-1,idat)-(revloc*recwocc-imvloc*imcwocc)*occ(idat_occ)*wtk
+             vlocpsi_r(2*ind  ,idat)=vlocpsi_r(2*ind  ,idat)-(revloc*imcwocc+imvloc*recwocc)*occ(idat_occ)*wtk
+           end do
+         end do
+       end do
+       end do ! idat
+       end do ! idat_occ
+#endif
+     end if
      if (allocated(fockbz%cgocc)) then
        ABI_FREE(cwaveocc_r)
      end if
