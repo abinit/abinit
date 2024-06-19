@@ -26,6 +26,7 @@ module m_fock_getghc
  use m_fock
  use m_pawcprj
  !use m_cgtools
+ use, intrinsic :: iso_c_binding, only: c_size_t
 
  use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
@@ -47,6 +48,7 @@ module m_fock_getghc
  use m_paw_ij,           only : paw_ij_type
  use m_mkffnl,           only : mkffnl
  use m_mpinfo,           only : proc_distrb_cycle
+ use m_abi_linalg
 
  implicit none
 
@@ -111,6 +113,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
+ complex(dpc) :: cinvucvol
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
@@ -149,6 +152,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
 !Some constants
  invucvol=1.d0/sqrt(gs_ham%ucvol)
+ cinvucvol=dcmplx(invucvol,0.0_dp)
  call matr3inv(gs_ham%gprimd,rprimd)
  cplex_fock=2;nspden_fock=1
  natom=fockcommon%natom
@@ -181,6 +185,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*Initialization of the array cwavef_r
 !*cwavef_r = current wavefunction in r-space
  ABI_MALLOC(cwavef_r,(2,n4f,n5f,n6f*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(cwavef_r,2*n4f*n5f*n6f*ndat)
+#endif
 !*dummytab = variables for fourwf
  ABI_MALLOC(dummytab,(2,nfft*ndat))
 !*vqg = 4pi/(G+q)**2
@@ -195,7 +202,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*Initialization of the array vlocpsi_r
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
  ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf,ndat))
- vlocpsi_r=zero
+#ifdef HAVE_OPENMP_OFFLOAD
+ if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(vlocpsi_r,cplex_fock*nfftf*ndat)
+#endif
+ if(gpu_option==ABI_GPU_DISABLED) then
+   vlocpsi_r=zero
+ else if(gpu_option==ABI_GPU_OPENMP) then
+   call gpu_set_to_zero(vlocpsi_r, int(cplex_fock,c_size_t)*nfftf*ndat)
+ end if
 
 !*Additional arrays in case of paw
  if (fockcommon%usepaw==1) then
@@ -221,13 +235,23 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! ==========================================
 ! === Get cwavef in real space using FFT ===
 ! ==========================================
- cwavef_r=zero
+ if(gpu_option==ABI_GPU_DISABLED) then
+   cwavef_r=zero
+ else if(gpu_option==ABI_GPU_OPENMP) then
+   call gpu_set_to_zero(cwavef_r, int(2,c_size_t)*n4f*n5f*n6f*ndat)
+ end if
  call timab(1515,2,tsec) ; call timab(1541,-2,tsec) ; call timab(1512,-1,tsec)
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 & mgfftf,mpi_enreg,ndat,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,&
 & gpu_option=gs_ham%gpu_option)
  call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
- cwavef_r=cwavef_r*invucvol
+ if(gpu_option==ABI_GPU_DISABLED) then
+   cwavef_r=cwavef_r*invucvol
+ else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   call abi_gpu_xscal(2,n4f*n5f*n6f*ndat,cinvucvol,cwavef_r,1)
+#endif
+ end if
 
 ! =====================================================
 ! === Select the states in cgocc_bz with the same spin ===
@@ -276,12 +300,21 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    ABI_MALLOC(rhog_munu,(2,nfftf,ndat_occ,ndat))
   !*vfock = Fock potential
    ABI_MALLOC(vfock,(cplex_fock*nfftf,ndat_occ,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(vfock,cplex_fock*nfftf*ndat_occ*ndat)
+#endif
    ABI_MALLOC(occ,(ndat_occ))
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(occ,ndat_occ)
+#endif
 
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
      ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnlxc,2*npw*nspinor*ndat)
+#endif
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
    end if
 
@@ -329,6 +362,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*   occ = occupancy of jband at this k point
      occ(1:ndat_occ)=fockbz%occ_bz(jband+bdtot_jindex:jband+ndat_occ-1+bdtot_jindex,my_jsppol)
      if(occ(1)<tol8) cycle
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET UPDATE TO(occ) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
 
 !    This timing is placed after the cycle ...
      call timab(1522,1,tsec) ; call timab(1542,-1,tsec)
@@ -340,13 +376,26 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        cwaveocc_r => fockbz%cwaveocc_bz(:,:,:,:,jband+jbg:jband+jbg+ndat_occ-1,my_jsppol)
      else
        ABI_MALLOC(cwaveocc_r,(2,n4f,n5f,n6f,ndat_occ))
-       cwaveocc_r=zero
+#ifdef HAVE_OPENMP_OFFLOAD
+       if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+#endif
+       if(gpu_option==ABI_GPU_DISABLED) then
+         cwaveocc_r=zero
+       else if(gpu_option==ABI_GPU_OPENMP) then
+         call gpu_set_to_zero(cwaveocc_r, int(2,c_size_t)*n4f*n5f*n6f*ndat_occ)
+       end if
        call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1542,-2,tsec)
        call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+(jband+ndat_occ-1)*npwj,my_jsppol),rhodum,cwaveocc_r, &
 &       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat_occ,ngfftf,&
 &       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,gpu_option=gs_ham%gpu_option)
        call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1542,-1,tsec)
-       cwaveocc_r=cwaveocc_r*invucvol
+       if(gpu_option==ABI_GPU_DISABLED) then
+         cwaveocc_r=cwaveocc_r*invucvol
+       else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         call abi_gpu_xscal(2,n4f*n5f*n6f*ndat_occ,cinvucvol,cwaveocc_r,1)
+#endif
+       end if
      end if
 
 ! ================================================
@@ -451,6 +500,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do ! idat
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+#endif
            ABI_FREE(cwaveocc_r)
          end if
          call timab(1524,2,tsec) ; call timab(1544,-2,tsec)
@@ -553,6 +605,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
   &         gvnlxc(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor),enl=dijhat(:,:,:,:,idat_occ,idat),&
   &         select_k=K_H_KPRIME)
          end do
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET UPDATE FROM(gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
          ghc2=ghc2-gvnlxc*occ(idat_occ)*wtk
          end do ! idat_occ
          call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
@@ -667,7 +722,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      call timab(1527,-1,tsec)
      if(gpu_option==ABI_GPU_DISABLED) then
        !$OMP PARALLEL DO &
-       !$OMP& PRIVATE(ind,imcwf,recwf,recwocc,imcwocc,revloc,imvloc)
+       !$OMP& PRIVATE(ind,recwocc,imcwocc,revloc,imvloc)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
        do i3=1,ngfftf(3)
@@ -686,9 +741,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do ! idat
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE TO(vfock)
        do idat_occ=1,ndat_occ
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-       !$OMP& MAP(tofrom:vlocpsi_r) MAP(to:cwavef_r,cwaveocc_r,occ,vfock) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc,revloc,imvloc) &
+       !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc) &
        !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
        do idat=1,ndat
        do i3=1,ngfftf(3)
@@ -705,13 +761,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do
        end do ! idat
        end do ! idat_occ
+       !$OMP TARGET UPDATE FROM(vlocpsi_r)
 #endif
      end if
      if (allocated(fockbz%cgocc)) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+#endif
        ABI_FREE(cwaveocc_r)
      end if
      call timab(1527,2,tsec)
-
    end do ! jband
 
 ! ========================================================
@@ -733,11 +792,20 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    end if
    ABI_FREE(rhor_munu)
    ABI_FREE(rhog_munu)
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vfock,cplex_fock*nfftf*ndat_occ*ndat)
+#endif
    ABI_FREE(vfock)
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(occ,ndat_occ)
+#endif
    ABI_FREE(occ)
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
      ABI_FREE(grnhat_12)
+#ifdef HAVE_OPENMP_OFFLOAD
+     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(gvnlxc,2*npw*nspinor*ndat)
+#endif
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
    end if
@@ -774,9 +842,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! ===============================
 ! === Deallocate local arrays ===
 ! ===============================
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwavef_r,2*n4f*n5f*n6f*ndat)
+#endif
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vlocpsi_r,cplex_fock*nfftf*ndat)
+#endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
@@ -880,9 +954,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !   ===============================
 !   === Deallocate local arrays ===
 !   ===============================
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwavef_r,2*n4f*n5f*n6f*ndat)
+#endif
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vlocpsi_r,cplex_fock*nfftf*ndat)
+#endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
    ABI_FREE(vqg)
@@ -891,6 +971,32 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
  call timab(1504,2,tsec) ; call timab(1507,-2,tsec) ; call timab(1515,-2,tsec) ; call timab(1547,-2,tsec)
 
+!NOTE: These subroutines were placed here because NVHPC would cause issues when
+!      processing OpenMP directives below by creating artifacts.
+!
+!     Tested with NVHPC 24.5
+!     Issues occured with arrays: work, gvnlx1, gvnl2, nonlop_out
+!     The name 'fock_getghc_array' is for debugging purposes.
+#ifdef HAVE_OPENMP_OFFLOAD
+ contains
+
+   subroutine ompgpu_enter_map_alloc(fock_getghc_array,size)
+    integer,intent(in)  :: size
+    real(dp),intent(inout) :: fock_getghc_array(size)
+
+    !$OMP TARGET ENTER DATA MAP(alloc:fock_getghc_array)
+
+   end subroutine ompgpu_enter_map_alloc
+
+   subroutine ompgpu_exit_map_delete(fock_getghc_array,size)
+    integer,intent(in)  :: size
+    real(dp),intent(inout) :: fock_getghc_array(size)
+
+    !$OMP TARGET EXIT DATA MAP(delete:fock_getghc_array)
+
+   end subroutine ompgpu_exit_map_delete
+
+#endif
  end subroutine fock_getghc
 !!***
 
