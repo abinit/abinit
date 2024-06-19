@@ -904,7 +904,8 @@ contains
 
   ! Allocate and copy GPU buffers if user doesn't manage them
   transfer_vectin=.not. xomp_target_is_present(c_loc(vectin)) &
-      .and. (cpopt < 2 .or. (choice/=7 .and.paw_opt >=3))
+      .and. ((cpopt < 2 .and. choice < 2) .or. (cpopt <= 3 .and. choice >= 2) &
+      .or. (choice/=7 .and.paw_opt >=3))
   transfer_vectout=.not. xomp_target_is_present(c_loc(vectout)) &
       .and. (signs==2 .and. (paw_opt == 0 .or. paw_opt == 1 .or. paw_opt == 4))
   transfer_svectout=.not. xomp_target_is_present(c_loc(svectout)) &
