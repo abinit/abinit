@@ -2976,11 +2976,12 @@ end subroutine fourwf
 !!
 !! SOURCE
 
-subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
+subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp, gpu_option)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,isign,nfft,ndat,tim_fourdp
+ integer,intent(in),optional :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2991,7 +2992,7 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
  integer :: fftalg,fftalga,fftalgb,fftcache,i1,i2,i3,base,idat
  integer :: n1,n1half1,n1halfm,n2,n2half1,n3,n4
  integer :: n4half1,n5,n5half1,n6 !nd2proc,nd3proc,i3_local,i2_local,
- integer :: comm_fft,nproc_fft,me_fft
+ integer :: comm_fft,nproc_fft,me_fft,gpu_option_
  real(dp) :: xnorm
  character(len=500) :: msg
 !arrays
@@ -3012,11 +3013,21 @@ subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fo
    fourdp_counter = fourdp_counter + ndat
  end if
 
+ ! GPU version of fourdp
+ gpu_option_=ABI_GPU_DISABLED
+ if (PRESENT(gpu_option)) gpu_option_=gpu_option
+
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  n4=ngfft(4); n5=ngfft(5); n6=ngfft(6)
  me_fft=ngfft(11); nproc_fft=ngfft(10)
  comm_fft = mpi_enreg%comm_fft
  !write(std_out,*)"fourdp, nx,ny,nz,nfft =",n1,n2,n3,nfft
+
+ ! Run fourdp with OpenMP GPU if requested, on CPU otherwise
+ if(gpu_option_==ABI_GPU_OPENMP) then
+   call ompgpu_fourdp(cplex,ngfft,n4,n5,n6,ndat,isign,fofg,fofr)
+   goto 100
+ end if
 
  fftcache=ngfft(8)
  fftalg  =ngfft(7); fftalga =fftalg/100; fftalgb =mod(fftalg,100)/10
