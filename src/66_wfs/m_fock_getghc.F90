@@ -296,8 +296,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
   !*rhormunu = overlap matrix between cwavef and (jkpt,mu) in R-space
    ABI_MALLOC(rhor_munu,(cplex_fock,nfftf,ndat_occ,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rhor_munu,cplex_fock*nfftf*ndat_occ*ndat)
+#endif
   !*rhogmunu = overlap matrix between cwavef and (jkpt,mu) in G-space
    ABI_MALLOC(rhog_munu,(2,nfftf,ndat_occ,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rhog_munu,2*nfftf*ndat_occ*ndat)
+#endif
   !*vfock = Fock potential
    ABI_MALLOC(vfock,(cplex_fock*nfftf,ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -430,7 +436,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(5) &
-       !$OMP& MAP(tofrom:rhor_munu) MAP(to:cwavef_r,cwaveocc_r) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc)
+       !$OMP& MAP(to:rhor_munu,cwavef_r,cwaveocc_r) PRIVATE(ind,imcwf,recwf,recwocc,imcwocc)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
          do i3=1,n3f
@@ -474,11 +480,32 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
   &       rho12(:,:,:,idat_occ,idat),&
   &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,idat_occ,idat),qphon=qvec_j,&
   &       xred=gs_ham%xred,atindx=gs_ham%atindx)
-
-         rhor_munu(1,:,idat_occ,idat)=rhor_munu(1,:,idat_occ,idat)+rho12(1,:,nspinor,idat_occ,idat)
-         rhor_munu(2,:,idat_occ,idat)=rhor_munu(2,:,idat_occ,idat)-rho12(2,:,nspinor,idat_occ,idat)
        end do ! idat_occ
        end do ! idat
+
+       if(gpu_option==ABI_GPU_DISABLED) then
+         !$OMP PARALLEL DO COLLAPSE(2) &
+         !$OMP& PRIVATE(idat,idat_occ)
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
+           rhor_munu(1,:,idat_occ,idat)=rhor_munu(1,:,idat_occ,idat)+rho12(1,:,nspinor,idat_occ,idat)
+           rhor_munu(2,:,idat_occ,idat)=rhor_munu(2,:,idat_occ,idat)-rho12(2,:,nspinor,idat_occ,idat)
+         end do ! idat_occ
+         end do ! idat
+       else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+         !$OMP& MAP(to:rhor_munu,rho12) PRIVATE(idat,idat_occ)
+         do idat=1,ndat
+         do idat_occ=1,ndat_occ
+         do ifft=1,nfftf
+           rhor_munu(1,ifft,idat_occ,idat)=rhor_munu(1,ifft,idat_occ,idat)+rho12(1,ifft,nspinor,idat_occ,idat)
+           rhor_munu(2,ifft,idat_occ,idat)=rhor_munu(2,ifft,idat_occ,idat)-rho12(2,ifft,nspinor,idat_occ,idat)
+         end do ! ifft
+         end do ! idat_occ
+         end do ! idat
+#endif
+       end if
      end if
 
 
@@ -545,7 +572,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
-       !$OMP& MAP(tofrom:rhog_munu) MAP(to:vqg)
+       !$OMP& MAP(to:rhog_munu,vqg)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
        do ifft=1,nfftf
@@ -794,7 +821,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    if (associated(gs_ham%ph3d_kp)) then
      ABI_FREE(gs_ham%ph3d_kp)
    end if
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rhor_munu,cplex_fock*nfftf*ndat_occ*ndat)
+#endif
    ABI_FREE(rhor_munu)
+#ifdef HAVE_OPENMP_OFFLOAD
+   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rhog_munu,2*nfftf*ndat_occ*ndat)
+#endif
    ABI_FREE(rhog_munu)
 #ifdef HAVE_OPENMP_OFFLOAD
    if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vfock,cplex_fock*nfftf*ndat_occ*ndat)
