@@ -59,6 +59,7 @@ real(dp),allocatable,target :: work_gpu(:,:,:,:)
 
 #endif
 
+ public :: ompgpu_fourdp
  public :: ompgpu_fourwf
  public :: alloc_ompgpu_fourwf
  public :: free_ompgpu_fourwf
@@ -86,6 +87,98 @@ end function ompgpu_fourwf_work_mem
 ! Homemade CUDA/HIP interfaces would allow the use of GCC.
 ! But it is likely that OpenMP performance won't be optimal outside GPU vendors compilers.
 #ifdef HAVE_OPENMP_OFFLOAD
+
+subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
+!arrays
+ real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+
+!Local variables-------------------------------
+!scalars
+ integer      :: n1,n2,n3,nfft_tot
+ complex(dpc) :: norm
+ logical      :: transfer_fofr, transfer_fofg
+ character(len=500) :: msg
+
+! *************************************************************************
+
+ n1=ngfft(1);
+ n2=ngfft(2);
+ n3=ngfft(3);
+ nfft_tot=n1*n2*n3;
+ norm=dcmplx(one/(n1*n2*n3), 0.0_dp)
+
+ !*********** CHECK some compatibilities **************
+ if( (n1/=ldx) .or. (n2/=ldy) .or. (n3/=ldz)) then
+   write(msg,"(a,a,i5,i5,i5,a,i5,i5,i5,a)") "FFT SIZE ERROR: \n when gpu mode is on the fft grid must not be augmented",&
+    "(n1,n2,n3) = (", n1,n2,n3,") whereas (ldx,ldy,ldz) = (", ldx,ldy,ldz, ")"
+   ABI_ERROR(msg)
+ end if
+
+ ! ***********  GPU ALLOCATIONS  ***********************
+
+ if (fourwf_initialized == 0) then
+   call alloc_ompgpu_fourwf(ngfft,ndat)
+ endif !end of initialisation
+
+ ! If fft size has changed, we realloc our buffers
+ if((nfft_tot/=fft_size) .or. (ndat/=ndat_loc)) then
+   call free_ompgpu_fourwf
+   call alloc_ompgpu_fourwf(ngfft,ndat)
+ end if !end if "fft size changed"
+
+ transfer_fofg=   .not. xomp_target_is_present(c_loc(fofg))
+ transfer_fofr=   .not. xomp_target_is_present(c_loc(fofr))
+
+ !$OMP TARGET ENTER DATA MAP(alloc:fofg)    IF(transfer_fofg)
+ !$OMP TARGET ENTER DATA MAP(alloc:fofr)    IF(transfer_fofr)
+ !$OMP TARGET UPDATE TO(fofg) IF(transfer_fofg .and. isign==FFT_INVERSE)
+ !$OMP TARGET UPDATE TO(fofr) IF(transfer_fofr .and. isign==FFT_FORWARD)
+
+ select case (cplex)
+ case (2)
+   ! Complex to Complex.
+   select case (isign)
+   case (FFT_INVERSE) ! +1
+     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     call gpu_fft_exec_z2z(c_loc(fofg), c_loc(fofr), FFT_INVERSE)
+     !$OMP END TARGET DATA
+     call gpu_fft_stream_synchronize()
+   case (FFT_FORWARD) ! -1
+     !$OMP TARGET DATA USE_DEVICE_PTR(fofg,fofr)
+     call gpu_fft_exec_z2z(c_loc(fofr), c_loc(fofg), FFT_FORWARD)
+     !$OMP END TARGET DATA
+     call gpu_fft_stream_synchronize()
+     ! Normalize here
+     call abi_gpu_xscal(2,ldx*ldy*ldz*ndat,norm,fofg,1)
+   case default
+     ABI_BUG("Wrong isign")
+   end select
+ case (1)
+   ! Real case.
+   ABI_BUG("Real case for OpenMP GPU fourdp not handled yet !")
+   !select case (isign)
+   !case (ABI_FFTW_BACKWARD) ! +1
+   !  ! +1; G --> R
+   !  call fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofg,fofr)
+   !case (ABI_FFTW_FORWARD)  ! -1
+   !  ! -1; R --> G
+   !  call fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,fofr,fofg)
+   !case default
+   !  ABI_BUG("Wrong isign")
+   !end select
+ end select
+
+ !$OMP TARGET UPDATE FROM(fofg) IF(transfer_fofg .and. isign==FFT_FORWARD)
+ !$OMP TARGET UPDATE FROM(fofr) IF(transfer_fofr .and. isign==FFT_INVERSE)
+ !$OMP TARGET EXIT DATA MAP(delete:fofg)    IF(transfer_fofg)
+ !$OMP TARGET EXIT DATA MAP(delete:fofr)    IF(transfer_fofr)
+
+end subroutine ompgpu_fourdp
 
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
@@ -466,6 +559,23 @@ end subroutine free_ompgpu_fourwf
 
 #else
 ! interface for unsupported compilers
+subroutine ompgpu_fourdp(cplex,ngfft,ldx,ldy,ldz,ndat,isign,fofg,fofr)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex,ngfft(18),ldx,ldy,ldz,ndat,isign
+!arrays
+ real(dp),intent(inout) :: fofg(2*ldx*ldy*ldz*ndat)
+ real(dp),intent(inout) :: fofr(cplex*ldx*ldy*ldz*ndat)
+
+! *************************************************************************
+
+ ABI_UNUSED((/cplex,ldx,ldy,ldz,ndat,isign/))
+ ABI_UNUSED((/ngfft/))
+ ABI_UNUSED((/fofg,fofr/))
+
+end subroutine ompgpu_fourdp
+
 subroutine ompgpu_fourwf(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,istwf_k,&
 &  kg_kin,kg_kout,mgfft,ndat,ngfft,npwin,npwout,ldx,ldy,ldz,option,weight_r,weight_i)
  implicit none

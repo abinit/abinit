@@ -484,7 +484,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1544,-2,tsec)
        ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
-       call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc)
+       call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,ndat*ndat_occ,&
+&         ngfftf,tim_fourdp_fock_getghc,gpu_option=gpu_option)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1544,-1,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
@@ -557,7 +558,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if ! gpu_option
 
      call timab(1515,2,tsec) ; call timab(1513,-1,tsec) ; call timab(1545,-2,tsec) 
-     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc)
+     call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,ndat*ndat_occ,ngfftf,tim_fourdp_fock_getghc,gpu_option=gpu_option)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1545,-1,tsec)
 #endif
      call timab(1525,-2,tsec) ; call timab(1545,-2,tsec)
@@ -575,6 +576,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        cplex_dij=2*gs_ham%dimekb1/(gs_ham%lmnmax*(gs_ham%lmnmax+1))
        ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,cplex_fock,ndat_occ,ndat))
        dijhat=zero
+
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET UPDATE FROM(vfock) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        do idat=1,ndat
        do idat_occ=1,ndat_occ
        do iatom=1,natom
@@ -741,7 +746,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end do ! idat
      else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET UPDATE TO(vfock)
        do idat_occ=1,ndat_occ
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
        !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc) &
