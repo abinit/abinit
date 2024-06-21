@@ -10,7 +10,7 @@
 !!  MPI-IO primitives are used when the FFT arrays are MPI distributed.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MVer, MT, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -163,7 +163,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  character(len=500) :: msg,errmsg
  character(len=fnlen) :: my_fildata
  character(len=nctk_slen) :: varname
- type(hdr_type) :: hdr0
+ type(hdr_type),target :: hdr0
  type(wffile_type) :: wff
  type(MPI_type) :: MPI_enreg_seq
 !arrays
@@ -171,6 +171,7 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:),fftn3_distrib(:),ffti3_local(:)
  real(dp), ABI_CONTIGUOUS pointer :: arr_file(:,:),my_density(:,:)
  real(dp),allocatable :: rhor_file(:,:),rhog_in(:,:),rhor_out(:,:),rhog_out(:,:)
+ type(pawrhoij_type),pointer:: pawrhoij__(:)
 
 ! *************************************************************************
 
@@ -459,7 +460,8 @@ subroutine ioarr(accessfil,arr,dtset,etotal,fform,fildata,hdr,mpi_enreg, &
 
    ! Eventually copy (or distribute) PAW data
    if (rdwrpaw==1.and.restartpaw/=0) then
-     if (size(hdr0%pawrhoij) /= size(pawrhoij)) then
+     pawrhoij__ => hdr0%pawrhoij  ! Trick needed by nvhpc 23.9
+     if (size(pawrhoij__) /= size(pawrhoij)) then
        call pawrhoij_copy(hdr0%pawrhoij,pawrhoij,comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab, &
                           keep_nspden=.true.)
      else
@@ -687,7 +689,7 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
 !Local variables-------------------------------
 !!scalars
  integer,parameter :: master=0
- integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ispden,unt,mpierr,fform
+ integer :: n1,n2,n3,comm_fft,nproc_fft,me_fft,iarr,ierr,ii,ispden,unt,mpierr,fform
  integer :: i3_glob,my_iomode
  integer(kind=XMPI_OFFSET_KIND) :: hdr_offset,my_offset,nfft_tot
  integer :: ncid,ncerr
@@ -733,8 +735,8 @@ subroutine fftdatar_write(varname,path,iomode,hdr,crystal,ngfft,cplex,nfft,nspde
    end if
    call hdr%fort_write(unt, fform, ierr)
    ABI_CHECK(ierr==0,"ierr !=0")
-   do ispden=1,nspden
-     write(unt, err=10, iomsg=errmsg) (datar(iarr,ispden), iarr=1,cplex * nfft)
+   do ii=1,nspden
+     write(unt, err=10, iomsg=errmsg) (datar(iarr,ii), iarr=1,cplex * nfft)
    end do
    close(unt, err=10, iomsg=errmsg)
 

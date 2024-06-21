@@ -6,7 +6,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2022 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2024 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -3863,6 +3863,7 @@ pawtab%lamb_shielding=paw_setuploc%lamb_shielding
  call pawrad_free(tproj_mesh)
  call pawrad_free(core_mesh)
  call pawrad_free(vloc_mesh)
+ call pawrad_free(coretau_mesh)
 
  if (allocated(vlocr)) then
    LIBPAW_DEALLOCATE(vlocr)

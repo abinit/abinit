@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2024 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ module m_parser
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
-                         endswith, char_count, find_digit !, startswith,
+                         endswith, char_count, find_digit, replace !, startswith,
  use m_geometry,  only : xcart2xred, det3r, mkrdim
 
  implicit none
@@ -111,7 +111,7 @@ module m_parser
  !public :: chkint_prt
 
  public :: prttagm             ! Print the content of intarr or dprarr.
- public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
+ public :: prttagm_images      ! Extension to prttagm to include the printing of images  information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
  public :: get_acell_rprim     ! Get acell and rprim from string
 
@@ -175,8 +175,7 @@ module m_parser
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
-
- public :: intagm_img   !  Read input file variables according to images path definition (1D array)
+ public :: intagm_img               ! Read input file variables according to images path definition (1D array)
 
  interface intagm_img
    module procedure intagm_img_1D
@@ -242,6 +241,9 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
 
+   ! Make sure double quotation marks are used to enclose strings.
+   !string = replace(string(1:lenstr), "'", '"')
+
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
    ! TODO: This capabilty can now be implemented via the structure:"xyx:path" variable
@@ -278,9 +280,12 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  ! XG20200720: Why not saving string ? string_raw is less processed than string ...
  ! MG: Because we don't want a processed string without comments.
  ! Abipy may use the commented section to extract additional metadata e.g. the pseudos md5
- INPUT_STRING = string_with_comments
+ INPUT_STRING = trim(string_with_comments)
 
+ !write(std_out,'(4a)')"string_with_comments", ch10, trim(string_with_comments), ch10
+ !write(std_out,'(4a)')"INPUT_STRING", ch10, trim(INPUT_STRING), ch10
  !write(std_out,'(a)')string(:lenstr)
+ !stop
 
 end subroutine parsefile
 !!***
@@ -328,7 +333,8 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  integer :: done,idig,index_slash,sign
  real(dp) :: den,num
  logical :: logi
- character(len=500) :: msg,iomsg
+ character(len=500) :: msg
+ character(len=100) :: iomsg
 
 ! *************************************************************************
 
@@ -484,7 +490,7 @@ end subroutine inread
 !! OUTPUT
 !!  lenstr=actual number of character in string
 !!  string*(strln)=preprocessed string of character
-!!  raw_string=string without any preprocessine (comments are included.
+!!  raw_string=string without any preprocessing (comments are included)
 !!
 !! SOURCE
 
@@ -1031,6 +1037,7 @@ end subroutine incomprs
 !!   'ENE'=>real(dp) (expect a "energy", identify Ha, hartree, eV, Ry, meV, Rydberg, K, Kelvin)
 !!   'LOG'=>integer, but read logical variable T,F,.true., or .false.
 !!   'KEY'=>character, returned in key_value
+!!   'INT_OR_KEY'=>integer scalar (returned in intarr(1)) or character (returned in key_value)
 !!
 !! OUTPUT
 !!  intarr(1:narr), dprarr(1:narr)
@@ -1042,7 +1049,7 @@ end subroutine incomprs
 !!           ds_input = 0 => value was found which is not specific to jdtset
 !!           ds_input > 0 => value was found which is specific to jdtset
 !!   one could add more information, eg whether a ? or a : was used, etc...
-!!   [key_value]=Stores the value of key if typevarphys=="KEY".
+!!   [key_value]=Stores the value of key if typevarphys=="KEY" or typevarphys=="INT_OR_KEY".
 !!      The string must be large enough to contain the output. fnlen is OK in many cases
 !!      except when reading a list of files. The routine aborts if key_value cannot store the output.
 !!      Output string is left justified.
@@ -1120,7 +1127,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
 !scalars
- integer :: b1,b2,b3,cs1len,cslen,dozens,ier,itoken,itoken1,itoken2,itoken2_1colon
+ integer :: b1,b2,b3,cs1len,cslen,dozens,ier,ii,itoken,itoken1,itoken2,itoken2_1colon
  integer :: itoken2_1plus,itoken2_1times,itoken2_2colon,itoken2_2plus
  integer :: itoken2_2times,itoken2_colon,itoken2_plus,itoken2_times
  integer :: itoken_1colon,itoken_1plus,itoken_1times,itoken_2colon,itoken_2plus
@@ -1229,17 +1236,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i1)')dozens
+     write(appen,'(i0)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
+     cs1len=toklen+len(trim(appen))+3
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
-     itoken1=index(string,cs1(1:cslen))
+     itoken1=index(string,cs1(1:cs1len))
      ! Look for another occurence of the same token in string, if so, leaves:
-     itoken2=index(string,cs1(1:cslen), BACK=.true. )
+     itoken2=index(string,cs1(1:cs1len), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
+       'There are two occurences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
        ABI_ERROR(msg)
@@ -1247,7 +1255,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cs1len),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        ABI_ERROR(msg)
@@ -1257,6 +1265,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        opttoken=1
        itoken=itoken1
        cs=cs1
+       cslen=cs1len
        ds_input_=jdtset
      end if
 
@@ -1535,18 +1544,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  if(typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' .or. &
     typevarphys=='BFI' .or. typevarphys=='TIM') typevar='DPR'
 
- if (typevarphys=='KEY') then
+ if (typevarphys=='KEY' .or. typevarphys=='INT_OR_KEY') then
    ! Consistency check for keyword (no multidataset, no series)
    if (opttoken>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'a series has been defined in the input file.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
    end if
    if (narr>=2) then
-     write(msg, '(9a)' )&
-       'For the keyword "',cs(1:cslen),'", of KEY type,',ch10,&
+     write(msg, '(10a)' )&
+       'For the keyword "',cs(1:cslen),'", of ',trim(typevarphys),' type,',ch10,&
        'the number of data requested is larger than 1.',ch10,&
        'This is forbidden.',ch10,'Action: check your input file.'
      ABI_ERROR(msg)
@@ -1560,19 +1569,31 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
    ! Absolute location in string of blank which follows token:
    b1 = itoken + cslen - 1
 
-   if (typevarphys == 'KEY') then
+   if (typevarphys == 'KEY'  .or. typevarphys=='INT_OR_KEY') then
      ! In case of typevarphys='KEY', the chain of character will be returned in cs.
-     ABI_CHECK(present(key_value), "typevarphys == KEY requires optional argument key_value")
-     b2 = index(string(b1+1:), '"')
-     ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
-     b2 = b1 + b2 + 1
-     b3 = index(string(b2:), '"')
-     ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
-     b3 = b3 + b2 - 2
-     if ((b3 - b2 + 1) > len(key_value)) then
-       ABI_ERROR("Len of key_value too small to contain value parsed from file")
+     ABI_CHECK(present(key_value), "typevarphys == KEY or INT_OR_KEY requires optional argument key_value")
+     if (typevarphys == 'INT_OR_KEY') then
+       ABI_CHECK(narr==1, "typevarphys == INT_OR_KEY requires narr==1")
      end if
-     key_value = adjustl(string(b2:b3))
+     b2 = index(string(b1+1:), '"')
+     b3=0 ; do ii=b1,b1+b2-1 ; if (string(ii:ii)/=blank) b3=1 ; end do
+     if (typevarphys == 'KEY') then
+       ABI_CHECK(b2 /= 0, sjoin('Cannot find first " defining string for token:', token))
+       ABI_CHECK(b3 == 0, sjoin('There are chars between token name and first " for token:', token))
+     end if
+     if (typevarphys == 'KEY' .or. (b2/=0.and.b3==0)) then
+       b2 = b1 + b2 + 1
+       b3 = index(string(b2:), '"')
+       ABI_CHECK(b3 /= 0, sjoin('Cannot find second " defining string for token:', token))
+       b3 = b3 + b2 - 2
+       if ((b3 - b2 + 1) > len(key_value)) then
+         ABI_ERROR("Len of key_value too small to contain value parsed from file")
+       end if
+       key_value = adjustl(string(b2:b3))
+     else if (typevarphys == 'INT_OR_KEY') then
+       ! Read the scalar that follows the blank
+       call inarray(b1,cs,dprarr,intarr,marr,narr,string,'INT')
+     endif
 
    else
      ! Read the array (or eventual scalar) that follows the blank

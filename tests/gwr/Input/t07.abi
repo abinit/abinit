@@ -1,12 +1,13 @@
-# LiF. Interface with CC4S code
+# LiF. Interface with CC4S code (NC pseudos)
 
-# Number of datasets: 4-step calculation
+# Number of datasets: 2-step calculation
 ndtset 2
+iomode 1
 
 ngkpt     1 1 1              # Number of grid points for k-point generation
 nshiftk   1
 shiftk    0 0 0              # Mesh centered on gamma
-istwfk    *1
+istwfk    *1                 # Required (for the time being)
 
 # Definition of the unit cell: fcc
 #acell 3*7.6079786             # Lattice constants (in atomic units)
@@ -25,8 +26,6 @@ xred   0.00    0.00    0.00   # Reduced coordinates of atom 1
 
 # Definition of the plane-wave basis set
 ecut 15.0                     # Kinetic energy cut-off, in Hartree
-
-gw_icutcoul 3      # For legacy reasons
 
 ####################
 # Dataset 1: SCF run
@@ -53,14 +52,17 @@ pseudos "Li.psp8, F.upf"
 #%% files_to_test =
 #%%   t07.abo, tolnlines = 10, tolabs = 2.0e-2, tolrel = 5.0e-1;
 #%%   t07o_DS2_GridVectors.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_GridVectors.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
 #%%   t07o_DS2_EigenEnergies.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
-#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_EigenEnergies.elements, tolnlines = 5, tolabs = 1.0e-2, tolrel = 1.0e-2;
 #%%   t07o_DS2_CoulombPotential.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombPotential.elements, tolnlines = 50, tolabs = 2.0e-3, tolrel = 5.0e-2;
+#%%   t07o_DS2_CoulombVertex.yaml, tolnlines = 0, tolabs = 2.0e-3, tolrel = 5.0e-2;
 #%% [paral_info]
 #%% max_nprocs = 8
 #%% [extra_info]
 #%% authors = M. Giantomassi
-#%% keywords = GWR, CC4S
+#%% keywords = NC, CC4S
 #%% description =
-#%%   LiF. Interface with CC4S code
+#%%   LiF. Interface with CC4S code with NC pseudos
 #%%<END TEST_INFO>

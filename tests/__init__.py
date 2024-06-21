@@ -7,7 +7,6 @@ from socket import gethostname
 
 import sys
 import os
-import imp
 import platform
 import re
 
@@ -152,12 +151,16 @@ _tsuite_dirs = [
     "etsf_io",
     "fast",
     "gwr",
+    #"gwpt",
     "psml",
     "gpu",
     "libxc",
     "mpiio",
     "paral",
     # "hpc",
+    "hpc_gpu_omp",
+    "gpu_omp",
+    "gpu_kokkos",
     # "physics",
     "seq",
     "tutoatdep",
@@ -177,6 +180,7 @@ _tsuite_dirs = [
     "v7",
     "v8",
     "v9",
+    "v10",
     "vdwxc",
     "wannier90",
 ]
@@ -184,6 +188,15 @@ _tsuite_dirs = [
 _tsuite_dirs.sort()
 _tsuite_dirs = tuple([os.path.join(abenv.tests_dir, dir_name)
                       for dir_name in _tsuite_dirs])
+
+
+def load_mod(filepath):
+    try:
+        import imp
+        return imp.load_source(filepath, filepath)
+    except ModuleNotFoundError:
+        from importlib.machinery import SourceFileLoader
+        return SourceFileLoader(filepath, filepath).load_module()
 
 
 class Suite(object):
@@ -197,8 +210,9 @@ class Suite(object):
         self.name = os.path.basename(suite_path)
 
         module_name = os.path.join(suite_path, "__init__.py")
-        module = imp.load_source(
-            module_name, os.path.join(suite_path, "__init__.py"))
+        module = load_mod(os.path.join(suite_path, "__init__.py"))
+        #module = imp.load_source(
+        #    module_name, os.path.join(suite_path, "__init__.py"))
 
         self.keywords = set(module.keywords)
         self.need_cpp_vars = set(module.need_cpp_vars)

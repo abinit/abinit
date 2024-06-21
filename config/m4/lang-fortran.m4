@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -201,7 +201,7 @@ AC_DEFUN([_ABI_FC_CHECK_LLVM],[
 
   dnl AC_MSG_CHECKING([if we are using the LLVM Flang Fortran compiler])
   fc_info_string=`$1 --version 2>/dev/null | head -n 1`
-  abi_result=`echo "${fc_info_string}" | grep -e '^[[CcFf]]lang'`
+  abi_result=`echo "${fc_info_string}" | grep -e '[[CcFf]]lang'`
   if test "${abi_result}" = ""; then
     abi_result="no"
     fc_info_string=""
