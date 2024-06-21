@@ -7,7 +7,7 @@
 !! and their related ini and free routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
+!! Copyright (C) 2001-2024 ABINIT group (DCA, XG, GMR, SE, Mver, JJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1963,7 +1963,7 @@ real(dp) :: rpt(3)
  ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
  ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
-!indexi contains the indeces to the bonds
+!indexi contains the indices to the bonds
  ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
  ABI_MALLOC(bonds_tmp%nbondi,(natom))
@@ -2410,7 +2410,7 @@ real(dp) :: rpt(3)
  ABI_MALLOC(bonds_tmp%bond_vect,(3,natom*natom*14-natom))
  ABI_MALLOC(bonds_tmp%bond_length,(natom*natom*14-natom))
 
-!indexi contains the indeces to the bonds
+!indexi contains the indices to the bonds
  ABI_MALLOC(bonds_tmp%indexi,(natom,natom*natom*14-natom))
 
  ABI_MALLOC(bonds_tmp%nbondi,(natom))

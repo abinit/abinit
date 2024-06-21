@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2022 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2024 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -232,7 +232,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  call timab(1515,2,tsec) ; call timab(1541,-2,tsec) ; call timab(1512,-1,tsec)
  call fourwf(0,rhodum0,cwavef,rhodum,cwavef_r,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 & mgfftf,mpi_enreg,ndat1,ngfftf,npw,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,&
-& use_gpu_cuda=gs_ham%use_gpu_cuda)
+& gpu_option=gs_ham%gpu_option)
  call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1541,-1,tsec)
  cwavef_r=cwavef_r*invucvol
 
@@ -329,7 +329,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1542,-2,tsec)
        call fourwf(1,rhodum0,fockbz%cgocc(:,1+jcg+npwj*(jband-1):jcg+jband*npwj,my_jsppol),rhodum,cwaveocc_r, &
 &       gbound_kp,gbound_kp,jstwfk,kg_occ,kg_occ,mgfftf,mpi_enreg,ndat1,ngfftf,&
-&       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
+&       npwj,1,n4f,n5f,n6f,0,tim_fourwf_fock_getghc,weight1,weight1,gpu_option=gs_ham%gpu_option)
        call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1542,-1,tsec)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
@@ -669,7 +669,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call timab(1515,2,tsec) ; call timab(1512,-1,tsec) ; call timab(1547,-2,tsec)
    call fourwf(0,rhodum0,rhodum,ghc1,psilocal,gboundf,gboundf,gs_ham%istwf_k,gs_ham%kg_k,gs_ham%kg_k,&
 &   mgfftf,mpi_enreg,ndat1,ngfftf,1,npw,n4f,n5f,n6f,3,tim_fourwf_fock_getghc,weight1,weight1,&
-&   use_gpu_cuda=gs_ham%use_gpu_cuda)
+&   gpu_option=gs_ham%gpu_option)
    call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-1,tsec)
    ABI_FREE(psilocal)
 
@@ -789,7 +789,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  typat(natom)=type of each atom
 !!  usecprj=1 if cprj datastructure has been allocated
-!!  use_gpu_cuda= 0 or 1 to know if we use cuda for nonlop call
+!!  gpu_option= GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  wtk(nkpt)=weight associated with each k point
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
@@ -803,13 +803,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 
 subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 &  mpw,my_natom,natom,nband,nfft,ngfft,nkpt,nloalg,npwarr,nspden,nspinor,nsppol,&
-&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,use_gpu_cuda,wtk,xred,ylm)
+&  ntypat,occ,optfor,paw_ij,pawtab,ph1d,psps,rprimd,typat,usecprj,gpu_option,wtk,xred,ylm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mband,mcg,mcprj,mgfft,mkmem,mpsang,mpw,my_natom,natom,nfft,nkpt
  integer,intent(in) :: nspden,nsppol,nspinor,ntypat,optfor
- integer,intent(in) :: usecprj,use_gpu_cuda
+ integer,intent(in) :: usecprj,gpu_option
  type(MPI_type),intent(inout) :: mpi_enreg
  type(pseudopotential_type),intent(in) :: psps
 !arrays
@@ -889,7 +889,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 & typat,xred,nfft,mgfft,ngfft,rprimd,nloalg,usecprj=usecprj,&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
 & paw_ij=paw_ij,ph1d=ph1d,fock=fock,&
-& use_gpu_cuda=use_gpu_cuda)
+& gpu_option=gpu_option)
  rmet = MATMUL(TRANSPOSE(rprimd),rprimd)
  fockcommon%use_ACE=use_ACE_old
 

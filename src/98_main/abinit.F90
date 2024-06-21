@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -67,14 +67,11 @@
 #endif
 
 #include "abi_common.h"
-
-! nvtx related macro definition
 #include "nvtx_macros.h"
 
 program abinit
 
  use defs_basis
- use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
@@ -90,8 +87,9 @@ program abinit
  use mpi
 #endif
 
- use defs_datatypes, only : pspheader_type
+ use defs_datatypes,only : pspheader_type
  use defs_abitypes, only : MPI_type
+ use m_build_info,  only : abinit_version, dump_config
  use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
@@ -113,12 +111,15 @@ program abinit
  use m_out_spg_anal,  only : out_spg_anal
  use m_driver,        only : driver
 
-#ifdef HAVE_GPU_CUDA
+#ifdef HAVE_GPU
  use m_gpu_toolbox
+#endif
+
+#ifdef HAVE_GPU_CUDA
  use m_manage_cuda
 #endif
 
-#if defined(HAVE_GPU_CUDA) && defined(HAVE_GPU_NVTX_V3)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
 
@@ -156,8 +157,7 @@ program abinit
  integer :: lenstr,me,print_mem_report
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
- integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,use_gpu_cuda
- logical :: use_nvtx
+ integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -181,9 +181,7 @@ program abinit
  character(len=8) :: strdat
  character(len=10) :: strtime
  character(len=13) :: warn_fmt
-#ifdef HAVE_GPU_CUDA
- integer :: gpu_devices(5)
-#endif
+ integer :: gpu_devices(12)
 
 !******************************************************************
 
@@ -352,7 +350,7 @@ program abinit
  ! Check whether the string only contains valid keywords
  call chkvars(string)
 
-!At this stage, all the information from the "files" file and "input" file have been read and checked.
+ ! At this stage, all the information from the "files" file and "input" file have been read and checked.
 
 !------------------------------------------------------------------------------
 
@@ -365,24 +363,26 @@ program abinit
  end if
 
 !Activate GPU is required
- use_gpu_cuda=0
- use_nvtx=.false.
-#if defined HAVE_GPU_CUDA
+ gpu_option=ABI_GPU_DISABLED
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
-   if (dtsets(ii)%use_gpu_cuda==1) then
-     use_gpu_cuda=1
+   if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
+     gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%use_nvtx==1) then
-      use_nvtx=.true.
-   end if
  end do
- call setdevice_cuda(gpu_devices,use_gpu_cuda)
-
-#ifdef HAVE_GPU_NVTX_V3
-    NVTX_INIT(use_nvtx)
+#ifdef HAVE_GPU
+ call setdevice_cuda(gpu_devices,gpu_option)
+#else
+ if (gpu_option/=ABI_GPU_DISABLED) then
+   write(msg,'(a)')ch10,'Use of GPU is requested but ABINIT was not built with GPU support.'
+   ABI_ERROR(msg)
+ end if
 #endif
+
+!Enable GPU markers (NVTX/ROCTX) if required
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ NVTX_INIT()
 #endif
 
 !------------------------------------------------------------------------------
@@ -427,9 +427,9 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
-     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal
      !  so there is only one call to the latter, for both units)
-     ! both 
+     ! both
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
@@ -619,7 +619,7 @@ program abinit
  ABI_FREE(pspheads)
 
 #if defined HAVE_GPU_CUDA
- call unsetdevice_cuda(use_gpu_cuda)
+ call unsetdevice_cuda(gpu_option)
 #endif
 
  call xpapi_shutdown()

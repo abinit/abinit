@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2022 ABINIT group (XG, NSAI, MKV)
+!!  Copyright (C) 2005-2024 ABINIT group (XG, NSAI, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -149,14 +149,16 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 
 !Local variables-------------------------------
 !scalars
- integer :: my_nspinor,option,unit_out,iir,jjr,kkr
+ integer :: mcg1_3,my_nspinor,option,unit_out,iir,jjr,kkr
  real(dp) :: pdif_mod,eenth,ucvol_local
+ logical :: save_cg1_3
  character(len=500) :: message
 !arrays
  real(dp) :: gmet(3,3),gprimdlc(3,3),pdif(3),ptot(3),red_ptot(3),rmet(3,3)
 !! ptot(3) = total polarization (not reduced) REC
 !! red_ptot(3) = internal reduced total polarization REC
  real(dp) ::  A(3,3),A1(3,3),A_new(3,3),efield_new(3)
+ real(dp),allocatable :: cg1_3(:,:,:)
 
 ! *************************************************************************
 
@@ -229,13 +231,22 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
    end select
 
    unit_out = ab_out
-   call berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
+
+   ! by default berryphase_new writes ddk wavefunctions to disk
+   ! with save_cg1_3 set to true it can return them in memory
+   ! this feature is used at present when orbmag is also called,
+   ! as in afterscfloop
+   save_cg1_3 = .FALSE.
+   mcg1_3 = 0
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
 &   gprimd,hdr,psps%indlmn,kg,&
-&   psps%lmnmax,mband,mcg,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
+&   psps%lmnmax,mband,mcg,mcg1_3,mcprj,mkmem,mpi_enreg,mpw,my_natom,natom,npwarr,&
 &   nsppol,psps%ntypat,nkpt,option,pawrhoij,&
 &   pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&                            !!REC
-&  pwind_alloc,pwnsfac,rprimd,dtset%typat,ucvol,&
+&  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,&
 &   unit_out,usecprj,psps%usepaw,xred,psps%ziontypat)
+   ABI_FREE(cg1_3)
 
    dtefield%red_ptot1(:)=red_ptot(:)
 

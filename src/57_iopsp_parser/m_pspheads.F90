@@ -7,7 +7,7 @@
 !!  in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV, MG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1156,6 +1156,8 @@ subroutine upfxc2abi(dft, pspxc)
    pspxc = -106132
  case (00030603)  !(" NOX  LYP OPTX BLYP") ! OLYP
    pspxc = -110131
+! case () !("R2SCAN01") ! R2SCAN01
+!   pspxc = -645642
 !    FIXME: important cases left to be patched with libxc:
 !    vosko wilkins nusair
 !    ortiz ballone
@@ -1196,6 +1198,7 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
  ! It should be OK as long as the UPF2 NC pseudos are generated with oncvpsp
  ! but it does not cover all QE possibilities.
  ierr = 0; msg = ""
+ ixc = 0
  select case (dft)
  case ("PZ")
    ixc = -001009
@@ -1215,6 +1218,8 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ixc = -118130
  case ('SLA  PW   NOGX NOGC')  ! string produced by oncvpsp3
    ixc = -1012
+ case ('R2SCAN01')
+   ixc = -645642
  case default
    ierr = 1
  end select
@@ -1230,11 +1235,20 @@ integer function upfdft_to_ixc(dft, ixc, msg) result(ierr)
    ABI_CHECK(next_token(dft, start, c_name) == 0 , "Error reading c_name")
    ABI_CHECK(next_token(dft, start, gcx_name) == 0 , "Error reading gcx_name")
    ABI_CHECK(next_token(dft, start, gcc_name) == 0 , "Error reading gcc_name")
+   !call remove_non_ascii(gcc_name)
    !print *, "dft: `", trim(dft), "`"
-   !print *, trim(x_name), ", " trim(c_name), ", ", trim(gcx_name), ", ", trim(gcc_name)
+   !print *, "x_name: `", trim(x_name), "`, c_name: `", trim(c_name), &
+   !         "`, gcx_name: `", trim(gcx_name), "`, gcc_name: `", trim(gcc_name), "`"
 
    if (x_name == "SLA" .and. c_name == "PW") then
-     if (gcx_name == "NOGX" .and. gcc_name == "NOGV") ixc = -1012
+     !print *, "in first if", gcx_name == "NOGX", trim(gcc_name) == "NOGC"
+     !print *, "len_trim(gcc_name)", len_trim(gcc_name)
+     if (gcx_name == "NOGX" .and. gcc_name == "NOGC") then
+       ixc = -1012
+     else
+       ierr = 1
+       !print *, "in second ierr"
+     end if
    else
      ierr = 1
    end if

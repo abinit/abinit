@@ -7,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2024 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,6 @@ program cut3d
 
  use defs_basis
  use m_errors
- use m_build_info
  use m_xmpi
  use m_nctk
  use m_abicore
@@ -53,6 +52,7 @@ program cut3d
  use m_crystal
 
  use defs_abitypes,     only : MPI_type
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein

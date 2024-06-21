@@ -22,7 +22,7 @@
 !! * MPI_type: the data related to MPI parallelization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (XG)
+!! Copyright (C) 2001-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -86,6 +86,9 @@ module defs_abitypes
 
   integer :: me_g0
   ! if set to 1, means that the current processor is taking care of the G(0 0 0) planewave.
+
+  integer :: me_g0_fft
+  ! same as me_g0, but in the FFT representation (me_g0_fft=1 if me_fft=0).
 
 ! ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! This is for the parallelisation over atoms (PAW)
