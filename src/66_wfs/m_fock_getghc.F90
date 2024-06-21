@@ -322,6 +322,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnlxc,2*npw*nspinor*ndat)
 #endif
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
+     ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
+#ifdef HAVE_OPENMP_OFFLOAD
+     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rho12,2*nfftf*ndat_occ*ndat)
+#endif
    end if
 
 !* Load k^prime hamiltonian in the gs_ham datastructure
@@ -467,8 +471,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
      if (fockcommon%usepaw==1) then
 
-       ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
-
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+ndat_occ*nspinor-1)
 
@@ -478,7 +480,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
   &       nhat12_grdim,nspinor,fockcommon%ntypat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12(:,:,:,:,:,idat),&
   &       rho12(:,:,:,:,idat),&
   &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,:,idat),qphon=qvec_j,&
-  &       xred=gs_ham%xred,atindx=gs_ham%atindx)
+  &       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option)
        end do ! idat
 
        if(gpu_option==ABI_GPU_DISABLED) then
@@ -742,7 +744,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        end if ! end stresses
 
        ABI_FREE(dijhat)
-       ABI_FREE(rho12)
      end if !end PAW
      call timab(1526,2,tsec) ; call timab(1546,-2,tsec)
 
@@ -843,6 +844,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #endif
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
+#ifdef HAVE_OPENMP_OFFLOAD
+     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rho12,2*nfftf*ndat_occ*ndat)
+#endif
+     ABI_FREE(rho12)
    end if
 
    call timab(1528,2,tsec)
