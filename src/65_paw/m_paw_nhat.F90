@@ -26,6 +26,7 @@ MODULE m_paw_nhat
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_abi_linalg
 
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
@@ -42,6 +43,10 @@ MODULE m_paw_nhat
  use m_mpinfo,       only : set_mpi_enreg_fft,unset_mpi_enreg_fft,initmpi_seq
  use m_fft,          only : zerosym, fourwf, fourdp
  use m_paw_lmn,      only : klmn2ijlmn
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+  use m_nvtx
+#endif
 
  implicit none
 
@@ -661,16 +666,565 @@ end subroutine pawmknhat
 !!
 !! SOURCE
 
-subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
+subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
 &          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
-&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat
- integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb
+ integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb,gpu_option
+ integer,optional,intent(in) :: comm_atom
+ type(distribfft_type),optional,intent(in),target :: distribfft
+ type(pawang_type),intent(in),target :: pawang
+!arrays
+ integer,intent(in) :: ngfft(18)
+ integer,optional,intent(in) ::atindx(natom)
+ integer,optional,target,intent(in) :: mpi_atmtab(:)
+ real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
+ real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat)
+ real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat)
+ real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat)
+ type(pawfgrtab_type),intent(inout),target :: pawfgrtab(my_natom)
+ type(pawtab_type),intent(in),target :: pawtab(ntypat)
+ type(pawcprj_type),intent(in) :: cprj1(natom,nspinor),cprj2(natom,nspinor*ndat)
+
+!Local variables ---------------------------------------
+!scalars
+ integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat
+ integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
+ integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,atom_nfgd,nprojs,shift,nlmn
+ logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
+ type(distribfft_type),pointer :: my_distribfft
+ type(mpi_type) :: mpi_enreg_fft
+!arrays
+ integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
+ integer,pointer :: my_atmtab(:)
+ real(dp) :: rdum(1),cpf_ql(2),tsec(2),ro(2),ro_ql(2)
+ real(dp),allocatable :: work(:,:), qijl(:,:), nhat12_atm(:,:,:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:),atom_gylm(:,:),atom_dltij(:)
+ integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:),ang_gntselect(:,:),atom_indklmn(:,:)
+
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ call nvtxStartRange("pawmknhat_psipsi_ndat")
+#endif
+
+!Compatibility tests
+ if (present(comm_fft)) then
+   if ((.not.present(paral_kgb)).or.(.not.present(me_g0))) then
+     ABI_BUG('Need paral_kgb and me_g0 with comm_fft!')
+   end if
+   if (present(paral_kgb)) then
+     if (paral_kgb/=0) then
+       ABI_BUG('paral_kgb/=0 not coded!')
+     end if
+   end if
+ end if
+ if (ider>0.and.nhat12_grdim==0) then
+!   ABI_BUG('Gradients of nhat required but not allocated !')
+ end if
+ if (nspinor==2) then
+   ABI_BUG('nspinor==2 not coded!')
+ end if
+ gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
+ if(gpu_option_/=ABI_GPU_OPENMP) gpu_option_=ABI_GPU_DISABLED ! Only OpenMP variant supported
+ if (gpu_option_/=ABI_GPU_DISABLED) then
+   if(ider==3) then
+     ABI_BUG('ider==3 not coded with GPU!')
+   end if
+   if(ider==1 .or. ider==2) then
+     ABI_BUG('ider=={1,2} not coded with GPU!')
+   end if
+ end if
+
+ compute_phonon=.false.;qeq0=.false.
+ if (present(gprimd).and.present(qphon).and.present(xred)) compute_phonon=.true.
+ if (compute_phonon) qeq0=(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15)
+ if (present(atindx)) order=.true.
+!Set up parallelism over atoms
+ paral_atom=(present(comm_atom).and.(my_natom/=natom))
+ nullify(my_atmtab);if (present(mpi_atmtab)) my_atmtab => mpi_atmtab
+ my_comm_atom=xmpi_comm_self;if (present(comm_atom)) my_comm_atom=comm_atom
+ call get_my_atmtab(my_comm_atom,my_atmtab,my_atmtab_allocated,paral_atom,natom,my_natom_ref=my_natom)
+
+!Initialisations
+ compute_nhat=(ider==0.or.ider==2.or.ider==3)
+ compute_grad=(ider==1.or.ider==2)
+ compute_grad1=(ider==3)
+ if ((.not.compute_nhat).and.(.not.compute_grad)) return
+
+ if (compute_nhat) then
+   select case(gpu_option_)
+   case (ABI_GPU_DISABLED)
+     nhat12=zero
+   case (ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET ENTER DATA MAP(alloc:nhat12_atm)
+#endif
+     call gpu_set_to_zero(nhat12,2*nfft*(nspinor**2)*ndat)
+   case default
+     ABI_BUG("Unsupported GPU option")
+   end select
+ end if
+ if (compute_grad) grnhat12=zero
+ if (compute_grad1) grnhat_12=zero
+
+ if (compute_grad) then
+!   ABI_BUG('compute_grad not tested!')
+ end if
+
+ nprojs=0
+ do iatom = 1,my_natom
+   nprojs = nprojs + cprj1(iatom, 1)%nlmn
+ end do
+ ABI_MALLOC(projs1,(2,nprojs,nspinor))
+ ABI_MALLOC(projs2,(2,nprojs,nspinor*ndat))
+ !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
+ do idat=1, nspinor
+   shift = 0
+   do iatom = 1,my_natom
+     nlmn = cprj1(iatom, 1)%nlmn
+     projs1(:, shift+1:shift+nlmn, idat) = cprj1(iatom, idat)%cp(:, 1:nlmn)
+     shift = shift + nlmn
+   end do
+ end do
+ !$OMP PARALLEL DO PRIVATE(shift,idat,iatom,nlmn)
+ do idat=1, ndat*nspinor
+   shift = 0
+   do iatom = 1,my_natom
+     nlmn = cprj2(iatom, idat)%nlmn
+     projs2(:, shift+1:shift+nlmn, idat) = cprj2(iatom, idat)%cp(:, 1:nlmn)
+     shift = shift + nlmn
+   end do
+ end do
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(to:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+!------------------------------------------------------------------------
+!----- Loop over atoms
+!------------------------------------------------------------------------
+ shift = 0;
+ do iatom=1,my_natom
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("iter_iatom")
+#endif
+   nlmn = cprj1(iatom, 1)%nlmn
+   iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
+   iatm=iatom_tot
+   if (order) iatm=atindx(iatom_tot)
+   itypat    = pawfgrtab(iatom)%itypat
+   lm_size   = pawfgrtab(iatom)%l_size**2
+   lmn_size  = pawtab(itypat)%lmn_size
+   lmn2_size = pawtab(itypat)%lmn2_size
+   ABI_MALLOC(qijl,(lm_size,lmn2_size))
+   qijl=zero
+   qijl=pawtab(itypat)%qijl
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("paw_init")
+#endif
+   ABI_MALLOC(nhat12_atm, (2,nfft,nspinor**2,ndat))
+   if (compute_nhat) then
+     select case(gpu_option_)
+     case (ABI_GPU_DISABLED)
+       nhat12_atm=zero
+     case (ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:nhat12_atm)
+#endif
+       call gpu_set_to_zero(nhat12_atm,2*nfft*(nspinor**2)*ndat)
+     case default
+       ABI_BUG("Unsupported GPU option")
+     end select
+   end if
+   ABI_MALLOC(cpf,(2,ndat,lmn2_size))
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+
+!  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
+   if (((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)).or.&
+&   (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0))) then
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxStartRange("init")
+#endif
+     optgr0=0; optgr1=0
+     if ((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)) then
+       if (allocated(pawfgrtab(iatom)%gylm))  then
+         ABI_FREE(pawfgrtab(iatom)%gylm)
+       end if
+       ABI_MALLOC(pawfgrtab(iatom)%gylm,(pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
+       pawfgrtab(iatom)%gylm_allocated=2;optgr0=1
+     end if
+     if (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0)) then
+       if (allocated(pawfgrtab(iatom)%gylmgr))  then
+         ABI_FREE(pawfgrtab(iatom)%gylmgr)
+       end if
+       ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(3,pawfgrtab(iatom)%nfgd,pawfgrtab(iatom)%l_size**2))
+       pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
+     end if
+     if (optgr0+optgr1>0) then
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+       call nvtxStartRange("pawgylm")
+#endif
+       call pawgylm(pawfgrtab(iatom)%gylm,pawfgrtab(iatom)%gylmgr,rdum,&
+&       lm_size,pawfgrtab(iatom)%nfgd,optgr0,optgr1,0,pawtab(itypat),&
+&       pawfgrtab(iatom)%rfgd)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+       call nvtxEndRange()
+#endif
+     end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxEndRange()
+#endif
+
+   end if
+   if (compute_phonon.and.(.not.qeq0).and.(pawfgrtab(iatom)%expiqr_allocated==0)) then
+     if (allocated(pawfgrtab(iatom)%expiqr))  then
+       ABI_FREE(pawfgrtab(iatom)%expiqr)
+     end if
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(2,pawfgrtab(iatom)%nfgd))
+     call pawexpiqr(pawfgrtab(iatom)%expiqr,gprimd,pawfgrtab(iatom)%nfgd,qphon,&
+&     pawfgrtab(iatom)%rfgd,xred(:,iatom_tot))
+     pawfgrtab(iatom)%expiqr_allocated=2
+   end if
+
+   atom_gylm    => pawfgrtab(iatom)%gylm
+   atom_expiqr  => pawfgrtab(iatom)%expiqr
+   atom_ifftsph => pawfgrtab(iatom)%ifftsph
+   atom_dltij   => pawtab(itypat)%dltij
+   atom_indklmn => pawtab(itypat)%indklmn
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,qijl) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("loop_ndat_isploop")
+#endif
+   do isploop=1,nspinor**2    ! Loop over density components of the compensation charge.
+!    TODO Here we might take advantage of symmetry relations between the four components if nspinor==2
+     isp1=spinor_idxs(1,isploop)
+     isp2=spinor_idxs(2,isploop)
+
+     if(gpu_option_==ABI_GPU_DISABLED) then
+       !$OMP PARALLEL DO PRIVATE(idat,ilmn,jlmn,klmn)
+       do idat=1,ndat
+         do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+         ilmn=atom_indklmn(7,klmn)
+         jlmn=atom_indklmn(8,klmn)
+         cpf(1,idat,klmn) = &
+&           (projs1(1,shift+ilmn,isp1) * projs2(1,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(2,shift+ilmn,isp1) * projs2(2,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(1,shift+jlmn,isp1) * projs2(1,shift+ilmn,isp2+(idat-1)*nspinor)&
+&           +projs1(2,shift+jlmn,isp1) * projs2(2,shift+ilmn,isp2+(idat-1)*nspinor))
+
+         cpf(2,idat,klmn) = &
+&           (projs1(1,shift+ilmn,isp1) * projs2(2,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           -projs1(2,shift+ilmn,isp1) * projs2(1,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(1,shift+jlmn,isp1) * projs2(2,shift+ilmn,isp2+(idat-1)*nspinor)&
+&           -projs1(2,shift+jlmn,isp1) * projs2(1,shift+ilmn,isp2+(idat-1)*nspinor))
+         end do
+       end do
+     else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+       !$OMP& PRIVATE(idat,ilmn,jlmn,klmn) MAP(to:cpf,projs1,projs2)
+       do idat=1,ndat
+         do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+         ilmn=atom_indklmn(7,klmn)
+         jlmn=atom_indklmn(8,klmn)
+         cpf(1,idat,klmn) = &
+&           (projs1(1,shift+ilmn,isp1) * projs2(1,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(2,shift+ilmn,isp1) * projs2(2,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(1,shift+jlmn,isp1) * projs2(1,shift+ilmn,isp2+(idat-1)*nspinor)&
+&           +projs1(2,shift+jlmn,isp1) * projs2(2,shift+ilmn,isp2+(idat-1)*nspinor))
+
+         cpf(2,idat,klmn) = &
+&           (projs1(1,shift+ilmn,isp1) * projs2(2,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           -projs1(2,shift+ilmn,isp1) * projs2(1,shift+jlmn,isp2+(idat-1)*nspinor)&
+&           +projs1(1,shift+jlmn,isp1) * projs2(2,shift+ilmn,isp2+(idat-1)*nspinor)&
+&           -projs1(2,shift+jlmn,isp1) * projs2(1,shift+ilmn,isp2+(idat-1)*nspinor))
+         end do
+       end do
+#endif
+     end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxStartRange("loop_klmn")
+#endif
+
+       if (compute_nhat) then
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+         call nvtxStartRange("loop0")
+#endif
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           ang_gntselect => pawang%gntselect
+           !$OMP TARGET UPDATE FROM(cpf,nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,ic,jc,ils,mm,ilslm,klm,lmin,lmax,klmn)
+           do idat=1,ndat
+             do ic=1,atom_nfgd
+             do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+               klm =atom_indklmn(1,klmn)
+               lmin=atom_indklmn(3,klmn)  ! abs(il-jl)
+               lmax=atom_indklmn(4,klmn)  ! il+jl
+               do ils=lmin,lmax,2   ! Sum over (L,M)
+                 do mm=-ils,ils
+                   ilslm=ils*ils+ils+mm+1
+                     if (pawang%gntselect(ilslm,klm)>0) then
+                       jc=atom_ifftsph(ic)
+                       nhat12_atm(1,jc,isploop,idat)=nhat12_atm(1,jc,isploop,idat)+atom_dltij(klmn)*half*cpf(1,idat,klmn)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm)
+                       nhat12_atm(2,jc,isploop,idat)=nhat12_atm(2,jc,isploop,idat)+atom_dltij(klmn)*half*cpf(2,idat,klmn)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm)
+                   end if
+                 end do
+               end do
+               end do
+             end do
+           end do
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           ang_gntselect => pawang%gntselect
+           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+           !$OMP& MAP(to:nhat12_atm,atom_gylm,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn)&
+           !$OMP& PRIVATE(idat,ic,jc,ils,mm,ilslm,klm,lmin,lmax,klmn)
+           do idat=1,ndat
+             do ic=1,atom_nfgd
+             do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+               klm =atom_indklmn(1,klmn)
+               lmin=atom_indklmn(3,klmn)  ! abs(il-jl)
+               lmax=atom_indklmn(4,klmn)  ! il+jl
+               do ils=lmin,lmax,2   ! Sum over (L,M)
+                 do mm=-ils,ils
+                   ilslm=ils*ils+ils+mm+1
+                   if (ang_gntselect(ilslm,klm)>0) then
+                     jc=atom_ifftsph(ic)
+                     nhat12_atm(1,jc,isploop,idat)=nhat12_atm(1,jc,isploop,idat)+atom_dltij(klmn)*half*cpf(1,idat,klmn)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm)
+                     nhat12_atm(2,jc,isploop,idat)=nhat12_atm(2,jc,isploop,idat)+atom_dltij(klmn)*half*cpf(2,idat,klmn)*qijl(ilslm,klmn)*atom_gylm(ic,ilslm)
+                   end if
+                 end do
+               end do
+               end do
+             end do
+           end do
+#endif
+         end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+         call nvtxEndRange()
+#endif
+       end if ! compute_nhat
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+     call nvtxEndRange()
+#endif
+!    If needed, multiply eventually by exp(-i.q.r) phase
+     if (compute_nhat) then
+       if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+         call nvtxStartRange("loop1")
+#endif
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           !$OMP TARGET UPDATE FROM(nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ro,ro_ql,ic,jc)
+           do idat=1,ndat
+           do ic=1,pawfgrtab(iatom)%nfgd
+             jc=pawfgrtab(iatom)%ifftsph(ic)
+             ro(1:2)=nhat12_atm(1:2,jc,isploop,idat)
+             !nhat12_atm(1,jc,isploop,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+             !nhat12_atm(2,jc,isploop,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+             nhat12_atm(1,jc,isploop,idat)=ro(1)*atom_expiqr(1,ic)-ro(2)*atom_expiqr(2,ic)
+             nhat12_atm(2,jc,isploop,idat)=ro(2)*atom_expiqr(1,ic)+ro(1)*atom_expiqr(2,ic)
+!             nhat12_atm(1,jc,isploop,idat)=nhat12_atm(1,jc,isploop,idat)*&
+!&               atom_expiqr(1,ic)-nhat12_atm(2,jc,isploop,idat)*atom_expiqr(2,ic)
+!             nhat12_atm(2,jc,isploop,idat)=nhat12_atm(2,jc,isploop,idat)*&
+!&               atom_expiqr(1,ic)+nhat12_atm(1,jc,isploop,idat)*atom_expiqr(2,ic)
+           end do
+           end do
+           !$OMP TARGET UPDATE TO(nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+           !$OMP& MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm) PRIVATE(ic,jc,ro)
+           do idat=1,ndat
+           do ic=1,atom_nfgd
+             jc=atom_ifftsph(ic)
+             ro(1:2)=nhat12_atm(1:2,jc,isploop,idat)
+             nhat12_atm(1,jc,isploop,idat)=ro(1)*atom_expiqr(1,ic)-ro(2)*atom_expiqr(2,ic)
+             nhat12_atm(2,jc,isploop,idat)=ro(2)*atom_expiqr(1,ic)+ro(1)*atom_expiqr(2,ic)
+           end do
+           end do
+#endif
+         end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+         call nvtxEndRange()
+#endif
+       end if
+     end if
+
+   end do ! isploop (density components of the compensation charge)
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,qijl,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+! accumlate nhat12 for all the atoms
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("nhat_add")
+#endif
+!nhat12(2,nfft,nspinor**2,ndat)
+   if (compute_nhat) then
+     select case (gpu_option_)
+     case (ABI_GPU_DISABLED)
+       !$OMP PARALLEL DO COLLAPSE(3)
+       do idat=1,ndat
+         do isp1=1,nspinor**2
+           do ils=1,nfft
+             nhat12(:,ils,isp1,idat)=nhat12(:,ils,isp1,idat)+nhat12_atm(:,ils,isp1,idat)
+           end do
+         end do
+       end do
+     case (ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET DATA USE_DEVICE_PTR(nhat12_atm,nhat12)
+       call abi_gpu_xaxpy(2, nfft*ndat*(nspinor**2),cone,c_loc(nhat12_atm),1,c_loc(nhat12),1)
+       !$OMP END TARGET DATA
+#endif
+     case default
+       ABI_BUG("Unsupported GPU option")
+     end select
+   end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("paw_free")
+#endif
+   if (pawfgrtab(iatom)%gylm_allocated==2) then
+     ABI_FREE(pawfgrtab(iatom)%gylm)
+     ABI_MALLOC(pawfgrtab(iatom)%gylm,(0,0))
+     pawfgrtab(iatom)%gylm_allocated=0
+   end if
+   if (pawfgrtab(iatom)%gylmgr_allocated==2) then
+     ABI_FREE(pawfgrtab(iatom)%gylmgr)
+     ABI_MALLOC(pawfgrtab(iatom)%gylmgr,(0,0,0))
+     pawfgrtab(iatom)%gylmgr_allocated=0
+   end if
+   ABI_FREE(qijl)
+   ABI_FREE(cpf)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+   ABI_FREE(nhat12_atm)
+   if (pawfgrtab(iatom)%expiqr_allocated==2) then
+     ABI_FREE(pawfgrtab(iatom)%expiqr)
+     ABI_MALLOC(pawfgrtab(iatom)%expiqr,(0,0))
+     pawfgrtab(iatom)%expiqr_allocated=0
+   end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+   shift = shift + nlmn
+ end do ! iatom
+
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET EXIT DATA MAP(delete:projs1,projs2) IF(gpu_option_==ABI_GPU_OPENMP)
+#endif
+ ABI_FREE(projs1)
+ ABI_FREE(projs2)
+
+ if (compute_grad1) grnhat_12=-grnhat_12
+
+!----- Reduction in case of parallelism -----!
+ if (paral_atom)then
+   call timab(48,1,tsec)
+   if (compute_nhat) then
+     call xmpi_sum(nhat12,my_comm_atom,ierr)
+   end if
+   if (compute_grad) then
+     call xmpi_sum(grnhat12,my_comm_atom,ierr)
+   end if
+   if (compute_grad1) then
+     call xmpi_sum(grnhat_12,my_comm_atom,ierr)
+   end if
+   call timab(48,2,tsec)
+ end if
+
+!----- Avoid unbalanced g-components numerical errors -----!
+
+ if (izero==1.and.compute_nhat) then
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxStartRange("end")
+#endif
+!  Create fake mpi_enreg to wrap fourdp
+   if (present(distribfft)) then
+     my_distribfft => distribfft
+   else
+     ABI_MALLOC(my_distribfft,)
+     call init_distribfft_seq(my_distribfft,'f',ngfft(2),ngfft(3),'fourdp')
+   end if
+   call initmpi_seq(mpi_enreg_fft)
+   ABI_FREE(mpi_enreg_fft%distribfft)
+   if (present(comm_fft)) then
+     call set_mpi_enreg_fft(mpi_enreg_fft,comm_fft,my_distribfft,me_g0,paral_kgb)
+     my_comm_fft=comm_fft;paral_kgb_fft=paral_kgb
+   else
+     my_comm_fft=xmpi_comm_self;paral_kgb_fft=0;
+     mpi_enreg_fft%distribfft => my_distribfft
+   end if
+!  Do FFT
+   ABI_MALLOC(work,(2,nfft))
+   cplex=2
+   do idat=1,ndat
+   do isp1=1,MIN(2,nspinor**2)
+     call fourdp(cplex,work,nhat12(:,:,isp1,idat),-1,mpi_enreg_fft,nfft,1,ngfft,0)
+     call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
+     call fourdp(cplex,work,nhat12(:,:,isp1,idat),+1,mpi_enreg_fft,nfft,1,ngfft,0)
+   end do
+   end do ! idat
+   ABI_FREE(work)
+!  Destroy fake mpi_enreg
+   call unset_mpi_enreg_fft(mpi_enreg_fft)
+   if (.not.present(distribfft)) then
+     call destroy_distribfft(my_distribfft)
+     ABI_FREE(my_distribfft)
+   end if
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+   call nvtxEndRange()
+#endif
+ end if
+
+!Destroy atom table used for parallelism
+ call free_my_atmtab(my_atmtab,my_atmtab_allocated)
+
+#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
+ call nvtxEndRange()
+#endif
+ DBG_EXIT("COLL")
+
+end subroutine pawmknhat_psipsi_ndat
+!!***
+
+subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
+&          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
+&          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option) ! optional arguments
+
+ implicit none
+
+!Arguments ---------------------------------------------
+!scalars
+ integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat
+ integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb,gpu_option
  integer,optional,intent(in) :: comm_atom
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
@@ -703,6 +1257,10 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 
 ! *************************************************************************
 
+ call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
+ &          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
+ &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option)
+ return
  DBG_ENTER("COLL")
 
 !Compatibility tests
