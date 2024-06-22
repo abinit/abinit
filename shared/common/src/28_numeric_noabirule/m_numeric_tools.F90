@@ -61,8 +61,7 @@ MODULE m_numeric_tools
  public :: coeffs_gausslegint    ! Compute the coefficients (supports and weights) for Gauss-Legendre integration.
  public :: simpson_cplx          ! Integrate a complex function via extended Simpson's rule.
  public :: hermitianize          ! Force a square matrix to be hermitian
- public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it
-                                 ! to its hermitian conjugate.
+ public :: mkherm                ! Make the complex array(2,ndim,ndim) hermitian, by adding half of it to its hermitian conjugate.
  public :: hermit                ! Rdefine diagonal elements of packed matrix to impose Hermiticity.
  public :: symmetrize            ! Force a square matrix to be symmetric
  public :: pack_matrix           ! Packs a matrix into hermitian format
@@ -79,14 +78,11 @@ MODULE m_numeric_tools
  public :: cmplx_sphcart         ! Convert an array of cplx numbers from spherical to Cartesian coordinates or vice versa.
  public :: pfactorize            ! Factorize a number in terms of an user-specified set of prime factors.
  public :: isordered             ! Check the ordering of a sequence.
- public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[
-                                 ! where 1 is not included (tol12)
- public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2]
-                                 ! where -1/2 is not included (tol12)
+ public :: wrap2_zero_one        ! Transforms a real number in a reduced number in the interval [0,1[ ! where 1 is not included (tol12)
+ public :: wrap2_pmhalf          ! Transforms a real number in areduced number in the interval ]-1/2,1/2] ! where -1/2 is not included (tol12)
  public :: interpol3d_0d         ! Linear interpolation in 3D
  public :: interpol3d_1d         ! Linear interpolation in 3D for an array
- public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point
-                                 ! to be interpolated in interpol3d
+ public :: interpol3d_indices    ! Computes the indices in a cube which are neighbors to the point to be interpolated in interpol3d
  public :: interpolate_denpot    ! Liner interpolation of scalar field e.g. density of potential
  public :: simpson_int           ! Simpson integral of a tabulated function. Returns arrays with integrated values
  public :: simpson               ! Simpson integral of a tabulated function. Returns scalar with the integral on the full mesh.
@@ -251,7 +247,7 @@ MODULE m_numeric_tools
 !!
 !! SOURCE
 
- type,public :: stats_t
+ type, public :: stats_t
    real(dp) :: mean
    real(dp) :: stdev
    real(dp) :: min
@@ -4936,16 +4932,14 @@ pure function interpol3d_0d(r, nr1, nr2, nr3, grid) result(res)
  real(dp),intent(in) :: grid(nr1,nr2,nr3),r(3)
 
 !Local variables--------------------------------------------------------
-!scalars
  integer :: ir1,ir2,ir3,pr1,pr2,pr3
- real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8
- real(dp) :: x1,x2,x3
+ real(dp) :: res1,res2,res3,res4,res5,res6,res7,res8, x1,x2,x3
 
 ! *************************************************************************
 
- call interpol3d_indices (r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
+ call interpol3d_indices(r,nr1,nr2,nr3,ir1,ir2,ir3, pr1,pr2,pr3)
 
-!weight
+ ! weight
  x1=one+r(1)*nr1-real(ir1)
  x2=one+r(2)*nr2-real(ir2)
  x3=one+r(3)*nr3-real(ir3)
