@@ -36,9 +36,7 @@ program abitk
  use m_ebands
  use m_crystal
  use m_kpts
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
 
  use defs_datatypes,   only : ebands_t
@@ -304,10 +302,8 @@ program abitk
    !call ebands_write(ebands_kpath, prtebands, path)
 
    ! Write EBANDS file
-#ifdef HAVE_NETCDF
    NCF_CHECK(ebands_ncwrite_path(other_ebands, cryst, "abinitio_EBANDS.nc"))
    NCF_CHECK(ebands_ncwrite_path(ebands_kpath, other_cryst, "skw_EBANDS.nc"))
-#endif
 
    call wrtout(std_out, &
      ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &

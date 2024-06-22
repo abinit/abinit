@@ -31,6 +31,7 @@ module m_kpts
 
  use m_time,           only : timab, cwtime, cwtime_report
  use m_copy,           only : alloc_copy
+ use m_numeric_tools,  only : wrap2_zero_one, interpol3d_0d
  use m_symtk,          only : mati3inv, mati3det, matr3inv, smallprim
  use m_fstrings,       only : sjoin, itoa, ftoa, ltoa, ktoa
  use m_numeric_tools,  only : wrap2_pmhalf
@@ -46,8 +47,8 @@ module m_kpts
  public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
  public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
                                      ! modulo time reversal if appropriate.
- public :: kpts_sort                 ! Order list of k-points according to the norm.
- public :: kpts_pack_in_stars        !
+ public :: kpts_sort                 ! order list of k-points according to the norm.
+ public :: kpts_pack_in_stars        ! Pack k-points in stars.
  public :: kpts_map                  ! Compute symmetry table.
  public :: kpts_map_print            ! Print the symmetry table bz2ibz to a list of units with header.
  public :: listkk                    ! Find correspondence between two set of k-points.
@@ -55,14 +56,34 @@ module m_kpts
  !FIXME: Deprecated
  public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
                                      ! Duplicates work in getkgrid, but need all outputs of kpt_fullbz, and indkpt
-
- private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
-
  public :: smpbz                     ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
  public :: testkgrid                 ! Test different grids of k points.
 
  ! FIXME: deprecated
  public :: mknormpath
+ private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
+
+
+!----------------------------------------------------------------------
+
+!!****t* m_kpts/bzlint_t
+!! NAME
+!! bzlint_t
+!!
+!! FUNCTION
+!! Linear interpolator for functions defined in the BZ.
+!!
+!! SOURCE
+
+ type, public :: bzlint_t
+   integer :: nx, ny, nz, ndat
+   integer :: ngkpt(3)
+   real(dp),allocatable :: vals_grid(:,:,:,:)
+ contains
+   procedure :: init => bzlint_init
+   procedure :: interp => bzlint_interp
+   procedure :: free => bzlint_free
+ end type bzlint_t
 !!***
 
 !----------------------------------------------------------------------
@@ -496,6 +517,7 @@ end subroutine kpts_sort
 !! kpts_pack_in_stars
 !!
 !! FUNCTION
+!!  Pack k-points in Stars using kmap symmetry table.
 !!
 !! INPUTS
 !!
@@ -3289,6 +3311,106 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  end if
 
 end subroutine mknormpath
+!!***
+
+!!****f* m_kpts/bzlint_init
+!! NAME
+!! bzlint_init
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
+
+!Arguments ------------------------------------
+ class(bzlint_t),intent(inout) :: self
+ integer,intent(in) :: ngkpt(3), ndat, nkpt
+ real(dp),intent(in) :: kpts(3,nkpt), values(ndat, nkpt)
+
+!Local variables-------------------------------
+ integer :: ik, idat, ix, iy, iz, inds(3)
+ real(dp) :: kpt_wrap(3), shift(3)
+
+! *********************************************************************
+
+ self%ngkpt = ngkpt; self%ndat = ndat
+ ! The mesh is closed i.e. periodic images are included.
+ self%nx = ngkpt(1) + 1
+ self%ny = ngkpt(2) + 1
+ self%nz = ngkpt(3) + 1
+ ABI_CALLOC(self%vals_grid, (self%nx, self%ny, self%nz, ndat))
+
+ ! Insert values in the grid.
+ do ik=1,nkpt
+   call wrap2_zero_one(kpts(:,ik), kpt_wrap, shift)
+   inds = nint(kpt_wrap * self%ngkpt)
+   ix = inds(1); iy = inds(2); iz = inds(3)
+   self%vals_grid(ix,iy,iz,:) = values(:, ik)
+ end do
+
+ ! Add periodic replicas.
+ do ix=1,self%nx - 1
+   do iy=1,self%ny - 1
+      self%vals_grid(ix,iy,self%nz,:) = self%vals_grid(ix,iy,1,:)
+   end do
+   self%vals_grid(ix,self%ny,self%nz,:) = self%vals_grid(ix,1,1,:)
+ end do
+ self%vals_grid(self%nx,:,:,:) = self%vals_grid(1,:,:,:)
+
+end subroutine bzlint_init
+!!***
+
+!!****f* m_kpts/bzlint_interp
+!! NAME
+!! bzlint_interp
+!!
+!! FUNCTION
+!! Interpolate values at kpt
+!!
+!! SOURCE
+
+subroutine bzlint_interp(self, kpt, results)
+
+!Arguments ------------------------------------
+ class(bzlint_t),intent(in) :: self
+ real(dp),intent(in) :: kpt(3)
+ real(dp),intent(out) :: results(self%ndat)
+
+!Local variables-------------------------------
+ integer :: idat
+ real(dp) :: kpt_wrap(3), shift(3)
+! *********************************************************************
+
+ call wrap2_zero_one(kpt, kpt_wrap, shift)
+ do idat=1,self%ndat
+   results(idat) = interpol3d_0d(kpt_wrap, self%nx, self%ny, self%nz, self%vals_grid(:,:,:,idat))
+ end do
+end subroutine bzlint_interp
+!!***
+
+!!****f* m_kpts/bzlint_free
+!! NAME
+!! bzlint_free
+!!
+!! FUNCTION
+!! Free dynamic memory
+!!
+!! SOURCE
+
+subroutine bzlint_free(self)
+
+!Arguments ------------------------------------
+ class(bzlint_t),intent(inout) :: self
+! *********************************************************************
+
+ ABI_SFREE(self%vals_grid)
+
+end subroutine bzlint_free
 !!***
 
 end module m_kpts

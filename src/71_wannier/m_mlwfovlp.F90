@@ -31,9 +31,7 @@ module m_mlwfovlp
 #ifdef FC_NAG
  use f90_unix_dir
 #endif
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_dtset
@@ -172,12 +170,10 @@ class(abstract_wf), pointer :: mywfc
  integer :: iwan
  integer :: lproj,lwanniersetup,mwan
 #if defined HAVE_WANNIER90
-#ifdef HAVE_NETCDF
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
  integer,allocatable :: irvec(:,:),ndegen(:)
-#endif
 #endif
  integer :: nntot,num_nnmax
  integer :: master,max_num_bands,nprocs,spaceComm,rank
@@ -233,7 +229,7 @@ class(abstract_wf), pointer :: mywfc
  leig=.true.          ! .false. and .true. are possible
 !
  gamma_only=.false. !not yet implemented
- spinors=.false. 
+ spinors=.false.
  if (dtset%nspinor == 2) spinors = .true.
 !
 !mpi initialization
@@ -698,7 +694,6 @@ class(abstract_wf), pointer :: mywfc
    call xmpi_sum(wann_spreads,spaceComm,ierr)
 
    ! Output ABIWAN.nc file
-#ifdef HAVE_NETCDF
    if (hdr%kptopt == 0) then
      ABI_WARNING("Output of ABIWAN.nc requires kptopt /= 0. ABIWAN.nc file won't be produced!")
      ! Need kptrlatt in wigner_seitz and client code need to know the k-grid.
@@ -749,7 +744,7 @@ class(abstract_wf), pointer :: mywfc
        nctkarr_t("U_matrix_opt", "dp", "two, max_num_bands, mwan, number_of_kpoints, number_of_spins"), &
        nctkarr_t("wann_centres", "dp", "three, mwan, number_of_spins"), &
        nctkarr_t("wann_spreads", "dp", "mwan, number_of_spins") &
-       ])
+     ])
      NCF_CHECK(ncerr)
 
      ! Write data.
@@ -775,7 +770,6 @@ class(abstract_wf), pointer :: mywfc
      ABI_FREE(irvec)
      ABI_FREE(ndegen)
    end if
-#endif
 
 !  CALL SILVESTRELLI'S APPROACH TO EVALUATE vdW INTERACTION ENERGY USING MLWF!!
 !  ----------------------------------------------------------------------------------------------
@@ -1680,7 +1674,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
                  do iband1=1,mband
                    do ispinor=1,nspinor
                      if(lfile) index=ispinor + nspinor*(igk2-1) + nspinor*npw_k2*(iband2-1) !In case of MPI, see below
-                     ! TODO : Check if the index in the cg_elems are correct. 
+                     ! TODO : Check if the index in the cg_elems are correct.
 !
 !                    If MPI sometimes the info was read from an unformatted file
 !                    If that is the case lfile==.true.
@@ -1696,9 +1690,9 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !
                      else
 ! TODO: Here it is very inefficient.
-! Could be replaced with the fftbox and dotproduct. 
-! cgtk_rotate. sphere. 
-! 
+! Could be replaced with the fftbox and dotproduct.
+! cgtk_rotate. sphere.
+!
                         cm1(1,iband1,iband2,intot,ikpt1,isppol)=&
                              & cm1(1,iband1,iband2,intot,ikpt1,isppol) &
                              & + mywfc%cg_elem(1,  igk1, ispinor,iband1, ikpt1, isppol) &

@@ -249,6 +249,7 @@ type, public :: gqk_t
   integer,allocatable :: my_q2ibz(:,:)
   ! (6, my_nq)
   ! Mapping my_qpoints --> qibz
+  ! symrel conventions
 
   integer,allocatable :: my_q2bz(:)
   ! (my_nq)
@@ -2997,13 +2998,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer :: bstart_k,bstart_kq,nband_k,nband_kq,band_k, in_k, im_kq !ib1,ib2, band_kq,
  integer :: ik_ibz,ikq_ibz,isym_k,isym_kq,trev_k,trev_kq
  integer :: my_ik, my_is, comm_rpt, my_npert, my_ip, my_iq, spin,istwf_k,istwf_kq,npw_k,npw_kq
- integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone
+ integer :: mpw, nb,ierr,cnt, n1,n2,n3,n4,n5,n6,nspden,ndone, db_iqpt
  integer :: sij_opt,usecprj,usevnl,optlocal,optnl,opt_gvnlx1
  integer :: nfft,nfftf,mgfft,mgfftf, nkpg, nkpg1, qbuf_size, iqbuf_cnt, root_ncid, spin_ncid, ncerr
  integer :: ii, my_nqibz, iq_start, iq_ibz, isym_q, trev_q, prev_iqbz
  real(dp) :: cpu, wall, gflops, cpu_q, wall_q, gflops_q, cpu_all, wall_all, gflops_all
  real(dp) :: ecut, eshift, eig0nk, weight_q, weight_k
- logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time
+ logical :: gen_eigenpb, isirr_k, isirr_kq, isirr_q, print_time, use_ftinterp
  type(wfd_t) :: wfd
  type(gs_hamiltonian_type) :: gs_hamkq
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -3011,10 +3012,13 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(gqk_t),pointer :: gqk
  character(len=500) :: msg
 !arrays
- integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1)
+ integer :: g0_k(3), g0_kq(3), g0_q(3), work_ngfft(18),gmax(3),indkk_kq(6,1), units(2)
+ integer :: mapc_qq2dvdb(6) ! mapl_k(6), mapl_kq(6), mapl_kqmp(6), mapl_kmp(6), mapc_qq(6),
  integer(i1b),allocatable :: itreat_qibz(:)
+ integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
+ integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
@@ -3032,6 +3036,8 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  type(pawcprj_type),allocatable  :: cwaveprj0(:,:)
 
 !************************************************************************
+
+ units = [std_out, ab_out]
 
  ! This parameter defines the size of the q-buffer used to store the g(k, q) e-ph matrix elements
  ! for all the k-point treated by this MPI rank.
@@ -3066,23 +3072,67 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  ! Activate parallelism over perturbations at the level of the DVDB
  call gstore%set_perts_distrib(cryst, dvdb, my_npert)
 
- !call wrtout([std_out, ab_out], " Cannot find eph_ngqpt_fine q-points in DVDB --> Activating Fourier interpolation.")
  ! Prepare Fourier interpolation of DFPT potentials.
  comm_rpt = xmpi_comm_self
  !comm_rpt = bqs_comm%value
- call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
 
- ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
- ABI_MALLOC(itreat_qibz, (gstore%nqibz))
- ABI_MALLOC(qselect, (gstore%nqibz))
- qselect = 0; itreat_qibz = 0
- call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
- ABI_FREE(itreat_qibz)
- ABI_FREE(qselect)
+ ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
+ !use_ftinterp = .True.
+ !use_ftinterp = .False.
+
+ cnt = 0
+ spin_loop: do my_is=1,gstore%my_nspins
+   spin = gstore%my_spins(my_is)
+   gqk => gstore%gqk(my_is)
+   do my_iq=1,gqk%my_nq
+     iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
+     trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
+     db_iqpt = dvdb%findq(qq_ibz)
+     if (db_iqpt == -1) then
+       cnt = 1
+       exit spin_loop
+     end if
+   end do
+ end do spin_loop
+ call xmpi_sum(cnt, comm, ierr)
+ use_ftinterp = (cnt /= 0)
+
+ if (.not. use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+   ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
+   use_ftinterp = .True.
+ end if
+
+ if (use_ftinterp) then
+   call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, gstore%qptopt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+
+   ! Build q-cache in the *dense* IBZ using the global mask qselect and itreat_qibz.
+   ABI_MALLOC(itreat_qibz, (gstore%nqibz))
+   ABI_MALLOC(qselect, (gstore%nqibz))
+   qselect = 0; itreat_qibz = 0
+   call dvdb%ftqcache_build(nfftf, ngfftf, gstore%nqibz, gstore%qibz, dtset%dvdb_qcache_mb, qselect, itreat_qibz, gstore%comm)
+   ABI_FREE(itreat_qibz)
+   ABI_FREE(qselect)
+
+ else
+   call wrtout(units, " DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.")
+   ! Need to translate itreat_qibz into itreatq_dvdb.
+   ! FIXME: Not used
+   ABI_ICALLOC(qselect, (dvdb%nqpt))
+   ABI_ICALLOC(itreatq_dvdb, (dvdb%nqpt))
+   !do iq_ibz=1,gstore%nqibz
+   !  if (itreat_qibz(iq_ibz) == 0) cycle
+   !  db_iqpt = qibz2dvdb(iq_ibz)
+   !  ABI_CHECK(db_iqpt /= -1, sjoin("Could not find IBZ q-point:", ktoa(gstore%qibz(:, iq_ibz)), "in the DVDB file."))
+   !  itreatq_dvdb(db_iqpt) = 1
+   !end do
+   call dvdb%qcache_read(nfftf, ngfftf, dtset%dvdb_qcache_mb, qselect, itreatq_dvdb, comm)
+   ABI_FREE(qselect)
+   ABI_FREE(itreatq_dvdb)
+ end if
 
  ! Initialize the wave function descriptor.
  ! Only wavefunctions for the symmetrical imagine of the k/k+q wavevectors treated by this MPI rank are stored.
-
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
@@ -3367,8 +3417,18 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
      !call dvdb%ftinterp_qpt(qq_bz, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
 
      ! Version with qcache.
-     call dvdb%get_ftqbz(cryst, qq_bz, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
-                         gqk%pert_comm%value)
+     if (use_ftinterp) then
+       call dvdb%get_ftqbz(cryst, qq_bz, qq_ibz, gqk%my_q2ibz(:, my_iq), cplex, nfftf, ngfftf, v1scf, &
+                           gqk%pert_comm%value)
+     else
+       ! Read and reconstruct the dvscf potentials for qpt and my_npert perturbations.
+       db_iqpt = dvdb%findq(qq_ibz)
+       ABI_CHECK(db_iqpt /= -1, sjoin("Could not find symmetric of q-point:", ktoa(qq_bz), "in DVDB file."))
+       ! The first entry in mapc_qq2dvdb gives the index in dvdb%qpts.
+       ! The other entries in mapc_qq are OK as they refer to symmetries.
+       mapc_qq2dvdb = gqk%my_q2ibz(:, my_iq); mapc_qq2dvdb(1) = db_iqpt
+       call dvdb%readsym_qbz(cryst, qq_bz, mapc_qq2dvdb, cplex, nfftf, ngfftf, v1scf, gqk%pert_comm%value)
+     end if
 
      ! Allocate vlocal1 with correct cplex. Note nvloc and my_npert.
      ABI_MALLOC(vlocal1, (cplex*n4, n5, n6, gs_hamkq%nvloc, my_npert))
@@ -3651,6 +3711,9 @@ subroutine dump_data()
  !iq_buf(:, iqbuf_cnt) = [my_iq, iq_bz]
  my_iq = iq_buf(1, 1)
  iq_glob = my_iq + gqk%my_qstart - 1
+
+ !print *, "in dump_data with start: ", [1, 1, 1, 1, gqk%my_kstart, iq_glob]
+ !print *, "                  count; ", [gqk%cplex, gqk%nb, gqk%nb, gqk%natom3, gqk%my_nk, iqbuf_cnt]
 
  ! NB: this is an individual IO operation
  ncerr = nf90_put_var(spin_ncid, spin_vid("gvals"), my_gbuf, &

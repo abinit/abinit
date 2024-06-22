@@ -23,8 +23,6 @@
 
 #include "abi_common.h"
 
-
-
 module m_wannier_io
   use defs_basis
   use defs_wannier90
