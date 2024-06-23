@@ -350,7 +350,7 @@ program abinit
  ! Check whether the string only contains valid keywords
  call chkvars(string)
 
-!At this stage, all the information from the "files" file and "input" file have been read and checked.
+ ! At this stage, all the information from the "files" file and "input" file have been read and checked.
 
 !------------------------------------------------------------------------------
 
@@ -427,9 +427,9 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
-     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal
      !  so there is only one call to the latter, for both units)
-     ! both 
+     ! both
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out
