@@ -542,11 +542,12 @@ end subroutine wedge_product
 !!
 !! OUTPUT
 !!  npts=number of points falling inside the Wigner-Seitz cell
-!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell
+!!  irvec(3,npts)=Reduced coordinated of the points inside the W-S cell (sorted by lenght)
 !!  ndegen(npts)=Weigths associated to each point.
+!!  rmods(npts)=Lenght of the irvec
 !!
 !! SIDE EFFECTS
-!!  irvec and ndegen are are allocated with the correct
+!!  irvec, ndegen and rmods  are allocated with the correct
 !!  size inside the routine and returned to the caller.
 !!
 !! NOTES
@@ -561,7 +562,7 @@ end subroutine wedge_product
 !!
 !! SOURCE
 
-subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvol)
+subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods, prtvol)
 
 !Arguments ------------------------------------
 !scalars
@@ -571,17 +572,20 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
  integer,intent(in) :: kptrlatt(3,3),lmax(3)
  integer,allocatable,intent(out) :: irvec(:,:),ndegen(:)
  real(dp),intent(in) :: center(3),rmet(3,3)
+ real(dp),allocatable,intent(out) :: rmods(:)
 
 !Local variables-------------------------------
 !scalars
  integer :: in1,in2,in3,l1,l2,l3,ii,icount,n1,n2,n3
- integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3
+ integer :: l0,l1_max,l2_max,l3_max,nl,verbose,mm1,mm2,mm3,ir
  real(dp) :: tot,dist_min
  real(dp),parameter :: TOL_DIST=tol7
  character(len=500) :: msg
 !arrays
+ integer,allocatable :: iperm(:), swap2(:,:), swap1(:)
+ real(dp),parameter :: gammak(3) = zero
  real(dp) :: diff(3)
- real(dp),allocatable :: dist(:),swap2(:,:),swap1(:)
+ real(dp),allocatable :: dist(:)
 
 ! *************************************************************************
 
@@ -598,7 +602,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
  l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
- ABI_MALLOC(dist,(nl))
+ ABI_MALLOC(dist, (nl))
 
  ! Allocate with maximum size
  mm1 = 2 * n1 + 1
@@ -643,10 +647,10 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  if (verbose >= 1) then
    write(msg,'(a,i0)')' lattice points in Wigner-Seitz supercell: ',npts
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out, msg)
    do ii=1,npts
-     write(msg,'(a,3(i3),a,i4)')'  vector ', irvec(:,ii),' degeneracy: ', ndegen(ii)
-     call wrtout(std_out,msg,'COLL')
+     write(msg,'(a,3(i3,1x),a,i0)')'  vector: ', irvec(:,ii),', degeneracy: ', ndegen(ii)
+     call wrtout(std_out, msg)
    end do
  end if
 
@@ -662,20 +666,31 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, prtvo
 
  ABI_FREE(dist)
 
- ! Reallocate the output with correct size.
- ABI_MALLOC(swap1,(npts))
- swap1(:)=ndegen(1:npts)
- ABI_FREE(ndegen)
- ABI_MALLOC(ndegen,(npts))
- ndegen=swap1
- ABI_FREE(swap1)
-
- ABI_MALLOC(swap2,(3,npts))
- swap2(:,:)=irvec(1:3,1:npts)
+ ! Reallocate ndegen and irvec with correct size and sort by norm
+ ABI_MALLOC(swap2, (3, npts))
+ swap2(:,:) = irvec(1:3, 1:npts)
+ !ABI_REMALLOC(irvec, (3, npts))
  ABI_FREE(irvec)
- ABI_MALLOC(irvec,(3,npts))
- irvec=swap2
+ call sort_gvecs(npts, gammak, rmet, swap2, out_gvec=irvec, iperm=iperm)
+ !irvec = swap2
  ABI_FREE(swap2)
+
+ ABI_MALLOC(swap1, (npts))
+ swap1(:) = ndegen(1:npts)
+ ABI_REMALLOC(ndegen, (npts))
+ ndegen = swap1
+
+ do ir=1,npts
+   ndegen(ir) = swap1(iperm(ir))
+ end do
+
+ ABI_MALLOC(rmods, (npts))
+ do ir=1,npts
+   rmods(ir) = sqrt(dot_product(irvec(:,ir), matmul(rmet, irvec(:,ir))))
+ end do
+
+ ABI_FREE(swap1)
+ ABI_FREE(iperm)
 
 end subroutine wigner_seitz
 !!***
@@ -1256,8 +1271,8 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
      call wrtout(iout,msg)
    end do
    write(msg,'(a,1p,e15.7,a)') ' Unit cell volume ucvol=',ucvol+tol10,' bohr^3'
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
  ! Compute real space metric.
@@ -1272,8 +1287,8 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
    angle(2)=acos(rmet(1,3)/sqrt(rmet(1,1)*rmet(3,3)))/two_pi*360.0d0
    angle(3)=acos(rmet(1,2)/sqrt(rmet(1,1)*rmet(2,2)))/two_pi*360.0d0
    write(msg, '(a,3es16.8,a)' )' Angles (23,13,12)=',angle(1:3),' degrees'
-   call wrtout(iout,msg,'COLL')
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(iout,msg)
+   call wrtout(std_out,msg)
  end if
 
 end subroutine metric
@@ -1823,7 +1838,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 
 !Initialize the file
  write(msg, '(a,a,a)' )' bonds_lgth_angles : about to open file ',trim(fnameabo_app_geo),ch10
- call wrtout(std_out,msg,'COLL'); call wrtout(ab_out,msg,'COLL')
+ call wrtout(std_out,msg); call wrtout(ab_out,msg)
 
  if (open_file(fnameabo_app_geo,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
    ABI_ERROR(msg)
@@ -1831,7 +1846,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  rewind(temp_unit)
 
  write(msg, '(a,a)' ) ch10,' ABINIT package : GEO file '
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Compute maximum number of neighbors is the neighbor list,
 !from the indicative coordination number
@@ -1844,7 +1859,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 & ' nearest neighbors and next nearest neighbors, ',ch10,&
 & '                  and ',(coordn*(coordn-1))/2,&
 & ' distinct angles between nearest neighbors'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Compute metric tensor in real space rmet
  do nu=1,3
@@ -1856,15 +1871,15 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
  end do
 
  write(msg, '(a,a)' )ch10,' Primitive vectors of the periodic cell (bohr)'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
  do nu=1,3
    write(msg, '(1x,a,i1,a,3f10.5)' ) '  R(',nu,')=',rprimd(:,nu)
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  write(msg, '(a,a)' ) ch10,&
 & ' Atom list        Reduced coordinates          Cartesian coordinates (bohr)'
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
 !Set up a list of character identifiers for all atoms : iden(ia)
  ABI_MALLOC(iden,(natom))
@@ -1894,18 +1909,18 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    write(msg, '(a,a,3f10.5,a,3f10.5)' ) &
 &   '   ',iden(ia),(xred(ii,ia)+tol10,ii=1,3),&
 &   '    ',(xcart(ii,ia)+tol10,ii=1,3)
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  write(msg, '(a,a,a,a,i4,a)' )ch10,&
 & ' XMOL data : natom, followed by cartesian coordinates in Angstrom',&
 & ch10,ch10,natom,ch10
- call wrtout(temp_unit,msg,'COLL')
+ call wrtout(temp_unit,msg)
 
  do ia=1,natom
    call atomdata_from_znucl(atom,znucl(typat(ia)))
    write(msg, '(a,a,3f10.5)' )'   ',atom%symbol,xcart(1:3,ia)*Bohr_Ang
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
  end do
 
  ABI_FREE(xcart)
@@ -1919,7 +1934,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
    write(msg, '(a,a,a,a,a,a,a,a,a)' ) ch10,'===========',&
 &   '=====================================================================',&
 &   ch10,' ',iden(ia),ch10,ch10,' Bond lengths '
-   call wrtout(temp_unit,msg,'COLL')
+   call wrtout(temp_unit,msg)
 
 !  Search other atoms for bonds, but must proceed
 !  in such a way to consider a search box sufficiently large,
@@ -2027,14 +2042,14 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 &     '  ',trim(iden(ia)),' - ',trim(iden(ib)),&
 &     list_neighb(ineighb,2:4,1),'bond length is ',&
 &     length,' bohr  ( or ',Bohr_Ang*length,' Angst.)'
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
    end do
 
 !  Output the angle list
    if(coordn>1)then
 
      write(msg, '(a,a)' ) ch10,' Bond angles '
-     call wrtout(temp_unit,msg,'COLL')
+     call wrtout(temp_unit,msg)
 
      do ineighb=2,coordn
        do jneighb=ineighb+1,coordn+1
@@ -2065,7 +2080,7 @@ subroutine bonds_lgth_angles(coordn,fnameabo_app_geo,natom,ntypat,rprimd,typat,x
 &         '  ',trim(iden(ib)),list_neighb(ineighb,2:4,1),' - ',&
 &         trim(iden(ia)),' - ',trim(iden(ic)),&
 &         list_neighb(jneighb,2:4,1),'bond angle is ',thdeg,' degrees '
-         call wrtout(temp_unit,msg,'COLL')
+         call wrtout(temp_unit,msg)
        end do
      end do
 
@@ -2434,10 +2449,10 @@ subroutine shellstruct(xred,rprimd,natom,magv,distv,smult,sdisv,nsh,atp,prtvol)
 
  if (prtvoll>2) then
    write(msg,'(a,i4,a)')' shellstruct found ',nsh,' shells at distances (sdisv) '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    call prmat(sdisv(1:nsh),1,nsh,1,std_out)
    write(msg,fmt='(a,150i4)')' and multiplicities (smult) ', smult(1:nsh)
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  end if
 
 !DEBUB
@@ -2520,11 +2535,11 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end if
 
  if (option==3.and.(.not.present(varlist))) then
-   call  wrtout(std_out,'ioniondist error: option=3 but no variable list provided for symmetrization','COLL')
+   call  wrtout(std_out,'ioniondist error: option=3 but no variable list provided for symmetrization')
    return
  end if
 
-!call wrtout(std_out,' ioniondist start ','COLL')
+!call wrtout(std_out,' ioniondist start ')
 
  distm=0
  katom=atpp-1
@@ -2539,7 +2554,7 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end do
 
  if (prtvoll>=3) then
-   call  wrtout(std_out,'ioniondist: ionic distances:','COLL')
+   call  wrtout(std_out,'ioniondist: ionic distances:')
    call prmat(distm,natom,natom,natom,std_out)
  end if
 
@@ -2565,10 +2580,10 @@ subroutine ioniondist(natom,rprimd,xred,inm,option,varlist,magv,atp,prtvol)
  end do
 
  if (prtvoll==2) then
-   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call wrtout(std_out,'ioniondist: symmetrized matrix:')
    call prmat(distm,1,natom,natom,std_out)
  else if (prtvoll>=3) then
-   call wrtout(std_out,'ioniondist: symmetrized matrix:','COLL')
+   call wrtout(std_out,'ioniondist: symmetrized matrix:')
    call prmat(distm,natom,natom,natom,std_out)
  end if
 
@@ -2743,7 +2758,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
  else
    write(msg,'(a)')' The inversion was not found in the symmetries list.'
  end if
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ! Find the symmetries that are related through the inversion symmetry
  call symdet(determinant,nsym,symrel)
@@ -2774,14 +2789,14 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
 &       ' Symmetry operations no. ',is,' and no. ',is2,&
 &       ' are related through the inversion.',ch10,&
 &       ' Symmetry operation no. ',is_discarded,' will be suppressed.'
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if ! found
 
    end do !is2
  end do !is
 
  if (nsym2/=(nsym/2).or.nsym==1) then
-   call wrtout(std_out, ' Program uses the original set of symmetries ', 'COLL')
+   call wrtout(std_out, ' Program uses the original set of symmetries ')
    nsym_out=nsym
    ABI_MALLOC(symrel_out,(3,3,nsym))
    ABI_MALLOC(tnons_out,(3,nsym))
@@ -2790,7 +2805,7 @@ subroutine remove_inversion(nsym,symrel,tnons,nsym_out,symrel_out,tnons_out,pinv
    pinv=1
  else
    write(msg,'(a)')' Inversion related operations have been suppressed from symmetries list.'
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    nsym_out=nsym2
    ABI_MALLOC(symrel_out,(3,3,nsym2))
    ABI_MALLOC(tnons_out,(3,nsym2))
@@ -3411,23 +3426,23 @@ subroutine littlegroup_pert(gprimd,idir,indsym,iout,ipert,natom,nsym,nsym1, &
  if (nsym1 /= 1) then
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,i5,a)')' Found ',nsym1,' symmetries that leave the perturbation invariant.'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    write(msg,'(a,i5,a)')' littlegroup_pert: found ',nsym1,' symmetries that leave the perturbation invariant: '
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  else
    if (iout /= ount .and. iout > 0) then
      write(msg,'(a,a)')' The set of symmetries contains',' only one element for this perturbation.'
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end if
    write(msg,'(a)')' littlegroup_pert: only one element in the set of symmetries for this perturbation:'
-   call wrtout(ount,msg,'COLL')
+   call wrtout(ount,msg)
  end if
 
  if (ount > 0) then
    do isym=1,nsym1
      write(msg, '(9i4)' )((symrl1(ii,jj,isym),ii=1,3),jj=1,3)
-     call wrtout(ount,msg,'COLL')
+     call wrtout(ount,msg)
    end do
  end if
 

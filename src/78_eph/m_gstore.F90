@@ -4400,8 +4400,7 @@ end subroutine gstore_print_for_abitests
 !!
 !! FUNCTION
 !!  Gather the MPI-distributed matrix elements for a given k/q-point index.
-!! Once one reciprocal dimension is fixed, the gathering is performed across
-!! the other one.
+!!  Once one reciprocal dimension is fixed, the gathering is performed across the other one.
 !!
 !! INPUTS
 !!  mode = String controlling the choice of the fixed dimension ("k" or "q")
@@ -4426,10 +4425,8 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
 
 !Local variables-------------------------------
 !scalars
- integer :: comm, ierr
- integer :: ipt_glob, ngather
- integer :: my_ipt, my_ngather, my_ptstart
- integer :: my_pert, ib, jb
+ integer :: comm, ierr, ipt_glob, ngather
+ integer :: my_ipt, my_ngather, my_ptstart, my_pert, ib, jb
 !arrays
  complex(dp), pointer :: my_g(:,:,:,:)
 
@@ -4468,10 +4465,10 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
 
          if (mode == "k") then
            g_gathered(my_pert, jb, ib, ipt_glob) = &
-             my_g(my_pert, jb, my_ipt, ib)
+                 my_g(my_pert, jb, my_ipt, ib)
          else
            g_gathered(my_pert, jb, ib, ipt_glob) = &
-             my_g(my_pert, jb, ib, my_ipt)
+                 my_g(my_pert, jb, ib, my_ipt)
          endif
 
        enddo

@@ -134,6 +134,7 @@ program abitk
  end do
 
  call get_command_argument(1, command)
+ call get_command_argument(2, path)
 
  select case (command)
  case ("from_poscar")
@@ -376,8 +377,6 @@ program abitk
    ABI_FREE(mu_e)
    ABI_FREE(n_ehst)
 
- !case ("ebands_dope")
-
  ! ====================
  ! Tools for developers
  ! ====================
@@ -442,16 +441,9 @@ program abitk
  end select
 
  ! Deallocate memory to make memcheck happy.
- call hdr%free()
- call cryst%free()
- call other_cryst%free()
- call kpath%free()
- call ebands_free(ebands)
- call ebands_free(ebands_kpath)
- call ebands_free(other_ebands)
- call edos%free()
- call jdos%free()
- call gaps%free()
+ call hdr%free(); call cryst%free(); call other_cryst%free(); call kpath%free()
+ call ebands_free(ebands); call ebands_free(ebands_kpath); call ebands_free(other_ebands)
+ call edos%free(); call jdos%free(); call gaps%free()
 
  ABI_SFREE(kibz)
  ABI_SFREE(wtk)
@@ -471,10 +463,6 @@ contains
 !!
 !! FUNCTION
 !!  Show command line help
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 

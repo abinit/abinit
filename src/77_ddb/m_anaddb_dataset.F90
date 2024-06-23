@@ -2229,8 +2229,7 @@ subroutine anaddb_init(input_path, filnam)
 !Local variables-------------------------
 !scalars
  integer:: lenstr, marr, jdtset, tread, i1, ierr
- character(len=strlen):: string, raw_string, fname
- character(len=fnlen) :: dirpath
+ character(len=strlen):: string, raw_string, fname, dirpath
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
