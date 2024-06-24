@@ -77,6 +77,9 @@ module m_mlwfovlp
 !! abiwan_t
 !!
 !! FUNCTION
+!!  This object stores the results of the Wannnierization algorithm
+!!  and can be constructure by reading the ABIWAN.nc file produdced by
+!!  Abinit when we call wannier90 in library mode.
 !!
 !! SOURCE
 
@@ -153,12 +156,11 @@ module m_mlwfovlp
    procedure :: print => abiwan_print
    ! print info on the object.
 
-   procedure :: interp_eigens => abiwan_interp_eigens
-   ! Interpolate KS eigenvalues at an arbitray k-point
+   procedure :: interp_h => abiwan_interp_h
+   ! Interpolate Hamiltonian at an arbitray k-point
 
    procedure :: free => abiwan_free
    ! Free memory.
-
  end type abiwan_t
 !!***
 
@@ -3555,31 +3557,31 @@ subroutine abiwan_print(abiwan)
 end subroutine abiwan_print
 !!***
 
-!!****f* m_mlwfovlp/abiwan_interp_eigens
+!!****f* m_mlwfovlp/abiwan_interp_h
 !! NAME
-!! abiwan_interp_eigens
+!! abiwan_interp_h
 !!
 !! FUNCTION
-!! Interpolate KS eigenvalues at an arbitray k-point
+!! Interpolate Hamiltonian at an arbitray k-point
 !!
 !! SOURCE
 
-subroutine abiwan_interp_eigens(abiwan, kpt, eigens)
+subroutine abiwan_interp_h(abiwan, kpt, hk_ij, eigens)
 
 !Arguments ------------------------------------
  class(abiwan_t),intent(in) :: abiwan
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: eigens(abiwan%nwan)
+ complex(dp),intent(out) :: hk_ij(abiwan%nwan, abiwan%nwan)
 
 !Local variables-------------------------------
-!scalars
  integer :: ir, ii, jj
- complex(dp) :: hk_ij(abiwan%nwan, abiwan%nwan), cphases(abiwan%nrpts)
+ complex(dp) :: eikr(abiwan%nrpts)
 
 !************************************************************************
 
  do ir=1,abiwan%nrpts
-   cphases(ir) = exp(j_dpc * two_pi * dot_product(abiwan%irvec(:, ir), kpt)) / abiwan%ndegen(ir)
+   eikr(ir) = exp(j_dpc * two_pi * dot_product(abiwan%irvec(:, ir), kpt)) / abiwan%ndegen(ir)
  end do
 
  ! O_ij(k) = sum_R e^{+ik.R}*O_ij(R)
@@ -3587,8 +3589,8 @@ subroutine abiwan_interp_eigens(abiwan, kpt, eigens)
  do jj=1,abiwan%nwan
    do ii=1,abiwan%nwan
      do ir=1,abiwan%nrpts
-       hk_ij(ii, jj) = hk_ij(ii, jj) * cphases(ir) * abiwan%hwan_r(ir, ii, jj)
-       !hk_ij(ii, jj) = zdotu(abiwan%nrpts, cphases, 1, abiwan%hwan_r(:,ii,jj), 1)
+       hk_ij(ii, jj) = hk_ij(ii, jj) * eikr(ir) * abiwan%hwan_r(ir, ii, jj)
+       !hk_ij(ii, jj) = zdotu(abiwan%nrpts, eikr, 1, abiwan%hwan_r(:,ii,jj), 1)
      end do
    end do
  end do
@@ -3596,7 +3598,7 @@ subroutine abiwan_interp_eigens(abiwan, kpt, eigens)
  hk_ij = half * (hk_ij + transpose(conjg(hk_ij)))
  !call xheev("N", "U", abiwan%nwan, hk_ij, eigens)
 
-end subroutine abiwan_interp_eigens
+end subroutine abiwan_interp_h
 !!***
 
 !!****f* m_mlwfovlp/abiwan_free
