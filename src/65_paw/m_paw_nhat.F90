@@ -662,14 +662,14 @@ end subroutine pawmknhat
 !! SOURCE
 
 subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
-&          nspinor,ntypat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
+&          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
 &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft) ! optional arguments
 
  implicit none
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor
+ integer,intent(in) :: ider,izero,my_natom,natom,nfft,nhat12_grdim,ntypat,nspinor,ndat
  integer,optional,intent(in) :: me_g0,comm_fft,paral_kgb
  integer,optional,intent(in) :: comm_atom
  type(distribfft_type),optional,intent(in),target :: distribfft
@@ -679,16 +679,16 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  integer,optional,intent(in) ::atindx(natom)
  integer,optional,target,intent(in) :: mpi_atmtab(:)
  real(dp),optional, intent(in) ::gprimd(3,3),qphon(3),xred(3,natom)
- real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim)
- real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3))
- real(dp),intent(out) :: nhat12(2,nfft,nspinor**2)
+ real(dp),intent(out) :: grnhat12(2,nfft,nspinor**2,3*nhat12_grdim,ndat)
+ real(dp),optional,intent(out) :: grnhat_12(2,nfft,nspinor**2,3,natom*(ider/3),ndat)
+ real(dp),intent(out) :: nhat12(2,nfft,nspinor**2,ndat)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
  type(pawtab_type),intent(in) :: pawtab(ntypat)
- type(pawcprj_type),intent(in) :: cprj1(natom,nspinor),cprj2(natom,nspinor)
+ type(pawcprj_type),intent(in) :: cprj1(natom,nspinor),cprj2(natom,nspinor*ndat)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn
+ integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size
  real(dp) :: re_p,im_p
@@ -698,7 +698,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
- real(dp) :: rdum(1),cpf(2),cpf_ql(2),tsec(2),ro(2),ro_ql(2),nhat12_atm(2,nfft,nspinor**2)
+ real(dp) :: rdum(1),cpf(2),cpf_ql(2),tsec(2),ro(2),ro_ql(2),nhat12_atm(2,nfft,nspinor**2,ndat)
  real(dp),allocatable :: work(:,:), qijl(:,:)
 
 ! *************************************************************************
@@ -798,6 +798,9 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      pawfgrtab(iatom)%expiqr_allocated=2
    end if
 
+   !$OMP PARALLEL DO PRIVATE(ilslm,ils,mm,ic,jc,cpf_ql) &
+   !$OMP& PRIVATE(isp1,isp2,klm,lmin,lmax,ilmn,jlmn,re_p,im_p,cpf,ro,ro_ql)
+   do idat=1,ndat
    do isploop=1,nspinor**2    ! Loop over density components of the compensation charge.
 !    TODO Here we might take advantage of symmetry relations between the four components if nspinor==2
      isp1=spinor_idxs(1,isploop)
@@ -812,15 +815,15 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !      call klmn2ijlmn(klmn,lmn_size,ilmn,jlmn)  ! This mapping should be stored in pawtab_type
 
 !      Retrieve the factor due to the PAW projections.
-       re_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &
-&       +cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2)%cp(2,jlmn) &
-&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2)%cp(1,ilmn) &
-&       +cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2)%cp(2,ilmn)
+       re_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(1,jlmn) &
+&       +cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(2,jlmn) &
+&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(1,ilmn) &
+&       +cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(2,ilmn)
 
-       im_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2)%cp(2,jlmn) &
-&       -cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2)%cp(1,jlmn) &
-&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2)%cp(2,ilmn) &
-&       -cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2)%cp(1,ilmn)
+       im_p =  cprj1(iatm,isp1)%cp(1,ilmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(2,jlmn) &
+&       -cprj1(iatm,isp1)%cp(2,ilmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(1,jlmn) &
+&       +cprj1(iatm,isp1)%cp(1,jlmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(2,ilmn) &
+&       -cprj1(iatm,isp1)%cp(2,jlmn) * cprj2(iatm,isp2+(idat-1)*nspinor)%cp(1,ilmn)
 
        cpf(1)=re_p*pawtab(itypat)%dltij(klmn)*half
        cpf(2)=im_p*pawtab(itypat)%dltij(klmn)*half
@@ -832,10 +835,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
              if (pawang%gntselect(ilslm,klm)>0) then
                cpf_ql(1)=cpf(1)*qijl(ilslm,klmn)
                cpf_ql(2)=cpf(2)*qijl(ilslm,klmn)
+               !!$OMP PARALLEL DO PRIVATE(ic,jc)
                do ic=1,pawfgrtab(iatom)%nfgd
                  jc=pawfgrtab(iatom)%ifftsph(ic)
-                 nhat12_atm(1,jc,isploop)=nhat12_atm(1,jc,isploop)+cpf_ql(1)*pawfgrtab(iatom)%gylm(ic,ilslm)
-                 nhat12_atm(2,jc,isploop)=nhat12_atm(2,jc,isploop)+cpf_ql(2)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                 nhat12_atm(1,jc,isploop,idat)=nhat12_atm(1,jc,isploop,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylm(ic,ilslm)
+                 nhat12_atm(2,jc,isploop,idat)=nhat12_atm(2,jc,isploop,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylm(ic,ilslm)
                end do
              end if
            end do
@@ -851,13 +855,13 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
                cpf_ql(2)=cpf(2)*qijl(ilslm,klmn)
                do ic=1,pawfgrtab(iatom)%nfgd
                  jc=pawfgrtab(iatom)%ifftsph(ic)
-                 grnhat12(1,jc,isploop,1)=grnhat12(1,jc,isploop,1)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
-                 grnhat12(1,jc,isploop,2)=grnhat12(1,jc,isploop,2)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
-                 grnhat12(1,jc,isploop,3)=grnhat12(1,jc,isploop,3)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
+                 grnhat12(1,jc,isploop,1,idat)=grnhat12(1,jc,isploop,1,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
+                 grnhat12(1,jc,isploop,2,idat)=grnhat12(1,jc,isploop,2,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
+                 grnhat12(1,jc,isploop,3,idat)=grnhat12(1,jc,isploop,3,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
 
-                 grnhat12(2,jc,isploop,1)=grnhat12(2,jc,isploop,1)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
-                 grnhat12(2,jc,isploop,2)=grnhat12(2,jc,isploop,2)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
-                 grnhat12(2,jc,isploop,3)=grnhat12(2,jc,isploop,3)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
+                 grnhat12(2,jc,isploop,1,idat)=grnhat12(2,jc,isploop,1,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
+                 grnhat12(2,jc,isploop,2,idat)=grnhat12(2,jc,isploop,2,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
+                 grnhat12(2,jc,isploop,3,idat)=grnhat12(2,jc,isploop,3,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
                end do
              end if
            end do
@@ -872,13 +876,13 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
                cpf_ql(2)=cpf(2)*qijl(ilslm,klmn)
                do ic=1,pawfgrtab(iatom)%nfgd
                  jc=pawfgrtab(iatom)%ifftsph(ic)
-                 grnhat_12(1,jc,isploop,1,iatom)=grnhat_12(1,jc,isploop,1,iatom)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
-                 grnhat_12(1,jc,isploop,2,iatom)=grnhat_12(1,jc,isploop,2,iatom)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
-                 grnhat_12(1,jc,isploop,3,iatom)=grnhat_12(1,jc,isploop,3,iatom)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
+                 grnhat_12(1,jc,isploop,1,iatom,idat)=grnhat_12(1,jc,isploop,1,iatom,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
+                 grnhat_12(1,jc,isploop,2,iatom,idat)=grnhat_12(1,jc,isploop,2,iatom,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
+                 grnhat_12(1,jc,isploop,3,iatom,idat)=grnhat_12(1,jc,isploop,3,iatom,idat)+cpf_ql(1)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
 
-                 grnhat_12(2,jc,isploop,1,iatom)=grnhat_12(2,jc,isploop,1,iatom)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
-                 grnhat_12(2,jc,isploop,2,iatom)=grnhat_12(2,jc,isploop,2,iatom)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
-                 grnhat_12(2,jc,isploop,3,iatom)=grnhat_12(2,jc,isploop,3,iatom)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
+                 grnhat_12(2,jc,isploop,1,iatom,idat)=grnhat_12(2,jc,isploop,1,iatom,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(1,ic,ilslm)
+                 grnhat_12(2,jc,isploop,2,iatom,idat)=grnhat_12(2,jc,isploop,2,iatom,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(2,ic,ilslm)
+                 grnhat_12(2,jc,isploop,3,iatom,idat)=grnhat_12(2,jc,isploop,3,iatom,idat)+cpf_ql(2)*pawfgrtab(iatom)%gylmgr(3,ic,ilslm)
                end do
              end if
            end do
@@ -888,62 +892,76 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !    If needed, multiply eventually by exp(-i.q.r) phase
      if (compute_nhat) then
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+         !$OMP PARALLEL DO PRIVATE(ro,ro_ql,ic,jc)
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
            ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1:2)=nhat12_atm(1:2,jc,isploop)
-           nhat12_atm(1,jc,isploop)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           nhat12_atm(2,jc,isploop)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1:2)=nhat12_atm(1:2,jc,isploop,idat)
+           nhat12_atm(1,jc,isploop,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           nhat12_atm(2,jc,isploop,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
        end if
      end if
 
      if (compute_grad) then
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+         !$OMP PARALLEL DO PRIVATE(ro,ro_ql,ic,jc)
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
            ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1)=grnhat12(1,jc,isploop,1)-qphon(1)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,1)+qphon(1)*nhat12_atm(1,jc,isploop)
-           grnhat12(1,jc,isploop,1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat12(2,jc,isploop,1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat12(1,jc,isploop,2)-qphon(2)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,2)+qphon(2)*nhat12_atm(1,jc,isploop)
-           grnhat12(1,jc,isploop,2)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat12(2,jc,isploop,2)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat12(1,jc,isploop,3)-qphon(3)*nhat12_atm(2,jc,isploop)
-           ro(2)=grnhat12(2,jc,isploop,3)+qphon(3)*nhat12_atm(1,jc,isploop)
-           grnhat12(1,jc,isploop,3)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat12(2,jc,isploop,3)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat12(1,jc,isploop,1,idat)-qphon(1)*nhat12_atm(2,jc,isploop,idat)
+           ro(2)=grnhat12(2,jc,isploop,1,idat)+qphon(1)*nhat12_atm(1,jc,isploop,idat)
+           grnhat12(1,jc,isploop,1,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat12(2,jc,isploop,1,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat12(1,jc,isploop,2,idat)-qphon(2)*nhat12_atm(2,jc,isploop,idat)
+           ro(2)=grnhat12(2,jc,isploop,2,idat)+qphon(2)*nhat12_atm(1,jc,isploop,idat)
+           grnhat12(1,jc,isploop,2,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat12(2,jc,isploop,2,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat12(1,jc,isploop,3,idat)-qphon(3)*nhat12_atm(2,jc,isploop,idat)
+           ro(2)=grnhat12(2,jc,isploop,3,idat)+qphon(3)*nhat12_atm(1,jc,isploop,idat)
+           grnhat12(1,jc,isploop,3,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat12(2,jc,isploop,3,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
        end if
      end if
      if (compute_grad1) then
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+         !$OMP PARALLEL DO PRIVATE(ro,ro_ql,ic,jc)
          do ic=1,pawfgrtab(iatom)%nfgd
            jc=pawfgrtab(iatom)%ifftsph(ic)
            ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
            ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
-           ro(1)=grnhat_12(1,jc,isploop,1,iatom)
-           ro(2)=grnhat_12(2,jc,isploop,1,iatom)
-           grnhat_12(1,jc,isploop,1,iatom)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat_12(2,jc,isploop,1,iatom)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat_12(1,jc,isploop,2,iatom)
-           ro(2)=grnhat_12(2,jc,isploop,2,iatom)
-           grnhat_12(1,jc,isploop,2,iatom)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat_12(2,jc,isploop,2,iatom)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
-           ro(1)=grnhat_12(1,jc,isploop,3,iatom)
-           ro(2)=grnhat_12(2,jc,isploop,3,iatom)
-           grnhat_12(1,jc,isploop,3,iatom)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-           grnhat_12(2,jc,isploop,3,iatom)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat_12(1,jc,isploop,1,iatom,idat)
+           ro(2)=grnhat_12(2,jc,isploop,1,iatom,idat)
+           grnhat_12(1,jc,isploop,1,iatom,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat_12(2,jc,isploop,1,iatom,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat_12(1,jc,isploop,2,iatom,idat)
+           ro(2)=grnhat_12(2,jc,isploop,2,iatom,idat)
+           grnhat_12(1,jc,isploop,2,iatom,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat_12(2,jc,isploop,2,iatom,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+           ro(1)=grnhat_12(1,jc,isploop,3,iatom,idat)
+           ro(2)=grnhat_12(2,jc,isploop,3,iatom,idat)
+           grnhat_12(1,jc,isploop,3,iatom,idat)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+           grnhat_12(2,jc,isploop,3,iatom,idat)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
          end do
        end if
      end if
    end do ! isploop (density components of the compensation charge)
+   end do ! idat
 ! accumlate nhat12 for all the atoms
-   if (compute_nhat) nhat12=nhat12+nhat12_atm
+!nhat12(2,nfft,nspinor**2,ndat)
+   if (compute_nhat) then
+     !$OMP PARALLEL DO COLLAPSE(3)
+     do idat=1,ndat
+       do isp1=1,nspinor**2
+         do ils=1,nfft
+           nhat12(:,ils,isp1,idat)=nhat12(:,ils,isp1,idat)+nhat12_atm(:,ils,isp1,idat)
+         end do
+       end do
+     end do
+   end if
 
    if (pawfgrtab(iatom)%gylm_allocated==2) then
      ABI_FREE(pawfgrtab(iatom)%gylm)
@@ -1003,11 +1021,13 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !  Do FFT
    ABI_MALLOC(work,(2,nfft))
    cplex=2
+   do idat=1,ndat
    do isp1=1,MIN(2,nspinor**2)
-     call fourdp(cplex,work,nhat12(:,:,isp1),-1,mpi_enreg_fft,nfft,1,ngfft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1,idat),-1,mpi_enreg_fft,nfft,1,ngfft,0)
      call zerosym(work,cplex,ngfft(1),ngfft(2),ngfft(3),comm_fft=my_comm_fft,distribfft=my_distribfft)
-     call fourdp(cplex,work,nhat12(:,:,isp1),+1,mpi_enreg_fft,nfft,1,ngfft,0)
+     call fourdp(cplex,work,nhat12(:,:,isp1,idat),+1,mpi_enreg_fft,nfft,1,ngfft,0)
    end do
+   end do ! idat
    ABI_FREE(work)
 !  Destroy fake mpi_enreg
    call unset_mpi_enreg_fft(mpi_enreg_fft)
