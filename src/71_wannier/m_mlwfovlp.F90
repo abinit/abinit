@@ -266,7 +266,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: have_disentangled_spin(nsppol)
  integer,allocatable :: irvec(:,:),ndegen(:)
  real(dp),allocatable :: rmods(:)
- type(abiwan_t) :: abiwan
+ !type(abiwan_t) :: abiwan
 #endif
  integer :: nntot,num_nnmax
  integer :: master,max_num_bands,nprocs,spaceComm,rank
@@ -865,9 +865,9 @@ class(abstract_wf), pointer :: mywfc
      ABI_FREE(rmods)
 
      ! DEBUG SECTION
-     do isppol=1,nsppol
-       call abiwan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil, xmpi_comm_self); call abiwan%print(); call abiwan%free(); stop 0
-     end do
+     !do isppol=1,nsppol
+     !  call abiwan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil, xmpi_comm_self); call abiwan%print(); call abiwan%free() !; stop 0
+     !end do
 
    end if
 
@@ -3365,7 +3365,7 @@ end subroutine mlwfovlp_ylmfar
 !! abiwan_from_ncfile
 !!
 !! FUNCTION
-!!  Initialiaze an abiwan instance from a netcf file
+!! Initialize an abiwan_t instance from a netcf file
 !!
 !! INPUTS
 !!
