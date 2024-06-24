@@ -707,7 +707,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 
            izero=0
            call pawmknhat_psipsi(Cprj_ksum,Cprj_kgw(:,i2:i2+spad),ider0,izero,Cryst%natom,&
-&            Cryst%natom,gwx_nfftot,gwx_ngfft,nhat12_grdim,nspinor,Cryst%ntypat,Pawang,Pawfgrtab,&
+&            Cryst%natom,gwx_nfftot,gwx_ngfft,nhat12_grdim,nspinor,Cryst%ntypat,1,Pawang,Pawfgrtab,&
 &            grnhat12,nhat12,pawtab)
 
 #if 1

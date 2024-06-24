@@ -485,7 +485,7 @@ subroutine calc_sigx_me(sigmak_ibz, ikcalc, bmin, bmax, cryst, qp_ebands, Sigp, 
 
            izero=0
            call pawmknhat_psipsi(Cprj_ksum,Cprj_kgw(:,i2:i2+spad),ider0,izero,cryst%natom,&
-                                 cryst%natom,x_nfft,x_ngfft,nhat12_grdim,nspinor,cryst%ntypat,Pawang,Pawfgrtab,&
+                                 cryst%natom,x_nfft,x_ngfft,nhat12_grdim,nspinor,cryst%ntypat,1,Pawang,Pawfgrtab,&
                                  grnhat12,nhat12,pawtab)
 
          else

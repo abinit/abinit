@@ -473,14 +473,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+ndat_occ*nspinor-1)
 
        do idat=1,ndat
-       do idat_occ=1,ndat_occ
-         call pawmknhat_psipsi(cwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),&
+         call pawmknhat_psipsi(cwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),cwaveocc_prj(:,:),&
   &       ider,izero,natom,natom,nfftf,ngfftf,&
-  &       nhat12_grdim,nspinor,fockcommon%ntypat,fockbz%pawang,fockcommon%pawfgrtab,grnhat12(:,:,:,:,idat_occ,idat),&
-  &       rho12(:,:,:,idat_occ,idat),&
-  &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,idat_occ,idat),qphon=qvec_j,&
+  &       nhat12_grdim,nspinor,fockcommon%ntypat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12(:,:,:,:,:,idat),&
+  &       rho12(:,:,:,:,idat),&
+  &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,:,idat),qphon=qvec_j,&
   &       xred=gs_ham%xred,atindx=gs_ham%atindx)
-       end do ! idat_occ
        end do ! idat
 
        if(gpu_option==ABI_GPU_DISABLED) then
