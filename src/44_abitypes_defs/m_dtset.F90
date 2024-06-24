@@ -3487,7 +3487,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtcurrent prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
