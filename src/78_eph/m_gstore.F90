@@ -3077,9 +3077,10 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  !comm_rpt = bqs_comm%value
 
  ! qibz2dvdb gives the mapping gstore%ibz --> dvdb%ibz
- !use_ftinterp = .True.
+ use_ftinterp = .True.
  !use_ftinterp = .False.
 
+#if 0
  cnt = 0
  spin_loop: do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
@@ -3101,6 +3102,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
    ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
    use_ftinterp = .True.
  end if
+#endif
 
  if (use_ftinterp) then
    call wrtout(units, " Cannot find all IBZ q-points in the DVDB --> Activating Fourier interpolation.")
