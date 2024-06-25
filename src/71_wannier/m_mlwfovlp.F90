@@ -266,7 +266,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
- integer,allocatable :: irvec(:,:),ndegen(:)
+ integer,allocatable :: irvec(:,:),ndegen(:),exclude_bands(:,:)
  real(dp),allocatable :: rmods(:)
  !type(abiwan_t) :: abiwan
 #endif
@@ -396,6 +396,8 @@ class(abstract_wf), pointer :: mywfc
  ABI_MALLOC(proj_s_qaxis_loc,(3,mband))
  ABI_MALLOC(proj_z,(3,mband,nsppol))
  ABI_MALLOC(proj_zona,(mband,nsppol))
+ ABI_MALLOC(exclude_bands, (mband,nsppol))
+
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !2) Call to  Wannier setup
@@ -408,7 +410,7 @@ class(abstract_wf), pointer :: mywfc
 &  g1,lwanniersetup,mband,natom,nband_inc,nkpt,&
 &  nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 &  proj_l,proj_m,proj_radial,proj_site,proj_s_loc, proj_s_qaxis_loc, proj_x,proj_z,proj_zona,&
-&  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
+&  real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred,exclude_bands)
 
  do isppol=1, nsppol
    write(message, '(6a)' ) ch10,&
@@ -672,9 +674,6 @@ class(abstract_wf), pointer :: mywfc
      end if
 
      end if
-
-
-
  end if !dtset%w90iniprj/=0
 !
 !Deallocations
@@ -688,6 +687,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_FREE(proj_zona)
  ABI_FREE(proj_s_loc)
  ABI_FREE(proj_s_qaxis_loc)
+
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !6) write files for wannier function plot
@@ -828,7 +828,7 @@ class(abstract_wf), pointer :: mywfc
        nctkarr_t("num_bands", "int", "number_of_spins"), &
        nctkarr_t("band_in_int", "int", "max_number_of_states, number_of_spins"), &
        nctkarr_t("lwindow_int", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
-       !nctkarr_t("exclude_bands", "int", "max_number_of_states, number_of_spins"), &
+       nctkarr_t("exclude_bands", "int", "max_number_of_states, number_of_spins"), &
        !nctkarr_t("eigenvalues_w", "int", "max_num_bands, number_of_kpoints, number_of_spins"), &
        nctkarr_t("spread", "dp", "three, number_of_spins"), &
        !nctkarr_t("A_matrix", "dp", "two, max_num_bands, mwan, number_of_kpoints, number_of_spins"), &
@@ -849,7 +849,7 @@ class(abstract_wf), pointer :: mywfc
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "num_bands"), num_bands))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_in_int"), l2int(band_in)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "lwindow_int"), l2int(lwindow)))
-     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "exclude_bands"), exclude_bands))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "exclude_bands"), exclude_bands))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eigenvalues_w"), eigenvalues_w))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "spread"), spreadw))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "A_matrix"), c2r(A_matrix)))
@@ -902,6 +902,7 @@ class(abstract_wf), pointer :: mywfc
  ABI_FREE(eigenvalues_w)
  ABI_FREE(M_matrix)
  ABI_FREE(A_matrix)
+ ABI_FREE(exclude_bands)
 
  call mywfc%free()
  ABI_FREE_SCALAR(mywfc)
@@ -1216,7 +1217,7 @@ end subroutine mlwfovlp_seedname
 & nntot,num_bands,num_nnmax,nsppol,nwan,ovikp,&
 & proj_l,proj_m,proj_radial,proj_site,proj_s_loc, &
 & proj_s_qaxis_loc,proj_x,proj_z,proj_zona,&
-& real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred)
+& real_lattice,recip_lattice,rprimd,seed_name,spinors,xcart,xred,exclude_bands)
 
 !Arguments---------------------------
 ! scalars
@@ -1234,6 +1235,7 @@ end subroutine mlwfovlp_seedname
  real(dp),intent(out) :: proj_site(3,mband,nsppol),proj_x(3,mband,nsppol),proj_z(3,mband,nsppol)
  real(dp),intent(out) :: proj_zona(mband,nsppol),xcart(3,natom)
  logical,intent(out) :: band_in(mband,nsppol)
+ integer,intent(out) :: exclude_bands(mband,nsppol)
  character(len=3),intent(out) :: atom_symbols(natom)
  character(len=fnlen),intent(in) :: seed_name(nsppol),filew90_win(nsppol)
 
@@ -1249,7 +1251,7 @@ end subroutine mlwfovlp_seedname
  character(len=fnlen) :: filew90_nnkp
  type(atomdata_t) :: atom
 !arrays
- integer :: exclude_bands(mband,nsppol),ngkpt(3)
+ integer :: ngkpt(3)
 
 ! *************************************************************************
 
@@ -3386,13 +3388,13 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ncid, ncerr, ierr, my_rank, ii, ir, ik, ib, nsppol_, mband, nwan, nkbz, ount, num_bands
+ integer :: ncid, my_rank, ii, ir, ik, ib, nsppol_, mband, nwan, nkbz, ount, num_bands ! ierr, ncerr,
  character(len=500) :: msg
  character(len=fnlen) :: out_path
  type(crystal_t) :: crystal
 !arrays
  integer :: kptrlatt(3,3)
- integer,allocatable :: int_1d(:), int_2d(:,:), shiftk(:,:)
+ integer,allocatable :: int_1d(:), int_2d(:,:) !, shiftk(:,:)
  real(dp),allocatable :: u_mat(:,:,:,:), u_mat_opt(:,:,:,:), all_eigens(:,:)
 
 !************************************************************************
@@ -3496,10 +3498,12 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
  ! Get the final rotation matrix: the product of the optimal subspace and
  ! the rotation among the nwann Wannier functions.
  !
+ !ii = maxval(abiwan%ndimwin)
  !ALLOCATE(u_kc (nbndep, nwan, nkbz))
  !u_kc(:, :, :) = czero
  !do ik=1,nkbz
- !  u_kc(1:ndimwin(ik), 1:nwan, ik) = matmul(u_mat_opt(1:ndimwin(ik), :, ik), u_mat(:, 1:nwan, ik))
+ !  u_kc(1:abiwan%ndimwin(ik), 1:nwan, ik) = &
+ !   matmul(u_mat_opt(1:abiwan%ndimwin(ik), :, ik), u_mat(:, 1:nwan, ik))
  !end do
 
  ! Build the Hamiltonian in the Wannier representation.
@@ -3541,7 +3545,11 @@ subroutine abiwan_print(abiwan)
 
 !Arguments ------------------------------------
  class(abiwan_t),intent(in) :: abiwan
+
+!Local variables-------------------------------
 !************************************************************************
+
+ write(std_out, *)abiwan%nwan
 
  !ABI_SFREE(abiwan%irvec)
  !ABI_SFREE(abiwan%ndegen)

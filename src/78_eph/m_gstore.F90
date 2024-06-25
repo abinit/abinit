@@ -276,6 +276,12 @@ type, public :: gqk_t
   ! Contiguous indices.
   ! TODO: Change name as it's a bit ambigous: my_pertcase?
 
+  ! FIXME: I don't remember why I decided to have my_npert as first dimension
+  ! now it seems much more more natural to me to have
+
+  ! (nb, nb, my_npert, my_nk, my_nq) or
+  ! (nb, nb, my_npert, my_nq, my_nk)
+
   complex(dp), allocatable :: my_g(:,:,:,:,:)
   ! (my_npert, nb, my_nq, nb, my_nk)
   ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
@@ -3018,7 +3024,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: kg_k(:,:), kg_kq(:,:), nband(:,:), wfd_istwfk(:), qselect(:)
  integer,allocatable :: iq_buf(:,:), done_qbz_spin(:,:), my_iqibz_inds(:)
- integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
+ !integer,allocatable :: qibz2dvdb(:) !, displs(:), recvcounts(:)
  real(dp) :: kk_bz(3),kq_bz(3),kk_ibz(3),kq_ibz(3), qq_bz(3), qq_ibz(3), vk(3)
  real(dp) :: phfrq(3*cryst%natom), ylmgr_dum(1,1,1)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
