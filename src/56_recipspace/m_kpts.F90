@@ -3333,7 +3333,7 @@ subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
  real(dp),intent(in) :: kpts(3,nkpt), values(ndat, nkpt)
 
 !Local variables-------------------------------
- integer :: ik, idat, ix, iy, iz, inds(3)
+ integer :: ik, ix, iy, iz, inds(3)
  real(dp) :: kpt_wrap(3), shift(3)
 
 ! *********************************************************************
