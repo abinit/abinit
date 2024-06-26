@@ -474,14 +474,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        iband_cprj=(my_jsppol-1)*fockbz%mkptband+jbg+jband
        cwaveocc_prj=>fockbz%cwaveocc_prj(:,iband_cprj:iband_cprj+ndat_occ*nspinor-1)
 
-       do idat=1,ndat
-         call pawmknhat_psipsi(cwaveprj(:,1+(idat-1)*nspinor:idat*nspinor),cwaveocc_prj(:,:),&
-  &       ider,izero,natom,natom,nfftf,ngfftf,&
-  &       nhat12_grdim,nspinor,fockcommon%ntypat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12(:,:,:,:,:,idat),&
-  &       rho12(:,:,:,:,idat),&
-  &       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12(:,:,:,:,:,:,idat),qphon=qvec_j,&
-  &       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option)
-       end do ! idat
+       call pawmknhat_psipsi(cwaveprj(:,:),cwaveocc_prj(:,:),&
+&       ider,izero,natom,natom,nfftf,ngfftf,&
+&       nhat12_grdim,nspinor,fockcommon%ntypat,ndat,ndat_occ,fockbz%pawang,fockcommon%pawfgrtab,grnhat12,&
+&       rho12,&
+&       fockcommon%pawtab,gprimd=gs_ham%gprimd,grnhat_12=grnhat_12,qphon=qvec_j,&
+&       xred=gs_ham%xred,atindx=gs_ham%atindx,gpu_option=gpu_option)
 
        if(gpu_option==ABI_GPU_DISABLED) then
          !$OMP PARALLEL DO COLLAPSE(2) &
