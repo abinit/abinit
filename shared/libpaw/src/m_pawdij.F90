@@ -2128,7 +2128,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
  character(len=500) :: msg
 !arrays
  real(dp) :: rdum1(1),rdum2(2)
- real(dp),allocatable :: dijhat_idij(:),prod(:)
+ real(dp),allocatable :: dijhat_idij(:,:),prod(:,:)
 
 ! *************************************************************************
 
@@ -2172,14 +2172,13 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
 !Init memory
  dijhat=zero
- LIBPAW_ALLOCATE(prod,(qphase*lm_size))
- LIBPAW_ALLOCATE(dijhat_idij,(qphase*lmn2_size))
+ LIBPAW_ALLOCATE(prod,(qphase*lm_size,ndat))
+ LIBPAW_ALLOCATE(dijhat_idij,(qphase*lmn2_size,ndat))
 
 !----------------------------------------------------------
 !Loop over spin components
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
- do idat=1,ndat
  do idij=1,nsploop
    if (idij<=nsppol.or.(nspden==4.and.idij<=3)) then
 
@@ -2198,47 +2197,57 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 !      ===== Standard case ============================
        if (.not.has_qphase) then
          if (qphase==1) then
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ilslm,ic,idat)
+           do idat=1,ndat
            do ilslm=1,lm_size
              do ic=1,nfgd
-               vr=Pot(pawfgrtab%ifftsph(ic),ispden,idat)
-               prod(ilslm)=prod(ilslm)+vr*pawfgrtab%gylm(ic,ilslm)
+               prod(ilslm,idat)=prod(ilslm,idat)+Pot(pawfgrtab%ifftsph(ic),ispden,idat)*pawfgrtab%gylm(ic,ilslm)
              end do
            end do
+           end do
          else
+           !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
+           do idat=1,ndat
            ilslm1=1
            do ilslm=1,lm_size
              do ic=1,nfgd
                jc=2*pawfgrtab%ifftsph(ic)
                vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
-               prod(ilslm1  )=prod(ilslm1  )+vr*pawfgrtab%gylm(ic,ilslm)
-               prod(ilslm1+1)=prod(ilslm1+1)+vi*pawfgrtab%gylm(ic,ilslm)
+               prod(ilslm1  ,idat)=prod(ilslm1  ,idat)+vr*pawfgrtab%gylm(ic,ilslm)
+               prod(ilslm1+1,idat)=prod(ilslm1+1,idat)+vi*pawfgrtab%gylm(ic,ilslm)
              end do
              ilslm1=ilslm1+qphase
+           end do
            end do
          end if
 
 !      ===== Including Exp(iqr) phase (DFPT only) =====
        else
          if (qphase==1) then
+           !$OMP PARALLEL DO PRIVATE(vr,ilslm,ic,idat)
+           do idat=1,ndat
            do ilslm=1,lm_size
              do ic=1,nfgd
                vr=Pot(pawfgrtab%ifftsph(ic),ispden,idat)
-               prod(ilslm)=prod(ilslm)+vr*pawfgrtab%gylm(ic,ilslm)&
+               prod(ilslm,idat)=prod(ilslm,idat)+vr*pawfgrtab%gylm(ic,ilslm)&
 &                                        *pawfgrtab%expiqr(1,ic)
              end do
            end do
+           end do
          else
-           ilslm1=1
+           !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
+           do idat=1,ndat
            do ilslm=1,lm_size
              do ic=1,nfgd
+               ilslm1=1+(ilslm-1)*qphase
                jc=2*pawfgrtab%ifftsph(ic)
                vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
-               prod(ilslm1  )=prod(ilslm1  )+pawfgrtab%gylm(ic,ilslm)&
+               prod(ilslm1  ,idat)=prod(ilslm1  ,idat)+pawfgrtab%gylm(ic,ilslm)&
 &                *(vr*pawfgrtab%expiqr(1,ic)-vi*pawfgrtab%expiqr(2,ic))
-               prod(ilslm1+1)=prod(ilslm1+1)+pawfgrtab%gylm(ic,ilslm)&
+               prod(ilslm1+1,idat)=prod(ilslm1+1,idat)+pawfgrtab%gylm(ic,ilslm)&
 &                *(vr*pawfgrtab%expiqr(2,ic)+vi*pawfgrtab%expiqr(1,ic))
              end do
-             ilslm1=ilslm1+qphase
+           end do
            end do
          end if
        end if
@@ -2260,6 +2269,8 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
        dijhat_idij=zero
 
        if (qphase==1) then
+         !$OMP PARALLEL DO PRIVATE(ilslm,idat,klmn,ils,mm,lm0,klm,lmin,lmax,isel)
+         do idat=1,ndat
          do klmn=1,lmn2_size
            klm =pawtab%indklmn(1,klmn)
            lmin=pawtab%indklmn(3,klmn)
@@ -2268,12 +2279,15 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              lm0=ils**2+ils+1
              do mm=-ils,ils
                ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
-               if (isel>0) dijhat_idij(klmn)=dijhat_idij(klmn) &
-&                  +prod(ilslm)*pawtab%qijl(ilslm,klmn)
+               if (isel>0) dijhat_idij(klmn,idat)=dijhat_idij(klmn,idat) &
+&                  +prod(ilslm,idat)*pawtab%qijl(ilslm,klmn)
              end do
            end do
          end do
+         end do
        else
+         !$OMP PARALLEL DO PRIVATE(ilslm,ilslm1,idat,klmn,ils,mm,lm0,klm,klmn1,lmin,lmax,isel)
+         do idat=1,ndat
          do klmn=1,lmn2_size
            klmn1=2*klmn-1
            klm =pawtab%indklmn(1,klmn)
@@ -2284,11 +2298,12 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              do mm=-ils,ils
                ilslm=lm0+mm;ilslm1=2*ilslm;isel=pawang%gntselect(ilslm,klm)
                if (isel>0) then
-                 dijhat_idij(klmn1  )=dijhat_idij(klmn1  )+prod(ilslm1-1)*pawtab%qijl(ilslm,klmn)
-                 dijhat_idij(klmn1+1)=dijhat_idij(klmn1+1)+prod(ilslm1  )*pawtab%qijl(ilslm,klmn)
+                 dijhat_idij(klmn1  ,idat)=dijhat_idij(klmn1  ,idat)+prod(ilslm1-1,idat)*pawtab%qijl(ilslm,klmn)
+                 dijhat_idij(klmn1+1,idat)=dijhat_idij(klmn1+1,idat)+prod(ilslm1  ,idat)*pawtab%qijl(ilslm,klmn)
                end if
              end do
            end do
+         end do
          end do
        end if
 
@@ -2300,19 +2315,25 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
        !if ispden=2 => real part of D^22_ij
        !if ispden=3 => real part of D^12_ij
        !if ispden=4 => imaginary part of D^12_ij
+       !$OMP PARALLEL DO PRIVATE(idat,klmn,klmn1,klmn2)
+       do idat=1,ndat
        klmn1=max(1,ispden-2);klmn2=1
        do klmn=1,lmn2_size
-         dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2)
+         dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2,idat)
          klmn1=klmn1+cplex_dij
          klmn2=klmn2+qphase
        end do
+       end do
        if (qphase==2) then
          !Same storage with exp^(-i.q.r) phase
+         !$OMP PARALLEL DO PRIVATE(idat,klmn,klmn1,klmn2)
+         do idat=1,ndat
          klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
-           dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2)
+           dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2,idat)
            klmn1=klmn1+cplex_dij
            klmn2=klmn2+qphase
+         end do
          end do
        endif
 
@@ -2320,27 +2341,34 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
    !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
+     do idat=1,ndat
      dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
+     end do
      if (cplex_dij==2) then
+       do idat=1,ndat
        do klmn=2,lmn2_size*cplex_dij,cplex_dij
          dijhat(klmn,idij+(idat-1)*ndij)=-dijhat(klmn,idij+(idat-1)*ndij)
        end do
+       end do
        if (qphase==2) then
+         do idat=1,ndat
          do klmn=2+lmn2_size*cplex_dij,2*lmn2_size*cplex_dij,cplex_dij
            dijhat(klmn,idij+(idat-1)*ndij)=-dijhat(klmn,idij+(idat-1)*ndij)
+         end do
          end do
        end if
      end if
 
    !Antiferro: D_ij(:,2)=D^down_ij=D^up_ij
    else if (nsppol==1.and.idij==2) then
+     do idat=1,ndat
      dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
+     end do
    end if
 
 !----------------------------------------------------------
 !End loop on spin density components
  end do
- end do !idat
 
 !Free temporary memory spaces
  LIBPAW_DEALLOCATE(prod)
