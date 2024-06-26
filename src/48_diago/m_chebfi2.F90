@@ -800,7 +800,6 @@ subroutine chebfi_rayleighRitzQuotients(chebfi,maxeig,mineig,DivResults)
 
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xAXColsRows, Results1%self)
 
-!PAW
  call xgBlock_colwiseDotProduct(chebfi%xXColsRows, chebfi%xBXColsRows, Results2%self)
 
  call xgBlock_colwiseDivision(Results1%self, Results2%self, DivResults, &
@@ -998,14 +997,12 @@ subroutine chebfi_ampfactor(chebfi,eig,lambda_minus,lambda_plus,nline_bands)
 
     call xgBlock_setBlock(chebfi%xXColsRows, X_part, iband, chebfi%total_spacedim, 1)
     call xgBlock_setBlock(chebfi%xAXColsRows, AX_part, iband, chebfi%total_spacedim, 1)
+    call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
 
     call xgBlock_scale(X_part, 1/ampfactor, 1)
     call xgBlock_scale(AX_part, 1/ampfactor, 1)
+    call xgBlock_scale(BX_part, 1/ampfactor, 1)
 
-    if(chebfi%paw) then
-      call xgBlock_setBlock(chebfi%xBXColsRows, BX_part, iband, chebfi%total_spacedim, 1)
-      call xgBlock_scale(BX_part, 1/ampfactor, 1)
-    end if
   end do
 
 end subroutine chebfi_ampfactor

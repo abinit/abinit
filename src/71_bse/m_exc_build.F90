@@ -658,7 +658,7 @@ subroutine exc_build_block(BSp,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,Wfd,scr
          is_qeq0 = (normv(qbz,Cryst%gmet,'G')<GW_TOLQ0)
 
          ! Symmetrize em1(omega=0)
-         call screen%symmetrizer(iq_bz,Cryst,Gsph_c,Qmesh,Vcp)
+         call screen%rotate_iqbz(iq_bz, Cryst, Gsph_c, Qmesh, Vcp)
 
          ! Set up table of |q_BZ+G|
          if (iq_ibz==1) then

@@ -1,5 +1,5 @@
 
-.Version 10.1.0.7 of ABINIT, released Apr 2024.
+.Version 10.1.2.2 of ABINIT, released Apr 2024.
 .(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
 
 .Copyright (C) 1998-2024 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 15 Apr 2024.
-- ( at 01h34 )
+.Starting date : Tue 14 May 2024.
+- ( at 16h49 )
   
 - input  file    -> /Users/giantomassi/git_repos/abinit/_build/tests/Test_suite/gwpt_t01-t02-t03-t04/t03.abi
 - output file    -> t03.abo
@@ -431,7 +431,7 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          7.9
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.7
 
 ================================================================================
 
