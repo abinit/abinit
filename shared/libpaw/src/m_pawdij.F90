@@ -762,7 +762,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 !    ===== Need to compute Dijhat
        LIBPAW_ALLOCATE(dijhat,(cplex_dij*qphase*lmn2_size,ndij))
        call pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom_tot,&
-&                     natom,ndij,nfft,nfftot,nspden,nsppol,pawang,pawfgrtab(iatom),&
+&                     natom,ndij,nfft,nfftot,nspden,nsppol,1,pawang,pawfgrtab(iatom),&
 &                     pawtab(itypat),v_dijhat,qphon,ucvol,xred,mpi_comm_grid=my_comm_grid)
        if (dijhat_need) paw_ij(iatom)%dijhat(:,:)=dijhat(:,:)
        if (dij_need) paw_ij(iatom)%dij(:,:)=paw_ij(iatom)%dij(:,:)+dijhat(:,:)
@@ -938,7 +938,7 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
      if (usexcnhat/=0) then
        LIBPAW_ALLOCATE(dijxchat,(cplex_dij*lmn2_size,ndij))
        call pawdijhat(dijxchat,cplex_dij,1,gprimd,iatom_tot,&
-&                     natom,ndij,nfft,nfftot,nspden,nsppol,pawang,pawfgrtab(iatom),&
+&                     natom,ndij,nfft,nfftot,nspden,nsppol,1,pawang,pawfgrtab(iatom),&
 &                     pawtab(itypat),vxc,qphon,ucvol,xred,mpi_comm_grid=my_comm_grid)
        paw_ij(iatom)%dijxc_hat(1:cplex_dij*lmn2_size,:)=dijxchat(1:cplex_dij*lmn2_size,:)
        LIBPAW_DEALLOCATE(dijxchat)
@@ -2102,26 +2102,26 @@ end subroutine pawdijxcm
 !! SOURCE
 
 subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
-&                    natom,ndij,ngrid,ngridtot,nspden,nsppol,pawang,pawfgrtab,&
+&                    natom,ndij,ngrid,ngridtot,nspden,nsppol,ndat,pawang,pawfgrtab,&
 &                    pawtab,Pot,qphon,ucvol,xred,&
 &                    mpi_comm_grid) ! Optional argument
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: cplex_dij,iatom,natom,ndij
- integer,intent(in) :: ngrid,ngridtot,nspden,nsppol,qphase
+ integer,intent(in) :: ngrid,ngridtot,nspden,nsppol,ndat,qphase
  integer,intent(in),optional :: mpi_comm_grid
  real(dp),intent(in) :: ucvol
  type(pawang_type),intent(in) :: pawang
  type(pawfgrtab_type),intent(inout) :: pawfgrtab
 !arrays
- real(dp),intent(in) :: gprimd(3,3),Pot(qphase*ngrid,nspden),qphon(3),xred(3,natom)
- real(dp),intent(out) :: dijhat(:,:)
+ real(dp),intent(in) :: gprimd(3,3),Pot(qphase*ngrid,nspden,ndat),qphon(3),xred(3,natom)
+ real(dp),intent(out),target :: dijhat(:,:)
  type(pawtab_type),intent(in) :: pawtab
 
 !Local variables ---------------------------------------
 !scalars
- integer :: ic,idij,idijend,ier,ils,ilslm,ilslm1,isel,ispden,jc,klm,klmn,klmn1,klmn2
+ integer :: ic,idij,idijend,ier,ils,ilslm,ilslm1,isel,ispden,idat,jc,klm,klmn,klmn1,klmn2
  integer :: lm0,lm_size,lmax,lmin,lmn2_size,mm,my_comm_grid,nfgd,nsploop,optgr0
  logical :: has_qphase,qne0
  real(dp) :: vi,vr
@@ -2141,7 +2141,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
  my_comm_grid=xmpi_comm_self;if (present(mpi_comm_grid)) my_comm_grid=mpi_comm_grid
 
 !Check data consistency
- if (size(dijhat,1)/=cplex_dij*qphase*lmn2_size.or.size(dijhat,2)/=ndij) then
+ if (size(dijhat,1)/=cplex_dij*qphase*lmn2_size.or.size(dijhat,2)/=ndij*ndat) then
    msg='invalid sizes for Dijhat !'
    LIBPAW_BUG(msg)
  end if
@@ -2179,6 +2179,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 !Loop over spin components
 !----------------------------------------------------------
  nsploop=nsppol;if (ndij==4) nsploop=4
+ do idat=1,ndat
  do idij=1,nsploop
    if (idij<=nsppol.or.(nspden==4.and.idij<=3)) then
 
@@ -2199,7 +2200,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
          if (qphase==1) then
            do ilslm=1,lm_size
              do ic=1,nfgd
-               vr=Pot(pawfgrtab%ifftsph(ic),ispden)
+               vr=Pot(pawfgrtab%ifftsph(ic),ispden,idat)
                prod(ilslm)=prod(ilslm)+vr*pawfgrtab%gylm(ic,ilslm)
              end do
            end do
@@ -2208,7 +2209,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ilslm=1,lm_size
              do ic=1,nfgd
                jc=2*pawfgrtab%ifftsph(ic)
-               vr=Pot(jc-1,ispden);vi=Pot(jc,ispden)
+               vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
                prod(ilslm1  )=prod(ilslm1  )+vr*pawfgrtab%gylm(ic,ilslm)
                prod(ilslm1+1)=prod(ilslm1+1)+vi*pawfgrtab%gylm(ic,ilslm)
              end do
@@ -2221,7 +2222,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
          if (qphase==1) then
            do ilslm=1,lm_size
              do ic=1,nfgd
-               vr=Pot(pawfgrtab%ifftsph(ic),ispden)
+               vr=Pot(pawfgrtab%ifftsph(ic),ispden,idat)
                prod(ilslm)=prod(ilslm)+vr*pawfgrtab%gylm(ic,ilslm)&
 &                                        *pawfgrtab%expiqr(1,ic)
              end do
@@ -2231,7 +2232,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ilslm=1,lm_size
              do ic=1,nfgd
                jc=2*pawfgrtab%ifftsph(ic)
-               vr=Pot(jc-1,ispden);vi=Pot(jc,ispden)
+               vr=Pot(jc-1,ispden,idat);vi=Pot(jc,ispden,idat)
                prod(ilslm1  )=prod(ilslm1  )+pawfgrtab%gylm(ic,ilslm)&
 &                *(vr*pawfgrtab%expiqr(1,ic)-vi*pawfgrtab%expiqr(2,ic))
                prod(ilslm1+1)=prod(ilslm1+1)+pawfgrtab%gylm(ic,ilslm)&
@@ -2301,7 +2302,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
        !if ispden=4 => imaginary part of D^12_ij
        klmn1=max(1,ispden-2);klmn2=1
        do klmn=1,lmn2_size
-         dijhat(klmn1,idij)=dijhat_idij(klmn2)
+         dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2)
          klmn1=klmn1+cplex_dij
          klmn2=klmn2+qphase
        end do
@@ -2309,7 +2310,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
          !Same storage with exp^(-i.q.r) phase
          klmn1=max(1,ispden-2)+lmn2_size*cplex_dij;klmn2=2
          do klmn=1,lmn2_size
-           dijhat(klmn1,idij)=dijhat_idij(klmn2)
+           dijhat(klmn1,idij+(idat-1)*ndij)=dijhat_idij(klmn2)
            klmn1=klmn1+cplex_dij
            klmn2=klmn2+qphase
          end do
@@ -2319,26 +2320,27 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
    !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
-     dijhat(:,idij)=dijhat(:,idij-1)
+     dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
      if (cplex_dij==2) then
        do klmn=2,lmn2_size*cplex_dij,cplex_dij
-         dijhat(klmn,idij)=-dijhat(klmn,idij)
+         dijhat(klmn,idij+(idat-1)*ndij)=-dijhat(klmn,idij+(idat-1)*ndij)
        end do
        if (qphase==2) then
          do klmn=2+lmn2_size*cplex_dij,2*lmn2_size*cplex_dij,cplex_dij
-           dijhat(klmn,idij)=-dijhat(klmn,idij)
+           dijhat(klmn,idij+(idat-1)*ndij)=-dijhat(klmn,idij+(idat-1)*ndij)
          end do
        end if
      end if
 
    !Antiferro: D_ij(:,2)=D^down_ij=D^up_ij
    else if (nsppol==1.and.idij==2) then
-     dijhat(:,idij)=dijhat(:,idij-1)
+     dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
    end if
 
 !----------------------------------------------------------
 !End loop on spin density components
  end do
+ end do !idat
 
 !Free temporary memory spaces
  LIBPAW_DEALLOCATE(prod)
