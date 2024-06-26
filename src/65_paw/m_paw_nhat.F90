@@ -1244,7 +1244,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !scalars
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
- integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size
+ integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_
  real(dp) :: re_p,im_p
  logical :: compute_grad,compute_grad1,compute_nhat,my_atmtab_allocated,paral_atom,qeq0,compute_phonon,order
  type(distribfft_type),pointer :: my_distribfft
@@ -1252,15 +1252,11 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
 !arrays
  integer,parameter :: spinor_idxs(2,4)=RESHAPE((/1,1,2,2,1,2,2,1/),(/2,4/))
  integer,pointer :: my_atmtab(:)
- real(dp) :: rdum(1),cpf(2),cpf_ql(2),tsec(2),ro(2),ro_ql(2),nhat12_atm(2,nfft,nspinor**2,ndat)
- real(dp),allocatable :: work(:,:), qijl(:,:)
+ real(dp) :: rdum(1),cpf(2),cpf_ql(2),tsec(2),ro(2),ro_ql(2)
+ real(dp),allocatable :: work(:,:), qijl(:,:), nhat12_atm(:,:,:,:)
 
 ! *************************************************************************
 
- call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
- &          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
- &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option)
- return
  DBG_ENTER("COLL")
 
 !Compatibility tests
@@ -1279,6 +1275,13 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
  end if
  if (nspinor==2) then
    ABI_BUG('nspinor==2 not coded!')
+ end if
+ gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
+ if(gpu_option_==ABI_GPU_OPENMP) then
+   call pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nhat12_grdim,&
+   &          nspinor,ntypat,ndat,pawang,pawfgrtab,grnhat12,nhat12,pawtab, &
+   &          gprimd,grnhat_12,qphon,xred,atindx,mpi_atmtab,comm_atom,comm_fft,me_g0,paral_kgb,distribfft,gpu_option)
+   return
  end if
 
  compute_phonon=.false.;qeq0=.false.
@@ -1319,6 +1322,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
    ABI_MALLOC(qijl,(lm_size,lmn2_size))
    qijl=zero
    qijl=pawtab(itypat)%qijl
+   ABI_MALLOC(nhat12_atm, (2,nfft,nspinor**2,ndat))
    if (compute_nhat) nhat12_atm=zero
 
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
@@ -1532,6 +1536,7 @@ subroutine pawmknhat_psipsi(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngfft,nha
      pawfgrtab(iatom)%gylmgr_allocated=0
    end if
    ABI_FREE(qijl)
+   ABI_FREE(nhat12_atm)
    if (pawfgrtab(iatom)%expiqr_allocated==2) then
      ABI_FREE(pawfgrtab(iatom)%expiqr)
      ABI_MALLOC(pawfgrtab(iatom)%expiqr,(0,0))
