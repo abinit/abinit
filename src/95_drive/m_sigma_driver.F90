@@ -64,10 +64,9 @@ module m_sigma_driver
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
- use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
+ use m_screening,     only : epsilonm1_results
  use m_ppmodel,       only : ppmodel_t
- use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
+ use m_sigma,         only : sigma_t, write_sigma_header
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_t, melements_t
@@ -383,7 +382,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ==== Initialize Sigp, Er and basic objects ====
  ! ===============================================
  ! * Sigp is completetly initialized here.
- ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
+ ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
@@ -1374,7 +1373,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Initialize Sigma results ===
  ! TODO it is better if we use ragged arrays indexed by the k-point
- call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
+ call Sr%init(Sigp, Kmesh%nibz, Dtset%usepawu)
 
  ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  !
@@ -1857,11 +1856,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! if(dtset%ucrpa==0) then
    if (Dtset%gwgamma<3) then
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm)
    else
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
@@ -2540,7 +2539,7 @@ endif
 
      ABI_FREE(bdm_mask)       ! The master already used bdm_mask
      ABI_FREE(nat_occs)       ! Occs were already placed in qp_ebands
-     call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
+     call Er%free()           ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
 
      if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then
        ! Compute energies only if all k-points are available
@@ -2666,9 +2665,9 @@ endif
        call xmpi_barrier(Wfd%comm)
        call Vcp_full%free()
        ! Save the new total exchange energy Ex = Ex[GW.1RDM]
-       ex_energy=sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh, qp_ebands)
        ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM]
-       exc_mbb_energy=sigma_get_excene(Sr,Kmesh,qp_ebands)
+       exc_mbb_energy = Sr%get_excene(Kmesh,qp_ebands)
 
        ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
        !           <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
@@ -2684,8 +2683,8 @@ endif
        !
        ! Print the updated total energy and all energy components
        !
-       eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,qp_ebands)
-       ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,qp_ebands)
+       eh_energy = Sr%get_haene(GW1RDM_me,Kmesh,qp_ebands)
+       ekin_energy = Sr%get_kiene(GW1RDM_me,Kmesh,qp_ebands)
        ! SD 2-RDM
        etot_sd=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
        ! MBB 2-RDM
@@ -2746,7 +2745,7 @@ endif
        end if
      end do
 
-     if (wfd%my_rank == master) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,ks_ebands)
+     if (wfd%my_rank == master) call Sr%write_sigma_results(ikcalc, ik_ibz, Sigp, ks_ebands)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2780,7 +2779,7 @@ endif
      ! if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=MAXVAL(MAXVAL(ks_vbik(:,:),DIM=1))) ) then
      if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=ks_vbik) ) then  ! FIXME here the two arrays use a different indexing.
 
-       ex_energy = sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh,qp_ebands)
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(units, msg)
      end if
@@ -2830,7 +2829,7 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
-     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
+     NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
@@ -2925,10 +2924,8 @@ endif
  call Gsph_c%free()
  call Vcp%free()
  call cryst%free()
- call sigma_free(Sr)
- if(.not.rdm_update) then
-   call em1results_free(Er)
- end if
+ call Sr%free()
+ if (.not.rdm_update) call Er%free()
  call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
@@ -3638,7 +3635,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
    end if
 
-   call init_Er_from_file(Er,fname,mqmem,Dtset%npweps,comm)
+   call Er%init_from_file(fname,mqmem,Dtset%npweps,comm)
 
    Sigp%npwc=Er%npwe
    if (Sigp%npwc>Sigp%npwx) then

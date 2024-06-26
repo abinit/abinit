@@ -94,9 +94,7 @@ subroutine array2_gwpc_free(Array)
 
 ! *********************************************************************
 
- if (allocated(Array%vals)) then
-   ABI_FREE(Array%vals)
- end if
+ ABI_SFREE(Array%vals)
 
 end subroutine array2_gwpc_free
 !!***
