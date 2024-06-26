@@ -607,24 +607,25 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
        !$OMP TARGET UPDATE FROM(vfock) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-       do idat=1,ndat
-       do idat_occ=1,ndat_occ
        do iatom=1,natom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
-         ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij))
-         dijhat_tmp=zero
+         ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij*ndat_occ*ndat))
          call pawdijhat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
-&         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
-&         fockcommon%pawtab(itypat),vfock(:,idat_occ,idat),qphon,gs_ham%ucvol,gs_ham%xred)
-         do ii=1,cplex_fock
-           ind=(ii-1)*lmn2_size*cplex_dij
-           dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
-         end do
+&         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,ndat_occ*ndat,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
+&         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
+         do idat=1,ndat
+           do idat_occ=1,ndat_occ
+             do ii=1,cplex_fock
+               ind=(ii-1)*lmn2_size*cplex_dij
+               dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
+               dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=&
+&                   dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij)
+             end do
+           end do ! idat_occ
+         end do ! idat
          ABI_FREE(dijhat_tmp)
        end do
-       end do ! idat_occ
-       end do ! idat
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=17
        
        if(need_ghc) then
