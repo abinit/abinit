@@ -173,7 +173,7 @@ The computation of c parameter of TB09 functional, compatible with NCPP and PAW,
 
 By the way, mBJ/TB09 is not adapted to forces/stresses computation because it does not solve a variational problem for the energy. This means that it is probably not suitable for DFPT.
 
-See the new tests [[test:libxc_23]], [[test:libxc_24]], test:libxc_34, test:libxc_35.
+See the new tests [[test:libxc_23]], [[test:libxc_24]]
 
 By M. Torrent (MR 938)
 
