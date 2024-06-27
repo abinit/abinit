@@ -41,7 +41,7 @@ module m_mlwfovlp
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
  use m_io_tools, only : delete_file, get_unit, open_file
- use m_hide_lapack,     only : matrginv
+ use m_hide_lapack,     only : matrginv, xheev
  use m_fstrings,      only : strcat, sjoin, itoa
  use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int, isdiagmat, get_diag
  use m_special_funcs,   only : besjm
@@ -96,7 +96,7 @@ module m_mlwfovlp
                                ! the exclusion from the original Hamiltonian
 
    integer :: nkbz
-   integer :: nrpts
+   integer :: nr_h, nr_e, nr_ph
    !integer :: nshiftk
    integer :: ngkpt(3)
 
@@ -112,17 +112,16 @@ module m_mlwfovlp
    ! (nkbz)
    ! Number of bands within outer window at each k-point
 
-   integer,allocatable :: irvec(:,:)
+   integer,allocatable :: r_h(:,:), r_e(:,:), r_ph(:,:)
    ! R points for H in the Wannier representation
-   ! (3, nrpts)
+   ! (3, nr_h)
 
-   real(dp),allocatable :: mod_irvec(:)
-   ! (nrpts)
+   integer,allocatable :: ndegen_r_h(:), ndegen_re(:), ndegen_ph(:)
+
+   real(dp),allocatable :: mod_r_h(:), mod_r_e(:), mod_r_ph(:)
+   ! (nr_h)
 
    real(dp),allocatable :: all_eigens(:,:)
-
-   integer,allocatable :: ndegen(:)
-   ! (nrpts)
 
    real(dp),allocatable :: centres(:,:)
    ! Wannier centers
@@ -152,8 +151,14 @@ module m_mlwfovlp
    complex(dp),allocatable :: u_kc(:,:,:)
 
    complex(dp),allocatable :: hwan_r(:,:,:)
-   ! (nrpts, nwan, nwan)
+   ! (nr_h, nwan, nwan)
    ! KS Hamiltonian in the Wannier representation.
+
+   integer :: my_npert = -1
+   type(xcomm_t), pointer :: pert_comm => null()
+
+   complex(dp),allocatable :: gwanr_phe(:,:,:,:,:)
+   ! (nr_e, nr_ph, nwan, nwan, my_npert))
 
  contains
    procedure :: from_ncfile => abiwan_from_ncfile
@@ -165,10 +170,17 @@ module m_mlwfovlp
    procedure :: interp_h => abiwan_interp_h
    ! Interpolate Hamiltonian at an arbitray k-point
 
+   procedure :: setup_eph_ws_kq => abiwan_setup_eph_ws_kq
+
+   !procedure :: interp_eph_manyq => abiwan_interp_eph_manyq
+   ! Interpolate e-ph matrix elements.
+
    procedure :: free => abiwan_free
    ! Free memory.
  end type abiwan_t
 !!***
+
+ public :: abiwan_compare_with_ebands
 
 contains
 !!***
@@ -272,9 +284,9 @@ class(abstract_wf), pointer :: mywfc
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
- integer,allocatable :: irvec(:,:),ndegen(:),exclude_bands(:,:)
- real(dp),allocatable :: rmods(:)
- !type(abiwan_t) :: abiwan
+ integer,allocatable :: irvec_r_h(:,:),ndegen_r_h(:),exclude_bands(:,:)
+ real(dp),allocatable :: rmods_r_h(:)
+ type(abiwan_t) :: abiwan
 #endif
  integer :: nntot,num_nnmax
  integer :: master,max_num_bands,nprocs,spaceComm,rank
@@ -801,7 +813,8 @@ class(abstract_wf), pointer :: mywfc
    if (rank == master .and. hdr%kptopt /= 0) then
      abiwan_fname = strcat(dtfil%filnam_ds(4), "_ABIWAN.nc")
      call wrtout(std_out, sjoin("Saving wannier90 ouput results in:", abiwan_fname))
-     call wigner_seitz([zero, zero, zero], [2, 2, 2], dtset%kptrlatt, crystal%rmet, nrpts, irvec, ndegen, rmods, prtvol=prtvol)
+     call wigner_seitz([zero, zero, zero], [2, 2, 2], dtset%kptrlatt, crystal%rmet, &
+                       nrpts, irvec_r_h, ndegen_r_h, rmods_r_h, prtvol=prtvol)
      ! We know if disentanglement has been done by looking at the output values of lwindow
      ! Not elegant but it is the only way to avoid the parsing of the wannier input.
      ! In wannier_run lwindow is set to True if not disentanglement
@@ -858,8 +871,8 @@ class(abstract_wf), pointer :: mywfc
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "eigenvalues_w"), eigenvalues_w))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "spread"), spreadw))
      !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "A_matrix"), c2r(A_matrix)))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "irvec"), irvec))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ndegen"), ndegen))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "irvec"), irvec_r_h))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ndegen"), ndegen_r_h))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "have_disentangled_spin"), have_disentangled_spin))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "U_matrix"), c2r(U_matrix)))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "U_matrix_opt"), c2r(U_matrix_opt)))
@@ -867,14 +880,14 @@ class(abstract_wf), pointer :: mywfc
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "wann_spreads"), wann_spreads))
      NCF_CHECK(nf90_close(ncid))
 
-     ABI_FREE(irvec)
-     ABI_FREE(ndegen)
-     ABI_FREE(rmods)
+     ABI_FREE(irvec_r_h)
+     ABI_FREE(ndegen_r_h)
+     ABI_FREE(rmods_r_h)
 
      ! DEBUG SECTION
-     !do isppol=1,nsppol
-     !  call abiwan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil, xmpi_comm_self); call abiwan%print(); call abiwan%free() !; stop 0
-     !end do
+     do isppol=1,nsppol
+       call abiwan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil%filnam_ds(4), xmpi_comm_self); call abiwan%print(); call abiwan%free(); stop 0
+     end do
 
    end if
 
@@ -3382,22 +3395,21 @@ end subroutine mlwfovlp_ylmfar
 !!
 !! SOURCE
 
-subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
+subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, out_prefix, comm)
 
 !Arguments ------------------------------------
  class(abiwan_t),intent(out) :: abiwan
- character(len=*),intent(in) :: filepath
- type(datafiles_type),intent(in) :: dtfil
+ character(len=*),intent(in) :: filepath, out_prefix
  integer,intent(in) :: spin, nsppol, comm
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ncid, my_rank, ii, ir, ik, ib, jb, mb, nsppol_, mband, nwan, nkbz, ount, num_bands, nrpts ! ierr, ncerr,
+ integer :: ncid, my_rank, ii, ir, ik, ib, jb, mb, nsppol_, mband, nwan, nkbz, ount, num_bands, nr_h ! ierr, ncerr,
  integer :: nextbands
  character(len=500) :: msg
  character(len=fnlen) :: out_path
- type(crystal_t) :: crystal
+ type(crystal_t) :: cryst
  complex(dp) :: ctmp
 !arrays
  integer :: kptrlatt(3,3)
@@ -3416,15 +3428,14 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
  NCF_CHECK(nctk_get_dim(ncid, "number_of_spins", nsppol_))
  ABI_CHECK_IEQ(nsppol, nsppol_, "Inconsistent number of spins")
 
- call crystal%ncread(ncid)
+ call cryst%ncread(ncid)
 
  ! NB: mband is the value of nband and not the number of bands for Wannier that is called num_bands!
  NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
  NCF_CHECK(nctk_get_dim(ncid, "number_of_kpoints", nkbz))
- NCF_CHECK(nctk_get_dim(ncid, "nrpts", nrpts))
- NCF_CHECK(nctk_get_dim(ncid, "nrpts", abiwan%nrpts))
+ NCF_CHECK(nctk_get_dim(ncid, "nrpts", nr_h))
  NCF_CHECK(nf90_get_var(ncid, vid("nwan"), nwan, start=[spin]))
- abiwan%nkbz = nkbz; abiwan%nwan = nwan; abiwan%nrpts = nrpts
+ abiwan%nkbz = nkbz; abiwan%nwan = nwan; abiwan%nr_h = nr_h
 
  ! Read variables for this spin.
  NCF_CHECK(nf90_get_var(ncid, vid("num_bands"), num_bands, start=[spin]))
@@ -3434,10 +3445,10 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
  ABI_MALLOC(abiwan%kbz, (3, nkbz))
  NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_coordinates_of_kpoints"), abiwan%kbz))
 
- ABI_MALLOC(abiwan%irvec, (3, abiwan%nrpts))
- ABI_MALLOC(abiwan%ndegen, (abiwan%nrpts))
- NCF_CHECK(nf90_get_var(ncid, vid("irvec"), abiwan%irvec))
- NCF_CHECK(nf90_get_var(ncid, vid("ndegen"), abiwan%ndegen))
+ ABI_MALLOC(abiwan%r_h, (3, nr_h))
+ ABI_MALLOC(abiwan%ndegen_r_h, (nr_h))
+ NCF_CHECK(nf90_get_var(ncid, vid("irvec"), abiwan%r_h))
+ NCF_CHECK(nf90_get_var(ncid, vid("ndegen"), abiwan%ndegen_r_h))
  NCF_CHECK(nf90_get_var(ncid, vid("have_disentangled_spin"), ii, start=[spin]))
 
  ABI_MALLOC(abiwan%exclude_bands, (mband))
@@ -3501,9 +3512,9 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
 
  abiwan%krank = krank_from_kptrlatt(nkbz, abiwan%kbz, kptrlatt, compute_invrank=.False.)
 
- ABI_MALLOC(abiwan%mod_irvec, (abiwan%nrpts))
- do ir=1,abiwan%nrpts
-   abiwan%mod_irvec(ir) = sqrt(dot_product(abiwan%irvec(:,ir), matmul(crystal%rmet, abiwan%irvec(:,ir))))
+ ABI_MALLOC(abiwan%mod_r_h, (abiwan%nr_h))
+ do ir=1,abiwan%nr_h
+   abiwan%mod_r_h(ir) = sqrt(dot_product(abiwan%r_h(:,ir), matmul(cryst%rmet, abiwan%r_h(:,ir))))
  end do
 
  ! Get total rotation matrix: the product of the optimal subspace x the rotation among the nwann Wannier functions.
@@ -3517,19 +3528,23 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
  ! ====================================================
  ! Build the Hamiltonian in the Wannier representation
  ! ====================================================
- !call abiwan%filter_eigs(et_opt)
-
  nextbands = count(abiwan%exclude_bands /= 0)
  !REAL(KIND = DP) :: et_opt(nbndep, nks)
  !! hamiltonian eigenvalues within the outer window in the first ndimwin(ik) entries
  ii = abiwan%num_bands ! TODO: Check
  ABI_MALLOC(et_opt, (ii ,nkbz))
 
+ print *, "nextbands", nextbands
+ print *, "exclude_bands:", abiwan%exclude_bands
+ print *, "band_in:", abiwan%band_in
+ print *, "lwindow:", abiwan%lwindow
+
  if (nextbands /= 0) then
    do ik=1,nkbz
      jb = 0; mb = 0
      do ib=1,abiwan%num_bands
-       if (abiwan%exclude_bands(ib) /= 0) cycle
+       !if (abiwan%exclude_bands(ib) /= 0) cycle
+       if (.not. abiwan%band_in(ib)) cycle
        jb = jb + 1
        if (abiwan%lwindow(jb, ik)) then
          mb = mb + 1
@@ -3566,37 +3581,37 @@ subroutine abiwan_from_ncfile(abiwan, filepath, spin, nsppol, dtfil, comm)
  end do ! ik
  ABI_FREE(et_opt)
 
- ABI_CALLOC(chw, (nwan, nwan, nrpts))
- do ir=1,nrpts
+ ABI_CALLOC(chw, (nwan, nwan, nr_h))
+ do ir=1,nr_h
    do ik=1,nkbz
-     chw(:,:,ir) = chw(:,:,ir) + chs(:,:,ik) * exp(-j_dpc * two_pi * dot_product(abiwan%kbz(:, ik), abiwan%irvec(:, ir))) / dble(nkbz)
+     chw(:,:,ir) = chw(:,:,ir) + chs(:,:,ik) * exp(-j_dpc * two_pi * dot_product(abiwan%kbz(:, ik), abiwan%r_h(:, ir))) / dble(nkbz)
    end do
  end do
 
  ABI_FREE(chs)
 
  ! Now transpose the data to have R_e as first dimension
- ABI_CALLOC(abiwan%hwan_r, (abiwan%nrpts, nwan, nwan))
- do ir=1,abiwan%nrpts
+ ABI_CALLOC(abiwan%hwan_r, (nr_h, nwan, nwan))
+ do ir=1,nr_h
    abiwan%hwan_r(ir,:,:) = chw(:,:,ir)
  end do
  ABI_FREE(chw)
 
  ! Write spatial decay to file.
- if (my_rank == master) then
-   out_path = strcat(dtfil%filnam_ds(4), "_spin", itoa(spin), "_HRWAN.txt")
+ if (my_rank == master .and. len_trim(out_prefix) > 0) then
+   out_path = strcat(out_prefix, "_spin", itoa(spin), "_HRWAN.txt")
    if (open_file(out_path, msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
      ABI_ERROR(msg)
    end if
    write(ount, "(a)")'# Decay of Hamiltonian H in Wannier representation'
    write(ount, "(a)")'# |R| [Bohr]      Max_{m,n} |H(R,m,n)| [Ha] '
-   do ir=1,abiwan%nrpts
-     write(ount, *) abiwan%mod_irvec(ir), maxval(abs(abiwan%hwan_r(ir,:,:)))
+   do ir=1,nr_h
+     write(ount, *) abiwan%mod_r_h(ir), maxval(abs(abiwan%hwan_r(ir,:,:)))
    end do
    close(ount)
  end if
 
- call crystal%free()
+ call cryst%free()
 
 contains
  integer function vid(var_name)
@@ -3616,24 +3631,28 @@ end subroutine abiwan_from_ncfile
 
 subroutine abiwan_print(abiwan)
 
+ use m_yaml
+
 !Arguments ------------------------------------
  class(abiwan_t),intent(in) :: abiwan
 
 !Local variables-------------------------------
+ !type(yamldoc_t) :: ydoc
 !************************************************************************
 
- write(std_out, *)abiwan%nwan
+ !ydoc = yamldoc_open("ABIWAN_PARAMS")
 
- !ABI_SFREE(abiwan%irvec)
- !ABI_SFREE(abiwan%ndegen)
- !ABI_SFREE(abiwan%centres)
- !ABI_SFREE(abiwan%spreads)
- !ABI_SFREE(abiwan%kbz)
- !ABI_SFREE(abiwan%band_in)
- !ABI_SFREE(abiwan%lwindow)
- !ABI_SFREE(abiwan%u_mat)
- !ABI_SFREE(abiwan%uopt_mat)
- !ABI_SFREE(abiwan%uk)
+ !call ydoc%add_string("method", "Gaussian")
+ !call ydoc%add_ints("nwan, num_bands, nspinor, intmeth, edos_npts", &
+ !                   [abiwan%nwan, abiwan%num_bands, abiwan%nspinor, abiwan%intmeth, abiwan%nw])
+ !call ydoc%add_reals("nelect, abiwan_mesh_step_eV", &
+ !                   [abiwan%nelect, abiwan%step * Ha_eV])
+
+ !call ydoc%add_real("Fermi_level_eV", efermi * Ha_eV)
+
+ ! Write header in Yaml format but prepend # so that one can still use tools such as gnuplot or xmgrace.
+ !call ydoc%write_and_free(unt, firstchar="#")
+
 
 end subroutine abiwan_print
 !!***
@@ -3643,41 +3662,41 @@ end subroutine abiwan_print
 !! abiwan_interp_h
 !!
 !! FUNCTION
-!! Interpolate Hamiltonian at an arbitray k-point
+!! Interpolate the Hamiltonian at an arbitray k-point
 !!
 !! SOURCE
 
-subroutine abiwan_interp_h(abiwan, kpt, hk_ij, eigens)
+subroutine abiwan_interp_h(abiwan, kpt, uk_wan, eigens)
 
 !Arguments ------------------------------------
  class(abiwan_t),intent(in) :: abiwan
  real(dp),intent(in) :: kpt(3)
  real(dp),intent(out) :: eigens(abiwan%nwan)
- complex(dp),intent(out) :: hk_ij(abiwan%nwan, abiwan%nwan)
+ complex(dp),intent(out) :: uk_wan(abiwan%nwan, abiwan%nwan)
 
 !Local variables-------------------------------
- integer :: ir, ii, jj
- complex(dp) :: eikr(abiwan%nrpts)
-
+ integer :: ir, ii, jj !, ncols
+ complex(dp) :: eikr(abiwan%nr_h)
 !************************************************************************
 
- do ir=1,abiwan%nrpts
-   eikr(ir) = exp(j_dpc * two_pi * dot_product(abiwan%irvec(:, ir), kpt)) / abiwan%ndegen(ir)
+ do ir=1,abiwan%nr_h
+   eikr(ir) = exp(j_dpc * two_pi * dot_product(abiwan%r_h(:, ir), kpt)) / abiwan%ndegen_r_h(ir)
  end do
 
  ! O_ij(k) = sum_R e^{+ik.R}*O_ij(R)
- hk_ij = zero
+ uk_wan = zero
+ !ncols = abiwan%nwan ** 2
  do jj=1,abiwan%nwan
    do ii=1,abiwan%nwan
-     do ir=1,abiwan%nrpts
-       hk_ij(ii, jj) = hk_ij(ii, jj) * eikr(ir) * abiwan%hwan_r(ir, ii, jj)
-       !hk_ij(ii, jj) = zdotu(abiwan%nrpts, eikr, 1, abiwan%hwan_r(:,ii,jj), 1)
+     do ir=1,abiwan%nr_h
+       uk_wan(ii, jj) = uk_wan(ii, jj) + eikr(ir) * abiwan%hwan_r(ir, ii, jj)
+       !uk_wan(ii, jj) = zdotu(abiwan%nr_h, eikr, 1, abiwan%hwan_r(:,ii,jj), 1)
      end do
    end do
  end do
 
- hk_ij = half * (hk_ij + transpose(conjg(hk_ij)))
- !call xheev("N", "U", abiwan%nwan, hk_ij, eigens)
+ uk_wan = half * (uk_wan + transpose(conjg(uk_wan)))
+ call xheev("N", "U", abiwan%nwan, uk_wan, eigens)
 
 end subroutine abiwan_interp_h
 !!***
@@ -3700,17 +3719,21 @@ subroutine abiwan_free(abiwan)
  ! intger
  ABI_SFREE(abiwan%ndimwin)
  ABI_SFREE(abiwan%exclude_bands)
- ABI_SFREE(abiwan%irvec)
+ ABI_SFREE(abiwan%r_h)
+ ABI_SFREE(abiwan%r_e)
+ ABI_SFREE(abiwan%r_ph)
 
  ! real
- ABI_SFREE(abiwan%mod_irvec)
- ABI_SFREE(abiwan%ndegen)
+ ABI_SFREE(abiwan%ndegen_r_h)
+ ABI_SFREE(abiwan%ndegen_re)
+ ABI_SFREE(abiwan%ndegen_ph)
+ ABI_SFREE(abiwan%mod_r_h)
+ ABI_SFREE(abiwan%mod_r_e)
+ ABI_SFREE(abiwan%mod_r_ph)
  ABI_FREE(abiwan%all_eigens)
-
  ABI_SFREE(abiwan%centres)
  ABI_SFREE(abiwan%spreads)
  ABI_SFREE(abiwan%kbz)
- !ABI_SFREE(abiwan%eigs_w)
  ABI_SFREE(abiwan%band_in)
  ABI_SFREE(abiwan%lwindow)
 
@@ -3719,10 +3742,157 @@ subroutine abiwan_free(abiwan)
  ABI_SFREE(abiwan%u_mat_opt)
  ABI_SFREE(abiwan%u_kc)
  ABI_SFREE(abiwan%hwan_r)
+ ABI_SFREE(abiwan%gwanr_phe)
 
  call abiwan%krank%free()
 
 end subroutine abiwan_free
+!!***
+
+!!****f* m_mlwfovlp/abiwan_setup_eph_ws_kq
+!! NAME
+!! abiwan_setup_eph_ws_kq
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine abiwan_setup_eph_ws_kq(abiwan, cryst, shiftk, kptrlatt, qptrlatt, my_npert, pert_comm)
+
+!Arguments ------------------------------------
+ class(abiwan_t),intent(inout) :: abiwan
+ type(crystal_t),intent(in) :: cryst
+ real(dp),intent(in) :: shiftk(3)
+ integer,intent(in) :: kptrlatt(3,3), qptrlatt(3,3)
+ integer,intent(in) :: my_npert
+ type(xcomm_t),target,intent(in) :: pert_comm
+
+!************************************************************************
+
+ call wigner_seitz(shiftk, [2, 2, 2], kptrlatt, cryst%rmet, &
+                   abiwan%nr_e, abiwan%r_e, abiwan%ndegen_re, abiwan%mod_r_h) ! out
+
+ call wigner_seitz([zero, zero, zero], [2, 2, 2], qptrlatt, cryst%rmet, &
+                   abiwan%nr_ph, abiwan%r_ph, abiwan%ndegen_ph, abiwan%mod_r_ph) ! out
+
+ ! TODO: Allocate g in the Wannier representation.
+ abiwan%my_npert = my_npert
+ abiwan%pert_comm => pert_comm
+ ABI_CALLOC(abiwan%gwanr_phe, (abiwan%nr_ph, abiwan%nr_e, abiwan%nwan, abiwan%nwan, my_npert))
+
+end subroutine abiwan_setup_eph_ws_kq
+!!***
+
+!!****f* m_mlwfovlp/abiwan_interp_eph_manyq
+!! NAME
+!! abiwan_interp_eph_manyq
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine abiwan_interp_eph_manyq(abiwan, ndat, qpts, kpt)
+
+!Arguments ------------------------------------
+ class(abiwan_t),intent(in) :: abiwan
+ integer,intent(in) :: ndat
+ real(dp),intent(in) :: qpts(3,ndat), kpt(3)
+
+!Local variables-------------------------------
+ integer :: ir, nr_e, nr_ph, nwan, idat !, iwan, jwan
+ real(dp),allocatable :: eigens_k(:), eigens_kq(:)
+ complex(dp),allocatable :: eikr(:), eiqr(:), u_k(:,:), u_kq(:,:)
+
+!************************************************************************
+
+ nr_ph = abiwan%nr_ph; nr_e = abiwan%nr_e; nwan = abiwan%nwan
+
+ ABI_MALLOC(eikr, (nr_e))
+ ABI_MALLOC(eiqr, (nr_ph))
+ ABI_MALLOC(eigens_k, (nwan))
+ ABI_MALLOC(eigens_kq, (nwan))
+ ABI_MALLOC(u_k, (nwan, nwan))
+ ABI_MALLOC(u_kq, (nwan, nwan))
+
+ do ir=1,nr_e
+   eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, abiwan%r_e(:, ir))) / abiwan%ndegen_re(ir)
+ end do
+ call abiwan%interp_h(kpt, u_k, eigens_k)
+
+ !! Intermediate results.
+ !ABI_CALLOC(gq, (nr_e, nwan, nwan, abiwan%my_npert))
+ !do my_ip=1,gqk%my_npert
+ !do jwan=1,nwan
+ !do iwan=1,nwan
+ !  do ir=1,nr_e
+ !    !gq = abiwan%gwanr_phe(:, ir, iwan, jwan, my_ip) * eiqr(:)
+ !  end do
+ !end do
+ !end do
+ !end do
+ !ABI_FREE(gq)
+
+ !call abiwan%interp_h(kq, u_kq, eigens_kq)
+ !do ir=1,nr_ph
+ !  eiqr(ir) = exp(+j_dpc * two_pi * dot_product(qpt, abiwan%r_ph(:, ir))) / abiwan%ndegen_ph(ir)
+ !end do
+
+ ABI_FREE(eikr)
+ ABI_FREE(eiqr)
+ ABI_FREE(eigens_k)
+ ABI_FREE(eigens_kq)
+ ABI_FREE(u_k)
+ ABI_FREE(u_kq)
+
+end subroutine abiwan_interp_eph_manyq
+!!***
+
+!!****f* m_mlwfovlp/abiwan_compare_with_ebands
+!! NAME
+!! abiwan_compare_with_ebands
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine abiwan_compare_with_ebands(abiwan_filepath, cryst, ebands)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: abiwan_filepath
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ik, band, nwan
+ type(abiwan_t) :: abiwan
+!arrays
+ real(dp) :: kpt(3)
+ real(dp),allocatable :: eigens_k(:)
+ complex(dp),allocatable :: u_k(:,:)
+
+!************************************************************************
+
+ do spin=1,ebands%nsppol
+   call abiwan%from_ncfile(abiwan_filepath, spin, ebands%nsppol, "", xmpi_comm_self)
+   call abiwan%print()
+   nwan = abiwan%nwan
+   ABI_MALLOC(u_k, (nwan, nwan))
+   ABI_MALLOC(eigens_k, (nwan))
+
+   do ik=1,ebands%nkpt
+     kpt = ebands%kptns(:,ik)
+     call abiwan%interp_h(kpt, u_k, eigens_k)
+     print *, "wannier:", eigens_k(:)
+     print *, "ebands:", ebands%eig(:, ik, spin)
+   end do
+
+   ABI_FREE(u_k)
+   ABI_FREE(eigens_k)
+   call abiwan%free()
+ end do
+
+end subroutine abiwan_compare_with_ebands
 !!***
 
 end module m_mlwfovlp
