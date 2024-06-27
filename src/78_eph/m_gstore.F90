@@ -158,7 +158,7 @@ module m_gstore
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
- use m_mlwfovlp, only : abiwan_t
+ use m_mlwfovlp,       only : wan_t
 
  implicit none
 
@@ -4514,7 +4514,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
  !complex(dp) :: gtmp
  !character(len=500) :: msg
- type(abiwan_t),target :: abiwan
+ type(wan_t),target :: wan
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3)
@@ -4536,16 +4536,16 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    gqk => gstore%gqk(my_is)
    my_npert = gqk%my_npert
 
-   call abiwan%from_ncfile("foobar.nc", spin, gstore%nsppol, dtfil%filnam_ds(4), gqk%grid_comm%value)
-   !qqk%abiwan => abiwan
-   call abiwan%print()
+   call wan%from_ncfile("foobar.nc", spin, gstore%nsppol, dtfil%filnam_ds(4), gqk%grid_comm%value)
+   !qqk%wan => wan
+   call wan%print()
 
    qptrlatt_ = 0
    do ir=1,3
      qptrlatt_(ir,ir) = gstore%ngqpt(ir)
    end do
-   call abiwan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, my_npert, gqk%pert_comm)
-   nr_ph = abiwan%nr_ph; nr_e = abiwan%nr_e; nwan = abiwan%nwan
+   call wan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, my_npert, gqk%pert_comm)
+   nr_ph = wan%nr_ph; nr_e = wan%nr_e; nwan = wan%nwan
 
    ABI_MALLOC(emikr, (nr_e))
    ABI_MALLOC(emiqr, (nr_ph))
@@ -4563,17 +4563,17 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
      do my_ik=1,gqk%my_nk
        kpt = gqk%my_kpts(:,my_ik)
        do ir=1,nr_e
-         emikr(ir) = exp(-j_dpc * two_pi * dot_product(kpt, abiwan%r_e(:, ir))) / dble(gstore%nkbz)
+         emikr(ir) = exp(-j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / dble(gstore%nkbz)
        end do
 
        kq = kpt + qpt
-       ik = abiwan%krank%get_index(kpt)
-       ikq = abiwan%krank%get_index(kq)
+       ik = wan%krank%get_index(kpt)
+       ikq = wan%krank%get_index(kq)
        ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
        ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
 
-       u_kc => abiwan%u_kc(1:abiwan%ndimwin(ik), 1:nwan, ik)
-       u_kqc => abiwan%u_kc(1:abiwan%ndimwin(ikq), 1:nwan, ikq)
+       u_kc => wan%u_kc(1:wan%ndimwin(ik), 1:nwan, ik)
+       u_kqc => wan%u_kc(1:wan%ndimwin(ikq), 1:nwan, ikq)
 
        do my_ip=1,gqk%my_npert
          ! TODO: This is the tricky part where we have to "align" the bands
@@ -4593,14 +4593,14 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
      do ir=1,nr_ph
-       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, abiwan%r_ph(:, ir))) / dble(gstore%nqbz)
+       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, wan%r_ph(:, ir))) / dble(gstore%nqbz)
      end do
 
       do my_ip=1,my_npert
       do jwan=1,nwan
       do iwan=1,nwan
       do ir=1,nr_e
-         abiwan%gwanr_phe(:, ir, iwan, jwan, my_ip) = abiwan%gwanr_phe(:, ir, iwan, jwan, my_ip) + &
+         wan%gwanr_phe(:, ir, iwan, jwan, my_ip) = wan%gwanr_phe(:, ir, iwan, jwan, my_ip) + &
            cbuf_re(:, iwan, jwan, my_ip, my_iq) * emiqr(:)
       end do
       end do
@@ -4608,7 +4608,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
       end do ! my_ip
    end do ! my_iq
 
-   call xmpi_sum(abiwan%gwanr_phe, gqk%qpt_comm%value, ierr)
+   call xmpi_sum(wan%gwanr_phe, gqk%qpt_comm%value, ierr)
 
    ! Free memory for this spin
    ABI_FREE(emikr)
@@ -4616,7 +4616,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(gwan)
    ABI_FREE(cbuf_re)
 
-   call abiwan%free()
+   call wan%free()
  end do ! my_is
 
  ! Only master MPI proc prints to ab_out
@@ -4650,7 +4650,7 @@ end subroutine gstore_wannierize
 !!   !integer :: glob_nq, glob_nk, im_kq, in_k
 !!   !complex(dp) :: gtmp
 !!   !character(len=500) :: msg
-!!   !type(abiwan_t) :: abiwan
+!!   !type(wan_t) :: wan
 !!   !type(gqk_t),pointer :: gqk
 !!  !arrays
 !!   !real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
