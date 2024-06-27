@@ -4510,74 +4510,75 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  !integer,parameter :: master = 0
- integer :: spin, my_is, nr_e, nr_ph, nwan, my_ip, ir, my_ik, my_iq, ierr, iwan, jwan
+ integer :: nr_e, nr_ph, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert
  !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
  !complex(dp) :: gtmp
  !character(len=500) :: msg
- type(abiwan_t) :: abiwan
+ type(abiwan_t),target :: abiwan
  type(gqk_t),pointer :: gqk
 !arrays
- integer :: kptrlatt__(3,3)
- integer,allocatable :: r_e(:,:), r_ph(:,:), ndegen_re(:), ndegen_ph(:)
+ integer :: qptrlatt_(3,3)
  real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
- real(dp),allocatable :: eigens_k(:), eigens_kq(:), re_mods(:), ph_mods(:)
- complex(dp),allocatable :: u_k(:,:), u_kq(:,:), cphaser_k(:), cphaser_q(:)
- complex(dp),allocatable :: gwan_rphe(:,:,:,:,:), cbuf_re(:,:,:,:,:), gwan(:,:)
+ complex(dp),allocatable :: emikr(:), emiqr(:)
+ complex(dp), ABI_CONTIGUOUS pointer :: u_kc(:,:), u_kqc(:,:)
+ complex(dp),allocatable :: cbuf_re(:,:,:,:,:), gwan(:,:)
 
 ! *************************************************************************
 
- ! Only master MPI proc prints to ab_out
- !if (xmpi_comm_rank(gstore%comm) /= master) return
+ ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'bz' is required", ierr)
+ ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
+ ABI_CHECK(ierr == 0, "The gstore object is incosistent with gstore_wannierize. See messages above.")
+
  !natom3 = dtset%natom * 3
-
- kptrlatt__ = gstore%ebands%kptrlatt
- call wigner_seitz(gstore%ebands%shiftk(:,1), [2, 2, 2], kptrlatt__, gstore%cryst%rmet, nr_e, r_e, ndegen_re, re_mods)
-
- kptrlatt__ = 0
- do ir=1,3
-   kptrlatt__(ir, ir) = gstore%ngqpt(ir)
- end do
- call wigner_seitz([zero, zero, zero], [2, 2, 2], kptrlatt__, gstore%cryst%rmet, nr_ph, r_ph, ndegen_ph, ph_mods)
-
- ABI_MALLOC(cphaser_k, (nr_e))
- ABI_MALLOC(cphaser_q, (nr_ph))
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
+   my_npert = gqk%my_npert
 
-   call abiwan%from_ncfile("foobar.nc", spin, gstore%nsppol, dtfil, gqk%grid_comm%value)
+   call abiwan%from_ncfile("foobar.nc", spin, gstore%nsppol, dtfil%filnam_ds(4), gqk%grid_comm%value)
+   !qqk%abiwan => abiwan
    call abiwan%print()
 
-   nwan = abiwan%nwan
-   ABI_MALLOC(eigens_k, (nwan))
-   ABI_MALLOC(eigens_kq, (nwan))
+   qptrlatt_ = 0
+   do ir=1,3
+     qptrlatt_(ir,ir) = gstore%ngqpt(ir)
+   end do
+   call abiwan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, my_npert, gqk%pert_comm)
+   nr_ph = abiwan%nr_ph; nr_e = abiwan%nr_e; nwan = abiwan%nwan
+
+   ABI_MALLOC(emikr, (nr_e))
+   ABI_MALLOC(emiqr, (nr_ph))
    ABI_MALLOC(gwan, (nwan, nwan))
-   ABI_MALLOC(u_k, (nwan, nwan))
-   ABI_MALLOC(u_kq, (nwan, nwan))
 
    ! Final output
-   ABI_CALLOC(gwan_rphe, (nr_e, nr_ph, nwan, nwan, gqk%my_npert))
-   ! Intermediate results.
-   ABI_CALLOC(cbuf_re, (nr_e, nwan, nwan, gqk%my_npert, gqk%my_nq))
+   !ABI_CALLOC(gwanr_phe, (nr_ph, nr_e, nwan, nwan, my_npert))
+
+   ! Intermediate buffer.
+   ABI_CALLOC(cbuf_re, (nr_e, nwan, nwan, my_npert, gqk%my_nq))
 
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
 
      do my_ik=1,gqk%my_nk
        kpt = gqk%my_kpts(:,my_ik)
-       call abiwan%interp_h(kpt, u_k, eigens_k)
        do ir=1,nr_e
-         cphaser_k(ir) = exp(-j_dpc * two_pi * dot_product(kpt, r_e(:, ir))) / dble(gstore%nkbz)
+         emikr(ir) = exp(-j_dpc * two_pi * dot_product(kpt, abiwan%r_e(:, ir))) / dble(gstore%nkbz)
        end do
 
        kq = kpt + qpt
-       call abiwan%interp_h(kq, u_kq, eigens_kq)
+       ik = abiwan%krank%get_index(kpt)
+       ikq = abiwan%krank%get_index(kq)
+       ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
+       ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
+
+       u_kc => abiwan%u_kc(1:abiwan%ndimwin(ik), 1:nwan, ik)
+       u_kqc => abiwan%u_kc(1:abiwan%ndimwin(ikq), 1:nwan, ikq)
 
        do my_ip=1,gqk%my_npert
-         ! This is the tricky part where we have to "align" the bands
+         ! TODO: This is the tricky part where we have to "align" the bands
          !g_bb = gqk%my_g(my_ip, gqk%nb, my_iq, gqk%nb, my_ik)
-         !gwan = u_kq % g_bb % uk
+         !gwan = u_kqc % g_bb % ukC
          do jwan=1,nwan
          do iwan=1,nwan
             cbuf_re(:, iwan, jwan, my_ip, my_iq) = cbuf_re(:, iwan, jwan, my_ip, my_iq) * gwan(iwan, jwan)
@@ -4592,94 +4593,41 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    do my_iq=1,gqk%my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
      do ir=1,nr_ph
-       cphaser_q(ir) = exp(-j_dpc * two_pi * dot_product(qpt, r_ph(:, ir))) / dble(gstore%nqbz)
+       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, abiwan%r_ph(:, ir))) / dble(gstore%nqbz)
      end do
 
-      do my_ip=1,gqk%my_npert
-        do jwan=1,nwan
-        do iwan=1,nwan
-        do ir=1,nr_e
-           gwan_rphe(:, ir, iwan, jwan, my_ip) = gwan_rphe(:, ir, iwan, jwan, my_ip) + &
-             cbuf_re(:, iwan, jwan, my_ip, my_iq) * cphaser_q(:)
-        end do
-        end do
-        end do
+      do my_ip=1,my_npert
+      do jwan=1,nwan
+      do iwan=1,nwan
+      do ir=1,nr_e
+         abiwan%gwanr_phe(:, ir, iwan, jwan, my_ip) = abiwan%gwanr_phe(:, ir, iwan, jwan, my_ip) + &
+           cbuf_re(:, iwan, jwan, my_ip, my_iq) * emiqr(:)
+      end do
+      end do
+      end do
       end do ! my_ip
    end do ! my_iq
 
-   call xmpi_sum(gwan_rphe, gqk%qpt_comm%value, ierr)
+   call xmpi_sum(abiwan%gwanr_phe, gqk%qpt_comm%value, ierr)
 
    ! Free memory for this spin
-   ABI_FREE(eigens_k)
-   ABI_FREE(eigens_kq)
-   ABI_FREE(u_k)
-   ABI_FREE(u_kq)
+   ABI_FREE(emikr)
+   ABI_FREE(emiqr)
    ABI_FREE(gwan)
-
-   !qqk%abiwan => abiwan
-   call abiwan%free()
    ABI_FREE(cbuf_re)
-   ABI_FREE(gwan_rphe)
+
+   call abiwan%free()
  end do ! my_is
 
- ABI_FREE(cphaser_k)
- ABI_FREE(cphaser_q)
-
- ! Abiwan% ?
- ABI_FREE(r_e)
- ABI_FREE(r_ph)
- ABI_FREE(ndegen_re)
- ABI_FREE(ndegen_ph)
- ABI_FREE(re_mods)
- ABI_FREE(ph_mods)
+ ! Only master MPI proc prints to ab_out
+ !if (xmpi_comm_rank(gstore%comm) /= master) return
 
 end subroutine gstore_wannierize
 !!***
 
-!!****f* m_gstore/gstore_wannierize_from_file
-!! NAME
-!! gstore_wannierize_from_file
-!!
-!! FUNCTION
-!!
-!! INPUTS
-!!
-!! SOURCE
-
-subroutine gstore_wannierize_from_file(gstore, dtset, dtfil)
-
-!Arguments ------------------------------------
- class(gstore_t),target, intent(in) :: gstore
- type(dataset_type),intent(in) :: dtset
- type(datafiles_type),intent(in) :: dtfil
-
-!Local variables-------------------------------
-!scalars
- !integer,parameter :: master = 0
- !integer :: spin, my_is, nr_e, nr_ph, nwan, my_ip, ir, my_ik, my_iq, ierr, iwan, jwan
- !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
- !integer :: glob_nq, glob_nk, im_kq, in_k
- !complex(dp) :: gtmp
- !character(len=500) :: msg
- !type(abiwan_t) :: abiwan
- !type(gqk_t),pointer :: gqk
-!arrays
- !integer,allocatable :: r_e(:,:), r_ph(:,:)
- !real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
- !real(dp),allocatable :: eigens_k(:), eigens_kq(:)
- !complex(dp),allocatable :: u_k(:,:), u_kq(:,:), cphaser_k(:), cphaser_q(:)
- !complex(dp),allocatable :: gwan_rphe(:,:,:,:,:), cbuf_re(:,:,:,:,:), gwan(:,:)
-
-! *************************************************************************
-
-end subroutine gstore_wannierize_from_file
-!!***
-
-!!  !----------------------------------------------------------------------
-!!
-!!  !!****f* m_gstore/gqk_wan_interp_manyq
+!!  !!****f* m_gstore/gstore_wannierize_from_file
 !!  !! NAME
-!!  !! gqk_wan_interp_manyq
+!!  !! gstore_wannierize_from_file
 !!  !!
 !!  !! FUNCTION
 !!  !!
@@ -4687,20 +4635,32 @@ end subroutine gstore_wannierize_from_file
 !!  !!
 !!  !! SOURCE
 !!
-!!  subroutine gqk_wan_interp_manyq(gqk, ndat, qpts, kpt)
+!!  subroutine gstore_wannierize_from_file(gstore, dtset, dtfil)
 !!
 !!  !Arguments ------------------------------------
-!!   class(gqk_t),intent(in) :: gqk
-!!   integer,intent(in) :: ndat
-!!   real(dp),intent(in) :: qpts(3,nat), kpt(3)
+!!   class(gstore_t),target, intent(in) :: gstore
+!!   type(dataset_type),intent(in) :: dtset
+!!   type(datafiles_type),intent(in) :: dtfil
 !!
 !!  !Local variables-------------------------------
 !!  !scalars
+!!   !integer,parameter :: master = 0
+!!   !integer :: spin, my_is, nr_e, nr_ph, nwan, my_ip, ir, my_ik, my_iq, ierr, iwan, jwan
+!!   !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+!!   !integer :: glob_nq, glob_nk, im_kq, in_k
+!!   !complex(dp) :: gtmp
+!!   !character(len=500) :: msg
+!!   !type(abiwan_t) :: abiwan
+!!   !type(gqk_t),pointer :: gqk
 !!  !arrays
+!!   !real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
+!!   !real(dp),allocatable :: eigens_k(:), eigens_kq(:)
+!!   !complex(dp),allocatable :: u_kc(:,:), u_kqc(:,:)
+!!   !complex(dp),allocatable :: gwanr_phe(:,:,:,:,:), cbuf_re(:,:,:,:,:), gwan(:,:)
 !!
 !!  ! *************************************************************************
 !!
-!!  end subroutine gqk_wan_interp_manyq
+!!  end subroutine gstore_wannierize_from_file
 !!  !!***
 
 end module m_gstore
