@@ -176,8 +176,12 @@ module m_dtfil
    ! Initialize via getsigeph_filepath
 
   character(len=fnlen) :: filgstorein
-   ! Filename used to read GSTOR.ncE file.
+   ! Filename used to read GSTORE.nc file.
    ! Initialize via getgstore_filepath
+
+  character(len=fnlen) :: filabiwanin
+   ! Filename used to read ABIWAN.nc file.
+   ! Initialize via getabiwan_filepath
 
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
@@ -600,17 +604,17 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_filepath)
+                 getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_filepath)
+                 getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_filepath)
+                 getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getdrhodb, build _DRHODB file name
@@ -631,6 +635,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filgstorein, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
+
+ ! According to getgstore_filepath, build _GSTORE file name
+ stringfile='_ABIWAN.nc'; stringvar='abiwan'
+ call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getabiwan_filepath)
+ if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
