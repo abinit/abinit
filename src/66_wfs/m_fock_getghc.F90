@@ -38,8 +38,7 @@ module m_fock_getghc
  use m_fft,          only : fftpac, fourwf, fourdp
  use m_fstrings,     only : sjoin, itoa
  use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME, init_hamiltonian
- use m_pawdij,       only : pawdijhat
- use m_paw_nhat,     only : pawmknhat_psipsi
+ use m_paw_nhat,     only : pawmknhat_psipsi, pawdijhat_ndat
  use m_spacepar,     only : hartre
  use m_nonlop,       only : nonlop
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, bandfft_kpt_savetabs,bandfft_kpt_restoretabs, &
@@ -603,15 +602,15 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        dijhat=zero
 
 #ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET UPDATE FROM(vfock) IF(gpu_option==ABI_GPU_OPENMP)
+       !!$OMP TARGET UPDATE FROM(vfock) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        do iatom=1,natom
          itypat=gs_ham%typat(iatom)
          lmn2_size=fockcommon%pawtab(itypat)%lmn2_size
          ABI_MALLOC(dijhat_tmp,(cplex_fock*cplex_dij*lmn2_size,ndij*ndat_occ*ndat))
-         call pawdijhat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
+         call pawdijhat_ndat(dijhat_tmp,cplex_dij,cplex_fock,gs_ham%gprimd,iatom,&
 &         natom,ndij,nfftf,nfftotf,nspden_fock,nspden_fock,ndat_occ*ndat,fockbz%pawang,fockcommon%pawfgrtab(iatom),&
-&         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred)
+&         fockcommon%pawtab(itypat),vfock,qphon,gs_ham%ucvol,gs_ham%xred,gpu_option=gpu_option)
          do idat=1,ndat
            do idat_occ=1,ndat_occ
              do ii=1,cplex_fock
