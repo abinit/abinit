@@ -224,6 +224,9 @@ ABI_FALLBACKS_INIT
 # Prepare MPI support
 ABI_MPI_INIT
 
+# Prepare openMP support
+ABI_OPENMP_INIT
+
 # Prepare GPU support
 # Note: must be done after MPI
 ABI_GPU_INIT
@@ -384,41 +387,8 @@ if test "${abi_hints_enable}" = "yes"; then
 
 fi
 
-# Adjust OpenMP flags if not used
-if test "${abi_openmp_enable}" != "yes"; then
-  FCFLAGS_OPENMP=""
-fi
-
-# Handling OpenMP offload
-if test "${abi_openmp_offload_enable}" = "yes"; then
-  # Fail if GPU support is not enabled
-  if test "${abi_gpu_enable}" = "no"; then
-    AC_MSG_ERROR([OpenMP offload is enabled with no GPU support (ie: CUDA), please check your config.])
-  fi
-  # Enable OpenMP if OpenMP offload is requested, to remain consistent
-  abi_openmp_enable="yes"
-  if test "${GPU_ARCH}" = ""; then
-    AC_MSG_WARN([GPU arch wasn't not set (empty GPU_ARCH variable), defaulting to NVIDIA Ampere (=80)])
-    GPU_ARCH=80
-  fi
-  # Perform pattern replacement in OpenMP offload flags with requested GPU arch
-  FCFLAGS_OPENMP_OFFLOAD=`echo "${FCFLAGS_OPENMP_OFFLOAD}" | sed "s/__GPU_ARCH__/$GPU_ARCH/"`
-
-  #FIXME With LLVM 16 embedded with ROCm 5.6.0, issues occurs if OpenMP offload is enabled everywhere
-  #Therefore, we enable it only if subfolders where it's needed and link time.
-  if test "${abi_fc_vendor}" == "llvm" -a "${abi_gpu_flavor}" == "hip-double"; then
-    amd_openmp_flags="${FCFLAGS_OPENMP_OFFLOAD}"
-    FC_LDFLAGS_EXTRA="${FCFLAGS_OPENMP_OFFLOAD} ${FC_LDFLAGS_EXTRA}"
-    FCFLAGS_OPENMP_OFFLOAD=""
-  fi
-
-  #FIXME With Cray CPE 23.12, it seems that "-lcraymp" isn't always added to LDFLAGS, so we add it here
-  if test "${abi_fc_vendor}" == "cray" -a "${abi_gpu_flavor}" == "hip-double"; then
-    FC_LDFLAGS_EXTRA="-lcraymp ${FC_LDFLAGS_EXTRA}"
-  fi
-else
-  FCFLAGS_OPENMP_OFFLOAD=""
-fi
+# Set Fortran flags according to openMP options
+_ABI_OMP_SET_FCFLAGS
 
 # Set Fortran preprocessing flags
 if test "${abi_fc_wrap}" = "yes"; then
@@ -683,24 +653,14 @@ AC_LANG_POP([C])
 
 ABI_MSG_SECTION([Multicore architecture support])
 
-# OpenMP support
-AC_MSG_CHECKING([whether to enable OpenMP support])
-AC_MSG_RESULT([${abi_openmp_enable}])
-if test "${abi_openmp_enable}" = "yes"; then
-  AC_MSG_CHECKING([Fortran flags for OpenMP])
-  AC_MSG_RESULT([${FCFLAGS_OPENMP}])
-  ABI_OMP_CHECK_COLLAPSE
-  if test "${abi_openmp_offload_enable}" = "yes"; then
-    ABI_OMP_CHECK_GPU_OFFLOAD
-  fi
-  AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
-fi
-
 # MPI support
 ABI_MPI_DETECT
 if test "${abi_mpi_enable}" = "yes"; then
   ABI_MPI_DUMP
 fi
+
+# OpenMP support
+ABI_OPENMP_DETECT
 
 # GPU support
 ABI_GPU_DETECT
