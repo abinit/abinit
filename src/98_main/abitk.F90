@@ -52,7 +52,7 @@ program abitk
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
  use m_phgamma,        only : find_ewin
- use m_mlwfovlp,       only : abiwan_compare_with_ebands
+ use m_mlwfovlp,       only : wan_compare_with_ebands
 
  implicit none
 
@@ -314,8 +314,8 @@ program abitk
  case ("abiwan_compare")
    ! Get energies on the IBZ from path
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   call abiwan_compare_with_ebands("t14o_DS2_ABIWAN.nc", cryst, ebands)
-   !call abiwan_compare_with_ebands(abiwan_filepath, cryst, ebands)
+   call wan_compare_with_ebands("t14o_DS2_ABIWAN.nc", cryst, ebands)
+   !call wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 
  case ("ebands_mu_T")
    ! Get energies on the IBZ from filepath
