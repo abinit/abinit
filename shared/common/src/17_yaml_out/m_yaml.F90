@@ -1473,6 +1473,7 @@ end subroutine yamldoc_write_unit_and_free
 !!  Write Yaml document to a list of units and free memory.
 !!
 !! INPUTS
+!!  units=List of unit numbers.
 !!  [newline]= set to false to prevent adding newlines after fields. Default: True
 !!
 !! SOURCE

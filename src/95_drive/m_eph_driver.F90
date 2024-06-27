@@ -768,16 +768,17 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (11)
-   ! Write e-ph matrix elements to GSTORE file.
+   ! Compute and write e-ph matrix elements to GSTORE file.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
      call gstore%from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
-     call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
-                         pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+     call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
+
+   call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
+                       pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
    call gstore%free()
 
  case (12, -12)
@@ -809,7 +810,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
      ! Customize input vars for this eph_task.
      dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
-     call gstore%init(path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
      call gstore%free()

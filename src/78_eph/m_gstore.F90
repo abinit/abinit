@@ -570,7 +570,7 @@ contains
 !!
 !! SOURCE
 
-subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
+subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -578,6 +578,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
  type(dataset_type),intent(in) :: dtset
+ type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(in) :: wfk0_hdr
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
@@ -593,19 +594,23 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  !character(len=5000) :: msg
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
- !integer :: glob_nk_spin(ebands%nsppol), glob_nq_spin(ebands%nsppol)
  integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
- integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:) !, done_qbz_spin(:,:)
+ integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:)
  real(dp):: my_shiftq(3,1)
  real(dp),allocatable :: qbz(:,:), wtk(:), kibz(:,:), kbz(:,:)
- !integer :: out_kptrlatt(3,3)
- !real(dp),allocatable :: out_kibz(:,:), out_wtk(:)
-
+ type(wan_t) :: wan_spin(ebands%nsppol)
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
+
+ if (dtfil%filabiwanin /= ABI_NOFILE) then
+   do spin=1,ebands%nsppol
+     call wan_spin(spin)%from_ncfile(dtfil%filabiwanin, spin, ebands%nsppol, dtfil%filnam_ds(4), comm)
+     !call wan_spin(spin)%print([std_out])
+   end do
+ end if
 
  ! Set basic parameters.
  gstore%comm = comm; gstore%nsppol = nsppol; gstore%path = path
@@ -630,10 +635,7 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  end if
 
  ! TODO
- !gstore%kptrlatt(3, 3)
- !gstore%kshift(3, 1)
- !gstore%qptrlatt(3, 3)
- !gstore%qshift(3, 1)
+ !gstore%kptrlatt(3, 3); gstore%kshift(3, 1); gstore%qptrlatt(3, 3); gstore%qshift(3, 1)
 
  ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
  ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
@@ -973,6 +975,10 @@ subroutine gstore_init(gstore, path, dtset, wfk0_hdr, cryst, ebands, ifc, comm)
  ABI_FREE(kglob2bz)
  ABI_FREE(qbz2ibz)
  ABI_FREE(kbz2ibz)
+
+ do spin=1,ebands%nsppol
+   call wan_spin(spin)%free()
+ end do
 
  call cwtime_report(" gstore_init:", cpu, wall, gflops)
 
@@ -4510,8 +4516,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  !integer,parameter :: master = 0
- integer :: nr_e, nr_ph, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert
- !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
+ integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
+ integer :: my_nk, my_nq !, root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
  !complex(dp) :: gtmp
  !character(len=500) :: msg
  type(wan_t),target :: wan
@@ -4519,9 +4525,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !arrays
  integer :: qptrlatt_(3,3)
  real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
- complex(dp),allocatable :: emikr(:), emiqr(:)
- complex(dp), ABI_CONTIGUOUS pointer :: u_kc(:,:), u_kqc(:,:)
- complex(dp),allocatable :: cbuf_re(:,:,:,:,:), gwan(:,:)
+ complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:)
+ complex(dp),allocatable :: gww_epq(:,:,:,:,:), gww_pk(:,:,:,:)
 
 ! *************************************************************************
 
@@ -4534,88 +4539,128 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
-   my_npert = gqk%my_npert
+   my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
 
    call wan%from_ncfile("foobar.nc", spin, gstore%nsppol, dtfil%filnam_ds(4), gqk%grid_comm%value)
    !qqk%wan => wan
-   call wan%print()
+   !call wan%print(units)
 
    qptrlatt_ = 0
    do ir=1,3
      qptrlatt_(ir,ir) = gstore%ngqpt(ir)
    end do
    call wan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, my_npert, gqk%pert_comm)
-   nr_ph = wan%nr_ph; nr_e = wan%nr_e; nwan = wan%nwan
+   nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
+   ! We have allocated grpe_wwp with shape: (nr_p, nr_e, nwan, nwan, my_npert)
 
    ABI_MALLOC(emikr, (nr_e))
-   ABI_MALLOC(emiqr, (nr_ph))
-   ABI_MALLOC(gwan, (nwan, nwan))
-
-   ! Final output
-   !ABI_CALLOC(gwanr_phe, (nr_ph, nr_e, nwan, nwan, my_npert))
+   ABI_MALLOC(emiqr, (nr_p))
+   ABI_MALLOC(gww_pk, (nwan, nwan, my_npert, my_nk))
 
    ! Intermediate buffer.
-   ABI_CALLOC(cbuf_re, (nr_e, nwan, nwan, my_npert, gqk%my_nq))
+   ABI_CALLOC(gww_epq, (nwan, nwan, nr_e, my_npert, my_nq))
 
-   do my_iq=1,gqk%my_nq
+   do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-
-     do my_ik=1,gqk%my_nk
+     ! Loop over my k-points (partial sum over k)
+     do my_ik=1,my_nk
        kpt = gqk%my_kpts(:,my_ik)
-       do ir=1,nr_e
-         emikr(ir) = exp(-j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / dble(gstore%nkbz)
-       end do
-
        kq = kpt + qpt
        ik = wan%krank%get_index(kpt)
        ikq = wan%krank%get_index(kq)
        ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
        ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
 
-       u_kc => wan%u_kc(1:wan%ndimwin(ik), 1:nwan, ik)
-       u_kqc => wan%u_kc(1:wan%ndimwin(ikq), 1:nwan, ikq)
+       nwin_k = wan%dimwin(ik)
+       nwin_kq = wan%dimwin(ikq)
+       ABI_MALLOC(u_kc, (1:nwin_k, 1:nwan))
+       ABI_MALLOC(u_kqc, (1:nwin_kq, 1:nwan))
+
+       u_kc = wan%u_kc(1:nwin_k, 1:nwan, ik)
+       u_kqc = wan%u_kc(1:nwin_kq, 1:nwan, ikq)
 
        do my_ip=1,gqk%my_npert
+         !----------------------------------------------------------
+         !  STEP 1: rotation to optimally smooth Bloch states
+         !----------------------------------------------------------
+         !
+         ! [Eqn. 24 of PRB 76, 165108 (2007)]
+         ! g~(k,q) = U(k+q)^\dagger * g(k,q) * U(k)
+
          ! TODO: This is the tricky part where we have to "align" the bands
+         !
+         ! the two zgemm calls perform the following ops:
+         ! epmats  = [ cu(ikq)^\dagger * epmatk ] * cu(ikk)
+         ! [here we have a size-reduction from nbnd*nbnd to nwan*nwan]
+         ! ouput stored in gww_pk(:,:, my_ip, my_ik)
+
          !g_bb = gqk%my_g(my_ip, gqk%nb, my_iq, gqk%nb, my_ik)
-         !gwan = u_kqc % g_bb % ukC
-         do jwan=1,nwan
-         do iwan=1,nwan
-            cbuf_re(:, iwan, jwan, my_ip, my_iq) = cbuf_re(:, iwan, jwan, my_ip, my_iq) * gwan(iwan, jwan)
-         end do
-         end do
+         !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kqc), MATMUL(g_bb, u_kc)))
+         !
+         !call ZGEMM('C', 'N', nwan, nbnd, nbnd, cone, u_kqc,  &
+         !          nbnd, epmatk(:, :, ik, imode), nbnd, czero, eptmp, nwan)
+         !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp,     &
+         !          nwan, u_kc, nbnd, czero, epmats(:, :, ik, imode), nwan)
        end do ! my_ip
+
+       !----------------------------------------------------------------------
+       !  STEP 3: Fourier transform to obtain matrix elements in electron wannier basis
+       !----------------------------------------------------------------------
+       !
+       ! [Eqn. 24 of PRB 76, 165108 (2007)]
+       ! g(R_e,q) = (1/nkc) sum_k e^{-ikR_e} g~(k,q)
+       ! g(R_e,q) is epmatw (nwan,nwan,ir)
+
+       do ir=1,nr_e
+         emikr(ir) = exp(-j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / dble(gstore%nkbz)
+       end do
+       ! gww_pk(nwan, nwan, my_npert,my_nk)
+       do my_ip=1,gqk%my_npert
+         do ir=1,nr_e
+           gww_epq(:,:,ir, my_ip, my_iq) = gww_epq(:,:,ir, my_ip, my_iq) + emikr(ir) * gww_pk(:,:,my_ip, my_ik)
+         end do
+       end do
+
+       ABI_FREE(u_kc)
+       ABI_FREE(u_kqc)
      end do ! my_ik
    end do ! my_iq
 
-   call xmpi_sum(cbuf_re, gqk%kpt_comm%value, ierr)
+   call xmpi_sum(gww_epq, gqk%kpt_comm%value, ierr)
 
-   do my_iq=1,gqk%my_nq
+    !----------------------------------------------------------
+    !  Fourier transform to go into Wannier basis
+    !----------------------------------------------------------
+    !
+    ! [Eqn. 24 of PRB 76, 165108 (2007)]
+    ! g(R_e,R_p) = (1/nq) sum_q e^{-iqR_p} g(R_e,q)
+
+   ! Loop over my q-points (partial sum over q)
+   do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
-     do ir=1,nr_ph
-       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, wan%r_ph(:, ir))) / dble(gstore%nqbz)
+     do ir=1,nr_p
+       emiqr(ir) = exp(-j_dpc * two_pi * dot_product(qpt, wan%r_p(:, ir))) / dble(gstore%nqbz)
      end do
 
       do my_ip=1,my_npert
       do jwan=1,nwan
       do iwan=1,nwan
       do ir=1,nr_e
-         wan%gwanr_phe(:, ir, iwan, jwan, my_ip) = wan%gwanr_phe(:, ir, iwan, jwan, my_ip) + &
-           cbuf_re(:, iwan, jwan, my_ip, my_iq) * emiqr(:)
+         wan%grpe_wwp(:, ir, iwan, jwan, my_ip) = wan%grpe_wwp(:, ir, iwan, jwan, my_ip) + &
+           gww_epq(iwan, jwan, :, my_ip, my_iq) * emiqr(:)
       end do
       end do
       end do
       end do ! my_ip
    end do ! my_iq
 
-   call xmpi_sum(wan%gwanr_phe, gqk%qpt_comm%value, ierr)
+   call xmpi_sum(wan%grpe_wwp, gqk%qpt_comm%value, ierr)
 
    ! Free memory for this spin
    ABI_FREE(emikr)
    ABI_FREE(emiqr)
-   ABI_FREE(gwan)
-   ABI_FREE(cbuf_re)
-
+   ABI_FREE(gww_pk)
+   ABI_FREE(gww_epq)
    call wan%free()
  end do ! my_is
 
@@ -4624,44 +4669,6 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 
 end subroutine gstore_wannierize
 !!***
-
-!!  !!****f* m_gstore/gstore_wannierize_from_file
-!!  !! NAME
-!!  !! gstore_wannierize_from_file
-!!  !!
-!!  !! FUNCTION
-!!  !!
-!!  !! INPUTS
-!!  !!
-!!  !! SOURCE
-!!
-!!  subroutine gstore_wannierize_from_file(gstore, dtset, dtfil)
-!!
-!!  !Arguments ------------------------------------
-!!   class(gstore_t),target, intent(in) :: gstore
-!!   type(dataset_type),intent(in) :: dtset
-!!   type(datafiles_type),intent(in) :: dtfil
-!!
-!!  !Local variables-------------------------------
-!!  !scalars
-!!   !integer,parameter :: master = 0
-!!   !integer :: spin, my_is, nr_e, nr_ph, nwan, my_ip, ir, my_ik, my_iq, ierr, iwan, jwan
-!!   !integer :: root_ncid, spin_ncid, ik_ibz, ik_glob, iq_glob, ipc, cplex, ncerr, natom3
-!!   !integer :: glob_nq, glob_nk, im_kq, in_k
-!!   !complex(dp) :: gtmp
-!!   !character(len=500) :: msg
-!!   !type(wan_t) :: wan
-!!   !type(gqk_t),pointer :: gqk
-!!  !arrays
-!!   !real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
-!!   !real(dp),allocatable :: eigens_k(:), eigens_kq(:)
-!!   !complex(dp),allocatable :: u_kc(:,:), u_kqc(:,:)
-!!   !complex(dp),allocatable :: gwanr_phe(:,:,:,:,:), cbuf_re(:,:,:,:,:), gwan(:,:)
-!!
-!!  ! *************************************************************************
-!!
-!!  end subroutine gstore_wannierize_from_file
-!!  !!***
 
 end module m_gstore
 !!***
