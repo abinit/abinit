@@ -904,7 +904,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    atom_dltij   => pawtab(itypat)%dltij
    atom_indklmn => pawtab(itypat)%indklmn
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,qijl) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,atom_dltij,qijl) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
    call nvtxStartRange("loop_ndat_isploop")
@@ -1084,7 +1084,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    call nvtxEndRange()
 #endif
 #ifdef HAVE_OPENMP_OFFLOAD
-   !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,qijl,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
+   !$OMP TARGET EXIT  DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,atom_dltij,qijl,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 ! accumlate nhat12 for all the atoms
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
@@ -1094,7 +1094,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    if (compute_nhat) then
      select case (gpu_option_)
      case (ABI_GPU_DISABLED)
-       !$OMP PARALLEL DO COLLAPSE(3)
+       !$OMP PARALLEL DO COLLAPSE(4)
        do idat1=1,ndat1
        do idat2=1,ndat2
          do isp1=1,nspinor**2
