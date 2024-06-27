@@ -517,7 +517,6 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
          do ilang=0,3
            if(ispin==2 .and. ilang==0)cycle
            iproj=0
-           last_proj=-1
            do ipspalch=1,npspalch
              if(abs(psps%mixalch(ipspalch,itypalch))>tol10)then
                do ilmn0=1,psps%lmnmax
@@ -525,19 +524,25 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                    if(indlmn_alch(6,ilmn0,ipspalch)==ispin)then
                      if(indlmn_alch(1,ilmn0,ipspalch)==ilang)then
                        ilmn=ilmn+1         ! increment the counter
+                       if (indlmn_alch(2,ilmn0,ipspalch)==-ilang*psps%useylm)then
+                         iln = iln+1
+                         iproj = iproj+1
+                       end if
                        if(ilmn>psps%lmnmax)then
                          ABI_BUG('Problem with the alchemical pseudopotentials : ilmn>lmnmax.')
                        end if
-                       if(last_proj/=indlmn_alch(3,ilmn0,ipspalch))then
-                           iproj     = iproj + 1
-                           last_proj = indlmn_alch(3,ilmn0,ipspalch)
-                           iln       = iln + 1
+                       psps%indlmn(1,ilmn,itypat)=ilang
+                       psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
+                       psps%indlmn(3,ilmn,itypat)=iproj 
+                       psps%indlmn(4,ilmn,itypat)=ilmn
+                       psps%indlmn(5,ilmn,itypat)=iln
+                       psps%indlmn(6,ilmn,itypat)=ispin
                        ! The two lines below do not work for PAW
                          if (psps%usepaw==0) then
-                           psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch)
+                           psps%ekb(iln,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(indlmn_alch(5,ilmn0,ipspalch),ipspalch)
                          end if
                          psps%ffspl(:,:,iln,itypat)=ffspl_alch(:,:,indlmn_alch(5,ilmn0,ipspalch),ipspalch)
-                       end if
+
                        psps%indlmn(1,ilmn,itypat)=ilang
                        psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
                        psps%indlmn(3,ilmn,itypat)=iproj                       ! This does not work for PAW
