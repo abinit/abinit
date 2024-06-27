@@ -47,6 +47,7 @@ module m_ephtk
  public :: ephtk_gkknu_from_atm       ! Transform the gkk matrix elements from (atom, red_direction) basis to phonon-mode basis.
  public :: ephtk_update_ebands        ! Update ebands according to dtset%occopt, tsmear, mbpt_sciss, eph_fermie, eph_extrael
  public :: ephtk_get_mpw_gmax
+ public :: ephtk_v1atm_to_vqnu        !  Receive potentials in atomic representation and return potential in phonon representation
 !!***
 
  real(dp),public,parameter :: EPHTK_WTOL = tol6
@@ -514,6 +515,59 @@ subroutine ephtk_get_mpw_gmax(nkpt, kpts, ecut, gmet, mpw, gmax, comm)
  my_gmax = gmax; call xmpi_max(my_gmax, gmax, comm, ierr)
 
 end subroutine ephtk_get_mpw_gmax
+!!***
+
+
+!!****f* m_epthk/ephtk_v1atm_to_vqnu
+!! NAME
+!!  ephtk_v1atm_to_vqnu
+!!
+!! FUNCTION
+!!  Receive potentials in atomic representation and return potential in phonon representation
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+pure subroutine ephtk_v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nfft, nspden, natom3
+!arrays
+ real(dp),intent(in) :: v1_atm(cplex, nfft, nspden, natom3)
+ real(dp),intent(out) :: v1_qnu(2, nfft, nspden, natom3)
+ real(dp),intent(in) :: displ_red(2, natom3, natom3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: nu, ip, ispden
+
+!************************************************************************
+
+ do nu=1,natom3
+   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
+   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials.
+   ! v1_qnu(2, nfft, nspden, natom3), v1_atm(cplex, nfft, nspden, natom3)
+   v1_qnu(:, :, :, nu) = zero
+   do ip=1,natom3
+     do ispden=1,nspden
+       if (cplex == 2) then
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + &
+           displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip) - displ_red(2,ip,nu) * v1_atm(2,:,ispden,ip)
+         v1_qnu(2, :, ispden, nu) = v1_qnu(2, :, ispden, nu) + &
+           displ_red(2,ip,nu) * v1_atm(1,:,ispden,ip) + displ_red(1,ip,nu) * v1_atm(2,:,ispden,ip)
+       else
+         ! Gamma point. d(q) = d(-q)* --> d is real.
+         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip)
+       end if
+     end do
+   end do
+ end do
+
+end subroutine ephtk_v1atm_to_vqnu
 !!***
 
 end module m_ephtk
