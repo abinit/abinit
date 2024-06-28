@@ -2227,36 +2227,52 @@ SUBROUTINE ImpurityOperator_occup_histo_time(this,histo,occupconfig,suscep,ntau,
       endif
 
       occuptot(itau)= occuptot(itau) + occup(iflavor,itau)
-      if(iflavor<this%flavors/2+1) THEN
-        spinup(1,itau)= spinup(1,itau) + occup(iflavor,itau)
-        if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
-          spinup(2,itau)= spinup(2,itau) + occup(iflavor,itau)
+      if(nspinor .eq. 1) then
+        if(iflavor<this%flavors/2+1) THEN
+          spinup(1,itau)= spinup(1,itau) + occup(iflavor,itau)
+          if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+            spinup(2,itau)= spinup(2,itau) + occup(iflavor,itau)
+          else
+            spinup(3,itau)= spinup(3,itau) + occup(iflavor,itau)
+            !if(spinup(3,itau)>4) THEN
+            ! write(6,*) "Error",spinup(:,itau),occup(:,itau)
+            ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+            !   write(6,*) iflavor,occup(iflavor,itau)
+            ! endif
+            ! stop
+            !endif
+          endif
         else
-          spinup(3,itau)= spinup(3,itau) + occup(iflavor,itau)
-          !if(spinup(3,itau)>4) THEN
-          ! write(6,*) "Error",spinup(:,itau),occup(:,itau)
-          ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
-          !   write(6,*) iflavor,occup(iflavor,itau)
-          ! endif
-          ! stop
-          !endif
+          spindn(1,itau)= spindn(1,itau) + occup(iflavor,itau)
+          if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
+            spindn(2,itau)= spindn(2,itau) + occup(iflavor,itau)
+          else
+            spindn(3,itau)= spindn(3,itau) + occup(iflavor,itau)
+            !if(spindn(3,itau)>4) THEN
+            ! write(6,*) "Error spin",spindn(:,itau),occup(:,itau)
+            ! write(6,*) "Error occup",occup(:,itau)
+            ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
+            !   write(6,*) iflavor,occup(iflavor,itau)
+            ! endif
+            ! stop
+            !endif
+          endif
         endif
-      else
-        spindn(1,itau)= spindn(1,itau) + occup(iflavor,itau)
-        if(iflavor==1.or.iflavor==2.or.iflavor==4.or.iflavor==6.or.iflavor==7.or.iflavor==9) THEN
-          spindn(2,itau)= spindn(2,itau) + occup(iflavor,itau)
+      else 
+      !spin-orbit case (here only useful for chi_charge and f-elements)
+        if(iflavor < 7) then
+          !mj=5/2
+          spinup(2,itau) = spinup(2,itau) + occup(iflavor,itau)
+          !if(iflavor ==1.or.iflavor==2.or.iflavor==3.or.iflavor==4) then
+          !  spinup(2,itau) = spinup(2,itau) + occup(iflavor,itau)
+          !else
+          !  spinup(3,itau) = spinup(3,itau) + occup(iflavor,itau)
+          !end if
         else
-          spindn(3,itau)= spindn(3,itau) + occup(iflavor,itau)
-          !if(spindn(3,itau)>4) THEN
-          ! write(6,*) "Error spin",spindn(:,itau),occup(:,itau)
-          ! write(6,*) "Error occup",occup(:,itau)
-          ! if(iflavor==1.or.iflavor==2.or.iflavor==4) THEN
-          !   write(6,*) iflavor,occup(iflavor,itau)
-          ! endif
-          ! stop
-          !endif
-        endif
-      endif
+          !mj=7/2
+          spinup(3,itau) = spindn(3,itau) + occup(iflavor,itau)
+        end if
+      end if 
 
 !   === Construct index of configuration in base 10
       iconfig=iconfig+2**(iflavor-1)*occup(iflavor,itau)
@@ -2365,27 +2381,46 @@ if(opt_histo .gt. 1) then
 endif
   
 if(opt_histo .gt. 2) then
-! == Scalar Charge Susceptibility
+  if(nspinor .eq. 1) then
+  ! == Scalar Charge Susceptibility
 
- do itau = 1,ntau
-   ntot(1) = ntot(1) + occuptot(itau)
-   ntot(2) = ntot(2) + float(spinup(2,itau)+spindn(2,itau))
-   ntot(3) = ntot(3) + float(spinup(3,itau)+spindn(3,itau))
- enddo
+    do itau = 1,ntau
+      ntot(1) = ntot(1) + occuptot(itau)
+      ntot(2) = ntot(2) + float(spinup(2,itau)+spindn(2,itau))
+      ntot(3) = ntot(3) + float(spinup(3,itau)+spindn(3,itau))
+    enddo
 
- do itau=1,ntau
-   do jtau=1,ntau
-     kdeltatau=jtau-itau+1
-     if(jtau<itau) kdeltatau=kdeltatau+ntau
-     if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
-     chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float((spinup(1,jtau)+spindn(1,jtau)))*float((spinup(1,itau)+spindn(1,itau)))
-     chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float((spinup(2,jtau)+spindn(2,jtau)))*float((spinup(2,itau)+spindn(2,itau)))
-     chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float((spinup(3,jtau)+spindn(3,jtau)))*float((spinup(3,itau)+spindn(3,itau)))
-   enddo
- enddo
+    do itau=1,ntau
+      do jtau=1,ntau
+        kdeltatau=jtau-itau+1
+        if(jtau<itau) kdeltatau=kdeltatau+ntau
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"
+        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float((spinup(1,jtau)+spindn(1,jtau)))*float((spinup(1,itau)+spindn(1,itau)))
+        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float((spinup(2,jtau)+spindn(2,jtau)))*float((spinup(2,itau)+spindn(2,itau)))
+        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float((spinup(3,jtau)+spindn(3,jtau)))*float((spinup(3,itau)+spindn(3,itau)))
+      enddo
+    enddo
 
-! == Spin-orbit Charge Susceptibility
-! Rotation of occupation matrix ... to be done
+  else
+  ! == Spin-orbit Charge Susceptibility
+  ! ntot(1) = Full occuptation, ntot(2) = mj_5/2, ntot(3) = mj_7/2 
+    do itau = 1,ntau                                                    
+      ntot(1) = ntot(1) + occuptot(itau)                                
+      ntot(2) = ntot(2) + float(spinup(2,itau))          
+      ntot(3) = ntot(3) + float(spinup(3,itau))          
+    enddo                                                               
+
+    do itau=1,ntau                                                                                                                  
+      do jtau=1,ntau                                                                                                                
+        kdeltatau=jtau-itau+1                                                                                                       
+        if(jtau<itau) kdeltatau=kdeltatau+ntau                                                                                      
+        if(kdeltatau> ntau) write(std_out,*) "Warning kdeltatau"                                                                    
+        chicharge(1,kdeltatau)=chicharge(1,kdeltatau)+float(occuptot(jtau))*float(occuptot(itau)) 
+        chicharge(2,kdeltatau)=chicharge(2,kdeltatau)+float(spinup(2,jtau))*float(spindn(2,itau)) 
+        chicharge(3,kdeltatau)=chicharge(3,kdeltatau)+float(spinup(3,jtau))*float(spinup(3,itau)) 
+      enddo                                                                                                                         
+    enddo                                                                                                                           
+  end if                                                                                                                                   
 endif
 
   FREE(occup)
