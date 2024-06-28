@@ -73,6 +73,34 @@ module m_kpts
 !! FUNCTION
 !! Linear interpolator for functions defined in the BZ.
 !!
+!! To interpolate initial data defined on a ngkpt(3) k-mesh.
+!! if the values of shape (ndat, nkpt) are known on nkpt k-points `kpts(3,nkpt)
+!! belonging to the ngkpt mesh, use the following calls:
+!!
+!! Example:
+!!   type(bzlint_t) :: bzlint
+!!   call bzlint%init(ngkpt, ndat, nkpt, kpts, values)
+!!
+!!   ! Now we can (linearly) interpolate at arbitrary kpoints
+!!   allocate(results, (ndat)
+!!   do ik=1,nk_interp(interp_kpt, results)
+!!     call bzlint%free(results)
+!!   end do
+!!
+!!   call bzlint%free()  ! Free memory
+!!
+!!   To handle complex data, use real(dp) pointers associated to complex(dp) arrays as in:
+!!
+!!       use, intrinsic :: iso_c_binding
+!!       complex(dp),allocatable,target :: cvalues(:)
+!!       real(dp), ABI_CONTIGUOUS pointer :: rpt_d2(:,:)
+!!
+!!       allocate(cvalues(ndat, nkpt))
+!!       ! fill cvalues...
+!!
+!!       call c_f_pointer(c_loc(cvalues), rpt_d2, [2*ndat, nkpt])
+!!       call bzlint%init(ngkpt, 2*ndat, nkpt, kpts, rpt_d2)
+!!
 !! SOURCE
 
  type, public :: bzlint_t

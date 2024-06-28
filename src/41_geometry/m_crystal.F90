@@ -28,9 +28,7 @@ module m_crystal
  use m_xmpi
  use m_nctk
  use, intrinsic :: iso_c_binding
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
@@ -1523,8 +1521,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
-#ifdef HAVE_NETCDF
-
  ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
@@ -1621,11 +1617,6 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
     NCF_CHECK(nf90_put_var(ncid, vid("use_antiferromagnetic_symmetries"), 0))
  end if
 
-
-#else
- ABI_ERROR("netcdf library not available")
-#endif
-
 contains
  integer function vid(vname)
    character(len=*),intent(in) :: vname
@@ -1660,11 +1651,8 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
  character(len=*),intent(in) :: path
  class(crystal_t),intent(in) :: crystal
 
-#ifdef HAVE_NETCDF
 !Local variables-------------------------------
-!scalars
  integer :: ncid
-
 ! *************************************************************************
 
  ncerr = nf90_noerr
@@ -1677,7 +1665,6 @@ integer function crystal_ncwrite_path(crystal, path) result(ncerr)
 
  NCF_CHECK(crystal_ncwrite(crystal, ncid))
  NCF_CHECK(nf90_close(ncid))
-#endif
 
 end function crystal_ncwrite_path
 !!***
@@ -1711,11 +1698,9 @@ subroutine crystal_ncread(cryst, ncid)
 !scalars
  integer :: use_antiferro
 
-#ifdef HAVE_NETCDF
-
 ! *************************************************************************
 
-   !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
+ !NCF_CHECK(nf90_inq_varid(ncid, varname, varid))
 
  ! ---------------
  ! Read dimensions
@@ -1770,10 +1755,6 @@ subroutine crystal_ncread(cryst, ncid)
  call Cryst%compute_geometry()
  call Cryst%index_atoms()
  call Cryst%compute_sym()
-
-#else
- ABI_ERROR("netcdf library not available")
-#endif
 
 end subroutine crystal_ncread
 !!***
