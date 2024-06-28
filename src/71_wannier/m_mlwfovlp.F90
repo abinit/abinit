@@ -21,6 +21,7 @@
 
 module m_mlwfovlp
 
+ use, intrinsic :: iso_c_binding
  use defs_basis
  use defs_wannier90
  use m_abicore
@@ -115,6 +116,7 @@ module m_mlwfovlp
    ! Used to find the index of the kpoint from its coordinates.
 
    integer,allocatable :: exclude_bands(:)
+   ! FIXME: Is this still needed.
 
    integer,allocatable :: dimwin(:)
    ! (nkbz)
@@ -149,7 +151,7 @@ module m_mlwfovlp
    logical,allocatable :: lwindow(:,:)
    ! (num_bands, nkbz)
 
-   !logical :: keep_umats
+   logical :: keep_umats
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
    complex(dp),allocatable :: u_kc(:,:,:)
@@ -158,7 +160,7 @@ module m_mlwfovlp
    ! (nr_h, nwan, nwan)
    ! KS Hamiltonian in the Wannier representation.
 
-   integer :: my_npert = -1
+   integer :: my_npert = -1, my_pert_start = -1
    ! My number of perturbations
 
    type(xcomm_t), pointer :: pert_comm => null()
@@ -179,9 +181,13 @@ module m_mlwfovlp
    ! Interpolate Hamiltonian at an arbitray k-point
 
    procedure :: setup_eph_ws_kq => wan_setup_eph_ws_kq
+   ! Prepare interpolation of e-ph matrix elements.
 
    procedure :: interp_eph_manyq => wan_interp_eph_manyq
    ! Interpolate e-ph matrix elements.
+
+   procedure :: ncwrite_filepath => wan_ncwrite_filepath
+   ! Write g in the Wannier representation to netcdf file.
 
    procedure :: free => wan_free
    ! Free memory.
@@ -292,7 +298,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
- integer,allocatable :: irvec_r_h(:,:),ndegen_h(:),exclude_bands(:,:)
+ integer,allocatable :: irvec_r_h(:,:),ndegen_h(:)
  real(dp),allocatable :: rmods_r_h(:)
  type(wan_t) :: wan
 #endif
@@ -310,7 +316,7 @@ class(abstract_wf), pointer :: mywfc
  integer,allocatable :: g1(:,:,:)
  integer,allocatable::ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
- integer,allocatable :: proj_s_loc(:)
+ integer,allocatable :: proj_s_loc(:), exclude_bands(:,:)
  real(dp) :: real_lattice(3,3)
  real(dp) :: recip_lattice(3,3)
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
@@ -894,7 +900,7 @@ class(abstract_wf), pointer :: mywfc
 
      ! DEBUG SECTION
      !do isppol=1,nsppol
-     !  call wan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil%filnam_ds(4), xmpi_comm_self); call wan%print([std_out]); call wan%free(); stop 0
+     !  call wan%from_ncfile(abiwan_fname, isppol, nsppol, .False., dtfil%filnam_ds(4), xmpi_comm_self); call wan%print([std_out]); call wan%free(); stop 0
      !end do
 
    end if
@@ -3395,7 +3401,7 @@ end subroutine mlwfovlp_ylmfar
 !! wan_from_ncfile
 !!
 !! FUNCTION
-!! Initialize an wan_t instance from a netcf file
+!! Initialize a wan_t instance from a netcf file
 !!
 !! INPUTS
 !!
@@ -3403,17 +3409,18 @@ end subroutine mlwfovlp_ylmfar
 !!
 !! SOURCE
 
-subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm)
+subroutine wan_from_ncfile(wan, filepath, spin, nsppol, keep_umats, out_prefix, comm) ! keep_umats
 
 !Arguments ------------------------------------
  class(wan_t),intent(out) :: wan
  character(len=*),intent(in) :: filepath, out_prefix
+ logical,intent(in) :: keep_umats
  integer,intent(in) :: spin, nsppol, comm
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: ncid, my_rank, ii, ir, ik, ib, jb, mb, nsppol_, mband, nwan, nkbz, ount, num_bands, nr_h ! ierr, ncerr,
+ integer :: ncid, my_rank, ii, ir, ik, ib, jb, mb, nsppol_, mband, nwan, nkbz, ount, num_bands, nr_h
  integer :: nextbands
  character(len=500) :: msg
  character(len=fnlen) :: out_path
@@ -3533,10 +3540,11 @@ subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm)
      matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
- !if (.not. keep_umats) then
- !  ABI_FREE(wan%u_mat)
- !  ABI_FREE(wan%u_mat_opt)
- !end if
+ wan%keep_umats = keep_umats
+ if (.not. keep_umats) then
+   ABI_FREE(wan%u_mat)
+   ABI_FREE(wan%u_mat_opt)
+ end if
 
  ! ====================================================
  ! Build the Hamiltonian in the Wannier representation
@@ -3603,7 +3611,7 @@ subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm)
 
  ABI_FREE(chs)
 
- ! Now transpose the data to have R_e as first dimension
+ ! Now transpose the data to have R_e in the first dimension.
  ABI_CALLOC(wan%hwan_r, (nr_h, nwan, nwan))
  do ir=1,nr_h
    wan%hwan_r(ir,:,:) = chw(:,:,ir)
@@ -3630,7 +3638,8 @@ contains
  integer function vid(var_name)
    character(len=*),intent(in) :: var_name
    vid = nctk_idname(ncid, var_name)
-end function vid
+ end function vid
+
 end subroutine wan_from_ncfile
 !!***
 
@@ -3697,15 +3706,6 @@ subroutine wan_interp_h(wan, kpt, uk_wan, eigens)
  end do
 
  ! O_ij(k) = sum_R e^{+ik.R}*O_ij(R)
- !uk_wan = zero
- !do jj=1,wan%nwan
- !  do ii=1,wan%nwan
- !    do ir=1,wan%nr_h
- !      uk_wan(ii, jj) = uk_wan(ii, jj) + eikr(ir) * wan%hwan_r(ir, ii, jj)
- !    end do
- !  end do
- !end do
-
  call ZGEMV("T", wan%nr_h, wan%nwan**2, cone, wan%hwan_r, wan%nr_h, eikr, 1, czero, uk_wan, 1)
 
  uk_wan = half * (uk_wan + transpose(conjg(uk_wan)))
@@ -3767,16 +3767,17 @@ end subroutine wan_free
 !! wan_setup_eph_ws_kq
 !!
 !! FUNCTION
+!!   Prepare interpolation of e-ph matrix elements.
 !!
 !! SOURCE
 
-subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_npert, pert_comm)
+subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_pert_start, my_npert, pert_comm)
 
 !Arguments ------------------------------------
  class(wan_t),intent(inout) :: wan
  type(crystal_t),intent(in) :: cryst
  real(dp),intent(in) :: shiftk(3)
- integer,intent(in) :: kptrlatt(3,3), qptrlatt(3,3), my_npert
+ integer,intent(in) :: kptrlatt(3,3), qptrlatt(3,3), my_pert_start, my_npert
  type(xcomm_t),target,intent(in) :: pert_comm
 
 !************************************************************************
@@ -3788,7 +3789,7 @@ subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_npert,
                    wan%nr_p, wan%r_p, wan%ndegen_p, wan%rmod_p) ! out
 
  ! Allocate g in the Wannier representation.
- wan%my_npert = my_npert
+ wan%my_pert_start = my_pert_start; wan%my_npert = my_npert
  wan%pert_comm => pert_comm
  ABI_CALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, my_npert))
 
@@ -3885,6 +3886,99 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, out_g)
 end subroutine wan_interp_eph_manyq
 !!***
 
+!!****f* m_mlwfovlp/wan_ncwrite_filepath
+!! NAME
+!! wan_ncwrite_filepath
+!!
+!! FUNCTION
+!!  Write g in the Wannier representation to netcdf file.
+!!
+!! SOURCE
+
+subroutine wan_ncwrite_filepath(wan, filepath, cryst, ebands, pert_comm)
+
+!Arguments ------------------------------------
+ class(wan_t),target,intent(in) :: wan
+ character(len=*),intent(in) :: filepath
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ type(xcomm_t),intent(in) :: pert_comm
+
+!Local variables-------------------------------
+!scalars
+ integer :: spin, ncid, spin_ncid, ncerr, natom3
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
+!************************************************************************
+
+ spin = wan%spin; natom3 = 3 * cryst%natom
+
+ if (spin == 1) then
+   NCF_CHECK(nctk_open_create(ncid, filepath, pert_comm%value))
+   NCF_CHECK(cryst%ncwrite(ncid))
+   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   ! Dimensions in root group
+   !ncerr = nctk_def_dims(ncid, [ &
+   !   nctkdim_t("natom3", natom3), &
+   !   nctkdim_t("nr_p", wan%nr_p)  &
+   !], defmode=.True.)
+   !NCF_CHECK(ncerr)
+
+ else
+   NCF_CHECK(nctk_open_modify(ncid, filepath, pert_comm%value))
+ end if
+
+ ! Create group for this spin.
+ NCF_CHECK(nf90_def_grp(ncid, strcat("gwan", "_spin", itoa(spin)), spin_ncid))
+
+ ! Defined dimensions in gwan_spin group.
+ ncerr = nctk_def_dims(spin_ncid, [ &
+    nctkdim_t("nwan", wan%nwan), &
+    nctkdim_t("natom3", natom3), &
+    nctkdim_t("nr_h", wan%nr_h),  &
+    nctkdim_t("nr_e", wan%nr_e),  &
+    nctkdim_t("nr_p", wan%nr_p)  &
+ ], defmode=.True.)
+ NCF_CHECK(ncerr)
+
+ ncerr = nctk_def_arrays(spin_ncid, [ &
+   nctkarr_t("r_h", "dp", "three, nr_h"), &
+   nctkarr_t("r_e", "dp", "three, nr_e"), &
+   nctkarr_t("r_p", "dp", "three, nr_p"), &
+   nctkarr_t("hwan_r", "dp", "two, nr_h, nwan, nwan"), &
+   nctkarr_t("grpw_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
+ ])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(spin_ncid))
+ !NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_h"), wan%r_h))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_e"), wan%r_e))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_p"), wan%r_p))
+
+ call c_f_pointer(c_loc(wan%hwan_r), rpt_d4, [2, wan%nr_h, wan%nwan, wan%nwan])
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
+
+ ! Here take into account that array is distributed over perturbations.
+ call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+ ncerr = nf90_put_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
+                      start=[1,1,1,1,1,wan%my_pert_start], count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nf90_close(ncid))
+
+contains
+ !integer function vid(var_name)
+ !  character(len=*),intent(in) :: var_name
+ !  vid = nctk_idname(ncid, var_name)
+ !end function vid
+ integer function vid_spin(var_name)
+   character(len=*),intent(in) :: var_name
+   vid_spin = nctk_idname(spin_ncid, var_name)
+ end function vid_spin
+
+end subroutine wan_ncwrite_filepath
+!!***
+
 !!****f* m_mlwfovlp/wan_compare_with_ebands
 !! NAME
 !! wan_compare_with_ebands
@@ -3912,7 +4006,7 @@ subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 !************************************************************************
 
  do spin=1,ebands%nsppol
-   call wan%from_ncfile(abiwan_filepath, spin, ebands%nsppol, "", xmpi_comm_self)
+   call wan%from_ncfile(abiwan_filepath, spin, ebands%nsppol, .False., "", xmpi_comm_self)
    call wan%print([std_out])
    nwan = wan%nwan
    ABI_MALLOC(u_k, (nwan, nwan))

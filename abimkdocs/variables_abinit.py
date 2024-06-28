@@ -23947,7 +23947,6 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="GET the ABIWAN.nc from FILEPATH",
-    #requires="[[optdriver]] == 7",
     added_in_version="10.1.1",
     text=r"""
 This variable defines the path of the ABIWAN.nc file with the Wannier rotation matrices produced by ABINIT
@@ -23964,7 +23963,6 @@ Variable(
     dimensions="scalar",
     defaultval="None",
     mnemonics="GET the ABIWAN.nc from dataset",
-    #requires="[[optdriver]] == 7",
     added_in_version="10.1.1",
     text=r"""
 This variable is similar in spirit to [[getabiwan_filepath]] but uses the dataset index

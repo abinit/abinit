@@ -222,6 +222,7 @@ type, public :: dataset_type
  integer :: getqps = 0
  integer :: getscr = 0
  integer :: getsuscep = 0
+ integer :: getvarpeq = 0
  integer :: getvel = 0
  integer :: getwfk = 0
  integer :: getwfkfine = 0
@@ -1019,6 +1020,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: getvarpeq_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
@@ -1607,6 +1609,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getvarpeq          = dtin%getvarpeq
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
@@ -1616,6 +1619,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getgstore_filepath = dtin%getgstore_filepath
  dtout%getabiwan_filepath = dtin%getabiwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
+ dtout%getvarpeq_filepath = dtin%getvarpeq_filepath
  dtout%getwfk_filepath    = dtin%getwfk_filepath
  dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
  dtout%getwfq_filepath    = dtin%getwfq_filepath
@@ -3400,6 +3404,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvarpeq getvarpeq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
