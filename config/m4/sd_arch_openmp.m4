@@ -174,9 +174,9 @@ AC_DEFUN([SD_OPENMP_INIT], [
   fi
 
   # Display configuration
-  if test "${STEREDEG_CONFIG_BYPASS_CHECKS}" != "yes"; then
-    _SD_OPENMP_DUMP_CONFIG
-  fi
+  #if test "${STEREDEG_CONFIG_BYPASS_CHECKS}" != "yes"; then
+  #  _SD_OPENMP_DUMP_CONFIG
+  #fi
 
   # Export configuration
   AC_SUBST(sd_openmp_options)
