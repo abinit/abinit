@@ -1396,17 +1396,9 @@
 #
 # Uncomment the following lines at your own risks
 
-# Enable BSE unpacking (gmatteo)
-#
-#enable_bse_unpacked="yes"
-
 # Enable optimized cRPA build for ifort <=17 (routerovitch)
 #
 #enable_crpa_optim="yes"
-
-# Enable exports (pouillon)
-#
-#enable_exports="yes"
 
 # Enable double precision for GW calculations (gmatteo)
 #
