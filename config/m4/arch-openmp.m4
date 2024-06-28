@@ -218,6 +218,16 @@ fi
 # Note 2: it should be run as early as possible.
 #
 AC_DEFUN([ABI_OPENMP_INIT], [
+
+  # Use existing OPENMP env variables (Fortran only)
+  OPENMP_FCFLAGS=""
+  OPENMP_CFLAGS=""
+  OPENMP_CXXFLAGS=""
+  OPENMP_LDFLAGS=""
+  OPENMP_LIBS=""
+  test ! -z "${FCFLAGS_OPENMP}" && OPENMP_FCFLAGS="${OPENMP_FCFLAGS}${FCFLAGS_OPENMP}"
+  test ! -z "${FCFLAGS_OPENMP_OFFLOAD}" && OPENMP_FCFLAGS="${OPENMP_FCFLAGS}${FCFLAGS_OPENMP_OFFLOAD}"
+
   # Delegate most of the init stage to Steredeg
   SD_OPENMP_INIT([auto optional warn no-cc no-cxx])
 
@@ -287,8 +297,6 @@ AC_DEFUN([ABI_OPENMP_DETECT], [
   # Delegate the actual detection to Steredeg
   SD_OPENMP_DETECT
   AC_MSG_NOTICE([OpenMP support is enabled in Fortran source code only])
-  #AC_MSG_CHECKING([whether to enable OpenMP support])
-  #AC_MSG_RESULT([${abi_openmp_enable}])
 
   abi_openmp_ok="${sd_openmp_ok}"
 

@@ -94,24 +94,26 @@ AC_DEFUN([SD_OPENMP_INIT], [
     [sd_openmp_enable="no"; sd_openmp_init="def"])
 
   # Declare environment variables
-  AC_ARG_VAR([OPENMP_CPPFLAGS], [C preprocessing flags for openMP.])
-  AC_ARG_VAR([OPENMP_CFLAGS], [C flags for openMP.])
-  AC_ARG_VAR([OPENMP_CXXFLAGS], [C++ flags for openMP.])
-  AC_ARG_VAR([OPENMP_FCFLAGS], [Fortran flags for openMP.])
-  AC_ARG_VAR([OPENMP_LDFLAGS], [Linker flags for openMP.])
-  AC_ARG_VAR([OPENMP_LIBS], [Library flags for openMP.])
+  #AC_ARG_VAR([OPENMP_CPPFLAGS], [C preprocessing flags for openMP.])
+  #AC_ARG_VAR([OPENMP_CFLAGS], [C flags for openMP.])
+  #AC_ARG_VAR([OPENMP_CXXFLAGS], [C++ flags for openMP.])
+  #AC_ARG_VAR([OPENMP_FCFLAGS], [Fortran flags for openMP.])
+  #AC_ARG_VAR([OPENMP_FFLAGS], [Fortran flags for openMP (better use OPENMP_FCFLAGS).])
+  #AC_ARG_VAR([OPENMP_LDFLAGS], [Linker flags for openMP.])
+  #AC_ARG_VAR([OPENMP_LIBS], [Library flags for openMP.])
 
   # Detect use of environment variables
   if test "${sd_openmp_enable}" = "yes" -o "${sd_openmp_enable}" = "auto"; then
     tmp_openmp_vars="${OPENMP_CPPFLAGS}${OPENMP_LDFLAGS}${OPENMP_LIBS}"
     if test "${sd_openmp_enable_cc}" = "yes"; then
-      tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_CFLAGS}"
+      test ! -z "${OPENMP_CFLAGS}" && tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_CFLAGS}"
     fi
     if test "${sd_openmp_enable_cxx}" = "yes"; then
-      tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_CXXFLAGS}"
+      test ! -z "${OPENMP_CXXFLAGS}" && tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_CXXFLAGS}"
     fi
     if test "${sd_openmp_enable_fc}" = "yes"; then
-      tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_FCFLAGS}"
+      test ! -z "${OPENMP_FFLAGS}" && tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_FFLAGS}"
+      test ! -z "${OPENMP_FCFLAGS}" && tmp_openmp_vars="${tmp_openmp_vars}${OPENMP_FCFLAGS}"
     fi
     if test "${sd_openmp_init}" = "def" -o "${sd_openmp_init}" = "yon"; then
       if test "${tmp_openmp_vars}" != ""; then
@@ -136,7 +138,7 @@ AC_DEFUN([SD_OPENMP_INIT], [
         sd_openmp_cppflags="${sd_openmp_cppflags_def}"
         test "${sd_openmp_enable_cc}" = "yes" && sd_openmp_cflags="${sd_openmp_cflags_def}"
         test "${sd_openmp_enable_cxx}" = "yes" && sd_openmp_cxxflags="${sd_openmp_cxxflags_def}"
-        test "${sd_openmp_enable_fc}" = "yes" @@ sd_openmp_fcflags="${sd_openmp_fcflags_def}"
+        test "${sd_openmp_enable_fc}" = "yes" && sd_openmp_fcflags="${sd_openmp_fcflags_def}"
         sd_openmp_ldflags="${sd_openmp_ldflags_def}"
         sd_openmp_libs="${sd_openmp_libs_def}"
         ;;
@@ -156,6 +158,7 @@ AC_DEFUN([SD_OPENMP_INIT], [
           test "${OPENMP_CXXFLAGS}" != "" && sd_openmp_cxxflags="${OPENMP_CXXFLAGS}"
         fi
         if test "${sd_openmp_enable_fc}" = "yes"; then
+          test "${OPENMP_FFLAGS}" != "" && sd_openmp_fcflags="${OPENMP_FFLAGS}"
           test "${OPENMP_FCFLAGS}" != "" && sd_openmp_fcflags="${OPENMP_FCFLAGS}"
         fi
         test "${OPENMP_LDFLAGS}" != "" && sd_openmp_ldflags="${OPENMP_LDFLAGS}"
@@ -172,7 +175,7 @@ AC_DEFUN([SD_OPENMP_INIT], [
 
   # Display configuration
   if test "${STEREDEG_CONFIG_BYPASS_CHECKS}" != "yes"; then
-    _sd_OPENMP_DUMP_CONFIG
+    _SD_OPENMP_DUMP_CONFIG
   fi
 
   # Export configuration
