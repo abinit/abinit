@@ -303,7 +303,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
  real(dp),pointer :: gsc_ptr(:,:)
  type(fock_common_type),pointer :: fock
  type(pawcprj_type),pointer :: cwaveprj_fock(:,:),cwaveprj_idat(:,:),cwaveprj_nonlop(:,:)
- logical :: transfer_omp_args
+ logical :: transfer_omp_args,fourwf_on_cpu
  integer :: tmp2i(2)
 
 ! *********************************************************************
@@ -382,6 +382,7 @@ subroutine getghc_ompgpu(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_
      ABI_BUG('wrong size for gvnlxc!')
    end if
  end if
+ fourwf_on_cpu=.false.; if((mpi_enreg%me_g0==1 .or. mpi_enreg%me_g0_fft==1) .and. gs_ham%istwf_k==2) fourwf_on_cpu=.true.
  use_cwavef_r=present(cwavef_r)
  n4=gs_ham%n4 ; n5=gs_ham%n5 ; n6=gs_ham%n6
  nspinortot=gs_ham%nspinor
@@ -464,6 +465,10 @@ has_fock=.false.
 
  if (any(type_calc == [0, 1, 3])) then
 
+   if(fourwf_on_cpu) then
+     gs_ham%gpu_option=ABI_GPU_DISABLED
+     !$OMP TARGET UPDATE FROM(cwavef)
+   end if
 !  Need a Vlocal
    if (.not.associated(gs_ham%vlocal)) then
      ABI_BUG("We need vlocal in gs_ham!")
@@ -759,6 +764,10 @@ has_fock=.false.
 #ifndef HAVE_GPU_HIP
    !$OMP TARGET EXIT DATA MAP(delete:work)
 #endif
+   if(fourwf_on_cpu) then
+     gs_ham%gpu_option=ABI_GPU_OPENMP
+     !$OMP TARGET UPDATE TO(ghc)
+   end if
 
  end if ! type_calc
  ABI_NVTX_END_RANGE()
