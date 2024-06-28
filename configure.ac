@@ -224,14 +224,9 @@ ABI_FALLBACKS_INIT
 # Prepare MPI support
 ABI_MPI_INIT
 
-# Prepare openMP support
-ABI_OPENMP_INIT
-
-# Prepare GPU support
+# Prepare GPU support (requires MPI)
 # Note: must be done after MPI
 ABI_GPU_INIT
-
-# GPU support requires MPI
 if test "${abi_gpu_enable}" = "yes" -a "${abi_mpi_enable}" != "yes"; then
   AC_MSG_ERROR([GPU support requires MPI])
 fi
@@ -660,6 +655,8 @@ if test "${abi_mpi_enable}" = "yes"; then
 fi
 
 # OpenMP support
+# Note: OPENMP_INIT has to be done after openMP Fortran flags have been set
+ABI_OPENMP_INIT
 ABI_OPENMP_DETECT
 
 # GPU support

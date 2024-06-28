@@ -93,14 +93,14 @@ AC_DEFUN([SD_FFTW3_INIT], [
   # Declare environment variables
   AC_ARG_VAR([FFTW3_CPPFLAGS], [C preprocessing flags for FFTW3.])
   AC_ARG_VAR([FFTW3_CFLAGS], [C flags for FFTW3.])
-  AC_ARG_VAR([FFTW3_FFLAGS], [Fortran flags for FFTW3.])
   AC_ARG_VAR([FFTW3_FCFLAGS], [Fortran flags for FFTW3.])
+  AC_ARG_VAR([FFTW3_FFLAGS], [Fortran flags for FFTW3 (better use FFTW3_FCFLAGS).])
   AC_ARG_VAR([FFTW3_LDFLAGS], [Linker flags for FFTW3.])
   AC_ARG_VAR([FFTW3_LIBS], [Library flags for FFTW3.])
 
   # Detect use of environment variables
   if test "${sd_fftw3_enable}" = "yes" -o "${sd_fftw3_enable}" = "auto"; then
-    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_FCFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
+    tmp_fftw3_vars="${FFTW3_CPPFLAGS}${FFTW3_CFLAGS}${FFTW3_FFLAGS}${FFTW3_FCFLAGS}${FFTW3_LDFLAGS}${FFTW3_LIBS}"
     if test "${sd_fftw3_init}" = "def" -a ! -z "${tmp_fftw3_vars}"; then
       sd_fftw3_enable="yes"
       sd_fftw3_init="env"
