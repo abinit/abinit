@@ -151,7 +151,7 @@ module m_mlwfovlp
    logical,allocatable :: lwindow(:,:)
    ! (num_bands, nkbz)
 
-   !logical :: keep_umats
+   logical :: keep_umats
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
    complex(dp),allocatable :: u_kc(:,:,:)
@@ -298,7 +298,7 @@ class(abstract_wf), pointer :: mywfc
  integer :: ncid, ncerr, nrpts
  character(len=fnlen) :: abiwan_fname
  integer :: have_disentangled_spin(nsppol)
- integer,allocatable :: irvec_r_h(:,:),ndegen_h(:),exclude_bands(:,:)
+ integer,allocatable :: irvec_r_h(:,:),ndegen_h(:)
  real(dp),allocatable :: rmods_r_h(:)
  type(wan_t) :: wan
 #endif
@@ -316,7 +316,7 @@ class(abstract_wf), pointer :: mywfc
  integer,allocatable :: g1(:,:,:)
  integer,allocatable::ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
- integer,allocatable :: proj_s_loc(:)
+ integer,allocatable :: proj_s_loc(:), exclude_bands(:,:)
  real(dp) :: real_lattice(3,3)
  real(dp) :: recip_lattice(3,3)
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
@@ -900,7 +900,7 @@ class(abstract_wf), pointer :: mywfc
 
      ! DEBUG SECTION
      !do isppol=1,nsppol
-     !  call wan%from_ncfile(abiwan_fname, isppol, nsppol, dtfil%filnam_ds(4), xmpi_comm_self); call wan%print([std_out]); call wan%free(); stop 0
+     !  call wan%from_ncfile(abiwan_fname, isppol, nsppol, .False., dtfil%filnam_ds(4), xmpi_comm_self); call wan%print([std_out]); call wan%free(); stop 0
      !end do
 
    end if
@@ -3409,11 +3409,12 @@ end subroutine mlwfovlp_ylmfar
 !!
 !! SOURCE
 
-subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm) ! keep_umats
+subroutine wan_from_ncfile(wan, filepath, spin, nsppol, keep_umats, out_prefix, comm) ! keep_umats
 
 !Arguments ------------------------------------
  class(wan_t),intent(out) :: wan
  character(len=*),intent(in) :: filepath, out_prefix
+ logical,intent(in) :: keep_umats
  integer,intent(in) :: spin, nsppol, comm
 
 !Local variables-------------------------------
@@ -3539,10 +3540,11 @@ subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm) ! keep
      matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
- !if (.not. keep_umats) then
- !  ABI_FREE(wan%u_mat)
- !  ABI_FREE(wan%u_mat_opt)
- !end if
+ wan%keep_umats = keep_umats
+ if (.not. keep_umats) then
+   ABI_FREE(wan%u_mat)
+   ABI_FREE(wan%u_mat_opt)
+ end if
 
  ! ====================================================
  ! Build the Hamiltonian in the Wannier representation
@@ -3609,7 +3611,7 @@ subroutine wan_from_ncfile(wan, filepath, spin, nsppol, out_prefix, comm) ! keep
 
  ABI_FREE(chs)
 
- ! Now transpose the data to have R_e as first dimension
+ ! Now transpose the data to have R_e in the first dimension.
  ABI_CALLOC(wan%hwan_r, (nr_h, nwan, nwan))
  do ir=1,nr_h
    wan%hwan_r(ir,:,:) = chw(:,:,ir)
@@ -4004,7 +4006,7 @@ subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 !************************************************************************
 
  do spin=1,ebands%nsppol
-   call wan%from_ncfile(abiwan_filepath, spin, ebands%nsppol, "", xmpi_comm_self)
+   call wan%from_ncfile(abiwan_filepath, spin, ebands%nsppol, .False., "", xmpi_comm_self)
    call wan%print([std_out])
    nwan = wan%nwan
    ABI_MALLOC(u_k, (nwan, nwan))
