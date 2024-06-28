@@ -2710,7 +2710,11 @@ include 'mpif.h'
     !==============================
     ! Print Susceptibilities
     !==============================
-    write(atomnb, '("0",i1)') Iatom
+    if(Iatom .lt. 10) then
+       write(atomnb, '("0",i1)') Iatom
+    else
+       write(atomnb, '(i2)') Iatom
+    end if
     !Local Magnetic Susceptibility
     if(this%opt_histo .gt. 1) then
       !Scalar
@@ -2721,6 +2725,8 @@ include 'mpif.h'
           this%suscep(:,n1)=this%suscep(:,n1)/float(this%size)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%suscep(n2,n1),n2=1,3)
         enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%suscep(n2,1),n2=1,3) 
 
       else
         !SOC
@@ -2730,6 +2736,8 @@ include 'mpif.h'
           this%chi(:,n1)=this%chi(:,n1)/float(this%size)/float(this%samples)
           write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (n1-1)*this%beta/this%samples,(this%chi(n2,n1),n2=1,3)
         enddo
+        !add tau=beta
+        write(735,'(1x,f14.8,2x,f12.8,2x,f12.8,2x,f12.8)') (this%samples)*this%beta/this%samples,(this%chi(n2,1),n2=1,3)
       endif
     close(unit=735)
     endif
@@ -2746,6 +2754,8 @@ include 'mpif.h'
         !write(735 '(1x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(n2,n1),n2=1,3),this%ntot(1)
         write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (n1-1)*this%beta/this%samples,(this%chicharge(1,n1)),this%ntot(1)
       enddo
+      !add tau=beta
+      write(735, '(1x,f14.8,2x,f14.8,2x,f14.8)') (this%samples)*this%beta/this%samples,(this%chicharge(1,1)),this%ntot(1)
       close(unit=735)
     endif
  
