@@ -145,7 +145,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
  integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iln,iproj,ipsp,ipspalch
- integer :: ispin,itypalch,itypat,last_proj,mtypalch,npsp,npspalch,ntypalch
+ integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
  real(dp),save :: ecore_old=zero,gsqcut_old=zero,gsqcutdg_old=zero, spnorbscl_old=-one,hyb_mixing_old=-999.0_dp
