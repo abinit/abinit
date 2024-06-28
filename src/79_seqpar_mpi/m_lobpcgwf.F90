@@ -50,6 +50,10 @@ module m_lobpcgwf
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
 
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
+
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data
 #endif
