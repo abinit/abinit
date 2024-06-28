@@ -16191,8 +16191,6 @@ Like a _DEN file, it can be analyzed by cut3d.
 The file structure of this unformatted output file is described in [[help:abinit#denfile|this section]].
 Note that the computation of the kinetic energy density must be activated,
 thanks to the input variable [[usekden]].
-Please note that kinetic energy density is **not** yet implemented in the case
-of PAW ([[usepaw]] = 1) calculations.
 """,
 ),
 
