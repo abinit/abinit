@@ -699,7 +699,7 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
  ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex = 2 is required", ierr)
- ABI_CHECK(ierr == 0, "The gstore object is incosistent with varpeq. See messages above.")
+ ABI_CHECK(ierr == 0, "The gstore object is inconsistent with varpeq. See messages above.")
 
  self%gstore => gstore
 
@@ -873,7 +873,7 @@ subroutine polstate_update_pcond(self, factor)
 
 !Arguments ------------------------------------
  class(polstate_t), intent(inout) :: self
- real(dp) :: factor
+ real(dp),intent(in) :: factor
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk

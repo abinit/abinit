@@ -774,12 +774,21 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
      call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
 
    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
+
+   ! Here we wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
+   if (dtfil%filabiwanin /= ABI_NOFILE) call gstore%wannierize(dtset, dtfil)
    call gstore%free()
+
+ !case (-11)
+ !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
+ !  call gstore%wannierize(dtset, dtfil)
+ !  call gstore%free()
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic/anisotropic case)
