@@ -325,6 +325,9 @@ type, public :: gqk_t
   type(xcomm_t) :: grid_comm
    ! MPI communicator for full grid of procs treating this spin.
 
+  type(wan_t) :: wan
+   ! Object used to interpolate e-ph matrix elements with Wannier.
+
   real(dp),allocatable :: my_wnuq(:,:)
   ! (my_npert, my_nq)
   ! Phonon frequencies in Ha (MPI distributed)
@@ -524,6 +527,9 @@ contains
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
 
+  !procedure :: compute_from_wannier => gstore_compute_from_wannier
+  ! Compute e-ph matrix elements.
+
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
 
@@ -596,6 +602,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer,parameter :: master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, qtimrev
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
+ logical :: keep_umats
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
  !character(len=5000) :: msg
@@ -613,8 +620,9 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
 
  if (dtfil%filabiwanin /= ABI_NOFILE) then
+   keep_umats = .False.
    do spin=1,ebands%nsppol
-     call wan_spin(spin)%from_ncfile(dtfil%filabiwanin, spin, ebands%nsppol, dtfil%filnam_ds(4), comm)
+     call wan_spin(spin)%from_ncfile(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
      !call wan_spin(spin)%print([std_out])
    end do
  end if
@@ -2857,6 +2865,8 @@ subroutine gqk_free(gqk)
  ABI_SFREE(gqk%vk_cart_ibz)
  ABI_SFREE(gqk%vkmat_cart_ibz)
 
+ call gqk%wan%free()
+
  ! Free communicators
  call gqk%kpt_comm%free()
  call gqk%qpt_comm%free()
@@ -4466,7 +4476,7 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
 !scalars
  class(gqk_t), target, intent(in) :: gqk
  character(len=*),intent(in) :: mode
- integer, intent(in) :: fixed_pt
+ integer,intent(in) :: fixed_pt
 !arrays
  complex(dp), allocatable, intent(out) :: g_gathered(:,:,:,:)
 
@@ -4553,8 +4563,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
  integer :: my_nk, my_nq
  !character(len=500) :: msg
- logical :: write_gr
- type(wan_t),target :: wan
+ logical :: write_gr, keep_umats
+ type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3)
@@ -4571,9 +4581,10 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    gqk => gstore%gqk(my_is)
    my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
 
-   call wan%from_ncfile(dtfil%filabiwanin, spin, gstore%nsppol, dtfil%filnam_ds(4), gqk%grid_comm%value)
+   keep_umats = .False.
+   call gqk%wan%from_ncfile(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
+   wan => gqk%wan
    !call wan%print([units])
-   !qqk%wan => wan
 
    qptrlatt_ = 0
    do ir=1,3
@@ -4691,17 +4702,17 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(emiqr)
    ABI_FREE(gww_pk)
    ABI_FREE(gww_epq)
-   call wan%free()
  end do ! my_is
 
  ! Write netcdf file with g in the Wannier representation.
  write_gr = .True.
  if (write_gr) then
+ !if (dtset%eph_print_gwanr /= 0) then
    do spin=1,gstore%nsppol
      my_is = gstore%spin2my_is(spin)
      if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
        gqk => gstore%gqk(my_is)
-       !call gqk%wan%ncwrite_filepath("foo.nc", gstore%cryst, gstore%ebands, gqk%pert_comm)
+       call gqk%wan%ncwrite_filepath("foo.nc", gstore%cryst, gstore%ebands, gqk%pert_comm)
      end if
     call xmpi_barrier(gstore%comm)
    end do
