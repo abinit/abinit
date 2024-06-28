@@ -4,6 +4,7 @@
 !!
 !! FUNCTION
 !!  The high level wfd_t inteface for building wannier functions
+!!
 !! COPYRIGHT
 !!  Copyright (C) 2005-2022 ABINIT group (hexu)
 !!  This file is distributed under the terms of the

@@ -1,11 +1,9 @@
-
-
 !!****m* ABINIT/m_abstract_wf
 !! NAME
 !!  m_abstract_wf
 !!
 !! FUNCTION
-!!  Interface with Wannier90. 
+!!  Interface with Wannier90.
 !!  This module contains the abstract type abstract_wf and its children.
 !!  The abstract_wf type is used to store the wavefunctions either in wfd or wfk format.
 !!  And it provide the common interface for both format.
@@ -73,7 +71,7 @@ module m_abstract_wf
  use m_fft,            only : fourwf
  use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
 
- implicit none 
+ implicit none
 
  private
 
@@ -93,7 +91,7 @@ module m_abstract_wf
     !num_nnmax: maximum number of nearest neighbors
     !nntot: total number of nearest neighbors
     !nsppol: number of spin polarizations
-   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0 
+   integer :: nkpt=0, mband=0, num_nnmax=0, nntot=0, nsppol=0
    !rank: rank of the current process
     !comm: communicator
     !nprocs: number of processes
@@ -153,7 +151,7 @@ module m_abstract_wf
     !mband: number of bands
     !mkmem: number of kpoints in this process
     !nkpt: number of kpoints
-    
+
     integer :: natom=0, nspinor=0, nsppol=0, mband=0, &
          & mkmem=0, nkpt=0, rank=-999, nprocs=-999, comm=-999
   contains
@@ -186,7 +184,7 @@ module m_abstract_wf
     procedure :: init => cg_cprj_init !initialize the cg_cprj type
     procedure :: free => cg_cprj_free !free the cg_cprj type
     procedure :: compute_index_cprj !compute the index of the cprj
-    procedure :: cg_elem 
+    procedure :: cg_elem
     procedure :: cg_elem_complex
     procedure :: cprj_elem
     procedure :: get_cg_ptr => cg_cprj_get_cprj_ptr
@@ -194,10 +192,10 @@ module m_abstract_wf
     procedure :: write_cg_and_cprj_tmpfile
     procedure :: remove_tmpfile
     procedure :: load_cg
- end type cg_cprj 
+ end type cg_cprj
 
 
-!type wfd_t: 
+!type wfd_t:
 !  wavefunctions in the WFD format.
  type, public, extends(abstract_wf) :: wfd_wf
    ! The working wfd, ebands, etc
@@ -617,7 +615,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   end function abstract_wf_cg_elem_complex
 
 !-----------------------------------------------------------------------------
-!> get a block of the wavefunction for any abstract_wf type. 
+!> get a block of the wavefunction for any abstract_wf type.
 !> It should be overrided for each type.
 !> @param self: the abstract_wf type
 !> @param ikpt2: the index of the k point
@@ -937,7 +935,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
       !mpw = maxval(self%hdr_bz%npwarr)
       mband = self%hdr_bz%mband
       !call gstore%get_mpw_gmax(ecut, mpw, gmax)
-      gmax = gmax + 4 ! FIXME: this is to account for umklapp 
+      gmax = gmax + 4 ! FIXME: this is to account for umklapp
       gmax = 2*gmax + 1
       call ngfft_seq(work_ngfft, gmax)
 
@@ -1206,7 +1204,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     call self%abstract_wf%free()
   end subroutine cg_cprj_free
 
-  ! return one entry of cg. 
+  ! return one entry of cg.
   ! parameters:
   ! icplx: 1 for real part, 2 for imaginary part
   ! ig: index of G vector
