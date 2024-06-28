@@ -786,9 +786,27 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gstore%free()
 
  !case (-11)
+ !  Typical workflow for gstore with Wannierization
+ !
+ !  1) Wannierize with Abinit to get ABIWAN.nc file.
+ !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in wannierization
+ !     Compute g(R_e, R_p) and save results to GWAN.nc file.
+ !  3) Finally compute properties with extra dense meshes:
+ !
+ !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distributed gvals.
+ !        - Decide if gvals should be precomputed and stored or computed on the fly.
+ !        - Read GWAN.nc to build gstore%gqk(spin)%wan
+ !        - Pass gstore object to eph_task routines (what about ebands)?
+ !
  !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%wannierize(dtset, dtfil)
  !  call gstore%free()
+
+ !case (XXX)
+ !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+ !  call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
+ !  call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
+ !  call gstore%compute_from_wannier(dtset, dtfil)
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic/anisotropic case)

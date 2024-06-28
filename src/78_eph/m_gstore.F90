@@ -607,7 +607,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  character(len=10) :: priority
  !character(len=5000) :: msg
 !arrays
- integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol)
+ integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
  integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
  integer,allocatable :: select_qbz_spin(:,:), select_kbz_spin(:,:)
  real(dp):: my_shiftq(3,1)
@@ -618,12 +618,14 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call cwtime(cpu, wall, gflops, "start")
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
+ units = [std_out, ab_out]
 
  if (dtfil%filabiwanin /= ABI_NOFILE) then
+   ! Read ABIWAN.nc file to get the set of bands that should be included in the computation.
    keep_umats = .False.
    do spin=1,ebands%nsppol
-     call wan_spin(spin)%from_ncfile(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
-     !call wan_spin(spin)%print([std_out])
+     call wan_spin(spin)%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
+     call wan_spin(spin)%print(units)
    end do
  end if
 
@@ -657,6 +659,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, nproc_spin, comm_spin, comm)
 
  ! Define q-mesh: either from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation)
+ ! Save it in gstore for future reference.
  ngqpt = dtset%ddb_ngqpt; my_nshiftq = 1; my_shiftq(:,1) = dtset%ddb_shiftq
  if (all(dtset%eph_ngqpt_fine /= 0)) then
    ngqpt = dtset%eph_ngqpt_fine; my_shiftq = 0
@@ -4563,7 +4566,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
  integer :: my_nk, my_nq
  !character(len=500) :: msg
- logical :: write_gr, keep_umats
+ logical :: keep_umats
+ character(len=fnlen) :: out_path
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
@@ -4582,7 +4586,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
 
    keep_umats = .False.
-   call gqk%wan%from_ncfile(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
+   call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
    wan => gqk%wan
    !call wan%print([units])
 
@@ -4704,19 +4708,16 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(gww_epq)
  end do ! my_is
 
- ! Write netcdf file with g in the Wannier representation.
- write_gr = .True.
- if (write_gr) then
- !if (dtset%eph_print_gwanr /= 0) then
-   do spin=1,gstore%nsppol
-     my_is = gstore%spin2my_is(spin)
-     if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
-       gqk => gstore%gqk(my_is)
-       call gqk%wan%ncwrite_filepath("foo.nc", gstore%cryst, gstore%ebands, gqk%pert_comm)
-     end if
-    call xmpi_barrier(gstore%comm)
-   end do
- end if
+ ! Write EPHWAN.nc netcdf file with g in the Wannier representation.
+ do spin=1,gstore%nsppol
+   my_is = gstore%spin2my_is(spin)
+   if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
+     gqk => gstore%gqk(my_is)
+     out_path = strcat(dtfil%filnam_ds(4), "_EPHWAN.nc")
+     call gqk%wan%ncwrite_ephwan(out_path, gstore%cryst, gstore%ebands, gqk%pert_comm)
+   end if
+  call xmpi_barrier(gstore%comm)
+ end do
 
 end subroutine gstore_wannierize
 !!***
