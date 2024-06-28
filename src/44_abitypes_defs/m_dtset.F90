@@ -204,6 +204,7 @@ type, public :: dataset_type
  integer :: ga_algor
  integer :: ga_fitness
  integer :: ga_n_rules
+ integer :: getabiwan = 0
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
@@ -1019,6 +1020,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
+ character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
 
  contains
@@ -1592,6 +1594,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
+ dtout%getabiwan          = dtin%getabiwan
  dtout%getdrhodb          = dtin%getdrhodb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
@@ -1611,6 +1614,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getpot_filepath    = dtin%getpot_filepath
  dtout%getsigeph_filepath = dtin%getsigeph_filepath
  dtout%getgstore_filepath = dtin%getgstore_filepath
+ dtout%getabiwan_filepath = dtin%getabiwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
  dtout%getwfk_filepath    = dtin%getwfk_filepath
  dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
@@ -3393,6 +3397,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
+ list_vars=trim(list_vars)//' getabiwan getabiwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'

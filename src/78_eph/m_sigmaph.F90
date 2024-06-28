@@ -1145,6 +1145,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    sigma%use_ftinterp = .False.
  end if
 
+ if (.not. sigma%use_ftinterp .and. dtset%eph_use_ftinterp /= 0) then
+   ABI_WARNING("Enforcing FT interpolation for q-points even if it's not strictly needed.")
+   sigma%use_ftinterp = .True.
+ end if
+
  if (sigma%use_ftinterp) then
    ! Use ddb_ngqpt q-mesh to compute the real-space represention of DFPT v1scf potentials to prepare Fourier interpolation.
    ! R-points are distributed inside comm_rpt

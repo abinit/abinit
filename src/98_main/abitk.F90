@@ -36,9 +36,7 @@ program abitk
  use m_ebands
  use m_crystal
  use m_kpts
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
 
  use defs_datatypes,   only : ebands_t
@@ -54,6 +52,7 @@ program abitk
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
  use m_phgamma,        only : find_ewin
+ use m_mlwfovlp,       only : wan_compare_with_ebands
 
  implicit none
 
@@ -136,6 +135,7 @@ program abitk
  end do
 
  call get_command_argument(1, command)
+ call get_command_argument(2, path)
 
  select case (command)
  case ("from_poscar")
@@ -304,14 +304,18 @@ program abitk
    !call ebands_write(ebands_kpath, prtebands, path)
 
    ! Write EBANDS file
-#ifdef HAVE_NETCDF
    NCF_CHECK(ebands_ncwrite_path(other_ebands, cryst, "abinitio_EBANDS.nc"))
    NCF_CHECK(ebands_ncwrite_path(ebands_kpath, other_cryst, "skw_EBANDS.nc"))
-#endif
 
    call wrtout(std_out, &
      ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &
      newlines=2)
+
+ case ("abiwan_compare")
+   ! Get energies on the IBZ from path
+   call get_path_ebands_cryst(path, ebands, cryst, comm)
+   call wan_compare_with_ebands("t14o_DS2_ABIWAN.nc", cryst, ebands)
+   !call wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 
  case ("ebands_mu_T")
    ! Get energies on the IBZ from filepath
@@ -380,8 +384,6 @@ program abitk
    ABI_FREE(mu_e)
    ABI_FREE(n_ehst)
 
- !case ("ebands_dope")
-
  ! ====================
  ! Tools for developers
  ! ====================
@@ -446,16 +448,9 @@ program abitk
  end select
 
  ! Deallocate memory to make memcheck happy.
- call hdr%free()
- call cryst%free()
- call other_cryst%free()
- call kpath%free()
- call ebands_free(ebands)
- call ebands_free(ebands_kpath)
- call ebands_free(other_ebands)
- call edos%free()
- call jdos%free()
- call gaps%free()
+ call hdr%free(); call cryst%free(); call other_cryst%free(); call kpath%free()
+ call ebands_free(ebands); call ebands_free(ebands_kpath); call ebands_free(other_ebands)
+ call edos%free(); call jdos%free(); call gaps%free()
 
  ABI_SFREE(kibz)
  ABI_SFREE(wtk)
@@ -475,10 +470,6 @@ contains
 !!
 !! FUNCTION
 !!  Show command line help
-!!
-!! INPUTS
-!!
-!! OUTPUT
 !!
 !! SOURCE
 

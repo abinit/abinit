@@ -13830,7 +13830,7 @@ to generate discretized DDK wavefunctions. Note that convergence with kpt mesh i
 *much* faster using the DFPT approach, and the [[berryopt]] approach is not recommended
 unless a very specific ground state feature is also needed.
 
-* [[orbmag]] = 1: Compute orbital magnetization and Chern vector 
+* [[orbmag]] = 1: Compute orbital magnetization and Chern vector
 * [[orbmag]] = 2: Same as [[orbmag]] 1 but also print out values of each term making up total
 orbital magnetic moment and a band-by-band decomposition.
 """,
@@ -21270,18 +21270,18 @@ Variable(
     text=r"""
 Selects a van-der-Waals density functional to apply the corresponding
 correction to the exchange-correlation energy. If set to zero, no correction
-will be applied.
+will be applied. For response functions, only [[vdw_xc]]=5, 6 and 7 have been implemented (obviously also 0)..
 Possible values are:
 
   * 0: no correction.
-  * 1: apply vdW-DF1 (DRSLL) from [[cite:Dion2004]].
-  * 2: apply vdw-DF2 (LMKLL) from [[cite:Lee2010]].
-  * 5: apply vdw-DFT-D2 as proposed by S. Grimme [[cite:Grimme2006]] (adding a semi-empirical dispersion potential). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
-  * 6: apply vdw-DFT-D3 as proposed by S. Grimme [[cite:Grimme2010]] (refined version of DFT-D2). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence and [[vdw_tol_3bt]] variable to include 3-body corrections.
-  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method from [[cite:Becke2006]]). Available only for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
-  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method [[cite:Silvestrelli2008]]. For details on this implementation please check [[cite:Espejo2012]]. The improvements introduced by Andrinopoulos _et al._ [[cite:Andrinopoulos2011]], namely the amalgamation procedure, splitting of p-like MLWFs into two s-like Wannier functions and fractional occupation of MLWFs are performed automatically.
-  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method [[cite:Ambrosetti2012]].
-  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions [[cite:Silvestrelli2013]]. For periodic systems a supercell approach has to be used since **vdw_supercell** is not enabled in this case.
+  * 1: apply vdW-DF1 (DRSLL) from [[cite:Dion2004]]. Not available for response functions.
+  * 2: apply vdw-DF2 (LMKLL) from [[cite:Lee2010]]. Not available for response functions.
+  * 5: apply vdw-DFT-D2 as proposed by S. Grimme [[cite:Grimme2006]] (adding a semi-empirical dispersion potential). Available for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 6: apply vdw-DFT-D3 as proposed by S. Grimme [[cite:Grimme2010]] (refined version of DFT-D2). Available for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence and [[vdw_tol_3bt]] variable to include 3-body corrections.
+  * 7: apply vdw-DFT-D3(BJ) as proposed by Grimme (based on Becke-Jonhson method from [[cite:Becke2006]]). Available for ground-state calculations and response functions; see [[vdw_tol]] variable to control convergence.
+  * 10: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by P. L. Silvestrelli, also known as vdW-WF1 method [[cite:Silvestrelli2008]]. For details on this implementation please check [[cite:Espejo2012]]. The improvements introduced by Andrinopoulos _et al._ [[cite:Andrinopoulos2011]], namely the amalgamation procedure, splitting of p-like MLWFs into two s-like Wannier functions and fractional occupation of MLWFs are performed automatically. Not available for response functions.
+  * 11: evaluate the vdW correlation energy from maximally localized Wannier functions, as proposed by A. Ambrosetti and P. L. Silvestrelli, also known as vdW-WF2 method [[cite:Ambrosetti2012]]. Not available for response functions.
+  * 14: apply DFT/vdW-QHO-WF method as proposed by Silvestrelli, which combines the quantum harmonic oscillator-model with localized Wannier functions [[cite:Silvestrelli2013]]. For periodic systems a supercell approach has to be used since **vdw_supercell** is not enabled in this case. Not available for response functions.
 
 For [[vdw_xc]] = 1 and [[vdw_xc]] = 2, the implementation follows the strategy
 devised in the article of Roman-Perez and Soler [[cite:Romanperez2009]].
@@ -22290,17 +22290,17 @@ Possible values are:
      Write KERANGE.nc file with all the tables required by the code to automate NSCF band structure calculations
      inside the pocket(s) and electron lifetime computation in the EPH code when [[eph_task]] = -4.
 
-  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of 
+  * "wannier" --> Read WFK file and run Wannierization. It has the similar effect of
       [[prtwant]] = 2, which uses the **ABINIT- Wannier90** interface. The difference is that with wfk_task "wannier",
-      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in 
+      the $\kk$-points in the full BZ is not necessary. Instead, the wavefunctions with the $\kk$-points not in
       the IBZ will be reconstructed by symmetry. This functionality does not yet work with PAW when the wavefunction
-      is not already in full BZ. 
-    
+      is not already in full BZ.
+
       ABINIT will produce the input files required by Wannier90 and it will run
       Wannier90 to produce the Maximally-locallized Wannier functions (see [
       http://www.wannier.org ](http://www.wannier.org) ).
       !!! Notes
-      
+
           * The files that are created can also be used by Wannier90 in stand-alone mode.
           * In order to use Wannier90 as a post-processing program for ABINIT you might have to
             compile it with the appropriate flags (see ABINIT makefile). You might use ./configure --enable-wannier90
@@ -23936,6 +23936,39 @@ This variable can also be used when [[eph_task]] == 11 i.e. when we compute the 
 In this case, the code assumes we want to restart a GSTORE calculation and only the (k, q) entries
 that are missing in the nc file are computed.
 This option is very useful if the previous job has been killed due to timeout limit.
+""",
+),
+
+Variable(
+    abivarname="getabiwan_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the ABIWAN.nc from FILEPATH",
+    #requires="[[optdriver]] == 7",
+    added_in_version="10.1.1",
+    text=r"""
+This variable defines the path of the ABIWAN.nc file with the Wannier rotation matrices produced by ABINIT
+when wannier90 in invoked in library mode.
+See also [[getabiwan]].
+""",
+),
+
+Variable(
+    abivarname="getabiwan",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the ABIWAN.nc from dataset",
+    #requires="[[optdriver]] == 7",
+    added_in_version="10.1.1",
+    text=r"""
+This variable is similar in spirit to [[getabiwan_filepath]] but uses the dataset index
+instead of the filepath.
 """,
 ),
 
