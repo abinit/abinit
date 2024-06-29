@@ -77,9 +77,10 @@ module m_mlwfovlp
 !! wan_t
 !!
 !! FUNCTION
-!!  This object stores the results of the Wannnierization algorithm
-!!  and can be constructure by reading the ABIWAN.nc file produdced by
+!!  This object stores the results of the Wannnierization algorithm.
+!!  It can be constructed by reading the ABIWAN.nc file produced by
 !!  Abinit when we call wannier90 in library mode.
+!!  See mlwfovlp routine.
 !!
 !! SOURCE
 
@@ -172,16 +173,16 @@ module m_mlwfovlp
    ! My number of perturbations and my initial perturbation.
 
    type(xcomm_t), pointer :: pert_comm => null()
-   ! MPI communicator for parallelism over perturbations.
+   ! MPI-communicator for parallelism over perturbations.
 
    complex(dp),allocatable :: grpe_wwp(:,:,:,:,:)
    ! (nr_p, nr_e, nwan, nwan, my_npert))
    ! e-ph matrix elements in the wannier representation.
-   ! NB: These matrix elements are in the atomic basis and distributed insider per_comm
+   ! NB: These matrix elements are in the atomic basis and distributed inside pert_comm
 
  contains
    procedure :: from_abiwan => wan_from_abiwan
-   !  Initialiaze an wan instance from a netcf file
+   !  Initialize a wan_t instance from a netcf file
 
    procedure :: print => wan_print
    ! print info on the object.
@@ -195,10 +196,10 @@ module m_mlwfovlp
    procedure :: interp_eph_manyq => wan_interp_eph_manyq
    ! Interpolate e-ph matrix elements.
 
-   procedure :: ncwrite_ephwan => wan_ncwrite_ephwan
+   procedure :: ncwrite_gwan => wan_ncwrite_gwan
    ! Write g in the Wannier representation to netcdf file.
 
-   procedure :: ncread_ephwan => wan_ncread_ephwan
+   procedure :: from_abiwan_gwan => wan_from_abiwan_gwan
    ! Read g in the Wannier representation from netcdf file.
 
    procedure :: free => wan_free
@@ -3415,7 +3416,7 @@ end subroutine mlwfovlp_ylmfar
 !! wan_from_abiwan
 !!
 !! FUNCTION
-!! Initialize a wan_t instance from the ABIWAN.nc netcf file
+!!  Initialize a wan_t instance from the ABIWAN.nc netcf file
 !!
 !! INPUTS
 !!
@@ -3423,7 +3424,7 @@ end subroutine mlwfovlp_ylmfar
 !!
 !! SOURCE
 
-subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_prefix, comm) ! keep_umats
+subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_prefix, comm)
 
 !Arguments ------------------------------------
  class(wan_t),intent(out) :: wan
@@ -3562,16 +3563,15 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  ! ====================================================
  ! Build the Hamiltonian in the Wannier representation
  ! ====================================================
+ !call wan%get_opt_eig(et_opt)
  nextbands = count(wan%exclude_bands /= 0)
  !REAL(KIND = DP) :: et_opt(nbndep, nks)
  !! hamiltonian eigenvalues within the outer window in the first dimwin(ik) entries
  ii = wan%num_bands ! TODO: Check
  ABI_MALLOC(et_opt, (ii ,nkbz))
 
- !print *, "nextbands", nextbands
- !print *, "exclude_bands:", wan%exclude_bands
- !print *, "band_in:", wan%band_in
- !print *, "lwindow:", wan%lwindow
+ !print *, "nextbands", nextbands; print *, "exclude_bands:", wan%exclude_bands
+ !print *, "band_in:", wan%band_in; print *, "lwindow:", wan%lwindow
 
  if (nextbands /= 0) then
    do ik=1,nkbz
@@ -3621,7 +3621,6 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
      chw(:,:,ir) = chw(:,:,ir) + chs(:,:,ik) * exp(-j_dpc * two_pi * dot_product(wan%kbz(:, ik), wan%r_h(:, ir))) / dble(nkbz)
    end do
  end do
-
  ABI_FREE(chs)
 
  ! Now transpose the data to have R_e in the first dimension.
@@ -3718,9 +3717,10 @@ subroutine wan_interp_h(wan, kpt, uk_wan, eigens)
    eikr(ir) = exp(j_dpc * two_pi * dot_product(wan%r_h(:, ir), kpt)) / wan%ndegen_h(ir)
  end do
 
- ! O_ij(k) = sum_R e^{+ik.R}*O_ij(R)
+ ! H_ij(k) = sum_R e^{+ik.R} * H_ij(R)
  call ZGEMV("T", wan%nr_h, wan%nwan**2, cone, wan%hwan_r, wan%nr_h, eikr, 1, czero, uk_wan, 1)
 
+ ! Hermitianize and diagonalize.
  uk_wan = half * (uk_wan + transpose(conjg(uk_wan)))
  call xheev("N", "U", wan%nwan, uk_wan, eigens)
 
@@ -3742,7 +3742,7 @@ subroutine wan_free(wan)
  class(wan_t),intent(inout) :: wan
 !************************************************************************
 
- ! intger
+ ! integer
  ABI_SFREE(wan%dimwin)
  ABI_SFREE(wan%exclude_bands)
  ABI_SFREE(wan%r_h)
@@ -3780,7 +3780,7 @@ end subroutine wan_free
 !! wan_setup_eph_ws_kq
 !!
 !! FUNCTION
-!!   Prepare interpolation of e-ph matrix elements.
+!!   Prepare the interpolation of e-ph matrix elements.
 !!
 !! SOURCE
 
@@ -3898,20 +3898,20 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, out_g)
 end subroutine wan_interp_eph_manyq
 !!***
 
-!!****f* m_mlwfovlp/wan_ncwrite_ephwan
+!!****f* m_mlwfovlp/wan_ncwrite_gwan
 !! NAME
-!! wan_ncwrite_ephwan
+!! wan_ncwrite_gwan
 !!
 !! FUNCTION
 !!  Write g in the Wannier representation to netcdf file.
 !!
 !! SOURCE
 
-subroutine wan_ncwrite_ephwan(wan, ephwan_filepath, cryst, ebands, pert_comm)
+subroutine wan_ncwrite_gwan(wan, gwan_filepath, cryst, ebands, pert_comm)
 
 !Arguments ------------------------------------
  class(wan_t),target,intent(in) :: wan
- character(len=*),intent(in) :: ephwan_filepath
+ character(len=*),intent(in) :: gwan_filepath
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(xcomm_t),intent(in) :: pert_comm
@@ -3925,22 +3925,21 @@ subroutine wan_ncwrite_ephwan(wan, ephwan_filepath, cryst, ebands, pert_comm)
  spin = wan%spin; natom3 = 3 * cryst%natom
 
  if (spin == 1) then
-   NCF_CHECK(nctk_open_create(root_ncid, ephwan_filepath, pert_comm%value))
+   NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
    NCF_CHECK(cryst%ncwrite(root_ncid))
    NCF_CHECK(ebands_ncwrite(ebands, root_ncid))
  else
-   NCF_CHECK(nctk_open_modify(root_ncid, ephwan_filepath, pert_comm%value))
+   NCF_CHECK(nctk_open_modify(root_ncid, gwan_filepath, pert_comm%value))
  end if
 
- ! Create group for this spin.
- NCF_CHECK(nf90_def_grp(root_ncid, strcat("ephwan", "_spin", itoa(spin)), spin_ncid))
+ ! Create group for this spin and define dimensions.
+ NCF_CHECK(nf90_def_grp(root_ncid, strcat("gwan", "_spin", itoa(spin)), spin_ncid))
 
- ! Defined dimensions in ephwan_spin group.
  ncerr = nctk_def_dims(spin_ncid, [ &
     nctkdim_t("nwan", wan%nwan), &
     nctkdim_t("natom3", natom3), &
-    nctkdim_t("nr_h", wan%nr_h),  &
-    nctkdim_t("nr_e", wan%nr_e),  &
+    nctkdim_t("nr_h", wan%nr_h), &
+    nctkdim_t("nr_e", wan%nr_e), &
     nctkdim_t("nr_p", wan%nr_p)  &
  ], defmode=.True.)
  NCF_CHECK(ncerr)
@@ -3954,8 +3953,8 @@ subroutine wan_ncwrite_ephwan(wan, ephwan_filepath, cryst, ebands, pert_comm)
  ])
  NCF_CHECK(ncerr)
 
+ ! Write data.
  NCF_CHECK(nctk_set_datamode(spin_ncid))
- !NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_h"), wan%r_h))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_e"), wan%r_e))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_p"), wan%r_p))
@@ -3963,10 +3962,12 @@ subroutine wan_ncwrite_ephwan(wan, ephwan_filepath, cryst, ebands, pert_comm)
  call c_f_pointer(c_loc(wan%hwan_r), rpt_d4, [2, wan%nr_h, wan%nwan, wan%nwan])
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
 
- ! Here take into account that array is distributed over perturbations.
+ ! Take into account that the array is distributed over perturbations.
+ !NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
  call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  ncerr = nf90_put_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
-                      start=[1,1,1,1,1,wan%my_pert_start], count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+                      start=[1,1,1,1,1,wan%my_pert_start], &
+                      count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_close(root_ncid))
@@ -3977,50 +3978,51 @@ contains
    vid_spin = nctk_idname(spin_ncid, var_name)
  end function vid_spin
 
-end subroutine wan_ncwrite_ephwan
+end subroutine wan_ncwrite_gwan
 !!***
 
-!!****f* m_mlwfovlp/wan_ncread_ephwan
+!!****f* m_mlwfovlp/wan_from_abiwan_gwan
 !! NAME
-!! wan_ncread_ephwan
+!! wan_from_abiwan_gwan
 !!
 !! FUNCTION
-!!  Read g in the Wannier representation to netcdf file.
+!!  Read g in the Wannier representation from netcdf file.
 !!
 !! SOURCE
 
-subroutine wan_ncread_ephwan(wan, ephwan_filepath, spin, spin_comm, pert_comm) !, out_cryst, out_ebands,
+subroutine wan_from_abiwan_gwan(wan, abiwan_filepath, gwan_filepath, spin, nsppol, &
+                                  out_cryst, spin_comm, pert_comm) ! out_ebands,
 
 !Arguments ------------------------------------
- class(wan_t),target,intent(in) :: wan
- character(len=*),intent(in) :: ephwan_filepath
- integer,intent(in) :: spin
- !type(crystal_t),intent(out) :: out_cryst
+ class(wan_t),target,intent(inout) :: wan
+ character(len=*),intent(in) :: abiwan_filepath, gwan_filepath
+ integer,intent(in) :: spin, nsppol
+ type(crystal_t),intent(out) :: out_cryst
  !type(ebands_t),intent(out) :: out_ebands
  type(xcomm_t),intent(in) :: spin_comm, pert_comm
 
 !Local variables-------------------------------
 !scalars
  integer :: root_ncid, spin_ncid, ncerr !, natom3
+ logical,parameter :: keep_umats = .False.
  !real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
 !************************************************************************
 
- ABI_CHECK_IEQ(spin, wan%spin, "Wrong spin!")
+ call wan%from_abiwan(abiwan_filepath, spin, nsppol, keep_umats, "", spin_comm%value)
 
- NCF_CHECK(nctk_open_read(root_ncid, ephwan_filepath, pert_comm%value))
- !call out_cryst%ncread(root_ncid)
+ NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, pert_comm%value))
+ call out_cryst%ncread(root_ncid)
  !call out_ebands%ncread(root_ncid)
 
  ! Get group for this spin.
- NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("ephwan", "_spin", itoa(spin)), spin_ncid))
- !NCF_CHECK(nf90_def_grp(root_ncid, strcat("ephwan", "_spin", itoa(spin)), spin_ncid))
+ NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gwan", "_spin", itoa(spin)), spin_ncid))
 
- ! Defined dimensions in ephwan_spin group.
+ ! Define dimensions in gwan_spin group.
  !ncerr = nctk_def_dims(spin_ncid, [ &
  !   nctkdim_t("nwan", wan%nwan), &
  !   nctkdim_t("natom3", natom3), &
- !   nctkdim_t("nr_h", wan%nr_h),  &
- !   nctkdim_t("nr_e", wan%nr_e),  &
+ !   nctkdim_t("nr_h", wan%nr_h), &
+ !   nctkdim_t("nr_e", wan%nr_e), &
  !   nctkdim_t("nr_p", wan%nr_p)  &
  !], defmode=.True.)
  !NCF_CHECK(ncerr)
@@ -4036,16 +4038,16 @@ subroutine wan_ncread_ephwan(wan, ephwan_filepath, spin, spin_comm, pert_comm) !
 
  !NCF_CHECK(nctk_set_datamode(spin_ncid))
  !!NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
- !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_h"), wan%r_h))
- !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_e"), wan%r_e))
- !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_p"), wan%r_p))
+ !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("r_h"), wan%r_h))
+ !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("r_e"), wan%r_e))
+ !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("r_p"), wan%r_p))
 
  !call c_f_pointer(c_loc(wan%hwan_r), rpt_d4, [2, wan%nr_h, wan%nwan, wan%nwan])
- !NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
+ !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
 
  !! Here take into account that array is distributed over perturbations.
  !call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
- !ncerr = nf90_put_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
+ !ncerr = nf90_get_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
  !                     start=[1,1,1,1,1,wan%my_pert_start], count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  !NCF_CHECK(ncerr)
 
@@ -4057,7 +4059,7 @@ contains
    vid_spin = nctk_idname(spin_ncid, var_name)
  end function vid_spin
 
-end subroutine wan_ncread_ephwan
+end subroutine wan_from_abiwan_gwan
 !!***
 
 !!****f* m_mlwfovlp/wan_compare_with_ebands
@@ -4077,14 +4079,18 @@ subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik, band, nwan
+ integer :: spin, ik, band, nwan, abi_unt, wan_unt
  type(wan_t) :: wan
+ character(len=500) :: msg
+ character(len=fnlen) :: prefix, abi_ebands_path, wan_ebands_path
 !arrays
  real(dp) :: kpt(3)
  real(dp),allocatable :: eigens_k(:)
  complex(dp),allocatable :: u_k(:,:)
 
 !************************************************************************
+
+ prefix = ""
 
  do spin=1,ebands%nsppol
    call wan%from_abiwan(abiwan_filepath, spin, ebands%nsppol, .False., "", xmpi_comm_self)
@@ -4093,13 +4099,25 @@ subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
    ABI_MALLOC(u_k, (nwan, nwan))
    ABI_MALLOC(eigens_k, (nwan))
 
+   abi_ebands_path = strcat(prefix, "abi_ebands_spin", itoa(spin), ".dat")
+   wan_ebands_path = strcat(prefix, "wan_ebands_spin", itoa(spin), ".dat")
+   if (open_file(abi_ebands_path, msg, newunit=abi_unt, form='formatted', action="write", status='unknown') /= 0) then
+     ABI_ERROR(msg)
+   end if
+   if (open_file(wan_ebands_path, msg, newunit=wan_unt, form='formatted', action="write", status='unknown') /= 0) then
+     ABI_ERROR(msg)
+   end if
+
+   write(abi_unt, *)"# ik, eig [Ha]"
+   write(wan_unt, *)"# ik, eig [Ha]"
    do ik=1,ebands%nkpt
      kpt = ebands%kptns(:,ik)
      call wan%interp_h(kpt, u_k, eigens_k)
-     !print *, "wannier:", eigens_k(:)
-     !print *, "ebands:", ebands%eig(:, ik, spin)
-     !print *, "|ebands - wann| :", abs(ebands%eig(1:nwan, ik, spin) - eigens_k(:))
+     write(abi_unt, *)ik, ebands%eig(:, ik, spin)
+     write(wan_unt, *)ik, eigens_k(:)
    end do
+   close(abi_unt)
+   close(wan_unt)
 
    ABI_FREE(u_k)
    ABI_FREE(eigens_k)

@@ -525,6 +525,7 @@ contains
 !! OUTPUT
 !!
 !! SOURCE
+
  subroutine read_chkunit(seed_name,nkpt,ndimwin,ierr)
 
 !Arguments ------------------------------------

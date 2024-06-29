@@ -695,11 +695,9 @@ subroutine varpeq_init(self, gstore, dtset)
 !----------------------------------------------------------------------
 
  ! Consistency check
- ierr = 0
- ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex = 2 is required", ierr)
- ABI_CHECK(ierr == 0, "The gstore object is inconsistent with varpeq. See messages above.")
+ !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+ !  ABI_ERROR("The gstore object is inconsistent with varpeq. See messages above.")
+ !end if
 
  self%gstore => gstore
 
