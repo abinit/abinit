@@ -326,7 +326,7 @@ type, public :: gqk_t
    ! MPI communicator for full grid of procs treating this spin.
 
   type(wan_t) :: wan
-   ! Object used to interpolate e-ph matrix elements with Wannier.
+   ! Object used to interpolate the e-ph matrix elements with Wannier.
 
   real(dp),allocatable :: my_wnuq(:,:)
   ! (my_npert, my_nq)
@@ -554,7 +554,8 @@ contains
   procedure :: print_for_abitests => gstore_print_for_abitests
   ! Print subset of results to ab_out for testing purposes.
 
-  procedure :: check_qkzone_gmode =>  gstore_check_qkzone_gmode
+  procedure :: check_cplex_qkzone_gmode => gstore_check_cplex_qkzone_gmode
+  ! Perform consistency checks
 
   procedure :: wannierize => gstore_wannierize
 
@@ -3795,19 +3796,21 @@ end subroutine gstore_compute
 !!
 !! SOURCE
 
-integer function gstore_check_qkzone_gmode(gstore, qzone, kzone, gmode) result(ierr)
+integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode) result(ierr)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(in) :: gstore
+ integer,intent(in) :: cplex
  character(len=*),intent(in) :: qzone, kzone, gmode
 ! *************************************************************************
 
  ierr = 0
+ ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == cplex, sjoin("cplex:", itoa(2), " is required"), ierr)
  ABI_CHECK_NOSTOP(gstore%qzone == qzone, sjoin("qzone = ", qzone, "is required"), ierr)
  ABI_CHECK_NOSTOP(gstore%kzone == kzone, sjoin("kzone = ", kzone, "is required"), ierr)
  ABI_CHECK_NOSTOP(gstore%gmode == gmode, sjoin("gmode = ", gmode, "is required"), ierr)
 
-end function gstore_check_qkzone_gmode
+end function gstore_check_cplex_qkzone_gmode
 !!***
 
 !----------------------------------------------------------------------
@@ -4563,8 +4566,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  !integer,parameter :: master = 0
- integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
- integer :: my_nk, my_nq
+ integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq
+ integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
  !character(len=500) :: msg
  logical :: keep_umats
  character(len=fnlen) :: out_path
@@ -4576,14 +4579,13 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:)
 ! *************************************************************************
 
- if (gstore%check_qkzone_gmode("bz", "bz", "atom") /= 0) then
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom") /= 0) then
    ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
  end if
 
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
-   gqk => gstore%gqk(my_is)
-   my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
+   gqk => gstore%gqk(my_is); my_nq = gqk%my_nq; my_nk = gqk%my_nk; my_npert = gqk%my_npert
 
    keep_umats = .False.
    call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
@@ -4708,16 +4710,16 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(gww_epq)
  end do ! my_is
 
- ! Write EPHWAN.nc netcdf file with g in the Wannier representation.
+ ! Write GWAN.nc netcdf file with g in the Wannier representation.
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
    if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
      gqk => gstore%gqk(my_is)
-     out_path = strcat(dtfil%filnam_ds(4), "_EPHWAN.nc")
-     call gqk%wan%ncwrite_ephwan(out_path, gstore%cryst, gstore%ebands, gqk%pert_comm)
+     out_path = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
+     call gqk%wan%ncwrite_gwan(out_path, gstore%cryst, gstore%ebands, gqk%pert_comm)
    end if
   call xmpi_barrier(gstore%comm)
- end do
+ end do ! spin
 
 end subroutine gstore_wannierize
 !!***

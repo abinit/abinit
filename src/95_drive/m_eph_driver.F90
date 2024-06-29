@@ -788,14 +788,14 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !case (-11)
  !  Typical workflow for gstore with Wannierization
  !
- !  1) Wannierize with Abinit to get ABIWAN.nc file.
- !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in wannierization
+ !  1) Wannierize with Abinit and wannier90 in library to get ABIWAN.nc file.
+ !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization.
  !     Compute g(R_e, R_p) and save results to GWAN.nc file.
- !  3) Finally compute properties with extra dense meshes:
+ !  3) Start new job to compute properties with extra dense meshes:
  !
  !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distributed gvals.
  !        - Decide if gvals should be precomputed and stored or computed on the fly.
- !        - Read GWAN.nc to build gstore%gqk(spin)%wan
+ !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
  !        - Pass gstore object to eph_task routines (what about ebands)?
  !
  !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
