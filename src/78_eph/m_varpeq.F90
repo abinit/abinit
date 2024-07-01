@@ -38,6 +38,7 @@ module m_varpeq
  use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : sjoin, ktoa, ftoa, strcat
  use m_gstore,          only : gstore_t, gqk_t
+ use m_io_tools,        only : file_exists
  use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt
  use m_symkpt,          only : symkpt
  use m_symtk,           only : mati3inv
@@ -177,7 +178,8 @@ module m_varpeq
     procedure :: collect => varpeq_collect
     procedure :: print => varpeq_print
     procedure :: ncwrite => varpeq_ncwrite
-    !procedure :: ncread => ncread
+    procedure :: ncread => varpeq_ncread
+    procedure :: compare => varpeq_compare
 
  end type varpeq_t
 !!***
@@ -208,7 +210,9 @@ subroutine varpeq(gstore, dtset, dtfil)
 
 !Local variables-------------------------------
 !scalars
- type(varpeq_t) :: vpq
+ type(varpeq_t) :: vpq, vpq_restart
+ integer, parameter :: master = 0
+ integer :: my_rank, ierr
 
 !----------------------------------------------------------------------
 
@@ -216,6 +220,15 @@ subroutine varpeq(gstore, dtset, dtfil)
  call vpq%solve()
  call vpq%print()
  call vpq%ncwrite(dtset, dtfil)
+
+ ! DEBUG
+ !my_rank = xmpi_comm_rank(gstore%comm)
+ !if (my_rank == master) then
+ !  call vpq_restart%ncread(dtfil%filvarpeqin, xmpi_comm_self, keep_open=.False.)
+ !  call vpq%compare(vpq_restart, allow_mesh_mismatch=.False.)
+ !  call vpq_restart%free()
+ !endif
+
  call vpq%free()
 
 end subroutine varpeq
@@ -231,8 +244,8 @@ end subroutine varpeq
 !!
 !! INPUTS
 !!
-!! OUTPUT
 !!
+!! OUTPUT
 !! SOURCE
 
 subroutine varpeq_free(self)
@@ -245,6 +258,7 @@ subroutine varpeq_free(self)
 
 !----------------------------------------------------------------------
 
+ ! Free allocatable arrays
  ABI_SFREE(self%iter_rec_spin)
  ABI_SFREE(self%nstep2cv_spin)
  ABI_SFREE(self%kpts_spin)
@@ -252,18 +266,163 @@ subroutine varpeq_free(self)
  ABI_SFREE(self%a_spin)
  ABI_SFREE(self%b_spin)
 
+ ! Free local datatypes
+ call self%cryst_trinv%free()
+ call self%gaps%free()
  do my_is=1,self%gstore%my_nspins
    call self%polstate(my_is)%free()
  enddo
 
+ ! Nullify pointers
  self%gstore => null()
 
- ! Close netcdf file.
+ ! Close netcdf file
  if (self%ncid /= nctk_noid) then
    NCF_CHECK(nf90_close(self%ncid))
+   self%ncid = nctk_noid
  end if
 
 end subroutine varpeq_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_compare
+!! NAME
+!!  varpeq_compare
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_compare(self, other, allow_mesh_mismatch)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(in) :: self, other
+ logical, optional, intent(in) :: allow_mesh_mismatch
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ integer :: ierr
+ logical :: mismatch
+
+!----------------------------------------------------------------------
+
+ ierr = 0
+
+ ABI_CHECK_NOSTOP(self%pkind == other%pkind, "Difference found in pkind.", ierr)
+ ABI_CHECK_NOSTOP(self%gstore%nsppol == other%gstore%nsppol, "Difference found in nsppol.", ierr)
+ msg = " Comparing VAPREQ crystal with GSTORE crystal (time-reversal and inversion symmetries only) "
+ ABI_CHECK_NOSTOP(self%cryst_trinv%compare(other%cryst_trinv, header=msg) == 0, "Difference found in cryst.", ierr)
+
+ if (present(allow_mesh_mismatch) .and. (.not. allow_mesh_mismatch)) then
+   ABI_CHECK_NOSTOP(self%max_nk == other%max_nk, "Difference found in max_nk.", ierr)
+   ABI_CHECK_NOSTOP(self%max_nq == other%max_nq, "Difference found in max_nq.", ierr)
+   ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
+   ABI_CHECK_NOSTOP(all(self%kpts_spin == other%kpts_spin), "Difference found in kpts_spin.", ierr)
+   ABI_CHECK_NOSTOP(all(self%qpts_spin == other%qpts_spin), "Difference found in qpts_spin.", ierr)
+ endif
+
+ ABI_CHECK(ierr == 0, "Fatal error in sigmaph_compare, see previous messages!")
+
+end subroutine varpeq_compare
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_ncread
+!! NAME
+!!  varpeq_ncread
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_ncread(self, path, comm, keep_open)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(inout) :: self
+ character(len=fnlen), intent(in) :: path
+ integer, intent(in) :: comm
+ logical, optional, intent(in) :: keep_open
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ type(gstore_t), target :: gstore
+ integer :: ncid, nsppol, natom3
+ real(dp) :: cpu, wall, gflops
+
+!----------------------------------------------------------------------
+
+ ABI_CHECK(file_exists(path), sjoin("Cannot find file", path))
+
+ call cwtime(cpu, wall, gflops, "start")
+ ! Pointer to a "fake" local gstore
+ self%gstore => gstore
+
+ NCF_CHECK(nctk_open_read(ncid, path, comm))
+
+ ! Read crystal structure
+ call self%cryst_trinv%ncread(ncid)
+
+ ! Read varpeq dimensions
+ NCF_CHECK(nctk_get_dim(ncid, "max_nk", self%max_nk))
+ NCF_CHECK(nctk_get_dim(ncid, "max_nq", self%max_nq))
+ NCF_CHECK(nctk_get_dim(ncid, "max_nb", self%max_nb))
+ NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%gstore%nsppol))
+ NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
+
+ ! Read data
+ ! scalars
+ NCF_CHECK(nf90_get_var(ncid, vid("nkbz"), self%gstore%nkbz))
+ NCF_CHECK(nf90_get_var(ncid, vid("nqbz"), self%gstore%nqbz))
+
+ ! arrays
+ nsppol = self%gstore%nsppol
+ ABI_MALLOC(self%gstore%glob_nk_spin, (nsppol))
+ ABI_MALLOC(self%gstore%glob_nq_spin, (nsppol))
+ ABI_MALLOC(self%gstore%brange_spin, (2, nsppol))
+ ABI_MALLOC(self%kpts_spin, (3, self%max_nk, nsppol))
+ ABI_MALLOC(self%qpts_spin, (3, self%max_nq, nsppol))
+ ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, nsppol))
+ ABI_MALLOC(self%b_spin, (2, natom3, self%max_nq, nsppol))
+
+ NCF_CHECK(nf90_get_var(ncid, vid("nk_spin"), self%gstore%glob_nk_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("nq_spin"), self%gstore%glob_nq_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("brange_spin"), self%gstore%brange_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("a_spin"), self%a_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("b_spin"), self%b_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), self%gstore%ngqpt))
+ NCF_CHECK(nf90_get_var(ncid, vid("varpeq_pkind"), self%pkind))
+
+ if (present(keep_open) .and. keep_open) then
+   self%ncid = ncid
+ else
+   NCF_CHECK(nf90_close(ncid))
+   self%ncid = nctk_noid
+ end if
+
+ call cwtime_report(" varpeq_nread", cpu, wall, gflops)
+
+!----------------------------------------------------------------------
+
+ contains
+  integer function vid(var_name)
+    character(len=*),intent(in) :: var_name
+    vid = nctk_idname(ncid, var_name)
+ end function vid
+
+end subroutine varpeq_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -292,7 +451,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  integer, parameter :: master = 0
  integer :: my_rank
  integer :: ncid, ncerr
- real(dp) :: cpu_all, wall_all, gflops_all
+ real(dp) :: cpu, wall, gflops
 
 !----------------------------------------------------------------------
 
@@ -300,7 +459,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
  my_rank = xmpi_comm_rank(self%gstore%comm)
 
- call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Create netcdf file (only master works, HDF5 + MPI-IO is handled afterwards by reopening the file inside ncwrite_comm)
  path = strcat(dtfil%filnam_ds(4), "_VARPEQ.nc")
@@ -384,7 +543,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
  end if ! master
 
  call xmpi_barrier(self%gstore%comm)
- call cwtime_report(" varpeq: netcdf", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" varpeq: netcdf", cpu, wall, gflops)
 
 end subroutine varpeq_ncwrite
 !!***

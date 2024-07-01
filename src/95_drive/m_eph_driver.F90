@@ -800,7 +800,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  case (13)
    ! Variational polaron equations
    if (gstore_filepath /= ABI_NOFILE) then
-     call wrtout(units, sjoin(" Computing variational polaron from pre-existent GSTORE file:", gstore_filepath))
+     call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
      call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
      call varpeq(gstore, dtset, dtfil)
      call gstore%free()
