@@ -1,7 +1,6 @@
 # Added by runtests.py
 output_file = "t34.abo"
 indata_prefix = "t34i"
-outdata_prefix = "t34o"
 tmpdata_prefix = "t34t"
 # end runtests.py section
 
@@ -25,7 +24,7 @@ ncell = 2 2 2
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = buda2_gnu_8.2_mpich3
+#%% exclude_builders = ubu_gnu_9.2_openmpi
 #%% system_xml = t98_model.xml
 #%% [files]
 #%% files_to_test = 

@@ -22,8 +22,6 @@ getxcart    1
 getwfk      1          # Use GS wave functions from dataset1
 kptopt      3          # Need full k-point set for finite-Q response
 rfphon      1          # Do phonon response
-rfatpol     1 2        # Treat displacements of all atoms
-rfdir       1 1 1      # Do all directions (symmetry will be used)
 
 #Dataset 2 : phonon frequencies and band corrections
 qpt2   0.0 0.0 0.0

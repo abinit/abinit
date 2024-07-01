@@ -27,8 +27,6 @@ qpt2   0.00000000E+00  0.00000000E+00  0.00000000E+00
 getwfk   1          
 kptopt   2        # use time-reversal symmetry for Gamma
 rfphon   1          
-rfatpol  1 2        
-rfdir    1 1 1      
 tolvrs   1.0d-8     
 
 #qpt3  5.00000000E-01  0.00000000E+00  0.00000000E+00

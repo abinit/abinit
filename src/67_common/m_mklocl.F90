@@ -6,14 +6,10 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -128,12 +124,6 @@ contains
 !! with respect to one atomic displacement. The argument list
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
-!!
-!! PARENTS
-!!      m_forces,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -278,12 +268,6 @@ end subroutine mklocl
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routine different.
 !!
-!! PARENTS
-!!      m_mklocl,m_respfn_driver,m_stress
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
-!!
 !! SOURCE
 
 subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,mgfft,&
@@ -309,10 +293,15 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ierr,ig1,ig2,ig3,ii,itypat
  integer :: jj,me_fft,me_g0,n1,n2,n3,nproc_fft,shift1
  integer :: shift2,shift3
+#ifdef FC_NVHPC
+!Silly trick to prevent NVHPC optimization issue
+ logical :: nothing=.false.
+#endif
  real(dp),parameter :: tolfix=1.0000001_dp
  real(dp) :: aa,bb,cc,cutoff,dbl_ig1,dbl_ig2,dbl_ig3,dd,diff,dq,dq2div6,dqdiv6
- real(dp) :: dqm1,ee,ff,gmag,gsquar,ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
- real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,sfi,sfr
+ real(dp) :: dqm1,ee,ff,gmag,gsquar!beta,gcart_para,gcart_perp
+ real(dp) :: ph12i,ph12r,ph1i,ph1r,ph2i,ph2r
+ real(dp) :: ph3i,ph3r,phimag_igia,phre_igia,rcut_loc,sfi,sfr
  real(dp) :: svion,svioni,svionr,term,vion1,vion2,xnorm
  character(len=500) :: message
 !arrays
@@ -378,6 +367,7 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
  !Initialize Gcut-off array from m_gtermcutoff
  call termcutoff(gcutoff,gsqcut,icutcoul,ngfft,nkpt,rcut,rprimd,vcutgeo)
+ rcut_loc = half*SQRT(DOT_PRODUCT(rprimd(:,3),rprimd(:,3)))
 
  do itypat=1,ntypat
 !  ia1,ia2 sets range of loop over atoms:
@@ -442,6 +432,11 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !              Loop over all atoms of this type:
                do ia=ia1,ia2
+#ifdef FC_NVHPC
+                 !Silly trick to prevent NVHPC optimization issue
+                 if(nothing) write(100,*) shift1,shift2,shift3
+#endif                 
+
                  shift1=1+n1+(ia-1)*(2*n1+1)
                  shift2=1+n2+(ia-1)*(2*n2+1)+natom*(2*n1+1)
                  shift3=1+n3+(ia-1)*(2*n3+1)+natom*(2*n1+1+2*n2+1)
@@ -488,41 +483,84 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
                end do
 
              else if(option==3)then
+!               if(icutcoul .ne. 2) then
+!                Also get (dV(q)/dq)/q:
+!                (note correction of Numerical Recipes sign error
+!                before (3._dp*aa**2-1._dp)
+!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+&                 - 2.0_dp*vion1                 ) / gsquar 
 
-!              Also get (dV(q)/dq)/q:
-!              (note correction of Numerical Recipes sign error
-!              before (3._dp*aa**2-1._dp)
-!              ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
-               ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
-               ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
-&               - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
-               vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
-&               - 2.0_dp*vion1                 ) / gsquar
-
-               gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
-&               gprimd(1,3)*dble(ig3)
-               gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
-&               gprimd(2,3)*dble(ig3)
-               gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
-&               gprimd(3,3)*dble(ig3)
-!              Assemble structure over all atoms of given type
-               sfr=zero
-               sfi=zero
-               do ia=ia1,ia2
-                 sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
-                 sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
-               end do
-
-!              Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
-               term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
-
-!              Compute contribution to stress tensor
-               lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
-               lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
-               lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
-               lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
-               lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
-               lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+&                 gprimd(1,3)*dble(ig3)
+                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+&                 gprimd(2,3)*dble(ig3)
+                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+&                 gprimd(3,3)*dble(ig3)
+!                Assemble structure over all atoms of given type
+                 sfr=zero
+                 sfi=zero
+                 do ia=ia1,ia2
+                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+                 end do               
+!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!                Compute contribution to stress tensor
+                 lpsstr(1)=lpsstr(1)-term*gcart(1)*gcart(1)
+                 lpsstr(2)=lpsstr(2)-term*gcart(2)*gcart(2)
+                 lpsstr(3)=lpsstr(3)-term*gcart(3)*gcart(3)
+                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!               else if (icutcoul .eq. 2) then
+!!                Also get (dV(q)/dq)/q:
+!!                (note correction of Numerical Recipes sign error
+!!                before (3._dp*aa**2-1._dp)
+!!                ee*dqm1 + ff*dqdiv6 is the best estimate of dV(q)/dq from splines
+!                 ee= vlspl(jj+1,1,itypat)-vlspl(jj,1,itypat)
+!                 ff=  (3._dp*bb**2-1._dp)*vlspl(jj+1,2,itypat) &
+!&                 - (3._dp*aa**2-1._dp)*vlspl(jj,2,itypat)
+!                 vion2 = ( ( ee*dqm1 + ff*dqdiv6 )/gmag&
+!&                 - 2.0_dp*vion1          ) / gsquar 
+!
+!                 gcart(1)=gprimd(1,1)*dble(ig1)+gprimd(1,2)*dble(ig2)+&
+!&                 gprimd(1,3)*dble(ig3)
+!                 gcart(2)=gprimd(2,1)*dble(ig1)+gprimd(2,2)*dble(ig2)+&
+!&                 gprimd(2,3)*dble(ig3)
+!                 gcart(3)=gprimd(3,1)*dble(ig1)+gprimd(3,2)*dble(ig2)+&
+!&                 gprimd(3,3)*dble(ig3)
+!!                Assemble structure over all atoms of given type
+!                 sfr=zero
+!                 sfi=zero
+!                 do ia=ia1,ia2
+!                   sfr=sfr+phre_mk(ig1,ig2,ig3,ia)
+!                   sfi=sfi-phimag_mk(ig1,ig2,ig3,ia)
+!                 end do
+!                 !Implement beta correction as in eq. 62 (PRB 96 075448 2017)           
+!                 gcart_para = sqrt(gcart(1)**2+gcart(2)**2)
+!                 gcart_perp = gcart(3)
+!                 gsquar = gcart(1)**2+gcart(2)**2+gcart(3)**2
+!                 if(gcart_para .gt. tol12) then
+!                   beta = gsquar*rcut_loc/(two*gcart_para)* &
+!                        &       exp(-gcart_para*rcut_loc)* &
+!                        &cos(gcart_perp*rcut_loc)/(one-exp(-gcart_para*rcut_loc)*cos(gcart_perp*rcut_loc))
+!                 else
+!                   beta = zero
+!                 end if
+!!                Compute Re( rho^*(G)* sf ) * [(dV(G)/dG)/|G|]
+!                 term=(rhog(re,ii)*sfr+rhog(im,ii)*sfi)*vion2
+!!                Compute contribution to stress tensor                 
+!                 lpsstr(1)=lpsstr(1)-term*(gcart(1)*gcart(1))*(1+beta)
+!                 lpsstr(2)=lpsstr(2)-term*(gcart(2)*gcart(2))*(1+beta)
+!                 lpsstr(3)=lpsstr(3)-term*(gcart(3)*gcart(3)-gsquar)
+!                 lpsstr(4)=lpsstr(4)-term*gcart(3)*gcart(2)
+!                 lpsstr(5)=lpsstr(5)-term*gcart(3)*gcart(1)
+!                 lpsstr(6)=lpsstr(6)-term*gcart(2)*gcart(1)
+!              endif
 
              else
                write(message, '(a,i0,a)' )' mklocl: Option=',option,' not allowed.'
@@ -620,15 +658,25 @@ subroutine mklocl_recipspace(dyfrlo,eei,gmet,gprimd,grtn,gsqcut,icutcoul,lpsstr,
 
 !  Normalize and add term -eei/ucvol on diagonal
 !  (see page 802 of notes)
-   lpsstr(1)=(lpsstr(1)-eei)/ucvol
-   lpsstr(2)=(lpsstr(2)-eei)/ucvol
-   lpsstr(3)=(lpsstr(3)-eei)/ucvol
-   lpsstr(4)=lpsstr(4)/ucvol
-   lpsstr(5)=lpsstr(5)/ucvol
-   lpsstr(6)=lpsstr(6)/ucvol
+!   if(icutcoul .ne. 2) then
+     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+     lpsstr(4)=lpsstr(4)/ucvol
+     lpsstr(5)=lpsstr(5)/ucvol
+     lpsstr(6)=lpsstr(6)/ucvol
+!   elseif (icutcoul .eq. 2) then
+!     lpsstr(1)=(lpsstr(1)-eei)/ucvol
+!     lpsstr(2)=(lpsstr(2)-eei)/ucvol
+!     lpsstr(3)=(lpsstr(3)-eei)/ucvol
+!     lpsstr(4)=lpsstr(4)/ucvol
+!     lpsstr(5)=lpsstr(5)/ucvol
+!     lpsstr(6)=lpsstr(6)/ucvol   
+     !lpsstr=lpsstr/ucvol
+!   endif 
 
  end if
-
+ 
  if(option==4)then
 !  Init mpi_comm
    if(mpi_enreg%nproc_fft>1)then
@@ -739,13 +787,6 @@ end subroutine mklocl_recipspace
 !! OUTPUT
 !!  vpsp1(cplex*nfft)=first-order local crystal pseudopotential in real space
 !!    (including the minus sign, forgotten in the paper non-linear..
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1004,12 +1045,6 @@ end subroutine dfpt_vlocal
 !! and the internal loops to be considered were sufficiently different
 !! as to make the two routines different.
 !! * The routine was adapted from mklocl.F90
-!!
-!! PARENTS
-!!      m_dfpt_looppert,m_dfpt_lwwf,m_dfpt_nstwf,m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1351,12 +1386,6 @@ end subroutine vlocalstr
 !!    q-gradient of the atomic displacement Hamiltonian. This is lately included 
 !!    in the matrix element calculation.
 !!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
-!!
 !! SOURCE
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
@@ -1613,12 +1642,6 @@ end subroutine dfpt_vlocaldq
 !!    2nd order energy wrt an atomic displacement and a strain:
 !!    \Delta E^{\tau_{\kappa\alpha}^* (\beta)}_{m\kvec,\gamma\delta}
 !!     
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 
@@ -1908,12 +1931,6 @@ end subroutine dfpt_vlocaldqdq
 !!  **A -i factor has been factorized out in all the contributions of the second
 !!    q-gradient of the metric Hamiltonian. This is lately included in the contribution
 !!    of the corresponing term (T4) to the flexoelectric tensor in dfpt_flexoout.F90
-!!
-!! PARENTS
-!!      m_dfpt_lwwf
-!!
-!! CHILDREN
-!!      dfpt_mkvxcgga_n0met,fourdp,ptabs_fourdp,splfit
 !!
 !! SOURCE
 

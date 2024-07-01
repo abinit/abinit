@@ -32,6 +32,7 @@ spin_sia_k1dir = 0.0 0.0 1.0  ! direction of SIA
 
 spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 
+randomseed = 111111             ! DO NOT set randomseed. It is only for testing the code.
 
 ##############################################################
 # This section is used only for regression testing of ABINIT #
@@ -41,9 +42,10 @@ spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 #%% [setup]
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_XML
-#%% system_xml = tmulti5_2.xml
+#%% spin_pot = tmulti5_2.xml
 #%% exclude_builders = .*_nag_7.[01]_.*
 #%% coeff_xml = no
+#%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
 #%%   tmulti5_2.abo, tolnlines = 4, tolabs = 1e+2, tolrel = 0.4, fld_options = -medium;
@@ -51,12 +53,13 @@ spin_calc_thermo_obs = 1      ! calculate thermodynamics related observables
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Effective potential, multibinit
+#%% keywords = Effective potential, multibinit, spinpot
 #%% description = 
 #%%   read xml  and run spin dynamics. MvT calculation. 
 #%%   LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.  
 #%%   Parameters in this file does not give reasonable results and should be
 #%%   tuned, which is designed for the tutorial. It also serve the purpose  of
 #%%   limiting the test run to a short enough time.
+#%% topics = SpinDynamicsMultibinit
 #%%<END TEST_INFO>
 

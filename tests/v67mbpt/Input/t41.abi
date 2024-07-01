@@ -1,12 +1,12 @@
-# TiO2 
-# GW calculations test PPM-HL: other schemes to treat invalid frequencies. 
+# TiO2
+# GW calculations test PPM-HL: other schemes to treat invalid frequencies.
 
 ndtset 3
 #istwfk *1
 
-ecut      10 
-ecutwfn   10 
-ecutsigx  10 
+ecut      10
+ecutwfn   10
+ecutsigx  10
 
 nband      40       # number of (occ and empty) bands to be computed
 
@@ -32,7 +32,7 @@ getscr3   -1
 ppmodel 2
 gw_invalid_freq 2
 nkptgw    1
-kptgw   0.0  0.0  0.0    
+kptgw   0.0  0.0  0.0
 bdgw     24  25
 
 nstep    20
@@ -70,14 +70,14 @@ xred
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t41.abo, tolnlines = 1, tolabs = 1.010e-03, tolrel = 4.000e-05, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors =  T. Rangel
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%   TiO2
-#%%   GW calculations with PPM-HL treating invalid frequencies in different ways. 
+#%%   GW calculations with PPM-HL treating invalid frequencies in different ways.
 #%%<END TEST_INFO>

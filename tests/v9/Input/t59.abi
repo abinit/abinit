@@ -1,7 +1,7 @@
 t59o_DVDB
 8
-t57o_DS4_POT1  
-t57o_DS4_POT4  
+t57o_DS4_POT1
+t57o_DS4_POT4
 t57o_DS5_POT1
 t57o_DS5_POT2
 t57o_DS5_POT4
@@ -12,6 +12,7 @@ t57o_DS6_POT4
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = mrgdv
+#%% need_cpp_vars = HAVE_NETCDF_MPI
 #%% test_chain = t57.abi, t58.abi, t59.abi, t60.abi, t61.abi
 #%% [files]
 #%% files_to_test =
@@ -19,7 +20,7 @@ t57o_DS6_POT4
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [shell]
-#%% post_commands = 
+#%% post_commands =
 #%%  ww_cp t59o_DVDB t60o_DS20_DVDB;
 #%%  ww_cp t59o_DVDB t61o_DS20_DVDB
 #%% [extra_info]

@@ -27,8 +27,6 @@
  getddk3   2
    nqpt3   1
     qpt3   0.0d0 0.0d0 0.0d0
-rfatpol3   1 2
-  rfdir3   1 1 1
  rfelfd3   3
  rfphon3   1
  tolwfr3   1.0d-16
@@ -52,12 +50,15 @@ rfatpol3   1 2
  getddk5   4
    nqpt5   1
     qpt5   0.0d0 0.0d0 0.0d0
-rfatpol5   1 2
-  rfdir5   1 1 1
  rfelfd5   3
  rfphon5   1
  tolwfr5   1.0d-16
  useylm5   1
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #COMMON DATA
  ngkpt 2 2 2

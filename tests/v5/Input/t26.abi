@@ -24,9 +24,12 @@ ieig2rf   1
 getwfk    1          # Use GS wave functions from dataset1
 kptopt    3          # Need full k-point set for finite-Q response
 rfphon    1          # Do phonon response
-rfatpol   1 2        # Treat displacements of all atoms
-rfdir     1 1 1      # Do all directions (symmetry will be used)
 tolvrs    1.0d-4     # This default is active for sets 3-10
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #####################################################################
 # COMMON VARIABLES

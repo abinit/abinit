@@ -7,7 +7,7 @@
 !! It includes testing of complex and real numbers, and all2all and gatherv
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,11 +20,6 @@
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
 
@@ -84,11 +79,21 @@ program testTransposer
 
   call xmpi_init()
 
-  npw = 4000+xmpi_comm_rank(xmpi_world)
+  npw = 4000+2*xmpi_comm_rank(xmpi_world)
   nband = 2000
   ncycle = 20
   if ( xmpi_comm_size(xmpi_world) > 1 ) then
-    nCpuRows = 2
+    if ( MOD(xmpi_comm_size(xmpi_world),10) == 0 ) then
+      nCpuRows = 2
+    else if ( MOD(xmpi_comm_size(xmpi_world),8) == 0 ) then
+      nCpuRows = 4
+    else if ( MOD(xmpi_comm_size(xmpi_world),6) == 0 ) then
+      nCpuRows = 3
+    else if ( MOD(xmpi_comm_size(xmpi_world),4) == 0 ) then
+      nCpuRows = 2
+    else
+      nCpuRows = 1
+    end if
     nCpuCols = xmpi_comm_size(xmpi_world)/nCpuRows
   else
     nCpuRows = 1
@@ -96,6 +101,9 @@ program testTransposer
   end if
 
   std_out = 6+xmpi_comm_rank(xmpi_world)
+
+  write(std_out,*) " nCpuRows,nCpuCols",nCpuRows,nCpuCols
+
 
  ! Initialize memory profiling if it is activated
  ! if a full memocc.prc report is desired, set the argument of abimem_init to "2" instead of "0"
@@ -105,8 +113,12 @@ program testTransposer
 #endif
 
   call test1()
-  
-  call test2()
+
+  ! nspinor = 1
+  call test2(1)
+
+  ! nspinor = 2
+  call test2(2)
 
   call xg_finalize()
 
@@ -127,7 +139,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -141,48 +153,76 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
-!!
 !! SOURCE
   subroutine test1()
     ABI_MALLOC(cg, (2,npw*nband))
     ABI_MALLOC(cg0, (2,npw*nband))
-  
+
     call random_number(cg)
     cg0(:,:) = cg(:,:)
-  
+
     call xgBlock_map(xcgLinalg,cg,SPACE_C,npw,nband,xmpi_world)
-  
+
     write(std_out,*) " Complex all2all"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
-  
+
     write(std_out,*) " Complex gatherv"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
-  
+
     call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
-  
+
     write(std_out,*) " Real all2all"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
-  
+
     write(std_out,*) " Real gatherv"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_GATHER)
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,1,&
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
     call backAndForth()
     call xgTransposer_free(xgTransposer)
     call printTimes()
-  
+
+    write(std_out,*) " Complex all2all (nspinor=2)"
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+    call backAndForth()
+    call xgTransposer_free(xgTransposer)
+    call printTimes()
+
+    write(std_out,*) " Complex gatherv (nspinor=2)"
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+    call backAndForth()
+    call xgTransposer_free(xgTransposer)
+    call printTimes()
+
+    call xgBlock_map(xcgLinalg,cg,SPACE_CR,2*npw,nband,xmpi_world)
+
+    write(std_out,*) " Real all2all (nspinor=2)"
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+    call backAndForth()
+    call xgTransposer_free(xgTransposer)
+    call printTimes()
+
+    write(std_out,*) " Real gatherv (nspinor=2)"
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,2,&
+      STATE_LINALG,TRANS_GATHER,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
+    call backAndForth()
+    call xgTransposer_free(xgTransposer)
+    call printTimes()
+
     ABI_FREE(cg)
     ABI_FREE(cg0)
   end subroutine test1
@@ -196,7 +236,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -210,12 +250,9 @@ program testTransposer
 !! OUTPUT
 !!  (main routine)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
-  subroutine test2()
+  subroutine test2(nspinor)
+    integer,intent(in) :: nspinor
     type(xgTransposer_t) :: xgTransposerGh
     type(xgTransposer_t) :: xgTransposerGhc
     type(xg_t) :: dotLinalg
@@ -232,11 +269,13 @@ program testTransposer
     call xgBlock_map(xghLinalg,gh,SPACE_C,npw,nband,xmpi_world)
     call xgBlock_map(xghcLinalg,ghc,SPACE_C,npw,nband,xmpi_world)
 
-    write(std_out,*) "Transposer constructor"
-    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nCpuRows,nCpuCols,STATE_LINALG,TRANS_ALL2ALL)
+    write(std_out,*) "Transposer constructor : nspinor =",nspinor
+
+    call xgTransposer_constructor(xgTransposer,xcgLinalg,xcgColsRows,nspinor,&
+      STATE_LINALG,TRANS_ALL2ALL,xmpi_comm_null,xmpi_comm_null,ncpuCols,ncpuRows)
     call xgTransposer_copyConstructor(xgTransposerGh,xgTransposer,xghLinalg,xghColsRows,STATE_LINALG)
     call xgTransposer_copyConstructor(xgTransposerGhc,xgTransposer,xghcLinalg,xghcColsRows,STATE_LINALG)
-    
+
     write(std_out,*) "Init data"
     call random_number(cg)
     call random_number(gh)
@@ -295,7 +334,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -308,10 +347,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -344,7 +379,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -357,10 +392,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -384,10 +415,10 @@ program testTransposer
         call xmpi_max(walltime,maxt,xmpi_world,ierr)
       end do
       call xmpi_max(cputime,maxt,xmpi_world,ierr)
-      write(std_out,"(a,f20.4)") ".Mean time: ", maxt/ncycle
-      errmax = (sum(cg0-cg))/nband
+      write(std_out,"(a,f20.5)") "-Mean time:  ", maxt/ncycle
+      errmax = (sum(abs(cg0-cg)))/nband
       call xmpi_sum(errmax,xmpi_world,ierr)
-      write(std_out,"(a,f20.4)") " Difference: ",errmax
+      write(std_out,"(a,f20.14)") " Difference: ",errmax
       call xmpi_barrier(xmpi_world)
     end subroutine backAndForth
 !!***
@@ -400,7 +431,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -413,12 +444,6 @@ program testTransposer
 !!
 !! OUTPUT
 !!  (main routine)
-!!
-!! PARENTS
-!!      testtransposer
-!!
-!! CHILDREN
-!!      timab,time_accu
 !!
 !! SOURCE
 
@@ -444,4 +469,3 @@ program testTransposer
 
   end program testTransposer
 !!***
-

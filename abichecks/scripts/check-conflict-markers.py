@@ -23,7 +23,7 @@ exclude_exts = set([
 ])
 
 exclude_bins = set([
-  "abinit", "anaddb", "mrgddb", "aim", "fftprof", "mrgdv", "mrgddb", "mrggkk", "ujdet",
+  "abinit", "anaddb", "mrgddb", "aim", "fftprof", "mrgdv", "mrgddb", "mrggkk", "lruj",
   "band2eps", "abitk", "cut3d", "fold2Bloch", "conducti", "ioprof", "lapackprof",
   "macroave", "optic", "vdw_kernelgen", "vdw_kernelgen", "mrgscr",
 ])

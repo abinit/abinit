@@ -1,0 +1,7 @@
+num_wann 38
+num_bands 40
+spinors : true
+num_iter 0
+shell_list 1
+exclude_bands 39-40
+skip_B1_tests : true

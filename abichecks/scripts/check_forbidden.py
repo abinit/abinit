@@ -118,7 +118,16 @@ IGNORED_ALLOCATE_FILES = [
 "libpaw.h",
 "libtetra.h",
 "malloc.finc",
-"defs.h"
+"defs.h",
+# QE library
+"pseudo_types.F90",
+"read_upf_new.F90",
+"xmltools.F90",
+# Minimax library
+"minimax_grids.F90",
+"minimax_omega.F90",
+"minimax_tau.F90",
+"minimax_utils.F90",
 ]
 
 #List of "call" statements

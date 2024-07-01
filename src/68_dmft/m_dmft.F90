@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,14 +87,6 @@ contains
 !!  paw_dmft <type(paw_dmft_type)> =  data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_vtorho
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 
@@ -577,14 +565,6 @@ end subroutine dmft_solve
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
-!!
 !! SOURCE
 
 subroutine impurity_solve(cryst_struc,green,hu,paw_dmft,&
@@ -843,14 +823,6 @@ end subroutine impurity_solve
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
-!!
 !! SOURCE
 
 subroutine dyson(green,paw_dmft,self,weiss,opt_weissself)
@@ -963,14 +935,6 @@ end subroutine dyson
 !!  paw_dmft = data for self-consistent DFT+DMFT calculations.
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      compute_green,copy_green,copy_matlu,dc_self,destroy_green,destroy_self
-!!      dftu_self,dyson,hubbard_one,init_green,initialize_self,print_green
-!!      rw_self,wrtout
 !!
 !! SOURCE
 

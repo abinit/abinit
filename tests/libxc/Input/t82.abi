@@ -45,11 +45,13 @@ kptopt3?      2
 nqpt3?        1
 qpt3?         0.0 0.0 0.0
 rfphon3?      1
-rfatpol3?     1 1
 rfdir3?       1 0 0
 tolvrs3?      1.0d-10
 getwfk3?     11
 getddk3?     21
+
+ rfatpol      1 1
+
 
  pp_dirpath "$ABI_PSPDIR"
  pseudos "Si-LDA.paw"

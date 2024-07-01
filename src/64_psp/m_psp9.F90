@@ -6,14 +6,10 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2024 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -105,19 +101,11 @@ contains
 !!    %has_tvale=True if the pseudo contains the pseudo valence charge
 !!    %tvalespl(mqgrid_vl,2)=the pseudo valence density and 2nd derivative in reciprocal space on a regular grid
 !!
-!! PARENTS
-!!      m_pspini
-!!
-!! CHILDREN
-!!      dgesv
-!!
 !! SOURCE
 
 subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 &                  mmax,mpsang,mpssoang,mqgrid,mqgrid_vl,nproj,n1xccc,pspso,qchrg,qgrid,qgrid_vl,&
 &                  useylm,vlspl,xcccrc,xccc1d,zion,znucl,nctab,maxrad)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -418,6 +406,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  rmatch = zero
  nders  = 0
+ maxrad = zero
  if (has_nlcc) then
 
 !    In Abinit, at least for the Troullier-Martins pseudopotential,
@@ -687,19 +676,11 @@ end subroutine psp9in
 !! NOTES
 !!  This routine will be built only if PSML support is enabled.
 !!
-!! PARENTS
-!!      m_psp9
-!!
-!! CHILDREN
-!!      dgesv
-!!
 !! SOURCE
 
 #if defined HAVE_LIBPSML
 
 subroutine psp9cc(psxml,mmax,n1xccc,rad,rchrg,xccc1d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

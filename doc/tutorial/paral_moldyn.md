@@ -14,7 +14,7 @@ main input variables that govern convergence and numerical efficiency.
 You are supposed to know already some basics of parallelism in ABINIT,
 explained in the tutorial
 [A first introduction to ABINIT in parallel](/tutorial/basepar), and
-[ground state with plane waves](/tutorial/paral_gspw).
+[parallelism over bands and plane waves](/tutorial/paral_bandpw).
 
 This tutorial should take about 1.5 hour to be done and requires to have at
 least a 200 CPU core parallel computer.
@@ -111,7 +111,7 @@ performed in parallel. In `tmoldyn_01.in`, [[paral_kgb]] has been set to 1 to
 activate the parallelisation over **k**-points, G-vectors and bands. 
 The three following keywords give the number of processors for each level of
 parallelisation. Since we have only 1 **k**-point in the simulation ([[ngkpt]]
-has been set to 1 1 1) [[npkpt]] is set to 1,  [[npband]] to 2 with [[bandpp]]=40 (1 unique block),
+has been set to 1 1 1) [[np_spkpt]] is set to 1,  [[npband]] to 2 with [[bandpp]]=40 (1 unique block),
 and [[npfft]] is kept to 1.
 
 Then run the calculation in parallel over 2 CPU cores. You can change the

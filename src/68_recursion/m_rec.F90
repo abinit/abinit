@@ -9,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (MMancini)
+!! Copyright (C) 2002-2024 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +24,6 @@
 !!   that all the strongly connected routines are changed accordingly to accomodate the modification of the data type.
 !!   Typical examples of strongly connected routines are creation, destruction or reset methods.
 !!
-!! PARENTS
-!!
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,12 +94,6 @@ CONTAINS  !===========================================================
 !!  that proc has to compute: proc_pt_dev(1,iproc) which device
 !!  associated to proc i (-1 if none), proc_pt_dev(2,iproc) how
 !!  many points
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -223,12 +213,6 @@ end subroutine H_D_distrib
 !!
 !! So when  recgratio!=1, ntranche will  not correspond to the npt!
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
 subroutine find_maxmin_proc(recpar,nproc,me,gratio,ngfft,proc_pt_dev)
@@ -289,12 +273,6 @@ end subroutine find_maxmin_proc
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rec,m_vtorhorec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
  subroutine cpu_distribution(gratio,rset,ngfft,beta_coeff,calc_type)
@@ -329,8 +307,10 @@ end subroutine find_maxmin_proc
 #if defined HAVE_GPU_CUDA
  else
    if(rset%tp==4)then
-     ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
-     ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     if(.not. allocated(rset%GPU%par%displs)) then
+       ABI_MALLOC(rset%GPU%par%displs,(0:rset%mpi%nproc-1))
+       ABI_MALLOC(rset%GPU%par%vcount,(0:rset%mpi%nproc-1))
+     end if
    endif
    recpar => rset%GPU%par
 #endif
@@ -416,12 +396,6 @@ end subroutine cpu_distribution
 !! SIDE EFFECTS
 !! All pointers set to null().
 !!
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -593,12 +567,6 @@ end subroutine InitRec
 !! OUTPUT
 !! metrec <type(metricrec_type)>= infinitesimal metrics used in recursion
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
 subroutine Init_MetricRec(metrec,nlpsp,rmet,ucvol,rprimd,xred,ngfft,natom,debug)
@@ -665,12 +633,6 @@ end subroutine Init_MetricRec
 !!
 !! SIDE EFFECTS
 !! nlrec <type(nlpsprec_type)>=pseudo-potentials information for recursion
-!!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -768,12 +730,6 @@ end subroutine Init_nlpspRec
 !! SIDE EFFECTS
 !! All pointers are deallocated.
 !!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
 subroutine CleanRec(rset)
@@ -848,12 +804,6 @@ end subroutine CleanRec
 !! OUTPUT
 !! rset%min_nrec is changed
 !!
-!! PARENTS
-!!      m_vtorhorec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
 subroutine Calcnrec(rset,b2)
@@ -918,12 +868,6 @@ end subroutine Calcnrec
 !!  tronc=True if truncation is made
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 
@@ -1237,12 +1181,6 @@ end subroutine getngrec
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
-!!
 !! SOURCE
 
 
@@ -1461,12 +1399,6 @@ end subroutine pspnl_operat_rec
 !!    strength matrix H: eivec(:,:,mang,psp)
 !!
 !! SIDE EFFECTS
-!!
-!! PARENTS
-!!      m_rec
-!!
-!! CHILDREN
-!!      dgetrf,dgetri,dsyev,exp_mat,gamma_function,set2unit,wrtout
 !!
 !! SOURCE
 

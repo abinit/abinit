@@ -17,10 +17,14 @@
 
 #Fourth dataset : phonons and  homogeneous electric field response
  rfelfd4 3     getwfk4 2     getddk4 3
- rfdir4  1 1 1 rfphon4 1     rfatpol4  1 2
+ rfphon4 1     
  diemix4  0.85
  diemac4  1.0
  tolwfr4  1.0d-12
+
+#Compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 #Common data
  acell   3*10.26

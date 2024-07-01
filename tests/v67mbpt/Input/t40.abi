@@ -1,4 +1,4 @@
-# Crystalline alpha-quartz. 
+# Crystalline alpha-quartz.
 # GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 
 ndtset 3
@@ -28,7 +28,7 @@ getwfk3   -2
 getscr3   -1
 nband3     50
 nkptgw3    2
-kptgw3   0.0  0.0  0.0    
+kptgw3   0.0  0.0  0.0
          0.5  0.0  0.0
 bdgw3    24  25
          24  25
@@ -81,14 +81,14 @@ rprim   5.0000000000e-01 -8.6602540378e-01  0.0000000000e+00
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t40.abo, tolnlines = 25, tolabs = 1.010e-03, tolrel = 6.000e-03, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, psp8, GW
-#%% description = 
+#%% description =
 #%%   Crystalline alpha-quartz
 #%%   GW calculations with istwfk /= 1 and NC pseudopotentials with multiple projectors.
 #%%<END TEST_INFO>

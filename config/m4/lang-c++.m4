@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -163,6 +163,41 @@ AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
 ]) # _ABI_CXX_CHECK_INTEL
 
 
+
+# _ABI_CXX_CHECK_CRAY(COMPILER)
+# -----------------------------
+#
+# Checks whether the specified C compiler is the CRAY Clang++ compiler.
+# If yes, tries to determine its version number and sets the abi_cxx_vendor
+# and abi_cxx_version variables accordingly.
+#
+AC_DEFUN([_ABI_CXX_CHECK_CRAY],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the CRAY Clang++ C++ compiler])
+  cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cxx_info_string}" | grep 'Cray clang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cxx_info_string=""
+    abi_cxx_vendor="unknown"
+    abi_cxx_version="unknown"
+  else
+    AC_DEFINE([CXX_CRAY],1,
+      [Define to 1 if you are using the CRAY Clang++ C++ compiler.])
+    abi_cxx_vendor="cray"
+    abi_cxx_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cxx_version}" = "${abi_result}"; then
+      abi_cxx_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CXX_CHECK_CRAY
+
+
+
 # _ABI_CXX_CHECK_LLVM(COMPILER)
 # -----------------------------
 #
@@ -194,6 +229,39 @@ AC_DEFUN([_ABI_CXX_CHECK_LLVM],[
   fi
   dnl AC_MSG_RESULT(${abi_result})
 ]) # _ABI_CXX_CHECK_LLVM
+
+
+
+# _ABI_CXX_CHECK_NVHPC(COMPILER)
+# ----------------------------
+#
+# Checks whether the specified C++ compiler is the NVIDIA HPC SDK C++
+# compiler. If yes, tries to determine its version number and sets the
+# abi_cxx_vendor and abi_cxx_version variables accordingly.
+#
+AC_DEFUN([_ABI_CXX_CHECK_NVHPC],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the NVIDIA HPC SDK C++ compiler])
+  cxx_info_string=`$1 -V 2>&1 | grep "^nvc++"`
+  abi_result=`echo "${cxx_info_string}"`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cxx_info_string=""
+    abi_cxx_vendor="unknown"
+    abi_cxx_version="unknown"
+  else
+    AC_DEFINE([CXX_NVHPC],1,[Define to 1 if you are using the NVIDIA HPC SDK C++ compiler.])
+    abi_cxx_vendor="nvhpc"
+    abi_cxx_version=`echo "${abi_result}" | cut -f2 -d" "`
+    if test "${abi_cxx_version}" = ""; then
+      abi_cxx_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CXX_CHECK_NVHPC
 
 
 
@@ -274,7 +342,13 @@ AC_DEFUN([ABI_PROG_CXX],[
     _ABI_CXX_CHECK_INTEL(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_CRAY(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_LLVM(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_NVHPC(${CXX})
   fi
   if test "${abi_cxx_vendor}" = "unknown"; then
     _ABI_CXX_CHECK_PGI(${CXX})

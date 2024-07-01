@@ -7,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2024 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,16 +27,19 @@ MODULE m_fourier_interpol
  use m_errors
 
  use defs_abitypes, only : MPI_type
- use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
- use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
+ use m_fft,         only : zerosym, indirect_parallel_Fourier, fourdp
+ use m_pawfgr,      only : pawfgr_type,pawfgr_destroy,indgrid
+ use m_distribfft,  only : init_distribfft_seq
+ use m_mpinfo,      only : destroy_mpi_enreg, initmpi_seq
 
  implicit none
 
  private
 
 !public procedures.
- public :: transgrid        ! Convert a density/potential from the coarse to the fine grid and vice versa
- public :: fourier_interpol ! Perform a Fourier interpolation. Just a wrapper for transgrid.
+ public :: transgrid            ! Convert a density/potential from the coarse to the fine grid and vice versa
+ public :: fourier_interpol     ! Fourier interpolation. Just a wrapper for transgrid.
+ public :: fourier_interpol_seq ! Fourier interpolation without MPI-FFT.
 
 CONTAINS  !========================================================================================
 !!***
@@ -89,14 +92,6 @@ CONTAINS  !=====================================================================
 !!    rhor(cplex*nfftc,nspden)=output density/potential in r space on the coarse grid
 !!  if optgrid=+1:
 !!    rhorf(cplex*nfftf,nspden)=output density/potential in r space on the fine grid
-!!
-!! PARENTS
-!!      m_afterscfloop,m_dfpt_looppert,m_dfpt_vtorho,m_dft_energy
-!!      m_fourier_interpol,m_getgh1c,m_gstate,m_hamiltonian,m_nonlinear
-!!      m_orbmag,m_paw_mkrho,m_respfn_driver,m_scfcv_core,m_vtorho,m_vtorhorec
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
 !!
 !! SOURCE
 
@@ -417,12 +412,6 @@ end subroutine transgrid
 !!  if optout=1:
 !!   rhog_out(2,nfftc)=Fourier transform of output density/potential on the coarse grid
 !!
-!! PARENTS
-!!      m_dvdb,m_ioarr,m_qparticles
-!!
-!! CHILDREN
-!!      indgrid,pawfgr_destroy,transgrid
-!!
 !! SOURCE
 
 subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,ngfft_out,&
@@ -505,6 +494,82 @@ subroutine fourier_interpol(cplex,nspden,optin,optout,nfft_in,ngfft_in,nfft_out,
  call pawfgr_destroy(Pawfgr)
 
 end subroutine fourier_interpol
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_fourier_interpol/fourier_interpol_seq
+!! NAME
+!! fourier_interpol_seq
+!!
+!! FUNCTION
+!!  Perform a Fourier interpolation in sequential i.e. without MPI-FFT.
+!!
+!! INPUTS
+!! cplex=1 if rhor is real, 2 if rhor is complex
+!! nspden=number of spin-density components
+!! from_nfft =number of points in the input FFT box (WARNING no FFT parallelism)
+!! from_ngfft_(18)=all needed information about 3D FFT, for the input grid
+!! to_nfft=number of points in the output FFT box
+!! to_ngfft_out=all needed information about 3D FFT, for the output grid
+!! from_rhor=Input density
+!!
+!! OUTPUT
+!! to_rhor=Output density in r-space
+!! [to_rhog]=Output density in g-space.
+!!
+!! SOURCE
+
+subroutine fourier_interpol_seq(cplex, nspden, from_nfft, from_ngfft, to_nfft, to_ngfft, from_rhor, to_rhor, &
+                                to_rhog) ! optional
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: cplex, nspden, from_nfft, to_nfft
+!arrays
+ integer,intent(in) :: from_ngfft(18), to_ngfft(18)
+ real(dp),intent(inout) :: from_rhor(cplex*from_nfft, nspden)
+ real(dp),intent(out) :: to_rhor(cplex*to_nfft, nspden)
+ real(dp),optional,intent(out) :: to_rhog(2, to_nfft)
+
+!Local variables ---------------------------------------
+!scalars
+ type(MPI_type) :: MPI_enreg_seq
+!arrays
+ integer :: ngfft_in(18),ngfft_out(18)
+ real(dp),allocatable :: from_rhog(:,:), to_rhog__(:,:)
+! *************************************************************************
+
+ ngfft_in = from_ngfft; ngfft_out = to_ngfft
+ ngfft_in(4:6) = ngfft_in(1:3); ngfft_out(4:6) = ngfft_out(1:3)
+ ! No MPI-FFT here.
+ ngfft_in(9:18) = 0; ngfft_out(9:18) = 0
+ ngfft_in(10) = 1; ngfft_out(10) = 1
+
+ call initmpi_seq(MPI_enreg_seq)
+
+ ! Which one is coarse? Note that this part is not very robust and can fail!
+ if (ngfft_in(2) * ngfft_in(3) < ngfft_out(2) * ngfft_out(3)) then
+   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfft_in(2), ngfft_in(3), 'all')
+   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfft_out(2), ngfft_out(3), 'all')
+ else
+   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfft_in(2), ngfft_in(3), 'all')
+   call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfft_out(2), ngfft_out(3), 'all')
+ end if
+
+ ABI_MALLOC(from_rhog,  (2, from_nfft))
+ ABI_MALLOC(to_rhog__, (2, to_nfft))
+
+ call fourier_interpol(cplex, nspden, 0, 0, from_nfft, ngfft_in, to_nfft, ngfft_out, &
+                       MPI_enreg_seq, from_rhor, to_rhor, from_rhog, to_rhog__)
+
+ if (present(to_rhog)) to_rhog = to_rhog__
+
+ ABI_FREE(from_rhog)
+ ABI_FREE(to_rhog__)
+ call destroy_mpi_enreg(MPI_enreg_seq)
+
+end subroutine fourier_interpol_seq
 !!***
 
 !----------------------------------------------------------------------

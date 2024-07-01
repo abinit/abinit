@@ -12008,11 +12008,3 @@
    1   2   3   2  0.56486537682130D+00  0.57714878660655D-01
    2   2   3   2 -0.12372922674502D+01 -0.87027030475172D-06
    3   2   3   2 -0.18846698859476D+01 -0.87207547633987D-16
-
- List of bloks and their characteristics 
-  
- 2nd eigenvalue derivatives   - # elements :      36
- qpt  0.00000000E+00  0.00000000E+00  0.00000000E+00   1.0
-  
- 2nd eigenvalue derivatives   - # elements :      36
- qpt  5.00000000E-01  0.00000000E+00  0.00000000E+00   1.0

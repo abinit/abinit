@@ -44,8 +44,6 @@
 #Dataset ?2 : RF
 
   getwfq?2  -1
- rfatpol?2  1 1
-   rfdir?2  1 1 1
   rfphon?2  1
   tolvrs?2  1.0d-10
 

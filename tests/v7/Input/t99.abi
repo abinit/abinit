@@ -18,8 +18,6 @@
   tolwfr1   1.0d-24
 # DATASET 2: elastic constants and internal strains       
   rfphon2   1      
-  rfatpol2   1 2          
-   rfdir2   1 1 1         
     nqpt2   1
      qpt2   0.0 0.0 0.0  
   rfstrs2   3

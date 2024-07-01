@@ -1,0 +1,113 @@
+###################################################################
+## Automatic test for ABINIT and LRUJ:                           ##
+##  Determine in situ Hund's J using ujdet; application of       ##
+##  4 distinct potential perturbations                           ##
+##  Fe BCC | ferromagnetic | PAW                        DJA 2010 ##
+##                                        Modified by: LMac 2022 ##
+##  Prelimirary step for test v9#109 (lruj)                      ##
+###################################################################
+
+# 4 potential perturbations applied
+     ndtset  4
+
+# 2 atom cell
+      acell  3*5.42
+    chkprim  0
+      rprim  1.00 0.00 0.00
+             0.00 1.00 0.00
+             0.00 0.00 1.00
+     nsppol  2
+
+#Definition of the atom types
+     ntypat  1
+      znucl  26
+
+#Definition of the atoms
+      natom  2
+      typat  1 1
+       xred  0.0 0.0 0.0
+             0.5 0.5 0.5
+       ecut  8
+  pawecutdg  40
+      nband  25
+     nbdbuf  2                    # This is to improve the portability (the residual of degenerate states with indices nband 
+                                  # and nband+1 is not portable).
+
+#Definition of the k-point grid
+     kptopt  1
+      ngkpt  3 3 3
+    nshiftk  1
+     shiftk  0.5 0.5 0.5
+
+#Smearing
+     occopt  4
+     tsmear  0.05 eV
+
+#DFT+U
+    usepawu  1
+      lpawu  2                    # 3d Fe orbitals will we treated with J parameter
+       nsym  48                   # nsym & symrel: break cubic symmetry of crystal
+                                  # and allow individual ionic occupations
+     symrel   1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
+             -1  0  0   0  1  0   0  0 -1       1  0  0   0 -1  0   0  0  1
+             -1  0  0   0 -1  0   0  0  1       1  0  0   0  1  0   0  0 -1
+              1  0  0   0 -1  0   0  0 -1      -1  0  0   0  1  0   0  0  1
+              0  1  0   1  0  0   0  0  1       0 -1  0  -1  0  0   0  0 -1
+              0 -1  0   1  0  0   0  0 -1       0  1  0  -1  0  0   0  0  1
+              0 -1  0  -1  0  0   0  0  1       0  1  0   1  0  0   0  0 -1
+              0  1  0  -1  0  0   0  0 -1       0 -1  0   1  0  0   0  0  1
+              0  0  1   1  0  0   0  1  0       0  0 -1  -1  0  0   0 -1  0
+              0  0 -1   1  0  0   0 -1  0       0  0  1  -1  0  0   0  1  0
+              0  0 -1  -1  0  0   0  1  0       0  0  1   1  0  0   0 -1  0
+              0  0  1  -1  0  0   0 -1  0       0  0 -1   1  0  0   0  1  0
+              1  0  0   0  0  1   0  1  0      -1  0  0   0  0 -1   0 -1  0
+             -1  0  0   0  0  1   0 -1  0       1  0  0   0  0 -1   0  1  0
+             -1  0  0   0  0 -1   0  1  0       1  0  0   0  0  1   0 -1  0
+              1  0  0   0  0 -1   0 -1  0      -1  0  0   0  0  1   0  1  0
+              0  1  0   0  0  1   1  0  0       0 -1  0   0  0 -1  -1  0  0
+              0 -1  0   0  0  1  -1  0  0       0  1  0   0  0 -1   1  0  0
+              0 -1  0   0  0 -1   1  0  0       0  1  0   0  0  1  -1  0  0
+              0  1  0   0  0 -1  -1  0  0       0 -1  0   0  0  1   1  0  0
+              0  0  1   0  1  0   1  0  0       0  0 -1   0 -1  0  -1  0  0
+              0  0 -1   0  1  0  -1  0  0       0  0  1   0 -1  0   1  0  0
+              0  0 -1   0 -1  0   1  0  0       0  0  1   0  1  0  -1  0  0
+              0  0  1   0 -1  0  -1  0  0       0  0 -1   0  1  0   1  0  0
+    pawujat  1                    # Compulsory for supercell extrapolation scheme
+    pawujv1  -0.2 eV              # Apply 4 non-zero perturbations for testing
+    pawujv2  -0.1 eV              # the lruj post-processing utility
+    pawujv3  0.1 eV
+    pawujv4  0.2 eV
+   macro_uj  4                    # activate determination of Hund's J:
+                                  # +pawujv applied to spin up channel; 
+                                  # -pawujv applied to spin down
+
+#Only to accelerate test
+          irdwfk  0
+ getwfk_filepath  "./t106i_WFK"
+          tolvrs  10d-9
+
+#Save disk space
+     prteig  0
+      prtwf  0
+     prtden  0
+
+ pp_dirpath "$ABI_PSPDIR"
+    pseudos "26fe.paw"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain = t105.abi, t106.abi, t107.abi, t108.abi, t109.abi
+#%% [files]
+#%% files_to_test = 
+#%%   t107.abo, tolnlines = 15, tolabs = 2.0e-04, tolrel = 1.0e+00, fld_options =  -medium
+#%% [paral_info]
+#%% max_nprocs = 8
+#%% [extra_info]
+#%% authors = M. Torrent, D.J. Adams, L. MacEnulty
+#%% keywords = lruj,ujdet,DFTU,PAW
+#%% description = Compute the Hund's J in bcc Fe in 2 atom cell with ujdet
+#%%    intrinsic subroutine (using a two-point linear regression); generate
+#%%    input LRUJ.nc files for lruj post-processing utility
+#%% topics = DFT+U
+#%%<END TEST_INFO>

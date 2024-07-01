@@ -2,7 +2,7 @@
 authors: SPesant, MCote, XG, BAmadon
 ---
 
-# Tutorial on DFT+U
+# DFT+U
 
 ## The projected density of states of NiO.
 

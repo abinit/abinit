@@ -6,7 +6,7 @@
 !! Calculate the effective interaction in the correlated orbitals
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon,ROuterovitch)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -14,10 +14,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -54,7 +50,7 @@ contains
 !! Calculate the effective interaction in the correlated orbitals
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (TApplencourt,BA)
+!! Copyright (C) 1999-2024 ABINIT group (TApplencourt,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,12 +78,6 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_sigma_driver
-!!
-!! CHILDREN
-!!      print_orbitals,wrtout
-!!
 !! SOURCE
 
  subroutine calc_ucrpa(itypatcor,cryst,Kmesh,lpawu,M1_q_m,Qmesh,npwe,&
@@ -101,7 +91,7 @@ contains
  use m_io_tools,      only : open_file
  use m_wfd,           only : wfd_t
  use m_io_screening,  only : read_screening, em1_ncname
- use m_bz_mesh,       only : kmesh_t, get_BZ_item
+ use m_bz_mesh,       only : kmesh_t
  use m_crystal,       only : crystal_t
  use m_plowannier,    only : operwan_realspace_type,plowannier_type
  implicit none
@@ -208,7 +198,7 @@ contains
 !close(2012)
 
  do ik_bz=1,nkbz
-   call get_BZ_item(Kmesh,ik_bz,k_coord(ik_bz,:),ik_ibz,isym_kgw,iik,ph_mkt)
+   call kmesh%get_BZ_item(ik_bz,k_coord(ik_bz,:),ik_ibz,isym_kgw,iik,ph_mkt)
  end do
 
 ! open(unit=2012,file='iqbz_COORD',form='formatted',status='unknown')

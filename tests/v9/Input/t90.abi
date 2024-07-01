@@ -1,8 +1,6 @@
 #################################################################
 # Automatic test for ABINIT:                                    #
-#    Test the inclusion of a file in an input file              #
-#                                                               #
-#              Graphene, 2 atoms in the box                     #
+#    Test the different Coulomb cut-off (icutcoul)              #
 #################################################################
 
 

@@ -2,7 +2,7 @@
 # the electric field gradient code properly reflects the symmetry.
 
 
-prtefg 2 # print all elements of EFG tensor
+nucefg 2 # print all elements of EFG tensor
 quadmom 0.770 # In-115 electric quadrupole moment
 
 ecut 5 # should be 15 for a "real" calculation

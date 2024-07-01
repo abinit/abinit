@@ -7,8 +7,6 @@ spinat 0 0 4
 
 #Response-function calculation, with q=0.5
   rfphon2   1            # Will consider phonon-type perturbation
- rfatpol2   1 1          # Only the first atom is displaced
-   rfdir2   1 1 1        # Along all directions
     nqpt2   1            # One wavevector is to be considered
      qpt2  0    0    0.5
   getwfk2  1

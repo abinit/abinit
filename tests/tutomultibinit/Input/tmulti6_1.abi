@@ -1,0 +1,45 @@
+##############################################################################
+#Test for multibinit, just read lwf potential and run dynamics 
+##############################################################################
+
+ncellmat = 8 0 0  0 8 0 0 0 8 # size of supercell
+lwf_dynamics=3               # type of dynamics. 3: Berendsen thermostat
+lwf_dt =1e-16 s              # time step.
+lwf_ntime = 3000             # number of time steps
+lwf_nctime = 100             # write to netcdf history file per 100 steps.
+lwf_taut = 1e-14 s           # characteristic time for berendsen dynamics. 
+lwf_init_state=1             # initial state. 1: random amplitude.
+
+lwf_var_temperature=1        # whether to do variable temperature calculation.
+lwf_temperature_start=600.1  # Starting temperature.
+lwf_temperature_end=0.1      # Ending temperature.
+lwf_temperature_nstep=7      # number of temperature steps.
+
+
+randomseed=111111 # for testing only
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = multibinit
+#%% need_cpp_vars = HAVE_NETCDF
+#%% exclude_builders = .*_nag_7.[01]_.*
+#%% lwf_pot = tmulti6_1.nc
+#%% exec_args = --F03
+
+#%% [files]
+#%% files_to_test = 
+#%%   tmulti6_1.abo, tolnlines = 3, tolabs = 0.01, tolrel = 0.02, fld_options = -medium;
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = X. He 
+#%% keywords = Effective potential, multibinit, lwfpot
+#%% description = 
+#%%   read xml and run lattice wannier function dynamics
+#%%   The ncellmat  parameters are small.
+#%%
+#%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
+#%%   is detected, which is needed by the random number generator.
+#%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
+#%%   
+#%%<END TEST_INFO>

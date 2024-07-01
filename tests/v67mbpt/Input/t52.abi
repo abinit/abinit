@@ -1,19 +1,19 @@
 #Prepare the computation of linear and non-linear optic properties
-#of GaAs crystal : ground-state with few bands,
+#of GaAs crystal: ground-state with few bands,
 #then non-SCF with a larger number of bands, then ddk for different directions
 #Note that the k point sampling shoud be finer for significant results. The cut-off energy is also too low.
 
  ndtset 6
   nstep 500
 
- nband 14 
+ nband 14
 
 #First dataset : SC run with kpoints in the IBZ
    nband1 10
-  nbdbuf1 4    
+  nbdbuf1 4
  kptopt1 1
- prtden1 1   
- getden1 0   
+ prtden1 1
+ getden1 0
  getwfk1 0    ! Usual file handling data
 
  ngkpt1 4 4 4
@@ -24,35 +24,35 @@
          0.0 0.0 0.5
 
 #Second dataset : NSC run with large number of bands, and points in the IBZ
-    iscf2 -2  
+    iscf2 -2
   kptopt2  1
    getden2 1   ! Usual file handling data
     nstep2 9   ! Only for portability of tests. Do not keep in production runs.
 
 #Third dataset : NSC run with large number of bands, and points in the the full BZ
-    iscf3 -2  
+    iscf3 -2
   kptopt3  3
-  getwfk3  2   
+  getwfk3  2
    getden3 1   ! Usual file handling data
     nstep3 6   ! Only for portability of tests. Do not keep in production runs.
  tolwfr3 1.e-27 ! Also for portability of tests.
 
 #Fourth dataset : ddk response function along axis 1
    iscf4 -3
-  nstep4  1  
-  nline4  0  
+  nstep4  1
+  nline4  0
   prtwf4  3
  kptopt4  3
 
-   nqpt4  1  qpt4  0.0d0 0.0d0 0.0d0 
+   nqpt4  1  qpt4  0.0d0 0.0d0 0.0d0
   rfdir4  1 0 0
  rfelfd4  2
  getwfk4  3
 
 #Fifth dataset : ddk response function along axis 2
    iscf5 -3
-  nstep5  1  
-  nline5  0   
+  nstep5  1
+  nline5  0
   prtwf5  3
  kptopt5  3
 
@@ -63,8 +63,8 @@
 
 #Sixth dataset : ddk response function along axis 3
    iscf6 -3
-  nstep6  1  
-  nline6  0    
+  nstep6  1
+  nline6  0
   prtwf6  3
  kptopt6  3
 
@@ -81,16 +81,16 @@
 
  acell   3*10.217
  diemac 12
- ecut 8.00     
+ ecut 8.00
  ixc 7
- natom  2  
+ natom  2
 
  nbdbuf 2
  ntypat  1
  rprim   0 .5 .5  .5 0 .5  .5 .5 0
  xred 0 0 0
-   1/4 1/4 1/4 
- typat  1 1  
+   1/4 1/4 1/4
+ typat  1 1
  tolwfr  1.e-28
  znucl  14
 
@@ -104,14 +104,14 @@
 #%% [shell]
 #%% pre_commands = iw_cp test_EP.nc test_EP.nc
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%  t52.abo,               tolnlines = 20 , tolabs = 1.1e-2, tolrel = 4.0e-2, fld_options =  -ridiculous;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Y. Gillet
 #%% keywords = NC, optic
-#%% description = 
+#%% description =
 #%%   Silicon: Solution of optic with temperature-dependent renormalization
 #%%   WARNING: This feature is still under testing, files and variables could change in the next versions
 #%% topics = Optic

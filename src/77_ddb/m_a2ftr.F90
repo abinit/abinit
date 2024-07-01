@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2022 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2024 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -91,14 +86,6 @@ contains
 !!
 !! OUTPUT
 !!  elph_ds
-!!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
 !!
 !! NOTES
 !!   copied from ftiaf9.f
@@ -1047,14 +1034,6 @@ end subroutine mka2f_tr
 !! OUTPUT
 !!  elph_ds
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
-!!
 !! NOTES
 !!   copied from ftiaf9.f
 !!
@@ -1669,14 +1648,6 @@ end subroutine mka2f_tr_lova
 !!  tau_k(nsppol,nkptirr,nband)=mode relaxation time due to electron phonono coupling
 !!  rate_e(nene)= scattering rate due to electron phonono coupling vs. energy
 !!
-!! PARENTS
-!!      m_elphon
-!!
-!! CHILDREN
-!!      dgemm,ebands_prtbltztrp_tau_out,ebands_update_occ,ep_el_weights
-!!      ep_ph_weights,ftgam,ftgam_init,gam_mult_displ,ifc%fourq,matrginv
-!!      mkqptequiv,phdispl_cart2red,spline,splint,wrtout,xmpi_sum,zgemm
-!!
 !! SOURCE
 
 subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
@@ -2266,12 +2237,10 @@ subroutine get_tau_k(Cryst,ifc,Bst,elph_ds,elph_tr_ds,eigenGS,max_occ)
 
 !BoltzTraP output files in SIESTA format
  if (elph_ds%prtbltztrp == 1) then
-   ! CP added
-   ! CP test to prevent use in case occopt = 9
+    !Prevent use in case occopt = 9
     if (Bst%occopt==9) then
        ABI_ERROR("Boltztrap outputting not possible with occopt = 9 at the moment")
     end if
-    ! End CP added
    call ebands_prtbltztrp_tau_out (tmp_eigenGS(elph_ds%minFSband:elph_ds%maxFSband,:,:),&
 &   elph_ds%tempermin,elph_ds%temperinc,ntemper,fermie, &
 &   elph_ds%elph_base_name,elph_ds%k_phon%new_kptirr,nband,elph_ds%nelect,new_nkptirr, &

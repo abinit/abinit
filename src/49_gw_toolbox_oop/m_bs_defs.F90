@@ -6,15 +6,11 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT and EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2024 ABINIT and EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -61,9 +57,9 @@ MODULE m_bs_defs
 !! integer,public,parameter :: BSE_WFREQ_FULL  =3
 
 ! Flags for the interpolation
- integer,public,parameter :: BSE_INTERP_YG            =0 ! Interpolation with 8 neighbours
- integer,public,parameter :: BSE_INTERP_RL            =1 ! Interpolation with 1 neighbour (Rohlfing & Louie 2000)
- integer,public,parameter :: BSE_INTERP_RL2           =2 ! Hybrid between RL & YG with 2 neighbours (for debug)
+ integer,public,parameter :: BSE_INTERP_YG        =0 ! Interpolation with 8 neighbours
+ integer,public,parameter :: BSE_INTERP_RL        =1 ! Interpolation with 1 neighbour (Rohlfing & Louie 2000)
+ integer,public,parameter :: BSE_INTERP_RL2       =2 ! Hybrid between RL & YG with 2 neighbours (for debug)
 
  character(len=fnlen),public,parameter :: BSE_NOFILE="None"
 
@@ -81,9 +77,9 @@ MODULE m_bs_defs
 !! SOURCE
 
  type,public :: transition
-   integer :: k=0               ! Index of the k-point in the BZ
-   integer :: v=0               ! Valence band index.
-   integer :: c=0               ! Conduction band index.
+   integer :: k = 0               ! Index of the k-point in the BZ
+   integer :: v = 0               ! Valence band index.
+   integer :: c = 0               ! Conduction band index.
    complex(dpc) :: en=huge(one) ! Transition energy
  end type transition
 
@@ -221,11 +217,11 @@ type,public :: excparam
   type(transition),allocatable :: Trans_interp(:,:)
   ! Transitions for interpolated mesh
 
+  contains
+    procedure :: free => bs_parameters_free
+    procedure :: print => print_bs_parameters
+    procedure :: calctype2str => bsp_calctype2str
 end type excparam
-
- public :: bs_parameters_free
- public :: print_bs_parameters
- public :: bsp_calctype2str
 !!***
 
 !!****t* m_bs_defs/excfiles
@@ -264,13 +260,13 @@ type,public :: excfiles
   character(len=fnlen) :: out_basename = BSE_NOFILE
   ! Prefix to be used for other output files.
 
+contains
+  procedure :: print => print_bs_files
+  ! Printout of the excfiles data type.
 end type excfiles
-
-public :: print_bs_files    ! Printout of the excfiles data type.
 !!***
 
-
-CONTAINS  !========================================================================================================
+contains
 !!***
 
 !----------------------------------------------------------------------
@@ -282,26 +278,15 @@ CONTAINS  !=====================================================================
 !! FUNCTION
 !!  Free all memory allocated in a structure of type excparam
 !!
-!! SIDE EFFECTS
-!!  Bsp<excparam>=All associated pointers are deallocated.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine bs_parameters_free(BSp)
 
 !Arguments ------------------------------------
-!scalars
- type(excparam),intent(inout) :: BSp
+ class(excparam),intent(inout) :: BSp
 
 !************************************************************************
 
- !@excparam
  ABI_SFREE(BSp%q)
  ABI_FREE(Bsp%nreh)
  ABI_SFREE(Bsp%vcks2t)
@@ -329,28 +314,16 @@ end subroutine bs_parameters_free
 !! FUNCTION
 !!  Printout of the parameters used for the BS calculation.
 !!
-!! INPUTS
-!!  p<excparam>=Datatype storing the parameters of the Bethe-Salpeter calculation.
-!!
-!! OUTPUT
-!!  Only printing.
-!!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
+subroutine print_bs_parameters(BSp, header, unit, mode_paral, prtvol)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
- type(excparam),intent(inout) :: BSp
 
 !Local variables ------------------------------
 !scalars
@@ -398,8 +371,8 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
     ' Highest occupied state                  ',BSp%homo_spin(spin),ch10,&
     ' Lowest unoccupied state                 ',BSp%lumo_spin(spin),ch10,&
     ' Highest unoccupied state                ',BSp%nbnds,""
-!    ' Number of valence bands                 ',BSp%nbndv,ch10,&
-!    ' Number of conduction bands              ',BSp%nbndc,""
+    !' Number of valence bands                 ',BSp%nbndv,ch10,&
+    !' Number of conduction bands              ',BSp%nbndc,""
    call wrtout(my_unt,msg,my_mode)
  end do
 
@@ -411,7 +384,7 @@ subroutine print_bs_parameters(BSp,header,unit,mode_paral,prtvol)
  call wrtout(my_unt,msg,my_mode)
 
  ! Calculation type
- call bsp_calctype2str(Bsp,msg)
+ call bsp_calctype2str(Bsp, msg)
  call wrtout(my_unt,msg,my_mode)
 
  if (ABS(Bsp%mbpt_sciss)>tol6) then
@@ -506,20 +479,14 @@ end subroutine print_bs_parameters
 !! FUNCTION
 !!  Returns a string with the calculation type.
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_bs_defs,m_exc_spectra
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
-subroutine bsp_calctype2str(BSp,str)
+subroutine bsp_calctype2str(BSp, str)
 
 !Arguments ------------------------------------
 !scalars
+ class(excparam),intent(in) :: BSp
  character(len=500),intent(out) :: str
- type(excparam),intent(in) :: BSp
 
 !************************************************************************
 
@@ -568,16 +535,10 @@ end subroutine bsp_calctype2str
 !!    input:  allocatable array
 !!    output: Trans(max_nreh,nsppol) stores the correspondence t -> (band,kbz,spin) and the transition energy.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,nkibz,nsppol,nspinor,gw_energy,occ,ktab,&
-&  minmax_tene,nreh)
+                            minmax_tene,nreh)
 
 !Arguments ------------------------------------
 !scalars
@@ -632,9 +593,9 @@ subroutine init_transitions(Trans,lomo_spin,humo_spin,ir_cut,uv_cut,nkbz,nbnds,n
            tene = DBLE(cplx_enet)
 
            add_transition =                      &
-&             (tene > tol12) .and.               &  ! Resonant transition.
-&             ( ABS(delta_f) > tol12) .and.      &  ! c-v transition.
-&             (tene < uv_cut .and. tene > ir_cut)   ! Energy cutoff.
+              (tene > tol12) .and.               &  ! Resonant transition.
+              ( ABS(delta_f) > tol12) .and.      &  ! c-v transition.
+              (tene < uv_cut .and. tene > ir_cut)   ! Energy cutoff.
 
            if (add_transition) then
              it = it + 1
@@ -678,17 +639,14 @@ end subroutine init_transitions
 !! OUTPUT
 !!  str(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function repr_1trans(Trans,prtvol) result(str)
+pure function repr_1trans(Trans, prtvol) result(str)
 
 !Arguments ------------------------------------
-!scalars
+ class(transition),intent(in) :: Trans
  integer,optional,intent(in) :: prtvol
  character(len=500) :: str
- type(transition),intent(in) :: Trans
 
 !Local variables ------------------------------
 !scalars
@@ -723,8 +681,6 @@ end function repr_1trans
 !! OUTPUT
 !!  string(len=500)=The string representing the transition.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
@@ -736,7 +692,6 @@ pure function repr_2trans(Trans1,Trans2,prtvol) result(string)
  type(transition),intent(in) :: Trans1,Trans2
 
 !Local variables ------------------------------
-!scalars
  integer :: my_prtvol
 
 !************************************************************************
@@ -766,23 +721,15 @@ end function repr_2trans
 !! OUTPUT
 !!  Only printing.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine print_bs_files(BS_files,header,unit,mode_paral,prtvol)
 
 !Arguments ------------------------------------
-!scalars
- type(excfiles),intent(in) :: BS_files
+ class(excfiles),intent(in) :: BS_files
  integer,optional,intent(in) :: unit,prtvol
  character(len=4),optional,intent(in) :: mode_paral
  character(len=*),optional,intent(in) :: header
-!arrays
 
 !Local variables ------------------------------
 !scalars

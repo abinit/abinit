@@ -557,7 +557,7 @@ function is modeled according to
 
 \begin{equation} \label{eq:ppmodel_imag}
 \text{Im}\,\ee^{-1}_{\GG_1\GG_2}(\qq,\ww) = A_{\GG_1\GG_2}(\qq)\, \bigl[
-\delta(\ww-\ww_{\GG_1\GG_2}(\qq)) - \delta(\ww+\ww_{\GG_1\GG_2}(\qq)) \bigr]
+\delta(\ww-\tww_{\GG_1\GG_2}(\qq)) - \delta(\ww+\tww_{\GG_1\GG_2}(\qq)) \bigr]
 \end{equation} 
 
 \begin{equation} \label{eq:ppmodel_real}

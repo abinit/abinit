@@ -23,7 +23,7 @@ nband 50
 occopt 7  tsmear 0.015
 
 # === SCF cycle options
-nstep 5  tolvrs 1.d-7
+nstep 6  tolvrs 1.d-7
 ecut 8. pawecutdg 10.
 diemix 0.5
 
@@ -57,7 +57,7 @@ pawprtvol 3
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t79.abo, tolnlines = 74, tolabs = 1.100e-05, tolrel = 1.300e-06
+#%%   t79.abo, tolnlines = 28, tolabs = 1.e-05, tolrel = 6.5e-05, fld_options = -medium
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

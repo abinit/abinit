@@ -18,14 +18,14 @@ module m_tdep_phdos
   use m_crystal,          only : crystal_t
   use m_ddb,              only : ddb_type
   use m_tdep_phi2,        only : Eigen_type, tdep_write_yaml, tdep_write_dij, tdep_calc_dij,&
-&                                tdep_init_phi2, tdep_destroy_phi2, Phi2_type          
+&                                tdep_init_phi2, tdep_destroy_phi2, Phi2_type
   use m_tdep_qpt,         only : Qpoints_type
   use m_tdep_readwrite,   only : Input_type, MPI_enreg_type
   use m_tdep_latt,        only : Lattice_type
   use m_tdep_sym,         only : Symetries_type
   use m_tdep_shell,       only : Shell_type
   use m_tdep_abitypes,    only : Qbz_type, tdep_ifc2phi2, tdep_read_ifc, tdep_write_ifc, &
-&                                tdep_write_ddb,tdep_init_ifc  
+&                                tdep_write_ddb,tdep_init_ifc
 
   implicit none
 
@@ -44,7 +44,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   integer, intent(in) :: natom,natom_unitcell
   double precision, intent(in) :: Rlatt4abi(3,natom_unitcell,natom)
   type(Input_type),intent(in) :: Invar
-  type(phonon_dos_type),intent(out) :: PHdos
+  type(phdos_t),intent(out) :: PHdos
   type(Phi2_type),intent(in) :: Phi2
   type(ifc_type),intent(inout) :: Ifc
   type(Lattice_type),intent(in) :: Lattice
@@ -108,7 +108,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
       call tdep_ifc2phi2(Ifc_tmp%dipdip,Ifc_tmp,Invar,Lattice,natom_unitcell,0,Phi2_tmp,Rlatt4abi,Shell2at,Sym)
 !     Write IFC in ifc_check.dat (for check)
       call tdep_write_ifc(Crystal,Ifc_tmp,Invar,natom_unitcell,1)
-  
+
 !     Write the Phi2-tmp.dat file
       if (Invar%debug) then
         write(Invar%stdout,'(a)') ' See the Phi2-tmp.dat file corresponding to the ifc_out.dat/Phi2 file'
@@ -138,7 +138,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   ! Only 1 shift in q-mesh
   wminmax = zero
   do
-    call mkphdos(PHdos,Crystal,Ifc,prtdos,Invar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
+    call PHdos%init(Crystal,Ifc,prtdos,Invar%dosdeltae,dossmear,dos_ngqpt,1,dos_qshift, &
       "freq_displ", wminmax, count_wminmax, XMPI_WORLD)
      if (all(count_wminmax == 0)) exit
      wminmax(1) = wminmax(1) - abs(wminmax(1)) * 0.05
@@ -160,7 +160,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     integ=integ + domega*PHdos%phdos(iomega)
   end do
   PHdos%phdos(:)=PHdos%phdos(:)/integ
-  if (MPIdata%iam_master) then 
+  if (MPIdata%iam_master) then
     open(unit=56,file=trim(Invar%output_prefix)//'vdos.dat')
     do iomega=1,PHdos%nomega
       if (Invar%enunit.eq.0) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_eV*1000,PHdos%phdos(iomega)
@@ -169,7 +169,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
       if (Invar%enunit.eq.3) write(56,'(2(f18.6,1x))') PHdos%omega(iomega)*Ha_THz    ,PHdos%phdos(iomega)
     end do
     close(56)
-  end if  
+  end if
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE PATH GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -179,8 +179,8 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 ! Compute the frequencies (1)
 ! =======================
 !FB  Eigen2nd_path%eigenval=zero ; Eigen2nd_path%eigenvec=zero ; Eigen2nd_path%dynmat=zero
-!FB  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
-!FB  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
+!FB  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell))
+!FB  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell))
 !FB  ABI_MALLOC(omega,(3*Invar%natom_unitcell))
 !FB  do iqpt=1,Qpt%nqpt
 !FB    omega=zero ; eigenV=zero ; dij=zero
@@ -195,16 +195,16 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB            Eigen2nd_path%dynmat(1,ii,iatom,jj,jatom,iqpt)  = real(dij(ii+3*(iatom-1),jj+3*(jatom-1)))
 !FB            Eigen2nd_path%dynmat(2,ii,iatom,jj,jatom,iqpt)  =aimag(dij(ii+3*(iatom-1),jj+3*(jatom-1)))
 !FB          end do
-!FB        end do  
+!FB        end do
 !FB      end do
-!FB    end do  
+!FB    end do
 !FB  end do
 !FB  ABI_FREE(dij)
 !FB  ABI_FREE(eigenV)
 !FB  ABI_FREE(omega)
 !FB! Write the Dij, eigenvalues and eigenvectors (in ASCII)
 !FB! ======================================================
-!FB  if (MPIdata%iam_master) then 
+!FB  if (MPIdata%iam_master) then
 !FB    open(unit=51,file=trim(Invar%output_prefix)//'eigenvectors-path-1.dat')
 !FB    open(unit=52,file=trim(Invar%output_prefix)//'dij-path-1.dat')
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-path-1.dat')
@@ -218,7 +218,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    close(51)
 !FB    close(52)
 !FB    close(53)
-!FB  end if  
+!FB  end if
 
 ! Compute the frequencies (2)
 ! =======================
@@ -232,7 +232,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
   ABI_FREE(displ)
 ! Write the Dij, eigenvalues and eigenvectors (in ASCII and YAML)
 ! ======================================================
-  if (MPIdata%iam_master) then 
+  if (MPIdata%iam_master) then
 !FB    open(unit=51,file=trim(Invar%output_prefix)//'eigenvectors-path-2.dat')
 !FB    open(unit=52,file=trim(Invar%output_prefix)//'dij-path-2.dat')
 !FB    open(unit=53,file=trim(Invar%output_prefix)//'omega-path-2.dat')
@@ -250,7 +250,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
     close(52)
     close(53)
     call tdep_write_yaml(Eigen2nd_path,Qpt,Invar%output_prefix)
-  end if  
+  end if
 
 !FB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !FB!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ON THE MP GRID !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -259,12 +259,12 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB! =============================================
 !FB  if (Qbz%nqbz.ne.Qbz%nqibz) then
 !FB    write(Invar%stdlog,*) 'DIFFERENCES BETWEEN NQBZ \& NQIBZ :',Qbz%nqbz,Qbz%nqibz
-!FB  end if  
+!FB  end if
 !FB! Compute the frequencies(1)
 !FB! =======================
 !FB  Eigen2nd_MP%eigenval=zero ; Eigen2nd_MP%eigenvec=zero ; Eigen2nd_MP%dynmat=zero
-!FB  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
-!FB  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell)) 
+!FB  ABI_MALLOC(dij   ,(3*Invar%natom_unitcell,3*Invar%natom_unitcell))
+!FB  ABI_MALLOC(eigenV,(3*Invar%natom_unitcell,3*Invar%natom_unitcell))
 !FB  ABI_MALLOC(omega,(3*Invar%natom_unitcell))
 !FB  do iq_ibz=1,Qbz%nqibz
 !FB    omega=zero ; eigenV=zero ; dij=zero
@@ -279,10 +279,10 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB            Eigen2nd_MP%dynmat(1,ii,iatom,jj,jatom,iq_ibz)  = real(dij(ii+3*(iatom-1),jj+3*(jatom-1)))
 !FB            Eigen2nd_MP%dynmat(2,ii,iatom,jj,jatom,iq_ibz)  =aimag(dij(ii+3*(iatom-1),jj+3*(jatom-1)))
 !FB          end do
-!FB        end do  
+!FB        end do
 !FB      end do
-!FB    end do  
-!FB  end do  
+!FB    end do
+!FB  end do
 !FB  ABI_FREE(dij)
 !FB  ABI_FREE(eigenV)
 !FB  ABI_FREE(omega)
@@ -300,7 +300,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    close(51)
 !FB    close(52)
 !FB    close(53)
-!FB  end if  
+!FB  end if
 !FB
 ! Compute the frequencies (2)
 ! =======================
@@ -326,7 +326,7 @@ subroutine tdep_calc_phdos(Crystal,DDB,Eigen2nd_MP,Eigen2nd_path,Ifc,Invar,Latti
 !FB    close(51)
 !FB    close(52)
 !FB    close(53)
-!FB  end if  
+!FB  end if
 
 ! Write the DDB
 ! =============
@@ -345,7 +345,7 @@ subroutine tdep_calc_thermo(Invar,Lattice,MPIdata,PHdos,U0)
   type(Input_type),intent(in) :: Invar
   type(Lattice_type), intent(inout) :: Lattice
   type(MPI_enreg_type), intent(in) :: MPIdata
-  type(phonon_dos_type),intent(in) :: PHdos
+  type(phdos_t),intent(in) :: PHdos
 
   integer :: iomega,itemp,iatom,itypat
   double precision :: k_B,wovert,heatcapa,entropy,internalE,freeE,expm2x,ln2shx,cothx,xx
@@ -555,7 +555,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   write(Invar%stdout,'(a,6(f8.3,1x))') ' | C61 C62 C63 C64 C65 C66 |   ',Cij(6,1),Cij(6,2),Cij(6,3),Cij(6,4),Cij(6,5),Cij(6,6)
 
 ! Compute the eigenvalues of the Cij matrix in order to find the Born-Huang
-! stability criterion (see Wallace, Thermodynamics of crystal, p39) 
+! stability criterion (see Wallace, Thermodynamics of crystal, p39)
   ABI_MALLOC(WORK,(1))
   ABI_MALLOC(Sij,(6,6)) ; Sij(:,:)=0.d0
   ABI_MALLOC(eigenvalues,(6)) ; eigenvalues(:)=0.d0
@@ -570,13 +570,13 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
     if (eigenvalues(ii).lt.0.d0) then
       write(Invar%stdout,'(a)') ' WARNING :'
       write(Invar%stdout,'(a,i3,a,1x,f8.3,1x)') 'The eigenvalue number',ii,'is negative and equals to',eigenvalues(ii)
-      write(Invar%stdout,'(a)') 'The Born-Huang stability criterion is not fulfilled' 
+      write(Invar%stdout,'(a)') 'The Born-Huang stability criterion is not fulfilled'
     end if
-  end do  
+  end do
 
   ABI_FREE(WORK)
-  ABI_FREE(Sij)  
-  ABI_FREE(eigenvalues)  
+  ABI_FREE(Sij)
+  ABI_FREE(eigenvalues)
 
 ! For an anisotropic material
   write(Invar%stdout,'(a)') ' '
@@ -597,7 +597,7 @@ subroutine tdep_calc_elastic(Phi2,distance,Invar,Lattice)
   write(Invar%stdout,'(a,6(f8.3,1x))') ' | S51 S52 S53 S54 S55 S56 |   ',Sij(5,1),Sij(5,2),Sij(5,3),Sij(5,4),Sij(5,5),Sij(5,6)
   write(Invar%stdout,'(a,6(f8.3,1x))') ' | S61 S62 S63 S64 S65 S66 |   ',Sij(6,1),Sij(6,2),Sij(6,3),Sij(6,4),Sij(6,5),Sij(6,6)
   Lattice%Sij=Sij
-  ABI_FREE(Sij)  
+  ABI_FREE(Sij)
 
 ! For an orthotropic material
   write(Invar%stdout,'(a)') ' '

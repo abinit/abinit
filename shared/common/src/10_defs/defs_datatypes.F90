@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/defs_datatypes
 !! NAME
 !! defs_datatypes
@@ -26,7 +25,7 @@
 !! * pspheader_type: for norm-conserving pseudopotentials, the header of the file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2022 ABINIT group (XG)
+!! Copyright (C) 2001-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -64,22 +63,22 @@ module defs_datatypes
 
  type ebands_t
 
-  integer :: bantot                ! total number of bands (sum(nband(:))
-  integer :: ivalence              ! CP added: highest valence band index (useful when occopt=9 only)
+  integer :: bantot                ! Total number of bands (sum(nband(:))
+  integer :: ivalence              ! Highest valence band index (useful when occopt=9 only)
   integer :: mband                 ! Max number of bands i.e MAXVAL(nband) (to dimension arrays)
-  integer :: nkpt                  ! number of k points
+  integer :: nkpt                  ! Number of k points
   integer :: nspinor               ! 1 for collinear, 2 for noncollinear.
-  integer :: nsppol                ! number of spin-polarizations
+  integer :: nsppol                ! Number of spin-polarizations
   integer :: ntemp                 ! Number of temperatures
   integer :: occopt                ! Occupation option, see input variable.
 
   real(dp) :: entropy              ! Entropy associated with the smearing (adimensional)
   real(dp) :: fermie               ! Fermi energy ! CP: when occopt = 9, fermi energy of the quasi-FD distribution of excited
 ! electrons in the conduction bands above ivalence
-  real(dp) :: fermih               ! CP added: Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
+  real(dp) :: fermih               ! Fermi energy of the excited holes in the valence bands <= ivalence (occopt = 9 only)
   real(dp) :: nelect               ! Number of electrons.
-  real(dp) :: ne_qFD               ! CP added: Number of electrons excited in the bands > ivalence (occopt = 9 only)
-  real(dp) :: nh_qFD               ! CP added: Number of holes     excited in the bands <=ivalence (occopt = 9 only)
+  real(dp) :: ne_qFD               ! Number of electrons excited in the bands > ivalence (occopt = 9 only)
+  real(dp) :: nh_qFD               ! Number of holes     excited in the bands <=ivalence (occopt = 9 only)
   real(dp) :: tphysel              ! Physical temperature of electrons.
   real(dp) :: tsmear               ! Temperature of smearing.
   !real(dp) :: max_occ             ! Spin degeneracy factor: max_occ = two / (self%nspinor * self%nsppol)
@@ -226,6 +225,9 @@ module defs_datatypes
    ! Number of points in the reciprocal space grid on which
    ! the radial functions are specified (same grid as the one used for the local part).
 
+   ! TODO
+   !integer :: mqgrid_ff = 0
+
    logical :: has_tvale = .False.
     ! True if the norm-conserving pseudopotential provides the atomic pseudized valence density.
     ! If alchemy, has_tvale is True only if all the mixed pseudos
@@ -245,6 +247,15 @@ module defs_datatypes
     ! \int{(16/15)*pi^5*n(r)*r^6* dr}
     ! (tNcore(q) = FT of pseudo core density)
 
+   real(dp) :: dtaucdq0 = zero
+    ! Gives 1/q d(tau_core(q))/dq for q=0
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
+   real(dp) :: d2taucdq0 = zero
+    ! Gives contribution of d2(tau_core(q))/d2q for q=0
+    ! \int{(16/15)*pi^5*n(r)*r^6* dr}
+    ! (tau_core(q) = FT of pseudo core kinetic energy density)
+
    real(dp) :: dnvdq0 = zero
     ! Gives 1/q d(tNvale(q))/dq for q=0
     ! (tNvale(q) = FT of pseudo valence density)
@@ -260,6 +271,30 @@ module defs_datatypes
     ! tcorespl is **always** allocated and initialized with zeros if not has_tcore
     ! A similar approach is used in PAW.
 
+   real(dp), allocatable :: ttaucorespl(:,:)
+    ! ttaucorespl(mqgrid_vl,2)
+    ! Gives the pseudo core kinetic energy density in reciprocal space on a regular grid.
+    ! ttaucorespl is **always** allocated and initialized with zeros if not has_tcore
+
+   integer :: num_tphi = 0
+   ! Number of pseudo atomic orbitals. 0 if pseudo does not provide them
+
+   logical :: has_jtot = .False.
+   ! True if tpsi are given in terms of j (relativistic pseudo with SOC)
+
+   real(dp), allocatable :: tphi_qspl(:,:,:)
+    ! (mqgrid_ff, 2, num_tphi)
+    ! Form factors for the pseudo wavefunctions.
+
+   integer,allocatable :: tphi_n(:), tphi_l(:)
+    ! (num_tphi) arrays giving n, l
+
+   real(dp),allocatable :: tphi_jtot(:)
+    ! (num_tphi) array with jtot.
+
+   real(dp),allocatable :: tphi_occ(:)
+    ! (num_tphi) array with atomic occupancies taken from pseudo.
+
  end type nctab_t
 !!***
 
@@ -272,8 +307,7 @@ module defs_datatypes
 !! FUNCTION
 !! This structured datatype contains all the information about one
 !! norm-conserving pseudopotential, including the description of the local
-!! and non-local parts, the different projectors, the non-linear core
-!! correction ...
+!! and non-local parts, the different projectors, the non-linear core correction ...
 !!
 !! SOURCE
 
@@ -285,11 +319,9 @@ module defs_datatypes
 ! Integer scalars
   integer :: dimekb
    ! Dimension of Ekb
-   ! ->Norm conserving : Max. number of Kleinman-Bylander energies
-   !                     for each atom type
+   ! ->Norm conserving : Max. number of Kleinman-Bylander energies for each atom type
    !                     dimekb=lnmax (lnmax: see this file)
-   ! ->PAW : Max. number of Dij coefficients connecting projectors
-   !                     for each atom type
+   ! ->PAW : Max. number of Dij coefficients connecting projectors for each atom type
    !                     dimekb=lmnmax*(lmnmax+1)/2 (lmnmax: see this file)
 
   integer :: lmnmax
@@ -309,14 +341,13 @@ module defs_datatypes
 
   integer :: mpsang
    ! Highest angular momentum of non-local projectors over all type of psps.
-   ! shifted by 1 : for all local psps, mpsang=0; for largest s, mpsang=1,
+   ! shifted by 1: for all local psps, mpsang=0; for largest s, mpsang=1,
    ! for largest p, mpsang=2; for largest d, mpsang=3; for largest f, mpsang=4
    ! This gives also the number of non-local "channels"
 
   integer :: mpspso
    ! mpspso is set to 1 if none of the psps is used with a spin-orbit part (that
-   !  is, if the user input variable so_psp is not equal
-   !  to 1 in at least one case
+   !  is, if the user input variable so_psp is not equal to 1 in at least one case
    ! otherwise, it is set to 2
 
   integer :: mpssoang
@@ -415,15 +446,14 @@ module defs_datatypes
 
   real(dp), allocatable :: ekb(:,:)
    ! ekb(dimekb,ntypat*(1-usepaw))
-   !  ->NORM-CONSERVING PSPS ONLY:
+   ! NORM-CONSERVING PSPS ONLY:
    !    (Real) Kleinman-Bylander energies (hartree)
    !           for number of basis functions (l,n) (lnmax)
    !           and number of atom types (ntypat)
-   ! NOTE (MT) : ekb (norm-conserving) is now diagonal (one dimension
-   !             lnmax); it would be easy to give it a second
-   !             (symmetric) dimension by putting
-   !             dimekb=lnmax*(lnmax+1)/2
-   !             in the place of dimekb=lmnmax.
+   ! NOTE (MT):
+   !   ekb (norm-conserving) is now diagonal (one dimension lnmax);
+   !   it would be easy to give it a second (symmetric) dimension by putting
+   !   dimekb=lnmax*(lnmax+1)/2 in the place of dimekb=lmnmax.
 
   real(dp), allocatable :: ffspl(:,:,:,:)
    ! ffspl(mqgrid_ff,2,lnmax,ntypat)
@@ -462,6 +492,14 @@ module defs_datatypes
    ! for each type of atom, on the radial grid. The components
    ! xccc1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
    ! pseudo-core charge with respect to the radial distance.
+
+  real(dp), allocatable :: xcctau1d(:,:,:)
+   ! xcctau1d(n1xccc*(1-usepaw),6,ntypat)
+   ! Norm-conserving psps only
+   ! The component xcctau1d(n1xccc,1,ntypat) is the pseudo-core charge kinetic energy density
+   ! for each type of atom, on the radial grid. The components
+   ! xcctau1d(n1xccc,ideriv,ntypat) give the ideriv-th derivative of the
+   ! pseudo-core charge kinetic energy density with respect to the radial distance.
 
   real(dp), allocatable :: zionpsp(:)
    ! zionpsp(npsp)
@@ -502,7 +540,8 @@ module defs_datatypes
 
    type(nctab_t),allocatable :: nctab(:)
    ! nctab(ntypat)
-   ! Tables storing data for NC pseudopotentials.
+   ! Tables storing additional data for NC pseudopotentials that are not always avaiable if every psp format.
+   ! We try to mimim pawtab as much as possible so that we can reuse PAW routines in the NC context.
 
    integer :: nc_xccc_gspace = 0
    ! NC pseudos only. Set to 1 if the non-linear core correction should
@@ -618,4 +657,3 @@ module defs_datatypes
 
 end module defs_datatypes
 !!***
-

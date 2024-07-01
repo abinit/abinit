@@ -1,0 +1,202 @@
+
+.Version 9.4.1 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.3 computer) 
+
+.Copyright (C) 1998-2024 ABINIT group . 
+ ABINIT comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Sun 21 Mar 2021.
+- ( at 09h28 )
+  
+- input  file    -> /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/TestBot_MPI1/tutoparal_tparal_bandpw_01_MPI1/tparal_bandpw_01.abi
+- output file    -> tparal_bandpw_01_MPI1.abo
+- root for input  files -> tparal_bandpw_01_MPI1i
+- root for output files -> tparal_bandpw_01_MPI1o
+
+- inpspheads : Reading pseudopotential header in XML form from 
+-   /home/buildbot/ABINIT/alps_gnu_9.3_openmpi/trunk__gonze-9.4/tests/Psps_for_tests/Pseudodojo_paw_pw_standard/Au.xml
+
+--- !Autoparal
+# Autoparal section for GS calculations with paral_kgb 1
+info:
+    autoparal: 1
+    paral_kgb: 1
+    max_ncpus: 64
+    nspinor: 1
+    nsppol: 1
+    nkpt: 1
+    mband: 640
+configurations:
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.661381768
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 4,
+            npband: 16,
+            bandpp: 10,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.653809390
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 8,
+            npband: 8,
+            bandpp: 20,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.652034578
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 16,
+            npband: 4,
+            bandpp: 40,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.668215873
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 6,
+            npband: 10,
+            bandpp: 16,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.650905287
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 15,
+            npband: 4,
+            bandpp: 40,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.610039107
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 4,
+            npband: 16,
+            bandpp: 8,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.650428659
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 12,
+            npband: 5,
+            bandpp: 32,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.603092191
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 8,
+            npband: 8,
+            bandpp: 16,
+            }
+    - tot_ncpus: 64
+      mpi_ncpus: 64
+      omp_ncpus: 1
+      efficiency:  0.601454880
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 16,
+            npband: 4,
+            bandpp: 32,
+            }
+    - tot_ncpus: 60
+      mpi_ncpus: 60
+      omp_ncpus: 1
+      efficiency:  0.638648569
+      vars: {
+            npimage: 1,
+            npkpt: 1,
+            npspinor: 1,
+            npfft: 3,
+            npband: 20,
+            bandpp: 8,
+            }
+...
+
+ ====================================================================================================
+ Searching for all possible proc distributions for this input with #CPUs<=64:
+
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ |       np_spkpt|       npfft|      npband|      bandpp|  #MPI(proc)|    WEIGHT|
+ |    1<<    1|    1<<   22|    1<<   64|    1<<  640|    1<<   64|  <=    64|
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ |           1|           4|          16|          10|          64|    42.328|
+ |           1|           8|           8|          20|          64|    41.844|
+ |           1|          16|           4|          40|          64|    41.730|
+ |           1|           6|          10|          16|          60|    40.093|
+ |           1|          15|           4|          40|          60|    39.054|
+ |           1|           4|          16|           8|          64|    39.043|
+ |           1|          12|           5|          32|          60|    39.026|
+ |           1|           8|           8|          16|          64|    38.598|
+ |           1|          16|           4|          32|          64|    38.493|
+ |           1|           3|          20|           8|          60|    38.319|
+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ Only the best possible choices for nproc are printed...
+
+ >>> Possible (best) choices for the number of bands (nband) are:
+     with: npfft=4
+     nband=   624 using     64 CPUs =    64 MPI x  1 threads (npband=   16)
+     nband=   656 using     64 CPUs =    64 MPI x  1 threads (npband=   16)
+     nband=   640 using     64 CPUs =    64 MPI x  1 threads (npband=   16)
+     nband=   645 using     60 CPUs =    60 MPI x  1 threads (npband=   15)
+     nband=   630 using     60 CPUs =    60 MPI x  1 threads (npband=   15)
+     nband=   644 using     56 CPUs =    56 MPI x  1 threads (npband=   14)
+     nband=   650 using     52 CPUs =    52 MPI x  1 threads (npband=   13)
+     nband=   637 using     52 CPUs =    52 MPI x  1 threads (npband=   13)
+     nband=   648 using     48 CPUs =    48 MPI x  1 threads (npband=   12)
+     nband=   636 using     48 CPUs =    48 MPI x  1 threads (npband=   12)
+     nband=   627 using     44 CPUs =    44 MPI x  1 threads (npband=   11)
+     nband=   649 using     44 CPUs =    44 MPI x  1 threads (npband=   11)
+ >>> The present nband value (   640) seems to be a good choice!
+
+ Launch a parallel version of ABINIT with a distribution of processors among the above list,
+ and the associated input variables (np_spkpt, npband, npfft, bandpp, etc.).
+ The higher weight should be better.
+ ====================================================================================================
+
+

@@ -60,8 +60,13 @@ EXTERNAL_MODS = {
     #"m_build_info",
     #"m_optim_dumper",
     "libxc_functionals",
-    #Scale-UP for effective models
-    "scup_global"
+    # Scale-UP for effective models
+    "scup_global",
+    # GreenX library (temporary version)
+    "gx_minimax",
+    "mp2_grids",
+    # YAKL module
+    "gator_mod",
 }
 
 
@@ -420,7 +425,14 @@ class AbinitProject(NotebookWriter):
         def filter_fortran(files):
             return [f for f in files if f.endswith(".f") or f.endswith(".F90")]
 
-        import imp
+        def load_mod(filepath):
+            try:
+                import imp
+                return imp.load_source(filepath, filepath)
+            except ModuleNotFoundError:
+                from importlib.machinery import SourceFileLoader
+                return SourceFileLoader(filepath, filepath).load_module()
+
         name2path = OrderedDict()
         for d in self.dirpaths:
             if os.path.basename(d) == "98_main":
@@ -432,7 +444,7 @@ class AbinitProject(NotebookWriter):
             else:
                 # Get source files from abinit.src.
                 abinit_src = os.path.join(d, "abinit.src")
-                mod = imp.load_source(abinit_src, abinit_src)
+                mod = load_mod(abinit_src)
                 for basename in filter_fortran(mod.sources):
                     if basename in name2path:
                         raise RuntimeError("Found two Fortran files with same basename `%s` and other in dir `%s`\n"
@@ -914,6 +926,7 @@ class AbinitProject(NotebookWriter):
 
             prog_name = prog_file.programs[0].name
             if prog_name.lower() == "fold2bloch": prog_name = "fold2Bloch"
+            if prog_name.lower() == "fortran_gator": continue
             config.set(prog_name, "libraries", "\n" + "\n".join(dirnames))
             # py3k
             #config[prog_name]["libraries"] = "\n" + "\n".join(dirnames)

@@ -44,8 +44,6 @@ qpt9     -2.50000000E-01  5.00000000E-01  2.50000000E-01
 nqpt    1        # 1 qpoint at a time
 getwfk  1        # all other datasets get WFK from DS1
 prtwf   0
-rfatpol 1 1      # all atoms are perturbed
-rfdir   1 1 1    # all directions of perturbation
 rfphon  1
 tolvrs  1e-7
 
@@ -68,6 +66,7 @@ znucl  13
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% exclude_builders = eos_nvhpc_23.1_elpa, eos_nvhpc_23.9_elpa, eos_nvhpc_23.11_elpa
 #%% test_chain = t85.abi, t86.abi, t87.abi, t88.abi, t89.abi
 #%% [files]
 #%% files_to_test = 

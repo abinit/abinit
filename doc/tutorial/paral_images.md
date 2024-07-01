@@ -16,7 +16,7 @@ e.g. path-integral molecular dynamics, hyperdynamics, linear combination of imag
 The parallelism on images can be used for all these algorithms.
 
 You are supposed to know already some basics of parallelism in ABINIT, explained in the tutorial
-[A first introduction to ABINIT in parallel](/tutorial/basepar), and  [ground state with plane waves](/tutorial/paral_gspw).
+[A first introduction to ABINIT in parallel](/tutorial/basepar), and  [parallelism over bands and plane waves](/tutorial/paral_bandpw).
 
 This tutorial should take about 1.5 hour and requires to have at least a 10 CPU
 core parallel computer.
@@ -107,7 +107,7 @@ Note the use of [[bandpp]] 10 to accelerate the convergence.
 
 !!! important
     If your system were larger and required more CPU time, all the usual variables for parallelism
-    [[npkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
+    [[np_spkpt]], [[npband]], [[npfft]], [[npspinor]] could be used wisely.
 
 Then run the calculation in sequential, first for the initial
 configuration (`timages_01.abi`), and then for the final one (`timages_02.abi`). You

@@ -17,8 +17,7 @@ smdelta2    1
 getwfk2     1          # Use GS wave functions from dataset1
 kptopt2     3          # Need full k-point set for finite-Q response
 rfphon2     1          # Do phonon response
-rfatpol2    1 2        # Treat displacements of all atoms
-rfdir2      1 0 0      # Do all directions (symmetry will be used)
+rfdir       1 0 0      # Do all directions (symmetry will be used)
 tolvrs2     1.0d-8     # This default is active for sets 3-10
 
 

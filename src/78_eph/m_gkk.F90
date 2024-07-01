@@ -5,12 +5,10 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2024 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -37,9 +35,7 @@ module m_gkk
  use m_wfk
  use m_nctk
  use m_dtfil
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
 
  use defs_abitypes,    only : MPI_type
  use m_time,           only : cwtime, sec2str
@@ -59,6 +55,7 @@ module m_gkk
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
  use m_wfd,            only : wfd_init, wfd_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_ephtk,          only : ephtk_v1atm_to_vqnu
 
  implicit none
 
@@ -94,14 +91,6 @@ contains  !=====================================================================
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! NOTES
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,ebands_kq,dvdb,ifc,&
@@ -128,7 +117,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
 !Local variables ------------------------------
 !scalars
- integer,parameter :: tim_getgh1c=1,berryopt0=0, useylmgr1=0,master=0
+ integer,parameter :: tim_getgh1c=1, berryopt0=0, useylmgr1=0, master=0, qptopt1 = 1
  integer :: my_rank,nproc,mband,mband_kq,my_minb,my_maxb,nsppol,nkpt,nkpt_kq,idir,ipert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor
  integer :: ib1,ib2,band,ik,ikq,timerev_q
@@ -147,14 +136,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
- real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
- real(dp) :: dvdb_qdamp(1)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
+ real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:)
- real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
@@ -175,15 +162,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); i_am_master = my_rank == master
 
  ! Copy important dimensions
- natom = cryst%natom
- natom3 = 3 * natom
- nsppol = ebands_k%nsppol
- nspinor = ebands_k%nspinor
- nspden = dtset%nspden
- nkpt = ebands_k%nkpt
- mband = ebands_k%mband
- nkpt_kq = ebands_kq%nkpt
- mband_kq = ebands_kq%mband
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands_k%nsppol; nspinor = ebands_k%nspinor; nspden = dtset%nspden
+ nkpt = ebands_k%nkpt; mband = ebands_k%mband; nkpt_kq = ebands_kq%nkpt; mband_kq = ebands_kq%mband
  ecut = dtset%ecut
  !write(std_out, *)"ebands dims (b, k, s): ", ebands_k%mband, ebands_k%nkpt, ebands_k%nsppol
  !write(std_out, *)"ebands_kq dims (b, k, s): ", ebands_kq%mband, ebands_kq%nkpt, ebands_kq%nsppol
@@ -256,7 +236,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  ! Read wavefunctions on the k-points grid and q-shifted k-points grid.
  call wfd_k%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
-
  call wfd_kq%read_wfk(wfq_path, iomode_from_fname(wfq_path))
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
@@ -298,13 +277,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,natom,&
    dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
-   usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda,&
+   usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option,&
    comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
 
  ! Allocate vlocal. Note nvloc
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ! Allocate work space arrays.
- ABI_MALLOC(blkflg, (natom3,natom3))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
 
  call cwtime(cpu, wall, gflops, "start")
@@ -313,7 +291,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  if (dtset%eph_use_ftinterp /= 0) then
    ABI_WARNING(sjoin("Enforcing FT interpolation for q-point", ktoa(qpt)))
    comm_rpt = xmpi_comm_self
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfftf, ngfftf, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -346,12 +324,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  else if (dtset%eph_task == -2) then
    ! Write GKQ file with all perturbations. gkq are given in the atom representation.
-   ! TODO: mband_kq == mband
+   ! TODO: Assuming mband_kq == mband
    ABI_MALLOC(gkq_atm, (2, mband_kq, mband, nkpt))
    if (i_am_master) then
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
      fname = strcat(dtfil%filnam_ds(4), "_GKQ.nc")
-#ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKQ file")
      NCF_CHECK(cryst%ncwrite(ncid))
      ! Write bands on k mesh.
@@ -371,7 +348,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        nctkarr_t("eigenvalues_kq", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
        nctkarr_t('phfreqs', "dp", 'number_of_phonon_modes'), &
        nctkarr_t('phdispl_cart', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
-       !nctkarr_t('phdispl_cart_qvers', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t('phdispl_red', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t("gkq_representation", "char", "character_string_length"), &
        nctkarr_t('gkq', "dp", &
@@ -401,13 +377,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(eigens_kq)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfrq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart'), displ_cart))
-     ! Add phonon displacement for qvers
-     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, nanaqdir="reduced")
-     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
-#endif
-   end if
+   end if ! master
+
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
@@ -416,7 +389,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  do ipc=1,natom3
    idir = mod(ipc-1, 3) + 1
    ipert = (ipc - idir) / 3 + 1
-   write(msg, '(a,2i4)') " Treating ipert, idir = ", ipert, idir
+   write(msg, '(a,2(i0,1x))') " Treating ipert, idir = ", ipert, idir
    call wrtout(std_out, msg, do_flush=.True.)
    if (dtset%eph_task == 2) gkk = zero
 
@@ -508,18 +481,16 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        do ib2=1,mband
          do ib1=1,mband_kq
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
-             mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                          mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            band = 2*ib2-1 + (spin-1) * 2 * mband
-
            if (dtset%eph_task == 2) then
              gkk(band,ik,1,1,ib1) = dotr
              gkk(band+1,ik,1,1,ib1) = doti
            else
              gkq_atm(:, ib1, ib2, ik) = [dotr, doti]
            end if
-
-         end do
-       end do
+         end do ! ib1
+       end do ! ib2
 
      end do ! ikpt
 
@@ -533,13 +504,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        call xmpi_sum_master(gkq_atm, master, comm, ierr)
        if (i_am_master) then
          ! Write the netCDF file.
-#ifdef HAVE_NETCDF
          ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gkq"), gkq_atm, &
-           start=[1, 1, 1, ipc, 1, 1], count=[2, mband, mband, 1, nkpt, spin])
+                              start=[1, 1, 1, ipc, 1, spin], count=[2, mband, mband, 1, nkpt, 1])
          NCF_CHECK(ncerr)
-#endif
        end if
      end if
+
    end do ! spin
 
    if (dtset%eph_task == 2) then
@@ -550,7 +520,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! Write the netCDF file.
      call appdig(ipc,dtfil%fnameabo_gkk,gkkfilnam)
      fname = strcat(gkkfilnam, ".nc")
-#ifdef HAVE_NETCDF
      if (i_am_master) then
        NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
        NCF_CHECK(cryst%ncwrite(ncid))
@@ -558,7 +527,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        call gkk_ncwrite(gkk2d, qpt, 1.0_dp,  ncid)
        NCF_CHECK(nf90_close(ncid))
      end if
-#endif
      ! Free memory
      call gkk_free(gkk2d)
    end if
@@ -570,9 +538,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  call wrtout(std_out, sjoin("cpu-time:", sec2str(cpu), ",wall-time:", sec2str(wall)), do_flush=.True.)
 
  if (dtset%eph_task == -2 .and. i_am_master) then
-#ifdef HAVE_NETCDF
    NCF_CHECK(nf90_close(ncid))
-#endif
  end if
 
  ! ===========
@@ -594,7 +560,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
  ABI_FREE(ylmgr_kq)
- ABI_FREE(blkflg)
 
  call gs_hamkq%free()
  call wfd_k%free()
@@ -624,12 +589,6 @@ end subroutine eph_gkk
 !! OUTPUT
 !!  Only writing
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      get_kg
-!!
 !! SOURCE
 
 subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
@@ -645,24 +604,18 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master = 0
- integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
+ integer,parameter :: master = 0, qptopt1 = 1
+ integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt, ncid, ncerr
+ integer :: iq, nu, iatom, ii, jj, kk
+ real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
  logical :: with_lr_model
-#ifdef HAVE_NETCDF
- integer :: ncid, ncerr
-#endif
 !arrays
  integer :: ngfft(18)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
  real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
- real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:)
- real(dp),allocatable :: v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
-#if 1
- integer :: iq, nu, iatom, ii, jj, kk
- real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
+ real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:), v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
  type(kpath_t) :: qpath
- real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3)
- real(dp) :: values(dvdb%natom3)
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3), values(dvdb%natom3)
 
 !************************************************************************
 
@@ -718,7 +671,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
  call qpath%free()
  return
-#endif
 
  my_rank = xmpi_comm_rank(dvdb%comm)
  comm = dvdb%comm
@@ -741,7 +693,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  else if (dtset%eph_task == +16) then
    call wrtout([std_out, ab_out], " Using Fourier interpolation.")
     comm_rpt = xmpi_comm_self
-    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
+    call dvdb%ftinterp_setup(dtset%ddb_ngqpt, qptopt1, 1, dtset%ddb_shiftq, nfft, ngfft, comm_rpt)
     interpolated = 1
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
@@ -750,7 +702,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  with_lr_model = .True.
 
  ! Create netcdf file.
-#ifdef HAVE_NETCDF
  if (my_rank == master) then
    NCF_CHECK(nctk_open_create(ncid, out_ncpath, comm))
    NCF_CHECK(dvdb%cryst%ncwrite(ncid))
@@ -778,7 +729,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngfft"), ngfft(1:3)))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpt"), qpt))
  end if
-#endif
 
  ABI_MALLOC(v1_qnu, (2, nfft, dvdb%nspden, dvdb%natom3))
  if (with_lr_model) then
@@ -810,7 +760,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
- call v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
+ call ephtk_v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
 
  if (with_lr_model) then
    ! Compute LR model in the atomic representation then compute phonon representation in v1lr_qnu.
@@ -822,26 +772,22 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
        if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
      end do
    end do
-   call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
+   call ephtk_v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
  end if
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "displ_cart"), displ_cart))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1_qnu"), v1_qnu))
  if (with_lr_model) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "v1lr_qnu"), v1lr_qnu))
  end if
-#endif
 
  ABI_FREE(v1scf)
  ABI_FREE(v1_qnu)
  ABI_SFREE(v1lr_atm)
  ABI_SFREE(v1lr_qnu)
 
-#ifdef HAVE_NETCDF
  NCF_CHECK(nf90_close(ncid))
-#endif
  call dvdb%close()
 
  call wrtout(std_out, "dvqnu file written", do_flush=.True.)
@@ -851,85 +797,16 @@ end subroutine ncwrite_v1qnu
 
 !----------------------------------------------------------------------
 
-!!****f* m_gkk/v1atm_to_vqnu
-!! NAME
-!!  v1atm_to_vqnu
-!!
-!! FUNCTION
-!!  Receive potentials in atomic representation and return potential in phonon representation
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! PARENTS
-!!      m_gkk
-!!
-!! CHILDREN
-!!      get_kg
-!!
-!! SOURCE
-
-subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: cplex, nfft, nspden, natom3
-!arrays
- real(dp),intent(in) :: v1_atm(cplex, nfft, nspden, natom3)
- real(dp),intent(out) :: v1_qnu(2, nfft, nspden, natom3)
- real(dp),intent(in) :: displ_red(2, natom3, natom3)
-
-!Local variables-------------------------------
-!scalars
- integer :: nu, ip, ispden
-
-!************************************************************************
-
- do nu=1,natom3
-   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
-   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-   ! v1_qnu(2, nfft, nspden, natom3), v1_atm(cplex, nfft, nspden, natom3)
-   v1_qnu(:, :, :, nu) = zero
-   do ip=1,natom3
-     do ispden=1,nspden
-       if (cplex == 2) then
-         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + &
-           displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip) - displ_red(2,ip,nu) * v1_atm(2,:,ispden,ip)
-         v1_qnu(2, :, ispden, nu) = v1_qnu(2, :, ispden, nu) + &
-           displ_red(2,ip,nu) * v1_atm(1,:,ispden,ip) + displ_red(1,ip,nu) * v1_atm(2,:,ispden,ip)
-       else
-         ! Gamma point. d(q) = d(-q)* --> d is real.
-         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip)
-       end if
-     end do
-   end do
- end do
-
-end subroutine v1atm_to_vqnu
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gkk/find_mpw
 !! NAME
 !!  find_mpw
 !!
 !! FUNCTION
-!!  Look at all k-points and spins to find the maximum
-!!  number of plane waves.
+!!  Look at all k-points and spins to find the maximum number of plane waves.
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_gkk
-!!
-!! NOTES
-!!
-!! CHILDREN
-!!      get_kg
 !!
 !! SOURCE
 
@@ -938,20 +815,18 @@ subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: mpw
- integer,intent(in) :: nsppol, nkpt
- integer,intent(in) :: comm
+ integer,intent(in) :: nsppol, nkpt, comm
  real(dp),intent(in) :: ecut
 !arrays
- real(dp),intent(in) :: kpts(3,nkpt)
- real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(in) :: kpts(3,nkpt), gmet(3,3)
 
 !Local variables ------------------------------
 !scalars
- integer :: my_rank, cnt, nproc, ierr
- integer :: ispin, ikpt
- integer :: my_mpw, onpw
+ integer :: my_rank, cnt, nproc, ierr, ispin, ikpt, my_mpw, onpw
  integer,allocatable :: gtmp(:,:)
  real(dp) :: kpt(3)
+
+!************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 

@@ -7,7 +7,7 @@
 !! This is a way to check that the testing capabilities are not lost when the test farm is modified ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2017-2022 ABINIT group (XG)
+!! Copyright (C) 2017-2024 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,12 +32,6 @@
 !! counting the final number of blocks, and second to merge
 !! the two DDBs. This would save memory.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,test_dummy,test_same_actual_arg
-!!      test_unused_arg,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -49,11 +43,11 @@
 program dummy_tests
 
  use defs_basis
- use m_build_info
  use m_abicore
  use m_errors
  use m_xmpi
  use m_dummy_tests
+ use m_build_info,   only : abinit_version
  implicit none
 
 !Local variables-------------------------------

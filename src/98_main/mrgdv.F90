@@ -6,7 +6,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MG)
+!! Copyright (C) 2004-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,14 +19,6 @@
 !!   for each potential:
 !!     Abinit header with info on the perturbation and the FFT mesh
 !!     potential on the FFT mesh
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,dvdb%free,dvdb%list_perts
-!!      dvdb%open_read,dvdb%print,dvdb%qdownsample,dvdb_merge_files
-!!      dvdb_test_ftinterp,dvdb_test_v1complete,dvdb_test_v1rsym
-!!      get_command_argument,herald,ngfft_seq,prompt,wrtout,xmpi_init
 !!
 !! SOURCE
 
@@ -41,10 +33,10 @@ program mrgdv
  use defs_basis
  use m_xmpi
  use m_errors
- use m_build_info
  use m_abicore
  use m_dvdb
 
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : sjoin, itoa, ltoa
  use m_numeric_tools,   only : vdiff_eval, vdiff_print
@@ -63,7 +55,7 @@ program mrgdv
  character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
- integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18)
+ integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18), qptopt
  character(len=fnlen),allocatable :: v1files(:)
 
 ! *************************************************************************
@@ -195,7 +187,9 @@ program mrgdv
      call get_command_argument(2, dvdb_filepath)
      call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
+     ABI_CHECK(get_arg("qptopt", qptopt, msg, default=1) == 0, msg)
      write(std_out,"(a)")sjoin(" Downsampling q-mesh with ngqpt:", ltoa(ngqpt))
+     write(std_out,"(a)")sjoin("                         qptopt:", itoa(qptopt))
      write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
      dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
@@ -203,7 +197,7 @@ program mrgdv
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      if (prtvol > 0) call dvdb%print(prtvol=prtvol)
      call dvdb%list_perts([-1,-1,-1], npert_miss, unit=std_out)
-     call dvdb%qdownsample(dump_file, ngqpt, comm)
+     call dvdb%qdownsample(dump_file, qptopt, ngqpt, comm)
      call dvdb%free()
 
    !case ("convert")

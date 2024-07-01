@@ -6,14 +6,10 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -39,12 +35,13 @@ module m_wfk_analyze
  use m_dtfil
  use m_distribfft
 
+ use m_io_tools,        only : iomode_from_fname
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
+ use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq, init_mpi_enreg
  use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : ddkstore_t
  use m_pawang,          only : pawang_type
@@ -65,6 +62,9 @@ module m_wfk_analyze
  use m_classify_bands,  only : classify_bands
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
+ use m_iowf,            only : prtkbff
+
+ use m_wfd_wannier,     only : wfd_run_wannier
 
  implicit none
 
@@ -107,9 +107,6 @@ contains
 !! rprim(3,3)=Dimensionless real space primitive translations.
 !! xred(3,natom)=Reduced atomic coordinates.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -126,9 +123,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
 !!
 !! SOURCE
 
@@ -153,7 +147,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat
+ integer :: ierr,usexcnhat,iomode
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
@@ -162,7 +156,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfkfull_path
  logical :: call_pawinit, use_paw_aeur
- type(hdr_type) :: wfk0_hdr
+ type(hdr_type) :: wfk0_hdr, hdr_kfull
  type(crystal_t) :: cryst
  type(ebands_t) :: ebands
  type(pawfgr_type) :: pawfgr
@@ -279,6 +273,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    pawtab(:)%usepawu   = 0
    pawtab(:)%useexexch = 0
    pawtab(:)%exchmix   =zero
+   pawtab(:)%lamb_shielding   =zero
 
    call setsym_ylm(cryst%gprimd,pawang%l_max-1,cryst%nsym,dtset%pawprtvol,cryst%rprimd,cryst%symrec,pawang%zarot)
 
@@ -329,7 +324,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+
+     ! Write KB form factors.
+     if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
+       call prtkbff(wfkfull_path, hdr_kfull, psps, dtset%prtvol)
+     end if
+     call hdr_kfull%free()
    end if
    call xmpi_barrier(comm)
 
@@ -356,6 +357,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_EINTERP)
    ! Band structure interpolation from eigenvalues computed on the k-mesh.
    call ebands_interpolate_kpath(ebands, dtset, cryst, [0, 0], dtfil%filnam_ds(4), comm)
+
+ case (WFK_TASK_CHECK_SYMTAB)
+   call wfk_check_symtab(wfk0_path, comm)
 
  case (WFK_TASK_CLASSIFY)
    ! Band classification.
@@ -405,6 +409,41 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  !case ("paw_aeden")
 
+ case (WFK_TASK_WANNIER)
+  ! Construct Wannier function.
+
+  ! TODO: only when kpoint in IBZ
+  ! First generate WFK for fullBZ
+  !if (my_rank == master) then
+  !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+  !  call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+  !end if
+  !call xmpi_barrier(comm)
+
+  ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
+  ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
+  keep_ur = .False.; bks_mask = .True.
+  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
+    dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
+    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
+
+  ABI_FREE(keep_ur)
+  ABI_FREE(bks_mask)
+  iomode= iomode_from_fname(wfk0_path)
+  call wfd%read_wfk(wfk0_path, iomode)
+
+
+  call destroy_mpi_enreg(mpi_enreg)
+  call init_mpi_enreg(mpi_enreg)
+  call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
+  call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
+
+  call wfd_run_wannier(cryst=cryst, ebands=ebands,&
+       & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
+       & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
+       & dtset=dtset, dtfil=dtfil,  &
+       & pawang=pawang, pawrad=pawrad, &
+       & pawtab=pawtab, psps=psps )
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
  end select
@@ -441,12 +480,6 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !! FUNCTION
 !!  Initialize the wavefunction descriptor
 !!
-!! PARENTS
-!!      m_wfk_analyze
-!!
-!! CHILDREN
-!!      wfd%read_wfk,wfd_init
-!!
 !! SOURCE
 
 subroutine read_wfd()
@@ -464,7 +497,8 @@ subroutine read_wfd()
    ABI_FREE(keep_ur)
    ABI_FREE(bks_mask)
 
-   call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   !call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
+   call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
    !call wfd%test_ortho(cryst, pawtab)
 
  end subroutine read_wfd

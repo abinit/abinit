@@ -99,16 +99,15 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% need_cpp_vars = 
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t31.abo, tolnlines = 6, tolabs = 1.100e-03, tolrel = 5.400e-04
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
 #%% keywords = GW
-#%% description = 
+#%% description =
 #%%   SiC in zinc-blende structure (nkpt 2; ecut 6)
 #%%   In dataset 1, ABINIT finds the ground state wavefunctions (tolwfr 1.0d-16)
 #%%   the eigenvectors necessary for the GW calculation being stored in _WFK.

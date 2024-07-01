@@ -51,11 +51,13 @@ ALL_BINARIES = [
     "mrgscr",
     "multibinit",
     "optic",
-    "tdep",
+    "atdep",
     "testtransposer",
-    "ujdet",
+    "lruj",
 ]
 
+import platform
+SYSTEM = platform.system()
 
 @contextmanager
 def cd(path):
@@ -112,10 +114,15 @@ def make(ctx, jobs="auto", touch=False, clean=False, binary=""):
         # TODO Check for errors in make.stderr
         #cprint("Exit code: %s" % retcode, "green" if retcode == 0 else "red")
 
+        if SYSTEM == "Darwin":
+            for binary in ALL_BINARIES:
+                cmd = f"codesign -v --force --deep src/98_main/{binary}"
+                cprint("Executing: %s" % cmd, "yellow")
+                ctx.run(cmd, pty=True)
 
 @task
 def clean(ctx):
-    """Remove object files in src and shared. Do not object files in fallbacks"""
+    """Remove object files in src and shared. Do not remove object files in fallbacks"""
     top = find_top_build_tree(".", with_abinit=False)
     with cd(top):
         ctx.run("cd src && make clean && cd ..", pty=True)
@@ -155,7 +162,7 @@ def makemake(ctx):
 def makedeep(ctx, jobs="auto"):
     """Execute `makemake && make clean && make`"""
     makemake(ctx)
-    make(ctk, jobs=jobs, clean=True)
+    make(ctx, jobs=jobs, clean=True)
 
 
 @task
@@ -234,7 +241,7 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        cmd = "ctags -R --langmap=fortran:+.finc.f90 shared/ src/"
+        cmd = "ctags -R --langmap=fortran:+.finc.f90,c:.c.cu shared/ src/"
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
         #ctx.run('ctags -R --exclude="_*"', pty=True)
@@ -250,7 +257,7 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc]" "%s" src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*[.F90,.f90,.finc,.c,.cu,.cpp]" "%s" src shared' % pattern
         #cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
@@ -455,6 +462,27 @@ def branchoff(ctx, start_point):
     # Change default upstream. If you forget this step, you will be pushing to trunk
     run("git branch --set-upstream-to origin")
     run("git push origin HEAD")
+
+
+@task
+def dryrun_merge(ctx, start_point):
+    """"Merge `remote/branch` in dry-run mode."""
+
+    def run(cmd):
+        cprint(f"Executing: `{cmd}`", color="green")
+        ctx.run(cmd)
+
+    run(f"git merge --no-commit --no-ff {start_point}")
+
+    print("""
+To examine the staged changes:
+
+    $ git diff --cached
+
+And you can undo the merge, even if it is a fast-forward merge:
+
+$ git merge --abort
+""")
 
 
 @task

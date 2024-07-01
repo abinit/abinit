@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -164,12 +160,6 @@ contains
 !!   in real and reciprocal space respectively.
 !! * Note the use of "symrec" in the symmetrization expression above.
 !!
-!! PARENTS
-!!      m_forstr,m_scfcv_core
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
@@ -259,14 +249,15 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (dtset%icoulomb>0) vloc_method=2
  if (psps%usewvl==1) vloc_method=2
 !Pseudo core charge density:
-! Method 1: PAW, nc_xccc_gspace
-! Method 2: Norm-conserving PP, wavelets
+! Method 1 construct through G space FT: PAW, nc_xccc_gspace==1
+! Method 2 construct in real space     : Norm-conserving PP default, wavelets
  coredens_method=1;if (psps%usepaw==0) coredens_method=2
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+!Pseudo core charge kinetic energy density: same convention as coredens_method
  coretau_method=0
- if (dtset%usekden==1.and.psps%usepaw==1) then
+ if (dtset%usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
  end if
 
@@ -670,12 +661,6 @@ end subroutine forces
 !! in real and reciprocal space respectively.
 !! Note the use of "symrec" in the symmetrization expression above.
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine sygrad(gred,natom,dedt,nsym,symrec,indsym)
@@ -762,12 +747,6 @@ end subroutine sygrad
 !! OUTPUT
 !! gresid(3,natom)=forces due to the residual of the potential
 !!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
-!!
 !! SOURCE
 
 subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqgrid,nattyp,nfft,&
@@ -815,7 +794,7 @@ subroutine fresidrsp(atindx1,dtset,gmet,gprimd,gresid,gsqcut,mgfft,mpi_enreg,mqg
  call fourdp(1,vresg,work,-1,mpi_enreg,nfft,1,ngfft,0)
  ABI_FREE(work)
 
-!Determine wether a gaussan atomic density has to be used or not
+!Determine whether a gaussan atomic density has to be used or not
  usegauss=.true.
  if (usepaw==0) usegauss = any(.not.psps%nctab(1:ntypat)%has_tvale)
  if (usepaw==1) usegauss=(minval(pawtab(1:ntypat)%has_tvale)==0)
@@ -895,12 +874,6 @@ end subroutine fresidrsp
 !! At the end, each processor gets its part of the whole FFT grid.
 !! These modifications are not efficient when large FFT grids are used.
 !! So they have to be considered as a first step before a comprehensive parallelization of this routine.
-!!
-!! PARENTS
-!!      m_forces,m_prcref,m_scfcv_core
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
@@ -1516,12 +1489,6 @@ end subroutine fresid
 !!  forold(3,natom)=cartesian forces of previous SCF cycle (hartree/bohr)
 !!
 !! TODO
-!!
-!! PARENTS
-!!      m_forces
-!!
-!! CHILDREN
-!!      dposv,prtxvf,wrtout,xred2xcart
 !!
 !! SOURCE
 
