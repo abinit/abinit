@@ -28,6 +28,10 @@ that rationalizes the fact that, beyond some number of processors, the
 inherently sequential parts will dominate parallel parts, and give a
 limitation to the maximal speedup that can be achieved.
 
+This tutorial describes only basic possibilities of parallel computing with ABINIT.
+After reading this basic tutorial, you will likely benefit to read other tutorials related
+to parallelism in ABINIT. This will be explained later.
+
 ## Generalities
 
 With the broad availability of multi-core processors, everybody now has a
@@ -150,14 +154,14 @@ more processors. Please keep also in mind that in some situations,
 parallelization is simply impossible. At the present time, the parts of ABINIT
 that have been parallelized, and for which a tutorial is available, include:
 
-* [ground state with plane waves](/tutorial/paral_gspw),
+* [parallelism over bands and plane waves](/tutorial/paral_bandpw),
 * [ground state with wavelets](/tutorial/paral_gswvl),
 * [molecular dynamics](/tutorial/paral_moldyn),
 * [parallelism on "images"](/tutorial/paral_images),
 * [density-functional perturbation theory (DFPT)](/tutorial/paral_dfpt),
 * [Many-Body Perturbation Theory](/tutorial/paral_mbt).
 
-Note that the tutorial on [ground state with plane waves](/tutorial/paral_gspw) presents a complete overview of the
+Note that the tutorial on [parallelism over bands and plane waves](/tutorial/paral_bandpw) presents a complete overview of the
 parallelism for the ground state, including up to four levels of parallelisation and, as such, is rather complex.
 Of course, it is also quite powerful, and allows to use several hundreds of processors.
 
@@ -187,6 +191,8 @@ mkdir Work_paral
 cd Work_paral
 cp ../tbasepar_1.abi .
 ```
+
+{% dialog tests/tutorial/Input/tbasepar_1.abi %}
 
 You can start immediately a sequential run with
 
@@ -266,7 +272,11 @@ mpirun -np 2 -machinefile cluster ../../src/main/abinit tbasepar_1.abi >& tbasep
 ```
 
 Now, examine the corresponding output file. If you have kept the output from
-the sequential job, you can make a diff between the two files. You will notice
+the sequential job, you can make a diff between the two files. 
+
+{% dialog tests/tutorial/Refs/tbasepar_1.abo %}
+
+You will notice
 that the numerical results are quite identical. You will also see that 182
 k-points have been kept in the memory in the sequential case (keyword `mkmem`), while 91
 k-points have been kept in the memory (per processor !) in the parallel case.
@@ -330,6 +340,9 @@ This is quite unphysical, and has the sole purpose to show the spin
 parallelism with as few as two processors: the k-point parallelism has
 precedence over the spin parallelism, so that with 2 processors, one ought
 to have only one k-point to see the spin parallelism.
+
+{% dialog tests/tutorial/Input/tbasepar_2.abi %}
+
 If needed, modify the input file, to provide a local temporary disk space.
 Run this test case, in sequential, then in parallel.
 
@@ -337,6 +350,8 @@ While the jobs are running, read the input. Then look closely
 at the output and log files in the sequential and parallel cases. They are quite similar. 
 Actually, apart the mention of two processors and the speedup, there is no other
 manifestation of the parallelism.
+
+{% dialog tests/tutorial/Refs/tbasepar_2.abo %}
 
 If you have more than 2 processors at hand, you might increase the value of
 [[ngkpt]], so that more than one k-point is available, and see that the

@@ -16,11 +16,16 @@
   kptopt2  3
     nqpt2  1
      qpt2  0.0d0 0.0d0 0.0d0
- rfatpol2  9 9
-   rfdir2  1 0 0
+ rfatpol   9 9
+   rfdir   1 0 0
   rfphon2  1
   toldfe2  1.0d-10
    nstep2  6
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 # data common to all sets
    ngkpt  1 1 1

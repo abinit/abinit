@@ -6,14 +6,10 @@
 !!  Iterative diagonalization of the BSE Hamiltonian with band-by-band conjugate gradient method
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -103,12 +99,6 @@ CONTAINS  !===============================================================
 !!  Note that this routine has been written having in mind an homogeneous network of machines.
 !!  A network made of different CPU will lead to unpredictable results as each node has
 !!  to check for the converge of the calculation.
-!!
-!! PARENTS
-!!      m_exc_diago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -306,7 +296,14 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
      do line=1,nline_for(state)
        ! Compute etrial=<phi|H|phi> and the residual [H-etrial]|phi>.
        hphi = czero
+#ifdef FC_NVHPC
+!Buggy NVHPC compiler
+       do jj=1,my_t2-my_t1+1;do ii=1,hexc_size
+         hphi(ii)=hphi(ii)+hexc(ii,jj)*my_phi(jj)
+       enddo ; enddo
+#else
        hphi = MATMUL(hexc, my_phi)
+#endif
        call xmpi_sum(hphi,comm,ierr)
 
        etrial = DOT_PRODUCT(my_phi, hphi(my_t1:my_t2))
@@ -418,7 +415,14 @@ subroutine exc_iterative_diago(BSp,BS_files,Hdr_bse,prtvol,comm)
        ! Line minimization of the Raileigh functional.
        ABI_MALLOC(vec_tmp,(hexc_size))
        vec_tmp=czero
+#ifdef FC_NVHPC
+!Buggy NVHPC compiler
+       do jj=my_t1,my_t2;do ii=1,hexc_size
+         vec_tmp(ii)=vec_tmp(ii)+hexc(ii,jj-my_t1+1)*cg_dir(jj)
+       enddo ; enddo
+#else
        vec_tmp = MATMUL(hexc, cg_dir(my_t1:my_t2))
+#endif
        call xmpi_sum(vec_tmp,comm,ierr)
 
        !if (my_rank==master) then
@@ -643,12 +647,6 @@ CONTAINS  !===========================================================
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_init_phi_block(ihexc_fname,use_mpio,comm)
@@ -802,12 +800,6 @@ end subroutine exc_init_phi_block
 !!
 !! FUNCTION
 !!  Write phi_block on the Fortran file oeig_fname.
-!!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 
@@ -963,12 +955,6 @@ end subroutine exc_write_phi_block
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_subspace_rotation()
@@ -1066,12 +1052,6 @@ end subroutine exc_subspace_rotation
 !! SIDE EFFECTS
 !!   phi_block(my_t1:my_t2,nstates)=Contains the trial eigenstates.
 !!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
-!!
 !! SOURCE
 
 subroutine exc_cholesky_ortho()
@@ -1166,10 +1146,6 @@ end subroutine exc_cholesky_ortho
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function convergence_degree(resid)
@@ -1202,12 +1178,6 @@ end function convergence_degree
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_exc_itdiago
-!!
-!! CHILDREN
-!!      xmpi_barrier,xmpi_exch,xmpi_sum
 !!
 !! SOURCE
 

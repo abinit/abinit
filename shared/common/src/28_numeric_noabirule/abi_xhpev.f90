@@ -9,7 +9,7 @@
 !!  symmetric or hermitian matrix A in packed storage
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2022 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2024 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +26,9 @@
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-  subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk)
+  subroutine abi_dhpev(jobz,uplo,n,a,w,z,ldz,istwf_k,use_slk,use_gpu_elpa)
 
  !Arguments ------------------------------------
  character(len=1), intent(in) :: jobz
@@ -40,10 +38,10 @@
  real(dp), intent(out) :: z(:,:)
  real(dp), intent(out) :: w(:)
  integer, optional, intent(in) :: istwf_k
- integer, optional, intent(in) :: use_slk
+ integer, optional, intent(in) :: use_slk,use_gpu_elpa
 
 !Local variables-------------------------------
- integer :: info,use_slk_,istwf_k_
+ integer :: info,use_slk_,use_gpu_elpa_,istwf_k_
 #ifdef HAVE_LINALG_SCALAPACK
  type(matrix_scalapack) :: sca_a,sca_ev
  real(dp),allocatable :: tmp_evec(:,:)
@@ -60,6 +58,10 @@
 
  use_slk_ = 0; if (present(use_slk)) use_slk_ = use_slk
  istwf_k_ = 1; if (present(istwf_k)) istwf_k_ = istwf_k
+ use_gpu_elpa_=0
+#ifdef HAVE_LINALG_ELPA
+ if (present(use_gpu_elpa)) use_gpu_elpa_=use_gpu_elpa
+#endif
 
 !===== SCALAPACK
  if (ABI_LINALG_SCALAPACK_ISON.and.use_slk_==1.and.n>slk_minsize)  then
@@ -68,14 +70,15 @@
    dim_evec1= 2*n/istwf_k_
    ABI_MALLOC(tmp_evec,(dim_evec1,n))
    tmp_evec = zero
-   call init_matrix_scalapack(sca_a,n,n,slk_processor,istwf_k_, tbloc=10)
-   call init_matrix_scalapack(sca_ev,n,n,slk_processor,istwf_k_, tbloc=10)
+   call sca_a%init(n,n,slk_processor,istwf_k_)
+   call sca_ev%init(n,n,slk_processor,istwf_k_)
 #ifdef HAVE_LINALG_ELPA
    call matrix_from_global_sym(sca_a,a,istwf_k_)
 #else
    call matrix_from_global(sca_a,a,istwf_k_)
 #endif
-   call compute_eigen_problem(slk_processor,sca_a,sca_ev,w,slk_communicator,istwf_k_)
+   call compute_eigen_problem(slk_processor,sca_a,sca_ev,w,slk_communicator,istwf_k_,&
+&                             use_gpu_elpa=use_gpu_elpa_)
    call matrix_to_global(sca_a,a,istwf_k_)
    call matrix_to_reference(sca_ev,tmp_evec,istwf_k_)
    call xmpi_sum(tmp_evec,z,dim_evec1*n,slk_communicator,ierr)
@@ -95,6 +98,10 @@
 
  ABI_CHECK(info==0,"dhpev returned info!=0")
 
+#ifndef HAVE_LINALG_ELPA
+ ABI_UNUSED(use_gpu_elpa)
+#endif
+
 end subroutine abi_dhpev
 !!***
 
@@ -107,8 +114,6 @@ end subroutine abi_dhpev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -164,8 +169,6 @@ end subroutine abi_chpev
 !! FUNCTION
 !!
 !! INPUTS
-!!
-!! PARENTS
 !!
 !! SOURCE
 

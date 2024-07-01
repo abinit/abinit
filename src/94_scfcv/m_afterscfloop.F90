@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_afterscfloop
 !! NAME
 !!  m_afterscfloop
@@ -7,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -42,6 +37,7 @@ module m_afterscfloop
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
@@ -65,6 +61,7 @@ module m_afterscfloop
  use m_spin_current,     only : spin_current
  use m_mkrho,            only : mkrho, prtrhomxmn
  use m_elpolariz,        only : elpolariz
+ use m_orbmag,           only : orbmag
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
@@ -274,26 +271,13 @@ contains
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_scfcv_core
-!!
-!! CHILDREN
-!!      applyprojectorsonthefly,denspot_free_history,eigensystem_info,elpolariz
-!!      energies_copy,exchange_electronpositron,forstr,getph,hdr%update
-!!      kswfn_free_scf_data,last_orthon,metric,mkrho,nhatgrid,nonlop_test
-!!      pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar,prtrhomxmn
-!!      scprqt,setnoccmmp,spin_current,timab,total_energies,transgrid
-!!      write_energies,wrtout,wvl_eigen_abi2big,wvl_mkrho,wvl_nhatgrid
-!!      wvl_occ_abi2big,wvl_psitohpsi,wvl_rho_abi2big,wvl_tail_corrections
-!!      wvl_vtrial_abi2big,xcden,xmpi_sum,xred2xcart
-!!
 !! SOURCE
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -318,8 +302,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(efield_type),intent(inout) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -373,10 +357,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
- integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: bantot,bufsz,calc_pol_ddk,choice,cplex,ierr,ifft,igrad,ishift,ispden
+ integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
- logical :: test_gylmgr,test_nfgd,test_rfgd
+ logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
@@ -387,10 +371,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
- real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -512,8 +496,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        mband_cprj=mcprj/(dtset%nspinor*dtset%mkmem*dtset%nsppol)
        paw_dmft%use_sc_dmft=0 ; paw_dmft%use_dmft=0 ! dmft not used here
        call pawmkrhoij(atindx,atindx1,cprj,dimcprj_srt,dtset%istwfk,dtset%kptopt,dtset%mband,mband_cprj,&
-&       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspinor,dtset%nsppol,&
-&       occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
+&       mcprj,dtset%mkmem,mpi_enreg,dtset%natom,dtset%nband,dtset%nkpt,dtset%nspden,dtset%nspinor,&
+&       dtset%nsppol,occ,mpi_enreg%paral_kgb,paw_dmft,pawrhoij,dtfil%unpaw,dtset%usewvl,dtset%wtk)
        ABI_FREE(dimcprj_srt)
 !      3-Symetrize rhoij, compute nhat and add it to rhor
        call pawmkrho(1,dum,1,gprimd,0,indsym,0,mpi_enreg,my_natom,dtset%natom,dtset%nspden,dtset%nsym,&
@@ -535,10 +519,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(252,1,tsec)
 
 !----------------------------------------------------------------------
-!Polarization Calculation
+!Polarization Calculation, but not orbital magnetism
 !----------------------------------------------------------------------
 
- if(dtset%berryopt/=0)then
+ if(dtset%berryopt/=0 .AND. dtset%orbmag == 0)then
    call elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,energies%e_elecfield,gprimd,hdr,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
@@ -547,6 +531,36 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
+
+!----------------------------------------------------------------------
+!Orbital magnetization calculation using PEAD DDK wavefunctions
+!----------------------------------------------------------------------
+
+ if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+   save_cg1_3 = .TRUE.
+   mcg1_3 = mcg
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+
+   calc_pol_ddk = 2
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
+       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg1_3,mcprj,&
+       &  dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,npwarr,dtset%nsppol,psps%ntypat,&
+       &  dtset%nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
+       &  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,ab_out,&
+       &  usecprj,psps%usepaw,xred,psps%ziontypat)
+
+   if ( .NOT. ALLOCATED(vtrial_local)) then
+     ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
+   end if
+   vtrial_local = vtrial
+   call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
+     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
+     & pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+
+   ABI_FREE(vtrial_local)
+   ABI_FREE(cg1_3)
+
+ end if
 
 !----------------------------------------------------------------------
 !Gradient and Laplacian of the Density Calculation
@@ -565,13 +579,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
      ABI_MALLOC(lrhor,(nfftf,dtset%nspden))
    end if
    write(message,'(a,a)') ch10, " Compute gradient of the electron density"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    if(dtset%prtlden/=0) then
      write(message,'(a)') " and also Compute Laplacian of the electron density"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
 
    ABI_MALLOC(qphon,(3))
    qphon(:)=zero
@@ -595,40 +609,40 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    if(dtset%prtgden/=0) then
 !    Print result for grhor
      write(message,'(a,a)') ch10, " Result for gradient of the electron density for each direction (1,2,3):"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 1rst direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,1),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 2nd direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,2),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a,a,a)') ch10," 3rd direction:",ch10,&
 &     "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,grhor(:,:,3),optrhor=2,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
    if(dtset%prtlden/=0) then
 !    Print result for lrhor
      write(message,'(a,a)') ch10, " Result for Laplacian of the electron density :"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,lrhor,optrhor=3,ucvol=ucvol)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
 
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
  end if
 
 !----------------------------------------------------------------------
@@ -648,12 +662,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    tim_mkrho=5
    if(dtset%prtelf/=0) then
      write(message,'(a,a)') ch10, " Compute ELF"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
      write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,message)
    end if
    write(message,'(a,a)') ch10, " Compute kinetic energy density"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
    if (psps%usepaw==0) then
@@ -675,12 +689,12 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Print result
  if(dtset%prtkden/=0) then
    write(message,'(a,a)') ch10, "Result for kinetic energy density :"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
    write(message,'(a)') "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
  end if
 
 !----------------------------------------------------------------------
@@ -708,7 +722,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        write(message, '(a,a,a,a)' ) ch10,&
 &       ' afterscfloop: ERROR -', ch10, &
 &       '   The density is complex, ELF analysis cannot be performed.'
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,message)
 !      ABI_ERROR(message)
      end if
 
@@ -717,7 +731,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
        ishift=0
        ABI_MALLOC(rhonow,(nfftf,dtset%nspden,ngrad*ngrad))
        write(message,'(a,a)') ch10, " Compute gradient of the electron density"
-       call wrtout(ab_out,message,'COLL')
+       call wrtout(ab_out,message)
        ABI_MALLOC(qphon,(3))
        qphon(:)=zero
        call xcden (cplex,gprimd,ishift,mpi_enreg,nfftf,ngfftf,ngrad,dtset%nspden,qphon,rhor,rhonow)
@@ -871,9 +885,9 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    end if ! endif dtset%nspden<=2
 
    write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
    write(message,'(a)') " End of ELF section"
-   call wrtout(ab_out,message,'COLL')
+   call wrtout(ab_out,message)
 
    if (dtset%usekden==0) then
      ABI_FREE(taur)
@@ -954,14 +968,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !print a warning to the output file (non-dummy arguments: dtset%nstep,
 !residm, diffor - infos from tollist have been saved inside )
  choice=3
- ! CP modified
- !call scprqt(choice,cpus,deltae,diffor,dtset,&
-!& eigen,etotal,favg,fcart,energies%e_fermie,dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
-!& 1,dtset%iscf,istep,istep_fock_outer,istep_mix,dtset%kptns,maxfor,&
-!& moved_atm_inside,mpi_enreg,dtset%nband,dtset%nkpt,&
-!& dtset%nstep,occ,optres,prtfor,prtxml,quit,&
-!& res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
-!& electronpositron=electronpositron, fock=fock)
  call scprqt(choice,cpus,deltae,diffor,dtset,&
 & eigen,etotal,favg,fcart,energies%e_fermie,energies%e_fermih,&
 & dtfil%fnameabo_app_eig,dtfil%filnam_ds(1),&
@@ -970,7 +976,6 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & dtset%nstep,occ,optres,prtfor,prtxml,quit,&
 & res2,resid,residm,response,tollist,psps%usepaw,vxcavg,dtset%wtk,xred,conv_retcode,&
 & electronpositron=electronpositron, fock=fock)
- ! End CP modified
 
 !output POSCAR and FORCES files, VASP style, for PHON code and friends.
  if (dtset%prtposcar == 1) then
@@ -1008,23 +1013,13 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Update the content of the header (evolving variables)
  bantot=hdr%bantot
  if (dtset%positron==0) then
-   ! CP modified
-   !call hdr%update(bantot,etotal,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,etotal,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  else
-   ! CP modified
-   !call hdr%update(bantot,electronpositron%e0,energies%e_fermie,residm,rprimd,occ,&
-   !  pawrhoij,xred,dtset%amu_orig(:,1),&
-   !  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
    call hdr%update(bantot,electronpositron%e0,energies%e_fermie,energies%e_fermih,residm,rprimd,occ,&
      pawrhoij,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-   ! End CP modified
  end if
 
 #ifdef HAVE_LOTF
@@ -1084,7 +1079,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (associated(extfpmd)) then
    results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
-   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+   results_gs%extfpmd_eshift=extfpmd%eshift
  end if
 
  results_gs%intgres(:,:)=zero

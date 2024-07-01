@@ -83,7 +83,7 @@ For the temperature dependence of the Fermi energy, see [[topic:ElPhonTransport]
 
 ## Tutorials
 
-* (Legacy procedure) A tutorial is available at [[tutorial:tdepes|the temperature dependence of the electronic structure]]:.
+* (Legacy procedure) A tutorial is available at [[tutorial:eph_tdep_legacy|the temperature dependence of the electronic structure]]:.
 * (New procedure) Two tutorials are available at [[tutorial:eph_intro|an overview of the EPH code]], and
 [[tutorial:eph4zpr|Zero-point renormalization of the band gap and temperature-dependent band gaps]]:.
 

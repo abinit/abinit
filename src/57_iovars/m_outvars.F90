@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -32,9 +28,7 @@ module m_outvars
  use m_errors
  use m_xomp
  use m_xmpi
-#if defined HAVE_NETCDF
  use netcdf
-#endif
  use m_outvar_a_h
  use m_outvar_i_n
  use m_outvar_o_z
@@ -104,12 +98,6 @@ contains
 !! The lines of code needed to output the defaults are preserved
 !! (see last section of the routine, but are presently disabled)
 !!
-!! PARENTS
-!!      abinit
-!!
-!! CHILDREN
-!!      create_nc_file,outvar_a_h,outvar_i_n,outvar_o_z,wrtout
-!!
 !! SOURCE
 
 subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
@@ -177,17 +165,17 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 01. First line indicating outvars
 
  if(choice==1)then
-   write(iout, '(a)' )&
-&   ' -outvars: echo values of preprocessed input variables --------'
+   write(iout, '(a)' )' -outvars: echo values of preprocessed input variables --------'
  else
-   write(iout, '(a)' )&
-&   ' -outvars: echo values of variables after computation  --------'
+   write(iout, '(a)' )' -outvars: echo values of variables after computation  --------'
  end if
 
 !###########################################################
 !### 02. Open NetCDF file for export variables
 
-#ifdef HAVE_NETCDF
+!Wrap the netcdf OUT.nc into conditional for flexible output writing
+ if ( dtsets(1)%ncout == 1 ) then
+
  ! Enable netcdf output only if the number of datasets is small.
  ! otherwise v6[34] crashes with errmess:
  !    nf90_def_dim - NetCDF library returned:   NetCDF: NC_MAX_DIMS exceeded
@@ -195,24 +183,29 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ! one should use groups for this kind of operations!!
 
  ncid = 0
- if (ndtset_alloc  < 10) then
-   if (iout==std_out)then
-     write(iout,*) ch10,' These variables are accessible in NetCDF format (',trim(filnam4)//'_OUT.nc',')',ch10
-   end if
-   call create_nc_file(trim(filnam4)//"_OUT.nc",ncid)
-
-   if (dtsets(1)%prtvol==-2) then
-     if (ncid>0)then
-       ncid=-ncid
-     else
-       ncid=-1
+   if (ndtset_alloc  < 10) then
+     if (iout==std_out)then
+       write(iout,*) ch10,' These variables are accessible in NetCDF format (',trim(filnam4)//'_OUT.nc',')',ch10
      end if
+     call create_nc_file(trim(filnam4)//"_OUT.nc",ncid)
+
+     if (dtsets(1)%prtvol==-2) then
+       if (ncid>0)then
+        ncid=-ncid
+       else
+        ncid=-1
+       end if
+     end if
+   else
+     ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
    end if
- else
-   ABI_COMMENT("output of OUT.nc has been disabled. Too many datasets")
- end if
-#endif
  !ncid = 0
+
+  else if ( dtsets(1)%ncout == 0 ) then
+   ABI_COMMENT("ncout set to 0. No OUT.nc will be printed.")
+  else
+   ABI_COMMENT("ncout value unregonized. OUT.nc will proceed will default settings.")
+ end if !ncout condition
 
 !###########################################################
 !##1 03. Set up dimensions : determine whether these are different for different datasets.
@@ -274,10 +267,8 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    end do
  end if
 
-!DEBUG
-! write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
-! write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
-!ENDDEBUG
+ !write(std_out,*)' outvars : multivals%nkpthf =',multivals%nkpthf
+ !write(std_out,*)' outvars : dtsets(1:ndtset_alloc)%nkpthf =',dtsets(1:ndtset_alloc)%nkpthf
 
  nshiftk=1
  if(sum((dtsets(1:ndtset_alloc)%kptopt)**2)/=0)then
@@ -311,9 +302,7 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
    rf2_dkdk=dtsets(idtset)%rf2_dkdk
    rf2_dkde=dtsets(idtset)%rf2_dkde
    if(rfddk/=0 .or. rfelfd/=0 .or. rfphon/=0 .or. rfstrs/=0 .or. &
-&   rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfmagn/=0)then
-     response_(idtset)=1
-   end if
+      rfuser/=0 .or. rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfmagn/=0) response_(idtset)=1
  end do
 
 !###########################################################
@@ -368,15 +357,14 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
 !### 08. Print variables, for different ranges of names
 
  call outvar_a_h(choice,dmatpuflag,dtsets,iout,jdtset_,marr,multivals,mxvals,&
-& ncid,ndtset,ndtset_alloc,results_out,strimg)
+                 ncid,ndtset,ndtset_alloc,results_out,strimg)
 
  call outvar_i_n(dtsets,iout,jdtset_,marr,multivals,mxvals,&
-& ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,response_,results_out,strimg)
+                 ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,response_,results_out,strimg)
 
  call outvar_o_z(choice,dtsets,iout,&
-& jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
-& results_out,strimg,timopt)
-
+                 jdtset_,marr,multivals,mxvals,ncid,ndtset,ndtset_alloc,npsp,prtvol_glob,&
+                 results_out,strimg,timopt)
 
 !###########################################################
 !## Deallocations and cleaning
@@ -386,20 +374,15 @@ subroutine outvars(choice,dmatpuflag,dtsets,filnam4,iout,&
  ABI_FREE(strimg)
 
  write(message,'(a,80a)')ch10,('=',mu=1,80)
- call wrtout(iout,message,'COLL')
+ call wrtout(iout,message)
 
-#ifdef HAVE_NETCDF
- if (ncid /= 0) then
+ if (ncid /= 0 .and. dtsets(1)%ncout == 1) then
    ncerr=nf90_close(abs(ncid))
    if (ncerr/=nf90_NoErr) then
      message='Netcdf Error while closing the OUT.nc file: '//trim(nf90_strerror(ncerr))
      ABI_ERROR(message)
    end if
  end if
-#endif
- if (.false.) write(std_out,*) ncerr
-
-!**************************************************************************
 
 end subroutine outvars
 !!***

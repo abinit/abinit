@@ -61,7 +61,6 @@ prtbbb 1
   getwfk3   2
   getddk3   3
 #  ird1wf3 1
-   rfdir3   1 1 1
   rfelfd3   2
   tolwfr3   1.0d-20
   nband3    8
@@ -71,8 +70,6 @@ prtbbb 1
 #***********************************
   getwfk4  2
   getddk4  3
-  rfatpol4 1 2
-  rfdir4   1 1 1
   rfelfd4 3
   rfphon4  1
   toldfe4  1.0d-10
@@ -80,6 +77,11 @@ prtbbb 1
   kptopt4 2
 
  nbdbuf 0
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 
  pp_dirpath "$ABI_PSPDIR"

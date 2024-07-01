@@ -7,12 +7,10 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! TODO
 !!  Get rid of xmpi_paral. Sequential code is the **exception**. Developers should code parallel
@@ -26,12 +24,11 @@
 
 #include "abi_common.h"
 
-MODULE m_xmpi
+module m_xmpi
 
  use defs_basis
  use m_profiling_abi
- !use m_errors
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
 #ifdef HAVE_FC_ISO_FORTRAN_2008
  use ISO_FORTRAN_ENV, only : int16, int32, int64
 #endif
@@ -41,7 +38,7 @@ MODULE m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : clib_ulimit_stack !, clib_usleep
+ use m_clib
 
  implicit none
 
@@ -69,6 +66,7 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
+
 #else
  ! Fake replacements for the sequential version. Values are taken from
  ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
@@ -137,7 +135,7 @@ MODULE m_xmpi
 
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
- ! This counter should be zero at the end of the run if all requests have been released)
+ ! This counter should be zero at the end of the run if all requests have been released.
 
  logical,save, private :: xmpi_use_inplace_operations = .False.
  ! Enable/disable usage of MPI_IN_PLACE in e.g. xmpi_sum
@@ -159,7 +157,7 @@ MODULE m_xmpi
 !! xcomm_t
 !!
 !! FUNCTION
-!!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
+!!  A small object storing the MPI communicator, the rank of the process and the size of the communicator.
 !!  Provides helper functions to perform typical operations and parallelize loops.
 !!  The datatype is initialized with xmpi_comm_self
 !!
@@ -169,13 +167,54 @@ MODULE m_xmpi
    integer :: value = xmpi_comm_self
    integer :: nproc = 1
    integer :: me = 0
+   integer,private :: can_use_shmem__ = -1
+     ! -1 --> unitialized, 0 if ranks do not belong to a shared memory region else 1
+
  contains
-   ! procedure :: iam_master => xcomm_iam_master
-   procedure :: skip => xcomm_skip
+   procedure :: skip => xcomm_skip                     ! Skip iteration according to rank
    procedure :: set_to_null => xcomm_set_to_null
    procedure :: set_to_self => xcomm_set_to_self
    procedure :: free => xcomm_free
+   procedure :: from_cart_sub => xcomm_from_cart_sub   ! Build sub-communicators in a Cartesian grid.
+   procedure :: prep_gatherv => xcomm_prep_gatherv     ! Prepare a typical gatherv operation.
+   procedure :: print_names => xcomm_print_names
+   procedure :: can_use_shmem => xcomm_can_use_shmem
+   procedure :: allocate_shared_master => xcomm_allocate_shared_master
  end type xcomm_t
+
+ public :: xcomm_from_mpi_int
+!!***
+
+!----------------------------------------------------------------------
+
+!!****t* m_xmpi/xmpi_pool2d_t
+!! NAME
+!! xmpi_pool2d_t
+!!
+!! FUNCTION
+!!  Pool of MPI processors operating on a 2D problem of shape (n1, n2).
+!!  Each item in the (n1, n2) matrix is assigned to a single pool.
+!!  Note that differerent pools do not necessarily have the same number of procs,
+!!  thus a pool is more flexibile than a Cartesian grid although inter-pool communication becomes more complex.
+!!
+!! SOURCE
+
+ type, public :: xmpi_pool2d_t
+
+   integer :: n1 = -1, n2 = -1
+   ! Dimensions of the 2d problem
+
+   type(xcomm_t) :: comm
+   ! MPI communicator.
+
+   logical,allocatable :: treats(:,:)
+   ! (n1, n2)
+   ! True if this pool treats (i1, i2)
+
+ contains
+   procedure :: from_dims => pool2d_from_dims     ! Init pool from problem dims.
+   procedure :: free => pool2d_free               ! Free memory.
+ end type xmpi_pool2d_t
 !!***
 
 ! Public procedures.
@@ -191,16 +230,20 @@ MODULE m_xmpi
  public :: xmpi_comm_rank             ! Hides MPI_COMM_RANK from MPI library.
  public :: xmpi_comm_size             ! Hides MPI_COMM_SIZE from MPI library.
  public :: xmpi_comm_free             ! Hides MPI_COMM_FREE from MPI library.
+ public :: xmpi_comm_dup              ! Hides MPI_COMM_DUP from MPI library.
  public :: xmpi_comm_group            ! Hides MPI_COMM_GROUP from MPI library.
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
+ public :: xmpi_comm_translate_rank   ! Translate one rank
  public :: xmpi_comm_split            ! Hides MPI_COMM_SPLIT from MPI library.
  public :: xmpi_subcomm               ! Creates a sub-communicator from an input communicator.
+ public :: xmpi_comm_multiple_of      ! Creates sub-communicator with number of procs multiple of a certain number.
  public :: xmpi_barrier               ! Hides MPI_BARRIER from MPI library.
  public :: xmpi_name                  ! Hides MPI_NAME from MPI library.
  public :: xmpi_iprobe                ! Hides MPI_IPROBE from MPI library.
  public :: xmpi_wait                  ! Hides MPI_WAIT from MPI library.
  public :: xmpi_waitall               ! Hides MPI_WAITALL from MPI library.
  public :: xmpi_request_free          ! Hides MPI_REQUEST_FREE from MPI library.
+ public :: xmpi_requests_add          ! Increase/decrement xmpi_count_requests internal counter
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
  public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
@@ -209,6 +252,7 @@ MODULE m_xmpi
  public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
  public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+ public :: xmpi_distrib_2d            ! Try to optimally distribute nprocs in a 2d grid of shape (n1, n2)
 
 ! Private procedures.
  private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
@@ -259,7 +303,9 @@ MODULE m_xmpi
  public :: xmpi_gather
  public :: xmpi_gatherv
  public :: xmpi_max
- public :: xmpi_min
+ public :: xmpi_max_ip
+ public :: xmpi_min         ! Out-of-place version
+ public :: xmpi_min_ip      ! In-place version
  public :: xmpi_recv
  public :: xmpi_irecv
  public :: xmpi_scatterv
@@ -271,6 +317,9 @@ MODULE m_xmpi
  public :: xmpi_isum_ip
  public :: xmpi_land              ! allreduce with MPI_LAND
  public :: xmpi_lor               ! allreduce with MPI_LOR
+
+ public :: xmpi_win_fence
+ public :: xmpi_win_free
 
 #ifdef HAVE_MPI_IO
  public :: xmpio_max_address      !  Returns .TRUE. if offset cannot be stored in integer(kind=XMPI_ADDRESS_KIND).
@@ -290,16 +339,6 @@ MODULE m_xmpi
  public :: xmpio_create_fherm_packed
  public :: xmpio_create_coldistr_from_fpacked
  public :: xmpio_create_coldistr_from_fp3blocks
-
-!interface xmpio_read
-!  module procedure xmpio_read_int
-!  module procedure xmpio_read_dp
-!end interface xmpio_read
-!
-!interface xmpio_write
-!  module procedure xmpio_write_int
-!  module procedure xmpio_write_dp
-!end interface xmpio_write
 #endif
 
 !----------------------------------------------------------------------
@@ -439,6 +478,8 @@ interface xmpi_ibcast
   module procedure xmpi_ibcast_dp2d
   module procedure xmpi_ibcast_dp3d
   module procedure xmpi_ibcast_dp4d
+  module procedure xmpi_ibcast_dpc2d
+  module procedure xmpi_ibcast_spc2d
 end interface xmpi_ibcast
 
 !----------------------------------------------------------------------
@@ -491,6 +532,12 @@ interface xmpi_max
   module procedure xmpi_max_dp0d_ip
 end interface xmpi_max
 
+interface xmpi_max_ip
+  module procedure xmpi_max_int0d_ip
+  module procedure xmpi_max_dp0d_ip
+  module procedure xmpi_max_int1d_ip
+end interface xmpi_max_ip
+
 !----------------------------------------------------------------------
 
 interface xmpi_min
@@ -498,6 +545,12 @@ interface xmpi_min
   module procedure xmpi_min_dpv
   module procedure xmpi_min_dp
 end interface xmpi_min
+
+! In-place version of xmpi_min
+interface xmpi_min_ip
+  module procedure xmpi_min_int1d
+  module procedure xmpi_min_dp
+end interface xmpi_min_ip
 
 !----------------------------------------------------------------------
 
@@ -527,6 +580,7 @@ interface xmpi_irecv
   module procedure xmpi_irecv_int1d
   module procedure xmpi_irecv_dp1d
   module procedure xmpi_irecv_dp2d
+  module procedure xmpi_irecv_dp3d
 end interface xmpi_irecv
 
 !----------------------------------------------------------------------
@@ -546,6 +600,7 @@ interface xmpi_isend
   module procedure xmpi_isend_int1d
   module procedure xmpi_isend_dp1d
   module procedure xmpi_isend_dp2d
+  module procedure xmpi_isend_dp3d
 end interface xmpi_isend
 
 !----------------------------------------------------------------------
@@ -627,6 +682,7 @@ interface xmpi_sum
   module procedure xmpi_sum_dp3d2t !?
   module procedure xmpi_sum_dp4d2t !?
   module procedure xmpi_sum_c0dc
+  module procedure xmpi_sum_c0sc
   module procedure xmpi_sum_c1dc
   module procedure xmpi_sum_c2dc
   module procedure xmpi_sum_c3dc
@@ -653,7 +709,14 @@ end interface xmpi_isum
 ! Non-blocking in-place version
 interface xmpi_isum_ip
   module procedure xmpi_isum_ip_dp2d
+  module procedure xmpi_isum_ip_dp3d
   module procedure xmpi_isum_ip_dp4d
+  module procedure xmpi_isum_ip_spc1d
+  module procedure xmpi_isum_ip_dpc1d
+  module procedure xmpi_isum_ip_spc2d
+  module procedure xmpi_isum_ip_dpc2d
+  module procedure xmpi_isum_ip_spc3d
+  module procedure xmpi_isum_ip_dpc3d
 end interface xmpi_isum_ip
 !!***
 
@@ -669,6 +732,18 @@ interface xmpi_lor
 end interface xmpi_lor
 !!!***
 
+! This to bypass missing interface for MPI_WIN_ALLOCATE etc
+! See https://github.com/pmodels/mpich/issues/2659
+!INTERFACE MPI_WIN_ALLOCATE_SHARED
+!SUBROUTINE MPI_WIN_ALLOCATE_SHARED_CPTR(SIZE, DISP_UNIT, INFO, COMM, &
+!BASEPTR, WIN, IERROR)
+!USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
+!INTEGER :: DISP_UNIT, INFO, COMM, WIN, IERROR
+!INTEGER(KIND=XMPI_ADDRESS_KIND) :: SIZE
+!TYPE(C_PTR) :: BASEPTR
+!END SUBROUTINE
+!END INTERFACE MPI_WIN_ALLOCATE_SHARED
+
 
 !----------------------------------------------------------------------
 
@@ -682,17 +757,6 @@ CONTAINS  !===========================================================
 !! FUNCTION
 !!  Hides MPI_INIT from MPI library. Perform the initialization of some basic variables
 !!  used by the MPI routines employed in abinit.
-!!
-!! INPUTS
-!!  None
-!!
-!! PARENTS
-!!      abinit,abitk,aim,anaddb,atdep,band2eps,conducti,cut3d,dummy_tests
-!!      fftprof,fold2Bloch,ioprof,lapackprof,macroave,mrgddb,mrgdv,mrggkk
-!!      mrgscr,multibinit,optic,testtransposer,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -712,6 +776,8 @@ subroutine xmpi_init()
 
 ! *************************************************************************
 
+ call set_num_threads_if_undef()
+
  mpierr=0
 #ifdef HAVE_MPI
 
@@ -723,9 +789,7 @@ subroutine xmpi_init()
  !required = MPI_THREAD_SERIALIZED
  !required = MPI_THREAD_MULTIPLE
  call MPI_INIT_THREAD(required,provided,mpierr)
- if (provided /= required) then
-   call xmpi_abort(msg="MPI_INIT_THREADS: provided /= required")
- end if
+ if (provided /= required) call xmpi_abort(msg="MPI_INIT_THREADS: provided /= required")
 #endif
 
  !%comm_world = xmpi_world ! Needed to bypass a bug in some OMPI implementations (intent(inout))
@@ -738,12 +802,12 @@ subroutine xmpi_init()
  if (lflag) xmpi_tag_ub = attribute_val
 
 !  Define type values.
- call MPI_TYPE_SIZE(MPI_CHARACTER,xmpi_bsize_ch,mpierr)
- call MPI_TYPE_SIZE(MPI_INTEGER,xmpi_bsize_int,mpierr)
- call MPI_TYPE_SIZE(MPI_REAL,xmpi_bsize_sp,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION,xmpi_bsize_dp,mpierr)
- call MPI_TYPE_SIZE(MPI_COMPLEX,xmpi_bsize_spc,mpierr)
- call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX,xmpi_bsize_dpc,mpierr)
+ call MPI_TYPE_SIZE(MPI_CHARACTER, xmpi_bsize_ch, mpierr)
+ call MPI_TYPE_SIZE(MPI_INTEGER, xmpi_bsize_int, mpierr)
+ call MPI_TYPE_SIZE(MPI_REAL, xmpi_bsize_sp, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_PRECISION, xmpi_bsize_dp, mpierr)
+ call MPI_TYPE_SIZE(MPI_COMPLEX, xmpi_bsize_spc, mpierr)
+ call MPI_TYPE_SIZE(MPI_DOUBLE_COMPLEX, xmpi_bsize_dpc, mpierr)
 
  ! Find the byte size of Fortran record marker used in MPI-IO routines.
  if (xmpio_bsize_frm == 0) then
@@ -751,29 +815,75 @@ subroutine xmpi_init()
  end if
 #endif
 
- ! Increase stack size.
+ ! Try to increase stack size.
  call clib_ulimit_stack(rlim_cur, rlim_max, ierr)
 
- ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment
  if (xmpi_comm_rank(xmpi_world) == 0) then
 
-    if (ierr /= 0) then
-      write(std_out,*)" WARNING: cannot increase stack size limit. "
-      !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
-    end if
+   if (ierr /= 0) then
+     write(std_out, "(a)")" WARNING: cannot increase stack size limit. "
+     !write(std_out, *)"rlim_cur, rlim_max, ierr", rlim_cur, rlim_max, ierr
+   end if
 
-    inquire(file=ABI_MPIABORTFILE, exist=exists)
-    if (exists) then
-       ! Get free unit (emulate F2008 newunit for portability reasons)
-       unt = xmpi_get_unit()
-       if (unt == -1) call xmpi_abort(msg="Cannot find free unit!!")
-       open(unit=unt, file=trim(ABI_MPIABORTFILE), status="old", iostat=ierr)
-       if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
-       if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
-    end if
+   ! Master Removes the ABI_MPIABORTFILE if present so that we start with a clean environment
+   inquire(file=ABI_MPIABORTFILE, exist=exists)
+   if (exists) then
+     ! Get free unit (emulate F2008 newunit for portability reasons)
+     unt = xmpi_get_unit()
+     if (unt == -1) call xmpi_abort(msg="Cannot find free unit!!")
+     open(unit=unt, file=trim(ABI_MPIABORTFILE), status="old", iostat=ierr)
+     if (ierr == 0) close(unit=unt, status="delete", iostat=ierr)
+     if (ierr /= 0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
+   end if
+
+   ! If MPI interfaces are buggy, MPI_IN_PLACE is not allowed
+#if defined HAVE_MPI2_INPLACE && defined HAVE_MPI_BUGGY_INTERFACES
+   write(std_out, "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   write(ab_out , "(a)")"ERROR: Cannot use MPI_IN_PLACE with this buggy MPI version!"
+   call xmpi_abort(msg="Stopping here!")
+#endif
+
  end if
 
 end subroutine xmpi_init
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/set_num_threads_if_undef
+!! NAME
+!!  set_num_threads_if_undef
+!!
+!! FUNCTION
+!!  sets OMP_NUM_THREADS to 1 is the env variable is undefined.
+!!
+!! SOURCE
+
+subroutine set_num_threads_if_undef()
+
+#ifdef HAVE_OPENMP
+!Local variables-------------------
+ integer :: ierr
+ character(len=100) :: omp_num_threads
+! *************************************************************************
+
+ ! Get the value of OMP_NUM_THREADS environment variable
+ call get_environment_variable('OMP_NUM_THREADS', omp_num_threads, status=ierr)
+
+ ! If OMP_NUM_THREADS is not defined (ierr != 0), set it to 1
+ if (ierr /= 0) then
+   ierr = clib_setenv('OMP_NUM_THREADS', '1', 1)
+   if (ierr == 0) then
+     write(std_out,"(a)")'- OMP_NUM_THREADS was not defined. It has been set to 1.'
+   else
+     write(std_out,"(a)")'- WARNING: Failed to set OMP_NUM_THREADS.'
+   end if
+ else
+   !write(std_out,*)'- OMP_NUM_THREADS is already set to: ', trim(omp_num_threads)
+ end if
+#endif
+
+end subroutine set_num_threads_if_undef
 !!***
 
 !----------------------------------------------------------------------
@@ -785,18 +895,12 @@ end subroutine xmpi_init
 !! FUNCTION
 !!  Set internal flag to use MPI_IN_PLACE whenever possible.
 !!
-!! PARENTS
-!!      m_argparse
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_set_inplace_operations(bool)
 
 !Local variables-------------------
- logical :: bool
+ logical,intent(in) :: bool
 
 ! *************************************************************************
 
@@ -814,10 +918,6 @@ end subroutine xmpi_set_inplace_operations
 !! FUNCTION
 !! Get free unit (emulate F2008 newunit for portability reasons)
 !! Return -1 if no unit is found.
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -847,13 +947,6 @@ end function xmpi_get_unit
 !!
 !! INPUTS
 !!  None
-!!
-!! PARENTS
-!!      aim,atdep,band2eps,conducti,cut3d,fold2Bloch,m_multibinit_driver
-!!      macroave,mrggkk,testtransposer,ujdet,vdw_kernelgen
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -892,12 +985,6 @@ end subroutine xmpi_end
 !!  [mpierr]=Error code to return to invoking environment.
 !!  [msg]=User message
 !!  [exit_status]=optional, shell return code, default 1
-!!
-!! PARENTS
-!!      m_errors,m_initcuda,m_libpaw_tools,m_mpinfo,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -985,12 +1072,6 @@ end subroutine xmpi_abort
 !! NOTES
 !!  By default, it uses "call exit(1)", that is not completely portable.
 !!
-!! PARENTS
-!!      m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine sys_exit(exit_status)
@@ -1029,12 +1110,6 @@ end subroutine sys_exit
 !! INPUTS
 !!  unt=Unit number for formatted output.
 !!
-!! PARENTS
-!!      abinit,m_argparse,m_errors
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_show_info(unit)
@@ -1047,7 +1122,6 @@ subroutine xmpi_show_info(unit)
 
 ! *************************************************************************
 
- !@m_xmpi
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
 
 #ifdef HAVE_MPI1
@@ -1095,19 +1169,15 @@ end subroutine xmpi_show_info
 !! OUTPUT
 !!  xmpi_comm_rank=The rank of the node inside comm
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-function xmpi_comm_rank(comm)
+integer function xmpi_comm_rank(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_rank
 
 !Local variables-------------------
  integer :: mpierr
-
 ! *************************************************************************
 
  mpierr=0
@@ -1136,29 +1206,24 @@ end function xmpi_comm_rank
 !!  comm=MPI communicator.
 !!
 !! OUTPUT
-!!  xmpi_comm_size=The number of processors inside comm.
-!!
-!! PARENTS
+!!  xmpi_comm_size=The number of processors inside comm. Return 0 if comm = xmpi_comm_null
 !!
 !! SOURCE
 
-function xmpi_comm_size(comm)
+integer function xmpi_comm_size(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_size
 
 !Local variables-------------------------------
-!scalars
  integer :: mpierr
 
 ! *************************************************************************
 
  mpierr=0; xmpi_comm_size=1
 #ifdef HAVE_MPI
- if (comm/=xmpi_comm_null) then
-   call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
- end if
+ xmpi_comm_size = 0
+ if (comm /= xmpi_comm_null) call MPI_COMM_SIZE(comm,xmpi_comm_size,mpierr)
 #endif
 
 end function xmpi_comm_size
@@ -1176,11 +1241,6 @@ end function xmpi_comm_size
 !!
 !! INPUTS
 !!  comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1232,11 +1292,6 @@ end subroutine xmpi_comm_free_0D
 !! INPUTS
 !!  comms(:)=MPI communicators
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_comm_free_1D(comms)
@@ -1281,11 +1336,6 @@ end subroutine xmpi_comm_free_1D
 !!
 !! INPUTS
 !!  comms=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1334,11 +1384,6 @@ end subroutine xmpi_comm_free_2D
 !!
 !! INPUTS
 !!  comms=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1389,12 +1434,6 @@ end subroutine xmpi_comm_free_3D
 !!
 !! INPUTS
 !!  spaceGroup=MPI group
-!!
-!! PARENTS
-!!      m_paw_tools,m_wfd,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1448,12 +1487,6 @@ end subroutine xmpi_group_free
 !! OUTPUT
 !!  newgroup= new group derived from above, in the order defined by ranks
 !!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_group_incl(group,nranks,ranks,newgroup,mpierr)
@@ -1493,12 +1526,6 @@ end subroutine xmpi_group_incl
 !!
 !! OUTPUT
 !!  newcomm=new communicator
-!!
-!! PARENTS
-!!      m_wfd
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1545,17 +1572,14 @@ end subroutine xmpi_comm_create
 !!  [my_rank_in_group]=optional: my rank in the group of new sub-communicator
 !!  xmpi_subcomm=new (sub-)communicator
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
+integer function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
 
 !Arguments-------------------------
 !scalars
  integer,intent(in) :: comm,nranks
  integer,intent(out),optional :: my_rank_in_group
- integer :: xmpi_subcomm
 !arrays
  integer,intent(in) :: ranks(nranks)
 
@@ -1595,6 +1619,93 @@ end function xmpi_subcomm
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_comm_multiple
+!! NAME
+!!  xmpi_comm_multiple
+!!
+!! FUNCTION
+!!  Given an input communicator `input_comm`, create a new communicator
+!!  with number of procs multiple of a certain number `ntasks`.
+!!  Use all procs if ntasks >= input_nprocs.
+!!
+!! INPUTS
+!!  ntasks=Number of tasks.
+!!  comm=input communicator
+!!
+!! OUTPUT
+!!  idle_proc=True if this proc is idle. In this case, output_comm contains all the idle procs.
+!!  output_comm=Output communicator
+!!
+!! SOURCE
+
+subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
+
+!Arguments-------------------------
+!scalars
+ integer,intent(in) :: ntasks, input_comm
+ integer,intent(out) :: output_comm
+ logical,intent(out) :: idle_proc
+
+!Local variables-------------------------------
+ integer :: color, my_rank, ierr, input_nproc
+
+! *************************************************************************
+
+ my_rank = xmpi_comm_rank(input_comm)
+ input_nproc = xmpi_comm_size(input_comm)
+
+ if (input_nproc <= ntasks) then
+   ! Use all procs in input comm.
+   idle_proc = .False.; output_comm = input_comm
+#ifdef HAVE_MPI
+   call MPI_Comm_dup(input_comm, output_comm, ierr)
+#endif
+ else
+   color = merge(0, 1, my_rank + 1 <= (ntasks / input_nproc) * input_nproc)
+   idle_proc = color == 1
+   call xmpi_comm_split(input_comm, color, my_rank, output_comm, ierr)
+ end if
+
+end subroutine xmpi_comm_multiple_of
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_comm_dup
+!! NAME
+!!  xmpi_comm_dup
+!!
+!! FUNCTION
+!!  Hides MPI_COMM_DUP from MPI library.
+!!
+!! INPUTS
+!!  in_comm=input MPI communicator.
+!!
+!! OUTPUT
+!!  out_comm=Output MPI communicator.
+!!  mpierr=error code returned
+!!
+!! SOURCE
+
+subroutine xmpi_comm_dup(in_comm, out_comm, mpierr)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: out_comm, mpierr
+
+!----------------------------------------------------------------------
+
+#ifdef HAVE_MPI
+  call MPI_Comm_dup(in_comm, out_comm, mpierr)
+#else
+  out_comm = in_comm
+#endif
+
+end subroutine xmpi_comm_dup
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_comm_group
 !! NAME
 !!  xmpi_comm_group
@@ -1608,12 +1719,6 @@ end function xmpi_subcomm
 !! OUTPUT
 !!  spaceGroup=The group associated to comm.
 !!  mpierr=error code returned
-!!
-!! PARENTS
-!!      m_paw_tools,m_wfd,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1654,18 +1759,11 @@ end subroutine xmpi_comm_group
 !!  mpierr=error code returned
 !!  output_comm=new splitted communicator
 !!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
-subroutine xmpi_comm_split(input_comm,color,key,output_comm,mpierr)
+subroutine xmpi_comm_split(input_comm, color, key, output_comm, mpierr)
 
 !Arguments-------------------------
-!scalars
  integer,intent(in) :: color,input_comm,key
  integer,intent(out) :: mpierr,output_comm
 
@@ -1700,12 +1798,6 @@ end subroutine xmpi_comm_split
 !!  mpierr=error code returned
 !!  ranks2(nrank)=array of corresponding ranks in group2,
 !!                xmpi_undefined when no correspondence exists
-!!
-!! PARENTS
-!!      m_paw_tools,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1753,15 +1845,9 @@ end subroutine xmpi_group_translate_ranks
 !!  to_ranks(nrank)=array of corresponding ranks in to_comm
 !!                xmpi_undefined when no correspondence exists
 !!
-!! PARENTS
-!!      m_paral_pert
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
-subroutine xmpi_comm_translate_ranks(from_comm,nrank,from_ranks,to_comm,to_ranks)
+subroutine xmpi_comm_translate_ranks(from_comm, nrank, from_ranks, to_comm, to_ranks)
 
 !Arguments-------------------------
 !scalars
@@ -1791,6 +1877,32 @@ end subroutine xmpi_comm_translate_ranks
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_comm_translate_rank
+!! NAME
+!!  xmpi_comm_translate_rank
+!!
+!! FUNCTION
+!!  Helper function to translate a single rank `from_rank` in communicator `from_rank` to
+!!  the rank in communicator `to_comm`.
+
+integer function xmpi_comm_translate_rank(from_comm, from_rank, to_comm) result(to_rank)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: from_comm, from_rank, to_comm
+
+!Local variables-------------------------------
+ integer :: from_ranks(1), to_ranks(1)
+! *************************************************************************
+
+ from_ranks(1) = from_rank
+ call xmpi_comm_translate_ranks(from_comm, 1, from_ranks, to_comm, to_ranks)
+ to_rank = to_ranks(1)
+
+end function xmpi_comm_translate_rank
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_barrier
 !! NAME
 !!  xmpi_barrier
@@ -1801,21 +1913,6 @@ end subroutine xmpi_comm_translate_ranks
 !! INPUTS
 !!  comm=MPI communicator
 !!
-!! PARENTS
-!!      m_Ctqmcoffdiag,m_abihist,m_alloc_hamilt_gpu,m_bse_io,m_calc_ucrpa
-!!      m_chebfi,m_datafordmft,m_ddk,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv
-!!      m_dtfil,m_dvdb,m_errors,m_exc_build,m_exc_diago,m_exc_itdiago
-!!      m_exc_spectra,m_fit_polynomial_coeff,m_forctqmc,m_green,m_gstateimg
-!!      m_gwrdm,m_haydock,m_hdr,m_io_kss,m_io_redirect,m_ioarr,m_iowf,m_ipi
-!!      m_ksdiago,m_mkrho,m_mlwfovlp,m_mover_effpot,m_paw_mkaewf,m_paw_mkrho
-!!      m_plowannier,m_polynomial_coeff,m_precpred_1geo
-!!      m_primitive_potential_list,m_rf2_init,m_sigma_driver,m_sigmaph,m_slk
-!!      m_spmat_csr,m_tddft,m_vtorho,m_vtorhorec,m_wfd,m_wfd_optic,m_wffile
-!!      m_wfk,m_wfk_analyze,testtransposer
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_barrier(comm)
@@ -1824,7 +1921,7 @@ subroutine xmpi_barrier(comm)
  integer,intent(in) :: comm
 
 !Local variables-------------------
- integer   :: ier
+ integer :: ier
 #ifdef HAVE_MPI
  integer :: nprocs
 #endif
@@ -1849,38 +1946,32 @@ end subroutine xmpi_barrier
 !!  xmpi_name
 !!
 !! FUNCTION
+!!  Returns the name of the processor
 !!  Hides MPI_GET_PROCESSOR_NAME from MPI library.
 !!
-!! OUTPUT
-!!  name= the host name transformed to integer variable.
-!!  mpierr=Status error.
-!!
-!! PARENTS
-!!      m_gpu_detect
-!!
-!! CHILDREN
-!!      xmpi_comm_free
+!! For the MPI standard:
+!!    The name returned should identify a particular piece of hardware; the exact format is implementation defined.
+!!    This name may or may not be the same as might be returned by gethostname, uname, or sysinfo.
 !!
 !! SOURCE
 
-subroutine xmpi_name(name_ch, mpierr)
+subroutine xmpi_name(name_ch, ierr)
 
 !Arguments-------------------------
- integer,intent(out) ::  mpierr
  character(20),intent(out) :: name_ch
+ integer,intent(out) ::  ierr
 
 !Local variables-------------------
- integer :: name,len
+ integer :: len
 ! character(len=MPI_MAX_PROCESSOR_NAME) :: name_ch
 
 ! *************************************************************************
 !Get the name of this processor (usually the hostname)
 
- name   = 0
- mpierr = 0
+ ierr = 0
 
 #ifdef HAVE_MPI
- call MPI_GET_PROCESSOR_NAME(name_ch, len, mpierr)
+ call MPI_GET_PROCESSOR_NAME(name_ch, len, ierr)
  name_ch = trim(name_ch)
 
 #else
@@ -1908,12 +1999,6 @@ end subroutine xmpi_name
 !! OUTPUT
 !!  flag= True if a message with the specified source, tag, and communicator is available
 !!  mpierr= status error
-!!
-!! PARENTS
-!!      m_paw_an,m_paw_ij,m_pawfgrtab,m_pawrhoij
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -1956,13 +2041,6 @@ end subroutine xmpi_iprobe
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!      m_dfpt_scfcv,m_dvdb,m_fftw3,m_mover,m_paw_an,m_paw_ij,m_paw_occupancies
-!!      m_pawfgrtab,m_pawrhoij,m_scfcv_core,m_sg2002,m_sigmaph
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_wait(request, mpierr)
@@ -2003,12 +2081,6 @@ end subroutine xmpi_wait
 !!
 !! OUTPUT
 !!  mpierr= status error
-!!
-!! PARENTS
-!!      m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2051,11 +2123,6 @@ end subroutine xmpi_waitall_1d
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_waitall_2d(array_of_requests, mpierr)
@@ -2094,11 +2161,6 @@ end subroutine xmpi_waitall_2d
 !! OUTPUT
 !!  mpierr= status error
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_request_free(requests,mpierr)
@@ -2126,6 +2188,26 @@ subroutine xmpi_request_free(requests,mpierr)
 end subroutine xmpi_request_free
 !!***
 
+!!****f* m_xmpi/xmpi_requests_add
+!! NAME
+!!  xmpi_requests_add
+!!
+!! FUNCTION
+!!  Increase/decrement xmpi_count_requests internal counter
+!!
+!! SOURCE
+
+subroutine xmpi_requests_add(count)
+
+!Arguments-------------------------
+ integer,intent(in) :: count
+! *************************************************************************
+
+ xmpi_count_requests = xmpi_count_requests + count
+
+end subroutine xmpi_requests_add
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_xmpi/xmpi_error_string
@@ -2138,11 +2220,6 @@ end subroutine xmpi_request_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2185,8 +2262,6 @@ end subroutine xmpi_error_string
 !! SIZE EFFECTS
 !!  comm= communicator (should be intent(in) but is intent(inout) in some
 !!             OMPI implementation ; known as a bug)
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -2260,11 +2335,6 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !!  are not executed. Moreover allocation such as foo(my_start:my_stop) will generate a zero-sized array.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
@@ -2280,9 +2350,9 @@ subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
  nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- block   = ntasks/nprocs
- res     = MOD(ntasks,nprocs)
- block_p1= block+1
+ block   = ntasks / nprocs
+ res     = MOD(ntasks, nprocs)
+ block_p1= block + 1
 
  if (my_rank < res) then
    my_start =  my_rank   *block_p1+1
@@ -2302,7 +2372,7 @@ end subroutine xmpi_split_work_i4b
 !!  xmpi_split_block
 !!
 !! FUNCTION
-!!  Splits tasks inside communicator using cyclic distribution.
+!!  Splits tasks inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2312,12 +2382,6 @@ end subroutine xmpi_split_work_i4b
 !! OUTPUT
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
-!!
-!! PARENTS
-!!      m_sigmaph
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2359,12 +2423,6 @@ end subroutine xmpi_split_block
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
 !!
-!! PARENTS
-!!      m_phgamma,m_sigmaph
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_split_cyclic(ntasks, comm, my_ntasks, my_inds)
@@ -2405,7 +2463,7 @@ end subroutine xmpi_split_cyclic
 !!  xmpi_split_list
 !!
 !! FUNCTION
-!!  Splits list of itmes inside communicator using block distribution.
+!!  Splits list of items inside communicator using block distribution.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2416,12 +2474,6 @@ end subroutine xmpi_split_cyclic
 !! OUTPUT
 !!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
 !!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
-!!
-!! PARENTS
-!!      m_phgamma
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2464,9 +2516,9 @@ end subroutine xmpi_split_list
 !!  The output arrays istart(1:nprocs) and istop(1:nprocs)
 !!  report the starting and final task index for each CPU.
 !!  Namely CPU with rank ii has to perform all the tasks between
-!!  istart(ii+1) and istop(ii+1). Note the Fortran convention of using
-!!  1 as first index of the array.
+!!  istart(ii+1) and istop(ii+1). Note the Fortran convention of using 1 as first index of the array.
 !!  Note, moreover, that if a proc has rank > ntasks then:
+!!
 !!   istart(rank+1)=ntasks+1
 !!   istop(rank+1)=ntask
 !!
@@ -2486,18 +2538,12 @@ end subroutine xmpi_split_list
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
-!! PARENTS
-!!      m_exc_build,m_phonons,m_screening,m_screening_driver,m_skw
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_split_work2_i4b(ntasks, nprocs, istart, istop)
 
 !Arguments ------------------------------------
- integer,intent(in)  :: ntasks,nprocs
+ integer,intent(in) :: ntasks,nprocs
  integer,intent(inout) :: istart(nprocs), istop(nprocs)
 
 !Local variables-------------------------------
@@ -2538,12 +2584,6 @@ end subroutine xmpi_split_work2_i4b
 !! OUTPUT
 !!  istart(nprocs),istop(nprocs)= indices defining the initial and final task for each processor
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_split_work2_i8b(ntasks,nprocs,istart,istop)
@@ -2583,19 +2623,14 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! FUNCTION
 !!  Fill table defining the distribution of the tasks according to the number of processors involved in the
-!!  calculation. For each set of indeces, the table contains the rank of the node in the MPI communicator.
+!!  calculation. For each set of indices, the table contains the rank of the node in the MPI communicator.
 !!
 !! INPUTS
 !!  nprocs=The number of processors performing the calculation in parallel.
 !!
 !! OUTPUT
-!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indeces.
+!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indices.
 !!  Tasks are distributed across the nodes in column-major order.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -2658,49 +2693,43 @@ end subroutine xmpi_distab_4D
 !!  xmpi_distrib_with_replicas
 !!
 !! FUNCTION
-!!  This function distributes the i-th task among `nprocs` inside a MPI communicator.
+!!  This function distributes the i-th task `itask` among `nprocs` inside a MPI communicator.
 !!  If nprocs > ntasks, multiple MPI ranks will be assigned to a given task.
 !!
 !! INPUTS
 !!  itask=Index of the task (must be <= ntasks)
 !!  ntasks= number of tasks
-!!  rank=MPI Rank of this processor
+!!  rank=MPI Rank of this processor in the MPI communicator.
 !!  nprocs=Number of processors in the MPI communicator.
 !!
 !! OUTPUT
 !!  True if this node will treat itask (replicas are possible if nprocs > ntasks)
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-pure function xmpi_distrib_with_replicas(itask,ntasks,rank,nprocs) result(bool)
+pure logical function xmpi_distrib_with_replicas(itask, ntasks, rank, nprocs) result(bool)
 
 !Arguments ------------------------------------
-!scalars
  integer,intent(in) :: itask,rank,nprocs,ntasks
- logical :: bool
 
 !Local variables-------------------------------
-!scalars
  integer :: ii,mnp_pool,rk_base
 
 ! *************************************************************************
 
- ! If the number of processors is less than ntasks, we have max one task per processor,
+ ! If the number of processors is less than ntasks, we have max one processor per task
  ! else we replicate the tasks inside a pool of max size mnp_pool
  if (nprocs <= ntasks) then
-   bool = (MODULO(itask-1, nprocs)==rank)
+   bool = modulo(itask - 1, nprocs) == rank
  else
    mnp_pool = (nprocs / ntasks)
-   !write(std_out,*)"Will duplicate itasks"
-   !write(std_out,*)"mnp_pool",mnp_pool,"nprocs, ntasks",nprocs,ntasks
+   !write(std_out,*)"Will duplicate itask, mnp_pool", mnp_pool, "nprocs, ntasks", nprocs, ntasks
 
-   rk_base = MODULO(itask-1, nprocs)
+   rk_base = modulo(itask - 1, nprocs)
    bool = .False.
    do ii=1,mnp_pool+1
-     if (rank == rk_base + (ii-1) * ntasks) then
-        bool = .True.; exit
+     if (rank == rk_base + (ii - 1) * ntasks) then
+       bool = .True.; exit
      end if
    end do
  end if
@@ -2745,11 +2774,6 @@ end function xmpi_distrib_with_replicas
 !!  From MPI4 specification, this routine is useless as large-count MPI communications
 !!    can be called with the use of the MPI_count datatype (instead of INTEGER).
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_type)
@@ -2776,8 +2800,7 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 ! *************************************************************************
 
 #ifdef HAVE_MPI
- if (XMPI_ADDRESS_KIND<int64) &
-&  call xmpi_abort(msg="Too much data to communicate for this architecture!")
+ if (XMPI_ADDRESS_KIND<int64) call xmpi_abort(msg="Too much data to communicate for this architecture!")
 
 !Divide data in chunks
  cc=int(largecount,kind=int32)/INT_MAX
@@ -2848,7 +2871,9 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 
 end subroutine xmpi_largetype_create
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_int
 !! NAME
 !!  largetype_sum_int
@@ -2871,7 +2896,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_real
 !! NAME
 !!  largetype_sum_real
@@ -2894,13 +2921,16 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dble
 !! NAME
 !!  largetype_sum_dble
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for double precision reals
+
  subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
   integer :: len,datatype
   real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2917,7 +2947,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_cplx
 !! NAME
 !!  largetype_sum_cplx
@@ -2940,7 +2972,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dcplx
 !! NAME
 !!  largetype_sum_dcplx
@@ -2963,7 +2997,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_lor_log
 !! NAME
 !!  largetype_lor_log
@@ -2986,10 +3022,12 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
 !!***
+
 !--------------------------------------
-!!****f* m_xmpi/largetype_lang_log
+
+!!****f* m_xmpi/largetype_land_log
 !! NAME
-!!  largetype_lang_log
+!!  largetype_land_log
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LANG for logicals
@@ -3022,11 +3060,6 @@ end subroutine xmpi_largetype_create
 !! SIDE EFFECTS
 !!  largetype= (INTEGER) MPI type to release
 !!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -3097,7 +3130,8 @@ end subroutine xmpi_largetype_free
 !!  The routine will abort if the displacement cannot be represented with a default integer.
 !!
 !! INPUTS
-!! ncount= number of blocks (integer) --- also number of entries in arrays array_of_types, array_of_displacements and array_of_blocklengths
+!! ncount= number of blocks (integer) --- also number of entries in arrays
+!!         array_of_types, array_of_displacements and array_of_blocklengths
 !! array_of_blocklength(ncount)=number of elements in each block (array of integer)
 !! array_of_displacements(ncount)=byte displacement of each block (array of integer)
 !! array_of_types(ncount)=type of elements in each block (array of handles to datatype objects)
@@ -3106,17 +3140,11 @@ end subroutine xmpi_largetype_free
 !! new_type=new datatype (handle)
 !! mpierr=MPI status error
 !!
-!! PARENTS
-!!      m_slk,m_wffile,m_wfk,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_type_struct(ncount,block_length,block_displ,block_type,new_type,mpierr)
+subroutine xmpio_type_struct(ncount, block_length, block_displ, block_type, new_type, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3171,11 +3199,9 @@ end subroutine xmpio_type_struct
 !!  bsize_frm=Byte size of the Fortran record marker.
 !!  mpi_type_frm=MPI type of the marker.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
-subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
+subroutine xmpio_get_info_frm(bsize_frm, mpi_type_frm, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -3339,17 +3365,11 @@ end subroutine xmpio_get_info_frm
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!      m_bse_io,m_exc_diago,m_exc_itdiago,m_hdr,m_io_screening,m_xmpi
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
+subroutine xmpio_read_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -3362,11 +3382,11 @@ subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
 !Local variables-------------------------------
 !scalars
  integer :: bsize_frm,mpi_type_frm,myfh
- integer(kind=int16) :: delim_record2
- integer(kind=int32) :: delim_record4
- integer(kind=int64) :: delim_record8
+ integer(kind=int16) :: delim_record2(1)
+ integer(kind=int32) :: delim_record4(1)
+ integer(kind=int64) :: delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
- integer*16 :: delim_record16
+ integer*16 :: delim_record16(1)
 #endif
  character(len=500) :: msg
 !arrays
@@ -3386,18 +3406,18 @@ subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
 
    if (bsize_frm==4) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      call MPI_FILE_READ_AT(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3405,19 +3425,19 @@ subroutine xmpio_read_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
  CASE (xmpio_collective)
 
    if (bsize_frm==4) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record4
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record4,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record4(1)
    else if (bsize_frm==8) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record8
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record8,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record8(1)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record16
+     fmarker = delim_record16(1)
 #endif
    else if (bsize_frm==2) then
-     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     fmarker = delim_record2
+     call MPI_FILE_READ_AT_ALL(myfh,offset,delim_record2,1,mpi_type_frm,statux,mpierr)
+     fmarker = delim_record2(1)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3470,17 +3490,11 @@ end subroutine xmpio_read_frm
 !!     input: offset of  the Fortran marker.
 !!     output: new offset updated after the writing, depending on advance.
 !!
-!! PARENTS
-!!      m_ioarr
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
+subroutine xmpio_write_frm(fh, offset, sc_mode, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -3518,23 +3532,23 @@ subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
  CASE (xmpio_single)
    if (bsize_frm==4) then
      delim_record4 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record4 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record4],1,mpi_type_frm,statux,mpierr)
 
    else if (bsize_frm==8) then
      delim_record8 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record8 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record8],1,mpi_type_frm,statux,mpierr)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      delim_record16 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record16 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record16],1,mpi_type_frm,statux,mpierr)
 #endif
    else if (bsize_frm==2) then
      delim_record2 = fmarker
-     call MPI_FILE_WRITE_AT(myfh,offset,delim_record2, 1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT(myfh,last,delim_record2 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,offset,[delim_record2], 1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT(myfh,last,[delim_record2],1,mpi_type_frm,statux,mpierr)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3542,22 +3556,22 @@ subroutine xmpio_write_frm(fh,offset,sc_mode,fmarker,mpierr,advance)
  CASE (xmpio_collective)
    if (bsize_frm==4) then
      delim_record4 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record4 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record4 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record4],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record4],1,mpi_type_frm,statux,mpierr)
    else if (bsize_frm==8) then
      delim_record8 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record8 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record8 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record8],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record8],1,mpi_type_frm,statux,mpierr)
 #if defined HAVE_FC_INT_QUAD
    else if (bsize_frm==16) then
      delim_record16 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record16,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record16 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record16],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record16],1,mpi_type_frm,statux,mpierr)
 #endif
    else if (bsize_frm==2) then
      delim_record2 = fmarker
-     call MPI_FILE_WRITE_AT_ALL(myfh,offset,delim_record2 ,1,mpi_type_frm,statux,mpierr)
-     call MPI_FILE_WRITE_AT_ALL(myfh,last,delim_record2 ,1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,offset,[delim_record2],1,mpi_type_frm,statux,mpierr)
+     call MPI_FILE_WRITE_AT_ALL(myfh,last,[delim_record2],1,mpi_type_frm,statux,mpierr)
    else
      call xmpi_abort(msg='Wrong record marker length!')
    end if
@@ -3609,17 +3623,11 @@ end subroutine xmpio_write_frm
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_wfk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fstripes(ncount,sizes,types,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fstripes(ncount, sizes, types, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3704,17 +3712,11 @@ end subroutine xmpio_create_fstripes
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_exc_build,m_exc_itdiago,m_mpiotk,m_wfk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_2D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3725,8 +3727,7 @@ subroutine xmpio_create_fsubarray_2D(sizes,subsizes,array_of_starts,old_type,new
  integer,intent(in) :: sizes(2),subsizes(2),array_of_starts(2)
 !Local variables-------------------------------
 !scalars
- integer :: bsize_frm,bsize_old,nx,ny
- integer :: column_type,ldx
+ integer :: bsize_frm,bsize_old,nx,ny,column_type,ldx
  integer(XMPI_OFFSET_KIND) :: st_x,st_y
  integer(MPI_ADDRESS_KIND) :: stride_x
  !character(len=500) :: msg
@@ -3794,17 +3795,11 @@ end subroutine xmpio_create_fsubarray_2D
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_mpiotk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_3D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3844,9 +3839,9 @@ subroutine xmpio_create_fsubarray_3D(sizes,subsizes,array_of_starts,old_type,new
 
  ! The view starts at the first element of the submatrix.
  my_offpad = (st_x-1)*bsize_old + &
-&            (st_y-1)*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_z-1)*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
-&             xmpio_bsize_frm
+             (st_y-1)*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_z-1)*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
+              xmpio_bsize_frm
 
  ! Byte size of the Fortran record + the two markers.
  stride_x = ldx*bsize_old + 2*bsize_frm
@@ -3896,17 +3891,11 @@ end subroutine xmpio_create_fsubarray_3D
 !!  new_type=New MPI type.
 !!  mpierr= MPI error code
 !!
-!! PARENTS
-!!      m_mpiotk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new_type,my_offpad,mpierr)
+subroutine xmpio_create_fsubarray_4D(sizes, subsizes, array_of_starts, old_type, new_type, my_offpad, mpierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -3949,10 +3938,10 @@ subroutine xmpio_create_fsubarray_4D(sizes,subsizes,array_of_starts,old_type,new
 
  ! The view starts at the first element of the submatrix.
  my_offpad = (st_x-1)*bsize_old + &
-&            (st_y-1)*        (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_z-1)*ldy*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
-&            (st_a-1)*lda*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
-&             xmpio_bsize_frm
+             (st_y-1)*        (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_z-1)*ldy*    (ldx*bsize_old+2*xmpio_bsize_frm) + &
+             (st_a-1)*lda*ldy*(ldx*bsize_old+2*xmpio_bsize_frm) + &
+             xmpio_bsize_frm
 
  ! Byte size of the Fortran record + the two markers.
  stride_x = ldx*bsize_old + 2*bsize_frm
@@ -4007,17 +3996,11 @@ end subroutine xmpio_create_fsubarray_4D
 !! OUTPUT
 !!  ierr=A non-zero error code signals failure.
 !!
-!! PARENTS
-!!      m_bse_io,m_exc_itdiago,m_slk,m_wfk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
+subroutine xmpio_check_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -4047,12 +4030,11 @@ subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
 
  ! Workaround for XLF
  myfh = fh
-
  ierr=0
 
  bsize_frm    = xmpio_bsize_frm     ! Byte size of the Fortran record marker.
  mpi_type_frm = xmpio_mpi_type_frm  ! MPI type of the record marker.
- !
+
  ! Define the view for the file.
  nb=2*nfrec
  ABI_MALLOC(block_length,(nb+2))
@@ -4194,16 +4176,11 @@ end subroutine xmpio_check_frmarkers
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_int(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
+subroutine xmpio_read_int(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -4291,16 +4268,11 @@ end subroutine xmpio_read_int
 !!     input: file pointer used to access the Fortran marker.
 !!     output: new offset updated after the reading, depending on advance.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_read_dp(fh,offset,sc_mode,ncount,buf,fmarker,mpierr,advance)
+subroutine xmpio_read_dp(fh, offset, sc_mode, ncount, buf, fmarker, mpierr, advance)
 
 !Arguments ------------------------------------
 !scalars
@@ -4365,8 +4337,6 @@ end subroutine xmpio_read_dp
 !! FUNCTION
 !!  Returns .TRUE. if offset cannot be stored in a Fortran integer of kind XMPI_ADDRESS_KIND.
 !!
-!! PARENTS
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4411,17 +4381,11 @@ end function xmpio_max_address
 !! OUTPUT
 !!  ierr=A non-zero error code signals failure.
 !!
-!! PARENTS
-!!      m_exc_build,m_exc_itdiago,m_ioarr,m_slk,m_wfk
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
 
-subroutine xmpio_write_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
+subroutine xmpio_write_frmarkers(fh, offset, sc_mode, nfrec, bsize_frecord, ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -4611,12 +4575,6 @@ end subroutine xmpio_write_frmarkers
 !!
 !!  File views for C-streams is not optimal since one can use a single slice of contigous data.
 !!
-!! PARENTS
-!!      m_exc_build
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4765,12 +4723,6 @@ end subroutine xmpio_create_fherm_packed
 !!     offset_err=1 so that the caller will know that several MPI-IO reads are nedded to
 !!     read the file.
 !!
-!! PARENTS
-!!      m_bse_io
-!!
-!! CHILDREN
-!!      xmpi_comm_free
-!!
 !! SOURCE
 
 #ifdef HAVE_MPI_IO
@@ -4830,7 +4782,7 @@ subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my
        ii_hpk = row_glob
        jj_hpk = col_glob
        ijp_glob = row_glob + col_glob*(col_glob-1)/2  ! Index for packed form
-     else ! Exchange the indeces as (jj,ii) will be read.
+     else ! Exchange the indices as (jj,ii) will be read.
        ii_hpk = col_glob
        jj_hpk = row_glob
        ijp_glob = col_glob + row_glob*(row_glob-1)/2  ! Index for packed form
@@ -4896,12 +4848,6 @@ end subroutine xmpio_create_coldistr_from_fpacked
 !!  1) block_displ is given in bytes due to the presence of the marker.
 !!     If the displacement of an element is too large, the routine returns
 !!     offset_err=1 so that the caller knows that several MPI-IO reads are required to (read| write) the file.
-!!
-!! PARENTS
-!!      m_bse_io
-!!
-!! CHILDREN
-!!      xmpi_comm_free
 !!
 !! SOURCE
 
@@ -4999,7 +4945,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
        ii_hpk = row_glob - row_shift
        jj_hpk = col_glob - col_shift
-       if (jj_hpk<ii_hpk) then ! Exchange the indeces so that the symmetric is read.
+       if (jj_hpk<ii_hpk) then ! Exchange the indices so that the symmetric is read.
          swap   = jj_hpk
          jj_hpk = ii_hpk
          ii_hpk = swap
@@ -5024,7 +4970,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
        ii = row_glob - row_shift
        jj = col_glob - col_shift
 
-       if (uplo==2) then ! Exchange the indeces since the symmetric element will be read.
+       if (uplo==2) then ! Exchange the indices since the symmetric element will be read.
          swap=jj
          jj  =ii
          ii  =swap
@@ -5052,8 +4998,8 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
    end do
  end do
 
- write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
- write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
+ !write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
+ !write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
 
  !block_displ (1)=max_displ ! Do not change this value.
  !if (min_displ>0) block_displ (1)=min_displ ! Do not change this value.
@@ -5083,35 +5029,494 @@ end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
 
- !type(xcomm_t) function from_mpi_int(comm_value) result(new)
- !  new%value = comm_value
- !  new%nproc  xmpi_comm_size(comm_value)
- !  new%me  xmpi_comm_rank(comm_value)
- !end function from_mpi_int
- !pure logical function xcomm_iam_master(self)
- !  class(xcomm_t),intent(in) :: self
- !  xcomm_iam_master = self%me == 0
- !end function xcomm_iam_master
- pure logical function xcomm_skip(self, iter)
-   class(xcomm_t),intent(in) :: self
-   integer,intent(in) :: iter
-   xcomm_skip = mod(iter, self%nproc) /= self%me
- end function xcomm_skip
- subroutine xcomm_set_to_self(self)
-   class(xcomm_t),intent(inout) :: self
-   call self%free()
-   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
- end subroutine xcomm_set_to_self
- subroutine xcomm_set_to_null(self)
-   class(xcomm_t),intent(inout) :: self
-   call self%free()
-   self%value = xmpi_comm_null
- end subroutine xcomm_set_to_null
- subroutine xcomm_free(self)
-   class(xcomm_t),intent(inout) :: self
-   call xmpi_comm_free(self%value)
-   self%me = -1; self%nproc = 0
- end subroutine xcomm_free
+!!****f* m_xmpi/xmpi_distrib_2d
+!! NAME
+!! xmpi_distrib_2d
+!!
+!! FUNCTION
+!!  Try to optimally distribute nprocs in a 2d grid of shape (n1, n2) given a problem of dimension (n1, n2).
+!!  Use order string to define priorities:
+!!      "12" or "21" if both dimensions should be optimized (if not possibile the first one gets optimized)
+!!      "1" or "2" to optimize only one dimension.
+!!  Return: exit status in ierr.
+!!
+!! SOURCE
 
-END MODULE m_xmpi
+subroutine xmpi_distrib_2d(nprocs, order, size1, size2, n1, n2, ierr)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: nprocs, size1, size2
+ character(len=*),intent(in) :: order
+ integer,intent(out) :: n1, n2, ierr
+
+!Local variables-------------------------------
+ integer :: ii
+
+!----------------------------------------------------------------------
+
+ ierr = 1; n1 = -1; n2 = -1
+
+ select case (order)
+ case ("12")
+   call balance_12()
+   if (ierr /= 0) call balance_1()
+ case ("21")
+   call balance_21()
+   if (ierr /= 0) call balance_2()
+ case ("1")
+   call balance_1()
+ case ("2")
+   call balance_2()
+ case default
+   ! Wrong order
+   ierr = -1
+ end select
+
+contains
+
+subroutine balance_12()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size1, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size2, nprocs / ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+end subroutine balance_12
+
+subroutine balance_21()
+ ! Try to find n1 x n2 = nprocs so that (size1, size2) are multiple of (n1, n2)
+ do ii=nprocs,1,-1
+   if (mod(size2, ii) == 0 .and. mod(nprocs, ii) == 0 .and. mod(size1, nprocs / ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+end subroutine balance_21
+
+subroutine balance_1()
+ integer :: imod1
+ ! Try to find n1 x n2 = nprocs so that only size1 is multiple of n1. Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod1 = mod(size1, ii)
+   if ((imod1 == 0 .or. imod1 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n1 = ii; n2 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size1) then
+   n1 = nprocs; n2 = 1; ierr = 0; return
+ end if
+end subroutine balance_1
+
+subroutine balance_2()
+ integer :: imod2
+ ! Try to find n1 x n2 = nprocs so that only size2 is multiple of n2. Allow for some load imbalance.
+ do ii=nprocs,1,-1
+   imod2 = mod(size2, ii)
+   if ((imod2 == 0 .or. imod2 >= nprocs / 2) .and. mod(nprocs, ii) == 0) then
+     n2 = ii; n1 = nprocs / ii; ierr = 0; exit
+   end if
+ end do
+
+ if (ierr /= 0 .and. nprocs <= size2) then
+   n2 = nprocs; n1 = 1; ierr = 0; return
+ end if
+end subroutine balance_2
+
+end subroutine xmpi_distrib_2d
+!!***
+
+type(xcomm_t) function xcomm_from_mpi_int(comm_int) result(new)
+  integer,intent(in) :: comm_int
+  integer :: new_comm, ierr
+  new%value = comm_int; new%me = 0; new%nproc = 1
+#ifdef HAVE_MPI
+  call MPI_Comm_dup(comm_int, new_comm, ierr)
+  new%value = new_comm
+  new%nproc = xmpi_comm_size(new_comm)
+  new%me = xmpi_comm_rank(new_comm)
+#endif
+end function xcomm_from_mpi_int
+
+! Skip iteration `iter` according to rank in xcomm.
+! [root]: Rank of the proc treating iteration `iter`
+
+logical function xcomm_skip(xcomm, iter, root)
+ class(xcomm_t),intent(in) :: xcomm
+ integer,intent(in) :: iter
+ integer,optional,intent(out) :: root
+
+ integer :: root__
+
+ root__ = mod(iter, xcomm%nproc)
+ xcomm_skip = root__ /= xcomm%me
+ if (present(root)) root = root__
+end function xcomm_skip
+
+subroutine xcomm_set_to_self(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xcomm%free()
+ xcomm%value = xmpi_comm_self; xcomm%me = 0; xcomm%nproc = 1
+end subroutine xcomm_set_to_self
+
+subroutine xcomm_set_to_null(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xcomm%free()
+ xcomm%value = xmpi_comm_null
+end subroutine xcomm_set_to_null
+
+subroutine xcomm_free(xcomm)
+ class(xcomm_t),intent(inout) :: xcomm
+ call xmpi_comm_free(xcomm%value)
+ xcomm%me = -1; xcomm%nproc = 0
+end subroutine xcomm_free
+
+! Build sub-communicators in a Cartesian grid.
+subroutine xcomm_from_cart_sub(xcomm, comm_cart, keepdim)
+ class(xcomm_t),intent(out) :: xcomm
+ integer,intent(in) :: comm_cart
+ logical,intent(in) :: keepdim(:)
+ integer :: ierr
+
+#ifdef HAVE_MPI
+ call MPI_CART_SUB(comm_cart, keepdim, xcomm%value, ierr)
+#endif
+ xcomm%me = xmpi_comm_rank(xcomm%value)
+ xcomm%nproc = xmpi_comm_size(xcomm%value)
+
+end subroutine xcomm_from_cart_sub
+
+! Prepare a typical gatherv operation in which each MPI rank sends
+! `nitems_per_rank(rank+1)` items and each item has length `nelem_per_item`.
+! Final results are packed according to the rank of the processor.
+
+subroutine xcomm_prep_gatherv(xcomm, nelem_per_item, nitems_per_rank, sendcount, recvcounts, displs)
+ class(xcomm_t),intent(in) :: xcomm
+ integer,intent(in) :: nelem_per_item, nitems_per_rank(xcomm%nproc)
+ integer,intent(out) :: sendcount
+ integer, allocatable, intent(out) :: recvcounts(:), displs(:)
+
+!Local variables-------------------
+ integer :: ii
+!----------------------------------------------------------------------
+
+ ABI_MALLOC(recvcounts, (xcomm%nproc))
+ ABI_MALLOC(displs, (xcomm%nproc))
+ sendcount = nelem_per_item * nitems_per_rank(xcomm%me + 1)
+
+ recvcounts(:) = nelem_per_item * nitems_per_rank
+ displs(1) = 0
+ do ii=2,xcomm%nproc
+   displs(ii) = nelem_per_item * sum(nitems_per_rank(1:ii-1))
+ end do
+end subroutine xcomm_prep_gatherv
+!!***
+
+! Debugging tool to print the hostname of the procs in the communicator
+subroutine xcomm_print_names(xcomm)
+ class(xcomm_t),intent(in) :: xcomm
+
+!Local variables-------------------
+ integer :: ip, ierr
+ character(20) :: my_name, names(xcomm%nproc)
+!----------------------------------------------------------------------
+
+ call xmpi_name(my_name, ierr)
+ call xmpi_allgather(my_name, names, xcomm%value, ierr)
+
+ if (xcomm%me == 0) then
+   write(std_out, "(a5,2x,a20)")"rank", "hostname"
+   do ip=0,xcomm%nproc-1
+     write(std_out, "(i5,2x,a20)")ip, trim(names(ip+1))
+   end do
+ end if
+
+end subroutine xcomm_print_names
+!!***
+
+! Return True if all procs in xcomm can create a shared memory region. Cache the result.
+logical function xcomm_can_use_shmem(xcomm) result(ok)
+ class(xcomm_t),intent(inout) :: xcomm
+
+!Local variables-------------------
+ integer :: ierr, new_comm
+!----------------------------------------------------------------------
+
+ ok = .False.
+#ifdef HAVE_MPI
+ if (xcomm%can_use_shmem__ == - 1) then
+   ! First call --> cache result
+   call MPI_COMM_SPLIT_TYPE(xcomm%value, MPI_COMM_TYPE_SHARED, xcomm%me, MPI_INFO_NULL, new_comm, ierr)
+   xcomm%can_use_shmem__ = merge(1, 0, xmpi_comm_size(new_comm) == xcomm%nproc)
+   call xmpi_comm_free(new_comm)
+ end if
+ ok = xcomm%can_use_shmem__ == 1
+#endif
+
+end function xcomm_can_use_shmem
+!!***
+
+subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
+
+ class(xcomm_t),intent(inout) :: xcomm
+ integer(kind=XMPI_ADDRESS_KIND), intent(in) :: count
+ integer,intent(in) :: kind, info
+ type(c_ptr),intent(out) :: baseptr
+ !INTEGER(KIND=XMPI_ADDRESS_KIND) :: baseptr
+ integer,intent(out) :: win
+
+!Local variables-------------------
+ integer :: disp_unit
+#ifdef HAVE_MPI
+#if 0
+ integer :: ierr
+ integer(kind=XMPI_ADDRESS_KIND) :: my_size
+#endif
+#endif
+!----------------------------------------------------------------------
+
+ if (.not. xcomm%can_use_shmem()) call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+
+ select case (kind)
+ case (sp)
+  disp_unit = xmpi_bsize_sp
+ case (dp)
+  disp_unit = xmpi_bsize_dp
+ case default
+  call xmpi_abort(msg="MPI communicator does not support shared memory allocation!")
+ end select
+
+ ! FIXME This is problematic as the API with type(c_ptr) requires mpi_f08
+ ! else the gcc with mpicc complains with
+ ! Error: Type mismatch in argument 'baseptr' at (1); passed TYPE(c_ptr) to INTEGER(8)
+ ! See https://github.com/pmodels/mpich/issues/2659
+
+#ifdef HAVE_MPI
+#if 0
+ my_size = 0; if (xcomm%me == 0) my_size = count * disp_unit
+ call MPI_WIN_ALLOCATE_SHARED(my_size, disp_unit, info, xcomm%value, baseptr, win, ierr)
+                              !INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+                              !INTEGER DISP_UNIT, INFO, COMM, WIN, ierr)
+
+ if (xcomm%me /= 0) call MPI_WIN_SHARED_QUERY(win, 0, my_size, disp_unit, baseptr, ierr)
+ if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="allocated_shared returned ierr /= 0")
+ !MPI_WIN_SHARED_QUERY(WIN, RANK, SIZE, DISP_UNIT, BASEPTR, IERROR)
+ !       INTEGER WIN, RANK, DISP_UNIT, IERROR
+ !       INTEGER(KIND=MPI_ADDRESS_KIND) SIZE, BASEPTR
+
+ ! No local operations prior to this epoch, so give an assertion
+ call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
+#else
+  ! this macro is being used befor m_errors is compiled, so work around it
+! ABI_UNUSED(count)
+! ABI_UNUSED(info)
+  if (.FALSE.) write(std_out,*) count
+  if (.FALSE.) write(std_out,*) info
+#endif
+#endif
+
+end subroutine xcomm_allocate_shared_master
+!!***
+
+!!****f* m_xmpi/pool2d_from_dims
+!! NAME
+!!  pool2d_from_dims
+!!
+!! FUNCTION
+!!  Build pool of MPI procs to distribute (n1 x n2) tasks.
+!!
+!! INPUTS
+!!  n1, n2: dimensions of the problem
+!!  input_comm: Initial MPI communicator
+!!  [rectangular]: If True, change the number of procs in each pool so that it's possible to
+!!      create a rectangular grid. Useful for Scalapack algorithms in which 1d grid are not efficient.
+!!      Default: False.
+!!
+!! SOURCE
+
+subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
+
+!Arguments-------------------------
+ class(xmpi_pool2d_t),intent(out) :: pool
+ integer,intent(in) :: n1, n2, input_comm
+ logical,optional,intent(in) :: rectangular
+
+!Local variables-------------------
+ integer :: itask, ntasks, my_rank, nprocs, color, mpierr, jj, i1, i2, my_ntasks, new_comm
+ integer :: grid_dims(2) ! , check(n1, n2)
+ integer,allocatable :: my_inds(:)
+!----------------------------------------------------------------------
+
+ my_rank = xmpi_comm_rank(input_comm); nprocs = xmpi_comm_size(input_comm)
+
+ pool%n1 = n1; pool%n2 = n2
+ ABI_MALLOC(pool%treats, (n1, n2))
+ pool%treats = .False.
+
+ ntasks = n1 * n2; color = ntasks + 1
+
+ if (nprocs <= ntasks) then
+    color = my_rank
+    call xmpi_split_block(ntasks, input_comm, my_ntasks, my_inds)
+    do jj=1,size(my_inds)
+      itask = my_inds(jj) ! = i1 + (i2 - 1) * n1
+      i1 = mod(itask - 1, n1) + 1
+      i2 = 1 + (itask - i1) / n1
+      pool%treats(i1, i2) = .True.
+    end do
+    ABI_FREE(my_inds)
+ else
+   i2_loop: do i2=1,n2
+     do i1=1,n1
+       itask = i1 + (i2 - 1) * n1
+       if (xmpi_distrib_with_replicas(itask, ntasks, my_rank, nprocs)) then
+         pool%treats(i1, i2) = .True.; color = itask; exit i2_loop
+       end if
+     end do
+   end do i2_loop
+ end if
+
+ !DEBUG
+ ! where (pool%treats)
+ !   check = 1
+ ! else where
+ !   check = 0
+ ! end where
+ ! call xmpi_sum(check, input_comm, mpierr)
+ ! if (any(check == 0)) then
+ !   write(std_out, *) check
+ !   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
+ ! end if
+ !END_DEBUG
+
+ call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)
+ pool%comm = xcomm_from_mpi_int(new_comm)
+ call xmpi_comm_free(new_comm)
+
+ if (present(rectangular)) then
+   if (rectangular) then
+     if (pool%comm%nproc == 1 .or. is_rectangular_grid(pool%comm%nproc, grid_dims)) return
+
+     do jj=pool%comm%nproc-1,1,-1
+       if (is_rectangular_grid(jj, grid_dims)) then
+         color = merge(1, 0, pool%comm%me < jj)
+         call xmpi_comm_split(pool%comm%value, color, pool%comm%me, new_comm, mpierr)
+         call pool%comm%free()
+         pool%comm = xcomm_from_mpi_int(new_comm)
+         call xmpi_comm_free(new_comm)
+         if (color == 0) pool%treats = .False.
+         exit
+       end if
+     end do
+   end if
+ end if
+
+contains
+
+logical function is_rectangular_grid(nproc, grid_dims) result (ans)
+ integer,intent(in) :: nproc
+ integer,intent(out) :: grid_dims(2)
+
+!----------------------------------------------------------------------
+ integer :: i
+ ! Search for a rectangular grid of processors
+ i = INT(SQRT(float(nproc)))
+ do while (MOD(nproc,i) /= 0)
+   i = i - 1
+ end do
+ i = max(i, 1)
+
+ grid_dims(1) = i
+ grid_dims(2) = int(nproc / i)
+ ans = grid_dims(1) > 1 .and. grid_dims(2) > 1
+
+end function is_rectangular_grid
+
+end subroutine pool2d_from_dims
+!!***
+
+!!****f* m_xmpi/pool2d_free
+!! NAME
+!!  pool2d_free
+!!
+!! FUNCTION
+!!  Free memory
+
+subroutine pool2d_free(pool)
+!Arguments-------------------------
+ class(xmpi_pool2d_t),intent(inout) :: pool
+!----------------------------------------------------------------------
+
+ ABI_SFREE(pool%treats)
+ call pool%comm%free()
+
+end subroutine pool2d_free
+!!***
+
+subroutine xmpi_win_fence(win, assert)
+  integer,intent(in) :: win
+  integer,optional,intent(in) :: assert
+  integer :: assert__, ierr
+  assert__ = 0; if (present(assert)) assert__ = assert
+#ifdef HAVE_MPI
+  call MPI_WIN_FENCE(assert__, win, ierr)
+  if (ierr /= MPI_SUCCESS) call xmpi_abort(msg="MPI_WIN_FENCE return ierr /= 0")
+#endif
+end subroutine xmpi_win_fence
+
+subroutine xmpi_win_free(win)
+  integer,intent(inout) :: win
+#ifdef HAVE_MPI
+  integer :: ierr
+  call MPI_WIN_FREE(win, ierr)
+#endif
+end subroutine xmpi_win_free
+!!***
+
+! Return the number of nodes `num_nodes` in the `in_comm` communicator.
+
+subroutine xmpi_get_nodes_in_comm(in_comm, num_nodes, nprocs_per_node)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: num_nodes
+ integer,optional,allocatable,intent(out) :: nprocs_per_node(:)
+
+!Local variables-------------------
+ integer :: ierr, in_rank, node_comm, node_rank !, masters_comm, color, np
+!----------------------------------------------------------------------
+
+#ifndef HAVE_MPI
+ num_nodes = 1
+ if (present(nprocs_per_node)) then
+   ABI_MALLOC(nprocs_per_node, (num_nodes))
+   nprocs_per_node = 1
+ end if
+
+#else
+ in_rank = xmpi_comm_rank(in_comm)
+ call MPI_COMM_SPLIT_TYPE(in_comm, MPI_COMM_TYPE_SHARED, in_rank, MPI_INFO_NULL, node_comm, ierr)
+ node_rank = xmpi_comm_rank(node_comm)
+ num_nodes = merge(1, 0, node_rank == 0)
+ call xmpi_sum(num_nodes, in_comm, ierr)
+
+ if (present(nprocs_per_node)) then
+  !ABI_MALLOC(nprocs_per_node, (num_nodes))
+  !color = merge(0, 1, node_rank == 0)
+  !call xmpi_comm_split(in_comm, color, in_rank, masters_comm, ierr)
+  !if (color == 0) then
+  !  np = xmpi_comm_size(node_comm)
+  !  call MPI_GATHER(np, 1, MPI_INT, nprocs_per_node, 1, MPI_INT, 0, masters_comm, ierr)
+  !end if
+  !call xmpi_comm_free(masters_comm)
+ end if
+
+ call xmpi_comm_free(node_comm)
+
+#endif
+
+end subroutine xmpi_get_nodes_in_comm
+!!***
+
+end module m_xmpi
 !!***

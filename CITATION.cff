@@ -1,0 +1,14 @@
+abstract: "ABINIT is a software suite to calculate the optical, mechanical, vibrational, and other observable properties of materials. Starting from the quantum equations of density functional theory, you can build up to advanced applications with perturbation theories based on DFT, and many-body Green's functions (GW and DMFT) .
+ABINIT can calculate molecules, nanostructures and solids with any chemical composition, and comes with several complete and robust tables of atomic potentials.
+On-line tutorials are available for the main features of the code, and several schools and workshops are organized each year."
+authors:
+  - name: "The ABINIT group"
+cff-version: 1.2.0
+contact: info@abinit.org
+preferred-citation:
+  - doi: 10.1016/J.cpc.2019.107042
+license: 
+  - GPL-3.0
+message: "If you use this software, please cite the article from preferred-citation DOI contained in this CITATION.cff file and also consult https://docs.abinit.org/theory/acknowledgments for further acknowledgments of the ABINIT group efforts."
+repository-code: "https://github.com/abinit"
+title: "ABINIT"

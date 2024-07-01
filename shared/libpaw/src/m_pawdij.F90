@@ -8,7 +8,7 @@
 !!         VNL = Sum_ij [ Dij |pi><pj| ],  with pi, pj= projectors
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MT, FJ, BA, JWZ)
+!! Copyright (C) 2013-2024 ABINIT group (MT, FJ, BA, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -155,13 +155,6 @@ CONTAINS
 !!    In order to compute first-order Dij, paw_an (resp. paw_ij) datastructures
 !!    must contain first-order quantities, namely paw_an1 (resp. paw_ij1).
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_respfn_driver
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,ntypat,&
@@ -226,7 +219,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
  logical,allocatable :: lmselect(:)
  real(dp),allocatable :: dij0(:),dijhartree(:)
  real(dp),allocatable :: dijhat(:,:),dijexxc(:,:),dijfock_cv(:,:),dijfock_vv(:,:),dijpawu(:,:)
- real(dp),allocatable :: dijnd(:,:),dijso(:,:),dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
+ real(dp),allocatable :: dijnd(:,:),dijso(:,:)
+ real(dp),allocatable :: dijxc(:,:),dij_ep(:),dijxchat(:,:),dijxcval(:,:)
  real(dp),pointer :: v_dijhat(:,:),vpawu(:,:,:,:),vpawx(:,:,:)
 
 ! *************************************************************************
@@ -416,8 +410,8 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    dij_need=.false.;dij0_need=.false.;dijexxc_need=.false.;dijfock_need=.false.
    dijhartree_need=.false.;dijhat_need=.false.;dijhatfr_need=.false.;
-   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.;dijxchat_need=.false.
-   dijxcval_need=.false.; dijnd_need=.false.
+   dijso_need=.false.;dijU_need=.false.;dijxc_need=.false.
+   dijxchat_need=.false.;dijxcval_need=.false.; dijnd_need=.false.
 
    if (dij_available) then
      if (paw_ij(iatom)%has_dij==1) then
@@ -1095,12 +1089,6 @@ end subroutine pawdij
 !!      dij(lmn2_size+1:2*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
@@ -1154,6 +1142,7 @@ subroutine pawdijhartree(dijhartree,qphase,nspden,pawrhoij,pawtab)
        klmn=pawrhoij%rhoijselect(irhoij)
 
        ro=pawrhoij%rhoijp(jrhoij,ispden)*pawtab%dltij(klmn)
+       !print *, "debug: irhoij, ro, pawtab%eijkl(klmn,klmn)",  irhoij, ro, pawtab%eijkl(klmn,klmn)
 
        !Diagonal k=l
        dijhartree(iq0_dij+klmn)=dijhartree(iq0_dij+klmn)+ro*pawtab%eijkl(klmn,klmn)
@@ -1207,12 +1196,6 @@ end subroutine pawdijhartree
 !!
 !!  NOTES:
 !!   WARNING: What follows has been tested only for cases where nsppol=1 and 2, nspden=1 and 2 with nspinor=1.
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -1456,12 +1439,6 @@ end subroutine pawdijfock
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
@@ -1599,7 +1576,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
              call simp_gen(vxcij1(kln),ff,pawrad)
            end do
            !if Meta GGA add 1/2*[<nabla_phi_i|vxctau1|nabla_phi_j>
-           !                    -<nabla_tphi_i|vxcttau|nabla_tphi_j>]
+           !                    -<nabla_tphi_i|vxcttau1|nabla_tphi_j>]
            if (usekden==1) then
              do jln=1,basis_size
                j0ln=jln*(jln-1)/2
@@ -1866,12 +1843,6 @@ end subroutine pawdijxc
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijxcm(dijxc,cplex_dij,qphase,lmselect,ndij,nspden,nsppol,&
@@ -2128,12 +2099,6 @@ end subroutine pawdijxcm
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_fock_getghc,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
@@ -2301,7 +2266,7 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ils=lmin,lmax,2
              lm0=ils**2+ils+1
              do mm=-ils,ils
-               ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+               ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                if (isel>0) dijhat_idij(klmn)=dijhat_idij(klmn) &
 &                  +prod(ilslm)*pawtab%qijl(ilslm,klmn)
              end do
@@ -2316,9 +2281,11 @@ subroutine pawdijhat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            do ils=lmin,lmax,2
              lm0=ils**2+ils+1
              do mm=-ils,ils
-               ilslm=lm0+mm;ilslm1=2*ilslm;isel=pawang%gntselect(lm0+mm,klm)
-               if (isel>0) dijhat_idij(klmn1:klmn1+1)=dijhat_idij(klmn1:klmn1+1) &
-&                  +prod(ilslm1-1:ilslm1)*pawtab%qijl(ilslm,klmn)
+               ilslm=lm0+mm;ilslm1=2*ilslm;isel=pawang%gntselect(ilslm,klm)
+               if (isel>0) then
+                 dijhat_idij(klmn1  )=dijhat_idij(klmn1  )+prod(ilslm1-1)*pawtab%qijl(ilslm,klmn)
+                 dijhat_idij(klmn1+1)=dijhat_idij(klmn1+1)+prod(ilslm1  )*pawtab%qijl(ilslm,klmn)
+               end if
              end do
            end do
          end do
@@ -2423,12 +2390,6 @@ end subroutine pawdijhat
 !!   is \alpha^2 L_R\cdot m/|r-R|^3, where \alpha is the fine structure constant.
 !!
 !!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
@@ -2444,7 +2405,8 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
 !Local variables ---------------------------------------
 !scalars
- integer :: idir,ij_size,il,ilmn,im,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ integer :: idir,ij_size,il,ilmn,im,imesh,jl,jlmn,jm,klmn,kln,lmn2_size,mesh_size
+ real(dp) :: rr
  complex(dpc) :: cmatrixelement,lms
 !arrays
  integer,pointer :: indlmn(:,:),indklmn(:,:)
@@ -2480,8 +2442,10 @@ subroutine pawdijnd(dijnd,cplex_dij,ndij,nucdipmom,pawrad,pawtab)
 
  LIBPAW_ALLOCATE(ff,(mesh_size))
  do kln=1,ij_size
-   ff(2:mesh_size)=(pawtab%phiphj(2:mesh_size,kln) - &
-&    pawtab%tphitphj(2:mesh_size,kln))/pawrad%rad(2:mesh_size)**3
+   do imesh = 2, mesh_size
+     rr = pawrad%rad(imesh)
+     ff(imesh)=(pawtab%phiphj(imesh,kln)- pawtab%tphitphj(imesh,kln))/(rr**3)
+   end do !imesh
    call pawrad_deducer0(ff,mesh_size,pawrad)
    call simp_gen(intgr3(kln),ff,pawrad)
  end do
@@ -2574,12 +2538,6 @@ end subroutine pawdijnd
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -2719,7 +2677,8 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
    else if (idij==2) then
      do klmn=1,lmn2_size
        if (indklmn(3,klmn)==0) then   ! il==jl
-         dijso(klmn1:klmn1+1,2)=-dijso(klmn1:klmn1+1,1)
+         dijso(klmn1  ,2)=-dijso(klmn1  ,1)
+         dijso(klmn1+1,2)=-dijso(klmn1+1,1)
        end if
        klmn1=klmn1+cplex_dij
      end do
@@ -2739,6 +2698,7 @@ subroutine pawdijso(dijso,cplex_dij,qphase,ndij,nspden,&
  LIBPAW_DEALLOCATE(dijso_rad)
 
 end subroutine pawdijso
+
 !!***
 
 !----------------------------------------------------------------------
@@ -2775,12 +2735,6 @@ end subroutine pawdijso
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3038,12 +2992,6 @@ end subroutine pawdiju
 !!        Im(D_kl^A) = -Im(D_lk^A)  ( using (b) and (c) )
 !!        Im(D_kl^B) =  Im(D_lk^B)  ( using (a) and (c) )
 !!
-!! PARENTS
-!!      m_paw_denpot,m_paw_dfpt,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdiju_euijkl(diju,cplex_dij,qphase,ndij,pawrhoij,pawtab)
@@ -3231,12 +3179,6 @@ end subroutine pawdiju_euijkl
 !!          contains the real part of the phase, i.e. D_ij*cos(q.r)
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -3546,12 +3488,6 @@ end subroutine pawdijexxc
 !!      dij(cplex_dij*lmn2_size+1:2*cplex_dij*lmn2_size,:)
 !!          contains the imaginary part of the phase, i.e. D_ij*sin(q.r)
 !!
-!! PARENTS
-!!      m_d2frnl,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop,m_dfptnl_pert
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,ntypat,&
@@ -3578,7 +3514,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 
 !Local variables-------------------------------
 !scalars
- integer :: cplex_dij,cplex_nspden,dplex_nsp,dplex_q,iatom,iatom_tot,ic,idij,idijend,ier,ils,ilslm,isel
+ integer :: cplex_dij,cplex_nspden,cplex_p1,iatom,iatom_tot,ic,idij,idijend,ier,ils,ilslm,isel
  integer :: ispden,istr,itypat,jc,klm,klmn,klmn1,klmn2,kln,lm_size,lmn2_size,lm0,lmax,lmin,mesh_size
  integer :: mm,my_comm_atom,my_comm_grid,mu,mua,mub,ndij,nfftot,nfgd,nsploop
  integer :: optgr0,optgr1,optgr2,usexcnhat
@@ -3639,8 +3575,6 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
  nfftot=ngfft(1)*ngfft(2)*ngfft(3)
  fact=ucvol/dble(nfftot)
  cplex_nspden=merge(1,2,nspden/=4)
- dplex_nsp=cplex_nspden-1
- dplex_q=qphase-1
 
 !Loops over  atoms
  do iatom=1,my_natom
@@ -3803,10 +3737,18 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
 
 !                ----- Retrieve potential Vloc^(1)
                  LIBPAW_ALLOCATE(vloc,(qphase,nfgd))
-                 do ic=1,nfgd
-                   jc=qphase*pawfgrtab(iatom)%ifftsph(ic)-dplex_q
-                   vloc(1:qphase,ic)=vpsp1(jc:jc+dplex_q)
-                 end do
+                 if (qphase==1) then
+                   do ic=1,nfgd
+                     jc=qphase*pawfgrtab(iatom)%ifftsph(ic)
+                     vloc(1,ic)=vpsp1(jc)
+                   end do
+                 else
+                   do ic=1,nfgd
+                     jc=2*pawfgrtab(iatom)%ifftsph(ic)-1
+                     vloc(1,ic)=vpsp1(jc  )
+                     vloc(2,ic)=vpsp1(jc+1)
+                   end do
+                 end if
 
 !                ----- Compute Integral [ Vloc^(1)(r).g_l(r).Y_lm(r) ]
                  LIBPAW_ALLOCATE(intvloc,(qphase,lm_size))
@@ -3864,7 +3806,7 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
              paw_ij1(iatom)%dijfr(:,ispden)=zero
 
 !            ---- Loop over (i,j) components
-             klmn1=1;klmn2=1+lmn2_size*cplex_dij
+             klmn1=1;klmn2=1+lmn2_size*cplex_dij ; cplex_p1=cplex_nspden+1
              do klmn=1,lmn2_size
                klm =pawtab(itypat)%indklmn(1,klmn)
                lmin=pawtab(itypat)%indklmn(3,klmn)
@@ -3872,17 +3814,33 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
                do ils=lmin,lmax,2
                  lm0=ils**2+ils+1
                  do mm=-ils,ils
-                   ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                   ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                    if (isel>0) then
                      !The following works only because cplex_nspden<=cplex_dij
-                     paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
-    &                 paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
-    &                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
-                     if (qphase==2) then
-                       paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden)= &
-    &                   paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden) &
-    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(1+cplex_nspden:2*cplex_nspden,ilslm)
+                     paw_ij1(iatom)%dijfr(klmn1,ispden)=paw_ij1(iatom)%dijfr(klmn1,ispden) &
+    &                 +pawtab(itypat)%qijl(ilslm,klmn)*intv(1,ilslm)
+                     if (cplex_nspden==2) then
+                       paw_ij1(iatom)%dijfr(klmn1+1,ispden)=paw_ij1(iatom)%dijfr(klmn1+1,ispden) &
+    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(2,ilslm)
                      end if
+                     if (qphase==2) then
+                       paw_ij1(iatom)%dijfr(klmn2,ispden)=paw_ij1(iatom)%dijfr(klmn2,ispden) &
+    &                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(cplex_p1,ilslm)
+                       if (cplex_nspden==2) then
+                         paw_ij1(iatom)%dijfr(klmn2+1,ispden)=paw_ij1(iatom)%dijfr(klmn2+1,ispden) &
+    &                     +pawtab(itypat)%qijl(ilslm,klmn)*intv(4,ilslm)
+                       end if
+                     end if
+!Previous version
+!                    dplex_nsp=cplex_nspden-1
+!                    paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
+!    &                paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
+!    &                +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
+!                    if (qphase==2) then
+!                      paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden)= &
+!    &                  paw_ij1(iatom)%dijfr(klmn2:klmn2+dplex_nsp,ispden) &
+!    &                  +pawtab(itypat)%qijl(ilslm,klmn)*intv(1+cplex_nspden:2*cplex_nspden,ilslm)
+!                    end if
                    end if
                  end do
                end do
@@ -4079,12 +4037,20 @@ subroutine pawdijfr(gprimd,idir,ipert,my_natom,natom,nfft,ngfft,nspden,nsppol,nt
              do ils=lmin,lmax,2
                lm0=ils**2+ils+1
                do mm=-ils,ils
-                 ilslm=lm0+mm;isel=pawang%gntselect(lm0+mm,klm)
+                 ilslm=lm0+mm;isel=pawang%gntselect(ilslm,klm)
                  if (isel>0) then
                    !The following works only because cplex_nspden<=cplex_dij
-                   paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
-&                    paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
-&                    +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
+                   paw_ij1(iatom)%dijfr(klmn1,ispden)=paw_ij1(iatom)%dijfr(klmn1,ispden) &
+&                    +pawtab(itypat)%qijl(ilslm,klmn)*intv(1,ilslm)
+                   if (cplex_nspden==2) then
+                     paw_ij1(iatom)%dijfr(klmn1+1,ispden)=paw_ij1(iatom)%dijfr(klmn1+1,ispden) &
+&                      +pawtab(itypat)%qijl(ilslm,klmn)*intv(2,ilslm)
+                   end if
+!Previous version
+!                  dplex_nsp=cplex_nspden-1
+!                  paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden)= &
+!&                   paw_ij1(iatom)%dijfr(klmn1:klmn1+dplex_nsp,ispden) &
+!&                   +pawtab(itypat)%qijl(ilslm,klmn)*intv(1:cplex_nspden,ilslm)
                  end if
                end do
              end do
@@ -4184,12 +4150,6 @@ end subroutine pawdijfr
 !!      vpawu(2*i-1,:) contains the real part
 !!      vpawu(2*i,:) contains the imaginary part
 !!
-!! PARENTS
-!!      m_dftu_self,m_paw_hr,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
  subroutine pawpupot(cplex_dij,ndij,noccmmp,nocctot,&
@@ -4208,7 +4168,7 @@ end subroutine pawdijfr
 !Option for interaction energy in case of non-collinear magnetism:
 !           1: E_int=-J/4.N.(N-2)                   (better)
 !           2: E_int=-J/2.(Nup.(Nup-1)+Ndn.(Ndn-1)) (Nup and Ndn are ill-defined)
- integer,parameter :: option_interaction=1
+! integer,parameter :: option_interaction=3
 
  integer :: iplex,ispden,jspden,lpawu,m1,m11,m2,m21,m3,m31,m4,m41,nspden_eff
  real(dp) :: mnorm,mx,my,mz,n_sig,n_msig,n_tot,VUKStemp,n_sigs,n_msigs
@@ -4229,7 +4189,7 @@ end subroutine pawdijfr
    msg = "usepawu<0 not allowed!"
    LIBPAW_BUG(msg)
  end if
- if(option_interaction==3.and.pawtab%usepawu>=10) then
+ if(ndij==4.and.pawtab%option_interaction_pawu==3.and.pawtab%usepawu>=10) then
    msg = "Option_interaction==3 is not compatible with usepawu>=10 in pawpupot"
    LIBPAW_ERROR(msg)
  end if
@@ -4339,17 +4299,22 @@ end subroutine pawdijfr
        if(pawtab%usepawu==1.or.pawtab%usepawu==4) then ! not activated if usepawu=10 !!
 !        Here we compute vpawu=vpawu-v_dc
          vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-pawtab%upawu*(n_tot-half)
-         if (ndij/=4.or.option_interaction==2) then
+         if (ndij/=4.or.pawtab%option_interaction_pawu==2) then
            if(pawtab%usepawu/=4) then
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+pawtab%jpawu*(n_sig-half)
            else
              vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
            endif
-         else if (ndij==4.and.option_interaction==1) then
+         else if (ndij==4.and.(pawtab%usepawu==4.or.pawtab%option_interaction_pawu==1)) then
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
-         else if (ndij==4.and.option_interaction==3) then
+         else if (ndij==4.and.pawtab%option_interaction_pawu==3) then
 !          Here vdc^{alpha,beta}=\vect{m}.\vect{sigma}^{\beta,\alpha}
            vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*(n_tot-one)
+           if (ispden==1) then
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mz
+           else
+             vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)-half*pawtab%jpawu*mz
+           end if
          end if
 
 !        Around mean field
@@ -4403,12 +4368,12 @@ end subroutine pawdijfr
            end do
          end do
        end do
-       if((pawtab%usepawu==1.or.pawtab%usepawu==4).and.option_interaction==3) then ! not activated if usepawu=10 !!
-         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*mx
+       if(pawtab%usepawu==1.and.pawtab%option_interaction_pawu==3) then ! not activated if usepawu=10 !!
+         vpawu(1,m11,m11,ispden)=vpawu(1,m11,m11,ispden)+half*pawtab%jpawu*mx
          if(ispden==3) then
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)-half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)-half*pawtab%jpawu*my
          else
-           vpawu(2,m11,m11,ispden)=vpawu(1,m11,m21,ispden)+half*pawtab%jpawu*my
+           vpawu(2,m11,m11,ispden)=vpawu(2,m11,m11,ispden)+half*pawtab%jpawu*my
          end if
        end if
      end do
@@ -4472,12 +4437,6 @@ end subroutine pawdijfr
 !!
 !! OUTPUT
 !!  paw_ij%vpawx(pawtab%lexexch*2+1,pawtab%lexexch*2+1)=local exact-exchange potential
-!!
-!! PARENTS
-!!      m_paw_denpot,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -4629,13 +4588,6 @@ end subroutine pawdijfr
 !!
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*lmn2_size,nspden)=symmetrized dij quantities as output
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_dfpt_scfcv,m_dfptnl_loop,m_nonlinear,m_paw_denpot
-!!      m_pawdij,m_respfn_driver,m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5376,12 +5328,6 @@ end subroutine symdij
 !! SIDE EFFECTS
 !!  paw_ij(natom)%dij???(cplex_dij*qphase*lmn2_size,nspden)=symmetrized dij quantities as output
 !!
-!! PARENTS
-!!      m_paw_denpot,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
-!!
 !! SOURCE
 
 subroutine symdij_all(gprimd,indsym,ipert,my_natom,natom,nsym,ntypat,&
@@ -5521,12 +5467,6 @@ end subroutine symdij_all
 !!
 !! OUTPUT
 !!  dij_out = coeff2d_type array containing the gathered Dij
-!!
-!! PARENTS
-!!      m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 
@@ -5682,12 +5622,6 @@ end subroutine pawdij_gather
 !!
 !! OUTPUT
 !! (Only writing)
-!!
-!! PARENTS
-!!      m_paw_tools,m_pawdij
-!!
-!! CHILDREN
-!!      pawio_print_ij,wrtout
 !!
 !! SOURCE
 

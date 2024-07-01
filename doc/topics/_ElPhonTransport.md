@@ -72,7 +72,7 @@ ANADDB can be found [[pdf:elphon_manual|here]].
 
 ## Tutorials
 
-* (Legacy approach) [[tutorial:eph|The tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
+* (Legacy approach) [[tutorial:eph_legacy|The legacy tutorial on the electron-phonon interaction]] presents the use of the utility MRGKK and ANADDB to examine the electron-phonon interaction and the subsequent calculation of superconductivity temperature (for bulk systems).
 
 * (New procedure) Two tutorials are available at [[tutorial:eph_intro|an overview of the EPH code]], and
 at [[tutorial:eph4mob|Phonon-limited mobility]]:.

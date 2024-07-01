@@ -1,0 +1,89 @@
+# example of orbmag calculation of chemical shielding. system is 
+# Ne atom at center of an empty box.
+#
+# for an atom, use a single k pt at Gamma
+kptopt 0
+nkpt 1
+kpt 3*0.0
+
+# for a solid, one would use kptopt 3 and ngkpt 8 8 8 (say)
+
+nband 4
+occopt 1
+
+# dipole of strength 1, in direction x, on atom 1
+nucdipmom 1.0 0.0 0.0
+
+# no symmetries--in general a single dipole in the unit cell
+# destroys TR symmetry and most if not all spatial symmetries
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+istwfk *1
+
+ndtset 2
+
+# two datasets, first is ground state
+tolvrs1 1.0D-18
+nstep1 25 # added to force stop on automatic tests, in general should be larger
+
+# second is DDK perturbation, in all 3 directions, 
+# with orbmag 2 (or 1) to trigger orbmag calculation at
+# the end of the DDK
+rfddk2 1
+rfdir2 1 1 1
+iscf2 -3
+getwfk2 -1
+orbmag2 2
+tolwfr2 1.0D-20
+nstep2 10
+
+# lamb shielding for core electrons of this PAW set
+lambsig 341.0D-6
+
+# ecut 30 gives better convergence
+ecut 15
+pawecutdg 30
+
+# some flags that orbmag and nucdipmom require
+optforces 0
+optstress 0
+pawcpxocc 2
+usexcnhat 0
+pawxcdev 0
+paral_atom 0
+paral_kgb 0
+
+# Structural parameters
+# cubic box 20 bohr/side
+acell    3*20.0
+       
+natom    1
+ntypat   1
+typat    1
+znucl    10
+
+# Ne atom at center of box
+xred
+3*1/2 
+
+pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pseudos="Ne.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   tnuc_4.abo, tolnlines=  62, tolabs=  1.1e-5, tolrel= 1.01e0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = 
+#%% topics = NMR, DFPT
+#%%<END TEST_INFO>

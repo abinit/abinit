@@ -6,14 +6,10 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -124,16 +120,6 @@ CONTAINS  !=====================================================================
 !! Notice that this formula is expressed on the fine grid, and requires
 !! interpolating the PAW radial functions onto this grid, as well as calling
 !! initylmr in order to get the angular functions on the grid points.
-!!
-!! PARENTS
-!!      m_outscfcv
-!!
-!! CHILDREN
-!!      flush_unit,fourwf,free_my_atmtab,get_my_atmtab,nhatgrid
-!!      paw_pwaves_lmn_free,paw_pwaves_lmn_init,pawcprj_alloc,pawcprj_free
-!!      pawfgrtab_free,pawfgrtab_init,pawfgrtab_print,pawtab_get_lsize
-!!      sphereboundary,wrap2_zero_one,wrtout,xcart2xred,xmpi_barrier,xmpi_max
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -488,7 +474,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
        call fourwf(cplex,denpot,fofgin(:,1:npw_k),fofgout,fofr(:,:,:,1:n6),gbound,gbound,istwf_k,kg_k,kg_k,&
          mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
-         use_gpu_cuda=Dtset%use_gpu_cuda)
+         gpu_option=Dtset%gpu_option)
 
 !      Here I do not know if fourwf works in the case of spinors,
 !      It seems that not all fftalg option support ndata! should check!

@@ -1,0 +1,89 @@
+# Added by runtests.py
+output_file = "t22.abo"
+indata_prefix = "t22i"
+outdata_prefix = "t22o"
+tmpdata_prefix = "t22t"
+# end runtests.py section
+
+# -----------------------------------------------------
+# -  Input file for Abinit                            -
+# -  Testing temperature-dependent libxc functionals  -
+# -    on crystalline aluminum                        -
+# -  Several XC functionals                           -
+# -  Several electronic temperatures                  -
+# -----------------------------------------------------
+
+# 1- Datasets: functionals, temperatures
+# -----------------------------------------------------
+  ndtset 7
+  ixc1 -259  occopt1 3  tsmear1  1000. K  # LDA KSDT, at 1000K (Fermi-Dirac occ. scheme)
+  ixc2 -259  occopt2 3  tsmear2  5000. K  # LDA KSDT, at 5000K (Fermi-Dirac occ. scheme)
+  ixc3 -259  occopt3 4  tphysel3 5000. K  # LDA KSDT, at 5000K (Gaussian occ. scheme)
+  ixc4 -577  occopt4 3  tsmear4  1000. K  # LDA GDSMFB, at 1000K (Fermi-Dirac occ. scheme)
+  ixc5 -577  occopt5 3  tsmear5  5000. K  # LDA GDSMFB, at 5000K (Fermi-Dirac occ. scheme)
+  ixc6 -318  occopt6 3  tsmear6  1000. K  # LDA CORRKSDT, at 1000K (Fermi-Dirac occ. scheme)
+  ixc7 -318  occopt7 3  tsmear7  5000. K  # LDA CORRKSDT, at 5000K (Fermi-Dirac occ. scheme)
+
+# 2- Unit cell
+# -----------------------------------------------------
+  acell 3*7.60         # Cell sizes in Bohr
+  rprim 0.0  0.5  0.5  # FCC primitive vectors (to be scaled by acell)
+        0.5  0.0  0.5
+        0.5  0.5  0.0
+  ntypat 1             # There is only one type of atom
+  znucl 13             # Atomic number of the type of atom; here Aluminum
+  natom 1              # There is only one atom per cell
+  typat 1              # This atom is of type 1, that is, Aluminum
+  xred 0.0 0.0 0.0     # Reduced coordinates of atom 1
+  nsym 0               # We use all spacial symmetries
+
+# 3- Electronic states
+# -----------------------------------------------------
+  nband 6              # Number of electronic bands per cell
+  occopt 3             # Fermi-Dirac occupation scheme
+  tsmear 0.04          # Smearing temperature for occupation scheme
+
+# 4- K-points sampling
+# -----------------------------------------------------
+ ngkpt 3*2             # This is a 2x2x2 FCC grid, based on the primitive vectors
+ nshiftk 4             # We use 4 shifted grids (to improve sampling efficiency)
+ shiftk 0.0 0.0 0.0
+        0.0 0.5 0.5
+        0.5 0.0 0.5
+        0.5 0.5 0.0
+
+# 5- Convergence parameters
+# -----------------------------------------------------
+ecut 6.                # Energy cut-off of the PW basis, in Hartree
+pawecutdg 10.          # Energy cut-off of the PAW density PW basis, in Hartree
+nstep 20               # Maximal number of SCF cycles
+toldfe 1.0d-8          # Total energy difference to achieve
+
+# 6- Options for output
+# -----------------------------------------------------
+ prtdos 0 prtwf 0 prtden 0 prtgsr 0  # Do no output useless files
+ prtwf1 1  getwfk1 0                 # Dataset 1: output wave-functions
+ getwfk 1                            # Other datasets: read wave-functions of dataset 1
+
+
+# 7- Pseudopotentials
+# -----------------------------------------------------
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "Pseudodojo_paw_pw_standard/Al.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t22.abo, tolnlines=  0, tolabs= 0.000, tolrel=  0.000, fld_options = -medium
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = M. Torrent
+#%% keywords = PAW, libxc
+#%% description =
+#%%   Crystalline aluminum, primitive cell.
+#%%   Testing temperature-dependent libxc functionals.
+#%%   Several XC functionals, several electronic temperatures.
+#%%<END TEST_INFO>

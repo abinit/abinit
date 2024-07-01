@@ -1,0 +1,95 @@
+# test DDK and orbital magnetism response with nuclear dipole moment 
+# metallic Na
+# also tests reading of Lamb shielding from PAW data set file
+#
+# ecut and other parameters are set very very loose for a fast test
+
+# unconverged, use ecut at least 20 for convergence
+ecut 5
+pawecutdg 10
+
+# limit steps to speed test
+nstep 10
+
+# this is very loose, should be at least ngkpt 3*12 or more
+ngkpt 3*4
+
+nucdipmom
+1.0 0.0 0.0
+
+# metallic occupancy with empty bands
+occopt 7 
+nband 8
+
+ndtset 2
+
+#tolvrs should be tighter in real runs, say 1.0D-18
+tolvrs1 1.0D-12
+prtwf1 1
+
+# tolwfr should be tighter in real runs, say 1.0D-20
+tolwfr2 1.0D-14
+getwfk2 -1
+prtwf2 0
+rfddk2 1
+rfdir2 1 1 1
+iscf2 -3
+orbmag2 2
+
+istwfk *1
+
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
+symmorphi 0
+
+nshiftk 4
+shiftk 3*1/2
+1/2 0 0
+0 1/2 0
+0 0 1/2
+
+prteig 0
+prtden 0
+
+optforces 0
+optstress 0
+pawcpxocc 2
+usexcnhat 0
+pawxcdev 0
+
+paral_atom 0
+paral_kgb 0
+
+acell    3*8.12582223  
+
+rprim   -0.500000000000000   0.500000000000000   0.500000000000000 
+         0.500000000000000  -0.500000000000000   0.500000000000000 
+         0.500000000000000   0.500000000000000  -0.500000000000000 
+       
+natom    1  
+ntypat   1  
+typat    1  
+znucl    11  
+xred     0.000000000000000   0.000000000000000   0.000000000000000 
+
+pp_dirpath="$ABI_PSPDIR/Pseudodojo_paw_pbe_standard/"
+pseudos="Na.xml"
+
+##############################################################
+# This section is used only for regression testing of ABINIT #
+##############################################################
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test = 
+#%%   t143.abo, tolnlines= 90, tolabs=  1.5E-5, tolrel= 1.0
+#%% [paral_info]
+#%% max_nprocs = 1
+#%% [extra_info]
+#%% authors = J. Zwanziger
+#%% keywords = PAW
+#%% description = Orbital magnetism in metallic sodium 
+#%% topics = NMR, MagField
+#%%<END TEST_INFO>

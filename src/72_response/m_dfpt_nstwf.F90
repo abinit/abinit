@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group ()
+!!  Copyright (C) 2008-2024 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -35,7 +31,6 @@ module m_dfpt_nstwf
  use m_dtset
  use m_dtfil
 
-
  use defs_datatypes, only : pseudopotential_type
  use defs_abitypes, only : MPI_type
  use m_time,     only : timab
@@ -53,7 +48,7 @@ module m_dfpt_nstwf
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_copy, pawrhoij_nullify, &
-&                       pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
+                        pawrhoij_init_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_get, pawcprj_copy
  use m_pawdij,   only : pawdijfr
  use m_pawfgr,   only : pawfgr_type
@@ -72,7 +67,7 @@ module m_dfpt_nstwf
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll
  use m_dfpt_mkvxcstr, only : dfpt_mkvxcstr
  use m_mklocl,     only : dfpt_vlocal, vlocalstr
- use m_cgprj,           only : getcprj
+ use m_cgprj,      only : getcprj
 
  implicit none
 
@@ -102,7 +97,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2022 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2024 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -217,12 +212,6 @@ contains
 !!     delta_u^(j1)=-1/2 Sum_{j}[<u0_k+q_j|S^(j1)|u0_k_i>.|u0_k+q_j>]
 !!     see PRB 78, 035105 (2008), Eq. (42) [[cite:Audouze2008]]
 !!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
-!!
 !! SOURCE
 
 subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
@@ -302,7 +291,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: ierr,ii,ikg,ikg1,ikpt,ikpt_me,ilmn,iorder_cprj,ipert1
  integer :: ispden,isppol,istwf_k,istr,istr1,itypat,jband,jj,kdir1,kpert1,master,mcgq,mcprjq
  integer :: mdir1,me,mpert1,my_natom,my_comm_atom,my_nsppol,nband_k,nband_kocc,need_ylmgr1
- integer :: nddir,nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
+ integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
  integer :: nband_me, iband_me, jband_me, iband_
@@ -322,9 +311,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,allocatable :: bands_treated_now(:),band_procs(:)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
- real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3),rhodum(1)
+ real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
  real(dp) :: sumelfd(2),symfact(3),tsec(2),ylmgr_dum(1,3,1)
- real(dp),allocatable :: buffer(:),cgrvtrial(:,:),ch1c(:,:,:,:),cs1c(:,:,:,:)
+ real(dp),allocatable :: buffer(:),ch1c(:,:,:,:),cs1c(:,:,:,:)
  real(dp),allocatable :: ch1c_tmp(:,:)
  real(dp),allocatable :: cs1c_tmp(:,:)
  real(dp),allocatable :: cwave0(:,:),cwavef(:,:),dcwavef(:,:)
@@ -529,8 +518,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,nsppol,nspden,dtset%natom,&
 & dtset%typat,xred,dtset%nfft,dtset%mgfft,dtset%ngfft,rprimd,dtset%nloalg,ph1d=ph1d,&
 & paw_ij=paw_ij,mpi_atmtab=my_atmtab,comm_atom=my_comm_atom,mpi_spintab=mpi_enreg%my_isppoltab,&
-& usecprj=usecprj,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
- 
+& usecprj=usecprj,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 has_vectornd = (with_vectornd .EQ. 1)
  if(has_vectornd) then
     ABI_MALLOC(vectornd_pac,(dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),gs_hamkq%nvloc,3))
@@ -845,15 +833,8 @@ has_vectornd = (with_vectornd .EQ. 1)
      ! Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
-       do nddir = 1, 3
-         ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-         call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
-           & rhodum,rhodum,cgrvtrial,vectornd(:,nddir))
-         call fftpac(isppol,mpi_enreg,dtset%nspden,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),&
-           & dtset%ngfft(4),dtset%ngfft(5),dtset%ngfft(6),dtset%ngfft,&
-           & cgrvtrial,vectornd_pac(:,:,:,1,nddir),2)
-         ABI_FREE(cgrvtrial)
-       end do
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamkq%nvloc, 3, pawfgr, mpi_enreg, vectornd,vectornd_pac)
        call gs_hamkq%load_spin(isppol, vectornd=vectornd_pac)
        vectornd_pac_idir(:,:,:,:)=vectornd_pac(:,:,:,:,idir)
        call rf_hamkq%load_spin(isppol, vectornd=vectornd_pac_idir)
@@ -937,7 +918,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  if (iband > endband) endband = iband
                end if
              end do
-! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+! NB: eig_k is band distributed in call to read_band_block, though array has full size,
 !     only certain columns for my iband are filled, then used below
              call ddks(idir1)%read_band_block((/startband,endband/),ik_ddk,isppol,xmpio_collective, &
 &                 cg_k=cg_ddk(:,:,idir1))
@@ -1297,9 +1278,9 @@ has_vectornd = (with_vectornd .EQ. 1)
                if (bands_treated_now(iband_) == 0) cycle
 
 ! distribute gvnlx1 to my subcomm
-               gvnlx1_tmp = zero 
+               gvnlx1_tmp = zero
                if (iband_ == iband) then
-                 gvnlx1_tmp = gvnlx1 
+                 gvnlx1_tmp = gvnlx1
                end if
 ! TODO CHECK IF IT IS BAND_PROCS(IBAND_)
                !call xmpi_bcast(gvnlx1_tmp, band_procs(iband_), mpi_enreg%comm_band, ierr)
@@ -1309,7 +1290,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                  ch1c_tmp(:,1:nband_me) = ch1c(:,1:nband_me,iband_,ikpt_me)
                end if
 
- 
+
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
                call projbd(cgq,gvnlx1_tmp,-1,icgq,0,istwf_k,mcgq,0,nband_me,npw1_k,nspinor,&
 &                 dum1,ch1c_tmp,option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
@@ -1406,7 +1387,7 @@ has_vectornd = (with_vectornd .EQ. 1)
                    end if
                  end if
                end if ! ipert==ipert1.and.idir==idir1 or some iband for some proc in pool is filled
-  
+
                if (abs(occ_k(iband))>tol8) then
 !                Computation of term (I)
                  if (has_dcwf2) then
@@ -1904,7 +1885,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2024 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1956,12 +1937,6 @@ end subroutine dfpt_nstpaw
 !!
 !! TODO
 !!  XG 20141103 The localization tensor cannot be defined in the metallic case. It should not be computed.
-!!
-!! PARENTS
-!!      m_dfpt_scfcv
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 
@@ -2030,7 +2005,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  end if
 
 !Keep track of total time spent in dfpt_nstwf
- call timab(102,1,tsec)
+ call timab(112,1,tsec)
  tim_getgh1c=2
 
 !Miscelaneous inits
@@ -2149,7 +2124,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          if (iband > endband) endband = iband
        end if
      end do
-! NB: eig_k is band distributed in call to read_band_block, though array has full size, 
+! NB: eig_k is band distributed in call to read_band_block, though array has full size,
 !     only certain columns for my iband are filled, then used below
      call ddks(idir1)%read_band_block((/startband,endband/),ik_ddks(idir1),isppol,xmpio_collective, &
 &         cg_k=cg_ddk(:,:,idir1), eig_k=eig2_ddk(:,idir1))
@@ -2195,8 +2170,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !  Get ddk wavefunctions for iband
      if(nddk_needed > 0) then
        cwaveddk(:,:,:)=cg_ddk(:,1+(iband_me-1)*npw1_k*dtset%nspinor:iband_me*npw1_k*dtset%nspinor,:)
-     end if 
-   end if 
+     end if
+   end if
    call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
    call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
    if(nddk_needed > 0) then
@@ -2299,7 +2274,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          end do ! idir
 
          call rf_hamkq%free()
-       end if     ! ipert1<=dtset%natom .or. ipert1==dtset%natom+2 
+       end if     ! ipert1<=dtset%natom .or. ipert1==dtset%natom+2
      end do     ! ipert1
    end if     ! ipert /= natom +1
 
@@ -2426,7 +2401,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
    ABI_FREE(eig2_ddk)
  end if
 
- call timab(102,2,tsec)
+ call timab(112,2,tsec)
 
  DBG_EXIT("COLL")
 
@@ -2463,12 +2438,6 @@ end subroutine dfpt_nstwf
 !! OUTPUT
 !!  cwavef_d(2,npw1_k*nspinor)=first order wavefunction for a particular k point
 !!                             in the diagonal gauge
-!!
-!! PARENTS
-!!      m_dfpt_nstwf
-!!
-!! CHILDREN
-!!      xmpi_sum
 !!
 !! SOURCE
 

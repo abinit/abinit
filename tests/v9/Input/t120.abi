@@ -1,0 +1,80 @@
+# PAW Hybrid functional calculation for C in the diamond structure
+# Dataset 1: PBE
+# Dataset 2: PBE0 with vanishing alpha (=PBE)
+# Dataset 3: PBE0 (ixc=41)
+# Dataset 4: PBE0 with manually set alpha to 0.25 (=PBE0)
+
+ndtset  4
+
+# Datset 1
+ixc1          11
+# Datset 2
+ixc2          41
+hyb_mixing2   1.0e-7
+# Datset 3
+ixc3          41
+# Datset 4
+ixc4          41
+hyb_mixing4    0.25
+
+
+
+# Definition of the k-point grid
+ngkpt     2 2 2
+nshiftk   1
+shiftk   0.0 0.0 0.0  # This grid contains the Gamma point
+tolvrs   1.0d-12
+nband       5
+istwfk     *1
+
+getwfk     -1
+
+
+# Definition of the unit cell: fcc
+acell 3*6.7406530878521345  #Same parameters as Shiskin
+rprim  0.0  0.5  0.5        #FCC primitive vectors (to be scaled by acell)
+       0.5  0.0  0.5
+       0.5  0.5  0.0
+
+# Definition of the atom types
+ntypat  1
+znucl   6
+
+# Definition of the atoms
+natom 2           # There are two atoms
+typat  1 1
+xred              # Reduced coordinate of atoms
+       0.0   0.0   0.0
+       0.25  0.25  0.25
+
+# Definition of the planewave basis set (at convergence 16 Rydberg 8 Hartree)
+  ecut      10.0     # Maximal kinetic energy cut-off, in Hartree
+  pawecutdg 12.0     # Maximal kinetic energy cut-off, in Hartree
+
+# Definition of the SCF procedure
+nstep    8        # Maximal number of SCF cycles
+diemac  12.0      # Although this is not mandatory, it is worth to
+                  # precondition the SCF cycle. The model dielectric
+                  # function used as the standard preconditioner
+                  # is described in the "dielng" input variable section.
+                  # Here, we follow the prescription for bulk silicon.
+
+
+ pp_dirpath "$ABI_PSPDIR"
+ pseudos "C.GGA_X_PBE+GGA_C_PBE-paw.xml"
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% [files]
+#%% files_to_test =
+#%%   t120.abo, tolnlines=67, tolabs= 4.0e-3, tolrel= 1.0e-1, fld_options = -easy
+#%% [paral_info]
+#%% max_nprocs = 6
+#%% [extra_info]
+#%% authors = F. Bruneval and M. Torrent
+#%% keywords = GW
+#%% description =
+#%%   Diamond: PAW hybrid functionals: PBE, PBE0 with vanishing alpha (=PBE), PBE0, PBE0 with manually tuned alpha =0.25
+#%%
+#%%<END TEST_INFO>

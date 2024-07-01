@@ -22,8 +22,6 @@
 #RF
  xred4  0.0 0.0  0.1155     0.0 0.0 -0.1155
   rfphon4  1
- rfatpol4  1 1
-   rfdir4  0 0 1
     nqpt4  1
      qpt4  0.0 0.0 0.0
   getwfk4  2
@@ -32,13 +30,19 @@
 #RF
  xred5  0.0 0.0  0.1155     0.0 0.0 -0.1155
   rfphon5  1
- rfatpol5  1 1
-   rfdir5  0 0 1
     nqpt5  1
      qpt5  0.0 0.0 0.0
   getwfk5  2
   tolvrs5  5.0d-3
 frzfermi5  1
+
+
+ rfatpol   1 1
+   rfdir   0 0 1
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
 
 
 #Common data

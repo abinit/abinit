@@ -6,14 +6,10 @@
 !!  Routines related to non-linear core correction.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, TRangel, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, TRangel, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -98,12 +94,6 @@ contains
 !!
 !! NOTES
 !! Note that this routine is tightly connected to the dfpt_mkcore.f routine
-!!
-!! PARENTS
-!!      m_forces,m_longwave,m_nonlinear,m_prcref,m_respfn_driver,m_setvtr
-!!      m_stress,m_xchybrid
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -536,10 +526,6 @@ subroutine mkcore(corstr,dyfrx2,grxc,mpi_enreg,natom,nfft,nspden,ntypat,n1,n1xcc
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore(xx,yy,zz,aa,bb,cc)
@@ -590,7 +576,7 @@ end subroutine mkcore
 !!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
 !!  xccc1d(n1xccc,6,ntypat)=1D core charge function and 5 derivatives for each atom type
 !!  xred(3,natom)=reduced coordinates for atoms in unit cell
-!!  [usekden]= --optional-- if TRUE, output the kinetic enrgy density instead of the density
+!!  [usekden]= --optional-- if TRUE, output the kinetic energy density instead of the density
 !!
 !! OUTPUT
 !!  === if option==1 ===
@@ -604,16 +590,11 @@ end subroutine mkcore
 !!    frozen-wavefunction part of the dynamical matrix
 !!
 !! SIDE EFFECTS
-!!  xccc3d(n1*n2*n3)=3D core electron density for XC core correction (bohr^-3)
+!!  xccc3d(n1*n2*n3)=3D core electron (event. kinetic energy) density for XC core correction (bohr^-3)
 !!   (computed and returned when option=1, needed as input when option=3)
 !!
 !! NOTES
 !!  Based on mkcore.F90
-!!
-!! PARENTS
-!!      m_forces,m_setvtr,m_stress
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -663,7 +644,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  real(dp) :: scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: dtcore(:),d2tcore(:),rnorm(:)
  real(dp),allocatable :: rrdiff(:,:),tcore(:)
- real(dp),allocatable,target :: tcoretau(:,:)
+ real(dp),allocatable,target :: tcoretau(:,:) ! only needed in PAW case.
  real(dp), ABI_CONTIGUOUS pointer :: corespl(:,:),vxc_eff(:)
 
 !************************************************************************
@@ -671,16 +652,17 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  call timab(12,1,tsec)
 
 !Make sure options are acceptable
- usekden_=.false.;if (present(usekden)) usekden_=usekden
  if (option<0.or.option>4) then
    write(message, '(a,i12,a,a,a)' )&
     'option=',option,' is not allowed.',ch10,&
     'Must be 1, 2, 3 or 4.'
    ABI_BUG(message)
  end if
+
+ usekden_=.false.;if (present(usekden)) usekden_=usekden
  if (usekden_) then
-   message='usekden=1 not yet allowed!'
-   ABI_BUG(message)
+   message='usekden=1 mkcore_alt not yet in production. You have been warned! May not work with PAW or NC'
+   ABI_WARNING(message)
  end if
 
 
@@ -750,10 +732,12 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 
 !  Set search range (density cuts off perfectly beyond range)
    range=xcccrc(itypat);if (usepaw==1) range=pawtab(itypat)%rcore
-   range2=range**2 ; rangem1=one/range
 
 !  Skip loop if this type has no core charge
    if (abs(range)<1.d-16) cycle
+
+   range2=range**2 ; rangem1=one/range
+
 
 !  PAW: select core density type and create mesh
    if (usepaw==1) then
@@ -1075,10 +1059,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Define magnitude of cross product of two vectors
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
    function cross_mkcore_alt(xx,yy,zz,aa,bb,cc)
@@ -1099,11 +1079,6 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
 !! FUNCTION
 !!  Find the grid index of a given position in the cell according to the BC
 !!  Determine also whether the index is inside or outside the box for free BC
-!!
-!! PARENTS
-!!      m_mkcore
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -1163,12 +1138,6 @@ end subroutine mkcore_alt
 !!
 !! NOTES
 !! Note that this routine is tightly connected to the mkcore.f routine
-!!
-!! PARENTS
-!!      m_dfpt_elt,m_dfpt_looppert,m_dfpt_nstwf,m_dfpt_scfcv,m_dfptnl_loop
-!!      m_pead_nl_loop,m_respfn_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

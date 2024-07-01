@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (AL)
+!!  Copyright (C) 2014-2024 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -84,15 +80,6 @@ contains
 !! SIDE EFFECTS
 !!  cg(2,*)=updated wavefunctions
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      apply_invovl,dotprod_g,getghc,pawcprj_alloc,pawcprj_axpby,pawcprj_copy
-!!      pawcprj_free,prep_getghc,prep_index_wavef_bandpp
-!!      rayleigh_ritz_distributed,rayleigh_ritz_subdiago,timab,wrtout
-!!      xmpi_alltoallv,xmpi_barrier,xmpi_max,xmpi_min,xmpi_sum
-!!
 !! NOTES
 !!  -- TODO --
 !!  Normev?
@@ -153,7 +140,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  integer :: mcg
  real(dp) :: dprod_r, dprod_i
  character(len=500) :: message
- integer :: rdisplsloc(mpi_enreg%nproc_band),recvcountsloc(mpi_enreg%nproc_band)
+ integer :: rdisplsloc(mpi_enreg%nproc_band), recvcountsloc(mpi_enreg%nproc_band)
  integer :: sdisplsloc(mpi_enreg%nproc_band), sendcountsloc(mpi_enreg%nproc_band)
  integer :: ikpt_this_proc, npw_filter, nband_filter
  type(pawcprj_type), allocatable :: cwaveprj(:,:), cwaveprj_next(:,:), cwaveprj_prev(:,:)
@@ -184,23 +171,23 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! Initialize the _filter pointers. Depending on paral_kgb, they might point to the actual arrays or to _alltoall variables
  if (dtset%paral_kgb == 1) then
    ikpt_this_proc = bandfft_kpt_get_ikpt()
-   npw_filter = bandfft_kpt(ikpt_this_proc)%ndatarecv
-   nband_filter = mpi_enreg%bandpp
+   npw_filter     = bandfft_kpt(ikpt_this_proc)%ndatarecv
+   nband_filter   = mpi_enreg%bandpp
 
-   ABI_MALLOC(cg_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(gsc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(ghc_alltoall1, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall1,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall1,    (2, npw_filter*nspinor*nband_filter))
    ABI_MALLOC(gvnlxc_alltoall1, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(cg_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(gsc_alltoall2, (2, npw_filter*nspinor*nband_filter))
-   ABI_MALLOC(ghc_alltoall2, (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(cg_alltoall2,     (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(gsc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
+   ABI_MALLOC(ghc_alltoall2,    (2, npw_filter*nspinor*nband_filter))
    ABI_MALLOC(gvnlxc_alltoall2, (2, npw_filter*nspinor*nband_filter))
 
    ! Init tranpose variables
-   recvcountsloc=bandfft_kpt(ikpt_this_proc)%recvcounts*2*nspinor*mpi_enreg%bandpp
-   rdisplsloc=bandfft_kpt(ikpt_this_proc)%rdispls*2*nspinor*mpi_enreg%bandpp
-   sendcountsloc=bandfft_kpt(ikpt_this_proc)%sendcounts*2*nspinor
-   sdisplsloc=bandfft_kpt(ikpt_this_proc)%sdispls*2*nspinor
+   recvcountsloc = bandfft_kpt(ikpt_this_proc)%recvcounts * 2 * nspinor * mpi_enreg%bandpp
+   rdisplsloc    = bandfft_kpt(ikpt_this_proc)%rdispls    * 2 * nspinor * mpi_enreg%bandpp
+   sendcountsloc = bandfft_kpt(ikpt_this_proc)%sendcounts * 2 * nspinor
+   sdisplsloc    = bandfft_kpt(ikpt_this_proc)%sdispls    * 2 * nspinor
 
    ! Load balancing, so that each processor has approximately the same number of converged and non-converged bands
    ! for two procs, rearrange 1 2 3 4 5 6 as 1 4 2 5 3 6
@@ -225,9 +212,10 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
 
    ! sort according to bandpp (from lobpcg, I don't fully understand what's going on but it works and it's fast)
    call prep_index_wavef_bandpp(mpi_enreg%nproc_band,mpi_enreg%bandpp,&
-&   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
-&   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
-&   index_wavef_band)
+        &   nspinor,bandfft_kpt(ikpt_this_proc)%ndatarecv,&
+        &   bandfft_kpt(ikpt_this_proc)%recvcounts,bandfft_kpt(ikpt_this_proc)%rdispls,&
+        &   index_wavef_band)
+
    cg_alltoall2(:,:) = cg_alltoall1(:,index_wavef_band)
 
    cg_filter => cg_alltoall2
@@ -331,7 +319,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
  ! if(mpi_enreg%me == 0) write(0, *) nline_max
  do iband=1, nband_filter
    ! nline necessary to converge to tolwfr
-   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr / resids_filter(iband), dtset%nline)
+   nline_tolwfr = cheb_oracle(eig(iband), filter_low, dtset%ecut, dtset%tolwfr_diago / resids_filter(iband), dtset%nline)
    ! nline necessary to decrease residual by a constant factor
    nline_decrease = cheb_oracle(eig(iband), filter_low, dtset%ecut, 0.1_dp, dtset%nline)
 
@@ -383,7 +371,7 @@ subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspino
    if(paw) then
      call timab(timer_apply_inv_ovl, 1, tsec)
      call apply_invovl(gs_hamk, ghc_filter(:,shift:), gsm1hc_filter(:,shift:), cwaveprj_next(:,iactive:), &
-&     npw_filter, nactive, mpi_enreg, nspinor)
+&     npw_filter, nactive, mpi_enreg, nspinor, dtset%invovl_blksliced)
      call timab(timer_apply_inv_ovl, 2, tsec)
    else
      gsm1hc_filter(:,shift:) = ghc_filter(:,shift:)
@@ -608,11 +596,6 @@ end subroutine chebfi
 !! OUTPUT
 !! y= Tn(x)
 !!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
-!!
 !! NOTES
 !!
 !! SOURCE
@@ -656,11 +639,6 @@ end function cheb_poly
 !!
 !! OUTPUT
 !! n= number of iterations needed to decrease residual by tol
-!!
-!! PARENTS
-!!      chebfi
-!!
-!! CHILDREN
 !!
 !! NOTES
 !!

@@ -32,6 +32,10 @@
  nspinor3?  2
  nband3?   10
 
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 #Common data
  acell 3*8.0d0
@@ -42,10 +46,7 @@
  nstep 20
  ntypat  2
  qpt 3*0.0d0
- rfasr 0
  rfphon  0
- rfatpol   1 2
- rfdir     1 1 1
  tolwfr  1.0d-16
  typat  1 2
  xred    3*0.235d0 3*-0.235d0

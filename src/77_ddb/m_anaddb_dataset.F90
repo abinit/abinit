@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2024 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -28,7 +24,8 @@ module m_anaddb_dataset
  use m_abicore
  use m_errors
 
- use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa
+ use m_fstrings,  only : next_token, rmquotes, sjoin, inupper, ltoa, itoa, basename
+ use m_clib,      only : clib_mkdir_if_needed
  use m_symtk,     only : mati3det
  use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
@@ -185,7 +182,7 @@ module m_anaddb_dataset
   ! iatfix(natom)
 
   integer, allocatable:: iatprj_bs(:)
-  
+
   integer, allocatable:: lwf_anchor_iband(:)
   integer, allocatable:: lwf_projector(:)
 
@@ -227,14 +224,6 @@ contains
 !!
 !! INPUTS
 !!  anaddb_dtset = anaddb datastructure
-!!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -292,15 +281,9 @@ end subroutine anaddb_dtset_free
 !!  Could be divided into two routines as in abinit.
 !!    FIXME: move checks to chkin9?
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
-subroutine invars9 (anaddb_dtset, lenstr, natom, string)
+subroutine invars9(anaddb_dtset, lenstr, natom, string)
 
 !Arguments-------------------------------
 !scalars
@@ -312,8 +295,7 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
 !scalars
  integer, parameter:: vrsddb = 100401  ! Set routine version number here:
  integer, parameter:: jdtset = 1
- integer:: ii, iph1, iph2, marr, tread, start
- integer:: idet
+ integer:: ii, iph1, iph2, marr, tread, start, idet
  character(len = 500):: message
  character(len = fnlen):: path
 !arrays
@@ -436,12 +418,12 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
    ABI_ERROR(message)
  end if
 
- anaddb_dtset%dosdeltae = one/Ha_cmm1
+ anaddb_dtset%dosdeltae = 0.2_dp/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dosdeltae',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dosdeltae = dprarr(1)
 
 !FIXME : should probably be smaller
- anaddb_dtset%dossmear = 5.0/Ha_cmm1
+ anaddb_dtset%dossmear = one/Ha_cmm1
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dossmear',tread, 'DPR')
  if(tread == 1) anaddb_dtset%dossmear = dprarr(1)
  if(anaddb_dtset%dossmear <= zero)then
@@ -1905,15 +1887,9 @@ end subroutine invars9
 !! NOTES
 !! Should be executed by one processor only.
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
-subroutine outvars_anaddb (anaddb_dtset, nunit)
+subroutine outvars_anaddb(anaddb_dtset, nunit)
 
 !Arguments-------------------------------
 !scalars
@@ -2212,7 +2188,6 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
 
  write(nunit, '(a, 80a, a)') ch10, ('=',ii = 1, 80), ch10
 
-
 end subroutine outvars_anaddb
 !!***
 
@@ -2227,7 +2202,7 @@ end subroutine outvars_anaddb
 !! Initialize the code ppddb9: write heading and make the first i/os
 !!
 !! INPUTS
-!!  input_path: String with input file path. Empty string activates files file legacy mode.
+!!  input_path: String with input file path. Empty string activates files file in legacy mode.
 !!
 !! OUTPUT
 !! character(len = fnlen) filnam(7)=character strings giving file names
@@ -2243,27 +2218,19 @@ end subroutine outvars_anaddb
 !!     (6) Root name for electron-phonon file names
 !!     (7) Name of file containing the 3 ddk filenames and the GS wf file name
 !!
-!! PARENTS
-!!      anaddb
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
-!!
 !! SOURCE
 
 subroutine anaddb_init(input_path, filnam)
 
-  use m_fstrings
-
 !Arguments-------------------------------
-!arrays
  character(len=*), intent(in):: input_path
  character(len=*), intent(out):: filnam(8)
 
 !Local variables-------------------------
 !scalars
- integer:: lenstr, marr, jdtset, tread, i1
- character(len = strlen):: string, raw_string, fname
+ integer:: lenstr, marr, jdtset, tread, i1 !, ierr
+ character(len=strlen):: string, raw_string, fname
+ !character(len=fnlen) :: dirpath
 !arrays
  integer, allocatable:: intarr(:)
  real(dp), allocatable:: dprarr(:)
@@ -2289,6 +2256,7 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out, *)' Give name for output molecular dynamics: '
    read(std_in, '(a)' ) filnam(4)
    write(std_out, '(a, a)' )'-   ',trim(filnam(4))
+   ! GA: This message is confusing, because filnam(5) is also for EIG2D files.
    write(std_out, *)' Give name for input elphon matrix elements (GKK file): '
    read(std_in, '(a)' ) filnam(5)
    write(std_out, '(a, a)' )'-   ',trim(filnam(5))
@@ -2316,30 +2284,30 @@ subroutine anaddb_init(input_path, filnam)
    jdtset = 0
 
    ! Allow user to override default values
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value = filnam(2))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
    write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value = filnam(3))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value=filnam(3))
    ABI_CHECK(tread == 1, "ddb_filepath variable must be specified in the input file")
    write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
 
    ! Nobody knows the scope of this line in the files file.
-   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value = filnam(4))
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value = filnam(5))
+   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
+
+   ! GA: This variable name is confusing, because filnam(5) is also for EIG2D files.
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value = filnam(6))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value = filnam(7))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value = filnam(8))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "outdata_prefix", tread, 'KEY', key_value=filnam(8))
    if (tread == 1) then
      write(std_out, "(2a)")'- Root name for output files: ', trim(filnam(8))
-   endif
-
-
+   end if
 
    ABI_FREE(intarr)
    ABI_FREE(dprarr)
@@ -2356,6 +2324,13 @@ subroutine anaddb_init(input_path, filnam)
    write(std_out, "(2a)")'- Root name for output files set to: ', trim(filnam(8))
  endif
 
+ !i1 = index(filnam(8), "/")
+ !if (i1 > 0) then
+ !  dirpath = filnam(8)(1:i1-1)
+ !  call clib_mkdir_if_needed(dirpath, ierr)
+ !  ABI_CHECK(ierr == 0, sjoin("Error", itoa(ierr), "while trying to create directory", dirpath))
+ !end if
+
 end subroutine anaddb_init
 !!***
 
@@ -2371,12 +2346,6 @@ end subroutine anaddb_init
 !!   the string (with upper case) from the input file, to which the XYZ data is (possibly) appended
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_anaddb_dataset
-!!
-!! CHILDREN
-!!      chkvars_in_string, inupper
 !!
 !! SOURCE
 
@@ -2421,7 +2390,7 @@ subroutine anaddb_chkvars(string)
  list_vars = trim(list_vars)//' kptrlatt kptrlatt_fine'
 !L
 
- list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_qpt lwf_anchor_proj'
+ list_vars = trim(list_vars)//' lwf_anchor_iband lwf_anchor_proj lwf_anchor_qpt'
  list_vars = trim(list_vars)//' lwf_disentangle lwf_mu lwf_ngqpt lwf_nwann lwf_projector lwf_sigma'
  list_vars = trim(list_vars)//' lwfflag'
 !M
@@ -2463,8 +2432,8 @@ subroutine anaddb_chkvars(string)
 
 !Extra token, also admitted:
 !<ANADDB_UNITS>
- list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
+ list_vars = trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV meV Ha'
+ list_vars = trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs S Sec Second T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>

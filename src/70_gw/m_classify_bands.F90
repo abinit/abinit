@@ -7,14 +7,10 @@
 !!  a set of degenerate bands at a given k-point and spin.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -139,11 +135,6 @@ contains
 !!
 !! * LIMITATIONS: The method does not work if k is at zone border and the little group of k
 !!                contains a non-symmorphic fractional translation.
-!!
-!! PARENTS
-!!      m_sigma_driver,m_wfk_analyze
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -566,11 +557,6 @@ end subroutine classify_bands
 !!  L_{at} is the position of the initial atom inside the first unit cell
 !!  Note that atom a might be in a cell different from the initial one. No wrapping is done.
 !!
-!! PARENTS
-!!      m_classify_bands
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine rotate_cprj(kpoint,isym,nspinor,nbnds,natom,nsym,typat,indsym,Cprj_in,Cprj_out)
@@ -650,8 +636,6 @@ end subroutine rotate_cprj
 !!
 !! OUTPUT
 !!  omat(2)=The onsite matrix element.
-!!
-!! PARENTS
 !!
 !! SOURCE
 

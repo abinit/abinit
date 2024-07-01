@@ -14,7 +14,7 @@
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (HM, MG)
+!!  Copyright (C) 2008-2024 ABINIT group (HM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,8 +24,6 @@
 !!
 !!   [sigma] = Siemens/m  with S = Ampere/Volt = Ohm^-1
 !!   [mu] = S L^2 Q
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -60,7 +58,7 @@ module m_rta
  use m_crystal,        only : crystal_t
  use m_numeric_tools,  only : bisect, simpson_int, safe_div, arth
  use m_fstrings,       only : strcat, sjoin, itoa, ltoa, stoa, ftoa, yesno
- use m_kpts,           only : kpts_timrev_from_kptopt
+ use m_kpts,           only : kpts_timrev_from_kptopt, kpts_map
  use m_occ,            only : occ_fd, occ_dfde
  use m_pawtab,         only : pawtab_type
  use m_ddk,            only : ddkstore_t
@@ -141,14 +139,15 @@ type,public :: rta_t
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all degenerate states should be included when symmetries are used.
 
-  !integer,allocatable :: kcalc2ibz(:,:)
+  integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
 
   integer,allocatable :: kcalc2ebands(:,:)
+   ! (6, nkcalc)
    ! Mapping ikcalc --> ebands IBZ
-   ! Note that this array is not necessarily equation to kcalc2ibz computed in sigmaph
-   ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
+   ! Note that this array is not necessarily equal to kcalc2ibz computed in sigmaph
+   ! because we may have used sigma_ngkpt to downsample the initial nkpt mesh.
    ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
    real(dp),allocatable :: kTmesh(:)
@@ -281,12 +280,6 @@ contains  !=====================================================
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
@@ -359,7 +352,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 !Local variables ------------------------------
  integer,parameter :: sppoldbl1 = 1, master = 0
  integer :: ierr, spin, nprocs, my_rank, timrev, ik_ibz, ib, irta, itemp, ndat, nsppol, idat, mband, ikpt
- real(dp) :: dksqmax, cpu, wall, gflops
+ real(dp) :: cpu, wall, gflops
  character(len=500) :: msg
  character(len=fnlen) :: wfk_fname_dense
  type(ebands_t) :: tmp_ebands, ebands_dense
@@ -409,7 +402,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  call alloc_copy(sigmaph%bstart_ks, new%bstart_ks)
  call alloc_copy(sigmaph%bstop_ks, new%bstop_ks)
  call alloc_copy(sigmaph%nbcalc_ks, new%nbcalc_ks)
- !call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
+ call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
  !new%bmin = 1; new%bmax = ebands%mband ! This for debugging purposes, results should not change
@@ -464,6 +457,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
 
  !print *, "linewidth_serta", maxval(abs(new%linewidths(:,:,:,:,1)))
  !print *, "linewidth_mrta", maxval(abs(new%linewidths(:,:,:,:,2)))
+ !print *, "max velocities", maxval(abs(new%vbks))
 
  if ( &
      dtset%useria == 888 .and. &
@@ -588,16 +582,15 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
    ABI_MALLOC(indkk, (6, tmp_ebands%nkpt))
 
    krank = krank_from_kptrlatt(new%ebands%nkpt, new%ebands%kptns, new%ebands%kptrlatt, compute_invrank=.False.)
-   call krank%get_mapping(tmp_ebands%nkpt, tmp_ebands%kptns, dksqmax, cryst%gmet, indkk, &
-                          cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True.)
-   call krank%free()
 
-   if (dksqmax > tol12) then
-      write(msg, '(3a,es16.6,a)' ) &
+   if (kpts_map("symrec", timrev, cryst, krank, tmp_ebands%nkpt, tmp_ebands%kptns, indkk) /= 0) then
+     write(msg, '(3a)' ) &
        "Error while downsampling ebands in the transport driver",ch10, &
-       "The k-point could not be generated from a symmetrical one. dksqmax: ",dksqmax, ch10
-      ABI_ERROR(msg)
+       "The k-point could not be generated from a symmetrical one."
+     ABI_ERROR(msg)
    end if
+
+   call krank%free()
 
    ! Downsampling linewidths and velocities.
    ABI_MOVE_ALLOC(new%linewidths, tmp_array5)
@@ -674,11 +667,6 @@ end function rta_new
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -906,7 +894,7 @@ subroutine compute_rta(self, cryst, dtset, dtfil, comm)
          self%pi(:,:,iw,spin,itemp,irta) = - volt_SI * matmul(work_33, l0inv_33nw(:, :, iw))
        end do
 
-       ! ZT:  S^T sigma S k^-1 T (tensor form with k=k_electronic only):
+       ! ZT: S^T sigma S k^-1 T (tensor form with k=k_electronic only):
        do iw=1,self%nw
          S_33 = self%seebeck(:,:,iw,spin,itemp,irta)
          S_33 = matmul(matmul(transpose(S_33), self%sigma(:,:,iw,spin,itemp,irta)), S_33)
@@ -1096,11 +1084,6 @@ end subroutine compute_rta
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine compute_rta_mobility(self, cryst, comm)
@@ -1113,7 +1096,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
 !Local variables ------------------------------
  integer :: nsppol, nkibz, ib, ik_ibz, spin, ii, jj, itemp, ieh, cnt, nprocs, irta, time_opt
  real(dp) :: eig_nk, mu_e, linewidth, fact, fact0, max_occ, kT, wtk, cpu, wall, gflops
- real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3)
+ real(dp) :: vr(3), vv_tens(3,3), vv_tenslw(3,3) !, tmp_tens(3,3)
 
 !************************************************************************
 
@@ -1123,6 +1106,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  nkibz = self%ebands%nkpt; nsppol = self%ebands%nsppol
 
  time_opt = 0 ! This to preserve the previous behaviour in which TR was not used.
+ !time_opt = -1 ! This to preserve the previous behaviour in which TR was not used.
 
  ABI_CALLOC(self%mobility_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
  ABI_CALLOC(self%conductivity_mu, (3, 3, 2, nsppol, self%ntemp, self%nrta))
@@ -1141,6 +1125,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
  ! TODO: Implement other tensors. Compare these results with the ones obtained with spectral sigma
  ! In principle, they should be the same, in practice the integration of sigma requires enough resolution
  ! around the band edge.
+ !print *, "in RTA max velocities", maxval(abs(self%vbks))
  cnt = 0
  do spin=1,nsppol
    do ik_ibz=1,nkibz
@@ -1152,13 +1137,20 @@ subroutine compute_rta_mobility(self, cryst, comm)
 
        ! Store outer product in vv_tens
        vr(:) = self%vbks(:, ib, ik_ibz, spin)
+       ! Don't remove this if: it makes the loop a bit faster and, most importantly,
+       ! it prevents intel from miscompiling the code.
+       if (all(abs(vr) == zero)) cycle
+
        do ii=1,3
          do jj=1,3
            vv_tens(ii, jj) = vr(ii) * vr(jj)
          end do
        end do
+
        ! Symmetrize tensor.
+       !print *, "intens", vv_tens
        vv_tens = cryst%symmetrize_cart_tens33(vv_tens, time_opt)
+       !print *, "out_tens", vv_tens
 
        ! Multiply by the lifetime (SERTA or MRTA)
        do irta=1,self%nrta
@@ -1167,6 +1159,7 @@ subroutine compute_rta_mobility(self, cryst, comm)
            mu_e = self%transport_mu_e(itemp)
            ieh = 2; if (eig_nk >= mu_e) ieh = 1
            linewidth = self%linewidths(itemp, ib, ik_ibz, spin, irta)
+           !print *, linewidth, wtk, occ_dfde(eig_nk, kT, mu_e), "tens", vv_tens
            call safe_div( - wtk * vv_tens * occ_dfde(eig_nk, kT, mu_e), two * linewidth, zero, vv_tenslw)
            self%conductivity_mu(:, :, ieh, spin, itemp, irta) = self%conductivity_mu(:, :, ieh, spin, itemp, irta) &
              + vv_tenslw(:, :)
@@ -1216,11 +1209,6 @@ end subroutine compute_rta_mobility
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ncid=Netcdf file handle.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_ncwrite(self, cryst, dtset, ncid)
@@ -1250,12 +1238,17 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  !    nctkarr_t("eph_ngqpt_fine", "int", "three"), &
 
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol), &
+    nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("nkibz", self%ebands%nkpt) &
+ ], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
     nctkarr_t('transport_ngkpt', "int", "three"), &
     nctkarr_t('sigma_erange', "dp", "two"), &
+    nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+    nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+    nctkarr_t("kibz", "dp", "three, nkibz"), &
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('n_ehst', "dp", "two, nsppol, ntemp"), &
@@ -1299,6 +1292,9 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), self%kcalc2ebands))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%ebands%kptns))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  if (self%assume_gap) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
@@ -1349,11 +1345,6 @@ end subroutine rta_ncwrite
 !! cryst<crystal_t>=Crystalline structure
 !! dtset<dataset_type>=All input variables for this dataset.
 !! dtfil<datafiles_type>=variables related to files.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 
@@ -1542,11 +1533,6 @@ end subroutine write_tensor
 !!
 !! INPUTS
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine rta_free(self)
@@ -1561,7 +1547,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%bstart_ks)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
- !ABI_SFREE(self%kcalc2ibz)
+ ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%kcalc2ebands)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
@@ -1610,12 +1596,6 @@ end subroutine rta_free
 !! psps<pseudopotential_type>=Variables related to pseudopotentials.
 !! comm=MPI communicator.
 !!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
-!!      safe_div
-!!
 !! SOURCE
 
 subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
@@ -1634,7 +1614,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
 !Local variables ------------------------------
  integer,parameter :: master = 0
- integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr
+ integer :: spin, ikcalc, nkcalc, nbsum, nbcalc, itemp, iter, ierr, bsize
  integer :: nkibz, nsppol, band_k, ik_ibz, bmin, bmax, band_sum, ntemp, ii, jj, iq_sum, btype, nsp
  integer :: ikq_ibz, isym_kq, trev_kq, cnt, tag, nprocs, receiver, my_rank, isym, itime, isym_lgk
 #ifdef HAVE_NETCDF
@@ -1750,6 +1730,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
        end if
      end if
 
+     ! Note that the size along the (n, m) axis does not depend on the kcalc index.
      ABI_CALLOC(sr_p%vals, (sr_p%nq_ibzk_eff, bmin:bmax, bmin:bmax, ntemp))
      ABI_MALLOC(sr_p%kq_symtab, (6, sr_p%nq_ibzk_eff))
      ABI_MALLOC(sr_p%lgk_sym2glob, (2, sr_p%lgk_nsym))
@@ -1816,6 +1797,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
 
  !call ibte%solve_ibte(solver_type=1)
 
+ bsize = bmax - bmin + 1
  ABI_CALLOC(fkn_in, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_out, (3, nkibz, bmin:bmax, nsppol))
  ABI_CALLOC(fkn_serta, (3, nkibz, bmin:bmax, nsppol))
@@ -1840,9 +1822,33 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (abs_tol <= zero) then
    rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
    abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
-   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from minimal carrier density over all T")
    call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
    call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
+ end if
+
+ if (my_rank == master) then
+   path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   call wrtout(unts, ch10//sjoin("- Writing IBTE transport results to:", path))
+   NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
+
+   ncerr = nctk_def_dims(ncid, [ &
+      nctkdim_t("nkibz", nkibz), nctkdim_t("bsize", bsize), nctkdim_t("nkcalc", ibte%nkcalc) &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   ncerr = nctk_def_arrays(ncid, [ &
+     nctkarr_t('fkn_out_sigma', "dp", "three, nkibz, bsize, nsppol, ntemp"), &
+     nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
+     nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
+   ], defmode=.True.)
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
  end if
 
  cnt = 0
@@ -1958,6 +1964,11 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
+     ! Write fnk_out_sigma to disk.
+     if (my_rank == master) then
+       NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fkn_out_sigma"), fkn_out, start=[1,1,1,1,itemp]))
+     end if
+
      do spin=1,nsppol
        max_adiff_spin(spin) = maxval(abs(fkn_out(:,:,:,spin) - fkn_in(:,:,:,spin)))
      end do
@@ -2075,22 +2086,18 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !call ibte%print_rta_txt_files(cryst, dtset, dtfil)
    ! Creates the netcdf file used to store the results of the calculation.
 #ifdef HAVE_NETCDF
-   path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
-   call wrtout(unts, ch10//sjoin("- Writing IBTE transport results to:", path))
-   NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
-
-   ncerr = nctk_def_arrays(ncid, [ &
-     nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
-     nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
-   ], defmode=.True.)
-   NCF_CHECK(ncerr)
+   !path = strcat(dtfil%filnam_ds(4), "_RTA.nc")
+   !call wrtout(unts, ch10//sjoin("- Writing IBTE transport results to:", path))
+   !NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
 
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_sigma"), ibte_sigma))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_mob"), ibte_mob))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_rho"), ibte_rho))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), ibte%kcalc2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), ibte%kcalc2ebands))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), ibte%ebands%kptns))
    NCF_CHECK(nf90_close(ncid))
 #endif
 
@@ -2138,12 +2145,6 @@ end subroutine ibte_driver
 !! INPUTS
 !! cryst<crystal_t>=Crystalline structure
 !! comm=MPI communicator.
-!!
-!! PARENTS
-!!      m_rta
-!!
-!! CHILDREN
-!!      safe_div
 !!
 !! SOURCE
 

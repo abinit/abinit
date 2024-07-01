@@ -6,14 +6,10 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2022 ABINIT group (MVeithen,MB)
+!!  Copyright (C) 2002-2024 ABINIT group (MVeithen,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -140,12 +136,6 @@ contains
 !!
 !! SIDE EFFECTS
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
-!!
-!! PARENTS
-!!      m_nonlinear
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 
@@ -614,12 +604,6 @@ end subroutine pead_nl_loop
 !! OUTPUT
 !!  d3lo(2,3,mpert,3,mpert,3,mpert) = matrix of the 3DTEs
 !!
-!! PARENTS
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
-!!
 !! SOURCE
 
 subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
@@ -766,7 +750,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        call fourwf(cplex,vlocal1,cwavef3,gh1,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
 &       tim_fourwf,weight,weight,&
-&       use_gpu_cuda=dtset%use_gpu_cuda)
+&       gpu_option=dtset%gpu_option)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential
@@ -784,7 +768,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
        tim_fourwf = 0 ; weight = one
        call fourwf(cplex,vlocal1,cwave0,gh0,wfraug,gs_hamk%gbound_k,gs_hamk%gbound_k,&
 &       istwf_k,kg_k,kg_k,mgfft,mpi_enreg,1,dtset%ngfft,npw_k,npw_k,n4,n5,n6,option,&
-&       tim_fourwf,weight,weight,use_gpu_cuda=dtset%use_gpu_cuda)
+&       tim_fourwf,weight,weight,gpu_option=dtset%gpu_option)
 
 !      In case i2pert = phonon-type perturbation
 !      add first-order change in the nonlocal potential
@@ -930,12 +914,6 @@ end subroutine pead_nl_resp
 !! For a given set of values of i1pert,i3pert,i1dir and
 !! i3dir, the routine computes the k-point derivatives for
 !! 12dir = 1,2,3
-!!
-!! PARENTS
-!!      m_pead_nl_loop
-!!
-!! CHILDREN
-!!      dzgedi,dzgefa,mpi_recv,mpi_send,wrtout,xmpi_sum
 !!
 !! SOURCE
 

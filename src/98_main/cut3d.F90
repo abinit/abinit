@@ -7,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2024 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,15 +26,6 @@
 !! ucvol = unit cell volume (> 0)
 !! filrho = name of the density file (binary or netcdf)
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,abinit_doctor,cryst%free,cut3d_hirsh
-!!      cut3d_lineint,cut3d_planeint,cut3d_pointint,cut3d_rrho,cut3d_volumeint
-!!      cut3d_wffile,destroy_mpi_enreg,fftdatar_write,flush_unit,hdr%echo
-!!      hdr%free,hdr_read_from_fname,herald,init_distribfft_seq,initmpi_seq
-!!      metric,ngfft_seq,timein,wrtout,xmpi_end,xmpi_init,xred2xcart
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -47,7 +38,6 @@ program cut3d
 
  use defs_basis
  use m_errors
- use m_build_info
  use m_xmpi
  use m_nctk
  use m_abicore
@@ -62,6 +52,7 @@ program cut3d
  use m_crystal
 
  use defs_abitypes,     only : MPI_type
+ use m_build_info,      only : abinit_version
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein

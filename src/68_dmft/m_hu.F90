@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2022 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2024 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -13,10 +13,6 @@
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -111,12 +107,6 @@ CONTAINS  !=====================================================================
 !!
 !! OUTPUTS
 !!  hu <type(hu_type)>= U interaction
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -317,12 +307,6 @@ end subroutine init_hu
 !! OUTPUTS
 !!  hu_new <type(hu_type)>= U interaction
 !!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine copy_hu(ntypat,hu,hu_new)
@@ -372,12 +356,6 @@ end subroutine copy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_dmft
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -431,12 +409,6 @@ end subroutine destroy_hu
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -505,11 +477,6 @@ end subroutine print_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -594,12 +561,6 @@ end subroutine vee2udens_hu
 !!
 !! SIDE EFFECT
 !!  hu <type(hu_type)> = data for the interaction in DMFT.
-!!
-!! PARENTS
-!!      m_forctqmc,m_hubbard_one
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1080,12 +1041,6 @@ end subroutine rotatevee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine printvee_hu(ndim,vee,prtopt,basis,upawu,f2)
@@ -1432,12 +1387,6 @@ end subroutine printvee_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
-!!
 !! SOURCE
 
 subroutine vee2udensatom_hu(ndim,nspinor,udens_atoms,veetemp,basis,prtonly)
@@ -1528,10 +1477,6 @@ end subroutine vee2udensatom_hu
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 function reddd(mi,ndim)
@@ -1560,7 +1505,7 @@ end function reddd
 !! from the Slm to the Ylm basis if option==1 or from Ylm to Slm if !option==2
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1579,12 +1524,6 @@ end function reddd
 !!  mat_inp_c= Output matrix in Ylm or Slm basis according to option
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1713,7 +1652,7 @@ end subroutine vee_slm2ylm_hu
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1730,12 +1669,6 @@ end subroutine vee_slm2ylm_hu
 !!  mat_out_c= real output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_forctqmc
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1796,7 +1729,7 @@ end subroutine vee_ndim2tndim_hu_r
 !! into a full spin and orbital interaction matrix of dimension [2*(2l+1)]**4
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1813,12 +1746,6 @@ end subroutine vee_ndim2tndim_hu_r
 !!  mat_out_c= Complex output matrix
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -1878,7 +1805,7 @@ end subroutine vee_ndim2tndim_hu
 !! from the Ylm basis to the J,M_J basis if option==1
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1895,12 +1822,6 @@ end subroutine vee_ndim2tndim_hu
 !!
 !! NOTES
 !!  usefull only in ndij==4
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2041,7 +1962,7 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! Condon tables
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2054,12 +1975,6 @@ subroutine vee_ylm2jmj_hu(lcor,mat_inp_c,mat_out_c,option)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 
@@ -2316,7 +2231,7 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! in JMJ Basis
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (BA)
+!! Copyright (C) 1998-2024 ABINIT group (BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2329,12 +2244,6 @@ subroutine udens_slatercondon_hu(fk,lcor)
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_hu
-!!
-!! CHILDREN
-!!      wrtout
 !!
 !! SOURCE
 

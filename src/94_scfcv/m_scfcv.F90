@@ -6,16 +6,12 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
+!!  Copyright (C) 2014-2024 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! NOTES
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -75,7 +71,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2022 ABINIT group (JB)
+!!  Copyright (C) 2014-2024 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,12 +166,6 @@ contains
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_gstate
-!!
-!! CHILDREN
-!!      scfcv_core
 !!
 !! SOURCE
 
@@ -369,12 +359,6 @@ end subroutine scfcv_init
 !!
 !! NOTES
 !!
-!! PARENTS
-!!      m_gstate,m_mover_effpot
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_destroy(this)
@@ -472,12 +456,6 @@ end subroutine scfcv_destroy
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_gstate,m_mover
-!!
-!! CHILDREN
-!!      scfcv_core
-!!
 !! SOURCE
 
 subroutine scfcv_run(this, electronpositron, itimes, rhog, rhor, rprimd, xred, xred_old, conv_retcode)
@@ -538,10 +516,6 @@ end subroutine scfcv_run
 !!!!
 !!!! NOTES
 !!!!
-!!!! PARENTS
-!!!!
-!!!! CHILDREN
-!!!!
 !!!! SOURCE
 !!
 !!subroutine scfcv_reformatWFK(this,rhog, rhor, rprimd, xred, xred_old)
@@ -594,12 +568,6 @@ end subroutine scfcv_run
 !! SIDE EFFECTS
 !!
 !! NOTES
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!      scfcv_core
 !!
 !! SOURCE
 
@@ -676,12 +644,6 @@ end subroutine scfcv_runWEntropyDMFT
 !!
 !! NOTES
 !!  Wrapper to scfcv to avoid circular dependencies ...
-!!
-!! PARENTS
-!!      m_scfcv
-!!
-!! CHILDREN
-!!      scfcv_core
 !!
 !! SOURCE
 

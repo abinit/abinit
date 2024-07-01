@@ -6,14 +6,10 @@
 !!  This module contains routines for the RMM-DIIS eigenvalue solver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2020-2022 ABINIT group (MG)
+!!  Copyright (C) 2020-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -57,6 +53,7 @@ module m_rmm_diis
 !!***
 
  public :: rmm_diis
+ public :: subspace_rotation   ! rayleigh-ritz procedure from gs_hamk
 !!***
 
  type,private :: rmm_diis_t
@@ -143,7 +140,7 @@ contains
 !!  mpi_enreg=information about MPI parallelization
 !!  nband=number of bands at this k point for that spin polarization
 !!  npw=number of plane waves at this k point
-!!  my_nspinor=number of plane waves at this k point
+!!  my_nspinor=number of spinors treated by this MPI proc
 !!
 !! OUTPUT
 !!  eig(nband)=array for holding eigenvalues (hartree)
@@ -161,13 +158,6 @@ contains
 !!    The first entry gives the previous accuracy.
 !!    The second entry gives the number of iterations already performed with this level.
 !!
-!! PARENTS
-!!      m_vtowfk
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kinpw, gsc, &
@@ -177,7 +167,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
  integer,intent(in) :: istep, ikpt, isppol, nband, npw, my_nspinor
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
  type(dataset_type),intent(in) :: dtset
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*dtset%usepaw)
  real(dp),intent(inout) :: enlx(nband), resid(nband)
@@ -422,7 +412,7 @@ subroutine rmm_diis(istep, ikpt, isppol, cg, dtset, eig, occ, enlx, gs_hamk, kin
      call cg_norm2g(istwf_k, npwsp, ndat, residv_bk, resid(ib_start), me_g0, comm_bsf)
    else
      call getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg_bk, ghc_bk, gsc_bk, mpi_enreg, prtvol, &
-                         eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
+                          eig(ib_start), resid(ib_start), enlx(ib_start), residv_bk, gvnlxc_bk, normalize=.False.)
    end if
 
    ! Band locking.
@@ -711,12 +701,6 @@ end subroutine rmm_diis
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_push_iter(diis, iter, ndat, eig_bk, resid_bk, enlx_bk, cg_bk, residv_bk, gsc_bk, tag)
@@ -766,10 +750,6 @@ end subroutine rmm_diis_push_iter
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -863,12 +843,6 @@ end function rmm_diis_exit_iter
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_print_block(diis, ib_start, ndat, istep, ikpt, isppol)
@@ -922,13 +896,6 @@ end subroutine rmm_diis_print_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enreg, prtvol, &
@@ -939,7 +906,7 @@ subroutine getghc_eigresid(gs_hamk, npw, my_nspinor, ndat, cg, ghc, gsc, mpi_enr
  integer,intent(in) :: npw, my_nspinor, ndat, prtvol
  real(dp),intent(inout) :: cg(2, npw*my_nspinor*ndat)
  real(dp),intent(out) :: ghc(2,npw*my_nspinor*ndat), gsc(2,npw*my_nspinor*ndat*gs_hamk%usepaw)
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),intent(out) :: eig(ndat), resid(ndat), enlx(ndat)
  real(dp),intent(out) :: residvecs(2, npw*my_nspinor*ndat), gvnlxc(2, npw*my_nspinor*ndat)
  logical,optional,intent(in) :: normalize
@@ -1012,10 +979,6 @@ end subroutine getghc_eigresid
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 type(rmm_diis_t) function rmm_diis_new(accuracy_level, usepaw, istwf_k, npwsp, max_niter, bsize, prtvol) result(diis)
@@ -1057,12 +1020,6 @@ end function rmm_diis_new
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_free(diis)
@@ -1096,12 +1053,6 @@ end subroutine rmm_diis_free
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
 !!
 !! SOURCE
 
@@ -1193,12 +1144,6 @@ end subroutine rmm_diis_update_block
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine rmm_diis_eval_mats(diis, iter, ndat, me_g0, comm)
@@ -1260,13 +1205,6 @@ end subroutine rmm_diis_eval_mats
 !! OUTPUT
 !! mat_out(cplx*N*N+1/2)= packed matrix (upper triangle)
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine my_pack_matrix(n, mat_in, mat_out)
@@ -1325,13 +1263,6 @@ end subroutine my_pack_matrix
 !!  cg(2,*)=updated wavefunctions
 !!  gsc(2,*)=update <G|S|C>
 !!
-!! PARENTS
-!!      m_rmm_diis
-!!
-!! CHILDREN
-!!      abi_zgemm_2r,cg_zcopy,cg_zdotg_zip,cg_zgemm,cwtime,cwtime_report,dgemm
-!!      getghc,my_pack_matrix,pack_matrix,prep_getghc,subdiago,xmpi_sum
-!!
 !! SOURCE
 
 subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor, savemem, enlx, eig, cg, gsc, ghc, gvnlxc)
@@ -1339,7 +1270,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
 !Arguments ------------------------------------
  integer,intent(in) :: prtvol, nband, npw, my_nspinor, savemem
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
- type(mpi_type),intent(inout) :: mpi_enreg
+ type(mpi_type),intent(in) :: mpi_enreg
  real(dp),target,intent(inout) :: cg(2,npw*my_nspinor*nband)
  real(dp),target,intent(inout) :: gsc(2,npw*my_nspinor*nband*gs_hamk%usepaw)
  !real(dp),target,intent(out) :: ghc(2,npw*my_nspinor*nband)
@@ -1358,8 +1289,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  real(dp),target :: fake_gsc_bk(0,0)
  real(dp) :: subovl(use_subovl0)
  real(dp),allocatable :: subham(:), h_ij(:,:,:), evec(:,:,:), evec_re(:,:), gwork(:,:)
- real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:)
- real(dp), ABI_CONTIGUOUS pointer :: gsc_bk(:,:)
+ real(dp),ABI_CONTIGUOUS pointer :: ghc_bk(:,:), gvnlxc_bk(:,:), gsc_bk(:,:)
  real(dp) :: dots(2, nband)
  type(pawcprj_type) :: cprj_dum(1,1)
 
@@ -1391,6 +1321,7 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
  !cplex = 2; if (istwf_k == 2) cplex = 1
 
  ABI_CALLOC(h_ij, (cplex, nband, nband))
+
  ! Allocate full ghc and gvnlxc to be able to rotate residuals and Vnlx matrix elements
  ! after subdiago. More memory but we can save a call to H|psi>.
  if (savemem == 0) then
@@ -1436,6 +1367,9 @@ subroutine subspace_rotation(gs_hamk, prtvol, mpi_enreg, nband, npw, my_nspinor,
          ig = 1 + (iband - ib_start) * npwsp
          do ib=1,nband
            ig0 = 1 + npwsp * (ib - 1)
+#if defined FC_NVHPC
+if (ig<0) write(100,*) ig,ig0,h_ij(1,ib,iband),cg(1,ig0),ghc_bk(1,ig)
+#endif
            h_ij(1,ib,iband) = h_ij(1,ib,iband) - cg(1,ig0) * ghc_bk(1,ig)
          end do
        end if

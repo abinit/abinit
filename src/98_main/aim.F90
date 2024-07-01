@@ -6,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2022 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2024 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -21,12 +21,6 @@
 !! WARNING
 !! ABINIT rules are not yet followed in the present routine.
 !!
-!! PARENTS
-!!
-!! CHILDREN
-!!      abi_io_redirect,abimem_init,adini,aim_shutdown,defad,drvaim,herald
-!!      inpar,int2char4,timein,xmpi_bcast,xmpi_end,xmpi_init
-!!
 !! SOURCE
 
 #if defined HAVE_CONFIG_H
@@ -40,18 +34,18 @@ program aim
  use defs_basis
  use m_abicore
  use m_xmpi
- use m_build_info
  use m_errors
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
- use m_time,     only : timein
- use m_io_tools, only : open_file, file_exists
- use m_specialmsg,  only : specialmsg_getcount, herald
- use m_fstrings, only : int2char4
- use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
+ use m_build_info,   only : abinit_version
+ use m_time,         only : timein
+ use m_io_tools,     only : open_file, file_exists
+ use m_specialmsg,   only : specialmsg_getcount, herald
+ use m_fstrings,     only : int2char4
+ use m_bader !,      only : adini, drvaim, inpar, defad, aim_shutdown
 
  implicit none
 

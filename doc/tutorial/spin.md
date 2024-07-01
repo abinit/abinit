@@ -543,7 +543,7 @@ It is at the origin of the magneto crystalline anisotropy (MCA) of paramount tec
 
 The table below can help to know how to handle the different magnetic calculation cases in ABINIT:
 
-|  case         | msppol | nspinor | nspden |
+|  case         | nsppol | nspinor | nspden |
 | ------------- | ------ | ------- | ------ |
 | non-magnetic  | 1      | 1       | 1      |
 | collinear FM  | 2      | 1       | 2      |

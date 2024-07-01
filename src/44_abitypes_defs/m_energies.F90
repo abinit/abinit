@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_energies
 !! NAME
 !!  m_energies
@@ -8,14 +7,10 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2024 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -41,11 +36,7 @@ module m_energies
  private
 
 !public parameter
- ! CP modified
- ! integer, public, parameter :: n_energies=35
  integer, public, parameter :: n_energies=38
- ! End CP modified
- ! Number of energies stored in energies datastructure
 
 !!***
 
@@ -117,9 +108,8 @@ module m_energies
   real(dp) :: e_fermie=zero
    ! Fermie energy
 
-  ! CP added
   real(dp) :: e_fermih=zero
-  ! End CP added
+   ! Fermi energy for holes
 
   real(dp) :: e_fock=zero
    ! Fock part of total energy (hartree units)
@@ -219,12 +209,6 @@ CONTAINS !===========================================================
 !! OUTPUT
 !!   energies <type(energies_type)>=values to initialise
 !!
-!! PARENTS
-!!      m_bethe_salpeter,m_electronpositron,m_gstate,m_positron,m_results_gs
-!!      m_scfcv_core,m_screening_driver,m_sigma_driver
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine energies_init(energies)
@@ -253,7 +237,7 @@ subroutine energies_init(energies)
  energies%e_extfpmd     = zero
  energies%edc_extfpmd   = zero
  energies%e_fermie      = zero
- energies%e_fermih      = zero ! CP added (useful when occopt = 9)
+ energies%e_fermih      = zero
  energies%e_fock        = zero
  energies%e_fockdc      = zero
  energies%e_fock0       = zero
@@ -296,11 +280,6 @@ end subroutine energies_init
 !! OUTPUT
 !!   energies_out <type(energies_type)>=output values
 !!
-!! PARENTS
-!!      m_afterscfloop,m_electronpositron,m_positron,m_results_gs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine energies_copy(energies_in,energies_out)
@@ -330,7 +309,7 @@ end subroutine energies_init
  energies_out%e_extfpmd            = energies_in%e_extfpmd
  energies_out%edc_extfpmd          = energies_in%edc_extfpmd
  energies_out%e_fermie             = energies_in%e_fermie
- energies_out%e_fermih             = energies_in%e_fermih ! CP added
+ energies_out%e_fermih             = energies_in%e_fermih
  energies_out%e_fock               = energies_in%e_fock
  energies_out%e_fockdc             = energies_in%e_fockdc
  energies_out%e_fock0              = energies_in%e_fock0
@@ -377,11 +356,6 @@ end subroutine energies_copy
 !! SIDE EFFECTS
 !!   energies <type(energies_type)>=energies stored in a datastructure
 !!   energies_array=energies stored in a single array
-!!
-!! PARENTS
-!!      m_results_img
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -511,11 +485,6 @@ end subroutine energies_to_array
 !!
 !! SIDE EFFECTS
 !!
-!! PARENTS
-!!      m_common,m_entropyDMFT
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
  subroutine energies_eval_eint(energies,dtset,usepaw,optdc,eint,eintdc)
@@ -610,11 +579,6 @@ end subroutine energies_eval_eint
 !! OUTPUT
 !!  Only writing.
 !!
-!! PARENTS
-!!      m_results_gs
-!!
-!! CHILDREN
-!!
 !! SOURCE
 
 subroutine energies_ncwrite(enes, ncid)
@@ -632,27 +596,6 @@ subroutine energies_ncwrite(enes, ncid)
 ! *************************************************************************
 
 !@energies_type
- ! CP modified
- !ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
- ! "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
- ! "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
- ! "e_entropy", "entropy", "e_ewald", &
- ! "e_exactX","e_fermie", &
- ! "e_fock", "e_fockdc", "e_fock0", "e_hartree", "e_hybcomp_E0", "e_hybcomp_v0", "e_hybcomp_v", "e_kinetic",&
- ! "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", &
- ! "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
- ! "e_xc", "e_xcdc", "e_xc_vdw", &
- ! "h0","e_zeeman"], &
- ! [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
- !  enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
- !  enes%e_entropy, enes%entropy, enes%e_ewald, &
- !  enes%e_exactX, enes%e_fermie, &
- !  enes%e_fock, enes%e_fockdc,enes%e_fock0,  enes%e_hartree, &
- !  enes%e_hybcomp_E0, enes%e_hybcomp_v0, enes%e_hybcomp_v, enes%e_kinetic,&
- !  enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, &
- !  enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
- !  enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
- !  enes%h0,enes%e_zeeman])
  ncerr = nctk_defnwrite_dpvars(ncid, [character(len=nctk_slen) :: &
   "e_chempot", "e_constrained_dft", "e_corepsp", "e_corepspdc", "e_eigenvalues", "e_elecfield", &
   "e_electronpositron", "edc_electronpositron", "e0_electronpositron",&
@@ -662,7 +605,7 @@ subroutine energies_ncwrite(enes, ncid)
   "e_localpsp", "e_magfield", "e_monopole", "e_nlpsp_vfock", "e_nucdip", &
   "e_paw", "e_pawdc", "e_sicdc", "e_vdw_dftd", &
   "e_xc", "e_xcdc", "e_xc_vdw", &
-  "h0", "e_zeeman", "e_fermih"], & ! CP added fermih
+  "h0", "e_zeeman", "e_fermih"], &
   [enes%e_chempot, enes%e_constrained_dft, enes%e_corepsp, enes%e_corepspdc, enes%e_eigenvalues, enes%e_elecfield, &
    enes%e_electronpositron, enes%edc_electronpositron, enes%e0_electronpositron,&
    enes%e_entropy, enes%entropy, enes%e_ewald, &
@@ -672,8 +615,7 @@ subroutine energies_ncwrite(enes, ncid)
    enes%e_localpsp, enes%e_magfield, enes%e_monopole, enes%e_nlpsp_vfock, enes%e_nucdip, &
    enes%e_paw, enes%e_pawdc, enes%e_sicdc, enes%e_vdw_dftd,&
    enes%e_xc, enes%e_xcdc, enes%e_xc_vdw,&
-   enes%h0,enes%e_zeeman,enes%e_fermih]) ! CP added fermih
- ! End CP modified
+   enes%h0,enes%e_zeeman,enes%e_fermih])
 
  NCF_CHECK(ncerr)
 

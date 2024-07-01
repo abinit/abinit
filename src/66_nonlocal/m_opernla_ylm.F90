@@ -5,14 +5,10 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MT)
+!!  Copyright (C) 2008-2024 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -146,12 +142,6 @@ contains
 !! 2-Operate for one type of atom, and within this given type of atom,
 !!   for a subset of at most nincat atoms.
 !!
-!! PARENTS
-!!      m_cgprj,m_nonlop_ylm
-!!
-!! CHILDREN
-!!      timab,xmpi_sum
-!!
 !! SOURCE
 
 subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
@@ -204,7 +194,7 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
 !Useful variables
  choice_=abs(choice)
  wt=four_pi/sqrt(ucvol);if (cplex==1) wt=2.d0*wt
- ipw0=1;if (istwf_k==2.and.mpi_enreg%me_g0==1) ipw0=2
+ ipw0=1;if (istwf_k==2.and.mpi_enreg%me_g0_fft==1) ipw0=2
  cplex_dgxdt(:)  = 0 ; if (cplex == 1) cplex_dgxdt(:)  = 1
  cplex_d2gxdt(:) = 0 ; if (cplex == 1) cplex_d2gxdt(:) = 1
  nthreads=1

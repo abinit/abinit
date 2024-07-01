@@ -7,7 +7,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2024 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,12 +77,6 @@ CONTAINS
 !!  reusable! Note however the storage mode of nabla_ij differs from optics_paw
 !!  (here Cartesian coordinates run faster). Besides nabla_ij contains the matrix
 !!  elements of \nabla instead of the elements of the momentum operator p.
-!!
-!! PARENTS
-!!      m_bethe_salpeter,m_paw_optics,m_screening_driver
-!!
-!! CHILDREN
-!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 
@@ -261,12 +255,6 @@ end subroutine pawnabla_init
 !!  reusable! Note however the storage mode of nabla_ij differs from optics_paw
 !!  (here Cartesian coordinates run faster). Besides nabla_ij contains the matrix
 !!  elements of \nabla instead of the elements of the momentum operator p.
-!!
-!! PARENTS
-!!      m_paw_optics
-!!
-!! CHILDREN
-!!      nderiv_gen,pawrad_deducer0,setnabla_ylm,simp_gen
 !!
 !! SOURCE
 

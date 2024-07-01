@@ -1,4 +1,3 @@
-! CP modified
 !!****m* ABINIT/m_bethe_salpeter
 !! NAME
 !!  m_bethe_salpeter
@@ -9,14 +8,10 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2022 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2024 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -34,16 +29,14 @@ module m_bethe_salpeter
  use m_abicore
  use m_xmpi
  use m_errors
- use m_screen
  use m_nctk
  use m_distribfft
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_hdr
  use m_dtset
  use m_dtfil
  use m_crystal
+ use m_screen
 
  use defs_datatypes,    only : pseudopotential_type, ebands_t
  use defs_abitypes,     only : MPI_type
@@ -55,20 +48,20 @@ module m_bethe_salpeter
  use m_hide_lapack,     only : matrginv
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_fftcore,         only : print_ngfft
- use m_fft_mesh,        only : rotate_FFT_mesh, get_gftt, setmesh
+ use m_fft_mesh,        only : rotate_FFT_mesh, get_gfft, setmesh
  use m_fft,             only : fourdp
- use m_bz_mesh,         only : kmesh_t, kmesh_init, kmesh_free, get_ng0sh, kmesh_print, get_BZ_item, find_qmesh, make_mesh
+ use m_bz_mesh,         only : kmesh_t, get_ng0sh, find_qmesh, make_mesh
  use m_double_grid,     only : double_grid_t, double_grid_init, double_grid_free
  use m_ebands,          only : ebands_init, ebands_print, ebands_copy, ebands_free, &
                                ebands_update_occ, ebands_get_valence_idx, ebands_apply_scissors, ebands_report_gap
  use m_kg,              only : getph
- use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
- use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
+ use m_gsphere,         only : gsphere_t
+ use m_vcoul,           only : vcoul_t
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfdgw_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
  use m_energies,        only : energies_type, energies_init
- use m_io_screening,    only : hscr_t, hscr_free, hscr_io, hscr_bcast, hscr_from_file, hscr_print
+ use m_io_screening,    only : hscr_t, get_hscr_qmesh_gsph
  use m_haydock,         only : exc_haydock_driver
  use m_exc_diago,       only : exc_diago_driver
  use m_exc_analyze,     only : exc_den
@@ -80,7 +73,7 @@ module m_bethe_salpeter
  use m_paw_ij,          only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify
  use m_pawfgrtab,       only : pawfgrtab_type, pawfgrtab_free, pawfgrtab_init
  use m_pawrhoij,        only : pawrhoij_type, pawrhoij_alloc, pawrhoij_copy, pawrhoij_free,&
-&                              pawrhoij_inquire_dim, pawrhoij_symrhoij
+                               pawrhoij_inquire_dim, pawrhoij_symrhoij
  use m_pawdij,          only : pawdij, symdij
  use m_pawfgr,          only : pawfgr_type, pawfgr_init, pawfgr_destroy
  use m_paw_hr,          only : pawhur_t, pawhur_free, pawhur_init
@@ -92,7 +85,7 @@ module m_bethe_salpeter
  use m_paw_dmft,        only : paw_dmft_type
  use m_paw_mkrho,       only : denfgr
  use m_paw_nhat,        only : nhatgrid,pawmknhat
- use m_paw_tools,       only : chkpawovlp,pawprt
+ use m_paw_tools,       only : chkpawovlp, pawprt
  use m_paw_correlations,only : pawpuxinit
  use m_exc_build,       only : exc_build_ham
  use m_setvtr,          only : setvtr
@@ -150,9 +143,6 @@ contains
 !!   * _EXC_MDF: macroscopic dielectric function with excitonic effects obtained by solving the
 !!              Bethe-Salpeter problem at different level of sophistication.
 !!
-!! PARENTS
-!!      m_driver
-!!
 !! NOTES
 !!
 !! ON THE USE OF FFT GRIDS:
@@ -169,12 +159,6 @@ contains
 !! ---------------------------
 !!    - Only the usual FFT grid (defined by ecut) is used. It is defined by nfft, ngfft, mgfft, ...
 !!      For compatibility reasons, (nfftf,ngfftf,mgfftf) are set equal to (nfft,ngfft,mgfft) in that case.
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
 !!
 !! SOURCE
 
@@ -225,17 +209,16 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  type(kmesh_t) :: Kmesh,Qmesh
  type(gsphere_t) :: Gsph_x,Gsph_c,Gsph_x_dense,Gsph_c_dense
  type(Hdr_type) :: Hdr_wfk,Hdr_bse
- type(ebands_t) :: KS_BSt,QP_BSt,KS_BSt_dense,QP_BSt_dense
+ type(ebands_t) :: ks_ebands,qp_ebands,ks_ebands_dense,qp_ebands_dense
  type(Energies_type) :: KS_energies
- type(vcoul_t) :: Vcp
+ type(vcoul_t) :: Vcp, Vcp_dense
  type(wfdgw_t) :: Wfd, Wfd_dense
- type(screen_t) :: W
+ type(screen_t) :: screen
  type(screen_info_t) :: W_info
  type(wvl_data) :: wvl
  type(kmesh_t) :: Kmesh_dense,Qmesh_dense
  type(Hdr_type) :: Hdr_wfk_dense
  type(double_grid_t) :: grid
- type(vcoul_t) :: Vcp_dense
  type(eprenorms_t) :: Epren
 !arrays
  integer :: ngfft_osc(18),ngfftc(18),ngfftf(18),nrcell(3)
@@ -270,7 +253,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(650,1,tsec) ! bse(Total)
  call timab(651,1,tsec) ! bse(Init1)
 
- comm = xmpi_world; nprocs  = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  wfk_fname = dtfil%fnamewffk
 
@@ -330,13 +313,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call pspini(Dtset,Dtfil,ecore,psp_gencond,gsqcutc_eff,gsqcutf_eff,Pawrad,Pawtab,Psps,rprimd,comm_mpi=comm)
 
  ! === Initialization of basic objects including the BSp structure that defines the parameters of the run ===
- call setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-   Cryst,Kmesh,Qmesh,KS_BSt,QP_BSt,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,wvl%descr)
+ call setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
+   Cryst,Kmesh,Qmesh,ks_ebands,qp_ebands,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,wvl%descr)
 
  if (BSp%use_interp) then
    call setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,Kmesh_dense,&
-     Qmesh_dense,KS_BSt_dense,QP_BSt_dense,Gsph_x_dense,Gsph_c_dense,&
-     Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+     Qmesh_dense,ks_ebands_dense,qp_ebands_dense,Gsph_x_dense,Gsph_c_dense,&
+     Vcp_dense,Hdr_wfk_dense,grid,comm)
  end if
 
  !call timab(652,2,tsec) ! setup_bse
@@ -388,6 +371,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    Pawtab(:)%usepawu   = 0
    Pawtab(:)%useexexch = 0
    Pawtab(:)%exchmix   =zero
+   Pawtab(:)%lamb_shielding = zero
 
    ! * Evaluate <phi_i|nabla|phi_j>-<tphi_i|nabla|tphi_j> for the long wavelength limit.
    ! TODO solve problem with memory leak and clean this part as well as the associated flag
@@ -398,7 +382,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Initialize and compute data for DFT+U
    Paw_dmft%use_dmft=Dtset%usedmft
    call pawpuxinit(Dtset%dmatpuopt,Dtset%exchmix,Dtset%f4of2_sla,Dtset%f6of2_sla,&
-      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Dtset%nspinor,Cryst%ntypat,Pawang,Dtset%pawprtvol,&
+      is_dfpt,Dtset%jpawu,Dtset%lexexch,Dtset%lpawu,Dtset%nspinor,Cryst%ntypat,Dtset%optdcmagpawu,Pawang,Dtset%pawprtvol,&
       Pawrad,Pawtab,Dtset%upawu,Dtset%usedmft,Dtset%useexexch,Dtset%usepawu)
    if (Dtset%usepawu>0.or.Dtset%useexexch>0) then
      ABI_ERROR('BS equation with DFT+U not completely coded!')
@@ -420,7 +404,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
    ABI_MALLOC(gfft_osc,(3,nfftot_osc))
-   call get_gftt(ngfft_osc,k0,gmet,gsq_osc,gfft_osc)
+   call get_gfft(ngfft_osc,k0,gmet,gsq_osc,gfft_osc)
    ABI_FREE(gfft_osc)
 
    ! Set up q grids, make qmax 20% larger than largest expected:
@@ -571,8 +555,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  !===========================
  !* Evaluate Planewave part (complete charge in case of NC pseudos).
  !
- ABI_MALLOC(ks_rhor,(nfftf,Wfd%nspden))
- call wfd%mkrho(Cryst,Psps,Kmesh,KS_BSt,ngfftf,nfftf,ks_rhor)
+ ABI_MALLOC(ks_rhor, (nfftf, Wfd%nspden))
+ call wfd%mkrho(cryst, psps, ks_ebands, ngfftf, nfftf, ks_rhor)
  !
  !=== Additional computation for PAW ===
  nhatgrdim=0
@@ -618,14 +602,15 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      Dtset%ixc,Cryst%natom,Cryst%natom,Dtset%nspden,&
      Cryst%ntypat,Dtset%nucdipmom,nzlmopt,option,KS_Paw_an,KS_Paw_an,KS_paw_ij,&
      Pawang,Dtset%pawprtvol,Pawrad,KS_Pawrhoij,Dtset%pawspnorb,&
-     Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Cryst%ucvol,Psps%znuclpsp)
+     Pawtab,Dtset%pawxcdev,Dtset%spnorbscl,Dtset%xclevel,Dtset%xc_denpos,Dtset%xc_taupos,&
+     Cryst%ucvol,Psps%znuclpsp)
  end if !PAW
 
  if (.not.allocated(ks_nhatgr))  then
    ABI_MALLOC(ks_nhatgr,(nfftf,Dtset%nspden,0))
  end if
 
- call test_charge(nfftf,KS_BSt%nelect,Dtset%nspden,ks_rhor,Cryst%ucvol,&
+ call test_charge(nfftf,ks_ebands%nelect,Dtset%nspden,ks_rhor,Cryst%ucvol,&
    Dtset%usepaw,usexcnhat,Pawfgr%usefinegrid,compch_sph,compch_fft,drude_plsmf)
 
  ! === For PAW, add the compensation charge on the FFT mesh, then get rho(G) ===
@@ -670,12 +655,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 !WARNING cannot use Dtset%mgfft, this has to be checked better
 !mgfft=MAXVAL(ngfftc(:))
 !allocate(ph1d(2,3*(2*mgfft+1)*Cryst%natom),ph1df(2,3*(2*mgfftf+1)*Cryst%natom))
- write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
- if (Dtset%mgfftdg/=mgfftf) then
+! write(std_out,*)' CHECK ',Dtset%mgfftdg,mgfftf
+! if (Dtset%mgfftdg/=mgfftf) then
 !  write(std_out,*)"WARNING Dtset%mgfftf /= mgfftf"
 !  write(std_out,*)'HACKING Dtset%mgfftf'
 !  Dtset%mgfftdg=mgfftf
- end if
+! end if
  ABI_MALLOC(ph1d,(2,3*(2*Dtset%mgfft+1)*Cryst%natom))
  ABI_MALLOC(ph1df,(2,3*(2*mgfftf+1)*Cryst%natom))
 
@@ -690,10 +675,10 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ABI_FREE(ph1d)
 
  call setvtr(Cryst%atindx1,Dtset,KS_energies,Cryst%gmet,Cryst%gprimd,grchempottn,grewtn,grvdw,gsqcutf_eff,&
-& istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
-& Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
-& optene,Pawrad,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,Cryst%rprimd,strsxc,&
-& Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl,xccc3d,Cryst%xred)
+   istep,kxc,mgfftf,moved_atm_inside,moved_rhor,MPI_enreg_seq,&
+   Cryst%nattyp,nfftf,ngfftf,ngrvdw,ks_nhat,ks_nhatgr,nhatgrdim,nkxc,Cryst%ntypat,Psps%n1xccc,n3xccc,&
+   optene,Pawang,Pawrad,KS_Pawrhoij,Pawtab,ph1df,Psps,ks_rhog,ks_rhor,Cryst%rmet,&
+   Cryst%rprimd,strsxc,Cryst%ucvol,usexcnhat,ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl,xccc3d,Cryst%xred)
 
  ABI_FREE(ph1df)
  ABI_FREE(vpsp)
@@ -702,7 +687,6 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! ==== Compute KS PAW Dij ====
  ! ============================
  if (Wfd%usepaw==1) then
-   _IBM6("Another silly write for IBM6")
    call timab(561,1,tsec)
    !
    ! Calculate the unsymmetrized Dij.
@@ -729,15 +713,15 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ABI_FREE(grewtn)
  ABI_FREE(grvdw)
 
- !=== QP_BSt stores energies and occ. used for the calculation ===
- !* Initialize QP_BSt with KS values.
- !* In case of SC update QP_BSt using the QPS file.
+ !=== qp_ebands stores energies and occ. used for the calculation ===
+ !* Initialize qp_ebands with KS values.
+ !* In case of SC update qp_ebands using the QPS file.
  ABI_MALLOC(qp_rhor,(nfftf,Dtset%nspden))
- qp_rhor=ks_rhor
+ qp_rhor = ks_rhor
 
  ! AE density used for the model dielectric function.
- ABI_MALLOC(qp_aerhor,(nfftf,Dtset%nspden))
- qp_aerhor=ks_rhor
+ ABI_MALLOC(qp_aerhor, (nfftf,Dtset%nspden))
+ qp_aerhor = ks_rhor
 
  ! PAW: Compute AE rhor. Under testing
  if (Wfd%usepaw==1 .and. BSp%mdlf_type/=0) then
@@ -752,8 +736,8 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! TODO: I pass KS_pawrhoij instead of QP_pawrhoij but in the present version there's no difference.
 
    call denfgr(Cryst%atindx1,Cryst%gmet,Wfd%comm,Cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,qp_nhat,&
-&   Wfd%nspinor,Wfd%nsppol,Wfd%nspden,Cryst%ntypat,Pawfgr,Pawrad,KS_pawrhoij,Pawtab,Dtset%prtvol,&
-&   qp_rhor,qp_rhor_paw,qp_rhor_n_one,qp_rhor_nt_one,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
+     Wfd%nspinor,Wfd%nsppol,Wfd%nspden,Cryst%ntypat,Pawfgr,Pawrad,KS_pawrhoij,Pawtab,Dtset%prtvol,&
+     qp_rhor,qp_rhor_paw,qp_rhor_n_one,qp_rhor_nt_one,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
 
    norm = SUM(qp_rhor_paw(:,1))*Cryst%ucvol/PRODUCT(Pawfgr%ngfft(1:3))
    write(msg,'(a,F8.4)') '  QUASIPARTICLE DENSITY CALCULATED - NORM OF DENSITY: ',norm
@@ -772,7 +756,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_FREE(qp_rhor_paw)
  end if
 
-!call copy_bandstructure(KS_BSt,QP_BSt)
+ !call copy_bandstructure(ks_ebands,qp_ebands)
 
  if (.FALSE.) then
 !  $ m_ks_to_qp(ib,jb,k,s) := <\psi_{ib,k,s}^{KS}|\psi_{jb,k,s}^{QP}> $
@@ -786,12 +770,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
      end do
    end do
    !
-   ! Now read m_ks_to_qp and update the energies in QP_BSt.
+   ! Now read m_ks_to_qp and update the energies in qp_ebands.
    ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
    ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
 
-   call rdqps(QP_BSt,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
+   call rdqps(qp_ebands,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
     nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_ks_to_qp,prev_rhor,prev_Pawrhoij)
 
    ABI_FREE(prev_rhor)
@@ -801,7 +785,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_FREE(prev_pawrhoij)
    !
    !  if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
-   !  call show_QP(QP_BSt,m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
+   !  call show_QP(qp_ebands,m_ks_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
    !  end if
    !
    !  === Compute QP wfg as linear combination of KS states ===
@@ -823,12 +807,12 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Compute QP occupation numbers.
    call wrtout(std_out,'bethe_salpeter: calculating QP occupation numbers')
 
-   call ebands_update_occ(QP_BSt,Dtset%spinmagntarget,prtvol=0)
-   ABI_MALLOC(qp_vbik,(QP_BSt%nkpt,QP_BSt%nsppol))
-   qp_vbik(:,:) = ebands_get_valence_idx(QP_BSt)
+   call ebands_update_occ(qp_ebands,Dtset%spinmagntarget,prtvol=0)
+   ABI_MALLOC(qp_vbik,(qp_ebands%nkpt,qp_ebands%nsppol))
+   qp_vbik(:,:) = ebands_get_valence_idx(qp_ebands)
    ABI_FREE(qp_vbik)
 
-   call wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,qp_rhor)
+   call wfd%mkrho(cryst, psps, qp_ebands, ngfftf, nfftf, qp_rhor)
  end if
 
  ABI_MALLOC(qp_rhog,(2,nfftf))
@@ -850,7 +834,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ABI_FREE(bks_mask)
  !
  ! ================================================================
- ! Build the screened interaction W in the irreducible wedge.
+ ! Build the screened interaction W in the irreducible q-wedge.
  ! * W(q,G1,G2) = vc^{1/2} (q,G1) e^{-1}(q,G1,G2) vc^{1/2) (q,G2)
  ! * Use Coulomb term for q-->0,
  ! * Only the first small Q is used, shall we average if nqlwl>1?
@@ -858,42 +842,32 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! TODO clean this part and add an option to retrieve a single frequency to save memory.
  call timab(654,1,tsec) ! bse(rdmkeps^-1)
 
- call screen_nullify(W)
- if (BSp%use_coulomb_term) then !  Init W.
+ call screen%nullify()
+ if (BSp%use_coulomb_term) then
+   ! Init W.
    ! Incore or out-of-core solution?
-   mqmem=0; if (Dtset%gwmem/10==1) mqmem=Qmesh%nibz
+   mqmem = 0; if (Dtset%gwmem /10 == 1) mqmem = Qmesh%nibz
 
    W_info%invalid_freq = Dtset%gw_invalid_freq
    W_info%mat_type = MAT_INV_EPSILON
-   !W_info%mat_type = MAT_W
-   !W_info%vtx_family
-   !W_info%ixc
-   !W_info%use_ada
    W_info%use_mdf = BSp%mdlf_type
-   !W_info%use_ppm
-   !W_info%vtx_test
-   !W_info%wint_method
-   !
-   !W_info%ada_kappa
    W_info%eps_inf = BSp%eps_inf
-   !W_info%drude_plsmf
 
-   call screen_init(W,W_Info,Cryst,Qmesh,Gsph_c,Vcp,w_fname,mqmem,Dtset%npweps,&
-    Dtset%iomode,ngfftf,nfftf_tot,Wfd%nsppol,Wfd%nspden,qp_aerhor,Wfd%prtvol,Wfd%comm)
+   call screen%init(W_Info, Cryst, Qmesh, Gsph_c, Vcp, w_fname, mqmem, Dtset%npweps, &
+                    Dtset%iomode, ngfftf, nfftf_tot, Wfd%nsppol, Wfd%nspden, qp_aerhor, Wfd%prtvol, Wfd%comm)
  end if
  call timab(654,2,tsec) ! bse(rdmkeps^-1)
- !
+
  ! =============================================
  ! ==== Build of the excitonic Hamiltonian =====
  ! =============================================
- !
  call timab(656,1,tsec) ! bse(mkexcham)
 
  call exc_build_ham(BSp,BS_files,Cryst,Kmesh,Qmesh,ktabr,Gsph_x,Gsph_c,Vcp,&
-& Wfd,W,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
- !
- ! Free Em1 to make room for the full excitonic Hamiltonian.
- call screen_free(W)
+                    Wfd,screen,Hdr_bse,nfftot_osc,ngfft_osc,Psps,Pawtab,Pawang,Paw_pwff)
+
+ ! Free W to make room for the full excitonic Hamiltonian.
+ call screen%free()
 
  call timab(656,2,tsec) ! bse(mkexcham)
  !
@@ -926,7 +900,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
  case (BSE_ALGO_DDIAGO, BSE_ALGO_CG)
    call timab(660,1,tsec) ! bse(exc_diago_driver)
-   call exc_diago_driver(Wfd,Bsp,BS_files,KS_BSt,QP_BSt,Cryst,Kmesh,Psps, Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
+   call exc_diago_driver(Wfd,Bsp,BS_files,ks_ebands,qp_ebands,Cryst,Kmesh,Psps, Pawtab,Hur,Hdr_bse,drude_plsmf,Epren)
    call timab(660,2,tsec) ! bse(exc_diago_driver)
 
    if (.FALSE.) then ! Calculate electron-hole excited state density. Not tested at all.
@@ -935,7 +909,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    if (.FALSE.) then
      paw_add_onsite=.FALSE.; spin_opt=1; which_fixed=1; eh_rcoord=(/zero,zero,zero/); nrcell=(/2,2,2/)
-!    call exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
+     !call exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsite,spin_opt,which_fixed,eh_rcoord,nrcell,ngfftf)
    end if
 
    if (BSp%use_interp) then
@@ -946,19 +920,17 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call timab(661,1,tsec) ! bse(exc_haydock_driver)
 
    if (BSp%use_interp) then
-
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren, &
-       kmesh_dense=Kmesh_dense, ks_bst_dense=KS_BSt_dense, qp_bst_dense=QP_BSt_dense,wfd_dense=Wfd_dense, &
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,ks_ebands,qp_ebands,Wfd,Psps,Pawtab,Hur,Epren, &
+       kmesh_dense=Kmesh_dense, ks_bst_dense=ks_ebands_dense, qp_bst_dense=qp_ebands_dense,wfd_dense=Wfd_dense, &
        vcp_dense=Vcp_dense, grid=grid)
    else
-     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,KS_BSt,QP_BSt,Wfd,Psps,Pawtab,Hur,Epren)
+     call exc_haydock_driver(BSp,BS_files,Cryst,Kmesh,Hdr_bse,ks_ebands,qp_ebands,Wfd,Psps,Pawtab,Hur,Epren)
    end if
 
    call timab(661,2,tsec) ! bse(exc_haydock_driver)
 
  case default
-   write(msg,'(a,i0)')" Wrong BSE algorithm: ",BSp%algorithm
-   ABI_ERROR(msg)
+   ABI_ERROR(sjoin("Wrong BSE algorithm: ",itoa(BSp%algorithm)))
  end select
 
  call timab(657,2,tsec) ! bse(mkexceps)
@@ -981,18 +953,18 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! Free local data structures.
  call destroy_mpi_enreg(MPI_enreg_seq)
  call cryst%free()
- call gsph_free(Gsph_x)
- call gsph_free(Gsph_c)
- call kmesh_free(Kmesh)
- call kmesh_free(Qmesh)
+ call Gsph_x%free()
+ call Gsph_c%free()
+ call Kmesh%free()
+ call Qmesh%free()
  call Hdr_wfk%free()
  call Hdr_bse%free()
- call ebands_free(KS_BSt)
- call ebands_free(QP_BSt)
- call vcoul_free(Vcp)
+ call ebands_free(ks_ebands)
+ call ebands_free(qp_ebands)
+ call Vcp%free()
  call pawhur_free(Hur)
  ABI_FREE(Hur)
- call bs_parameters_free(BSp)
+ call BSp%free()
  call wfd%free()
  call pawfgr_destroy(Pawfgr)
  call eprenorms_free(Epren)
@@ -1001,13 +973,13 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  if (BSp%use_interp) then
    call double_grid_free(grid)
    call wfd_dense%free()
-   call gsph_free(Gsph_x_dense)
-   call gsph_free(Gsph_c_dense)
-   call kmesh_free(Kmesh_dense)
-   call kmesh_free(Qmesh_dense)
-   call ebands_free(KS_BSt_dense)
-   call ebands_free(QP_BSt_dense)
-   call vcoul_free(Vcp_dense)
+   call Gsph_x_dense%free()
+   call Gsph_c_dense%free()
+   call Kmesh_dense%free()
+   call Qmesh_dense%free()
+   call ebands_free(ks_ebands_dense)
+   call ebands_free(qp_ebands_dense)
+   call Vcp_dense%free()
    call Hdr_wfk_dense%free()
  end if
 
@@ -1057,7 +1029,7 @@ end subroutine bethe_salpeter
 !! Kmesh<kmesh_t>=Structure defining the k-sampling for the wavefunctions.
 !! Qmesh<kmesh_t>=Structure defining the q-sampling for the symmetrized inverse dielectric matrix.
 !! Gsph_x<gsphere_t=Data type gathering info on the G-sphere for wave functions and e^{-1},
-!! KS_BSt<ebands_t>=The KS band structure (energies, occupancies, k-weights...)
+!! ks_ebands<ebands_t>=The KS band structure (energies, occupancies, k-weights...)
 !! Vcp<vcoul_t>=Structure gathering information on the Coulomb interaction in reciprocal space,
 !!   including a possible cutoff in real space.
 !! ngfft_osc(18)=Contain all needed information about the 3D FFT for the oscillator matrix elements.
@@ -1068,19 +1040,10 @@ end subroutine bethe_salpeter
 !! BS_files<excfiles>=Files used in the calculation.
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
-!!
 !! SOURCE
 
-subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
-& Cryst,Kmesh,Qmesh,KS_BSt,QP_bst,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
+subroutine setup_bse(codvsn,acell,rprim,ngfft_osc,Dtset,Dtfil,BS_files,Psps,Pawtab,BSp,&
+                     Cryst,Kmesh,Qmesh,ks_ebands,qp_ebands,Hdr_wfk,Gsph_x,Gsph_c,Vcp,Hdr_bse,w_fname,Epren,comm,Wvl)
 
 !Arguments ------------------------------------
 !scalars
@@ -1095,14 +1058,13 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  type(crystal_t),intent(out) :: Cryst
  type(kmesh_t),intent(out) :: Kmesh,Qmesh
  type(gsphere_t),intent(out) :: Gsph_x,Gsph_c
- type(ebands_t),intent(out) :: KS_BSt,QP_Bst
+ type(ebands_t),intent(out) :: ks_ebands,qp_ebands
  type(Pawtab_type),intent(in) :: Pawtab(Psps%ntypat*Dtset%usepaw)
  type(vcoul_t),intent(out) :: Vcp
  type(excfiles),intent(out) :: BS_files
  type(wvl_internal_type), intent(in) :: Wvl
  type(eprenorms_t),intent(out) :: Epren
 !arrays
- integer,intent(in) :: ngfftf(18)
  integer,intent(out) :: ngfft_osc(18)
  real(dp),intent(in) :: acell(3),rprim(3,3)
 
@@ -1113,7 +1075,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  integer :: bantot,enforce_sym,ib,ibtot,ik_ibz,isppol,jj,method,iat,ount !ii,
  integer :: mband,io,nfftot_osc,spin,hexc_size,nqlwl,iq
  integer :: timrev,iq_bz,isym,iq_ibz,itim
- integer :: my_rank,nprocs,fform,npwe_file,ierr,my_k1, my_k2,my_nbks
+ integer :: my_rank,nprocs,ierr,my_k1, my_k2,my_nbks
  integer :: first_dig,second_dig,it
  real(dp) :: ucvol,qnorm
  real(dp):: eff,mempercpu_mb,wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
@@ -1125,10 +1087,9 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  type(hscr_t) :: Hscr
 !arrays
  integer :: ng0sh_opt(3),val_idx(Dtset%nsppol)
- integer,allocatable :: npwarr(:),val_indeces(:,:),nlmn_atm(:)
+ integer,allocatable :: npwarr(:),val_indices(:,:),nlmn_atm(:)
  real(dp) :: qpt_bz(3),minmax_tene(2)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3)
- real(dp) :: qred2cart(3,3),qcart2red(3,3)
  real(dp),allocatable :: doccde(:),eigen(:),occfact(:),qlwl(:,:)
  real(dp),allocatable :: igwene(:,:,:)
  real(dp),pointer :: energies_p(:,:,:)
@@ -1170,95 +1131,47 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  cryst = Hdr_wfk%get_crystal(gw_timrev=timrev, remove_inv=remove_inv)
  call cryst%print()
- !
- ! Setup of the k-point list and symmetry tables in the  BZ -----------------------------------
- if (Dtset%chksymbreak==0) then
-   ABI_WARNING("Calling make_mesh")
-   call make_mesh(Kmesh,Cryst,Dtset%kptopt,Dtset%kptrlatt,Dtset%nshiftk,Dtset%shiftk,break_symmetry=.TRUE.)
-   ! TODO
-   !Check if kibz from KSS file corresponds to the one returned by make_mesh.
+
+ ! Setup of the k-point list and symmetry tables in the BZ
+ if (Dtset%chksymbreak == 0) then
+   call make_mesh(Kmesh, Cryst, Dtset%kptopt, Dtset%kptrlatt, Dtset%nshiftk, Dtset%shiftk, break_symmetry=.TRUE.)
  else
-   call kmesh_init(Kmesh,Cryst,Hdr_wfk%nkpt,Hdr_wfk%kptns,Dtset%kptopt)
+   call Kmesh%init(Cryst, Hdr_wfk%nkpt, Hdr_wfk%kptns, Dtset%kptopt)
  end if
  BSp%nkibz = Kmesh%nibz  !We might allow for a smaller number of points....
 
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh,"K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh%print("K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
- nqlwl = 0
- w_fname = ABI_NOFILE
- if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
-   w_fname=Dtfil%fnameabi_scr
- else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
-   w_fname=Dtfil%fnameabi_sus
+ nqlwl = 0; w_fname = ABI_NOFILE
+ if (dtset%getscr /= 0 .or. dtset%irdscr /= 0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
+   w_fname = dtfil%fnameabi_scr
+ else if (dtset%getsuscep /= 0 .or. dtset%irdsuscep /= 0) then
+   w_fname = dtfil%fnameabi_sus
    ABI_ERROR("(get|ird)suscep not implemented")
  end if
 
- if (w_fname /= ABI_NOFILE) then ! Read dimensions from the external file
+ if (w_fname /= ABI_NOFILE) then
+   call get_hscr_qmesh_gsph(w_fname, dtset, cryst, hscr, qmesh, gsph_c, qlwl, comm)
+   call hscr%free()
+   nqlwl = size(qlwl, dim=2)
 
-   if (.not. file_exists(w_fname)) then
-     w_fname = nctk_ncify(w_fname)
-     ABI_COMMENT(sjoin("File not found. Will try netcdf file: ", w_fname))
-   end if
-
-   if (my_rank==master) then
-     ! Master reads npw and nqlwl from SCR file.
-     call wrtout(std_out,sjoin('Testing file: ', w_fname))
-
-     call hscr_from_file(hscr,w_fname,fform,xmpi_comm_self)
-     ! Echo the header.
-     if (Dtset%prtvol>0) call hscr_print(Hscr)
-
-     npwe_file = Hscr%npwe ! Have to change %npweps if it was larger than dim on disk.
-     nqlwl     = Hscr%nqlwl
-
-     if (Dtset%npweps>npwe_file) then
-       write(msg,'(2(a,i0),2a,i0)')&
-        "The number of G-vectors stored on file (",npwe_file,") is smaller than Dtset%npweps = ",Dtset%npweps,ch10,&
-        "Calculation will proceed with the maximum available set, npwe_file = ",npwe_file
-       ABI_WARNING(msg)
-       Dtset%npweps = npwe_file
-     else  if (Dtset%npweps<npwe_file) then
-       write(msg,'(2(a,i0),2a,i0)')&
-        "The number of G-vectors stored on file (",npwe_file,") is larger than Dtset%npweps = ",Dtset%npweps,ch10,&
-        "Calculation will proceed with Dtset%npweps = ",Dtset%npweps
-       ABI_COMMENT(msg)
-     end if
-   end if
-
-   call hscr_bcast(Hscr,master,my_rank,comm)
-   call xmpi_bcast(Dtset%npweps,master,comm,ierr)
-   call xmpi_bcast(nqlwl,master,comm,ierr)
-
-   if (nqlwl>0) then
-     ABI_MALLOC(qlwl,(3,nqlwl))
-     qlwl = Hscr%qlwl
-   end if
-   !
-   ! Init Qmesh from the SCR file.
-   call kmesh_init(Qmesh,Cryst,Hscr%nqibz,Hscr%qibz,Dtset%kptopt)
-
-   ! The G-sphere for W and Sigma_c is initialized from the gvectors found in the SCR file.
-   call gsph_init(Gsph_c,Cryst,Dtset%npweps,gvec=Hscr%gvec)
-
-   call hscr_free(Hscr)
  else
    ! Init Qmesh from the K-mesh reported in the WFK file.
-   call find_qmesh(Qmesh,Cryst,Kmesh)
-
+   call find_qmesh(Qmesh, Cryst, Kmesh)
    ! The G-sphere for W and Sigma_c is initialized from ecuteps.
-   call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
+   call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
    Dtset%npweps = Gsph_c%ng
  end if
 
  BSp%npweps = Dtset%npweps
  BSp%ecuteps = Dtset%ecuteps
 
- if (nqlwl==0) then
+ if (nqlwl == 0) then
    nqlwl=1
    ABI_MALLOC(qlwl,(3,nqlwl))
    qlwl(:,nqlwl)= GW_Q0_DEFAULT
-   write(msg,'(3a,i2,a,3f9.6)')&
+   write(msg,'(3a,i0,a,3f9.6)')&
      "The Header of the screening file does not contain the list of q-point for the optical limit ",ch10,&
      "Using nqlwl= ",nqlwl," and qlwl = ",qlwl(:,1)
    ABI_COMMENT(msg)
@@ -1269,11 +1182,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ! * Stop if a nonzero umklapp is needed to reconstruct the BZ. In this case, indeed,
  !   epsilon^-1(Sq) should be symmetrized in csigme using a different expression (G-G_o is needed)
  !
- call kmesh_print(Qmesh,"Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Qmesh,"Q-mesh for the screening function",ab_out ,0           ,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",std_out,Dtset%prtvol,"COLL")
+ call Qmesh%print("Q-mesh for the screening function",ab_out ,0           ,"COLL")
 
  do iq_bz=1,Qmesh%nbz
-   call get_BZ_item(Qmesh,iq_bz,qpt_bz,iq_ibz,isym,itim)
+   call qmesh%get_BZ_item(iq_bz,qpt_bz,iq_ibz,isym,itim)
    sq = (3-2*itim)*MATMUL(Cryst%symrec(:,:,isym),Qmesh%ibz(:,iq_ibz))
    if (ANY(ABS(Qmesh%bz(:,iq_bz)-sq )>1.0d-4)) then
      write(std_out,*) sq,Qmesh%bz(:,iq_bz)
@@ -1434,7 +1347,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! FIXME use bs_loband(nsppol)
  Bsp%lomo_spin = Dtset%bs_loband
- write(std_out,*)"bs_loband",Dtset%bs_loband
+ !write(std_out,*)"bs_loband",Dtset%bs_loband
  !if (Bsp%nsppol == 2) Bsp%lomo_spin(2) = Dtset%bs_loband
 
  ! Check lomo correct only for unpolarized semiconductors
@@ -1448,30 +1361,19 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ! ==============================================
  Bsp%inclvkb = Dtset%inclvkb
 
- qred2cart = two_pi*Cryst%gprimd
- qcart2red = qred2cart
- call matrginv(qcart2red,3,3)
-
- if (Dtset%gw_nqlwl==0) then
-   BSp%nq = 6
-   ABI_MALLOC(BSp%q,(3,BSp%nq))
-   BSp%q(:,1) = (/one,zero,zero/)  ! (100)
-   BSp%q(:,2) = (/zero,one,zero/)  ! (010)
-   BSp%q(:,3) = (/zero,zero,one/)  ! (001)
-   BSp%q(:,4) = MATMUL(qcart2red,(/one,zero,zero/)) ! (x)
-   BSp%q(:,5) = MATMUL(qcart2red,(/zero,one,zero/)) ! (y)
-   BSp%q(:,6) = MATMUL(qcart2red,(/zero,zero,one/)) ! (z)
+ if (Dtset%gw_nqlwl == 0) then
+   ! Predefined list of 6 q-versors (b vectors and Cart axis)
+   call cryst%get_redcart_qdirs(Bsp%nq, Bsp%q)
  else
    BSp%nq = Dtset%gw_nqlwl
-   ABI_MALLOC(BSp%q,(3,BSp%nq))
+   ABI_MALLOC(BSp%q, (3,BSp%nq))
    BSp%q = Dtset%gw_qlwl
+   do iq=1,BSp%nq ! normalization
+     qnorm = normv(BSp%q(:,iq), Cryst%gmet,"G")
+     BSp%q(:,iq) = BSp%q(:,iq) / qnorm
+   end do
  end if
 
- do iq=1,BSp%nq ! normalization
-   qnorm = normv(BSp%q(:,iq),Cryst%gmet,"G")
-   BSp%q(:,iq) = BSp%q(:,iq)/qnorm
- end do
- !
  ! ======================================================
  ! === Define the flags defining the calculation type ===
  ! ======================================================
@@ -1480,11 +1382,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  BSp%mbpt_sciss = zero ! Shall we use the scissors operator to open the gap?
  if (ABS(Dtset%mbpt_sciss)>tol6) BSp%mbpt_sciss = Dtset%mbpt_sciss
 
-!now test input parameters from input and WFK file and assume some defaults
-!
-! TODO Add the possibility of using a randomly shifted k-mesh with nsym>1.
-! so that densities and potentials are correctly symmetrized but
-! the list of the k-point in the IBZ is not expanded.
+ ! Now test input parameters from input and WFK file and assume some defaults
+ !
+ ! TODO Add the possibility of using a randomly shifted k-mesh with nsym>1.
+ ! so that densities and potentials are correctly symmetrized but
+ ! the list of the k-point in the IBZ is not expanded.
 
  if (mband < Dtset%nband(1)) then
    write(msg,'(2(a,i0),3a,i0)')&
@@ -1506,8 +1408,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !TODO add new dim for exchange part and consider the possibility of having npwsigx > npwwfn (see setup_sigma).
 
  ! === Build enlarged G-sphere for the exchange part ===
- call gsph_extend(Gsph_c,Cryst,Dtset%ecutwfn,Gsph_x)
- call print_gsphere(Gsph_x,unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
+ call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
 
  ! NPWVEC as the biggest between npweps and npwwfn. MG RECHECK this part.
  !BSp%npwwfn = Dtset%npwwfn
@@ -1517,11 +1419,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp,Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
-     nqlwl,qlwl,ngfftf,comm)
+   call Vcp%init(Gsph_x,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,&
+     nqlwl,qlwl,comm)
  else
-   call vcoul_init(Vcp,Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
-     nqlwl,qlwl,ngfftf,comm)
+   call Vcp%init(Gsph_c,Cryst,Qmesh,Kmesh,Dtset%rcut,Dtset%gw_icutcoul,Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,&
+     nqlwl,qlwl,comm)
  end if
 
  ABI_FREE(qlwl)
@@ -1564,17 +1466,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ABI_MALLOC(npwarr,(Dtset%nkpt))
  npwarr=BSP%npwwfn
 
- ! CP modified
- !call ebands_init(bantot,KS_BSt,Dtset%nelect,doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-!&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-!&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-!&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- call ebands_init(bantot,KS_BSt,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
-&  doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
-&  Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
-&  dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
-&  dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
- ! End CP modified
+ call ebands_init(bantot,ks_ebands,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+   doccde,eigen,Dtset%istwfk,Kmesh%ibz,Dtset%nband,&
+   Kmesh%nibz,npwarr,Dtset%nsppol,Dtset%nspinor,Dtset%tphysel,Dtset%tsmear,Dtset%occopt,occfact,Kmesh%wt,&
+   dtset%cellcharge(1), dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
+   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -1582,28 +1478,28 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  !TODO Occupancies are zero if NSCF. One should calculate the occupancies from the energies when
  ! the occupation scheme for semiconductors is used.
- call ebands_update_occ(KS_BSt,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+ call ebands_update_occ(ks_ebands,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
 
- call ebands_print(KS_BSt,"Band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
+ call ebands_print(ks_ebands,"Band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
 
- call ebands_report_gap(KS_BSt,header=" KS band structure",unit=std_out,mode_paral="COLL")
+ call ebands_report_gap(ks_ebands,header=" KS band structure",unit=std_out,mode_paral="COLL")
 
- ABI_MALLOC(val_indeces,(KS_BSt%nkpt,KS_BSt%nsppol))
- val_indeces = ebands_get_valence_idx(KS_BSt)
+ ABI_MALLOC(val_indices,(ks_ebands%nkpt,ks_ebands%nsppol))
+ val_indices = ebands_get_valence_idx(ks_ebands)
 
- do spin=1,KS_BSt%nsppol
-   val_idx(spin) = val_indeces(1,spin)
+ do spin=1,ks_ebands%nsppol
+   val_idx(spin) = val_indices(1,spin)
    write(msg,'(a,i2,a,i0)')" For spin : ",spin," val_idx ",val_idx(spin)
    call wrtout(std_out,msg)
-   if ( ANY(val_indeces(1,spin) /= val_indeces(:,spin)) ) then
+   if ( ANY(val_indices(1,spin) /= val_indices(:,spin)) ) then
      ABI_ERROR("BSE code does not support metals")
    end if
  end do
 
- ABI_FREE(val_indeces)
+ ABI_FREE(val_indices)
  !
  ! === Create the BSE header ===
- call hdr_init(KS_BSt,codvsn,Dtset,Hdr_bse,Pawtab,pertcase0,Psps,wvl)
+ call hdr_init(ks_ebands,codvsn,Dtset,Hdr_bse,Pawtab,pertcase0,Psps,wvl)
 
  ! === Get Pawrhoij from the header of the WFK file ===
  ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
@@ -1612,10 +1508,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
 
- ! CP modified
- !call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
  call hdr_bse%update(bantot,1.0d20,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
- ! End CP modified
 
  ABI_FREE(occfact)
 
@@ -1632,8 +1525,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  else
    ! * Here I have to be sure that Qmesh%bz is always inside the BZ, not always true since bz is buggy
    ! * -one is used because we loop over all the possibile differences, unlike screening
-   call get_ng0sh(my_k2-my_k1+1,Kmesh%bz(:,my_k1:my_k2),Kmesh%nbz,Kmesh%bz,&
-&    Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
+   call get_ng0sh(my_k2-my_k1+1,Kmesh%bz(:,my_k1:my_k2),Kmesh%nbz,Kmesh%bz,Qmesh%nbz,Qmesh%bz,-one,ng0sh_opt)
  end if
 
  call xmpi_max(ng0sh_opt,BSp%mg0,comm,ierr)
@@ -1672,7 +1564,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  ! TODO generalize the code to account for this unlikely case.
  !if (Dtset%nsppol==2) then
- !  ABI_CHECK(BSp%homo == val_idx(2),"Different valence indeces for spin up and down")
+ !  ABI_CHECK(BSp%homo == val_idx(2),"Different valence indices for spin up and down")
  !end if
 
  !BSp%lumo = BSp%homo + 1
@@ -1689,11 +1581,11 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  BSp%nkbz = Kmesh%nbz
 
- call ebands_copy(KS_BSt,QP_bst)
- ABI_MALLOC(igwene,(QP_bst%mband,QP_bst%nkpt,QP_bst%nsppol))
+ call ebands_copy(ks_ebands,qp_ebands)
+ ABI_MALLOC(igwene,(qp_ebands%mband,qp_ebands%nkpt,qp_ebands%nsppol))
  igwene=zero
 
- call bsp_calctype2str(Bsp,msg)
+ call Bsp%calctype2str(msg)
  call wrtout(std_out,"Calculation type: "//TRIM(msg))
 
  SELECT CASE (Bsp%calc_type)
@@ -1701,7 +1593,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call ebands_apply_scissors(QP_BSt,BSp%mbpt_sciss)
+     call ebands_apply_scissors(qp_ebands,BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)
@@ -1715,12 +1607,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
      ABI_ERROR(msg)
    end if
 
-   call rdgw(QP_Bst,gw_fname,igwene,extrapolate=.FALSE.) ! here gwenergy is real
+   call rdgw(qp_ebands,gw_fname,igwene,extrapolate=.FALSE.) ! here gwenergy is real
 
    do isppol=1,Dtset%nsppol
      write(std_out,*) ' k       GW energies [eV]'
      do ik_ibz=1,Kmesh%nibz
-       write(std_out,'(i3,7x,10f7.2/50(10x,10f7.2/))')ik_ibz,(QP_bst%eig(ib,ik_ibz,isppol)*Ha_eV,ib=1,BSp%nbnds)
+       write(std_out,'(i3,7x,10f7.2/50(10x,10f7.2/))')ik_ibz,(qp_ebands%eig(ib,ik_ibz,isppol)*Ha_eV,ib=1,BSp%nbnds)
      end do
      write(std_out,*) ' k       Im GW energies [eV]'
      do ik_ibz=1,Kmesh%nibz
@@ -1732,7 +1624,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the QP energies!"
      ABI_COMMENT(msg)
-     call ebands_apply_scissors(QP_BSt,BSp%mbpt_sciss)
+     call ebands_apply_scissors(qp_ebands,BSp%mbpt_sciss)
    end if
 
  CASE (BSE_HTYPE_RPA_QP)
@@ -1743,12 +1635,12 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    ABI_ERROR(msg)
  END SELECT
 
- call ebands_report_gap(QP_BSt,header=" QP band structure",unit=std_out,mode_paral="COLL")
+ call ebands_report_gap(qp_ebands,header=" QP band structure",unit=std_out,mode_paral="COLL")
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
  ABI_MALLOC(gw_energy,(BSp%nbnds,Kmesh%nibz,Dtset%nsppol))
- gw_energy = QP_BSt%eig
+ gw_energy = qp_ebands%eig
 
  BSp%have_complex_ene = ANY(igwene > tol16)
 
@@ -1760,7 +1652,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  BSp%uvcut = Dtset%bs_eh_cutoff(2)
 
  call init_transitions(BSp%Trans,BSp%lomo_spin,BSp%humo_spin,BSp%ircut,Bsp%uvcut,BSp%nkbz,Bsp%nbnds,Bsp%nkibz,&
-&  BSp%nsppol,Dtset%nspinor,gw_energy,QP_BSt%occ,Kmesh%tab,minmax_tene,Bsp%nreh)
+&  BSp%nsppol,Dtset%nspinor,gw_energy,qp_ebands%occ,Kmesh%tab,minmax_tene,Bsp%nreh)
 
  ! Setup of the frequency mesh for the absorption spectrum.
  ! If not specified, use the min-max resonant transition energy and make it 10% smaller|larger.
@@ -1827,8 +1719,8 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  end if
 
  msg=' Fundamental parameters for the solution of the Bethe-Salpeter equation:'
- call print_bs_parameters(BSp,unit=std_out,header=msg,mode_paral="COLL",prtvol=Dtset%prtvol)
- call print_bs_parameters(BSp,unit=ab_out, header=msg,mode_paral="COLL")
+ call BSp%print(unit=std_out,header=msg,mode_paral="COLL",prtvol=Dtset%prtvol)
+ call BSp%print(unit=ab_out, header=msg,mode_paral="COLL")
 
  if (ANY (Cryst%symrec(:,:,1) /= RESHAPE ( (/1,0,0,0,1,0,0,0,1/),(/3,3/) )) .or. ANY( ABS(Cryst%tnons(:,1)) > tol6) ) then
    write(msg,'(3a,9i2,2a,3f6.3,2a)')&
@@ -1871,7 +1763,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
    BS_files%out_eig = TRIM(BS_files%out_basename)//"_BSEIG"
  end if
 
- call print_bs_files(BS_files,unit=std_out)
+ call BS_files%print(unit=std_out)
  !
  ! ==========================================================
  ! ==== Temperature dependence of the spectrum ==============
@@ -2004,7 +1896,7 @@ end subroutine setup_bse
 !! Kmesh<BZ_mesh_type>=Structure defining the k-sampling for the wavefunctions.
 !! Qmesh<BZ_mesh_type>=Structure defining the q-sampling for the symmetrized inverse dielectric matrix.
 !! Gsph_x<gsphere_t=Data type gathering info on the G-sphere for wave functions and e^{-1},
-!! KS_BSt<Bandstructure_type>=The KS band structure (energies, occupancies, k-weights...)
+!! ks_ebands<Bandstructure_type>=The KS band structure (energies, occupancies, k-weights...)
 !! Vcp<vcoul_t>=Structure gathering information on the Coulomb interaction in reciprocal space,
 !!   including a possible cutoff in real space.
 !! ngfft_osc(18)=Contain all needed information about the 3D FFT for the oscillator matrix elements.
@@ -2014,19 +1906,10 @@ end subroutine setup_bse
 !! Hdr_bse<Hdr_type>=Local header initialized from the parameters used for the Bethe-Salpeter calculation.
 !! w_file=File name used to construct W. Set to ABI_NOFILE if no external file is used.
 !!
-!! PARENTS
-!!      m_bethe_salpeter
-!!
-!! CHILDREN
-!!      double_grid_init,ebands_apply_scissors,ebands_copy,ebands_init
-!!      ebands_print,ebands_report_gap,ebands_update_occ,find_qmesh,gsph_extend
-!!      gsph_init,init_transitions,kmesh_init,kmesh_print,make_mesh
-!!      print_gsphere,vcoul_init,wfk_read_eigenvalues,wrtout
-!!
 !! SOURCE
 
-subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
-& Kmesh_dense,Qmesh_dense,KS_BSt_dense,QP_bst_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,ngfftf,grid,comm)
+subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh, &
+   Kmesh_dense,Qmesh_dense,ks_ebands_dense,qp_ebands_dense,Gsph_x,Gsph_c,Vcp_dense,Hdr_wfk_dense,grid,comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -2038,12 +1921,11 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  type(crystal_t),intent(in) :: Cryst
  type(kmesh_t),intent(in) :: Kmesh
  type(kmesh_t),intent(out) :: Kmesh_dense,Qmesh_dense
- type(ebands_t),intent(out) :: KS_BSt_dense,QP_Bst_dense
+ type(ebands_t),intent(out) :: ks_ebands_dense,qp_ebands_dense
  type(double_grid_t),intent(out) :: grid
  type(vcoul_t),intent(out) :: Vcp_dense
  type(gsphere_t),intent(out) :: Gsph_x,Gsph_c
 !arrays
- integer,intent(in) :: ngfftf(18)
 
 !Local variables ------------------------------
 !scalars
@@ -2105,7 +1987,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
    ABI_ERROR(msg)
  end if
 
- ! Setup of the k-point list and symmetry tables in the  BZ
+ ! Setup of the k-point list and symmetry tables in the BZ
  SELECT CASE(BSp%interp_mode)
  CASE (1,2,3,4)
    if(Dtset%chksymbreak == 0) then
@@ -2120,7 +2002,7 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
      ABI_FREE(shiftk)
    else
      !Initialize Kmesh with no wrapping inside ]-0.5;0.5]
-     call kmesh_init(Kmesh_dense,Cryst,Hdr_wfk_dense%nkpt,Hdr_wfk_dense%kptns,Dtset%kptopt)
+     call Kmesh_dense%init(Cryst,Hdr_wfk_dense%nkpt,Hdr_wfk_dense%kptns,Dtset%kptopt)
    end if
  CASE DEFAULT
    ABI_ERROR("Not yet implemented")
@@ -2129,14 +2011,14 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ! Init Qmesh
  call find_qmesh(Qmesh_dense,Cryst,Kmesh_dense)
 
- call gsph_init(Gsph_c,Cryst,0,ecut=Dtset%ecuteps)
+ call Gsph_c%init(Cryst, 0, ecut=Dtset%ecuteps)
 
  call double_grid_init(Kmesh,Kmesh_dense,Dtset%kptrlatt,BSp%interp_kmult,grid)
 
  BSp%nkibz_interp = Kmesh_dense%nibz  !We might allow for a smaller number of points....
 
- call kmesh_print(Kmesh_dense,"Interpolated K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
- call kmesh_print(Kmesh_dense,"Interpolated K-mesh for the wavefunctions",ab_out, 0,           "COLL")
+ call Kmesh_dense%print("Interpolated K-mesh for the wavefunctions",std_out,Dtset%prtvol,"COLL")
+ call Kmesh_dense%print("Interpolated K-mesh for the wavefunctions",ab_out, 0,           "COLL")
 
  if (nbnds_kss_dense < Dtset%nband(1)) then
    write(msg,'(2(a,i0),3a,i0)')&
@@ -2153,8 +2035,8 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
    end do
  end do
 
- call gsph_extend(Gsph_c,Cryst,Dtset%ecutwfn,Gsph_x)
- call print_gsphere(Gsph_x,unit=std_out,prtvol=Dtset%prtvol)
+ call Gsph_c%extend(Cryst, Dtset%ecutwfn, Gsph_x)
+ call Gsph_x%print(unit=std_out,prtvol=Dtset%prtvol)
 
  nqlwl=1
  ABI_MALLOC(qlwl,(3,nqlwl))
@@ -2162,11 +2044,11 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  ! Compute Coulomb term on the largest G-sphere.
  if (Gsph_x%ng > Gsph_c%ng ) then
-   call vcoul_init(Vcp_dense,Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-&    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,ngfftf,comm)
+   call Vcp_dense%init(Gsph_x,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_x%ng,nqlwl,qlwl,comm)
  else
-   call vcoul_init(Vcp_dense,Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
-&    Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,ngfftf,comm)
+   call Vcp_dense%init(Gsph_c,Cryst,Qmesh_dense,Kmesh_dense,Dtset%rcut,Dtset%gw_icutcoul,&
+                       Dtset%vcutgeo,Dtset%ecutsigx,Gsph_c%ng,nqlwl,qlwl,comm)
  end if
 
  ABI_FREE(qlwl)
@@ -2196,19 +2078,12 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
  ABI_MALLOC(npwarr,(kmesh_dense%nibz))
  npwarr=BSP%npwwfn
 
- ! CP modified
- !call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
-!&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
-!&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-!&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
-!&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
- call ebands_init(bantot_dense,KS_BSt_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,& ! CP added
-&  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
-&  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
-&  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
-&  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
-&  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
- ! End CP modified
+ call ebands_init(bantot_dense,ks_ebands_dense,Dtset%nelect,Dtset%ne_qFD,Dtset%nh_qFD,Dtset%ivalence,&
+  doccde,eigen,Hdr_wfk_dense%istwfk,Kmesh_dense%ibz,nbands_temp,&
+  Kmesh_dense%nibz,npwarr,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,Hdr_wfk_dense%tphysel,Hdr_wfk_dense%tsmear,&
+  Hdr_wfk_dense%occopt,occfact,Kmesh_dense%wt,&
+  hdr_wfk_dense%cellcharge, hdr_wfk_dense%kptopt, hdr_wfk_dense%kptrlatt_orig, hdr_wfk_dense%nshiftk_orig, &
+  hdr_wfk_dense%shiftk_orig, hdr_wfk_dense%kptrlatt, hdr_wfk_dense%nshiftk, hdr_wfk_dense%shiftk)
 
  ABI_FREE(doccde)
  ABI_FREE(eigen)
@@ -2220,22 +2095,22 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
 
  !TODO Occupancies are zero if NSCF. One should calculate the occupancies from the energies when
  ! the occupation scheme for semiconductors is used.
- call ebands_update_occ(KS_BSt_dense,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
+ call ebands_update_occ(ks_ebands_dense,Dtset%spinmagntarget,prtvol=Dtset%prtvol)
 
- call ebands_print(KS_BSt_dense,"Interpolated band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
+ call ebands_print(ks_ebands_dense,"Interpolated band structure read from the WFK file",unit=std_out,prtvol=Dtset%prtvol)
 
- call ebands_report_gap(KS_BSt_dense,header="Interpolated KS band structure",unit=std_out,mode_paral="COLL")
+ call ebands_report_gap(ks_ebands_dense,header="Interpolated KS band structure",unit=std_out,mode_paral="COLL")
 
  BSp%nkbz_interp = Kmesh_dense%nbz
 
- call ebands_copy(KS_BSt_dense,QP_bst_dense)
+ call ebands_copy(ks_ebands_dense,qp_ebands_dense)
 
  SELECT CASE (Bsp%calc_type)
  CASE (BSE_HTYPE_RPA_KS)
    if (ABS(BSp%mbpt_sciss)>tol6) then
      write(msg,'(a,f8.2,a)')' Applying a scissors operator energy= ',BSp%mbpt_sciss*Ha_eV," [eV] on top of the KS energies."
      call wrtout(std_out,msg)
-     call ebands_apply_scissors(QP_BSt_dense,BSp%mbpt_sciss)
+     call ebands_apply_scissors(qp_ebands_dense,BSp%mbpt_sciss)
    else
      write(msg,'(a,f8.2,a)')' Using KS energies since mbpt_sciss= ',BSp%mbpt_sciss*Ha_eV," [eV]."
      call wrtout(std_out,msg)
@@ -2250,18 +2125,18 @@ subroutine setup_bse_interp(Dtset,Dtfil,BSp,Cryst,Kmesh,&
    ABI_ERROR(msg)
  END SELECT
 
- call ebands_report_gap(QP_BSt_dense,header=" Interpolated QP band structure",unit=std_out,mode_paral="COLL")
+ call ebands_report_gap(qp_ebands_dense,header=" Interpolated QP band structure",unit=std_out,mode_paral="COLL")
 
  ! Transitions are ALWAYS ordered in c-v-k mode with k being the slowest index.
  ! FIXME: linewidths not coded.
  ABI_MALLOC(gw_energy, (BSp%nbnds,Kmesh_dense%nibz,Dtset%nsppol))
- gw_energy = QP_BSt_dense%eig
+ gw_energy = qp_ebands_dense%eig
 
  ABI_MALLOC(Bsp%nreh_interp,(Hdr_wfk_dense%nsppol))
  Bsp%nreh_interp=zero
 
  call init_transitions(BSp%Trans_interp,BSp%lomo_spin,BSp%humo_spin,BSp%ircut,Bsp%uvcut,BSp%nkbz_interp,Bsp%nbnds,&
-&  Bsp%nkibz_interp,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,gw_energy,QP_BSt_dense%occ,Kmesh_dense%tab,minmax_tene,&
+&  Bsp%nkibz_interp,Hdr_wfk_dense%nsppol,Hdr_wfk_dense%nspinor,gw_energy,qp_ebands_dense%occ,Kmesh_dense%tab,minmax_tene,&
 &  Bsp%nreh_interp)
 
  ABI_FREE(gw_energy)

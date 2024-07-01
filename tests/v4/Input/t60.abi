@@ -24,10 +24,15 @@
  kptopt3   2
    nqpt3   1
     qpt3   0  0  0
-rfatpol3   2  2
-  rfdir3   0  0  1
+rfatpol    2  2
+  rfdir    0  0  1
  rfphon3   1
  tolvrs3   1.0d-8
+
+#Backwards compatibility
+     asr   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+  chneut   0   # The default value 1 is preferable, this is only to keep backward compatibility for the automatic tests
+
 
 # common input data
 

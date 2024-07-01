@@ -2,15 +2,13 @@
 !! NAME
 !!
 !! FUNCTION
-!!  Ccomputation of phonon-electron self-energy.
+!!  Computation of phonon-electron self-energy.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (GKA)
+!!  Copyright (C) 2008-2024 ABINIT group (GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! PARENTS
 !!
 !! SOURCE
 
@@ -28,7 +26,7 @@ module m_phpi
  use m_errors
  use m_ifc
  use m_ebands
- use iso_c_binding
+ use, intrinsic :: iso_c_binding
  use m_nctk
 #ifdef HAVE_NETCDF
  use netcdf
@@ -92,11 +90,6 @@ contains  !=====================================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! PARENTS
-!!      m_eph_driver
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -320,7 +313,7 @@ subroutine eph_phpi(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,e
  call init_hamiltonian(gs_hamkq,psps,pawtab,nspinor,NSPPOL,nspden,natom,&
 &  dtset%typat,cryst%xred,nfft,mgfft,ngfft,cryst%rprimd,dtset%nloalg,&
 &  comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab,&
-&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,use_gpu_cuda=dtset%use_gpu_cuda)
+&  usecprj=usecprj,ph1d=ph1d,nucdipmom=dtset%nucdipmom,gpu_option=dtset%gpu_option)
 
  ! Allocate vlocal. Note nvloc
  ! I set vlocal to huge to trigger possible bugs (DFPT routines should not access the data)
@@ -607,12 +600,7 @@ end subroutine eph_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 
@@ -661,12 +649,7 @@ end subroutine out_phpi
 !!
 !! OUTPUT
 !!
-!! PARENTS
-!!      m_phpi
-!!
 !! NOTES
-!!
-!! CHILDREN
 !!
 !! SOURCE
 

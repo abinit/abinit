@@ -889,7 +889,7 @@ end subroutine tdep_calc_constraints
       if (abs(norm1).gt.tol8) then
         write(std_out,'(a,1(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR1) : alpha,Sum =',alpha,norm1
         if (abs(norm1).gt.tol6) then
-          ABI_ERROR('The acoustic sum rule is not fulfilled (order 1)')
+          ABI_WARNING('The acoustic sum rule is not fulfilled (order 1)')
         end if
       end if
     enddo
@@ -904,7 +904,7 @@ end subroutine tdep_calc_constraints
         if (abs(norm1).gt.tol8) then
           write(std_out,'(a,2(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT1) : alpha,beta,Sum=',alpha,beta,norm1
           if (abs(norm1).gt.tol6) then
-            ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 1)')
+            ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 1)')
           end if 
         end if 
       end do !beta
@@ -922,7 +922,7 @@ end subroutine tdep_calc_constraints
           if (abs(norm1).gt.tol8) then
             write(std_out,'(a,3(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR2) : iatom,alpha,beta,Sum =',iatom,alpha,beta,norm1
             if (abs(norm1).gt.tol6) then
-              ABI_ERROR('The acoustic sum rule is not fulfilled (order 2)')
+              ABI_WARNING('The acoustic sum rule is not fulfilled (order 2)')
             end if
           end if
         enddo
@@ -944,7 +944,7 @@ end subroutine tdep_calc_constraints
               write(std_out,'(a,4(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT2) : iatom,alpha,beta,gama,Sum =',&
 &                                                        iatom,alpha,beta,gama,norm1
               if (abs(norm1).gt.tol4) then
-                ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 2)')
+                ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 2)')
               end if 
             end if 
           end do !gama
@@ -1016,7 +1016,7 @@ end subroutine tdep_calc_constraints
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
 &                                                             ii,jj,kk,iatom,jatom,asr3(1,jatom,ii,jj,kk)
                 if (abs(asr3(1,jatom,ii,jj,kk)).gt.tol6)&
-&                  ABI_ERROR('The acoustic sum rule is not fulfilled (order 3, 3rd dim)')
+&                  ABI_WARNING('The acoustic sum rule is not fulfilled (order 3, 3rd dim)')
               end if
             end do !jatom
 !           Check the second acoustic sum rule
@@ -1025,7 +1025,7 @@ end subroutine tdep_calc_constraints
                 write(std_out,'(a,1x,5(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR3) --->',&
 &                                                             ii,jj,kk,iatom,katom,asr3(2,katom,ii,jj,kk)
                 if (abs(asr3(2,katom,ii,jj,kk)).gt.tol6)&                
-&                  ABI_ERROR('The acoustic sum rule is not fulfilled (order 3, 2nd dim)')
+&                  ABI_WARNING('The acoustic sum rule is not fulfilled (order 3, 2nd dim)')
               end if
             end do !jatom
           end do !kk
@@ -1041,7 +1041,7 @@ end subroutine tdep_calc_constraints
                   write(std_out,'(a,6(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 &                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
                   if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
-&                     ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')
+&                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
                 end if
               end do !lambda
             end do !gama
@@ -1114,7 +1114,7 @@ end subroutine tdep_calc_constraints
                     write(std_out,'(a,1x,7(i3,1x),1(e17.10,1x))') '>>>>> WARNING (ASR4) --->',&
 &                      ii,jj,kk,ll,iatom,jatom,katom,asr4(jatom,katom,ii,jj,kk,ll)
                     if (abs(asr4(jatom,katom,ii,jj,kk,ll)).gt.tol6)&
-&                      ABI_ERROR('The acoustic sum rule is not fulfilled (order 4)')
+&                      ABI_WARNING('The acoustic sum rule is not fulfilled (order 4)')
                   end if
                 end do !katom  
               end do !jatom  
@@ -1133,7 +1133,7 @@ end subroutine tdep_calc_constraints
 !FB                        &'>>>>> WARNING (ROT3) ---> iatom,jatom,alpha,beta,gama,lambda,norm =',&
 !FB&                                iatom,jatom,alpha,beta,gama,lambda,rot3(jatom,alpha,beta,gama,lambda)
 !FB                  if (abs(rot3(jatom,alpha,beta,gama,lambda)).gt.tol6)& 
-!FB&                     ABI_ERROR('The invariance under arbitrary rotation is not fulfilled (order 3)')
+!FB&                     ABI_WARNING('The invariance under arbitrary rotation is not fulfilled (order 3)')
 !FB                end if  
 !FB              end do !lambda 
 !FB            end do !gama 
