@@ -60,7 +60,7 @@ tsmear?4  0.04
 
 #Optimization of the lattice parameters
 optcell 1
-ionmov  2
+geoopt  "bfgs"
 ntime  10
 dilatmx 1.05
 ecutsm  0.5
