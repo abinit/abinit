@@ -109,6 +109,11 @@ if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
 endif()
 
+option(ABINIT_ENABLE_ZDOT_BUGFIX "Activate workaround for bugged ZDOTC and ZDOTU (default OFF)" OFF)
+if(ABINIT_ENABLE_ZDOT_BUGFIX)
+  set(HAVE_LINALG_ZDOTC_BUG 1)
+  set(HAVE_LINALG_ZDOTU_BUG 1)
+endif()
 
 option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)
 
