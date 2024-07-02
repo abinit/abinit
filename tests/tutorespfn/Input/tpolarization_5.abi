@@ -67,7 +67,7 @@ xred
 
 # Relaxation of atomic positions
 optcell 0 # the cell geometry is not allowed to changed
-ionmov 2 # the ion positions will be relaxed
+geoopt "bfgs" # the ion positions will be relaxed
 tolmxf 1.0d-5
 ntime 13
 
