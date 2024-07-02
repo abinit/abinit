@@ -175,18 +175,8 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
  if( (inp%elaflag==2 .or. inp%elaflag==3&
 & .or. inp%elaflag==4 .or. inp%elaflag==5) .and. natom/=1 )then
 !  extracting force matrix at gamma
-   d2cart = zero
-   do ipert1=1,natom
-     do ii1=1,3
-       ivarA=ii1+3*(ipert1-1)
-       do ipert2=1,natom
-         do ii2=1,3
-           ivarB=ii2+3*(ipert2-1)
-           d2cart(1,ivarA,ivarB)=blkval(1,ii1,ipert1,ii2,ipert2,iblok)
-         end do
-       end do
-     end do
-   end do
+   d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:natom,1:3,1:natom,iblok), (/3*natom,3*natom/))
+   d2cart(2,:,:) = zero
 
 !  Eventually impose the acoustic sum rule
 !  FIXME: this might depend on ifcflag: impose that it is 0 or generalize
@@ -203,15 +193,14 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  ENDDEBUG
 
 !  according to formula, invert the kmatrix(3natom,3natom)
-   Apmatr(:,:)=kmatrix(:,:)
 
 !  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
    Nmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       if (mod(ivarA,3)==0 .and. mod(ivarB,3)==0) Nmatr(ivarA,ivarB)=one
-       if (mod(ivarA,3)==1 .and. mod(ivarB,3)==1) Nmatr(ivarA,ivarB)=one
-       if (mod(ivarA,3)==2 .and. mod(ivarB,3)==2) Nmatr(ivarA,ivarB)=one
+   do ivarB=1,natom
+     do ivarA=1,natom
+       Nmatr(3*ivarA  ,3*ivarB   ) = one
+       Nmatr(3*ivarA+1, 3*ivarB+1) = one
+       Nmatr(3*ivarA+2, 3*ivarB+2) = one
      end do
    end do
 
@@ -264,25 +253,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !  do the multiplication to get the reduced matrix,in two steps
 !  rotate to eigenbasis constructed above to isolate acoustic modes
-   Cpmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       do ii1=1,3*natom
-         Cpmatr(ivarA,ivarB)=Cpmatr(ivarA,ivarB)+eigvecp(1,ii1,ivarA)*&
-&         Apmatr(ii1,ivarB)
-       end do
-     end do
-   end do
-
-   Apmatr(:,:)=zero
-   do ivarA=1,3*natom
-     do ivarB=1,3*natom
-       do ii1=1,3*natom
-         Apmatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)+Cpmatr(ivarA,ii1)*&
-&         eigvecp(1,ii1,ivarB)
-       end do
-     end do
-   end do
+   Apmatr(:,:) = MATMUL(TRANSPOSE(eigvecp(1,:,:)), MATMUL(kmatrix(:,:), eigvecp(1,:,:)))
 
 !  DEBUG
 !  the blok diagonal parts
