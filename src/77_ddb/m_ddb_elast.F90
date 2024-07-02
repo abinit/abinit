@@ -196,7 +196,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
    Nmatr(:,:)=zero
-   do ivarB=1,natom
+   do ivarB=0,natom-1
      do ivarA=0,natom-1
        Nmatr(3*ivarA+1, 3*ivarB+1) = one
        Nmatr(3*ivarA+2, 3*ivarB+2) = one
