@@ -359,40 +359,15 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  transfer the inverse of k-matrix back to the k matrix
 !  so now the inverse of k matrix is in the kmatrix
 !  ending the part for pseudoinversing the K matrix
-!  then do the first matrix mulplication
-   new1(:,:)=zero
-   do ii1=1,6
-     do ii2=1,3*natom
-       do ivarA=1,3*natom
-         new1(ii1,ii2)=new1(ii1,ii2)+instrain(ivarA,ii1)*&
-&         kmatrix(ivarA,ii2)
-       end do
-     end do
-   end do
-!  then do the second matrix mulplication, and change the value of kmatrix
-   new2(:,:)=zero
-   do ii1=1,6
-     do ii2=1,6
-       do ivarB=1,3*natom
-         new2(ii1,ii2)=new2(ii1,ii2)+new1(ii1,ivarB)*&
-&         instrain(ivarB,ii2)
-       end do
-     end do
-   end do
+   new2(:,:) = MATMUL(MATMUL(TRANSPOSE(instrain), kmatrix), instrain(:,:))
+
+
 !  then finish the matrix mupl., consider the unit cellvolume
 !  and the unit change next step
-   do ivarA=1,6
-     do ivarB=1,6
-       new2(ivarA,ivarB)=(new2(ivarA,ivarB)/ucvol)*HaBohr3_GPa
-     end do
-   end do
+   new2(:,:)=(new2(:,:)/ucvol)*HaBohr3_GPa
+
 !  then the relaxed one should be the previous one minus the new2 element
-   do ivarA=1,6
-     do ivarB=1,6
-       elast_relaxed(ivarA,ivarB)=elast_relaxed(ivarA,ivarB)-&
-&       new2(ivarA,ivarB)
-     end do
-   end do
+   elast_relaxed(:,:)=elast_relaxed(:,:)-new2(:,:)
  end if
 !the above end if end if for elaflag=2 or elafalg=3 or elafalg=4,
 !or elafalg=5 in line 125
