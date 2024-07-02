@@ -197,10 +197,10 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  NOTE: MJV 13/3/2011 This is just the 3x3 unit matrix copied throughout the dynamical matrix
    Nmatr(:,:)=zero
    do ivarB=1,natom
-     do ivarA=1,natom
-       Nmatr(3*ivarA  ,3*ivarB   ) = one
+     do ivarA=0,natom-1
        Nmatr(3*ivarA+1, 3*ivarB+1) = one
        Nmatr(3*ivarA+2, 3*ivarB+2) = one
+       Nmatr(3*ivarA+3, 3*ivarB+3) = one
      end do
    end do
 
@@ -283,11 +283,7 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
      call wrtout(iout,message,'COLL')
    end if
 !  then give the value of reduced matrix form Apmatr to Amatr
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       Amatr(ivarA,ivarB)=Apmatr(ivarA,ivarB)
-     end do
-   end do
+   Amatr(:,:) = Apmatr(1:3*natom-3, 1:3*natom-3)
 
 !  now the reduced matrix is in the Amatr, the convert it
 !  first give the give the value of Bmatr from Amatr
@@ -314,29 +310,10 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 
 !  the do the matrix muplication to get pseudoinverse inverse matrix
    Cmatr(:,:)=zero
-   Amatr(:,:)=zero
    do ivarA=1,3*natom-3
      Cmatr(ivarA,ivarA)=1.0_dp/eigval(ivarA)
    end do
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       do ii1=1,3*natom-3
-         Amatr(ivarA,ivarB)=Amatr(ivarA,ivarB)+eigvec(1,ivarA,ii1)*&
-&         Cmatr(ii1,ivarB)
-       end do
-     end do
-   end do
-
-!  then the second mulplication
-   Cmatr(:,:)=zero
-   do ivarA=1,3*natom-3
-     do ivarB=1,3*natom-3
-       do ii1=1,3*natom-3
-         Cmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)+&
-&         Amatr(ivarA,ii1)*eigvec(1,ivarB,ii1)
-       end do
-     end do
-   end do
+   Amatr(:,:) = MATMUL(MATMUL(eigvec(1,:,:), Cmatr(:,:)), TRANSPOSE(eigvec(1,:,:)))
 
 !  DEBUG
 !  write(std_out,'(/,a,/)')'the pseudo inverse of the force matrix'
@@ -348,13 +325,13 @@ subroutine ddb_elast(inp,crystal,blkval,compl,compl_clamped,compl_stress,d2asr,&
 !  end do
 !  ENDDEBUG
 
-!  so now the inverse of the reduced matrix is in the matrixC
+!  so now the inverse of the reduced matrix is in the matrixA
 !  now do another mulplication to get the pseudoinverse of the original
    Cpmatr(:,:)=zero
    Apmatr(:,:)=zero
    do ivarA=1,3*natom-3
      do ivarB=1,3*natom-3
-       Cpmatr(ivarA,ivarB)=Cmatr(ivarA,ivarB)
+       Cpmatr(ivarA,ivarB)=Amatr(ivarA,ivarB)
      end do
    end do
 
