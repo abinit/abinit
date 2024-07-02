@@ -24,7 +24,7 @@ posocc     1.0    # Occupation number for the positron
 #-------------------------------------------------------------------------------
 #Definition of variables specific to atomic relaxation
 
-ionmov   2        # We now include the effect of the atomic relaxation
+geoopt   "bfgs"   # We now include the effect of the atomic relaxation
                   #   (BFGS relaxation algorithm)
 
 ntime    4        # We will perform only 4 steps of relaxation

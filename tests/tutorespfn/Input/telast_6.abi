@@ -6,7 +6,7 @@
 # Set 1 : Initial self-consistent and lattice optimization run
 
   getwfk?1   0
-  ionmov?1   2        # Broyden lattice optimization scheme
+  geoopt?1   "bfgs"   # Broyden lattice optimization scheme
    ntime?1   5        # Maximim lattice optimization steps
  optcell?1   1        # Optimize cell volume only
  strfact?1   100      # Test convergence of stresses (Hartree/bohr^3) by

@@ -67,7 +67,7 @@ prteig 0
 
 #Structural relaxation
 #*********************
-   ionmov 2
+   geoopt "bfgs"
    optcell 2
    tolvrs 1.0d-15
    tolmxf 5.0d-6
