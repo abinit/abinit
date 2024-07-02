@@ -5231,6 +5231,76 @@ and [[spgroupma]], or define by hand the set of symmetries, using [[symrel]], [[
 ),
 
 Variable(
+    abivarname="geoopt",
+    varset="rlx",
+    vartype="string",
+    topics=['GeoOpt_compulsory'],
+    dimensions="scalar",
+    defaultval="none",
+    mnemonics="GEOmetry OPTimization",
+    added_in_version="10.3",
+    text=r"""
+Choice of algorithm to control the displacements of ions for geometry optimization, and possibly changes of cell shape and size (see [[optcell]]).
+No meaning for RF calculations.
+
+  * "none" --> Do not move ions (**default behaviour**)
+
+  * "viscous" --> Move atoms using molecular dynamics with optional viscous damping (friction linearly proportional to velocity).
+  The viscous damping is controlled by the [[vis]] parameter.
+  If undamped molecular dynamics is desired, set [[vis]] to 0.
+  The implemented algorithm is the generalisation of the Numerov technique (6th order), but is NOT invariant upon time-reversal,
+  so that the energy is not conserved.
+  The value **ionmov** = 6 will usually be preferred, although the algorithm that is implemented is lower-order.
+  The time step is governed by [[dtion]].
+  **Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if [[vis]] >0)
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]]
+
+  * "bfgs" --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
+  This is much more efficient for structural optimization than viscous damping, when there are
+  less than about 10 degrees of freedom to optimize.
+  **Purpose:** Structural optimization
+  **Cell optimization:** Yes (if [[optcell]]/=0)
+
+  * "mdmin" --> Simple relaxation of ionic positions according to (converged) forces.
+  Equivalent to **ionmov** = 1 with zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+
+  * "quenched" --> Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which
+  the scalar product of velocity and force is negative. The only related parameter is the time step ([[dtion]]).
+  The goal is not to produce a realistic dynamics, but to go as fast as possible to the minimum.
+  For this purpose, it is advised to set all the masses to the same value
+  (for example, use the Carbon mass, i.e. set [[amu]] to 12 for all type of atoms).
+  **Purpose:** Structural optimization
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+
+  * "fire" --> Fast inertial relaxation engine (FIRE) algorithm proposed by Erik Bitzek, Pekka Koskinen, Franz Gähler,
+    Michael Moseler, and Peter Gumbsch in [[cite:Bitzek2006]].
+    According to the authors, the efficiency of this method is nearly the same as L-bfgs (**ionmov** = 22).
+    It is based on conventional molecular dynamics with additional velocity modifications and adaptive time steps.
+    The initial time step is set with [[dtion]]. Note that the physical meaning and unit of [[dtion]] are different
+    from the default ones.
+    The purpose of this algorithm is relaxation, not molecular dynamics. [[dtion]] governs the ion position changes,
+    but the cell parameter changes as well.
+    The positions are in reduced coordinates instead of in cartesian coordinates.
+    The suggested first guess of dtion is 0.03.
+    **Purpose:** Relaxation
+    **Cell optimization:** Yes (if [[optcell]]/=0)
+    **Related variables:** The initial time step [[dtion]]
+
+  * "lbfgs" --> Conduct structural optimization using the Limited-memory
+    Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS) [[cite:Nocedal1980]].
+    The routines are based on the original implementation by J. Nocedal available on netlib.org.
+    This algorithm can be much better than the native implementation of BFGS in ABINIT (**ionmov** = 2)
+    when one approaches convergence, perhaps because of better treatment of numerical details.
+    **Purpose:** Structural optimization
+    **Cell optimization:** Yes (if [[optcell]]/=0)
+""",
+),
+
+Variable(
     abivarname="get1den",
     varset="files",
     vartype="integer",
@@ -7912,8 +7982,6 @@ No meaning for RF calculations.
   * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS).
   This is much more efficient for structural optimization than viscous damping, when there are
   less than about 10 degrees of freedom to optimize.
-  Another version of the BFGS is available with **ionmov** == 22, and is apparently more robust and
-  efficient than **ionmov** == 2.
   **Purpose:** Structural optimization
   **Cell optimization:** Yes (if [[optcell]]/=0)
 
@@ -10656,6 +10724,77 @@ Used in the algorithm Linear Combination of Constrained DFT Energies, that is, w
 This array gives, for each one of the [[nimage]] images, the factor
 by which the total energies for systems with same geometry but different electronic structures (occupation numbers) are linearly combined.
 The sum of these factors must equal 1.
+""",
+),
+
+Variable(
+    abivarname="moldyn",
+    varset="rlx",
+    vartype="string",
+    topics=['MolecularDynamics_compulsory'],
+    dimensions="scalar",
+    defaultval="none",
+    mnemonics="MOLecular DYNamics",
+    added_in_version="10.3",
+    text=r"""
+Choice of algorithm for the molecular dynamics simulation, and possibly changes of cell shape and size (see [[optcell]]).
+
+  * "none" --> Do not move ions (**default behaviour**)
+
+  * "nve_verlet" --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81].
+  The only related parameter is the time step ([[dtion]]).
+  **Purpose:** Molecular dynamics
+  **Cell optimization:** No (Use [[optcell]] = 0 only)
+  **Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+
+  * "nvt_isokin" --> Isokinetic ensemble molecular dynamics.
+    The equation of motion of the ions in contact with a thermostat are solved with the
+    algorithm proposed in [[cite:Zhang1997]], as worked out in [[cite:Minary2003]].
+    The conservation of the kinetic energy is obtained within machine precision at each step.
+    As in [[cite:Evans1983]], when there is no fixing of atoms, the number of degrees of freedom in which the
+    microscopic kinetic energy is hosted is 3*[[natom]] - 4.
+    Indeed, the total kinetic energy is constrained, which accounts for
+    minus one degree of freedom (also mentioned in [[cite:Minary2003]]), but also there are three degrees of freedom
+    related to the total momentum in each direction, that cannot be counted as microscopic degrees of freedom, since the
+    total momentum is also preserved (but this is not mentioned in [[cite:Minary2003]]).
+    When some atom is fixed in one or more direction,
+    e.g. using [[natfix]], [[natfixx]], [[natfixy]], or [[natfixz]], the number of degrees of freedom is decreased accordingly,
+    albeit taking into account that the total momentum is not preserved
+    anymore (e.g. fixing the position of one atom gives 3*natom-4, like in the non-fixed case).
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case
+    the velocities [[vel]] are not initialized, or all initialized to zero.
+
+  * "nvt_nose" --> Isothermal/isochoric ensemble. The equation of motion of the ions in contact with a thermostat
+    with the algorithm proposed in [[cite:Martyna1996]].
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** No (Use [[optcell]] = 0 only)
+    **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+
+  * "npt_martyna" --> Isothermal/isobaric ensemble. The equation of motion of the ions in contact with a thermostat
+    and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
+    If optcell=1, the mass of the barostat ([[bmass]]) must be given in addition.
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** Yes (Use [[optcell]] = 1 only)
+    **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+
+  * "nst_martyna" --> Isothermal/isobaric ensemble. The equation of motion of the ions in contact with a thermostat
+    and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
+    If optcell=2, the mass of the barostat ([[bmass]]) must be given in addition.
+    **Purpose:** Molecular dynamics
+    **Cell optimization:** Yes (Use [[optcell]] = 2 only)
+    **Related variables:** The time step ([[dtion]]), the temperatures ([[mdtemp]]),
+    the number of thermostats ([[nnos]]), and the masses of thermostats ([[qmass]]).
+
+  * "nve_velverlet" --> Simple constant energy molecular dynamics using
+   the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]].
+   The only related parameter is the time step ([[dtion]]).
+   **Purpose:** Molecular dynamics
+   **Cell optimization:** No (Use [[optcell]] = 0 only)
+   **Related variables:** time step [[dtion]]
 """,
 ),
 
