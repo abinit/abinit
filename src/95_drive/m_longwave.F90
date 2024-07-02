@@ -164,9 +164,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  type(wffile_type) :: wffgs,wfftgs
  !arrays
  integer :: ngfft(18),ngfftf(18),perm(6)
- real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
+ real(dp) :: dummy6(6),other_dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3)
  real(dp) :: rmet(3,3),rprimd(3,3),rprimd_for_kg(3,3)
  real(dp) :: strsxc(6)
+ real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
+ real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  integer,allocatable :: atindx(:),atindx1(:)
  integer,allocatable :: blkflg(:,:,:,:,:,:),blkflg_car(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
@@ -178,9 +180,9 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: d3etot_nv(:,:,:,:,:,:,:),doccde(:)
  real(dp),allocatable :: eigen0(:),ffnl(:,:,:,:,:),ffnl_i(:,:,:,:,:)
  real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
- real(dp),allocatable :: phnons(:,:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
+ real(dp),allocatable :: phnons(:,:,:),ph1d(:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
 ! real(dp),allocatable :: symrel_cart(:,:,:)
- real(dp),allocatable :: work(:),xccc3d(:)
+ real(dp),allocatable :: dummy_vpsp(:)mwork(:),xccc3d(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
@@ -502,23 +504,38 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if ! getden
 ! ABI_FREE(cg)
 
+!Generate the 1-dimensional phases
+ ABI_MALLOC(ph1d,(2,3*(2*mgfft+1)*dtset%natom))
+ call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
+
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
 !driver.
  n3xccc=0;if (psps%n1xccc/=0) n3xccc=nfftf
  ABI_MALLOC(xccc3d,(n3xccc))
- coredens_method=2
- if (coredens_method==2.and.psps%n1xccc/=0) then
-   option=1
+ if (psps%n1xccc/=0) then 
    ABI_MALLOC(dummy_dyfrx2,(3,3,natom)) ! dummy
-   ABI_MALLOC(vxc,(0,0)) ! dummy
-   ABI_MALLOC(grxc,(3,natom))
-   call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
-&   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+   if (psps%nc_xccc_gspace==1) then
+     ABI_MALLOC(dummy_vpsp,(nfftf))
+     optatm=1;optdyfr=0;opteltfr=0;optgr=0;optstr=0;optv=0;optn=n3xccc/nfftf;optn2=1
+     call atm2fft(atindx1,xccc3d,dummy_vpsp,dummy_dyfrx2,dum_dyfrv,dum_eltfrxc,dum_gauss,gmet,gprimd,&
+  &   dum_grn,dum_grv,gsqcut,mgfftf,psps%mqgrid_vl,natom,nattyp,nfftf,ngfftf,&
+  &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
+  &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
+     
+     ABI_FREE(dummy_vpsp,(nfftf))
+   end if 
+   if (psps%nc_xccc_gspace==0) then
+     option=1
+     ABI_MALLOC(vxc,(0,0)) ! dummy
+     ABI_MALLOC(grxc,(3,natom))
+     call mkcore(dummy6,dummy_dyfrx2,grxc,mpi_enreg,natom,nfftf,dtset%nspden,ntypat,&
+  &   ngfftf(1),psps%n1xccc,ngfftf(2),ngfftf(3),option,rprimd,dtset%typat,ucvol,vxc,&
+  &   psps%xcccrc,psps%xccc1d,xccc3d,xred)
+     ABI_FREE(vxc) ! dummy
+     ABI_FREE(grxc) ! dummy
+   end if
    ABI_FREE(dummy_dyfrx2) ! dummy
-   ABI_FREE(vxc) ! dummy
-   ABI_FREE(grxc) ! dummy
  end if
 
 !Set up xc potential. Compute kxc here.
@@ -680,7 +697,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 & hdr,kg,kxc,dtset%mband,dtset%mgfft,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
-& pawfgr,pawtab,&
+& pawfgr,pawtab,ph1d,&
 & psps,rfpert,rhog,rhor,rmet,rprimd,ucvol,useylmgr,xred,ylm,ylmgr)
 
 !Merge stationay and nonvariational contributions
