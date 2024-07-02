@@ -197,7 +197,7 @@ the relaxation (with the `tpositron_4.abi` input file) of the vacancy by issuing
     abinit tpositron_4.abi >& log
 
 In this calculation we switched on the atomic relaxation by setting
-[[ionmov]] = 2. We need to calculate forces to be able to move the atoms, so we
+[[geoopt]] = "bfgs". We need to calculate forces to be able to move the atoms, so we
 set [[optforces]] = 1. In the provided `tpositron_4.abi` file, we only perform 4
 relaxation steps ([[ntime]] = 4) to save time, but more steps would be needed to
 converge the positron lifetime.
