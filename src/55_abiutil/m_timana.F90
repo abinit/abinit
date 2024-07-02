@@ -9,7 +9,7 @@
 !! a detailed analysis of the time-consuming routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2024 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,7 +143,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer :: aslot,bslot,cslot,flag_count,flag_write,ierr,ii,ikpt,ipart
  integer :: ilist,isort,islot,isppol,itim,itimab,ltimab,maxii,me
  integer :: npart,nlist,nothers,nproc,nthreads,return_ncount
- integer(i8b) :: npwmean,npwnbdmean
+ integer(i8b) :: nbdmean,npwmean,npwnbdmean
  integer :: spaceworld,temp_list,totcount,tslot,utimab,ount
  real(dp) :: cpunm,lflops,other_cpu,other_wal,percent_limit,subcpu,subwal,timab_cpu,timab_wall,wallnm
  character(len=500) :: msg
@@ -168,19 +168,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  call timab(49,1,tsec)
 
 !The means are computed as integers, for later compatibility
- npwmean=0; npwnbdmean=0
+ nbdmean=0; npwmean=0; npwnbdmean=0
  do isppol=1,nsppol
    do ikpt=1,nkpt
      npwmean=npwmean+npwtot(ikpt)
      npwnbdmean=npwnbdmean+npwtot(ikpt)*nband(ikpt+(isppol-1)*nkpt)
+     nbdmean=nbdmean+nband(ikpt+(isppol-1)*nkpt)
    end do
  end do
 
  ! initialize ftime, valgrind complains on line 832 = sum up of all Gflops
  ftimes=zero
 
- npwmean=dble(npwmean)/dble(nkpt*nsppol)
- npwnbdmean=dble(npwnbdmean)/dble(nkpt*nsppol)
+ npwmean=int(dble(npwmean)/dble(nkpt*nsppol))
+ npwnbdmean=int(dble(npwnbdmean)/dble(nkpt*nsppol))
+ nbdmean=int(dble(nbdmean)/dble(nkpt*nsppol))
 
 !List of timed subroutines, eventual initialisation of the number of data, and declaration of a slot as being "basic"
 !Channels 1 to 299 are for optdriver=0 (GS), 1 (RF) and 2 (Suscep), at random
@@ -789,19 +791,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1021)='get_dtsets_pspheads(pspheads)   ';
  names(1022)='get_dtsets_pspheads(indefo)     ';
  names(1023)='get_dtsets_pspheads(invars2m)   ';
- 
- names(1091)='listkk                          '; basic(1091) = 1
 
- names(1100)='nonlop_ylm                      '
- names(1101)='nlo_ylm%opernla                 '
- names(1102)='nlo_ylm%opernla_mv              '
- names(1103)='nlo_ylm%opernlb                 '
- names(1104)='nlo_ylm%opernlb_mv              '
- names(1105)='nlo_ylm%opernlc                 '
- names(1106)='nlo_ylm%opernld                 '
- names(1107)='nlo_ylm%opernld(l)              '
- names(1108)='nlo_ylm%opernld(l+im)           '
- names(1119)='nlo_ylm(other)                  '
+ names(1091)='listkk                          '; basic(1091) = 1
 
  names(1150)='outscfcv                        '
  names(1151)='outscfcv(preparation)           '
@@ -938,30 +929,30 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1502)='fock_updatecwaveocc             '; basic(1502)=1
  names(1503)='fock_updatecwaveocc(MPI)        '; ! 100 % nested inside 1502
 
- names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507 
+ names(1504)='fock_getghc                     '; !1504 = 1505 + 1506 + 1507
  names(1505)='fock_getghc(init)               '; ! 100 % nested inside 1504
  names(1506)='fock_getghc-kmu_loop            '; ! 100 % nested inside 1504, 1506 = 1521+ ... 1528
  names(1507)='fock_getghc(post-k)             '; ! 100 % nested inside 1504
- names(1512)='fock_getghc(fourwf)             ' 
- names(1513)='fock_getghc(fourdp)             ' 
- names(1514)='fock_getghc(nonlop)             ' 
+ names(1512)='fock_getghc(fourwf)             '
+ names(1513)='fock_getghc(fourdp)             '
+ names(1514)='fock_getghc(nonlop)             '
  names(1515)='fock_getghc(/=fourXX,nonlop)    ';  basic(1515)=1  ! ulterior slot for test
 
 !Partitioning of the loop on k points inside fock_getghc (1506)
- names(1521)='fock_getghc(init k loop)        '   
- names(1522)='fock_getghc(j loop fourwf)      '   
- names(1523)='fock_getghc(calc_rhor_munu)     '  
- names(1524)='fock_getghc(calc_rhog_munu)     '  
- names(1525)='fock_getghc(calc_vloc)          '  
+ names(1521)='fock_getghc(init k loop)        '
+ names(1522)='fock_getghc(j loop fourwf)      '
+ names(1523)='fock_getghc(calc_rhor_munu)     '
+ names(1524)='fock_getghc(calc_rhog_munu)     '
+ names(1525)='fock_getghc(calc_vloc)          '
  names(1526)='fock_getghc(calc_dij_fock_hat)  '
  names(1527)='fock_getghc(calc_vlocpsi)       '
  names(1528)='fock_getghc(clean k loop)       '
 
 !Partitioning in small blocs without fourXX and nonlop. One has to add 1521, 1523, 1527, 1528
  names(1541)='fock_getghc(init wo fourwf)     '; !related to 1505
- names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522  
- names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524  
- names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525  
+ names(1542)='fock_getghc(j loop wo fourwf)   '; !related to 1522
+ names(1544)='fock_getghc(calc_rhog_munu wo fo'; !related to 1524
+ names(1545)='fock_getghc(calc_vloc wo fourXX)'; !related to 1525
  names(1546)='fock_getghc(calc_dij_fock_hat wo'; !related to 1526
  names(1547)='fock_getghc(post-k wo fourXX+MPI'; !related to 1507
  names(1548)='fock_getghc(post-k xmpi_sum)    '; !related to 1507
@@ -1012,15 +1003,14 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  names(1651) = 'lobpcg_init                    '
  names(1652) = 'lobpcg_free                    '
- names(1653) = 'lobpcg_run                     '
+! names(1653) = 'lobpcg_run                     '
  names(1654) = 'lobpcg_getAX_BX                '
  names(1655) = 'lobpcg_orthoWrtPrev            '
- names(1656) = 'lobpcg_Bortho                  '
- names(1657) = 'lobpcg_RayleighRitz            '
+! names(1656) = 'lobpcg_Bortho                  '
+! names(1657) = 'lobpcg_RayleighRitz            '
  names(1658) = 'lobpcg_maxResidu               '
  names(1659) = 'lobpcg_run@getAX_BX            '
  names(1660) = 'lobpcg_pcond                   '
- names(1661) = 'lobpcg_RayleighRitz@hegv       '
 
  ! xg_t
  names(1662) = 'xgTransposer_transpose@ColsRows'
@@ -1031,9 +1021,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1667) = 'xgTransposer_init              '
  names(1668) = 'xgTransposer_free              '
  names(1669) = 'xgTransposer_transpose         '
- names(1670) = 'xgBlock_potrf                  '
+ names(1670) = 'xgBlock_gemm(blas)             '
  names(1671) = 'xgBlock_trsm                   '
- names(1672) = 'xgBlock_gemm(blas)             '
+ names(1672) = 'xgBlock_potrf                  '
  names(1673) = 'xgBlock_set                    '
  names(1674) = 'xgBlock_get                    '
  names(1675) = 'xgBlock_heev                   '
@@ -1126,27 +1116,25 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1750) = 'chebfiwf2                     '; basic(1750) = 1
  names(1751) = 'chebfi2_init                  '
  names(1752) = 'chebfi2_free                  '
- names(1753) = 'chebfi2_run                   '
+! names(1753) = 'chebfi2_run                   '
  names(1754) = 'chebfi2_getAX_BX              '
  names(1755) = 'chebfi2_invovl                '
  names(1756) = 'chebfi2_residu                '
  names(1757) = 'chebfi2_RayleighRitz          '
- names(1758) = 'chebfi2_pcond                 '
+! names(1758) = 'chebfi2_pcond                 '
  names(1759) = 'chebfi2_RR_q                  '
  names(1760) = 'chebfi2_next_p                '
  names(1761) = 'chebfi2_swap                  '
  names(1762) = 'chebfi2_amp_f                 '
  names(1763) = 'chebfi2_alltoall              '
- names(1764) = 'chebfi2_RR@hegv               '
- names(1765) = 'chebfi2_RR@scale              '
- names(1766) = 'chebfi2_RR@XNP_reset          '
- names(1767) = 'chebfi2_RR@gemm_1             '
- names(1768) = 'chebfi2_RR@gemm_2             '
  names(1769) = 'chebfi2_X_NP@init             '
  names(1770) = 'chebfi2_AX_BX@init            '
 
  names(1780)='ctgk_rotate'; basic(1780) = 1
 
+ names(1795) = 'RayleighRitz@diago            '; ndata(1795) = nbdmean*nbdmean
+ names(1796) = 'RayleighRitz@gemm_1           '
+ names(1797) = 'RayleighRitz@gemm_2           '
 
  ! DVDB object
  names(1800)='dvdb_new                        '; basic(1800) = 1
@@ -1419,9 +1407,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    case(44)
 !      Estimate the complement of dmft (in vtorho, only)
      tslots(:9)=(/-626, 991,-620,-621,-622,-623,-624,-625,-627/)
-   case(45)
-!      Estimate the complement of nonlop_ylm
-     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
+!   case(45)
+!!      Estimate the complement of nonlop_ylm
+!     tslots(:10)=(/1119,1100,-1101,-1102,-1103,-1104,-1105,-1106,-1107,-1108/)
    case(46)
 !      Sum the calls of getcprj
      tslots(:4)=(/1290,1293,1294,1295/)
@@ -1805,7 +1793,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(54)
          list(:11)=(/1504,1505,(ii,ii=1521,1528,1),1507/)            ; msg='fock_getghc small blocs'
        case(55)
-         list(:15)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547,1548/) 
+         list(:15)=(/1504,1512,1513,1514,1541,1521,1542,1523,1544,1545,1546,1527,1528,1547,1548/)
              msg='fock_getghc small blocs + fourXX,  nonlop, xmpi_sum '
        case(60)
          list(:13)=(/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/) ; msg = 'chebfi'
@@ -1822,17 +1810,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(74)
          list(:7)=(/ (ii,ii=1741,1747,1) /)              ; msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
-         list(:20)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1661,1)/)     ; msg='lobpcgwf2 core engine '
+         list(:19)=(/ (ii,ii=1640,1648,1), (ii,ii=1651,1660,1)/)     ; msg='lobpcgwf2 core engine '
        case(76)
-         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
+         list(:12)=(/1750,1751,1752,1754,1755,1756,1757,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/) ; msg='low-level xgScalapack type '
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/) ; msg='low-level xgTransposer type '
        case(79)
          list(:12)=(/1300,1293,1302,1303,1304,1305,1363,1370,351,211,880,1301/) ; msg='cgwf_cprj'
-       case(80)
-         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
+!       case(80)
+!         list(:10)=(/1100,1101,1102,1103,1104,1105,1106,1107,1108,1119/) ; msg='nonlop_ylm'
        case(81)
          list(:5)=(/1290,1293,1294,1295,1299/) ; msg='getcprj'
        case(82)
@@ -1840,7 +1828,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        case(83)
          list(:5)=(/1370,235,1371,1372,1375/)  ; msg='getchc'
        case(84)
-         list(:14)=(/1750,1751,1752,1753,1754,1755,1756,1757,1758,1759,1760,1761,1762,1763/) ; msg='chebfiwf2 core engine '
+         list(:19)=(/ (ii,ii=1670,1688,1) /)                         ; msg='low-level xgBlock type '
        case default
          cycle ! This allows one to disable temporarily some partitionings
 
@@ -1998,8 +1986,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if
      end do
 
-     nlist=6
-     list(:nlist)=(/1661,1764,1765,1766,1767,1768/)
+     nlist=3
+     list(:nlist)=(/1795,1796,1797/)
      flag_write=1
      do ilist=1,nlist
        isort = list(ilist)
@@ -2021,8 +2009,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
         ' Detailed analysis of some time consuming routines ',&
         '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
         '                                 (sec)                (msec)              (microsec)'
-       nlist=10
-       list(:nlist)=(/802,803,9,75,76,77,210,11,1661,1764/)
+       nlist=9
+       list(:nlist)=(/802,803,9,75,76,77,210,11,1795/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then

@@ -3,7 +3,7 @@
 !! m_hamiltonian
 !!
 !! FUNCTION
-!!  This module provides the definition of the gs_hamiltonian_type and rf_hamiltonian_type
+!!  This module provides the definition of the gs_hamiltonian_type and of the rf_hamiltonian_type
 !!  datastructures used in the "getghc" and "getgh1c" routines to apply the Hamiltonian (or
 !!  its derivative) on a wavefunction.
 !!  Methods to initialize or destroy the objects are defined here.
@@ -14,7 +14,7 @@
 !!  Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -545,6 +545,11 @@ module m_hamiltonian
    ! vlocal1(cplex*n4,n5,n6,nvloc)
    ! 1st-order local potential in real space, on the augmented fft grid
 
+  real(dp), pointer :: vxctaulocal(:,:,:,:,:) => null()
+   ! vxctaulocal(n4,n5,n6,nvloc,4)
+   ! derivative of XC energy density with respect to kinetic energy density,
+   ! in real space, on the augmented fft grid
+
  contains
    procedure :: free => destroy_rf_hamiltonian
     ! Free the memory in the RF Hamiltonian
@@ -700,7 +705,7 @@ end subroutine destroy_hamiltonian
 !!  rprimd(3,3)=Direct lattice vectors in Bohr.
 !!  typat(natom)=Type of each atom.
 !!  [usecprj]=flag use only for PAW; 1 if cprj datastructure is allocated
-!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)  
+!!  [gpu_option] = GPU implementation to use, i.e. cuda, openMP, ... (0=not using GPU)
 !!  xred(3,natom)=Reduced coordinates of the atoms.
 !!  pawtab(ntypat*psps%usepaw)<pawtab_type>=PAW TABulated data initialized at start.
 !!  [paw_ij(:) <type(paw_ij_type)>]=optional, paw arrays given on (i,j) channels
@@ -1541,6 +1546,7 @@ subroutine destroy_rf_hamiltonian(rf_Ham)
  if (associated(rf_Ham%ddkinpw_kp)) nullify(rf_Ham%ddkinpw_kp)
  if (associated(rf_Ham%vectornd)) nullify(rf_Ham%vectornd)
  if (associated(rf_Ham%vlocal1)) nullify(rf_Ham%vlocal1)
+ if (associated(rf_Ham%vxctaulocal)) nullify(rf_Ham%vxctaulocal)
  if (associated(rf_Ham%e1kbfr)) nullify(rf_Ham%e1kbfr)
  if (associated(rf_Ham%e1kbsc)) nullify(rf_Ham%e1kbsc)
 
@@ -1718,6 +1724,7 @@ end subroutine init_rf_hamiltonian
 !!  [vectornd(n4,n5,n6,nvloc)]=optional, vector potential of nuclear magnetic dipoles in real space in
 !!   ddk direction idir
 !!  [vlocal1(cplex*n4,n5,n6,nvloc)]=optional, 1st-order local potential in real space
+!!  [vxctaulocal(n4,n5,n6,nvloc,4)]=optional, deriv of e_XC wrt kin energy, for mGGA
 !!  [with_nonlocal]=optional, true if non-local factors have to be loaded
 !!
 !! SIDE EFFECTS
@@ -1726,7 +1733,7 @@ end subroutine init_rf_hamiltonian
 !!
 !! SOURCE
 
-subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,with_nonlocal)
+subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,vxctaulocal,with_nonlocal)
 
 !Arguments ------------------------------------
 !scalars
@@ -1736,6 +1743,7 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,with_nonlocal
 !arrays
  real(dp),optional,target,intent(in) :: vlocal1(:,:,:,:)
  real(dp),optional,target,intent(in) :: vectornd(:,:,:,:)
+ real(dp),optional,target,intent(in) :: vxctaulocal(:,:,:,:,:)
 
 !Local variables-------------------------------
 !scalars
@@ -1755,6 +1763,11 @@ subroutine load_spin_rf_hamiltonian(rf_Ham,isppol,vectornd,vlocal1,with_nonlocal
  if (present(vectornd)) then
    ABI_CHECK(size(vectornd)==rf_Ham%cplex*rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc,"Wrong vectornd")
    rf_Ham%vectornd => vectornd
+ end if
+
+ if (present(vxctaulocal)) then
+    ABI_CHECK(size(vxctaulocal)==rf_Ham%n4*rf_Ham%n5*rf_Ham%n6*rf_Ham%nvloc*4,"Wrong vxctaulocal")
+    rf_Ham%vxctaulocal => vxctaulocal
  end if
 
  ! Retrieve non-local factors for this spin component

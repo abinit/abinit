@@ -21,6 +21,7 @@ nav:
     #- NewUser: guide/new_user.md
     - NewUser: index.md
     - Abinit: guide/abinit.md
+    - Abitk: guide/abitk.md
     - Aim: guide/aim.md
     - Anaddb: guide/anaddb.md
     - aTDEP: guide/atdep.md
@@ -39,6 +40,7 @@ nav:
         - CentOS: INSTALL_CentOS.md
         - EasyBuild: INSTALL_EasyBuild.md
         - GPUs: INSTALL_gpu.md
+# The topics should be declared both in this file and in abimkdocs/variables.py
 - Topics:
     - Features: topics/features.md
     - Topic List: topics/index.md
@@ -89,6 +91,7 @@ nav:
     - topics/GWR.md
     - topics/GWls.md
     - topics/Hybrids.md
+    - topics/Install.md
     - topics/k-points.md
     - topics/LatticeModel.md
     - topics/LatticeWannier.md
@@ -101,6 +104,7 @@ nav:
     - topics/MagMom.md
     - topics/MolecularDynamics.md
     - topics/multidtset.md
+    - topics/NMR.md
     - topics/nonlinear.md
     - topics/Optic.md
     - topics/Output.md
@@ -180,7 +184,7 @@ nav:
     - Polarization & finite field : tutorial/polarization.md
     - DFPT1: tutorial/rf1.md
     - DFPT2: tutorial/rf2.md
-    - parallelism: tutorial/basepar.md
+    - Parallelism: tutorial/basepar.md
     - ABINIT postprocessors:
         - aTDEP1: tutorial/atdep1.md
         #- aTDEP2: tutorial/atdep2.md
@@ -345,7 +349,7 @@ extra_css:
 extra_javascript:
     - extra_javascript/abidocs.js
 
-copyright: Copyright &copy; 2020-2021 The Abinit Group
+copyright: Copyright &copy; 2020-2024 The Abinit Group
 
 google_analytics: ['UA-116681470-1', 'docs.abinit.org']
 

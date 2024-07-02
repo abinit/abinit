@@ -6,7 +6,7 @@
 !!  Procedures for computing densities from KS orbitals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SM, VR, FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -903,14 +903,14 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !Add extfpmd free electrons contribution to density
  if(present(extfpmd)) then
    if(associated(extfpmd)) then
-     if(extfpmd%version==1.or.extfpmd%version==2.or.extfpmd%version==3.or.extfpmd%version==4) then
-       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
-     else if(extfpmd%version==10) then
+     if(extfpmd%version==10) then
        do ispden=1,dtset%nspden
          do ifft=1,dtset%nfft
            rhor(ifft,ispden)=rhor(ifft,ispden)+extfpmd%nelectarr(ifft,ispden)/ucvol/dtset%nspden
          end do
        end do
+     else
+       rhor(:,:)=rhor(:,:)+extfpmd%nelect/ucvol/dtset%nspden
      end if
      rhog(1,1)=rhog(1,1)+extfpmd%nelect/ucvol/dtset%nspden
    end if

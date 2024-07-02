@@ -3,6 +3,7 @@
 #
 set(45_xgTools_SRC
   m_xg.F90
+  m_xg_ortho_RR.F90
   m_xgScalapack.F90
   m_xgTransposer.F90
   )
@@ -18,6 +19,7 @@ target_include_directories(45_xgTools
   PRIVATE
   ${CMAKE_BINARY_DIR}
   ${CMAKE_SOURCE_DIR}/shared/common/src/incs
+  ${CMAKE_SOURCE_DIR}/src/incs
   PUBLIC
   ${CMAKE_CURRENT_BINARY_DIR}/modules
   )
@@ -28,6 +30,7 @@ target_compile_definitions(45_xgTools
 
 target_link_libraries(45_xgTools
   PUBLIC
+  abinit::44_abitools
   abinit::44_abitypes_defs)
 
 if(ABINIT_ENABLE_GPU_CUDA AND ABINIT_KOKKOS_WANTED)

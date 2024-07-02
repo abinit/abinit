@@ -12,7 +12,7 @@ module m_lobpcg2
 
   use m_xg
   use m_xgTransposer
-  use m_xgScalapack
+  use m_xg_ortho_RR
   use defs_basis
   use m_abicore
   use m_errors
@@ -39,34 +39,17 @@ module m_lobpcg2
   integer, parameter :: VAR_WP  = 1011
   integer, parameter :: VAR_XWP = 1100
 
-  integer, parameter :: EIGENVX = 1
-  integer, parameter :: EIGENVD = 2
-  integer, parameter :: EIGENV = 3
-  integer, parameter :: EIGENPVX = 4
-  integer, parameter :: EIGENPVD = 5
-  integer, parameter :: EIGENPV = 6
-  integer, parameter :: EIGENEVD = 7
-  integer, parameter :: EIGENEV = 8
-  integer, parameter :: EIGENPEVD = 9
-  integer, parameter :: EIGENPEV = 10
-  integer, parameter :: EIGENSLK = 11
-  logical, parameter :: EIGPACK(11) = &
-    (/ .false.,.false.,.false., &
-       .true. ,.true. ,.true. ,&
-       .false.,.false.,&
-       .true. ,.true., .false.  /)
-
   integer, parameter :: tim_init     = 1651
   integer, parameter :: tim_free     = 1652
-  integer, parameter :: tim_run      = 1653
+!  integer, parameter :: tim_run      = 1653
   integer, parameter :: tim_getAX_BX = 1654
   integer, parameter :: tim_ortho    = 1655
-  integer, parameter :: tim_Bortho   = 1656
-  integer, parameter :: tim_RR       = 1657
+!  integer, parameter :: tim_Bortho   = 1656
+!  integer, parameter :: tim_RR       = 1657
   integer, parameter :: tim_maxres   = 1658
   integer, parameter :: tim_ax_bx    = 1659
   integer, parameter :: tim_pcond    = 1660
-  integer, parameter :: tim_hegv     = 1661
+!  integer, parameter :: tim_hegv     = 1661
 
   integer, parameter :: tim_Bortho_X    = 1641
   integer, parameter :: tim_Bortho_XW   = 1642
@@ -76,14 +59,6 @@ module m_lobpcg2
   integer, parameter :: tim_RR_XW       = 1646
   integer, parameter :: tim_RR_XWP      = 1647
   integer, parameter :: tim_RR_Xall     = 1648
-
-#ifdef HAVE_OPENMP
-  integer, save :: eigenSolver = EIGENVD     ! Type of eigen solver to use
-#else
-  integer, save :: eigenSolver = EIGENVX     ! Type of eigen solver to use
-#endif
-  !double precision, save :: eigenSolverTime(10) = tiny(0.d0)      ! Store time for each solver
-  !double precision, save :: eigenSolverCount(10) = 0      ! Store time for each solver
 
   type, public :: lobpcg_t
     logical :: is_nested                     ! For OpenMP nested region
@@ -173,7 +148,6 @@ module m_lobpcg2
   public :: lobpcg_memInfo
   public :: lobpcg_run
   public :: lobpcg_free
-  public :: lobpcg_getAX_BX
 
   contains
 
@@ -388,12 +362,10 @@ module m_lobpcg2
     integer :: iblock, nblock
     integer :: iline, nline
     integer :: rows_tmp, cols_tmp, nband_eff, iband_min, iband_max
-    integer :: RR_var,RR_tim
     type(xgBlock_t) :: eigenBlock   !
     type(xgBlock_t) :: residuBlock,occBlock
-    type(xgBlock_t):: RR_eig ! Will be eigenvaluesXN
     double precision :: maxResidu, minResidu
-    double precision :: dlamch
+    double precision :: dlamch,tolerance
     integer :: ierr = 0
     integer :: nrestart
     double precision :: tsec(2)
@@ -411,16 +383,17 @@ module m_lobpcg2
       end subroutine getAX_BX
     end interface
     interface
-      subroutine pcond(W,gpu_option)
+      subroutine pcond(W)
         use m_xg, only : xgBlock_t
         type(xgBlock_t), intent(inout) :: W
-        integer, intent(in) :: gpu_option
       end subroutine pcond
     end interface
 
-    call timab(tim_run,1,tsec)
+!    call timab(tim_run,1,tsec)
 
     lobpcg%prtvol = prtvol
+
+    tolerance=2*dlamch('E')
 
     blockdim = lobpcg%blockdim
     blockdim2 = 2*blockdim
@@ -463,14 +436,11 @@ module m_lobpcg2
 
     lobpcg%AllX0 = X0
 
-    call xg_init(residu_eff,SPACE_R,blockdim,1)
+    call xg_init(residu_eff,SPACE_R,blockdim,1,gpu_option=ABI_GPU_DISABLED)
 
     if ( lobpcg%paral_kgb == 1 ) then
       call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
-      !call xgTransposer_constructor(lobpcg%xgTransposerX,lobpcg%X,lobpcg%XColsRows,nspinor,&
-      !  lobpcg%nproc_rows,lobpcg%nproc_cols,STATE_LINALG,TRANS_GATHER)
-
+        STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0,gpu_option=lobpcg%gpu_option)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerAX,lobpcg%xgTransposerX,&
         lobpcg%AX,lobpcg%AXColsRows,STATE_LINALG)
       call xgTransposer_copyConstructor(lobpcg%xgTransposerBX,lobpcg%xgTransposerX,&
@@ -509,8 +479,6 @@ module m_lobpcg2
 
       if (lobpcg%paral_kgb == 1) then
         call xgTransposer_transpose(lobpcg%xgTransposerX,STATE_COLSROWS)
-        !call xgTransposer_transpose(lobpcg%xgTransposerAX,STATE_COLSROWS)
-        !call xgTransposer_transpose(lobpcg%xgTransposerBX,STATE_COLSROWS)
         lobpcg%xgTransposerAX%state=STATE_COLSROWS
         lobpcg%xgTransposerBX%state=STATE_COLSROWS
       end if
@@ -525,10 +493,10 @@ module m_lobpcg2
       end if
 
       ! B-orthonormalize X, BX and AX
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_X) ! true to rotate AX as well
+      call xg_Borthonormalize(lobpcg%X,lobpcg%BX,ierr,tim_Bortho_X,lobpcg%gpu_option,AX=lobpcg%AX)
 
       ! Do first RR on X to get the first eigen values
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigenvaluesN,ierr,tim_RR_X)
+      call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvaluesN,ierr,lobpcg%prtvol,tim_RR_X,lobpcg%gpu_option)
 
       compute_residu = .true.
 
@@ -547,16 +515,16 @@ module m_lobpcg2
 
         ! Apply preconditioner
         call timab(tim_pcond,1,tsec)
-        call pcond(lobpcg%W,lobpcg%gpu_option)
+        call pcond(lobpcg%W)
         call timab(tim_pcond,2,tsec)
 
         ! Compute residu norm here !
         call timab(tim_maxres,1,tsec)
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         call timab(tim_maxres,2,tsec)
 
-        if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
+          ! There is a transfer from GPU to CPU in this copy
           call xgBlock_copy(residuBlock,residu_eff%self)
           iband_min = 1 + blockdim*(iblock-1)
           iband_max = blockdim*iblock
@@ -586,8 +554,6 @@ module m_lobpcg2
 
         if (lobpcg%paral_kgb == 1) then
           call xgTransposer_transpose(lobpcg%xgTransposerW,STATE_COLSROWS)
-          !call xgTransposer_transpose(lobpcg%xgTransposerAW,STATE_COLSROWS)
-          !call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_COLSROWS)
           lobpcg%xgTransposerAW%state=STATE_COLSROWS
           lobpcg%xgTransposerBW%state=STATE_COLSROWS
         end if
@@ -601,50 +567,55 @@ module m_lobpcg2
           call xgTransposer_transpose(lobpcg%xgTransposerBW,STATE_LINALG)
         end if
 
-        ! B-orthonormalize W, BW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr) ! Do rotate AW
-        !call lobpcg_Borthonormalize(lobpcg,VAR_W,.true.,ierr) ! Do rotate AW
-
         ! DO RR in the correct subspace
         ! if residu starts to be too small, there is an accumulation error in
         ! P with values such as 1e-29 that make the eigenvectors diverge
         if ( iline == 1 .or. minResidu < 1e-27) then
           ! Do RR on XW to get the eigen vectors
-          call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
-          RR_var = VAR_XW
-          RR_tim = tim_RR_XW
-          call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
-          call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
-          call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
-          RR_eig = eigenvalues2N
+          call xg_Borthonormalize(lobpcg%XW,lobpcg%BXW,ierr,tim_Bortho_XW,lobpcg%gpu_option,AX=lobpcg%AXW) ! Do rotate AW
+          call xgBlock_zero(lobpcg%P)
+          call xgBlock_zero(lobpcg%AP)
+          call xgBlock_zero(lobpcg%BP)
           if ( ierr /= 0 ) then
-            ABI_COMMENT("This is embarrasing. Let's pray")
+            ABI_COMMENT("B-orthonormalization (XW) did not work.")
+          end if
+          call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+           & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
+           & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
+          if ( ierr /= 0 ) then
+            ABI_WARNING("RayleighRitz (XW) did not work, but continue anyway.")
+            exit
           end if
         else
           ! B-orthonormalize P, BP
-          call lobpcg_Borthonormalize(lobpcg,VAR_XWP,.true.,ierr,tim_Bortho_XWP) ! Do rotate AWP
+          call xg_Borthonormalize(lobpcg%XWP%self,lobpcg%BXWP%self,ierr,tim_Bortho_XWP,lobpcg%gpu_option,AX=lobpcg%AXWP%self) ! Do rotate AW
           ! Do RR on XWP to get the eigen vectors
           if ( ierr == 0 ) then
-            RR_var = VAR_XWP
-            RR_tim = tim_RR_XWP
-            RR_eig = eigenvalues3N%self
+            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues3N%self,ierr,lobpcg%prtvol,tim_RR_XWP,lobpcg%gpu_option,&
+           & tolerance=tolerance,XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
+           & AWP=lobpcg%AWP,BWP=lobpcg%BWP,XWP=lobpcg%XWP%self)
+            if ( ierr /= 0 ) then
+              ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
+              exit
+            end if
           else
-            call lobpcg_Borthonormalize(lobpcg,VAR_XW,.true.,ierr,tim_Bortho_XW) ! Do rotate AW
-            RR_var = VAR_XW
-            RR_tim = tim_RR_XW
-            RR_eig = eigenvalues2N
-            call xgBlock_zero(lobpcg%P, gpu_option=lobpcg%gpu_option)
-            call xgBlock_zero(lobpcg%AP, gpu_option=lobpcg%gpu_option)
-            call xgBlock_zero(lobpcg%BP, gpu_option=lobpcg%gpu_option)
+            ABI_COMMENT("B-orthonormalization (XWP) did not work, try on XW.")
+            call xg_Borthonormalize(lobpcg%XW,lobpcg%BXW,ierr,tim_Bortho_XW,lobpcg%gpu_option,AX=lobpcg%AXW) ! Do rotate AW
+            if ( ierr /= 0 ) then
+              ABI_COMMENT("B-orthonormalization (XW) did not work.")
+            end if
+            call xgBlock_zero(lobpcg%P)
+            call xgBlock_zero(lobpcg%AP)
+            call xgBlock_zero(lobpcg%BP)
             nrestart = nrestart + 1
+            call xg_RayleighRitz(lobpcg%X,lobpcg%AX,lobpcg%BX,eigenvalues2N,ierr,lobpcg%prtvol,tim_RR_XW,lobpcg%gpu_option,tolerance=tolerance,&
+           & XW=lobpcg%XW,AW=lobpcg%AW,BW=lobpcg%BW,P=lobpcg%P,AP=lobpcg%AP,BP=lobpcg%BP,WP=lobpcg%WP,&
+           & AWP=lobpcg%AWP,BWP=lobpcg%BWP)
+            if ( ierr /= 0 ) then
+              ABI_WARNING("RayleighRitz (XWP) did not work, but continue anyway.")
+              exit
+            end if
           end if
-          !RR_eig = eigenvalues3N%self
-        end if
-        !RR_eig = eigenvalues3N%self
-        call lobpcg_rayleighRitz(lobpcg,RR_var,RR_eig,ierr,RR_tim,2*dlamch('E'))
-        if ( ierr /= 0 ) then
-          ABI_WARNING("I could not make it. Sorry. However do not stop as at a later step things might work out.")
-          exit
         end if
 
         ABI_NVTX_END_RANGE()
@@ -654,9 +625,9 @@ module m_lobpcg2
         ! Recompute AX-Lambda*BX for the last time
         call lobpcg_getResidu(lobpcg,eigenvaluesN)
         ! Apply preconditioner
-        call pcond(lobpcg%W,lobpcg%gpu_option)
+        call pcond(lobpcg%W)
         ! Recompute residu norm here !
-        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock,gpu_option=lobpcg%gpu_option)
+        call xgBlock_colwiseNorm2(lobpcg%W,residuBlock)
         if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(residuBlock)
         if (nbdbuf>=0) then
           call xgBlock_copy(residuBlock,residu_eff%self)
@@ -686,7 +657,7 @@ module m_lobpcg2
 
       ! Save eigenvalues
       call xgBlock_setBlock(eigen,eigenBlock,iblock,blockdim,1)
-      call xgBlock_copy(eigenvaluesN,eigenBlock,gpu_option=lobpcg%gpu_option)
+      call xgBlock_copy(eigenvaluesN,eigenBlock)
 
       ! Save new X in X0
       call lobpcg_setX0(lobpcg,iblock)
@@ -707,7 +678,7 @@ module m_lobpcg2
     call xg_free(residu_eff)
 
     if ( ierr /= 0 ) then
-      ABI_COMMENT("But before that, I want to recalculate H|Psi> and S|Psi>")
+      ABI_COMMENT("Some errors happened, so H|Psi> and S|Psi> are computed before leaving")
       if ( lobpcg%paral_kgb == 1 ) then
         call xgTransposer_constructor(lobpcg%xgTransposerAllX0,lobpcg%AllX0,lobpcg%AllX0ColsRows,nspinor,&
           STATE_LINALG,TRANS_ALL2ALL,lobpcg%comm_rows,lobpcg%comm_cols,0,0)
@@ -740,12 +711,10 @@ module m_lobpcg2
     end if
 
     if ( nblock > 1 ) then
-      lobpcg%X = X0
-      lobpcg%AX = lobpcg%AllAX0%self
-      lobpcg%BX = lobpcg%AllBX0%self
-      lobpcg%blockdim = blockdim*nblock
-      call lobpcg_Borthonormalize(lobpcg,VAR_X,.true.,ierr,tim_Bortho_Xall) ! Do rotate AX
-      call lobpcg_rayleighRitz(lobpcg,VAR_X,eigen,ierr,tim_RR_Xall,2*dlamch('E'))
+      call xg_Borthonormalize(X0,lobpcg%AllBX0%self,ierr,tim_Bortho_Xall,&
+        & lobpcg%gpu_option,AX=lobpcg%AllAX0%self) ! Do rotate AX
+      call xg_RayleighRitz(X0,lobpcg%AllAX0%self,lobpcg%AllBX0%self,eigen,ierr,lobpcg%prtvol,tim_RR_Xall,&
+        & lobpcg%gpu_option,tolerance=tolerance)
     end if
 
     if ( lobpcg%paral_kgb == 1 ) then
@@ -757,7 +726,7 @@ module m_lobpcg2
       call xgTransposer_free(lobpcg%xgTransposerBW)
     end if
 
-    call timab(tim_run,2,tsec)
+!    call timab(tim_run,2,tsec)
 
   end subroutine lobpcg_run
 
@@ -774,7 +743,7 @@ module m_lobpcg2
 
     !lobpcg%XWP(:,X+1:X+blockdim) = lobpcg%X0(:,(iblock-1)*blockdim+1:iblock*blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,lobpcg%X0,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X0,lobpcg%X, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%X0,lobpcg%X)
 
   end subroutine lobpcg_getX0
 
@@ -810,13 +779,11 @@ module m_lobpcg2
     call xg_init(buffer,space(var),previousBlock,blockdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
 
     ! buffer = BX0^T*X
-    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self,&
-        gpu_option=lobpcg%gpu_option)
+    call xgBlock_gemm(lobpcg%BX0%trans,lobpcg%X%normal,1.0d0,lobpcg%BX0,var,0.d0,buffer%self)
 
     ! sum all process contribution
     ! X = - X0*(BX0^T*X) + X
-    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,&
-        var,gpu_option=lobpcg%gpu_option)
+    call xgBlock_gemm(lobpcg%X0%normal,lobpcg%X0%normal,-1.0d0,lobpcg%X0,buffer%self,1.0d0,var)
 
     call xg_free(buffer)
 
@@ -824,412 +791,6 @@ module m_lobpcg2
     call timab(tim_ortho,2,tsec)
 
   end subroutine lobpcg_orthoXwrtBlocks
-
-
-  subroutine lobpcg_Borthonormalize(lobpcg,var,BorthoA,info,timer)
-
-    type(lobpcg_t), intent(inout) :: lobpcg
-    integer       , intent(in   ) :: var
-    integer       , intent(in   ) :: timer
-    logical       , intent(in   ) :: BorthoA
-    integer       , intent(  out) :: info
-    type(xg_t) :: buffer
-    type(xgBlock_t) :: X
-    type(xgBlock_t) :: BX
-    type(xgBlock_t) :: AX
-    double precision :: tsec(2)
-
-    call timab(tim_Bortho,1,tsec)
-    call timab(timer,1,tsec)
-    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_B_ORTHO)
-
-    select case (var)
-    case (VAR_X) ! Select X vectors
-      X = lobpcg%X
-      AX = lobpcg%AX
-      BX = lobpcg%BX
-    case (VAR_W) ! Select W vectors
-      X = lobpcg%W
-      AX = lobpcg%AW
-      BX = lobpcg%BW
-    case (VAR_P) ! Select P vectors
-      X = lobpcg%P
-      AX = lobpcg%AP
-      BX = lobpcg%BP
-    case (VAR_WP) ! Select W vectors
-      X = lobpcg%WP
-      AX = lobpcg%AWP
-      BX = lobpcg%BWP
-    case (VAR_XW) ! Select W vectors
-      X = lobpcg%XW
-      AX = lobpcg%AXW
-      BX = lobpcg%BXW
-    case (VAR_XWP) ! Select W vectors
-      X = lobpcg%XWP%self
-      AX = lobpcg%AXWP%self
-      BX = lobpcg%BXWP%self
-    case default
-      ABI_ERROR("Bortho")
-    end select
-
-    call xg_init(buffer,space(X),cols(X),cols(X),lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-
-    ! Compute X^TBX
-    call xgBlock_gemm(X%trans,BX%normal,1.d0,X,BX,0.d0,buffer%self,gpu_option=lobpcg%gpu_option)
-
-    ! Compute Cholesky decomposition (Upper part)
-    call xgBlock_potrf(buffer%self,'u',info,gpu_option=lobpcg%gpu_option)
-
-    if ( info /= 0 ) then
-      ABI_COMMENT("An old style abi_xorthonormalize happened but now I'll try to continue ;-)")
-      call xg_free(buffer)
-      return
-    end if
-
-!!$omp parallel default(shared)
-!!$omp single
-!!$omp task
-    ! Solve YU=X
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,X,gpu_option=lobpcg%gpu_option)
-!!$omp end task
-
-!!$omp task
-    ! Solve BYU=BX
-    call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,BX,gpu_option=lobpcg%gpu_option)
-!!$omp end task
-
-!!$omp task
-    if ( BorthoA .eqv. .true. ) then
-      ! Solve AYU=AX
-      call xgBlock_trsm('r','u',buffer%normal,'n',1.d0,buffer%self,AX,gpu_option=lobpcg%gpu_option)
-    end if
-!!$omp end task
-!!$omp end single nowait
-!!$omp end parallel
-
-    call xg_free(buffer)
-
-    ABI_NVTX_END_RANGE()
-    call timab(tim_Bortho,2,tsec)
-    call timab(timer,2,tsec)
-
-  end subroutine lobpcg_Borthonormalize
-
-
-  subroutine lobpcg_rayleighRitz(lobpcg,var,eigenvalues,info,timer,tolerance)
-
-    use m_time
-    type(lobpcg_t) , intent(inout) :: lobpcg
-    integer        , intent(in   ) :: var
-    integer        , intent(in   ) :: timer
-    type(xgBlock_t), intent(inout) :: eigenvalues
-    integer        , intent(  out) :: info
-    double precision, optional, intent(in) :: tolerance
-    integer :: blockdim
-    integer :: spacedim
-    integer :: subdim
-    !integer :: neigen
-    double precision :: abstol
-#ifdef HAVE_LINALG_SCALAPACK
-    logical :: use_slk
-#endif
-    type(xg_t) :: vec
-    type(xg_t) :: subA
-    type(xg_t) :: subB
-    type(xgBlock_t) :: subsub
-    type(xgBlock_t) :: X
-    type(xgBlock_t) :: AX
-    type(xgBlock_t) :: BX
-    type(xgBlock_t) :: Cwp
-    type(xgBlock_t) :: WP
-    type(xgBlock_t) :: AWP
-    type(xgBlock_t) :: BWP
-    type(xgScalapack_t) :: scalapack
-    double precision :: tsec(2)
-#ifdef HAVE_LINALG_MKL_THREADS
-    integer :: mkl_get_max_threads
-#endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-    integer :: openblas_get_num_threads
-#endif
-
-    call timab(tim_RR, 1, tsec)
-    call timab(timer , 1, tsec)
-    ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RR)
-
-    blockdim = lobpcg%blockdim
-    spacedim = lobpcg%spacedim
-
-    select case(var)
-
-    case(VAR_X)
-      subdim = blockdim
-      X = lobpcg%X
-      AX = lobpcg%AX
-      BX = lobpcg%BX
-      !eigenSolver = minloc(eigenSolverTime(7:10), dim=1) + 6
-      eigenSolver = EIGENEV
-      if(lobpcg%gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENEVD
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENEVD
-#elif HAVE_LINALG_OPENBLAS_THREADS
-      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENEVD
-#endif
-
-    case(VAR_XW)
-      subdim = blockdim*2
-      X = lobpcg%XW
-      AX = lobpcg%AXW
-      BX = lobpcg%BXW
-      WP = lobpcg%W
-      AWP = lobpcg%AW
-      BWP = lobpcg%BW
-      !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
-      eigenSolver = EIGENVX
-      if(lobpcg%gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENVD
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
-#elif HAVE_LINALG_OPENBLAS_THREADS
-      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
-#endif
-
-    case (VAR_XWP)
-      subdim = blockdim*3
-      X = lobpcg%XWP%self
-      AX = lobpcg%AXWP%self
-      BX = lobpcg%BXWP%self
-      WP = lobpcg%WP
-      AWP = lobpcg%AWP
-      BWP = lobpcg%BWP
-      !eigenSolver = minloc(eigenSolverTime(1:6), dim=1)
-        eigenSolver = EIGENVX
-      if(lobpcg%gpu_option==ABI_GPU_OPENMP) eigenSolver = EIGENVD
-#ifdef HAVE_LINALG_MKL_THREADS
-      if ( mkl_get_max_threads() > 1 ) eigenSolver = EIGENVD
-#elif HAVE_LINALG_OPENBLAS_THREADS
-      if ( openblas_get_num_threads() > 1 ) eigenSolver = EIGENVD
-#endif
-
-    case default
-      ABI_ERROR("RR")
-    end select
-
-#ifdef HAVE_LINALG_SCALAPACK
-    call xgScalapack_init(scalapack,lobpcg%spacecom,subdim,lobpcg%prtvol-2,(lobpcg%gpu_option/=ABI_GPU_DISABLED),use_slk)
-    if ( use_slk) then
-      eigenSolver = EIGENSLK
-    end if
-#endif
-
-    ! Select diago algorithm
-
-    abstol = 0d0 ; if ( present(tolerance) ) abstol = tolerance
-
-    call xg_init(subA,space(X),subdim,subdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-    !call xgBlock_zero(subA%self)
-    if ( var /= VAR_X ) then
-      call xg_init(subB,space(X),subdim,subdim,lobpcg%spacecom, gpu_option=lobpcg%gpu_option)
-      !call xgBlock_zero(subB%self)
-      !call xgBlock_one(subB%self)
-    end if
-
-    if ( eigenSolver == EIGENVX .or. eigenSolver == EIGENPVX ) then
-      call xg_init(vec,space(x),subdim,blockdim, gpu_option=lobpcg%gpu_option)
-    else if ( EIGPACK(eigenSolver) ) then
-      call xg_init(vec,space(x),subdim,subdim, gpu_option=lobpcg%gpu_option)
-    else
-      call xg_setBlock(subA,vec%self,1,subdim,blockdim)
-    endif
-
-     ! Compute subA and subB by part
-    !--- begin
-    ! |  E  |  XAW  | XAP |  |  I  |  XBW  | XBP |
-    ! |  *  |  WAW  | WAP |  |  *  |   I   | WBP |
-    ! |  *  |   *   | PAP |  |  *  |   *   |  I  |
-
-    call xg_setBlock(subA,subsub,1,blockdim,blockdim)
-    call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subsub,gpu_option=lobpcg%gpu_option)
-
-    if ( var /= VAR_X ) then
-      call xg_setBlock(subB,subsub,1,blockdim,blockdim)
-      call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subsub,gpu_option=lobpcg%gpu_option)
-    endif
-
-    if ( var == VAR_XW .or. var == VAR_XWP ) then
-      ! subA
-      call xg_setBlock(subA,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%AW%normal,1.0d0,lobpcg%XW,lobpcg%AW,0.d0,subsub,&
-          gpu_option=lobpcg%gpu_option)
-
-      ! subB
-      call xg_setBlock(subB,subsub,blockdim+1,2*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XW%trans,lobpcg%BW%normal,1.0d0,lobpcg%XW,lobpcg%BW,0.d0,subsub,&
-        gpu_option=lobpcg%gpu_option)
-    end if
-
-    if ( var == VAR_XWP ) then
-      ! subA
-      call xg_setBlock(subA,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%AP%normal,1.0d0,lobpcg%XWP%self,lobpcg%AP,0.d0,subsub,&
-          gpu_option=lobpcg%gpu_option)
-
-      ! subB
-      call xg_setBlock(subB,subsub,2*blockdim+1,3*blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%XWP%trans,lobpcg%BP%normal,1.0d0,lobpcg%XWP%self,lobpcg%BP,0.d0,subsub,&
-          gpu_option=lobpcg%gpu_option)
-    end if
-
-    if ( EIGPACK(eigenSolver) ) then
-      call xgBlock_pack(subA%self,subA%self,'u')
-      if ( var /= VAR_X ) then
-        call xgBlock_pack(subB%self,subB%self,'u')
-      end if
-    end if
-
-    !FIXME Avoid those transfers
-    ! Compute X*AX subspace matrix
-    !call xgBlock_gemm(X%trans,AX%normal,1.0d0,X,AX,0.d0,subA%self)
-
-    ! Compute X*BX subspace matrix
-    !call xgBlock_gemm(X%trans,BX%normal,1.0d0,X,BX,0.d0,subB%self)
-    !---end
-
-    call timab(tim_hegv,1,tsec)
-    tsec(2) = abi_wtime()
-    if ( var == VAR_X ) then
-      ABI_NVTX_START_RANGE(NVTX_RR_HEEV)
-    ! Solve Hermitian eigen problem
-      select case (eigenSolver)
-      case (EIGENEVD)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heevd"
-        call xgBlock_heevd('v','u',subA%self,eigenvalues,info,gpu_option=lobpcg%gpu_option)
-      case (EIGENEV)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using heev"
-        call xgBlock_heev('v','u',subA%self,eigenvalues,info)
-      case (EIGENPEVD)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpevd"
-        call xgBlock_hpevd('v','u',subA%self,eigenvalues,vec%self,info)
-      case (EIGENPEV)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpev"
-        call xgBlock_hpev('v','u',subA%self,eigenvalues,vec%self,info)
-      case (EIGENSLK)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using pheev"
-        call xgScalapack_heev(scalapack,subA%self,eigenvalues,gpu_option=lobpcg%gpu_option)
-        info = 0 ! No error code returned for the moment
-      case default
-        ABI_ERROR("Error for Eigen Solver HEEV")
-      end select
-    else
-      ABI_NVTX_START_RANGE(NVTX_RR_HEGV)
-      ! Solve Hermitian general eigen problem only for first blockdim eigenvalues
-      select case (eigenSolver)
-      case (EIGENVX)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvx"
-        call xgBlock_hegvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
-          eigenvalues,vec%self,info)
-      case (EIGENVD)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegvd"
-        call xgBlock_hegvd(1,'v','u',subA%self,subB%self,eigenvalues,info,gpu_option=lobpcg%gpu_option)
-      case (EIGENV)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hegv"
-        call xgBlock_hegv(1,'v','u',subA%self,subB%self,eigenvalues,info)
-      case (EIGENPVX)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvx"
-        call xgBlock_hpgvx(1,'v','i','u',subA%self,subB%self,0.d0,0.d0,1,blockdim,abstol,&
-          eigenvalues,vec%self,info)
-      case (EIGENPVD)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgvd"
-        call xgBlock_hpgvd(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
-      case (EIGENPV)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using hpgv"
-        call xgBlock_hpgv(1,'v','u',subA%self,subB%self,eigenvalues,vec%self,info)
-      case (EIGENSLK)
-        if ( lobpcg%prtvol == 4 ) write(std_out,'(A,1x)',advance="no") "Using phegv"
-        call xgScalapack_hegv(scalapack,subA%self,subB%self,eigenvalues,gpu_option=lobpcg%gpu_option)
-        info = 0 ! No error code returned for the moment
-      case default
-        ABI_ERROR("Error for Eigen Solver HEGV")
-      end select
-    end if
-    if ( eigenSolver == EIGENSLK ) then
-      call xgScalapack_free(scalapack)
-    end if
-    tsec(2) = abi_wtime() - tsec(2)
-!    if ( var /= VAR_XW ) then
-!      eigenSolverTime(eigenSolver) = (eigenSolverTime(eigenSolver)*eigenSolverCount(eigenSolver) + tsec(2))/(eigenSolverCount(eigenSolver)+1)
-!      eigenSolverCount(eigenSolver) = eigenSolverCount(eigenSolver)+1
-!    end if
-    if ( lobpcg%prtvol == 4 ) write(std_out,*) tsec(2)
-    call timab(tim_hegv,2,tsec)
-    ABI_NVTX_END_RANGE()
-
-    if ( eigenSolver == EIGENVX .or. EIGPACK(eigenSolver)) then
-      call xg_free(subA)
-    end if
-    call xg_free(subB)
-
-    !FIXME Avoid those transfers
-    if ( info == 0 ) then
-      call xg_init(subB,space(X),spacedim,blockdim, gpu_option=lobpcg%gpu_option)
-
-      !/* Easy basic solution */
-      !/* Compute first part of X here */
-      ! Use subB as buffer
-      !lobpcg%XWP (:,X+1:X+blockdim) = matmul(lobpcg%XWP (:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_setBlock(vec%self,Cwp,1,blockdim,blockdim)
-      call xgBlock_gemm(lobpcg%X%normal,Cwp%normal,1.0d0,lobpcg%X,Cwp,0.d0,subB%self,&
-          gpu_option=lobpcg%gpu_option)
-      call xgBlock_copy(subB%self,lobpcg%X,gpu_option=lobpcg%gpu_option)
-
-      !lobpcg%AXWP(:,X+1:X+blockdim) = matmul(lobpcg%AXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(lobpcg%AX%normal,Cwp%normal,1.0d0,lobpcg%AX,Cwp,0.d0,subB%self,&
-          gpu_option=lobpcg%gpu_option)
-      call xgBlock_copy(subB%self,lobpcg%AX,gpu_option=lobpcg%gpu_option)
-
-      !lobpcg%BXWP(:,X+1:X+blockdim) = matmul(lobpcg%BXWP(:,X+1:X+blockdim),vec(1:blockdim,1:blockdim))
-      call xgBlock_gemm(lobpcg%BX%normal,Cwp%normal,1.0d0,lobpcg%BX,Cwp,0.d0,subB%self,&
-          gpu_option=lobpcg%gpu_option)
-      call xgBlock_copy(subB%self,lobpcg%BX,gpu_option=lobpcg%gpu_option)
-
-      if ( var /= VAR_X ) then
-        ! Cost to pay to avoid temporary array in xgemm
-        if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_from_gpu(vec%self) !FIXME Avoid that transfer
-        call xgBlock_cshift(vec%self,blockdim,1) ! Bottom 2*blockdim lines are now at the top
-        if(lobpcg%gpu_option==ABI_GPU_OPENMP) call xgBlock_copy_to_gpu(vec%self) !FIXME Avoid that transfer
-        call xgBlock_setBlock(vec%self,Cwp,1,subdim-blockdim,blockdim)
-
-        !lobpcg%XWP (:,P+1:P+blockdim) = matmul(lobpcg%XWP (:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(WP%normal,Cwp%normal,1.0d0,WP,Cwp,0.d0,subB%self,gpu_option=lobpcg%gpu_option)
-        call xgBlock_copy(subB%self,lobpcg%P,gpu_option=lobpcg%gpu_option)
-
-        !lobpcg%AXWP(:,P+1:P+blockdim) = matmul(lobpcg%AXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(AWP%normal,Cwp%normal,1.0d0,AWP,Cwp,0.d0,subB%self,gpu_option=lobpcg%gpu_option)
-        call xgBlock_copy(subB%self,lobpcg%AP,gpu_option=lobpcg%gpu_option)
-
-        !lobpcg%BXWP(:,P+1:P+blockdim) = matmul(lobpcg%BXWP(:,W+1:W+subdim-blockdim),vec(1:subdim-blockdim,1:blockdim))
-        call xgBlock_gemm(BWP%normal,Cwp%normal,1.0d0,BWP,Cwp,0.d0,subB%self,gpu_option=lobpcg%gpu_option)
-        call xgBlock_copy(subB%self,lobpcg%BP,gpu_option=lobpcg%gpu_option)
-
-        !/* Maybe faster solution
-        ! * Sum previous contribution plus P direction
-        ! */
-        call xgBlock_add(lobpcg%X,lobpcg%P,gpu_option=lobpcg%gpu_option)
-        call xgBlock_add(lobpcg%AX,lobpcg%AP,gpu_option=lobpcg%gpu_option)
-        call xgBlock_add(lobpcg%BX,lobpcg%BP,gpu_option=lobpcg%gpu_option)
-      end if
-    end if
-
-    ! Doing free on an already free object does not doe anything
-    call xg_free(vec)
-    call xg_free(subA)
-    call xg_free(subB)
-
-    ABI_NVTX_END_RANGE()
-    call timab(tim_RR, 2, tsec)
-    call timab(timer , 2, tsec)
-
-  end subroutine lobpcg_rayleighRitz
-
 
   subroutine lobpcg_getResidu(lobpcg,eigenvalues)
 
@@ -1240,7 +801,7 @@ module m_lobpcg2
     call timab(tim_maxres,1,tsec)
     ABI_NVTX_START_RANGE(NVTX_LOBPCG2_RESIDUE)
       !lobpcg%XWP(1:spacedim,shiftW+iblock) = lobpcg%AXWP(:,shiftX+iblock) - lobpcg%BXWP(:,shiftX+iblock)*eigenvalues(iblock)
-    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX, gpu_option=lobpcg%gpu_option)
+    call xgBlock_colwiseCymax(lobpcg%W,eigenvalues,lobpcg%BX,lobpcg%AX)
     ABI_NVTX_END_RANGE()
     call timab(tim_maxres,2,tsec)
   end subroutine lobpcg_getResidu
@@ -1259,7 +820,7 @@ module m_lobpcg2
 
     !X0(:,(iblock-1)*blockdim+1:iblock*blockdim) = lobpcg%XWP(:,lobpcg%X+1:lobpcg%X+blockdim)
     call xgBlock_setBlock(lobpcg%AllX0,Xtmp,(iblock-1)*blockdim+1,spacedim,blockdim)
-    call xgBlock_copy(lobpcg%X,Xtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%X,Xtmp)
   end subroutine lobpcg_setX0
 
 
@@ -1274,23 +835,12 @@ module m_lobpcg2
 
     ! BX
     call xg_setBlock(lobpcg%AllBX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%BX,CXtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%BX,CXtmp)
 
     ! AX
     call xg_setBlock(lobpcg%AllAX0,CXtmp,firstcol,lobpcg%spacedim,lobpcg%blockdim)
-    call xgBlock_copy(lobpcg%AX,CXtmp, gpu_option=lobpcg%gpu_option)
+    call xgBlock_copy(lobpcg%AX,CXtmp)
   end subroutine lobpcg_transferAX_BX
-
-
-  subroutine lobpcg_getAX_BX(lobpcg,AX,BX)
-
-    type(lobpcg_t) , intent(in   ) :: lobpcg
-    type(xgBlock_t), intent(  out) :: AX
-    type(xgBlock_t), intent(  out) :: BX
-
-    AX = lobpcg%AllAX0%self
-    BX = lobpcg%AllBX0%self
-  end subroutine lobpcg_getAX_BX
 
 
   subroutine lobpcg_allowNested(lobpcg)

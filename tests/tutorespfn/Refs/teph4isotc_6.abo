@@ -1,8 +1,8 @@
 
-.Version 9.11.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.1 computer) 
+.Version 10.1.2.4 of ABINIT, released Apr 2024.
+.(MPI version, prepared for a aarch64_darwin22.6.0_gnu12.2 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 May 2023.
-- ( at 05h27 )
+.Starting date : Mon 17 Jun 2024.
+- ( at 10h18 )
   
 - input  file    -> /home/buildbot/bb3/ABINIT/abiref_intel_19.1_mpich/antonius_ddbio/tests/TestBot_MPI1/tutorespfn_teph4isotc_1-teph4isotc_2-teph4isotc_3-teph4isotc_4-teph4isotc_5-teph4isotc_6-teph4isotc_7/teph4isotc_6.abi
 - output file    -> teph4isotc_6.abo

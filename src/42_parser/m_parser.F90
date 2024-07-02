@@ -6,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2024 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ module m_parser
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
-                         endswith, char_count, find_digit !, startswith,
+                         endswith, char_count, find_digit, replace !, startswith,
  use m_geometry,  only : xcart2xred, det3r, mkrdim
 
  implicit none
@@ -111,7 +111,7 @@ module m_parser
  !public :: chkint_prt
 
  public :: prttagm             ! Print the content of intarr or dprarr.
- public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
+ public :: prttagm_images      ! Extension to prttagm to include the printing of images  information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
  public :: get_acell_rprim     ! Get acell and rprim from string
 
@@ -175,8 +175,7 @@ module m_parser
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
-
- public :: intagm_img   !  Read input file variables according to images path definition (1D array)
+ public :: intagm_img               ! Read input file variables according to images path definition (1D array)
 
  interface intagm_img
    module procedure intagm_img_1D
@@ -241,6 +240,9 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
+
+   ! Make sure double quotation marks are used to enclose strings.
+   !string = replace(string(1:lenstr), "'", '"')
 
    ! Might import data from xyz file(s) into string
    ! Need string_raw to deal properly with xyz filenames
@@ -1234,17 +1236,18 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
      end if
 
      ! Use the metacharacter for the units, and save in cs1 and itoken1
-     write(appen,'(i1)')dozens
+     write(appen,'(i0)')dozens
      cs1=blank//token(1:toklen)//trim(appen)//'?'//blank
+     cs1len=toklen+len(trim(appen))+3
      ! Map token to all upper case (make case-insensitive):
      call inupper(cs1)
      ! Absolute index of blank//token//blank in string:
-     itoken1=index(string,cs1(1:cslen))
+     itoken1=index(string,cs1(1:cs1len))
      ! Look for another occurence of the same token in string, if so, leaves:
-     itoken2=index(string,cs1(1:cslen), BACK=.true. )
+     itoken2=index(string,cs1(1:cs1len), BACK=.true. )
      if(itoken1/=itoken2)then
        write(msg, '(7a)' )&
-       'There are two occurences of the keyword "',cs1(1:cslen),'" in the input file.',ch10,&
+       'There are two occurences of the keyword "',cs1(1:cs1len),'" in the input file.',ch10,&
        'This is confusing, so it has been forbidden.',ch10,&
        'Action: remove one of the two occurences.'
        ABI_ERROR(msg)
@@ -1252,7 +1255,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
 
      if(itoken/=0 .and. itoken1/=0)then
        write(msg, '(9a)' )&
-       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cslen),'"',ch10,&
+       'The keywords: "',cs(1:cslen),'" and: "',cs1(1:cs1len),'"',ch10,&
        'cannot be used together in the input file.',ch10,&
        'Action: remove one of the two keywords.'
        ABI_ERROR(msg)
@@ -1262,6 +1265,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        opttoken=1
        itoken=itoken1
        cs=cs1
+       cslen=cs1len
        ds_input_=jdtset
      end if
 

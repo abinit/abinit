@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2022 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2024 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -282,6 +282,11 @@ if ( ext_print == 1 ):
 # Write additional hand-made information
 if ( os.path.exists(add) ):
   makefile += "\n" + open(add, "rt").read()
+
+# Write additional cmake information
+cml = "src/98_main/CMakeLists.txt"
+if ( os.path.exists(cml) ):
+  makefile += "\nEXTRA_DIST = CMakeLists.txt\n"
 
 mf = open(my_output, "wt")
 mf.write(makefile)

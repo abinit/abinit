@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -391,7 +391,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
  integer(int32), ABI_CONTIGUOUS pointer :: kg_k(:,:) => null()
  real(dp) :: dielar(7),dphase_k(3),kpoint(3),qpt(3),rhodum(1),tsec(2),ylmgr_dum(0,0,0)
  real(dp),allocatable :: EigMin(:,:),buffer1(:),buffer2(:),cgq(:,:)
- real(dp),allocatable :: cgrkxc(:,:),cgrvtrial(:,:),doccde(:)
+ real(dp),allocatable :: cgrkxc(:,:),doccde(:)
  real(dp),allocatable :: dphasek(:,:),ek_k(:),ek_k_nd(:,:,:),eknk(:),eknk_nd(:,:,:,:,:),end_k(:)
  real(dp),allocatable :: enlx_k(:),enlxnk(:),focknk(:),fockfornk(:,:,:),ffnl(:,:,:,:),grnl_k(:,:), xcart(:,:)
  real(dp),allocatable :: grnlnk(:,:)
@@ -779,15 +779,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      ! vtrial. Note that it must be done for the three Cartesian directions. Also, the following
      ! code assumes explicitly and implicitly that nvloc = 1. This should eventually be generalized.
      if(has_vectornd) then
-        do idir = 1, 3
-          ABI_MALLOC(cgrvtrial,(dtset%nfft,dtset%nspden))
-          call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vectornd(:,:,idir))
-          call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vectornd_pac(:,:,:,1,idir),2)
-          ABI_FREE(cgrvtrial)
-        end do
-        call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
+       call gspot_transgrid_and_pack(isppol, psps%usepaw, dtset%paral_kgb, dtset%nfft, dtset%ngfft, nfftf, &
+         & dtset%nspden, gs_hamk%nvloc, 3, pawfgr, mpi_enreg, vectornd, vectornd_pac)
+       call gs_hamk%load_spin(isppol, vectornd=vectornd_pac)
      end if
-
+    
      call timab(982,2,tsec)
 
 !    BIG FAT k POINT LOOP
@@ -995,7 +991,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
            &                        dtset%gpu_option,nblk_gemm_nonlop)
            gemm_nonlop_nblocks = nblk_gemm_nonlop
          end if
-         if(gemm_nonlop_nblocks > 1) gemm_nonlop_is_distributed = .true.
+         gemm_nonlop_is_distributed = .false.
+         if(gemm_nonlop_nblocks > 1 .and. dtset%gpu_nl_distrib/=0) gemm_nonlop_is_distributed = .true.
        end if
 
 !      Build inverse of overlap matrix for chebfi
@@ -1088,7 +1085,12 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       rhoaug,paw_dmft,dtset%wtk(ikpt),zshift, rmm_diis_status(:,ikpt,isppol))
        ABI_NVTX_END_RANGE()
 
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+! Note: Should we keep nvhpc-23.1 in eos?
+#ifndef FC_NVHPC
        call timab(985,1,tsec)
+#endif
 
 #if defined HAVE_GPU_CUDA
        if(dtset%gpu_option==ABI_GPU_LEGACY .or. dtset%gpu_option==ABI_GPU_KOKKOS) call gpu_finalize_ffnl_ph3d()
@@ -1167,7 +1169,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        if ( dtset%gpu_option == ABI_GPU_OPENMP) then
          call ompgpu_free_hamilt_buffers()
        end if
+! LB-01/03/2024: Very weird compiler error on eos-nvhpc23.1 if the second call of timab(985,...) is included...
+! Drastic short-term solution : disable this timing for nvhpc... In fact this part is not important unless fock is activated
+#ifndef FC_NVHPC
        call timab(985,2,tsec)
+#endif
 
        ABI_FREE(ek_k)
        ABI_FREE(ek_k_nd)
@@ -1364,31 +1370,20 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
      end if ! nproc_spkpt>1
 
-!    Compute extfpmd u0 energy shift factor from eigenvalues and kinetic energy.
+!    Compute extfpmd energy shift
      if(associated(extfpmd)) then
-       extfpmd%vtrial=vtrial
-       call extfpmd%compute_shiftfactor(eigen,eknk,dtset%mband,mpi_enreg%me,&
-&       dtset%nband,dtset%nkpt,dtset%nsppol,dtset%wtk)
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,&
+&       dtset%nband,dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
      end if
-
-!    Compute the new occupation numbers from eigen
+     
+!    Compute occupations
      call timab(990,1,tsec)
      call newocc(doccde,eigen,energies%entropy,energies%e_fermie,energies%e_fermih,dtset%ivalence,&
 &     dtset%spinmagntarget,dtset%mband,dtset%nband,dtset%nelect,dtset%ne_qFD,dtset%nh_qFD,&
 &     dtset%nkpt,dtset%nspinor,dtset%nsppol,occ,dtset%occopt,prtvol,dtset%tphysel,&
-&     dtset%tsmear,dtset%wtk,&
-&     prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
+&     dtset%tsmear,dtset%wtk,prtstm=dtset%prtstm,stmbias=dtset%stmbias,extfpmd=extfpmd)
      call timab(990,2,tsec)
-
-
-!    Compute number of free electrons of extfpmd model
-     if(associated(extfpmd)) then
-       extfpmd%nelect=zero
-       call extfpmd%compute_nelect(energies%e_fermie,extfpmd%nelect,dtset%tsmear)
-       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear)
-       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear)
-     end if
-
+     
 !    !=========  DMFT call begin ============================================
      dmft_dftocc=0
      if(paw_dmft%use_dmft==1.and.psps%usepaw==1.and.dtset%nbandkss==0) then
@@ -1630,6 +1625,17 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        end do
      end do
 
+!    Compute extended plane waves contributions
+     if(associated(extfpmd)) then
+       extfpmd%nelect=zero
+       call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nsppol,dtset%nband,dtset%wtk)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+&       dtset%wtk,dtset%nband)
+     end if
+
      if(paw_dmft%use_dmft==1) then
        energies%e_kinetic = energies%e_kinetic -ekindmft+ekindmft2
        if(abs(dtset%pawprtvol)>=2) then
@@ -1650,6 +1656,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
      end if
 
      ABI_NVTX_START_RANGE(NVTX_MKRHO)
+
      if (psps%usepaw==0) then
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
@@ -1658,10 +1665,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
 &       rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,&
 &       extfpmd=extfpmd)
-    end if
-    ABI_NVTX_END_RANGE()
-     call timab(992,2,tsec)
+     end if
 
+     ABI_NVTX_END_RANGE()
+     call timab(992,2,tsec)
+    
 !    Treat fixed occupation numbers or non-self-consistent case
    else
 
@@ -1753,6 +1761,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
        call timab(989,2,tsec)
 
      end if ! nproc_spkpt>1
+
+!    Compute extended plane waves contributions
+     if(associated(extfpmd)) then
+       call extfpmd%compute_eshift(eigen,eknk,dtset%mband,dtset%nband,&
+&       dtset%nfft,dtset%nkpt,dtset%nsppol,dtset%nspden,dtset%wtk,vtrial)
+       extfpmd%nelect=zero
+       call extfpmd%compute_nelect(energies%e_fermie,dtset%nband,extfpmd%nelect,dtset%nkpt,&
+&       dtset%nspinor,dtset%nsppol,dtset%tsmear,dtset%wtk)
+       call extfpmd%compute_e_kinetic(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nspinor,&
+&       dtset%nsppol,dtset%nband,dtset%wtk)
+       call extfpmd%compute_entropy(energies%e_fermie,dtset%tsmear,dtset%nkpt,dtset%nsppol,dtset%nspinor,&
+&       dtset%wtk,dtset%nband)
+       ! CHECK number of electrons integrating rhor.
+       ! write(0,*) sum(rhor(:,:))*extfpmd%ucvol/dtset%nfft
+     end if
 
 !    Compute the highest occupied eigenenergy
      if(iscf/=-1 .and. iscf/=-2)then

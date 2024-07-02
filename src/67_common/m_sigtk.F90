@@ -8,7 +8,7 @@
 !!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -177,22 +177,21 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
  integer,intent(out) :: nkcalc
 !arrays
  real(dp),allocatable,intent(out) :: kcalc(:,:)
- integer,allocatable,intent(out) :: bstart_ks(:,:)
- integer,allocatable,intent(out) :: nbcalc_ks(:,:)
+ integer,allocatable,intent(out) :: bstart_ks(:,:), nbcalc_ks(:,:)
 
 !Local variables ------------------------------
 !scalars
  integer :: spin, ik, bstop, mband, sigma_nkbz
 !arrays
  integer :: kptrlatt(3,3)
- integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: val_indices(ebands%nkpt, ebands%nsppol)
  real(dp),allocatable :: sigma_wtk(:),sigma_kbz(:,:)
 
 ! *************************************************************************
 
  mband = ebands%mband
 
- val_indeces = ebands_get_valence_idx(ebands)
+ val_indices = ebands_get_valence_idx(ebands)
 
  if (any(dtset%sigma_ngkpt /= 0)) then
     call wrtout(std_out, " Generating list of k-points for self-energy from sigma_ngkpt and qprange.")
@@ -221,8 +220,8 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
    call wrtout(std_out, " Using buffer of bands above and below the Fermi level.")
    do spin=1,dtset%nsppol
      do ik=1,nkcalc
-       bstart_ks(ik,spin) = max(val_indeces(ik,spin) - qprange, 1)
-       bstop = min(val_indeces(ik,spin) + qprange, mband)
+       bstart_ks(ik,spin) = max(val_indices(ik,spin) - qprange, 1)
+       bstop = min(val_indices(ik,spin) + qprange, mband)
        nbcalc_ks(ik,spin) = bstop - bstart_ks(ik,spin) + 1
      end do
    end do
@@ -232,7 +231,7 @@ subroutine sigtk_kcalc_from_qprange(dtset, cryst, ebands, qprange, nkcalc, kcalc
    bstart_ks = 1
    do spin=1,dtset%nsppol
      do ik=1,nkcalc
-       nbcalc_ks(ik,spin) = min(val_indeces(ik,spin) - qprange, mband)
+       nbcalc_ks(ik,spin) = min(val_indices(ik,spin) - qprange, mband)
      end do
    end do
  end if
@@ -277,7 +276,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  integer :: spin, nsppol, ii, ik, nk_found, ifo, jj
  logical :: found
 !arrays
- integer :: val_indeces(ebands%nkpt, ebands%nsppol)
+ integer :: val_indices(ebands%nkpt, ebands%nsppol)
  integer :: kpos(6)
 
 ! *************************************************************************
@@ -288,7 +287,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
  ABI_CHECK(maxval(gaps%ierr) == 0, "qprange 0 cannot be used because I cannot find the gap (gap_err !=0)")
 
  nsppol = ebands%nsppol
- val_indeces = ebands_get_valence_idx(ebands)
+ val_indices = ebands_get_valence_idx(ebands)
 
  ! Include the direct and the fundamental KS gap.
  ! The problem here is that kptgw and nkptgw do not depend on the spin and therefore
@@ -319,7 +318,7 @@ subroutine sigtk_kcalc_from_gaps(dtset, ebands, gaps, nkcalc, kcalc, bstart_ks, 
    ik = kpos(ii)
    kcalc(:,ii) = ebands%kptns(:,ik)
    do spin=1,nsppol
-     bstart_ks(ii,spin) = val_indeces(ik,spin)
+     bstart_ks(ii,spin) = val_indices(ik,spin)
      nbcalc_ks(ii,spin) = 2
    end do
  end do

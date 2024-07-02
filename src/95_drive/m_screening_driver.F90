@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -60,7 +60,7 @@ module m_screening_driver
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_t
  use m_spectra,       only : spectra_t, W_EM_LF, W_EM_NLF, W_EELF
  use m_fftcore,       only : print_ngfft
- use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gftt, setmesh
+ use m_fft_mesh,      only : rotate_FFT_mesh, cigfft, get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge
  use m_wfk,           only : wfk_read_eigenvalues
@@ -90,9 +90,7 @@ module m_screening_driver
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
  use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier, fullbz_plowannier,destroy_plowannier
-!#ifdef __HAVE_GREENX
  use minimax_grids,      only : gx_minimax_grid !, gx_get_error_message
-!#endif
 
  implicit none
 
@@ -239,14 +237,12 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
  type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
-#ifdef __HAVE_GREENX
  integer :: gap_err
  real(dp) :: te_min, te_max
  type(gaps_t) :: gaps
  real(dp),allocatable :: tau_mesh(:), tau_wgs(:), iw_mesh(:), iw_wgs(:)
  real(dp),allocatable :: t2w_cos_wgs(:,:), w2t_cos_wgs(:,:), t2w_sin_wgs(:,:)
  real(dp) :: ft_max_error(3), cosft_duality_error
-#endif
 
 !************************************************************************
 
@@ -413,7 +409,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    if (Dtset%pawoptosc /= 0) rhoxsp_method = Dtset%pawoptosc
 
    ABI_MALLOC(gw_gfft,(3,nfftgw_tot))
-   call get_gftt(ngfft_gw,(/zero,zero,zero/),gmet,gw_gsq,gw_gfft)
+   call get_gfft(ngfft_gw,(/zero,zero,zero/),gmet,gw_gsq,gw_gfft)
    ABI_FREE(gw_gfft)
 
    ! Set up q grids, make qmax 20% larger than largest expected:
@@ -491,7 +487,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 ! valence and partially occupied are replicate on each node  while conduction bands are MPI distributed.
 ! This method is mandatory if gwpara==2 and/or we are using awtr==1 or the spectral method.
 ! If awtr==1, we evaluate chi0 taking advantage of time-reversal (speed-up~2)
-! Useful indeces:
+! Useful indices:
 !       nbvw = Max. number of fully/partially occupied states over spin
 !       nbcw = Max. number of unoccupied states considering the spin
 !TODO:

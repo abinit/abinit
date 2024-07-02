@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG)
+!!  Copyright (C) 2008-2024 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +37,7 @@ module m_afterscfloop
  use defs_abitypes,      only : mpi_type
  use m_time,             only : timab
  use m_xmpi,             only : xmpi_sum, xmpi_comm_rank,xmpi_comm_size
+ use m_berryphase_new,   only : berryphase_new
  use m_geometry,         only : xred2xcart, metric
  use m_crystal,          only : prtposcar
  use m_results_gs ,      only : results_gs_type
@@ -60,6 +61,7 @@ module m_afterscfloop
  use m_spin_current,     only : spin_current
  use m_mkrho,            only : mkrho, prtrhomxmn
  use m_elpolariz,        only : elpolariz
+ use m_orbmag,           only : orbmag
  use m_nonlop_test,      only : nonlop_test
  use m_common,           only : scprqt
  use m_xctk,             only : xcden
@@ -273,9 +275,9 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,grchempottn,grcondft,&
+& energies,etotal,extfpmd,favg,fcart,fock,forold,grchempottn,grcondft,&
 & gred,gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,extfpmd,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,&
 & kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
@@ -300,8 +302,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  type(efield_type),intent(inout) :: dtefield
  type(electronpositron_type),pointer :: electronpositron
  type(energies_type),intent(inout) :: energies
- type(hdr_type),intent(inout) :: hdr
  type(extfpmd_type),pointer,intent(inout) :: extfpmd
+ type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang
  type(pawfgr_type),intent(in) :: pawfgr
  type(pseudopotential_type),intent(in) :: psps
@@ -355,10 +357,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: response=0
- integer :: bantot,bufsz,choice,cplex,ierr,ifft,igrad,ishift,ispden,nfftotf,ngrad
- integer :: optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
+ integer :: bantot,bufsz,calc_pol_ddk,choice,cplex,ierr,ifft,igrad,ishift,ispden
+ integer :: mcg1_3,nfftotf,ngrad,optcut,optfor,optgr0,optgr1,optgr2,optrad,quit,shft
  integer :: spaceComm_fft,tim_mkrho
- logical :: test_gylmgr,test_nfgd,test_rfgd
+ logical :: save_cg1_3,test_gylmgr,test_nfgd,test_rfgd
  logical :: wvlbigdft=.false.
  real(dp) :: c_fermi,dtaur,dtaurzero,ucvol
  character(len=500) :: message
@@ -369,10 +371,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: dum,eexctx,eh,ekin,eloc,enl,eproj,esicdc,evxc,exc,ucvol_local
 #endif
 !arrays
- real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),ptot(3),red_ptot(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
- real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
- real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
+ real(dp),allocatable :: cg1_3(:,:,:),mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:),vtrial_local(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -517,10 +519,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(252,1,tsec)
 
 !----------------------------------------------------------------------
-!Polarization Calculation
+!Polarization Calculation, but not orbital magnetism
 !----------------------------------------------------------------------
 
- if(dtset%berryopt/=0)then
+ if(dtset%berryopt/=0 .AND. dtset%orbmag == 0)then
    call elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,energies%e_elecfield,gprimd,hdr,&
 &   kg,dtset%mband,mcg,mcprj,dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,nattyp,dtset%nkpt,&
 &   npwarr,dtset%nsppol,psps%ntypat,pawrhoij,pawtab,pel,pel_cg,pelev,pion,&
@@ -529,6 +531,36 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
  call timab(252,2,tsec)
  call timab(253,1,tsec)
+
+!----------------------------------------------------------------------
+!Orbital magnetization calculation using PEAD DDK wavefunctions
+!----------------------------------------------------------------------
+
+ if (dtset%berryopt == -2 .AND. dtset%orbmag /= 0) then
+   save_cg1_3 = .TRUE.
+   mcg1_3 = mcg
+   ABI_MALLOC(cg1_3,(2,mcg1_3,3))
+
+   calc_pol_ddk = 2
+   call berryphase_new(atindx1,cg,cg1_3,cprj,dtefield,dtfil,dtset,psps,&
+       &  gprimd,hdr,psps%indlmn,kg,psps%lmnmax,dtset%mband,mcg,mcg1_3,mcprj,&
+       &  dtset%mkmem,mpi_enreg,dtset%mpw,my_natom,dtset%natom,npwarr,dtset%nsppol,psps%ntypat,&
+       &  dtset%nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
+       &  pwind_alloc,pwnsfac,rprimd,save_cg1_3,dtset%typat,ucvol,ab_out,&
+       &  usecprj,psps%usepaw,xred,psps%ziontypat)
+
+   if ( .NOT. ALLOCATED(vtrial_local)) then
+     ABI_MALLOC(vtrial_local,(nfftf,dtset%nspden))
+   end if
+   vtrial_local = vtrial
+   call orbmag(cg,cg1_3,cprj,dtset,eigen,gsqcut,kg,mcg,mcg1_3,mcprj,dtset%mkmem,&
+     & mpi_enreg,dtset%mpw,nfftf,ngfftf,npwarr,occ,paw_an,paw_ij,pawang,pawfgr,&
+     & pawrad,pawtab,psps,rprimd,vtrial_local,vxctau,xred,ylm,ylmgr)
+
+   ABI_FREE(vtrial_local)
+   ABI_FREE(cg1_3)
+
+ end if
 
 !----------------------------------------------------------------------
 !Gradient and Laplacian of the Density Calculation
@@ -1047,7 +1079,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  if (associated(extfpmd)) then
    results_gs%entropy_extfpmd=extfpmd%entropy
    results_gs%nelect_extfpmd=extfpmd%nelect
-   results_gs%shiftfactor_extfpmd=extfpmd%shiftfactor
+   results_gs%extfpmd_eshift=extfpmd%eshift
  end if
 
  results_gs%intgres(:,:)=zero

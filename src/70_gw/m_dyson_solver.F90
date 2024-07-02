@@ -6,7 +6,7 @@
 !!  This module contains procedures to solve the Dyson equation to find QP energies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG)
+!! Copyright (C) 2008-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -136,7 +136,7 @@ CONTAINS  !====================================================================
 !!     %sigxcme(ib1:ib2,jkibz,io,is)= Sigma_xc as a function of frequency.
 !!     %sigcme4sd (ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_c  at frequencies around the KS eigenvalue
 !!     %sigxcme4sd(ib1:ib2,jkibz,io,is)= Diagonal matrix elements of \Sigma_xc at frequencies around the KS eigenvalue
-!!    where ib1 and ib2 are the band indeces included in the GW calculation for this k-point.
+!!    where ib1 and ib2 are the band indices included in the GW calculation for this k-point.
 !!
 !! SOURCE
 

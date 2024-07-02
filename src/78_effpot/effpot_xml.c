@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2022 ABINIT group (AM)
+ * Copyright (C) 2015-2024 ABINIT group (AM)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1516,11 +1516,8 @@ int xml_read_spin_uni(char * fname, int *uni_nnz, int *uni_ilist[],
               double *dtmp;
               size_t size;
               string2Array((char *)key, &dtmp, &size);
+              (*uni_amplitude_list)[counter]=dtmp[0];
               xmlFree(key);
-              for(i=0; i< size; i++)
-                {
-                  (*uni_amplitude_list)[i]=dtmp[i];
-                }
             }
             if (!xmlStrcmp(cur3->name, BAD_CAST"direction")) {
               key = xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
