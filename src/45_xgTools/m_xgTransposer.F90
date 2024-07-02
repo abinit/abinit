@@ -8,7 +8,7 @@
 !! This should really help to do the transposition operataion
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2022 ABINIT group (J. Bieder)
+!!  Copyright (C) 2017-2024 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -532,7 +532,8 @@ module m_xgTransposer
         end if
         call xgBlock_map(xgTransposer%xgBlock_colsrows,xgTransposer%buffer,space(xgTransposer%xgBlock_linalg),&
           xgTransposer%perPair*xgTransposer%nrowsColsRows,&
-          xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm)
+          xgTransposer%ncolsColsRows,xgTransposer%mpiData(MPI_ROWS)%comm,&
+          gpu_option=xgTransposer%gpu_option)
       end if
     case (STATE_COLSROWS)
       ABI_ERROR("Not yet implemented")

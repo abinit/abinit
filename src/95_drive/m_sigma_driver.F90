@@ -6,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2024 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,7 +50,7 @@ module m_sigma_driver
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
  use m_geometry,      only : normv, mkrdim, metric
  use m_fftcore,       only : print_ngfft
- use m_fft_mesh,      only : get_gftt, setmesh
+ use m_fft_mesh,      only : get_gfft, setmesh
  use m_fft,           only : fourdp
  use m_ioarr,         only : fftdatar_write, read_rhor
  use m_ebands,        only : ebands_update_occ, ebands_copy, ebands_report_gap, ebands_get_valence_idx, ebands_get_bandenergy,&
@@ -64,10 +64,9 @@ module m_sigma_driver
  use m_wfd,           only : wfd_init, wfdgw_t, wfdgw_copy, test_charge, wave_t
  use m_vcoul,         only : vcoul_t
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_ks_to_qp
- use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
- use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
- use m_sigma,         only : sigma_init, sigma_free, sigma_ncwrite, sigma_t, sigma_get_exene, &
-                             mels_get_haene, mels_get_kiene, sigma_get_excene, write_sigma_header, write_sigma_results
+ use m_screening,     only : epsilonm1_results
+ use m_ppmodel,       only : ppmodel_t
+ use m_sigma,         only : sigma_t, write_sigma_header
  use m_dyson_solver,  only : solve_dyson
  use m_esymm,         only : esymm_t, esymm_free, esymm_failed
  use m_melemts,       only : melflags_t, melements_t
@@ -383,7 +382,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ! ==== Initialize Sigp, Er and basic objects ====
  ! ===============================================
  ! * Sigp is completetly initialized here.
- ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in mkdump_Er
+ ! * Er is only initialized with dimensions, (SCR|SUSC) file is read in Er%mkdump
  call timab(403,1,tsec) ! setup_sigma
 
  call setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
@@ -483,7 +482,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    ! We use the FFT mesh for sigma_c since COHSEX and the extrapolar method require oscillator
    ! strengths on the FFT mesh.
    ABI_MALLOC(tmp_gfft,(3, gwc_nfftot))
-   call get_gftt(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
+   call get_gfft(gwc_ngfft, k0, gmet, gwc_gsq, tmp_gfft)
    ABI_FREE(tmp_gfft)
 
    ! Set up q-grid, make qmax 20% larger than largest expected.
@@ -1374,7 +1373,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  ! Initialize Sigma results ===
  ! TODO it is better if we use ragged arrays indexed by the k-point
- call sigma_init(Sigp,Kmesh%nibz,Dtset%usepawu,Sr)
+ call Sr%init(Sigp, Kmesh%nibz, Dtset%usepawu)
 
  ! Setup bare Hamiltonian := T + v_{loc} + v_{nl} + v_H.
  !
@@ -1857,11 +1856,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    ! if(dtset%ucrpa==0) then
    if (Dtset%gwgamma<3) then
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm)
    else
-     call mkdump_Er(Er,Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
+     call Er%mkdump(Vcp,Er%npwe,Gsph_c%gvec,dim_kxcg,kxcg,id_required,&
                     approx_type,ikxc,option_test,Dtfil%fnameabo_scr,Dtset%iomode,&
                     nfftf_tot,ngfftf,comm,fxc_ADA)
    end if
@@ -1880,7 +1879,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  if (sigma_needs_ppm(Sigp)) then
    my_plsmf=drude_plsmf; if (Dtset%ppmfrq>tol6) my_plsmf=Dtset%ppmfrq
-   call ppm_init(PPm,Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
+   call PPm%init(Er%mqmem,Er%nqibz,Er%npwe,Sigp%ppmodel,my_plsmf,Dtset%gw_invalid_freq)
 
    ! PPm%force_plsmf= force_ppmfrq  ! this line to change the plasme frequency in HL expression.
 
@@ -1927,14 +1926,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      if (Er%mqmem/=0) then
        ! Calculate ppmodel parameters for all q-points.
-       call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_aepaw_rhor(:,1))
      end if
 
    else
      ! NC or PAW with PPmodel 1.
      if (Er%mqmem/=0) then
        ! Calculate ppmodel parameters for all q-points
-       call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
+       call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,nfftf,Gsph_c%gvec,ngfftf,ks_rhor(:,1))
      end if
    end if ! PAW or NC PPm and/or needs density
  end if ! sigma_needs_ppm
@@ -2029,7 +2028,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
  nomega_sigc=Sr%nomega_r+Sr%nomega4sd; if (mod10==SIG_GW_AC) nomega_sigc=Sr%nomega_i
 
- ! min and max band indeces for GW corrections.
+ ! min and max band indices for GW corrections.
  ib1=Sigp%minbdgw; ib2=Sigp%maxbdgw
 
  !MG TODO: I don't like the fact that ib1 and ib2 are redefined here because this
@@ -2540,7 +2539,7 @@ endif
 
      ABI_FREE(bdm_mask)       ! The master already used bdm_mask
      ABI_FREE(nat_occs)       ! Occs were already placed in qp_ebands
-     call em1results_free(Er) ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
+     call Er%free()           ! We no longer need Er for GW@KS-DFT 1RDM but we may need space on the RAM memory
 
      if (gw1rdm==2 .and. Sigp%nkptgw==Wfd%nkibz) then
        ! Compute energies only if all k-points are available
@@ -2666,9 +2665,9 @@ endif
        call xmpi_barrier(Wfd%comm)
        call Vcp_full%free()
        ! Save the new total exchange energy Ex = Ex[GW.1RDM]
-       ex_energy=sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh, qp_ebands)
        ! Save the new total exchange-correlation MBB energy Exc = Exc^MBB[GW.1RDM]
-       exc_mbb_energy=sigma_get_excene(Sr,Kmesh,qp_ebands)
+       exc_mbb_energy = Sr%get_excene(Kmesh,qp_ebands)
 
        ! Transform <NO_i|K[NO]|NO_j> -> <KS_i|K[NO]|KS_j>,
        !           <KS_i|J[NO]|KS_j> -> <NO_i|J[NO]|NO_j>,
@@ -2684,8 +2683,8 @@ endif
        !
        ! Print the updated total energy and all energy components
        !
-       eh_energy=mels_get_haene(Sr,GW1RDM_me,Kmesh,qp_ebands)
-       ekin_energy=mels_get_kiene(Sr,GW1RDM_me,Kmesh,qp_ebands)
+       eh_energy = Sr%get_haene(GW1RDM_me,Kmesh,qp_ebands)
+       ekin_energy = Sr%get_kiene(GW1RDM_me,Kmesh,qp_ebands)
        ! SD 2-RDM
        etot_sd=ekin_energy+evext_energy+evextnl_energy+QP_energies%e_corepsp+QP_energies%e_ewald+eh_energy+ex_energy
        ! MBB 2-RDM
@@ -2746,7 +2745,7 @@ endif
        end if
      end do
 
-     if (wfd%my_rank == master) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,ks_ebands)
+     if (wfd%my_rank == master) call Sr%write_sigma_results(ikcalc, ik_ibz, Sigp, ks_ebands)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2780,7 +2779,7 @@ endif
      ! if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=MAXVAL(MAXVAL(ks_vbik(:,:),DIM=1))) ) then
      if (ALL(Sigp%minbnd==1).and. ALL(Sigp%maxbnd>=ks_vbik) ) then  ! FIXME here the two arrays use a different indexing.
 
-       ex_energy = sigma_get_exene(Sr,Kmesh,qp_ebands)
+       ex_energy = Sr%get_exene(Kmesh,qp_ebands)
        write(msg,'(a,2(es16.6,a))')' New Exchange energy : ',ex_energy,' Ha ,',ex_energy*Ha_eV,' eV'
        call wrtout(units, msg)
      end if
@@ -2830,7 +2829,7 @@ endif
      NCF_CHECK(nctk_defnwrite_ivars(ncid, ["sigres_version"], [1]))
      NCF_CHECK(cryst%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ks_ebands, ncid))
-     NCF_CHECK(sigma_ncwrite(Sigp, Er, Sr, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
+     NCF_CHECK(Sr%ncwrite(Sigp, Er, ncid)) ! WARNING!! If gw1rdm>0 then Er is no longer present!!
      ! Add qp_rhor. Note that qp_rhor == ks_rhor if wavefunctions are not updated.
      !ncerr = nctk_write_datar("qp_rhor",path,ngfft,cplex,nfft,nspden,&
      !                          comm_fft,fftn3_distrib,ffti3_local,datar,action)
@@ -2925,11 +2924,9 @@ endif
  call Gsph_c%free()
  call Vcp%free()
  call cryst%free()
- call sigma_free(Sr)
- if(.not.rdm_update) then
-   call em1results_free(Er)
- end if
- call ppm_free(PPm)
+ call Sr%free()
+ if (.not.rdm_update) call Er%free()
+ call PPm%free()
  call Hdr_sigma%free()
  call Hdr_wfk%free()
  call ebands_free(ks_ebands)
@@ -3028,7 +3025,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  type(gaps_t) :: gaps
 !arrays
  integer :: ng0sh_opt(3),G0(3),q_umklp(3),kpos(6), units(2)
- integer,allocatable :: npwarr(:),val_indeces(:,:)
+ integer,allocatable :: npwarr(:),val_indices(:,:)
  integer,pointer :: gvec_kss(:,:),gsphere_sigx_p(:,:)
  integer,pointer :: test_gvec_kss(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),sq(3),q_bz(3),gamma_point(3,1)
@@ -3371,8 +3368,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
  call gaps%print(unit=std_out)
  call ebands_report_gap(ks_ebands, unit=std_out)
 
- ABI_MALLOC(val_indeces,(ks_ebands%nkpt, nsppol))
- val_indeces = ebands_get_valence_idx(ks_ebands)
+ ABI_MALLOC(val_indices,(ks_ebands%nkpt, nsppol))
+ val_indices = ebands_get_valence_idx(ks_ebands)
 
  ! Create Sigma header
  ! TODO Fix problems with symmorphy and k-points
@@ -3443,8 +3440,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        ! All k-points: Add buffer of bands above and below the Fermi level.
        do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%minbnd(ik, spin) = MAX(val_indeces(ik,spin) - gw_qprange, 1)
-           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) + gw_qprange + 1, Sigp%nbnds)
+           Sigp%minbnd(ik, spin) = MAX(val_indices(ik,spin) - gw_qprange, 1)
+           Sigp%maxbnd(ik, spin) = MIN(val_indices(ik,spin) + gw_qprange + 1, Sigp%nbnds)
          end do
        end do
 
@@ -3453,7 +3450,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        Sigp%minbnd = 1
        do spin=1,nsppol
          do ik=1,Sigp%nkptgw
-           Sigp%maxbnd(ik, spin) = MIN(val_indeces(ik,spin) - gw_qprange, Sigp%nbnds)
+           Sigp%maxbnd(ik, spin) = MIN(val_indices(ik,spin) - gw_qprange, Sigp%nbnds)
          end do
        end do
      end if
@@ -3493,8 +3490,8 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
        ik = kpos(ii)
        Sigp%kptgw(:,ii) = Kmesh%ibz(:,ik)
        do spin=1,nsppol
-         Sigp%minbnd(ii,spin) = val_indeces(ik, spin)
-         Sigp%maxbnd(ii,spin) = val_indeces(ik, spin) + 1
+         Sigp%minbnd(ii,spin) = val_indices(ik, spin)
+         Sigp%maxbnd(ii,spin) = val_indices(ik, spin) + 1
        end do
      end do
    end if
@@ -3638,7 +3635,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
      ABI_COMMENT(sjoin("File not found. Will try netcdf file:", fname))
    end if
 
-   call init_Er_from_file(Er,fname,mqmem,Dtset%npweps,comm)
+   call Er%init_from_file(fname,mqmem,Dtset%npweps,comm)
 
    Sigp%npwc=Er%npwe
    if (Sigp%npwc>Sigp%npwx) then
@@ -3922,7 +3919,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,Dtset,Dtfil,Psps,Pawtab,&
 
  call gaps%free()
 
- ABI_FREE(val_indeces)
+ ABI_FREE(val_indices)
 
  DBG_EXIT('COLL')
 

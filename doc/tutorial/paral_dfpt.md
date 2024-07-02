@@ -18,7 +18,7 @@ that are computed on the basis of the density-functional perturbation theory
 Such computations are realized when one of the input variables [[rfphon]],
 [[rfelfd]] or [[rfstrs]] are non-zero, which activates [[optdriver]]=1.
 You are supposed to be well-familiarized with such calculations before starting
-the present tutorial. See the input variables described in [[varset:dfpt]] and
+the present tutorial. See the [respfn help file](/guide/respfn), the input variables described in [[varset:dfpt]] and
 the tutorial [Response-Function 1](/tutorial/rf1) and subsequent tutorials.
 
 You will learn about the basic implementation of parallelism for DFPT
@@ -129,7 +129,7 @@ drastically the number of k points: there are 60 k points in the irreducible
 Brillouin zone (this cannot be deduced from the examination of the input file, though).
 In order to treat properly the phonon calculation, the number of bands is larger than the
 default value, that would have given [[nband]]=3. Indeed, several of the unoccupied bands 
-plays a role in the response calculations in the case of etallic occupations.
+plays a role in the response calculations in the case of metallic occupations.
 For example, the acoustic sum rule might be largely violated when too few unoccopied 
 bands are treated. 
 
@@ -160,7 +160,7 @@ The only relevant information from the first step is the *_WFK file.
 First copy the output of the ground-state calculation so that it can be used
 as the input of the DFPT calculation:
 
-    cp tdfpt_01.o_WFK tdfpt_02.i_WFK
+    cp tdfpt_01o_WFK tdfpt_02i_WFK
 
 (A _WFQ file is not needed, as all GS wavefunctions at k+q are present in the GW wavefuction at k).
 Then, you can launch the calculation:
@@ -350,7 +350,7 @@ To launch the ground-state computation, type:
 then copy the output of the ground-state calculation so that it can be used as
 the input of the DFPT calculation:
 
-    mv tdfpt_03o_WFK.nc tdfpt_04i_WFK.nc
+    mv tdfpt_03o_WFK tdfpt_04i_WFK
 
 and launch the calculation:
 

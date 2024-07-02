@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -663,7 +663,7 @@ subroutine vtowfk(cg,cgq,cprj,cpus,dphase_k,dtefield,dtfil,dtset,&
      !call wrtout(std_out, "Calling cgtk_fixphase")
       if ( (.not.newlobpcg) .and. (.not.newchebfi) .and. (.not.has_cprj_in_memory) ) then
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,gs_hamk%usepaw)
-     else if (newlobpcg .or. newchebfi) then
+     else if ( (newlobpcg .or. newchebfi) .and. (.not.has_cprj_in_memory) ) then
        ! GSC is local to vtowfk and is completely useless since everything
        ! is calculated in my lobpcg, we don't care about the phase of gsc !
        call cgtk_fixphase(cg,gsc,icg,igsc,istwf_k,mcg,mgsc,mpi_enreg,nband_k,npw_k*my_nspinor,0)

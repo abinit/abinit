@@ -7,7 +7,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2022 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2024 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,7 +38,7 @@ module m_xmpi
 #ifdef FC_NAG
  use f90_unix_proc
 #endif
- use m_clib, only : clib_ulimit_stack !, clib_getpid !, clib_usleep
+ use m_clib
 
  implicit none
 
@@ -192,7 +192,7 @@ module m_xmpi
 !! xmpi_pool2d_t
 !!
 !! FUNCTION
-!!  Pool of MPI processors operating a 2D problem of shape (n1, n2).
+!!  Pool of MPI processors operating on a 2D problem of shape (n1, n2).
 !!  Each item in the (n1, n2) matrix is assigned to a single pool.
 !!  Note that differerent pools do not necessarily have the same number of procs,
 !!  thus a pool is more flexibile than a Cartesian grid although inter-pool communication becomes more complex.
@@ -205,7 +205,7 @@ module m_xmpi
    ! Dimensions of the 2d problem
 
    type(xcomm_t) :: comm
-   ! MPI communicator
+   ! MPI communicator.
 
    logical,allocatable :: treats(:,:)
    ! (n1, n2)
@@ -230,6 +230,7 @@ module m_xmpi
  public :: xmpi_comm_rank             ! Hides MPI_COMM_RANK from MPI library.
  public :: xmpi_comm_size             ! Hides MPI_COMM_SIZE from MPI library.
  public :: xmpi_comm_free             ! Hides MPI_COMM_FREE from MPI library.
+ public :: xmpi_comm_dup              ! Hides MPI_COMM_DUP from MPI library.
  public :: xmpi_comm_group            ! Hides MPI_COMM_GROUP from MPI library.
  public :: xmpi_comm_translate_ranks  ! Hides MPI_GROUP_TRANSLATE_RANKS from MPI library.
  public :: xmpi_comm_translate_rank   ! Translate one rank
@@ -757,9 +758,6 @@ CONTAINS  !===========================================================
 !!  Hides MPI_INIT from MPI library. Perform the initialization of some basic variables
 !!  used by the MPI routines employed in abinit.
 !!
-!! INPUTS
-!!  None
-!!
 !! SOURCE
 
 subroutine xmpi_init()
@@ -777,6 +775,8 @@ subroutine xmpi_init()
 #endif
 
 ! *************************************************************************
+
+ call set_num_threads_if_undef()
 
  mpierr=0
 #ifdef HAVE_MPI
@@ -850,6 +850,44 @@ end subroutine xmpi_init
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/set_num_threads_if_undef
+!! NAME
+!!  set_num_threads_if_undef
+!!
+!! FUNCTION
+!!  sets OMP_NUM_THREADS to 1 is the env variable is undefined.
+!!
+!! SOURCE
+
+subroutine set_num_threads_if_undef()
+
+#ifdef HAVE_OPENMP
+!Local variables-------------------
+ integer :: ierr
+ character(len=100) :: omp_num_threads
+! *************************************************************************
+
+ ! Get the value of OMP_NUM_THREADS environment variable
+ call get_environment_variable('OMP_NUM_THREADS', omp_num_threads, status=ierr)
+
+ ! If OMP_NUM_THREADS is not defined (ierr != 0), set it to 1
+ if (ierr /= 0) then
+   ierr = clib_setenv('OMP_NUM_THREADS', '1', 1)
+   if (ierr == 0) then
+     write(std_out,"(a)")'- OMP_NUM_THREADS was not defined. It has been set to 1.'
+   else
+     write(std_out,"(a)")'- WARNING: Failed to set OMP_NUM_THREADS.'
+   end if
+ else
+   !write(std_out,*)'- OMP_NUM_THREADS is already set to: ', trim(omp_num_threads)
+ end if
+#endif
+
+end subroutine set_num_threads_if_undef
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_xmpi/xmpi_set_inplace_operations
 !! NAME
 !!  xmpi_set_inplace_operations
@@ -862,7 +900,7 @@ end subroutine xmpi_init
 subroutine xmpi_set_inplace_operations(bool)
 
 !Local variables-------------------
- logical :: bool
+ logical,intent(in) :: bool
 
 ! *************************************************************************
 
@@ -1084,7 +1122,6 @@ subroutine xmpi_show_info(unit)
 
 ! *************************************************************************
 
- !@m_xmpi
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
 
 #ifdef HAVE_MPI1
@@ -1134,15 +1171,13 @@ end subroutine xmpi_show_info
 !!
 !! SOURCE
 
-function xmpi_comm_rank(comm)
+integer function xmpi_comm_rank(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_rank
 
 !Local variables-------------------
  integer :: mpierr
-
 ! *************************************************************************
 
  mpierr=0
@@ -1175,14 +1210,12 @@ end function xmpi_comm_rank
 !!
 !! SOURCE
 
-function xmpi_comm_size(comm)
+integer function xmpi_comm_size(comm)
 
 !Arguments-------------------------
  integer,intent(in) :: comm
- integer :: xmpi_comm_size
 
 !Local variables-------------------------------
-!scalars
  integer :: mpierr
 
 ! *************************************************************************
@@ -1541,13 +1574,12 @@ end subroutine xmpi_comm_create
 !!
 !! SOURCE
 
-function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
+integer function xmpi_subcomm(comm,nranks,ranks,my_rank_in_group)
 
 !Arguments-------------------------
 !scalars
  integer,intent(in) :: comm,nranks
  integer,intent(out),optional :: my_rank_in_group
- integer :: xmpi_subcomm
 !arrays
  integer,intent(in) :: ranks(nranks)
 
@@ -1635,6 +1667,41 @@ subroutine xmpi_comm_multiple_of(ntasks, input_comm, idle_proc, output_comm)
  end if
 
 end subroutine xmpi_comm_multiple_of
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_comm_dup
+!! NAME
+!!  xmpi_comm_dup
+!!
+!! FUNCTION
+!!  Hides MPI_COMM_DUP from MPI library.
+!!
+!! INPUTS
+!!  in_comm=input MPI communicator.
+!!
+!! OUTPUT
+!!  out_comm=Output MPI communicator.
+!!  mpierr=error code returned
+!!
+!! SOURCE
+
+subroutine xmpi_comm_dup(in_comm, out_comm, mpierr)
+
+!Arguments-------------------------
+ integer,intent(in) :: in_comm
+ integer,intent(out) :: out_comm, mpierr
+
+!----------------------------------------------------------------------
+
+#ifdef HAVE_MPI
+  call MPI_Comm_dup(in_comm, out_comm, mpierr)
+#else
+  out_comm = in_comm
+#endif
+
+end subroutine xmpi_comm_dup
 !!***
 
 !----------------------------------------------------------------------
@@ -2556,13 +2623,13 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! FUNCTION
 !!  Fill table defining the distribution of the tasks according to the number of processors involved in the
-!!  calculation. For each set of indeces, the table contains the rank of the node in the MPI communicator.
+!!  calculation. For each set of indices, the table contains the rank of the node in the MPI communicator.
 !!
 !! INPUTS
 !!  nprocs=The number of processors performing the calculation in parallel.
 !!
 !! OUTPUT
-!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indeces.
+!!  task_distrib(:,:,:,:) = Contains the rank of the node that is taking care of this particular set of loop indices.
 !!  Tasks are distributed across the nodes in column-major order.
 !!
 !! SOURCE
@@ -2804,7 +2871,9 @@ subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_
 
 end subroutine xmpi_largetype_create
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_int
 !! NAME
 !!  largetype_sum_int
@@ -2827,7 +2896,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_int
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_real
 !! NAME
 !!  largetype_sum_real
@@ -2850,13 +2921,16 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_real
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dble
 !! NAME
 !!  largetype_sum_dble
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_SUM for double precision reals
+
  subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
   integer :: len,datatype
   real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
@@ -2873,7 +2947,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dble
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_cplx
 !! NAME
 !!  largetype_sum_cplx
@@ -2896,7 +2972,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_cplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_sum_dcplx
 !! NAME
 !!  largetype_sum_dcplx
@@ -2919,7 +2997,9 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_sum_dcplx
 !!***
+
 !--------------------------------------
+
 !!****f* m_xmpi/largetype_lor_log
 !! NAME
 !!  largetype_lor_log
@@ -2942,10 +3022,12 @@ end subroutine xmpi_largetype_create
   if (.FALSE.) write(std_out,*) datatype
  end subroutine largetype_lor_log
 !!***
+
 !--------------------------------------
-!!****f* m_xmpi/largetype_lang_log
+
+!!****f* m_xmpi/largetype_land_log
 !! NAME
-!!  largetype_lang_log
+!!  largetype_land_log
 !!
 !! FUNCTION
 !!  Routine used to overload MPI_LANG for logicals
@@ -4700,7 +4782,7 @@ subroutine xmpio_create_coldistr_from_fpacked(sizes,my_cols,old_type,new_type,my
        ii_hpk = row_glob
        jj_hpk = col_glob
        ijp_glob = row_glob + col_glob*(col_glob-1)/2  ! Index for packed form
-     else ! Exchange the indeces as (jj,ii) will be read.
+     else ! Exchange the indices as (jj,ii) will be read.
        ii_hpk = col_glob
        jj_hpk = row_glob
        ijp_glob = col_glob + row_glob*(row_glob-1)/2  ! Index for packed form
@@ -4863,7 +4945,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
        ii_hpk = row_glob - row_shift
        jj_hpk = col_glob - col_shift
-       if (jj_hpk<ii_hpk) then ! Exchange the indeces so that the symmetric is read.
+       if (jj_hpk<ii_hpk) then ! Exchange the indices so that the symmetric is read.
          swap   = jj_hpk
          jj_hpk = ii_hpk
          ii_hpk = swap
@@ -4888,7 +4970,7 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
        ii = row_glob - row_shift
        jj = col_glob - col_shift
 
-       if (uplo==2) then ! Exchange the indeces since the symmetric element will be read.
+       if (uplo==2) then ! Exchange the indices since the symmetric element will be read.
          swap=jj
          jj  =ii
          ii  =swap
@@ -4916,8 +4998,8 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
    end do
  end do
 
- write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
- write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
+ !write(std_out,*)" MAX displ = ",max_displ," my_nels = ",my_nels
+ !write(std_out,*)" MIN displ = ",MINVAL(block_displ(2:my_nels+1))
 
  !block_displ (1)=max_displ ! Do not change this value.
  !if (min_displ>0) block_displ (1)=min_displ ! Do not change this value.
@@ -5187,7 +5269,7 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  integer :: disp_unit
 #ifdef HAVE_MPI
 #if 0
- integer :: ierr, disp_unit
+ integer :: ierr
  integer(kind=XMPI_ADDRESS_KIND) :: my_size
 #endif
 #endif
@@ -5225,8 +5307,11 @@ subroutine xcomm_allocate_shared_master(xcomm, count, kind, info, baseptr, win)
  ! No local operations prior to this epoch, so give an assertion
  call MPI_Win_fence(MPI_MODE_NOPRECEDE, win, ierr)
 #else
- ABI_UNUSED(count)
- ABI_UNUSED(info)
+  ! this macro is being used befor m_errors is compiled, so work around it
+! ABI_UNUSED(count)
+! ABI_UNUSED(info)
+  if (.FALSE.) write(std_out,*) count
+  if (.FALSE.) write(std_out,*) info
 #endif
 #endif
 
@@ -5291,18 +5376,18 @@ subroutine pool2d_from_dims(pool, n1, n2, input_comm, rectangular)
    end do i2_loop
  end if
 
-!DEBUG
-! where (pool%treats)
-!   check = 1
-! else where
-!   check = 0
-! end where
-! call xmpi_sum(check, input_comm, mpierr)
-! if (any(check == 0)) then
-!   write(std_out, *) check
-!   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
-! end if
-!END_DEBUG
+ !DEBUG
+ ! where (pool%treats)
+ !   check = 1
+ ! else where
+ !   check = 0
+ ! end where
+ ! call xmpi_sum(check, input_comm, mpierr)
+ ! if (any(check == 0)) then
+ !   write(std_out, *) check
+ !   call xmpi_abort(msg="Wrong distribution in pool2d_from_dims")
+ ! end if
+ !END_DEBUG
 
  call xmpi_comm_split(input_comm, color, my_rank, new_comm, mpierr)
  pool%comm = xcomm_from_mpi_int(new_comm)
@@ -5331,6 +5416,7 @@ contains
 logical function is_rectangular_grid(nproc, grid_dims) result (ans)
  integer,intent(in) :: nproc
  integer,intent(out) :: grid_dims(2)
+
 !----------------------------------------------------------------------
  integer :: i
  ! Search for a rectangular grid of processors

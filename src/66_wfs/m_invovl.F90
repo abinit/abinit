@@ -10,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2022 ABINIT group (AL)
+!! Copyright (C) 2013-2024 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -492,7 +492,7 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
 
  integer :: itypat, ilmn, nlmn, jlmn, ia, iaph3d, shift
  integer :: il, ilm, jlm, ipw, info, ierr, cplx
- integer :: ikpt_this_proc
+ integer :: ikpt_this_proc,cplex_dij
  logical :: parity
  real(dp) :: tsec(2)
  character(len=500) :: message
@@ -555,15 +555,28 @@ subroutine make_invovl(ham, dimffnl, ffnl, ph3d, mpi_enreg)
  shift = 0
  do itypat = 1, ham%ntypat
    nlmn = count(ham%indlmn(3,:,itypat)>0)
+   if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)/2) then
+     cplex_dij = 1
+   else if (size(ham%sij(:,itypat))==ham%lmnmax*(ham%lmnmax+1)) then
+     cplex_dij = 2
+   else
+     ABI_ERROR('sij size not recognize')
+   end if
    !! unpack ham%sij into inv_sij
    do jlmn = 1, nlmn
-     invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
-     jlm=ham%indlmn(4,jlmn, itypat)
+     if (cplex_dij==1) then
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + jlmn, itypat)
+     else
+       invovl%inv_sij(1, jlmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*jlmn-1, itypat)
+     end if
      do ilmn = 1, jlmn-1
-       ilm=ham%indlmn(4,ilmn, itypat)
-       if (ilm == jlm) then ! sparsity check
+       if (cplex_dij==1) then
          invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
          invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1)/2 + ilmn, itypat)
+       else
+         invovl%inv_sij(1, ilmn, jlmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+         invovl%inv_sij(1, jlmn, ilmn, itypat) = ham%sij(jlmn*(jlmn-1) + 2*ilmn-1, itypat)
+
        end if
      end do
    end do

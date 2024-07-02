@@ -7,7 +7,7 @@
 !!  to handle the header of the DDB files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC)
+!! Copyright (C) 2011-2024 ABINIT group (GA, MJV, XG, MT, MM, MVeithen, MG, PB, JCC, MMignolet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,13 +61,13 @@ MODULE m_ddb_hdr
 
  ! Description of perturbations and block types
  ! --------------------------------------------
- ! 
+ !
  ! GA: Variable names should not end with _d0E, _d1E, d2E, ...
  !     Such names may affect the variable type, with certain compilers.
  !     This is why I appended _xx, lack of a better suffix.
  !
  !
- ! These parameters should be consistent with input variable rfmeth 
+ ! These parameters should be consistent with input variable rfmeth
  ! and input parameter rftyp (e.g. ddb_get_block, ddb_read_block_txt).
  ! Changing these values requires to change the documentation as well.
  !
@@ -75,17 +75,19 @@ MODULE m_ddb_hdr
  integer,public,parameter :: BLKTYP_d1E_xx=4       ! First-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2E_ns=1       ! Second-order derivatives of total energy, non-stationary
  integer,public,parameter :: BLKTYP_d2E_st=2  ! Second-order derivatives of total energy, stationary
+ integer,public,parameter :: BLKTYP_d2E_mbc=85     ! Molecular Berry curvature (MBC)
  integer,public,parameter :: BLKTYP_d3E_xx=3       ! Third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d3E_lw=33   ! Long-wave third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2eig_re=5     ! Second-order derivatives of eigenvalues
  integer,public,parameter :: BLKTYP_d2eig_im=6 ! Static broadening of eigenvalues
 
  integer,public,parameter :: descrlen=500
- integer,public,parameter :: ntypes=8  ! The number of different block types
+ integer,public,parameter :: ntypes=9  ! The number of different block types
  character(len=descrlen),public,parameter :: DESCR_d0E_xx = ' Total energy                 - '
  character(len=descrlen),public,parameter :: DESCR_d1E_xx = ' 1st derivatives              - '
  character(len=descrlen),public,parameter :: DESCR_d2E_ns = ' 2nd derivatives (non-stat.)  - '
  character(len=descrlen),public,parameter :: DESCR_d2E_st = ' 2nd derivatives (stationary) - '
+ character(len=descrlen),public,parameter :: DESCR_d2E_mbc = ' 2nd derivatives (MBC)        - '
  character(len=descrlen),public,parameter :: DESCR_d3E_xx = ' 3rd derivatives              - '
  character(len=descrlen),public,parameter :: DESCR_d3E_lw = ' 3rd derivatives (long wave)  - '
  character(len=descrlen),public,parameter :: DESCR_d2eig_re = ' 2nd eigenvalue derivatives   - '
@@ -97,16 +99,16 @@ MODULE m_ddb_hdr
  character(len=descrlen),public,parameter :: DESCR_ipert_0 = 'displacement of atom '
  character(len=descrlen),public,parameter :: DESCR_ipert_1 = 'derivative wrt k'
  character(len=descrlen),public,parameter :: DESCR_ipert_2 = 'electric field'
- character(len=descrlen),public,parameter :: DESCR_ipert_3 = 'strain'  ! GA: Dont know the difference
- character(len=descrlen),public,parameter :: DESCR_ipert_4 = 'strain'  !     between these two
+ character(len=descrlen),public,parameter :: DESCR_ipert_3 = 'strain'  ! diagonal stress components
+ character(len=descrlen),public,parameter :: DESCR_ipert_4 = 'strain'  ! non-diagonal stress
  character(len=descrlen),public,parameter :: DESCR_ipert_5 = 'magnetic field'
  character(len=descrlen),public,parameter :: DESCR_ipert_10 = '2nd derivative wrt to k'
  character(len=descrlen),public,parameter :: DESCR_ipert_11 = '2nd derivative wrt to k and electric field'
 
- integer,public,parameter :: DDB_VERSION=20230401
+ integer,public,parameter :: DDB_VERSION=20230401 ! TODO: check if we should update this with new G matrix stuff
  ! DDB Version number for text format.
 
- integer,public,parameter :: DDB_VERSION_NC=20230219
+ integer,public,parameter :: DDB_VERSION_NC=20230219 ! TODO: check if we should update this with new G matrix stuff
  ! DDB NetCDF version number.
 
  type,public :: ddb_hdr_type
@@ -158,6 +160,9 @@ MODULE m_ddb_hdr
 
    ! GA: FIXME mblktyp doesnt make sense.
    ! Instead, we should have logical variables has_d2eig, has_d3E, etc.
+   ! MMig; I agree mblktyp does not make much sense and its not even always
+   ! treated properly throughout the code
+   ! The logical variables seems like a good idea to me
    integer :: mblktyp       ! Max block type
                             ! 0 = Total energy
                             ! 1 = 2nd derivatives (non-stat.)
@@ -165,7 +170,6 @@ MODULE m_ddb_hdr
                             ! 3 = 3rd derivatives
                             ! 4 = 1st derivatives
                             ! 5 = 2nd eigenvalue derivatives
-                            !
    real(dp) :: dilatmx
    real(dp) :: ecut
    real(dp) :: ecutsm
@@ -195,7 +199,7 @@ MODULE m_ddb_hdr
    ! typat(matom)
 
    integer,allocatable :: typ(:)
-   ! typ(nblok)
+   ! typ(nblok), type of the blocks: d2E_st, d3E_lw,...
 
    real(dp),allocatable :: amu(:)
    ! amu(mtypat)
@@ -605,7 +609,7 @@ subroutine ddb_hdr_get_block_dims(ddb_hdr)
  ! Compute mpert
  !ddb_hdr%mpert = ddb_hdr%natom+MPERT_MAX
  ! GA: mpert is stored in netcdf format but not in text format.
- 
+
  ! Compute msize
  if (is_type_d3E(ddb_hdr%mblktyp)) then
    ddb_hdr%msize=3*ddb_hdr%mpert*3*ddb_hdr%mpert*3*ddb_hdr%mpert
@@ -907,13 +911,13 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
      pawtab_lmn_size(itypat) = lmn_size
      pawtab_lmn2_size(itypat) = lmn2_size
      pawtab_shape_type(itypat) = shape_type
-     
+
      if (lmn2_size > max_lmn2_size) then
        max_lmn2_size = lmn2_size
-     end if 
+     end if
      if (basis_size > max_basis_size) then
        max_basis_size = basis_size
-     end if 
+     end if
    end do
 
    ncerr = nctk_def_dims(ncid_pawtab, [&
@@ -974,7 +978,7 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    ! -------------------------------------
 
  end if
- 
+
 
  ! ----------------
  ! Scalar variables
@@ -1082,13 +1086,13 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
                         trim(DESCR_ipert_1), start=[1, natom+1])
    NCF_CHECK(ncerr)
  end if
- 
+
  if (mpert >= natom+2) then
    ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
                         trim(DESCR_ipert_2), start=[1, natom+2])
    NCF_CHECK(ncerr)
  end if
- 
+
  if (mpert >= natom+3) then
    ncerr = nf90_put_var(ncid, vid("description_of_perturbations"), &
                         trim(DESCR_ipert_3), start=[1, natom+3])
@@ -1146,24 +1150,29 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
                       trim(DESCR_d2E_st), start=[1, 4])
  NCF_CHECK(ncerr)
 
- available_block_types(5) = BLKTYP_d3E_xx
+ available_block_types(5) = BLKTYP_d2E_mbc
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d3E_xx), start=[1, 5])
+                      trim(DESCR_d2E_mbc), start=[1, 5])
  NCF_CHECK(ncerr)
 
- available_block_types(6) = BLKTYP_d3E_lw
+ available_block_types(6) = BLKTYP_d3E_xx
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d3E_lw), start=[1, 6])
+                      trim(DESCR_d3E_xx), start=[1, 6])
  NCF_CHECK(ncerr)
 
- available_block_types(7) = BLKTYP_d2eig_re
+ available_block_types(7) = BLKTYP_d3E_lw
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d2eig_re), start=[1, 7])
+                      trim(DESCR_d3E_lw), start=[1, 7])
  NCF_CHECK(ncerr)
 
- available_block_types(8) = BLKTYP_d2eig_im
+ available_block_types(8) = BLKTYP_d2eig_re
  ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
-                      trim(DESCR_d2eig_im), start=[1, 8])
+                      trim(DESCR_d2eig_re), start=[1, 8])
+ NCF_CHECK(ncerr)
+
+ available_block_types(9) = BLKTYP_d2eig_im
+ ncerr = nf90_put_var(ncid, vid("description_of_block_types"),&
+                      trim(DESCR_d2eig_im), start=[1, 9])
  NCF_CHECK(ncerr)
 
  ncerr = nf90_put_var(ncid, vid("available_block_types"), available_block_types)
@@ -1241,7 +1250,7 @@ subroutine ddb_hdr_open_write_nc(ddb_hdr, filename, with_psps, with_dfpt_vars)
    end if
 
  end do
- 
+
  ! ------------------------
  ! Zeroth-order derivatives
  ! ------------------------
@@ -1611,8 +1620,8 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
 
 
  ! When merging ddbs, we want to open a header with fixed dimensions.
- ! GA: Might not be necessary if we handle the merging better. 
- !    
+ ! GA: Might not be necessary if we handle the merging better.
+ !
  if (present(matom)) matom_l = matom
  if (present(mtypat)) mtypat_l = mtypat
  if (present(mband)) mband_l = mband
@@ -1777,15 +1786,15 @@ subroutine ddb_hdr_open_read_txt(ddb_hdr, filename, comm, &
    ! -------------------------------
    ! Initialize the crystal
    ! -------------------------------
-  
+
    call mkrdim(ddb_hdr%acell,ddb_hdr%rprim,rprimd)
-  
+
    ! GA: space group and time reversal are not written in the text file
    !     but they are written in the netcdf version.
    !     It doesnt seem to make any difference to anaddb.
    spgroup = 1
    timrev = 2
-  
+
    call crystal_init(ddb_hdr%amu, ddb_hdr%crystal, &
 &   spgroup, ddb_hdr%natom, npsp, ddb_hdr%ntypat, &
 &   ddb_hdr%nsym, rprimd, ddb_hdr%typat, &
@@ -1955,7 +1964,7 @@ subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
 
        ddb_hdr%pawtab(itypat)%rpaw = pawtab_rpaw(itypat)
        ddb_hdr%pawtab(itypat)%rshp = pawtab_rshp(itypat)
-       
+
        ABI_MALLOC(ddb_hdr%pawtab(itypat)%dij0, (ddb_hdr%pawtab(itypat)%lmn2_size))
        ncerr = nf90_get_var(ncid_pawtab, nctk_idname(ncid_pawtab, 'Dij0'), &
                             ddb_hdr%pawtab(itypat)%dij0, &
@@ -2062,7 +2071,7 @@ subroutine ddb_hdr_open_read_nc(ddb_hdr, filename, comm, &
    NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, 'ngfft'), ngfft))
    ddb_hdr%ngfft = zero
    do ii=1,3
-     ddb_hdr%ngfft(ii) = ngfft(ii) 
+     ddb_hdr%ngfft(ii) = ngfft(ii)
    end do
 
    ! Basis
@@ -2395,7 +2404,7 @@ subroutine ddb_hdr_compare(ddb_hdr1, ddb_hdr2)
 !     end do
 !   end if
 ! end if
- 
+
 
 
  ! Should also compare indlmn and pspso ... but suppose that
@@ -2663,7 +2672,7 @@ subroutine ddb_hdr_bcast_dim(ddb_hdr, comm)
  call xmpi_bcast(ddb_hdr%psps%useylm, master, comm, ierr)
 
  DBG_EXIT("COLL")
- 
+
 end subroutine ddb_hdr_bcast_dim
 !!***
 
@@ -2975,7 +2984,10 @@ subroutine psddb8 (choice,dimekb,ekb,with_psps,indlmn,lmnmax,&
      read(nunit, '(32x,i6)' )vrspsp8
      if (vrspsp8==vrsio8_old.or.vrspsp8==vrsio8_old_old) then
        usepaw0=0
-       read(nunit, '(10x,i3,14x,i3,11x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
+       ! this format statement is inconsistent with test v2[13]
+       ! JWZ 31 May 2024
+       !read(nunit, '(10x,i3,14x,i3,11x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
+       read(nunit, '(10x,i3,14x,i3,14x,i3)', iostat=ios)dimekb0,lmnmax0,usepaw0
        if(ios/=0)then
          backspace(nunit)
          read (nunit, '(10x,i3,14x,i3)' )dimekb0,lmnmax0
@@ -3377,8 +3389,8 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527
- integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527
+ integer,parameter :: vrsio8=100401,vrsio8_old=010929,vrsio8_old_old=990527 ! should I modify this ? I guess not
+ integer,parameter :: cvrsio9=20230401,cvrsio8=20100401,cvrsio8_old=20010929,cvrsio8_old_old=19990527 ! should I modify this ? I guess not
  integer :: bantot,ddbvrs,iband,ii,ij,ikpt,iline,im,ndig,usepaw0
  logical :: ddbvrs_is_current_or_old,testn,testv
  character(len=500) :: message
@@ -3416,15 +3428,15 @@ subroutine ioddb8_in(filename,matom,mband,mkpt,msym,mtypat,unddb,&
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
      if (ndig==6) then
-       write(prefix,'(i2)') 20 
+       write(prefix,'(i2)') 20
      else if (ndig==5) then
-       write(prefix,'(i3)') 200 
+       write(prefix,'(i3)') 200
      end if
    else if (ddbvrs==vrsio8_old_old) then
      if (ndig==6) then
-       write(prefix,'(i2)') 19 
+       write(prefix,'(i2)') 19
      else if (ndig==5) then
-       write(prefix,'(i3)') 199 
+       write(prefix,'(i3)') 199
      end if
    end if
    ddbvrs8= trim(prefix) // trim(ddbvrs6)
@@ -4085,15 +4097,15 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
    write(ddbvrs6,'(i0)') ddbvrs
    if (ddbvrs==vrsio8 .or.ddbvrs==vrsio8_old) then
      if (ndig==6) then
-       write(prefix,'(i2)') 20 
+       write(prefix,'(i2)') 20
      else if (ndig==5) then
-       write(prefix,'(i3)') 200 
+       write(prefix,'(i3)') 200
      end if
    else if (ddbvrs==vrsio8_old_old) then
      if (ndig==6) then
-       write(prefix,'(i2)') 19 
+       write(prefix,'(i2)') 19
      else if (ndig==5) then
-       write(prefix,'(i3)') 199 
+       write(prefix,'(i3)') 199
      end if
    end if
    ddbvrs8= trim(prefix) // trim(ddbvrs6)
@@ -4366,7 +4378,10 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
    read (unddb,*)
    if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
-     read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
+     ! this format statement is inconsistent with the ddb for test v2[13] 
+     ! JWZ 31 May 2024
+     !read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
+     read (unddb, '(10x,i3,14x,i3,14x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      if(ios/=0)then
        backspace(unddb)
        read (unddb, '(10x,i3,14x,i3)')dimekb,lmnmax
@@ -4453,6 +4468,10 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
        blktyp=BLKTYP_d2E_ns
      else if(blkname==' 2nd derivatives (stationary) - ' .or. blkname==' 2rd derivatives (stationary) - ')then
        blktyp=BLKTYP_d2E_st
+     else if(blkname==' 2nd derivatives (MBC)        - ') then
+     ! wouldn't it be better to use conditions like:
+     ! else if(blkname==DESCR_d2E_mbc) then
+       blktyp=BLKTYP_d2E_mbc
      else if(blkname==' 3rd derivatives              - ')then
        blktyp=BLKTYP_d3E_xx
      else if(blkname==' Total energy                 - ')then
@@ -4657,8 +4676,8 @@ subroutine chkr8(reali,realt,name,tol)
 ! *********************************************************************
 
  if(abs(reali-realt)>tol) then
-   write(message, '(a,a,a,a,a,es16.6,a,a,a,es16.6,a,a,a)' )&
-   'Comparing reals for variable',name,'.',ch10,&
+   write(message, '(5a,es16.6,3a,es16.6,3a)' )&
+   'Comparing reals for variable',trim(name),'.',ch10,&
    'Value from input DDB is',reali,' and',ch10,&
    'from transfer DDB is',realt,'.',ch10,&
    'Action: check your DDBs.'
@@ -4705,10 +4724,10 @@ subroutine chki8(inti,intt,name)
 ! *********************************************************************
 
  if(inti/=intt) then
-   write(message, '(a,a,a,a,a,i10,a,a,a,i10,a,a,a)' )&
-   'Comparing integers for variable',name,'.',ch10,&
-   'Value from input DDB is',inti,' and',ch10,&
-   'from transfer DDB is',intt,'.',ch10,&
+   write(message, '(5a,i0,3a,i0,3a)' )&
+   'Comparing integers for variable',trim(name),'.',ch10,&
+   'Value from input DDB is ',inti,' and',ch10,&
+   'from transfer DDB is ',intt,'.',ch10,&
    'Action: check your DDBs.'
    ABI_ERROR(message)
  end if
@@ -5062,7 +5081,7 @@ logical function is_type_d2E(blktyp) result(answer)
 !Arguments ------------------------------------
  integer, intent(in) :: blktyp
 
-   if ((blktyp==BLKTYP_d2E_ns).or.(blktyp==BLKTYP_d2E_st)) then
+   if ((blktyp==BLKTYP_d2E_ns).or.(blktyp==BLKTYP_d2E_st).or.(blktyp==BLKTYP_d2E_mbc)) then
      answer = .True.
    else
      answer = .False.

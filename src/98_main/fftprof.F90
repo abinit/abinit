@@ -6,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2022 ABINIT group (MG)
+!! Copyright (C) 2004-2024 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -109,7 +109,7 @@ program fftprof
 !arrays
  integer :: ut_ngfft(18)
 #ifdef HAVE_GPU_CUDA
- integer :: gpu_devices(5)
+ integer :: gpu_devices(12)
 #endif
  real(dp),parameter :: gamma_point(3) = zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)

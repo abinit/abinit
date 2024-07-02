@@ -7,7 +7,7 @@
 !!  Special messages= WARNING, COMMENT, EXIT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MT)
+!! Copyright (C) 2008-2024 ABINIT group (MT,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,13 +204,13 @@ subroutine herald(code_name,code_version,iout)
 ! *************************************************************************
 
 !RELEASE TIME FROM ABIRULES
- year_rel=2023
- mm_rel=11
+ year_rel=2024
+ mm_rel=06
 !END OF RELEASE TIME
 
 !The technique used hereafter is the only one that we have found to obtain
 !perfect transferability across platforms and OS.
- write(iout, '(/,a,a,a,a,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),' '
+ write(iout, '(/,a,a,a,a,a,a,a,i4,a)' ) '.Version ',trim(code_version),' of ',trim(code_name),', released ',month_names(mm_rel),' ',year_rel,'.'
 #if defined HAVE_MPI
  write(iout, '(a,a,a,/)' ) '.(MPI version, prepared for a ',build_target,' computer) '
 #else
@@ -219,7 +219,7 @@ subroutine herald(code_name,code_version,iout)
 
 !GNU GPL license
  write(iout, '(a,/,a,a,a,/,a,/,a,/,a,/)' ) &
- '.Copyright (C) 1998-2022 ABINIT group . ',&
+ '.Copyright (C) 1998-2024 ABINIT group . ',&
  ' ',trim(code_name),' comes with ABSOLUTELY NO WARRANTY.',&
  ' It is free software, and you are welcome to redistribute it',&
  ' under certain conditions (GNU General Public License,',&

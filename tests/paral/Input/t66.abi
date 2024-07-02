@@ -82,12 +82,11 @@ pseudos "Pseudodojo_paw_pw_standard/Si.xml, Pseudodojo_paw_pw_standard/O.xml"
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
-#%% exclude_builders = graphene_gnu_11.2_macports
 #%% [paral_info]
 #%% nprocs_to_test = 4
 #%% max_nprocs = 4
 #%% [NCPU_4]
-#%% files_to_test = t66_MPI4.abo, tolnlines = 35, tolabs = 1.1e-03, tolrel = 6.0e-03, fld_options = -medium
+#%% files_to_test = t66_MPI4.abo, tolnlines = 35, tolabs = 1.1e-03, tolrel = 9.0e-03, fld_options = -medium
 #%% [extra_info]
 #%% authors =  M. Giantomassi
 #%% keywords = NC, DFPT

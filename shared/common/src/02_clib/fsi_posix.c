@@ -18,15 +18,42 @@
  02111-1307, USA.
 */
 
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
 #include "abi_clib.h"
 #include "xmalloc.h"
 
+/* Return 0 if dirpath is not an existent directory */
+int _directory_exist(const char *dirpath) {
+    struct stat info;
 
-void c_mkdir(char *path, int *ierr)
+    if (stat(dirpath, &info) != 0) {
+        if (errno == ENOENT) {
+            return 0; /* Path does not exist */
+        } else {
+            return -1; /* Other error (e.g., permission denied) */
+        }
+    } else if (info.st_mode & S_IFDIR) {
+        return 1; /* Path is a directory */
+
+    } else {
+        return 2; /* Path exists but is not a directory */
+    }
+}
+
+/* Create directory dirpath if it does not exist */
+void c_mkdir_if_needed(char *dirpath, int *ierr)
 {
-   /* S_IRWXU read, write, execute/search by owner
-   http://pubs.opengroup.org/onlinepubs/7908799/xsh/sysstat.h.html
-   */
-   *ierr = mkdir(path, S_IRWXU);
+   *ierr = _directory_exist(dirpath);
+
+   if (*ierr == 0) {
+     /* S_IRWXU read, write, execute/search by owner: http://pubs.opengroup.org/onlinepubs/7908799/xsh/sysstat.h.html */
+     *ierr = mkdir(dirpath, S_IRWXU);
+   }
+   else if (*ierr == 1) {
+     *ierr = 0;
+   }
 }

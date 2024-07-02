@@ -6,7 +6,7 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2024 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -406,6 +406,7 @@ subroutine psp9in(filpsp,ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
 
  rmatch = zero
  nders  = 0
+ maxrad = zero
  if (has_nlcc) then
 
 !    In Abinit, at least for the Troullier-Martins pseudopotential,

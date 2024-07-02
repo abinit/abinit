@@ -35,12 +35,12 @@ module m_sigc
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
- use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
+ use m_fft_mesh,      only : get_gfft, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsilonm1_results, epsm1_symmetrizer, epsm1_symmetrizer_inplace, get_epsm1
- use m_ppmodel,       only : setup_ppmodel, ppm_get_qbz, ppmodel_t, calc_sig_ppm
+ use m_screening,     only : epsilonm1_results
+ use m_ppmodel,       only : ppmodel_t
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_pawang,        only : pawang_type
@@ -51,6 +51,7 @@ module m_sigc
  use m_paw_sym,       only : paw_symcprj
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
  use m_hide_lapack,   only : xheev
+ use m_occ,           only : get_fact_spin_tol_empty
 
  implicit none
 
@@ -119,11 +120,6 @@ contains
 !!    %nsym=number of symmetry operations
 !!    %typat(natom)=type of each atom
 !! PPm<ppmodel_t>= Datatype gathering information on the Plasmonpole technique (see also ppm_get_qbz).
-!!    %model=type of ppmodel
-!!    %npwc=number of G-vectors for the correlation part.
-!!    %dm2_otq =size of second dimension of otq array
-!!    %dm2_bots=size of second dimension of botsq arrays
-!!    %dm_eig  =size of second dimension of eig arrays
 !! QP_BSt<ebands_t>=Datatype gathering info on the QP energies (KS if one shot)
 !!  eig(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=KS or QP energies for k-points, bands and spin
 !!  occ(Sigp%nbnds,Kmesh%nibz,Wfd%nsppol)=occupation numbers, for each k point in IBZ, each band and spin
@@ -157,9 +153,9 @@ contains
 !! SOURCE
 
 subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
-& Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
-& PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
-& gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
+                        Dtset,Cryst,QP_BSt,Sigp,Sr,Er,Gsph_Max,Gsph_c,Vcp,Kmesh,Qmesh,Ltg_k,&
+                        PPm,Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,allQP_sym,&
+                        gwc_ngfft,rho_ngfft,rho_nfftot,rhor,use_aerhor,aepaw_rhor,sigcme_tmp)
 
 !Arguments ------------------------------------
 !scalars
@@ -201,7 +197,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  integer :: isym_kgw,isym_ki,gwc_mgfft,use_padfft,gwc_fftalga,gwc_nfftot,nfftf,mgfftf,use_padfftf
  integer :: iwc,ifft
  real(dp) :: cpu_time,wall_time,gflops
- real(dp) :: e0i,fact_sp,theta_mu_minus_e0i,tol_empty,z2,en_high,gw_gsq,w_localmax,w_max
+ real(dp) :: e0i,fact_spin,theta_mu_minus_e0i,tol_empty,tol_empty_in, z2,en_high,gw_gsq,w_localmax,w_max
  complex(dpc) :: ctmp,omegame0i2_ac,omegame0i_ac,ph_mkgwt,ph_mkt
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg,sigma_type
@@ -354,19 +350,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
  ABI_MALLOC(npoles_missing,(minbnd:maxbnd))
  npoles_missing=0
 
- ! Normalization of theta_mu_minus_e0i
- ! If nsppol==2, qp_occ $\in [0,1]$
- SELECT CASE (Wfd%nsppol)
- CASE (1)
-   fact_sp=half; tol_empty=0.01   ! below this value the state is assumed empty
-   if (Wfd%nspinor==2) then
-    fact_sp=one; tol_empty=0.005  ! below this value the state is assumed empty
-   end if
- CASE (2)
-   fact_sp=one; tol_empty=0.005   ! to be consistent and obtain similar results if a metallic
- CASE DEFAULT                     ! spin unpolarized system is treated using nsppol==2
-   ABI_BUG('Wrong nsppol')
- END SELECT
+ ! Set tolerance used to decide if a band is empty
+ ! and normalization of theta_mu_minus_esum. If nsppol == 2, qp_occ $\in [0,1]$
+ tol_empty_in = 0.01
+ call get_fact_spin_tol_empty(wfd%nsppol, wfd%nspinor, tol_empty_in, fact_spin, tol_empty)
 
  ! Allocate arrays used to accumulate the matrix elements of \Sigma_c over
  ! k-points and bands. Note that for AC requires only the imaginary frequencies
@@ -481,7 +468,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
    if (Sigp%gwcomp==1) then
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
-     call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
+     call get_gfft(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
      ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,gwc_nfftot, [zero,zero,zero], gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
@@ -676,7 +663,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call wrtout(std_out, msg)
 
      ! Find the corresponding irred q-point.
-     call qmesh%get_BZ_item(iq_bz,qbz,iq_ibz,isym_q,itim_q)
+     call qmesh%get_BZ_item(iq_bz, qbz, iq_ibz, isym_q, itim_q)
      q_is_gamma = normv(qbz, Cryst%gmet, "G") < GW_TOLQ0
 
      !q_is_gamma = (normv(qbz,Cryst%gmet,"G") < 0.7)
@@ -691,11 +678,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      call Gsph_c%fft_tabs(g0,gwc_mgfft,gwc_ngfft,use_padfft,gw_gbound,igfftcg0)
 
      if (ANY(gwc_fftalga == [2, 4])) use_padfft=0 ! Pad-FFT is not coded in rho_tw_g
-#ifdef FC_IBM
-     ! XLF does not deserve this optimization (problem with [v67mbpt][t03])
-     use_padfft = 0
-#endif
-     if (use_padfft==0) then
+     if (use_padfft == 0) then
        ABI_FREE(gw_gbound)
        ABI_MALLOC(gw_gbound,(2*gwc_mgfft+8,2*use_padfft))
      end if
@@ -720,15 +703,15 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
      if (Er%mqmem==0) then
        ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
-       call get_epsm1(Er,Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
+       call Er%get_epsm1(Vcp,0,0,Dtset%iomode,xmpi_comm_self,iqibzA=iq_ibz)
        if (sigma_needs_ppm(Sigp)) then
          if (Wfd%usepaw==1.and.PPm%userho==1) then
            ! Use PAW AE rhor.
-           call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
+           call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
                               rho_ngfft,aepaw_rhor(:,1),iqiA=iq_ibz)
          else
-           call setup_ppmodel(PPm,Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
-                              rho_ngfft,rhor(:,1),iqiA=iq_ibz)
+           call PPm%setup(Cryst,Qmesh,Er%npwe,Er%nomega,Er%omega,Er%epsm1,rho_nfftot,Gsph_c%gvec,&
+                          rho_ngfft,rhor(:,1),iqiA=iq_ibz)
          end if
        end if
      end if
@@ -740,10 +723,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
      !      A check, however, is performed in sigma.
      !    - If gwcomp==1 and mod10 in [1,2,9], one needs both to set up botsq and epsm1_q
      if (sigma_needs_ppm(Sigp)) then
-       ABI_MALLOC(botsq,(PPm%npwc,PPm%dm2_botsq))
-       ABI_MALLOC(otq,(PPm%npwc,PPm%dm2_otq))
-       ABI_MALLOC(eig,(PPm%dm_eig,PPm%dm_eig))
-       call ppm_get_qbz(PPm,Gsph_c,Qmesh,iq_bz,botsq,otq,eig)
+       ABI_MALLOC(botsq, (PPm%npwc,PPm%dm2_botsq))
+       ABI_MALLOC(otq, (PPm%npwc,PPm%dm2_otq))
+       ABI_MALLOC(eig, (PPm%dm_eig,PPm%dm_eig))
+       call PPm%get_qbz(Gsph_c, Qmesh, iq_bz, botsq, otq, eig)
      end if
 
      if ( ANY(mod10 == [SIG_GW_AC,SIG_GW_CD,SIG_QPGW_CD])) then
@@ -751,9 +734,9 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
        ! TODO In case of AC we should symmetrize only the imaginary frequencies
        if (mod10==SIG_GW_CD.and.Er%mqmem==0) then
          ! Do in-place symmetrisation
-         call Epsm1_symmetrizer_inplace(iq_bz,Er%nomega, npwc,Er,Gsph_c,Qmesh,.TRUE.)
+         call Er%rotate_iqbz_inplace(iq_bz,Er%nomega, npwc, Gsph_c,Qmesh,.TRUE.)
        else
-         call Epsm1_symmetrizer(iq_bz,Er%nomega, npwc,Er,Gsph_c,Qmesh,.TRUE.,epsm1_qbz)
+         call Er%rotate_iqbz(iq_bz,Er%nomega, npwc,Gsph_c,Qmesh,.TRUE.,epsm1_qbz)
        end if
 
        if (mod10==SIG_GW_AC) then
@@ -860,7 +843,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          ! Multiply by the square root of the Coulomb term
          ! In 3-D systems, the factor sqrt(4pi) is included)
          do ii=1,nspinor
-           spad=(ii-1)*npwc
+           spad = (ii-1) * npwc
            rhotwg_ki(spad+1:spad+npwc,jb) = rhotwg_ki(spad+1:spad+npwc,jb)*vc_sqrt_qbz(1:npwc)
          end do
 
@@ -893,7 +876,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
          end if
        end do !jb  Got all matrix elements from minbnd up to maxbnd.
 
-       theta_mu_minus_e0i=fact_sp*qp_occ(ib,ik_ibz,spin)
+       theta_mu_minus_e0i=fact_spin*qp_occ(ib,ik_ibz,spin)
 
        ! Starting point to evaluate the derivative of Sigma and the Spectral function
        e0i=qp_ene(ib,ik_ibz,spin)
@@ -944,10 +927,10 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ! Note that ppmodel 3 or 4 work only in case of standard perturbative approach!
            ! Moreover, for ppmodel 3 and 4, spinorial case is not allowed
            sigc_ket  = czero_gw
-           call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,sigc_ket,sigcme_3)
+           call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq, otq, &
+                              omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, sigc_ket, sigcme_3)
 
-           if (PPm%model==3.or.PPm%model==4) then
+           if (PPm%model==3 .or. PPm%model==4) then
              sigcme2(:,kb)=sigcme2(:,kb) + (wtqp+wtqm)*DBLE(sigcme_3(:)) + (wtqp-wtqm)*j_gw*AIMAG(sigcme_3(:))
            end if
 
@@ -1004,8 +987,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
            ket1      = czero_gw
            ket2      = czero_gw
 
-           call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq,otq,&
-                             omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket1,sigcme_new)
+           call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq,otq, &
+                              omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket1, sigcme_new)
 
            if (Sigp%gwcalctyp==28) then
              if (PPm%model/=1.and.PPm%model/=2) then
@@ -1021,8 +1004,8 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
              ABI_MALLOC(otq_transp,(PPm%dm2_otq,PPm%npwc))
              otq_transp=TRANSPOSE(otq)
 
-             call calc_sig_ppm(PPm,nspinor,npwc,nomega_tot,rhotwgp,botsq_conjg_transp,otq_transp,&
-                omegame0i,Sigp%zcut,theta_mu_minus_e0i,eig,npwc,ket2,sigcme_3)
+             call PPm%calc_sigc(nspinor, npwc, nomega_tot, rhotwgp, botsq_conjg_transp, otq_transp, &
+                                omegame0i, Sigp%zcut, theta_mu_minus_e0i, eig, npwc, ket2, sigcme_3)
 
              ABI_FREE(botsq_conjg_transp)
              ABI_FREE(otq_transp)

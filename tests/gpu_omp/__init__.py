@@ -17,5 +17,16 @@ is_multi_parallel = True
 inp_files = [
 "t01.abi",
 "t02.abi",
-"t03.abi",
+"t03.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==1)
+"t04.abi", # test CHEBFI (istwfk==2, npband==1, paral_kgb==1)
+"t05.abi", # test LOBPCG (istwfk==1, npband==1, paral_kgb==1)
+"t06.abi", # test LOBPCG (istwfk==2, npband==1, paral_kgb==1)
+"t07.abi", # test CHEBFI (istwfk==1, npband==2, paral_kgb==1)
+"t08.abi", # test CHEBFI (istwfk==2, npband==2, paral_kgb==1)
+"t09.abi", # test LOBPCG (istwfk==1, npband==2, paral_kgb==1)
+"t10.abi", # test LOBPCG (istwfk==2, npband==2, paral_kgb==1)
+"t11.abi", # test CHEBFI (istwfk==1, npband==1, paral_kgb==0)
+"t12.abi", # test CHEBFI (istwfk==2, npband==1, paral_kgb==0)
+"t13.abi", # test LOBPCG (istwfk==1, npband==1, paral_kgb==0)
+"t14.abi", # test LOBPCG (istwfk==2, npband==1, paral_kgb==0)
 ]
