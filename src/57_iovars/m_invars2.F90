@@ -35,7 +35,7 @@ module m_invars2
 
  use defs_datatypes, only : pspheader_type
  use m_time,      only : timab
- use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper, inupper
+ use m_fstrings,  only : sjoin, itoa, ltoa, tolower, toupper
  use m_symtk,     only : matr3inv
  use m_parser,    only : intagm, intagm_img
  use m_geometry,  only : mkrdim, metric
@@ -1328,18 +1328,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getden_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getden_filepath = key_value
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'relax',tread,'KEY', key_value=key_value)
- if(tread==1) then 
-   dtset%relax = trim(key_value)
-   call inupper(dtset%relax)
- end if
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'md',tread,'KEY', key_value=key_value)
- if(tread==1) then 
-   dtset%md = trim(key_value)
-   call inupper(dtset%md)
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
 
@@ -1643,6 +1631,50 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  ! variables for random positions in unit cell
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',tread,'INT')
  if(tread==1) dtset%random_atpos=intarr(1)
+ 
+! parsing GEOmetryOPTimization keys to internal variable ionmov
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'geoopt',tread,'KEY',key_value=key_value)
+ if(tread==1) dtset%geoopt = tolower(key_value)
+ if (dtset%geoopt.ne.'none') then
+   if(INDEX(dtset%geoopt,'viscous').gt.0) then
+     dtset%ionmov=1
+   elseif(INDEX(dtset%geoopt,'bfgs').gt.0) then
+     dtset%ionmov=2
+   elseif(INDEX(dtset%geoopt,'lbfgs').gt.0) then
+     dtset%ionmov=22
+   elseif(INDEX(dtset%geoopt,'mdmin').gt.0) then
+     dtset%ionmov=5
+   elseif(INDEX(dtset%geoopt,'quenched').gt.0) then
+     dtset%ionmov=7
+   elseif(INDEX(dtset%geoopt,'fire').gt.0) then
+     dtset%ionmov=15
+   end if
+ end if
+ 
+! parsing MOLecularDYNamics keys to internal variable ionmov
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'moldyn',tread,'KEY',key_value=key_value)
+ if(tread==1) dtset%moldyn = tolower(key_value)
+ if(dtset%moldyn.ne.'none') then
+   if(INDEX(dtset%moldyn,'nve_verlet').gt.0) then
+     dtset%ionmov=6
+   elseif(INDEX(dtset%moldyn,'nve_velverlet').gt.0) then
+     dtset%ionmov=24
+   elseif(INDEX(dtset%moldyn,'nvt_isokin').gt.0) then
+     dtset%ionmov=12
+   elseif(INDEX(dtset%moldyn,'nvt_nose').gt.0) then
+     if(dtset%imgmov==0) then
+       ! point to pimd algorithm
+     end if
+   elseif(INDEX(dtset%moldyn,'nvt_langevin').gt.0) then
+     if(dtset%imgmov==0) then
+       ! point to pimd algorithm
+     end if
+   elseif(INDEX(dtset%moldyn,'npt_martyna').gt.0) then
+     dtset%ionmov=13
+   elseif(INDEX(dtset%moldyn,'nst_martyna').gt.0) then
+     dtset%ionmov=13
+   end if
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
  if(tread==1) dtset%ionmov=intarr(1)
@@ -2866,8 +2898,6 @@ if (dtset%usekden==1) then
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tl_radius',tread,'DPR')
  if(tread==1) dtset%tl_radius=dprarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%write_files = key_value
 ! Print variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'write_files',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%write_files = key_value

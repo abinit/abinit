@@ -1011,8 +1011,8 @@ type, public :: dataset_type
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
  character(len=fnlen) :: write_files = ABI_NOFILE
- character(len=fnlen) :: relax = ABI_NOFILE
- character(len=fnlen) :: md = ABI_NOFILE
+ character(len=fnlen) :: geoopt = ABI_NOFILE
+ character(len=fnlen) :: moldyn = ABI_NOFILE
 
  contains
 
@@ -1579,6 +1579,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%ga_algor           = dtin%ga_algor
  dtout%ga_fitness         = dtin%ga_fitness
  dtout%ga_n_rules         = dtin%ga_n_rules
+ dtout%geoopt             = dtin%geoopt
  dtout%getbseig           = dtin%getbseig
  dtout%getbsreso          = dtin%getbsreso
  dtout%getbscoup          = dtin%getbscoup
@@ -1768,6 +1769,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%mkmem              = dtin%mkmem
  dtout%mkqmem             = dtin%mkqmem
  dtout%mk1mem             = dtin%mk1mem
+ dtout%moldyn             = dtin%moldyn
  dtout%mpw                = dtin%mpw
  dtout%mqgrid             = dtin%mqgrid
  dtout%mqgriddg           = dtin%mqgriddg
@@ -3372,7 +3374,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
- list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
+ list_vars=trim(list_vars)//' genafm geoopt getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
@@ -3437,10 +3439,10 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' lwf_temperature lwf_temperature_start lwf_temperature_end'
  list_vars=trim(list_vars)//' lwf_temperature_nstep lwf_var_temperature'
 !M
- list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym md mdf_epsinf mdtemp mdwall'
+ list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
  list_vars=trim(list_vars)//' mep_mxstep mep_solver mem_test mixalch mixprec mixesimgf'
- list_vars=trim(list_vars)//' mqgrid mqgriddg'
+ list_vars=trim(list_vars)//' moldyn mqgrid mqgriddg'
 !N
  list_vars=trim(list_vars)//' natcon natfix natfixx natfixy natfixz'
  list_vars=trim(list_vars)//' natom natrd natsph natsph_extra natvshift nband nbandkss nbandhf'
@@ -3492,7 +3494,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' random_atpos randomseed ratsm ratsph ratsph_extra rcut'
  list_vars=trim(list_vars)//' recefermi recgratio recnpath recnrec recptrott recrcut rectesteg rectolden'
 !list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf rfasr'
- list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar relax restartxf'
+ list_vars=trim(list_vars)//' red_dfield red_efield red_efieldbar restartxf'
  list_vars=trim(list_vars)//' rfatpol rfddk rfdir rfelfd rfmagn rfmeth rfphon'
  list_vars=trim(list_vars)//' rfstrs rfstrs_ref rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rifcsph rprim'
  list_vars=trim(list_vars)//' rmm_diis rmm_diis_savemem'

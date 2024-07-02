@@ -761,9 +761,6 @@ subroutine outvar_i_n (dtsets,iout,&
  dprarr(1,:)=dtsets(:)%mbpt_sciss
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mbpt_sciss','ENE',0)
 
- strarr(1,:)=dtsets(:)%md
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'md','STR',0,strarr=strarr)
-
  dprarr(1,:)=dtsets(:)%mdf_epsinf
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'mdf_epsinf','DPR',0)
 
