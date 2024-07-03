@@ -147,9 +147,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  integer :: mcg,mgfftf,natom,nfftf,nfftot,nfftotf,nhatdim,nhatgrdim
 ! integer :: isym
  integer :: mpert,my_natom,n1,nkxc,nk3xc,ntypat,n3xccc,nylmgr
+ integer :: optatm,optdyfr,opteltfr,optgr,optstr,optv,optn,optn2
  integer :: option,optorth,psp_gencond,rdwrpaw,spaceworld,timrev,tim_mkrho
  integer :: usexcnhat,useylmgr
- real(dp) :: ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut_eff,gsqcutc_eff,residm
+ real(dp) :: boxcut,ecore,ecutdg_eff,ecut_eff,enxc,etot,fermie,fermih,gsqcut,gsqcut_eff,gsqcutc_eff,residm
  real(dp) :: ucvol,vxcavg
  logical :: non_magnetic_xc
  character(len=500) :: msg
@@ -182,7 +183,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  real(dp),allocatable :: grxc(:,:),kxc(:,:),vxc(:,:),nhat(:,:),nhatgr(:,:,:)
  real(dp),allocatable :: phnons(:,:,:),ph1d(:,:),rhog(:,:),rhor(:,:),dummy_dyfrx2(:,:,:)
 ! real(dp),allocatable :: symrel_cart(:,:,:)
- real(dp),allocatable :: dummy_vpsp(:)mwork(:),xccc3d(:)
+ real(dp),allocatable :: dummy_vpsp(:),work(:),xccc3d(:)
  real(dp),allocatable :: ylm(:,:),ylmgr(:,:,:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 ! *************************************************************************
@@ -504,8 +505,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if ! getden
 ! ABI_FREE(cg)
 
+!Compute large sphere cut-off gsqcut
+ call getcut(boxcut,dtset%ecut,gmet,gsqcut,dtset%iboxcut,std_out,dtset%qptn,dtset%ngfft)
+
 !Generate the 1-dimensional phases
- ABI_MALLOC(ph1d,(2,3*(2*mgfft+1)*dtset%natom))
+ ABI_MALLOC(ph1d,(2,3*(2*mgfftf+1)*dtset%natom))
  call getph(atindx,dtset%natom,dtset%ngfft(1),dtset%ngfft(2),dtset%ngfft(3),ph1d,xred)
 
 !Pseudo core electron density by method 2
@@ -523,7 +527,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
   &   ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,&
   &   dtset%qprtrb,dtset%rcut,dum_rhog,rprimd,dummy6,other_dummy6,ucvol,psps%usepaw,dum_vg,dum_vg,dum_vg,dtset%vprtrb,psps%vlspl)
      
-     ABI_FREE(dummy_vpsp,(nfftf))
+     ABI_FREE(dummy_vpsp)
    end if 
    if (psps%nc_xccc_gspace==0) then
      option=1
@@ -693,7 +697,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 
 !Main loop over the perturbations to calculate the stationary part
  call dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil,dtset,&
-& ffnl,gmet,gprimd,&
+& ffnl,gmet,gprimd,gsqcut,&
 & hdr,kg,kxc,dtset%mband,dtset%mgfft,&
 & dtset%mkmem,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,natom,nattyp,ngfftf,nfftf,&
 & dtset%nkpt,nkxc,dtset%nspinor,dtset%nsppol,npwarr,nylmgr,occ,&
