@@ -1250,7 +1250,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 
  DBG_ENTER("COLL")
 
- d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:atom,1:3,1:natom), SHAPE=[3*natom,3*natom])
+ d2cart(1,:,:) = RESHAPE(blkval(1,1:3,1:natom,1:3,1:natom), SHAPE=[3*natom,3*natom])
  d2cart(2,:,:) = zero
 
 !Eventually impose the acoustic sum rule
@@ -1321,7 +1321,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 !Then do the multiplication to get the reduced matrix,in two steps
 !After this the force constant matrix is decouple in two bloks,
 !acoustic and optical ones
- Apmatr(:,:) = MATMUL(TRANSPOSE(eigvecp(1,:,:)), MATMUL(kgrid, eigvecp(1,:,:)))
+ Apmatr(:,:) = MATMUL(TRANSPOSE(eigvecp(1,:,:)), MATMUL(kmatrix, eigvecp(1,:,:)))
 
 !DEBUG
 !the blok diago
