@@ -1,15 +1,34 @@
 # The following md files have been copied from ~abinit and should be `git ignored`
-INSTALL_gpu.md
 INSTALL_EasyBuild.md
+<<<<<<< HEAD
+INSTALL_MacOS.md
+||||||| 14ad88f4c8
 INSTALL_CentOS.md
 INSTALL_MacOS.md
+=======
+INSTALL_gpu.md
+INSTALL_CentOS.md
+>>>>>>> ionmov_is_dead
 INSTALL_Ubuntu.md
+<<<<<<< HEAD
+INSTALL_gpu.md
+INSTALL_CentOS.md
+||||||| 14ad88f4c8
+=======
+INSTALL_MacOS.md
+>>>>>>> ionmov_is_dead
 # The following md files have been automatically generated and should be `git ignored`
 developers/autoconf_examples.md
 variables/index.md
 variables/external_parameters.md
+<<<<<<< HEAD
+variables/anaddb.md
+||||||| 14ad88f4c8
 variables/multibinit.md
 variables/aim.md
+=======
+variables/optic.md
+>>>>>>> ionmov_is_dead
 variables/basic.md
 variables/bse.md
 variables/dev.md
@@ -27,9 +46,21 @@ variables/paw.md
 variables/rlx.md
 variables/vdw.md
 variables/w90.md
+<<<<<<< HEAD
+variables/multibinit.md
+variables/aim.md
+variables/atdep.md
+variables/optic.md
+||||||| 14ad88f4c8
 variables/optic.md
 variables/atdep.md
 variables/anaddb.md
+=======
+variables/anaddb.md
+variables/multibinit.md
+variables/atdep.md
+variables/aim.md
+>>>>>>> ionmov_is_dead
 variables/varset_stats.md
 topics/Abipy.md
 topics/APPA.md

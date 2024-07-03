@@ -13,7 +13,7 @@ ecut 10
 
 #First dataset : find the optimal bond length of H2, and associated total energy
    natom1  2             # There are two atoms
-  ionmov1  2             # Use the modified Broyden algorithm
+  geoopt1  "bfgs"        # Use the modified Broyden algorithm
    ntime1  10            # Maximum number of Broyden "timesteps"
   tolmxf1  5.0d-4        # Stopping criterion for the geometry optimization : when 
                          # the residual forces are less than tolmxf, the Broyden 

@@ -48,7 +48,7 @@ occopt 4
 tsmear 0.04
 
 #The relaxation
-ionmov 2
+geoopt "bfgs"
 tolmxf 5.0d-4
 ntime 10
 

@@ -188,7 +188,7 @@ The input variable [[optcell]] governs the automatic optimisation of cell shape 
 For the automatic optimisation of cell volume in this cubic crystal, use:
 
     optcell 1
-    ionmov 2
+    geoopt "bfgs"
     ntime 10
     dilatmx 1.05
     ecutsm 0.5
