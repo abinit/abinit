@@ -7956,12 +7956,13 @@ See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical co
 
 Variable(
     abivarname="ionmov",
-    varset="rlx",
+    varset="dev",
     vartype="integer",
-    topics=['MolecularDynamics_compulsory', 'GeoOpt_compulsory'],
+    topics=['MolecularDynamics_expert', 'GeoOpt_expert'],
     dimensions="scalar",
     defaultval=0,
     mnemonics="IONic MOVEs",
+    characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
 Choice of algorithm to control the displacements of ions, and possibly changes of cell shape and size (see [[optcell]]).
@@ -14147,7 +14148,7 @@ Variable(
     vartype="integer",
     topics=['PAW_expert'],
     dimensions="scalar",
-    defaultval=ValueWithConditions({'[[optdriver]] == 0 and [[ionmov]] < 6 and [[pawspnorb]] == 1 and [[iscf]] >= 10 and ([[kptopt]] !=1 or [[kptopt]]!=2) and [[usepaw]] == 1': 2,
+    defaultval=ValueWithConditions({'[[optdriver]] == 0 and [[moldyn]] /= "none" and [[pawspnorb]] == 1 and [[iscf]] >= 10 and ([[kptopt]] !=1 or [[kptopt]]!=2) and [[usepaw]] == 1': 2,
  'defaultval': 1}),
     mnemonics="PAW - use ComPleX rhoij OCCupancies",
     requires="[[usepaw]] == 1",
@@ -14168,7 +14169,7 @@ when SCF mixing on potential is chosen ([[iscf]] <10).
 When SCF mixing on density is chosen ([[iscf]] >= 10), the "direct"
 decomposition of energy is only printed out without being used. It is thus
 possible to use [[pawcpxocc]] = 1 in the latter case.
-In order to save CPU time, when molecular dynamics is selected ([[ionmov]] >= 6)
+In order to save CPU time, when molecular dynamics is selected ([[moldyn]] is not "none").
 and SCF mixing done on density ([[iscf]] >= 10), [[pawcpxocc]] = 2 is (by default) set to **1**.
 """,
 ),
@@ -14491,9 +14492,9 @@ The following values are permitted for **pawovlp**:
 - **pawovlp** = 0 --> no overlap is allowed
 - **pawovlp** > 0 and < 100 --> overlap is allowed only if it is less than **pawovlp** %
 
-Note that ABINIT will not stop at the first time a too large overlap is identified, in case of [[ionmov]]/=0
+Note that ABINIT will not stop at the first time a too large overlap is identified, in case of [[geoopt]] not "none" or [[moldyn]] not "none"
 or [[imgmov]]/=0, but only at the second time in the same dataset. Indeed, such trespassing might only be transient.
-However, a second trespassing in the same dataset, or if both [[ionmov]]=0 and [[imgmov]]=0, will induce stop.
+However, a second trespassing in the same dataset, or if both [[geoopt]] or [[moldyn]] are set to "none" and [[imgmov]]=0, will induce stop.
 """,
 ),
 
@@ -15849,9 +15850,9 @@ Variable(
     text=r"""
 If set to 1 or a larger value, provide output of electron density in real
 space rho(r), in units of electrons/Bohr^3.
-If [[ionmov]] == 0, the name of the density file will be the root output name,
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the density file will be the root output name,
 followed by _DEN.
-If [[ionmov]] /= 0, density files will be output at each time step, with
+If [[geoopt]] or [[moldyn]] /= "none" ([[ionmov]] /= 0), density files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -16012,10 +16013,10 @@ shifted grids, for the same grid spacing. There is no need to take care of the
 into account for insulators. The computation can be done in the self-
 consistent case as well as in the non-self-consistent case, using [[iscf]] = -3.
 This allows one to refine the DOS at fixed starting density.
-In that case, if [[ionmov]] == 0, the name of the potential file will be the
-root output name, followed by _DOS (like in the [[prtdos]] = 1 case).
-However, if [[ionmov]] /= 0, potential files will be output at each time
-step, with the name being made of
+In that case, if [[geoopt]] or [[moldyn]] are set to "none", the name of the potential
+file will be the root output name, followed by _DOS (like in the [[prtdos]] = 1 case).
+However, if [[geoopt]] or [[moldyn]] /= "none" ([[ionmov]] /= 0),
+potential files will be output at each time step, with the name being made of
 
   * the root output name,
   * followed by _TIMx, where x is related to the time step (see later)
@@ -16116,7 +16117,7 @@ Variable(
     text=r"""
 If set to 1, a file *_EIG, containing the k-points and one-electron eigenvalues is printed.
 
-If set to 2, with [[ionmov]] /= 0, eigenenergies file will be output at each time step, with
+If set to 2, with [[geoopt]] or [[moldyn]] /= "none" ([[ionmov]] /= 0), eigenenergies file will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -16253,8 +16254,8 @@ the maximum coordination number of atoms in the system.
 It will deduce a maximum number of "nearest" and "next-nearest" neighbors
 accordingly, and compute corresponding bond lengths.
 It will compute bond angles for the "nearest" neighbours only.
-If [[ionmov]] == 0, the name of the file will be the root output name, followed by _GEO.
-If [[ionmov]] /= 0, one file will be output at each time step, with the
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the file will be the root output name, followed by _GEO.
+If [[geoopt]] or [[moldyn]] /= "none", one file will be output at each time step, with the
 name being made of
 
   * the root output name,
@@ -16527,9 +16528,9 @@ Variable(
 If set >=1, provide output of the total (Kohn-Sham) potential (sum of local
 pseudo-potential, Hartree potential, and xc potential).
 
-If [[ionmov]] == 0, the name of the potential file will be the root output name,
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the potential file will be the root output name,
 followed by _POT.
-If [[ionmov]] /= 0, potential file will be output at each time step, with
+If [[geoopt]] or [[moldyn]] /= "none", potential file will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -16643,7 +16644,7 @@ In the run with positive [[prtstm]], one has to use:
   * [[occopt]] = 7, with specification of [[tsmear]]
   * [[nstep]] = 1
   * the [[tolwfr]] convergence criterion
-  * [[ionmov]] = 0 (this is the default value)
+  * [[geoopt]] or [[moldyn]] = "none" or [[ionmov]] = 0 (this is the default value)
   * [[optdriver]] = 0 (this is the default value)
 
 Note that you might have to adjust the value of [[nband]] as well, for the
@@ -16717,9 +16718,9 @@ Variable(
     text=r"""
 If set >=1, provide output of the Hartree potential.
 
-If [[ionmov]] == 0, the name of the potential file will be the root output name,
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the potential file will be the root output name,
 followed by _VHA.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[geoopt]] or [[moldyn]] /= "none", potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -16743,9 +16744,9 @@ Variable(
     text=r"""
 If set >=1, provide output of the sum of the Hartree potential and xc potential.
 
-If [[ionmov]] == 0, the name of the potential file will be the root output name,
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the potential file will be the root output name,
 followed by _VHXC.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[geoopt]] or [[moldyn]] /= "none", potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -16835,8 +16836,8 @@ Variable(
     text=r"""
 If set >=1, provide output of the local pseudo potential.
 
-If [[ionmov]] == 0, the name of the potential file will be the root output name, followed by _VPSP.
-If [[ionmov]] /= 0, potential files will be output at each time step, with the name being made of
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the potential file will be the root output name, followed by _VPSP.
+If [[geoopt]] or [[moldyn]] /= "none", potential files will be output at each time step, with the name being made of
 
   * the root output name,
   * followed by _TIMx, where x is related to the timestep (see later)
@@ -16859,9 +16860,9 @@ Variable(
     text=r"""
 If set >=1, provide output of the exchange-correlation potential.
 
-If [[ionmov]] == 0, the name of the potential file will be the root output name,
+If [[geoopt]] or [[moldyn]] are set to "none", the name of the potential file will be the root output name,
 followed by _VXC.
-If [[ionmov]] /= 0, potential files will be output at each time step, with
+If [[geoopt]] or [[moldyn]] /= "none", potential files will be output at each time step, with
 the name being made of
 
   * the root output name,
@@ -17207,10 +17208,10 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 This are the masses of the chains of [[nnos]] thermostats to be used when
-[[ionmov]] = 13 (Molecular Dynamics) or [[imgmov]] = 13 (Path Integral Molecular
+[[moldyn]] = "nvt_nose" or "npt_martyna" or "npt_martyna" (Molecular Dynamics) or [[imgmov]] = 13 (Path Integral Molecular
 Dynamics).
 
-If [[ionmov]] = 13 (Molecular Dynamics), this temperature control can be used
+If [[moldyn]] = "nvt_nose" or "npt_martyna" or "npt_martyna" (Molecular Dynamics), this temperature control can be used
 with  [[optcell]] =0, 1 (homogeneous cell deformation) or 2 (full cell deformation).
 If [[imgmov]] = 13 (Path Integral Molecular Dynamics), this temperature control
 can be used with  [[optcell]] =0 (NVT ensemble) or 2 (fully flexible NPT
@@ -18181,7 +18182,7 @@ Give the three dimensionless primitive translations in
 real space, to be rescaled by [[acell]] and [[scalecart]].
 The three first numbers are the coordinates of the first vector, the next three numbers are the coordinates
 of the second, and the last three the coordinates of the third.
-It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is fixed.
+It is [[EVOLVING]] only if [[geoopt]] == "bfgs" or "lbfgs" and [[optcell]]/=0, otherwise it is fixed.
 
 If the Default is used, that is, **rprim** is the unity matrix, the three
 dimensionless primitive vectors are three unit vectors in cartesian
@@ -18308,7 +18309,7 @@ computed from [[acell]], [[scalecart]], and [[rprim]].
   * R2p(i) = [[rprimd]](i,2) = [[scalecart]](i) x [[rprim]](i,2) x [[acell]](2) for i=1,2,3
   * R3p(i) = [[rprimd]](i,3) = [[scalecart]](i) x [[rprim]](i,3) x [[acell]](3) for i=1,2,3
 
-It is [[EVOLVING]] only if [[ionmov]] == 2 or 22 and [[optcell]]/=0, otherwise it is fixed.
+It is [[EVOLVING]] only if [[geoopt]] == "bfgs" or "lbfgs" and [[optcell]]/=0, otherwise it is fixed.
 """,
 ),
 
@@ -19027,7 +19028,7 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 The stresses (in atomic units) multiplied by [[strfact]] will be treated like forces (in atomic units) in the
-algorithms for optimization ([[ionmov]] = 2 or 22, non-zero [[optcell]]).
+algorithms for optimization ([[geoopt]] == "bfgs" or "lbfgs", non-zero [[optcell]]).
 For example, the stopping criterion defined by [[tolmxf]] relates to these
 scaled stresses.
 """,
@@ -19613,7 +19614,7 @@ If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
 to any particular cartesian component of any atom, INCLUDING fixed ones. This
 is to be used when trying to equilibrate a structure to its lowest energy
-configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
+configuration (select [[geoopt]]), or in case of molecular dynamics (select [[moldyn]])
 A value ten times smaller than [[tolmxf]] is suggested (for example 5.0d-6
 hartree/Bohr).
 This stopping criterion is not allowed for RF calculations.
@@ -19687,7 +19688,7 @@ structural relaxation iterations will stop.
 Can also control tolerance on stresses, when [[optcell]] /=0, using the
 conversion factor [[strfact]]. This tolerance applies to any particular
 cartesian component of any atom, excluding fixed ones. See the parameter
-[[ionmov]].
+[[geoopt]].
 This is to be used when trying to equilibrate a structure to its lowest energy
 configuration.
 A value of about 5.0d-5 hartree/Bohr or smaller is suggested (this corresponds
@@ -19736,7 +19737,7 @@ If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0). This tolerance applies
 to any particular cartesian component of any atom, INCLUDING fixed ones. This
 is to be used when trying to equilibrate a structure to its lowest energy
-configuration (select [[ionmov]]), or in case of molecular dynamics ([[ionmov]] = 1)
+configuration (select [[geoopt]]), or in case of molecular dynamics (select [[moldyn]])
 A value of 0.02 is suggested.
 This stopping criterion is not allowed for RF calculations.
 Since [[toldfe]], [[toldff]], [[tolrff]] and [[tolvrs]] are aimed
@@ -19848,8 +19849,8 @@ eigenstate. With the squared residual expressed in Hartrees^2  (Hartrees
 squared), the largest squared residual (called *residm* in the code) encountered over all
 bands and k-points must be less than **tolwfr** for iterations to halt due to successful convergence.
 Note that if [[iscf]] > 0, this criterion should be replaced by those based on
-[[toldfe]] (preferred for [[ionmov]] == 0), [[toldff]] [[tolrff]] (preferred for
-[[ionmov]] /= 0), or [[tolvrs]] (preferred for theoretical reasons!).
+[[toldfe]] (preferred for [[geoopt]] or [[moldyn]] == "none"), [[toldff]] [[tolrff]] (preferred for
+[[geoopt]] or [[moldyn]] /= "none"), or [[tolvrs]] (preferred for theoretical reasons!).
 When **tolwfr** is 0.0, this criterion is ignored, and a finite value of
 [[toldfe]], [[toldff]], [[tolrff]] or [[tolvrs]] must be specified. This also imposes a
 restriction on taking an ion step; ion steps are not permitted unless the
@@ -20239,7 +20240,7 @@ Note also that the density matrix has to respect some symmetry rules
 determined by the space group. If the symmetry is not respected in the input,
 the matrix is however automatically symmetrised.
 
-The sign of [[usedmatpu]] has influence only when [[ionmov]] /= 0 (dynamics or relaxation):
+The sign of [[usedmatpu]] has influence only when [[geoopt]] or [[moldyn]] are not set to "none" (dynamics or relaxation):
 
 - When [[usedmatpu]]>0, the density matrix is kept constant only at first ionic step
 - When [[usedmatpu]]<0, the density matrix is kept constant at each ionic step
@@ -20683,8 +20684,7 @@ manually to the strict number need for an isolator system ( _i.e._ number of
 electron over two). The cut-off is not relevant in the wavelet case, use
 [[wvl_hgrid]] instead.
 In wavelet case, the system must be isolated systems (molecules or clusters).
-All geometry optimization are available (see [[ionmov]], especially the
-geometry optimisation and the molecular dynamics).
+All geometry optimization and molecular dynamics are available (see [[geoopt]] and [[moldyn]])
 The spin computation is not currently possible with wavelets and metallic
 systems may be slow to converge.
 """,
@@ -21435,13 +21435,13 @@ Variable(
     abivarname="vel",
     varset="rlx",
     vartype="real",
-    topics=['PIMD_useful', 'MolecularDynamics_basic'],
+    topics=['PIMD_useful', 'MolecularDynamics_basic', 'GeoOpt_basic'],
     dimensions=[3, '[[natom]]'],
     defaultval=MultipleValue(number=None, value=0),
     mnemonics="VELocity",
     characteristics=['[[EVOLVING]]'],
     commentdims="It is represented internally as [[vel]](3,[[natom]],[[nimage]])",
-    requires="[[ionmov]] > 0",
+    requires="[[geoopt]] or [[moldyn]] /= none ([[ionmov]] > 0)",
     added_in_version="before_v9",
     text=r"""
 Gives the starting velocities of atoms, in cartesian coordinates, in
@@ -21451,7 +21451,7 @@ initial velocity giving the right kinetic energy will be generated.
 If the atom manipulator is used, [[vel]] will be related to the preprocessed
 set of atoms, generated by the atom manipulator. The user must thus foresee
 the effect of this atom manipulator (see [[objarf]]).
-Velocities evolve is [[ionmov]] == 1.
+Velocities evolve is [[geoopt]] == "viscous" ([[ionmov]] == 1).
 """,
 ),
 
@@ -22087,7 +22087,7 @@ provided, then the values of [[xred]] will be computed from the provided
 [[xcart]] (i.e. the user may use [[xcart]] instead of [[xred]]
 to provide starting coordinates).
 One and only one of [[xred]] or [[xcart]] must be provided.
-Atomic positions evolve if [[ionmov]]/=0.
+Atomic positions evolve if [[geoopt]] or [[moldyn]] /= "none".
 """,
 ),
 
@@ -22136,7 +22136,7 @@ If you prefer to work only with cartesian coordinates, you may work entirely
 with "[[xcart]]" and ignore [[xred]], in which case [[xred]]
 must be absent from the input file.
 One and only one of [[xred]] or [[xcart]] must be provided.
-Atomic positions evolve if [[ionmov]]/=0.
+Atomic positions evolve if [[geoopt]] or [[moldyn]] /= "none".
 
 The echo of [[xcart]] in the main output file is accompanied by its echo in Angstrom,
 named `xangst`.
