@@ -41,7 +41,6 @@ module m_dfptlw_loop
  use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_io_tools,    only : file_exists,iomode_from_fname,get_unit
- use m_kg,          only : getcut,getph
  use m_inwffil,     only : inwffil
  use m_fft,         only : fourdp
  use m_ioarr,       only : read_rhor
@@ -197,7 +196,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  integer :: alpha,ask_accurate,beta,comm_cell,cplex,delta,dkdk_index,formeig,gamma
  integer :: ia1,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,idir_dkdk 
  integer :: idq,ierr,ii,ireadwf,istr,itypat,mcg,me,mpsang
- integer :: n1,n2,n3,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
+ integer :: n1,n2,n3,ndir,n1dq,n2dq,nhat1grdim,nfftotf,nspden,n3xccc
  integer :: optgeom,opthartdqdq,optorth,pawread
  integer :: pert1case,pert2case,pert3case,timrev,usexcnhat 
  real(dp) :: delad,delag,delbd,delbg,ecut,ecut_eff   
@@ -223,6 +222,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  real(dp),allocatable :: vpsp1_i1pertdq(:,:,:),vpsp1_i2pertdq(:,:,:)
  real(dp),allocatable :: vpsp1_i1pertdq_geom(:,:,:), vpsp1_i1pertdqdq(:,:,:)
  real(dp),allocatable :: vxc1dqdq(:),work(:)
+ real(dp),allocatable :: xccc3d1(:),xccc3d2(:)
  type(pawrhoij_type),allocatable :: pawrhoij_read(:)
  
  
@@ -289,15 +289,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
 !Specific allocations for strain-gradient perturbation
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
-  ABI_MALLOC(vhart1dqdq,(2*nfftf))
-  ABI_MALLOC(vpsp1dqdq,(2*nfftf))
-  ABI_MALLOC(vxc1dqdq,(2*nfftf))
+   ABI_MALLOC(vhart1dqdq,(2*nfftf))
+   ABI_MALLOC(vpsp1dqdq,(2*nfftf))
+   ABI_MALLOC(vxc1dqdq,(2*nfftf))
+ end if
+
+!Allocate xccc (only for quadrupoles yet)
+ if (dtset%lw_qdrpl==1.and.psps%n1xccc/=0) then
+   ABI_MALLOC(xccc3d2,(cplex*nfftf))
  end if
 
 !This is necessary to deactivate paw options in the dfpt_rhotov routine
  ABI_MALLOC(pawrhoij_read,(0))
  usexcnhat=0
- n3xccc=0
+ n3xccc=0;if(psps%n1xccc/=0)n3xccc=nfftf
  pawread=0
  nhat1grdim=0
  ABI_MALLOC(nhat1,(cplex*dtset%nfft,nspden))
@@ -429,6 +434,20 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
 
              !Allocate the second-gradient array
              ABI_MALLOC(vpsp1_i1pertdqdq,(2*nfftf,dtset%nspden,n2dq))
+
+             !Calculate first-order xccc potential for quadrupoles
+             if (i2pert<=natom.and.dtset%lw_qdrpl==1.and.psps%n1xccc/=0.and.nkxc == 7) then
+               if (psps%nc_xccc_gspace==1) then
+                 ndir=1
+                 call dfpt_atm2fft(atindx,cplex,gmet,gprimd,gsqcut,i2dir,i2pert,&
+                 & mgfft,psps%mqgrid_vl,dtset%natom,ndir,nfftf,ngfftf,psps%ntypat,&
+                 & ph1d,psps%qgrid_vl,dtset%qptn,dtset%typat,ucvol,psps%usepaw,xred,psps,pawtab,&
+                 & atmrhor1=xccc3d2,optn_in=n3xccc/nfftf,optn2_in=1)
+               else if (psps%nc_xccc_gspace==0) then
+                 call dfpt_mkcore(cplex,i2dir,i2pert,dtset%natom,psps%ntypat,n1,psps%n1xccc,&
+                 & n2,n3,dtset%qptn,rprimd,dtset%typat,ucvol,psps%xcccrc,psps%xccc1d,xccc3d2,xred)
+               end if 
+             end if
 
              do i3pert = 1, mpert
                do i3dir = 1, 3
@@ -707,6 +726,7 @@ subroutine dfptlw_loop(atindx,blkflg,cg,d3e_pert1,d3e_pert2,d3etot,dimffnl,dtfil
  ABI_FREE(rho2g1)
  ABI_FREE(nhat1)
  ABI_FREE(pawrhoij_read)
+ ABI_SFREE(xccc3d2)
 
  if (dtset%lw_flexo==1.or.dtset%lw_flexo==2.or.dtset%lw_flexo==4) then
   ABI_FREE(vhart1dqdq)
