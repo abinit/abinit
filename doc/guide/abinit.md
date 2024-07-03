@@ -323,7 +323,7 @@ This file is formatted.
 
   * **abo_TIMx_DOS**
 filenames of files containing the density of states in the case [[prtdos]]=2
-and [[geoopt]]=viscous or bfgs (also corresponding to [[ionmov]]=1 or 2).
+and [[geoopt]]="viscous" or "bfgs" (also corresponding to [[ionmov]]=1 or 2).
 The value of "x" after "TIM" is described hereafter.
 See also the keyword [[prtdos]]. This file is formatted.
 
@@ -334,7 +334,7 @@ formatted.
 
   * **abo_TIMx_GEO**
 filenames of files containing the geometrical analysis (bond lengths and bond
-angles) in the case [[geoopt]]=viscous or bfgs (also corresponding to [[ionmov]]=1 or 2).
+angles) in the case [[geoopt]]="viscous" or "bfgs" (also corresponding to [[ionmov]]=1 or 2).
 The value of "x" after "TIM" is described hereafter.
 See also the keyword [[prtgeo]]. This file is formatted.
 
@@ -352,7 +352,7 @@ structure.
 When ions are not fixed, the **POT**, **DEN**, or **GEO** files are output each
 time that a SCF cycle is finished. The " **x** " of **TIMx** aims at giving
 each of these files a different name. It is attributed as follows:
-\- case ionmov==1 or geoopt==viscous: there is an initialization phase, that takes 4 calls to
+\- case ionmov==1 or geoopt=="viscous": there is an initialization phase, that takes 4 calls to
 the SCF calculation. The value of x will be A, B, C, and D. Then, x will be 1,
 2, 3 ..., actually in agreement with the value of itime (see the keyword
 [[ntime]])
@@ -1344,7 +1344,7 @@ boxcut >= 2, and then one may try smaller values of [[ngfft]] if the results
 are not significantly altered. See the descriptions of these variables above.
 
 (5) If you are running calculations to relax or equilibrate structures, i.e.
-with [[geoopt]]=viscous and possibly [[vis]]>0, then the quality of your molecular
+with [[geoopt]]="viscous" and possibly [[vis]]>0, then the quality of your molecular
 dynamics or relaxation will be affected by the parameters [[amu]], [[dtion]],
 [[vis]], [[ntime]], [[tolmxf]]. Clearly if you want a relaxed structure you
 must either run long enough or make repeated runs until the largest force in
@@ -1357,7 +1357,7 @@ consensus exists in the community that forces larger than about 0.1
 eV/Angstrom are really too large to consider the relaxation to be converged.
 It is best for the user to get experience with this in his/her own
 application.  
-The option [[geoopt]]=bfgs or quenched are also available This uses the Broyden
+The option [[geoopt]]="bfgs" or quenched are also available This uses the Broyden
 (BFGS) scheme for structural optimization and is much more efficient than
 viscous damping for structural relaxation.
 
