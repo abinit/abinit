@@ -539,7 +539,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,ddb_version,gprimd,ints
 !Calculate the piezoelectric force-response tensor including the improper contribution
  piezofr(:,:,:,:) = SUM(phi1(1:3,1:natom,1:3,1:natom,1:3), DIM=4)
  do iatd=1,3
-   piezofr(iatd,:,:,iatd) = piezofr(iatd,:,:,iatd) + forces(:,:)
+   piezofr(iatd,:,:,iatd) = piezofr(iatd,:,:,iatd) + TRANSPOSE(forces(:,:))
  end do
 
 !Calculate the ion-relaxed internal strain tensor
@@ -1231,8 +1231,8 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
 
 !Local variables -------------------------
 !scalars
- integer :: ii1,ipertA,ivarA
- integer :: ii2,ipertB,ivarB
+ integer :: ii1,ivarA
+ integer :: ivarB
  integer :: ier
  character(len=500) :: message
 !arrays
