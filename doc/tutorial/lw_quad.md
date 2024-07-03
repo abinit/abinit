@@ -115,4 +115,22 @@ Open the output and look for the Quadrupole data block:
 Since we are in a binary FCC solid, there are only two independent quadrupoles values given by 
 $Q_{\kappa\beta}^{\gamma\delta} = Q_\kappa |\varepsilon_{\beta\gamma\delta}|$ where $\varepsilon_{\beta\gamma\delta}$ is the Levi-Cevita symbol. 
 
+In case you want to use the quadrupole tensor for the [EPW](https://epw-code.org/) code, you can use 
+the python convertor located in ```abinit/scripts/post_processing/ab2epw_quad.py```
 
+{% dialog ../scripts/post_processing/ab2epw_quad.py %}
+
+
+If you run the python code, the script will ask for the name of the output. Once provided you should obtain the following result:
+
+```sh
+  atom   dir       Qxx             Qyy         Qzz          Qyz            Qxz         Qxy
+    1     1      0.00000000   0.00000000   0.00000000  13.48660685   0.00000000   0.00000000
+    1     2      0.00000000   0.00000000   0.00000000   0.00000000  13.48660686   0.00000000
+    1     3      0.00000000   0.00000000   0.00000000   0.00000000   0.00000000  13.48660686
+    2     1      0.00000000   0.00000000   0.00000000  -6.00088730   0.00000000   0.00000000
+    2     2      0.00000000   0.00000000   0.00000000   0.00000000  -6.00088729   0.00000000
+    2     3      0.00000000   0.00000000   0.00000000   0.00000000   0.00000000  -6.00088729
+```
+
+which can be copied in a file name Quadrupole.fmt and used in EPW. 
