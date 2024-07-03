@@ -2595,20 +2595,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
    end if
-   !Longwave calculation not compatible with nonlinear core corrections
-   if(dt%optdriver==RUNL_LONGWAVE)then
-     do ipsp=1,npsp
-  !    Check that xccc is zero
-       if (pspheads(ipsp)%xccc/=0) then
-         write(msg, '(5a,i0,3a)' )&
-         'For a longwave calculation it is not possible to use norm-conserving pseudopotentials',ch10,&
-         'with a non-linear core correction.',ch10,&
-         'However, for pseudopotential number ',ipsp,', there is such a core correction.',ch10,&
-         'Action: change this pseudopotential file.'
-         ABI_ERROR_NOSTOP(msg, ierr)
-       end if
-     end do
-   end if
    !Longwave calculation function only for useylm=1
    if(dt%optdriver==RUNL_LONGWAVE.and.dt%useylm/=1.and.(dt%lw_qdrpl/=0.or.dt%lw_flexo/=0))then
     write(msg, '(3a,2a,2a)' )&

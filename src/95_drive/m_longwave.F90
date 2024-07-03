@@ -47,7 +47,7 @@ module m_longwave
  use m_rhotoxc,     only : rhotoxc
  use m_ioarr,       only : read_rhor
  use m_symtk,       only : matr3inv,symmetrize_xred
- use m_kg,          only : kpgio
+ use m_kg,          only : kpgio,getcut,getph
  use m_inwffil,     only : inwffil
  use m_spacepar,    only : setsym
  use m_mkrho,       only : mkrho
@@ -61,6 +61,7 @@ module m_longwave
  use m_initylmg,    only : initylmg
  use m_dynmat,      only : d3lwsym, sylwtens
  use m_geometry,    only : symredcart
+ use m_atm2fft,     only : atm2fft
 
  implicit none
 
@@ -215,10 +216,10 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  end if
 
 !Not usable with core electron density corrections
- if (psps%n1xccc/=0) then
-   msg='This routine cannot be used for n1xccc/=0'
-   ABI_BUG(msg)
- end if
+! if (psps%n1xccc/=0) then
+!   msg='This routine cannot be used for n1xccc/=0'
+!   ABI_BUG(msg)
+! end if
 
 
 !Define some data
@@ -553,8 +554,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  nhatgrdim=0;nhatdim=0
  ABI_MALLOC(nhat,(0,0))
  ABI_MALLOC(nhatgr,(0,0,0))
-! n3xccc=0
-! ABI_MALLOC(xccc3d,(n3xccc))
  non_magnetic_xc=.false.
 
  enxc=zero; usexcnhat=0
@@ -563,6 +562,8 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  call rhotoxc(enxc,kxc,mpi_enreg,nfftf,ngfftf,&
 & nhat,nhatdim,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,&
 & rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata)
+
+ ABI_FREE(xccc3d)
 
 !Set up the spherical harmonics (Ylm) and gradients at each k point 
  if (psps%useylm==1) then
@@ -793,7 +794,6 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
  ABI_FREE(d3e_pert2)
  ABI_FREE(d3e_pert3)
  ABI_SFREE(pawrhoij)
- ABI_FREE(xccc3d)
  ABI_SFREE(nhat)
  ABI_SFREE(nhatgr)
  ABI_SFREE(ylm)
