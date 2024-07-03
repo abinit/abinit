@@ -1661,14 +1661,10 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
      dtset%ionmov=24
    elseif(INDEX(dtset%moldyn,'nvt_isokin').gt.0) then
      dtset%ionmov=12
-   elseif(INDEX(dtset%moldyn,'nvt_nose').gt.0) then
-     if(dtset%imgmov==0) then
-       ! point to pimd algorithm
-     end if
    elseif(INDEX(dtset%moldyn,'nvt_langevin').gt.0) then
-     if(dtset%imgmov==0) then
-       ! point to pimd algorithm
-     end if
+     dtset%ionmov=16
+   elseif(INDEX(dtset%moldyn,'nvt_nose').gt.0) then
+     dtset%ionmov=13
    elseif(INDEX(dtset%moldyn,'npt_martyna').gt.0) then
      dtset%ionmov=13
    elseif(INDEX(dtset%moldyn,'nst_martyna').gt.0) then

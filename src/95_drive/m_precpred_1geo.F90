@@ -29,6 +29,7 @@ module m_precpred_1geo
  use m_abihist
  use m_xmpi
  use m_nctk
+ use m_pimd
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -52,6 +53,7 @@ module m_precpred_1geo
  use m_pred_velverlet,     only : pred_velverlet
  use m_pred_moldyn,        only : pred_moldyn
  use m_pred_langevin,      only : pred_langevin
+ use m_pred_langevin_pimd, only : pred_langevin_pimd
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
@@ -92,7 +94,7 @@ contains
 !! SOURCE
 
 subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,dilatmx,filnam_ds4,hist,hmctt,&
-& icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,rprimd_orig,skipcycle,usewvl)
+& icycle,iexit,itime,mttk_vars,nctime,ncycle,nerr_dilatmx,npsp,ntime,pimd_param,rprimd_orig,skipcycle,usewvl)
 
 !Arguments ------------------------------------
 !scalars
@@ -107,6 +109,7 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
  type(abimover), intent(in) :: ab_mover
  type(delocint), intent(inout) :: deloc
  type(mttk_type), intent(inout) :: mttk_vars
+ type(pimd_type), intent(in) :: pimd_param
 !arrays
  real(dp), intent(in) :: amu_curr(ab_mover%ntypat)
  real(dp), intent(in) :: rprimd_orig(3,3)
@@ -182,6 +185,8 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
      call pred_srkna14(ab_mover,hist,icycle,DEBUG,iexit,skipcycle)
    case (15)
      call pred_fire(ab_mover, ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
+   case (16)
+     call pred_langevin_pimd(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle,pimd_param)
    case (20)
      call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
    case (21)

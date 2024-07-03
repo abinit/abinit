@@ -28,6 +28,7 @@ module m_mover
  use m_abimover
  use m_abihist
  use m_dtset
+ use m_pimd
  use m_xmpi
  use m_nctk
  use m_dtfil
@@ -53,7 +54,7 @@ module m_mover
  use m_xfpack,             only : xfh_update
  use m_precpred_1geo,      only : precpred_1geo
  use m_pred_simple,        only : prec_simple
-!use m_generate_training_set, only : generate_training_set
+ !use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -203,6 +204,7 @@ type(abimover_specs) :: specs
 type(abiforstr) :: preconforstr ! Preconditioned forces and stress
 type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
+type(pimd_type) :: pimd_param
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: ntime,option,comm
 integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
@@ -788,7 +790,9 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
-
+     
+     call pimd_init(scfcv_args%dtset,pimd_param,me==master)
+     
      call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
 &     scfcv_args%dtset%chkdilatmx,&
 &     scfcv_args%mpi_enreg%comm_cell,&
@@ -796,8 +800,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 &     hist,scfcv_args%dtset%hmctt,&
 &     icycle,iexit,itime,mttk_vars,&
 &     scfcv_args%dtset%nctime,ncycle,nerr_dilatmx,scfcv_args%dtset%npsp,ntime,&
-&     scfcv_args%dtset%rprimd_orig,skipcycle,&
-&     scfcv_args%dtset%usewvl)
+&     pimd_param,scfcv_args%dtset%rprimd_orig,skipcycle,scfcv_args%dtset%usewvl)
 
 !    Write MOLDYN netcdf and POSABIN files (done every dtset%nctime time step)
 !    This file is not created for multibinit run
