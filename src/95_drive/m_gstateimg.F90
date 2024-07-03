@@ -1096,7 +1096,7 @@ subroutine predictimg(deltae,imagealgo_str,imgmov,itimimage,itimimage_eff,list_d
 &   ndynimage,nimage,nimage_tot,ntimimage_stored,results_img)
 
  case(6)
-   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
+   call move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,pimd_param,results_img)
 
  case(9, 10, 13)
 !    Path Integral Molecular Dynamics
@@ -1199,8 +1199,9 @@ end subroutine predict_copy
 !! itimimage_eff=time index in the history
 !! nimage=number of images
 !! ntimimage_stored=number of time steps stored in the history
-!!  mpi_enreg=MPI-parallelisation information
+!! mpi_enreg=MPI-parallelisation information
 !! m1geo_param=parameters for the 1geo algorithms
+!! pimd_param=datastructure that contains all the parameters necessary to Path-Integral MD
 !!
 !! OUTPUT
 !!
@@ -1226,13 +1227,14 @@ end subroutine predict_copy
 !!
 !! SOURCE
 
-subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,results_img)
+subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimimage_stored,pimd_param,results_img)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itimimage_eff,nimage,nimage_tot,ntimimage_stored
  type(MPI_type),intent(in) :: mpi_enreg
  type(m1geo_type),intent(inout) :: m1geo_param
+ type(pimd_type),intent(in) :: pimd_param
 !arrays
  type(results_img_type),target,intent(inout) :: results_img(nimage,ntimimage_stored)
 
@@ -1364,6 +1366,7 @@ subroutine move_1geo(itimimage_eff,m1geo_param,mpi_enreg,nimage,nimage_tot,ntimi
 & m1geo_param%nerr_dilatmx,&
 & m1geo_param%npsp,&
 & m1geo_param%ntime,&
+& pimd_param,&
 & m1geo_param%rprimd_orig,&
 & m1geo_param%skipcycle,&
 & m1geo_param%usewvl)

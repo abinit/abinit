@@ -676,7 +676,7 @@ type(abimover_specs),intent(out) :: specs
 
 !  This is the initialization for ionmov==15
 !  -------------------------------------------
-case (15)
+ case (15)
 !  Values use in XML Output
    specs%type4xml='FIRE'
    specs%isVused=.TRUE.  ! Velocities are used
@@ -686,6 +686,20 @@ case (15)
    specs%method = 'Fast inertial relaxation engine'
 !  Number of history
    specs%nhist = 2
+!  This is the initialization for ionmov==16
+!  ------------------------------------------
+case (16)
+!  TEMPORARLY optcell is not allow
+   specs%isARused=.FALSE.
+   specs%isVused=.TRUE.  ! Velocities are used
+   specs%ncycle=3
+!  Values use in XML Output
+   specs%type4xml='langevin'
+   specs%crit4xml='tolmxf'
+!  Name of specs%method
+   specs%method = 'Langevin molecular dynamics'
+!  Number of history
+   specs%nhist = 3
 !  This is the initialization for ionmov==20
 !  -------------------------------------------
  case (20)
