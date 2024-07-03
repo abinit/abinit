@@ -175,9 +175,9 @@ Variable(
     text=r"""
 Gives the masses in atomic mass units for each kind of atom in the input cell. These
 masses are used in performing molecular dynamical atomic motion if
-[[ionmov]] = 1, 6, 7 or 8. They are also used in phonon calculations during the
-diagonalization of the dynamical matrix. Note that one may set all masses to 1
-for certain cases in which merely structural relaxation is desired and not
+[[geoopt]] = "viscous" or "quenched" or if [[moldyn]] = "nve_verlet" (corresponding to [[ionmov]] = 1, 6, 7 or 8).
+They are also used in phonon calculations during the diagonalization of the dynamical matrix.
+Note that one may set all masses to 1 for certain cases in which merely structural relaxation is desired and not
 actual molecular dynamics.
 
 Using the recommended values of [[cite:Martin1987]], 1 atomic mass unit = 1.6605402e-27 kg. In this
@@ -704,7 +704,7 @@ Variable(
     mnemonics="Barostat MASS",
     added_in_version="before_v9",
     text=r"""
-bmass is the mass of the barostat when [[ionmov]] = 13 (constant pressure molecular dynamics)
+bmass is the mass of the barostat when [[moldyn]] = "npt_martyna" or "nst_martyna" (corresponding to [[ionmov]] = 13).
 """,
 ),
 
@@ -2746,7 +2746,7 @@ Variable(
     text=r"""
 [[dilatmx]] is an auxiliary variable used to book additional memory (see detailed description later) for possible
 on-the-flight enlargement of the plane wave basis set, due to cell volume increase during geometry optimization by ABINIT.
-Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[ionmov]] == 2 or 22.
+Useful only when doing cell optimization, e.g. [[optcell]]/=0, usually with [[geoopt]] = "bfgs" or "lbfgs" ([[ionmov]] == 2 or 22).
 Supposing that the starting (estimated) lattice parameters are already rather accurate (or likely to be too large),
 then the recommended value of [[dilatmx]] is 1.05.
 When you have no idea of evolution of the lattice parameters, and suspect that a large increase during geometry optimization is possible, while
@@ -3618,12 +3618,13 @@ Variable(
     mnemonics="Delta Time for IONs",
     added_in_version="before_v9",
     text=r"""
-Used for controlling ion time steps. If [[ionmov]] is set to 1, 6, 7 and 15, then
+Used for controlling ion time steps. If [[geoopt]] is set to "viscous", "quenched" or "fire",
+or if [[moldyn]] is set to "nve_verlet" ([[ionmov]] is set to 1, 6, 7 and 15), then
 molecular dynamics is  used to update atomic positions in response to forces.
 The parameter [[dtion]] is a time step in atomic units of time. (One atomic
 time unit is 2.418884e-17 seconds, which is the value of Planck's constant in
 hartree*sec.) In this case the atomic masses, in amu (given in array " [[amu]]
-"), are used in Newton's equation and the viscosity (for [[ionmov]] =1) and
+"), are used in Newton's equation and the viscosity (for [[geoopt]] = "viscous") and
 number of time steps are provided to the code using input variables "[[vis]]"
 and "[[ntime]]". The code actually converts from masses in amu to masses in
 atomic units (in units of electron masses) but the user enters masses in
@@ -3633,10 +3634,10 @@ atomic units (in units of electron masses) but the user enters masses in
 A typical good value for [[dtion]] is about 100. The user must try several
 values for [[dtion]] in order to establish the stable and efficient choice for
 the accompanying amu, atom types and positions, and [[vis]] (viscosity).
-For quenched dynamics ([[ionmov]] = 7), a larger time step might be taken, for
+For quenched dynamics ([[geoopt]] = "quenched"), a larger time step might be taken, for
 example 200. No meaning for RF calculations.
 It is also used in geometric relaxation calculation with the FIRE algorithm
-([[ionmov]]=15), where the time is virtual. A small dtion should be set, for example 0.03.
+([[geoopt]] = "fire"), where the time is virtual. A small dtion should be set, for example 0.03.
 """,
 ),
 
@@ -5111,7 +5112,7 @@ Variable(
     text=r"""
 The forces multiplied by [[fxcartfactor]] will be treated like difference in
 cartesian coordinates in the process of optimization. This is a simple preconditioner.
-TO BE UPDATED See ([[ionmov]] = 2 or 22, non-zero [[optcell]]). For example, the
+TO BE UPDATED See ([[geoopt]] = "bfgs" or "lbfgs", non-zero [[optcell]]). For example, the
 stopping criterion defined by [[tolmxf]] relates to these scaled stresses.
 """,
 ),
@@ -5250,7 +5251,6 @@ No meaning for RF calculations.
   If undamped molecular dynamics is desired, set [[vis]] to 0.
   The implemented algorithm is the generalisation of the Numerov technique (6th order), but is NOT invariant upon time-reversal,
   so that the energy is not conserved.
-  The value **ionmov** = 6 will usually be preferred, although the algorithm that is implemented is lower-order.
   The time step is governed by [[dtion]].
   **Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if [[vis]] >0)
   **Cell optimization:** No (Use [[optcell]] = 0 only)
@@ -5263,7 +5263,7 @@ No meaning for RF calculations.
   **Cell optimization:** Yes (if [[optcell]]/=0)
 
   * "mdmin" --> Simple relaxation of ionic positions according to (converged) forces.
-  Equivalent to **ionmov** = 1 with zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].
+  Equivalent to **geoopt** = "viscous" with zero masses, albeit the relaxation coefficient is not [[vis]], but [[iprcfc]].
   **Purpose:** Structural optimization
   **Cell optimization:** No (Use [[optcell]] = 0 only)
 
@@ -5609,7 +5609,7 @@ which is a frequently occurring case.
   * If [[getden]] is a negative number, it indicates the number of datasets to go
 backward to find the needed file. Going back beyond the first dataset is equivalent to using zero for the get variable.
 
-Be careful: the output density file of a run with non-zero [[ionmov]] does
+Be careful: the output density file of a run with [[geoopt]] /= "none" or [[moldyn]] /= "none" ([[ionmov]] /= 0) does
 not have the proper name (it has a "TIM" indication) for use as an input of an [[iscf]]<0 calculation.
 One should use the output density of a [[ionmov]] == 0 run.
 """,
@@ -7494,9 +7494,10 @@ fixed for structural optimization or molecular dynamics. The variable
 [[iatfixx]], [[iatfixy]], and [[iatfixz]], allow to fix some atoms along x, y
 or z directions, or a combination of these.
 
-WARNING: The implementation is inconsistent !! For [[ionmov]] ==1, the fixing
-of directions was done in cartesian coordinates, while for the other values of
-[[ionmov]], it was done in reduced coordinates. Sorry for this.
+WARNING: The implementation is inconsistent !! For [[geoopt]] set to "viscous" (or [[ionmov]] = 1),
+the fixing of directions was done in cartesian coordinates, while for the other values of
+[[geoopt]] or for any value of [[moldyn]] ([[ionmov]] /= 1), it was done in reduced coordinates.
+Sorry for this.
 
 There is no harm in fixing one atom in the three directions using [[iatfix]],
 then fixing it again in other directions by mentioning it in **iatfixx**,
@@ -8055,7 +8056,7 @@ No meaning for RF calculations.
     **Related variables:** time step ([[dtion]]) and the first temperature in [[mdtemp]] in case
     the velocities [[vel]] are not initialized, or all initialized to zero.
 
-  * 13 --> Isothermal/isenthalpic ensemble. The equation of motion of the ions in contact with a thermostat
+  * 13 --> The equation of motion of the ions in contact with a thermostat
     and a barostat are solved with the algorithm proposed in [[cite:Martyna1996]].
     If optcell=1 or 2, the mass of the barostat ([[bmass]]) must be given in addition.
     **Purpose:** Molecular dynamics
@@ -10478,7 +10479,7 @@ Give the initial and final temperature of the Nose-Hoover thermostat
 temperature will change linearly from the initial temperature **mdtemp(1)** at
 itime=1 to the final temperature **mdtemp(2)** at the end of the [[ntime]] timesteps.
 
-In the case of the isokinetic molecular dynamics ([[ionmov]] = 12), **mdtemp(1)** allows ABINIT
+In the case of the isokinetic molecular dynamics ([[moldyn]] = "nvt_isokin"), **mdtemp(1)** allows ABINIT
 to generate velocities ([[vel]]) to start the run if they are not provided by the user or if they all vanish. However **mdtemp(2)** is not used (even if it must be defined to please the parser). If some velocities are non-zero, **mdtemp** is not used, the kinetic energy computed from the velocities is kept constant during the run.
 """,
 ),
@@ -10495,8 +10496,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the location (atomic units) of walls on which the atoms will bounce
-back when [[ionmov]] = 6, 7, 8 or 9. For each cartesian direction idir=1, 2 or
-3, there is a pair of walls with coordinates xcart(idir)=-wall and
+back when [[geoopt]] = "quenched" or [[moldyn]] = "nve_verlet" (also when [[ionmov]] = 6, 7, 8 or 9).
+For each cartesian direction idir=1, 2 or 3, there is a pair of walls with coordinates xcart(idir)=-wall and
 xcart(idir)=rprimd(idir,idir)+wall. Supposing the particle will cross the
 wall, its velocity normal to the wall is reversed, so that it bounces back.
 By default, given in Bohr atomic units (1 Bohr=0.5291772108 Angstroms),
@@ -12126,9 +12127,9 @@ Variable(
     mnemonics="Number of NOSe masses",
     added_in_version="before_v9",
     text=r"""
-Gives the number of thermostats in the chain of oscillators
-thermostats as proposed in [[cite:Martyna1996]]. The thermostat chains can be used either to perform Molecular Dynamics (MD) ([[ionmov]] = 13) or to perform Path Integral Molecular Dynamics
-(PIMD) ([[imgmov]] = 13).
+Gives the number of thermostats in the chain of oscillators thermostats as proposed in [[cite:Martyna1996]].
+The thermostat chains can be used either to performMolecular Dynamics (MD) ([[moldyn]] = "nvt_nose", "npt_martyna" or "nst_martyna")
+or to perform Path Integral Molecular Dynamics (PIMD) ([[imgmov]] = 13).
 The mass of these thermostats is given by [[qmass]].
 """,
 ),
@@ -13115,8 +13116,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 Gives the maximum number of molecular dynamics time steps or structural
-optimization steps to be done if [[ionmov]] is non-zero.
-Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
+optimization steps to be done if [[geoopt]] or [[moldyn]] are not "none".
+Starting with Abinit9, ntime is automatically set to 1000,
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
@@ -13125,10 +13126,10 @@ Users are encouraged to pass a **timelimit** to Abinit using the command line an
 so that the code will try to stop smoothly before the timelimit and produce the DEN and the WFK files
 that may be used to restart the calculation.
 
-Note that at the present the option [[ionmov]] = 1 is initialized with four
+Note that at the present the option [[geoopt]] = "viscous" ([[ionmov]] = 1) is initialized with four
 Runge-Kutta steps which costs some overhead in the startup. By contrast, the
-initialisation of other [[ionmov]] values is only one SCF call.
-Note that **ntime** is ignored if [[ionmov]] = 0.
+initialisation of other [[geoopt]] or [[moldyn]] values is only one SCF call.
+Note that **ntime** is ignored if [[geoopt]] or [[moldyn]] are set to "none" ([[ionmov]] = 0).
 """,
 ),
 
@@ -13814,13 +13815,13 @@ Variable(
     mnemonics="OPTimize the CELL shape and dimensions",
     added_in_version="before_v9",
     text=r"""
-Allows one to optimize the unit cell shape and dimensions, when [[ionmov]] >= 2 or
-3. The configuration for which the stress almost vanishes is iteratively
+Allows one to optimize the unit cell shape and dimensions (for [[ionmov]] >=2).
+The configuration for which the stress almost vanishes is iteratively
 determined, by using the same algorithms as for the nuclei positions.
 May modify [[acell]] and/or [[rprim]]. The ionic positions are ALWAYS
 updated, according to the forces. A target stress tensor might be defined, see [[strtarget]].
 
-  * **optcell** = 0: modify nuclear positions, since [[ionmov]] = 2 or 3, but no cell shape and dimension optimisation.
+  * **optcell** = 0: modify nuclear positions, but no cell shape and dimension optimisation.
   * **optcell** = 1: optimisation of volume only (do not modify [[rprim]], and allow an homogeneous dilatation of the three components of [[acell]])
   * **optcell** = 2: full optimization of cell geometry (modify [[acell]] and [[rprim]] \- normalize the vectors of [[rprim]] to generate the [[acell]]). This is the usual mode for cell shape and volume optimization. It takes into account the symmetry of the system, so that only the effectively relevant degrees of freedom are optimized.
   * **optcell** = 3: constant-volume optimization of cell geometry (modify [[acell]] and [[rprim]] under constraint \- normalize the vectors of [[rprim]] to generate the [[acell]])
