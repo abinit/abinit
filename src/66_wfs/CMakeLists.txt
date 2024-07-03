@@ -48,6 +48,7 @@ target_link_libraries(66_wfs
   abinit::44_abitypes_defs
   abinit::46_ghc_omp
   abinit::56_recipspace
+  abinit::62_iowfdenpot
   abinit::62_cg_noabirule
   abinit::66_nonlocal
   )
