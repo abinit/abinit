@@ -8,6 +8,8 @@
  nshiftk 1
  shiftk 0.0 0.0 0.0
 
+ iomode 3               # To make sure that teph_tdep_legacy_1o_DS3_EIGR2D.nc is produced
+
 # Ground state density
  tolvrs1  1.0d-8      # Underconverged : tolvrs 1.0d-18 should be used for converged results
 
