@@ -1404,7 +1404,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,ddb_version,intstrn,lattflex
  Cpmatr(:,:)=0.0_dp
  Cpmatr(1:3*natom-3,1:3*natom-3) = Cmatr(:,:)
 
- Apmatr(:,:) = MATMUL(eigvecp(1,:,:), MATMUL(Cpmatr, TRANSPOSE(eigvec(1,:,:))))
+ Apmatr(:,:) = MATMUL(eigvecp(1,:,:), MATMUL(Cpmatr, TRANSPOSE(eigvecp(1,:,:))))
 
 !Now the inverse is in Cpmatr
  kmatrix(:,:)=Apmatr(:,:)
