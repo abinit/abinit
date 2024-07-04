@@ -402,13 +402,7 @@ call ydoc%add_real("diem",diem)
    chi(degree)=chicoeffs(2)                !at pert=0.0 is just the second coefficient.
    chi0err(degree)=chi0err(degree)/diem    !Chi0 error divided by diem also.
    hubpar(degree)=signum*(1.0d0/chi0(degree)-1.0d0/chi(degree))
-<<<<<<< HEAD
    hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree)**2)**2+(chierr(degree)/chi(degree)**2)**2)
-||||||| 3797a33b79
-   hubparerr(degree)=sqrt(chi0err(degree)/chi0(degree)**2+chierr(degree)/chi(degree)**2)
-=======
-   hubparerr(degree)=sqrt((chi0err(degree)/chi0(degree))**2+(chierr(degree)/chi(degree))**2)
->>>>>>> trunk/develop
    ABI_FREE(chi0coeffs)
    ABI_FREE(chicoeffs)
  end do

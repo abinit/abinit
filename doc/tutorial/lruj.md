@@ -20,7 +20,7 @@ generate input data to successfully execute the lruj post-processing utility.
 We strongly encourage you to read the [PAW1](/tutorial/paw1), [PAW2](/tutorial/paw2)
 and [DFT+U](/tutorial/dftu) tutorials to familiarize yourself with the manifestation of
 PAW atomic datasets within Abinit. Also consider checking out this video introducing
-the PAW formalism in an Abinit context. 
+the PAW formalism in an Abinit context.
 
 <iframe width="1384" height="629" src="https://www.youtube.com/embed/5WEdd78GDFw" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
