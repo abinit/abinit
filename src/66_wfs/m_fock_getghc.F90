@@ -118,12 +118,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! Arrays
  integer :: ngfft(18),ngfftf(18)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
- real(dp) :: enlout_dum(1),dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
+ real(dp) :: dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
  real(dp) :: rhodum0(0,1,1),str(3,3)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
  real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:)
- real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
+ real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
@@ -338,7 +338,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &   istwf_kp=jstwfk,npw_kp=npwj,kg_kp=fockbz%kg_bz(:,1+jkg:npwj+jkg))
 !* Some temporary allocations needed for PAW
    if (fockcommon%usepaw==1) then
-     ABI_MALLOC(vectin_dum,(2,npwj*nspinor))
+     ABI_MALLOC(enlout_dum,(ndat_occ))
+     ABI_MALLOC(vectin_dum,(2,npwj*nspinor*ndat_occ))
      vectin_dum=zero
      ABI_MALLOC(ffnl_kp_dum,(npwj,1,gs_ham%lmnmax,gs_ham%ntypat))
      nkpg=size(gs_ham%kpg_k,2)
@@ -598,7 +599,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        ndij=nspden_fock
        ! dimekb1 is dimensioned as cplex_dij*lmnmax*(lmnmax+1)/2
        cplex_dij=2*gs_ham%dimekb1/(gs_ham%lmnmax*(gs_ham%lmnmax+1))
-       ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,cplex_fock,ndat_occ,ndat))
+       ABI_MALLOC(dijhat,(gs_ham%dimekb1,natom,ndij,ndat_occ,cplex_fock,ndat))
        dijhat=zero
 
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -615,8 +616,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            do idat_occ=1,ndat_occ
              do ii=1,cplex_fock
                ind=(ii-1)*lmn2_size*cplex_dij
-               dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,:)
-               dijhat(1:cplex_dij*lmn2_size,iatom,:,ii,idat_occ,idat)=&
+               dijhat(1:cplex_dij*lmn2_size,iatom,:,idat_occ,ii,idat)=&
 &                   dijhat_tmp(ind+1:ind+cplex_dij*lmn2_size,1+(idat_occ-1)*ndij+(idat-1)*ndat_occ*ndij:idat_occ*ndij+(idat-1)*ndat_occ*ndij)
              end do
            end do ! idat_occ
@@ -628,18 +628,19 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if(need_ghc) then
          choice=1
          call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
-         do idat_occ=1,ndat_occ
          do idat=1,ndat
-           call nonlop(choice,cpopt,cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-  &         1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
-  &         gvnlxc(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor),enl=dijhat(:,:,:,:,idat_occ,idat),&
-  &         select_k=K_H_KPRIME)
-         end do
+           call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),&
+&               mpi_enreg,ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
+&               gvnlxc,enl_ndat=dijhat(:,:,:,:,:,idat),&
+&               select_k=K_H_KPRIME)
 #ifdef HAVE_OPENMP_OFFLOAD
          !$OMP TARGET UPDATE FROM(gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
-         ghc2=ghc2-gvnlxc*occ(idat_occ)*wtk
-         end do ! idat_occ
+           do idat_occ=1,ndat_occ
+             ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)=ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)&
+&               -gvnlxc(:,1+(idat_occ-1)*npw*nspinor:idat_occ*npw*nspinor)*occ(idat_occ)*wtk
+           end do ! idat_occ
+         end do ! idat
          call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
        end if
 
@@ -810,6 +811,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    bdtot_jindex=bdtot_jindex+nband_k
    jkg=jkg+npwj
    if (fockcommon%usepaw==1) then
+     ABI_FREE(enlout_dum)
      ABI_FREE(vectin_dum)
      ABI_FREE(ffnl_kp_dum)
      ABI_FREE(kpg_kp)

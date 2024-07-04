@@ -86,7 +86,7 @@ contains
 !!
 !! SOURCE
  subroutine gemm_nonlop(atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,dimffnlin,dimffnlout,&
-&                 enl,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
+&                 enl,enl_ndat,enlout,ffnlin,ffnlout,gmet,gprimd,idir,indlmn,istwf_k,&
 &                 kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,lmnmax,matblk,mgfft,&
 &                 mpi_enreg,natom,nattyp,ndat,ngfft,nkpgin,nkpgout,nloalg,&
 &                 nnlout,npwin,npwout,nspinor,nspinortot,ntypat,only_SO,paw_opt,&
@@ -107,7 +107,7 @@ contains
   !arrays
   integer,intent(in),target :: atindx1(natom),indlmn(6,lmnmax,ntypat),kgin(3,npwin)
   integer,intent(in),target :: kgout(3,npwout),nattyp(ntypat),ngfft(18),nloalg(3),typat(natom)
-  real(dp),intent(in),target :: enl(dimenl1,dimenl2,nspinortot**2,dimekbq)
+  real(dp),intent(in),target :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
   real(dp),intent(in),target :: ffnlin(npwin,dimffnlin,lmnmax,ntypat)
   real(dp),intent(in),target :: ffnlout(npwout,dimffnlout,lmnmax,ntypat),gmet(3,3)
   real(dp),intent(in) :: gprimd(3,3),kptin(3),kptout(3)
@@ -127,7 +127,7 @@ contains
   integer :: nnlout_test
   integer :: iatm, ndgxdt, ndgxdtfac, nd2gxdt, nd2gxdtfac, optder, itypat, ilmn
   integer :: cplex_dgxdt(9), cplex_d2gxdt(18)
-  logical :: local_vectproj
+  logical :: local_vectproj,use_enl_ndat
   real(dp) :: d2gxdt_dum_in(1,1,1,1,1), d2gxdt_dum_out(1,1,1,1,1),d2gxdt_dum_out2(1,1,1,1,1)
   real(dp), allocatable :: sij_typ(:)
   real(dp), ABI_CONTIGUOUS pointer :: projections(:,:,:)
@@ -147,7 +147,7 @@ contains
   integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
   real(dp),pointer :: ffnlin_(:,:,:,:),ffnlout_(:,:,:,:)
   real(dp),pointer :: ph3din_(:,:,:),ph3dout_(:,:,:)
-  real(dp),pointer :: enl_(:,:,:,:)
+  real(dp),pointer :: enl_(:,:,:,:),enl_ndat_(:,:,:,:,:)
   real(dp), ABI_CONTIGUOUS pointer :: sij_(:,:)
   real(dp), ABI_CONTIGUOUS pointer :: kpgin_(:,:),kpgout_(:,:)
 
@@ -196,6 +196,7 @@ contains
   cplex_enl=1;if (paw_opt>0) cplex_enl=2*dimenl1/(lmnmax*(lmnmax+1)) ! is enl complex?
   cplex_fac=max(cplex,dimekbq)
   if ((nspinortot==2.or.cplex_enl==2).and.paw_opt>0.and.choice/=7) cplex_fac=2 ! is vnl_projections complex?
+  use_enl_ndat=.false. ; if (size(enl_ndat)>0) use_enl_ndat=.true.
 
   ! Processing one atom : set pointers to atom-specific arrays (for opernlc)
   if(iatom_only > 0) then
@@ -224,7 +225,22 @@ contains
         sij_(:,1)=sij(:,1)
       end if
     end if
-    if (size(enl)>0) then
+    if (size(enl_ndat)>0) then
+      ABI_MALLOC(enl_ndat_,(size(enl_ndat,1),1,nspinor**2,size(enl_ndat,4),ndat))
+      do idat=1,ndat
+        do ii=1,size(enl,4)
+          do ispden=1,nspinor**2
+            if (dimenl2==natom .and. usepaw==1) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,iatom_only,ispden,idat,ii)
+            else if (dimenl2==ntypat) then
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,itypat,ispden,idat,ii)
+            else
+              enl_ndat_(:,1,ispden,idat,ii)=enl_ndat(:,1,ispden,idat,ii)
+            end if
+          end do
+        end do
+      end do
+    else if (size(enl)>0) then
       ABI_MALLOC(enl_,(size(enl,1),1,nspinor**2,size(enl,4)))
       do ii=1,size(enl,4)
         do ispden=1,nspinor**2
@@ -251,6 +267,7 @@ contains
     ffnlin_     => ffnlin
     ffnlout_    => ffnlout
     enl_        => enl
+    enl_ndat_   => enl_ndat
     sij_        => sij
     indlmn_     => indlmn
     ph3din_     => ph3din
@@ -432,8 +449,10 @@ contains
 
   ! Working buffers for storing 2nd-derivative
   if (nd2gxdt>0) then
-    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs,nspinor*ndat))
-    d2projections(:,:,:) = zero
+    ABI_MALLOC(d2projections,(cplex, nd2gxdt*nprojs, nspinor*ndat))
+    if(cpopt < 4) then
+      d2projections(:,:,:) = zero
+    end if
   else
     ABI_MALLOC(d2projections,(1, 1, ndat))
   end if
@@ -563,6 +582,7 @@ contains
         id2end = d2shift+nattyp_(itypat)*nlmn*ngrads2
 
         do idat = 1,ndat
+        if(use_enl_ndat) enl_ => enl_ndat_(:,:,:,idat,:)
           call opernlc_ylm(atindx1_,cplex,cplex_dgxdt,cplex_d2gxdt,&
 &         cplex_enl,cplex_fac,&
 &         dprojections(:, idbeg:idend, 1+nspinor*(idat-1):nspinor*idat),&
@@ -852,7 +872,11 @@ contains
     ABI_FREE(ph3dout_)
     ABI_FREE(ffnlin_)
     ABI_FREE(ffnlout_)
-    ABI_FREE(enl_)
+    if(use_enl_ndat) then
+      ABI_FREE(enl_ndat_)
+    else
+      ABI_FREE(enl_)
+    end if
     ABI_FREE(indlmn_)
     if (size(sij) > 1) then
       ABI_FREE(sij_)

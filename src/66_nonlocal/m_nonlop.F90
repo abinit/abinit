@@ -338,7 +338,7 @@ contains
 
 subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnlout,&
 &                 paw_opt,signs,svectout,tim_nonlop,vectin,vectout,&
-&                 cprjin_left,enl,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k,vectproj) !optional arguments
+&                 cprjin_left,enl,enl_ndat,enlout_im,iatom_only,ndat_left,only_SO,qdir,select_k,vectproj) !optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -348,7 +348,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  type(gs_hamiltonian_type),intent(in),target :: hamk
 !arrays
  real(dp),intent(in) :: lambda(ndat)
- real(dp),intent(in),target,optional :: enl(:,:,:,:)
+ real(dp),intent(in),target,optional :: enl(:,:,:,:),enl_ndat(:,:,:,:,:)
  real(dp),intent(inout),target :: vectin(:,:)
  real(dp),intent(out),target :: enlout(:),svectout(:,:)
  real(dp),intent(out),optional :: enlout_im(:)
@@ -371,14 +371,14 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
  integer,pointer :: kgin(:,:),kgout(:,:)
  integer, ABI_CONTIGUOUS pointer :: atindx1_(:),indlmn_(:,:,:),nattyp_(:)
  real(dp) :: tsec(2)
- real(dp),pointer :: enl_ptr(:,:,:,:)
+ real(dp),pointer :: enl_ptr(:,:,:,:),enl_ndat_ptr(:,:,:,:,:)
  real(dp),pointer :: ffnlin(:,:,:,:),ffnlin_(:,:,:,:),ffnlout(:,:,:,:),ffnlout_(:,:,:,:)
  real(dp),pointer :: kpgin(:,:),kpgout(:,:)
  real(dp) :: kptin(3),kptout(3)
  real(dp),pointer :: ph3din(:,:,:),ph3din_(:,:,:),ph3dout(:,:,:),ph3dout_(:,:,:)
  real(dp),pointer :: phkxredin(:,:),phkxredin_(:,:),phkxredout(:,:),phkxredout_(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: ph1d_(:,:),sij_(:,:)
- real(dp), pointer :: enl_(:,:,:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: enl_(:,:,:,:),enl_ndat_(:,:,:,:,:)
  type(pawcprj_type),pointer :: cprjin_(:,:)
  integer :: b0,b1,b2,b3,b4,e0,e1,e2,e3,e4
  integer :: proj_shift,ia,nlmn
@@ -427,6 +427,10 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 !if (hamk%istwf_k/=hamk%istwf_kp) then
 !  ABI_BUG('istwf has to be the same for both k-points.')
 !end if
+
+ if (present(enl) .and. present(enl_ndat)) then
+   ABI_BUG("enl and enl_ndat cannot be specified concurrently !")
+ end if
 
 !Select k-dependent objects according to select_k input parameter
  select_k_=1;if (present(select_k)) select_k_=select_k
@@ -596,6 +600,12 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    dimenl1=hamk%dimekb1;dimenl2=hamk%dimekb2;dimekbq=1
  end if
 
+! If enl_ndat is present (meaning enl is absent), use it
+ if (present(enl_ndat)) then
+   enl_ndat_ptr => enl_ndat
+   dimenl1=size(enl_ndat,1);dimenl2=size(enl_ndat,2);dimekbq=size(enl_ndat,5)
+ end if
+
 
 !A specific version of nonlop based on BLAS3 can be used
 !But there are several restrictions
@@ -694,7 +704,22 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
        end do
      end do
    end if
-   if (size(enl_ptr)>0) then
+   if (present(enl_ndat)) then
+     ABI_MALLOC(enl_ndat_,(size(enl_ndat_ptr,1),1,hamk%nspinor**2,size(enl_ndat_ptr,5),ndat))
+     do idat=1,ndat
+       do ii=1,size(enl_ndat_ptr,4)
+         do ispden=1,hamk%nspinor**2
+           if (dimenl2==hamk%natom .and. hamk%usepaw==1) then
+             enl_ndat_(:,1,ispden,ii,idat)=enl_ndat_ptr(:,iatom_only_,ispden,idat,ii)
+           else if (dimenl2==hamk%ntypat) then
+             enl_ndat_(:,1,ispden,ii,idat)=enl_ndat_ptr(:,itypat,ispden,idat,ii)
+           else
+             enl_ndat_(:,1,ispden,ii,idat)=enl_ndat_ptr(:,1,ispden,idat,ii)
+           end if
+         end do
+       end do
+     end do
+   else if (size(enl_ptr)>0) then
      ABI_MALLOC(enl_,(size(enl_ptr,1),1,hamk%nspinor**2,size(enl_ptr,4)))
      do ii=1,size(enl_ptr,4)
        do ispden=1,hamk%nspinor**2
@@ -707,7 +732,9 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
          end if
        end do
      end do
+     ABI_MALLOC(enl_ndat_,(0,0,0,0,0))
    else
+     ABI_MALLOC(enl_ndat_,(0,0,0,0,0))
      ABI_MALLOC(enl_,(0,0,0,0))
    end if
    if (allocated(hamk%sij)) then
@@ -736,6 +763,17 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    ffnlout_    => ffnlout
    cprjin_     => cprjin
    enl_        => enl_ptr
+   if (present(enl_ndat)) then
+     if (.not. use_gemm_nonlop) then
+       ! An issue with Intel 16 forces to do this conversion
+       ABI_MALLOC(enl_ndat_,(size(enl_ndat_ptr,1),natom_,hamk%nspinor**2,size(enl_ndat_ptr,5),ndat))
+       do idat=1,ndat
+         enl_ndat_(:,:,:,:,idat)=enl_ndat_ptr(:,:,:,idat,:)
+       end do
+     else
+       enl_ndat_   => enl_ndat_ptr
+     end if
+   end if
    sij_        => hamk%sij
    indlmn_     => hamk%indlmn
    if (force_recompute_ph3d) then
@@ -755,7 +793,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    if(hamk%gpu_option==ABI_GPU_OPENMP) then
 
      call gemm_nonlop_ompgpu(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
-         dimffnlin,dimffnlout,enl_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
+         dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
          idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
          hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
          hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
@@ -782,7 +820,7 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    else
 
      call gemm_nonlop(hamk%atindx1,choice,cpopt,cprjin,dimenl1,dimenl2,dimekbq,&
-         dimffnlin,dimffnlout,enl_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
+         dimffnlin,dimffnlout,enl_ptr,enl_ndat_ptr,enlout,ffnlin,ffnlout,hamk%gmet,hamk%gprimd,&
          idir,hamk%indlmn,istwf_k,kgin,kgout,kpgin,kpgout,kptin,kptout,lambda,&
          hamk%lmnmax,hamk%matblk,hamk%mgfft,mpi_enreg,&
          hamk%natom,hamk%nattyp,ndat,hamk%ngfft,nkpgin,nkpgout,nloalg_,&
@@ -805,10 +843,11 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
 #endif
 
    !$omp parallel do default(shared), &
-   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout), &
+   !$omp& firstprivate(ndat,npwin,my_nspinor,choice,signs,paw_opt,npwout,cpopt,nnlout,enl_), &
    !$omp& private(b0,b1,b2,b3,b4,e0,e1,e2,e3,e4)
    !!$omp& schedule(static), if(hamk%gpu_option==ABI_GPU_DISABLED)
    do idat=1, ndat
+     if(present(enl_ndat)) enl_ => enl_ndat_(:,:,:,:,idat)
      !vectin_idat => vectin(:,1+npwin*my_nspinor*(idat-1):npwin*my_nspinor*idat)
      b0 = 1+npwin*my_nspinor*(idat-1)
      e0 = npwin*my_nspinor*idat
@@ -920,15 +959,24 @@ subroutine nonlop(choice,cpopt,cprjin,enlout,hamk,idir,lambda,mpi_enreg,ndat,nnl
    ABI_FREE(phkxredout_)
    ABI_FREE(ffnlin_)
    ABI_FREE(ffnlout_)
-   ABI_FREE(enl_)
+   if (present(enl_ndat)) then
+     ABI_FREE(enl_ndat_)
+   else
+     ABI_FREE(enl_)
+   end if
    ABI_FREE(indlmn_)
    ABI_FREE(cprjin_)
    if (allocated(hamk%sij)) then
      ABI_FREE(sij_)
    end if
- else if (force_recompute_ph3d) then
-   ABI_FREE(ph3din_)
-   ABI_FREE(ph3dout_)
+ else
+   if (force_recompute_ph3d) then
+     ABI_FREE(ph3din_)
+     ABI_FREE(ph3dout_)
+   end if
+   if (present(enl_ndat) .and. .not. use_gemm_nonlop) then
+     ABI_FREE(enl_ndat_)
+   end if
  end if
  if (kpgin_allocated) then
    ABI_FREE(kpgin)
