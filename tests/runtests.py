@@ -276,6 +276,9 @@ def main():
     parser.add_option("--etsf", action="store_true", default=False,
                        help="Validate netcdf files produced by the tests. Requires netcdf4")
 
+    parser.add_option("-y","--yaml-simplified-diff", dest="yaml_simplified_diff", default=False, action="store_true",
+                      help="Will only perform a simplified diff when comparing .abo files (based only on YAML sections)")
+
     parser.add_option("--touch", default="",
                       help=("Used in conjunction with `-m`."
                             "Touch the source files containing the given expression(s) before recompiling the code. "
@@ -584,7 +587,8 @@ def main():
                                    sub_timeout=options.sub_timeout,
                                    pedantic=options.pedantic,
                                    abimem_check=options.abimem,
-                                   etsf_check=options.etsf)
+                                   etsf_check=options.etsf,
+                                   simplified_diff=options.yaml_simplified_diff)
     if results is None: return 99
 
     if options.looponfail:
