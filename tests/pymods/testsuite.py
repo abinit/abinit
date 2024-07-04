@@ -331,7 +331,7 @@ class FileToTest(object):
     def __str__(self): pass
 
     def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
-                outf=sys.stdout):
+                outf=sys.stdout, simplified_yaml_test=False):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -342,6 +342,36 @@ class FileToTest(object):
             ref_fname = ref_fname[:-7] + ".out"
             #ref_fname = ref_fname[:-7] + ".abo"
         out_fname = os.path.abspath(os.path.join(workdir, self.name))
+
+        # Select only YAML section in the two files
+        if simplified_yaml_test:
+
+          yaml_section_start = "--- !"
+          yaml_section_end = "..."
+
+          def make_simplified(file_in,file_out,start_string,end_string):
+              f_in=open(file_in,'r')
+              f_out=open(file_out,'w')
+              inRecordingMode = False
+              for line in f_in.readlines():
+                  if not inRecordingMode:
+                      if start_string in line:
+                          inRecordingMode = True
+                          f_out.write(line)      
+                  elif end_string in line:
+                      inRecordingMode = False
+                      f_out.write(line) 
+                  else:
+                      f_out.write(line) 
+              f_in.close()
+              f_out.close()
+
+          ref_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min_ref"))
+          out_fname_min = os.path.abspath(os.path.join(workdir, self.name + ".min"))
+          make_simplified(ref_fname,ref_fname_min,yaml_section_start,yaml_section_end)
+          make_simplified(out_fname,out_fname_min,yaml_section_start,yaml_section_end)
+          ref_fname = ref_fname_min
+          out_fname = out_fname_min
 
         opts = {
             'label': self.name,
@@ -1894,6 +1924,8 @@ pp_dirpath $ABI_PSPDIR
                            Default: False
         etsf_check         True if netcdf files should be validated. Requires netcdf4.
                            Default: False
+        simplified_diff    True if we perform a "simplified diff" when comparing files
+                             by using only YAML sections in abo files
         ================  ====================================================================
 
         .. warning:
@@ -1921,6 +1953,7 @@ pp_dirpath $ABI_PSPDIR
         self.erase_files = kwargs.get("erase_files", self.erase_files)
         self.make_html_diff = kwargs.get("make_html_diff", self.make_html_diff)
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
+        simplified_diff = kwargs.get("simplified_diff")
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2070,12 +2103,14 @@ pp_dirpath $ABI_PSPDIR
             for f in self.files_to_test:
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
+                simplified_test = simplified_diff and os.path.splitext(f.name)[-1] == ".abo"
 
                 with open(fldiff_fname, "wt") as fh:
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
-                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh)
+                                                  yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh,
+                                                  simplified_yaml_test=simplified_test)
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
 
