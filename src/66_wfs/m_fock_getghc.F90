@@ -185,7 +185,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*cwavef_r = current wavefunction in r-space
  ABI_MALLOC(cwavef_r,(2,n4f,n5f,n6f*ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
- if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(cwavef_r,2*n4f*n5f*n6f*ndat)
+ !$OMP TARGET ENTER DATA MAP(alloc:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 !*dummytab = variables for fourwf
  ABI_MALLOC(dummytab,(2,nfft*ndat))
@@ -202,7 +202,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
  ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
- if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(vlocpsi_r,cplex_fock*nfftf*ndat)
+ !$OMP TARGET ENTER DATA MAP(alloc:vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
  if(gpu_option==ABI_GPU_DISABLED) then
    vlocpsi_r=zero
@@ -296,34 +296,34 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
   !*rhormunu = overlap matrix between cwavef and (jkpt,mu) in R-space
    ABI_MALLOC(rhor_munu,(cplex_fock,nfftf,ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rhor_munu,cplex_fock*nfftf*ndat_occ*ndat)
+   !$OMP TARGET ENTER DATA MAP(alloc:rhor_munu) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
   !*rhogmunu = overlap matrix between cwavef and (jkpt,mu) in G-space
    ABI_MALLOC(rhog_munu,(2,nfftf,ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rhog_munu,2*nfftf*ndat_occ*ndat)
+   !$OMP TARGET ENTER DATA MAP(alloc:rhog_munu) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
   !*vfock = Fock potential
    ABI_MALLOC(vfock,(cplex_fock*nfftf,ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(vfock,cplex_fock*nfftf*ndat_occ*ndat)
+   !$OMP TARGET ENTER DATA MAP(alloc:vfock) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_MALLOC(occ,(ndat_occ))
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(occ,ndat_occ)
+   !$OMP TARGET ENTER DATA MAP(alloc:occ) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
 
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
      ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
-     ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat))
+     ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
 #ifdef HAVE_OPENMP_OFFLOAD
-     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(gvnlxc,2*npw*nspinor*ndat)
+     !$OMP TARGET ENTER DATA MAP(alloc:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_MALLOC(grnhat12,(2,nfftf,nspinor**2,3*nhat12_grdim,ndat_occ,ndat))
      ABI_MALLOC(rho12,(2,nfftf,nspinor**2,ndat_occ,ndat))
 #ifdef HAVE_OPENMP_OFFLOAD
-     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(rho12,2*nfftf*ndat_occ*ndat)
+     !$OMP TARGET ENTER DATA MAP(alloc:rho12) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    end if
 
@@ -386,7 +386,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      else
        ABI_MALLOC(cwaveocc_r,(2,n4f,n5f,n6f,ndat_occ))
 #ifdef HAVE_OPENMP_OFFLOAD
-       if(gpu_option==ABI_GPU_OPENMP) call ompgpu_enter_map_alloc(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+       !$OMP TARGET ENTER DATA MAP(alloc:cwaveocc_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        if(gpu_option==ABI_GPU_DISABLED) then
          cwaveocc_r=zero
@@ -526,7 +526,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-           if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+           !$OMP TARGET EXIT DATA MAP(delete:cwaveocc_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
            ABI_FREE(cwaveocc_r)
          end if
@@ -772,8 +772,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 #ifdef HAVE_OPENMP_OFFLOAD
        do idat_occ=1,ndat_occ
        !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(4) &
-       !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc) &
-       !$OMP& IF(gpu_option==ABI_GPU_OPENMP)
+       !$OMP& MAP(to:vlocpsi_r) MAP(to:cwaveocc_r,occ,vfock) PRIVATE(ind,recwocc,imcwocc,revloc,imvloc)
        do idat=1,ndat
        do i3=1,ngfftf(3)
          do i2=1,ngfftf(2)
@@ -794,7 +793,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      end if
      if (allocated(fockbz%cgocc)) then
 #ifdef HAVE_OPENMP_OFFLOAD
-       if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwaveocc_r,2*n4f*n5f*n6f*ndat_occ)
+       !$OMP TARGET EXIT DATA MAP(delete:cwaveocc_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
        ABI_FREE(cwaveocc_r)
      end if
@@ -819,31 +818,31 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      ABI_FREE(gs_ham%ph3d_kp)
    end if
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rhor_munu,cplex_fock*nfftf*ndat_occ*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:rhor_munu) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(rhor_munu)
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rhog_munu,2*nfftf*ndat_occ*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:rhog_munu) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(rhog_munu)
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vfock,cplex_fock*nfftf*ndat_occ*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:vfock) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(vfock)
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(occ,ndat_occ)
+   !$OMP TARGET EXIT DATA MAP(delete:occ) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(occ)
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
      ABI_FREE(grnhat_12)
 #ifdef HAVE_OPENMP_OFFLOAD
-     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(gvnlxc,2*npw*nspinor*ndat)
+     !$OMP TARGET EXIT DATA MAP(delete:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(gvnlxc)
      ABI_FREE(grnhat12)
 #ifdef HAVE_OPENMP_OFFLOAD
-     if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(rho12,2*nfftf*ndat_occ*ndat)
+     !$OMP TARGET EXIT DATA MAP(delete:rho12) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
      ABI_FREE(rho12)
    end if
@@ -881,13 +880,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 ! === Deallocate local arrays ===
 ! ===============================
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwavef_r,2*n4f*n5f*n6f*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vlocpsi_r,cplex_fock*nfftf*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
@@ -993,13 +992,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !   === Deallocate local arrays ===
 !   ===============================
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(cwavef_r,2*n4f*n5f*n6f*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
 #ifdef HAVE_OPENMP_OFFLOAD
-   if(gpu_option==ABI_GPU_OPENMP) call ompgpu_exit_map_delete(vlocpsi_r,cplex_fock*nfftf*ndat)
+   !$OMP TARGET EXIT DATA MAP(delete:vlocpsi_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(vlocpsi_r)
    ABI_FREE(dummytab)
@@ -1009,32 +1008,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
  call timab(1504,2,tsec) ; call timab(1507,-2,tsec) ; call timab(1515,-2,tsec) ; call timab(1547,-2,tsec)
 
-!NOTE: These subroutines were placed here because NVHPC would cause issues when
-!      processing OpenMP directives below by creating artifacts.
-!
-!     Tested with NVHPC 24.5
-!     Issues occured with arrays: work, gvnlx1, gvnl2, nonlop_out
-!     The name 'fock_getghc_array' is for debugging purposes.
-#ifdef HAVE_OPENMP_OFFLOAD
- contains
-
-   subroutine ompgpu_enter_map_alloc(fock_getghc_array,size)
-    integer,intent(in)  :: size
-    real(dp),intent(inout) :: fock_getghc_array(size)
-
-    !$OMP TARGET ENTER DATA MAP(alloc:fock_getghc_array)
-
-   end subroutine ompgpu_enter_map_alloc
-
-   subroutine ompgpu_exit_map_delete(fock_getghc_array,size)
-    integer,intent(in)  :: size
-    real(dp),intent(inout) :: fock_getghc_array(size)
-
-    !$OMP TARGET EXIT DATA MAP(delete:fock_getghc_array)
-
-   end subroutine ompgpu_exit_map_delete
-
-#endif
  end subroutine fock_getghc
 !!***
 
