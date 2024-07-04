@@ -1,8 +1,9 @@
+MPI startup(): FI_PSM3_UUID was not generated, please set it to avoid possible resources ownership conflicts between MPI processes
 
-.Version 9.10.4 of LRUJ 
-.(MPI version, prepared for a x86_64_linux_intel18.0 computer) 
+.Version 10.1.4.2 of LRUJ, released Jun 2024.
+.(MPI version, prepared for a x86_64_linux_gnu8.5 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  LRUJ comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +15,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 16 Feb 2024.
-- ( at 15h58 )
+.Starting date : Tue  2 Jul 2024.
+- ( at 20h59 )
   
  Number of perturbations detected:  5
  Including unperturbed state, we have  6 data points.
@@ -24,36 +25,36 @@
  NOTE: Unlike the ujdet utility, lruj treats the 
  response functions as scalars, not matrices!
  See lruj tutorial for more information.
- 
- 
+
+
 *************************************************************************************************
 **************************************  Linear Response U  **************************************
- 
+
  Total number of atoms:    4
  Index of perturbed atom:    1
  Value of macro_uj:     1
  Value of dmatpuopt:     3
  Mixing constant factored out of Chi0:   0.450
  Percentage of AE orbital within the PAW sphere of perturbed subspace:     90.46723%
- 
+
   Perturbations           Occupations 
  --------------- -----------------------------
     alpha [eV]     Unscreened      Screened
  --------------- -----------------------------
-  -0.1500000676   8.6964981921   8.6520721998
-  -0.1000000451   8.6747201574   8.6474287212
-  -0.0500000225   8.6560314462   8.6427490201
-   0.0000000000   8.6380182458   8.6380182458
-   0.0500000225   8.6192514478   8.6332174978
-   0.1000000451   8.5980252003   8.6283148749
+  -0.1500000676   8.6964981640   8.6520722017
+  -0.1000000451   8.6747201354   8.6474287189
+  -0.0500000225   8.6560314261   8.6427490189
+   0.0000000000   8.6380182485   8.6380182485
+   0.0500000225   8.6192514252   8.6332175138
+   0.1000000451   8.5980251733   8.6283148790
                                                                        RMS Errors
                                                          ---------------------------------------
  Regression   Chi0 [eV^-1]   Chi [eV^-1]      U [eV]    | Chi0 [eV^-1]  Chi [eV^-1]     U [eV]
 --------------------------------------------------------|---------------------------------------
- Linear:        -0.8594082    -0.0949434     9.3689968  |    0.0023925    0.0000878    0.0029335
- Quadratic:     -0.8574665    -0.0955791     9.2963113  |    0.0023777    0.0000129    0.0027762
- Cubic:         -0.8007858    -0.0952726     9.2474280  |    0.0001546    0.0000015    0.0001937
- Degree 4 :     -0.8049062    -0.0952279     9.2587427  |    0.0000790    0.0000003    0.0000981
+ Linear:        -0.8594082    -0.0949434     9.3690012  |    0.0023925    0.0000878    0.0102653
+ Quadratic:     -0.8574666    -0.0955791     9.2963162  |    0.0023777    0.0000129    0.0035296
+ Cubic:         -0.8007858    -0.0952724     9.2474444  |    0.0001546    0.0000015    0.0002902
+ Degree 4 :     -0.8049064    -0.0952277     9.2587688  |    0.0000790    0.0000003    0.0001250
 *************************************************************************************************
 *************************************************************************************************
  
@@ -67,13 +68,13 @@ pawujat: 1
 macro_uj: 1
 diem_token: diemix
 diem:   4.50000000E-01
-chi0_coefficients_degree1: [  8.63742243E+00,  -3.86733705E-01, ]
-chi_coefficients_degree1: [  8.63792651E+00,  -9.49434253E-02, ]
-chi0_coefficients_degree2: [  8.63730593E+00,  -3.85859924E-01,   1.74756148E-02, ]
-chi_coefficients_degree2: [  8.63801126E+00,  -9.55791070E-02,  -1.27136279E-02, ]
-chi0_coefficients_degree3: [  8.63801773E+00,  -3.60353617E-01,  -1.60475280E-01,  -2.37267752E+00, ]
-chi_coefficients_degree3: [  8.63801982E+00,  -9.52725621E-02,  -1.48523123E-02,  -2.85157799E-02, ]
-chi0_coefficients_degree4: [  8.63806830E+00,  -3.62207800E-01,  -1.91659243E-01,  -2.13669088E+00,   2.35986539E+00, ]
-chi_coefficients_degree4: [  8.63801860E+00,  -9.52279061E-02,  -1.41012795E-02,  -3.41992693E-02,  -5.68348685E-02, ]
+chi0_coefficients_degree1: [  8.63742242E+00,  -3.86733689E-01, ]
+chi_coefficients_degree1: [  8.63792651E+00,  -9.49433851E-02, ]
+chi0_coefficients_degree2: [  8.63730592E+00,  -3.85859966E-01,   1.74744631E-02, ]
+chi_coefficients_degree2: [  8.63801127E+00,  -9.55790630E-02,  -1.27135520E-02, ]
+chi0_coefficients_degree3: [  8.63801773E+00,  -3.60353594E-01,  -1.60476889E-01,  -2.37268363E+00, ]
+chi_coefficients_degree3: [  8.63801983E+00,  -9.52724125E-02,  -1.48529734E-02,  -2.85256050E-02, ]
+chi0_coefficients_degree4: [  8.63806830E+00,  -3.62207891E-01,  -1.91662776E-01,  -2.13668243E+00,   2.36001094E+00, ]
+chi_coefficients_degree4: [  8.63801861E+00,  -9.52276722E-02,  -1.41005242E-02,  -3.42198126E-02,  -5.69420501E-02, ]
 ...
 
