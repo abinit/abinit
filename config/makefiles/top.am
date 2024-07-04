@@ -60,8 +60,10 @@ basic_tests:
 # Let Automake know how to perform basic tests
 #check-local:
 #$(MAKE) basic_tests @SET_MAKE@
+#check-local:
+#	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cat $(top_srcdir)/tests/built-in/README
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword CIF --yaml-simplified-diff
 
 # Set of internal tests
 test_fast:
