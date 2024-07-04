@@ -2098,7 +2098,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET ENTER DATA MAP(alloc:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 !----------------------------------------------------------
 !Loop over spin components
@@ -2155,14 +2155,15 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
                end do
              end do
            else if(gpu_option_==ABI_GPU_OPENMP) then
-             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-             !$OMP& PRIVATE(ilslm,idat,sum_r,sum_i,ilslm1) &
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+             !$OMP& PRIVATE(ilslm,idat,sum_r,sum_i,ilslm1,ic,jc) &
              !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
              do idat=1,ndat
                do ilslm=1,lm_size
                  ilslm1=1+(ilslm-1)*qphase
                  sum_r=0; sum_i=0
-                 !$OMP PARALLEL DO REDUCTION(+:sum_r) REDUCTION(+:sum_i) PRIVATE(ic,jc)
+                 !!$OMP PARALLEL DO REDUCTION(+:sum_r) REDUCTION(+:sum_i) PRIVATE(ic,jc)
                  do ic=1,nfgd
                    jc=2*atom_ifftsph(ic)
                    sum_r=sum_r+Pot(jc-1,ispden,idat)*atom_gylm(ic,ilslm)
@@ -2219,14 +2220,14 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              end do
            else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-             !$OMP& PRIVATE(ilslm,idat,sum_r,sum_i,ilslm1) &
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+             !$OMP& PRIVATE(ilslm,idat,sum_r,sum_i,ilslm1,ic,jc) &
              !$OMP& MAP(to:prod) MAP(to:Pot,atom_ifftsph,atom_expiqr,atom_gylm)
              do idat=1,ndat
                do ilslm=1,lm_size
                  ilslm1=1+(ilslm-1)*qphase
                  sum_r=0; sum_i=0
-                 !$OMP PARALLEL DO REDUCTION(+:sum_r) REDUCTION(+:sum_i) PRIVATE(ic,jc)
+                 !!$OMP PARALLEL DO REDUCTION(+:sum_r) REDUCTION(+:sum_i) PRIVATE(ic,jc)
                  do ic=1,nfgd
                    jc=2*atom_ifftsph(ic)
                    sum_r=sum_r+atom_gylm(ic,ilslm)&
@@ -2299,9 +2300,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
          call nvtxStartRange("compute_sum_qphase",7)
 #endif
-         !if(gpu_option_==ABI_GPU_DISABLED) then
-         if(.true.) then
-           !$OMP TARGET UPDATE FROM(prod) IF(gpu_option_==ABI_GPU_OPENMP)
+         if(gpu_option_==ABI_GPU_DISABLED) then
            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ilslm,ilslm1,idat,klmn,ils,mm,lm0,klm,klmn1,lmin,lmax,isel,sum_r,sum_i)
            do idat=1,ndat
              do klmn=1,lmn2_size
@@ -2322,10 +2321,10 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
                dijhat_idij(klmn1+1,idat)=sum_i
              end do
            end do
-           !$OMP TARGET UPDATE TO(dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
          else if(gpu_option_==ABI_GPU_OPENMP) then
-           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
-           !$OMP& PRIVATE(idat,sum_r,sum_i,klmn,klmn1,klm,lmin,lmax) &
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(2) &
+           !$OMP& PRIVATE(idat,sum_r,sum_i,klmn,klmn1,klm,lmin,lmax,ilslm,ilslm1,ils,mm,lm0) &
            !$OMP& MAP(to:dijhat_idij,prod,atom_indklmn,atom_qijl,gnt_scal)
            do idat=1,ndat
              do klmn=1,lmn2_size
@@ -2334,7 +2333,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
                klm =atom_indklmn(1,klmn)
                lmin=atom_indklmn(3,klmn)
                lmax=atom_indklmn(4,klmn)
-               !$OMP PARALLEL DO COLLAPSE(2) REDUCTION(+:sum_r,sum_i) PRIVATE(ilslm,ilslm1,ils,mm,lm0)
+               !!$OMP PARALLEL DO COLLAPSE(1) REDUCTION(+:sum_r,sum_i) PRIVATE(ilslm,ilslm1,ils,mm,lm0)
                do ils=lmin,lmax,2
                  do mm=-ils,ils
                    lm0=ils**2+ils+1
@@ -2472,7 +2471,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
 
 #ifdef HAVE_OPENMP_OFFLOAD
  !$OMP TARGET EXIT DATA MAP(delete:prod,dijhat_idij) IF(gpu_option_==ABI_GPU_OPENMP)
- !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal) IF(gpu_option_==ABI_GPU_OPENMP)
+ !$OMP TARGET EXIT DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,gnt_scal,atom_qijl,atom_indklmn) IF(gpu_option_==ABI_GPU_OPENMP)
  !$OMP TARGET EXIT DATA MAP(from:dijhat) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 !Free temporary memory spaces
