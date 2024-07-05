@@ -45,10 +45,6 @@ MODULE m_paw_nhat
  use m_fft,          only : zerosym, fourwf, fourdp
  use m_paw_lmn,      only : klmn2ijlmn
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-  use m_nvtx
-#endif
-
  implicit none
 
  private
@@ -695,6 +691,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 
 !Local variables ---------------------------------------
 !scalars
+ complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
  integer :: iatm,iatom,iatom_tot,ic,ierr,ils,ilslm,isp1,isp2,isploop,itypat,jc,klm,klmn,idat1,idat2
  integer :: lmax,lmin,lm_size,mm,my_comm_atom,my_comm_fft,optgr0,optgr1,paral_kgb_fft
  integer :: cplex,ilmn,jlmn,lmn_size,lmn2_size,gpu_option_,atom_nfgd,nprojs,shift,nlmn
@@ -706,15 +703,12 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  integer,pointer :: my_atmtab(:)
  real(dp) :: rdum(1),tsec(2),ro(2),ro_ql(2)
  real(dp),allocatable :: work(:,:), qijl(:,:), nhat12_atm(:,:,:,:,:),projs1(:,:,:),projs2(:,:,:),cpf(:,:,:,:)
- real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:),atom_gylm(:,:),atom_dltij(:)
+ real(dp), ABI_CONTIGUOUS pointer :: atom_expiqr(:,:),atom_gylm(:,:),atom_dltij(:),atom_gylmgr(:,:,:)
  integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:),ang_gntselect(:,:),atom_indklmn(:,:)
 
 ! *************************************************************************
 
  DBG_ENTER("COLL")
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
- call nvtxStartRange("pawmknhat_psipsi_ndat")
-#endif
 
 !Compatibility tests
  if (present(comm_fft)) then
@@ -736,9 +730,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  gpu_option_=ABI_GPU_DISABLED; if (present(gpu_option)) gpu_option_=gpu_option
  if(gpu_option_/=ABI_GPU_OPENMP) gpu_option_=ABI_GPU_DISABLED ! Only OpenMP variant supported
  if (gpu_option_/=ABI_GPU_DISABLED) then
-   if(ider==3) then
-     ABI_BUG('ider==3 not coded with GPU!')
-   end if
    if(ider==1 .or. ider==2) then
      ABI_BUG('ider=={1,2} not coded with GPU!')
    end if
@@ -765,16 +756,24 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    case (ABI_GPU_DISABLED)
      nhat12=zero
    case (ABI_GPU_OPENMP)
-#ifdef HAVE_OPENMP_OFFLOAD
-     !$OMP TARGET ENTER DATA MAP(alloc:nhat12_atm)
-#endif
+     !FIXME nhat12 assumed to be mapped on GPU
      call gpu_set_to_zero(nhat12,int(2,c_size_t)*nfft*(nspinor**2)*ndat2*ndat1)
    case default
      ABI_BUG("Unsupported GPU option")
    end select
  end if
  if (compute_grad) grnhat12=zero
- if (compute_grad1) grnhat_12=zero
+ if (compute_grad1) then
+   select case(gpu_option_)
+   case (ABI_GPU_DISABLED)
+     grnhat_12=zero
+   case (ABI_GPU_OPENMP)
+     !FIXME grnhat_12 assumed to be mapped on GPU
+     call gpu_set_to_zero(grnhat_12,int(2,c_size_t)*nfft*nspinor**2*3*natom*ndat2*ndat1)
+   case default
+     ABI_BUG("Unsupported GPU option")
+   end select
+ end if
 
  if (compute_grad) then
 !   ABI_BUG('compute_grad not tested!')
@@ -812,9 +811,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !------------------------------------------------------------------------
  shift = 0;
  do iatom=1,my_natom
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("iter_iatom")
-#endif
    nlmn = cprj1(iatom, 1)%nlmn
    iatom_tot=iatom;if (paral_atom) iatom_tot=my_atmtab(iatom)
    iatm=iatom_tot
@@ -826,9 +822,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    ABI_MALLOC(qijl,(lm_size,lmn2_size))
    qijl=zero
    qijl=pawtab(itypat)%qijl
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("paw_init")
-#endif
    ABI_MALLOC(nhat12_atm, (2,nfft,nspinor**2,ndat2,ndat1))
    if (compute_nhat) then
      select case(gpu_option_)
@@ -847,16 +840,10 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(alloc:cpf) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
 
 !  Eventually compute g_l(r).Y_lm(r) factors for the current atom (if not already done)
    if (((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)).or.&
 &   (((compute_grad).or.(compute_grad1)).and.(pawfgrtab(iatom)%gylmgr_allocated==0))) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("init")
-#endif
      optgr0=0; optgr1=0
      if ((compute_nhat).and.(pawfgrtab(iatom)%gylm_allocated==0)) then
        if (allocated(pawfgrtab(iatom)%gylm))  then
@@ -873,19 +860,10 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        pawfgrtab(iatom)%gylmgr_allocated=2;optgr1=1
      end if
      if (optgr0+optgr1>0) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("pawgylm")
-#endif
        call pawgylm(pawfgrtab(iatom)%gylm,pawfgrtab(iatom)%gylmgr,rdum,&
 &       lm_size,pawfgrtab(iatom)%nfgd,optgr0,optgr1,0,pawtab(itypat),&
 &       pawfgrtab(iatom)%rfgd)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
      end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
 
    end if
    if (compute_phonon.and.(.not.qeq0).and.(pawfgrtab(iatom)%expiqr_allocated==0)) then
@@ -898,6 +876,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      pawfgrtab(iatom)%expiqr_allocated=2
    end if
 
+
+   atom_gylmgr  => pawfgrtab(iatom)%gylmgr
    atom_gylm    => pawfgrtab(iatom)%gylm
    atom_expiqr  => pawfgrtab(iatom)%expiqr
    atom_ifftsph => pawfgrtab(iatom)%ifftsph
@@ -905,9 +885,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
    atom_indklmn => pawtab(itypat)%indklmn
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET ENTER DATA MAP(to:atom_gylm,atom_expiqr,atom_ifftsph,atom_dltij,qijl) IF(gpu_option_==ABI_GPU_OPENMP)
-#endif
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("loop_ndat_isploop")
 #endif
    do isploop=1,nspinor**2    ! Loop over density components of the compensation charge.
 !    TODO Here we might take advantage of symmetry relations between the four components if nspinor==2
@@ -960,14 +937,8 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        end do
 #endif
      end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("loop_klmn")
-#endif
 
        if (compute_nhat) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxStartRange("loop0")
-#endif
          if(gpu_option_==ABI_GPU_DISABLED) then
            atom_nfgd = pawfgrtab(iatom)%nfgd
            ang_gntselect => pawang%gntselect
@@ -1023,39 +994,100 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
            end do
 #endif
          end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxEndRange()
-#endif
        end if ! compute_nhat
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
+       if (compute_grad1) then
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           ang_gntselect => pawang%gntselect
+           do idat1=1,ndat1
+             do idat2=1,ndat2
+               do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+                 klm =atom_indklmn(1,klmn)
+                 lmin=atom_indklmn(3,klmn)  ! abs(il-jl)
+                 lmax=atom_indklmn(4,klmn)  ! il+jl
+                 do ils=lmin,lmax,2  ! Sum over (L,M)
+                   do mm=-ils,ils
+                     ilslm=ils*ils+ils+mm+1
+                     if (ang_gntselect(ilslm,klm)>0) then
+                       do ic=1,atom_nfgd
+                       jc=atom_ifftsph(ic)
+                       grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(1,ic,ilslm)
+                       grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(2,ic,ilslm)
+                       grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(3,ic,ilslm)
+
+                       grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(1,ic,ilslm)
+                       grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(2,ic,ilslm)
+                       grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1) &
+                           +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(3,ic,ilslm)
+                       end do
+                     end if
+                   end do
+                 end do
+               end do
+             end do
+           end do
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           ang_gntselect => pawang%gntselect
+           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+           !$OMP& MAP(to:grnhat_12,atom_gylmgr,cpf,qijl,atom_ifftsph,atom_dltij,atom_indklmn,ang_gntselect)&
+           !$OMP& PRIVATE(idat1,idat2,ic,jc,ils,mm,ilslm,klm,lmin,lmax,klmn)
+           do idat1=1,ndat1
+             do idat2=1,ndat2
+               do ic=1,atom_nfgd
+                 do klmn=1,lmn2_size  ! Loop over ij channels of this atom type.
+                   klm =atom_indklmn(1,klmn)
+                   lmin=atom_indklmn(3,klmn)  ! abs(il-jl)
+                   lmax=atom_indklmn(4,klmn)  ! il+jl
+                   do ils=lmin,lmax,2  ! Sum over (L,M)
+                     do mm=-ils,ils
+                       ilslm=ils*ils+ils+mm+1
+                       if (ang_gntselect(ilslm,klm)>0) then
+                         jc=atom_ifftsph(ic)
+                         grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(1,ic,ilslm)
+                         grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(2,ic,ilslm)
+                         grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(1,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(3,ic,ilslm)
+
+                         grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(1,ic,ilslm)
+                         grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(2,ic,ilslm)
+                         grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1) &
+                             +atom_dltij(klmn)*half*cpf(2,idat2,idat1,klmn)*qijl(ilslm,klmn)*atom_gylmgr(3,ic,ilslm)
+                       end if
+                     end do
+                   end do
+                 end do
+               end do
+             end do
+           end do
 #endif
+         end if
+       end if ! compute_grad1
 !    If needed, multiply eventually by exp(-i.q.r) phase
      if (compute_nhat) then
        if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxStartRange("loop1")
-#endif
          if(gpu_option_==ABI_GPU_DISABLED) then
-           !$OMP TARGET UPDATE FROM(nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ro,ro_ql,ic,jc)
            do idat1=1,ndat1
            do idat2=1,ndat2
            do ic=1,pawfgrtab(iatom)%nfgd
              jc=pawfgrtab(iatom)%ifftsph(ic)
              ro(1:2)=nhat12_atm(1:2,jc,isploop,idat2,idat1)
-             !nhat12_atm(1,jc,isploop,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
-             !nhat12_atm(2,jc,isploop,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
              nhat12_atm(1,jc,isploop,idat2,idat1)=ro(1)*atom_expiqr(1,ic)-ro(2)*atom_expiqr(2,ic)
              nhat12_atm(2,jc,isploop,idat2,idat1)=ro(2)*atom_expiqr(1,ic)+ro(1)*atom_expiqr(2,ic)
-!             nhat12_atm(1,jc,isploop,idat2,idat1)=nhat12_atm(1,jc,isploop,idat2,idat1)*&
-!&               atom_expiqr(1,ic)-nhat12_atm(2,jc,isploop,idat2,idat1)*atom_expiqr(2,ic)
-!             nhat12_atm(2,jc,isploop,idat2,idat1)=nhat12_atm(2,jc,isploop,idat2,idat1)*&
-!&               atom_expiqr(1,ic)+nhat12_atm(1,jc,isploop,idat2,idat1)*atom_expiqr(2,ic)
            end do
            end do
            end do
-           !$OMP TARGET UPDATE TO(nhat12_atm) IF(gpu_option_==ABI_GPU_OPENMP)
          else if(gpu_option_==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
            atom_nfgd = pawfgrtab(iatom)%nfgd
@@ -1073,23 +1105,69 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
            end do
 #endif
          end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxEndRange()
+       end if
+     end if
+     if (compute_grad1) then
+       if(compute_phonon.and.(.not.qeq0).and.pawfgrtab(iatom)%expiqr_allocated/=0) then
+         if(gpu_option_==ABI_GPU_DISABLED) then
+           !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat1,idat2,ro,ro_ql,ic,jc)
+           do idat1=1,ndat1
+             do idat2=1,ndat2
+               do ic=1,pawfgrtab(iatom)%nfgd
+                 jc=pawfgrtab(iatom)%ifftsph(ic)
+                 ro_ql(1)= pawfgrtab(iatom)%expiqr(1,ic)
+                 ro_ql(2)= pawfgrtab(iatom)%expiqr(2,ic)
+                 ro(1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+                 ro(1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+                 ro(1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+               end do
+             end do
+           end do
+         else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           atom_nfgd = pawfgrtab(iatom)%nfgd
+           !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO COLLAPSE(3) &
+           !$OMP&  MAP(to:atom_ifftsph,atom_expiqr,nhat12_atm) PRIVATE(idat1,idat2,ro,ro_ql,ic,jc)
+           do idat1=1,ndat1
+             do idat2=1,ndat2
+               do ic=1,atom_nfgd
+                 jc=atom_ifftsph(ic)
+                 ro_ql(1)= atom_expiqr(1,ic)
+                 ro_ql(2)= atom_expiqr(2,ic)
+                 ro(1)=grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,1,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,1,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+                 ro(1)=grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,2,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,2,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+                 ro(1)=grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)
+                 ro(2)=grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)
+                 grnhat_12(1,jc,isploop,3,iatom,idat2,idat1)=ro(1)*ro_ql(1)-ro(2)*ro_ql(2)
+                 grnhat_12(2,jc,isploop,3,iatom,idat2,idat1)=ro(2)*ro_ql(1)+ro(1)*ro_ql(2)
+               end do
+             end do
+           end do
 #endif
+         end if
        end if
      end if
 
    end do ! isploop (density components of the compensation charge)
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
 #ifdef HAVE_OPENMP_OFFLOAD
    !$OMP TARGET EXIT  DATA MAP(delete:atom_gylm,atom_expiqr,atom_ifftsph,atom_dltij,qijl,cpf) IF(gpu_option_==ABI_GPU_OPENMP)
 #endif
 ! accumlate nhat12 for all the atoms
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("nhat_add")
-#endif
 !nhat12(2,nfft,nspinor**2,ndat2)
    if (compute_nhat) then
      select case (gpu_option_)
@@ -1114,13 +1192,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
        ABI_BUG("Unsupported GPU option")
      end select
    end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("paw_free")
-#endif
    if (pawfgrtab(iatom)%gylm_allocated==2) then
      ABI_FREE(pawfgrtab(iatom)%gylm)
      ABI_MALLOC(pawfgrtab(iatom)%gylm,(0,0))
@@ -1142,13 +1214,7 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      ABI_MALLOC(pawfgrtab(iatom)%expiqr,(0,0))
      pawfgrtab(iatom)%expiqr_allocated=0
    end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
    shift = shift + nlmn
  end do ! iatom
 
@@ -1158,7 +1224,18 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
  ABI_FREE(projs1)
  ABI_FREE(projs2)
 
- if (compute_grad1) grnhat_12=-grnhat_12
+ if (compute_grad1) then
+   select case (gpu_option_)
+   case (ABI_GPU_DISABLED)
+     grnhat_12=-grnhat_12
+   case (ABI_GPU_OPENMP)
+#ifdef HAVE_OPENMP_OFFLOAD
+     call abi_gpu_xscal(1, size(grnhat_12),cminusone,grnhat_12,1)
+#endif
+   case default
+     ABI_BUG("Unsupported GPU option")
+   end select
+ end if
 
 !----- Reduction in case of parallelism -----!
  if (paral_atom)then
@@ -1178,9 +1255,6 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
 !----- Avoid unbalanced g-components numerical errors -----!
 
  if (izero==1.and.compute_nhat) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxStartRange("end")
-#endif
 !  Create fake mpi_enreg to wrap fourdp
    if (present(distribfft)) then
      my_distribfft => distribfft
@@ -1216,17 +1290,11 @@ subroutine pawmknhat_psipsi_ndat(cprj1,cprj2,ider,izero,my_natom,natom,nfft,ngff
      call destroy_distribfft(my_distribfft)
      ABI_FREE(my_distribfft)
    end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-   call nvtxEndRange()
-#endif
  end if
 
 !Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
  DBG_EXIT("COLL")
 
 end subroutine pawmknhat_psipsi_ndat
@@ -2134,13 +2202,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
                end do
              end do
            end do
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxEndRange()
-#endif
          else
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxStartRange("compute_int_qphase",9)
-#endif
            if(gpu_option_==ABI_GPU_DISABLED) then
              !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
              do idat=1,ndat
@@ -2175,17 +2237,11 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              end do
 #endif
            end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxEndRange()
-#endif
          end if
 
 !      ===== Including Exp(iqr) phase (DFPT only) =====
        else
          if (qphase==1) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxStartRange("including_exp",10)
-#endif
            !$OMP PARALLEL DO PRIVATE(vr,ilslm,ic,idat)
            do idat=1,ndat
              do ilslm=1,lm_size
@@ -2196,13 +2252,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
                end do
              end do
            end do
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxEndRange()
-#endif
          else
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxStartRange("including_exp_qphase",11)
-#endif
            if(gpu_option_==ABI_GPU_DISABLED) then
              !$OMP PARALLEL DO PRIVATE(vr,vi,ilslm1,ilslm,ic,jc,idat)
              do idat=1,ndat
@@ -2241,9 +2291,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              end do
 #endif
            end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-           call nvtxEndRange()
-#endif
          end if
        end if
 
@@ -2274,9 +2321,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
        end if
 
        if (qphase==1) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxStartRange("compute_sum",6)
-#endif
          !$OMP PARALLEL DO PRIVATE(ilslm,idat,klmn,ils,mm,lm0,klm,lmin,lmax,isel)
          do idat=1,ndat
            do klmn=1,lmn2_size
@@ -2293,13 +2337,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
              end do
            end do
          end do
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxEndRange()
-#endif
        else
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxStartRange("compute_sum_qphase",7)
-#endif
          if(gpu_option_==ABI_GPU_DISABLED) then
            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(ilslm,ilslm1,idat,klmn,ils,mm,lm0,klm,klmn1,lmin,lmax,isel,sum_r,sum_i)
            do idat=1,ndat
@@ -2348,9 +2386,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            end do
 #endif
          end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxEndRange()
-#endif
        end if
 
 !      ----------------------------------------------------------
@@ -2361,9 +2396,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
        !if ispden=2 => real part of D^22_ij
        !if ispden=3 => real part of D^12_ij
        !if ispden=4 => imaginary part of D^12_ij
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxStartRange("deduce",4)
-#endif
        if(gpu_option_==ABI_GPU_DISABLED) then
          !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,klmn,klmn1,klmn2)
          do idat=1,ndat
@@ -2386,13 +2418,7 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
          end do
 #endif
        end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-       call nvtxEndRange()
-#endif
        if (qphase==2) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxStartRange("deduce_qphase",5)
-#endif
          !Same storage with exp^(-i.q.r) phase
          if(gpu_option_==ABI_GPU_DISABLED) then
            !$OMP PARALLEL DO COLLAPSE(2) PRIVATE(idat,klmn,klmn1,klmn2)
@@ -2416,21 +2442,12 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
            end do
 #endif
          end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-         call nvtxEndRange()
-#endif
        endif
 
      end do !ispden
 
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    !Non-collinear: D_ij(:,4)=D^21_ij=D^12_ij^*
    else if (nspden==4.and.idij==4) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("iter_idij2",2)
-#endif
      do idat=1,ndat
        dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
      end do
@@ -2448,21 +2465,12 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
          end do
        end if
      end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
 
    !Antiferro: D_ij(:,2)=D^down_ij=D^up_ij
    else if (nsppol==1.and.idij==2) then
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxStartRange("iter_idij3",3)
-#endif
      do idat=1,ndat
        dijhat(:,idij+(idat-1)*ndij)=dijhat(:,idij-1+(idat-1)*ndij)
      end do
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
-     call nvtxEndRange()
-#endif
    end if
 
 !----------------------------------------------------------
@@ -2488,9 +2496,6 @@ subroutine pawdijhat_ndat(dijhat,cplex_dij,qphase,gprimd,iatom,&
    ABI_MALLOC(pawfgrtab%expiqr,(0,0))
    pawfgrtab%expiqr_allocated=0
  end if
-#if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
- call nvtxEndRange()
-#endif
 
 end subroutine pawdijhat_ndat
 !!***
