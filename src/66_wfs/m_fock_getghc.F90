@@ -213,10 +213,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*Additional arrays in case of paw
  if (fockcommon%usepaw==1) then
    nhat12_grdim=0
-   if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-     ider=3
-     ABI_MALLOC(strout,(2,npw*nspinor))
-   end if
    if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
      ider=3
      ABI_MALLOC(forout,(2,npw*nspinor))
@@ -315,6 +311,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
+     if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
+       ider=3
+       ABI_MALLOC(strout,(2,npw*nspinor*ndat_occ))
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET ENTER DATA MAP(alloc:strout) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+     end if
      ABI_MALLOC(grnhat_12,(2,nfftf,nspinor**2,3,natom*(ider/3),ndat_occ,ndat))
      ABI_MALLOC(gvnlxc,(2,npw*nspinor*ndat_occ))
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -679,62 +682,69 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
          signs=2;choice=3;cpopt=4;tim_nonlop=17
 
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET UPDATE FROM(vfock,rho12,cwavef) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
        ! first contribution
-         dotr=zero
          do idat=1,ndat
-         do idat_occ=1,ndat_occ
-         do idir=1,6
-           call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
-           call nonlop(choice,cpopt,cwaveocc_prj(:,1+(idat_occ-1)*nspinor:idat_occ*nspinor),enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
-&           1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
-&           strout,enl=dijhat(:,:,:,:,idat_occ,idat),select_k=K_H_KPRIME)
-           call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
-           call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,strout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
-           fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)-&
-&           dotr(idir)*occ(idat_occ)*wtk/gs_ham%ucvol
-         end do
-         end do ! idat_occ
+           dotr=zero
+           do idir=1,6
+             call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
+             call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
+  &           ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
+  &           strout,enl_ndat=dijhat(:,:,:,:,:,idat),select_k=K_H_KPRIME)
+             call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
+#ifdef HAVE_OPENMP_OFFLOAD
+             !$OMP TARGET UPDATE FROM(strout) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+             do idat_occ=1,ndat_occ
+               call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef(:,npw*nspinor*(idat-1)+1:npw*nspinor*idat),&
+                   strout(:,npw*nspinor*(idat_occ-1)+1:npw*nspinor*idat_occ),&
+                   mpi_enreg%me_g0,mpi_enreg%comm_fft)
+               fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)-&
+    &             dotr(idir)*occ(idat_occ)*wtk/gs_ham%ucvol
+             end do ! idat_occ
+           end do
          end do ! idat
+
        ! second contribution
-         str=zero
          do idat=1,ndat
-         do idat_occ=1,ndat_occ
-         do iatom=1,natom
-           do idir=1,3
-             do idir1=1,3
-               do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
-                 ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
-                 str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
-&                 vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
+           do idat_occ=1,ndat_occ
+             str=zero
+             do iatom=1,natom
+               do idir=1,3
+                 do idir1=1,3
+                   do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
+                     ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
+                     str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+    &                 vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
+                   end do
+                 end do
                end do
              end do
-           end do
-         end do
-         end do ! idat_occ
+             do idir=1,3
+               fockstr(idir)=str(idir,idir)
+             end do
+             fockstr(4)=(str(3,2)+str(2,3))*half
+             fockstr(5)=(str(3,1)+str(1,3))*half
+             fockstr(6)=(str(1,2)+str(2,1))*half
+             do idir=1,6
+                 fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)+&
+      &           fockstr(idir)/nfftf*occ(idat_occ)*wtk
+             end do
+           end do ! idat_occ
          end do ! idat
-         do idir=1,3
-           fockstr(idir)=str(idir,idir)
-         end do
-         fockstr(4)=(str(3,2)+str(2,3))*half
-         fockstr(5)=(str(3,1)+str(1,3))*half
-         fockstr(6)=(str(1,2)+str(2,1))*half
-         do idir=1,6
-         do idat_occ=1,ndat_occ
-           fockcommon%stress_ikpt(idir,fockcommon%ieigen)=fockcommon%stress_ikpt(idir,fockcommon%ieigen)+&
-&           fockstr(idir)/nfftf*occ(idat_occ)*wtk
-         end do ! idat_occ
-         end do
 
        ! third contribution
-         doti=zero
          do idat=1,ndat
-         do idat_occ=1,ndat_occ
-           do ifft=1,nfftf
-             doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
-           end do
-         end do ! idat_occ
+           do idat_occ=1,ndat_occ
+             doti=zero
+             do ifft=1,nfftf
+               doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
+             end do
+             fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)-doti/nfftf*occ(idat_occ)*wtk
+           end do ! idat_occ
          end do ! idat
-         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)-doti/nfftf*occ*wtk
 !         doti=zero
 !         do ifft=1,nfftf
 !           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
@@ -837,6 +847,12 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    ABI_FREE(occ)
   !*Additional arrays in case of paw
    if (fockcommon%usepaw==1) then
+     if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
+#ifdef HAVE_OPENMP_OFFLOAD
+       !$OMP TARGET EXIT DATA MAP(delete:strout) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+       ABI_FREE(strout)
+     end if
      ABI_FREE(grnhat_12)
 #ifdef HAVE_OPENMP_OFFLOAD
      !$OMP TARGET EXIT DATA MAP(delete:gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
@@ -898,9 +914,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        ABI_FREE(forikpt)
        ABI_FREE(forout)
      end if
-     if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       ABI_FREE(strout)
-     end if
    end if
    if(fockcommon%usepaw==1.or.fockcommon%optstr) then
      ABI_FREE(gboundf)
@@ -955,9 +968,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      if ((fockcommon%optfor).and.(fockcommon%ieigen/=0)) then
        ABI_FREE(forikpt)
        ABI_FREE(forout)
-     end if
-     if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-       ABI_FREE(strout)
      end if
    end if
    if(fockcommon%usepaw==1.or.fockcommon%optstr) then
