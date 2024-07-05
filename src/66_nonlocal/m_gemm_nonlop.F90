@@ -139,6 +139,7 @@ contains
   real(dp), allocatable :: work1(:),work2(:),work3(:,:),work4(:,:),work5(:,:,:),work6(:,:,:),work7(:,:,:)
   integer :: idbeg,idend,idfbeg,idfend,dshift,id2beg,id2end,d2shift,dfshift,enlout_shift
   real(dp) :: work(6)
+  integer :: ndgxdt_stored,ishift
   integer :: mu0,ic,nu,mu,jc
   integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
   integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
@@ -464,6 +465,11 @@ contains
     end if
     if(cpopt==4.and.allocated(dprojections)) then
       ABI_CHECK(cprjin(1,1)%ncpgr>=ndgxdt,"cprjin%ncpgr not correct! (1)")
+      ndgxdt_stored = cprjin(1,1)%ncpgr
+      ishift=0
+      if (((choice==2).or.(choice==3)).and.(ndgxdt_stored>ndgxdt).and.(signs==2)) ishift=idir-ndgxdt
+      if ((choice==2).and.(ndgxdt_stored==9).and.(signs==2)) ishift=ishift+6
+      if (choice==2.and.(ndgxdt_stored>ndgxdt).and.(signs==1)) ishift=ndgxdt_stored-ndgxdt
       do idat=1, ndat*nspinor
         shift = 0
         do iatom = ia_beg, ia_end
@@ -471,7 +477,7 @@ contains
           do ilmn=1,nlmn
             do igrad=1,ndgxdt
               dprojections(1:cplex, shift + igrad, idat) = &
-                cprjin(iatom, idat)%dcp(1:cplex,igrad,ilmn)
+                cprjin(iatom, idat)%dcp(1:cplex,igrad+ishift,ilmn)
             end do
             shift = shift + ndgxdt
           end do
