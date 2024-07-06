@@ -63,7 +63,7 @@ basic_tests:
 #check-local:
 #	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword CIF --yaml-simplified-diff
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff && rm -rf $(abspath $(top_builddir))/tests/Test_suite
 
 # Set of internal tests
 test_fast:
