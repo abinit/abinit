@@ -79,8 +79,7 @@ module m_mlwfovlp
 !! FUNCTION
 !!  This object stores the results of the Wannnierization algorithm.
 !!  It can be constructed by reading the ABIWAN.nc file produced by
-!!  Abinit when we call wannier90 in library mode.
-!!  See mlwfovlp routine.
+!!  Abinit when we call wannier90 in library mode. See mlwfovlp routine.
 !!
 !! SOURCE
 
@@ -90,10 +89,10 @@ module m_mlwfovlp
    ! Spin index.
 
    integer :: nwan
-   ! Number of Wannier functions
+   ! Number of Wannier functions.
 
    integer :: num_bands
-   ! Number bands seen by wannier90
+   ! Number bands seen by wannier90.
 
    !integer :: nbndep,         ! Number of remaining bands after excluding bands in Wannierizatin step
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
@@ -115,6 +114,7 @@ module m_mlwfovlp
    ! True if disentanglement has been used.
 
    real(dp) :: spread(3)
+   ! Spread of wannier functions.
 
    type(krank_t) :: krank
    ! Used to find the index of the kpoint from its coordinates.
@@ -122,9 +122,12 @@ module m_mlwfovlp
    integer,allocatable :: exclude_bands(:)
    ! FIXME: Is this still needed.
 
-   integer,allocatable :: dimwin(:)
+   integer,allocatable :: dimwin(:), winstart(:)
    ! (nkbz)
    ! Number of bands within the outer window at each k-point
+
+   integer :: bmin, bmax
+   ! Minimum and maximum band included in the Wannierization.
 
    integer,allocatable :: r_h(:,:), r_e(:,:), r_p(:,:)
    ! Lattice points for H in the Wannier representation
@@ -163,7 +166,10 @@ module m_mlwfovlp
 
    complex(dp),allocatable :: u_mat_opt(:,:,:)
    complex(dp),allocatable :: u_mat(:,:,:)
+
    complex(dp),allocatable :: u_kc(:,:,:)
+   ! (max_dimwin, nwan, nkbz)
+   ! total rotation matrix: the product of the optimal subspace x the rotation among the nwann Wannier functions.
 
    complex(dp),allocatable :: hwan_r(:,:,:)
    ! (nr_h, nwan, nwan)
@@ -3531,11 +3537,19 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  NCF_CHECK(nf90_close(ncid))
  !end if ! master
 
- ! Compute dimwin
+ ! Compute dimwin, winstart, bmin and bmax from lwindow.
  ABI_ICALLOC(wan%dimwin, (nkbz))
+ ABI_ICALLOC(wan%winstart, (nkbz))
+
+ wan%bmin = huge(1); wan%bmax = -1
  do ik=1,nkbz
    do ib=1,wan%num_bands
-     if (wan%lwindow(ib, ik)) wan%dimwin(ik) = wan%dimwin(ik) + 1
+     if (wan%lwindow(ib, ik)) then
+       wan%dimwin(ik) = wan%dimwin(ik) + 1
+       if (wan%winstart(ik) == 0) wan%winstart(ik) = ib
+       wan%bmin = min(wan%bmin, ib)
+       wan%bmax = max(wan%bmax, ib)
+     end if
    end do
  end do
 
@@ -3566,7 +3580,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  !call wan%get_opt_eig(et_opt)
  nextbands = count(wan%exclude_bands /= 0)
  !REAL(KIND = DP) :: et_opt(nbndep, nks)
- !! hamiltonian eigenvalues within the outer window in the first dimwin(ik) entries
+ ! KS eigenvalues within the outer window in the first dimwin(ik) entries
  ii = wan%num_bands ! TODO: Check
  ABI_MALLOC(et_opt, (ii ,nkbz))
 
@@ -3697,6 +3711,7 @@ end subroutine wan_print
 !!
 !! FUNCTION
 !! Interpolate the Hamiltonian at an arbitray k-point
+!! and return the rotation matrix.
 !!
 !! SOURCE
 
@@ -3744,6 +3759,7 @@ subroutine wan_free(wan)
 
  ! integer
  ABI_SFREE(wan%dimwin)
+ ABI_SFREE(wan%winstart)
  ABI_SFREE(wan%exclude_bands)
  ABI_SFREE(wan%r_h)
  ABI_SFREE(wan%r_e)
@@ -3813,7 +3829,7 @@ end subroutine wan_setup_eph_ws_kq
 !! wan_interp_eph_manyq
 !!
 !! FUNCTION
-!!  Interpolate e-ph matrix elements.
+!!  Interpolate the e-ph matrix elements at one k-point and nq q-points.
 !!
 !! SOURCE
 
@@ -3903,7 +3919,8 @@ end subroutine wan_interp_eph_manyq
 !! wan_ncwrite_gwan
 !!
 !! FUNCTION
-!!  Write g in the Wannier representation to netcdf file.
+!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph)
+!!  to the GWAN.nc netcdf file.
 !!
 !! SOURCE
 
@@ -4035,6 +4052,8 @@ subroutine wan_from_abiwan_gwan(wan, abiwan_filepath, gwan_filepath, spin, nsppo
  !  nctkarr_t("grpw_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
  !])
  !NCF_CHECK(ncerr)
+
+ !NCF_CHECK(nctk_get_dim(ncid, "max_number_of_states", mband))
 
  !NCF_CHECK(nctk_set_datamode(spin_ncid))
  !!NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
