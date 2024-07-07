@@ -23974,6 +23974,36 @@ instead of the filepath.
 ),
 
 Variable(
+    abivarname="getgwan_filepath",
+    varset="eph",
+    vartype="string",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the GWAN.nc from FILEPATH",
+    added_in_version="10.1.1",
+    text=r"""
+This variable defines the path of the GWAN.nc file with the e-ph matrix elements in the Wannier representation
+See also [[getgwan]].
+""",
+),
+
+Variable(
+    abivarname="getgwan",
+    varset="eph",
+    vartype="int",
+    topics=['ElPhonInt_basic'],
+    dimensions="scalar",
+    defaultval="None",
+    mnemonics="GET the GWAN.nc from dataset",
+    added_in_version="10.1.1",
+    text=r"""
+This variable is similar in spirit to [[getgwan_filepath]] but uses the dataset index
+instead of the filepath.
+""",
+),
+
+Variable(
     abivarname="gstore_erange",
     varset="eph",
     vartype="real",

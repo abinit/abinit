@@ -305,6 +305,9 @@ type, public :: gqk_t
   type(xcomm_t) :: qpt_comm
    ! MPI communicator over q-points
 
+  type(xcomm_t) :: qpt_kpt_comm
+   ! MPI communicator over k/q subgrid
+
   type(xcomm_t) :: pert_comm
    ! MPI communicator over atomic perturbations.
 
@@ -507,7 +510,7 @@ contains
   ! Print info on the object
 
   procedure, private :: distribute_spins__ => gstore_distribute_spins
-  ! Distribute spins (nsppol = 2) and create indirect mapping to spin index.
+!!  Distribute spins, create indirect mapping to spin index and init %brange_spin
 
   procedure, private :: set_mpi_grid__ => gstore_set_mpi_grid__
   ! Set the MPI cartesian grid
@@ -527,8 +530,7 @@ contains
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
 
-  !procedure :: compute_from_wannier => gstore_compute_from_wannier
-  ! Compute e-ph matrix elements.
+
 
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
@@ -555,9 +557,13 @@ contains
   ! Print subset of results to ab_out for testing purposes.
 
   procedure :: check_cplex_qkzone_gmode => gstore_check_cplex_qkzone_gmode
-  ! Perform consistency checks
+  ! Perform consistency checks.
 
   procedure :: wannierize => gstore_wannierize
+  ! Compute g(R_e,R_ph) from g(k,q)
+
+  !procedure :: compute_from_wannier => gstore_compute_from_wannier
+  ! Compute e-ph matrix elements.
 
 end type gstore_t
 !!***
@@ -603,7 +609,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  integer,parameter :: master = 0
  integer :: all_nproc, my_rank, ierr, my_nshiftq, nsppol, spin, natom3, cnt, qtimrev
  integer :: ik_ibz, ik_bz, iq_bz, iq_ibz, ebands_timrev, max_nq, max_nk, ncid, spin_ncid, ncerr, gstore_fform
- logical :: keep_umats
+ logical :: keep_umats, has_abiwan
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
  !character(len=5000) :: msg
@@ -621,6 +627,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  natom3 = 3 * cryst%natom; nsppol = ebands%nsppol
  units = [std_out, ab_out]
 
+ has_abiwan = .False.
  if (dtfil%filabiwanin /= ABI_NOFILE) then
    ! Read ABIWAN.nc file to get the set of bands that should be included in the computation.
    keep_umats = .False.
@@ -628,6 +635,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      call wan_spin(spin)%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
      call wan_spin(spin)%print(units)
    end do
+   has_abiwan = .True.
  end if
 
  ! Set basic parameters.
@@ -655,9 +663,20 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! TODO
  !gstore%kptrlatt(3, 3); gstore%kshift(3, 1); gstore%qptrlatt(3, 3); gstore%qshift(3, 1)
 
- ! Distribute spins, create indirect mapping to spin index and init gstore%brange_spin
+ ! Distribute spins, create indirect mapping to spin index and init %brange_spin
  ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
  call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, nproc_spin, comm_spin, comm)
+
+ ! Here we set brange_spin to be consistent with the wannierization.
+ if (has_abiwan) then
+   do spin=1,gstore%nsppol
+     gstore%brange_spin(1, spin) = wan_spin(spin)%bmin
+     gstore%brange_spin(2, spin) = wan_spin(spin)%bmax
+   end do
+   if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
+     ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
+   end if
+ end if
 
  ! Define q-mesh: either from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation)
  ! Save it in gstore for future reference.
@@ -1058,6 +1077,7 @@ end subroutine priority_from_eph_task
 !! gstore_distribute_spins
 !!
 !! FUNCTION
+!!  Distribute spins, create indirect mapping to spin index and init %brange_spin
 !!
 !! INPUTS
 !!
@@ -1265,6 +1285,8 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
    keepdim = .False.; keepdim(1) = .True.; call gqk%qpt_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for k-points
    keepdim = .False.; keepdim(2) = .True.; call gqk%kpt_comm%from_cart_sub(comm_cart, keepdim)
+   ! Communicator for the (qpt, kpt) 2D grid
+   keepdim = .False.; keepdim(1) = .True.; keepdim(2) = .True.; call gqk%qpt_kpt_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for perturbations.
    keepdim = .False.; keepdim(3) = .True.; call gqk%pert_comm%from_cart_sub(comm_cart, keepdim)
    ! Communicator for the (qpt, pert) 2D grid
@@ -2874,6 +2896,7 @@ subroutine gqk_free(gqk)
  ! Free communicators
  call gqk%kpt_comm%free()
  call gqk%qpt_comm%free()
+ call gqk%qpt_kpt_comm%free()
  call gqk%pert_comm%free()
  call gqk%band_comm%free()
  call gqk%qpt_pert_comm%free()
@@ -3791,17 +3814,19 @@ end subroutine gstore_compute
 !! gstore_from_ncpath
 !!
 !! FUNCTION
+!! Reconstruct object from netcdf file
 !!
 !! INPUTS
 !!
 !! SOURCE
 
-integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode) result(ierr)
+integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode, kfilter) result(ierr)
 
 !Arguments ------------------------------------
  class(gstore_t),intent(in) :: gstore
  integer,intent(in) :: cplex
  character(len=*),intent(in) :: qzone, kzone, gmode
+ character(len=*),optional,intent(in) :: kfilter
 ! *************************************************************************
 
  ierr = 0
@@ -3809,6 +3834,9 @@ integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gm
  ABI_CHECK_NOSTOP(gstore%qzone == qzone, sjoin("qzone = ", qzone, "is required"), ierr)
  ABI_CHECK_NOSTOP(gstore%kzone == kzone, sjoin("kzone = ", kzone, "is required"), ierr)
  ABI_CHECK_NOSTOP(gstore%gmode == gmode, sjoin("gmode = ", gmode, "is required"), ierr)
+ if (present(kfilter)) then
+   ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter = ", kfilter, "is required"), ierr)
+ end if
 
 end function gstore_check_cplex_qkzone_gmode
 !!***
@@ -4551,6 +4579,7 @@ end subroutine gqk_gather
 !! gstore_wannierize
 !!
 !! FUNCTION
+!!  Compute g(R_e,R_ph) from g(k,q)
 !!
 !! INPUTS
 !!
@@ -4566,8 +4595,9 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !Local variables-------------------------------
 !scalars
  !integer,parameter :: master = 0
- integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is,  my_ip, ir, my_ik, my_iq
- integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq
+ integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, my_ik, my_iq
+ integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj
+ integer :: band_kq, band_k, ib_k, ib_kq
  !character(len=500) :: msg
  logical :: keep_umats
  character(len=fnlen) :: out_path
@@ -4576,10 +4606,10 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 !arrays
  integer :: qptrlatt_(3,3)
  real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
- complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:)
+ complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:)
 ! *************************************************************************
 
- if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom") /= 0) then
+ if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
    ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
  end if
 
@@ -4605,9 +4635,10 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_MALLOC(emiqr, (nr_p))
    ABI_MALLOC(gww_pk, (nwan, nwan, my_npert, my_nk))
 
-   ! Intermediate buffer.
+   ! Intermediate buffer to store the sum over k-points.
    ABI_CALLOC(gww_epq, (nwan, nwan, nr_e, my_npert, my_nq))
 
+   ! Loop over my q-points (partial sum over q)
    do my_iq=1,my_nq
      call gqk%myqpt(my_iq, gstore, weight_qq, qpt)
 
@@ -4620,13 +4651,15 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
        ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
        ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
 
+       ! Get rotation matrices at k and k+q.
        nwin_k = wan%dimwin(ik)
        nwin_kq = wan%dimwin(ikq)
        ABI_MALLOC(u_kc, (1:nwin_k, 1:nwan))
        ABI_MALLOC(u_kqc, (1:nwin_kq, 1:nwan))
-
        u_kc = wan%u_kc(1:nwin_k, 1:nwan, ik)
        u_kqc = wan%u_kc(1:nwin_kq, 1:nwan, ikq)
+
+       ABI_MALLOC(g_bb, (nwin_kq, nwin_k))
 
        do my_ip=1,gqk%my_npert
          !----------------------------------------------------------
@@ -4637,18 +4670,38 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
          ! g~(k,q) = U(k+q)^\dagger * g(k,q) * U(k)
 
          ! TODO: This is the tricky part where we have to "align" the bands
-         !
+         ! gqk%nb = wan%bmax - wan%bmin + 1
+
+
+         ! (my_npert, nb, my_nq, nb, my_nk)
+         ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
+
+         jj = 0
+         do ib_k=1,gqk%nb
+           band_k = ib_k - wan%bmin + 1
+           if (.not. wan%lwindow(band_k, ik)) cycle
+           jj = jj + 1
+           ii = 0
+           do ib_kq=1,gqk%nb
+             band_kq = ib_kq - wan%bmin + 1
+             if (.not. wan%lwindow(band_kq, ikq)) cycle
+             ii = ii + 1
+             g_bb(ii, jj) = gqk%my_g(my_ip, ib_kq, my_iq, ib_k, my_ik)
+           end do
+         end do
+
          ! the two zgemm calls perform the following operations:
          ! epmats  = [ cu(ikq)^\dagger * epmatk ] * cu(ikk)
          ! [here we have a size-reduction from nbnd*nbnd to nwan*nwan]
          ! ouput stored in gww_pk(:,:, my_ip, my_ik)
 
-         !g_bb = gqk%my_g(my_ip, gqk%nb, my_iq, gqk%nb, my_ik)
-         !gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kqc), MATMUL(g_bb, u_kc)))
-         !
+         gww_pk(:,:, my_ip, my_ik) = MATMUL(CONJG(TRANSPOSE(u_kqc)), MATMUL(g_bb, u_kc))
+
          !call ZGEMM('C', 'N', nwan, nbnd, nbnd, cone, u_kqc, nbnd, epmatk(:, :, ik, imode), nbnd, czero, eptmp, nwan)
          !call ZGEMM('N', 'N', nwan, nwan, nbnd, cone, eptmp, nwan, u_kc, nbnd, czero, epmats(:, :, ik, imode), nwan)
        end do ! my_ip
+
+       ABI_FREE(g_bb)
 
        !----------------------------------------------------------------------
        !  STEP 3: Fourier transform to obtain matrix elements in electron wannier basis
@@ -4701,7 +4754,8 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
       end do ! my_ip
    end do ! my_iq
 
-   call xmpi_sum(wan%grpe_wwp, gqk%qpt_comm%value, ierr)
+   !call xmpi_sum(wan%grpe_wwp, gqk%qpt_comm%value, ierr)
+   call xmpi_sum(wan%grpe_wwp, gqk%qpt_kpt_comm%value, ierr)
 
    ! Free memory for this spin
    ABI_FREE(emikr)

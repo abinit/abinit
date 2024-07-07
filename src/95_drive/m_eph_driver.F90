@@ -759,7 +759,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (9)
    ! Compute cumulant from SIGEPH.nc file.
-   call cumulant_driver(dtfil, dtset, ebands, cryst,  comm)
+   call cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
@@ -781,22 +781,24 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Here we wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
+   ! Wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) call gstore%wannierize(dtset, dtfil)
    call gstore%free()
 
  !case (-11)
  !  Typical workflow for gstore with Wannierization
  !
- !  1) Wannierize with Abinit and wannier90 in library to get ABIWAN.nc file.
+ !  1) Wannierize with Abinit and wannier90 in library mode to get the ABIWAN.nc file.
+ !
  !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization.
  !     Compute g(R_e, R_p) and save results to GWAN.nc file.
+ !
  !  3) Start new job to compute properties with extra dense meshes:
  !
- !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distributed gvals.
+ !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distribute gvals.
  !        - Decide if gvals should be precomputed and stored or computed on the fly.
  !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
- !        - Pass gstore object to eph_task routines (what about ebands)?
+ !        - Pass gstore object to the eph_task routines (what about ebands)?
  !
  !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%wannierize(dtset, dtfil)

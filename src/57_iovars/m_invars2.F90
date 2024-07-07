@@ -1316,6 +1316,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getabiwan',tread,'INT')
  if(tread==1) dtset%getabiwan=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgwan',tread,'INT')
+ if(tread==1) dtset%getgwan=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb',tread,'INT')
  if(tread==1) dtset%getddb=intarr(1)
 
@@ -1336,6 +1339,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getabiwan_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getabiwan_filepath = key_value
+
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getgwan_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getgwan_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getddb_filepath = key_value
