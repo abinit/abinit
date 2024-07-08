@@ -58,9 +58,9 @@ module m_mlwfovlp
  use m_paw_sphharm, only : ylm_cmplx, initylmr
  use m_paw_overlap, only : smatrix_pawinit
  use m_evdw_wannier, only : evdw_wannier
- use m_fft,            only : fourwf
+ !use m_fft,         only : fourwf
  use m_abstract_wf, only: abstract_wf,  wann_ksetting_t, cg_cprj, wfd_wf
- use m_wannier_io,   only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
+ use m_wannier_io,  only: write_eigenvalues, write_Amn, compute_and_write_unk, write_Mmn
 
  implicit none
 
@@ -289,8 +289,8 @@ class(abstract_wf), pointer :: mywfc
  integer,intent(in) :: nsppol,ntypat,prtvol
  real(dp),intent(in) :: ucvol
  type(crystal_t),intent(in) :: crystal
- type(ebands_t),intent(inout) :: ebands
- type(hdr_type),intent(inout) :: hdr
+ type(ebands_t),intent(in) :: ebands
+ type(hdr_type),intent(in) :: hdr
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
@@ -298,7 +298,7 @@ class(abstract_wf), pointer :: mywfc
  type(pseudopotential_type),intent(in) :: psps
 !arrays
  integer,intent(in) :: atindx1(natom)
- integer :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
+ integer,intent(in) :: kg(3,mpw*mkmem),nattyp(ntypat),ngfft(18),npwarr(nkpt)
 ! real(dp), optional, intent(in) :: cg(2,mcg)
 ! type(pawcprj_type), optional, intent(in) :: cprj(natom,mcprj)
  real(dp),optional, intent(in) :: eigen(mband*nkpt*nsppol),gprimd(3,3),rprimd(3,3)
@@ -309,8 +309,6 @@ class(abstract_wf), pointer :: mywfc
  type(pawrad_type),intent(in) :: pawrad(:)
  type(pawtab_type),intent(in) :: pawtab(:)
 
- type(pawcprj_type), pointer :: cprj_ptr(:, :)
-
 !Local variables-------------------------------
 !scalars
  integer :: i, ierr, ikpt1,ikpt2,intot,isppol, iwan, lproj,lwanniersetup,mwan
@@ -320,11 +318,12 @@ class(abstract_wf), pointer :: mywfc
  integer :: have_disentangled_spin(nsppol)
  integer,allocatable :: irvec_r_h(:,:),ndegen_h(:)
  real(dp),allocatable :: rmods_r_h(:)
- type(wan_t) :: wan
+ !type(wan_t) :: wan
 #endif
+ integer,parameter :: master = 0
  integer :: nntot,num_nnmax
- integer :: master,max_num_bands,nprocs,spaceComm,rank
- integer  :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
+ integer :: max_num_bands,nprocs,comm,rank
+ integer :: nwan(nsppol),nband_inc(nsppol),num_bands(nsppol)
  logical :: gamma_only,leig,lmmn,lwannierrun,spinors !,have_disentangled
  character(len=fnlen) :: wfnname
  character(len=1000) :: msg
@@ -334,11 +333,10 @@ class(abstract_wf), pointer :: mywfc
 !arrays
  integer :: g1temp(3),ngkpt(3), units(2)
  integer,allocatable :: g1(:,:,:)
- integer,allocatable::ovikp(:,:)
+ integer,allocatable:: ovikp(:,:)
  integer,allocatable :: proj_l(:,:),proj_m(:,:),proj_radial(:,:)
  integer,allocatable :: proj_s_loc(:), exclude_bands(:,:)
- real(dp) :: real_lattice(3,3)
- real(dp) :: recip_lattice(3,3)
+ real(dp) :: real_lattice(3,3), recip_lattice(3,3)
  real(dp),allocatable :: cm1(:,:,:,:,:,:),cm2_paw(:,:,:)
  real(dp),allocatable :: eigenvalues_w(:,:,:)
  real(dp),allocatable :: proj_site(:,:,:),proj_x(:,:,:),proj_z(:,:,:),proj_zona(:,:)
@@ -350,7 +348,8 @@ class(abstract_wf), pointer :: mywfc
  complex(dpc),pointer :: A_matrix(:,:,:,:)
  logical,allocatable :: band_in(:,:),lwindow(:,:,:)
  character(len=3),allocatable :: atom_symbols(:)
- logical,allocatable::just_augmentation(:,:)
+ logical,allocatable:: just_augmentation(:,:)
+ type(pawcprj_type), pointer :: cprj_ptr(:, :)
 #ifdef HAVE_WANNIER90
  real(dp) :: spreadw(3,nsppol)
 #endif
@@ -380,10 +379,9 @@ class(abstract_wf), pointer :: mywfc
  if (dtset%nspinor == 2) spinors = .true.
 
  !mpi initialization
- spaceComm=MPI_enreg%comm_cell
- nprocs=xmpi_comm_size(spaceComm)
+ comm=MPI_enreg%comm_cell
+ nprocs=xmpi_comm_size(comm)
  rank=MPI_enreg%me_kpt
- master=0
  !write(std_out,'("master ",i0," rank ",i0," nprocs ",i0)') master,rank,nprocs
 
  !Generate seed names for wannier90 files, and file names
@@ -403,29 +401,27 @@ class(abstract_wf), pointer :: mywfc
  end if
 !
  if(MPI_enreg%paral_spinor==1) then
-   msg = ' Parallelization over spinorial components not yet available !'
-   ABI_ERROR(msg)
+   ABI_ERROR('Parallelization over spinorial components not yet available !')
+ end if
+
+ ! MG: TODO: Why this check?
+ if (psps%npsp/=psps%ntypat) then
+   ABI_ERROR("Alchemical mixing not supported in mlwfovlp")
  end if
 
  if (nsppol==2) then
    write(msg, '(3a)' ) ch10,'   mlwfovlp:  Calculating matrices for both spin polarization  ',ch10
    call wrtout(units, msg)
  end if
-!
-!get lattice parameters in wannier90 format
-!
+
+ ! get lattice parameters in wannier90 format
  do i=1, 3
    real_lattice(:,i)=Bohr_Ang*rprimd(i,:)
    recip_lattice(:,i)=two_pi*gprimd(i,:)/Bohr_Ang
  end do
-!
- if(psps%npsp/=psps%ntypat) then
-   ABI_ERROR("prb npsp")
- end if
-!
-!Allocations.
-!
- num_nnmax=12 !limit fixed for compact structure in wannier_setup.
+
+ ! Allocations.
+ num_nnmax=12 ! limit fixed for compact structure in wannier_setup.
  ABI_MALLOC(g1,(3,nkpt,num_nnmax))
  ABI_MALLOC(ovikp,(nkpt,num_nnmax))
  ABI_MALLOC(atom_symbols,(natom))
@@ -462,21 +458,16 @@ class(abstract_wf), pointer :: mywfc
    call wrtout(units, msg)
  end do
 
-!
-!some allocations after wannier90 setup
-!
+ ! some allocations after wannier90 setup
  max_num_bands=maxval(num_bands(:))
  mwan=maxval(nwan(:))
  ABI_MALLOC(eigenvalues_w,(max_num_bands,nkpt,nsppol))
  ABI_MALLOC(M_matrix,(max_num_bands,max_num_bands,nntot,nkpt,nsppol))
  ABI_MALLOC(A_matrix,(max_num_bands,mwan,nkpt,nsppol))
 
-
-!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !3) Write Eigenvalues (file seed_name.eig)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
  if (leig) then
    call write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w,  nsppol, nkpt, mband,  dtset, rank, master )
  end if !leig
@@ -527,13 +518,13 @@ class(abstract_wf), pointer :: mywfc
 
    !mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
    !     &  npwarr,nspinor,nsppol,ovikp,seed_name)
-   write(msg, '(a,a)' ) ch10,'   mlwfovlp : PW part of overlap computed   '
+   write(msg, '(a,a)' ) ch10,'   mlwfovlp: PW part of overlap computed   '
    call wrtout(std_out, msg)
 !
 !  compute PAW Contribution and add it to PW contribution
 !
    if(psps%usepaw==1) then
-     write(msg, '(a,a)' ) ch10,'** smatrix_pawinit : PAW part of overlap  '
+     write(msg, '(a,a)' ) ch10,'** smatrix_pawinit: PAW part of overlap  '
      call wrtout(std_out, msg)
      ABI_MALLOC(cm2_paw,(2,mband,mband))
      do isppol=1,nsppol
@@ -572,8 +563,8 @@ class(abstract_wf), pointer :: mywfc
      call wrtout(std_out,  msg)
    end if ! usepaw
 
-   call xmpi_barrier(spaceComm)
-   call xmpi_sum(cm1,spaceComm,ierr)
+   call xmpi_barrier(comm)
+   call xmpi_sum(cm1,comm,ierr)
 
    call write_Mmn(filew90_mmn, band_in, cm1, ovikp, g1, M_matrix,  nkpt, nsppol, nntot, mband, num_bands, msg, iam_master=(rank==master))
    ABI_FREE(cm1)
@@ -585,7 +576,7 @@ class(abstract_wf), pointer :: mywfc
    !end if !MPI nprocs>1
  end if !lmmn
 
- !Deallocate arrays  no longer used
+ !Deallocate arrays no longer needed
  ABI_FREE(ovikp)
  ABI_FREE(g1)
 
@@ -671,8 +662,8 @@ class(abstract_wf), pointer :: mywfc
    end if !usepaw==1
 
    ABI_FREE(just_augmentation)
-   call xmpi_barrier(spaceComm)
-   call xmpi_sum(A_matrix,spaceComm,ierr)
+   call xmpi_barrier(comm)
+   call xmpi_sum(A_matrix,comm,ierr)
 
    ! write projections  to a file
    if(rank==master) then
@@ -711,8 +702,8 @@ class(abstract_wf), pointer :: mywfc
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !7) Call to  Wannier90
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- if(lwannierrun) then
-   if(lwanniersetup.ne.1) ABI_ERROR("lwanniersetup.ne.1")
+ if (lwannierrun) then
+   if (lwanniersetup.ne.1) ABI_ERROR("lwanniersetup.ne.1")
    ABI_MALLOC(U_matrix,(mwan,mwan,nkpt,nsppol))
    ABI_MALLOC(U_matrix_opt,(max_num_bands,mwan,nkpt,nsppol))
    ABI_MALLOC(lwindow,(max_num_bands,nkpt,nsppol))
@@ -725,9 +716,11 @@ class(abstract_wf), pointer :: mywfc
    wann_centres(:,:,:)=zero
    wann_spreads(:,:)=zero
    ! write(std_out,*) seed_name; write(std_out,*) ngkpt
+   ABI_CHECK(isdiagmat(dtset%kptrlatt), "kptrlatt should be diagonal! Please use nkgpt with one shift")
    ngkpt(1)=dtset%kptrlatt(1,1)
-   ngkpt(2)=dtset%kptrlatt(2,2) ! ajouter test de verif que kptrlatt est bien diagonal
+   ngkpt(2)=dtset%kptrlatt(2,2)
    ngkpt(3)=dtset%kptrlatt(3,3)
+
 !  write(std_out,*) nkpt
 !  write(std_out,*) rprimd*Bohr_Ang
 !  write(std_out,*) two_pi*gprimd/Bohr_Ang
@@ -758,7 +751,7 @@ class(abstract_wf), pointer :: mywfc
      if(nprocs>1 .and. isppol==2.and.rank.ne.1) cycle
 
      write(msg, '(8a)' ) ch10,&
-       '** mlwfovlp :   call wannier90 library subroutine wannier_run ',ch10,&
+       '** mlwfovlp:   calling wannier90 library subroutine wannier_run ',ch10,&
        '   Calculation is running         ',ch10,&
        '-  see ',trim(filew90_wout(isppol)),' for details.'
      call wrtout(std_out, msg)
@@ -776,19 +769,19 @@ class(abstract_wf), pointer :: mywfc
 !    ----------------------------------------------------------------------------------------------
 
      write(msg, '(7a)' ) ch10,&
-&     '   mlwfovlp :  mlwfovlp_run completed -',ch10,&
-&     '-  see ',trim(filew90_wout(isppol)),' for details.',ch10
+       '   mlwfovlp :  mlwfovlp_run completed -',ch10,&
+       '-  see ',trim(filew90_wout(isppol)),' for details.',ch10
      call wrtout(units, msg)
    end do !isppol
 
    ! collect output of wannier90 from different processors
-   call xmpi_barrier(spaceComm)
+   call xmpi_barrier(comm)
 
-   call xmpi_sum(U_matrix,spaceComm,ierr)
-   call xmpi_sum(U_matrix_opt,spaceComm,ierr)
-   call xmpi_lor(lwindow,spaceComm)
-   call xmpi_sum(wann_centres,spaceComm,ierr)
-   call xmpi_sum(wann_spreads,spaceComm,ierr)
+   call xmpi_sum(U_matrix,comm,ierr)
+   call xmpi_sum(U_matrix_opt,comm,ierr)
+   call xmpi_lor(lwindow,comm)
+   call xmpi_sum(wann_centres,comm,ierr)
+   call xmpi_sum(wann_spreads,comm,ierr)
 
    ! Output ABIWAN.nc file
    if (hdr%kptopt == 0) then
@@ -1045,11 +1038,10 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
  character(len=fnlen) :: test_win1,test_win2,test_win3
  logical :: lfile
  character(len=2000) :: msg
- character(len=10)::postfix
+ character(len=10):: postfix
 ! *************************************************************************
 
  units = [std_out, ab_out]
-
  seed_name(:)=trim(fname_w90)
 
  do isppol=1,nsppol
@@ -1125,26 +1117,26 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
 
  if(nsppol==1) then
    write(msg, '(23a)' ) &
-&   '  - ',trim(filew90_win(1)),' is a mandatory secondary input',ch10,&
-&   '  - ',trim(filew90_wout(1)),' is the output for the library',ch10,&
-&   '  - ',trim(filew90_ramn(1)),' contains random projections',ch10,&
-&   '  - ',trim(filew90_amn(1)),' contains projections',ch10,&
-&   '  - ',trim(filew90_mmn(1)),' contains the overlap',ch10,&
-&   '  - ',trim(filew90_eig(1)),' contains the eigenvalues'
+    '  - ',trim(filew90_win(1)),' is a mandatory secondary input',ch10,&
+    '  - ',trim(filew90_wout(1)),' is the output for the library',ch10,&
+    '  - ',trim(filew90_ramn(1)),' contains random projections',ch10,&
+    '  - ',trim(filew90_amn(1)),' contains projections',ch10,&
+    '  - ',trim(filew90_mmn(1)),' contains the overlap',ch10,&
+    '  - ',trim(filew90_eig(1)),' contains the eigenvalues'
  elseif(nsppol==2) then
    write(msg, '(41a)' ) &
-&   '  - ',trim(filew90_win(1)),&
-&   ' and ',trim(filew90_win(2)),ch10,'are mandatory secondary input',ch10,&
-&   '  - ',trim(filew90_wout(1)),&
-&   ' and ',trim(filew90_wout(2)),ch10,' are the output for the library',ch10,&
-&   '  - ',trim(filew90_ramn(1)),&
-&   ' and ',trim(filew90_ramn(2)),ch10,' contain random projections',ch10,&
-&   '  - ',trim(filew90_amn(1)),&
-&   ' and ',trim(filew90_amn(2)),ch10,' contain projections',ch10,&
-&   '  - ',trim(filew90_mmn(1)),&
-&   ' and ',trim(filew90_mmn(2)),ch10,' contain the overlap',ch10,&
-&   '  - ',trim(filew90_eig(1)),&
-&   ' and ',trim(filew90_eig(2)),ch10,' contain the eigenvalues'
+    '  - ',trim(filew90_win(1)),&
+    ' and ',trim(filew90_win(2)),ch10,'are mandatory secondary input',ch10,&
+    '  - ',trim(filew90_wout(1)),&
+    ' and ',trim(filew90_wout(2)),ch10,' are the output for the library',ch10,&
+    '  - ',trim(filew90_ramn(1)),&
+    ' and ',trim(filew90_ramn(2)),ch10,' contain random projections',ch10,&
+    '  - ',trim(filew90_amn(1)),&
+    ' and ',trim(filew90_amn(2)),ch10,' contain projections',ch10,&
+    '  - ',trim(filew90_mmn(1)),&
+    ' and ',trim(filew90_mmn(2)),ch10,' contain the overlap',ch10,&
+    '  - ',trim(filew90_eig(1)),&
+    ' and ',trim(filew90_eig(2)),ch10,' contain the eigenvalues'
  end if
  call wrtout(units, msg)
 
@@ -1250,21 +1242,15 @@ end subroutine mlwfovlp_seedname
    write(msg, '(2a,2(i0,1x))')ch10,' mlwfovlp_setup nntot, mband, nwan ', nntot,mband_,nwan(1)
    call wrtout(std_out,msg)
    if (mband_ /= mband) then
-     write(msg, '(4a)' )&
-     'mband_ is not equal to mband ',ch10,&
-     'Action: check ',trim(filew90_nnkp)
+     write(msg, '(4a)' )'mband_ is not equal to mband ',ch10,'Action: check ',trim(filew90_nnkp)
      ABI_ERROR(msg)
    end if
    if(nwan(1) > mband) then
-     write(msg, '(4a)' )&
-       'nwan > mband ',ch10,&
-       'Action: check ',trim(filew90_nnkp)
+     write(msg, '(4a)' )'nwan > mband ',ch10,'Action: check ',trim(filew90_nnkp)
      ABI_ERROR(msg)
    end if
    if(nwan(1) == 0) then
-     write(msg, '(4a)' )&
-       'nwan = 0 ',ch10,&
-       'Action: check ',trim(filew90_nnkp)
+     write(msg, '(4a)' )'nwan = 0 ',ch10, 'Action: check ',trim(filew90_nnkp)
      ABI_ERROR(msg)
    end if
    do ikpt=1,nkpt
@@ -1427,7 +1413,7 @@ end subroutine mlwfovlp_seedname
      '   Disentanglement will be necessary'
      call wrtout(std_out,msg)
    end if
-   write(msg, '(2x,a,a,i0,1x,a)' )ch10,'   Each k-point has', nntot,' neighbours'
+   write(msg, '(2x,a,a,i0,1x,a)' )ch10,'   Each k-point has: ', nntot,' neighbours'
    call wrtout(std_out,msg)
  end do !isppol
 
@@ -1467,8 +1453,6 @@ end subroutine mlwfovlp_setup
 !! SIDE EFFECTS
 !!  (only writing, printing)
 !!
-!! NOTES
-!!
 !! SOURCE
 
 subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt,nntot,&
@@ -1493,11 +1477,10 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  integer :: iband1,iband2,ierr,ig,ig1,ig1b,ig2,ig2b
  integer :: ig3,ig3b,igk1,igk2,ikg,ikpt,ikpt1,ikpt2,imntot,index,intot
  integer :: ispinor,isppol,me,n1,n2,n3,npoint,npoint2,npw_k,npw_k2
- integer :: nprocs,spaceComm
- integer,allocatable::indpwk(:,:),kg_k(:,:)
- integer,allocatable :: invpwk(:,:)
+ integer :: nprocs,comm
+ integer,allocatable :: indpwk(:,:),kg_k(:,:), invpwk(:,:)
  character(len=500) :: msg
- logical::lfile
+ logical:: lfile
  real(dp),allocatable :: cg_read(:,:) !to be used in case of MPI
 
 !************************************************************************
@@ -1508,8 +1491,8 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !initialize flags
  lfile=.false.
 !mpi initialization
- spaceComm=MPI_enreg%comm_cell
- nprocs=xmpi_comm_size(spaceComm)
+ comm=MPI_enreg%comm_cell
+ nprocs=xmpi_comm_size(comm)
  me=MPI_enreg%me_kpt
 
  if(nprocs>1) then
@@ -1596,8 +1579,8 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  end do !isppol
  !write(std_out,*) "index for g points has been computed"
 
- call xmpi_barrier(spaceComm)
- call xmpi_sum(invpwk,spaceComm,ierr)
+ call xmpi_barrier(comm)
+ call xmpi_sum(invpwk,comm,ierr)
 
 !----------------------------------------------------------------------
 !------------test invpwk-----------------------------------------------
@@ -1820,8 +1803,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !! SIDE EFFECTS
 !!  (only writing, printing)
 !!
-!! NOTES
-!!
 !! SOURCE
 
  subroutine mlwfovlp_proj(A_matrix,band_in,mywfc, dtset,gprimd,just_augmentation,kg,&
@@ -1862,7 +1843,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  integer :: ispinor,isppol,itypat,iwan,jband,jj1,libprjn
  integer :: lmn_size,natprjn,nband_k,nbprjn,npw_k
  integer :: sumtmp
- integer :: max_lmax,max_lmax2,mproj,nprocs,spaceComm,rank
+ integer :: max_lmax,max_lmax2,mproj,nprocs,comm,rank
  real(dp),parameter :: qtol=2.0d-8
  real(dp) :: arg,norm_error,norm_error_bar
  real(dp) :: ucvol,x1,x2,xnorm,xnormb,xx,yy,zz
@@ -1878,8 +1859,6 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
  complex(dpc),allocatable :: gf(:,:),gft_lm(:)
  complex(dpc),allocatable :: ylmc_fac(:,:,:),ylmcp(:)
  integer :: idx
-
-!no_abirules
 !Tables 3.1 & 3.2, User guide
  integer,save :: orb_l_defs(-5:3)=(/2,2,1,1,1,0,1,2,3/)
 ! integer,parameter :: mtransfo(0:3,7)=&
@@ -1888,15 +1867,13 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
 !************************************************************************
 
 !mpi initialization
- spaceComm=MPI_enreg%comm_cell
- nprocs=xmpi_comm_size(spaceComm)
+ comm=MPI_enreg%comm_cell
+ nprocs=xmpi_comm_size(comm)
  rank=MPI_enreg%me_kpt
 
 !Check input variables
  if ((lproj/=1).and.(lproj/=2).and.(lproj/=5)) then
-   write(msg, '(3a)' )&
-   ' Value of lproj no allowed ',ch10,&
-   ' Action : change lproj.'
+   write(msg, '(3a)' )' Value of lproj no allowed ',ch10,' Action : change lproj.'
    ABI_ERROR(msg)
  end if
 
@@ -1947,8 +1924,7 @@ subroutine mlwfovlp_pw(mywfc,cm1,g1,kg,mband,mkmem,mpi_enreg,mpw,nfft,ngfft,nkpt
            if(band_in(iband1,isppol)) then
              jband=jband+1
              if(jband.gt.num_bands(isppol)) then
-               write(msg, '(a)' )'Value of jband is above num_bands '
-               ABI_ERROR(msg)
+               ABI_ERROR('Value of jband is above num_bands ')
              end if
              A_matrix(jband,iband2,ikpt,isppol)=cmplx(amn(1,iband1,iband2,ikpt,isppol),amn(2,iband1,iband2,ikpt,isppol))
            end if
@@ -2299,8 +2275,6 @@ end subroutine mlwfovlp_proj
 !! OUTPUT
 !!  A_paw(max_num_bands,nwan,nkpt) = A matrix containing initial guess for MLWFs
 !!                          (augmentation part of the matrix)
-!!
-!! SIDE EFFECTS
 !!
 !! NOTES
 !! This routine is still under developement
@@ -3069,17 +3043,16 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 !
  integer :: idum,ii,inversion_flag
  integer :: ir,iwan,jj,ll,lm,mm,mr
- real(dp):: onem,test
+ real(dp) :: onem,test
 ! arrays
- real(dp),allocatable::dummy(:,:),nrm(:)
- real(dp)::r(3,lmax2),rp(3,lmax2)
- real(dp)::rs2,rs3,rs6,rs12,umat(3,3)
- real(dp)::rot(lmax2,lmax2),tor(lmax2,lmax2),orb_lm(lmax2,-5:3,7)
- real(dp):: ylmrp(lmax2)
- real(dp):: ylmr_rr(lmax2,lmax2),ylmr_rr_save(lmax2,lmax2)
- real(dp):: ylmr_rrinv(lmax2,lmax2),ylmr_rp(lmax2,lmax2)
+ real(dp),allocatable:: dummy(:,:),nrm(:)
+ real(dp) :: r(3,lmax2),rp(3,lmax2)
+ real(dp) :: rs2,rs3,rs6,rs12,umat(3,3)
+ real(dp) :: rot(lmax2,lmax2),tor(lmax2,lmax2),orb_lm(lmax2,-5:3,7)
+ real(dp) :: ylmrp(lmax2)
+ real(dp) :: ylmr_rr(lmax2,lmax2),ylmr_rr_save(lmax2,lmax2)
+ real(dp) :: ylmr_rrinv(lmax2,lmax2),ylmr_rp(lmax2,lmax2)
  character(len=500) :: msg                   ! to be uncommented, if needed
-!no_abirules
 !integer :: orb_idx(16)=(/1,3,4,2,7,8,6,9,5,13,14,12,15,11,16,10/) !Tab3.1 Wannier90 user guide
 
 ! *************************************************************************
@@ -3181,7 +3154,7 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
 !setup to rotate ylmr_fac to new axes if called for
 !skip if only s projetors are used
  if ( lmax>0 ) then
-!  generate a set of nr=lmax2 random vetors
+!  generate a set of nr=lmax2 random vectors
    idum=123456
    do ir=1,lmax2
      do ii=1,3
@@ -3217,9 +3190,9 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
    end do !jj
    if(test>tol8) then
      write(msg, '(5a)' )&
-&     '  matrix inversion error for wannier rotations',ch10,&
-&     '  random vetors r(j,1:nr) are not all independent !! ',ch10,&
-&     '  Action : re-seed uniformrandom or maybe just try again'
+     '  matrix inversion error for wannier rotations',ch10,&
+     '  random vectors r(j,1:nr) are not all independent !! ',ch10,&
+     '  Action : re-seed uniformrandom or maybe just try again'
      ABI_ERROR(msg)
    end if !test>tol8
 
@@ -3244,7 +3217,7 @@ subroutine mlwfovlp_ylmfar(ylmr_fac,lmax,lmax2,mband,nwan,proj_l,proj_m,proj_x,p
        rp(:,:) = matmul ( umat(:,:) , r(:,:) )
      end if !inversion_flag
 
-!    get the ylm representation of the rotated vetors
+!    get the ylm representation of the rotated vectors
      ABI_MALLOC(nrm,(lmax2))
      nrm(:)=sqrt(rp(1,:)**2+rp(2,:)**2+rp(3,:)**2)**0.5
      call initylmr(lmax+1,1,lmax2,nrm,1,rp(:,:),ylmr_rp(:,:),dummy)
@@ -3375,7 +3348,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  ABI_FREE(int_2d)
 
  NCF_CHECK(nf90_get_var(ncid, vid("kptrlatt"), kptrlatt))
- ABI_CHECK(isdiagmat(kptrlatt), "kptrlatt should be diagonal!")
+ ABI_CHECK(isdiagmat(kptrlatt), "kptrlatt should be diagonal! Please use nkgpt with one shift")
  wan%ngkpt = get_diag(kptrlatt)
  !NCF_CHECK(nctk_get_dim(ncid, "nshiftk", wan%nshiftk))
  !if nshiftk
@@ -3403,7 +3376,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
    end do
  end do
 
- wan%krank = krank_from_kptrlatt(nkbz, wan%kbz, kptrlatt, compute_invrank=.False.)
+ wan%krank = krank_from_kptrlatt(nkbz, wan%kbz, kptrlatt, compute_invrank=.True.)
 
  ABI_MALLOC(wan%rmod_h, (wan%nr_h))
  do ir=1,wan%nr_h
@@ -3542,11 +3515,10 @@ subroutine wan_print(wan, units)
  ydoc = yamldoc_open("WANNIER_PARAMS")
 
  !call ydoc%add_string("method", "Gaussian")
- call ydoc%add_ints("spin, nwan, num_bands, nkbz, nr_h, nr_e, nr_p", &
-                    [wan%spin, wan%nwan, wan%num_bands, wan%nkbz, wan%nr_h, wan%nr_e, wan%nr_p])
+ call ydoc%add_ints("spin, nwan, num_bands, bmin, bmax, nkbz, nr_h, nr_e, nr_p", &
+                    [wan%spin, wan%nwan, wan%num_bands, wan%bmin, wan%bmax, wan%nkbz, wan%nr_h, wan%nr_e, wan%nr_p])
  !call ydoc%add_reals("nelect, wan_mesh_step_eV", &
  !                   [wan%nelect, wan%step * Ha_eV])
-
  !call ydoc%add_real("", efermi * Ha_eV)
 
  ! Write header in Yaml format but prepend # so that one can still use tools such as gnuplot or xmgrace.
@@ -3574,7 +3546,7 @@ subroutine wan_interp_h(wan, kpt, uk_wan, eigens)
  complex(dp),intent(out) :: uk_wan(wan%nwan, wan%nwan)
 
 !Local variables-------------------------------
- integer :: ir, ii, jj
+ integer :: ir
  complex(dp) :: eikr(wan%nr_h)
 !************************************************************************
 
@@ -3870,7 +3842,7 @@ subroutine wan_from_abiwan_gwan(wan, abiwan_filepath, gwan_filepath, spin, nsppo
 
 !Local variables-------------------------------
 !scalars
- integer :: root_ncid, spin_ncid, ncerr !, natom3
+ integer :: root_ncid, spin_ncid !, ncerr !, natom3
  logical,parameter :: keep_umats = .False.
  !real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
 !************************************************************************
@@ -3948,7 +3920,7 @@ subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik, band, nwan, abi_unt, wan_unt
+ integer :: spin, ik, nwan, abi_unt, wan_unt !band,
  type(wan_t) :: wan
  character(len=500) :: msg
  character(len=fnlen) :: prefix, abi_ebands_path, wan_ebands_path

@@ -595,7 +595,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 !Arguments ------------------------------------
 !scalars
  class(gstore_t),target,intent(out) :: gstore
- integer,intent(in) :: comm
  character(len=*),intent(in) :: path
  type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
@@ -603,6 +602,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  class(crystal_t),target,intent(in) :: cryst
  class(ebands_t),target,intent(in) :: ebands
  class(ifc_type),target,intent(in) :: ifc
+ integer,intent(in) :: comm
 
 !Local variables-------------------------------
 !scalars
@@ -612,7 +612,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  logical :: keep_umats, has_abiwan
  real(dp) :: cpu, wall, gflops
  character(len=10) :: priority
- !character(len=5000) :: msg
+ character(len=5000) :: msg
 !arrays
  integer :: ngqpt(3), qptrlatt(3,3), comm_spin(ebands%nsppol), nproc_spin(ebands%nsppol), units(2)
  integer,allocatable :: qbz2ibz(:,:), kbz2ibz(:,:), kibz2bz(:), qibz2bz(:), qglob2bz(:,:), kglob2bz(:,:)
@@ -629,7 +629,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  has_abiwan = .False.
  if (dtfil%filabiwanin /= ABI_NOFILE) then
-   ! Read ABIWAN.nc file to get the set of bands that should be included in the computation.
+   call wrtout(std_out, sjoin(" Reading set of bands to be included in gstore from ABIWAN file:", dtfil%filabiwanin))
    keep_umats = .False.
    do spin=1,ebands%nsppol
      call wan_spin(spin)%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, dtfil%filnam_ds(4), comm)
@@ -667,15 +667,12 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ABI_CHECK_ILEQ(dtset%mband, ebands%mband, "dtset%mband > ebands%mband")
  call gstore%distribute_spins__(dtset%mband, dtset%gstore_brange, nproc_spin, comm_spin, comm)
 
- ! Here we set brange_spin to be consistent with the wannierization.
  if (has_abiwan) then
+   ! Here we set brange_spin to be consistent with the wannierization.
    do spin=1,gstore%nsppol
      gstore%brange_spin(1, spin) = wan_spin(spin)%bmin
      gstore%brange_spin(2, spin) = wan_spin(spin)%bmax
    end do
-   if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
-     ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
-   end if
  end if
 
  ! Define q-mesh: either from DVDB (no interpolation) or eph_ngqpt_fine (Fourier interpolation)
@@ -695,7 +692,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  gstore%qptopt = ebands%kptopt; if (dtset%qptopt /= 0) gstore%qptopt = dtset%qptopt
  qtimrev = kpts_timrev_from_kptopt(gstore%qptopt)
 
- !call wrtout(std_out, sjoin(" Generating q-IBZ for with qptopt:", itoa(gstore%qptopt)))
+ call wrtout(std_out, sjoin(" Generating q-mesh for with ngqpt:", ltoa(ngqpt), " and qptopt:", itoa(gstore%qptopt)))
  call kpts_ibz_from_kptrlatt(cryst, qptrlatt, gstore%qptopt, my_nshiftq, my_shiftq, &
                              gstore%nqibz, gstore%qibz, gstore%wtq, gstore%nqbz, qbz)
                              !new_kptrlatt=gstore%qptrlatt, new_shiftk=gstore%qshift,
@@ -718,10 +715,11 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  !  print *, "iq_bz -> iq_ibz", qbz2ibz(1, iq_bz), qbz(:, iq_bz)
  !end do
 
- call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, ierr)
- ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for q-points!")
+ call get_ibz2bz(gstore%nqibz, gstore%nqbz, qbz2ibz, qibz2bz, msg, ierr)
+ ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for q-points!", ch10, msg))
 
  ! Get full BZ associated to ebands
+ call wrtout(std_out, sjoin(" Generating k-mesh for with ngkpt:", ltoa(get_diag(ebands%kptrlatt)), " and kptopt:", itoa(ebands%kptopt)))
  call kpts_ibz_from_kptrlatt(cryst, ebands%kptrlatt, ebands%kptopt, ebands%nshiftk, ebands%shiftk, &
                              gstore%nkibz, kibz, wtk, gstore%nkbz, kbz) !, bz2ibz=bz2ibz)
                              !new_kptrlatt=gstore%kptrlatt, new_shiftk=gstore%kshift,
@@ -747,8 +745,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! Order kbz by stars and rearrange entries in kbz2ibz table.
  !call kpts_pack_in_stars(gstore%nkbz, kbz, kbz2ibz)
 
- call get_ibz2bz(gstore%nkibz, gstore%nkbz, kbz2ibz, kibz2bz, ierr)
- ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
+ call get_ibz2bz(gstore%nkibz, gstore%nkbz, kbz2ibz, kibz2bz, msg, ierr)
+ ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
 
  ! These tables are used to exclude q/k points
  ! We use the full BZ because this mask can be also used when points are restricted to the IBZ
@@ -780,7 +778,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
    end do
 
  case ("bz")
-    select_qbz_spin = 1
+   select_qbz_spin = 1
 
  case default
    ABI_ERROR(sjoin("Invalid qzone:", gstore%qzone))
@@ -3339,7 +3337,7 @@ subroutine gstore_compute(gstore, wfk0_path, ngfft, ngfftf, dtset, cryst, ebands
  end if
 
  if (gstore%with_vk /= 0 .and. ndone == 0) then
-   call wrtout(std_out, " computing and writing velocity operator matrix elements in the ibz")
+   call wrtout(std_out, " computing and writing velocity operator matrix elements in the IBZ")
    call wrtout(std_out, " note that not all the k-points in the IBZ are computed when kfilter is activated!")
    call cwtime(cpu, wall, gflops, "start")
 
@@ -3830,12 +3828,12 @@ integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gm
 ! *************************************************************************
 
  ierr = 0
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == cplex, sjoin("cplex:", itoa(2), " is required"), ierr)
- ABI_CHECK_NOSTOP(gstore%qzone == qzone, sjoin("qzone = ", qzone, "is required"), ierr)
- ABI_CHECK_NOSTOP(gstore%kzone == kzone, sjoin("kzone = ", kzone, "is required"), ierr)
- ABI_CHECK_NOSTOP(gstore%gmode == gmode, sjoin("gmode = ", gmode, "is required"), ierr)
+ ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == cplex, sjoin("cplex:", itoa(cplex), "required but got: ", itoa(gstore%gqk(1)%cplex)), ierr)
+ ABI_CHECK_NOSTOP(gstore%qzone == qzone, sjoin("qzone: ", qzone, "required but got: ", gstore%qzone), ierr)
+ ABI_CHECK_NOSTOP(gstore%kzone == kzone, sjoin("kzone: ", kzone, "required but got: ", gstore%kzone), ierr)
+ ABI_CHECK_NOSTOP(gstore%gmode == gmode, sjoin("gmode: ", gmode, "required but got: ", gstore%gmode), ierr)
  if (present(kfilter)) then
-   ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter = ", kfilter, "is required"), ierr)
+   ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter = ", kfilter, "required but got: ", gstore%kfilter), ierr)
  end if
 
 end function gstore_check_cplex_qkzone_gmode
@@ -4604,10 +4602,13 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
- integer :: qptrlatt_(3,3)
- real(dp) :: weight_qq, qpt(3), weight_kk, kpt(3), kq(3)
+ integer :: qptrlatt_(3,3), units(2)
+ real(dp) :: weight_qq, qpt(3), kpt(3), kq(3) ! weight_kk,
  complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:)
 ! *************************************************************************
+
+ units = [std_out, ab_out]
+ call wrtout(units, "Computing e-ph vertex in the Wannier representation...")
 
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
    ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
@@ -4620,7 +4621,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    keep_umats = .False.
    call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
    wan => gqk%wan
-   !call wan%print([units])
+   call wan%print(units)
 
    qptrlatt_ = 0
    do ir=1,3

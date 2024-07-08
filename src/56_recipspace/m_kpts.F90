@@ -62,7 +62,7 @@ module m_kpts
  ! FIXME: deprecated
  public :: mknormpath
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
-
+!!***
 
 !----------------------------------------------------------------------
 
