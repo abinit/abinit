@@ -1238,10 +1238,13 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
    !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
-   write(msg,'(5a)')&
+   write(msg,'(6a,3(a,3es16.6,a))')&
      'Input rprim and acell gives vanishing unit cell volume.',ch10,&
      'This indicates linear dependency between primitive lattice vectors',ch10,&
-     'Action: correct either rprim or acell in input file.'
+     'Action: correct either rprim or acell in input file.', ch10, &
+     'Rprimd =',rprimd(:,1),ch10,&
+     '        ',rprimd(:,2),ch10,&
+     '        ',rprimd(:,3),ch10
    ABI_ERROR(msg)
  end if
  if (ucvol<zero)then

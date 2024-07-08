@@ -51,24 +51,14 @@ module m_abstract_wf
  use defs_wvltypes,  only : wvl_internal_type
  use defs_datatypes, only : pseudopotential_type, ebands_t
  use defs_abitypes, only : MPI_type
- use m_io_tools, only : delete_file, get_unit, open_file
- use m_hide_lapack,     only : matrginv
+ use m_io_tools, only : delete_file
  use m_fstrings,      only : strcat, sjoin, itoa
- use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int
- use m_special_funcs,   only : besjm
- use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
- use m_fftcore,  only : sphereboundary, ngfft_seq, get_kg
+ use m_fftcore,  only : ngfft_seq, get_kg
  use m_crystal,  only : crystal_t
- use m_ebands,   only : ebands_ncwrite, ebands_expandk, ebands_free
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type, simp_gen
+ use m_ebands,   only : ebands_expandk, ebands_free
  use m_pawtab,   only : pawtab_type
- use m_pawcprj,  only : pawcprj_type
- use m_paw_sphharm, only : ylm_cmplx, initylmr
- use m_paw_overlap, only : smatrix_pawinit
  use m_pawrhoij, only: pawrhoij_copy
- use m_evdw_wannier, only : evdw_wannier
- use m_fft,            only : fourwf
+ use m_pawcprj,  only : pawcprj_type
  use m_wfd, only: wfd_t, wfd_init, wave_t, WFD_STORED
 
  implicit none
@@ -498,7 +488,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
   & dtset, dtfil, hdr, MPI_enreg, nprocs, psps, pawtab, rank, comm)
     class(abstract_wf), pointer, intent(inout) :: mywfc
     type(crystal_t), target, intent(in) :: cryst
-    type(ebands_t), target, optional, intent(inout) :: ebands
+    type(ebands_t), target, optional, intent(in) :: ebands
     type(wfd_t), target, optional, intent(inout) :: wfd
     real(dp), target, optional, intent(in):: cg(:, :)
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
@@ -547,7 +537,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     type(ebands_t), target, intent(in) :: ebands
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
-    type(mpi_type), target, intent(in) :: MPI_enreg
+    type(mpi_type), target, intent(inout) :: MPI_enreg
     type(pseudopotential_type), target, intent(in) :: psps
     type(pawtab_type), target, optional, intent(in) :: pawtab(:)
     type(hdr_type), target, intent(in) :: hdr
@@ -1162,7 +1152,7 @@ subroutine init_mywfc(mywfc, ebands, wfd , cg, cprj, cryst, &
     type(pawcprj_type), target, optional, intent(in):: cprj(:,:)
     type(dataset_type),target, intent(in) :: dtset
     type(datafiles_type),target, intent(in) :: dtfil
-    type(mpi_type), target, intent(in) :: MPI_enreg
+    type(mpi_type), target, intent(inout) :: MPI_enreg
     type(pseudopotential_type), target, intent(in) :: psps
     type(pawtab_type), target, optional, intent(in) :: pawtab(:)
     type(hdr_type), target, intent(in) :: hdr

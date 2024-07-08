@@ -64,6 +64,7 @@ module m_wfk_analyze
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
  use m_wfd_wannier,     only : wfd_run_wannier
+ use m_wfk,             only : wfk_to_bz
 
  implicit none
 
@@ -146,7 +147,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  integer :: optcut,optgr0,optgr1,optgr2,optrad,psp_gencond !,ii
  !integer :: option,option_test,option_dij,optrhoij
  integer :: band,ik_ibz,spin,first_band,last_band
- integer :: ierr,usexcnhat,iomode
+ integer :: ierr,usexcnhat
  integer :: cplex,cplex_dij,cplex_rhoij,ndij,nspden_rhoij,gnt_option
  real(dp),parameter :: spinmagntarget=-99.99_dp
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff,gsqcut_shp
@@ -163,11 +164,11 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
  type(ddkstore_t) :: ds
+ type(dataset_type) :: my_dtset
 !arrays
- integer :: ngfftc(18),ngfftf(18)
+ integer :: ngfftc(18),ngfftf(18), units(2)
  integer,allocatable :: l_size_atm(:)
  real(dp),parameter :: k0(3)=zero
- !real(dp) :: nelect_per_spin(dtset%nsppol),n0(dtset%nsppol)
  real(dp),pointer :: gs_eigen(:,:,:)
  complex(gwpc),allocatable :: ur_ae(:)
  logical,allocatable :: keep_ur(:,:,:),bks_mask(:,:,:)
@@ -185,6 +186,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  ! abirules!
  if (.False.) write(std_out,*)acell,codvsn,rprim,xred
+ units = [std_out, ab_out]
 
  comm = xmpi_world; nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
@@ -415,43 +417,32 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_FREE(paw_onsite)
 
  case (WFK_TASK_WANNIER)
-  ! Construct Wannier functions.
+   ! Construct Wannier functions.
 
-  ! TODO: only when kpoint in IBZ
-  ! First generate WFK for fullBZ
-  !if (my_rank == master) then
-  !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-  !  call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
-  !  call ebands_free(ebands_bz); call hdr_bz%free()
-  !end if
-  !call xmpi_barrier(comm)
+   if (wfk0_hdr%kptopt == 1) then
+     ! Generate WFK in the full BZ (only master works here)
+     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+     if (my_rank == master) then
+       call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", wfkfull_path))
+       call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+       call ebands_free(ebands_bz); call hdr_bz%free()
+     end if
+     call xmpi_barrier(comm)
+     my_dtset = dtset%copy()
+     ebands_bz = wfk_read_ebands(wfkfull_path, comm, hdr_bz)
+     call hdr_realloc_nkpt_arrays(hdr_bz, my_dtset)
+     my_dtset%kptopt = hdr_bz%kptopt
+     call hdr_bz%vs_dtset(my_dtset)
+     call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
+     call ebands_free(ebands_bz); call hdr_bz%free(); call my_dtset%free()
 
-  ABI_MALLOC(keep_ur, (ebands%mband, ebands%nkpt, ebands%nsppol))
-  ABI_MALLOC(bks_mask, (ebands%mband, ebands%nkpt, ebands%nsppol))
-  keep_ur = .False.; bks_mask = .True.
-
-  call wfd_init(wfd,cryst,pawtab,psps,keep_ur,ebands%mband,ebands%nband,ebands%nkpt,dtset%nsppol,bks_mask,&
-    dtset%nspden,dtset%nspinor,ecut_eff,dtset%ecutsm,dtset%dilatmx,wfk0_hdr%istwfk,ebands%kptns,ngfftc,&
-    dtset%nloalg,dtset%prtvol,dtset%pawprtvol,comm)
-
-  ABI_FREE(keep_ur)
-  ABI_FREE(bks_mask)
-  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
-
-  call destroy_mpi_enreg(mpi_enreg)
-  call init_mpi_enreg(mpi_enreg)
-  call init_distribfft_seq(mpi_enreg%distribfft,'c',ngfftc(2),ngfftc(3),'all')
-  call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
-
-  call wfd_run_wannier(cryst=cryst, ebands=ebands,&
-                       hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
-                       ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
-                       dtset=dtset, dtfil=dtfil,  &
-                       pawang=pawang, pawrad=pawrad, &
-                       pawtab=pawtab, psps=psps )
+   else
+     call wfk0_hdr%vs_dtset(dtset)
+     call wfd_run_wannier__(wfk0_path, dtset, ebands, wfk0_hdr)
+   end if
 
  case default
-   ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
+   ABI_ERROR(sjoin("Wrong wfk_task:", itoa(dtset%wfk_task)))
  end select
 
  ! Free memory
@@ -505,8 +496,58 @@ subroutine read_wfd()
 
 end subroutine read_wfd
 
+subroutine wfd_run_wannier__(wfk_filepath, dtset_, ebands_, hdr_)
+
+ type(dataset_type),intent(in) :: dtset_
+ character(len=*),intent(in) :: wfk_filepath
+ type(ebands_t),intent(in) :: ebands_
+ type(hdr_type),intent(in) :: hdr_
+
+ ABI_MALLOC(keep_ur, (ebands_%mband, ebands_%nkpt, ebands_%nsppol))
+ ABI_MALLOC(bks_mask, (ebands_%mband, ebands_%nkpt, ebands_%nsppol))
+ keep_ur = .False.; bks_mask = .True.
+
+ ! Impose istwfk = 1 for all k-points. This is also done in respfn (see inkpts)
+ ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ !wfk0_hdr%istwfk = 1; ebands%istwfk = 1; dtset%istwfk = 1
+
+ call wfd_init(wfd, cryst, pawtab, psps, keep_ur, ebands_%mband, ebands_%nband, ebands_%nkpt, dtset_%nsppol, bks_mask, &
+   dtset_%nspden,  dtset_%nspinor, ecut_eff, dtset_%ecutsm, dtset_%dilatmx, hdr_%istwfk, ebands_%kptns, ngfftc, &
+   dtset_%nloalg, dtset_%prtvol, dtset_%pawprtvol, comm)
+
+ ABI_FREE(keep_ur)
+ ABI_FREE(bks_mask)
+ call wfd%read_wfk(wfk_filepath, iomode_from_fname(wfk_filepath))
+
+ call wfd_run_wannier(cryst=cryst, ebands=ebands_, hdr=hdr_, mpi_enreg=mpi_enreg, &
+                      ngfftc=ngfftc, ngfftf=ngfftf, wfd=wfd, dtset=dtset_, dtfil=dtfil,  &
+                      pawang=pawang, pawrad=pawrad, pawtab=pawtab, psps=psps)
+
+end subroutine wfd_run_wannier__
+
 end subroutine wfk_analyze
 !!***
+
+subroutine hdr_realloc_nkpt_arrays(hdr, dtset)
+
+  use m_copy, only : alloc_copy
+
+  class(hdr_type),intent(in) :: hdr
+  type(dataset_type),intent(inout) :: dtset
+
+  call dtset%free_nkpt_arrays()
+
+  dtset%nkpt = hdr%nkpt
+
+  call alloc_copy(hdr%istwfk, dtset%istwfk)
+  call alloc_copy(hdr%nband, dtset%nband)
+  call alloc_copy(hdr%kptns,   dtset%kpt)
+  call alloc_copy(hdr%kptns, dtset%kptns)
+  !call alloc_copy(hdr%occ, dtset%occ_orig(:,1)
+  call alloc_copy(hdr%wtk, dtset%wtk)
+  call alloc_copy(hdr%kptns, dtset%kptns_hf)
+
+end subroutine hdr_realloc_nkpt_arrays
 
 end module m_wfk_analyze
 !!***

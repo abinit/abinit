@@ -1395,9 +1395,7 @@ end subroutine dtset_initocc_chkneu
 type(dataset_type) function dtset_copy(dtin) result(dtout)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(in) :: dtin
-
 ! *************************************************************************
 
  DBG_ENTER("COLL")
@@ -2352,12 +2350,10 @@ end function dtset_copy
 subroutine dtset_free(dtset)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(inout) :: dtset
-
 ! *************************************************************************
 
-!please, use the same order as the one used in the declaration of the type (see defs_abitypes).
+ ! please, use the same order as the one used in the declaration of the type (see defs_abitypes).
 
  !@dataset_type
 !integer allocatable
@@ -2457,13 +2453,11 @@ end subroutine dtset_free
 subroutine dtset_free_nkpt_arrays(dtset)
 
 !Arguments ------------------------------------
-!scalars
  class(dataset_type),intent(inout) :: dtset
-
 ! *************************************************************************
 
  ABI_SFREE(dtset%istwfk)
- !ABI_SFREE(dtset%nband)
+ ABI_SFREE(dtset%nband)
  ABI_SFREE(dtset%kpt)
  ABI_SFREE(dtset%kptns)
  ABI_SFREE(dtset%occ_orig)

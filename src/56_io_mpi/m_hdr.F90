@@ -2521,7 +2521,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
  ntypat=hdr%ntypat
 
  if (master/=me) then
-!  Allocate all components of hdr
+   ! Allocate all components of hdr
    call hdr_malloc(hdr, bantot, nkpt, nsppol, npsp, natom, ntypat,&
                    nsym, hdr%nshiftk_orig, hdr%nshiftk)
  end if
