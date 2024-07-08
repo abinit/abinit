@@ -3849,7 +3849,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax, cryst%gmet, bz2ibz, inb%kptns, kfull, inb%nkpt, nkfull, cryst%nsym, &
-   sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
+             sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one / nkfull ! weights normalized to one

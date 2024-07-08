@@ -774,7 +774,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
+     !call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
      call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
 
