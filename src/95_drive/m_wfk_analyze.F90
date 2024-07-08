@@ -63,7 +63,6 @@ module m_wfk_analyze
  use m_pspini,          only : pspini
  use m_sigtk,           only : sigtk_kpts_in_erange
  use m_iowf,            only : prtkbff
-
  use m_wfd_wannier,     only : wfd_run_wannier
 
  implicit none
@@ -156,9 +155,9 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  character(len=500) :: msg
  character(len=fnlen) :: wfk0_path,wfkfull_path
  logical :: call_pawinit, use_paw_aeur
- type(hdr_type) :: wfk0_hdr, hdr_kfull
- type(crystal_t) :: cryst
- type(ebands_t) :: ebands
+ type(hdr_type) :: wfk0_hdr, hdr_bz
+ type(crystal_t) :: cryst, cryst_dtset
+ type(ebands_t) :: ebands, ebands_bz
  type(pawfgr_type) :: pawfgr
  !type(paw_dmft_type) :: paw_dmft
  type(mpi_type) :: mpi_enreg
@@ -207,6 +206,13 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
  cryst = wfk0_hdr%get_crystal()
  call cryst%print(header="Crystal structure from WFK file")
+
+ ! Compare structure with the one computed from input file.
+ cryst_dtset = dtset%get_crystal(1)
+ if (cryst%compare(cryst_dtset, header=" Comparing WFK crystal with crystal from dtset") /= 0) then
+   ABI_ERROR("Crystal structure from WFK and dataser do not agree! Check messages above!")
+ end if
+ call cryst_dtset%free()
 
  ebands = ebands_from_hdr(wfk0_hdr, maxval(wfk0_hdr%nband), gs_eigen)
 
@@ -324,13 +330,14 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ! Read wfk0_path and build WFK in full BZ.
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_kfull)
+     call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+     call ebands_free(ebands_bz)
 
      ! Write KB form factors.
      if (dtset%prtkbff == 1 .and. dtset%iomode == IO_MODE_ETSF .and. dtset%usepaw == 0) then
-       call prtkbff(wfkfull_path, hdr_kfull, psps, dtset%prtvol)
+       call prtkbff(wfkfull_path, hdr_bz, psps, dtset%prtvol)
      end if
-     call hdr_kfull%free()
+     call hdr_bz%free()
    end if
    call xmpi_barrier(comm)
 
@@ -408,13 +415,14 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
    ABI_FREE(paw_onsite)
 
  case (WFK_TASK_WANNIER)
-  ! Construct Wannier function.
+  ! Construct Wannier functions.
 
   ! TODO: only when kpoint in IBZ
   ! First generate WFK for fullBZ
   !if (my_rank == master) then
   !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-  !  call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
+  !  call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+  !  call ebands_free(ebands_bz); call hdr_bz%free()
   !end if
   !call xmpi_barrier(comm)
 
@@ -428,8 +436,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 
   ABI_FREE(keep_ur)
   ABI_FREE(bks_mask)
-  iomode= iomode_from_fname(wfk0_path)
-  call wfd%read_wfk(wfk0_path, iomode)
+  call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
 
   call destroy_mpi_enreg(mpi_enreg)
   call init_mpi_enreg(mpi_enreg)
@@ -437,11 +444,11 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
   call init_distribfft_seq(mpi_enreg%distribfft,'f',ngfftf(2),ngfftf(3),'all')
 
   call wfd_run_wannier(cryst=cryst, ebands=ebands,&
-       & hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
-       & ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
-       & dtset=dtset, dtfil=dtfil,  &
-       & pawang=pawang, pawrad=pawrad, &
-       & pawtab=pawtab, psps=psps )
+                       hdr=wfk0_hdr, mpi_enreg=mpi_enreg, &
+                       ngfftc=ngfftc, ngfftf=ngfftf,  wfd=wfd, &
+                       dtset=dtset, dtfil=dtfil,  &
+                       pawang=pawang, pawrad=pawrad, &
+                       pawtab=pawtab, psps=psps )
 
  case default
    ABI_ERROR(sjoin("Wrong task:", itoa(dtset%wfk_task)))
@@ -477,7 +484,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
 !!  read_wfd
 !!
 !! FUNCTION
-!!  Initialize the wavefunction descriptor
+!!  Initialize the wavefunction descriptor from file.
 !!
 !! SOURCE
 
@@ -494,9 +501,8 @@ subroutine read_wfd()
  ABI_FREE(keep_ur)
  ABI_FREE(bks_mask)
 
- !call wfd%read_wfk(wfk0_path,IO_MODE_MPI)
  call wfd%read_wfk(wfk0_path,iomode_from_fname(wfk0_path))
- !call wfd%test_ortho(cryst, pawtab)
+
 end subroutine read_wfd
 
 end subroutine wfk_analyze
