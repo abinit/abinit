@@ -49,6 +49,8 @@ module m_fock_getghc
  use m_mpinfo,           only : proc_distrb_cycle
  use m_abi_linalg
 
+ use, intrinsic :: iso_c_binding, only: c_loc
+
  implicit none
 
  private
@@ -119,16 +121,20 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  integer :: ngfft(18),ngfftf(18)
  integer,pointer :: gboundf(:,:),kg_occ(:,:),gbound_kp(:,:)
  real(dp) :: dotr(6),fockstr(6),for1(3),qphon(3),qvec_j(3),tsec(2),gsc_dum(2,0),rhodum(2,1)
- real(dp) :: rhodum0(0,1,1),str(3,3)
+ real(dp) :: rhodum0(0,1,1)
  real(dp), allocatable :: dummytab(:,:),dijhat(:,:,:,:,:,:),dijhat_tmp(:,:),ffnl_kp_dum(:,:,:,:),kpg_kp(:,:),occ(:)
- real(dp), allocatable :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
- real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:)
+ real(dp), allocatable, target :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
+ real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
  real(dp), allocatable,target ::cwavef_r(:,:,:,:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
- real(dp) :: rprimd(3,3),for12(3)
+ real(dp) :: rprimd(3,3),for12(3),esum
+ integer,  ABI_CONTIGUOUS pointer :: atom_ifftsph(:,:),atom_nfgd(:)
+ real(dp), ABI_CONTIGUOUS pointer :: stress_ikpt(:,:),atom_rfgd(:,:,:)
+ integer   :: ieigen
+
 
 ! *************************************************************************
 !return
@@ -685,9 +691,6 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
        if (fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
          signs=2;choice=3;cpopt=4;tim_nonlop=17
 
-#ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET UPDATE FROM(vfock,rho12,grnhat_12) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
        ! first contribution
          do idat=1,ndat
            dotr=zero
@@ -710,49 +713,148 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
            end do
          end do ! idat
 
+         ABI_MALLOC(atom_nfgd,    (natom))
+         do iatom=1,natom
+           atom_nfgd(iatom) =      fockcommon%pawfgrtab(iatom)%nfgd
+         end do
+         ABI_MALLOC(atom_ifftsph, (maxval(atom_nfgd), natom))
+         ABI_MALLOC(atom_rfgd,    (3, maxval(atom_nfgd), natom))
+         do iatom=1,natom
+           atom_ifftsph(1:atom_nfgd(iatom),iatom) = fockcommon%pawfgrtab(iatom)%ifftsph(1:atom_nfgd(iatom))
+           atom_rfgd(:,1:atom_nfgd(iatom),iatom) =  fockcommon%pawfgrtab(iatom)%rfgd(:,1:atom_nfgd(iatom))
+         end do
+         stress_ikpt =>  fockcommon%stress_ikpt
+         ieigen = fockcommon%ieigen
+
        ! second contribution
-         do idat=1,ndat
-           do idat_occ=1,ndat_occ
-             str=zero
-             do iatom=1,natom
+         !if(.true.) then
+         if(gpu_option==ABI_GPU_DISABLED) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           !$OMP TARGET UPDATE FROM(vfock,grnhat_12) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+           ABI_MALLOC(strdat, (3,3,ndat_occ,ndat))
+           strdat=zero
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
                do idir=1,3
                  do idir1=1,3
-                   do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
-                     ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
-                     str(idir,idir1)=str(idir,idir1)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
-    &                 vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
+                   esum=0
+                   do iatom=1,natom
+                     do ifft=1,atom_nfgd(iatom)
+                       !ind=fockcommon%pawfgrtab(iatom)%ifftsph(ifft)
+                       ind=atom_ifftsph(ifft,iatom)
+                       !strdat(idir,idir1,idat_occ,idat)=strdat(idir,idir1,idat_occ,idat)+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+                       esum=esum+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+                          vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*&
+                          atom_rfgd(idir1,ifft,iatom)
+                          !fockcommon%pawfgrtab(iatom)%rfgd(idir1,ifft)
+                      !   vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*atom_rfgd(idir1,ifft,iatom)
+                     end do
                    end do
+                   strdat(idir,idir1,idat_occ,idat)=esum
                  end do
                end do
-             end do
-             do idir=1,3
-               fockstr(idir)=str(idir,idir)
-             end do
-             fockstr(4)=(str(3,2)+str(2,3))*half
-             fockstr(5)=(str(3,1)+str(1,3))*half
-             fockstr(6)=(str(1,2)+str(2,1))*half
-             do idir=1,6
+             end do ! idat_occ
+           end do ! idat
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               do idir=1,3
+                 fockstr(idir)=strdat(idir,idir,idat_occ,idat)
+               end do
+               fockstr(4)=(strdat(3,2,idat_occ,idat)+strdat(2,3,idat_occ,idat))*half
+               fockstr(5)=(strdat(3,1,idat_occ,idat)+strdat(1,3,idat_occ,idat))*half
+               fockstr(6)=(strdat(1,2,idat_occ,idat)+strdat(2,1,idat_occ,idat))*half
+               do idir=1,6
                  fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)+&
-      &           fockstr(idir)/nfftf*occ(idat_occ)*wtk
-             end do
-           end do ! idat_occ
-         end do ! idat
+        &           fockstr(idir)/nfftf*occ(idat_occ)*wtk
+               end do
+             end do ! idat_occ
+           end do ! idat
+           ABI_FREE(strdat)
+         else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           ABI_MALLOC(strdat, (3,3,ndat_occ,ndat))
+           strdat=zero
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(4) MAP(tofrom:strdat) &
+           !$OMP& MAP(to:vfock,grnhat_12,atom_nfgd,atom_rfgd,atom_ifftsph) &
+           !$OMP& PRIVATE(idat,idat_occ,idir,idir1,esum)
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               do idir=1,3
+                 do idir1=1,3
+                   esum=0
+                   !$OMP PARALLEL DO PRIVATE(ifft,ind,iatom) REDUCTION(+:esum)
+                   do iatom=1,natom
+                     do ifft=1,atom_nfgd(iatom)
+                       ind=atom_ifftsph(ifft,iatom)
+                       esum=esum+(vfock(2*ind-1,idat_occ,idat)*grnhat_12(1,ind,1,idir,iatom,idat_occ,idat)-&
+      &                   vfock(2*ind,idat_occ,idat)*grnhat_12(2,ind,1,idir,iatom,idat_occ,idat))*atom_rfgd(idir1,ifft,iatom)
+                     end do
+                   end do
+                   strdat(idir,idir1,idat_occ,idat)=esum
+                 end do
+               end do
+             end do ! idat_occ
+           end do ! idat
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               do idir=1,3
+                 fockstr(idir)=strdat(idir,idir,idat_occ,idat)
+               end do
+               fockstr(4)=(strdat(3,2,idat_occ,idat)+strdat(2,3,idat_occ,idat))*half
+               fockstr(5)=(strdat(3,1,idat_occ,idat)+strdat(1,3,idat_occ,idat))*half
+               fockstr(6)=(strdat(1,2,idat_occ,idat)+strdat(2,1,idat_occ,idat))*half
+               do idir=1,6
+                 stress_ikpt(idir,ieigen+idat-1)=stress_ikpt(idir,ieigen+idat-1)+&
+        &           fockstr(idir)/nfftf*occ(idat_occ)*wtk
+               end do
+             end do ! idat_occ
+           end do ! idat
+           ABI_FREE(strdat)
+#endif
+         end if
+         ABI_FREE(atom_ifftsph)
+         ABI_FREE(atom_nfgd)
+         ABI_FREE(atom_rfgd)
 
        ! third contribution
-         do idat=1,ndat
-           do idat_occ=1,ndat_occ
-             doti=zero
-             do ifft=1,nfftf
-               doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
-             end do
-             fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)-doti/nfftf*occ(idat_occ)*wtk
-           end do ! idat_occ
-         end do ! idat
-!         doti=zero
-!         do ifft=1,nfftf
-!           doti=doti+vfock(2*ifft-1)*rhor_munu(1,ifft)-vfock(2*ifft)*rhor_munu(2,ifft)
-!         end do
-!         fockcommon%stress_ikpt(1:3,fockcommon%ieigen)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen)+doti/nfftf*occ*wtk*half
+         if(gpu_option==ABI_GPU_DISABLED) then
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               doti=zero
+               do ifft=1,nfftf
+                 doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)-vfock(2*ifft,idat_occ,idat)*rho12(2,ifft,nspinor,idat_occ,idat)
+               end do
+               fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)-doti/nfftf*occ(idat_occ)*wtk
+             end do ! idat_occ
+           end do ! idat
+         else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+           ABI_MALLOC(strdat, (1,1,ndat_occ,ndat))
+           strdat=zero
+           !$OMP TARGET TEAMS DISTRIBUTE COLLAPSE(2) &
+           !$OMP& MAP(tofrom:strdat) MAP(to:vfock,rho12) &
+           !$OMP& PRIVATE(idat,idat_occ,idir,idir1,doti)
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               doti=zero
+               !$OMP PARALLEL DO PRIVATE(ifft,ind,iatom) REDUCTION(+:doti)
+               do ifft=1,nfftf
+                 doti=doti+vfock(2*ifft-1,idat_occ,idat)*rho12(1,ifft,nspinor,idat_occ,idat)&
+                          -vfock(2*ifft,idat_occ,idat)  *rho12(2,ifft,nspinor,idat_occ,idat)
+               end do
+               strdat(1,1,idat_occ,idat)=doti
+             end do ! idat_occ
+           end do ! idat
+           do idat=1,ndat
+             do idat_occ=1,ndat_occ
+               fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(1:3,fockcommon%ieigen+idat-1) &
+                 -strdat(1,1,idat_occ,idat)/nfftf*occ(idat_occ)*wtk
+             end do ! idat_occ
+           end do ! idat
+           ABI_FREE(strdat)
+#endif
+         end if
        end if ! end stresses
 
        ABI_FREE(dijhat)
