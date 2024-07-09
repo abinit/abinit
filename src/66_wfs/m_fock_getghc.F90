@@ -712,9 +712,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          signs=2;choice=3;cpopt=4;tim_nonlop=17
 
        ! first contribution
-         do idat=1,ndat
-           dotr=zero
-           do idir=1,6
+         do idir=1,6
+           do idat=1,ndat
              call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
              call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
   &           ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
@@ -730,8 +729,8 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
                fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)-&
     &             dotr(idir)*occ(idat_occ)*wtk/gs_ham%ucvol
              end do ! idat_occ
-           end do
-         end do ! idat
+           end do ! idat
+         end do ! idir
 
          ABI_MALLOC(atom_nfgd,    (natom))
          do iatom=1,natom
