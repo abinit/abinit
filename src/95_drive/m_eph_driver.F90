@@ -787,7 +787,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
       call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
-      call gstore%wannierize(dtset, dtfil)
+      call gstore%wannierize(dtfil)
       call gstore%free()
    end if
 
@@ -807,7 +807,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !        - Pass gstore object to the eph_task routines (what about ebands)?
  !
  !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
- !  call gstore%wannierize(dtset, dtfil)
+ !  call gstore%wannierize(dtfil)
  !  call gstore%free()
 
  !case (XXX)
