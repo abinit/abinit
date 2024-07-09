@@ -706,7 +706,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  select case (dtset%eph_task)
  case (0)
-   ! This is just to access the DDB post-processing tools
+   ! This is just to access the DDB post-processing tools for phonons
    continue
 
  case (1)
@@ -806,15 +806,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
  !        - Pass gstore object to the eph_task routines (what about ebands)?
  !
- !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
- !  call gstore%wannierize(dtfil)
+ !  call gstore%from_gwan_file(dtfil%filgwanin, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%free()
-
- !case (XXX)
- !  path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
- !  call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
- !  call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
- !  call gstore%compute_from_wannier(dtset, dtfil)
 
  case (12, -12)
    ! Migdal-Eliashberg equations (isotropic/anisotropic case)
