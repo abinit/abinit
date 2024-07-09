@@ -114,7 +114,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  logical :: need_ghc,qeq0
  real(dp),parameter :: weight1=one
  real(dp) :: doti,eigen,imcwf,imcwocc,imvloc,invucvol,recwf,recwocc,revloc,wtk
- complex(dpc) :: cinvucvol
+ complex(dpc) :: cinvucvol,cucvol
  type(fock_common_type),pointer :: fockcommon
  type(fock_BZ_type),pointer :: fockbz
 ! Arrays
@@ -158,6 +158,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !Some constants
  invucvol=1.d0/sqrt(gs_ham%ucvol)
  cinvucvol=dcmplx(invucvol,0.0_dp)
+ cucvol=dcmplx(sqrt(gs_ham%ucvol),0.0_dp)
  call matr3inv(gs_ham%gprimd,rprimd)
  cplex_fock=2;nspden_fock=1
  natom=fockcommon%natom
@@ -202,8 +203,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
  ABI_MALLOC(ghc1,(2,npw*ndat))
  ABI_MALLOC(ghc2,(2,npw*ndat))
- ghc1=zero
- ghc2=zero
+#ifdef HAVE_OPENMP_OFFLOAD
+ !$OMP TARGET ENTER DATA MAP(alloc:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+ if(gpu_option==ABI_GPU_DISABLED) then
+   ghc1=zero
+   ghc2=zero
+ else if(gpu_option==ABI_GPU_OPENMP) then
+   call gpu_set_to_zero(ghc1, int(2,c_size_t)*npw*ndat)
+   call gpu_set_to_zero(ghc2, int(2,c_size_t)*npw*ndat)
+ end if
 !*Initialization of the array vlocpsi_r
 !*vlocpsi_r = partial local Fock operator applied to cwavef in r-space and summed over all occupied (jkpt,mu)
  ABI_MALLOC(vlocpsi_r,(cplex_fock*nfftf,ndat))
@@ -645,13 +654,24 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
 &               mpi_enreg,ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
 &               gvnlxc,enl_ndat=dijhat(:,:,:,:,:,idat),&
 &               select_k=K_H_KPRIME)
+
+           if(gpu_option==ABI_GPU_DISABLED) then
+             do idat_occ=1,ndat_occ
+               ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)=ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)&
+  &               -gvnlxc(:,1+(idat_occ-1)*npw*nspinor:idat_occ*npw*nspinor)*occ(idat_occ)*wtk
+             end do ! idat_occ
+           else if(gpu_option==ABI_GPU_OPENMP) then
 #ifdef HAVE_OPENMP_OFFLOAD
-         !$OMP TARGET UPDATE FROM(gvnlxc) IF(gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET TEAMS DISTRIBUTE PARALLEL DO &
+             !$OMP& MAP(to:gvnlxc,ghc2,occ) PRIVATE(idat_occ,ipw)
+             do ipw=1,npw
+               do idat_occ=1,ndat_occ
+                 ghc2(1:2,ipw+(idat-1)*npw*nspinor)=ghc2(1:2,ipw+(idat-1)*npw*nspinor)&
+    &               -gvnlxc(1:2,ipw+(idat_occ-1)*npw*nspinor)*occ(idat_occ)*wtk
+               end do
+             end do ! idat_occ
 #endif
-           do idat_occ=1,ndat_occ
-             ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)=ghc2(:,1+(idat-1)*npw*nspinor:idat*npw*nspinor)&
-&               -gvnlxc(:,1+(idat_occ-1)*npw*nspinor:idat_occ*npw*nspinor)*occ(idat_occ)*wtk
-           end do ! idat_occ
+           end if
          end do ! idat
          call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec)
        end if
@@ -1009,6 +1029,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
 #ifdef HAVE_OPENMP_OFFLOAD
@@ -1060,7 +1083,17 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    call timab(1512,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1547,-1,tsec)
    ABI_FREE(psilocal)
 
-   ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
+   if(gpu_option==ABI_GPU_DISABLED) then
+     ghc1=ghc1*sqrt(gs_ham%ucvol)+ghc2
+   else if(gpu_option==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+     !$OMP TARGET DATA USE_DEVICE_PTR(ghc1,ghc2)
+     call abi_gpu_xaxpy(2,npw*ndat,cucvol,c_loc(ghc1),1,c_loc(ghc2),1)
+     !$OMP END TARGET DATA
+     call gpu_copy(ghc1,ghc2,int(2,c_size_t)*npw*ndat)
+     !$OMP TARGET UPDATE FROM(ghc1)
+#endif
+   end if
 
 !  * If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
    ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
@@ -1115,6 +1148,9 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
    !$OMP TARGET EXIT DATA MAP(delete:cwavef_r) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
    ABI_FREE(cwavef_r)
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET EXIT DATA MAP(delete:ghc1,ghc2) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
    ABI_FREE(ghc1)
    ABI_FREE(ghc2)
 #ifdef HAVE_OPENMP_OFFLOAD
