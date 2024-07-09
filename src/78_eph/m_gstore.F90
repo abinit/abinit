@@ -2983,6 +2983,7 @@ subroutine gstore_set_perts_distrib(gstore, cryst, dvdb, my_npert)
      ! Activate parallelism over perturbations
      ! Build table with list of perturbations treated by this MPI rank inside pert_comm.
      ABI_WARNING("GSTORE with pert_comm%nproc > 1 not tested")
+     my_npert = gqk%my_npert
      call ephtk_set_pertables(cryst%natom, my_npert, pert_table, my_pinfo, gqk%pert_comm%value)
      call dvdb%set_pert_distrib(my_npert, cryst%natom * 3, my_pinfo, pert_table, gqk%pert_comm%value)
      ABI_CHECK(all(my_pinfo(3, :) == gqk%my_iperts), "my_pinfo(3, :) != gqk%my_iperts")
