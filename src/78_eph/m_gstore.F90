@@ -4603,7 +4603,7 @@ subroutine gstore_wannierize(gstore, dtfil)
  integer,parameter :: master = 0
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, my_ik, my_iq
  integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
- character(len=500) :: msg
+ !character(len=500) :: msg
  logical :: keep_umats
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
@@ -4771,9 +4771,9 @@ subroutine gstore_wannierize(gstore, dtfil)
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
    if (my_is /= 0) then
-     ! TODO: and I'm the in the first slice of gqk%grid_comm ...
      gqk => gstore%gqk(my_is)
-     wan => gqk%wan
+     ! TODO: and I'm the in the first slice of gqk%grid_comm ...
+     !gqk%coords_qkpb_sumbp(ndims)
      call gqk%wan%ncwrite_gwan(dtfil, gstore%cryst, gstore%ebands, gqk%pert_comm)
    end if
    call xmpi_barrier(gstore%comm)
