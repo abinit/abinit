@@ -139,7 +139,7 @@ module m_gstore
  !use m_yaml,           only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
- use m_io_tools,       only : iomode_from_fname, file_exists
+ use m_io_tools,       only : iomode_from_fname, file_exists, open_file
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -3963,7 +3963,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
      call replace_ch0(gstore%gmode)
    end if
 
-   ! gstore_gmode was added during the 78_eph/m_varpeq.f90 module development
+   ! gstore_ngqpt was added during the 78_eph/m_varpeq.f90 module development
    gstore%ngqpt(:) = 0
    ncerr = nf90_inq_varid(ncid, "gstore_ngqpt", varid)
    if (ncerr == nf90_noerr) then
@@ -4052,6 +4052,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call xmpi_bcast(gstore%qzone, master, comm, ierr)
    call xmpi_bcast(gstore%kfilter, master, comm, ierr)
    call xmpi_bcast(gstore%gmode, master, comm, ierr)
+   call xmpi_bcast(gstore%ngqpt, master, comm, ierr)
    call xmpi_bcast(gstore%wfk0_path, master, comm, ierr)
    call xmpi_bcast(brange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%erange_spin, master, comm, ierr)
@@ -4601,14 +4602,13 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
  integer,parameter :: master = 0
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, my_ik, my_iq
  integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
- !character(len=500) :: msg
+ character(len=500) :: msg
  logical :: keep_umats
- character(len=fnlen) :: out_path
  type(wan_t),pointer :: wan
  type(gqk_t),pointer :: gqk
 !arrays
  integer :: qptrlatt_(3,3), units(2)
- real(dp) :: weight_qq, qpt(3), kpt(3), kq(3) ! weight_kk,
+ real(dp) :: weight_qq, qpt(3), kpt(3), kq(3)
  complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:)
 ! *************************************************************************
 
@@ -4764,14 +4764,16 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(gww_epq)
  end do ! my_is
 
- ! Write data to disk.
- out_path = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
- call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", out_path))
+ ! ===================
+ ! Write data to disk
+ ! ===================
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
-   if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
+   if (my_is /= 0) then
+     ! TODO: and I'm the in the first slice of gqk%grid_comm ...
      gqk => gstore%gqk(my_is)
-     call gqk%wan%ncwrite_gwan(out_path, gstore%cryst, gstore%ebands, gqk%pert_comm)
+     wan => gqk%wan
+     call gqk%wan%ncwrite_gwan(dtfil, gstore%cryst, gstore%ebands, gqk%pert_comm)
    end if
    call xmpi_barrier(gstore%comm)
  end do ! spin

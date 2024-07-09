@@ -3746,22 +3746,28 @@ end subroutine wan_interp_eph_manyq
 !!
 !! SOURCE
 
-subroutine wan_ncwrite_gwan(wan, gwan_filepath, cryst, ebands, pert_comm)
+subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
 
 !Arguments ------------------------------------
  class(wan_t),target,intent(in) :: wan
- character(len=*),intent(in) :: gwan_filepath
+ type(datafiles_type),intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
  type(xcomm_t),intent(in) :: pert_comm
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, root_ncid, spin_ncid, ncerr, natom3
+ integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, units(2)
  real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
+ character(len=fnlen) :: gwan_filepath, txt_path
+ character(len=500) :: msg
 !************************************************************************
 
+ units = [std_out, ab_out]
  spin = wan%spin; natom3 = 3 * cryst%natom
+
+ gwan_filepath = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
+ call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", gwan_filepath))
 
  if (spin == 1) then
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
@@ -3808,8 +3814,32 @@ subroutine wan_ncwrite_gwan(wan, gwan_filepath, cryst, ebands, pert_comm)
                       start=[1,1,1,1,1,wan%my_pert_start], &
                       count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  NCF_CHECK(ncerr)
-
  NCF_CHECK(nf90_close(root_ncid))
+
+ !  Check spatial decay of EP matrix elements in wannier basis - electrons + phonons
+ !  We plot: R_e, R_p, max_{m,n,nu} |g(m,n,nu;R_e,R_p)|
+ if (pert_comm%me == 0) then
+   NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, xmpi_comm_self))
+   ! Get group for this spin.
+   NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gwan", "_spin", itoa(spin)), spin_ncid))
+
+   txt_path = strcat(dtfil%filnam_ds(4), "_spin", itoa(spin), "_GWAN.txt")
+   if (open_file(txt_path, msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
+     ABI_ERROR(msg)
+   end if
+   write(ount, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m, n, nu, R_e, :)| [Ha/Bohr] '
+   do ir=1,wan%nr_e
+     !call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+     !ncerr = nf90_get_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
+     !                     start=[1,1,1,1,1,wan%my_pert_start], count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+     !NCF_CHECK(ncerr)
+     !write(ount, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:, ir, iwan, jwan, my_ip)))
+   end do
+
+   close(ount)
+   NCF_CHECK(nf90_close(root_ncid))
+ end if
+
 
 contains
  integer function vid_spin(var_name)
