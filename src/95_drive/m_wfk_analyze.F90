@@ -430,7 +430,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
      call xmpi_barrier(comm)
      my_dtset = dtset%copy()
      ebands_bz = wfk_read_ebands(wfkfull_path, comm, hdr_bz)
-     call hdr_realloc_nkpt_arrays(hdr_bz, my_dtset)
+     call hdr_transfer_nkpt_arrays(hdr_bz, my_dtset)
      my_dtset%kptopt = hdr_bz%kptopt
      call hdr_bz%vs_dtset(my_dtset)
      call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
@@ -528,26 +528,31 @@ end subroutine wfd_run_wannier__
 end subroutine wfk_analyze
 !!***
 
-subroutine hdr_realloc_nkpt_arrays(hdr, dtset)
+subroutine hdr_transfer_nkpt_arrays(hdr, dtset)
 
   use m_copy, only : alloc_copy
 
   class(hdr_type),intent(in) :: hdr
   type(dataset_type),intent(inout) :: dtset
 
-  call dtset%free_nkpt_arrays()
+  ABI_SFREE(dtset%istwfk)
+  ABI_SFREE(dtset%kpt)
+  ABI_SFREE(dtset%kptns)
+  ABI_SFREE(dtset%occ_orig)
+  ABI_SFREE(dtset%wtk)
+  ABI_SFREE(dtset%kptns_hf)  ! Free HF k-points as well.
+  ABI_SFREE(dtset%nband)
 
   dtset%nkpt = hdr%nkpt
-
   call alloc_copy(hdr%istwfk, dtset%istwfk)
   call alloc_copy(hdr%nband, dtset%nband)
-  call alloc_copy(hdr%kptns,   dtset%kpt)
+  call alloc_copy(hdr%kptns, dtset%kpt)
   call alloc_copy(hdr%kptns, dtset%kptns)
   !call alloc_copy(hdr%occ, dtset%occ_orig(:,1)
   call alloc_copy(hdr%wtk, dtset%wtk)
   call alloc_copy(hdr%kptns, dtset%kptns_hf)
 
-end subroutine hdr_realloc_nkpt_arrays
+end subroutine hdr_transfer_nkpt_arrays
 
 end module m_wfk_analyze
 !!***
