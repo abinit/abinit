@@ -3860,7 +3860,7 @@ end subroutine wan_ncwrite_gwan
 !! SOURCE
 
 subroutine wan_from_abiwan_gwan(wan, abiwan_filepath, gwan_filepath, spin, nsppol, &
-                                  out_cryst, spin_comm, pert_comm) ! out_ebands,
+                                out_cryst, spin_comm, pert_comm) ! out_ebands,
 
 !Arguments ------------------------------------
  class(wan_t),target,intent(inout) :: wan
@@ -3941,11 +3941,10 @@ end subroutine wan_from_abiwan_gwan
 !!
 !! SOURCE
 
-subroutine wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
+subroutine wan_compare_with_ebands(abiwan_filepath, ebands)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: abiwan_filepath
- type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
 
 !Local variables-------------------------------

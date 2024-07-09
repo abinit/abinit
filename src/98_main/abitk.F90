@@ -314,8 +314,8 @@ program abitk
  case ("abiwan_compare")
    ! Get energies on the IBZ from path
    call get_path_ebands_cryst(path, ebands, cryst, comm)
-   call wan_compare_with_ebands("t14o_DS2_ABIWAN.nc", cryst, ebands)
-   !call wan_compare_with_ebands(abiwan_filepath, cryst, ebands)
+   call wan_compare_with_ebands("t14o_DS2_ABIWAN.nc", ebands)
+   !call wan_compare_with_ebands(abiwan_filepath, ebands)
 
  case ("ebands_mu_T")
    ! Get energies on the IBZ from filepath

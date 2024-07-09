@@ -4591,11 +4591,11 @@ end subroutine gqk_gather
 !!
 !! SOURCE
 
-subroutine gstore_wannierize(gstore, dtset, dtfil)
+subroutine gstore_wannierize(gstore, dtfil)
 
 !Arguments ------------------------------------
  class(gstore_t),target, intent(in) :: gstore
- type(dataset_type),intent(in) :: dtset
+ !type(dataset_type),intent(in) :: dtset
  type(datafiles_type),intent(in) :: dtfil
 
 !Local variables-------------------------------
