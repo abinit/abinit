@@ -85,35 +85,35 @@ module m_mlwfovlp
 
  type,public :: wan_t
 
-   integer :: spin
+   integer :: spin = -1
    ! Spin index.
 
-   integer :: nwan
+   integer :: nwan = -1
    ! Number of Wannier functions.
 
-   integer :: num_bands
+   integer :: num_bands = -1
    ! Number bands seen by wannier90.
 
    !integer :: nbndep,         ! Number of remaining bands after excluding bands in Wannierizatin step
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
                                ! the exclusion from the original Hamiltonian
 
-   integer :: nkbz
+   integer :: nkbz = -1
    ! Number of k-points in the full BZ
 
-   integer :: nr_h, nr_e, nr_p
+   integer :: nr_h = -1, nr_e = -1, nr_p = -1
    ! Number of lattice points for H, electrons, phonons
 
    !integer :: nshiftk
    ! Number of shifts. At present only 1 shift is supported.
 
-   integer :: ngkpt(3)
+   integer :: ngkpt(3) = 0
    ! K-mesh divisions
 
    logical :: have_disentangled
    ! True if disentanglement has been used.
 
-   real(dp) :: spread(3)
+   real(dp) :: spread(3) = -one
    ! Spread of wannier functions.
 
    type(krank_t) :: krank
@@ -126,7 +126,7 @@ module m_mlwfovlp
    ! (nkbz)
    ! Number of bands within the outer window at each k-point
 
-   integer :: bmin, bmax
+   integer :: bmin = -1, bmax = -1
    ! Minimum and maximum band included in the Wannierization.
 
    integer,allocatable :: r_h(:,:), r_e(:,:), r_p(:,:)
@@ -3473,8 +3473,8 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
    if (open_file(out_path, msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
      ABI_ERROR(msg)
    end if
-   write(ount, "(a)")'# Decay of Hamiltonian H in Wannier representation'
-   write(ount, "(a)")'# |R| [Bohr]      Max_{m,n} |H(R,m,n)| [Ha] '
+   write(ount, "(a)")"# Decay of Hamiltonian H in Wannier representation"
+   write(ount, "(a)")"# |R| [Bohr]                 Max_{m,n} |H(R,m,n)| [Ha]"
    do ir=1,nr_h
      write(ount, *) wan%rmod_h(ir), maxval(abs(wan%hwan_r(ir,:,:)))
    end do
@@ -3804,7 +3804,7 @@ subroutine wan_ncwrite_gwan(wan, gwan_filepath, cryst, ebands, pert_comm)
  ! Take into account that the array is distributed over perturbations.
  !NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
  call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
- ncerr = nf90_put_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
+ ncerr = nf90_put_var(spin_ncid, vid_spin("grpw_wwp"), rpt_d6, &
                       start=[1,1,1,1,1,wan%my_pert_start], &
                       count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  NCF_CHECK(ncerr)

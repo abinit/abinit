@@ -326,8 +326,8 @@ contains
   subroutine write_eigenvalues(filew90_eig,eigen, band_in,  eigenvalues_w, &
        & nsppol, nkpt, mband,  dtset, rank, master )
 
-    character(len=fnlen),intent(in) :: filew90_eig(nsppol)
     integer, intent(in) ::  nsppol, nkpt, mband, rank, master
+    character(len=fnlen),intent(in) :: filew90_eig(nsppol)
     logical, intent(in) :: band_in(:, :)
     real(dp), intent(in) :: eigen(mband,nkpt,nsppol)
     real(dp), intent(inout) :: eigenvalues_w(:, :, :)

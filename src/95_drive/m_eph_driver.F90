@@ -771,7 +771,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Compute and write e-ph matrix elements to GSTORE file.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
-     call gstore%from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+     call gstore%from_ncpath(dtfil%filgstorein, dtset%gstore_cplex, dtset, cryst, ebands, ifc, comm)
    else
      path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
      !call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
@@ -781,9 +781,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
-   if (dtfil%filabiwanin /= ABI_NOFILE) call gstore%wannierize(dtset, dtfil)
+   path = gstore%path
    call gstore%free()
+
+   ! Wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
+   if (dtfil%filabiwanin /= ABI_NOFILE) then
+      call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+      call gstore%wannierize(dtset, dtfil)
+      call gstore%free()
+   end if
 
  !case (-11)
  !  Typical workflow for gstore with Wannierization

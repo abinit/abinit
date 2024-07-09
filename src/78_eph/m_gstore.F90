@@ -1365,6 +1365,14 @@ subroutine gstore_print(gstore, unit, header, prtvol)
  do my_is=1,gstore%my_nspins
    spin = gstore%my_spins(my_is)
    gqk => gstore%gqk(my_is)
+   call wrtout(unit, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
+   call wrtout(unit, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
+   call wrtout(unit, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
+   call wrtout(unit, sjoin(" gqk_nb:", itoa(gqk%nb)))
+   call wrtout(unit, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
+   call wrtout(unit, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
+   call wrtout(unit, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
+
    call wrtout(unit, sjoin(ch10, " === MPI distribution ==="))
    call wrtout(unit, sjoin("P Number of CPUs for parallelism over perturbations: ", itoa(gqk%pert_comm%nproc)))
    call wrtout(unit, sjoin("P Number of perturbations treated by this CPU: ",  itoa(gqk%my_npert)))
@@ -1376,13 +1384,6 @@ subroutine gstore_print(gstore, unit, header, prtvol)
    if (gqk%pp_sum_comm%nproc /= 1) then
      call wrtout(unit, sjoin("P Number of CPUs for parallelism over wavevector summation: ", itoa(gqk%pp_sum_comm%nproc)))
    end if
-   call wrtout(unit, sjoin(" gqk_cplex:", itoa(gqk%cplex)), pre_newlines=1)
-   call wrtout(unit, sjoin(" gqk_bstart:", itoa(gqk%bstart)))
-   call wrtout(unit, sjoin(" gqk_bstop:", itoa(gqk%bstop)))
-   call wrtout(unit, sjoin(" gqk_nb:", itoa(gqk%nb)))
-   call wrtout(unit, sjoin(" gqk_my_npert:", itoa(gqk%my_npert)))
-   call wrtout(unit, sjoin(" gqk_my_nk:", itoa(gqk%my_nk)))
-   call wrtout(unit, sjoin(" gqk_my_nq:", itoa(gqk%my_nq)))
 
    if (allocated(gqk%vk_cart_ibz)) then
      write(msg,'(a,f8.1,a)')'- Local memory allocated for vnk_cart_ibz: ',ABI_MEM_MB(gqk%vk_cart_ibz),' [Mb] <<< MEM'
@@ -3821,20 +3822,33 @@ end subroutine gstore_compute
 integer function gstore_check_cplex_qkzone_gmode(gstore, cplex, qzone, kzone, gmode, kfilter) result(ierr)
 
 !Arguments ------------------------------------
- class(gstore_t),intent(in) :: gstore
+ class(gstore_t),target,intent(in) :: gstore
  integer,intent(in) :: cplex
  character(len=*),intent(in) :: qzone, kzone, gmode
  character(len=*),optional,intent(in) :: kfilter
+
+!Local variables-------------------------------
+ integer :: my_is
+ type(gqk_t),pointer :: gqk
 ! *************************************************************************
 
  ierr = 0
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == cplex, sjoin("cplex:", itoa(cplex), "required but got: ", itoa(gstore%gqk(1)%cplex)), ierr)
  ABI_CHECK_NOSTOP(gstore%qzone == qzone, sjoin("qzone: ", qzone, "required but got: ", gstore%qzone), ierr)
  ABI_CHECK_NOSTOP(gstore%kzone == kzone, sjoin("kzone: ", kzone, "required but got: ", gstore%kzone), ierr)
  ABI_CHECK_NOSTOP(gstore%gmode == gmode, sjoin("gmode: ", gmode, "required but got: ", gstore%gmode), ierr)
  if (present(kfilter)) then
-   ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter = ", kfilter, "required but got: ", gstore%kfilter), ierr)
+   ABI_CHECK_NOSTOP(gstore%kfilter == kfilter, sjoin("kfilter: ", kfilter, "required but got: ", gstore%kfilter), ierr)
  end if
+
+ do my_is=1,gstore%my_nspins
+   gqk => gstore%gqk(my_is)
+   ABI_CHECK_NOSTOP(gqk%cplex == cplex, sjoin("cplex:", itoa(cplex), "required but got: ", itoa(gqk%cplex)), ierr)
+   if (cplex == 1) then
+     ABI_CHECK_NOSTOP(allocated(gqk%my_g2), "my_g2 array is not allocated", ierr)
+   else if (cplex == 2) then
+     ABI_CHECK_NOSTOP(allocated(gqk%my_g), "my_g array is not allocated", ierr)
+   end if
+ end do
 
 end function gstore_check_cplex_qkzone_gmode
 !!***
@@ -3882,8 +3896,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
  integer,allocatable :: qglob2bz(:,:), kglob2bz(:,:), qbz2ibz(:,:), kbz2ibz(:,:)
  real(dp) :: qq_ibz(3)
  real(dp),allocatable :: gwork_q(:,:,:,:,:), slice_bb(:,:,:)
- real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:)
- real(dp),allocatable :: pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
+ real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:), pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
 
 ! *************************************************************************
 
@@ -3999,7 +4012,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call gstore_cryst%free()
 
    if (gstore_cplex == 1 .and. with_cplex == 2) then
-     ABI_ERROR("GSTORE file contains |g| while Abinit needs complex g. Regenerate GSTORE file with gstore_cplex 2")
+     ABI_ERROR("GSTORE file contains |g| while ABINIT needs complex g. Recompute GSTORE file with gstore_cplex 2")
    end if
  end if ! master
 
@@ -4514,11 +4527,9 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
 
 !Local variables-------------------------------
 !scalars
- integer :: comm, ierr, ipt_glob, ngather
- integer :: my_ipt, my_ngather, my_ptstart, my_pert, ib, jb
+ integer :: comm, ierr, ipt_glob, ngather, my_ipt, my_ngather, my_ptstart, my_pert, ib, jb
 !arrays
  complex(dp), pointer :: my_g(:,:,:,:)
-
 !----------------------------------------------------------------------
 
  select case(mode)
@@ -4542,7 +4553,6 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    ABI_ERROR(sjoin("Gathering MPI-distributed matrix elements, unsupported mode: ", mode))
  end select
 
-
  g_gathered(:,:,:,:) = zero
  do my_ipt=1,my_ngather
    ipt_glob = my_ipt + my_ptstart - 1
@@ -4551,15 +4561,11 @@ subroutine gqk_gather(gqk, mode, fixed_pt, g_gathered)
    do ib=1,gqk%nb
      do jb=1,gqk%nb
        do my_pert=1,gqk%my_npert
-
          if (mode == "k") then
-           g_gathered(my_pert, jb, ib, ipt_glob) = &
-                 my_g(my_pert, jb, my_ipt, ib)
+           g_gathered(my_pert, jb, ib, ipt_glob) = my_g(my_pert, jb, my_ipt, ib)
          else
-           g_gathered(my_pert, jb, ib, ipt_glob) = &
-                 my_g(my_pert, jb, ib, my_ipt)
+           g_gathered(my_pert, jb, ib, ipt_glob) = my_g(my_pert, jb, ib, my_ipt)
          endif
-
        enddo
      enddo
    enddo
@@ -4592,10 +4598,9 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 
 !Local variables-------------------------------
 !scalars
- !integer,parameter :: master = 0
+ integer,parameter :: master = 0
  integer :: nr_e, nr_p, nwan, iwan, jwan, spin, my_is, my_ip, ir, my_ik, my_iq
- integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj
- integer :: band_kq, band_k, ib_k, ib_kq
+ integer :: my_nk, my_nq, ierr, ik, ikq, my_npert, nwin_k, nwin_kq, ii, jj, band_kq, band_k, ib_k, ib_kq
  !character(len=500) :: msg
  logical :: keep_umats
  character(len=fnlen) :: out_path
@@ -4608,7 +4613,7 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 ! *************************************************************************
 
  units = [std_out, ab_out]
- call wrtout(units, "Computing e-ph vertex in the Wannier representation...")
+ call wrtout(units, " Computing e-ph vertex in the Wannier representation...", pre_newlines=1)
 
  if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "atom", kfilter="none") /= 0) then
    ABI_ERROR("The gstore object is inconsistent with gstore_wannierize. See messages above.")
@@ -4621,7 +4626,6 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    keep_umats = .False.
    call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
    wan => gqk%wan
-   call wan%print(units)
 
    qptrlatt_ = 0
    do ir=1,3
@@ -4630,12 +4634,12 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    call wan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, &
                             gqk%my_pert_start, my_npert, gqk%pert_comm)
    nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
+   if (gqk%grid_comm%me == master) call wan%print(units)
    ! We have allocated grpe_wwp with shape: (nr_p, nr_e, nwan, nwan, my_npert)
 
    ABI_MALLOC(emikr, (nr_e))
    ABI_MALLOC(emiqr, (nr_p))
    ABI_MALLOC(gww_pk, (nwan, nwan, my_npert, my_nk))
-
    ! Intermediate buffer to store the sum over k-points.
    ABI_CALLOC(gww_epq, (nwan, nwan, nr_e, my_npert, my_nq))
 
@@ -4645,16 +4649,13 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 
      ! Loop over my k-points (partial sum over k)
      do my_ik=1,my_nk
-       kpt = gqk%my_kpts(:,my_ik)
-       kq = kpt + qpt
-       ik = wan%krank%get_index(kpt)
-       ikq = wan%krank%get_index(kq)
+       kpt = gqk%my_kpts(:,my_ik); kq = kpt + qpt
+       !call wan%get_umats(kpt, kq, ik, ikq, nwin_k, nwin_kq, u_kc, u_kqc, msg, ierr)
+       ik = wan%krank%get_index(kpt); ikq = wan%krank%get_index(kq)
        ABI_CHECK(ik  /= -1, sjoin("Cannot find kpt: ", ktoa(kpt)))
        ABI_CHECK(ikq /= -1, sjoin("Cannot find k+q: ", ktoa(kq)))
-
        ! Get rotation matrices at k and k+q.
-       nwin_k = wan%dimwin(ik)
-       nwin_kq = wan%dimwin(ikq)
+       nwin_k = wan%dimwin(ik); nwin_kq = wan%dimwin(ikq)
        ABI_MALLOC(u_kc, (1:nwin_k, 1:nwan))
        ABI_MALLOC(u_kqc, (1:nwin_kq, 1:nwan))
        u_kc = wan%u_kc(1:nwin_k, 1:nwan, ik)
@@ -4673,20 +4674,18 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
          ! TODO: This is the tricky part where we have to "align" the bands
          ! gqk%nb = wan%bmax - wan%bmin + 1
 
-
          ! (my_npert, nb, my_nq, nb, my_nk)
          ! (       p, b1_kq,     q, b2_k, k)  -->  <k+q, b1| D_{q,p}H |k, b2>
 
          jj = 0
          do ib_k=1,gqk%nb
-           band_k = ib_k - wan%bmin + 1
-           if (.not. wan%lwindow(band_k, ik)) cycle
-           jj = jj + 1
-           ii = 0
+           band_k = ib_k - wan%bmin + 1; if (.not. wan%lwindow(band_k, ik)) cycle
+           jj = jj + 1; ii = 0
            do ib_kq=1,gqk%nb
-             band_kq = ib_kq - wan%bmin + 1
-             if (.not. wan%lwindow(band_kq, ikq)) cycle
+             band_kq = ib_kq - wan%bmin + 1; if (.not. wan%lwindow(band_kq, ikq)) cycle
              ii = ii + 1
+             g_bb(ii, jj) = zero
+             !print *, "ii, jj, nwin_kq, nwin_k", ii, jj, nwin_kq, nwin_k
              g_bb(ii, jj) = gqk%my_g(my_ip, ib_kq, my_iq, ib_k, my_ik)
            end do
          end do
@@ -4729,12 +4728,12 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
 
    call xmpi_sum(gww_epq, gqk%kpt_comm%value, ierr)
 
-    !----------------------------------------------------------
-    !  Fourier transform to go into Wannier basis
-    !----------------------------------------------------------
-    !
-    ! [Eqn. 24 of PRB 76, 165108 (2007)]
-    ! g(R_e,R_p) = (1/nq) sum_q e^{-iqR_p} g(R_e,q)
+   !----------------------------------------------------------
+   !  Fourier transform to go into Wannier basis
+   !----------------------------------------------------------
+   !
+   ! [Eqn. 24 of PRB 76, 165108 (2007)]
+   ! g(R_e,R_p) = (1/nq) sum_q e^{-iqR_p} g(R_e,q)
 
    ! Loop over my q-points (partial sum over q)
    do my_iq=1,my_nq
@@ -4765,15 +4764,16 @@ subroutine gstore_wannierize(gstore, dtset, dtfil)
    ABI_FREE(gww_epq)
  end do ! my_is
 
- ! Write GWAN.nc netcdf file with g in the Wannier representation.
+ ! Write data to disk.
+ out_path = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
+ call wrtout(units, sjoin("- Writing e-ph vertex in the Wannier representation to file:", out_path))
  do spin=1,gstore%nsppol
    my_is = gstore%spin2my_is(spin)
    if (my_is /= 0) then ! TODO: and I'm the in the first slice of gqk%grid_comm ...
      gqk => gstore%gqk(my_is)
-     out_path = strcat(dtfil%filnam_ds(4), "_GWAN.nc")
      call gqk%wan%ncwrite_gwan(out_path, gstore%cryst, gstore%ebands, gqk%pert_comm)
    end if
-  call xmpi_barrier(gstore%comm)
+   call xmpi_barrier(gstore%comm)
  end do ! spin
 
 end subroutine gstore_wannierize
