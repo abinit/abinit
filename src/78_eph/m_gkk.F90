@@ -596,9 +596,8 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  use m_bz_mesh, only : kpath_t, kpath_new
 
 !Arguments ------------------------------------
-!scalars
+ class(dvdb_t),intent(inout) :: dvdb
  type(dataset_type),target,intent(in) :: dtset
- type(dvdb_t),intent(inout) :: dvdb
  type(ifc_type),intent(in) :: ifc
  character(len=*),intent(in) :: out_ncpath
 
@@ -609,13 +608,13 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  integer :: iq, nu, iatom, ii, jj, kk
  real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
  logical :: with_lr_model
+ type(kpath_t) :: qpath
 !arrays
  integer :: ngfft(18)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
  real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
  real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:), v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
- type(kpath_t) :: qpath
- real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3), values(dvdb%natom3)
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3), glr(3), values(dvdb%natom3)
 
 !************************************************************************
 
@@ -756,7 +755,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
    call dvdb%ftinterp_qpt(qpt, nfft, ngfft, v1scf, dvdb%comm_rpt)
  end if
 
- ! Compute scattering potential in phonon representations instead ot atomic one.
+ ! Compute scattering potential the in phonon representations instead ot atomic one.
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)

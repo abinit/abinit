@@ -52,7 +52,6 @@ program abitk
  use m_common,         only : ebands_from_file, crystal_from_file
  use m_parser,         only : geo_t, geo_from_poscar_path
  use m_phgamma,        only : find_ewin
- use m_mlwfovlp,       only : wan_compare_with_ebands
 
  implicit none
 
@@ -310,12 +309,6 @@ program abitk
    call wrtout(std_out, &
      ch10//" Use `abicomp.py ebands abinitio_EBANDS.nc skw_EBANDS.nc -p combiplot` to compare the bands with AbiPy.", &
      newlines=2)
-
- case ("abiwan_compare")
-   ! Get energies on the IBZ from path
-   call get_path_ebands_cryst(path, ebands, cryst, comm)
-   call wan_compare_with_ebands("t14o_DS2_ABIWAN.nc", ebands)
-   !call wan_compare_with_ebands(abiwan_filepath, ebands)
 
  case ("ebands_mu_T")
    ! Get energies on the IBZ from filepath
