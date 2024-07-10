@@ -452,7 +452,7 @@ AC_DEFUN([_SD_NETCDF_FORTRAN_CHECK_CONFIG], [
     if test -n "${sd_netcdf_fortran_nfconfig}" ; then
       sd_netcdf_fortran_fcflags=$($sd_netcdf_fortran_nfconfig --fflags)
       sd_netcdf_fortran_libs=$($sd_netcdf_fortran_nfconfig --flibs)
-      sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --cflags)
+      sd_netcdf_fortran_cppflags=$($sd_netcdf_fortran_nfconfig --fflags)
     fi
   fi
 
