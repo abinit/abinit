@@ -32,7 +32,7 @@ module m_fock_getghc
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab, time_accu
  use m_symtk,        only : matr3inv
- use m_cgtools,      only : dotprod_g
+ use m_cgtools,      only : dotprod_g,dotprod_g_batch_half
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, fourwf, fourdp
@@ -126,7 +126,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  real(dp), allocatable, target :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
- real(dp), allocatable,target ::cwavef_r(:,:,:,:)
+ real(dp), allocatable,target ::cwavef_r(:,:,:,:),vdotr(:,:),vdoti(:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
@@ -712,6 +712,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
          signs=2;choice=3;cpopt=4;tim_nonlop=17
 
        ! first contribution
+         ABI_MALLOC(vdotr,(ndat_occ,6))
+         ABI_MALLOC(vdoti,(ndat_occ))
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET ENTER DATA MAP(alloc:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
          do idir=1,6
            do idat=1,ndat
              call timab(1515,2,tsec) ; call timab(1514,-1,tsec) ; call timab(1546,-2,tsec)
@@ -719,18 +724,23 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
   &           ndat_occ,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
   &           strout,enl_ndat=dijhat(:,:,:,:,:,idat),select_k=K_H_KPRIME)
              call timab(1514,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1546,-1,tsec) 
+             call dotprod_g_batch_half(vdotr(:,idir),vdoti,gs_ham%istwf_k,npw,ndat_occ,2,&
+                   cwavef(:,npw*nspinor*(idat-1)+1:npw*nspinor*idat),strout,&
+                   mpi_enreg%me_g0,mpi_enreg%comm_fft,gpu_option=gpu_option)
 #ifdef HAVE_OPENMP_OFFLOAD
-             !$OMP TARGET UPDATE FROM(strout) IF(gpu_option==ABI_GPU_OPENMP)
+             !$OMP TARGET UPDATE FROM(vdotr) IF(gpu_option==ABI_GPU_OPENMP)
 #endif
              do idat_occ=1,ndat_occ
-               call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef(:,npw*nspinor*(idat-1)+1:npw*nspinor*idat),&
-                   strout(:,npw*nspinor*(idat_occ-1)+1:npw*nspinor*idat_occ),&
-                   mpi_enreg%me_g0,mpi_enreg%comm_fft)
                fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(idir,fockcommon%ieigen+idat-1)-&
-    &             dotr(idir)*occ(idat_occ)*wtk/gs_ham%ucvol
+    &             vdotr(idat_occ,idir)*occ(idat_occ)*wtk/gs_ham%ucvol
              end do ! idat_occ
            end do ! idat
          end do ! idir
+#ifdef HAVE_OPENMP_OFFLOAD
+         !$OMP TARGET EXIT DATA MAP(delete:vdotr,vdoti) IF(gpu_option==ABI_GPU_OPENMP)
+#endif
+         ABI_FREE(vdotr)
+         ABI_FREE(vdoti)
 
          ABI_MALLOC(atom_nfgd,    (natom))
          do iatom=1,natom
