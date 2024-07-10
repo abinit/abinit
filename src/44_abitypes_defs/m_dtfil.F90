@@ -187,6 +187,10 @@ module m_dtfil
    ! Filename used to read GWAN.nc file.
    ! Initialize via getgwan_filepath
 
+  character(len=fnlen) :: filvarpeqin
+   ! Filename used to read VARPEQ.nc file.
+   ! Initialize via getvarpeq_filepath
+
   character(len=fnlen) :: filstat
    ! tmp//'_STATUS'
 
@@ -640,17 +644,23 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
                  getpath=dtset%getgstore_filepath)
  if (will_read == 0) dtfil%filgstorein = ABI_NOFILE
 
- ! According to getgstore_filepath, build _ABIWAN file name
+ ! According to getabiwan_filepath, build _ABIWAN file name
  stringfile='_ABIWAN.nc'; stringvar='abiwan'
  call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getabiwan_filepath)
  if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
 
- ! According to getgstore_filepath, build _GWAN file name
+ ! According to getgwan_filepath, build _GWAN file name
  stringfile='_GWAN.nc'; stringvar='gwan'
  call mkfilename(filnam, dtfil%filgwanin, dtset%getgwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getgwan_filepath)
  if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
+
+ ! According to getvarpeq_filepath, build _VARPEQ file name
+ stringfile='_VARPEQ.nc'; stringvar='varpeq'
+ call mkfilename(filnam, dtfil%filvarpeqin, dtset%getvarpeq, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getvarpeq_filepath)
+ if (will_read == 0) dtfil%filvarpeqin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
  ! A default is available if getden is 0
