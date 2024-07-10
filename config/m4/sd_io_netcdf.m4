@@ -431,8 +431,8 @@ AC_DEFUN([_SD_NETCDF_CHECK_CONFIG], [
     sd_netcdf_bin="${sd_netcdf_prefix}/bin"
     AC_CHECK_PROG([sd_netcdf_ncconfig],[nc-config],"${sd_netcdf_bin}/nc-config",[path = $bin])
     if test -n "${sd_netcdf_ncconfig}" ; then
-      sd_netcdf_fcflags=$($sd_netcdf_ncconfig --fflags)
-      sd_netcdf_libs=$($sd_netcdf_ncconfig --flibs)
+      sd_netcdf_fcflags=$($sd_netcdf_ncconfig --cflags)
+      sd_netcdf_libs=$($sd_netcdf_ncconfig --libs)
       sd_netcdf_cppflags=$($sd_netcdf_ncconfig --cflags)
     fi
   fi
