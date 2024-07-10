@@ -223,6 +223,7 @@ type, public :: dataset_type
  integer :: getqps = 0
  integer :: getscr = 0
  integer :: getsuscep = 0
+ integer :: getvarpeq = 0
  integer :: getvel = 0
  integer :: getwfk = 0
  integer :: getwfkfine = 0
@@ -659,6 +660,7 @@ type, public :: dataset_type
 
  character(len=fnlen) :: varpeq_aseed = "gaussian"
  character(len=fnlen) :: varpeq_pkind = "none"
+ integer :: varpeq_interpolate = 0
  integer :: varpeq_nstep = 30
  integer :: varpeq_pc_nupdate = 20
  real(dp) :: varpeq_tolgrs = tol6
@@ -1020,6 +1022,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
  character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
+ character(len=fnlen) :: getvarpeq_filepath = ABI_NOFILE
  character(len=fnlen) :: getgstore_filepath = ABI_NOFILE
  character(len=fnlen) :: getabiwan_filepath = ABI_NOFILE
  character(len=fnlen) :: getgwan_filepath = ABI_NOFILE
@@ -1608,6 +1611,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getkden            = dtin%getkden
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
+ dtout%getvarpeq          = dtin%getvarpeq
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
@@ -1618,6 +1622,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getabiwan_filepath = dtin%getabiwan_filepath
  dtout%getgwan_filepath   = dtin%getgwan_filepath
  dtout%getscr_filepath    = dtin%getscr_filepath
+ dtout%getvarpeq_filepath = dtin%getvarpeq_filepath
  dtout%getwfk_filepath    = dtin%getwfk_filepath
  dtout%getwfkfine_filepath= dtin%getwfkfine_filepath
  dtout%getwfq_filepath    = dtin%getwfq_filepath
@@ -2040,6 +2045,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%varpeq_aseed       = dtin%varpeq_aseed
  dtout%varpeq_pkind       = dtin%varpeq_pkind
+ dtout%varpeq_interpolate = dtin%varpeq_interpolate
  dtout%varpeq_nstep       = dtin%varpeq_nstep
  dtout%varpeq_tolgrs      = dtin%varpeq_tolgrs
  dtout%varpeq_pc_nupdate  = dtin%varpeq_pc_nupdate
@@ -3391,6 +3397,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getabiwan getabiwan_filepath getgwan getgwan_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvarpeq getvarpeq_filepath'
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
@@ -3558,8 +3565,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' use_oldchi'
 !V
  list_vars=trim(list_vars)//' vaclst vacnum vacuum vacwidth vcutgeo'
- list_vars=trim(list_vars)//' varpeq_aseed varpeq_gau_params varpeq_nstep varpeq_pkind varpeq_tolgrs'
- list_vars=trim(list_vars)//' varpeq_pc_nupdate varpeq_pc_factor'
+ list_vars=trim(list_vars)//' varpeq_aseed varpeq_gau_params varpeq_interpolate varpeq_nstep varpeq_pkind'
+ list_vars=trim(list_vars)//' varpeq_tolgrs varpeq_pc_nupdate varpeq_pc_factor'
  list_vars=trim(list_vars)//' vdw_nfrag vdw_supercell'
  list_vars=trim(list_vars)//' vdw_tol vdw_tol_3bt vdw_typfrag vdw_xc'
  list_vars=trim(list_vars)//' vdw_df_acutmin vdw_df_aratio vdw_df_damax'

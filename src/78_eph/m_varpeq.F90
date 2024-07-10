@@ -5,13 +5,13 @@
 !! FUNCTION
 !!  Description
 !!
-!! TODO
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2023-2024 ABINIT group (VV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+
+!! TODO
 !!
 !! SOURCE
 
@@ -38,7 +38,8 @@ module m_varpeq
  use defs_datatypes,    only : ebands_t
  use m_fstrings,        only : sjoin, ktoa, ftoa, strcat
  use m_gstore,          only : gstore_t, gqk_t
- use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt
+ use m_io_tools,        only : file_exists
+ use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt, bzlint_t
  use m_symkpt,          only : symkpt
  use m_symtk,           only : mati3inv
  use m_time,            only : cwtime, cwtime_report, timab, sec2str
@@ -117,6 +118,7 @@ module m_varpeq
     !procedure :: get_b_from_displ =>_get_b_from_displ
 
     procedure :: seed_a => polstate_seed_a
+    procedure :: load_a => polstate_load_a
 
     procedure :: get_norm => polstate_get_norm
     procedure :: gather => polstate_gather
@@ -146,6 +148,7 @@ module m_varpeq
    integer :: pc_nupdate = -1
    integer :: ncid = nctk_noid
 
+   integer :: nsppol
    integer :: max_nk
    integer :: max_nq
    integer :: max_nb
@@ -154,6 +157,16 @@ module m_varpeq
    real(dp) :: tolgrs
 
    real(dp) :: gau_params(2)
+
+   logical :: is_complete = .False.
+   logical :: restart = .False.
+   logical :: interpolate = .False.
+
+   integer :: ngkpt(3)
+
+   integer, allocatable :: nk_spin(:)
+   integer, allocatable :: nq_spin(:)
+   integer, allocatable :: nb_spin(:)
 
    real(dp), allocatable :: kpts_spin(:,:,:)
    real(dp), allocatable :: qpts_spin(:,:,:)
@@ -177,7 +190,9 @@ module m_varpeq
     procedure :: collect => varpeq_collect
     procedure :: print => varpeq_print
     procedure :: ncwrite => varpeq_ncwrite
-    !procedure :: ncread => ncread
+    procedure :: ncread => varpeq_ncread
+    procedure :: compare => varpeq_compare
+    procedure :: setup => varpeq_setup
 
  end type varpeq_t
 !!***
@@ -213,6 +228,7 @@ subroutine varpeq(gstore, dtset, dtfil)
 !----------------------------------------------------------------------
 
  call vpq%init(gstore, dtset)
+ call vpq%setup(dtfil)
  call vpq%solve()
  call vpq%print()
  call vpq%ncwrite(dtset, dtfil)
@@ -228,10 +244,7 @@ end subroutine varpeq
 !!  varpeq_free
 !!
 !! FUNCTION
-!!
-!! INPUTS
-!!
-!! OUTPUT
+!!  Free allocatable arrays
 !!
 !! SOURCE
 
@@ -245,25 +258,173 @@ subroutine varpeq_free(self)
 
 !----------------------------------------------------------------------
 
+ ! Free allocatable arrays
  ABI_SFREE(self%iter_rec_spin)
  ABI_SFREE(self%nstep2cv_spin)
  ABI_SFREE(self%kpts_spin)
  ABI_SFREE(self%qpts_spin)
  ABI_SFREE(self%a_spin)
  ABI_SFREE(self%b_spin)
+ ABI_SFREE(self%nk_spin)
+ ABI_SFREE(self%nq_spin)
+ ABI_SFREE(self%nb_spin)
 
- do my_is=1,self%gstore%my_nspins
-   call self%polstate(my_is)%free()
- enddo
+ ! Free local datatypes
+ call self%cryst_trinv%free()
 
- self%gstore => null()
-
- ! Close netcdf file.
+ ! Close netcdf file
  if (self%ncid /= nctk_noid) then
    NCF_CHECK(nf90_close(self%ncid))
+   self%ncid = nctk_noid
  end if
 
+ if (self%is_complete) then
+   call self%gaps%free()
+   do my_is=1,self%gstore%my_nspins
+     call self%polstate(my_is)%free()
+   enddo
+   self%gstore => null()
+ endif
+
 end subroutine varpeq_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_compare
+!! NAME
+!!  varpeq_compare
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_compare(self, other, allow_mesh_mismatch)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(in) :: self, other
+ logical, optional, intent(in) :: allow_mesh_mismatch
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ integer :: ierr
+ logical :: mismatch
+
+!----------------------------------------------------------------------
+
+ ierr = 0
+
+ ABI_CHECK_NOSTOP(self%pkind == other%pkind, "Difference found in pkind.", ierr)
+ ABI_CHECK_NOSTOP(self%nsppol == other%nsppol, "Difference found in nsppol.", ierr)
+ msg = " Comparing VAPREQ crystal with GSTORE crystal (time-reversal and inversion symmetries only) "
+ ABI_CHECK_NOSTOP(self%cryst_trinv%compare(other%cryst_trinv, header=msg) == 0, "Difference found in cryst.", ierr)
+   ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
+ ABI_CHECK_NOSTOP(all(self%nb_spin == other%nb_spin), "Difference found in nb_spin.", ierr)
+
+ if (present(allow_mesh_mismatch) .and. (.not. allow_mesh_mismatch)) then
+   ABI_CHECK_NOSTOP(self%max_nk == other%max_nk, "Difference found in max_nk.", ierr)
+   ABI_CHECK_NOSTOP(self%max_nq == other%max_nq, "Difference found in max_nq.", ierr)
+   ABI_CHECK_NOSTOP(all(self%nk_spin == other%nk_spin), "Difference found in nk_spin.", ierr)
+   ABI_CHECK_NOSTOP(all(self%nq_spin == other%nq_spin), "Difference found in nq_spin.", ierr)
+   ABI_CHECK_NOSTOP(all(self%qpts_spin == other%qpts_spin), "Difference found in qpts_spin.", ierr)
+   ABI_CHECK_NOSTOP(all(self%kpts_spin == other%kpts_spin), "Difference found in kpts_spin.", ierr)
+ endif
+
+ ABI_CHECK(ierr == 0, "Fatal error in varpeq_compare, see previous messages!")
+
+end subroutine varpeq_compare
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_ncread
+!! NAME
+!!  varpeq_ncread
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_ncread(self, path, comm, keep_open)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(inout) :: self
+ character(len=fnlen), intent(in) :: path
+ integer, intent(in) :: comm
+ logical, optional, intent(in) :: keep_open
+
+!Local variables-------------------------------
+ character(len=500) :: msg
+ integer :: ncid, nsppol, natom3
+ real(dp) :: cpu, wall, gflops
+
+!----------------------------------------------------------------------
+
+ ABI_CHECK(file_exists(path), sjoin(" varpeq_ncread: cannot find *VARPEQ.nc file", path))
+
+ call cwtime(cpu, wall, gflops, "start")
+
+ NCF_CHECK(nctk_open_read(ncid, path, comm))
+
+ ! Read crystal structure
+ call self%cryst_trinv%ncread(ncid)
+
+ ! Read varpeq dimensions
+ NCF_CHECK(nctk_get_dim(ncid, "max_nk", self%max_nk))
+ NCF_CHECK(nctk_get_dim(ncid, "max_nq", self%max_nq))
+ NCF_CHECK(nctk_get_dim(ncid, "max_nb", self%max_nb))
+ NCF_CHECK(nctk_get_dim(ncid, "nsppol", self%nsppol))
+ NCF_CHECK(nctk_get_dim(ncid, "natom3", natom3))
+
+ ! Read data
+ ! arrays
+ nsppol = self%nsppol
+ ABI_MALLOC(self%kpts_spin, (3, self%max_nk, nsppol))
+ ABI_MALLOC(self%qpts_spin, (3, self%max_nq, nsppol))
+ ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, nsppol))
+ ABI_MALLOC(self%b_spin, (2, natom3, self%max_nq, nsppol))
+ ABI_MALLOC(self%nk_spin, (nsppol))
+ ABI_MALLOC(self%nq_spin, (nsppol))
+ ABI_MALLOC(self%nb_spin, (nsppol))
+
+ NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("a_spin"), self%a_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("b_spin"), self%b_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("varpeq_pkind"), self%pkind))
+ NCF_CHECK(nf90_get_var(ncid, vid("nk_spin"), self%nk_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("nq_spin"), self%nq_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("nb_spin"), self%nb_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
+
+ if (present(keep_open) .and. keep_open) then
+   self%ncid = ncid
+ else
+   NCF_CHECK(nf90_close(ncid))
+   self%ncid = nctk_noid
+ end if
+
+ call cwtime_report(" varpeq_nread", cpu, wall, gflops)
+
+ self%is_complete = .False.
+
+!----------------------------------------------------------------------
+
+ contains
+  integer function vid(var_name)
+    character(len=*),intent(in) :: var_name
+    vid = nctk_idname(ncid, var_name)
+ end function vid
+
+end subroutine varpeq_ncread
 !!***
 
 !----------------------------------------------------------------------
@@ -290,9 +451,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 !Local variables-------------------------------
  character(len=fnlen) :: path
  integer, parameter :: master = 0
- integer :: my_rank
- integer :: ncid, ncerr
- real(dp) :: cpu_all, wall_all, gflops_all
+ integer :: my_rank, ncid, ncerr
+ real(dp) :: cpu, wall, gflops
 
 !----------------------------------------------------------------------
 
@@ -300,7 +460,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 
  my_rank = xmpi_comm_rank(self%gstore%comm)
 
- call cwtime(cpu_all, wall_all, gflops_all, "start")
+ call cwtime(cpu, wall, gflops, "start")
 
  ! Create netcdf file (only master works, HDF5 + MPI-IO is handled afterwards by reopening the file inside ncwrite_comm)
  path = strcat(dtfil%filnam_ds(4), "_VARPEQ.nc")
@@ -342,6 +502,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("iter_rec", "dp", "six, nstep, nsppol"), &
      nctkarr_t("nk_spin", "int", "nsppol"), &
      nctkarr_t("nq_spin", "int", "nsppol"), &
+     nctkarr_t("nb_spin", "int", "nsppol"), &
      nctkarr_t("brange_spin", "int", "two, nsppol"), &
      nctkarr_t("kpts_spin", "dp", "three, max_nk, nsppol"), &
      nctkarr_t("qpts_spin", "dp", "three, max_nq, nsppol"), &
@@ -349,7 +510,8 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
      nctkarr_t("b_spin", "dp", "two, natom3, max_nq, nsppol"), &
      nctkarr_t("cb_min_spin", "dp", "nsppol"), &
      nctkarr_t("vb_max_spin", "dp", "nsppol"), &
-     nctkarr_t("gstore_ngqpt", "i", "three") &
+     nctkarr_t("gstore_ngqpt", "i", "three"), &
+     nctkarr_t("ngkpt", "i", "three") &
    ])
    NCF_CHECK(ncerr)
 
@@ -370,8 +532,9 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_gau_params"), self%gau_params))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nstep2cv"), self%nstep2cv_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "iter_rec"), self%iter_rec_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%gstore%glob_nk_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%gstore%glob_nq_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%nk_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%nq_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nb_spin"), self%nb_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%gstore%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
@@ -380,11 +543,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "cb_min_spin"), self%gaps%cb_min))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), self%gstore%ngqpt))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngkpt"), self%ngkpt))
 
  end if ! master
 
  call xmpi_barrier(self%gstore%comm)
- call cwtime_report(" varpeq: netcdf", cpu_all, wall_all, gflops_all)
+ call cwtime_report(" varpeq: netcdf", cpu, wall, gflops)
 
 end subroutine varpeq_ncwrite
 !!***
@@ -412,9 +576,7 @@ subroutine varpeq_print(self)
 !scalars
  character(len=5000) :: msg
  integer, parameter :: master = 0
- integer :: comm, nproc, my_rank
- integer :: my_is, spin
- integer :: ii
+ integer :: comm, nproc, my_rank, my_is, spin, ii
  real(dp) :: enpol, enel, enph, enelph, eps, grs
 !arrays
  integer :: units(2)
@@ -486,10 +648,7 @@ subroutine varpeq_collect(self)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr
- integer :: my_is, spin
- integer :: my_ik, ik_glob
- integer :: my_iq, iq_glob
+ integer :: ierr, my_is, spin, my_ik, ik_glob, my_iq, iq_glob
  integer :: oc_iter, oc_a, oc_b
 
 !----------------------------------------------------------------------
@@ -556,6 +715,137 @@ end subroutine varpeq_collect
 
 !----------------------------------------------------------------------
 
+!!****f* m_varpeq/varpeq_setup
+!! NAME
+!!  varpeq_setup
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_setup(self, dtfil)
+
+!Arguments ------------------------------------
+ class(varpeq_t), target, intent(inout) :: self
+ type(datafiles_type), intent(in) :: dtfil
+
+!Local variables-------------------------------
+!scalars
+ character(len=5000) :: msg
+ class(polstate_t), pointer :: polstate
+ type(varpeq_t) :: vpq_loaded
+ type(bzlint_t) :: bzlint
+ integer, parameter :: master = 0
+ integer :: my_rank, comm, ierr, my_is, spin, nk, nb, ik, ib
+!arrays
+ integer :: units(2), ngkpt(3)
+ real(dp) :: kpt(3)
+ real(dp), allocatable :: a_loaded(:,:), kpts_loaded(:,:), ank(:)
+
+!----------------------------------------------------------------------
+
+ ! If a comaptible VARPEQ.nc file is avaliable along with special flags, use it to either
+ ! restart the calculation or interpolate initial charge localization
+
+ units = [std_out, ab_out]
+ comm = self%gstore%comm; my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master .and. (self%interpolate .or. self%restart)) then
+   call wrtout(units, " - getting charge localiztion from a previous VARPEQ.nc file")
+   call vpq_loaded%ncread(dtfil%filvarpeqin, xmpi_comm_self, keep_open=.False.)
+
+   if (self%interpolate .and. self%restart) then
+     msg = " Both varpeq_interpolate and eph_restart flags are provided, &
+       priority is given to the interpolation"
+     ABI_WARNING(msg)
+   endif
+
+   if (self%interpolate) then
+     call wrtout(units, " - interpolating previous A_nk")
+     call self%compare(vpq_loaded, allow_mesh_mismatch=.True.)
+
+     do spin=1,self%nsppol
+       ! prepare for interpolation
+       nk = vpq_loaded%nk_spin(spin)
+       nb = vpq_loaded%nb_spin(spin)
+       ngkpt(:) = vpq_loaded%ngkpt(:)
+       ABI_MALLOC(a_loaded, (2*nb, nk))
+       ABI_MALLOC(kpts_loaded, (3, nk))
+       ABI_MALLOC(ank, (2*nb))
+
+       write(ab_out, *) "from file"
+       do ik=1,nk
+         kpts_loaded(:, ik) = vpq_loaded%kpts_spin(:, ik, spin)
+         do ib=1,nb
+           ! DEBUG
+           a_loaded(2*ib-1, ik) = one
+           a_loaded(2*ib, ik) = zero
+           !a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
+           !a_loaded(2*ib, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
+         enddo
+       enddo
+
+       ! Now, the actual interpolation is performed
+       call bzlint%init(ngkpt, 2*nb, nk, kpts_loaded, a_loaded)
+       self%a_spin(:,:,:,spin) = zero
+
+
+       write(ab_out, *) "interpolation"
+       do ik=1,self%nk_spin(spin)
+         kpt = self%kpts_spin(:, ik, spin)
+         call bzlint%interp(kpt, ank)
+
+         write(ab_out, '(a, 3f8.4)') 'k-point: ', kpt(:)
+         write(ab_out, '(a, 6f8.4)') 'interp: ', ank(:)
+         !write(ab_out, '(a, 3f8.4)') 'k-point: ', kpts_loaded(:,ik)
+         write(ab_out, '(a, 6f8.4)') 'loaded: ', a_loaded(:,ik)
+
+         do ib=1,self%nb_spin(spin)
+           self%a_spin(1, ib, ik, spin) = ank(2*ib-1)
+           self%a_spin(2, ib, ik, spin) = ank(2*ib)
+
+         enddo
+       enddo
+
+       call bzlint%free()
+       ABI_FREE(ank)
+       ABI_FREE(kpts_loaded)
+       ABI_FREE(a_loaded)
+     enddo
+
+   else
+     call wrtout(units, " - restarting from previous A_nk")
+     call self%compare(vpq_loaded, allow_mesh_mismatch=.False.)
+     self%a_spin(:,:,:,:) = vpq_loaded%a_spin(:,:,:,:)
+
+   endif
+
+   call vpq_loaded%free()
+ endif
+ call xmpi_bcast(self%a_spin, master, comm, ierr)
+
+ ! Initialize charge localization in each polstate
+
+ do my_is=1,self%gstore%my_nspins
+   spin = self%gstore%my_spins(my_is)
+   polstate => self%polstate(my_is)
+
+   if (self%interpolate .or. self%restart) then
+     call polstate%load_a(self%a_spin(:,:,:,spin))
+   else
+     call polstate%seed_a(self%aseed, gau_params=self%gau_params)
+   endif
+
+ enddo
+end subroutine varpeq_setup
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_varpeq/varpeq_solve
 !! NAME
 !!  varpeq_solve
@@ -574,9 +864,10 @@ subroutine varpeq_solve(self)
  class(varpeq_t), target, intent(inout) :: self
 
 !Local variables-------------------------------
+ character(len=5000) :: msg
  class(polstate_t), pointer :: polstate
  integer :: my_is, spin
- integer ii
+ integer :: ii
 
 !----------------------------------------------------------------------
 
@@ -586,7 +877,7 @@ subroutine varpeq_solve(self)
    spin = self%gstore%my_spins(my_is)
    polstate => self%polstate(my_is)
 
-   call polstate%seed_a(self%aseed, gau_params=self%gau_params)
+   ! call polstate%seed_a(self%aseed, gau_params=self%gau_params)
 
    do ii=1,self%nstep
      call polstate%localize()
@@ -687,9 +978,7 @@ subroutine varpeq_init(self, gstore, dtset)
  character(len=5000) :: msg
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr
- integer :: my_is, spin, bstart
- integer :: my_iq
+ integer :: ierr, my_is, spin, bstart, my_iq
  real(dp) :: wtq
 
 !----------------------------------------------------------------------
@@ -711,9 +1000,13 @@ subroutine varpeq_init(self, gstore, dtset)
  self%gaps = ebands_get_gaps(gstore%ebands, ierr)
  self%cryst_trinv = gstore%cryst%new_trinv_only()
 
+ self%nsppol = gstore%nsppol
  self%max_nk = maxval(gstore%glob_nk_spin)
  self%max_nq = maxval(gstore%glob_nq_spin)
  self%max_nb = maxval(gstore%brange_spin(2,:) - gstore%brange_spin(1,:)) + 1
+
+ self%restart = (dtset%eph_restart == 1)
+ self%interpolate = (dtset%varpeq_interpolate == 1)
 
  ABI_MALLOC(self%polstate, (gstore%my_nspins))
  ABI_MALLOC(self%iter_rec_spin, (6, self%nstep, gstore%nsppol))
@@ -722,6 +1015,14 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%qpts_spin, (3, self%max_nq, gstore%nsppol))
  ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, gstore%nsppol))
  ABI_MALLOC(self%b_spin, (2, 3*gstore%cryst%natom, self%max_nq, gstore%nsppol))
+ ABI_MALLOC(self%nk_spin, (gstore%nsppol))
+ ABI_MALLOC(self%nq_spin, (gstore%nsppol))
+ ABI_MALLOC(self%nb_spin, (gstore%nsppol))
+
+ self%nk_spin(:) = gstore%glob_nk_spin(:)
+ self%nq_spin(:) = gstore%glob_nq_spin(:)
+ self%nb_spin(:) = gstore%brange_spin(2,:) - gstore%brange_spin(1,:) + 1
+ self%ngkpt(:) = dtset%ngkpt(:)
 
  ! Loop over my spins and initialize polaronic states
  do my_is=1,gstore%my_nspins
@@ -774,6 +1075,11 @@ subroutine varpeq_init(self, gstore, dtset)
    polstate%krank_qpts = polstate%get_krank_glob("q", gstore%ebands%kptrlatt)
 
  enddo
+
+ ! FIXME: fix this hack; it's needed only to setup kpts_spn & qpts_spin prior to all calculations
+ call self%collect()
+
+ self%is_complete = .True.
 
 end subroutine varpeq_init
 !!***
@@ -1211,12 +1517,8 @@ real(dp) function polstate_get_enelph(self) result(enelph)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
- integer :: my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw
- complex(dp) :: g_forw
- complex(dp) :: b
+ integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ complex(dp) :: a_from, a_forw, g_forw, b
 !arrays
  integer, allocatable :: kpq_map(:, :)
  real(dp) :: kpt(3)
@@ -1278,9 +1580,7 @@ real(dp) function polstate_get_enph(self) result(enph)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
-
+ integer :: ierr, my_iq, my_pert
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -1318,8 +1618,7 @@ real(dp) function polstate_get_enel(self) result(enel)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_ik, ik_ibz, ib
+ integer :: ierr, my_ik, ik_ibz, ib
 
 !----------------------------------------------------------------------
 
@@ -1360,12 +1659,8 @@ subroutine polstate_get_b_from_a(self)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
- integer :: my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw
- complex(dp) :: g_forw
- complex(dp) :: b_tmp
+ integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ complex(dp) :: a_from, a_forw, g_forw, b_tmp
 !arrays
  integer, allocatable :: qpk_map(:, :)
  real(dp) :: qpt(3)
@@ -1412,6 +1707,56 @@ end subroutine polstate_get_b_from_a
 
 !----------------------------------------------------------------------
 
+!!****f* m_varpeq/polstate_load_a
+!! NAME
+!!  polstate_load_a
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine polstate_load_a(self, varpeq_a)
+
+!Arguments ------------------------------------
+!scalars
+ class(polstate_t), intent(inout) :: self
+!arrays
+ real(dp), intent(in) :: varpeq_a(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ class(gqk_t), pointer :: gqk
+ integer :: my_ik, ik_glob, ib
+ real(dp) :: anorm
+ complex(dp) :: ank
+
+!----------------------------------------------------------------------
+
+ gqk => self%gqk
+
+ do my_ik=1,gqk%my_nk
+   ik_glob = gqk%my_kstart + my_ik - 1
+   do ib=1,gqk%nb
+     ! FIXME: find a better way to represnet vpq%a_spin so I don't have to treat Re & Im part separately
+     ank = varpeq_a(1, ib, ik_glob) + j_dpc*varpeq_a(2, ib, ik_glob)
+     self%my_a(ib, my_ik) = ank
+   enddo
+ enddo
+
+ anorm = self%get_norm('a')
+ self%my_a(:, :) = self%my_a(:, :)*sqrt(one*self%nkbz)/anorm
+
+ call self%gather('a')
+
+end subroutine polstate_load_a
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_varpeq/polstate_seed_a
 !! NAME
 !!  polstate_seed_a
@@ -1436,7 +1781,9 @@ subroutine polstate_seed_a(self, mode, gau_params)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
+ integer :: ierr
  real(dp) :: anorm
+ real(dp), allocatable :: re_rand(:,:), im_rand(:,:)
 
 !----------------------------------------------------------------------
 
@@ -1446,6 +1793,18 @@ subroutine polstate_seed_a(self, mode, gau_params)
  case ("gaussian")
    ABI_CHECK(present(gau_params), "polstate_seed_a: missing gau_params argument")
    call gaussian_(gau_params(1), gau_params(2))
+ case ("random")
+   ABI_MALLOC(re_rand, (gqk%nb, gqk%my_nk))
+   ABI_MALLOC(im_rand, (gqk%nb, gqk%my_nk))
+
+   call random_number(re_rand)
+   call random_number(im_rand)
+   self%my_a(:,:) = re_rand(:,:) + j_dpc*im_rand(:,:)
+
+   call xmpi_sum(self%my_a, gqk%qpt_pert_comm%value, ierr)
+
+   ABI_FREE(re_rand)
+   ABI_FREE(im_rand)
  case default
    ABI_ERROR(sjoin("polstate_seed_a, unsuported mode: ", mode))
  end select
