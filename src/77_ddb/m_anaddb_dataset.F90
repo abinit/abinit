@@ -65,6 +65,7 @@ module m_anaddb_dataset
   integer:: dieflag
   integer:: dipdip
   integer:: dipquad
+  integer:: dissip
   integer:: dossum
   integer:: dos_maxmode
   integer:: ep_scalprod
@@ -160,6 +161,7 @@ module m_anaddb_dataset
   real(dp):: elphsmear
   real(dp):: elph_fermie
   real(dp):: ep_extrael
+  real(dp):: eta
   real(dp):: eta_phongreen
   real(dp):: freeze_displ
   real(dp):: frmax
@@ -420,6 +422,16 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
    ABI_ERROR(message)
  end if
 
+ anaddb_dtset%dissip = 1
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'dissip',tread, 'INT')
+ if(tread == 1) anaddb_dtset%dissip = intarr(1)
+ if(anaddb_dtset%dissip < 0 .or. anaddb_dtset%dissip > 1)then
+   write(message, '(a, i0, 5a)' )&
+   'dissip is ',anaddb_dtset%dissip, ', but the only allowed values',ch10, &
+   'are 0 or 1 .',ch10, 'Action: correct dissip in your input file.'
+   ABI_ERROR(message)
+ end if
+
  anaddb_dtset%ep_scalprod = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'ep_scalprod',tread, 'INT')
  if(tread == 1) anaddb_dtset%ep_scalprod = intarr(1)
@@ -629,6 +641,11 @@ subroutine invars9 (anaddb_dtset, lenstr, natom, string)
      ABI_ERROR(message)
    end if
  end if
+
+ anaddb_dtset%eta = 0.00000_dp
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta',tread, 'DPR')
+ if(tread == 1) anaddb_dtset%eta = dprarr(1)
+
 
  anaddb_dtset%eta_phongreen = 0.000001_dp
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'eta_phongreen',tread, 'DPR')
@@ -1147,10 +1164,10 @@ if(tread == 1) anaddb_dtset%lwf_sigma = dprarr(1)
  anaddb_dtset%omegaflag = 0
  call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'omegaflag',tread, 'INT')
  if(tread == 1) anaddb_dtset%omegaflag = intarr(1)
- if(anaddb_dtset%omegaflag < 0 .or. anaddb_dtset%omegaflag > 2)then
+ if(anaddb_dtset%omegaflag < 0 .or. anaddb_dtset%omegaflag > 3)then
    write(message, '(a, i0, 5a)' )&
    'omegaflag is ',anaddb_dtset%omegaflag, ', but the only allowed values',ch10, &
-   'are between 0 to 2 (included).',ch10, 'Action: correct omegaflag in your input file.'
+   'are between 0 to 3 (included).',ch10, 'Action: correct omegaflag in your input file.'
    ABI_ERROR(message)
  end if
 
@@ -2302,6 +2319,8 @@ subroutine outvars_anaddb (anaddb_dtset, nunit)
    write(nunit, '(3x, a9, 7x, es16.8)')' omegamin',anaddb_dtset%omegamin
    write(nunit, '(3x, a9, 7x, es16.8)')' omegamax',anaddb_dtset%omegamax
    write(nunit, '(3x, a9, 7x, es16.8)')' eta_phongreen',anaddb_dtset%eta_phongreen
+   write(nunit, '(3x, a9, 3i10)')     '    dissip',anaddb_dtset%dissip
+   write(nunit, '(3x, a9, 7x, es16.8)')'      eta',anaddb_dtset%eta
  end if
 
 
@@ -2484,11 +2503,11 @@ subroutine anaddb_chkvars(string)
 !C
  list_vars = trim(list_vars)//' chneut'
 !D
- list_vars = trim(list_vars)//' dieflag dipdip dipquad dossum dosdeltae dossmear dostol dos_maxmode'
+ list_vars = trim(list_vars)//' dieflag dipdip dipquad dissip dossum dosdeltae dossmear dostol dos_maxmode'
 !E
  list_vars = trim(list_vars)//' ep_scalprod eivec elaflag elphflag enunit'
  list_vars = trim(list_vars)//' ep_b_min ep_b_max ep_int_gkk ep_keepbands ep_nqpt ep_nspline ep_prt_yambo'
- list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta_phongreen'
+ list_vars = trim(list_vars)//' elphsmear elph_fermie ep_extrael ep_qptlist eta eta_phongreen'
 !F
  list_vars = trim(list_vars)//' flexoflag freeze_displ frmax frmin'
 !G
