@@ -126,7 +126,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
  real(dp), allocatable, target :: gvnlxc(:,:),ghc1(:,:),ghc2(:,:),grnhat12(:,:,:,:,:,:),grnhat_12(:,:,:,:,:,:,:),forikpt(:,:)
  real(dp), allocatable :: rho12(:,:,:,:,:),rhog_munu(:,:,:,:),rhor_munu(:,:,:,:),vlocpsi_r(:,:),strdat(:,:,:,:)
  real(dp), allocatable :: vfock(:,:,:),psilocal(:,:,:),enlout_dum(:),vectin_dum(:,:),vqg(:),forout(:,:),strout(:,:)
- real(dp), allocatable,target ::cwavef_r(:,:,:,:),vdotr(:,:),vdoti(:)
+ real(dp), allocatable,target ::cwavef_r(:,:,:,:),vdotr(:,:),vdoti(:),vfockstr(:,:,:)
  real(dp), ABI_CONTIGUOUS  pointer :: cwaveocc_r(:,:,:,:,:)
  type(pawcprj_type),pointer :: cwaveocc_prj(:,:)
 
@@ -535,16 +535,16 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg,ndat)
      call timab(1513,2,tsec) ; call timab(1515,-1,tsec) ; call timab(1544,-1,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
-#ifdef HAVE_OPENMP_OFFLOAD
-       !$OMP TARGET UPDATE FROM(rhog_munu) IF(gpu_option==ABI_GPU_OPENMP)
-#endif
+       ABI_MALLOC(vfockstr, (6,ndat_occ,ndat))
+       call strfock(gs_ham%gprimd,fockcommon%gsqcut,vfockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
+&          fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,ndat*ndat_occ,rhog_munu,gs_ham%ucvol,&
+&          qvec_j,gpu_option=gpu_option)
        do idat=1,ndat
        do idat_occ=1,ndat_occ
-         call strfock(gs_ham%gprimd,fockcommon%gsqcut,fockstr,fockcommon%hyb_mixing,fockcommon%hyb_mixing_sr,&
-  &       fockcommon%hyb_range_fock,mpi_enreg,nfftf,ngfftf,fockbz%nkpt_bz,rhog_munu(:,:,idat_occ,idat),gs_ham%ucvol,qvec_j)
-         fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)+fockstr(:)*occ(idat_occ)*wtk
+         fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)=fockcommon%stress_ikpt(:,fockcommon%ieigen+idat-1)+vfockstr(:,idat_occ,idat)*occ(idat_occ)*wtk
        end do ! idat_occ
        end do ! idat
+       ABI_FREE(vfockstr)
        if (fockcommon%usepaw==0.and.(.not.need_ghc)) then
          if (allocated(fockbz%cgocc)) then
 #ifdef HAVE_OPENMP_OFFLOAD
