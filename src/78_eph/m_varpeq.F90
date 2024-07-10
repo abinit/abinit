@@ -813,7 +813,7 @@ subroutine varpeq_setup(self, dtfil)
 
          write(ab_out, '(a, 3f8.4)') 'k-point: ', kpt(:)
          write(ab_out, '(a, 6f8.4)') 'interp: ', ank(:)
-         write(ab_out, '(a, 3f8.4)') 'k-point: ', kpts_loaded(:,ik)
+         !write(ab_out, '(a, 3f8.4)') 'k-point: ', kpts_loaded(:,ik)
          write(ab_out, '(a, 6f8.4)') 'loaded: ', a_loaded(:,ik)
 
          do ib=1,self%nb_spin(spin)

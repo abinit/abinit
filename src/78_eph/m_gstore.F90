@@ -4012,6 +4012,7 @@ subroutine gstore_from_ncpath(gstore, path, with_cplex, dtset, cryst, ebands, if
    call xmpi_bcast(brange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%erange_spin, master, comm, ierr)
    call xmpi_bcast(gstore%qibz, master, comm, ierr)
+   call xmpi_bcast(gstore%ngqpt, master, comm, ierr)
    call xmpi_bcast(gstore%wtq, master, comm, ierr)
    call xmpi_bcast(qbz2ibz, master, comm, ierr)
    call xmpi_bcast(kbz2ibz, master, comm, ierr)
