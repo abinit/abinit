@@ -38,6 +38,7 @@ module m_ddb_magpen
  use m_io_tools,        only : open_file
  use m_cgtools,         only : fxphas_seq
  use m_dynmat,          only : pheigvec_normalize
+ use m_numeric_tools,   only : polcoe
 
  implicit none
 
@@ -80,12 +81,13 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+ subroutine ddb_magpen(ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,dissip,& 
+& magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & ntypat,omegaflag,prtvol,rftyp,ucvol,timdisp,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
+ integer,intent(in) :: dissip,mpert,mpopt,natom,ntypat,omegaflag,prtvol,rftyp,timdisp
  real(dp),intent(in) :: magpen,ucvol
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
@@ -234,7 +236,7 @@ contains
    rfphon(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (iblok /= 0 ) then
-     call mp_ifc(barmagsus,ddb%val,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
+     call mp_ifc(barmagsus,ddb%val,dissip,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
    & natom,nblok,ndim,omega(1),omegaflag,prtopt,prtvol,qphon,xred,zfield)
      
      !Apply ASR
@@ -255,7 +257,7 @@ contains
      call ddb%get_block(jblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    end if
    if (jblok /= 0 ) then
-     call mp_zeff(barmagsus,ddb%val,jblok,lm_epsilon,magsus,mpert,mpopt,&
+     call mp_zeff(barmagsus,ddb%val,dissip,jblok,lm_epsilon,magsus,mpert,mpopt,&
    & natom,nblok,ndim,dum_phongreen,prtopt,prtvol,ucvol,zeff,zfield)
    end if
 
@@ -267,7 +269,7 @@ contains
      call ddb%get_block(lblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    end if
    if (lblok /= 0 ) then
-     call mp_diel(barmagsus,ddb%val,epsilon,lblok,magsus,mpert,mpopt,&
+     call mp_diel(barmagsus,ddb%val,dissip,epsilon,lblok,magsus,mpert,mpopt,&
    & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield)
    end if
 
@@ -279,7 +281,7 @@ contains
    rfmagn(1:2)=1
    call ddb%get_block(iblok, qphon, qphnrm, rfphon, rfelfd, rfstrs, rftyp, omega=omega)
    if (lblok /= 0 ) then
-     call mp_macmagsus(barmagsus,ddb%val,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
+     call mp_macmagsus(barmagsus,ddb%val,dissip,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
    & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
    end if
 
@@ -766,6 +768,7 @@ contains
    do iat1= 1, natom
      do idir1= 1, 3
        icol= (iat1-1)*3 + idir1
+       !MR: caution, this conjg might be incorrect in presence of dissipation
        write(10,*) conjg(zfield(1:ndim,icol)*fac* &
      & exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
      end do
@@ -939,12 +942,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_ifc(barmagsus,blkval,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
+ subroutine mp_ifc(barmagsus,blkval,dissip,iblok,ifcmat,ifcmat_fm,magsus,mpert,mpopt,&
 & natom,nblok,ndim,omega,omegaflag,prtopt,prtvol,qphon,xred,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,omegaflag,prtopt,prtvol
+ integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,omegaflag,prtopt,prtvol
  real(dp),intent(in) :: omega
 !arrays
  real(dp),intent(inout) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -986,7 +989,11 @@ contains
 
  !Calculate the frozen-magnetic flavor
  ifc_zfield(:,:)=zfield(:,1:natom*3)
- fmifc= matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,ifc_zfield))
+ if (dissip==0) then
+   fmifc= matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,ifc_zfield))
+ else if (dissip==1) then
+   fmifc= matmul(transpose(-one*ifc_zfield),matmul(barmagsus,ifc_zfield))
+ end if
  fmifc= barifc + fmifc
 
  ifcmat= fmifc
@@ -994,7 +1001,11 @@ contains
 
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
-   srifc= matmul(transpose(conjg(ifc_zfield)),matmul(magsus,ifc_zfield))
+   if (dissip==0) then
+     srifc= matmul(transpose(conjg(ifc_zfield)),matmul(magsus,ifc_zfield))
+   else if (dissip==1) then
+     srifc= matmul(transpose(-one*ifc_zfield),matmul(magsus,ifc_zfield))
+   end if
    srifc= fmifc - srifc
 
    ifcmat= srifc
@@ -1177,12 +1188,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_diel(barmagsus,blkval,epsilon,iblok,magsus,mpert,mpopt,&
+ subroutine mp_diel(barmagsus,blkval,dissip,epsilon,iblok,magsus,mpert,mpopt,&
 & natom,nblok,ndim,prtopt,prtvol,ucvol,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
+ integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -1223,7 +1234,11 @@ contains
 
 !Calculate the frozen-magnetic flavor
  diel_zfield(:,:)=zfield(:,(natom+2)*3-2:(natom+2)*3)
- fmdielsus= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,diel_zfield))
+ if (dissip==0) then
+   fmdielsus= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,diel_zfield))
+ else if (dissip==1) then
+   fmdielsus= matmul(transpose(-one*diel_zfield),matmul(barmagsus,diel_zfield))
+ end if
  fmdielsus= bardielsus + fmdielsus
  fmepsilon= -four_pi/ucvol*fmdielsus
  fmepsilon(1,1)= one + fmepsilon(1,1)
@@ -1234,7 +1249,11 @@ contains
 
 !Calculate the spin-relaxed flavor
  if (mpopt==2) then
-   srdielsus= matmul(transpose(conjg(diel_zfield)),matmul(magsus,diel_zfield))
+   if (dissip==0) then
+     srdielsus= matmul(transpose(conjg(diel_zfield)),matmul(magsus,diel_zfield))
+   else if (dissip==1) then
+     srdielsus= matmul(transpose(-one*diel_zfield),matmul(magsus,diel_zfield))
+   end if
    srdielsus= fmdielsus - srdielsus
    srepsilon= -four_pi/ucvol*srdielsus
    srepsilon(1,1)= one + srepsilon(1,1)
@@ -1316,12 +1335,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_macmagsus(barmagsus,blkval,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
+ subroutine mp_macmagsus(barmagsus,blkval,dissip,iblok,invbarmagsus,macmagsus,magsus,mpatpol,mpdir,mpert,mpopt,&
 & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,nmdir,prtopt,prtvol
+ integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,nmdir,prtopt,prtvol
  real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: mpatpol(2),mpdir(3)
@@ -1388,14 +1407,22 @@ contains
 !the magnetic susceptibility, i.e., *minus* the second derivative of the total 
 !energy wrt two uniform Zeeman fields. 
 !Calculate the frozen-magnetic flavor
- fmmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(barmagsus,macmag_zfield))
+ if (dissip==0) then
+   fmmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(barmagsus,macmag_zfield))
+ else if (dissip==0) then
+   fmmacmagsus= matmul(transpose(-one*macmag_zfield),matmul(barmagsus,macmag_zfield))
+ end if
  fmmacmagsus= barmacmagsus - fmmacmagsus
 
  macmagsus= fmmacmagsus
 !
 !Calculate the spin-relaxed flavor
  if (mpopt==2) then
-   srmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(magsus,macmag_zfield))
+   if (dissip==0) then
+     srmacmagsus= matmul(transpose(conjg(macmag_zfield)),matmul(magsus,macmag_zfield))
+   else if (dissip==0) then
+     srmacmagsus= matmul(transpose(-one*macmag_zfield),matmul(magsus,macmag_zfield))
+   end if
    srmacmagsus= fmmacmagsus + srmacmagsus
 
    macmagsus= srmacmagsus
@@ -1474,12 +1501,12 @@ contains
 !!
 !! SOURCE
 
- subroutine mp_zeff(barmagsus,blkval,iblok,lm_epsilon,magsus,mpert,mpopt,&
+ subroutine mp_zeff(barmagsus,blkval,dissip,iblok,lm_epsilon,magsus,mpert,mpopt,&
 & natom,nblok,ndim,phongreen,prtopt,prtvol,ucvol,zeff,zfield)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: iblok,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
+ integer,intent(in) :: iblok,dissip,mpert,mpopt,natom,nblok,ndim,prtopt,prtvol
  real(dp), intent(in) :: ucvol
 !arrays
  real(dp),intent(in) :: blkval(2,3,mpert,3,mpert,nblok)
@@ -1525,21 +1552,33 @@ contains
  !Calculate the frozen-magnetic flavor
  ifc_zfield(:,:)=zfield(:,1:natom*3)
  diel_zfield(:,:)=zfield(:,(natom+2)*3-2:(natom+2)*3)
- fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
+ if (dissip==0) then
+   fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
+ else if (dissip==1) then
+   fmzeff= matmul(transpose(-one*diel_zfield),matmul(barmagsus,ifc_zfield))
+ end if
  fmzeff= barzeff - fmzeff
 
  zeff= fmzeff
 
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
-   srzeff= matmul(transpose(conjg(diel_zfield)),matmul(magsus,ifc_zfield))
+   if (dissip==0) then
+     srzeff= matmul(transpose(conjg(diel_zfield)),matmul(magsus,ifc_zfield))
+   else if (dissip==1) then
+     srzeff= matmul(transpose(-one*diel_zfield),matmul(magsus,ifc_zfield))
+   end if
    srzeff= fmzeff + srzeff
  
    zeff= srzeff
  end if
 
  !Now calculate the lattice-mediated contribution to the dielectric tensor
- lm_epsilon=-four_pi/ucvol*matmul(zeff,matmul(phongreen,transpose(conjg(zeff))))
+ if (dissip==0) then
+   lm_epsilon=-four_pi/ucvol*matmul(zeff,matmul(phongreen,transpose(conjg(zeff))))
+ else if (dissip==1) then
+   lm_epsilon=-four_pi/ucvol*matmul(zeff,matmul(phongreen,transpose(-one*zeff)))
+ end if
 
  if (prtopt==1) then
    !Write the results
@@ -1857,6 +1896,7 @@ contains
    do iat1= 1, natom
      do idir1= 1, 3
        icol= (iat1-1)*3 + idir1
+       !MR: Caution, this conjg might be wrong in presence of dissipation
        bc_ps(icol,irow)=conjg(bc_sp(irow,icol)*exp(two_pi*(0.d0,1.d0)* dot_product(qphon,xred(:,iat1))))
      end do
    end do
@@ -2103,13 +2143,14 @@ contains
 !!
 !! SOURCE
 
- subroutine ddb_omega_interpol(amu,ddb,ddb_lw,delta_asrw0,delta_asrw0_fm,eta,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
+ subroutine ddb_omega_interpol(amu,ddb,ddb_lw,delta_asrw0,delta_asrw0_fm, & 
+& dissip,eta,eta_phongreen,outfilename_radix,magpen,mpatpol,mpdir,mpert,mpopt,natom, &
 & nomega,ntypat,omegaflag,omegamax,omegamin,prtvol,rftyp,typat,ucvol,xred)
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: mpert,mpopt,natom,nomega,ntypat,omegaflag,prtvol,rftyp
- real(dp),intent(in) :: eta,magpen,omegamax,omegamin,ucvol
+ integer,intent(in) :: dissip,mpert,mpopt,natom,nomega,ntypat,omegaflag,prtvol,rftyp
+ real(dp),intent(in) :: eta,eta_phongreen,magpen,omegamax,omegamin,ucvol
  character(len=*),intent(in) :: outfilename_radix
 !arrays
  type(ddb_type),intent(inout) :: ddb,ddb_lw
@@ -2120,18 +2161,20 @@ contains
 
 !Local variables -------------------------
 !scalars
- integer :: diel_unit,i,iblok,ifound,ii,imode,ipert1,ipert2,iw,j,jblok,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
+ integer :: diel_unit,i,iblok,ifound,ii,imode,ipert1,ipert2,iw,j,jblok,jw,kblok,lblok,mmom_unit,mmspec_unit,nblok,ndim 
  integer :: nmat,nmdir,nwcalc,phon_unit,prtopt,spin_unit,zeff_unit,zeffspec_unit
  real(dp) :: omegastp
  character(len=5000) :: msg,pfmt
  character(len=fnlen) :: diel_filename,spin_filename,mmom_filename,mmspec_filename
  character(len=fnlen) :: phon_filename,zeff_filename,zeffspec_filename
+ complex(dpc) :: cplxvar,cplx_weta
 !arrays
  real(dp) :: qphnrm(3),qphon(3,3)
  real(dp), allocatable :: dint_barddb(:,:),int_barddb(:,:,:),omega(:),omegacalc(:)
  real(dp), allocatable :: w0hessian(:,:),w0berry(:,:)
  real(dp), allocatable :: eigvec(:,:,:,:,:),phfrq(:,:)
  real(dp), allocatable :: magphonspec(:),mode_magphonspec(:,:),mode_phonspec(:,:),phonspec(:)
+ real(dp), allocatable :: coeffs(:,:)
  complex(dpc), allocatable :: barmagsus(:,:,:),invbarmagsus(:,:,:)
  complex(dpc), allocatable :: invmagsus(:,:,:), lm_magsus(:,:,:), magsus(:,:,:), invhmat(:,:,:)
  complex(dpc), allocatable :: barmmom(:,:,:),mmom(:,:,:), zfield(:,:)
@@ -2206,6 +2249,9 @@ contains
  ABI_MALLOC(ifcmat_fm,(3*natom,3*natom))
  ABI_MALLOC(dint_barddb,(2,ddb%msize))
  ABI_MALLOC(int_barddb,(2,ddb%msize,1))
+ if (omegaflag == 3) then
+   ABI_MALLOC(coeffs,(2,nwcalc))
+ end if
 
 !For linear interpolation detect the w=0 Hessians and Berry curvatures
  if (omegaflag == 2) then
@@ -2261,12 +2307,31 @@ contains
      call lineal_omega_interp(w0hessian,w0berry,eta,ifcmat_fm, &
    & invmagsus(:,:,iw),mpatpol,mpdir,mpert,ddb%msize, &
    & natom,ndim,nmdir,int_barddb,omega(iw),zfield)
+   else if (omegaflag==3) then
+     cplx_weta=cmplx(omega(iw),eta,16)
+     do ii=1,ddb%msize
+       if (all(ddb%flg(ii,:)==1)) then
+         call polcoe(omegacalc,ddb%val(1,ii,:),nwcalc,coeffs(1,:))
+         call polcoe(omegacalc,ddb%val(2,ii,:),nwcalc,coeffs(2,:))
+         cplxvar=cmplx(zero,zero,16)
+         do jw= 1, nwcalc
+           cplxvar= cplxvar + cplx_weta**(jw-1)*cmplx(coeffs(1,jw),coeffs(2,jw),16)
+         end do
+         int_barddb(1,ii,1)=real(cplxvar)
+         int_barddb(2,ii,1)=aimag(cplxvar) 
+       else if (count(ddb%flg(ii,:)==0)/=nwcalc) then
+         write(msg,'(a,a,a)')&
+         'ddb_omega_interpol detects differences between the DDB bloks for each frequency.',ch10,&
+       & ' The interpolation has been stopped.' 
+         ABI_ERROR(msg)
+       end if
+     end do 
    end if
 
 !To deactivate interpolation
 !   int_barddb(:,:,1)=ddb%val(:,:,1)
 
-   if (omegaflag==1) then
+   if (omegaflag==1.or.omegaflag==3) then
      !Calculate the local spin susceptibilities
      call local_spinsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),invmagsus(:,:,iw),&
    & invhmat(:,:,iw),magpen,magsus(:,:,iw),mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol)
@@ -2276,15 +2341,15 @@ contains
    & mpatpol,mpdir,mpert,natom,1,ndim,nmdir,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
   
      !Calculate the dielectric susceptibility
-     call mp_diel(barmagsus(:,:,iw),int_barddb,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
+     call mp_diel(barmagsus(:,:,iw),int_barddb,dissip,epsilon(:,:,iw),1,magsus(:,:,iw),mpert,mpopt,&
    & natom,1,ndim,prtopt,prtvol,ucvol,zfield)
   
      !Calculate the interatomic force constants
-     call mp_ifc(barmagsus(:,:,iw),int_barddb,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
+     call mp_ifc(barmagsus(:,:,iw),int_barddb,dissip,1,ifcmat,ifcmat_fm,magsus(:,:,iw),mpert,mpopt,&
    & natom,1,ndim,omega(iw),omegaflag,prtopt,prtvol,qphon,xred,zfield)
   
      !Calculate the macroscopic magnetic susceptibility
-     call mp_macmagsus(barmagsus(:,:,iw),int_barddb,1,invbarmagsus(:,:,iw),&
+     call mp_macmagsus(barmagsus(:,:,iw),int_barddb,dissip,1,invbarmagsus(:,:,iw),&
    & macmagsus(:,:,iw),magsus(:,:,iw),mpatpol,mpdir,mpert,mpopt,&
    & natom,nblok,ndim,nmdir,prtopt,prtvol,ucvol)
    end if
@@ -2299,16 +2364,16 @@ contains
    end if
 
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
-   call phonon_green(amu,eigvec,eta,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
+   call phonon_green(amu,eigvec,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
  & magphongreen,magphonspec(iw),mode_magphonspec(:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,omega(iw),&
  & phfrq(:,iw),phongreen,phonspec(iw),typat,zfield)
 
-   if (omegaflag==1) then
+   if (omegaflag==1.or.omegaflag==3) then
 !     !Calculate the mode-resolved magnetic moments
 !     call mode_mmom(amu,eigvec,mmom(:,:,iw),mmomspec(:,iw),modemm(:,:,iw),mode_phonspec(:,iw),natom,ndim,ntypat,typat)
 
 !     !Calculate the Born effective charges
-     call mp_zeff(barmagsus(:,:,iw),int_barddb,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
+     call mp_zeff(barmagsus(:,:,iw),int_barddb,dissip,1,lm_epsilon(:,:,iw),magsus(:,:,iw),mpert,mpopt,&
    & natom,1,ndim,phongreen,prtopt,prtvol,ucvol,zeff(:,:,iw),zfield)
 
      !Calculate the mode-resolved Born effective charges
@@ -2316,10 +2381,18 @@ contains
 !   & typat,zeff(:,:,iw),zeffspec(:,iw))
 
      !Calculate here the phonons contribution to the spin susceptibility
-     lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(mmom(:,1:natom*3,iw)))))
+     if (dissip==0) then
+       lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(mmom(:,1:natom*3,iw)))))
+     else if (dissip==1) then
+       lm_magsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(-one*mmom(:,1:natom*3,iw))))
+     end if
 
      !Calclate here the lattice-mediated magnetic moments induced by an electric field
-     lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
+     if (dissip==0) then
+       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(conjg(zeff(:,:,iw)))))
+     else if (dissip==1) then
+       lm_magelsus(:,:,iw)=-matmul(mmom(:,1:natom*3,iw),matmul(phongreen,transpose(-one*zeff(:,:,iw))))
+     end if
 
      !Convert magnetic susceptibilities to the magnon basis
 !     work(:,:)=magsus(:,:,iw)
@@ -2806,6 +2879,7 @@ contains
  ABI_FREE(modezeff)
  ABI_SFREE(w0hessian)
  ABI_SFREE(w0berry)
+ ABI_SFREE(coeffs)
 
  end subroutine ddb_omega_interpol
 !!***
@@ -2877,7 +2951,6 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
 !scalars
  integer :: idir1,idir2,idir3,ipert1,ipert2,ipert3
  integer :: iat1,iat2,icol,irow,idir1_red,idir2_red,ipert1_red,ipert2_red
- real(dp) :: dissip
 !arrays
  real(dp), allocatable :: lhess(:,:,:,:,:)
  
@@ -2890,15 +2963,12 @@ subroutine lineal_omega_interp(blkval,blkval_lw,eta,ifcmat_fm, &
    do idir2= 1, 3
      do ipert1= 1, mpert
        do idir1= 1, 3
-!         dissip=one
-!         if (ipert1>=natom+11+1.and.ipert1<=2*natom.and.ipert1==ipert2.and.idir1==idir2) dissip=eta**4
-         dissip=eta**2
          lhess(1,idir1,ipert1,idir2,ipert2)= blkval(1,idir1,ipert1,idir2,ipert2) + &
        & omega*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3) - &
-       & dissip*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+       & eta*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3)
          lhess(2,idir1,ipert1,idir2,ipert2)= blkval(2,idir1,ipert1,idir2,ipert2) + &
        & omega*blkval_lw(2,idir1,ipert1,idir2,ipert2,idir3,ipert3) + &
-       & dissip*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3)
+       & eta*blkval_lw(1,idir1,ipert1,idir2,ipert2,idir3,ipert3)
 !         lhess(:,idir1,ipert1,idir2,ipert2)= blkval(:,idir1,ipert1,idir2,ipert2) + &
 !       & omega*blkval_lw(:,idir1,ipert1,idir2,ipert2,idir3,ipert3) 
        end do
@@ -3020,7 +3090,7 @@ end subroutine lineal_omega_interp
 #include "abi_common.h"
 
 
-subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,& 
+subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,& 
 & magphongreen,magphonspec,mode_magphonspec,mode_phonspec,natom,ndim,ntypat,omega,&
 & phfrq,phongreen,phonspec,typat,zfield)
 
@@ -3033,7 +3103,7 @@ subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,&
 !Arguments ------------------------------------
 !scalars
  integer, intent(in)  :: natom,ndim,ntypat 
- real(dp), intent(in) :: eta,omega
+ real(dp), intent(in) :: eta_phongreen,omega
  real(dp), intent(out) :: magphonspec,phonspec
 !arrays
  integer, intent(in) :: typat(natom)
@@ -3081,7 +3151,7 @@ subroutine phonon_green(amu,eigvec,eta,ifc,ifc_fm,invmagsus,&
  ABI_MALLOC(dynmat,(pdim,pdim))
  ABI_MALLOC(w2dynmat,(pdim,pdim))
 
- cplx_eta=cmplx(0.0_dp,eta)
+ cplx_eta=cmplx(0.0_dp,eta_phongreen)
  do iat2= 1, natom
    do idir2= 1, 3
      icol= (iat2-1)*3 + idir2
