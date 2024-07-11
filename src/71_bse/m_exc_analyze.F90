@@ -34,7 +34,7 @@ module m_exc_analyze
  use m_bz_mesh,           only : kmesh_t
  use m_crystal,           only : crystal_t
  use m_wfd,               only : wfdgw_t
- use m_fft_mesh,          only : bigbox_fft
+ use m_fft_mesh,          only : supercell_fft
  use m_bse_io,            only : exc_read_eigen
  use m_pptools,           only : printxsf
  use m_pawrad,            only : pawrad_type
@@ -109,7 +109,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  integer :: optcut,optgr0,optgr1,optgr2,optrad
  integer :: ik_bz,ierr,my_rank !ik_ibz, istwf_k, isym_k,itim_k, my_nbbp, npw_k,
  integer :: spin,spin_start,spin_stop,reh
- integer :: rt_idx,art_idx,ii,iatom,nr_tot
+ integer :: rt_idx,art_idx,ii,iatom,sc_nfft
  integer :: irc,ir1,ir2,ir3,wp1,wp2,wp3,wp_idx,eh_fft_idx,eh_rr,rr
  integer :: hsize,xsf_unt,ncells,nvec
  integer :: sc_natom,master
@@ -118,7 +118,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  character(len=500) :: msg
  character(len=fnlen) :: eig_fname,out_fname
 !arrays
- integer :: nrcl(3),bbox(3)
+ integer :: nrcl(3),sc_ngfft(18)
  !integer :: bbp_distrb(Wfd%mband,Wfd%mband),got(Wfd%nproc)
  integer,allocatable :: rcl2fft(:),sc_typat(:),l_size_atm(:),vec_idx(:)
  real(dp),parameter :: origin0(3)=(/zero,zero,zero/)
@@ -189,7 +189,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 
  ! rcl2fft: The image of the point in the small box.
  ! rcl2red: The reduced coordinates of the point in the big box in terms of rprimd.
- call bigbox_fft(nrcl, ngfftf, nr_tot, bbox, rcl2fft, rclred)
+ call supercell_fft(nrcl, ngfftf, sc_nfft, sc_ngfft, rcl2fft, rclred)
  !
  ! Wrap the point to [0,1[ where 1 is not included (tol12)
  call wrap2_zero_one(eh_rcoord, eh_red, eh_shift)
@@ -204,7 +204,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  end do
  write(std_out,*)"Position of (e|h) in the center of the big box in FFT coordinates:",eh_red(:)
 
- eh_rr = 1 + eh_red(1) + eh_red(2)*bbox(1) + eh_red(3)*bbox(1)*bbox(2)
+ eh_rr = 1 + eh_red(1) + eh_red(2)*sc_ngfft(1) + eh_red(3)*sc_ngfft(1)*sc_ngfft(2)
  eh_fft_idx = rcl2fft(eh_rr)
 
  write(std_out,*)" Reduced coordinates of (e|h) in the center of the big box ",rclred(:,eh_rr)
@@ -242,7 +242,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  ABI_FREE(vec_idx)
 
  ! Allocate the excitonic wavefunction on the big box.
- ABI_CALLOC(exc_phi, (nr_tot))
+ ABI_CALLOC(exc_phi, (sc_nfft))
  !
  !got=0;
  !bbp_mask=.FALSE.; bbp_mask(minb:maxb,minb:maxb)=.TRUE.
@@ -279,7 +279,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
      !call wfd_paw_get_aeur(Wfd,band,ik_ibz,spin,Cryst,Paw_onsite,Psps,Pawtab,Pawfgrtab,ur_ae,ur_ae_onsite,ur_ps_onsite)
 
      if (which_fixed==1) then ! electron
-       do rr=1,nr_tot
+       do rr=1,sc_nfft
          wp_idx = rcl2fft(rr)
          r12 = eh_red - rclred(:,rr)
          k_dot_r12 = two_pi * DOT_PRODUCT(k_bz,r12)
@@ -317,9 +317,9 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  call xmpi_sum_master(exc_phi,master,comm,ierr)
  !
  ! The exciton density probability.
- ABI_MALLOC(exc_phi2, (nr_tot))
+ ABI_MALLOC(exc_phi2, (sc_nfft))
 
- do rr=1,nr_tot
+ do rr=1,sc_nfft
    exc_phi2(rr) = ABS(exc_phi(rr))**2
  end do
  !
@@ -359,7 +359,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
      ABI_ERROR(msg)
    end if
 
-   call printxsf(bbox(1),bbox(2),bbox(3),exc_phi2,sc_rprimd,origin0,sc_natom,Cryst%ntypat,sc_typat,&
+   call printxsf(sc_ngfft(1),sc_ngfft(2),sc_ngfft(3),exc_phi2,sc_rprimd,origin0,sc_natom,Cryst%ntypat,sc_typat,&
                  sc_xcart,Cryst%znucl,xsf_unt,0)
 
    close(xsf_unt)
