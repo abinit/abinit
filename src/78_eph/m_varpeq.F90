@@ -170,6 +170,7 @@ module m_varpeq
    integer, allocatable :: nk_spin(:)
    integer, allocatable :: nq_spin(:)
    integer, allocatable :: nb_spin(:)
+   integer, allocatable :: brange_spin(:,:)
 
    real(dp), allocatable :: kpts_spin(:,:,:)
    real(dp), allocatable :: qpts_spin(:,:,:)
@@ -272,6 +273,7 @@ subroutine varpeq_free(self)
  ABI_SFREE(self%nk_spin)
  ABI_SFREE(self%nq_spin)
  ABI_SFREE(self%nb_spin)
+ ABI_SFREE(self%brange_spin)
 
  ! Free local datatypes
  call self%cryst_trinv%free()
@@ -406,6 +408,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  NCF_CHECK(nf90_get_var(ncid, vid("nk_spin"), self%nk_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nq_spin"), self%nq_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("nb_spin"), self%nb_spin))
+ NCF_CHECK(nf90_get_var(ncid, vid("brange_spin"), self%brange_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("ngkpt"), self%ngkpt))
 
  if (present(keep_open) .and. keep_open) then
@@ -538,7 +541,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nk_spin"), self%nk_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nq_spin"), self%nq_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "nb_spin"), self%nb_spin))
-   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%gstore%brange_spin))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "brange_spin"), self%brange_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kpts_spin"), self%kpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "qpts_spin"), self%qpts_spin))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "a_spin"), self%a_spin))
@@ -784,11 +787,8 @@ subroutine varpeq_setup(self, dtfil)
        do ik=1,nk
          kpts_loaded(:, ik) = vpq_loaded%kpts_spin(:, ik, spin)
          do ib=1,nb
-           ! DEBUG
-           a_loaded(2*ib-1, ik) = one
-           a_loaded(2*ib, ik) = zero
-           !a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
-           !a_loaded(2*ib, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
+           a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
+           a_loaded(2*ib, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
          enddo
        enddo
 
@@ -801,11 +801,6 @@ subroutine varpeq_setup(self, dtfil)
        do ik=1,self%nk_spin(spin)
          kpt = self%kpts_spin(:, ik, spin)
          call bzlint%interp(kpt, ank)
-
-         write(ab_out, '(a, 3f8.4)') 'k-point: ', kpt(:)
-         write(ab_out, '(a, 6f8.4)') 'interp: ', ank(:)
-         !write(ab_out, '(a, 3f8.4)') 'k-point: ', kpts_loaded(:,ik)
-         write(ab_out, '(a, 6f8.4)') 'loaded: ', a_loaded(:,ik)
 
          do ib=1,self%nb_spin(spin)
            self%a_spin(1, ib, ik, spin) = ank(2*ib-1)
@@ -1020,10 +1015,12 @@ subroutine varpeq_init(self, gstore, dtset)
  ABI_MALLOC(self%nk_spin, (gstore%nsppol))
  ABI_MALLOC(self%nq_spin, (gstore%nsppol))
  ABI_MALLOC(self%nb_spin, (gstore%nsppol))
+ ABI_MALLOC(self%brange_spin, (2, gstore%nsppol))
 
  self%nk_spin(:) = gstore%glob_nk_spin(:)
  self%nq_spin(:) = gstore%glob_nq_spin(:)
  self%nb_spin(:) = gstore%brange_spin(2,:) - gstore%brange_spin(1,:) + 1
+ self%brange_spin(:,:) = gstore%brange_spin(:,:)
  self%ngkpt(:) = dtset%ngkpt(:)
 
  ! Loop over my spins and initialize polaronic states

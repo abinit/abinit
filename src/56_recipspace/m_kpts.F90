@@ -3363,27 +3363,19 @@ subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
 
  self%ngkpt = ngkpt; self%ndat = ndat
  ! The mesh is closed i.e. periodic images are included.
- self%nx = ngkpt(1) + 1
- self%ny = ngkpt(2) + 1
- self%nz = ngkpt(3) + 1
+ self%nx = ngkpt(1)
+ self%ny = ngkpt(2)
+ self%nz = ngkpt(3)
  ABI_CALLOC(self%vals_grid, (self%nx, self%ny, self%nz, ndat))
 
  ! Insert values in the grid.
  do ik=1,nkpt
    call wrap2_zero_one(kpts(:,ik), kpt_wrap, shift)
    inds = nint(kpt_wrap * self%ngkpt)
-   ix = inds(1); iy = inds(2); iz = inds(3)
+   ! here we need to shift the indices by 1 (since Fortran people like to count starting from 1 (: )
+   ix = inds(1) + 1; iy = inds(2) + 1; iz = inds(3) + 1
    self%vals_grid(ix,iy,iz,:) = values(:, ik)
  end do
-
- ! Add periodic replicas.
- do ix=1,self%nx - 1
-   do iy=1,self%ny - 1
-      self%vals_grid(ix,iy,self%nz,:) = self%vals_grid(ix,iy,1,:)
-   end do
-   self%vals_grid(ix,self%ny,self%nz,:) = self%vals_grid(ix,1,1,:)
- end do
- self%vals_grid(self%nx,:,:,:) = self%vals_grid(1,:,:,:)
 
 end subroutine bzlint_init
 !!***
