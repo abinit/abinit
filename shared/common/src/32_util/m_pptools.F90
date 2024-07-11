@@ -155,9 +155,7 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
 
 ! *************************************************************************
 
- DBG_ENTER("COLL")
-
- if (all(realrecip/= [0,1])) then
+ if (all(realrecip /= [0, 1])) then
    ABI_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
  end if
 
@@ -228,8 +226,6 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  write (nunit,'(a)')' END_DATAGRID_3D'
  write (nunit,'(a)')' END_BLOCK_DATAGRID3D'
 
- DBG_EXIT("COLL")
-
 end subroutine printxsf
 !!***
 
@@ -269,9 +265,7 @@ subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
  real(dp),intent(in) :: fofr(2,ldx,ldy,ldz)
 
 !Local variables-------------------------------
-!scalars
  integer :: ount,ix,iy,iz
-!arrays
 
 ! *************************************************************************
 
@@ -337,9 +331,7 @@ end subroutine print_fofr_ri
 !!
 !! SOURCE
 
-
 subroutine print_fofr_xyzri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,conv_fact,unit)
-
 
 !Arguments -----------------------------------------------
 !scalars
@@ -428,7 +420,6 @@ end subroutine print_fofr_xyzri
 
 subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xcart,unit)
 
-
 !Arguments -----------------------------------------------
 !scalars
  integer,intent(in) :: nx,ny,nz,ldx,ldy,ldz,natom
@@ -442,7 +433,6 @@ subroutine print_fofr_cube(nx,ny,nz,ldx,ldy,ldz,fofr,rprimd,natom,znucl_atom,xca
 !scalars
  integer,parameter :: cplx=2
  integer :: ount,ix,iy,iz,iatom
-!arrays
 
 ! *************************************************************************
 
@@ -526,8 +516,7 @@ end subroutine print_fofr_cube
 !! SOURCE
 
 subroutine printbxsf(eigen,ewind,fermie,gprimd,kptrlatt,mband,&
-& nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
-
+                    nkptirred,kptirred,nsym,use_afm,symrec,symafm,use_tr,nsppol,shiftk,nshiftk,fname,ierr)
 
 !Arguments ------------------------------------
 !scalars
@@ -874,7 +863,6 @@ subroutine printvtk(eigen,v_surf,ewind,fermie,gprimd,kptrlatt,mband,&
      end do !ik1
    end do !ik2
  end do !ik3
-
 
  if (ierr/=0) then
    ABI_FREE(fulltoirred)

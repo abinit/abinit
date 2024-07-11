@@ -58,7 +58,7 @@ MODULE m_fft_mesh
  public :: ctimes_eikr         ! Version for complex array
  public :: phase               ! Compute ph(ig)=$\exp(\pi\ i \ n/ngfft)$ for n=0,...,ngfft/2,-ngfft/2+1,...,-1
  public :: mkgrid_fft          ! Sets the grid of fft (or real space) points to be treated.
- public :: bigbox_fft
+ public :: supercell_fft
 
  interface calc_ceigr
    module procedure calc_ceigr_spc
@@ -1726,9 +1726,9 @@ subroutine mkgrid_fft(ffti3_local,fftn3_distrib,gridcart,nfft,ngfft,rprimd)
 end subroutine mkgrid_fft
 !!***
 
-!!****f* ABINIT/bigbox_fft
+!!****f* ABINIT/supercell_fft
 !! NAME
-!!  bigbox_fft
+!!  supercell_fft
 !!
 !! FUNCTION
 !!
@@ -1738,11 +1738,11 @@ end subroutine mkgrid_fft
 !!
 !! SOURCE
 
-subroutine bigbox_fft(nrcl, ngfftf, nr_tot, bbox, rcl2fft, rclred)
+subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, rcl2fft, rclred)
 
 !Arguments ------------------------------------
- integer,intent(in) :: nrcl(3), ngfftf(18) !,nrcell(3)
- integer,intent(out) :: nr_tot, bbox(3)
+ integer,intent(in) :: nrcl(3), ngfft(18)
+ integer,intent(out) :: sc_nfft, sc_ngfft(18)
  integer,allocatable,intent(out) :: rcl2fft(:)
  real(dp),allocatable,intent(out) :: rclred(:,:)
 
@@ -1750,32 +1750,36 @@ subroutine bigbox_fft(nrcl, ngfftf, nr_tot, bbox, rcl2fft, rclred)
  integer :: irc, ir1, ir2, ir3, wp1, wp2, wp3, wp_idx
 ! *************************************************************************
 
- nr_tot = product(ngfftf(1:3)) * product(nrcl)  ! Total number of points in the big box.
- bbox = nrcl * ngfftf(1:3)
+ sc_ngfft = ngfft
+ sc_ngfft(1:3) = nrcl(1:3) * ngfft(1:3)
+ sc_ngfft(4) = 2*(sc_ngfft(1)/2)+1
+ sc_ngfft(5) = 2*(sc_ngfft(2)/2)+1
+ sc_ngfft(6) = sc_ngfft(3)
+ sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the big box.
 
  ! rcl2fft: The image of the point in the small box.
  ! rcl2red: The reduced coordinates of the point in the big box in terms of rprimd.
- ABI_MALLOC(rcl2fft, (nr_tot))
- ABI_MALLOC(rclred, (3, nr_tot))
+ ABI_MALLOC(rcl2fft, (sc_nfft))
+ ABI_MALLOC(rclred, (3, sc_nfft))
 
  irc = 0
- do ir3=0,bbox(3)-1 ! Loop over the points in the big box.
-   do ir2=0,bbox(2)-1
-     do ir1=0,bbox(1)-1
+ do ir3=0,sc_ngfft(3)-1 ! Loop over the points in the big box.
+   do ir2=0,sc_ngfft(2)-1
+     do ir1=0,sc_ngfft(1)-1
        irc = 1+irc
-       wp1=MODULO(ir1, ngfftf(1)) ! The FFT index of the point wrapped into the original cell.
-       wp2=MODULO(ir2, ngfftf(2))
-       wp3=MODULO(ir3, ngfftf(3))
-       wp_idx = 1 + wp1 + wp2*ngfftf(1) + wp3*ngfftf(1)*ngfftf(2)
+       wp1=MODULO(ir1, ngfft(1)) ! The FFT index of the point wrapped into the original cell.
+       wp2=MODULO(ir2, ngfft(2))
+       wp3=MODULO(ir3, ngfft(3))
+       wp_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
        rcl2fft(irc)  = wp_idx
-       rclred(1,irc) = DBLE(ir1)/ngfftf(1) ! Reduced coordinates in terms of the original cell.
-       rclred(2,irc) = DBLE(ir2)/ngfftf(2)
-       rclred(3,irc) = DBLE(ir3)/ngfftf(3)
+       rclred(1,irc) = DBLE(ir1)/ngfft(1) ! Reduced coordinates in terms of the original cell.
+       rclred(2,irc) = DBLE(ir2)/ngfft(2)
+       rclred(3,irc) = DBLE(ir3)/ngfft(3)
      end do
    end do
  end do
 
-end subroutine bigbox_fft
+end subroutine supercell_fft
 
 END MODULE m_fft_mesh
 !!***
