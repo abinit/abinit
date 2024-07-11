@@ -784,6 +784,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
 !arrays
  integer, allocatable :: nband_rbz(:),icg2_rbz(:,:)
  integer, allocatable :: blkflg_save(:,:,:,:)
+ integer, allocatable :: flg(:,:,:,:)
  integer, pointer     :: kpt_fine_sub(:)
  real(dp)             :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef2(:,:),center(:),eigen0tmp(:),eigenqtmp(:)
@@ -1102,7 +1103,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  end if
 
  if(ieig2rf==1 .or. ieig2rf==2 ) then
-   write(ab_out,'(a)')' Components of second-order derivatives of the electronic energy, EIGR2D.'
+   write(ab_out,'(a)')' Components of second-order derivatives of the electronic energy, EIGR2D, in Ha unit.'
    write(ab_out,'(a)')' For automatic tests, printing the matrix for the first k-point, first band, first atom.'
    do idir1=1,3
      do idir2=1,3
@@ -1112,7 +1113,18 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
      end do ! idir2
    end do ! idir1
  end if
-
+ if(ieig2rf > 2) then
+   write(ab_out,'(a)')' Components of the Sternheimer part only of the second-order derivatives of the electronic energy,'
+   write(ab_out,'(a)')' EIGR2D, in Ha unit.'
+   write(ab_out,'(a)')' For automatic tests, printing the matrix for the first k-point, first band, first atom.'
+   do idir1=1,3
+     do idir2=1,3
+       ar=eig2nkq(1,1,1,idir1,1,idir2,1) ; if(abs(ar)<tol10)ar=zero
+       ai=eig2nkq(2,1,1,idir1,1,idir2,1) ; if(abs(ai)<tol10)ai=zero
+       write (ab_out,'(4i4,2es20.10)') idir1,1,idir2,1,ar,ai
+     end do ! idir2
+   end do ! idir1
+ end if
  if(present(eigbrd))then
    if(smdelta >0) then   !broadening
      write(ab_out,'(a)')' '
@@ -1131,8 +1143,13 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  ! -------------------------
  ! Output d2eig data to file
  ! -------------------------
- if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
-
+ ! Write the second-order derivatives in reduced coordinate of the electronic energy, EIG2D to file, in Hartree unit.
+ ! When ieig2rf==1 or 2 --> EIG(R/I)2D contains the total second-order derivatives
+ ! When ieig2rf > 2 --> EIG(R/I)2D contains the Sternheimer part only.
+ !
+ if (dtset%ieig2rf==1 .or. dtset%ieig2rf==2) then
+   ! SP: For this case, the eig2nkq contains the active space and Sternheimer part
+   !
    ! GA: Here, mpert needs to be replaced by natom
    !     but why is mpert larger than natom in the first place?
    mpert_ = dtset%natom
@@ -1177,7 +1194,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
    call ddb_hdr%free()
    call ddb%free()
 
-   if(smdelta>0) then
+   if (smdelta>0) then
      ! write out _EIGI2D file
 
      call ddb%init(dtset, 1, mpert_, &
@@ -1212,7 +1229,52 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
    ABI_FREE(blkflg_save)
 
  end if !ieig2rf==1.or.ieig2rf==2
+ !
+ if (ieig2rf == 3 .or. ieig2rf == 4 .or. ieig2rf == 5) then
+     ! SP: these cases are used for non-adiabatic quantities. In this routine we do not have access
+     !     to the phonon frequency. Therefore eig2nkq only contains the Sternheimer part.
+     !
+     mpert_ = dtset%natom
 
+     ! Initialize perturbation flags
+     ABI_MALLOC(flg,(3,mpert_,3,mpert_))
+     flg = one
+
+     ! Initialize ddb object
+     call ddb%init(dtset, 1, mpert_, &
+                  mband=bdeigrf,&
+                  nkpt=nkpt_rbz,&
+                  kpt=dtset%kptns(1:3,1:nkpt_rbz),&
+                  with_d2eig=.true.)
+
+     ! Create the ddb header
+     dscrpt=' Note : temporary (transfer) database '
+     call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                       mpert=mpert_,&
+                       xred=xred,occ=occ_pert,&
+                       mband=bdeigrf / dtset%nsppol,&
+                       nkpt=nkpt_rbz,&
+                       kpt=dtset%kptns(:,1:nkpt_rbz))
+
+     ! Set d2eig data
+     call ddb%set_qpt(1, dtset%qptn)
+     call ddb%set_d2eig_reshape(1, eig2nkq, flg)
+
+     ! Open the file and write header
+     call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+     ! Write d2eig data block
+     call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
+     call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
+
+     ! close and free memory
+     call ddb_hdr%close()
+     call ddb_hdr%free()
+     call ddb%free()
+     !
+     ABI_FREE(flg)
+     !
+ end if
 
  if(allocated(smdfun))  then
    ABI_FREE(smdfun)
@@ -1349,14 +1411,13 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  type(ddb_type) :: ddb
 !arrays
  integer,allocatable :: flg(:,:,:,:)
- integer, allocatable :: nband_rbz(:)
+ integer,allocatable :: nband_rbz(:)
  integer,pointer      :: kpt_fine_sub(:)
  real(dp)             :: tsec(2)
  real(dp),allocatable :: center(:)
  real(dp) :: eigen(mband*nsppol),eigen_prime(mband*nsppol)
  real(dp),allocatable :: fan(:,:,:,:,:,:,:)
  real(dp),allocatable :: gkk(:,:,:,:,:)
- real(dp),allocatable :: eig2nkq_tmp(:,:,:,:,:,:,:)
  real(dp),allocatable :: smdfun(:,:)
  real(dp),pointer     :: wgt_sub(:)
 
@@ -1397,11 +1458,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  if(ieig2rf == 4 ) then
    ABI_MALLOC_OR_DIE(fan,(2*mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq,mband), ierr)
    fan(:,:,:,:,:,:,:) = zero
-   ABI_MALLOC_OR_DIE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
-   eig2nkq_tmp(:,:,:,:,:,:,:) = zero
-!  This is not efficient because double the memory. Alternative: use buffer and
-!  print part by part.
-   eig2nkq_tmp = eig2nkq
    if(present(eigbrd))then
      eigbrd(:,:,:,:,:,:,:)=zero
    end if
@@ -1411,11 +1467,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  if(ieig2rf == 5 ) then
    ABI_MALLOC_OR_DIE(gkk,(2*mband*nsppol,dtset%nkpt,3,natom,mband), ierr)
    gkk(:,:,:,:,:) = zero
-   ABI_MALLOC_OR_DIE(eig2nkq_tmp,(2,mband*nsppol,dtset%nkpt,3,natom,3,natom*dim_eig2nkq), ierr)
-   eig2nkq_tmp(:,:,:,:,:,:,:) = zero
-!  This is not efficient because double the memory. Alternative: use buffer and
-!  print part by part.
-   eig2nkq_tmp = eig2nkq
    if(present(eigbrd))then
      eigbrd(:,:,:,:,:,:,:)=zero
    end if
@@ -1621,12 +1672,10 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    end if
    if(ieig2rf == 4) then
      call xmpi_sum(eig2nkq,spaceworld,ierr)
-     call xmpi_sum(eig2nkq_tmp,spaceworld,ierr)
      call xmpi_sum(fan,spaceworld,ierr)
    end if
    if(ieig2rf == 5) then
      call xmpi_sum(eig2nkq,spaceworld,ierr)
-     call xmpi_sum(eig2nkq_tmp,spaceworld,ierr)
      call xmpi_sum(gkk,spaceworld,ierr)
    end if
    if(present(eigbrd) .and. (ieig2rf == 3 .or. ieig2rf == 4 .or. ieig2rf == 5))then
@@ -1639,7 +1688,11 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_FREE(mpi_enreg%my_kpttab)
  end if
 
- if(ieig2rf > 2) then
+ if (ieig2rf > 2) then
+   ! SP: Important: the second-order derivatives of the electronic energy printed here is the total one, including
+   !                both the Sternheimer and active-space part. Instead, the file _EIGR2D produced when ieig2rf > 2
+   !                contains ONLY the Sternheimer part and is therefore not the same values as here.
+   !                Note that in the case of ieig2rf == 1 or 2, the _EIGR2D file does contain the full one.
    write(ab_out,'(a)')' Components of second-order derivatives of the electronic energy, EIGR2D.'
    write(ab_out,'(a)')' For automatic tests, printing the matrix for the first k-point, first band, first atom.'
    band_index = 0
@@ -1682,50 +1735,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_FREE(center)
  end if
 
-   if (ieig2rf == 3 .or. ieig2rf == 4 .or. ieig2rf == 5) then
-
-       mpert_ = dtset%natom
-
-       ! Initialize perturbation flags
-       ABI_MALLOC(flg,(3,mpert_,3,mpert_))
-       flg = one
-
-       ! Initialize ddb object
-       call ddb%init(dtset, 1, mpert_, &
-                    mband=bdeigrf,&
-                    nkpt=nkpt_rbz,&
-                    kpt=dtset%kptns(1:3,1:nkpt_rbz),&
-                    with_d2eig=.true.)
-
-       ! Create the ddb header
-       dscrpt=' Note : temporary (transfer) database '
-       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
-                         mpert=mpert_,&
-                         xred=xred,occ=occ_rbz,&
-                         mband=bdeigrf / dtset%nsppol,&
-                         nkpt=nkpt_rbz,&
-                         kpt=dtset%kptns(:,1:nkpt_rbz))
-
-       ! Set d2eig data
-       call ddb%set_qpt(1, dtset%qptn)
-       call ddb%set_d2eig_reshape(1, eig2nkq, flg)
-
-       ! Open the file and write header
-       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
-
-       ! Write d2eig data block
-       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
-       call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
-
-       ! close and free memory
-       call ddb_hdr%close()
-       call ddb_hdr%free()
-       call ddb%free()
-
-       ABI_FREE(flg)
-
-   end if
-
 !  print _FAN file for this perturbation. Note that the Fan file will only be produced if
 !  abinit is compiled with netcdf.
 
@@ -1760,7 +1769,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      ABI_UNUSED(ncid)
 #endif
      ABI_FREE(fan)
-     ABI_FREE(eig2nkq_tmp)
    end if
 !  print _GKK.nc file for this perturbation. Note that the GKK file will only be produced if
 !  abinit is compiled with netcdf.
@@ -1779,7 +1787,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
      ABI_UNUSED(ncid)
 #endif
      ABI_FREE(gkk)
-     ABI_FREE(eig2nkq_tmp)
    end if
 
 !  print _EIGI2D file for this perturbation
@@ -1823,9 +1830,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
  if (allocated(fan)) then
    ABI_FREE(fan)
- end if
- if (allocated(eig2nkq_tmp)) then
-   ABI_FREE(eig2nkq_tmp)
  end if
  if (allocated(gkk)) then
    ABI_FREE(gkk)
