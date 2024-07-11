@@ -793,11 +793,9 @@ subroutine varpeq_setup(self, dtfil)
        do ik=1,nk
          kpts_loaded(:, ik) = vpq_loaded%kpts_spin(:, ik, spin)
          do ib=1,nb
-           ! DEBUG
-           a_loaded(2*ib-1, ik) = one
-           a_loaded(2*ib, ik) = zero
-           !a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
-           !a_loaded(2*ib, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
+           a_loaded(2*ib-1, ik) = vpq_loaded%a_spin(1, ib, ik, spin) ! real
+           a_loaded(2*ib, ik) = vpq_loaded%a_spin(2, ib, ik, spin) ! imaginary
+
          enddo
        enddo
 
@@ -810,11 +808,6 @@ subroutine varpeq_setup(self, dtfil)
        do ik=1,self%nk_spin(spin)
          kpt = self%kpts_spin(:, ik, spin)
          call bzlint%interp(kpt, ank)
-
-         write(ab_out, '(a, 3f8.4)') 'k-point: ', kpt(:)
-         write(ab_out, '(a, 6f8.4)') 'interp: ', ank(:)
-         !write(ab_out, '(a, 3f8.4)') 'k-point: ', kpts_loaded(:,ik)
-         write(ab_out, '(a, 6f8.4)') 'loaded: ', a_loaded(:,ik)
 
          do ib=1,self%nb_spin(spin)
            self%a_spin(1, ib, ik, spin) = ank(2*ib-1)
