@@ -135,17 +135,26 @@ subroutine pred_langevin_pimd(ab_mover,hist,icycle,itime,ncycle,ntime,zDEBUG,iex
  pimd_stressin(3,1,1)=strten(5)
  pimd_stressin(2,1,1)=strten(6)
  pimd_xred(:,:,1)=xred(:,:)
- pimd_xred_prev(:,:,1)=hist%xred(:,:,hist%ihist-1)
+ if (itime==1) then
+   pimd_xred_prev(:,:,1)=xred(:,:)
+ else
+   ihist_prev = abihist_findIndex(hist,-1)
+   pimd_xred_prev(:,:,1)=hist%xred(:,:,ihist_prev)
+ end if
  pimd_forces(:,:,1)=fcart(:,:)
  pimd_vel(:,:,1)=vel(:,:)
- write(0,*) 'CALL pimd_langevin_nvt HERE'
+!  write(0,*) 'CALL pimd_langevin_nvt HERE'
 !  call pimd_langevin_nvt()
- call pimd_langevin_nvt(pimd_etotal,pimd_forces,hist%ihist,ab_mover%natom,pimd_param,&
-&         0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
- write(0,*) 'prev:', pimd_xred_prev(1,1,1)
- write(0,*) 'actual:', pimd_xred(1,1,1)
- write(0,*) 'next:', pimd_xred_next(1,1,1)
- 
+ call pimd_langevin_nvt(pimd_etotal,pimd_forces,itime,ab_mover%natom,pimd_param,&
+ &         0,rprimd,pimd_stressin,1,pimd_vel,ucvol,pimd_xred,pimd_xred_next,pimd_xred_prev)
+
+!  write(0,*) hist%xred(1,1,:), pimd_xred_prev(1,1,1)
+!  write(0,*) 'prev:', pimd_xred_prev(1,1,1)
+!  write(0,*) 'actual:', pimd_xred(1,1,1)
+!  write(0,*) 'next:', pimd_xred_next(1,1,1)
+!  write(0,*) 'force:', pimd_forces(1,1,1)
+!  write(0,*) ''
+
  hist%ihist = abihist_findIndex(hist,+1)
  call var2hist(acell,hist,ab_mover%natom,rprimd,pimd_xred_next(:,:,1),zDEBUG)
  hist%vel(:,:,hist%ihist)=pimd_vel(:,:,1)
