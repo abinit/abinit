@@ -728,32 +728,36 @@ end subroutine gkk_free
 !!
 !! SOURCE
 
-subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,eigenq,&
+subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,eigenq,&
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
-&  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
+&  dtset,xred,pawtab,psps,eigbrd,eigenq_fine,hdr_fine,hdr0)
 
 !Arguments ------------------------------------
+ type(datafiles_type), intent(in) :: dtfil
+ type(MPI_type), intent(inout) :: mpi_enreg
 !scalars
  integer,intent(in) :: bdeigrf,dim_eig2nkq,dim_eig2rf,ieig2rf,mband,mk1mem,mpert,mpw1,nkpt_rbz
  integer,intent(in) :: npert,nspinor,nsppol,smdelta
- real(dp),intent(in) :: elph2_imagden,esmear
- type(MPI_type),intent(inout) :: mpi_enreg
-!arrays
  integer,intent(in) :: clflg(3,mpert)
  integer,intent(in) :: istwfk_pert(nkpt_rbz,3,mpert)
  integer,intent(in) :: npwar1(nkpt_rbz,mpert)
+!arrays
+ type(dataset_type), intent(in) :: dtset
+ real(dp),intent(in) :: elph2_imagden,esmear
  real(dp),intent(in) :: cg1_pert(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf,3,mpert)
  real(dp),intent(in) :: gh0c1_pert(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf,3,mpert)
  real(dp),intent(in) :: gh1c_pert(2,mpw1*nspinor*mband*mk1mem*nsppol*dim_eig2rf,3,mpert)
  real(dp),intent(inout) :: eigen0(nkpt_rbz*mband*nsppol)
+ real(dp),intent(inout) :: xred(3,dtset%natom)
  real(dp),intent(in) :: eigen1(nkpt_rbz*2*nsppol*mband**2,3,mpert)
  real(dp),intent(inout) :: eigenq(nkpt_rbz*mband*nsppol)
  real(dp),intent(out) :: eig2nkq(2,mband*nsppol,nkpt_rbz,3,npert,3,npert*dim_eig2nkq)
  real(dp),intent(out),optional :: eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)
  real(dp),intent(in),pointer,optional :: eigenq_fine(:,:,:)
  real(dp), intent(in) :: occ(mband*nkpt_rbz*nsppol)
- type(dataset_type), intent(in) :: dtset
+ type(pseudopotential_type), intent(inout) :: psps
+ type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(hdr_type),intent(in),optional :: hdr_fine,hdr0
 
 !Local variables-------------------------------
@@ -762,8 +766,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  integer :: band2tot_index,band_index,bandtot_index,iband,icg2,idir1,idir2
  integer :: ikpt,ipert1,ipert2,isppol,istwf_k,jband,npw1_k,nkpt_sub,ikpt2
 !integer :: ipw
- integer :: master,me,spaceworld,ierr
- integer :: mband_mem
+ integer :: master,me,spaceworld,ierr,mband_mem,mpert_
 !real(dp),parameter :: etol=1.0d-3
  real(dp),parameter :: etol=1.0d-6
 !real(dp),parameter :: etol=zero
@@ -773,19 +776,23 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  real(dp) :: eig2_diar,eigbrd_i,eigbrd_r
  character(len=500) :: message
  character(len=500) :: msg
+ character(len=fnlen) :: dscrpt
 !DBSP
 ! character(len=300000) :: message2
 !END
  logical :: test_do_band
 !arrays
  integer, allocatable :: nband_rbz(:),icg2_rbz(:,:)
- integer,pointer      :: kpt_fine_sub(:)
+ integer, allocatable :: blkflg_save(:,:,:,:)
+ integer, pointer     :: kpt_fine_sub(:)
  real(dp)             :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef2(:,:),center(:),eigen0tmp(:),eigenqtmp(:)
  real(dp) :: eigen(mband*nsppol),eigen_prime(mband*nsppol)
  real(dp),allocatable :: gh(:,:),gh1(:,:),ghc(:,:)
- real(dp),allocatable :: smdfun(:,:)
+ real(dp),allocatable :: smdfun(:,:),occ_pert(:)
  real(dp),pointer     :: wgt_sub(:)
+ type(ddb_type)       :: ddb
+ type(ddb_hdr_type)   :: ddb_hdr
 
 ! *********************************************************************
 
@@ -1121,6 +1128,92 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
    end if
  end if
 
+ ! -------------------------
+ ! Output d2eig data to file
+ ! -------------------------
+ if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
+
+   ! GA: Here, mpert needs to be replaced by natom
+   !     but why is mpert larger than natom in the first place?
+   mpert_ = dtset%natom
+
+   ! Initialize perturbation flags
+   ! GA: At the moment, they are all set to one
+   ! Instead, they should be used to save individual perturbations
+   ! to separate files and merge them after the loop.
+   ABI_MALLOC(blkflg_save,(3,mpert_,3,mpert_))
+   blkflg_save = one
+
+  ! Initialize ddb object
+   call ddb%init(dtset, 1, mpert_, &
+                mband=bdeigrf,&
+                nkpt=nkpt_rbz,&
+                kpt=dtset%kptns(1:3,1:nkpt_rbz),&
+                with_d2eig=.true.)
+
+   ! Create the ddb header
+   dscrpt=' Note : temporary (transfer) database '
+   call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                     mpert=mpert_,&
+                     xred=xred,occ=occ_pert,&
+                     mband=bdeigrf / dtset%nsppol,&
+                     nkpt=nkpt_rbz,&
+                     kpt=dtset%kptns(:,1:nkpt_rbz))
+
+   ! Set d2eig data
+   call ddb%set_qpt(1, dtset%qptn)
+   call ddb%set_d2eig_reshape(1, eig2nkq, blkflg_save)
+
+   call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+   ! Open the file and write header
+   call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
+
+   ! Write d2eig data block
+   call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
+
+   ! close and free memory
+   call ddb_hdr%close()
+   call ddb_hdr%free()
+   call ddb%free()
+
+   if(smdelta>0) then
+     ! write out _EIGI2D file
+
+     call ddb%init(dtset, 1, mpert_, &
+                  mband=bdeigrf,&
+                  nkpt=nkpt_rbz,&
+                  kpt=dtset%kptns(:,1:nkpt_rbz),&
+                  with_d2eig=.true.)
+
+     ! Create the ddb header
+     dscrpt=' Note : temporary (transfer) database '
+     call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
+                       mpert=mpert_,&
+                       xred=xred,occ=occ_pert,&
+                       mband=bdeigrf / dtset%nsppol,&
+                       nkpt=nkpt_rbz,&
+                       kpt=dtset%kptns(:,1:nkpt_rbz))
+
+     call ddb%set_qpt(1, dtset%qptn)
+     call ddb%set_d2eig_reshape(1, eigbrd, blkflg_save, blktyp=BLKTYP_d2eig_im)
+
+     call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
+
+     call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1,comm=mpi_enreg%comm_world)
+     call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
+
+     call ddb_hdr%close()
+     call ddb_hdr%free()
+     call ddb%free()
+
+   end if !smdelta
+
+   ABI_FREE(blkflg_save)
+
+ end if !ieig2rf==1.or.ieig2rf==2
+
+
  if(allocated(smdfun))  then
    ABI_FREE(smdfun)
  end if
@@ -1198,7 +1291,7 @@ end subroutine eig2stern
 !!  eigbrd(2,mband*nsppol,nkpt_rbz,3,npert,3,npert)= OPTIONAL, array containing the
 !!            the contribution of each perturbations pair
 !!            to the eigenstate broadening (inverse lifetime)
-!!            computed statically (without phonon frequencies). 
+!!            computed statically (without phonon frequencies).
 !!
 !! SOURCE
 

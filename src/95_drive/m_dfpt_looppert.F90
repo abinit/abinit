@@ -177,7 +177,7 @@ contains
 !!  vtrial(nfftf,nspden)=GS potential (Hartree)
 !!  vxc(nfftf,nspden)=Exchange-Correlation GS potential (Hartree)
 !!  vxcavg=average of vxc potential
-!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA  
+!!  vxctau(nfftf,nspden,4*usekden)=derivative of e_xc with respect to kinetic energy density, for mGGA
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -2349,117 +2349,32 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if(smdelta>0)then
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd,eigenq_fine,hdr_fine,hdr0)
        else
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd)
        end if
      else
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps,eigbrd,eigenq_fine,hdr_fine,hdr0)
        else
-         call eig2stern(occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
+         call eig2stern(dtfil,occ_pert,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0_pert,eigenq_pert,&
 &         eigen1_pert,eig2nkq,dtset%elph2_imagden,dtset%esmear,gh0c1_pert,gh1c_pert,&
 &         dtset%ieig2rf,istwfk_pert,dtset%mband,mk1mem_rbz,mpert,dtset%natom,mpi_enreg,mpw1,nkpt_rbz,&
-&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset)
+&         npwar1_pert,dtset%nspinor,dtset%nsppol,smdelta,dtset,xred,pawtab,psps)
        end if
      end if
      call wrtout(std_out, 'Leaving: eig2stern')
-
-
-     ! -------------------------
-     ! Output d2eig data to file
-     ! -------------------------
-     if (dtset%ieig2rf==1.or.dtset%ieig2rf==2) then
-
-       ! GA: Here, mpert needs to be replaced by natom
-       !     but why is mpert larger than natom in the first place?
-       mpert_ = dtset%natom
-
-       ! Initialize perturbation flags
-       ! GA: At the moment, they are all set to one
-       ! Instead, they should be used to save individual perturbations
-       ! to separate files and merge them after the loop.
-       ABI_MALLOC(blkflg_save,(3,mpert_,3,mpert_))
-       blkflg_save = one
-
-       ! Initialize ddb object
-       call ddb%init(dtset, 1, mpert_, &
-                    mband=bdeigrf,&
-                    nkpt=nkpt_rbz,&
-                    kpt=dtset%kptns(1:3,1:nkpt_rbz),&
-                    with_d2eig=.true.)
-
-       ! Create the ddb header
-       dscrpt=' Note : temporary (transfer) database '
-       call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
-                         mpert=mpert_,&
-                         xred=xred,occ=occ_pert,&
-                         mband=bdeigrf / dtset%nsppol,&
-                         nkpt=nkpt_rbz,&
-                         kpt=dtset%kptns(:,1:nkpt_rbz))
-
-       ! Set d2eig data
-       call ddb%set_qpt(1, dtset%qptn)
-       call ddb%set_d2eig_reshape(1, eig2nkq, blkflg_save)
-
-       call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
-
-       ! Open the file and write header
-       call ddb_hdr%open_write(dtfil%fnameabo_eigr2d, with_psps=1, comm=mpi_enreg%comm_world)
-
-       ! Write d2eig data block
-       call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
-
-       ! close and free memory
-       call ddb_hdr%close()
-       call ddb_hdr%free()
-       call ddb%free()
-
-       if(smdelta>0) then
-         ! write out _EIGI2D file
-
-         call ddb%init(dtset, 1, mpert_, &
-                      mband=bdeigrf,&
-                      nkpt=nkpt_rbz,&
-                      kpt=dtset%kptns(:,1:nkpt_rbz),&
-                      with_d2eig=.true.)
-
-         ! Create the ddb header
-         dscrpt=' Note : temporary (transfer) database '
-         call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
-                           mpert=mpert_,&
-                           xred=xred,occ=occ_pert,&
-                           mband=bdeigrf / dtset%nsppol,&
-                           nkpt=nkpt_rbz,&
-                           kpt=dtset%kptns(:,1:nkpt_rbz))
-
-         call ddb%set_qpt(1, dtset%qptn)
-         call ddb%set_d2eig_reshape(1, eigbrd, blkflg_save, blktyp=BLKTYP_d2eig_im)
-
-         call ddb_hdr%set_typ(ddb%nblok, ddb%typ)
-
-         call ddb_hdr%open_write(dtfil%fnameabo_eigi2d, with_psps=1,comm=mpi_enreg%comm_world)
-         call ddb%write_d2eig(ddb_hdr, 1, comm=mpi_enreg%comm_world)
-
-         call ddb_hdr%close()
-         call ddb_hdr%free()
-         call ddb%free()
-
-       end if !smdelta
-
-       ABI_FREE(blkflg_save)
-
-     end if !ieig2rf==1.or.ieig2rf==2
+     !
    else
      write(msg,'(3a)')&
      'K point grids must be the same for every perturbation: eig2stern not called',ch10,&
