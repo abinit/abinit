@@ -144,7 +144,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
  integer,save :: mpssoang_old=0,mqgridff_old=0,mqgridvl_old=0,optnlxccc_old=-1
  integer,save :: paw_size_old=-1,pawxcdev_old=-1,positron_old=-2,usekden_old=-1,usepaw_old=-1
  integer,save :: usexcnhat_old=-1,usewvl_old=-1,useylm_old=-1
- integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iproj,ipsp,ipspalch
+ integer :: comm_mpi_,ierr,ii,ilang,ilmn,ilmn0,iln,iproj,ipsp,ipspalch
  integer :: ispin,itypalch,itypat,mtypalch,npsp,npspalch,ntypalch
  integer :: ntypat,ntyppure,paw_size
  logical :: has_coretau,has_kij,has_tproj,has_tvale,has_nabla,has_shapefncg,has_vminushalf,has_wvl
@@ -511,7 +511,7 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
 !      Combine the different non-local projectors : for the scalar part then
 !      the spin-orbit part, treat the different angular momenta
 !      WARNING : this coding does not work for PAW
-       ilmn=0
+       ilmn=0; iln=0
        psps%indlmn(:,:,itypat)=0
        do ispin=1,2
          do ilang=0,3
@@ -524,21 +524,31 @@ subroutine pspini(dtset,dtfil,ecore,gencond,gsqcut,gsqcutdg,pawrad,pawtab,psps,r
                    if(indlmn_alch(6,ilmn0,ipspalch)==ispin)then
                      if(indlmn_alch(1,ilmn0,ipspalch)==ilang)then
                        ilmn=ilmn+1         ! increment the counter
-                       iproj=iproj+1       ! increment the counter, this does not work for PAW
+                       if (indlmn_alch(2,ilmn0,ipspalch)==-ilang*psps%useylm)then
+                         iln = iln+1
+                         iproj = iproj+1
+                       end if
                        if(ilmn>psps%lmnmax)then
                          ABI_BUG('Problem with the alchemical pseudopotentials : ilmn>lmnmax.')
                        end if
                        psps%indlmn(1,ilmn,itypat)=ilang
                        psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
-                       psps%indlmn(3,ilmn,itypat)=iproj                       ! This does not work for PAW
-                       psps%indlmn(4,ilmn,itypat)=ilmn                        ! This does not work for PAW
-                       psps%indlmn(5,ilmn,itypat)=ilmn
+                       psps%indlmn(3,ilmn,itypat)=iproj 
+                       psps%indlmn(4,ilmn,itypat)=ilmn
+                       psps%indlmn(5,ilmn,itypat)=iln
                        psps%indlmn(6,ilmn,itypat)=ispin
                        ! The two lines below do not work for PAW
-                       if (psps%usepaw==0) then
-                         psps%ekb(ilmn,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(ilmn0,ipspalch)
-                       end if
-                       psps%ffspl(:,:,ilmn,itypat)=ffspl_alch(:,:,ilmn0,ipspalch)
+                         if (psps%usepaw==0) then
+                           psps%ekb(iln,itypat)=psps%mixalch(ipspalch,itypalch) *ekb_alch(indlmn_alch(5,ilmn0,ipspalch),ipspalch)
+                         end if
+                         psps%ffspl(:,:,iln,itypat)=ffspl_alch(:,:,indlmn_alch(5,ilmn0,ipspalch),ipspalch)
+
+                       psps%indlmn(1,ilmn,itypat)=ilang
+                       psps%indlmn(2,ilmn,itypat)=indlmn_alch(2,ilmn0,ipspalch)
+                       psps%indlmn(3,ilmn,itypat)=iproj                       ! This does not work for PAW
+                       psps%indlmn(4,ilmn,itypat)=indlmn_alch(4,ilmn0,ipspalch)  ! This does not work for PAW
+                       psps%indlmn(5,ilmn,itypat)=iln
+                       psps%indlmn(6,ilmn,itypat)=ispin
                      end if ! ilang is OK
                    end if ! ispin is OK
                  end if ! ilmn0 exist
