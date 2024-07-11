@@ -692,7 +692,7 @@ case (16)
 !  TEMPORARLY optcell is not allow
    specs%isARused=.FALSE.
    specs%isVused=.TRUE.  ! Velocities are used
-   specs%ncycle=3
+   specs%ncycle=1
 !  Values use in XML Output
    specs%type4xml='langevin'
    specs%crit4xml='tolmxf'
