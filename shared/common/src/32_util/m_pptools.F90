@@ -121,33 +121,30 @@ end subroutine prmat
 !! Write a generic array in the XSF format (XCrysden format)
 !!
 !! INPUTS
-!! basis(3,3) = basis vectors of the direct real lattice or of the reciprocal lattice (fortran convention)
-!!              (Bohr units if realrecip=0, Bohr^-1 if realrecip=1, see below)
-!! realrecip = 0  for a plot in real space
-!!             1  for a plot in reciprocal space
-!! nunit   = unit number of the output file (already open by the caller, not closed here!)
 !! n1=grid size along x
 !! n2=grid size along y
 !! n3=grid size along z
-!! origin(3) = origin of the grid
 !! datagrid(n1*n2*n3) = datagrid values stored using the fortran convention
+!! basis(3,3) = basis vectors of the direct real lattice or of the reciprocal lattice (fortran convention)
+!!              (Bohr units if realrecip=0, Bohr^-1 if realrecip=1, see below)
+!! origin(3) = origin of the grid
+!! nunit   = unit number of the output file (already open by the caller, not closed here!)
+!! realrecip = 0  for a plot in real space
+!!             1  for a plot in reciprocal space
 !!
 !! OUTPUT
 !! Only write
 !!
 !! SOURCE
 
-subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znucl,nunit,realrecip)
-
+subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, xcart, znucl, nunit, realrecip)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: n1,n2,n3,nunit,realrecip
- integer,intent(in) :: natom,ntypat
+ integer,intent(in) :: n1, n2, n3, nunit, realrecip, natom, ntypat
 !arrays
  integer,intent(in) :: typat(natom)
- real(dp),intent(in) :: basis(3,3),datagrid(n1*n2*n3),origin(3)
- real(dp),intent(in) :: xcart(3,natom), znucl(ntypat)
+ real(dp),intent(in) :: basis(3,3), datagrid(n1*n2*n3), origin(3), xcart(3,natom), znucl(ntypat)
 
 !Local variables-------------------------------
 !scalars
@@ -167,8 +164,7 @@ subroutine printxsf(n1,n2,n3,datagrid,basis,origin,natom,ntypat,typat,xcart,znuc
 !conversion between ABINIT default units and XCrysden units
  fact=Bohr_Ang; if (realrecip ==1) fact=one/fact  !since we are in reciprocal space
 
-!TODO insert crystalline structure and dummy atoms in case of reciprocal space
-!need to convert basis too
+!TODO insert crystalline structure and dummy atoms in case of reciprocal space need to convert basis too
 
  write(nunit,'(1X,A)')  'DIM-GROUP'
  write(nunit,*) '3  1'

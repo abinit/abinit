@@ -45,21 +45,19 @@ module m_kpts
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
  public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
- public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
-                                     ! modulo time reversal if appropriate.
+ public :: symkchk                   ! Checks that the set of k points has the full space group symmetry, modulo time reversal if appropriate.
  public :: kpts_sort                 ! order list of k-points according to the norm.
  public :: kpts_pack_in_stars        ! Pack k-points in stars.
  public :: kpts_map                  ! Compute symmetry table.
  public :: kpts_map_print            ! Print the symmetry table bz2ibz to a list of units with header.
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
- !FIXME: Deprecated
- public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
-                                     ! Duplicates work in getkgrid, but need all outputs of kpt_fullbz, and indkpt
  public :: smpbz                     ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
  public :: testkgrid                 ! Test different grids of k points.
+ public :: kptrlatt_from_ngkpt       ! Insert ngkpt in kptrlatt matrix
 
- ! FIXME: deprecated
+ !FIXME: Deprecated
+ public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
  public :: mknormpath
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
 !!***
@@ -2590,8 +2588,7 @@ end subroutine smpbz
 !!
 !! SOURCE
 
-subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
-& msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
+subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
 
 !Arguments ------------------------------------
 !scalars
@@ -3435,7 +3432,35 @@ subroutine bzlint_free(self)
  class(bzlint_t),intent(inout) :: self
 ! *********************************************************************
  ABI_SFREE(self%vals_grid)
+
 end subroutine bzlint_free
+!!***
+
+!!****f* m_kpts/kptrlatt_from_ngkpt
+!! NAME
+!! kptrlatt_from_ngkpt
+!!
+!! FUNCTION
+!! Insert ngkpt in kptrlatt 3x3 array
+!!
+!! SOURCE
+
+pure subroutine kptrlatt_from_ngkpt(ngkpt, kptrlatt)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ngkpt(3)
+ integer,intent(out) :: kptrlatt(3,3)
+
+!Local variables-------------------------------
+ integer :: ii
+!************************************************************************
+
+ kptrlatt = 0
+ do ii=1,3
+   kptrlatt(ii,ii) = ngkpt(ii)
+ end do
+
+end subroutine kptrlatt_from_ngkpt
 !!***
 
 end module m_kpts

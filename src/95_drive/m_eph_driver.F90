@@ -71,7 +71,7 @@ module m_eph_driver
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
- use m_varpeq,          only : varpeq
+ use m_varpeq,          only : varpeq, varpeq_plot
 
  implicit none
 
@@ -829,8 +829,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      ABI_ERROR(sjoin("Cannot find GSTORE file:", gstore_path))
    end if
 
- !case (-13)
+ case (-13)
    ! Plot polaron wavefunctions and atomic displacements in the supercell.
+   call varpeq_plot(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
 
  case (14)
    ! Molecular Berry Curvature

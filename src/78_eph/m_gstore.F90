@@ -139,7 +139,7 @@ module m_gstore
  !use m_yaml,           only : yamldoc_t
  use m_numeric_tools,  only : arth, get_diag, isdiagmat
  use m_krank,          only : krank_t, krank_new, krank_from_kptrlatt, get_ibz2bz, star_from_ibz_idx
- use m_io_tools,       only : iomode_from_fname, file_exists, open_file
+ use m_io_tools,       only : iomode_from_fname, file_exists !, open_file
  use m_special_funcs,  only : gaussian
  use m_copy,           only : alloc_copy
  use m_fftcore,        only : ngfft_seq, get_kg
@@ -149,7 +149,8 @@ module m_gstore
  use defs_datatypes,   only : ebands_t, pseudopotential_type
  use m_hdr,            only : hdr_type, fform_from_ext, hdr_ncread
  use m_symtk,          only : matr3inv
- use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars
+ use m_kpts,           only : kpts_ibz_from_kptrlatt, kpts_timrev_from_kptopt, kpts_map, kpts_sort, kpts_pack_in_stars, &
+                              kptrlatt_from_ngkpt
  use m_bz_mesh,        only : kmesh_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
  use m_ifc,            only : ifc_type
@@ -529,8 +530,6 @@ contains
 
   procedure :: compute => gstore_compute
   ! Compute e-ph matrix elements.
-
-
 
   procedure :: calc_my_phonons => gstore_calc_my_phonons
   ! Helper function to compute ph quantities for all q-points treated by the MPI proc.
@@ -4665,10 +4664,7 @@ subroutine gstore_wannierize(gstore, dtfil)
    call gqk%wan%from_abiwan(dtfil%filabiwanin, spin, gstore%nsppol, keep_umats, dtfil%filnam_ds(4), gqk%grid_comm%value)
    wan => gqk%wan
 
-   qptrlatt_ = 0
-   do ir=1,3
-     qptrlatt_(ir,ir) = gstore%ngqpt(ir)
-   end do
+   call kptrlatt_from_ngkpt(gstore%ngqpt, qptrlatt_)
    call wan%setup_eph_ws_kq(gstore%cryst, gstore%ebands%shiftk(:,1), gstore%ebands%kptrlatt, qptrlatt_, &
                             gqk%my_pert_start, my_npert, gqk%pert_comm)
    nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan
