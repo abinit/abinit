@@ -626,9 +626,21 @@ subroutine varpeq_print(self)
        call wrtout(units, msg)
 
      enddo
-
      write(msg, '(a)') repeat('-', 80)
      call wrtout(units, msg)
+
+     if (grs < self%tolgrs) then
+       write(msg, '(a,es8.2,a,es8.2)') "gradient norm ", grs, " < varpeq_tolgrs=", self%tolgrs
+       call wrtout(units, msg)
+       call wrtout(units, "Calculation is completed and convergence reached.")
+     else
+       call wrtout(units, "Calculation is completed but not converged.")
+       write(msg, '(a,es8.2,a,es8.2,a,a)') "gradient norm ", grs, &
+         " >= varpeq_tolgrs=", self%tolgrs, ch10, &
+         "You may want to restart the SCF cycle with varpeq_restart=1 option"
+       ABI_WARNING(msg)
+     endif
+
    enddo
  endif
 
@@ -792,7 +804,6 @@ subroutine varpeq_setup(self, dtfil)
        ABI_MALLOC(kpts_loaded, (3, nk))
        ABI_MALLOC(ank, (2*nb))
 
-       write(ab_out, *) "from file"
        do ik=1,nk
          kpts_loaded(:, ik) = vpq_loaded%kpts_spin(:, ik, spin)
          do ib=1,nb
@@ -805,8 +816,6 @@ subroutine varpeq_setup(self, dtfil)
        call bzlint%init(ngkpt, 2*nb, nk, kpts_loaded, a_loaded)
        self%a_spin(:,:,:,spin) = zero
 
-
-       write(ab_out, *) "interpolation"
        do ik=1,self%nk_spin(spin)
          kpt = self%kpts_spin(:, ik, spin)
          call bzlint%interp(kpt, ank)
