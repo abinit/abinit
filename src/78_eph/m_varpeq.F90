@@ -46,7 +46,7 @@ module m_varpeq
  use m_fft_mesh,        only : supercell_fft, calc_ceikr
  use m_pawtab,          only : pawtab_type
  use m_gstore,          only : gstore_t, gqk_t
- use m_supercell,       only : supercell_type, init_supercell, destroy_supercell
+ use m_supercell,       only : supercell_type
  use m_fftcore,         only : ngfft_seq !, get_kg
  use m_ephtk,           only : ephtk_get_mpw_gmax
 
@@ -2246,7 +2246,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
 
  ! Build supercell from ngkpt
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
- call init_supercell(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, scell, ordering=.False.)
+ call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False.)
 
  nkbz = product(vpq%ngkpt)
  call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
@@ -2383,6 +2383,20 @@ else
  NCF_CHECK(nf90_get_var(ncid, vid("pheigvec_cart_ibz"), pheigvec_cart_ibz))
  NCF_CHECK(nf90_close(ncid))
 
+
+ do iq_bz=1,nqbz
+   do nu=1,natom3
+   end do ! nu
+ end do ! iq_bz
+
+
+
+
+
+
+
+
+
  ABI_FREE(phfreqs_ibz)
  ABI_FREE(pheigvec_cart_ibz)
  !ABI_FREE(pheigvec_cart_qbz)
@@ -2404,7 +2418,7 @@ end if
 #endif
 
  call vpq%free()
- call destroy_supercell(scell)
+ call scell%free()
 
 contains
 integer function vid(var_name)

@@ -1008,7 +1008,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
        ! DOS including velocity projected onto interface normal vector
        veloc = veloc_1q(:,imode)
        do icart = 1, phdos%n_normal_vec_dmm
-         ! projection of the velocity onto chosen normal vector for the interface in DMM. 
+         ! projection of the velocity onto chosen normal vector for the interface in DMM.
          ! NB: The sign can change, but norm of scalar product is the correct recipe.
          projfact = zero
          ! as we are summing only over irred q-points, need to add all contributions
@@ -1025,7 +1025,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
      ! Tetrahedra; Save phonon frequencies, eigenvectors and angular momentum.
      ! Sum is done after the loops over the two meshes.
      full_phfrq(:,iq_ibz) = phfrq(:)
-     full_veloc(:,:,iq_ibz) = veloc_1q(:,:) 
+     full_veloc(:,:,iq_ibz) = veloc_1q(:,:)
      full_eigvec(:,:,:,:,iq_ibz) = eigvec
      full_phangmom(:,:,iq_ibz) = phangmom
 
@@ -1146,7 +1146,7 @@ subroutine phdos_init(phdos, crystal, ifc, prtdos, dosdeltae_in, dossmear, dos_n
          ! DOS including velocity projected onto interface normal vector
          veloc = full_veloc(:,imode,iq_ibz)
          do icart = 1, phdos%n_normal_vec_dmm
-           ! projection of the velocity onto chosen normal vector for the interface in DMM. 
+           ! projection of the velocity onto chosen normal vector for the interface in DMM.
            ! NB: The sign can change, but norm of scalar product is the correct recipe.
            projfact = zero
            ! as we are summing only over irred q-points, need to add all contributions
@@ -1392,7 +1392,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
 
  ! only diagonal supercell case for the moment
  do itemper = 1, ntemper
-   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl, thm_scells(itemper))
+   call thm_scells(itemper)%init(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl)
  end do
 
  ! precalculate phase factors???
@@ -1422,7 +1422,7 @@ subroutine zacharias_supercell_make(Crystal, Ifc, ntemper, rlatt, tempermin, tem
 
      ! add displacement for this mode to supercell positions eq 5 of Zacharias
        freeze_displ = modesign * sigma
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(itemper))
+       call thm_scells(itemper)%freeze_displ(phdispl1(:,:,:), freeze_displ)
 
    end do !itemper
 
@@ -1555,7 +1555,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
  ! only diagonal supercell case for the moment
  do iconfig = 1, nconfig
-   call init_supercell(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl, thm_scells(iconfig))
+   call thm_scells(iconfig)%init(Crystal%natom, rlatt, Crystal%rprimd, Crystal%typat, Crystal%xcart, Crystal%znucl)
  end do
 
  ! precalculate phase factors???
@@ -1637,7 +1637,7 @@ subroutine thermal_supercell_make(amplitudes,Crystal, Ifc,namplitude, nconfig,op
 
        freeze_displ =  rand * sigma
 
-       call freeze_displ_supercell (phdispl1(:,:,:), freeze_displ, thm_scells(iconfig))
+       call thm_scells(iconfig)%freeze_displ(phdispl1(:,:,:), freeze_displ)
      end do !iconfig
    end do !imode
  end do !iq
@@ -1681,7 +1681,7 @@ subroutine thermal_supercell_free(nscells, thm_scells)
 
  if (allocated(thm_scells)) then
    do icell = 1, nscells
-     call destroy_supercell(thm_scells(icell))
+     call thm_scells(icell)%free()
    end do
  end if
 
@@ -1726,7 +1726,7 @@ subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_s
    write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
    write (title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons"
-   call prt_supercell (filename, thm_scells(itemp), title1, title2)
+   call thm_scells(itemp)%print(filename, title1, title2)
  end do
 
 end subroutine zacharias_supercell_print
@@ -1767,7 +1767,7 @@ subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
    write (filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
    write (title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
    title2 = "#  generated with random thermal displacements of all phonons"
-   call prt_supercell (filename, thm_scells(itemp), title1, title2)
+   call thm_scells(itemp)%print(filename, title1, title2)
  end do
 
 end subroutine thermal_supercell_print
@@ -3286,20 +3286,20 @@ subroutine freeze_displ_allmodes(displ, freeze_displ, natom, outfile_radix, phfr
 ! *************************************************************************
 
  !determine supercell needed to freeze phonon
- call init_supercell_for_qpt(natom, qphon, rprimd, typat, xcart, znucl, scell)
+ call scell%init_for_qpt(natom, qphon, rprimd, typat, xcart, znucl)
 
  do jmode = 1, 3*natom
    ! reset positions
    scell%xcart = scell%xcart_ref
 
    ! displace atoms according to phonon jmode
-   call freeze_displ_supercell(displ(:,:,jmode), freeze_displ, scell)
+   call scell%freeze_displ(displ(:,:,jmode), freeze_displ)
 
    ! print out everything for this wavevector and mode
-   call prt_supercell_for_qpt (phfreq(jmode), jmode, outfile_radix, scell)
+   call scell%print_for_qpt(phfreq(jmode), jmode, outfile_radix)
  end do
 
- call destroy_supercell(scell)
+ call scell%free()
 
 end subroutine freeze_displ_allmodes
 !!***
