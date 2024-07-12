@@ -45,24 +45,22 @@ module m_kpts
  public :: kpts_timrev_from_kptopt   ! Returns the value of timrev from kptopt
  public :: kpts_ibz_from_kptrlatt    ! Determines the IBZ, the weights and the BZ from kptrlatt
  public :: tetra_from_kptrlatt       ! Create an instance of htetra_t from kptrlatt and shiftk
- public :: symkchk                   ! Checks that the set of k points has the full space group symmetry,
-                                     ! modulo time reversal if appropriate.
+ public :: symkchk                   ! Checks that the set of k points has the full space group symmetry, modulo time reversal if appropriate.
  public :: kpts_sort                 ! order list of k-points according to the norm.
  public :: kpts_pack_in_stars        ! Pack k-points in stars.
  public :: kpts_map                  ! Compute symmetry table.
  public :: kpts_map_print            ! Print the symmetry table bz2ibz to a list of units with header.
  public :: listkk                    ! Find correspondence between two set of k-points.
  public :: getkgrid                  ! Compute the grid of k points in the irreducible Brillouin zone.
- !FIXME: Deprecated
- public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
-                                     ! Duplicates work in getkgrid, but need all outputs of kpt_fullbz, and indkpt
  public :: smpbz                     ! Generate a set of special k (or q) points which samples in a homogeneous way the BZ
  public :: testkgrid                 ! Test different grids of k points.
+ public :: kptrlatt_from_ngkpt       ! Insert ngkpt in kptrlatt matrix
 
- ! FIXME: deprecated
+ !FIXME: Deprecated
+ public :: get_full_kgrid            ! Create full grid of kpoints and find equivalent irred ones.
  public :: mknormpath
  private :: get_kpt_fullbz           ! Create full grid of kpoints from kptrlatt and shiftk
-
+!!***
 
 !----------------------------------------------------------------------
 
@@ -72,6 +70,34 @@ module m_kpts
 !!
 !! FUNCTION
 !! Linear interpolator for functions defined in the BZ.
+!!
+!! To interpolate initial data defined on a ngkpt(3) k-mesh.
+!! if the values of shape (ndat, nkpt) are known on nkpt k-points `kpts(3,nkpt)
+!! belonging to the ngkpt mesh, use the following calls:
+!!
+!! Example:
+!!   type(bzlint_t) :: bzlint
+!!   call bzlint%init(ngkpt, ndat, nkpt, kpts, values)
+!!
+!!   ! Now we can (linearly) interpolate at arbitrary kpoints
+!!   allocate(results, (ndat)
+!!   do ik=1,nk_interp(interp_kpt, results)
+!!     call bzlint%free(results)
+!!   end do
+!!
+!!   call bzlint%free()  ! Free memory
+!!
+!!   To handle complex data, use real(dp) pointers associated to complex(dp) arrays as in:
+!!
+!!       use, intrinsic :: iso_c_binding
+!!       complex(dp),allocatable,target :: cvalues(:)
+!!       real(dp), ABI_CONTIGUOUS pointer :: rpt_d2(:,:)
+!!
+!!       allocate(cvalues(ndat, nkpt))
+!!       ! fill cvalues...
+!!
+!!       call c_f_pointer(c_loc(cvalues), rpt_d2, [2*ndat, nkpt])
+!!       call bzlint%init(ngkpt, 2*ndat, nkpt, kpts, rpt_d2)
 !!
 !! SOURCE
 
@@ -453,7 +479,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
    end do ! End primary loop over k-points
 
    write(msg,'(a)')' symkchk : k-point set has full space-group symmetry.'
-   call wrtout([std_out, ab_out], msg, 'COLL')
+   call wrtout([std_out, ab_out], msg)
  end if
 
 end function symkchk
@@ -1567,7 +1593,7 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
  kptrlen=sqrt(length2)
 
  !write(msg,'(a,es16.6)' )' getkgrid : length of smallest supercell vector (bohr)=',kptrlen
- !call wrtout(std_out,msg,'COLL')
+ !call wrtout(std_out,msg)
 ! If the number of shifts has been decreased, determine the set of kptrlatt2 vectors
 ! with minimal length (without using fact_vacuum)
 ! It is worth to determine the minimal set of vectors so that the kptrlatt that is output
@@ -2040,7 +2066,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
 !write(std_out,*)' smpbz : downsampling(:)=',downsampling(:)
 !ENDDEBUG
 
- if(option/=0) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ','COLL')
+ if(option/=0) call wrtout(iout,'       Homogeneous q point set in the B.Z.  ')
 
  if(abs(brav)/=1)then
 !  Only generate Monkhorst-Pack lattices
@@ -2130,7 +2156,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
 
 !  Simple Lattice
-   if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Simple Lattice Grid ')
    if (mkpt<nkptlatt*nshiftk) then
      write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -2283,7 +2309,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
  else if(brav==2)then
 
 !  Face-Centered Lattice
-   if (prtvol > 0) call wrtout(std_out,'       Face-Centered Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Face-Centered Lattice Grid ')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/2) then
      write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -2360,7 +2386,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
  else if(brav==3)then
 
 !  Body-Centered Lattice (not mandatory cubic !)
-   if (prtvol > 0) call wrtout(std_out,'       Body-Centered Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Body-Centered Lattice Grid ')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)*nshiftk/4) then
      write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -2438,7 +2464,7 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
  else if(brav==4)then
 
 !  Hexagonal Lattice  (D6h)
-   if (prtvol > 0) call wrtout(std_out,'       Hexagonal Lattice Grid ','COLL')
+   if (prtvol > 0) call wrtout(std_out,'       Hexagonal Lattice Grid ')
    if (mkpt<ngkpt(1)*ngkpt(2)*ngkpt(3)) then
      write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
 &     'The value of mkpt is not large enough. It should be',ch10,&
@@ -2510,15 +2536,15 @@ subroutine smpbz(brav,iout,kptrlatt,mkpt,nkpt,nshiftk,option,shiftk,spkpt,downsa
    end if
 
    write(msg,'(a,i8)')' Grid q points  : ',nkpt
-   call wrtout(iout,msg,'COLL')
+   call wrtout(iout,msg)
    nkpout=nkpt
    if(nkpt>80)then
-     call wrtout(iout,' greater than 80, so only write 20 of them ','COLL')
+     call wrtout(iout,' greater than 80, so only write 20 of them ')
      nkpout=20
    end if
    do ii=1,nkpout
      write(msg, '(1x,i2,a2,3es16.8)' )ii,') ',spkpt(1,ii),spkpt(2,ii),spkpt(3,ii)
-     call wrtout(iout,msg,'COLL')
+     call wrtout(iout,msg)
    end do
  end if
 
@@ -2562,8 +2588,7 @@ end subroutine smpbz
 !!
 !! SOURCE
 
-subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
-& msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
+subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,msym,nshiftk,nsym,prtkpt,rprimd,shiftk,symafm,symrel,vacuum)
 
 !Arguments ------------------------------------
 !scalars
@@ -2763,8 +2788,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
      ' testkgrid : will perform the analysis of a series of k-grids.',ch10,&
      '  Note that kptopt=1 in this analysis, irrespective of its input value.',ch10,ch10,&
      ' Grid#    kptrlatt         shiftk         kptrlen       nkpt  iset',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg)
+   call wrtout(iout,msg)
    ABI_MALLOC(grid_list,(mkpt_list))
    ABI_MALLOC(kptrlen_list,(mkpt_list))
    grid_list(:)=0
@@ -2788,8 +2813,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 &     '    1  ',kptrlatt(:,1),'  ',shiftk(1,1),'  ',kptrlen,1,1,ch10,&
 &     '       ',kptrlatt(:,2),'  ',shiftk(2,1),ch10,&
 &     '       ',kptrlatt(:,3),'  ',shiftk(3,1),ch10
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(iout,msg,'COLL')
+     call wrtout(std_out,msg)
+     call wrtout(iout,msg)
 !    The unit cell volume is fake
      ucvol=kptrlen**3
    end if
@@ -3093,8 +3118,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 &       '  ',kptrlen_trial,nkpt_trial,iset,ch10,&
 &       '       ',kptrlatt_trial(:,2),'  ',shiftk_trial(2,1),ch10,&
 &       '       ',kptrlatt_trial(:,3),'  ',shiftk_trial(3,1),ch10
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(iout,msg,'COLL')
+       call wrtout(std_out,msg)
+       call wrtout(iout,msg)
 
 !      Keep track of this grid, if it is worth
        if(kptrlen_trial > kptrlen_list(nkpt_trial)*(1.0_dp+tol8))then
@@ -3145,8 +3170,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
        ndims=0
        write(msg,'(2a)' )ch10,' Note that the system is zero-dimensional.'
      end if
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(iout,msg,'COLL')
+     call wrtout(std_out,msg)
+     call wrtout(iout,msg)
    end if
 
 !  The asymptotic value of the merit factor is determined
@@ -3162,8 +3187,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 &   '  (the merit factor will tend to one or two in 3 dimensions)',ch10,&
 &   '  (and to one, two or four in 2 dimensions)',ch10,ch10,&
 &   '    nkpt   kptrlen    grid#  merit_factor'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg)
+   call wrtout(iout,msg)
 
    kptrlen_max=0.0_dp
    do ii=1,mkpt_list
@@ -3171,8 +3196,8 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
        kptrlen_max=kptrlen_list(ii)
        merit_factor=kptrlen_max**ndims/dble(ii)*factor
        write(msg, '(i6,es14.4,i6,f12.4)' )ii,kptrlen_max,grid_list(ii),merit_factor
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(iout,msg,'COLL')
+       call wrtout(std_out,msg)
+       call wrtout(iout,msg)
      end if
      if(kptrlen_max>1.2_dp*(1.0_dp-tol8)*kptrlen_target)exit
    end do
@@ -3181,14 +3206,14 @@ subroutine testkgrid(bravais,iout,kptrlatt,kptrlen,&
 &   ' For target kptrlen=',kptrlen_target,',',&
 &   ' the selected grid is number',igrid_current,',',ch10,&
 &   '     giving kptrlen=',kptrlen_current,' with nkpt=',nkpt_current
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(iout,msg,'COLL')
+   call wrtout(std_out,msg)
+   call wrtout(iout,msg)
 
    write(msg,'(a,a,a,a)' )ch10,&
 &   ' testkgrid : stop after analysis of a series of k-grids.',ch10,&
 &   '  For usual production runs, set prtkpt back to 0 (the default).'
-   call wrtout(std_out,msg,'COLL',do_flush=.True.)
-   call wrtout(iout,msg,'COLL',do_flush=.True.)
+   call wrtout(std_out,msg, do_flush=.True.)
+   call wrtout(iout,msg, do_flush=.True.)
 
    call abi_abort('PERS',exit_status=0,print_config=.false.)
  end if
@@ -3201,7 +3226,7 @@ end subroutine testkgrid
 !! mknormpath
 !!
 !! FUNCTION
-!! Please do not use this  routine, use make_normpath instead.
+!! Please do not use this routine, use make_normpath instead.
 !! mknormpath should be removed
 !!
 !!  This simple routine generates a normalized path that can be used to plot a band
@@ -3228,7 +3253,6 @@ end subroutine testkgrid
 !!  Do not use this routine, it is obsolete and should be replaced by make_path in m_bz_mesh.
 !!
 !! SOURCE
-
 
 subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
 
@@ -3271,40 +3295,40 @@ subroutine mknormpath(nbounds,bounds,gmet,ndiv_small,ndiv,npt_tot,path)
  write(std_out,*)lng
  fct=minval(lng)
 
-!Avoid division by zero if k(:,i+1)=k(:,i)
+ ! Avoid division by zero if k(:,i+1)=k(:,i)
  if (abs(fct)<tol6) then
    write(msg,'(3a)')&
-&   'found two consecutive points in the path which are equal',ch10,&
-&   'This is not allowed, please modify the path in your input file'
+    'found two consecutive points in the path which are equal',ch10,&
+    'This is not allowed, please modify the path in your input file'
    ABI_ERROR(msg)
  end if
 
  fct=fct/ndiv_small
  ndiv(:)=nint(lng(:)/fct)
-!The 1 stand for the first point
+ ! The 1 stand for the first point
  npt_tot=sum(ndiv)+1
 
  if (.not.present(path)) then
-   write(msg,'(2a,i8)')ch10,' mknormpath : total number of points on the path: ',npt_tot
-   call wrtout(std_out,msg,'COLL')
+   write(msg,'(2a,i0)')ch10,' mknormpath : total number of points on the path: ',npt_tot
+   call wrtout(std_out,msg)
    write(msg,'(2a)')ch10,' Number of divisions for each segment of the normalized path: '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    do ii=1,nbounds-1
      write(msg,'(2(3f8.5,a),i5,a)')&
      bounds(:,ii),' ==> ',bounds(:,ii+1),' ( ndiv: ',ndiv(ii),' )'
-     call wrtout(std_out,msg,'COLL')
+     call wrtout(std_out,msg)
    end do
    write(msg,'(a)')ch10
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
  else
    write(msg,'(2a)')ch10,' Normalized Path: '
-   call wrtout(std_out,msg,'COLL')
+   call wrtout(std_out,msg)
    idx=1
    do ii=1,nbounds-1
      do jp=1,ndiv(ii)
        path(:,idx)=bounds(:,ii)+(jp-1)*(path(:,ii+1)-path(:,ii))/ndiv(ii)
        write(msg,'(i4,4x,3(f8.5,1x))')idx,path(:,idx)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        idx=idx+1
      end do
    end do
@@ -3335,7 +3359,6 @@ subroutine bzlint_init(self, ngkpt, ndat, nkpt, kpts, values)
 !Local variables-------------------------------
  integer :: ik, ix, iy, iz, inds(3)
  real(dp) :: kpt_wrap(3), shift(3)
-
 ! *********************************************************************
 
  self%ngkpt = ngkpt; self%ndat = ndat
@@ -3382,6 +3405,7 @@ subroutine bzlint_interp(self, kpt, results)
  do idat=1,self%ndat
    results(idat) = interpol3d_0d(kpt_wrap, self%nx, self%ny, self%nz, self%vals_grid(:,:,:,idat))
  end do
+
 end subroutine bzlint_interp
 !!***
 
@@ -3399,10 +3423,36 @@ subroutine bzlint_free(self)
 !Arguments ------------------------------------
  class(bzlint_t),intent(inout) :: self
 ! *********************************************************************
-
  ABI_SFREE(self%vals_grid)
 
 end subroutine bzlint_free
+!!***
+
+!!****f* m_kpts/kptrlatt_from_ngkpt
+!! NAME
+!! kptrlatt_from_ngkpt
+!!
+!! FUNCTION
+!! Insert ngkpt in kptrlatt 3x3 array
+!!
+!! SOURCE
+
+pure subroutine kptrlatt_from_ngkpt(ngkpt, kptrlatt)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: ngkpt(3)
+ integer,intent(out) :: kptrlatt(3,3)
+
+!Local variables-------------------------------
+ integer :: ii
+!************************************************************************
+
+ kptrlatt = 0
+ do ii=1,3
+   kptrlatt(ii,ii) = ngkpt(ii)
+ end do
+
+end subroutine kptrlatt_from_ngkpt
 !!***
 
 end module m_kpts

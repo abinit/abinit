@@ -589,7 +589,7 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods
 
 ! *************************************************************************
 
- verbose = 0; if (PRESENT(prtvol)) verbose = prtvol
+ verbose = 0; if (present(prtvol)) verbose = prtvol
 
  if (kptrlatt(1,2) /= 0 .or. kptrlatt(2,1) /= 0 .or. &
      kptrlatt(1,3) /= 0 .or. kptrlatt(3,1) /= 0 .or. &
@@ -600,8 +600,8 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods
  n1 = kptrlatt(1,1); n2 = kptrlatt(2,2); n3 = kptrlatt(3,3)
  l1_max = lmax(1); l2_max = lmax(2); l3_max = lmax(3)
 
- nl=(2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
- l0=1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
+ nl = (2*l1_max+1)*(2*l2_max+1)*(2*l3_max+1)
+ l0 = 1+l1_max*(1+(2*l2_max+1)**2+(2*l3_max+1)) ! Index of the origin.
  ABI_MALLOC(dist, (nl))
 
  ! Allocate with maximum size
@@ -746,16 +746,13 @@ subroutine phdispl_cart2red(natom, gprimd, displ_cart, displ_red)
          ! 23 june 2004: rprimd becomes gprimd
          ! could be gprim and then multiply by acell...
          ! Nope, checked and ok with gprimd 24 jun 2004
-         displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + &
-&         gprimd(kdir,idir) * displ_cart(1,k1,jbranch)
+         displ_red(1,ibranch,jbranch) = displ_red(1,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(1,k1,jbranch)
 
-         displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + &
-&         gprimd(kdir,idir) * displ_cart(2,k1,jbranch)
+         displ_red(2,ibranch,jbranch) = displ_red(2,ibranch,jbranch) + gprimd(kdir,idir) * displ_cart(2,k1,jbranch)
 
        end do !kdir
      end do !idir
    end do !iatom
-   !
  end do !jbranch
 
 end subroutine phdispl_cart2red
@@ -840,9 +837,7 @@ subroutine getspinrot(rprimd, spinrot, symrel)
      matr2(:,ii) = coordinvt(1,:)*matr1(1,ii) + coordinvt(2,:)*matr1(2,ii) + coordinvt(3,:)*matr1(3,ii)
    end do
 
-   ! Find the eigenvector with unit eigenvalue of the
-   ! rotation matrix in cartesian coordinate, matr2
-
+   ! Find the eigenvector with unit eigenvalue of the rotation matrix in cartesian coordinate, matr2
    matr1(:,:)=matr2(:,:)
    matr1(1,1)=matr1(1,1)-one
    matr1(2,2)=matr1(2,2)-one
@@ -930,14 +925,10 @@ subroutine getspinrot(rprimd, spinrot, symrel)
  end if ! the case of the identity matrix
 
 !DEBUG
-!write(std_out,*)' getspinrot :'
-!write(std_out,*)' symre =',symrel(:,:)
-!write(std_out,*)' symrel1 =',symrel1(:,:)
-!write(std_out,*)' rprimd =',rprimd(:,:)
-!write(std_out,*)' matr2 =',matr2(:,:)
-!write(std_out,*)' matr1 =',matr1(:,:)
-!write(std_out,*)' phi (degree)=',phi*180._dp/pi
-!write(std_out,'(a,3d16.6)' )' axis=',axis(:)
+!write(std_out,*)' getspinrot :'; write(std_out,*)' symre =',symrel(:,:)
+!write(std_out,*)' symrel1 =',symrel1(:,:); write(std_out,*)' rprimd =',rprimd(:,:)
+!write(std_out,*)' matr2 =',matr2(:,:); write(std_out,*)' matr1 =',matr1(:,:)
+!write(std_out,*)' phi (degree)=',phi*180._dp/pi; write(std_out,'(a,3d16.6)' )' axis=',axis(:)
 !write(std_out,*)' vecta=',vecta(:)
 !stop
 !ENDDEBUG
@@ -1024,7 +1015,7 @@ end function spinrot_cmat
 !!
 !! SOURCE
 
-subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
+subroutine rotmat(xaxis, zaxis, inversion_flag, umat)
 
 !Arguments ------------------------------------
 !scalars
@@ -1046,27 +1037,21 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  zmod = sqrt(zaxis(1)**2 + zaxis(2)**2 + zaxis(3)**2)
 
  if(xmod < 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'The module of the xaxis should be greater than 1.d-8,',ch10,&
-&   'however, |xaxis|=',xmod
+   write(msg,'(a,a,a,i0)')&
+   'The module of the xaxis should be greater than 1.d-8,',ch10,'however, |xaxis|=',xmod
    ABI_BUG(msg)
  end if
 
  if(zmod < 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'The module of the zaxis should be greater than 1.d-8,',ch10,&
-&   'however, |zaxis|=',zmod
+   write(msg,'(a,a,a,i0)')'The module of the zaxis should be greater than 1.d-8,',ch10,'however, |zaxis|=',zmod
    ABI_ERROR(msg)
  end if
 
 !verify that both axis are perpendicular
- cosine = (xaxis(1)*zaxis(1) + xaxis(2)*zaxis(2) &
-& + xaxis(3)*zaxis(3))/(xmod*zmod)
+ cosine = (xaxis(1)*zaxis(1) + xaxis(2)*zaxis(2) + xaxis(3)*zaxis(3))/(xmod*zmod)
 
  if(abs(cosine) > 1.d-8)then
-   write(msg,'(a,a,a,i6)')&
-&   'xaxis and zaxis should be perpendicular,',ch10,&
-&   'however, cosine=',cosine
+   write(msg,'(a,a,a,i6)')'xaxis and zaxis should be perpendicular,',ch10,'however, cosine=',cosine
    ABI_BUG(msg)
  end if
 
@@ -1082,8 +1067,8 @@ subroutine rotmat(xaxis,zaxis,inversion_flag,umat)
  if(xmod>10._dp .or. zmod>10._dp) then
    inversion_flag=1
    write(msg, '(4a)' )&
-&   'inversion operation will be appended to axis transformation',ch10,&
-&   'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
+    'inversion operation will be appended to axis transformation',ch10,&
+    'Action: If you did not intend this, make |z|<10 and |x|<10 ',ch10
    call wrtout(std_out,msg)
  end if
 
@@ -1238,10 +1223,13 @@ subroutine metric(gmet, gprimd, iout, rmet, rprimd, ucvol)
  ! Also ask that the mixed product is positive.
  if (abs(ucvol)<tol12) then
    !write(std_out,*)"rprimd",rprimd,"ucvol",ucvol
-   write(msg,'(5a)')&
+   write(msg,'(6a,3(a,3es16.6,a))')&
      'Input rprim and acell gives vanishing unit cell volume.',ch10,&
      'This indicates linear dependency between primitive lattice vectors',ch10,&
-     'Action: correct either rprim or acell in input file.'
+     'Action: correct either rprim or acell in input file.', ch10, &
+     'Rprimd =',rprimd(:,1),ch10,&
+     '        ',rprimd(:,2),ch10,&
+     '        ',rprimd(:,3),ch10
    ABI_ERROR(msg)
  end if
  if (ucvol<zero)then

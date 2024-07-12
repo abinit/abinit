@@ -4785,14 +4785,14 @@ subroutine ddb_write(ddb, ddb_hdr, filename, with_psps, comm)
 
 ! ************************************************************************
 
-  call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
+ call ddb_hdr%get_iomode(filename, 2, iomode, filename_)
 
-  if (iomode==IO_MODE_ETSF) then
-    call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
-  else if (iomode==IO_MODE_FORTRAN) then
-    call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
-    ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
-  end if
+ if (iomode==IO_MODE_ETSF) then
+   call ddb%write_nc(ddb_hdr, filename_, comm=comm, with_psps=with_psps)
+ else if (iomode==IO_MODE_FORTRAN) then
+   call ddb%write_txt(ddb_hdr, filename_, with_psps=with_psps, comm=comm)
+   ddb_hdr%mpert = ddb%mpert  ! Text format doesnt know about mpert.
+ end if
 
 end subroutine ddb_write
 !!***
@@ -6239,7 +6239,6 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
    if (ddb_hdr%with_psps>0 .or. ddb_hdr%psps%usepaw > 0) then
      iddb_psps = iddb
    end if
-
  end do
 
  ddb%nsppol = nsppol
@@ -6264,8 +6263,8 @@ subroutine merge_ddb(nddb, filenames, outfile, dscrpt, chkopt)
 
  call ddb_hdr%free()  ! GA: why do I need this? Try to remove
  call ddb_hdr%open_read(filenames(1), comm, &
-                          matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
-                          msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
+                        matom=matom,mtypat=mtypat,mband=mband,mkpt=mkpt,&
+                        msym=msym,dimekb=dimekb,lmnmax=lmnmax,usepaw=usepaw)
  call ddb_hdr%close()
  ddb_hdr%mpert = mpert
  ddb_hdr%msize = msize
@@ -6920,31 +6919,26 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
    end if
  end do ! iblok
 
-! Check if all the information relatives to the q points sampling are found in the DDB;
-! if not => stop message
+! Check if all the information relatives to the q points sampling are found in the DDB if not => stop message
  nqmiss = 0
  do iqpt=1,nqpt
    if (qtest(iqpt,1)==0) then
      nqmiss = nqmiss + 1
      qmiss_(nqmiss) = iqpt
-     write(msg, '(3a)' )&
-      ' symdm9: the bloks found in the DDB are characterized',ch10,&
-      '  by the following wavevectors :'
+     write(msg, '(3a)' )' symdm9: the bloks found in the DDB are characterized',ch10,'  by the following wavevectors :'
      call wrtout(std_out,msg)
      do iblok=1,ddb%nblok
        write(msg, '(a,4d20.12)')' ',ddb%qpt(1,iblok),ddb%qpt(2,iblok),ddb%qpt(3,iblok),ddb%nrm(1,iblok)
        call wrtout(std_out,msg)
      end do
-     write(msg, '(a,a,a,i0,a,a,a,3es16.6,a,a,a,a)' )&
-      'Information is missing in the DDB.',ch10,&
-      'The dynamical matrix number ',iqpt,' cannot be built,',ch10,&
-      'since no block with qpt:',spqpt(1:3,iqpt),ch10,&
-      'has been found.',ch10,&
-      'Action: add the required block in the DDB, or modify the q-mesh your input file.'
-     if (.not.allow_qmiss) then
+     write(msg, '(3a,i0,3a,3es16.6,3a)' )&
+       'Information is missing in the DDB file.',ch10,&
+       'The dynamical matrix with iqpt= ',iqpt,' cannot be built,',ch10,&
+       'since no block with qpt: ',spqpt(1:3,iqpt), ' has been found.',ch10,&
+       'Action: add the required block in the DDB, or modify the q-mesh your input file.'
+     if (.not. allow_qmiss) then
        ABI_ERROR(msg)
      else
-       !continue
        ABI_COMMENT(msg)
      end if
    end if
@@ -7058,7 +7052,6 @@ subroutine symdm9(ddb, dynmat, gprimd, indsym, mpert, natom, nqpt, nsym, rfmeth,
 
  ABI_FREE(ddd)
  ABI_FREE(qtest)
-
 
  call xmpi_sum(dynmat, comm, ierr)
 

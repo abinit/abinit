@@ -3849,7 +3849,7 @@ subroutine ebands_expandk(inb, cryst, ecut_eff, force_istwfk1, dksqmax, bz2ibz, 
 
  timrev = kpts_timrev_from_kptopt(inb%kptopt)
  call listkk(dksqmax, cryst%gmet, bz2ibz, inb%kptns, kfull, inb%nkpt, nkfull, cryst%nsym, &
-   sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
+             sppoldbl, cryst%symafm, cryst%symrel, timrev, comm, use_symrec=.False.)
 
  ABI_MALLOC(wtk, (nkfull))
  wtk = one / nkfull ! weights normalized to one
@@ -4195,19 +4195,20 @@ end subroutine ebands_sort
 !!  band_block(2)=Initial and final band index. If [0,0], all bands are used
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
+!!  [out_prefix]: optional string prefix used to write netcdf file.
+!!  [malloc_only]: if true, create new bands object but don't interpolate eigenvalues.
 !!
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
 !!
 !! NOTES
-!!  Fermi level and occupation factors of the interpolate bands are not recomputed by this routine.
+!!  Fermi level and occupation factors of the interpolated bands are not recomputed by this routine.
 !!  This operation is delegated to the caller.
 !!
 !! SOURCE
 
-
-type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
-        band_block, comm, out_prefix) result(new)
+type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, band_block, comm, &
+                                             out_prefix, malloc_only) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -4215,6 +4216,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  character(len=*),optional,intent(in) :: out_prefix
+ logical,optional,intent(in) :: malloc_only
 !arrays
  integer,intent(in) :: intp_kptrlatt(3,3),band_block(2)
  real(dp),intent(in) :: params(:)
@@ -4224,8 +4226,7 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 !scalars
  integer,parameter :: master = 0
  integer :: ik_ibz,spin,new_bantot,new_mband,cplex,itype,nb,ib
- integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk
- integer :: ncid
+ integer :: nprocs,my_rank,cnt,ierr,band,new_nkbz,new_nkibz,new_nshiftk, ncid
  type(skw_t) :: skw
 !arrays
  integer :: new_kptrlatt(3,3),my_bblock(2)
@@ -4236,13 +4237,13 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- itype = nint(params(1))
+
  my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
  ! Get ibz, new shifts and new kptrlatt.
  call kpts_ibz_from_kptrlatt(cryst, intp_kptrlatt, ebands%kptopt, intp_nshiftk, intp_shiftk, &
-   new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
+                             new_nkibz, new_kibz, new_wtk, new_nkbz, new_kbz, new_kptrlatt=new_kptrlatt, new_shiftk=new_shiftk)
  new_nshiftk = size(new_shiftk, dim=2)
 
  ! Initialize new ebands_t in new IBZ
@@ -4261,10 +4262,10 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ABI_CALLOC(new_occ, (new_bantot))
 
  call ebands_init(new_bantot, new, ebands%nelect, ebands%ne_qFD,ebands%nh_qFD,ebands%ivalence,&
-   new_doccde, new_eig, new_istwfk, new_kibz,&
-   new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
-   ebands%occopt, new_occ, new_wtk, &
-   ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
+                  new_doccde, new_eig, new_istwfk, new_kibz,&
+                  new_nband, new_nkibz, new_npwarr, ebands%nsppol, ebands%nspinor, ebands%tphysel, ebands%tsmear,&
+                  ebands%occopt, new_occ, new_wtk, &
+                  ebands%cellcharge, ebands%kptopt, intp_kptrlatt, intp_nshiftk, intp_shiftk, new_kptrlatt, new_nshiftk, new_shiftk)
 
  ! Get fermi level from input ebands.
  new%fermie = ebands%fermie
@@ -4281,7 +4282,12 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
+ if (present(malloc_only)) then
+   if (malloc_only) return
+ end if
+
  ! Build SKW object for all bands.
+ itype = nint(params(1))
  if (itype == 1 .or. itype == 2) then
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
    skw = skw_new(cryst, params(2:), cplex, ebands%mband, ebands%nkpt, ebands%nsppol, ebands%kptns, ebands%eig, my_bblock, comm)
@@ -4321,23 +4327,9 @@ type(ebands_t) function ebands_interp_kmesh(ebands, cryst, params, intp_kptrlatt
  if (my_rank == master .and. itype == 1 .and. present(out_prefix)) then
    ! Write ESKW file with crystal and (interpolated) band structure energies.
    !call wrtout(ab_out, sjoin("- Writing interpolated bands to file:", strcat(prefix, tag)))
-   ! Write crystal and (interpolated) band structure energies.
    NCF_CHECK(nctk_open_create(ncid, strcat(out_prefix, "_ESKW.nc"), xmpi_comm_self))
    NCF_CHECK(cryst%ncwrite(ncid))
    NCF_CHECK(ebands_ncwrite(new, ncid))
-
-   ! TODO
-   !NCF_CHECK(skw%ncwrite(ncid))
-   ! Define variables specific to SKW algo.
-   !ncerr = nctk_def_arrays(ncid, [ &
-   ! nctkarr_t("band_block", "int", "two"), &
-   ! nctkarr_t("einterp", "dp", "four")], defmode=.True.)
-   !NCF_CHECK(ncerr)
-
-   ! Write data.
-   !NCF_CHECK(nctk_set_datamode(ncid))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "band_block"), band_block))
-   !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "einterp"), params))
    NCF_CHECK(nf90_close(ncid))
  end if
 
@@ -4364,13 +4356,14 @@ end function ebands_interp_kmesh
 !!  band_block(2)=Initial and final band index to be interpolated. [0,0] if all bands are used.
 !!    This is a global variable i.e. all MPI procs must call the routine with the same value.
 !!  comm=MPI communicator
+!!  [malloc_only]: if true, create new bands object but don't interpolate eigenvalues.
 !!
 !! OUTPUT
 !!  New ebands_t object with interpolated energies.
 !!
 !! SOURCE
 
-type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm) result(new)
+type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_block, comm, malloc_only) result(new)
 
 !Arguments ------------------------------------
 !scalars
@@ -4378,6 +4371,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  type(ebands_t),intent(in) :: ebands
  type(crystal_t),intent(in) :: cryst
  type(kpath_t),intent(in) :: kpath
+ logical,optional,intent(in) :: malloc_only
 !arrays
  integer,intent(in) :: band_block(2)
  real(dp),intent(in) :: params(:)
@@ -4398,7 +4392,7 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
 ! *********************************************************************
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- itype = nint(params(1))
+
  my_bblock = band_block; if (all(band_block == 0)) my_bblock = [1, ebands%mband]
  nb = my_bblock(2) - my_bblock(1) + 1
 
@@ -4441,7 +4435,12 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
  ABI_FREE(new_eig)
  ABI_FREE(new_occ)
 
+ if (present(malloc_only)) then
+   if (malloc_only) return
+ end if
+
  ! Build SKW object for all bands.
+ itype = nint(params(1))
  select case (itype)
  case (1)
    cplex = 1; if (kpts_timrev_from_kptopt(ebands%kptopt) == 0) cplex = 2
@@ -4473,7 +4472,6 @@ type(ebands_t) function ebands_interp_kpath(ebands, cryst, kpath, params, band_b
 
  ! Sort eigvalues_k in ascending order to be compatible with other ebands routines.
  call ebands_sort(new)
-
  call skw%free()
 
 end function ebands_interp_kpath

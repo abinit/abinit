@@ -5,13 +5,13 @@
 !! FUNCTION
 !!  Description
 !!
-!! TODO
-!!
 !! COPYRIGHT
 !!  Copyright (C) 2023-2024 ABINIT group (VV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
+
+!! TODO
 !!
 !! SOURCE
 
@@ -34,15 +34,21 @@ module m_varpeq
  use netcdf
  use m_nctk
  use m_xmpi
+ use m_ifc
+ use m_wfd
 
- use defs_datatypes,    only : ebands_t
- use m_fstrings,        only : sjoin, ktoa, ftoa, strcat
+ use defs_datatypes,    only : ebands_t, pseudopotential_type
+ use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa
+ use m_time,            only : cwtime_report, cwtime
+ use m_io_tools,        only : file_exists, iomode_from_fname, open_file
+ use m_pptools,         only : printxsf
+ use m_kpts,            only : kpts_map, kpts_timrev_from_kptopt, bzlint_t, kptrlatt_from_ngkpt
+ use m_fft_mesh,        only : supercell_fft, calc_ceikr
+ use m_pawtab,          only : pawtab_type
  use m_gstore,          only : gstore_t, gqk_t
- use m_io_tools,        only : file_exists
- use m_kpts,            only : kpts_ibz_from_kptrlatt, kpts_map, kpts_timrev_from_kptopt, bzlint_t
- use m_symkpt,          only : symkpt
- use m_symtk,           only : mati3inv
- use m_time,            only : cwtime, cwtime_report, timab, sec2str
+ use m_supercell,       only : supercell_type, init_supercell, destroy_supercell
+ use m_fftcore,         only : ngfft_seq !, get_kg
+ use m_ephtk,           only : ephtk_get_mpw_gmax
 
  implicit none
 
@@ -135,7 +141,6 @@ module m_varpeq
 !!  varpeq_t
 !!
 !! FUNCTION
-!!  Description
 !!
 !! SOURCE
 
@@ -199,6 +204,7 @@ module m_varpeq
 !!***
 
  public :: varpeq ! Main entry point
+ public :: varpeq_plot
 
 contains !=====================================================================
 
@@ -245,11 +251,8 @@ end subroutine varpeq
 !!  varpeq_free
 !!
 !! FUNCTION
+!!  Free allocatable arrays
 !!
-!! INPUTS
-!!
-!!
-!! OUTPUT
 !! SOURCE
 
 subroutine varpeq_free(self)
@@ -317,8 +320,7 @@ subroutine varpeq_compare(self, other, allow_mesh_mismatch)
 !Local variables-------------------------------
  character(len=500) :: msg
  integer :: ierr
- logical :: mismatch
-
+ !logical :: mismatch
 !----------------------------------------------------------------------
 
  ierr = 0
@@ -367,7 +369,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  logical, optional, intent(in) :: keep_open
 
 !Local variables-------------------------------
- character(len=500) :: msg
+ !character(len=500) :: msg
  integer :: ncid, nsppol, natom3
  real(dp) :: cpu, wall, gflops
 
@@ -457,8 +459,7 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
 !Local variables-------------------------------
  character(len=fnlen) :: path
  integer, parameter :: master = 0
- integer :: my_rank
- integer :: ncid, ncerr
+ integer :: my_rank, ncid, ncerr
  real(dp) :: cpu, wall, gflops
 
 !----------------------------------------------------------------------
@@ -583,9 +584,7 @@ subroutine varpeq_print(self)
 !scalars
  character(len=5000) :: msg
  integer, parameter :: master = 0
- integer :: comm, nproc, my_rank
- integer :: my_is, spin
- integer :: ii
+ integer :: comm, nproc, my_rank, my_is, spin, ii
  real(dp) :: enpol, enel, enph, enelph, eps, grs
 !arrays
  integer :: units(2)
@@ -669,10 +668,7 @@ subroutine varpeq_collect(self)
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr
- integer :: my_is, spin
- integer :: my_ik, ik_glob
- integer :: my_iq, iq_glob
+ integer :: ierr, my_is, spin, my_ik, ik_glob, my_iq, iq_glob
  integer :: oc_iter, oc_a, oc_b
 
 !----------------------------------------------------------------------
@@ -764,12 +760,9 @@ subroutine varpeq_setup(self, dtfil)
  type(varpeq_t) :: vpq_loaded
  type(bzlint_t) :: bzlint
  integer, parameter :: master = 0
- integer :: my_rank, comm, ierr
- integer :: my_is, spin
- integer :: nk, nb, ik, ib
+ integer :: my_rank, comm, ierr, my_is, spin, nk, nb, ik, ib
 !arrays
- integer :: units(2)
- integer :: ngkpt(3)
+ integer :: units(2), ngkpt(3)
  real(dp) :: kpt(3)
  real(dp), allocatable :: a_loaded(:,:), kpts_loaded(:,:), ank(:)
 
@@ -880,10 +873,9 @@ subroutine varpeq_solve(self)
  class(varpeq_t), target, intent(inout) :: self
 
 !Local variables-------------------------------
- character(len=5000) :: msg
+ !character(len=5000) :: msg
  class(polstate_t), pointer :: polstate
- integer :: my_is, spin
- integer :: ii
+ integer :: my_is, spin, ii
 
 !----------------------------------------------------------------------
 
@@ -994,19 +986,15 @@ subroutine varpeq_init(self, gstore, dtset)
  character(len=5000) :: msg
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
- integer :: ierr
- integer :: my_is, spin, bstart
- integer :: my_iq
+ integer :: ierr, my_is, spin, bstart, my_iq
  real(dp) :: wtq
 
 !----------------------------------------------------------------------
 
  ! Consistency check
- ierr = 0
- ABI_CHECK_NOSTOP(gstore%kzone == "bz", "kzone = 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%qzone == "bz", "qzone = 'bz' is required", ierr)
- ABI_CHECK_NOSTOP(gstore%gqk(1)%cplex == 2, "cplex = 2 is required", ierr)
- ABI_CHECK(ierr == 0, "The gstore object is inconsistent with varpeq. See messages above.")
+ !if (gstore%check_cplex_qkzone_gmode(2, "bz", "bz", "phonon") /= 0) then
+ !  ABI_ERROR("The gstore object is inconsistent with varpeq. See messages above.")
+ !end if
 
  self%gstore => gstore
 
@@ -1539,12 +1527,8 @@ real(dp) function polstate_get_enelph(self) result(enelph)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
- integer :: my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw
- complex(dp) :: g_forw
- complex(dp) :: b
+ integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ complex(dp) :: a_from, a_forw, g_forw, b
 !arrays
  integer, allocatable :: kpq_map(:, :)
  real(dp) :: kpt(3)
@@ -1606,9 +1590,7 @@ real(dp) function polstate_get_enph(self) result(enph)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
-
+ integer :: ierr, my_iq, my_pert
 !----------------------------------------------------------------------
 
  gqk => self%gqk
@@ -1646,8 +1628,7 @@ real(dp) function polstate_get_enel(self) result(enel)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_ik, ik_ibz, ib
+ integer :: ierr, my_ik, ik_ibz, ib
 
 !----------------------------------------------------------------------
 
@@ -1688,12 +1669,8 @@ subroutine polstate_get_b_from_a(self)
 !Local variables-------------------------------
 !scalars
  class(gqk_t), pointer :: gqk
- integer :: ierr
- integer :: my_iq, my_pert
- integer :: my_ik, ik_forw, ib, jb
- complex(dp) :: a_from, a_forw
- complex(dp) :: g_forw
- complex(dp) :: b_tmp
+ integer :: ierr, my_iq, my_pert, my_ik, ik_forw, ib, jb
+ complex(dp) :: a_from, a_forw, g_forw, b_tmp
 !arrays
  integer, allocatable :: qpk_map(:, :)
  real(dp) :: qpt(3)
@@ -2078,8 +2055,7 @@ end subroutine polstate_get_mapping
 !!
 !! SOURCE
 
-type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) &
-    result(krank_kpts)
+type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) result(krank_kpts)
 
 !Arguments ------------------------------------
 !scalars
@@ -2110,8 +2086,7 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) &
 !----------------------------------------------------------------------
 
  contains
- type(krank_t) function get_krank_glob_(my_kpts, my_nk, my_kstart, glob_nk, comm) &
-     result(krank_kpts)
+ type(krank_t) function get_krank_glob_(my_kpts, my_nk, my_kstart, glob_nk, comm) result(krank_kpts)
 
   integer, intent(in) :: comm, my_nk, my_kstart, glob_nk
   real(dp), intent(in) :: my_kpts(3, my_nk)
@@ -2138,6 +2113,251 @@ type(krank_t) function polstate_get_krank_glob(self, mode, kptrlatt) &
 end function polstate_get_krank_glob
 !!***
 
+!!****f* m_varpeq/varpeq_plot
+!! NAME
+!!  varpeq_plot
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!! wfk0_path=String with the path to the GS unperturbed WFK file.
+!! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
+!! dtset<dataset_type>=All input variables for this dataset.
+!! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
+!! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
+!! comm=MPI communicator.
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: wfk0_path
+ integer,intent(in) :: ngfft(18),ngfftf(18)
+ type(dataset_type), intent(in) :: dtset
+ type(datafiles_type), intent(in) :: dtfil
+ type(crystal_t),intent(in) :: cryst
+ type(ebands_t),intent(in) :: ebands
+ type(ifc_type),intent(in) :: ifc
+ type(pseudopotential_type),intent(in) :: psps
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+!scalars
+ integer,parameter :: master = 0, ndat1 = 1
+ integer :: my_rank, ib, irsp, ir, uc_idx, ount, n1, n2, n3, n4, n5, n6, mpw, nfft, nfftf, mgfft, mgfftf, band, bstart
+ integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev
+ integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz
+ logical :: isirr_k
+ real(dp) :: cpu_all, wall_all, gflops_all
+ character(len=500) :: msg
+ character(len=fnlen) :: path
+ type(varpeq_t) :: vpq
+ type(wfd_t) :: wfd
+ type(supercell_type) :: scell
+ type(krank_t) :: krank_ibz
+!arrays
+ integer :: nrcl(3), sc_ngfft(18), mapl_k(6), kptrlatt_(3,3) !, qptrlatt_(3,3)
+ integer :: units(2), work_ngfft(18), gmax(3), mapl_kk(6), g0_k(3)
+ integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), rcl2fft(:), kbz2ibz(:,:), gbound_k(:,:)
+ real(dp),parameter :: origin0(3) = zero
+ real(dp) :: kk(3), kk_ibz(3)
+ real(dp),allocatable :: rclred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:)
+ !real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
+ logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
+ complex(dp) :: ank
+ complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:), ceikr(:)
+!----------------------------------------------------------------------
+
+ units = [std_out, ab_out]
+ my_rank = xmpi_comm_rank(comm)
+
+ ! Read A_nk and B_qnu and other useful tables from file
+ call vpq%ncread(dtfil%filvarpeqin, comm, keep_open=.False.)
+
+ ! Copy important dimensions
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
+ nkibz = ebands%nkpt; mband = ebands%mband
+
+ ! FFT meshes
+ nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
+ nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
+ n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
+ n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
+
+ ! Initialize the wave function descriptor.
+ ! TODO: mband can be decreased
+ ABI_MALLOC(nband, (nkibz, nsppol))
+ ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
+ ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
+ nband = mband; bks_mask = .False.; keep_ur = .False.
+
+ ! Impose istwfk = 1 for all k-points. This is also done in respfn (see inkpts)
+ ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
+ ABI_MALLOC(wfd_istwfk, (nkibz))
+ wfd_istwfk = 1
+
+ call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
+               dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft, &
+               dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
+
+ call wfd%print(header="Wavefunctions for varpeq_plot")
+
+ ABI_FREE(nband)
+ ABI_FREE(keep_ur)
+ ABI_FREE(wfd_istwfk)
+ ABI_FREE(bks_mask)
+
+ ! Read wavefunctions.
+ call wfd%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
+
+ call cwtime(cpu_all, wall_all, gflops_all, "start")
+
+ ! Compute mpw and gmax
+ do spin=1,nsppol
+   nk = vpq%nk_spin(spin)
+   do ik=1, vpq%nk_spin(spin)
+     call ephtk_get_mpw_gmax(nk, vpq%kpts_spin(:, 1:nk, spin), dtset%ecut, cryst%gmet, mpw, gmax, comm, &
+                             init_with_zero=spin==1)
+   end do
+ end do
+
+ ! Init work_ngfft
+ gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
+ gmax = 2*gmax + 1
+ call ngfft_seq(work_ngfft, gmax)
+ !!write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
+
+ ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
+ krank_ibz = krank_from_kptrlatt(wfd%nkibz, wfd%kibz, ebands%kptrlatt, compute_invrank=.False.)
+
+ ! Build supercell from ngkpt
+ call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
+ call init_supercell(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, scell, ordering=.False.)
+
+ nkbz = product(vpq%ngkpt)
+ call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, rcl2fft, rclred)
+ ABI_FREE(rclred)
+
+ ! Compute polaron wavefunction in the WS supercell.
+ ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
+ ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
+
+ ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol))
+ ABI_MALLOC(ceikr, (sc_nfft*nspinor))
+
+ do spin=1,nsppol
+   do ik=1, vpq%nk_spin(spin)
+     kk = vpq%kpts_spin(:, ik, spin)
+
+     if (kpts_map("symrel", ebands_timrev, cryst, krank_ibz, 1, kk, mapl_k) /= 0) then
+       write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-point could not be generated from a symmetrical one.",trim(ltoa(kk))
+       ABI_ERROR(msg)
+     end if
+
+     ik_ibz = mapl_kk(1); isym_k = mapl_kk(2); trev_k = mapl_kk(6); g0_k = mapl_kk(3:5)
+     isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
+     kk_ibz = ebands%kptns(:, ik_ibz)
+     istwf_k_ibz = wfd%istwfk(ik_ibz); npw_kq_ibz = wfd%npwarr(ik_ibz)
+
+     ! Get npw_k, kg_k for k
+     call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, &  ! in
+                              istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)                ! out
+
+     ABI_MALLOC(ug_k, (2, npw_k*nspinor))
+     call calc_ceikr(kk, sc_ngfft, sc_nfft, nspinor, ceikr)
+
+     do ib=1,vpq%nb_spin(spin)
+       bstart = vpq%brange_spin(1, spin)
+       band = bstart + ib - 1
+       ank = vpq%a_spin(1, ib, ik, spin) + j_dpc * vpq%a_spin(2, ib, ik, spin)
+       call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
+                          cryst, mapl_kk, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
+
+       do spinor=1,nspinor
+         spad = (spinor - 1) * sc_nfft
+         do ir=1, sc_nfft
+           uc_idx = rcl2fft(ir)
+           irsp = ir + spad
+           pol_wf(irsp, spin) = pol_wf(irsp, spin) + (ank * ur_k(uc_idx) * ceikr(irsp))
+         end do
+       end do
+
+     end do ! ib
+
+     ABI_FREE(kg_k)
+     ABI_FREE(kpg_k)
+     ABI_FREE(ug_k)
+   end do ! ik
+ end do ! spin
+
+ ABI_FREE(work)
+ ABI_FREE(ur_k)
+ ABI_FREE(gbound_k)
+ ABI_FREE(rcl2fft)
+ ABI_FREE(ceikr)
+ call krank_ibz%free()
+
+ call xmpi_sum_master(pol_wf, master, comm, ierr)
+
+ ! Write polaron density in XSF format.
+ if (my_rank == master) then
+   !pol_wf = pol_wf / sqrt(nkbz)
+   ABI_MALLOC(pol_rho, (sc_nfft))
+
+   if (nspinor == 1) then
+     do spin=1,nsppol
+       pol_rho = abs(pol_wf(:, spin)) ** 2
+       path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
+       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
+       if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
+         ABI_ERROR(msg)
+       end if
+       call printxsf(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+                     scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
+       close(ount)
+     end do
+
+   else
+     pol_rho(:) = abs(pol_wf(1:sc_nfft, 1)) ** 2
+     pol_rho(:) = abs(pol_wf(sc_nfft+1:, 1)) ** 2 + pol_rho(:)
+
+     path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
+     if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
+       ABI_ERROR(msg)
+     end if
+     call printxsf(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+                   scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
+     close(ount)
+   end if
+
+   ABI_FREE(pol_rho)
+ end if
+
+ ABI_FREE(pol_wf)
+ call wfd%free()
+ call cwtime_report(" varpeq_plot wavefunction polaron completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
+
+
+ ! Write polaron-induced displacementes in XSF format.
+ !if (my_rank == master) then
+ !  path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPLACEMENTS.xsf")
+ !  if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
+ !    ABI_ERROR(msg)
+ !  end if
+ !  !call printxsf(n1, n2, n3, datagrid, basis, origin, scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
+ !  close(ount)
+ !end if
+
+ call vpq%free()
+ call destroy_supercell(scell)
+
+end subroutine varpeq_plot
+!!***
 
 end module m_varpeq
 !!***

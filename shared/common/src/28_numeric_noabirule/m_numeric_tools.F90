@@ -6096,8 +6096,6 @@ end subroutine kramerskronig
 !! OUTPUT
 !! scalar product of the two vectors
 !!
-!! SIDE EFFECTS
-!!
 !! WARNINGS
 !! vector size is not checked
 !!
@@ -6107,7 +6105,6 @@ end subroutine kramerskronig
 !!
 !! MG: FIXME: Well, optized blas1 is for sure better than what you wrote!
 !! Now I dont' have time to update ref files
-!!
 !!
 !! SOURCE
 
@@ -6140,7 +6137,7 @@ end function dotproduct
 !! invcb
 !!
 !! FUNCTION
-!! Compute a set of inverse cubic roots as fast as possible :
+!! Compute a set of inverse cubic roots as fast as possible:
 !! rspts(:)=rhoarr(:)$^\frac{-1}{3}$
 !!
 !! INPUTS
@@ -6176,7 +6173,6 @@ subroutine invcb(rhoarr,rspts,npts)
 !do ipts=1,npts
 !rspts(ipts)=sign( (abs(rhoarr(ipts)))**m1thrd,rhoarr(ipts))
 !end do
-!
 
  rhomtrd=sign( (abs(rhoarr(1)))**m1thrd, rhoarr(1) )
  rhom1=one/rhoarr(1)
@@ -6184,7 +6180,7 @@ subroutine invcb(rhoarr,rspts,npts)
  do ipts=2,npts
    rho=rhoarr(ipts)
    prod=rho*rhom1
-!  If the previous point is too far ...
+   ! If the previous point is too far ...
    if(prod < 0.01_dp .or. prod > 10._dp )then
      rhomtrd=sign( (abs(rho))**m1thrd , rho )
      rhom1=one/rho
@@ -6216,7 +6212,7 @@ end subroutine invcb
 !!
 !! FUNCTION
 !!  Subroutine safe_div performs "safe division", that is to prevent overflow,
-!!  underflow, NaN, or infinity errors.  An alternate value is returned if the
+!!  underflow, NaN, or infinity errors. An alternate value is returned if the
 !!  division cannot be performed. (bmy, 2/26/08)
 !!
 !!  For more information, see the discussion on:
@@ -6312,11 +6308,9 @@ end subroutine bool2index
 !! SOURCE
 !!
 
-
 subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
 
 !Arguments ------------------------------------
-
 !scalars
  integer                     :: degree,npts
  real(dp),intent(out)        :: RMSerr
@@ -6330,8 +6324,7 @@ subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
  real(dp)                    :: residual,fitval
 !arrays
  integer,allocatable         :: tmp(:)
- real(dp),allocatable        :: tmptwo(:)
- real(dp),allocatable        :: A(:,:),ATA(:,:)
+ real(dp),allocatable        :: tmptwo(:), A(:,:),ATA(:,:)
 
 !####################################################################
 !#####################  Get Polynomial Fit  #########################
@@ -6384,9 +6377,6 @@ subroutine polynomial_regression(degree,npts,xvals,yvals,coeffs,RMSerr)
     residual=residual+(fitval-yvals(ipoint))**2
   end do
   RMSerr=sqrt(residual/(real(npts-1,8)))
-
-!####################################################################
-!########################  Deallocations  ###########################
 
   ABI_FREE(A)
   ABI_FREE(ATA)
