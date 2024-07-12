@@ -790,10 +790,10 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !    ###########################################################
 !    ### 16. => Precondition forces, stress and energy
 !    ### 17. => Call to each predictor
-     
-     scfcv_args%dtset%imgmov = 9
-     call pimd_init(scfcv_args%dtset,pimd_param,me==master)
-     scfcv_args%dtset%imgmov = 0
+!    Some MOLDYN algorithms require pimd_param to be initialized
+     if(scfcv_args%dtset%ionmov==16) then
+       call pimd_init(scfcv_args%dtset,pimd_param,me==master,force_imgmov=9)
+     end if
      
      call precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,&
 &     scfcv_args%dtset%chkdilatmx,&

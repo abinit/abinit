@@ -132,7 +132,7 @@ CONTAINS !===========================================================
 !!
 !! SOURCE
 
-subroutine pimd_init(dtset,pimd_param,is_master)
+subroutine pimd_init(dtset,pimd_param,is_master,force_imgmov)
 
  implicit none
 
@@ -141,16 +141,22 @@ subroutine pimd_init(dtset,pimd_param,is_master)
  logical,intent(in) :: is_master
  type(dataset_type),target,intent(in) :: dtset
  type(pimd_type),intent(inout) :: pimd_param
+ integer,optional,intent(in) :: force_imgmov
 !Local variables-------------------------------
 !scalars
- integer :: ierr
+ integer :: ierr,imgmov
  character(len=200) :: msg
 
 !************************************************************************
+ if(present(force_imgmov)) then
+   imgmov=force_imgmov
+ else
+   imgmov=dtset%imgmov
+ end if
 
  call pimd_nullify(pimd_param)
 
- if((dtset%imgmov==9).or.(dtset%imgmov==10).or.(dtset%imgmov==13))then
+ if((imgmov==9).or.(imgmov==10).or.(imgmov==13))then
    pimd_param%adpimd      = dtset%adpimd
    pimd_param%constraint  = dtset%pimd_constraint
    pimd_param%irandom     = dtset%irandom
@@ -170,13 +176,13 @@ subroutine pimd_init(dtset,pimd_param,is_master)
    pimd_param%qmass       =>dtset%qmass
    pimd_param%typat       =>dtset%typat
    pimd_param%wtatcon     =>dtset%wtatcon
-   if(dtset%imgmov==10)then
+   if(imgmov==10)then
      pimd_param%use_qtb=1
      if(is_master)then
        call pimd_init_qtb(dtset,pimd_param%qtb_file_unit)
      end if
    end if
-   if(dtset%imgmov==13)then
+   if(imgmov==13)then
      ABI_MALLOC(pimd_param%zeta_prev,(3,dtset%natom,dtset%nimage,dtset%nnos))
      ABI_MALLOC(pimd_param%zeta     ,(3,dtset%natom,dtset%nimage,dtset%nnos))
      ABI_MALLOC(pimd_param%zeta_next,(3,dtset%natom,dtset%nimage,dtset%nnos))
