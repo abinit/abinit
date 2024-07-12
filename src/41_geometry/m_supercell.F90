@@ -1,5 +1,4 @@
 !!****m* ABINIT/m_supercell
-!!
 !! NAME
 !! m_supercell
 !!
@@ -109,7 +108,7 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
-&    typat_primcell, xcart_primcell, znucl, scell, ordering)
+                                 typat_primcell, xcart_primcell, znucl, scell, ordering)
 
 !Arguments ------------------------------------
 !scalars
@@ -131,7 +130,6 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
  integer :: rlatt(3,3) ! number of primitive cells in each direction for the supercell
  character(len=500) :: msg
 ! *************************************************************************
-
 
 ! maximum number of unit cells in a given direction
  maxsc = 10
@@ -241,7 +239,6 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
        icell=icell+1
        scell%rvecs(:,icell)=(/i1-1, i2-1, i3-1/)
 
-
        do iatom = 1, natom_primcell
          iatom_supercell = iatom_supercell + 1
          scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
@@ -258,8 +255,6 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  if(iatom_supercell /= scell%natom) then
     write(std_out,*)"iatom_supercell /= scell%natom"
  endif
-
-
 
  scell%xcart = scell%xcart_ref
  scell%qphon = zero
@@ -440,7 +435,6 @@ subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 end subroutine prt_supercell_for_qpt
 !!***
 
-
 !****f* m_supercell/prt_supercell
 !!
 !! NAME
@@ -555,25 +549,25 @@ subroutine copy_supercell (scell_in,scell_copy)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(in) :: scell_in
-  type(supercell_type), intent(inout) :: scell_copy
+ type(supercell_type), intent(in) :: scell_in
+ type(supercell_type), intent(inout) :: scell_copy
 
 ! *************************************************************************
 
-  call destroy_supercell(scell_copy)
-  scell_copy%natom_primcell = scell_in%natom_primcell
-  scell_copy%natom = scell_in%natom
-  scell_copy%ntypat = scell_in%ntypat
-  scell_copy%ncells = scell_in%ncells
-  scell_copy%rlatt = scell_in%rlatt
-  scell_copy%rprimd = scell_in%rprimd
-  scell_copy%qphon = scell_in%qphon
-  call alloc_copy(scell_in%xcart        , scell_copy%xcart)
-  call alloc_copy(scell_in%xcart_ref    , scell_copy%xcart_ref)
-  call alloc_copy(scell_in%atom_indexing, scell_copy%atom_indexing)
-  call alloc_copy(scell_in%uc_indexing  , scell_copy%uc_indexing)
-  call alloc_copy(scell_in%typat        , scell_copy%typat)
-  call alloc_copy(scell_in%znucl        , scell_copy%znucl)
+ call destroy_supercell(scell_copy)
+ scell_copy%natom_primcell = scell_in%natom_primcell
+ scell_copy%natom = scell_in%natom
+ scell_copy%ntypat = scell_in%ntypat
+ scell_copy%ncells = scell_in%ncells
+ scell_copy%rlatt = scell_in%rlatt
+ scell_copy%rprimd = scell_in%rprimd
+ scell_copy%qphon = scell_in%qphon
+ call alloc_copy(scell_in%xcart        , scell_copy%xcart)
+ call alloc_copy(scell_in%xcart_ref    , scell_copy%xcart_ref)
+ call alloc_copy(scell_in%atom_indexing, scell_copy%atom_indexing)
+ call alloc_copy(scell_in%uc_indexing  , scell_copy%uc_indexing)
+ call alloc_copy(scell_in%typat        , scell_copy%typat)
+ call alloc_copy(scell_in%znucl        , scell_copy%znucl)
 
 end subroutine copy_supercell
 !!***
@@ -602,14 +596,14 @@ subroutine getPBCIndexes_supercell(index,ncell)
   integer :: ii
 ! *********************************************************************
 
-  do ii=1,3
-    do while (index(ii) > ncell(ii))
-      index(ii) = index(ii) - ncell(ii)
-    end do
-    do while (index(ii) <= 0)
-      index(ii) = index(ii) + ncell(ii)
-    end do
-  end do
+ do ii=1,3
+   do while (index(ii) > ncell(ii))
+     index(ii) = index(ii) - ncell(ii)
+   end do
+   do while (index(ii) <= 0)
+     index(ii) = index(ii) + ncell(ii)
+   end do
+ end do
 
 end subroutine getPBCIndexes_supercell
 !!***
@@ -637,6 +631,7 @@ subroutine findBound_supercell(min,max,ncell)
 !Arguments ---------------------------------------------
   integer, intent(inout) :: min,max
   integer, intent(in) :: ncell
+
 !Local variables ---------------------------------------
   if(abs(max)>abs(min)) then
     max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
@@ -672,22 +667,23 @@ function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 !Arguments ------------------------------------
 !scalar
 !array
-  real(dp),intent(in):: rprimd(3,3)
-  real(dp),intent(in):: xcart1(3),xcart2(3)
-  integer,intent(in) :: cell1(3),cell2(3)
-  real(dp) :: dist
+ real(dp),intent(in):: rprimd(3,3)
+ real(dp),intent(in):: xcart1(3),xcart2(3)
+ integer,intent(in) :: cell1(3),cell2(3)
+ real(dp) :: dist
 !Local variables -------------------------------
-  real(dp) :: rpt1(3),rpt2(3)
-  integer  :: mu
+ real(dp) :: rpt1(3),rpt2(3)
+ integer  :: mu
 !! *************************************************************************
-  do mu=1,3
-    rpt1(mu) = cell1(1)*rprimd(mu,1)+cell1(2)*rprimd(mu,2)+cell1(3)*rprimd(mu,3)
-    rpt2(mu) = cell2(1)*rprimd(mu,1)+cell2(2)*rprimd(mu,2)+cell2(3)*rprimd(mu,3)
-  end do
 
-  dist = ((xcart2(1)+rpt2(1)-xcart1(1)-rpt1(1))**2+&
-&         (xcart2(2)+rpt2(2)-xcart1(2)-rpt1(2))**2+&
-&         (xcart2(3)+rpt2(3)-xcart1(3)-rpt1(3))**2)**0.5
+ do mu=1,3
+   rpt1(mu) = cell1(1)*rprimd(mu,1)+cell1(2)*rprimd(mu,2)+cell1(3)*rprimd(mu,3)
+   rpt2(mu) = cell2(1)*rprimd(mu,1)+cell2(2)*rprimd(mu,2)+cell2(3)*rprimd(mu,3)
+ end do
+
+ dist = ((xcart2(1)+rpt2(1)-xcart1(1)-rpt1(1))**2+&
+         (xcart2(2)+rpt2(2)-xcart1(2)-rpt1(2))**2+&
+         (xcart2(3)+rpt2(3)-xcart1(3)-rpt1(3))**2)**0.5
 
 end function distance_supercell
 !!***
@@ -712,16 +708,15 @@ subroutine destroy_supercell (scell)
 !Arguments ------------------------------------
 !scalars
   type(supercell_type), intent(inout) :: scell
-
 ! *************************************************************************
 
-  ABI_SFREE(scell%xcart)
-  ABI_SFREE(scell%xcart_ref)
-  ABI_SFREE(scell%typat)
-  ABI_SFREE(scell%atom_indexing)
-  ABI_SFREE(scell%uc_indexing)
-  ABI_SFREE(scell%znucl)
-  ABI_SFREE(scell%rvecs)
+ ABI_SFREE(scell%xcart)
+ ABI_SFREE(scell%xcart_ref)
+ ABI_SFREE(scell%typat)
+ ABI_SFREE(scell%atom_indexing)
+ ABI_SFREE(scell%uc_indexing)
+ ABI_SFREE(scell%znucl)
+ ABI_SFREE(scell%rvecs)
 
 end subroutine destroy_supercell
 !!***
@@ -791,9 +786,7 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
 
  transv=reshape((/ (((((/ ix,iy,iz /),iatom=1,nat_org),ix=0,ext(1)-1),iy=0,ext(2)-1),iz=0,ext(3)-1) /), (/ 3, nat_org,nprcl/) )
 
-!DEBUG
-!write(std_out,*)'mksupercell: xred_org ' ,xred_org
-!END DEBUG
+ !write(std_out,*)'mksupercell: xred_org ' ,xred_org
 
  do iprcl=1,nprcl
    xred_sc(:,1+(iprcl-1)*nat_org:iprcl*nat_org)=xred_org+transv(:,:,iprcl)
@@ -805,10 +798,8 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
    xred_sc(jdim,:)=xred_sc(jdim,:)/ext(jdim)
  end do
 
-!DEBUG
-!write(std_out,*)'mksupercell: xred_sc ', xred_sc
-!write(std_out,*)'mksupercell: magv_sc ', magv_sc
-!END DEBUG
+ !write(std_out,*)'mksupercell: xred_sc ', xred_sc
+ !write(std_out,*)'mksupercell: magv_sc ', magv_sc
 
  ABI_FREE(transv)
 
