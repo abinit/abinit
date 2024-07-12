@@ -1626,24 +1626,27 @@ end subroutine fock2ACE
 !!
 !! SOURCE
 
-subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
+subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat)
 
 !Arguments ------------------------------------
 ! Scalars
+ integer :: ndat
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
- real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k)
+ real(dp),intent(inout) :: cwavef(:,:)!,ghc(2,gs_ham%npw_k*ndat)
  real(dp),intent(inout) :: ghc(:,:)
 
 !Local variables-------------------------------
 ! Scalars
- integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw
- real(dp) :: doti,dotr,eigen
+ complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
+ integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw,idat
+ real(dp) :: eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
- real(dp) :: tsec(2) 
- real(dp), allocatable :: ghc1(:,:),xi(:,:)
+ real(dp) :: tsec(2)
+ real(dp), allocatable :: mat(:,:,:),ghc1(:,:)
+ real(dp), ABI_CONTIGUOUS pointer :: xi(:,:,:)
 
 ! *************************************************************************
 
@@ -1661,20 +1664,23 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
- ABI_MALLOC(ghc1,(2,npw*my_nspinor))
- ghc1=zero
- ABI_MALLOC(xi,(2,npw*my_nspinor))
+ ABI_MALLOC(ghc1,(2,npw*my_nspinor*ndat))
+ ABI_MALLOC(mat,(2,nband_k,ndat))
 
- do iband=1, nband_k
-   xi(1,:)=gs_ham%fockACE_k%xi(1,:,iband)
-   xi(2,:)=gs_ham%fockACE_k%xi(2,:,iband)
+ xi => gs_ham%fockACE_k%xi(:,:,:)
 
-   call dotprod_g(dotr,doti,gs_ham%istwf_k,npw*my_nspinor,2,xi,cwavef,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+ call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
+                   xi, npw, &
+                   cwavef, npw, &
+                   czero, &
+                   mat, nband_k)
+ call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
+                   xi, npw, &
+                   mat, nband_k, &
+                   czero, &
+                   ghc1, npw)
 
-   ghc1(1,:)=ghc1(1,:)-(dotr*gs_ham%fockACE_k%xi(1,:,iband)-doti*gs_ham%fockACE_k%xi(2,:,iband))
-   ghc1(2,:)=ghc1(2,:)-(dotr*gs_ham%fockACE_k%xi(2,:,iband)+doti*gs_ham%fockACE_k%xi(1,:,iband))
- end do
- ABI_FREE(xi)
+ ABI_FREE(mat)
 
 !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
 ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
@@ -1688,21 +1694,23 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
 !* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
 !* at each convergence step. (consistent definition with the definition of hartree energy)
  if (fockcommon%ieigen/=0) then
-   eigen=zero
-!* Dot product of cwavef and ghc
-!* inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
-   if(gs_ham%istwf_k==2) then
-     eigen=half*cwavef(1,1)*ghc1(1,1)
-   else
-     eigen=cwavef(1,1)*ghc1(1,1)+cwavef(2,1)*ghc1(2,1)
-   end if
-   do ipw=2,npw
-     eigen=eigen+cwavef(1,ipw)*ghc1(1,ipw)+cwavef(2,ipw)*ghc1(2,ipw)
-   end do
-   if(gs_ham%istwf_k>=2) eigen=two*eigen
-!   call xmpi_sum(eigen,mpi_enreg%comm_kpt,ier)
-   fockcommon%eigen_ikpt(fockcommon%ieigen)= eigen
-   fockcommon%ieigen = 0
+   do idat=1,ndat
+     eigen=zero
+!   * Dot product of cwavef and ghc
+!   * inspired from the routine 54_spacepar/meanvalue_g but without the reference to parallelism and filtering
+     if(gs_ham%istwf_k==2) then
+       eigen=half*cwavef(1,1+(idat-1)*npw)*ghc1(1,1+(idat-1)*npw)
+     else
+       eigen=cwavef(1,1+(idat-1)*npw)*ghc1(1,1+(idat-1)*npw)+cwavef(2,1+(idat-1)*npw)*ghc1(2,1+(idat-1)*npw)
+     end if
+     do ipw=2,npw
+       eigen=eigen+cwavef(1,ipw+(idat-1)*npw)*ghc1(1,ipw+(idat-1)*npw)+cwavef(2,ipw+(idat-1)*npw)*ghc1(2,ipw+(idat-1)*npw)
+     end do
+     if(gs_ham%istwf_k>=2) eigen=two*eigen
+!    call xmpi_sum(eigen,mpi_enreg%comm_kpt,ier)
+     fockcommon%eigen_ikpt(fockcommon%ieigen+idat-1)= eigen
+     fockcommon%ieigen = 0
+   end do ! idat
  end if
 
 ! ===============================

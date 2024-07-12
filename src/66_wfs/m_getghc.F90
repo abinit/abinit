@@ -862,10 +862,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
            end do ! idat
            call timab(360,2,tsec)
          else
-           do idat=1,ndat
-             call fock_ACE_getghc(cwavef(:,1+(idat-1)*npw_k1*my_nspinor:idat*npw_k1*my_nspinor),&
-&             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg)
-           end do ! idat
+           call fock_ACE_getghc(cwavef,gvnlxc_,gs_ham,mpi_enreg,ndat)
          end if
        end if
      end if
