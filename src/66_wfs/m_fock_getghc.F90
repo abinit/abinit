@@ -1259,7 +1259,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !scalars
  integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
  integer :: ierr,info,idir,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
- integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
+ integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,nkpg
  integer :: npw_k,spaceComm
  integer :: use_ACE_old
  integer :: blocksize,iblock,jblock,iblocksize,jblocksize,nblockbd
@@ -1626,11 +1626,12 @@ end subroutine fock2ACE
 !!
 !! SOURCE
 
-subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat)
+subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat,gpu_option)
 
 !Arguments ------------------------------------
 ! Scalars
  integer :: ndat
+ integer,optional :: gpu_option
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
@@ -1640,7 +1641,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat)
 !Local variables-------------------------------
 ! Scalars
  complex(dpc), parameter :: cminusone  = (-1._dp,0._dp)
- integer :: iband,ikpt,ipw,my_nspinor,nband_k,npw,idat
+ integer :: ikpt,ipw,my_nspinor,nband_k,npw,idat,gpu_option_
  real(dp) :: eigen
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
@@ -1662,6 +1663,7 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat)
  npw=gs_ham%npw_k
  nband_k=fockcommon%nband(ikpt)
  my_nspinor=max(1,gs_ham%nspinor/mpi_enreg%nproc_spinor)
+ gpu_option_=ABI_GPU_DISABLED; if(present(gpu_option)) gpu_option_ = gpu_option
 !*Initialization of the array ghc1
 !*ghc1 will contain the exact exchange contribution to the Hamiltonian
  ABI_MALLOC(ghc1,(2,npw*my_nspinor*ndat))
@@ -1669,24 +1671,54 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg,ndat)
 
  xi => gs_ham%fockACE_k%xi(:,:,:)
 
- call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
-                   xi, npw, &
-                   cwavef, npw, &
-                   czero, &
-                   mat, nband_k)
- call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
-                   xi, npw, &
-                   mat, nband_k, &
-                   czero, &
-                   ghc1, npw)
+ if(gpu_option_==ABI_GPU_DISABLED) then
+   call abi_zgemm_2r('C', 'N', nband_k, ndat, npw, cone, &
+                     xi, npw, &
+                     cwavef, npw, &
+                     czero, &
+                     mat, nband_k)
+   call abi_zgemm_2r('N', 'N', npw, ndat, nband_k, cminusone, &
+                     xi, npw, &
+                     mat, nband_k, &
+                     czero, &
+                     ghc1, npw)
+
+   !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
+   ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
+   ghc(:,:)=ghc(:,:) + ghc1(:,:)
+
+   ! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)
+
+ else if(gpu_option_==ABI_GPU_OPENMP) then
+#ifdef HAVE_OPENMP_OFFLOAD
+   !$OMP TARGET ENTER DATA MAP(alloc:xi,ghc1,mat)
+   !$OMP TARGET UPDATE TO(xi)
+   call abi_gpu_xgemm(2, 'C', 'N', nband_k, ndat, npw, cone, &
+                     xi, npw, &
+                     cwavef, npw, &
+                     czero, &
+                     mat, nband_k)
+   call abi_gpu_xgemm(2, 'N', 'N', npw, ndat, nband_k, cminusone, &
+                     xi, npw, &
+                     mat, nband_k, &
+                     czero, &
+                     ghc1, npw)
+
+   !$OMP TARGET UPDATE FROM(ghc1)
+   !* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
+   ! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
+
+   !$OMP TARGET DATA USE_DEVICE_PTR(ghc1,ghc)
+   call abi_gpu_xaxpy(2,npw*ndat,cone,c_loc(ghc1),1,c_loc(ghc),1)
+   !$OMP END TARGET DATA
+
+   ! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)
+
+   !$OMP TARGET EXIT DATA MAP(delete:xi,ghc1,mat)
+#endif
+ end if
 
  ABI_FREE(mat)
-
-!* If the calculation is parallelized, perform an MPI_allreduce to sum all the contributions in the array ghc
-! ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_spkpt + ghc1(:,:)
- ghc(:,:)=ghc(:,:) + ghc1(:,:)
-
-! call xmpi_sum(ghc,mpi_enreg%comm_kpt,ier)
 
 ! ============================================
 ! === Calculate the contribution to energy ===
