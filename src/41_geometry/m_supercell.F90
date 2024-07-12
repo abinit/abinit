@@ -111,7 +111,6 @@ CONTAINS  !=====================================================================
 subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
 &    typat_primcell, xcart_primcell, znucl, scell, ordering)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom_primcell
@@ -152,9 +151,8 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
      end if
    end do
    if (rlatt(ii,ii) == -1) then
-     write(msg,'(a,I4,a,I7,2a,3E20.10)')' No supercell found with less than ', &
-&           maxsc,' unit cells in direction ', &
-&           ii, ch10, ' qphon = ', qphon
+     write(msg,'(a,I0,a,I0,2a,3E20.10)')' No supercell found with less than ', &
+           maxsc,' unit cells in direction ', ii, ch10, ' qphon = ', qphon
      ABI_ERROR(msg)
    end if
  end do
@@ -196,7 +194,6 @@ end subroutine init_supercell_for_qpt
 
 subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, scell, ordering)
 
- implicit none
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: natom_primcell
@@ -249,7 +246,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
          iatom_supercell = iatom_supercell + 1
          scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
          scell%xcart_ref(:,iatom_supercell) = xcart_primcell(:,iatom) &
-&            + matmul(rprimd_primcell,scell%uc_indexing(:,iatom_supercell))
+            + matmul(rprimd_primcell,scell%uc_indexing(:,iatom_supercell))
          scell%atom_indexing(iatom_supercell) = iatom
          scell%typat(iatom_supercell) = typat_primcell(iatom)
        end do
@@ -268,9 +265,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
  scell%qphon = zero
 
  if (present(ordering)) then
-   if (ordering) then
-     call order_supercell_typat(scell)
-   end if
+   if (ordering) call order_supercell_typat(scell)
  end if
 
 end subroutine init_supercell
@@ -293,8 +288,6 @@ end subroutine init_supercell
 !! SOURCE
 
 subroutine order_supercell_typat (scell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -345,8 +338,6 @@ end subroutine order_supercell_typat
 !! SOURCE
 
 subroutine freeze_displ_supercell (displ,freeze_displ,scell)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -417,8 +408,6 @@ end subroutine freeze_displ_supercell
 
 subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   real(dp), intent(in) :: freq
@@ -473,15 +462,12 @@ end subroutine prt_supercell_for_qpt
 
 subroutine prt_supercell (filename, scell, title1, title2)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   type(supercell_type), intent(in) :: scell
   character(len=fnlen), intent(in) :: filename
   character(len=80), intent(in) :: title1
   character(len=80), intent(in) :: title2
-
 
 !Local variables-------------------------------
 !scalar
@@ -567,8 +553,6 @@ end subroutine prt_supercell
 
 subroutine copy_supercell (scell_in,scell_copy)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   type(supercell_type), intent(in) :: scell_in
@@ -611,8 +595,6 @@ end subroutine copy_supercell
 
 subroutine getPBCIndexes_supercell(index,ncell)
 
- implicit none
-
 !Arguments ---------------------------------------------
   integer, intent(inout)  :: index(3)
   integer, intent(in) :: ncell(3)
@@ -651,8 +633,6 @@ end subroutine getPBCIndexes_supercell
 !! SOURCE
 
 subroutine findBound_supercell(min,max,ncell)
-
- implicit none
 
 !Arguments ---------------------------------------------
   integer, intent(inout) :: min,max
@@ -729,35 +709,19 @@ end function distance_supercell
 
 subroutine destroy_supercell (scell)
 
-  implicit none
-
 !Arguments ------------------------------------
 !scalars
   type(supercell_type), intent(inout) :: scell
 
 ! *************************************************************************
 
-  if(allocated(scell%xcart))  then
-    ABI_FREE(scell%xcart)
-  end if
-  if(allocated(scell%xcart_ref))  then
-    ABI_FREE(scell%xcart_ref)
-  end if
-  if(allocated(scell%typat))  then
-    ABI_FREE(scell%typat)
-  end if
-  if(allocated(scell%atom_indexing))  then
-    ABI_FREE(scell%atom_indexing)
-  end if
-  if(allocated(scell%uc_indexing))  then
-    ABI_FREE(scell%uc_indexing)
-  end if
-  if(allocated(scell%znucl))  then
-    ABI_FREE(scell%znucl)
-  end if
-   if(allocated(scell%rvecs))  then
-    ABI_FREE(scell%rvecs)
-  end if
+  ABI_SFREE(scell%xcart)
+  ABI_SFREE(scell%xcart_ref)
+  ABI_SFREE(scell%typat)
+  ABI_SFREE(scell%atom_indexing)
+  ABI_SFREE(scell%uc_indexing)
+  ABI_SFREE(scell%znucl)
+  ABI_SFREE(scell%rvecs)
 
 end subroutine destroy_supercell
 !!***
@@ -786,8 +750,6 @@ end subroutine destroy_supercell
 !! SOURCE
 
 subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_sc,rprimd_sc,ext,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

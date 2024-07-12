@@ -71,7 +71,7 @@ module m_eph_driver
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
- use m_varpeq,          only : varpeq
+ use m_varpeq,          only : varpeq, varpeq_plot
 
  implicit none
 
@@ -156,7 +156,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  real(dp) :: cpu,wall,gflops
  logical :: use_wfk, use_wfq, use_dvdb, use_sigeph, use_drhodb, use_gstore
  character(len=500) :: msg
- character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath
+ character(len=fnlen) :: wfk0_path, wfq_path, ddb_filepath, dvdb_filepath, sigeph_filepath, path, drhodb_filepath, gstore_filepath, gstore_path
  type(hdr_type) :: wfk0_hdr, wfq_hdr
  type(crystal_t) :: cryst, cryst_ddb
  type(ebands_t) :: ebands, ebands_kq
@@ -415,7 +415,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call ddb%from_file(ddb_filepath, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
 
    call ddb%set_brav(dtset%brav)
-
  end if
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
@@ -468,6 +467,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      iblock_quadrupoles = 1
    end if
  end if
+
  call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
  call xmpi_bcast(qdrp_cart, master, comm, ierr)
 
@@ -706,7 +706,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  select case (dtset%eph_task)
  case (0)
-   ! This is just to access the DDB post-processing tools
+   ! This is just to access the DDB post-processing tools for phonons
    continue
 
  case (1)
@@ -759,7 +759,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  case (9)
    ! Compute cumulant from SIGEPH.nc file.
-   call cumulant_driver(dtfil, dtset, ebands, cryst,  comm)
+   call cumulant_driver(dtfil, dtset, ebands, cryst, comm)
 
  case (10)
    ! Estimate polaron effective mass in the triply-degenerate VB or CB cubic case
@@ -771,23 +771,43 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Compute and write e-ph matrix elements to GSTORE file.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Restarting GSTORE computation from:", dtfil%filgstorein))
-     call gstore%from_ncpath(dtfil%filgstorein, 1, dtset, cryst, ebands, ifc, comm)
+     call gstore%from_ncpath(dtfil%filgstorein, dtset%gstore_cplex, dtset, cryst, ebands, ifc, comm)
    else
-     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     call wrtout(units, sjoin(" Will start computation of GSTORE file:", dtfil%filgstorein))
-     call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
+     gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     !call wrtout(units, sjoin(" Will start computation of GSTORE file:", gstore_path))
+     call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
 
    call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                        pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
-   ! Here we wannierize the e-ph matrix elements if the ABIWAN.nc was provided.
-   if (dtfil%filabiwanin /= ABI_NOFILE) call gstore%wannierize(dtset, dtfil)
+   gstore_path = gstore%path
    call gstore%free()
 
+   ! Wannierize the e-ph matrix elements if the ABIWAN.nc is provided.
+   if (dtfil%filabiwanin /= ABI_NOFILE) then
+     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+     call gstore%wannierize(dtfil)
+     call gstore%free()
+   end if
+
  !case (-11)
- !  call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
- !  call gstore%wannierize(dtset, dtfil)
+ !  Typical workflow for gstore with Wannierization
+ !
+ !  1) Wannierize with Abinit and wannier90 in library mode to get the ABIWAN.nc file.
+ !
+ !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization.
+ !     Compute g(R_e, R_p) and save results to GWAN.nc file.
+ !
+ !  3) Start new job to compute properties with extra dense meshes:
+ !
+ !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distribute gvals.
+ !        - Decide if gvals should be precomputed and stored or computed on the fly.
+ !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
+ !        - Pass gstore object to the eph_task routines (what about ebands)?
+ !
+ !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
+ !  call gstore%from_gwan_file(dtfil%filgwanin, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%free()
 
  case (12, -12)
@@ -805,9 +825,13 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call varpeq(gstore, dtset, dtfil)
      call gstore%free()
    else
-     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     ABI_ERROR(sjoin("Cannot find GSTORE file:", path))
+     gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     ABI_ERROR(sjoin("Cannot find GSTORE file:", gstore_path))
    end if
+
+ case (-13)
+   ! Plot polaron wavefunctions and atomic displacements in the supercell.
+   call varpeq_plot(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
 
  case (14)
    ! Molecular Berry Curvature
@@ -815,15 +839,15 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
    else
-     path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
+     gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
      call wrtout(units, sjoin(" Computing GSTORE file:", dtfil%filgstorein, "for Berry curvature from scracth"))
      ! Customize input vars for this eph_task.
      dtset%gstore_qzone = "ibz"; dtset%gstore_kzone = "bz"; dtset%gstore_cplex = 2; dtset%gstore_with_vk = 1
-     call gstore%init(path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
+     call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
      call gstore%compute(wfk0_path, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, &
                          pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
      call gstore%free()
-     call gstore%from_ncpath(path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+     call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
    end if
 
    call berry_curvature(gstore, dtset, dtfil)
@@ -853,7 +877,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    dvdb%comm = xmpi_comm_self
    if (my_rank == master) then
      call dvdb%open_read(ngfftf, xmpi_comm_self)
-
      ! Compute \delta V_{q,nu)(r) and dump results to netcdf file.
      call ncwrite_v1qnu(dvdb, dtset, ifc, strcat(dtfil%filnam_ds(4), "_V1QNU.nc"))
    end if

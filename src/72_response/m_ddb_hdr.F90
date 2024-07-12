@@ -2798,6 +2798,7 @@ end subroutine ddb_hdr_bcast
 !! SOURCE
 
 subroutine ddb_hdr_get_iomode(ddb_hdr, filenamein, io, iomode, filenameout)
+
 !Arguments ------------------------------------
  class(ddb_hdr_type),intent(inout) :: ddb_hdr
  character(len=fnlen),intent(in) :: filenamein
@@ -4378,7 +4379,7 @@ subroutine inprep8 (filename,unddb,dimekb,lmnmax,mband,mblktyp,msym,natom,nblok,
 
    read (unddb,*)
    if (ddbvrs==cvrsio8_old.or.ddbvrs==cvrsio8_old_old) then
-     ! this format statement is inconsistent with the ddb for test v2[13] 
+     ! this format statement is inconsistent with the ddb for test v2[13]
      ! JWZ 31 May 2024
      !read (unddb, '(10x,i3,14x,i3,11x,i3)', iostat=ios )dimekb,lmnmax,usepaw
      read (unddb, '(10x,i3,14x,i3,14x,i3)', iostat=ios )dimekb,lmnmax,usepaw

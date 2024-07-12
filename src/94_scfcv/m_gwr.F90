@@ -963,8 +963,8 @@ subroutine gwr_init(gwr, dtset, dtfil, cryst, psps, pawtab, ks_ebands, mpi_enreg
    call kpts_map_print(units, " Mapping kBZ --> kIBZ", "symrec", gwr%kbz, kibz, gwr%kbz2ibz, gwr%dtset%prtvol)
  end if
 
- !call get_ibz2bz(gwr%nkibz, gwr%nkbz, gwr%kbz2ibz, kibz2bz, ierr)
- !ABI_CHECK(ierr == 0, "Something wrong in symmetry tables for k-points")
+ !call get_ibz2bz(gwr%nkibz, gwr%nkbz, gwr%kbz2ibz, kibz2bz, msg, ierr)
+ !ABI_CHECK(ierr == 0, sjoin("Something wrong in symmetry tables for k-points", ch10, msg))
 
  ! Table with symrel conventions for the symmetrization of the wfs.
  ABI_MALLOC(gwr%kbz2ibz_symrel, (6, gwr%nkbz))

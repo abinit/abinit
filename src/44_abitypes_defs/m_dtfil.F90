@@ -183,6 +183,10 @@ module m_dtfil
    ! Filename used to read ABIWAN.nc file.
    ! Initialize via getabiwan_filepath
 
+  character(len=fnlen) :: filgwanin
+   ! Filename used to read GWAN.nc file.
+   ! Initialize via getgwan_filepath
+
   character(len=fnlen) :: filvarpeqin
    ! Filename used to read VARPEQ.nc file.
    ! Initialize via getvarpeq_filepath
@@ -645,6 +649,12 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  call mkfilename(filnam, dtfil%filabiwanin, dtset%getabiwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
                  getpath=dtset%getabiwan_filepath)
  if (will_read == 0) dtfil%filabiwanin = ABI_NOFILE
+
+ ! According to getgwan_filepath, build _GWAN file name
+ stringfile='_GWAN.nc'; stringvar='gwan'
+ call mkfilename(filnam, dtfil%filgwanin, dtset%getgwan, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
+                 getpath=dtset%getgwan_filepath)
+ if (will_read == 0) dtfil%filgwanin = ABI_NOFILE
 
  ! According to getvarpeq_filepath, build _VARPEQ file name
  stringfile='_VARPEQ.nc'; stringvar='varpeq'
