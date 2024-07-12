@@ -818,10 +818,10 @@ has_fock=.false.
 
 !    Calculation of the Fock exact exchange contribution from the Fock or ACE operator
      if (has_fock) then
-       !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_)
        if (fock_get_getghc_call(fock)==1) then
          if (gs_ham%usepaw==0) cwaveprj_idat => cwaveprj
          if (fock%use_ACE==0) then
+           !$OMP TARGET UPDATE FROM(cwavef,gvnlxc_)
            call timab(360,1,tsec)
            do idat=1,ndat
              if (gs_ham%usepaw==1) cwaveprj_idat => cwaveprj_fock(:,(idat-1)*my_nspinor+1:idat*my_nspinor)
@@ -829,11 +829,11 @@ has_fock=.false.
 &             gvnlxc_(:,1+(idat-1)*npw_k2*my_nspinor:idat*npw_k2*my_nspinor),gs_ham,mpi_enreg,ndat)
            end do ! idat
            call timab(360,2,tsec)
+           !$OMP TARGET UPDATE TO(cwavef,gvnlxc_)
          else
-           call fock_ACE_getghc(cwavef,gvnlxc_,gs_ham,mpi_enreg,ndat)
+           call fock_ACE_getghc(cwavef,gvnlxc_,gs_ham,mpi_enreg,ndat,gpu_option=ABI_GPU_OPENMP)
          end if
        end if
-       !$OMP TARGET UPDATE TO(cwavef,gvnlxc_)
      end if
 
    else if (type_calc == 3) then
