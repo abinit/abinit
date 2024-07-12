@@ -204,7 +204,7 @@ optdriver7   5
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = NC, DFPT, NONLINEAR
+#%% keywords = NC, DFPT, NONLINEAR, MINIMAL
 #%% description = 
 #%%   AlAs (zinc-blende structure).      
 #%%   Compute different response functions, then

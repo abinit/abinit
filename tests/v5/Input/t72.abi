@@ -94,7 +94,7 @@ xred
 #%% max_nprocs = 3
 #%% [extra_info]
 #%% authors = T. Rangel
-#%% keywords = NC, GW 
+#%% keywords = NC, GW, MINIMAL
 #%% description = 
 #%%   Extrapolar approximation for GW calculations on metals. Norm-conserving.
 #%%   PRB 78, 085125 (2008)
