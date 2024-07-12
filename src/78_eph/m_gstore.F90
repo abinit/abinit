@@ -713,7 +713,6 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! HM: the bz2ibz produced above is incomplete, I do it here using listkk
  ABI_MALLOC(qbz2ibz, (6, gstore%nqbz))
-
  gstore%qrank_ibz = krank_from_kptrlatt(gstore%nqibz, gstore%qibz, qptrlatt, compute_invrank=.False.)
 
  if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
