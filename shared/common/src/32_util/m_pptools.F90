@@ -170,9 +170,8 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  do iy = 1,3
    write(nunit,'(3(ES17.10,2X))') (Bohr_Ang*basis(ix,iy), ix=1,3)
  end do
-!
+
 !generate translated coordinates to fit origin shift
-!
  do iatom = 1,natom
    tau (:,iatom) = xcart(:,iatom) - origin(:)
  end do
@@ -196,7 +195,7 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  write(nunit,'(a)')' BEGIN_BLOCK_DATAGRID3D'
  write(nunit,'(a)')' datagrid'
  write(nunit,'(a)')' DATAGRID_3D_DENSITY'
-!NOTE: XCrysden uses aperiodical data grid
+ ! NOTE: XCrysden uses aperiodical data grid
  write(nunit,*)n1+1,n2+1,n3+1
  write(nunit,*)origin
  write(nunit,*)basis(:,1)*fact
@@ -213,7 +212,7 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
    write (nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
  end do
 
-!Now write upper plane
+ ! Now write upper plane
  nslice=1
  do iy=1,n2
    write (nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
@@ -252,9 +251,7 @@ end subroutine printxsf
 !!
 !! SOURCE
 
-
 subroutine print_fofr_ri(ri_mode,nx,ny,nz,ldx,ldy,ldz,fofr,unit)
-
 
 !Arguments -----------------------------------------------
 !scalars

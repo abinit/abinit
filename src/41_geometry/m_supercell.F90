@@ -5,7 +5,7 @@
 !! FUNCTION
 !! Module for using a supercell, in particular for phonon displacement freezing.
 !! Container type is defined, and destruction, print subroutines
-!! as well as the central init_supercell
+!! as well as the central supercell_init
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2024 ABINIT group (MJV, DJA)
@@ -65,28 +65,29 @@ module m_supercell
    real(dp), allocatable :: znucl(:)                ! (ntypat) nuclear charges of species
    integer, allocatable :: rvecs(:,:)               ! supercell vectors
 
+ contains
+
+   procedure :: init_for_qpt => supercell_init_for_qpt
+   procedure :: init => supercell_init
+   procedure :: freeze_displ => supercell_freeze_displ
+   procedure :: copy => supercell_copy
+   procedure :: free => supercell_free
+   procedure :: print_for_qpt => supercell_print_for_qpt
+   procedure :: print => supercell_print
  end type supercell_type
 
- public :: init_supercell_for_qpt
- public :: init_supercell
- public :: freeze_displ_supercell
- public :: prt_supercell_for_qpt
- public :: prt_supercell
- public :: copy_supercell
  public :: distance_supercell
  public :: findBound_supercell
  public :: getPBCIndexes_supercell
- public :: destroy_supercell
-
  public :: mksupercell  !  computes atomic positons, magnetic ordering of supercell
 !!***
 
 CONTAINS  !===========================================================================================
 
-!!****f* m_supercell/init_supercell_for_qpt
+!!****f* m_supercell/supercell_init_for_qpt
 !!
 !! NAME
-!! init_supercell_for_qpt
+!! supercell_init_for_qpt
 !!
 !! FUNCTION
 !! Initialize scell structure, from unit cell vectors, and atoms, based on qpoint chosen
@@ -107,13 +108,13 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
-                                 typat_primcell, xcart_primcell, znucl, scell, ordering)
+subroutine supercell_init_for_qpt(scell, natom_primcell, qphon, rprimd_primcell, &
+                                  typat_primcell, xcart_primcell, znucl, ordering)
 
 !Arguments ------------------------------------
 !scalars
+ class(supercell_type), intent(out) :: scell
  integer, intent(in) :: natom_primcell
- type(supercell_type), intent(out) :: scell
  logical,optional,intent(in) :: ordering
 !arrays
  integer , intent(in) :: typat_primcell(natom_primcell)
@@ -156,20 +157,19 @@ subroutine init_supercell_for_qpt(natom_primcell, qphon, rprimd_primcell, &
  end do
 
  if (present(ordering)) then
-   call init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, scell, ordering)
+   call scell%init(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, ordering)
  else
-   call init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, scell)
+   call scell%init(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl)
  end if
 
  scell%qphon = qphon
 
-end subroutine init_supercell_for_qpt
+end subroutine supercell_init_for_qpt
 !!***
 
-!!****f* m_supercell/init_supercell
-!!
+!!****f* m_supercell/supercell_init
 !! NAME
-!! init_supercell
+!! supercell_init
 !!
 !! FUNCTION
 !! Initialize scell structure, from unit cell vectors, and atoms, based on rlatt multiplicity matrix
@@ -190,12 +190,12 @@ end subroutine init_supercell_for_qpt
 !!
 !! SOURCE
 
-subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, scell, ordering)
+subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, ordering)
 
 !Arguments ------------------------------------
 !scalars
+ class(supercell_type), intent(out) :: scell
  integer, intent(in) :: natom_primcell
- type(supercell_type), intent(out) :: scell
  logical,optional,intent(in) :: ordering
 !arrays
  integer , intent(in) :: rlatt(3,3)
@@ -207,8 +207,6 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
 !local
 !scalars
  integer :: iatom_supercell, i1,i2,i3, iatom, icell
-
-!arrays
 
  scell%natom_primcell = natom_primcell
  scell%rlatt = rlatt
@@ -263,7 +261,7 @@ subroutine init_supercell(natom_primcell, rlatt, rprimd_primcell, typat_primcell
    if (ordering) call order_supercell_typat(scell)
  end if
 
-end subroutine init_supercell
+end subroutine supercell_init
 !!***
 
 !!****f* m_supercell/order_supercell_typat
@@ -286,13 +284,13 @@ subroutine order_supercell_typat (scell)
 
 !Arguments ------------------------------------
 !scalars
- type(supercell_type), intent(inout) :: scell
+ class(supercell_type), intent(inout) :: scell
 
 ! local tmp variables
  integer :: itypat, iatom_supercell, iatom
  type(supercell_type) :: scell_tmp
 
- call copy_supercell (scell,scell_tmp)
+ call scell%copy(scell_tmp)
 
  iatom_supercell = 0
  do itypat = 1, scell%ntypat
@@ -307,7 +305,7 @@ subroutine order_supercell_typat (scell)
    end do
  end do
 
- call destroy_supercell(scell_tmp)
+ call scell_tmp%free()
 
 end subroutine order_supercell_typat
 !!***
@@ -332,11 +330,11 @@ end subroutine order_supercell_typat
 !!
 !! SOURCE
 
-subroutine freeze_displ_supercell (displ,freeze_displ,scell)
+subroutine supercell_freeze_displ(scell, displ, freeze_displ)
 
 !Arguments ------------------------------------
 !scalars
- type(supercell_type), intent(inout) :: scell
+ class(supercell_type), intent(inout) :: scell
  real(dp), intent(in) :: freeze_displ
 !arrays
  real(dp), intent(in) :: displ(2,3*scell%natom_primcell)
@@ -378,13 +376,13 @@ subroutine freeze_displ_supercell (displ,freeze_displ,scell)
 !&        - freeze_displ * sin(qdotr) * displ(2,ipratom+1:ipratom+3)
  end do
 
-end subroutine freeze_displ_supercell
+end subroutine supercell_freeze_displ
 !!***
 
-!****f* m_supercell/prt_supercell_for_qpt
+!****f* m_supercell/supercell_print_for_qpt
 !!
 !! NAME
-!! prt_supercell_for_qpt
+!! supercell_print_for_qpt
 !!
 !! FUNCTION
 !! output atomic positions, supercell vectors, etc... to a file
@@ -401,12 +399,12 @@ end subroutine freeze_displ_supercell
 !!
 !! SOURCE
 
-subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
+subroutine supercell_print_for_qpt (scell, freq, jmode, outfile_radix)
 
 !Arguments ------------------------------------
 !scalars
+  class(supercell_type), intent(in) :: scell
   real(dp), intent(in) :: freq
-  type(supercell_type), intent(in) :: scell
   integer, intent(in) :: jmode
   character(len=fnlen), intent(in) :: outfile_radix
 
@@ -430,15 +428,14 @@ subroutine prt_supercell_for_qpt (freq, jmode, outfile_radix, scell)
   write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
   write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
 
-  call prt_supercell(filename, scell, title1, title2)
+  call scell%print(filename, title1, title2)
 
-end subroutine prt_supercell_for_qpt
+end subroutine supercell_print_for_qpt
 !!***
 
-!****f* m_supercell/prt_supercell
-!!
+!****f* m_supercell/supercell_print
 !! NAME
-!! prt_supercell
+!! supercell_print
 !!
 !! FUNCTION
 !! output atomic positions, supercell vectors, etc... to a file
@@ -454,11 +451,11 @@ end subroutine prt_supercell_for_qpt
 !!
 !! SOURCE
 
-subroutine prt_supercell (filename, scell, title1, title2)
+subroutine supercell_print(scell, filename, title1, title2)
 
 !Arguments ------------------------------------
 !scalars
-  type(supercell_type), intent(in) :: scell
+  class(supercell_type), intent(in) :: scell
   character(len=fnlen), intent(in) :: filename
   character(len=80), intent(in) :: title1
   character(len=80), intent(in) :: title2
@@ -526,13 +523,13 @@ subroutine prt_supercell (filename, scell, title1, title2)
 ! close file
   close(scunit)
 
-end subroutine prt_supercell
+end subroutine supercell_print
 !!***
 
-!****f* m_supercell/copy_supercell
+!****f* m_supercell/supercell_copy
 !!
 !! NAME
-!! copy_supercell
+!! supercell_copy
 !!
 !! FUNCTION
 !! copy supercell structure
@@ -545,16 +542,16 @@ end subroutine prt_supercell
 !!
 !! SOURCE
 
-subroutine copy_supercell (scell_in,scell_copy)
+subroutine supercell_copy(scell_in, scell_copy)
 
 !Arguments ------------------------------------
 !scalars
- type(supercell_type), intent(in) :: scell_in
- type(supercell_type), intent(inout) :: scell_copy
-
+ class(supercell_type), intent(in) :: scell_in
+ class(supercell_type), intent(inout) :: scell_copy
 ! *************************************************************************
 
- call destroy_supercell(scell_copy)
+ call scell_copy%free()
+
  scell_copy%natom_primcell = scell_in%natom_primcell
  scell_copy%natom = scell_in%natom
  scell_copy%ntypat = scell_in%ntypat
@@ -569,7 +566,7 @@ subroutine copy_supercell (scell_in,scell_copy)
  call alloc_copy(scell_in%typat        , scell_copy%typat)
  call alloc_copy(scell_in%znucl        , scell_copy%znucl)
 
-end subroutine copy_supercell
+end subroutine supercell_copy
 !!***
 
 !!****f* m_effective_potential/getPBCIndexes_supercell
@@ -592,6 +589,7 @@ subroutine getPBCIndexes_supercell(index,ncell)
 !Arguments ---------------------------------------------
   integer, intent(inout)  :: index(3)
   integer, intent(in) :: ncell(3)
+
 !Local variables ---------------------------------------
   integer :: ii
 ! *********************************************************************
@@ -626,20 +624,19 @@ end subroutine getPBCIndexes_supercell
 !!
 !! SOURCE
 
-subroutine findBound_supercell(min,max,ncell)
+subroutine findBound_supercell(min, max, ncell)
 
 !Arguments ---------------------------------------------
   integer, intent(inout) :: min,max
   integer, intent(in) :: ncell
 
-!Local variables ---------------------------------------
+! *********************************************************************
   if(abs(max)>abs(min)) then
     max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
   else
     min=-(ncell)/2; max=-min; if(mod(ncell,2)==0)  min= min +1
   end if
 
-! *********************************************************************
 end subroutine findBound_supercell
 !!***
 
@@ -671,10 +668,11 @@ function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
  real(dp),intent(in):: xcart1(3),xcart2(3)
  integer,intent(in) :: cell1(3),cell2(3)
  real(dp) :: dist
+
 !Local variables -------------------------------
  real(dp) :: rpt1(3),rpt2(3)
  integer  :: mu
-!! *************************************************************************
+! *************************************************************************
 
  do mu=1,3
    rpt1(mu) = cell1(1)*rprimd(mu,1)+cell1(2)*rprimd(mu,2)+cell1(3)*rprimd(mu,3)
@@ -688,10 +686,10 @@ function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 end function distance_supercell
 !!***
 
-!****f* m_supercell/destroy_supercell
+!****f* m_supercell/supercell_free
 !!
 !! NAME
-!! destroy_supercell
+!! supercell_free
 !!
 !! FUNCTION
 !! deallocate all dynamic memory for this supercell structure
@@ -703,11 +701,10 @@ end function distance_supercell
 !!
 !! SOURCE
 
-subroutine destroy_supercell (scell)
+subroutine supercell_free(scell)
 
 !Arguments ------------------------------------
-!scalars
-  type(supercell_type), intent(inout) :: scell
+ class(supercell_type), intent(inout) :: scell
 ! *************************************************************************
 
  ABI_SFREE(scell%xcart)
@@ -718,7 +715,7 @@ subroutine destroy_supercell (scell)
  ABI_SFREE(scell%znucl)
  ABI_SFREE(scell%rvecs)
 
-end subroutine destroy_supercell
+end subroutine supercell_free
 !!***
 
 !!****f* m_supercell/mksupercell
