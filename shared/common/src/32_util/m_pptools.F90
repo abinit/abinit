@@ -65,8 +65,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine prmat (mat, ni, nj, mi, unitm)
-
+subroutine prmat(mat, ni, nj, mi, unitm)
 
 !Arguments ------------------------------------
 !scalars
@@ -77,33 +76,29 @@ subroutine prmat (mat, ni, nj, mi, unitm)
 
 !Local variables-------------------------------
 !scalars
- character(len=1000)    :: message
+ character(len=1000)    :: msg
  integer,parameter      :: nline=10
  integer                :: ii,jj,jstart,jstop,unitn
 
 ! *************************************************************************
 
- if (present(unitm)) then ! standard printing to std_out
-   unitn=unitm
- else
-   unitn=std_out
- end if
+ unitn = std_out; if (present(unitm)) unitn = unitm
 
- do  jstart = 1, nj, nline
+ do jstart = 1, nj, nline
    jstop = min(nj, jstart+nline-1)
-   write(message, '(3x,10(i4,8x))' ) (jj,jj=jstart,jstop)
-   call wrtout(unitn,message,'COLL')
+   write(msg, '(3x,10(i4,8x))' ) (jj,jj=jstart,jstop)
+   call wrtout(unitn,msg)
  end do
 
  do ii = 1,ni
    do jstart= 1, nj, nline
      jstop = min(nj, jstart+nline-1)
      if (jstart==1) then
-       write(message, '(i3,1p,10e12.4)' ) ii, (mat(ii,jj),jj=jstart,jstop)
-       call wrtout(unitn,message,'COLL')
+       write(msg, '(i3,1p,10e12.4)' ) ii, (mat(ii,jj),jj=jstart,jstop)
+       call wrtout(unitn,msg)
      else
-       write(message, '(3x,1p,10e12.4)' )    (mat(ii,jj),jj=jstart,jstop)
-       call wrtout(unitn,message,'COLL')
+       write(msg, '(3x,1p,10e12.4)' )    (mat(ii,jj),jj=jstart,jstop)
+       call wrtout(unitn,msg)
      end if
    end do
  end do
@@ -159,11 +154,10 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
    ABI_BUG(sjoin('The argument realrecip should be 0 or 1, received:', itoa(realrecip)))
  end if
 
-!conversion between ABINIT default units and XCrysden units
- fact=Bohr_Ang; if (realrecip ==1) fact=one/fact  !since we are in reciprocal space
+ ! conversion between ABINIT default units and XCrysden units
+ fact = Bohr_Ang; if (realrecip == 1) fact=one/fact ! since we are in reciprocal space
 
-!TODO insert crystalline structure and dummy atoms in case of reciprocal space need to convert basis too
-
+ ! TODO insert crystalline structure and dummy atoms in case of reciprocal space need to convert basis too
  write(nunit,'(1X,A)')  'DIM-GROUP'
  write(nunit,*) '3  1'
  write(nunit,'(1X,A)') 'PRIMVEC'
@@ -171,9 +165,9 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
    write(nunit,'(3(ES17.10,2X))') (Bohr_Ang*basis(ix,iy), ix=1,3)
  end do
 
-!generate translated coordinates to fit origin shift
+ ! generate translated coordinates to fit origin shift
  do iatom = 1,natom
-   tau (:,iatom) = xcart(:,iatom) - origin(:)
+   tau(:,iatom) = xcart(:,iatom) - origin(:)
  end do
 
  write(nunit,'(1X,A)') 'PRIMCOORD'
@@ -206,24 +200,24 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  do iz=1,n3
    do iy=1,n2
      write(nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
-     nslice=nslice+1
+     nslice = nslice+1
    end do
    nsym=nslice-n2
-   write (nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
+   write(nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
  end do
 
  ! Now write upper plane
- nslice=1
+ nslice = 1
  do iy=1,n2
-   write (nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
+   write(nunit,'(8es16.8)') datagrid(1+n1*(nslice-1):n1+n1*(nslice-1)),datagrid(1+n1*(nslice-1))
    nslice=nslice+1
  end do
 
- nsym=nslice-n2
- write (nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
+ nsym = nslice-n2
+ write(nunit,'(8es16.8)') datagrid(1+n1*(nsym-1):n1+n1*(nsym-1)),datagrid(1+n1*(nsym-1))
 
- write (nunit,'(a)')' END_DATAGRID_3D'
- write (nunit,'(a)')' END_BLOCK_DATAGRID3D'
+ write(nunit,'(a)')' END_DATAGRID_3D'
+ write(nunit,'(a)')' END_BLOCK_DATAGRID3D'
 
 end subroutine printxsf
 !!***

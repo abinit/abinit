@@ -71,7 +71,7 @@ module m_eph_driver
  use m_cumulant,        only : cumulant_driver
  use m_frohlich,        only : frohlich_t, frohlichmodel_zpr, frohlichmodel_polaronmass
  use m_gwpt,            only : gwpt_run
- use m_varpeq,          only : varpeq, varpeq_plot
+ use m_varpeq,          only : varpeq_run, varpeq_plot
 
  implicit none
 
@@ -822,7 +822,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    if (gstore_filepath /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
      call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
-     call varpeq(gstore, dtset, dtfil)
+     call varpeq_run(gstore, dtset, dtfil)
      call gstore%free()
    else
      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
@@ -830,7 +830,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (-13)
-   ! Plot polaron wavefunctions and atomic displacements in the supercell.
+   ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
    call varpeq_plot(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
 
  case (14)
