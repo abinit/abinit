@@ -31,7 +31,8 @@ module m_supercell
  use m_symtk,    only : matr3inv
  use m_copy,     only : alloc_copy
  use m_io_tools, only : open_file
- use m_fstrings, only : int2char4, write_num
+ use m_fstrings, only : int2char4, write_num, itoa, sjoin
+ use m_numeric_tools, only : isdiagmat
 
  implicit none
 
@@ -57,6 +58,7 @@ module m_supercell
    integer :: rlatt(3,3)                            ! matrix for multiplicity of supercell
    real(dp) :: rprimd(3,3)                          ! new lattice vectors for supercell
    real(dp) :: qphon(3)                             ! phonon q vector used to generate scell, if any
+   character(len=3) :: xyz_order                    ! Order used to build the supercell
    real(dp), allocatable :: xcart(:,:)              ! (3, natom) positions of atoms
    real(dp), allocatable :: xcart_ref(:,:)          ! (3, natom) equilibrium positions of atoms
    integer, allocatable :: atom_indexing(:)         ! (natom) indexes original atom: 1..natom_primcell
@@ -181,22 +183,26 @@ end subroutine supercell_init_for_qpt
 !! typat_primcell(natom) = types of all atoms in primitive cell
 !! xcart_primcell(3,natom) = cartesian positions of atoms in primitive cell
 !! znucl = nuclear charges for all species
-!!
-!! ordering = if true,  typat will be 1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 ....
-!!            if false, typat will be 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 ....
+!! [ordering] = if true,  typat will be 1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 ....
+!!              if false, typat will be 1 2 3 4 1 2 3 4 1 2 3 4 1 2 3 4 ....
+!! [xyz_order]= Order used to build the supercell.
+!!  "zyx" if one should move along z first.
+!!  "xyz" if one should move along x first. This value should be used for plotting purposes
 !!
 !! OUTPUT
 !! scell = supercell structure to be initialized
 !!
 !! SOURCE
 
-subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, ordering)
+subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_primcell, xcart_primcell, znucl, &
+                          ordering, xyz_order) ! optional
 
 !Arguments ------------------------------------
 !scalars
  class(supercell_type), intent(out) :: scell
  integer, intent(in) :: natom_primcell
  logical,optional,intent(in) :: ordering
+ character(len=*),optional,intent(in) :: xyz_order
 !arrays
  integer , intent(in) :: rlatt(3,3)
  integer , intent(in) :: typat_primcell(natom_primcell)
@@ -207,6 +213,12 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
 !local
 !scalars
  integer :: iatom_supercell, i1,i2,i3, iatom, icell
+
+ if (.not. isdiagmat(rlatt)) then
+   ABI_ERROR('rlatt is not diagonal.')
+ end if
+
+ scell%xyz_order = "zyx"; if (present(xyz_order)) scell%xyz_order = xyz_order(1:3)
 
  scell%natom_primcell = natom_primcell
  scell%rlatt = rlatt
@@ -228,31 +240,33 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
  ABI_MALLOC(scell%uc_indexing,(3,scell%natom))
  ABI_MALLOC(scell%rvecs, (3, scell%ncells))
 
- iatom_supercell = 0
- icell =0
- do i1 = 1, rlatt(1,1)
-   do i2 = 1, rlatt(2,2)
-     do i3 = 1, rlatt(3,3)
+ iatom_supercell = 0; icell =0
 
-       icell=icell+1
-       scell%rvecs(:,icell)=(/i1-1, i2-1, i3-1/)
-
-       do iatom = 1, natom_primcell
-         iatom_supercell = iatom_supercell + 1
-         scell%uc_indexing(:,iatom_supercell) = (/i1-1,i2-1,i3-1/)
-         scell%xcart_ref(:,iatom_supercell) = xcart_primcell(:,iatom) &
-            + matmul(rprimd_primcell,scell%uc_indexing(:,iatom_supercell))
-         scell%atom_indexing(iatom_supercell) = iatom
-         scell%typat(iatom_supercell) = typat_primcell(iatom)
+ select case (scell%xyz_order)
+ case ("zyx")
+   ! legacy mode.
+   do i1 = 1, rlatt(1,1)
+     do i2 = 1, rlatt(2,2)
+       do i3 = 1, rlatt(3,3)
+         call build_()
        end do
      end do
    end do
- end do
 
- ABI_CHECK(iatom_supercell == scell%natom, "iatom_supercell /= scell%natom")
- if(iatom_supercell /= scell%natom) then
-    write(std_out,*)"iatom_supercell /= scell%natom"
- endif
+ case ("xyz")
+   do i3 = 1, rlatt(3,3)
+     do i2 = 1, rlatt(2,2)
+       do i1 = 1, rlatt(1,1)
+         call build_()
+       end do
+     end do
+   end do
+
+ case default
+   ABI_ERROR(sjoin("Invalid xyz_order", scell%xyz_order))
+ end select
+
+ ABI_CHECK_IEQ(iatom_supercell, scell%natom, "iatom_supercell /= scell%natom")
 
  scell%xcart = scell%xcart_ref
  scell%qphon = zero
@@ -260,6 +274,19 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
  if (present(ordering)) then
    if (ordering) call order_supercell_typat(scell)
  end if
+
+contains
+ subroutine build_()
+  icell = icell+1; scell%rvecs(:,icell) = [i1-1, i2-1, i3-1]
+  do iatom = 1, natom_primcell
+    iatom_supercell = iatom_supercell + 1
+    scell%uc_indexing(:,iatom_supercell) = [i1-1, i2-1, i3-1]
+    scell%xcart_ref(:,iatom_supercell) = xcart_primcell(:,iatom) &
+       + matmul(rprimd_primcell,scell%uc_indexing(:,iatom_supercell))
+    scell%atom_indexing(iatom_supercell) = iatom
+    scell%typat(iatom_supercell) = typat_primcell(iatom)
+  end do
+ end subroutine build_
 
 end subroutine supercell_init
 !!***
@@ -348,7 +375,7 @@ subroutine supercell_freeze_displ(scell, displ, freeze_displ)
 ! *************************************************************************
 
  zdispl = (cmplx(reshape(displ(1,:), (/3,scell%natom_primcell/)),&
-&                reshape(displ(2,:), (/3,scell%natom_primcell/))))
+                 reshape(displ(2,:), (/3,scell%natom_primcell/))))
 
  ! fix gauge by imposing real displacement for first atom in first direction
  ! multiply by normalized complex conjugate of first element
@@ -361,8 +388,8 @@ subroutine supercell_freeze_displ(scell, displ, freeze_displ)
 
  do iatom = 1, scell%natom
    expqdotr = exp(j*two_pi*(scell%qphon(1)*scell%uc_indexing(1,iatom) &
-&                          +scell%qphon(2)*scell%uc_indexing(2,iatom) &
-&                          +scell%qphon(3)*scell%uc_indexing(3,iatom)))
+                           +scell%qphon(2)*scell%uc_indexing(2,iatom) &
+                           +scell%qphon(3)*scell%uc_indexing(3,iatom)))
 
 ! this is offset in zdispl vector due to primitive cell atom position
    ipratom = scell%atom_indexing(iatom)
@@ -418,12 +445,13 @@ subroutine supercell_print_for_qpt (scell, freq, jmode, outfile_radix)
 ! add suffix with mode and qpoint
   call int2char4(jmode, jmodestring)
   ABI_CHECK((jmodestring(1:1)/='#'),'Bug: string length too short!')
+
 ! qphonstring should be like 0.000_0.000_0.000
   call write_num(scell%qphon(1),qphonstring1,'(F5.3)')
   call write_num(scell%qphon(2),qphonstring2,'(F5.3)')
   call write_num(scell%qphon(3),qphonstring3,'(F5.3)')
   filename = trim(outfile_radix) // "_qpt_" // qphonstring1 // "_" // qphonstring2 // &
-&              "_" // qphonstring3 // "_mode_" // trim(jmodestring)
+               "_" // qphonstring3 // "_mode_" // trim(jmodestring)
 
   write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
   write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
