@@ -1715,7 +1715,7 @@ subroutine zacharias_supercell_print(fname, ntemper, tempermin, temperinc, thm_s
    write (filename, '(3a)') trim(fname), "_T_", trim(adjustl(temper_str))
    write (title1, '(3a)') "#  Zacharias thermalized supercell at temperature T= ", trim(temper_str), " Kelvin"
    title2 = "#  generated with alternating thermal displacements of all phonons"
-   call thm_scells(itemp)%print(filename, title1, title2)
+   call thm_scells(itemp)%print_abinit(filename, title1, title2)
  end do
 
 end subroutine zacharias_supercell_print
@@ -1754,7 +1754,7 @@ subroutine thermal_supercell_print(fname, nconfig, temperature_K, thm_scells)
    write (filename, '(3a)') trim(fname), "_cf_", trim(adjustl(config_str))
    write (title1, '(a,I6,a)') "#  thermalized supercell at temperature T= ", temperature_K, " Kelvin"
    title2 = "#  generated with random thermal displacements of all phonons"
-   call thm_scells(itemp)%print(filename, title1, title2)
+   call thm_scells(itemp)%print_abinit(filename, title1, title2)
  end do
 
 end subroutine thermal_supercell_print

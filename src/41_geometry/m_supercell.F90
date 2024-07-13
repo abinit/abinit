@@ -28,10 +28,10 @@ module m_supercell
  use m_errors
  use m_abicore
 
- use m_symtk,    only : matr3inv
- use m_copy,     only : alloc_copy
- use m_io_tools, only : open_file
- use m_fstrings, only : int2char4, write_num, itoa, sjoin
+ use m_symtk,         only : matr3inv
+ use m_copy,          only : alloc_copy
+ use m_io_tools,      only : open_file
+ use m_fstrings,      only : int2char4, write_num, itoa, sjoin
  use m_numeric_tools, only : isdiagmat
 
  implicit none
@@ -75,7 +75,8 @@ module m_supercell
    procedure :: copy => supercell_copy
    procedure :: free => supercell_free
    procedure :: print_for_qpt => supercell_print_for_qpt
-   procedure :: print => supercell_print
+   procedure :: print_abinit => supercell_print_abinit
+   procedure :: write_xsf => supercell_write_xsf
  end type supercell_type
 
  public :: distance_supercell
@@ -413,7 +414,7 @@ end subroutine supercell_freeze_displ
 !!
 !! FUNCTION
 !! output atomic positions, supercell vectors, etc... to a file
-!! single qpoint and mode
+!! single qpoint and mode.
 !!
 !! INPUTS
 !! freq = phonon frequency for mode jmode
@@ -426,7 +427,7 @@ end subroutine supercell_freeze_displ
 !!
 !! SOURCE
 
-subroutine supercell_print_for_qpt (scell, freq, jmode, outfile_radix)
+subroutine supercell_print_for_qpt(scell, freq, jmode, outfile_radix)
 
 !Arguments ------------------------------------
 !scalars
@@ -441,6 +442,7 @@ subroutine supercell_print_for_qpt (scell, freq, jmode, outfile_radix)
   character(len=10) :: jmodestring
   character(len=80) :: title1, title2
   character(len=5) :: qphonstring1, qphonstring2, qphonstring3
+! *************************************************************************
 
 ! add suffix with mode and qpoint
   call int2char4(jmode, jmodestring)
@@ -456,17 +458,18 @@ subroutine supercell_print_for_qpt (scell, freq, jmode, outfile_radix)
   write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
   write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
 
-  call scell%print(filename, title1, title2)
+  call scell%print_abinit(filename, title1, title2)
 
 end subroutine supercell_print_for_qpt
 !!***
 
-!****f* m_supercell/supercell_print
+!****f* m_supercell/supercell_print_abinit
 !! NAME
-!! supercell_print
+!! supercell_print_abinit
 !!
 !! FUNCTION
 !! output atomic positions, supercell vectors, etc... to a file
+!! in Abinit input format.
 !!
 !! INPUTS
 !! filename = filename
@@ -479,7 +482,7 @@ end subroutine supercell_print_for_qpt
 !!
 !! SOURCE
 
-subroutine supercell_print(scell, filename, title1, title2)
+subroutine supercell_print_abinit(scell, filename, title1, title2)
 
 !Arguments ------------------------------------
 !scalars
@@ -493,7 +496,6 @@ subroutine supercell_print(scell, filename, title1, title2)
   integer :: scunit, iatom
   character(len=500) :: msg
   real(dp) :: xred(3), gprimd(3,3)
-
 ! *************************************************************************
 
   if (open_file(filename, msg, newunit=scunit) /= 0) then
@@ -551,7 +553,7 @@ subroutine supercell_print(scell, filename, title1, title2)
 ! close file
   close(scunit)
 
-end subroutine supercell_print
+end subroutine supercell_print_abinit
 !!***
 
 !****f* m_supercell/supercell_copy
@@ -790,7 +792,6 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
 !arrays
  real(dp) :: magvv_org(nat_org)
  real(dp),allocatable :: transv(:,:,:)
-
 ! *************************************************************************
 
  if (present(magv_org)) then
@@ -829,6 +830,64 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
  ABI_FREE(transv)
 
 end subroutine mksupercell
+!!***
+
+!****f* m_supercell/supercell_write_xsf
+!! NAME
+!! supercell_write_xsf
+!!
+!! FUNCTION
+!! output atomic positions, supercell vectors, etc... to a file
+!!
+!! INPUTS
+!! filename = filename
+!! title1 = first line of description of contents
+!! title2 = second line of description of contents
+!!
+!! OUTPUT
+!! printing to file
+!!
+!! SOURCE
+
+subroutine supercell_write_xsf(scell, xsf_filename)
+
+!Arguments ------------------------------------
+!scalars
+ class(supercell_type), intent(in) :: scell
+ character(len=*), intent(in) :: xsf_filename
+ !character(len=*), intent(in) :: title
+
+!Local variables-------------------------------
+!scalar
+ integer :: ount, ix, iy, iatom
+ character(len=500) :: msg
+! *************************************************************************
+
+ if (open_file(xsf_filename, msg, newunit=ount, status="unknown", action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
+
+ !write (ount, '(a)')"#", trim(title)
+ write (ount, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
+ write (ount, '(a,I0,a)') '# and has ', scell%ncells, ' primitive unit cells '
+ write (ount, '(a)') '#'
+ write(ount, "(a)")"CRYSTAL"
+ write(ount, "(a)")"# these are primitive lattice vectors (in Angstroms)"
+ do iy = 1,3
+   write(ount, '(3(ES17.10,2X))') (Bohr_Ang * scell%rprimd(ix,iy), ix=1,3)
+ end do
+ write(ount, "(a)")"PRIMCOORD"
+ write(ount, "(i0,1x,i0)") scell%natom, 1  ! # The second number is always 1 for PRIMCOORD coordinates.
+
+ do iatom=1,scell%natom
+   write(ount, '(i0, 6(3X,ES17.10))') &
+     NINT(scell%znucl(scell%typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
+     scell%xcart_ref(:,iatom) * Bohr_Ang, (scell%xcart(:,iatom) - scell%xcart_ref(:,iatom)) * Bohr_Ang
+ end do
+
+ close(ount)
+
+end subroutine supercell_write_xsf
 !!***
 
 end module m_supercell

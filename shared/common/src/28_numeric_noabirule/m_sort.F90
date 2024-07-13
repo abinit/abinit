@@ -427,7 +427,10 @@ subroutine sort_gvecs(npw_k, kpoint, gmet, in_gvec, out_gvec, iperm, tol)
    out_gvec(:,ig) = in_gvec(:,ig_sort)
  end do
 
- if (present(iperm)) iperm = iperm__
+ if (present(iperm)) then
+   ABI_MALLOC(iperm, (npw_k))
+   iperm = iperm__
+ end if
  ABI_FREE(iperm__)
 
 contains

@@ -174,16 +174,12 @@ subroutine printxsf(n1, n2, n3, datagrid, basis, origin, natom, ntypat, typat, x
  write(nunit,*) natom, ' 1'
  do iatom = 1,natom
    write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
-     Bohr_Ang*tau(1,iatom), &
-     Bohr_Ang*tau(2,iatom), &
-     Bohr_Ang*tau(3,iatom)
+     Bohr_Ang*tau(1,iatom), Bohr_Ang*tau(2,iatom), Bohr_Ang*tau(3,iatom)
  end do
  write(nunit,'(1X,A)') 'ATOMS'
  do iatom = 1,natom
    write(nunit,'(i9,3(3X,ES17.10))') NINT(znucl(typat(iatom))), & ! WARNING alchemy not supported by XCrysden
-     Bohr_Ang*tau(1,iatom), &
-     Bohr_Ang*tau(2,iatom), &
-     Bohr_Ang*tau(3,iatom)
+     Bohr_Ang*tau(1,iatom), Bohr_Ang*tau(2,iatom), Bohr_Ang*tau(3,iatom)
  end do
 
  write(nunit,'(a)')' BEGIN_BLOCK_DATAGRID3D'
