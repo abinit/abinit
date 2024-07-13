@@ -1183,7 +1183,7 @@ subroutine polstate_update_pcond(self, factor)
 
 !Local variables-------------------------------
  class(gqk_t), pointer :: gqk
- integer my_ik, ik_ibz, ib
+ integer :: my_ik, ik_ibz, ib
 
 !----------------------------------------------------------------------
 
@@ -2206,11 +2206,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
        write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-point could not be generated from a symmetrical one.",trim(ltoa(kk))
        ABI_ERROR(msg)
      end if
-     ik_ibz = mapl_kk(1)
 
+     ik_ibz = mapl_kk(1)
      do ib=1,vpq%nb_spin(spin)
-       band = bstart + ib - 1
-       bks_mask(band, ik_ibz, spin) = .True.
+       band = bstart + ib - 1; bks_mask(band, ik_ibz, spin) = .True.
      end do
    end do
  end do
@@ -2252,9 +2251,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  !!write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- ! Build supercell from ngkpt.
+ ! Build supercell from ngkpt (not xyz_order)
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
- call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False.)
+ call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False., xyz_order="xyz")
 
  nkbz = product(vpq%ngkpt)
  call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
@@ -2304,7 +2303,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
            pol_wf(irsp, spin) = pol_wf(irsp, spin) + (a_nk * ur_k(uc_idx) * ceikr(irsp))
          end do
        end do
-
      end do ! ib
 
      ABI_FREE(kg_k)
@@ -2353,16 +2351,15 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
                    scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
      close(ount)
    end if
-
    ABI_FREE(pol_rho)
- end if
+ end if ! master
 
  ABI_FREE(pol_wf)
  call wfd%free()
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  if (dtfil%filgstorein == ABI_NOFILE) then
-   call wrtout(std_out, "gstore_filepath is not specified. Cannot compute polaron-induced displacements.")
+   call wrtout(std_out, "gstore_filepath is not specified in input. Cannot compute polaron-induced displacements!")
 
  else
    ! Compute polaron-induced displacements.
@@ -2372,6 +2369,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
    NCF_CHECK(nctk_open_read(ncid, dtfil%filgstorein, comm))
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nqibz", nqibz))
    !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", nqbz))
+
+   ! TODO: Wrap phstore API?
+   !call gstore_read_ph_qibz(dtfil%filgstorein, ph, comm)
+   !call ph%free()
 
    ABI_MALLOC(qibz, (3, nqibz))
    ABI_MALLOC(phfreqs_ibz, (natom3, nqibz))
@@ -2400,7 +2401,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
    call kptrlatt_from_ngkpt(ngqpt, qptrlatt_)
    qrank_ibz = krank_from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
 
-   ! FIXME: sc%rvecs is not ordered by x, y, z as expected
+   ! FIXME: scell%rvecs is not ordered by x, y, z as expected
    ABI_CALLOC(sc_displ_cart, (2, 3, scell%natom))
 
    cnt = 0
@@ -2439,12 +2440,14 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
 
        ! Compute phase e^{iq.R}
        !call calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
+       do sc_iat=1,scell%natom
+         !cphase = exp(+j_dpc * two_pi * dot_product(qq, scell%rvecs(:, sc_iat)))
+       end do
 
        do nu=1,natom3
          !bstar_qnu = vpq%b_spin(1, nu, iq, spin) - j_dpc * vpq%b_spin(2, nu, iq, spin)
          do sc_iat=1,scell%natom
            iat = scell%atom_indexing(sc_iat)
-           !sc%rvec(:, sc_iat)
            !sc_displ_cart(:,:,sc_iat) = sc_displ_cart_qbz(:,:,sc_iat) + &
            !  displ_cart_qbz(1, :, iat, nu)
          end do
