@@ -49,6 +49,7 @@ module m_varpeq
  use m_supercell,       only : supercell_type
  use m_fftcore,         only : ngfft_seq !, get_kg
  use m_ephtk,           only : ephtk_get_mpw_gmax
+ use m_phonons,         only : pheigvec_rotate
 
  implicit none
 
@@ -203,15 +204,15 @@ module m_varpeq
  end type varpeq_t
 !!***
 
- public :: varpeq ! Main entry point
+ public :: varpeq_run ! Main entry point
  public :: varpeq_plot
 
 contains !=====================================================================
 
 
-!!****f* m_varpeq/varpeq
+!!****f* m_varpeq/varpeq_run
 !! NAME
-!!  varpeq
+!!  varpeq_run
 !!
 !! FUNCTION
 !!
@@ -221,7 +222,7 @@ contains !=====================================================================
 !!
 !! SOURCE
 
-subroutine varpeq(gstore, dtset, dtfil)
+subroutine varpeq_run(gstore, dtset, dtfil)
 
 !Arguments ------------------------------------
  class(gstore_t), intent(in) :: gstore
@@ -241,7 +242,7 @@ subroutine varpeq(gstore, dtset, dtfil)
  call vpq%ncwrite(dtset, dtfil)
  call vpq%free()
 
-end subroutine varpeq
+end subroutine varpeq_run
 !!***
 
 !----------------------------------------------------------------------
@@ -327,9 +328,9 @@ subroutine varpeq_compare(self, other, allow_mesh_mismatch)
 
  ABI_CHECK_NOSTOP(self%pkind == other%pkind, "Difference found in pkind.", ierr)
  ABI_CHECK_NOSTOP(self%nsppol == other%nsppol, "Difference found in nsppol.", ierr)
- msg = " Comparing VAPREQ crystal with GSTORE crystal (time-reversal and inversion symmetries only) "
+ msg = " Comparing VARPEQ crystal with GSTORE crystal (time-reversal and inversion symmetries only) "
  ABI_CHECK_NOSTOP(self%cryst_trinv%compare(other%cryst_trinv, header=msg) == 0, "Difference found in cryst.", ierr)
-   ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
+ ABI_CHECK_NOSTOP(self%max_nb == other%max_nb, "Difference found in max_nb.", ierr)
  ABI_CHECK_NOSTOP(all(self%nb_spin == other%nb_spin), "Difference found in nb_spin.", ierr)
 
  if (present(allow_mesh_mismatch) .and. (.not. allow_mesh_mismatch)) then
@@ -552,7 +553,6 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max_spin"), self%gaps%vb_max))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gstore_ngqpt"), self%gstore%ngqpt))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ngkpt"), self%ngkpt))
-
  end if ! master
 
  call xmpi_barrier(self%gstore%comm)
@@ -568,6 +568,7 @@ end subroutine varpeq_ncwrite
 !!  varpeq_print
 !!
 !! FUNCTION
+!! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 !!
 !! INPUTS
 !!
@@ -700,7 +701,7 @@ subroutine varpeq_collect(self)
  call xmpi_sum(self%kpts_spin, self%gstore%comm, ierr)
  call xmpi_sum(self%qpts_spin, self%gstore%comm, ierr)
 
- ! Don't forget to divide all by the #OverCount, since we use global communiator
+ ! Don't forget to divide all by the #OverCount, since we use global communicator
  do my_is=1,self%gstore%my_nspins
    spin = self%gstore%my_spins(my_is)
    gqk => self%gstore%gqk(my_is)
@@ -2109,6 +2110,7 @@ end function polstate_get_krank_glob
 !!  varpeq_plot
 !!
 !! FUNCTION
+!! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
@@ -2142,8 +2144,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  integer :: my_rank, ib, irsp, ir, uc_idx, ount, n1, n2, n3, n4, n5, n6, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf,
  integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
- integer :: nqibz, iq
- logical :: isirr_k
+ integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, iat, sc_iat, nu
+ logical :: isirr_k, isirr_q
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -2152,8 +2154,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  type(supercell_type) :: scell
  type(krank_t) :: krank_ibz, qrank_ibz
 !arrays
- integer :: nrcl(3), sc_ngfft(18), mapl_k(6), kptrlatt_(3,3) !, qptrlatt_(3,3)
- integer :: units(2), work_ngfft(18), gmax(3), mapl_kk(6), g0_k(3)
+ integer :: nrcl(3), sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
+ integer :: units(2), work_ngfft(18), gmax(3), mapl_kk(6), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), kbz2ibz(:,:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
  real(dp) :: kk(3), kk_ibz(3), qq(3), qq_ibz(3)
@@ -2161,9 +2163,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
  real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
+ real(dp),allocatable :: sc_displ_cart(:,:,:)
  !real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(dp) :: a_nk
+ complex(dp) :: a_nk !, bstar_qnu
  complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:), ceikr(:)
 !----------------------------------------------------------------------
 
@@ -2362,41 +2365,17 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
    call wrtout(std_out, "gstore_filepath is not specified. Cannot compute polaron-induced displacements.")
 
  else
+   ! Compute polaron-induced displacements.
+   ! Start by reading ph displacements and frequencies in the IBZ from the gstore file.
    call cwtime(cpu_all, wall_all, gflops_all, "start")
 
    NCF_CHECK(nctk_open_read(ncid, dtfil%filgstorein, comm))
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nqibz", nqibz))
-   !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", gstore%nqbz))
+   !NCF_CHECK(nctk_get_dim(ncid, "gstore_nqbz", nqbz))
 
-   ! Compute polaron-induced displacements.
-   ! Start by read displacements and frequencies in the IBZ from the gstore file
    ABI_MALLOC(qibz, (3, nqibz))
    ABI_MALLOC(phfreqs_ibz, (natom3, nqibz))
    ABI_MALLOC(pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, nqibz))
-   !ABI_MALLOC(pheigvec_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
-   !ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
-
-   !ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, natom3))
-   !ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
-   !ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
-   !ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
-   !ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
-   !ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, 3*cryst%natom))
-
-   !ABI_FREE(displ_cart_qbz)
-   !ABI_FREE(displ_cart_qibz)
-   !ABI_FREE(displ_red_qbz)
-   !ABI_FREE(displ_red_qibz)
-   !ABI_FREE(pheigvec_qbz)
-   !ABI_FREE(pheigvec_qibz)
-
-   !qptrlatt = 0; qptrlatt(1, 1) = ngqpt(1); qptrlatt(2, 2) = ngqpt(2); qptrlatt(3, 3) = ngqpt(3)
-   !qtimrev = kpts_timrev_from_kptopt(gstore%qptopt)
-   !if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
-   !  ABI_ERROR("Cannot map qBZ to IBZ!")
-   !end if
-   !call qrank_ibz%free()
-
    if (nproc > 1) then
      NCF_CHECK(nctk_set_collective(ncid, vid("gstore_qibz")))
      NCF_CHECK(nctk_set_collective(ncid, vid("phfreqs_ibz")))
@@ -2405,27 +2384,49 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), qibz))
    NCF_CHECK(nf90_get_var(ncid, vid("phfreqs_ibz"), phfreqs_ibz))
    NCF_CHECK(nf90_get_var(ncid, vid("pheigvec_cart_ibz"), pheigvec_cart_ibz))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_nqqpt"), ngqpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), qptopt))
    NCF_CHECK(nf90_close(ncid))
+
+   ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, natom3))
+   ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
+   ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, natom3))
+
+   ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
+   ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
+   ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, natom3))
+
+   qtimrev = kpts_timrev_from_kptopt(qptopt)
+   call kptrlatt_from_ngkpt(ngqpt, qptrlatt_)
+   qrank_ibz = krank_from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
+
+   ! FIXME: sc%rvecs is not ordered by x, y, z as expected
+   ABI_CALLOC(sc_displ_cart, (2, 3, scell%natom))
 
    cnt = 0
    do spin=1,nsppol
      do iq=1, vpq%nq_spin(spin)
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
        qq = vpq%qpts_spin(:, iq, spin)
-
-#if 0
-       !if (kpts_map("symrec", qtimrev, cryst, gstore%qrank_ibz, gstore%nqbz, qbz, qbz2ibz) /= 0) then
-       !  ABI_ERROR("Cannot map qBZ to IBZ!")
-       !end if
-       iq_ibz = gqk%my_q2ibz(1, my_iq); isym_q = gqk%my_q2ibz(2, my_iq)
-       trev_q = gqk%my_q2ibz(6, my_iq); g0_q = gqk%my_q2ibz(3:5,my_iq)
+       ! Note symrec here
+       if (kpts_map("symrec", qtimrev, cryst, qrank_ibz, 1, qq, mapl_qq) /= 0) then
+         ABI_ERROR("Cannot map qBZ to IBZ!")
+       end if
+       iq_ibz = mapl_qq(1); isym_q = mapl_qq(2)
+       trev_q = mapl_qq(6); g0_q = mapl_qq(3:5)
        ! Don't test if umklapp == 0 because we use the periodic gauge:
        !
        !      phfreq(q+G) = phfreq(q) and eigvec(q) = eigvec(q+G)
        !
-       !isirr_q = (isym_q == 1 .and. trev_q == 0 .and. all(g0_q == 0))
        isirr_q = (isym_q == 1 .and. trev_q == 0)
-       qq_ibz = gstore%qibz(:, iq_ibz)
+       qq_ibz = qibz(:, iq_ibz)
+
+       !displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
+       !displ_red_qbz, (2, 3, cryst%natom, natom3))
+       !pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
+
+       !pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, iq_ibz)
+       !phfreqs_ibz, (natom3, iq_ibz)
 
        if (isirr_q) then
          displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
@@ -2435,22 +2436,34 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
          call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
                               displ_red_qbz=displ_red_qbz)
        end if
-#endif
+
        ! Compute phase e^{iq.R}
        !call calc_ceigr_dpc(gg, nfft, nspinor, ngfft, ceigr)
 
-       !do nu=1,natom3
-       !end do ! nu
-
-
+       do nu=1,natom3
+         !bstar_qnu = vpq%b_spin(1, nu, iq, spin) - j_dpc * vpq%b_spin(2, nu, iq, spin)
+         do sc_iat=1,scell%natom
+           iat = scell%atom_indexing(sc_iat)
+           !sc%rvec(:, sc_iat)
+           !sc_displ_cart(:,:,sc_iat) = sc_displ_cart_qbz(:,:,sc_iat) + &
+           !  displ_cart_qbz(1, :, iat, nu)
+         end do
+       end do ! nu
      end do ! iq
    end do ! spin
 
    ABI_FREE(qibz)
    ABI_FREE(phfreqs_ibz)
    ABI_FREE(pheigvec_cart_ibz)
-   !ABI_FREE(pheigvec_cart_qbz)
    !ABI_FREE(displ_cart_qbz)
+   !ABI_FREE(displ_red_qbz)
+   !ABI_FREE(pheigvec_qbz)
+   ABI_FREE(displ_cart_qibz)
+   ABI_FREE(displ_red_qibz)
+   ABI_FREE(pheigvec_qibz)
+   call qrank_ibz%free()
+
+   call xmpi_sum_master(sc_displ_cart, master, comm, ierr)
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
@@ -2463,6 +2476,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
      close(ount)
    end if
 
+   ABI_FREE(sc_displ_cart)
    call cwtime_report(" Computation of polaron-induced displacements completed:", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 end if
 
