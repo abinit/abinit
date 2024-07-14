@@ -10,7 +10,7 @@
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
-
+!!
 !! TODO
 !!
 !! SOURCE
@@ -708,7 +708,7 @@ subroutine varpeq_collect(self)
    gqk => self%gstore%gqk(my_is)
    polstate => self%polstate(spin)
 
-   oc_iter = gqk%grid_comm%nproc
+   oc_iter = gqk%comm%nproc
    oc_a = gqk%qpt_pert_comm%nproc
    oc_b = gqk%kpt_comm%nproc
 
@@ -1554,7 +1554,7 @@ real(dp) function polstate_get_enelph(self) result(enelph)
 
    enddo
  enddo
- call xmpi_sum(enelph, gqk%grid_comm%value, ierr)
+ call xmpi_sum(enelph, gqk%comm%value, ierr)
  enelph = -two*enelph/(self%nkbz*self%nqbz)
 
  ABI_FREE(kpq_map)
@@ -2147,7 +2147,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, iat, sc_iat, nu, nqbz
  logical :: isirr_k, isirr_q
- real(dp) :: cpu_all, wall_all, gflops_all !, b_re, b_im, dd_re, dd_im
+ real(dp) :: cpu_all, wall_all, gflops_all, rtmp
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -2220,6 +2220,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  ! wfd_read_wfk will handle a possible conversion if WFK contains istwfk /= 1.
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
+
+ ! TODO: print info on boxcutmin
 
  call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft, &
@@ -2324,13 +2326,19 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  call xmpi_sum_master(pol_wf, master, comm, ierr)
 
  if (my_rank == master) then
-   !pol_wf = pol_wf / sqrt(nkbz)
+   pol_wf = pol_wf / nkbz
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    if (nspinor == 1) then
      ! Handle spin-polarized case by writing two xsf files.
      do spin=1,nsppol
+       rtmp = sum(vpq%a_spin(:,:,:, spin) ** 2) / nkbz
+       write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, "1/N_k \sum_nk |A_nk|^2 = ", rtmp
+       call wrtout(units, msg)
        pol_rho = abs(pol_wf(:, spin)) ** 2
+       write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to:", sum(pol_rho) * cryst%ucvol
+       call wrtout(units, msg)
+
        path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
        if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
        if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
@@ -2342,8 +2350,14 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
      end do
 
    else
+     rtmp = sum(vpq%a_spin(:,:,:, spin) ** 2) / nkbz
+     write(msg, "(a,es16.6)")" 1/N_k \sum_nk |A_nk|^2 = ", rtmp
+     call wrtout(units, msg)
+
      pol_rho(:) = abs(pol_wf(1:sc_nfft, 1)) ** 2
      pol_rho(:) = abs(pol_wf(sc_nfft+1:, 1)) ** 2 + pol_rho(:)
+     write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to:", sum(pol_rho) * cryst%ucvol
+     call wrtout(units, msg)
 
      path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
      if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
@@ -2456,7 +2470,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
            displ_c(:) = r2c(displ_cart_qbz(:, :, iat, nu))
            c3tmp = bstar_qnu * ceiqr(sc_iat) * displ_c(:)
            sc_displ_cart_re(:,sc_iat) = sc_displ_cart_re(:,sc_iat) + real(c3tmp)
-           ! Just to check if the imag part is zero.
+           ! This to check if the imag part is zero.
            sc_displ_cart_im(:,sc_iat) = sc_displ_cart_re(:,sc_iat) + aimag(c3tmp)
          end do
        end do ! nu
@@ -2478,10 +2492,14 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
 
    call xmpi_sum_master(sc_displ_cart_re, master, comm, ierr)
    sc_displ_cart_re = - sqrt2 * sc_displ_cart_re / nqbz
+   ! Here we displace the atoms in the supercell.
    scell%xcart = scell%xcart_ref + sc_displ_cart_re
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
+     rtmp = sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
+     write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, "1/N_q \sum_qnu |B_qnu|^2 = ", rtmp
+     call wrtout(units, msg)
      path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPLACEMENTS.xsf")
      call scell%write_xsf(path)
    end if

@@ -419,27 +419,29 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  case (WFK_TASK_WANNIER)
    ! Construct Wannier functions.
 
-   if (wfk0_hdr%kptopt == 1) then
-     ! Generate WFK in the full BZ (only master works here)
-     wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
-     if (my_rank == master) then
-       call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", wfkfull_path))
-       call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
-       call ebands_free(ebands_bz); call hdr_bz%free()
-     end if
-     call xmpi_barrier(comm)
-     my_dtset = dtset%copy()
-     ebands_bz = wfk_read_ebands(wfkfull_path, comm, hdr_bz)
-     call hdr_transfer_nkpt_arrays(hdr_bz, my_dtset)
-     my_dtset%kptopt = hdr_bz%kptopt
-     call hdr_bz%vs_dtset(my_dtset)
-     call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
-     call ebands_free(ebands_bz); call hdr_bz%free(); call my_dtset%free()
+   ! This part was implemented by gmatteo to debug GaAs with a 8x8x8 k-mesh.
 
-   else
+   !if (wfk0_hdr%kptopt == 1) then
+   !  ! Generate WFK in the full BZ (only master works here)
+   !  wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
+   !  if (my_rank == master) then
+   !    call wrtout(units, sjoin("- Generating WFK file with kpoints in the full BZ and istwfk == 1", wfkfull_path))
+   !    call wfk_to_bz(wfk0_path, dtset, psps, pawtab, wfkfull_path, hdr_bz, ebands_bz)
+   !    call ebands_free(ebands_bz); call hdr_bz%free()
+   !  end if
+   !  call xmpi_barrier(comm)
+   !  my_dtset = dtset%copy()
+   !  ebands_bz = wfk_read_ebands(wfkfull_path, comm, hdr_bz)
+   !  call hdr_transfer_nkpt_arrays(hdr_bz, my_dtset)
+   !  my_dtset%kptopt = hdr_bz%kptopt
+   !  call hdr_bz%vs_dtset(my_dtset)
+   !  call wfd_run_wannier__(wfkfull_path, my_dtset, ebands_bz, hdr_bz)
+   !  call ebands_free(ebands_bz); call hdr_bz%free(); call my_dtset%free()
+
+   !else
      call wfk0_hdr%vs_dtset(dtset)
      call wfd_run_wannier__(wfk0_path, dtset, ebands, wfk0_hdr)
-   end if
+   !end if
 
  case default
    ABI_ERROR(sjoin("Wrong wfk_task:", itoa(dtset%wfk_task)))
