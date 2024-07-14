@@ -3831,14 +3831,14 @@ end subroutine wan_ncwrite_gwan
 !!
 !! SOURCE
 
-subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, pert_comm, all_comm)
+subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
 
 !Arguments ------------------------------------
  class(wan_t),target,intent(inout) :: wan
  character(len=*),intent(in) :: gwan_filepath
  integer,intent(in) :: spin, nsppol
  type(crystal_t),intent(in) :: cryst
- type(xcomm_t),intent(in) :: all_comm, pert_comm
+ type(xcomm_t),intent(in) :: all_comm ! , pert_comm
 
 !Local variables-------------------------------
 !scalars
@@ -3849,7 +3849,11 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, pert_comm, all
 !************************************************************************
 
  units = [std_out, ab_out]
- call wrtout(units, sjoin(" Reading e-ph vertex in the Wannier representation from GWAN file:", gwan_filepath))
+ if (nsppol == 2) then
+   call wrtout(units, sjoin(" Reading g(R_e, R_p) for spin:", itoa(spin), " from GWAN file:", gwan_filepath))
+ else
+   call wrtout(units, sjoin(" Reading g(R_e, R_p) from GWAN file:", gwan_filepath))
+ end if
 
  NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, all_comm%value))
 

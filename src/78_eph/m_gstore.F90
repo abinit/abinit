@@ -430,6 +430,8 @@ type, public :: gstore_t
   type(ebands_t), pointer :: ebands => null()
   ! Electron bands
 
+  logical :: ebands_owns_memory = .True.
+
   type(ifc_type), pointer :: ifc => null()
   ! interatomic force constants.
 
@@ -625,6 +627,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
 
  ! Get references to other data structures.
  gstore%cryst => cryst; gstore%ebands => ebands; gstore%ifc => ifc
+ gstore%ebands_owns_memory = .False.
 
  has_abiwan = .False.; has_gwan = .False.; keep_umats = .False.
  if (dtfil%filabiwanin /= ABI_NOFILE) then
@@ -638,8 +641,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      has_gwan = .True.
      ! TODO:
      ! Interpolate band energies.
-     !call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, intp_nshiftk, intp_shiftk, out_ebands, comm)
-     !gstore%ebands => ebands
+     !call wan_interp_ebands(wan_spin, cryst, ebands, intp_kptrlatt, intp_nshiftk, intp_shiftk, dense_ebands, comm)
+     !gstore%ebands => dense_ebands; gstore%ebands_owns_memory = .True.
    end if
  end if
 
@@ -843,8 +846,8 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
  ! =============================================
  ! Initialize gqk basic dimensions and MPI grid
  ! =============================================
- !priority = "qk"
  call priority_from_eph_task(dtset%eph_task, priority)
+ !priority = "qk"
  call gstore%set_mpi_grid__(dtset%gstore_cplex, dtset%eph_np_pqbks, priority, nproc_spin, comm_spin)
  call xmpi_comm_free(comm_spin)
 
@@ -1032,7 +1035,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      call wan%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, "", gqk%comm%value)
      wan%my_pert_start = gqk%my_pert_start; wan%my_npert = gqk%my_npert; wan%pert_comm => gqk%pert_comm
      if (has_gwan) then
-       call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%pert_comm, gqk%comm)
+       call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%comm) ! gqk%pert_comm,
      end if
 
      nq = 1
@@ -1133,8 +1136,8 @@ subroutine gstore_distribute_spins(gstore, mband, gstore_brange, nproc_spin, com
 !----------------------------------------------------------------------
 
  all_nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
- nsppol = gstore%nsppol
 
+ nsppol = gstore%nsppol
  gstore%my_nspins = 0
  ABI_MALLOC(gstore%brange_spin, (2, nsppol))
 
@@ -1251,7 +1254,7 @@ subroutine gstore_set_mpi_grid__(gstore, gstore_cplex, eph_np_pqbks, priority, n
 
    else
      ! Automatic grid generation (hopefully smart)
-     ! Keep in mind that in gstore_build, the first loop is over q-points
+     ! Keep in mind that in gstore_compute, the first loop is over q-points
      ! in order to reduce the number of interpolations of the DFPT potentials in q-space
      ! hence the q-point parallelism is expected to be more efficient.
      ! On the other hand, the k-point parallelism and the perturbation parallelism
@@ -2608,6 +2611,8 @@ subroutine gstore_free(gstore)
  ABI_SFREE(gstore%glob_nk_spin)
  ABI_SFREE(gstore%glob_nq_spin)
  ABI_SFREE(gstore%erange_spin)
+
+ if (.not. gstore%ebands_owns_memory) call ebands_free(gstore%ebands)
 
  call gstore%krank_ibz%free()
  call gstore%qrank_ibz%free()
@@ -4641,7 +4646,7 @@ subroutine gstore_wannierize(gstore, dtfil)
 !arrays
  integer :: qptrlatt_(3,3), units(2)
  real(dp) :: weight_qq, qpt(3), kpt(3), kq(3)
- complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:), tmp_mat(:,:)
+ complex(dp),allocatable :: emikr(:), emiqr(:), u_kc(:,:), u_kqc(:,:), gww_epq(:,:,:,:,:), gww_pk(:,:,:,:), g_bb(:,:) !, tmp_mat(:,:)
 ! *************************************************************************
 
  units = [std_out, ab_out]
