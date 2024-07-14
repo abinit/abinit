@@ -1030,9 +1030,11 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
      associate (gqk => gstore%gqk(my_is), wan => gstore%gqk(my_is)%wan)
      ! Here we build gqk%wan
      call wan%from_abiwan(dtfil%filabiwanin, spin, ebands%nsppol, keep_umats, "", gqk%comm%value)
+     wan%my_pert_start = gqk%my_pert_start; wan%my_npert = gqk%my_npert; wan%pert_comm => gqk%pert_comm
      if (has_gwan) then
-       call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gwr%pert_comm, gqk%comm)
+       call wan%load_gwan(dtfil%filgwanin, gstore%cryst, spin, ebands%nsppol, gqk%pert_comm, gqk%comm)
      end if
+
      nq = 1
      ABI_MALLOC(out_gatm, (wan%nwan, wan%nwan, wan%my_npert, nq))
      do my_iq=1,gqk%my_nq
@@ -1044,6 +1046,7 @@ subroutine gstore_init(gstore, path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc,
        end do ! my_ik
      end do ! my_iq
      ABI_FREE(out_gatm)
+
      end associate
    end do ! my_is
    ABI_ERROR("All done")

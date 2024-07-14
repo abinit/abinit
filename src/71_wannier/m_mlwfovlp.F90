@@ -143,7 +143,7 @@ module m_mlwfovlp
 
    real(dp),allocatable :: all_eigens(:,:)
    ! (mband, nkbz)
-   ! KS eigenvalues.
+   ! All KS eigenvalues (before possible filtering done by wannier90)
 
    real(dp),allocatable :: centres(:,:)
    ! Wannier centers.
@@ -3612,7 +3612,7 @@ end subroutine wan_setup_eph_ws_kq
 !! wan_interp_eph_manyq
 !!
 !! FUNCTION
-!!  Interpolate the e-ph matrix elements at one k-point and nq q-points.
+!!  Interpolate the e-ph matrix elements for one k-point and nq q-points.
 !!
 !! SOURCE
 
@@ -3842,12 +3842,13 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, pert_comm, all
 
 !Local variables-------------------------------
 !scalars
- integer :: root_ncid, spin_ncid, ncerr
+ integer :: root_ncid, spin_ncid, ncerr, units(2)
  logical,parameter :: keep_umats = .False.
  type(crystal_t) :: gwan_cryst
  real(dp), ABI_CONTIGUOUS pointer :: rpt_d6(:,:,:,:,:,:) !, rpt_d4(:,:,:,:)
 !************************************************************************
 
+ units = [std_out, ab_out]
  call wrtout(units, sjoin(" Reading e-ph vertex in the Wannier representation from GWAN file:", gwan_filepath))
 
  NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, all_comm%value))
@@ -3875,21 +3876,22 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, pert_comm, all
  !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
 
  ! TODO:
- !ABI_CALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert))
-
  ! Take into account that the array might be distributed over perturbations.
- if (all_comm%nproc > 1) then
-   NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("grpe_wwp")))
- end if
+ !print *, "wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert", wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert
+ ABI_MALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert))
  call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
 
  ! nctkarr_t("grpe_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
+ if (all_comm%nproc > 1) then
+   NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("grpe_wwp")))
+ end if
  ncerr = nf90_get_var(spin_ncid, vid_spin("grpe_wwp"), rpt_d6, &
                       start=[1, 1, 1, 1, 1, wan%my_pert_start], &
                       count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_close(root_ncid))
+ call wrtout(units, " Reading completed")
 
 contains
  integer function vid_spin(var_name)
