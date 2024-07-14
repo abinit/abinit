@@ -2118,23 +2118,21 @@ end function polstate_get_krank_glob
 !! ngfft(18),ngfftf(18)=Coarse and Fine FFT meshes.
 !! dtset<dataset_type>=All input variables for this dataset.
 !! ebands<ebands_t>=The GS KS band structure (energies, occupancies, k-weights...)
-!! ifc<ifc_type>=interatomic force constants and corresponding real space grid info.
 !! comm=MPI communicator.
 !!
 !! OUTPUT
 !!
 !! SOURCE
 
-subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
+subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, psps, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: wfk0_path
- integer,intent(in) :: ngfft(18),ngfftf(18)
+ integer,intent(in) :: ngfft(18) !,ngfftf(18)
  type(dataset_type), intent(in) :: dtset
  type(datafiles_type), intent(in) :: dtfil
  type(crystal_t),intent(in) :: cryst
  type(ebands_t),intent(in) :: ebands
- type(ifc_type),intent(in) :: ifc
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
  integer,intent(in) :: comm
@@ -2185,12 +2183,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  ebands_timrev = kpts_timrev_from_kptopt(ebands%kptopt)
  krank_ibz = krank_from_kptrlatt(ebands%nkpt, ebands%kptns, ebands%kptrlatt, compute_invrank=.False.)
 
- ! FFT meshes
- !nfftf = product(ngfftf(1:3)); mgfftf = maxval(ngfftf(1:3))
- !nfft = product(ngfft(1:3)) ; mgfft = maxval(ngfft(1:3))
- !n1 = ngfft(1); n2 = ngfft(2); n3 = ngfft(3)
- !n4 = ngfft(4); n5 = ngfft(5); n6 = ngfft(6)
-
  ! Initialize the wave function descriptor.
  ABI_MALLOC(nband, (nkibz, nsppol))
  ABI_MALLOC(bks_mask, (mband, nkibz, nsppol))
@@ -2221,13 +2213,13 @@ subroutine varpeq_plot(wfk0_path, ngfft, ngfftf, dtset, dtfil, cryst, ebands, if
  ABI_MALLOC(wfd_istwfk, (nkibz))
  wfd_istwfk = 1
 
- ! TODO: print info on boxcutmin
-
  call wfd_init(wfd, cryst, pawtab, psps, keep_ur, mband, nband, nkibz, nsppol, bks_mask,&
                dtset%nspden, dtset%nspinor, dtset%ecut, dtset%ecutsm, dtset%dilatmx, wfd_istwfk, ebands%kptns, ngfft, &
                dtset%nloalg, dtset%prtvol, dtset%pawprtvol, comm)
 
  call wfd%print(header="Wavefunctions for varpeq_plot")
+
+ ! TODO: print info on boxcutmin
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)

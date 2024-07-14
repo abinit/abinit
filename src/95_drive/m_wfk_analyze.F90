@@ -164,7 +164,7 @@ subroutine wfk_analyze(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps
  type(mpi_type) :: mpi_enreg
  type(wfd_t) :: wfd
  type(ddkstore_t) :: ds
- type(dataset_type) :: my_dtset
+ !type(dataset_type) :: my_dtset
 !arrays
  integer :: ngfftc(18),ngfftf(18), units(2)
  integer,allocatable :: l_size_atm(:)

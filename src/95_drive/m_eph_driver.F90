@@ -796,16 +796,20 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  !
  !  1) Wannierize with Abinit and wannier90 in library mode to get the ABIWAN.nc file.
  !
- !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization.
+ !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization step.
  !     Compute g(R_e, R_p) and save results to GWAN.nc file.
  !
- !  3) Start new job to compute properties with extra dense meshes:
+ !  3) Start new job to compute properties with extra dense k/q-meshes (eph_ngkpt_fine and eph_ngqpt_fine)
  !
  !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distribute gvals.
  !        - Decide if gvals should be precomputed and stored or computed on the fly.
  !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
  !        - Pass gstore object to the eph_task routines (what about ebands)?
- !
+
+ !   call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+ !   call gstore%wannierize(dtfil)
+ !   call gstore%free()
+
  !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
  !  call gstore%from_gwan_file(dtfil%filgwanin, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%free()
@@ -818,7 +822,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call gstore%free()
 
  case (13)
-   ! Variational polaron equations
+   ! Variational polaron equations.
    if (gstore_filepath /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Computing variational polaron equations from pre-existent GSTORE file:", gstore_filepath))
      call gstore%from_ncpath(gstore_filepath, with_cplex2, dtset, cryst, ebands, ifc, comm)
@@ -830,8 +834,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
 
  case (-13)
-   ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
-   call varpeq_plot(wfk0_path, ngfftc, ngfftf, dtset, dtfil, cryst, ebands, ifc, pawtab, psps, comm)
+   ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files.
+   call varpeq_plot(wfk0_path, ngfftc, dtset, dtfil, cryst, ebands, pawtab, psps, comm)
 
  case (14)
    ! Molecular Berry Curvature
