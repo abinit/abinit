@@ -2143,7 +2143,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, ndat1 = 1
- integer :: my_rank, ib, irsp, ir, uc_idx, ount, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
+ integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
  integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, iat, sc_iat, nu, nqbz
