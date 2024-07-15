@@ -706,7 +706,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  select case (dtset%eph_task)
  case (0)
-   ! This is just to access the DDB post-processing tools for phonons
+   ! This is just to access the DDB post-processing tools for phonons.
    continue
 
  case (1)
@@ -725,7 +725,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                  pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (4, -4)
-   ! Compute electron self-energy (phonon contribution)
+   ! Compute electron self-energy (phonon contribution).
    call sigmaph(wfk0_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, dvdb, ifc, wfk0_hdr, &
                 pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
@@ -744,7 +744,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
                                    ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
  case (6)
-   ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model
+   ! Estimate zero-point renormalization and temperature-dependent electronic structure using the Frohlich model.
    if (my_rank == master) then
      call frohlichmodel_zpr(frohlich, cryst, dtset, efmasdeg, efmasval, ifc)
    end if
@@ -774,7 +774,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
      call gstore%from_ncpath(dtfil%filgstorein, dtset%gstore_cplex, dtset, cryst, ebands, ifc, comm)
    else
      gstore_path = strcat(dtfil%filnam_ds(4), "_GSTORE.nc")
-     !call wrtout(units, sjoin(" Will start computation of GSTORE file:", gstore_path))
      call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
    end if
 
@@ -787,35 +786,36 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Wannierize the e-ph matrix elements if the ABIWAN.nc is provided.
    if (dtfil%filabiwanin /= ABI_NOFILE) then
      call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+     !call gstore%load()
      call gstore%wannierize(dtfil)
      call gstore%free()
    end if
 
  !case (-11)
- !  Typical workflow for gstore with Wannierization
+ !  Typical workflow for gstore with Wannierization:
  !
- !  1) Wannierize with Abinit and wannier90 in library mode to get the ABIWAN.nc file.
+ !      1) Wannierize with Abinit and wannier90 in library mode to get the ABIWAN.nc file.
  !
- !  2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization step.
- !     Compute g(R_e, R_p) and save results to GWAN.nc file.
+ !      2) Pass ABIWAN.nc to the EPH code to compute GSTORE.nc only for the bands included in the wannierization step.
  !
- !  3) Start new job to compute properties with extra dense k/q-meshes (eph_ngkpt_fine and eph_ngqpt_fine)
+ !      3) Call gstore%wannierize to compute g(R_e, R_p) and save results to GWAN.nc file.
  !
- !        - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distribute gvals.
- !        - Decide if gvals should be precomputed and stored or computed on the fly.
- !        - Read GWAN.nc file to build gstore%gqk(spin)%wan
- !        - Pass gstore object to the eph_task routines (what about ebands)?
+ !      3) Start new job to compute properties with extra dense k/q-meshes (eph_ngkpt_fine and eph_ngqpt_fine)
+ !
+ !            - Init gstore object with extra dense meshes, possibly filtered and MPI-grid to distribute gvals.
+ !            - Decide if gvals should be precomputed and stored or computed on the fly.
+ !            - Read GWAN.nc file to build gstore%gqk(spin)%wan
+ !            - Pass gstore object to the eph_task routines (what about ebands)?
 
- !   call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
- !   call gstore%wannierize(dtfil)
- !   call gstore%free()
+ !  call gstore%from_ncpath(gstore_path, with_cplex2, dtset, cryst, ebands, ifc, comm)
+ !  call gstore%wannierize(dtfil)
+ !  call gstore%free()
 
  !  call gstore%init(gstore_path, dtset, dtfil, wfk0_hdr, cryst, ebands, ifc, comm)
- !  call gstore%from_gwan_file(dtfil%filgwanin, with_cplex2, dtset, cryst, ebands, ifc, comm)
  !  call gstore%free()
 
  case (12, -12)
-   ! Migdal-Eliashberg equations (isotropic/anisotropic case)
+   ! Migdal-Eliashberg equations (isotropic or anisotropic case).
    call gstore%from_ncpath(dtfil%filgstorein, with_cplex1, dtset, cryst, ebands, ifc, comm)
    if (dtset%eph_task == -12) call migdal_eliashberg_iso(gstore, dtset, dtfil)
    !if (dtset%eph_task == +12) call migdal_eliashberg_aniso(gstore, dtset, dtfil)
@@ -838,7 +838,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    call varpeq_plot(wfk0_path, ngfftc, dtset, dtfil, cryst, ebands, pawtab, psps, comm)
 
  case (14)
-   ! Molecular Berry Curvature
+   ! Molecular Berry Curvature.
    if (dtfil%filgstorein /= ABI_NOFILE) then
      call wrtout(units, sjoin(" Computing Berry curvature from pre-existent GSTORE file:", dtfil%filgstorein))
      call gstore%from_ncpath(dtfil%filgstorein, with_cplex2, dtset, cryst, ebands, ifc, comm)
@@ -900,8 +900,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  call cryst%free()
  call dvdb%free()
  call drhodb%free()
- call ddb%free()
  call ddb_hdr%free()
+ call ddb%free()
  call ifc%free()
  call wfk0_hdr%free()
  call ebands_free(ebands)
