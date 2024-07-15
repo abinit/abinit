@@ -28,9 +28,7 @@ module m_outscfcv
  use m_errors
  use m_xmpi
  use m_mpinfo
-#ifdef HAVE_NETCDF
  use netcdf
-#endif
  use m_nctk
  use m_hdr
  use m_plowannier
@@ -256,9 +254,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  integer :: my_comm_atom
  integer :: opt_imagonly
  integer :: indsym(4,dtset%nsym,dtset%natom)
-#ifdef HAVE_NETCDF
- integer :: ncid
-#endif
+ integer :: ncid, ncerr
  real(dp) :: norm,occ_norm,unocc_norm
  real(dp) :: rate_dum,rate_dum2
  real(dp) :: yp1, ypn, dr
@@ -597,28 +593,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if ! if paw+pawprtden
 
  call timab(1153,2,tsec)
- call timab(1154,1,tsec)
 
- ! Output of the GSR file (except when we are inside mover)
-#ifdef HAVE_NETCDF
- ! Temporarily disable for CRAY
-#ifndef FC_CRAY
- if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
-   !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
-   fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
-   ! Write crystal and band structure energies.
-   NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
-   NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
-   NCF_CHECK(crystal%ncwrite(ncid))
-   NCF_CHECK(ebands_ncwrite(ebands, ncid))
-   ! Add energy, forces, stresses
-   NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
-   NCF_CHECK(nf90_close(ncid))
- end if
-#endif
-#endif
-
- call timab(1154,2,tsec)
  call timab(1155,1,tsec)
 
  ! Output of VCLMB file
@@ -799,13 +774,11 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    end if
 
 !  EIG
-#if defined HAVE_NETCDF
    if (dtset%prteig==2 .and. me == master) then
      fname=trim(dtfil%fnameabo_app_eig)//'.nc'
      call write_eig(eigen,e_fermie,fname,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,&
 &     results_gs%extfpmd_eshift) ! Optional arguments
    end if
-#endif
 
    call timab(1160,2,tsec)
    call timab(1161,1,tsec)
@@ -956,7 +929,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call dos_calcnwrite(dos,dtset,crystal,ebands,dtfil%fnameabo_app_dos,spacecomm)
    end if
 
-#ifdef HAVE_NETCDF
    ! Write netcdf file with dos% results.
    if (me == master) then
      fname = trim(dtfil%filnam_ds(4))//'_FATBANDS.nc'
@@ -964,7 +936,6 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
      call fatbands_ncwrite(dos, crystal, ebands, hdr, dtset, psps, pawtab, ncid)
      NCF_CHECK(nf90_close(ncid))
    end if
-#endif
 
 !TODO: do not free dos here, but use the fractions below in calcdenmagsph
    call dos%free()
@@ -1042,7 +1013,6 @@ if (dtset%prt_lorbmag==1) then
      write (msg, "(a,E20.10,a)") " Zeeman energy -m.B = ", e_zeeman, " Ha"
      call wrtout([std_out, ab_out], msg)
    end if
-   ABI_SFREE(intgden)
  end if ! end if prtdensph or magnetic field
 
  call timab(1166,2,tsec)
@@ -1377,9 +1347,44 @@ if (dtset%prt_lorbmag==1) then
    call timab(1183,2,tsec)
  end if
 
+ call timab(1154,1,tsec)
+
+ ! Output of the GSR file (except when we are inside mover)
+ ! Temporarily disable for CRAY
+#ifndef FC_CRAY
+ if (me == master .and. dtset%prtgsr == 1 .and. dtset%usewvl == 0) then
+   !.and. (dtset%ionmov /= 0 .or. dtset%optcell /= 0)) then
+   fname = strcat(dtfil%filnam_ds(4), "_GSR.nc")
+   ! Write crystal and band structure energies.
+   NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
+   NCF_CHECK(hdr%ncwrite(ncid, fform_den, spinat=dtset%spinat, nc_define=.True.))
+   NCF_CHECK(crystal%ncwrite(ncid))
+   NCF_CHECK(ebands_ncwrite(ebands, ncid))
+   ! Add energy, forces, stresses
+   NCF_CHECK(results_gs_ncwrite(results_gs, ncid, dtset%ecut, dtset%pawecutdg))
+
+   if (allocated(intgden)) then
+     ! Write integrated density inside atomic spheres and ratsph(ntypat)=radius of spheres around atoms
+     ncerr = nctk_def_arrays(ncid, [ &
+       nctkarr_t("intgden", "dp", "number_of_components, number_of_atoms"), &
+       nctkarr_t("ratsph", "dp", "number_of_atom_species") &
+     ], defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "intgden"), intgden))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ratsph"), dtset%ratsph))
+   end if
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
+
+ call timab(1154,2,tsec)
+
  ABI_SFREE_PTR(elfr)
  ABI_SFREE_PTR(grhor)
  ABI_SFREE_PTR(lrhor)
+
+ ABI_SFREE(intgden)
 
  call crystal%free()
  call ebands_free(ebands)
