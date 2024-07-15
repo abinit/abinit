@@ -523,8 +523,8 @@ end subroutine wedge_product
 !! Calculates a grid of points that falls inside of (and eventually on the surface of)
 !! the Wigner-Seitz supercell centered on the origin of the B lattice with primitive
 !! translations nmonkh(1)*a_1+nmonkh(2)*a_2+nmonkh(3)*a_3.
-!! Subroutine taken from the Wannier90 code. Modified by MG to fulfil abinit coding rules.
-!! API slightly changed wrt the wannier90 version.
+!! Subroutine taken from the Wannier90 code.
+!! Modified by MG to fulfil abinit coding rules. API slightly changed wrt the wannier90 version.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2007 Jonathan Yates, Arash Mostofi,

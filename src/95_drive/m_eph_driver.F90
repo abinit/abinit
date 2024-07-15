@@ -400,8 +400,6 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  if (use_wfk) then
    call ddb%from_file(ddb_filepath, ddb_hdr, cryst_ddb, comm, prtvol=dtset%prtvol)
 
-   call ddb%set_brav(dtset%brav)
-
    ! DDB cryst comes from DFPT --> no time-reversal if q /= 0
    ! Change the value so that we use the same as the GS part.
    cryst_ddb%timrev = cryst%timrev
@@ -413,8 +411,25 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    ! Get crystal from DDB.
    ! Warning: We may loose precision in rprimd and xred because DDB in text format does not have enough significant digits.
    call ddb%from_file(ddb_filepath, ddb_hdr, cryst, comm, prtvol=dtset%prtvol)
-
    call ddb%set_brav(dtset%brav)
+ end if
+
+ ! Change the bravais lattice if needed
+ call ddb%set_brav(dtset%brav)
+
+ mtyp = ddb_hdr%mblktyp
+ mpert = ddb_hdr%mpert
+
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with automatic reshapes
+ ! that ddb%val and ddb%flg experience when passed as arguments of some routines
+ ! GA: Should replace with ddb_hdr%with_d3E_lw
+ iblock_quadrupoles = 0
+ qdrp_cart = zero
+ if (mtyp == BLKTYP_d3E_lw) then
+   lwsym = 1
+   call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+   iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
+   call ddb_lw%free()
  end if
 
  ! Set the q-shift for the DDB (well we mainly use gamma-centered q-meshes)
@@ -437,61 +452,53 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- ! Read the quadrupoles
- !iblock_quadrupoles = ddb%get_quadrupoles(ddb_hdr%ddb_version,1, 3, qdrp_cart)
+ !iblock_quadrupoles = 0
+ !qdrp_cart = zero
+ !if (my_rank == master) then
+ !  ! MG: Temporary hack to read the quadrupole tensor from a text file
+ !  ! Will be removed when the EPH code will be able to read Q* from the DDB.
 
- iblock_quadrupoles = 0
- qdrp_cart = zero
+ !  if (file_exists("quadrupoles_cart.out")) then
+ !    call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
+ !    quad_unt = 71
+ !    open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
+ !    do ii=1,2
+ !      read(quad_unt,*) msg
+ !      write(std_out, *)" msg: ", trim(msg)
+ !    end do
 
- if (my_rank == master) then
-   ! MG: Temporary hack to read the quadrupole tensor from a text file
-   ! Will be removed when the EPH code will be able to read Q* from the DDB.
-
-   if (file_exists("quadrupoles_cart.out")) then
-     call wrtout(std_out, " Reading quadrupoles from quadrupoles_cart.out")
-     quad_unt = 71
-     open(unit=quad_unt,file="quadrupoles_cart.out",action="read")
-     do ii=1,2
-       read(quad_unt,*) msg
-       write(std_out, *)" msg: ", trim(msg)
-     end do
-
-     do ii=1,3
-       do jj=1,3*3*ddb%natom
-         read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
-         write(std_out, *) iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
-       end do
-       read(quad_unt,'(a)') msg
-     end do
-     close(quad_unt)
-     iblock_quadrupoles = 1
-   end if
- end if
-
- call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
- call xmpi_bcast(qdrp_cart, master, comm, ierr)
+ !    do ii=1,3
+ !      do jj=1,3*3*ddb%natom
+ !        read(quad_unt,'(4(i5,3x),2(1x,f20.10))') iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+ !        write(std_out, *) iq2dir,iatom,iatdir,iq1dir,qdrp_cart(iq1dir,iq2dir,iatdir,iatom)
+ !      end do
+ !      read(quad_unt,'(a)') msg
+ !    end do
+ !    close(quad_unt)
+ !    iblock_quadrupoles = 1
+ !  end if
+ !end if
+ !call xmpi_bcast(iblock_quadrupoles, master, comm, ierr)
+ !call xmpi_bcast(qdrp_cart, master, comm, ierr)
 
  ! Here we get the quadrupoles from the DDB file (this should become the official API).
  ! Section Copied from Anaddb.
 
- if (iblock_quadrupoles == 0) then
-   mtyp = ddb_hdr%mblktyp
-   mpert = ddb_hdr%mpert
-   !msize = 3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
-   !call wrtout(std_out, sjoin(" Trying to read Q* from DDB file, mtyp:", itoa(mtyp)))
+ !if (iblock_quadrupoles == 0) then
+ !  mtyp = ddb_hdr%mblktyp
+ !  mpert = ddb_hdr%mpert
+ !  ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
+ !  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
 
-   ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
-   ! that ddb%val and ddb%flg experience when passed as arguments of some routines
-
-   ! Get Quadrupole tensor
-   qdrp_cart=zero
-   if (mtyp==33) then
-     lwsym=1
-     call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
-     iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version,lwsym, 33, qdrp_cart)
-     call ddb_lw%free()
-   end if
- endif
+ !  ! Get Quadrupole tensor
+ !  qdrp_cart = zero
+ !  if (mtyp == BLKTYP_d3E_lw) then
+ !    lwsym = 1
+ !    call ddb_lw_copy(ddb, ddb_lw, mpert, dtset%natom, dtset%ntypat)
+ !    iblock_quadrupoles = ddb_lw%get_quadrupoles(ddb_hdr%ddb_version, lwsym, BLKTYP_d3E_lw, qdrp_cart)
+ !    call ddb_lw%free()
+ !  end if
+ !endif
 
  ! The default value is 1. Here we set the flags to zero if Q* is not available.
  if (iblock_quadrupoles == 0) then
