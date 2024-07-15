@@ -148,9 +148,8 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,parameter :: master = 0, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, with_cplex1 = 1, with_cplex2 = 2
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
  integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift, ierr, npert_miss
- integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym !msize,
- integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj, qptopt
- integer :: ncid ! ,ncerr
+ integer :: omp_ncpus, work_size, nks_per_proc, mtyp, mpert, lwsym, qptopt, ncid ! ,ncerr
+ !integer :: iatdir, iq2dir, iq1dir, quad_unt, iatom, jj
  real(dp):: eff, mempercpu_mb, max_wfsmem_mb, nonscal_mem
  real(dp) :: ecore,ecut_eff,ecutdg_eff,gsqcutc_eff,gsqcutf_eff
  real(dp) :: cpu,wall,gflops
