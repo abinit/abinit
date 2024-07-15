@@ -42,7 +42,7 @@ module m_varpeq
  use m_numeric_tools,   only : r2c
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
- use m_pptools,         only : printxsf
+ use m_pptools,         only : write_xsf
  use m_kpts,            only : kpts_map, kpts_timrev_from_kptopt, bzlint_t, kptrlatt_from_ngkpt
  use m_fft_mesh,        only : supercell_fft, calc_ceikr
  use m_pawtab,          only : pawtab_type
@@ -205,8 +205,11 @@ module m_varpeq
  end type varpeq_t
 !!***
 
- public :: varpeq_run ! Main entry point
+ public :: varpeq_run
+   ! Main entry point
+
  public :: varpeq_plot
+  ! Compute polaron wavefunctions and atomic displacements in the supercell and write results to XSF files
 
 contains !=====================================================================
 
@@ -2111,7 +2114,7 @@ end function polstate_get_krank_glob
 !!  varpeq_plot
 !!
 !! FUNCTION
-!! Compute polaron wavefunctions and atomic displacements in the supercell and write results to files
+!! Compute polaron wavefunctions and atomic displacements in the supercell and write results to XSF files
 !!
 !! INPUTS
 !! wfk0_path=String with the path to the GS unperturbed WFK file.
@@ -2189,7 +2192,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_MALLOC(keep_ur, (mband, nkibz, nsppol))
  nband = mband; bks_mask = .False.; keep_ur = .False.
 
- ! Here we use brange_spin to select the number of bands that should be read and store.
+ ! Here we use brange_spin to select the number of bands that should be read and stored in memory.
  ! For the time being, spin and k-points are not MPI-distributed inside comm.
  do spin=1,nsppol
    bstart = vpq%brange_spin(1, spin)
@@ -2219,7 +2222,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  call wfd%print(header="Wavefunctions for varpeq_plot")
 
- ! TODO: print info on boxcutmin
+ if (dtset%boxcutmin >= two) then
+   call wrtout(std_out, " To reduce the size of the FFT mesh and the size of the XSF file, reduce boxcutmin from 2 to e.g. 1.1")
+ end if
 
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2247,7 +2252,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  !!write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- ! Build supercell from ngkpt (not xyz_order)
+ ! Build supercell from ngkpt (note xyz_order)
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
  call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False., xyz_order="xyz")
 
@@ -2259,7 +2264,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
  ABI_MALLOC(ceikr, (sc_nfft*nspinor))
- ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol)) ! init with zeros.
+ ! Init with zeros.
+ ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol))
 
  cnt = 0
  do spin=1,nsppol
@@ -2318,7 +2324,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call xmpi_sum_master(pol_wf, master, comm, ierr)
 
  if (my_rank == master) then
-   pol_wf = pol_wf / nkbz
+   pol_wf = pol_wf / sqrt(real(nkbz))
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    if (nspinor == 1) then
@@ -2333,12 +2339,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
        path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
        if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
-       if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
-         ABI_ERROR(msg)
-       end if
-       call printxsf(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
-                     scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
-       close(ount)
+       call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+                      scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, 0)
      end do
 
    else
@@ -2352,12 +2354,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      call wrtout(units, msg)
 
      path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
-     if (open_file(path, msg, newunit=ount, form='formatted', status='unknown', action="write") /= 0) then
-       ABI_ERROR(msg)
-     end if
-     call printxsf(sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
-                   scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, ount, 0)
-     close(ount)
+     call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+                    scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, 0)
    end if
    ABI_FREE(pol_rho)
  end if ! master
@@ -2440,6 +2438,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
        !pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, iq_ibz)
        !phfreqs_ibz, (natom3, iq_ibz)
+
+       ! TODO: Finalize the implementation.
 
        if (isirr_q) then
          displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
