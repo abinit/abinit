@@ -44,7 +44,7 @@ module m_mlwfovlp
  use m_io_tools, only : delete_file, get_unit, open_file
  use m_hide_lapack,     only : matrginv, xheev
  use m_fstrings,      only : strcat, sjoin, itoa
- use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int, isdiagmat, get_diag
+ use m_numeric_tools, only : uniformrandom, simpson_int, c2r, l2int, isdiagmat, get_diag, blocked_loop
  use m_special_funcs,   only : besjm
  use m_geometry,  only : xred2xcart, rotmat, wigner_seitz
  use m_crystal,  only : crystal_t
@@ -99,18 +99,17 @@ module m_mlwfovlp
    !integer :: nbndep,         ! Number of remaining bands after excluding bands in Wannierizatin step
    !integer :: nbndskip,       ! Number of bands to be skipped in Wannierization step, leading to
                                ! the exclusion from the original Hamiltonian
-
    integer :: nkbz = -1
    ! Number of k-points in the full BZ
 
    integer :: nr_h = -1, nr_e = -1, nr_p = -1
    ! Number of lattice points for H, electrons, phonons
 
-   !integer :: nshiftk
-   ! Number of shifts. At present only 1 shift is supported.
-
    integer :: ngkpt(3) = -1
    ! K-mesh divisions
+
+   !integer :: nshiftk
+   ! Number of shifts. At present only 1 shift is supported.
 
    logical :: have_disentangled
    ! True if disentanglement has been used.
@@ -137,13 +136,13 @@ module m_mlwfovlp
 
    integer,allocatable :: ndegen_h(:), ndegen_e(:), ndegen_p(:)
 
-   real(dp),allocatable :: rmod_h(:), rmod_p(:) ! rmod_e(:),
+   real(dp),allocatable :: rmod_h(:), rmod_p(:), rmod_e(:)
    ! (nr_h), (nr_p)
    ! Lenght in Bohr of the lattice points.
 
    real(dp),allocatable :: all_eigens(:,:)
    ! (mband, nkbz)
-   ! KS eigenvalues.
+   ! All KS eigenvalues (before possible filtering done by wannier90)
 
    real(dp),allocatable :: centres(:,:)
    ! Wannier centers.
@@ -217,6 +216,7 @@ module m_mlwfovlp
 !!***
 
  public :: wan_interp_ebands
+! Build new ebands_t object on a k-mesh via Wannier interpolation.
 
 contains
 !!***
@@ -1051,7 +1051,7 @@ subroutine mlwfovlp_seedname(fname_w90,filew90_win,filew90_wout,filew90_amn,&
    end if
 
    if(.not. lfile) then
-     write(msg,'(11a)')&
+     write(msg,'(12a)')&
       ' wannier90 interface needs one of the following input files:',ch10,&
       '      ',trim(test_win1),ch10,&
       '      ',trim(test_win2),ch10,&
@@ -1329,15 +1329,15 @@ end subroutine mlwfovlp_seedname
 
   do isppol=1,nsppol
     write(std_out,*)  "1", nntot,nwan(isppol)
-    write(std_out,*)  "2",num_bands(isppol)  ! states on which wannier functions are computed
+    write(std_out,*)  "2", num_bands(isppol)  ! states on which wannier functions are computed
     write(std_out,*)  "3", proj_site(:,1:nwan(isppol),isppol)
-    write(std_out,*)  "4",proj_l(1:nwan(isppol),isppol)
-    write(std_out,*)  "5",proj_m(1:nwan(isppol),isppol)
+    write(std_out,*)  "4", proj_l(1:nwan(isppol),isppol)
+    write(std_out,*)  "5", proj_m(1:nwan(isppol),isppol)
     write(std_out,*)  "6", proj_radial(1:nwan(isppol),isppol)
     write(std_out,*)  "7", proj_z(:,1:nwan(isppol),isppol)
     write(std_out,*)  "8", proj_x(:,1:nwan(isppol),isppol)
-    write(std_out,*)  "9",proj_zona(1:nwan(isppol),isppol)
-    write(std_out,*)  "10",exclude_bands(:,isppol)
+    write(std_out,*)  "9", proj_zona(1:nwan(isppol),isppol)
+    write(std_out,*)  "10", exclude_bands(:,isppol)
   end do!isppol
  end if  ! lwanniersetup
 
@@ -1353,7 +1353,7 @@ end subroutine mlwfovlp_seedname
  end do !isppol
 
  if (any(mband.gt.num_bands(:))) then
-   write(msg, '(a,a)' )ch10,'   Following bands are excluded from the calculation of wannier functions:'
+   write(msg, '(a,a)' )ch10,'   The following bands are excluded from the calculation of wannier functions:'
    call wrtout(std_out,msg)
 
    do isppol=1,nsppol
@@ -3347,8 +3347,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  ii = maxval(wan%dimwin)
  ABI_CALLOC(wan%u_kc, (ii, nwan, nkbz))
  do ik=1,nkbz
-   wan%u_kc(1:wan%dimwin(ik), 1:nwan, ik) = &
-     matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
+   wan%u_kc(1:wan%dimwin(ik), 1:nwan, ik) = matmul(wan%u_mat_opt(1:wan%dimwin(ik), :, ik), wan%u_mat(:, 1:nwan, ik))
  end do
 
  wan%keep_umats = keep_umats
@@ -3360,7 +3359,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  ! ====================================================
  ! Build the Hamiltonian in the Wannier representation
  ! ====================================================
- !call wan%get_opt_eig(et_opt)
+ !call wan%get_window_eig(et_opt)
  nextbands = count(wan%exclude_bands /= 0)
  !REAL(KIND = DP) :: et_opt(nbndep, nks)
  ! KS eigenvalues within the outer window in the first dimwin(ik) entries
@@ -3378,8 +3377,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
        if (.not. wan%band_in(ib)) cycle
        jb = jb + 1
        if (wan%lwindow(jb, ik)) then
-         mb = mb + 1
-         et_opt(mb, ik) = wan%all_eigens(ib, ik)
+         mb = mb + 1; et_opt(mb, ik) = wan%all_eigens(ib, ik)
        end if
      end do
    end do
@@ -3389,8 +3387,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
      mb = 0
      do ib=1,wan%dimwin(ik)
        if (wan%lwindow(ib, ik)) then
-         mb = mb + 1
-         et_opt(mb, ik) = wan%all_eigens(ib, ik)
+         mb = mb + 1; et_opt(mb, ik) = wan%all_eigens(ib, ik)
        end if
      end do
    end do
@@ -3420,7 +3417,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
  end do
  ABI_FREE(chs)
 
- ! Now transpose the data to have R_e in the first dimension.
+ ! Now rearrange the data to have R_e in the first dimension.
  ABI_CALLOC(wan%hwan_r, (nr_h, nwan, nwan))
  do ir=1,nr_h
    wan%hwan_r(ir,:,:) = chw(:,:,ir)
@@ -3433,7 +3430,7 @@ subroutine wan_from_abiwan(wan, abiwan_filepath, spin, nsppol, keep_umats, out_p
    if (open_file(out_path, msg, newunit=ount, form="formatted", action="write", status='unknown') /= 0) then
      ABI_ERROR(msg)
    end if
-   write(ount, "(a)")"# Decay of Hamiltonian H in Wannier representation"
+   write(ount, "(a)")"# Decay of Hamiltonian in the Wannier representation"
    write(ount, "(a)")"# |R| [Bohr]                 Max_{m,n} |H(R,m,n)| [Ha]"
    do ir=1,nr_h
      write(ount, *) wan%rmod_h(ir), maxval(abs(wan%hwan_r(ir,:,:)))
@@ -3511,7 +3508,7 @@ subroutine wan_interp_ham(wan, kpt, uk_wan, eigens)
 !************************************************************************
 
  do ir=1,wan%nr_h
-   eikr(ir) = exp(j_dpc * two_pi * dot_product(wan%r_h(:, ir), kpt)) / wan%ndegen_h(ir)
+   eikr(ir) = exp(j_dpc * two_pi * dot_product(kpt, wan%r_h(:, ir))) / wan%ndegen_h(ir)
  end do
 
  ! H_ij(k) = sum_R e^{+ik.R} * H_ij(R)
@@ -3552,7 +3549,7 @@ subroutine wan_free(wan)
  ABI_SFREE(wan%ndegen_e)
  ABI_SFREE(wan%ndegen_p)
  ABI_SFREE(wan%rmod_h)
- !ABI_SFREE(wan%rmod_e)
+ ABI_SFREE(wan%rmod_e)
  ABI_SFREE(wan%rmod_p)
  ABI_SFREE(wan%all_eigens)
  ABI_SFREE(wan%centres)
@@ -3578,7 +3575,7 @@ end subroutine wan_free
 !! wan_setup_eph_ws_kq
 !!
 !! FUNCTION
-!!   Prepare the interpolation of e-ph matrix elements.
+!!   Prepare the interpolation of the e-ph matrix elements.
 !!
 !! SOURCE
 
@@ -3593,16 +3590,33 @@ subroutine wan_setup_eph_ws_kq(wan, cryst, shiftk, kptrlatt, qptrlatt, my_pert_s
 
 !Local variables-------------------------------
  integer,parameter :: lmax(3) = [2,2,2]
+ real(dp),parameter :: center(3) = zero
 !************************************************************************
 
- call wigner_seitz(shiftk, lmax, kptrlatt, cryst%rmet, &
-                   wan%nr_e, wan%r_e, wan%ndegen_e, wan%rmod_h) ! out
+ ABI_UNUSED(shiftk)
 
- call wigner_seitz([zero, zero, zero], lmax, qptrlatt, cryst%rmet, &
-                   wan%nr_p, wan%r_p, wan%ndegen_p, wan%rmod_p) ! out
+ if (.not. allocated(wan%r_h)) then
+   call wigner_seitz(center, lmax, kptrlatt, cryst%rmet, wan%nr_h, wan%r_h, wan%ndegen_h, wan%rmod_h)
+ end if
+
+ if (.not. allocated(wan%r_e)) then
+   call wigner_seitz(center, lmax, kptrlatt, cryst%rmet, wan%nr_e, wan%r_e, wan%ndegen_e, wan%rmod_e)
+ end if
+
+ if (.not. allocated(wan%r_p)) then
+   call wigner_seitz(center, lmax, qptrlatt, cryst%rmet, wan%nr_p, wan%r_p, wan%ndegen_p, wan%rmod_p)
+ end if
+
+ if (wan%my_pert_start == -1) then
+   wan%my_pert_start = my_pert_start; wan%my_npert = my_npert; wan%pert_comm => pert_comm
+ else
+   ABI_CHECK_IEQ(wan%my_pert_start, my_pert_start, "different values for my_pert_start")
+   ABI_CHECK_IEQ(wan%my_npert, my_npert, "different values for my_npert")
+   ABI_CHECK(associated(wan%pert_comm), "wan%per_comm is not associated!")
+   ABI_CHECK_IEQ(wan%pert_comm%value, pert_comm%value, "different values for pert_comm%value")
+ end if
 
  ! Allocate g in the Wannier representation.
- wan%my_pert_start = my_pert_start; wan%my_npert = my_npert; wan%pert_comm => pert_comm
  ABI_CALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, my_npert))
 
 end subroutine wan_setup_eph_ws_kq
@@ -3613,7 +3627,8 @@ end subroutine wan_setup_eph_ws_kq
 !! wan_interp_eph_manyq
 !!
 !! FUNCTION
-!!  Interpolate the e-ph matrix elements at one k-point and nq q-points.
+!! Interpolate the e-ph matrix elements for one k-point and nq q-points.
+!! Returns matrix elements in the atomic-representation.
 !!
 !! SOURCE
 
@@ -3633,6 +3648,8 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
 
 !************************************************************************
 
+ ! TODO: Handle long-range part.
+
  nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan; my_npert = wan%my_npert
 
  ABI_MALLOC(eikr, (nr_e))
@@ -3640,6 +3657,10 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
  ABI_MALLOC(u_k, (nwan, nwan))
  ABI_MALLOC(u_kq, (nwan, nwan))
  ABI_MALLOC(cmat_w, (nwan, nwan))
+
+ ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
+ ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
+ ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
 
  do ir=1,nr_e
    eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / wan%ndegen_e(ir)
@@ -3703,8 +3724,7 @@ end subroutine wan_interp_eph_manyq
 !! wan_ncwrite_gwan
 !!
 !! FUNCTION
-!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph)
-!!  to the GWAN.nc netcdf file.
+!!  Write the e-ph matrix elements in the Wannier representation g(R_e, R_ph) to the GWAN.nc netcdf file.
 !!
 !! SOURCE
 
@@ -3719,10 +3739,10 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, var_id, units(2)
- real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:), rpt_d5(:,:,:,:,:)
+ integer :: spin, root_ncid, spin_ncid, ncerr, natom3, ount, ir, var_id, units(2), batch_size, idat, ndat
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
  character(len=fnlen) :: gwan_filepath, txt_path
- complex(dp),target,allocatable :: cbuf(:,:,:,:)
+ complex(dp),target,allocatable :: cbuf5(:,:,:,:,:)
  character(len=500) :: msg
 !************************************************************************
 
@@ -3735,6 +3755,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  if (spin == 1) then
    NCF_CHECK(nctk_open_create(root_ncid, gwan_filepath, pert_comm%value))
    NCF_CHECK(cryst%ncwrite(root_ncid))
+   !NCF_CHECK(hdr%ncwrite(root_ncid))
    NCF_CHECK(ebands_ncwrite(ebands, root_ncid))
  else
    NCF_CHECK(nctk_open_modify(root_ncid, gwan_filepath, pert_comm%value))
@@ -3756,6 +3777,9 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
    nctkarr_t("r_h", "dp", "three, nr_h"), &
    nctkarr_t("r_e", "dp", "three, nr_e"), &
    nctkarr_t("r_p", "dp", "three, nr_p"), &
+   nctkarr_t("ndegen_h", "int", "nr_h"), &
+   nctkarr_t("ndegen_e", "int", "nr_e"), &
+   nctkarr_t("ndegen_p", "int", "nr_p"), &
    nctkarr_t("hwan_r", "dp", "two, nr_h, nwan, nwan"), &
    nctkarr_t("grpe_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
  ])
@@ -3766,11 +3790,14 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_h"), wan%r_h))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_e"), wan%r_e))
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("r_p"), wan%r_p))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ndegen_h"), wan%ndegen_h))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ndegen_e"), wan%ndegen_e))
+ NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("ndegen_p"), wan%ndegen_p))
 
  call c_f_pointer(c_loc(wan%hwan_r), rpt_d4, [2, wan%nr_h, wan%nwan, wan%nwan])
  NCF_CHECK(nf90_put_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
 
- ! Take into account that the array is distributed over perturbations.
+ ! Take into account that the array might be distributed over perturbations.
  !NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
  call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
  ncerr = nf90_put_var(spin_ncid, vid_spin("grpe_wwp"), rpt_d6, &
@@ -3779,8 +3806,8 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
  NCF_CHECK(ncerr)
  NCF_CHECK(nf90_close(root_ncid))
 
- !  Check spatial decay of EP matrix elements in wannier basis - electrons + phonons
- !  We plot: R_e, R_p, max_{m,n,nu} |g(m,n,nu;R_e,R_p)|
+ ! Check spatial decay of the EP matrix elements in the wannier basis
+ ! We plot: R_e, R_p, max_{m,n,nu} |g(m,n,nu;R_e,R_p)|
  if (pert_comm%me == 0) then
    NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, xmpi_comm_self))
    ! Get group for this spin.
@@ -3792,17 +3819,24 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
    end if
    write(ount, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m,n,nu R_e,:)| [Ha/Bohr] '
    var_id = vid_spin("grpe_wwp")
-   ABI_MALLOC(cbuf, (wan%nr_p, wan%nwan, wan%nwan, natom3))
-   call c_f_pointer(c_loc(cbuf), rpt_d5, [2, wan%nr_p, wan%nwan, wan%nwan, natom3])
-   ! TODO
-   do ir=1,wan%nr_e
+   ! Perform IO in batches to keep memory at bay.
+   ! FIXME
+   batch_size = 1
+   ABI_MALLOC(cbuf5, (wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3))
+   call c_f_pointer(c_loc(cbuf5), rpt_d6, [2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
+
+   do ir=1,wan%nr_e, batch_size
+     ndat = blocked_loop(ir, wan%nr_e, batch_size)
      !nctkarr_t("grpe_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
-     ncerr = nf90_get_var(spin_ncid, var_id, rpt_d5, &
-                          start=[1,1,ir,1,1,1], count=[2, wan%nr_p, 1, wan%nwan, wan%nwan, natom3])
+     ncerr = nf90_get_var(spin_ncid, var_id, rpt_d6, &
+                          start=[1,1,ir,1,1,1], count=[2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
      NCF_CHECK(ncerr)
-     !write(ount, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:, ir, iwan, jwan, my_ip)))
+     do idat=1,ndat
+       ! TODO
+       !write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
+     end do
    end do
-   ABI_FREE(cbuf)
+   ABI_FREE(cbuf5)
 
    close(ount)
    NCF_CHECK(nf90_close(root_ncid))
@@ -3826,60 +3860,81 @@ end subroutine wan_ncwrite_gwan
 !!
 !! SOURCE
 
-subroutine wan_load_gwan(wan, gwan_filepath, spin, nsppol, spin_comm, pert_comm) ! out_ebands,
+subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
 
 !Arguments ------------------------------------
  class(wan_t),target,intent(inout) :: wan
  character(len=*),intent(in) :: gwan_filepath
  integer,intent(in) :: spin, nsppol
- !type(crystal_t),intent(out) :: out_cryst
- !type(ebands_t),intent(out) :: out_ebands
- type(xcomm_t),intent(in) :: spin_comm, pert_comm
+ type(crystal_t),intent(in) :: cryst
+ type(xcomm_t),intent(in) :: all_comm ! , pert_comm
 
 !Local variables-------------------------------
 !scalars
- integer :: root_ncid, spin_ncid !, ncerr !, natom3
+ integer :: root_ncid, spin_ncid, ncerr, units(2)
  logical,parameter :: keep_umats = .False.
- !real(dp), ABI_CONTIGUOUS pointer :: rpt_d4(:,:,:,:), rpt_d6(:,:,:,:,:,:)
+ type(crystal_t) :: gwan_cryst
+ real(dp), ABI_CONTIGUOUS pointer :: rpt_d6(:,:,:,:,:,:) !, rpt_d4(:,:,:,:)
 !************************************************************************
 
- NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, pert_comm%value))
- !call out_cryst%ncread(root_ncid); call out_ebands%ncread(root_ncid)
+ units = [std_out, ab_out]
+ if (nsppol == 2) then
+   call wrtout(units, sjoin(" Reading g(R_e, R_p) for spin:", itoa(spin), " from GWAN file:", gwan_filepath))
+ else
+   call wrtout(units, sjoin(" Reading g(R_e, R_p) from GWAN file:", gwan_filepath))
+ end if
 
- ! Get group for this spin.
+ NCF_CHECK(nctk_open_read(root_ncid, gwan_filepath, all_comm%value))
+
+ call gwan_cryst%ncread(root_ncid)
+ if (cryst%compare(gwan_cryst, header=" Comparing input crystal with GWAN crystal.") /= 0) then
+   ABI_ERROR("Crystal structure from input and GWAN file do not agree! Check messages above!")
+ end if
+ call gwan_cryst%free()
+
+ ! Get netcdf group for this spin.
  NCF_CHECK(nf90_inq_ncid(root_ncid, strcat("gwan", "_spin", itoa(spin)), spin_ncid))
 
- ! Read lattice vectors.
+ ! Read supercell lattice vectors.
  NCF_CHECK(nctk_get_dim(spin_ncid, "nr_e", wan%nr_e))
  NCF_CHECK(nctk_get_dim(spin_ncid, "nr_p", wan%nr_p))
 
  ABI_MALLOC(wan%r_e, (3, wan%nr_e))
  ABI_MALLOC(wan%r_p, (3, wan%nr_p))
+ ABI_MALLOC(wan%ndegen_e, (wan%nr_e))
+ ABI_MALLOC(wan%ndegen_p, (wan%nr_p))
 
  NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("r_e"), wan%r_e))
  NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("r_p"), wan%r_p))
+ NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("ndegen_e"), wan%ndegen_e))
+ NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("ndegen_p"), wan%ndegen_p))
 
- ! TODO:
- !ABI_CALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, my_npert))
-
- !!NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("foo")))
  !call c_f_pointer(c_loc(wan%hwan_r), rpt_d4, [2, wan%nr_h, wan%nwan, wan%nwan])
  !NCF_CHECK(nf90_get_var(spin_ncid, vid_spin("hwan_r"), rpt_d4))
 
- !! Here take into account that array is distributed over perturbations.
- !call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
- !ncerr = nf90_get_var(spin_ncid, vid_spin("gwrpw_wwp"), rpt_d6, &
- !                     start=[1,1,1,1,1,wan%my_pert_start], count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
- !NCF_CHECK(ncerr)
+ ! TODO:
+ ! Take into account that the array might be distributed over perturbations.
+ !print *, "wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert", wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert
+ ABI_MALLOC(wan%grpe_wwp, (wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert))
+ call c_f_pointer(c_loc(wan%grpe_wwp), rpt_d6, [2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+
+ ! nctkarr_t("grpe_wwp", "dp", "two, nr_p, nr_e, nwan, nwan, natom3") &
+ if (all_comm%nproc > 1) then
+   NCF_CHECK(nctk_set_collective(spin_ncid, vid_spin("grpe_wwp")))
+ end if
+ ncerr = nf90_get_var(spin_ncid, vid_spin("grpe_wwp"), rpt_d6, &
+                      start=[1, 1, 1, 1, 1, wan%my_pert_start], &
+                      count=[2, wan%nr_p, wan%nr_e, wan%nwan, wan%nwan, wan%my_npert])
+ NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_close(root_ncid))
+ call wrtout(units, " Reading of GWAN file completed.")
 
 contains
  integer function vid_spin(var_name)
    character(len=*),intent(in) :: var_name
    vid_spin = nctk_idname(spin_ncid, var_name)
  end function vid_spin
-
 end subroutine wan_load_gwan
 !!***
 
@@ -3888,6 +3943,9 @@ end subroutine wan_load_gwan
 !! wan_interp_ebands
 !!
 !! FUNCTION
+!!   Build new ebands_t object on a k-mesh via Wannier interpolation.
+!!
+!! INPUT
 !!  cryst<crystal_t> = Crystalline structure.
 !!  intp_kptrlatt(3,3) = New k-mesh
 !!  intp_nshiftk= Number of shifts in new k-mesh.
@@ -3914,7 +3972,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
 !Local variables-------------------------------
 !scalars
- integer :: spin, ik, nwan, ierr
+ integer :: spin, ik, nwan, ierr, cnt, my_rank, nproc
 !arrays
  integer :: band_block(2)
  real(dp) :: params(4)
@@ -3923,6 +3981,8 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
 !************************************************************************
 
+ my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
+
  band_block(:) = [1, wan_spin(1)%max_nwan]
  out_ebands = ebands_interp_kmesh(in_ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
                                   band_block, comm, malloc_only=.True.)
@@ -3930,13 +3990,14 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  do spin=1,in_ebands%nsppol
    associate (wan => wan_spin(spin))
-   nwan = wan_spin(spin)%nwan
+   nwan = wan%nwan
    ABI_MALLOC(u_k, (nwan, nwan))
    ABI_MALLOC(eigens_k, (nwan))
    do ik=1,out_ebands%nkpt
+     cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
      call wan%interp_ham(out_ebands%kptns(:,ik), u_k, eigens_k)
      out_ebands%eig(1:nwan, ik, spin) = eigens_k
-   end do
+   end do ! ik
    ABI_FREE(u_k)
    ABI_FREE(eigens_k)
    end associate

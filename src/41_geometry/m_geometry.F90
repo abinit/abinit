@@ -523,8 +523,8 @@ end subroutine wedge_product
 !! Calculates a grid of points that falls inside of (and eventually on the surface of)
 !! the Wigner-Seitz supercell centered on the origin of the B lattice with primitive
 !! translations nmonkh(1)*a_1+nmonkh(2)*a_2+nmonkh(3)*a_3.
-!! Subroutine taken from the Wannier90 code. Modified by MG to fulfil abinit coding rules.
-!! API slightly changed wrt the wannier90 version.
+!! Subroutine taken from the Wannier90 code.
+!! Modified by MG to fulfil abinit coding rules. API slightly changed wrt the wannier90 version.
 !!
 !! COPYRIGHT
 !! Copyright (C) 2007 Jonathan Yates, Arash Mostofi,
@@ -669,16 +669,14 @@ subroutine wigner_seitz(center, lmax, kptrlatt, rmet, npts, irvec, ndegen, rmods
  ! Reallocate ndegen and irvec with correct size and sort by norm
  ABI_MALLOC(swap2, (3, npts))
  swap2(:,:) = irvec(1:3, 1:npts)
- !ABI_REMALLOC(irvec, (3, npts))
  ABI_FREE(irvec)
+
  call sort_gvecs(npts, gammak, rmet, swap2, out_gvec=irvec, iperm=iperm)
- !irvec = swap2
  ABI_FREE(swap2)
 
  ABI_MALLOC(swap1, (npts))
  swap1(:) = ndegen(1:npts)
  ABI_REMALLOC(ndegen, (npts))
- ndegen = swap1
 
  do ir=1,npts
    ndegen(ir) = swap1(iperm(ir))

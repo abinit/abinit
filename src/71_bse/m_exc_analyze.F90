@@ -110,7 +110,7 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
  integer :: ik_bz,ierr,my_rank !ik_ibz, istwf_k, isym_k,itim_k, my_nbbp, npw_k,
  integer :: spin,spin_start,spin_stop,reh
  integer :: rt_idx,art_idx,ii,iatom,sc_nfft
- integer :: irc,ir1,ir2,ir3,wp1,wp2,wp3,wp_idx,eh_fft_idx,eh_rr,rr
+ integer :: ir1,ir2,ir3,uc_idx,eh_fft_idx,eh_rr,rr
  integer :: hsize,xsf_unt,ncells,nvec
  integer :: sc_natom,master
  real(dp) :: ene_rt,k_dot_r12
@@ -280,11 +280,11 @@ subroutine exc_plot(Bsp,Bs_files,Wfd,Kmesh,Cryst,Psps,Pawtab,Pawrad,paw_add_onsi
 
      if (which_fixed==1) then ! electron
        do rr=1,sc_nfft
-         wp_idx = rcl2fft(rr)
+         uc_idx = rcl2fft(rr)
          r12 = eh_red - rclred(:,rr)
          k_dot_r12 = two_pi * DOT_PRODUCT(k_bz,r12)
          eikr12 = DCMPLX(COS(k_dot_r12), SIN(k_dot_r12))
-         exc_phi(rr) = exc_phi(rr) + eikr12 * ur_v(wp_idx) * CONJG(ur_c(wp_idx))
+         exc_phi(rr) = exc_phi(rr) + eikr12 * ur_v(uc_idx) * CONJG(ur_c(uc_idx))
        end do
 
      else ! hole

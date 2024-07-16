@@ -1735,16 +1735,19 @@ end subroutine mkgrid_fft
 !! INPUTS
 !!
 !! OUTPUT
+!! sc_nfft=The total number of points in the supercell.
+!! sc2uc(sc_fft): The image of the point in the small box.
+!! scred(3,sc_nfft): The reduced coordinates of the point in the supercell in terms of rprimd.
 !!
 !! SOURCE
 
-subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, rcl2fft, rclred)
+subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nrcl(3), ngfft(18)
  integer,intent(out) :: sc_nfft, sc_ngfft(18)
- integer,allocatable,intent(out) :: rcl2fft(:)
- real(dp),allocatable,intent(out) :: rclred(:,:)
+ integer,allocatable,intent(out) :: sc2uc(:)
+ real(dp),allocatable,intent(out) :: scred(:,:)
 
 !Local variables-------------------------------
  integer :: irc, ir1, ir2, ir3, wp1, wp2, wp3, wp_idx
@@ -1755,26 +1758,24 @@ subroutine supercell_fft(nrcl, ngfft, sc_nfft, sc_ngfft, rcl2fft, rclred)
  sc_ngfft(4) = 2*(sc_ngfft(1)/2)+1
  sc_ngfft(5) = 2*(sc_ngfft(2)/2)+1
  sc_ngfft(6) = sc_ngfft(3)
- sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the big box.
+ sc_nfft = product(sc_ngfft(1:3)) ! Total number of points in the supercell
 
- ! rcl2fft: The image of the point in the small box.
- ! rcl2red: The reduced coordinates of the point in the big box in terms of rprimd.
- ABI_MALLOC(rcl2fft, (sc_nfft))
- ABI_MALLOC(rclred, (3, sc_nfft))
+ ABI_MALLOC(sc2uc, (sc_nfft))
+ ABI_MALLOC(scred, (3, sc_nfft))
 
  irc = 0
- do ir3=0,sc_ngfft(3)-1 ! Loop over the points in the big box.
+ do ir3=0,sc_ngfft(3)-1 ! Loop over the points in the supercell.
    do ir2=0,sc_ngfft(2)-1
      do ir1=0,sc_ngfft(1)-1
        irc = 1+irc
-       wp1=MODULO(ir1, ngfft(1)) ! The FFT index of the point wrapped into the original cell.
+       wp1=MODULO(ir1, ngfft(1)) ! The FFT index of the point wrapped into the unit cell.
        wp2=MODULO(ir2, ngfft(2))
        wp3=MODULO(ir3, ngfft(3))
        wp_idx = 1 + wp1 + wp2*ngfft(1) + wp3*ngfft(1)*ngfft(2)
-       rcl2fft(irc)  = wp_idx
-       rclred(1,irc) = DBLE(ir1)/ngfft(1) ! Reduced coordinates in terms of the original cell.
-       rclred(2,irc) = DBLE(ir2)/ngfft(2)
-       rclred(3,irc) = DBLE(ir3)/ngfft(3)
+       sc2uc(irc)  = wp_idx
+       scred(1,irc) = DBLE(ir1)/ngfft(1) ! Reduced coordinates in terms of the unit cell lattice vectors
+       scred(2,irc) = DBLE(ir2)/ngfft(2)
+       scred(3,irc) = DBLE(ir3)/ngfft(3)
      end do
    end do
  end do

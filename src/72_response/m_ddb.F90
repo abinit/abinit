@@ -1179,7 +1179,7 @@ subroutine ddb_set_brav(ddb, brav)
 ! *************************************************************************
 
  ! Renormalize rprim to possibly satisfy the constraint abs(rprim(1,2))=half when abs(brav)/=1
- ! This section is needed to preserver the behaviour of the old implementation.
+ ! This section is needed to preserve the behaviour of the old implementation.
  if (abs(brav)/=1 .and. abs(abs(ddb%rprim(1,2))-half)>tol10) then
    if(abs(ddb%rprim(1,2))<tol6)then
      write(msg, '(a,i0,7a)' )&
@@ -3573,8 +3573,8 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Arguments -------------------------------
 !scalars
- integer,intent(in) :: rftyp,chneut,selectz
  class(ddb_type),intent(inout) :: ddb
+ integer,intent(in) :: rftyp,chneut,selectz
  type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: dielt(3,3),zeff(3,3,crystal%natom)
@@ -3582,13 +3582,15 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
 !Local variables -------------------------
 !scalars
- integer :: ii
+ integer :: ii, units(2)
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp) :: qphnrm(3),qphon(3,3), my_zeff_raw(3,3,crystal%natom)
 
 ! *********************************************************************
+
+ units = [std_out, ab_out]
 
  ! Look for the Gamma Block in the DDB
  qphon(:,1)=zero
@@ -3608,13 +3610,13 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
  if (iblok /= 0) then
    write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
    ' Dielectric Tensor and Effective Charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Make the imaginary part of the Gamma block vanish
    write(msg, '(5a)'  ) ch10,&
    ' anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,',ch10,&
    '   and impose the ASR on the effective charges ',ch10
-   call wrtout([std_out, ab_out], msg)
+   call wrtout(units, msg)
 
    ! Extrac Zeff before enforcing sum rule.
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, my_zeff_raw, unit=dev_null)
@@ -3624,7 +3626,6 @@ integer function ddb_get_dielt_zeff(ddb, crystal, rftyp, chneut, selectz, dielt,
 
    ! Extraction of the dielectric tensor and the effective charges
    call dtech9(ddb%val, dielt, iblok, ddb%mpert, ddb%natom, ddb%nblok, zeff)
-
  end if ! iblok not found
 
  if (present(zeff_raw)) zeff_raw = my_zeff_raw
