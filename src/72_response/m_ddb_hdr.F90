@@ -74,12 +74,12 @@ MODULE m_ddb_hdr
  integer,public,parameter :: BLKTYP_d0E_xx=0       ! Total energy
  integer,public,parameter :: BLKTYP_d1E_xx=4       ! First-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2E_ns=1       ! Second-order derivatives of total energy, non-stationary
- integer,public,parameter :: BLKTYP_d2E_st=2  ! Second-order derivatives of total energy, stationary
+ integer,public,parameter :: BLKTYP_d2E_st=2       ! Second-order derivatives of total energy, stationary
  integer,public,parameter :: BLKTYP_d2E_mbc=85     ! Molecular Berry curvature (MBC)
  integer,public,parameter :: BLKTYP_d3E_xx=3       ! Third-order derivatives of total energy
- integer,public,parameter :: BLKTYP_d3E_lw=33   ! Long-wave third-order derivatives of total energy
+ integer,public,parameter :: BLKTYP_d3E_lw=33      ! Long-wave third-order derivatives of total energy
  integer,public,parameter :: BLKTYP_d2eig_re=5     ! Second-order derivatives of eigenvalues
- integer,public,parameter :: BLKTYP_d2eig_im=6 ! Static broadening of eigenvalues
+ integer,public,parameter :: BLKTYP_d2eig_im=6     ! Static broadening of eigenvalues
 
  integer,public,parameter :: descrlen=500
  integer,public,parameter :: ntypes=9  ! The number of different block types

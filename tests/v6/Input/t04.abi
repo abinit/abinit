@@ -51,7 +51,7 @@ getwfk    -1          # Use GS wave functions from dataset1
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords = MINIMAL
 #%% description = 
 #%%   Hydrogen dimer in a big cell.
 #%%   Produce different files (_DEN, _POT, _VHXC, _VHA), for subsequent analysis by CUT3D (see next run).
