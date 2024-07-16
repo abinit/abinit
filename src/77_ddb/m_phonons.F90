@@ -3415,12 +3415,9 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
 
  new%qibz => qibz
 
- new%natom = cryst%natom
- natom3 = cryst%natom * 3
- new%natom3 = natom3
- new%comm = comm
- new%nprocs = xmpi_comm_size(comm)
- new%my_rank = xmpi_comm_rank(comm)
+ new%natom = cryst%natom; natom3 = cryst%natom * 3; new%natom3 = natom3
+ new%comm = comm; new%nprocs = xmpi_comm_size(comm); new%my_rank = xmpi_comm_rank(comm)
+
  new%use_ifc_fourq = use_ifc_fourq
 
  ABI_MALLOC(new%displ_cart, (2, 3, cryst%natom, natom3))
@@ -3432,6 +3429,7 @@ type(phstore_t) function phstore_new(cryst, ifc, nqibz, qibz, use_ifc_fourq, com
  ABI_MALLOC(new%qibz_start, (0:new%nprocs-1))
  ABI_MALLOC(new%qibz_stop, (0:new%nprocs-1))
  call xmpi_split_work2_i4b(nqibz, new%nprocs, new%qibz_start, new%qibz_stop)
+
  my_q1 = new%qibz_start(new%my_rank)
  my_q2 = new%qibz_stop(new%my_rank)
 
@@ -3526,7 +3524,7 @@ subroutine phstore_async_rotate(self, cryst, ifc, iq_ibz, qpt_ibz, qpt_bz, isym_
  end do
  ABI_CHECK(rank /= self%nprocs, sjoin("Nobody has iq_ibz: ", itoa(iq_ibz)))
 
- ! Begin non-blocking communication for phfrq
+ ! Begin non-blocking communication for phfrq frequencies.
  if (self%my_rank == master) self%phfrq = self%phfreqs_qibz(:, iq_ibz)
  call xmpi_ibcast(self%phfrq, master, self%comm, self%requests(1), ierr)
 

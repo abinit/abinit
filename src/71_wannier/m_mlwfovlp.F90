@@ -3832,8 +3832,7 @@ subroutine wan_ncwrite_gwan(wan, dtfil, cryst, ebands, pert_comm)
                           start=[1,1,ir,1,1,1], count=[2, wan%nr_p, batch_size, wan%nwan, wan%nwan, natom3])
      NCF_CHECK(ncerr)
      do idat=1,ndat
-       ! TODO
-       !write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
+       write(ount, *) wan%rmod_e(ir+idat-1), maxval(abs(cbuf5(:,idat,:,:,:)))
      end do
    end do
    ABI_FREE(cbuf5)
