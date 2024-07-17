@@ -512,7 +512,7 @@ subroutine supercell_print_abinit(scell, filename, title1, title2)
  real(dp) :: xred(3), gprimd(3,3)
 ! *************************************************************************
 
- if (open_file(filename, msg, newunit=scunit, status="uknown", action="write") /= 0) then
+ if (open_file(filename, msg, newunit=scunit, status="unknown", action="write") /= 0) then
    ABI_ERROR(msg)
  end if
 
