@@ -4496,9 +4496,9 @@ subroutine gstore_print_for_abitests(gstore, dtset)
    write(ab_out,"(a)") " E-PH matrix elements:"
    write(ab_out, "(1x,5(a5,1x),a16)") "iq","ik", "mode", "im_kq", "in_k", "|g|^2 in Ha^2"
    do iq_glob=1,glob_nq
-     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write first and the last q-points.
+     if (iq_glob /= 1 .and. iq_glob /= glob_nq) cycle  ! Write the first and the last q-point.
      do ik_glob=1,glob_nk
-       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write first and the last k-points.
+       if (ik_glob /= 1 .and. ik_glob /= glob_nk) cycle ! Write the first and the last k-point.
        do ipc=1,natom3
          if (ipc /= 4 .and. ipc /= natom3) cycle ! Write the 4th and the last pertubation.
          ncerr = nf90_get_var(spin_ncid, spin_vid("gvals"), gslice_mn, &
@@ -4806,7 +4806,7 @@ subroutine gstore_wannierize(gstore, dvdb, dtfil)
    if (gqk%comm%me == 0) then
      write(*, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m,n,nu R_e,:)|  min_{m,n,nu} |g(m,n,nu R_e,:)|[Ha/Bohr] '
      do ir=1,nr_e
-       write(*, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:,ir,:,:,:))), sum(abs(wan%grpe_wwp(:,ir,:,:,:))) / size(wan%grpe_wwp(:,ir,:,:,:))
+       write(std_out, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:,ir,:,:,:))), sum(abs(wan%grpe_wwp(:,ir,:,:,:))) / size(wan%grpe_wwp(:,ir,:,:,:))
      end do
    end if
 
