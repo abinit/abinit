@@ -4799,7 +4799,7 @@ subroutine gstore_wannierize(gstore, dvdb, dtfil)
    call xmpi_sum(wan%grpe_wwp, gqk%qpt_kpt_comm%value, ierr)
 
    if (gqk%comm%me == 0) then
-     write(*, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m,n,nu R_e,:)|  min_{m,n,nu} |g(m,n,nu R_e,:)|[Ha/Bohr] '
+     write(std_out, '(a)') '#   R_e [Bohr]    max_{m,n,nu} |g(m,n,nu R_e,:)|  min_{m,n,nu} |g(m,n,nu R_e,:)|[Ha/Bohr] '
      do ir=1,nr_e
        write(std_out, *) wan%rmod_e(ir), maxval(abs(wan%grpe_wwp(:,ir,:,:,:))), sum(abs(wan%grpe_wwp(:,ir,:,:,:))) / size(wan%grpe_wwp(:,ir,:,:,:))
      end do
