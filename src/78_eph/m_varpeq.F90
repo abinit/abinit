@@ -39,7 +39,6 @@ module m_varpeq
 
  use defs_datatypes,    only : ebands_t, pseudopotential_type
  use m_fstrings,        only : sjoin, ktoa, ftoa, strcat, ltoa, itoa
- use m_numeric_tools,   only : r2c
  use m_time,            only : cwtime_report, cwtime
  use m_io_tools,        only : file_exists, iomode_from_fname, open_file
  use m_pptools,         only : write_xsf
@@ -50,7 +49,9 @@ module m_varpeq
  use m_supercell,       only : supercell_type
  use m_fftcore,         only : ngfft_seq !, get_kg
  use m_ephtk,           only : ephtk_get_mpw_gmax
+ use m_dynmat,          only : phdispl_from_eigvec
  use m_phonons,         only : pheigvec_rotate
+
 
  implicit none
 
@@ -2148,7 +2149,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: my_rank, ib, irsp, ir, uc_idx, mpw, band, bstart ! nfft, nfftf, mgfft, mgfftf, n1, n2, n3, n4, n5, n6,
  integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
- integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, iat, sc_iat, nu, nqbz
+ integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, icell, nu, nqbz
  logical :: isirr_k, isirr_q
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
@@ -2157,7 +2158,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  type(wfd_t) :: wfd
  type(supercell_type) :: scell
  type(krank_t) :: krank_ibz, qrank_ibz
- complex(dp) :: a_nk, bstar_qnu, c3tmp(3), displ_c(3)
+ complex(dp) :: a_nk, bstar_qnu, cphase, c3tmp(3)
 !arrays
  integer :: sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
  integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
@@ -2165,13 +2166,12 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),parameter :: origin0(3) = zero
  real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3)
  real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
- real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
- real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
- real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:), displ_cart_qbz(:,:,:,:)
- real(dp),allocatable :: sc_displ_cart_re(:,:), sc_displ_cart_im(:,:)
- !real(dp),allocatable :: phfrq(:), displ_cart(:,:,:,:)
+ real(dp),allocatable :: pheigvec_qibz(:,:,:,:)
+ real(dp),allocatable :: displ_cart_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)  !displ_red_qbz(:,:,:,:), displ_cart_qibz(:,:,:,:),
+ real(dp),allocatable :: phfreqs_ibz(:,:), pheigvec_cart_ibz(:,:,:,:,:) !, pheigvec_cart_qbz(:,:,:,:)
+ real(dp),allocatable :: sc_displ_cart_re(:,:,:), sc_displ_cart_im(:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- complex(dp),allocatable :: ceiqr(:)
+ !complex(dp),allocatable :: ceiqr(:)
  complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:), ceikr(:)
 !----------------------------------------------------------------------
 
@@ -2276,8 +2276,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
  ABI_MALLOC(ceikr, (sc_nfft*nspinor))
- ! Init output with zeros.
- ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol))
+ ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol)) ! Init output with zeros.
 
  cnt = 0
  do spin=1,nsppol
@@ -2296,7 +2295,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
      kk_ibz = ebands%kptns(:, ik_ibz)
      istwf_k_ibz = wfd%istwfk(ik_ibz); npw_kq_ibz = wfd%npwarr(ik_ibz)
-     !print *, mapl_k, kk, kk_ibz
 
      ! Get npw_k, kg_k for k
      call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, &  ! in
@@ -2310,9 +2308,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        band = bstart + ib - 1
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
                           cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
-
        !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k) ** 2) / wfd%nfft
-       !ur_k = ur_k / sqrt(nkbz * cryst%ucvol)
 
        a_nk = vpq%a_spin(1, ib, ik, spin) + j_dpc * vpq%a_spin(2, ib, ik, spin)
        do spinor=1,nspinor
@@ -2343,8 +2339,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  if (my_rank == master) then
    pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
-
-
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    if (nspinor == 1) then
@@ -2356,7 +2350,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        pol_rho = abs(pol_wf(:, spin))**2
        write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
        call wrtout(units, msg)
-       write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf)))", maxval(abs(aimag(pol_wf(:, spin))))
+       write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, spin))))
        call wrtout(units, msg)
        path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
        if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
@@ -2373,7 +2367,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      pol_rho(:) = abs(pol_wf(sc_nfft+1:, 1)) ** 2 + pol_rho(:)
      write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
      call wrtout(units, msg)
-     write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf)))", maxval(abs(aimag(pol_wf(:, 1))))
+     write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf))): ", maxval(abs(aimag(pol_wf(:, 1))))
      call wrtout(units, msg)
      call write_xsf(strcat(dtfil%filnam_ds(4), "_POLARON.xsf"), &
                     sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
@@ -2387,12 +2381,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  if (dtfil%filgstorein == ABI_NOFILE) then
-   call wrtout(std_out, "gstore_filepath is not specified in input. Cannot compute polaron-induced displacements!")
+   call wrtout(units, "gstore_filepath is not specified in input. Cannot compute polaron-induced displacements!")
 
  else
-   call wrtout(std_out, " Computing polaron-induced displacements.")
-
    ! Start by reading ph displacements and frequencies in the IBZ from the gstore file.
+   call wrtout(units, sjoin(" Computing polaron-induced displacements. Reading phonons from: ", dtfil%filgstorein))
    call cwtime(cpu_all, wall_all, gflops_all, "start")
 
    NCF_CHECK(nctk_open_read(ncid, dtfil%filgstorein, comm))
@@ -2418,13 +2411,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), qptopt))
    NCF_CHECK(nf90_close(ncid))
 
-   ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, natom3))
-   ABI_MALLOC(displ_red_qbz, (2, 3, cryst%natom, natom3))
-   ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, natom3))
-
-   ABI_MALLOC(displ_cart_qibz, (2, 3, cryst%natom, natom3))
-   ABI_MALLOC(displ_red_qibz, (2, 3, cryst%natom, natom3))
    ABI_MALLOC(pheigvec_qibz, (2, 3, cryst%natom, natom3))
+   ABI_MALLOC(displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
+   ABI_MALLOC(pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
 
    qtimrev = kpts_timrev_from_kptopt(qptopt)
    nqbz = product(ngqpt)
@@ -2433,14 +2422,21 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call scell%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
-   ABI_MALLOC(ceiqr, (scell%natom))
-   ABI_CALLOC(sc_displ_cart_re, (3, scell%natom))
-   ABI_CALLOC(sc_displ_cart_im, (3, scell%natom))
+   !ABI_MALLOC(ceiqr, (scell%ncells))
+   ABI_CALLOC(sc_displ_cart_re, (3, scell%natom, nsppol))
+   ABI_CALLOC(sc_displ_cart_im, (3, scell%natom, nsppol))
 
    cnt = 0
    do spin=1,nsppol
-     do iq=1, vpq%nq_spin(spin)
+     do iq=1,vpq%nq_spin(spin)
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
+
+       !if (iq == 1) then
+       !  do nu=1,3
+       !    write(std_out, *)"hello:", vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin)
+       !  end do
+       !end if
+
        qq = vpq%qpts_spin(:, iq, spin)
        ! Note symrec here
        if (kpts_map("symrec", qtimrev, cryst, qrank_ibz, 1, qq, mapl_qq) /= 0) then
@@ -2455,37 +2451,33 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        isirr_q = (isym_q == 1 .and. trev_q == 0)
        qq_ibz = qibz(:, iq_ibz)
 
-       !displ_cart_qbz, (2, 3, cryst%natom, cryst%natom * 3))
-       !displ_red_qbz, (2, 3, cryst%natom, natom3))
-       !pheigvec_qbz, (2, 3, cryst%natom, 3*cryst%natom))
-       !pheigvec_cart_ibz, (2, 3, cryst%natom, cryst%natom * 3, iq_ibz)
-       !phfreqs_ibz, (natom3, iq_ibz)
-
        ! TODO: Finalize the implementation.
+       pheigvec_qibz = pheigvec_cart_ibz(:,:,:,:,iq_ibz)
 
        if (isirr_q) then
-         displ_cart_qbz = displ_cart_qibz; displ_red_qbz = displ_red_qibz; pheigvec_qbz = pheigvec_qibz
+         ! Compute phonon displacements in Cartesian coordinates
+         call phdispl_from_eigvec(cryst%natom, cryst%ntypat, cryst%typat, cryst%amu, pheigvec_qibz, displ_cart_qbz)
+
        else
          ! Rotate phonon eigenvectors from q_ibz to q_bz.
          ! This part is needed to enforce the gauge in the ph eigenvectors, including e(-q) = e(q)^*
-         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz, &
-                              displ_red_qbz=displ_red_qbz)
+         call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz)
        end if
 
        ! Compute phase e^{iq.R}
-       do sc_iat=1,scell%natom
-         ceiqr(sc_iat) = exp(+j_dpc * two_pi * dot_product(qq, scell%rvecs(:, sc_iat)))
-       end do
+       !do icell=1,scell%ncells
+       !  ceiqr(icell) = exp(+j_dpc * two_pi * dot_product(qq, scell%rvecs(:, icell)))
+       !end do
 
-       do nu=1,natom3
-         bstar_qnu = conjg(vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin))
-         do sc_iat=1,scell%natom
-           iat = scell%atom_indexing(sc_iat)
-           displ_c(:) = r2c(displ_cart_qbz(:, :, iat, nu))
-           c3tmp = bstar_qnu * ceiqr(sc_iat) * displ_c(:)
-           sc_displ_cart_re(:,sc_iat) = sc_displ_cart_re(:,sc_iat) + real(c3tmp)
-           ! This to check if the imag part is zero.
-           sc_displ_cart_im(:,sc_iat) = sc_displ_cart_re(:,sc_iat) + aimag(c3tmp)
+       do sc_iat=1, scell%natom
+         uc_iat = scell%atom_indexing(sc_iat)
+         cphase = exp(+j_dpc * two_pi * dot_product(qq, scell%uc_indexing(:, sc_iat)))
+         ! Summing over ph modes.
+         do nu=1,natom3
+           bstar_qnu = conjg(vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin))
+           c3tmp = (displ_cart_qbz(1,:,uc_iat,nu) + j_dpc * displ_cart_qbz(2,:,uc_iat,nu)) * bstar_qnu * cphase
+           sc_displ_cart_re(:,sc_iat,spin) = sc_displ_cart_re(:,sc_iat,spin) + real(c3tmp)
+           sc_displ_cart_im(:,sc_iat,spin) = sc_displ_cart_im(:,sc_iat,spin) + aimag(c3tmp) ! This to check if the imag part is zero.
          end do
        end do ! nu
      end do ! iq
@@ -2494,28 +2486,28 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_FREE(qibz)
    ABI_FREE(phfreqs_ibz)
    ABI_FREE(pheigvec_cart_ibz)
-   !ABI_FREE(displ_cart_qbz)
-   !ABI_FREE(displ_red_qbz)
-   !ABI_FREE(pheigvec_qbz)
-   ABI_FREE(displ_cart_qibz)
-   ABI_FREE(displ_red_qibz)
+   ABI_FREE(displ_cart_qbz)
+   ABI_FREE(pheigvec_qbz)
    ABI_FREE(pheigvec_qibz)
-   ABI_FREE(ceiqr)
-   ABI_FREE(sc_displ_cart_im)
+   !ABI_FREE(ceiqr)
    call qrank_ibz%free()
 
    call xmpi_sum_master(sc_displ_cart_re, master, comm, ierr)
-   sc_displ_cart_re = - sqrt2 * sc_displ_cart_re / nqbz
-   ! Here we displace the atoms in the supercell.
-   scell%xcart = scell%xcart_ref + sc_displ_cart_re
+   call xmpi_sum_master(sc_displ_cart_im, master, comm, ierr)
+   sc_displ_cart_re = -sqrt2 * sc_displ_cart_re / nqbz
+   sc_displ_cart_im = -sqrt2 * sc_displ_cart_im / nqbz
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
      ! Handle spin-polarized case by writing two XSF files.
-     ! TODO: displ should depend on the spin
      do spin=1,nsppol
-       write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
+       !write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
+       !call wrtout(units, msg)
+       write(msg, "(a,i0a,es16.6)") "For spin:", spin, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,spin)))
        call wrtout(units, msg)
+       ! Here we displace the atoms in the supercell for this spin.
+       !do sc_iat=1,scell%natom; write(std_out, *) sc_displ_cart_re(:,sc_iat); end do
+       scell%xcart = scell%xcart_ref + sc_displ_cart_re(:,:,spin)
        path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
        if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
        call scell%write_xsf(path)
@@ -2524,9 +2516,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call scell%free()
    ABI_FREE(sc_displ_cart_re)
+   ABI_FREE(sc_displ_cart_im)
    call cwtime_report(" Computation of polaron-induced displacements completed:", cpu_all, wall_all, gflops_all, &
                       pre_str=ch10, end_str=ch10)
-end if
+ end if
 
  call vpq%free()
 

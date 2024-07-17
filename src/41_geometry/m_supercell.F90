@@ -4,8 +4,7 @@
 !!
 !! FUNCTION
 !! Module for using a supercell, in particular for phonon displacement freezing.
-!! Container type is defined, and destruction, print subroutines
-!! as well as the central supercell_init
+!! Container type is defined, and destruction, print subroutines as well as the central supercell_init
 !!
 !! COPYRIGHT
 !! Copyright (C) 2010-2024 ABINIT group (MJV, DJA)
@@ -51,24 +50,38 @@ module m_supercell
 !! SOURCE
 
  type, public :: supercell_type
-   integer :: natom_primcell                        ! number of atoms in primitive cell
-   integer :: natom                                 ! number of atoms in supercell
-   integer :: ntypat                                ! number of atom types
-   integer :: ncells                                ! number of unit cells in supercell
-   integer :: rlatt(3,3)                            ! matrix for multiplicity of supercell
-   real(dp) :: rprimd(3,3)                          ! new lattice vectors for supercell
-   real(dp) :: qphon(3)                             ! phonon q vector used to generate scell, if any
-   character(len=3) :: xyz_order                    ! Order used to build the supercell
-   real(dp), allocatable :: xcart(:,:)              ! (3, natom) positions of atoms
-   real(dp), allocatable :: xcart_ref(:,:)          ! (3, natom) equilibrium positions of atoms
-   integer, allocatable :: atom_indexing(:)         ! (natom) indexes original atom: 1..natom_primcell
-   integer, allocatable :: uc_indexing(:,:)         ! (3, natom) indexes unit cell atom is in:
-   integer, allocatable :: typat(:)                 ! (3, natom) positions of atoms
-   real(dp), allocatable :: znucl(:)                ! (ntypat) nuclear charges of species
-   integer, allocatable :: rvecs(:,:)               ! supercell vectors
+   integer :: natom_primcell
+     ! number of atoms in primitive cell
+   integer :: natom
+     ! number of atoms in supercell
+   integer :: ntypat
+     ! number of atom types
+   integer :: ncells
+     ! number of unit cells in supercell
+   integer :: rlatt(3,3)
+     ! matrix for multiplicity of supercell (for the time being must be diagonal)
+   real(dp) :: rprimd(3,3)
+     ! new lattice vectors for supercell
+   real(dp) :: qphon(3)
+     ! phonon q vector used to generate scell, if any
+   character(len=3) :: xyz_order
+     ! Order used to build the supercell.
+   real(dp), allocatable :: xcart(:,:)
+     ! (3, natom) Cartesian positions of atoms
+   real(dp), allocatable :: xcart_ref(:,:)
+     ! (3, natom) equilibrium Cartesian positions of atoms
+   integer, allocatable :: atom_indexing(:)
+     ! (natom) indexes original atom: 1..natom_primcell
+   integer, allocatable :: uc_indexing(:,:)
+     ! (3, natom) indexes unit cell atom is.
+   integer, allocatable :: typat(:)
+     ! (natom) type of each atom in the supercell.
+   real(dp), allocatable :: znucl(:)
+     ! (ntypat) nuclear charges of species
+   integer, allocatable :: rvecs(:,:)
+     ! supercell vectors
 
  contains
-
    procedure :: init_for_qpt => supercell_init_for_qpt
    procedure :: init => supercell_init
    procedure :: freeze_displ => supercell_freeze_displ
@@ -211,9 +224,10 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
  real(dp), intent(in) :: rprimd_primcell(3,3)
  real(dp), intent(in) :: xcart_primcell(3,natom_primcell)
 
-!local
+!Local variables-------------------------------
 !scalars
  integer :: iatom_supercell, i1,i2,i3, iatom, icell
+! *************************************************************************
 
  if (.not. isdiagmat(rlatt)) then
    ABI_ERROR('rlatt is not diagonal.')
@@ -234,7 +248,7 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
  ABI_MALLOC(scell%znucl,(scell%ntypat))
  scell%znucl(:) = znucl(:)
 
-!number of atoms in full supercell
+ ! number of atoms in full supercell
  scell%natom= natom_primcell*scell%ncells
  ABI_MALLOC(scell%xcart,(3,scell%natom))
  ABI_MALLOC(scell%xcart_ref,(3,scell%natom))
@@ -310,15 +324,16 @@ end subroutine supercell_init
 !!
 !! SOURCE
 
-subroutine order_supercell_typat (scell)
+subroutine order_supercell_typat(scell)
 
 !Arguments ------------------------------------
 !scalars
  class(supercell_type), intent(inout) :: scell
 
-! local tmp variables
+!Local variables-------------------------------
  integer :: itypat, iatom_supercell, iatom
  type(supercell_type) :: scell_tmp
+! *************************************************************************
 
  call scell%copy(scell_tmp)
 
@@ -370,7 +385,6 @@ subroutine supercell_freeze_displ(scell, displ, freeze_displ)
  real(dp), intent(in) :: displ(2,3*scell%natom_primcell)
 
 !Local variables-------------------------------
-!scalar
  integer :: iatom, ipratom
  complex(dpc) :: expqdotr, j=cmplx(zero,one)
  complex(dpc) :: phase
@@ -415,14 +429,12 @@ end subroutine supercell_freeze_displ
 !! supercell_print_for_qpt
 !!
 !! FUNCTION
-!! output atomic positions, supercell vectors, etc... to a file
-!! single qpoint and mode.
+!! output atomic positions, supercell vectors, etc... to a file. single qpoint and mode.
 !!
 !! INPUTS
 !! freq = phonon frequency for mode jmode
 !! jmode = mode which has been frozen into xcart contained in scell
 !! outfile_radix = radix of file name to be written to
-!! scell = supercell structure with data to be output
 !!
 !! OUTPUT
 !! printing to file
@@ -433,34 +445,34 @@ subroutine supercell_print_for_qpt(scell, freq, jmode, outfile_radix)
 
 !Arguments ------------------------------------
 !scalars
-  class(supercell_type), intent(in) :: scell
-  real(dp), intent(in) :: freq
-  integer, intent(in) :: jmode
-  character(len=fnlen), intent(in) :: outfile_radix
+ class(supercell_type), intent(in) :: scell
+ real(dp), intent(in) :: freq
+ integer, intent(in) :: jmode
+ character(len=*), intent(in) :: outfile_radix
 
 !Local variables-------------------------------
 !scalar
-  character(len=fnlen) :: filename
-  character(len=10) :: jmodestring
-  character(len=80) :: title1, title2
-  character(len=5) :: qphonstring1, qphonstring2, qphonstring3
+ character(len=fnlen) :: filename
+ character(len=10) :: jmodestring
+ character(len=80) :: title1, title2
+ character(len=5) :: qphonstring1, qphonstring2, qphonstring3
 ! *************************************************************************
 
-! add suffix with mode and qpoint
-  call int2char4(jmode, jmodestring)
-  ABI_CHECK((jmodestring(1:1)/='#'),'Bug: string length too short!')
+ ! add suffix with mode and qpoint
+ call int2char4(jmode, jmodestring)
+ ABI_CHECK((jmodestring(1:1)/='#'),'Bug: string length too short!')
 
-! qphonstring should be like 0.000_0.000_0.000
-  call write_num(scell%qphon(1),qphonstring1,'(F5.3)')
-  call write_num(scell%qphon(2),qphonstring2,'(F5.3)')
-  call write_num(scell%qphon(3),qphonstring3,'(F5.3)')
-  filename = trim(outfile_radix) // "_qpt_" // qphonstring1 // "_" // qphonstring2 // &
-               "_" // qphonstring3 // "_mode_" // trim(jmodestring)
+ ! qphonstring should be like 0.000_0.000_0.000
+ call write_num(scell%qphon(1),qphonstring1,'(F5.3)')
+ call write_num(scell%qphon(2),qphonstring2,'(F5.3)')
+ call write_num(scell%qphon(3),qphonstring3,'(F5.3)')
+ filename = trim(outfile_radix) // "_qpt_" // qphonstring1 // "_" // qphonstring2 // &
+                 "_" // qphonstring3 // "_mode_" // trim(jmodestring)
 
-  write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
-  write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
+ write (title1, '(a,3E20.10)') '# phonon q point : ', scell%qphon
+ write (title2, '(a,I7,a,E20.10)') '# phonon mode number : ', jmode, ' frequency ', freq
 
-  call scell%print_abinit(filename, title1, title2)
+ call scell%print_abinit(filename, title1, title2)
 
 end subroutine supercell_print_for_qpt
 !!***
@@ -488,72 +500,72 @@ subroutine supercell_print_abinit(scell, filename, title1, title2)
 
 !Arguments ------------------------------------
 !scalars
-  class(supercell_type), intent(in) :: scell
-  character(len=fnlen), intent(in) :: filename
-  character(len=80), intent(in) :: title1
-  character(len=80), intent(in) :: title2
+ class(supercell_type), intent(in) :: scell
+ character(len=fnlen), intent(in) :: filename
+ character(len=80), intent(in) :: title1
+ character(len=80), intent(in) :: title2
 
 !Local variables-------------------------------
 !scalar
-  integer :: scunit, iatom
-  character(len=500) :: msg
-  real(dp) :: xred(3), gprimd(3,3)
+ integer :: scunit, iatom
+ character(len=500) :: msg
+ real(dp) :: xred(3), gprimd(3,3)
 ! *************************************************************************
 
-  if (open_file(filename, msg, newunit=scunit) /= 0) then
-    ABI_ERROR(msg)
-  end if
+ if (open_file(filename, msg, newunit=scunit, status="uknown", action="write") /= 0) then
+   ABI_ERROR(msg)
+ end if
 
-! print header
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') '# anaddb file with frozen phonon mode in supercell'
-  write (scunit, '(a)') '# !!!   Do not forget to adjust nband   !!! '
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') title1
-  write (scunit, '(a)') title2
-  write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
-  write (scunit, '(a,I7,a)') '# and has ', scell%ncells, ' primitive unit cells '
-  write (scunit, '(a)') '#'
-  write (scunit, '(a)') '# lattice vectors for supercell :'
-  write (scunit, '(a,I7)') 'natom ', scell%natom
-  write (scunit, *)
-  write (scunit, '(a)') 'znucl '
-  do iatom = 1, size(scell%znucl)
-    write (scunit, '(I5)', ADVANCE="NO") int(scell%znucl(iatom))
-    if (mod(iatom,6) == 0) write (scunit, *)
-  end do
-  write (scunit, *)
-  write (scunit, *)
-  write (scunit, '(a,I7)') 'ntypat', scell%ntypat
-  write (scunit, '(a)') 'typat '
-  do iatom = 1, scell%natom
-    write (scunit, '(I5)', ADVANCE="NO") scell%typat(iatom)
-    if (mod(iatom,6) == 0) write (scunit, *)
-  end do
-  write (scunit, *)
-  write (scunit, '(a)') 'acell 1.0 1.0 1.0'
-  write (scunit, '(a)') 'rprim'
-  write (scunit, '(3E20.10)') scell%rprimd(:,1)
-  write (scunit, '(3E20.10)') scell%rprimd(:,2)
-  write (scunit, '(3E20.10)') scell%rprimd(:,3)
-  write (scunit, *)
-  write (scunit, '(a)') 'xcart'
-  do iatom = 1, scell%natom
-    write (scunit, '(3E20.10)') scell%xcart(:,iatom)
-  end do
-  ! for information, also print xred for atoms inside full supercell
-  call matr3inv(scell%rprimd, gprimd)
-  ! TODO: check this transpose is correct in some asymetric case
-  gprimd = transpose(gprimd)
-  write (scunit, '(a)') '# for information, add xred as well'
-  write (scunit, '(a)') '# xred'
-  do iatom = 1, scell%natom
-    xred = matmul (gprimd, scell%xcart(:,iatom))
-    write (scunit, '(a, 3E20.10)') '#  ', xred
-  end do
+ ! print header
+ write (scunit, '(a)') '#'
+ write (scunit, '(a)') '# anaddb file with frozen phonon mode in supercell'
+ write (scunit, '(a)') '# !!!   Do not forget to adjust nband   !!! '
+ write (scunit, '(a)') '#'
+ write (scunit, '(a)') title1
+ write (scunit, '(a)') title2
+ write (scunit, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
+ write (scunit, '(a,I7,a)') '# and has ', scell%ncells, ' primitive unit cells '
+ write (scunit, '(a)') '#'
+ write (scunit, '(a)') '# lattice vectors for supercell :'
+ write (scunit, '(a,I7)') 'natom ', scell%natom
+ write (scunit, *)
+ write (scunit, '(a)') 'znucl '
+ do iatom = 1, size(scell%znucl)
+   write (scunit, '(I5)', ADVANCE="NO") int(scell%znucl(iatom))
+   if (mod(iatom,6) == 0) write (scunit, *)
+ end do
+ write (scunit, *)
+ write (scunit, *)
+ write (scunit, '(a,I7)') 'ntypat', scell%ntypat
+ write (scunit, '(a)') 'typat '
+ do iatom = 1, scell%natom
+   write (scunit, '(I5)', ADVANCE="NO") scell%typat(iatom)
+   if (mod(iatom,6) == 0) write (scunit, *)
+ end do
+ write (scunit, *)
+ write (scunit, '(a)') 'acell 1.0 1.0 1.0'
+ write (scunit, '(a)') 'rprim'
+ write (scunit, '(3E20.10)') scell%rprimd(:,1)
+ write (scunit, '(3E20.10)') scell%rprimd(:,2)
+ write (scunit, '(3E20.10)') scell%rprimd(:,3)
+ write (scunit, *)
+ write (scunit, '(a)') 'xcart'
+ do iatom = 1, scell%natom
+   write (scunit, '(3E20.10)') scell%xcart(:,iatom)
+ end do
+ ! for information, also print xred for atoms inside full supercell
+ call matr3inv(scell%rprimd, gprimd)
+ ! TODO: check this transpose is correct in some asymetric case
+ gprimd = transpose(gprimd)
+ write (scunit, '(a)') '# for information, add xred as well'
+ write (scunit, '(a)') '# xred'
+ do iatom = 1, scell%natom
+   xred = matmul (gprimd, scell%xcart(:,iatom))
+   write (scunit, '(a, 3E20.10)') '#  ', xred
+ end do
 
-  ! close file
-  close(scunit)
+ ! close file
+ close(scunit)
 
 end subroutine supercell_print_abinit
 !!***
@@ -577,7 +589,6 @@ end subroutine supercell_print_abinit
 subroutine supercell_copy(scell_in, scell_copy)
 
 !Arguments ------------------------------------
-!scalars
  class(supercell_type), intent(in) :: scell_in
  class(supercell_type), intent(inout) :: scell_copy
 ! *************************************************************************
@@ -659,15 +670,15 @@ end subroutine getPBCIndexes_supercell
 subroutine findBound_supercell(min, max, ncell)
 
 !Arguments ---------------------------------------------
-  integer, intent(inout) :: min,max
-  integer, intent(in) :: ncell
+ integer, intent(inout) :: min,max
+ integer, intent(in) :: ncell
 
 ! *********************************************************************
-  if(abs(max)>abs(min)) then
-    max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
-  else
-    min=-(ncell)/2; max=-min; if(mod(ncell,2)==0)  min= min +1
-  end if
+ if(abs(max)>abs(min)) then
+   max=(ncell)/2; min=-max;  if(mod(ncell,2)==0) max = max -1
+ else
+   min=-(ncell)/2; max=-min; if(mod(ncell,2)==0)  min= min +1
+ end if
 
 end subroutine findBound_supercell
 !!***
@@ -691,15 +702,12 @@ end subroutine findBound_supercell
 !! SOURCE
 !!
 
-function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
+pure real(dp) function distance_supercell(xcart1,xcart2,rprimd,cell1,cell2) result(dist)
 
 !Arguments ------------------------------------
-!scalar
-!array
  real(dp),intent(in):: rprimd(3,3)
  real(dp),intent(in):: xcart1(3),xcart2(3)
  integer,intent(in) :: cell1(3),cell2(3)
- real(dp) :: dist
 
 !Local variables -------------------------------
  real(dp) :: rpt1(3),rpt2(3)
@@ -725,11 +733,6 @@ end function distance_supercell
 !!
 !! FUNCTION
 !! deallocate all dynamic memory for this supercell structure
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!! scell = supercell structure with data to be output
 !!
 !! SOURCE
 
@@ -815,12 +818,10 @@ subroutine mksupercell(xred_org,magv_org,rprimd_org,nat_org,nat_sc,xred_sc,magv_
  transv=reshape((/ (((((/ ix,iy,iz /),iatom=1,nat_org),ix=0,ext(1)-1),iy=0,ext(2)-1),iz=0,ext(3)-1) /), (/ 3, nat_org,nprcl/) )
 
  !write(std_out,*)'mksupercell: xred_org ' ,xred_org
-
  do iprcl=1,nprcl
    xred_sc(:,1+(iprcl-1)*nat_org:iprcl*nat_org)=xred_org+transv(:,:,iprcl)
    magv_sc(1+(iprcl-1)*nat_org:iprcl*nat_org)=magv_org
  end do
-
 
  do jdim=1,3
    xred_sc(jdim,:)=xred_sc(jdim,:)/ext(jdim)
@@ -839,12 +840,10 @@ end subroutine mksupercell
 !! supercell_write_xsf
 !!
 !! FUNCTION
-!! output atomic positions, supercell vectors, etc... to a file
+!! output atomic positions, supercell vectors, etc... to xsf_filenamt
 !!
 !! INPUTS
-!! filename = filename
-!! title1 = first line of description of contents
-!! title2 = second line of description of contents
+!! xsf_filename = filename
 !!
 !! OUTPUT
 !! printing to file
@@ -857,10 +856,8 @@ subroutine supercell_write_xsf(scell, xsf_filename)
 !scalars
  class(supercell_type), intent(in) :: scell
  character(len=*), intent(in) :: xsf_filename
- !character(len=*), intent(in) :: title
 
 !Local variables-------------------------------
-!scalar
  integer :: ount, ix, iy, iatom
  character(len=500) :: msg
 ! *************************************************************************
@@ -869,20 +866,24 @@ subroutine supercell_write_xsf(scell, xsf_filename)
    ABI_ERROR(msg)
  end if
 
+ ! Note: Don't put comments because Vesta on my Mac does not like them!
  !write (ount, '(a)')"#", trim(title)
- write (ount, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
- write (ount, '(a,I0,a)') '# and has ', scell%ncells, ' primitive unit cells '
- write (ount, '(a)') '#'
- write(ount, "(a)")"CRYSTAL"
- write(ount, "(a)")"# these are primitive lattice vectors (in Angstroms)"
+ !write (ount, '(a,3(3I7,2x))') '# supercell rlatt is ', scell%rlatt
+ !write (ount, '(a,I0,a)') '# and has ', scell%ncells, ' primitive unit cells '
+ !write (ount, '(a)') '#'
+
+ write(ount,'(1X,A)')  'DIM-GROUP'
+ write(ount,*) '3  1'
+ write(ount,'(1X,A)') 'PRIMVEC'
+ !write(ount, "(a)")"# these are primitive lattice vectors (in Angstroms)"
  do iy = 1,3
    write(ount, '(3(ES17.10,2X))') (Bohr_Ang * scell%rprimd(ix,iy), ix=1,3)
  end do
- write(ount, "(a)")"PRIMCOORD"
+ write(ount, "(1X, a)")"PRIMCOORD"
  write(ount, "(i0,1x,i0)") scell%natom, 1  ! # The second number is always 1 for PRIMCOORD coordinates.
 
  do iatom=1,scell%natom
-   write(ount, '(i0, 6(3X,ES17.10))') &
+   write(ount, '(i9, 6(3X,ES17.10))') &
      NINT(scell%znucl(scell%typat(iatom))), &  ! WARNING alchemy not supported by XCrysden
      scell%xcart_ref(:,iatom) * Bohr_Ang, (scell%xcart(:,iatom) - scell%xcart_ref(:,iatom)) * Bohr_Ang
  end do

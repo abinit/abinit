@@ -1529,11 +1529,6 @@ subroutine gstore_malloc__(gstore, with_cplex, max_nq, qglob2bz, max_nk, kglob2b
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
      tsign_k = 1; if (trev_k == 1) tsign_k = -1
 
-     !print *, "my_ik:", my_ik
-     !print *, gstore%cryst%symrel(:,:,isym_k)
-     !print *, allocated(gqk%my_kpts), shape(gqk%my_kpts)
-     !print *, associated(gstore%kibz), shape(gstore%kibz)
-
      ! Note symrel^T convention for k
      gqk%my_kpts(:, my_ik) = tsign_k * matmul(transpose(gstore%cryst%symrel(:,:,isym_k)), gstore%kibz(:, ik_ibz)) + g0_k
 
