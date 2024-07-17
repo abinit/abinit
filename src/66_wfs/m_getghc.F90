@@ -392,8 +392,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
    ndat_             = ndat
    istwf_k_          = gs_ham%istwf_k
-   double_rfft_trick = istwf_k_==2.and.k1_eq_k2
-   double_rfft_trick = double_rfft_trick.and.(.not.have_to_reequilibrate).and.mpi_enreg%paral_kgb==1
+   double_rfft_trick = istwf_k_==2.and.k1_eq_k2.and.(.not.have_to_reequilibrate)
+   double_rfft_trick = double_rfft_trick.and.(ndat>1.or.mpi_enreg%nproc_fft>1)
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    ! For npfft>1, we don't use the trick but MPI-FFT does not handle istwf_k==2,
    ! so we have to use istwf_k=1 locally and build cwavef_fft in a similar way
@@ -405,9 +405,15 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
      else
        ndat_ = ndat
      end if
-     kg_k_fft => bandfft_kpt(ikpt_this_proc)%kg_k_gather_sym(:,:)
      npw_fft=2*npw_k1
      if (mpi_enreg%me_g0_fft==1) npw_fft=npw_fft-1 ! Do not include G=(0,0,0) twice
+     ABI_MALLOC(kg_k_fft,(3,npw_fft))
+     kg_k_fft(:,1:npw_k1) = kg_k1(:,1:npw_k1)
+     if (mpi_enreg%me_g0_fft==1) then
+       kg_k_fft(:,npw_k1+1:npw_fft) = -kg_k1(:,2:npw_k1)
+     else
+       kg_k_fft(:,npw_k1+1:npw_fft) = -kg_k1(:,1:npw_k1)
+     end if
      ABI_MALLOC(cwavef_fft,(2,npw_fft*ndat_))
      call cwavef_double_rfft_trick_pack(cwavef,cwavef_fft,mpi_enreg,ndat,npw_k1)
    end if
@@ -724,6 +730,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 
    if (double_rfft_trick) then
      call cwavef_double_rfft_trick_unpack(ghc,cwavef_fft,mpi_enreg,ndat,npw_k1)
+     ABI_FREE(kg_k_fft)
      ABI_FREE(cwavef_fft)
    end if
 
