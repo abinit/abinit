@@ -3977,7 +3977,6 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
  real(dp) :: params(4)
  real(dp),allocatable :: eigens_k(:)
  complex(dp),allocatable :: u_k(:,:)
-
 !************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)

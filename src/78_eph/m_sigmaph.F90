@@ -3720,17 +3720,14 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, &
 
 ! *************************************************************************
 
- ! Open netcdf file
- msg = "Netcdf not activated at configure time!"
- ierr = 1
- ierr = 0
+ call cwtime(cpu, wall, gflops, "start")
 
+ msg = ""; ierr = 0
  if (.not. file_exists(path)) then
-   msg = sjoin("Cannot find file", path)
-   ierr = 1; return
+   msg = sjoin("Cannot find file", path); ierr = 1; return
  end if
 
- call cwtime(cpu, wall, gflops, "start")
+ ! Open netcdf file
  NCF_CHECK(nctk_open_read(ncid, path, comm))
 
  !TODO?
