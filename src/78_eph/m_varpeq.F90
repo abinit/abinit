@@ -6,7 +6,7 @@
 !!  Description
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2023-2024 ABINIT group (VV)
+!!  Copyright (C) 2023-2024 ABINIT group (VV, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -399,6 +399,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  ! Read data
  ! arrays
  nsppol = self%nsppol
+ !print *, "self%nsppol, self%max_nk, self%max_nq, self%max_nb", self%nsppol, self%max_nk, self%max_nq, self%max_nb
  ABI_MALLOC(self%kpts_spin, (3, self%max_nk, nsppol))
  ABI_MALLOC(self%qpts_spin, (3, self%max_nq, nsppol))
  ABI_MALLOC(self%a_spin, (2, self%max_nb, self%max_nk, nsppol))
@@ -406,6 +407,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
  ABI_MALLOC(self%nk_spin, (nsppol))
  ABI_MALLOC(self%nq_spin, (nsppol))
  ABI_MALLOC(self%nb_spin, (nsppol))
+ ABI_MALLOC(self%brange_spin, (2, self%nsppol))
 
  NCF_CHECK(nf90_get_var(ncid, vid("kpts_spin"), self%kpts_spin))
  NCF_CHECK(nf90_get_var(ncid, vid("qpts_spin"), self%qpts_spin))
@@ -425,7 +427,7 @@ subroutine varpeq_ncread(self, path, comm, keep_open)
    self%ncid = nctk_noid
  end if
 
- call cwtime_report(" varpeq_nread", cpu, wall, gflops)
+ call cwtime_report(" varpeq_ncread", cpu, wall, gflops)
 
  self%is_complete = .False.
 
@@ -1076,7 +1078,7 @@ subroutine varpeq_init(self, gstore, dtset)
      call gqk%myqpt(my_iq, gstore, wtq, polstate%my_qpts(:, my_iq))
    enddo
 
-   ! kranks (require initalizaiton of polstata%my_kpts/my_qpts)
+   ! kranks (require initalizaton of polstata%my_kpts/my_qpts)
    polstate%krank_kpts = polstate%get_krank_glob("k", gstore%ebands%kptrlatt)
    polstate%krank_qpts = polstate%get_krank_glob("q", gstore%ebands%kptrlatt)
 
@@ -2148,7 +2150,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, iat, sc_iat, nu, nqbz
  logical :: isirr_k, isirr_q
- real(dp) :: cpu_all, wall_all, gflops_all, rtmp
+ real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(varpeq_t) :: vpq
@@ -2158,10 +2160,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  complex(dp) :: a_nk, bstar_qnu, c3tmp(3), displ_c(3)
 !arrays
  integer :: sc_ngfft(18), mapl_k(6), kptrlatt_(3,3), qptrlatt_(3,3)
- integer :: units(2), work_ngfft(18), gmax(3), mapl_kk(6), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
+ integer :: units(2), work_ngfft(18), gmax(3), g0_k(3), mapl_qq(6), g0_q(3), ngqpt(3)
  integer,allocatable :: nband(:,:), wfd_istwfk(:), kg_k(:,:), sc2uc(:), gbound_k(:,:)
  real(dp),parameter :: origin0(3) = zero
- real(dp) :: kk(3), kk_ibz(3), qq(3), qq_ibz(3)
+ real(dp) :: kk(3), kk_ibz(3), kk_sc(3), qq(3), qq_ibz(3)
  real(dp),allocatable :: scred(:,:), kpg_k(:,:), ug_k(:,:), work(:,:,:,:), pol_rho(:), qibz(:,:)
  real(dp),allocatable :: displ_cart_qibz(:,:,:,:), displ_red_qibz(:,:,:,:), pheigvec_qibz(:,:,:,:)
  real(dp),allocatable :: displ_cart_qbz(:,:,:,:), displ_red_qbz(:,:,:,:), pheigvec_qbz(:,:,:,:)
@@ -2176,8 +2178,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  units = [std_out, ab_out]
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
+ call wrtout(std_out, " varpeq_plot: computing polaron wavefunction in real space.", pre_newlines=1)
+
  ! Read A_nk and B_qnu and other useful tables from file
  call vpq%ncread(dtfil%filvarpeqin, comm, keep_open=.False.)
+ call wrtout(std_out, "Reading done")
 
  ! Copy important dimensions
  natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands%nsppol; nspinor = ebands%nspinor; nspden = dtset%nspden
@@ -2204,9 +2209,12 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        ABI_ERROR(msg)
      end if
 
-     ik_ibz = mapl_kk(1)
+     ik_ibz = mapl_k(1)
      do ib=1,vpq%nb_spin(spin)
-       band = bstart + ib - 1; bks_mask(band, ik_ibz, spin) = .True.
+       band = bstart + ib - 1
+       !print *, "vpq%nb_spin(spin)", vpq%nb_spin(spin), "bstart:", bstart, "mband:", mband, "band", band
+       !print *, "ik_ibz:", ik_ibz, "nkibz:", nkibz
+       bks_mask(band, ik_ibz, spin) = .True.
      end do
    end do
  end do
@@ -2236,10 +2244,10 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  call cwtime(cpu_all, wall_all, gflops_all, "start")
 
- ! Compute mpw and gmax
+ call wrtout(std_out, " Computing mpw and gmax needed to allocate workspace array.")
  do spin=1,nsppol
    nk = vpq%nk_spin(spin)
-   do ik=1, vpq%nk_spin(spin)
+   do ik=1,nk
      call ephtk_get_mpw_gmax(nk, vpq%kpts_spin(:, 1:nk, spin), dtset%ecut, cryst%gmet, mpw, gmax, comm, &
                              init_with_zero=spin==1)
    end do
@@ -2249,28 +2257,33 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  gmax = gmax + 4 ! FIXME: this is to account for umklapp, shouls also consider Gamma-only and istwfk
  gmax = 2*gmax + 1
  call ngfft_seq(work_ngfft, gmax)
- !!write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
+ write(std_out,*)"work_ngfft(1:3): ",work_ngfft(1:3)
  ABI_MALLOC(work, (2, work_ngfft(4), work_ngfft(5), work_ngfft(6)))
 
- ! Build supercell from ngkpt (note xyz_order)
+ call wrtout(std_out, sjoin(" Building supercell from ngkpt:", ltoa(vpq%ngkpt)))
+ ! (note xyz_order)
  call kptrlatt_from_ngkpt(vpq%ngkpt, kptrlatt_)
- call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False., xyz_order="xyz")
+ call scell%init(cryst%natom, kptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
  nkbz = product(vpq%ngkpt)
  call supercell_fft(vpq%ngkpt, ngfft, sc_nfft, sc_ngfft, sc2uc, scred)
  ABI_FREE(scred)
 
- ! Compute polaron wavefunction in the supercell.
+ call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
+
+ ABI_MALLOC(kg_k, (3, mpw))
+
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
  ABI_MALLOC(ceikr, (sc_nfft*nspinor))
- ! Init with zeros.
+ ! Init output with zeros.
  ABI_CALLOC(pol_wf, (sc_nfft*nspinor, nsppol))
 
  cnt = 0
  do spin=1,nsppol
    bstart = vpq%brange_spin(1, spin)
-   do ik=1, vpq%nk_spin(spin)
+   nk = vpq%nk_spin(spin)
+   do ik=1, nk
      cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
 
      kk = vpq%kpts_spin(:, ik, spin)
@@ -2279,40 +2292,45 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        ABI_ERROR(msg)
      end if
 
-     ik_ibz = mapl_kk(1); isym_k = mapl_kk(2); trev_k = mapl_kk(6); g0_k = mapl_kk(3:5)
+     ik_ibz = mapl_k(1); isym_k = mapl_k(2); trev_k = mapl_k(6); g0_k = mapl_k(3:5)
      isirr_k = (isym_k == 1 .and. trev_k == 0 .and. all(g0_k == 0))
      kk_ibz = ebands%kptns(:, ik_ibz)
      istwf_k_ibz = wfd%istwfk(ik_ibz); npw_kq_ibz = wfd%npwarr(ik_ibz)
+     !print *, mapl_k, kk, kk_ibz
 
      ! Get npw_k, kg_k for k
      call wfd%get_gvec_gbound(cryst%gmet, dtset%ecut, kk, ik_ibz, isirr_k, dtset%nloalg, &  ! in
                               istwf_k, npw_k, kg_k, nkpg_k, kpg_k, gbound_k)                ! out
 
      ABI_MALLOC(ug_k, (2, npw_k*nspinor))
-     call calc_ceikr(kk, sc_ngfft, sc_nfft, nspinor, ceikr)
+     kk_sc = kk * vpq%ngkpt
+     call calc_ceikr(kk_sc, sc_ngfft, sc_nfft, nspinor, ceikr)
 
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
-       a_nk = vpq%a_spin(1, ib, ik, spin) + j_dpc * vpq%a_spin(2, ib, ik, spin)
        call wfd%rotate_cg(band, ndat1, spin, kk_ibz, npw_k, kg_k, istwf_k, &
-                          cryst, mapl_kk, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
+                          cryst, mapl_k, gbound_k, work_ngfft, work, ug_k, urs_kbz=ur_k)
 
+       !print *, "int_omega dr |u(r)}^2:", sum(abs(ur_k) ** 2) / wfd%nfft
+       !ur_k = ur_k / sqrt(nkbz * cryst%ucvol)
+
+       a_nk = vpq%a_spin(1, ib, ik, spin) + j_dpc * vpq%a_spin(2, ib, ik, spin)
        do spinor=1,nspinor
          spad = (spinor - 1) * sc_nfft
-         do ir=1, sc_nfft
-           uc_idx = sc2uc(ir)
+         do ir=1,sc_nfft
+           uc_idx = sc2uc(ir) + (spinor - 1) * wfd%nfft
            irsp = ir + spad
-           pol_wf(irsp, spin) = pol_wf(irsp, spin) + (a_nk * ur_k(uc_idx) * ceikr(irsp))
+           pol_wf(irsp, spin) = pol_wf(irsp, spin) + a_nk * ur_k(uc_idx) * ceikr(irsp)
          end do
        end do
      end do ! ib
 
-     ABI_FREE(kg_k)
-     ABI_FREE(kpg_k)
      ABI_FREE(ug_k)
+     ABI_FREE(kpg_k)
    end do ! ik
  end do ! spin
 
+ ABI_FREE(kg_k)
  ABI_FREE(work)
  ABI_FREE(ur_k)
  ABI_FREE(gbound_k)
@@ -2324,52 +2342,56 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call xmpi_sum_master(pol_wf, master, comm, ierr)
 
  if (my_rank == master) then
-   pol_wf = pol_wf / sqrt(real(nkbz))
+   pol_wf = pol_wf / (nkbz * sqrt(cryst%ucvol))
+
+
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    if (nspinor == 1) then
-     ! Handle spin-polarized case by writing two xsf files.
+     ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
-       rtmp = sum(vpq%a_spin(:,:,:, spin) ** 2) / nkbz
-       write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, "1/N_k \sum_nk |A_nk|^2 = ", rtmp
+       write(msg, "(a,i0,a,es16.6)")&
+         " For spin: ", spin, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:, spin)**2) / nkbz
        call wrtout(units, msg)
-       pol_rho = abs(pol_wf(:, spin)) ** 2
-       write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to:", sum(pol_rho) * cryst%ucvol
+       pol_rho = abs(pol_wf(:, spin))**2
+       write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
        call wrtout(units, msg)
-
+       write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf)))", maxval(abs(aimag(pol_wf(:, spin))))
+       call wrtout(units, msg)
        path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
        if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON.xsf")
-       call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+       call write_xsf(path, &
+                      sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
                       scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, 0)
-     end do
+     end do ! spin
 
    else
-     rtmp = sum(vpq%a_spin(:,:,:, spin) ** 2) / nkbz
-     write(msg, "(a,es16.6)")" 1/N_k \sum_nk |A_nk|^2 = ", rtmp
+     write(msg, "(a,es16.6)")" 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:, spin)**2) / nkbz
      call wrtout(units, msg)
 
      pol_rho(:) = abs(pol_wf(1:sc_nfft, 1)) ** 2
      pol_rho(:) = abs(pol_wf(sc_nfft+1:, 1)) ** 2 + pol_rho(:)
-     write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to:", sum(pol_rho) * cryst%ucvol
+     write(msg, "(a,i0,a,es16.6)")" Polaron density integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
      call wrtout(units, msg)
-
-     path = strcat(dtfil%filnam_ds(4), "_POLARON.xsf")
-     call write_xsf(path, sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
+     write(msg, "(a, es16.6)")" maxval(abs(aimag(pol_wf)))", maxval(abs(aimag(pol_wf(:, 1))))
+     call wrtout(units, msg)
+     call write_xsf(strcat(dtfil%filnam_ds(4), "_POLARON.xsf"), &
+                    sc_ngfft(1), sc_ngfft(2), sc_ngfft(3), pol_rho, scell%rprimd, origin0, &
                     scell%natom, scell%ntypat, scell%typat, scell%xcart, scell%znucl, 0)
    end if
    ABI_FREE(pol_rho)
  end if ! master
 
  ABI_FREE(pol_wf)
- call wfd%free()
- call scell%free()
+ call wfd%free(); call scell%free()
  call cwtime_report(" Computation of polaron wavefunction completed", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
 
  if (dtfil%filgstorein == ABI_NOFILE) then
    call wrtout(std_out, "gstore_filepath is not specified in input. Cannot compute polaron-induced displacements!")
 
  else
-   ! Compute polaron-induced displacements.
+   call wrtout(std_out, " Computing polaron-induced displacements.")
+
    ! Start by reading ph displacements and frequencies in the IBZ from the gstore file.
    call cwtime(cpu_all, wall_all, gflops_all, "start")
 
@@ -2392,7 +2414,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qibz"), qibz))
    NCF_CHECK(nf90_get_var(ncid, vid("phfreqs_ibz"), phfreqs_ibz))
    NCF_CHECK(nf90_get_var(ncid, vid("pheigvec_cart_ibz"), pheigvec_cart_ibz))
-   NCF_CHECK(nf90_get_var(ncid, vid("gstore_nqqpt"), ngqpt))
+   NCF_CHECK(nf90_get_var(ncid, vid("gstore_ngqpt"), ngqpt))
    NCF_CHECK(nf90_get_var(ncid, vid("gstore_qptopt"), qptopt))
    NCF_CHECK(nf90_close(ncid))
 
@@ -2409,7 +2431,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    call kptrlatt_from_ngkpt(ngqpt, qptrlatt_)
    qrank_ibz = krank_from_kptrlatt(nqibz, qibz, qptrlatt_, compute_invrank=.False.)
 
-   call scell%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, ordering=.False., xyz_order="xyz")
+   call scell%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
    ABI_MALLOC(ceiqr, (scell%natom))
    ABI_CALLOC(sc_displ_cart_re, (3, scell%natom))
@@ -2489,16 +2511,21 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    ! Write polaron-induced displacements in XSF format.
    if (my_rank == master) then
-     rtmp = sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
-     write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, "1/N_q \sum_qnu |B_qnu|^2 = ", rtmp
-     call wrtout(units, msg)
-     path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPLACEMENTS.xsf")
-     call scell%write_xsf(path)
+     ! Handle spin-polarized case by writing two XSF files.
+     ! TODO: displ should depend on the spin
+     do spin=1,nsppol
+       write(msg, "(a,i0,a,es16.6)")" For spin: ", spin, ": 1/N_q \sum_qnu |B_qnu|^2 = ", sum(vpq%b_spin(:,:,:, spin) ** 2) / nqbz
+       call wrtout(units, msg)
+       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
+       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
+       call scell%write_xsf(path)
+     end do
    end if
 
    call scell%free()
    ABI_FREE(sc_displ_cart_re)
-   call cwtime_report(" Computation of polaron-induced displacements completed:", cpu_all, wall_all, gflops_all, pre_str=ch10, end_str=ch10)
+   call cwtime_report(" Computation of polaron-induced displacements completed:", cpu_all, wall_all, gflops_all, &
+                      pre_str=ch10, end_str=ch10)
 end if
 
  call vpq%free()

@@ -228,6 +228,8 @@ subroutine supercell_init(scell, natom_primcell, rlatt, rprimd_primcell, typat_p
  scell%rprimd(:,2) = rprimd_primcell(:,2) * rlatt(2,2)
  scell%rprimd(:,3) = rprimd_primcell(:,3) * rlatt(3,3)
 
+ !call metric(scell%gmet, scell%gprimd, -1, scell%rmet, scell%rprimd, scell%ucvol)
+
  scell%ntypat = size(znucl)
  ABI_MALLOC(scell%znucl,(scell%ntypat))
  scell%znucl(:) = znucl(:)
@@ -550,7 +552,7 @@ subroutine supercell_print_abinit(scell, filename, title1, title2)
     write (scunit, '(a, 3E20.10)') '#  ', xred
   end do
 
-! close file
+  ! close file
   close(scunit)
 
 end subroutine supercell_print_abinit

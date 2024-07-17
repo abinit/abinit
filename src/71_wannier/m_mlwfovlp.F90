@@ -3927,7 +3927,7 @@ subroutine wan_load_gwan(wan, gwan_filepath, cryst, spin, nsppol, all_comm)
  NCF_CHECK(ncerr)
 
  NCF_CHECK(nf90_close(root_ncid))
- call wrtout(units, " Reading of GWAN file completed.")
+ call wrtout(units, " Reading of GWAN.nc file completed.")
 
 contains
  integer function vid_spin(var_name)

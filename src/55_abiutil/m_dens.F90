@@ -1983,9 +1983,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
 
 ! *************************************************************************
 
-!DEBUG
-!write(ab_out,*)' prtdenmagsph : enter, rhomag(1,2)=',rhomag(1,2)
-!ENDDEBUG
+ !write(ab_out,*)' prtdenmagsph : enter, rhomag(1,2)=',rhomag(1,2)
 
  if(nspden==2)then
    rho_tot=rhomag(1,1) ; mag_coll=rhomag(1,2)
@@ -2032,7 +2030,7 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
        do iatom=1,natom
          write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),intgden(1,iatom)
          if(option==21)then
-!          There is a change of sign to get the gradient wrt chrgat.
+           ! There is a change of sign to get the gradient wrt chrgat.
            write(msg, '(i5,f15.5,f20.8)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom)
          endif
          !If option=1, print atomic charge
@@ -2080,8 +2078,9 @@ real(dp),intent(in),optional :: ziontypat(ntypat)
            write(msg,'(i5,f10.5,2f13.6,a,f12.6,a,f12.6)' ) iatom,ratsph(typat(iatom)),-intgden(1,iatom),intgden(2,iatom)
          endif
          write(msg,'(a,a,f12.6,a,f12.6)')trim(msg),'  ',(intgden(1,iatom)+intgden(2,iatom)),' ',(intgden(1,iatom)-intgden(2,iatom))
-         if(option==1 .and. present(ziontypat))&
-&          write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,iatom)+intgden(2,iatom))
+         if(option==1 .and. present(ziontypat)) then
+           write(msg, '(a,f14.6)') trim(msg),ziontypat(typat(iatom))-(intgden(1,iatom)+intgden(2,iatom))
+         end if
          call wrtout(units,msg)
          ! Compute the sum of the magnetization
          sum_mag=sum_mag+intgden(1,iatom)-intgden(2,iatom)
