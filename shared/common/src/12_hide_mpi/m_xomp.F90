@@ -6,7 +6,7 @@
 !!  Thin wrappers and tools for OpenMP parallelization.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MG)
+!!  Copyright (C) 2008-2024 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -79,7 +79,6 @@ subroutine xomp_show_info(unit)
 
 !Local variables-------------------
  integer :: my_unt
-
 ! *************************************************************************
 
  my_unt = std_out; if (PRESENT(unit)) my_unt=unit
@@ -345,7 +344,9 @@ subroutine xomp_set_default_device(device_id)
 #ifdef HAVE_OPENMP_OFFLOAD
  call omp_set_default_device(device_id)
 #else
- ABI_UNUSED(device_id)
+! this macro is being called before m_errors is available
+! ABI_UNUSED(device_id)
+ if (.FALSE.) write(std_out,*)device_id
 #endif
 
 end subroutine xomp_set_default_device
@@ -515,8 +516,11 @@ function xomp_target_is_present(ptr)
  if(rc==0) xomp_target_is_present = .false.
 #else
  xomp_target_is_present = .false.
- ABI_UNUSED(device_id)
- ABI_UNUSED(rc)
+ ! this macro is called before m_errors is compiled
+ ! ABI_UNUSED(device_id)
+ ! ABI_UNUSED(rc)
+ if (.FALSE.) write(std_out,*)device_id
+ if (.FALSE.) write(std_out,*)rc
  ABI_UNUSED_A(ptr)
 #endif
 
@@ -562,15 +566,16 @@ function xomp_get_mapped_ptr(ptr) result(gpu_ptr)
  end if
 #else
  gpu_ptr = c_null_ptr
- ABI_UNUSED(device_id)
- ABI_UNUSED(rc)
+ ! this macro is called before m_errors is compiled
+! ABI_UNUSED(device_id)
+! ABI_UNUSED(rc)
+ if (.FALSE.) write(std_out,*)device_id
+ if (.FALSE.) write(std_out,*)rc
  ABI_UNUSED_A(ptr)
 #endif
 
 end function xomp_get_mapped_ptr
 !!***
-
-!----------------------------------------------------------------------
 
 END MODULE m_xomp
 !!***

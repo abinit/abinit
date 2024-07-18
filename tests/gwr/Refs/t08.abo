@@ -2,7 +2,7 @@
 .Version 9.9.3 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -608,8 +608,8 @@ meta: {optdriver: 6, }
    0.00000   0.00000   0.00000   0.00000   0.06340   0.00000   0.00000   0.00184
 
 
- setmesh: FFT mesh size selected  =    20x   20x   15
-          total number of points  =         6000
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
 
  Computing oscilator matrix elements for CC4S.
 
@@ -623,18 +623,23 @@ meta: {optdriver: 6, }
 
  Writing CoulombVertex data to file: t08o_DS2_CoulombVertex.elements
 
- Writing Coulomb vertex for testing purposes with ng: 4
+ Reading norm of Coulomb vertex for testing purposes with ng: 4
 
+ List of g-vectors in the Coulomb vertex:
+1 : [0, 0, 0]
+2 : [1, 0, 0]
+3 : [-1, 0, 0]
+4 : [0, 1, 0]
  For band1: 1 , band2: 1
-  0.00000E+00  0.00000E+00  2.29102E+01 -1.22699E-16  7.81490E+00 -1.50297E-17  7.81490E+00  1.50297E-17
+  7.60297E-01  2.00461E-01  2.00461E-01  2.00461E-01
  For band1: 1 , band2: 2
- -0.00000E+00  0.00000E+00 -2.52529E+00  2.33936E-15 -9.04683E-01  1.48353E-15 -9.04683E-01  1.38413E-15
+  0.00000E+00  2.20958E-02  2.20958E-02  2.20958E-02
  For band1: 1 , band2: 3
-  0.00000E+00  0.00000E+00  4.95265E-01  1.44318E-07  7.27827E-02  2.12086E-08 -7.27827E-02 -2.12086E-08
+  0.00000E+00  4.33192E-03  4.33192E-03  1.13474E-03
  For band1: 1 , band2: 4
-  0.00000E+00  0.00000E+00 -6.43151E-01  1.75506E-07 -9.45157E-02  2.57919E-08  9.45157E-02 -2.57919E-08
+  0.00000E+00  5.62517E-03  5.62517E-03  1.91589E-02
  For band1: 1 , band2: 5
-  0.00000E+00  0.00000E+00  2.04189E+00  3.24453E-08  3.00071E-01  4.76807E-09 -3.00071E-01 -4.76807E-09
+  0.00000E+00  1.78673E-02  1.78673E-02  1.13951E-03
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -556,7 +556,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
  ! GPU related parameters
  dtsets(:)%gpu_option=ABI_GPU_DISABLED
- dtsets(:)%gpu_use_nvtx=0
 #if defined HAVE_GPU
  call Get_ndevice(idev)
  if (idev>0) then
@@ -586,11 +585,6 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        dtsets(idtset)%gpu_option=intarr(1)
      end if
    end if
-
-#if defined HAVE_GPU && defined HAVE_GPU_MARKERS
-   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gpu_use_nvtx',tread,'INT')
-   if(tread==1)dtsets(idtset)%gpu_use_nvtx=intarr(1)
-#endif
 
    if (dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED) gpu_option=dtsets(idtset)%gpu_option
  end do
@@ -1555,6 +1549,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+
+! if getxred or getxcart we need to import xred before entering ingeo.
+! NB: xred/cart might be re-updated at runtime after running source dtset
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
+!   if (tread==1 .or. tread_geo==1) 
+!     source_dtset = 
+!     if (== -1) source_dtset = jdtset-1
+!   end if
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
+! 
+
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))
@@ -2467,9 +2472,9 @@ subroutine indefo(dtsets, ndtset_alloc, nprocs)
    dtsets(idtset)%imgwfstor=0
    dtsets(idtset)%intxc=0
    ! if (dtsets(idtset)%paral_kgb>0.and.idtset>0) dtsets(idtset)%intxc=0
-   dtsets(idtset)%invol_blk_sliced=1
+   dtsets(idtset)%invovl_blksliced=1
    if(dtsets(idtset)%gpu_option/=ABI_GPU_DISABLED.and.dtsets(idtset)%gpu_option/=ABI_GPU_LEGACY) then
-     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invol_blk_sliced=0
+     if (dtsets(idtset)%usepaw==1) dtsets(idtset)%invovl_blksliced=0
    end if
    dtsets(idtset)%ionmov=0
    dtsets(idtset)%densfor_pred=2

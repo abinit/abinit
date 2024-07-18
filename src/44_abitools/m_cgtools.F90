@@ -7,7 +7,7 @@
 !! using the "cg" convention, namely real array of shape cg(2,...)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
+!! Copyright (C) 1992-2024 ABINIT group (MG, MT, XG, DCA, GZ, FB, MVer, DCA, GMR, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3185,7 +3185,7 @@ subroutine cg_envlop(cg, ecut, gmet, icgmod, kg, kpoint, mcg, nband, npw, nspino
  ABI_MALLOC(cut_pws,(npw))
 
 !Run through G vectors in basis
-!$OMP PARALLEL DO PRIVATE(gs)
+!$OMP PARALLEL DO PRIVATE(gs,i1,i2,i3)
  do ig=1,npw
    i1=kg(1,ig) ; i2=kg(2,ig) ; i3=kg(3,ig)
 !(k+G)^2 evaluated using metric and kpoint

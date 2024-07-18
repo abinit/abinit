@@ -7,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2022 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2024 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3192,7 +3192,7 @@ call  setnoccmmp(compute_dmat,dimdmat,dmatpawu,dmatudiag,impose_dmat,indsym,nato
 
 !!! calculating for spin upup and dndn
 
-  do isp=1,2 ! upup and dndn spin componenets are considered
+  do isp=1,2 ! upup and dndn spin components are considered
   do coor=1,3
      do im1=1,2*my_lcur+1
      do im2=1,2*my_lcur+1

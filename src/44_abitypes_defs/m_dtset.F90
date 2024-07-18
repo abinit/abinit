@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2022 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2024 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +34,7 @@ module m_dtset
  use m_geometry,     only : mkrdim, metric, littlegroup_pert, irreducible_set_pert
  use m_parser,       only : intagm, chkvars_in_string
  use m_crystal,      only : crystal_t, crystal_init
-
+ 
  implicit none
 
  private
@@ -190,6 +190,7 @@ type, public :: dataset_type
  integer :: exchn2n3d
  integer :: extfpmd_nbcut = 25
  integer :: extfpmd_nbdbuf = 0
+ integer :: extfpmd_nband = 0
  integer :: extrapwf
  integer :: expert_user
 !F
@@ -206,6 +207,7 @@ type, public :: dataset_type
  integer :: getcell = 0
  integer :: getddb = 0
  integer :: getdvdb = 0
+ integer :: getdrhodb = 0
  integer :: getddk = 0
  integer :: getdelfd = 0
  integer :: getdkdk = 0
@@ -238,13 +240,13 @@ type, public :: dataset_type
  integer :: gpu_nl_distrib = 0
  integer :: gpu_nl_splitsize = 1
  integer :: gpu_option
- integer :: gpu_use_nvtx
 
  integer :: gstore_cplex = 2
  integer :: gstore_with_vk = 1
  character(len=fnlen) :: gstore_kzone = "ibz"
  character(len=fnlen) :: gstore_qzone = "bz"
  character(len=fnlen) :: gstore_kfilter = "none"
+ character(len=fnlen) :: gstore_gmode = "phonon"
  integer :: gstore_brange(2, 2) = 0
  real(dp) :: gstore_erange(2, 2) = zero
 
@@ -314,7 +316,7 @@ type, public :: dataset_type
  integer :: imgwfstor
  integer :: inclvkb = 2
  integer :: intxc
- integer :: invol_blk_sliced
+ integer :: invovl_blksliced
  integer :: iomode
  integer :: ionmov
  integer :: iprcel
@@ -323,6 +325,7 @@ type, public :: dataset_type
  integer :: irdchkprdm = 0
  integer :: irdddb = 0
  integer :: irddvdb = 0
+ integer :: irddrhodb = 0
  integer :: irdddk = 0
  integer :: irdden = 0
  integer :: irdefmas = 0
@@ -998,6 +1001,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_filepath = ABI_NOFILE
  character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getdrhodb_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
  character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
@@ -1316,7 +1320,7 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
      end if
      if (abs(nelect_occ-nelect_img)>tol11 .and. dtset%iscf/=-3) then
 
-!      There is a discrepancy
+       ! There is a discrepancy
        write(msg, &
        '(a,a,i4,a,e22.14,a,e16.8,a,a,a,e22.14,a,a,a,i5,a,a,a,a)' ) ch10,&
        ' initocc_chkneu: image=',iimage,', nelect_occ=',nelect_occ,', zval=',zval,',',ch10,&
@@ -1327,25 +1331,25 @@ subroutine dtset_initocc_chkneu(dtset, nelectjell, occopt)
        call wrtout(std_out,msg)
 
        if (abs(nelect_occ-dtset%nelect)>tol8) then
-!        The discrepancy is severe
+         ! The discrepancy is severe
          write(msg,'(a,a,e9.2,a,a)')ch10,&
          'These must obey zval-nelect_occ=cellcharge-nelectjell to better than ',tol8,ch10,&
          ' This is not the case. '
        else
-!        The discrepancy is not so severe
+         ! The discrepancy is not so severe
          write(msg, '(2a,e9.2)' )ch10,&
-&         'These should obey zval-nelect_occ=cellcharge-nelectjell to better than: ',tol11
+          'These should obey zval-nelect_occ=cellcharge-nelectjell to better than: ',tol11
        end if
        ABI_WARNING(msg)
 
        write(msg, '(6a)' ) &
        'Action: check input file for occ,wtk, and cellcharge.',ch10,&
        'Note that wtk is NOT automatically normalized when occopt=2,',ch10,&
-       'but IS automatically normalized otherwise.',ch10
+       'but is automatically normalized otherwise.',ch10
        call wrtout(std_out,msg)
 
        ! If the discrepancy is severe, stop
-       if (abs(nelect_occ-nelect_img)>tol8)then
+       if (abs(nelect_occ-nelect_img) > tol6) then
          ABI_ERROR(msg)
        end if
 
@@ -1552,6 +1556,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%expert_user        = dtin%expert_user
  dtout%extfpmd_nbcut      = dtin%extfpmd_nbcut
  dtout%extfpmd_nbdbuf     = dtin%extfpmd_nbdbuf
+ dtout%extfpmd_nband      = dtin%extfpmd_nband
  dtout%extrapwf           = dtin%extrapwf
  dtout%pawfatbnd          = dtin%pawfatbnd
  dtout%fermie_nest        = dtin%fermie_nest
@@ -1578,6 +1583,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getcell            = dtin%getcell
  dtout%getddb             = dtin%getddb
  dtout%getdvdb            = dtin%getdvdb
+ dtout%getdrhodb          = dtin%getdrhodb
  dtout%getddk             = dtin%getddk
  dtout%getdelfd           = dtin%getdelfd
  dtout%getdkdk            = dtin%getdkdk
@@ -1592,6 +1598,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getddb_filepath    = dtin%getddb_filepath
  dtout%getden_filepath    = dtin%getden_filepath
  dtout%getdvdb_filepath   = dtin%getdvdb_filepath
+ dtout%getdrhodb_filepath = dtin%getdrhodb_filepath
  dtout%getpot_filepath    = dtin%getpot_filepath
  dtout%getsigeph_filepath = dtin%getsigeph_filepath
  dtout%getgstore_filepath = dtin%getgstore_filepath
@@ -1617,13 +1624,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gpu_nl_distrib     = dtin%gpu_nl_distrib
  dtout%gpu_nl_splitsize   = dtin%gpu_nl_splitsize
  dtout%gpu_option         = dtin%gpu_option
- dtout%gpu_use_nvtx       = dtin%gpu_use_nvtx
 
  dtout%gstore_cplex       = dtin%gstore_cplex
  dtout%gstore_with_vk     = dtin%gstore_with_vk
  dtout%gstore_kzone       = dtin%gstore_kzone
  dtout%gstore_qzone       = dtin%gstore_qzone
  dtout%gstore_kfilter     = dtin%gstore_kfilter
+ dtout%gstore_gmode       = dtin%gstore_gmode
  dtout%gstore_brange      = dtin%gstore_brange
  dtout%gstore_erange      = dtin%gstore_erange
 
@@ -1692,7 +1699,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%imgwfstor          = dtin%imgwfstor
  dtout%inclvkb            = dtin%inclvkb
  dtout%intxc              = dtin%intxc
- dtout%invol_blk_sliced   = dtin%invol_blk_sliced
+ dtout%invovl_blksliced  = dtin%invovl_blksliced
  dtout%ionmov             = dtin%ionmov
  dtout%densfor_pred       = dtin%densfor_pred
  dtout%iprcel             = dtin%iprcel
@@ -1704,6 +1711,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%irdbscoup          = dtin%irdbscoup
  dtout%irdddb             = dtin%irdddb
  dtout%irddvdb            = dtin%irddvdb
+ dtout%irddrhodb          = dtin%irddrhodb
  dtout%irdddk             = dtin%irdddk
  dtout%irdden             = dtin%irdden
  dtout%irdefmas           = dtin%irdefmas
@@ -3212,9 +3220,10 @@ subroutine macroin2(dtsets, ndtset_alloc)
  integer,intent(in) :: ndtset_alloc
 !arrays
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
- character(len=500) :: msg
+
 !Local variables -------------------------------
 !scalars
+ !character(len=500) :: msg
  integer :: idtset,pawujat
 
 !******************************************************************
@@ -3222,12 +3231,11 @@ subroutine macroin2(dtsets, ndtset_alloc)
  do idtset=1,ndtset_alloc
    ! Set first PAW+U atom to perform atomic level shift
    if (dtsets(idtset)%typat(1)==0) cycle
-!LMac Here is where the pawujat is perturbed.
+   !LMac Here is where the pawujat is perturbed.
    pawujat=dtsets(idtset)%pawujat
    pawujat=pawujat-count(dtsets(idtset)%lpawu( dtsets(idtset)%typat( 1:pawujat ))<0)
 
-   write(msg,*)"LMac pawujat is: ",pawujat
-   call wrtout(std_out,msg)
+   !write(msg,*)"LMac pawujat is: ",pawujat; call wrtout(std_out,msg)
 
    if (dtsets(idtset)%macro_uj>0) then
      ! Level shift atom with amplitude pawujv
@@ -3345,7 +3353,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' eph_np_pqbks'
  list_vars=trim(list_vars)//' eph_phrange eph_phrange_w eph_phwinfact'
  list_vars=trim(list_vars)//' eph_prtscratew eph_restart eph_stern eph_task eph_tols_idelta eph_transport eph_use_ftinterp'
- list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user extfpmd_nbcut extfpmd_nbdbuf extrapwf'
+ list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d expert_user'
+ list_vars=trim(list_vars)//' extfpmd_nbcut extfpmd_nbdbuf extfpmd_nband extrapwf'
 !F
  list_vars=trim(list_vars)//' fband fermie_nest ffnl_lw'
  list_vars=trim(list_vars)//' fftalg fftcache fftgw fft_count'
@@ -3363,7 +3372,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
  list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
- list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getkden getdvdb getdrhodb getdvdb_filepath getdrhodb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getsigeph_filepath getgstore_filepath'
  list_vars=trim(list_vars)//' getqps getscr getscr_filepath'
@@ -3371,9 +3380,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_kokkos_nthrd gpu_linalg_limit gpu_nl_distrib'
- list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option gpu_use_nvtx'
+ list_vars=trim(list_vars)//' gpu_nl_splitsize gpu_option'
  list_vars=trim(list_vars)//' gwaclowrank gwcalctyp gwcomp gwencomp gwgamma gwmem'
- list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter'
+ list_vars=trim(list_vars)//' gstore_brange gstore_cplex gstore_erange gstore_kfilter gstore_gmode'
  list_vars=trim(list_vars)//' gstore_kzone gstore_qzone gstore_with_vk'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gwgmcorr gw_customnfreqsp gw1rdm'
  list_vars=trim(list_vars)//' gw_frqim_inzgrid gw_frqre_inzgrid gw_frqre_tangrid gw_freqsp'
@@ -3392,9 +3401,9 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' iatcon iatfix iatfixx iatfixy iatfixz iatsph'
  list_vars=trim(list_vars)//' ibte_abs_tol ibte_alpha_mix ibte_niter ibte_prep '
  list_vars=trim(list_vars)//' iboxcut icoulomb icutcoul ieig2rf'
- list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invol_blk_sliced iomode ionmov iqpt'
+ list_vars=trim(list_vars)//' imgmov imgwfstor inclvkb indata_prefix intxc invovl_blksliced iomode ionmov iqpt'
  list_vars=trim(list_vars)//' iprcel iprcfc irandom irdbscoup'
- list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irdefmas'
+ list_vars=trim(list_vars)//' irdbseig irdbsreso irdchkprdm irdddb irdddk irdden irdkden irddvdb irddrhodb irdefmas'
  list_vars=trim(list_vars)//' irdhaydock irdpawden irdqps'
  list_vars=trim(list_vars)//' irdscr irdsuscep irdwfk irdwfq ird1den'
  list_vars=trim(list_vars)//' irdwfkfine'
@@ -3464,16 +3473,14 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
  list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
- list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
- list_vars=trim(list_vars)//' printfiles prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
- list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm'
- list_vars=trim(list_vars)//' prtebands prtefg prtefmas prteig prteliash prtelf prtevk'
+ list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtchkprdm prtcif prtddb prtden'
+ list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefmas prteig prteliash prtelf prtevk'
  list_vars=trim(list_vars)//' prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prthist prtkden prtkpt prtlden'
- list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
- list_vars=trim(list_vars)//' prtprocar prtpot prtpsps'
+ list_vars=trim(list_vars)//' prtnabla prtnest prtocc prtphbands prtphdos prtphsurf prtposcar'
+ list_vars=trim(list_vars)//' prtpot prtprocar prtpsps'
  list_vars=trim(list_vars)//' prtspcur prtstm prtsuscep prtvclmb prtvha prtvdw prtvhxc prtkbff'
  list_vars=trim(list_vars)//' prtvol prtvolimg prtvpsp prtvxc prtwant prtwf prtwf_full prtxml prt1dm'
+ list_vars=trim(list_vars)//' prt_GF_csv prt_lorbmag prt_model'
  list_vars=trim(list_vars)//' pseudos ptcharge'
  list_vars=trim(list_vars)//' pvelmax pw_unbal_thresh'
 !Q

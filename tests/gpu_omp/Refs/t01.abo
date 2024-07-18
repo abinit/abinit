@@ -2,7 +2,7 @@
 .Version 9.11.6.7 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_nvhpc23.9-0 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -258,7 +258,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
  
 ================================================================================
  
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
  
 --- Iteration: (1/4) Internal Cycle: (1/1)
@@ -852,7 +852,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     110.750     110.742
  
 ================================================================================
  
-=== [ionmov= 2] Broyden-Fletcher-Goldfard-Shanno method (forces)            
+=== [ionmov= 2] Broyden-Fletcher-Goldfarb-Shanno method (forces)            
 ================================================================================
  
 --- Iteration: (1/4) Internal Cycle: (1/1)

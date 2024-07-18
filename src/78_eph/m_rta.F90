@@ -14,7 +14,7 @@
 !!  can be easily included once an appropriate model is added to the ab-initio e-ph scattering rates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (HM, MG)
+!!  Copyright (C) 2008-2024 ABINIT group (HM, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,14 +139,15 @@ type,public :: rta_t
    ! Number of bands included in self-energy matrix elements for each k-point in kcalc.
    ! Depends on spin because all degenerate states should be included when symmetries are used.
 
-  !integer,allocatable :: kcalc2ibz(:,:)
+  integer,allocatable :: kcalc2ibz(:,:)
    !kcalc2ibz(nkcalc, 6))
    ! Mapping ikcalc --> IBZ as reported by listkk.
 
   integer,allocatable :: kcalc2ebands(:,:)
+   ! (6, nkcalc)
    ! Mapping ikcalc --> ebands IBZ
-   ! Note that this array is not necessarily equation to kcalc2ibz computed in sigmaph
-   ! because we may have used sigma_nkpt to downsample the initial nkpt mesh.
+   ! Note that this array is not necessarily equal to kcalc2ibz computed in sigmaph
+   ! because we may have used sigma_ngkpt to downsample the initial nkpt mesh.
    ! This array is computed in get_ebands and is equal to kcalc2ibz if sigma_nkpt == ngkpt
 
    real(dp),allocatable :: kTmesh(:)
@@ -401,7 +402,7 @@ type(rta_t) function rta_new(dtset, dtfil, ngfftc, cryst, ebands, pawtab, psps, 
  call alloc_copy(sigmaph%bstart_ks, new%bstart_ks)
  call alloc_copy(sigmaph%bstop_ks, new%bstop_ks)
  call alloc_copy(sigmaph%nbcalc_ks, new%nbcalc_ks)
- !call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
+ call alloc_copy(sigmaph%kcalc2ibz, new%kcalc2ibz)
 
  new%bmin = minval(sigmaph%bstart_ks); new%bmax = maxval(sigmaph%bstop_ks)
  !new%bmin = 1; new%bmax = ebands%mband ! This for debugging purposes, results should not change
@@ -1237,12 +1238,17 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
  !    nctkarr_t("eph_ngqpt_fine", "int", "three"), &
 
  ncerr = nctk_def_dims(ncid, [ &
-    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol)], defmode=.True.)
+    nctkdim_t("ntemp", self%ntemp), nctkdim_t("nrta", self%nrta), nctkdim_t("nsppol", self%nsppol), &
+    nctkdim_t("nkcalc", self%nkcalc), nctkdim_t("nkibz", self%ebands%nkpt) &
+ ], defmode=.True.)
  NCF_CHECK(ncerr)
 
  ncerr = nctk_def_arrays(ncid, [ &
     nctkarr_t('transport_ngkpt', "int", "three"), &
     nctkarr_t('sigma_erange', "dp", "two"), &
+    nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+    nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+    nctkarr_t("kibz", "dp", "three, nkibz"), &
     nctkarr_t('kTmesh', "dp", "ntemp"), &
     nctkarr_t('transport_mu_e', "dp", "ntemp"), &
     nctkarr_t('n_ehst', "dp", "two, nsppol, ntemp"), &
@@ -1286,6 +1292,9 @@ subroutine rta_ncwrite(self, cryst, dtset, ncid)
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "transport_ngkpt"), dtset%transport_ngkpt))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "sigma_erange"), dtset%sigma_erange))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), self%kcalc2ibz))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), self%kcalc2ebands))
+ NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), self%ebands%kptns))
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kTmesh"), self%kTmesh))
  if (self%assume_gap) then
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "vb_max"), self%gaps%vb_max))
@@ -1538,7 +1547,7 @@ subroutine rta_free(self)
  ABI_SFREE(self%bstart_ks)
  ABI_SFREE(self%bstop_ks)
  ABI_SFREE(self%nbcalc_ks)
- !ABI_SFREE(self%kcalc2ibz)
+ ABI_SFREE(self%kcalc2ibz)
  ABI_SFREE(self%kcalc2ebands)
  ABI_SFREE(self%kTmesh)
  ABI_SFREE(self%eminmax_spin)
@@ -1813,7 +1822,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
  if (abs_tol <= zero) then
    rtmp = minval(ibte%n_ehst, mask=ibte%n_ehst > zero) * ibte%nsppol
    abs_tol = 1e-20 * rtmp / cryst%ucvol / Bohr_cm**3
-   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from carrier density")
+   call wrtout(std_out, " Input ibte_abs_tol <= zero ==> computing abs tolerance from minimal carrier density over all T")
    call wrtout(std_out, " using: abs_tol = 1e-20 * e_density (in cm**-3)")
    call wrtout(std_out, sjoin(" abs_tol:", ftoa(abs_tol), " from carrier_density:", ftoa(rtmp / cryst%ucvol / Bohr_cm**3)))
  end if
@@ -1824,13 +1833,17 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
 
    ncerr = nctk_def_dims(ncid, [ &
-      nctkdim_t("nkibz", nkibz), nctkdim_t("bsize", bsize)], defmode=.True.)
+      nctkdim_t("nkibz", nkibz), nctkdim_t("bsize", bsize), nctkdim_t("nkcalc", ibte%nkcalc) &
+   ], defmode=.True.)
    NCF_CHECK(ncerr)
 
    ncerr = nctk_def_arrays(ncid, [ &
      nctkarr_t('fkn_out_sigma', "dp", "three, nkibz, bsize, nsppol, ntemp"), &
      nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
      nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
+     nctkarr_t("kcalc2ibz", "int", "nkcalc, six"), &
+     nctkarr_t("kcalc2ebands", "int", "six, nkcalc"), &
+     nctkarr_t("kibz", "dp", "three, nkibz"), &
      nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
    ], defmode=.True.)
    NCF_CHECK(ncerr)
@@ -1951,6 +1964,7 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
      end do ! spin
 
      call xmpi_sum(fkn_out, comm, ierr)
+     ! Write fnk_out_sigma to disk.
      if (my_rank == master) then
        NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "fkn_out_sigma"), fkn_out, start=[1,1,1,1,itemp]))
      end if
@@ -2076,18 +2090,14 @@ subroutine ibte_driver(dtfil, ngfftc, dtset, ebands, cryst, pawtab, psps, comm)
    !call wrtout(unts, ch10//sjoin("- Writing IBTE transport results to:", path))
    !NCF_CHECK(nctk_open_modify(ncid, path , xmpi_comm_self))
 
-   !ncerr = nctk_def_arrays(ncid, [ &
-   !  nctkarr_t('ibte_sigma', "dp", "three, three, two, nsppol, ntemp"), &
-   !  nctkarr_t('ibte_mob', "dp", "three, three, two, nsppol, ntemp"), &
-   !  nctkarr_t('ibte_rho', "dp", "three, three, ntemp") &
-   !], defmode=.True.)
-   !NCF_CHECK(ncerr)
-
    ! Write data.
    NCF_CHECK(nctk_set_datamode(ncid))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_sigma"), ibte_sigma))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_mob"), ibte_mob))
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "ibte_rho"), ibte_rho))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ibz"), ibte%kcalc2ibz))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kcalc2ebands"), ibte%kcalc2ebands))
+   NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "kibz"), ibte%ebands%kptns))
    NCF_CHECK(nf90_close(ncid))
 #endif
 

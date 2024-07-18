@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, FJ, MT)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -248,7 +248,7 @@ contains
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
  coretau_method=0
- if (usekden==1.and.psps%usepaw==1) then
+ if (usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
  end if
 

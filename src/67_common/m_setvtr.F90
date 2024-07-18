@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
+!!  Copyright (C) 1998-2024 ABINIT group (XG, GMR, FJ, MT, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -361,7 +361,7 @@ subroutine setvtr(atindx1,dtset,energies,gmet,gprimd,grchempottn,grewtn,grvdw,gs
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
  coretau_method=0
- if (dtset%usekden==1.and.psps%usepaw==1) then
+ if (dtset%usekden==1) then
    coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
  end if
 !In some specific cases, XC has to be handled as non-magnetic

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
+!!  Copyright (C) 2008-2024 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -235,7 +235,7 @@ end subroutine destroy_mpi_enreg
 !!
 !! SOURCE
 
-subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
+subroutine copy_mpi_enreg(MPI_enreg1, MPI_enreg2)
 
 !Arguments ------------------------------------
 !scalars

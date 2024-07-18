@@ -151,6 +151,7 @@ _tsuite_dirs = [
     "etsf_io",
     "fast",
     "gwr",
+    #"gwpt",
     "psml",
     "gpu",
     "libxc",
@@ -159,6 +160,7 @@ _tsuite_dirs = [
     # "hpc",
     "hpc_gpu_omp",
     "gpu_omp",
+    "gpu_kokkos",
     # "physics",
     "seq",
     "tutoatdep",
@@ -178,6 +180,7 @@ _tsuite_dirs = [
     "v7",
     "v8",
     "v9",
+    "v10",
     "vdwxc",
     "wannier90",
 ]
