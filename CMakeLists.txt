@@ -248,6 +248,66 @@ endif()
 
 if (MPI_FOUND)
 
+  # try to detect if our MPI implementation supports MPI-IO
+  set(ABINIT_ENABLE_MPI_IO AUTO CACHE STRING "Enable to have MPI I/O support (default: no)")
+  set_property(CACHE ABINIT_ENABLE_MPI_IO PROPERTY STRINGS AUTO ON OFF)
+  if(ABINIT_ENABLE_MPI_IO STREQUAL "AUTO" OR (ABINIT_ENABLE_MPI_IO))
+    try_compile(MPI_HAS_IO
+      ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_io.F90
+      LINK_LIBRARIES MPI::MPI_Fortran)
+    if(MPI_HAS_IO)
+      set(ABINIT_ENABLE_MPI_IO ON CACHE STRING "Enable to have MPI I/O support (default: no)" FORCE)
+    else()
+      if(ABINIT_ENABLE_MPI_IO)
+        message(FATAL_ERROR "ABINIT_ENABLE_MPI_IO option is activated but the MPI library does not support MPI-IO!")
+      endif()
+      set(ABINIT_ENABLE_MPI_IO OFF CACHE STRING "Enable to have MPI I/O support (default: no)" FORCE)
+    endif()
+  endif()
+  if(ABINIT_ENABLE_MPI_IO)
+    set(HAVE_MPI_IO 1)
+  endif()
+
+  # try to detect if our MPI implementation supports MPI_INPLACE
+  set(ABINIT_ENABLE_MPI_INPLACE AUTO CACHE STRING "Enable the use of MPI_IN_PLACE (default: auto)")
+  set_property(CACHE ABINIT_ENABLE_MPI_INPLACE PROPERTY STRINGS AUTO ON OFF)
+  if((ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO") OR (ABINIT_ENABLE_MPI_INPLACE))
+    try_compile(MPI_HAS_INPLACE
+      ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
+      LINK_LIBRARIES MPI::MPI_Fortran)
+    if(MPI_HAS_INPLACE)
+      set(ABINIT_ENABLE_MPI_INPLACE ON CACHE STRING "Enable the use of MPI_IN_PLACE (default: auto)" FORCE)
+    else()
+      if(ABINIT_ENABLE_MPI_INPLACE)
+        message(FATAL_ERROR "ABINIT_ENABLE_MPI_INPLACE option is activated but the MPI library does not support MPI-INPLACE!")
+      endif()
+      set(ABINIT_ENABLE_MPI_INPLACE OFF CACHE STRING "Enable the use of MPI_IN_PLACE (default: auto)" FORCE)
+    endif()
+  endif()
+  if(ABINIT_ENABLE_MPI_INPLACE)
+    set(HAVE_MPI2_INPLACE 1)
+  endif()
+
+  # try to detect if our MPI implementation has buggy interfaces (mishandling scalars)
+  set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX AUTO CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)")
+  set_property(CACHE ABINIT_ENABLE_MPI_INTERFACES_BUGFIX PROPERTY STRINGS AUTO ON OFF)
+  if((ABINIT_ENABLE_MPI_INTERFACES_BUGFIX STREQUAL "AUTO") OR (NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX))
+    try_compile(MPI_NOT_BUGGY
+      ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_buggy_interfaces.F90
+      LINK_LIBRARIES MPI::MPI_Fortran)
+    if(NOT MPI_NOT_BUGGY)
+      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX ON CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
+    else()
+      if(NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
+        message(FATAL_ERROR "ABINIT_ENABLE_MPI_INTERFACES_BUGFIX option is deactivated but the MPI library has buggy interfaces!")
+      endif()
+      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX OFF CACHE STRING "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" FORCE)
+    endif()
+  endif()
+  if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
+    set(HAVE_MPI_BUGGY_INTERFACES 1)
+  endif()
+
   # try to detect if our MPI implementation is cuda-aware
   # 1. If using OpenMPI, then try to parse output of ompi_info
   # 2. If using MPICH, TODO
@@ -712,15 +772,20 @@ message("")
 
 message(STATUS "MPI config:")
 message("    MPI found            : ${MPI_FOUND}")
-message("    MPI standard version : ${MPI_Fortran_VERSION}")
-# note : make sure you correctly your C, C++ and Fortran compiler
-# through variable CC, CXX and FC
-message("    MPI_VENDOR           : ${MPI_VENDOR}")
-message("    MPI library version  : ${MPI_Fortran_LIBRARY_VERSION_STRING}")
-message("    MPI fortran compiler : ${MPI_Fortran_COMPILER}")
-message("    MPI headers          : ${MPI_Fortran_INCLUDE_DIRS}")
-message("    MPI libraries        : ${MPI_Fortran_LIBRARIES}")
-#message("    MPI link flags       : ${MPI_Fortran_LINK_FLAGS}")
+if (MPI_FOUND)
+  message("    MPI standard version : ${MPI_Fortran_VERSION}")
+  # note : make sure you correctly your C, C++ and Fortran compiler
+  # through variable CC, CXX and FC
+  message("    MPI_VENDOR           : ${MPI_VENDOR}")
+  message("    MPI library version  : ${MPI_Fortran_LIBRARY_VERSION_STRING}")
+  message("    MPI fortran compiler : ${MPI_Fortran_COMPILER}")
+  message("    MPI headers          : ${MPI_Fortran_INCLUDE_DIRS}")
+  message("    MPI libraries        : ${MPI_Fortran_LIBRARIES}")
+ #message("    MPI link flags       : ${MPI_Fortran_LINK_FLAGS}")
+  message("    MPI supports MPI-IO  : ${ABINIT_ENABLE_MPI_IO}")
+  message("    MPI supports INPLACE : ${ABINIT_ENABLE_MPI_INPLACE}")
+  message("    MPI has buggy interf.: ${ABINIT_ENABLE_MPI_INTERFACES_BUGFIX}")
+endif()
 message("")
 
 message(STATUS "OpenMP config :")
@@ -762,23 +827,23 @@ message("")
 
 
 message(STATUS "BLAS config:")
-message("  BLA_VENDOR        : ${BLA_VENDOR}")
+message("    BLA_VENDOR        : ${BLA_VENDOR}")
 if (BLAS_FOUND)
-  message("  BLAS_LINKER_FLAGS : ${BLAS_LINKER_FLAGS}")
-  message("  BLAS_LIBRARIES    : ${BLAS_LIBRARIES}")
-  message("  ZDOT workaround   : ${ABINIT_ENABLE_ZDOT_BUGFIX}")
+  message("    BLAS_LINKER_FLAGS : ${BLAS_LINKER_FLAGS}")
+  message("    BLAS_LIBRARIES    : ${BLAS_LIBRARIES}")
+  message("    ZDOT workaround   : ${ABINIT_ENABLE_ZDOT_BUGFIX}")
 else()
-  message("  BLAS not found ! Please recheck your environment variables.")
+  message("    BLAS not found ! Please recheck your environment variables.")
 endif()
 message("")
 
 message(STATUS "LAPACK config:")
-message("  BLA_VENDOR : ${BLA_VENDOR}")
+message("    BLA_VENDOR : ${BLA_VENDOR}")
 if (LAPACK_FOUND)
-  message("  LAPACK_LINKER_FLAGS : ${LAPACK_LINKER_FLAGS}")
-  message("  LAPACK_LIBRARIES    : ${LAPACK_LIBRARIES}")
+  message("    LAPACK_LINKER_FLAGS : ${LAPACK_LINKER_FLAGS}")
+  message("    LAPACK_LIBRARIES    : ${LAPACK_LIBRARIES}")
 else()
-  message("  LAPACK not found ! Please recheck your environment variables.")
+  message("    LAPACK not found ! Please recheck your environment variables.")
 endif()
 message("")
 
