@@ -6,7 +6,7 @@
 !!  This module contains utilities to analyze and retrieve information from the ebands_t.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (MG, MJV, BXu)
+!! Copyright (C) 2008-2024 ABINIT group (MG, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -151,7 +151,7 @@ MODULE m_ebands
    ! a linear interpolation between ief and ief + 1
 
    integer :: ihf = 0
-   ! Like ief (see above) 
+   ! Like ief (see above)
    ! But for fermi level of thermalized holes in valence bands
    ! For occopt 9 purposes
 
@@ -181,7 +181,7 @@ MODULE m_ebands
    real(dp),allocatable :: gef(:)
    ! gef(0:nsppol)
    ! DOS at the Fermi level. Total, spin up, spin down
-   
+
    real(dp),allocatable :: ghf(:)
    ! ghf(0:nsppol)
    ! DOS at the Fermi level of thermalized holes. Total, spin up, spin down
@@ -280,6 +280,7 @@ MODULE m_ebands
     ! fo_kpos(3,nsppol)
     ! fo_kpos(1:2,spin) ==> Indices of the k-points where the homo, lumo states are located (for each spin).
     ! fo_kpos(3,spin)   ==> the index of k-point where the direct gap is located (for each spin).
+    ! NB: f stands for fundamental, o for "optical" gap.
 
    real(dp) :: fermie
     ! Fermi energy taken from ebands.
@@ -2605,7 +2606,7 @@ subroutine ebands_set_extrael(ebands, nelect, nholes, spinmagntarget, msg, prtvo
 !scalars
  integer :: my_prtvol
  real(dp) :: prev_fermie,prev_fermih,prev_nelect,prev_nholes
- 
+
 ! *************************************************************************
 
  my_prtvol = 0; if (present(prtvol)) my_prtvol = prtvol
@@ -3019,7 +3020,7 @@ integer function ebands_ncwrite(ebands, ncid) result(ncerr)
  NCF_CHECK(ncerr)
 
  ! Abinit variables defining the K-point sampling.
- ncerr = nctk_def_arrays(ncid, [&
+ ncerr = nctk_def_arrays(ncid, [ &
    nctkarr_t('kptrlatt_orig', "i", 'number_of_reduced_dimensions, number_of_reduced_dimensions'), &
    nctkarr_t('shiftk_orig',  "dp", 'number_of_reduced_dimensions, nshiftk_orig'), &
    nctkarr_t('kptrlatt', "i", 'number_of_reduced_dimensions, number_of_reduced_dimensions'), &

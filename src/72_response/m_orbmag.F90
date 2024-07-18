@@ -7,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2022 ABINIT group (JWZ)
+!! Copyright (C) 2011-2024 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -169,7 +169,7 @@ CONTAINS  !=====================================================================
 !! wavefunctions and DDK wavefuntions. 
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -231,7 +231,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  type(dataset_type),intent(in) :: dtset
  type(MPI_type), intent(inout) :: mpi_enreg
  type(pawfgr_type),intent(in) :: pawfgr
- type(pseudopotential_type), intent(inout) :: psps
+ type(pseudopotential_type), intent(in) :: psps
 
  !arrays
  integer,intent(in) :: kg(3,mpw*mkmem_rbz),ngfftf(18),npwarr(dtset%nkpt)
@@ -248,7 +248,7 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
  type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
  type(pawang_type),intent(in) :: pawang
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
- type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
+ type(pawtab_type),intent(in) :: pawtab(psps%ntypat*psps%usepaw)
 
  !Local
  !scalars
@@ -474,8 +474,14 @@ subroutine orbmag(cg,cg1,cprj,dtset,eigen0,gsqcut,kg,mcg,mcg1,mcprj,mkmem_rbz,mp
 
      ! compute P_c|cg1>
      ABI_MALLOC(pcg1_k,(2,mcgk,3))
-     call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
-       & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+     if (dtset%berryopt /= -2) then
+       ! DDK wavefunctions computed in DFPT, must be projected onto conduction space
+       call make_pcg1(atindx,cg_k,cg1_k,cprj_k,dimlmn,dtset,gs_hamk,ikpt,isppol,&
+         & mcgk,mcprjk,mkmem_rbz,mpi_enreg,nband_k,npw_k,occ_k,pcg1_k)
+     else
+       ! we are using berryopt PEAD DDK functions which are already projected by construction
+       pcg1_k(1:2,1:mcgk,1:3) = cg1_k(1:2,1:mcgk,1:3)
+     end if
 
      ! compute <p|Pc cg1> cprjs
      ABI_MALLOC(cprj1_k,(dtset%natom,mcprjk,3))
@@ -710,7 +716,7 @@ end subroutine orbmag
 !! make NL(1) term at k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -817,7 +823,7 @@ end subroutine orbmag_nl1_k
 !! make NL term at k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -929,7 +935,7 @@ end subroutine orbmag_nl_k
 !! computes <P_c du/dk|H + E*S|P_c du/dk> term in orbital magnetism
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1083,7 +1089,7 @@ end subroutine orbmag_cc_k
 !! orbmag_vv_k
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1284,7 +1290,7 @@ end subroutine orbmag_vv_k
 !! compute Pc|cg1> from |cg1> and |cg>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1419,7 +1425,7 @@ end subroutine make_pcg1
 !! add core electron contribution to the orbital magnetic moment
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1488,7 +1494,7 @@ end subroutine lamb_core
 !! Onsite part of matrix element <u_n|dp>a_ij<dp|u_m>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1592,7 +1598,7 @@ end subroutine txt_me
 !! Onsite part of matrix element <u_n|a_ij|u_m>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1691,7 +1697,7 @@ end subroutine tt_me
 !! Transfer pawtab%sij to dterm, as complex, solely for convenience
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1759,7 +1765,7 @@ end subroutine dterm_qij
 !! Compute onsite <A0.AN>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1937,7 +1943,7 @@ end subroutine dterm_BM
 !! Compute onsite <L_R/2>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2048,7 +2054,7 @@ end subroutine dterm_LR
 !! Only printing. This routine outputs orbmag terms to the normal abi out file
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2022 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2219,7 +2225,7 @@ end subroutine orbmag_output
 !! free space in dterm_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2293,7 +2299,7 @@ end subroutine dterm_free
 !! allocate space in dterm_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2387,7 +2393,7 @@ end subroutine dterm_alloc
 !! transfer paw_ij to dterm%aij in more convenient format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2425,7 +2431,7 @@ subroutine dterm_aij(atindx,dterm,dtset,paw_ij,pawtab)
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2464,7 +2470,7 @@ end subroutine dterm_aij
 !! compute DIJ SO B1 if called for
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2505,7 +2511,7 @@ subroutine dterm_SOB1(atindx,cplex_dij,dterm,dtset,paw_an,pawang,pawrad,pawtab,q
   type(paw_an_type),intent(inout) :: paw_an(dtset%natom)
   type(pawang_type),intent(in) :: pawang
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2668,7 +2674,7 @@ end subroutine dterm_SOB1
 !! this is a driver to compute different onsite terms, in convenient (complex) format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2705,7 +2711,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
   !scalars
   type(dterm_type),intent(inout) :: dterm
   type(dataset_type),intent(in) :: dtset
-  type(pseudopotential_type), intent(inout) :: psps
+  type(pseudopotential_type), intent(in) :: psps
 
   !arrays
   integer,intent(in) :: atindx(dtset%natom)
@@ -2714,7 +2720,7 @@ subroutine make_d(atindx,dterm,dtset,gprimd,paw_an,paw_ij,pawang,pawrad,pawtab,p
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom)
   type(pawang_type),intent(in) :: pawang
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
-  type(pawtab_type),intent(inout) :: pawtab(dtset%ntypat)
+  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
@@ -2765,7 +2771,7 @@ end subroutine make_d
 !! estimate Fermi energy as max value of all occupied bands/kpts
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2021 ABINIT  group
+!! Copyright (C) 2003-2024 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

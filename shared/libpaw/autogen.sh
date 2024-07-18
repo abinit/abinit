@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-## Copyright (C) 2017-2022 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
+## Copyright (C) 2017-2024 ABINIT group (Yann Pouillon <devops@materialsevolution.es>)
 
 # Stop at first error encountered
 set -e

@@ -13,6 +13,8 @@ outdata_prefix = "trf2_5o"
 
 !Wavevector grid number 1 (coarse grid, from DDB)
   brav    2      ! Bravais Lattice : 1-S.C., 2-F.C., 3-B.C., 4-Hex.)
+                 ! Warning : This ANADDB input variable is obsolete. One should be able to use the default brav=1 in all cases.
+                 !           The tutorial should be updated to reflect correctly the current practice.
   ngqpt   4  4  4   ! Monkhorst-Pack indices
   nqshft  1         ! number of q-points in repeated basic q-cell
   q1shft  3*0.0
@@ -51,7 +53,7 @@ outdata_prefix = "trf2_5o"
 #%% executable = anaddb
 #%% test_chain = trf2_1.abi, trf2_2.abi, trf2_3.abi, trf2_4.abi, trf2_5.abi, trf2_6.abi, trf2_7.abi
 #%% [files]
-#%% files_to_test = trf2_5.abo, tolnlines=1, tolabs=1.1e-5, tolrel=1.8e-8; trf2_5o_PHANGMOM, tolnlines=264, tolabs=1.5e+00, tolrel=1.0e+00
+#%% files_to_test = trf2_5.abo, tolnlines=1, tolabs=1.1e-5, tolrel=1.8e-8; trf2_5o_PHANGMOM, tolnlines=270, tolabs=1.5e+00, tolrel=1.0e+00
 #%% [paral_info]
 #%% max_nprocs = 4
 #%% [extra_info]

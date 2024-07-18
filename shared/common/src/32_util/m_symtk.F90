@@ -6,7 +6,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2024 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +33,7 @@ module m_symtk
  private
 !!***
 
+!TODO: the following 4 routines should not be in this module! They are very general math. Move to m_matrix? Or numeric_noabirules directory?
  public :: mati3inv             ! Invert and transpose orthogonal 3x3 matrix of INTEGER elements.
  public :: mati3det             ! Compute the determinant of a 3x3 matrix of INTEGER elements.
  public :: matr3inv             ! Invert and TRANSPOSE general 3x3 matrix of real*8 elements.
@@ -2146,7 +2147,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1105,6 +1105,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%getdvdb
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getdvdb','INT',0)
 
+ intarr(1,:)=dtsets(:)%getdrhodb
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getdrhodb','INT',0)
+
  intarr(1,:)=dtsets(:)%getefmas
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'getefmas','INT',0)
 
@@ -1182,9 +1185,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
    intarr(1,:)=dtsets(:)%gpu_option
    call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_option','INT',0,firstchar=firstchar_gpu)
-
-   intarr(1,:)=dtsets(:)%gpu_use_nvtx
-   call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_use_nvtx','INT',0,firstchar=firstchar_gpu)
 
    if (any(dtsets(:)%gpu_option/=ABI_GPU_KOKKOS)) then
      intarr(1,:)=dtsets(:)%gpu_kokkos_nthrd
@@ -1428,6 +1428,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%extfpmd_nbdbuf
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nbdbuf','INT',0)
+
+ intarr(1,:)=dtsets(:)%extfpmd_nband
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'extfpmd_nband','INT',0)
 
 !Special treatment of the default values for the hybrid functional parameters.
  do ii=1,4

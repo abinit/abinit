@@ -7,7 +7,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2022 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2024 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -328,6 +328,7 @@ module defs_basis
  integer,public,parameter :: WFK_TASK_OPTICS_FULLBZ = 7
  integer,public,parameter :: WFK_TASK_KPTS_ERANGE= 8
  integer,public,parameter :: WFK_TASK_CHECK_SYMTAB = 9
+ integer,public,parameter :: WFK_TASK_WANNIER = 10
 
 ! Flags defining the method used for performing IO (input variable iomode)
  integer, parameter, public :: IO_MODE_FORTRAN_MASTER = -1
@@ -582,6 +583,8 @@ integer pure function str2wfktask(str) result(wfk_task)
    wfk_task = WFK_TASK_OPTICS_FULLBZ
  case ("check_symtab")
    wfk_task = WFK_TASK_CHECK_SYMTAB
+case ("wannier")
+   wfk_task = WFK_TASK_WANNIER
  case default
    wfk_task = WFK_TASK_NONE
  end select

@@ -1,4 +1,4 @@
-## Copyright (C) 2019-2022 ABINIT group (Yann Pouillon)
+## Copyright (C) 2019-2024 ABINIT group (Yann Pouillon)
 
 #
 # Kokkos (Kokkos "core" libraries)
@@ -78,6 +78,8 @@ AC_DEFUN([SD_KOKKOS_INIT], [
       else
         sd_kokkos_enable="yes"
         sd_kokkos_init="dir"
+        test -d "${withval}/lib" && sd_kokkos_libdir="${withval}/lib"
+        test -d "${withval}/lib64" && sd_kokkos_libdir="${withval}/lib64"
       fi],
     [ sd_kokkos_enable="${sd_kokkos_enable_def}"; sd_kokkos_init="def"])
 
@@ -118,7 +120,7 @@ AC_DEFUN([SD_KOKKOS_INIT], [
         sd_kokkos_cppflags="-I${with_kokkos}/include"
         sd_kokkos_cxxflags="${sd_kokkos_cxxflags_def} -I${with_kokkos}/include"
         sd_kokkos_ldflags="${sd_kokkos_ldflags_def}"
-        sd_kokkos_libs="-L${with_kokkos}/lib64 ${sd_kokkos_libs_def}"
+        sd_kokkos_libs="-L${sd_kokkos_libdir} ${sd_kokkos_libs_def}"
         ;;
 
       env)
@@ -259,7 +261,7 @@ AC_DEFUN([_SD_KOKKOS_CHECK_USE], [
 #  FIXME Kokkos is actually used with a wrapper on NVCC and C++ compiler.
 #  It's complicate, hence we only check for library presence and run no link check (WCGW?).
   sd_kokkos_cxx_ok="no"
-  if test -e "${with_kokkos}/lib64/libkokkoscore.${abi_so_ext}"; then
+  if test -e "${sd_kokkos_libdir}/libkokkoscore.${abi_so_ext}" -o -e "${sd_kokkos_libdir}/libkokkoscore.a"; then
     sd_kokkos_cxx_ok="yes"
   fi
   AC_MSG_RESULT([${sd_kokkos_cxx_ok}])

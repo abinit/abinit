@@ -16,7 +16,7 @@
 !! only these types to perfom calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2016-2022 ABINIT group (J. Bieder, MS)
+!!  Copyright (C) 2016-2024 ABINIT group (J. Bieder, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -429,7 +429,7 @@ contains
       end select
 #endif
 
-    else if ( l_gpu_option==ABI_GPU_DISABLED ) then
+    else if ( l_gpu_option==ABI_GPU_DISABLED .or. l_gpu_option==ABI_GPU_LEGACY ) then
 
       select case (space)
       case (SPACE_R,SPACE_CR)
@@ -678,10 +678,15 @@ contains
     xgBlock%LDim = rows
     xgBlock%cols = cols
     xgBlock%normal = 'n'
+    xgBlock%spacedim_comm = xmpi_comm_null
     if ( present(comm) ) xgBlock%spacedim_comm = comm
     xgBlock%gpu_option = ABI_GPU_DISABLED
     if ( xomp_target_is_present(c_loc(array)) ) xgBlock%gpu_option = ABI_GPU_OPENMP
     if ( present(gpu_option) ) xgBlock%gpu_option = gpu_option
+    if ( xgBlock%gpu_option /= ABI_GPU_DISABLED .and. xgBlock%gpu_option /= ABI_GPU_LEGACY .and. &
+         xgBlock%gpu_option /= ABI_GPU_OPENMP   .and. xgBlock%gpu_option /= ABI_GPU_KOKKOS ) then
+       ABI_ERROR('Bad GPU option in xgBlock_map')
+    end if
 
   end subroutine xgBlock_map
   !!***
@@ -1116,12 +1121,15 @@ contains
 
     call timab(tim_copy,1,tsec)
 
-    if (xgBlockA%gpu_option==xgBLockB%gpu_option) then
+    if (xgBlockA%gpu_option==xgBlockB%gpu_option) then
       l_gpu_option = xgBlockA%gpu_option
-    else if (xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBLockB%gpu_option==ABI_GPU_OPENMP) then
+    else if ((xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBlockB%gpu_option==ABI_GPU_LEGACY) &
+       .or.  (xgBlockA%gpu_option==ABI_GPU_LEGACY  .and.xgBlockB%gpu_option==ABI_GPU_DISABLED)) then
+      l_gpu_option = ABI_GPU_DISABLED
+    else if (xgBlockA%gpu_option==ABI_GPU_DISABLED.and.xgBlockB%gpu_option==ABI_GPU_OPENMP) then
       l_gpu_option = ABI_GPU_DISABLED
       call xgBlock_copy_from_gpu(xgBlockB)
-    else if (xgBlockB%gpu_option==ABI_GPU_DISABLED.and.xgBLockA%gpu_option==ABI_GPU_OPENMP) then
+    else if (xgBlockB%gpu_option==ABI_GPU_DISABLED.and.xgBlockA%gpu_option==ABI_GPU_OPENMP) then
       l_gpu_option = ABI_GPU_DISABLED
       call xgBlock_copy_from_gpu(xgBlockA)
     else
@@ -1390,7 +1398,7 @@ contains
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 # else
@@ -1398,7 +1406,7 @@ contains
           !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
           call MPI_ALLREDUCE(xgBlockW%vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
           !$OMP END TARGET DATA
@@ -1410,7 +1418,7 @@ contains
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecR)
           call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecR,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
 # else
@@ -1418,7 +1426,7 @@ contains
           !$OMP TARGET ENTER DATA MAP(alloc:vecR_buf)
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecR,vecR_buf)
           call MPI_ALLREDUCE(xgBlockW__vecR, vecR_buf,&
-          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
+          &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           xgBlockW%vecR(1:xgBlockW%cols,1:xgBlockW%rows)=vecR_buf(1:xgBlockW%cols,1:xgBlockW%rows)
           !$OMP END TARGET DATA
@@ -1488,7 +1496,7 @@ contains
 #ifdef HAVE_OPENMP_OFFLOAD_DATASTRUCTURE
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW%vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW%vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW%vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -1508,7 +1516,7 @@ contains
 !FIXME For several compilers, OMP doesn't work correctly with structured types, so use pointers
 # ifdef HAVE_MPI2_INPLACE
           !$OMP TARGET DATA USE_DEVICE_PTR(xgBlockW__vecC)
-          call MPI_ALLREDUCE(xmpi_in_place,xgBlockW__vecC,&
+          call MPI_ALLREDUCE(MPI_IN_PLACE,xgBlockW__vecC,&
           &    xgBlockW%cols*xgBlockW%rows,MPI_DOUBLE_COMPLEX,MPI_SUM,&
           &    xgBlockW%spacedim_comm,K)
           !$OMP END TARGET DATA
@@ -4199,20 +4207,20 @@ contains
     integer        , intent(in   ) :: newShape(2)
     type(c_ptr) :: cptr
 
-    if ( xgBLock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
-      write(std_out,*) "xgBLock%rows", xgBLock%rows
+    if ( xgBlock%rows*xgBlock%cols /= newShape(1)*newShape(2) ) then
+      write(std_out,*) "xgBlock%rows", xgBlock%rows
       write(std_out,*) "xgBlock%cols", xgBlock%cols
       write(std_out,*) "newShape(1)", newShape(1)
       write(std_out,*) "newShape(2)", newShape(2)
-      write(std_out,*) "xgBLock%rows*xgBlock%cols", xgBLock%rows*xgBlock%cols
+      write(std_out,*) "xgBlock%rows*xgBlock%cols", xgBlock%rows*xgBlock%cols
       write(std_out,*) "newShape(1)*newShape(2)", newShape(1)*newShape(2)
       ABI_ERROR("Bad shape")
     end if
 
-    xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBLock%rows)* xgBlock%cols)/newShape(2)
+    xgBlock%LDim = newShape(1)+( (xgBlock%LDim-xgBlock%rows)* xgBlock%cols)/newShape(2)
     xgBlock%rows = newShape(1)
     xgBlock%cols = newShape(2)
-    select case(xgBLock%space)
+    select case(xgBlock%space)
     case (SPACE_R,SPACE_CR)
       cptr = getClocR(xgBlock%LDim,xgBlock%cols,xgBlock%vecR)
       call c_f_pointer(cptr,xgBlock%vecR,newshape)

@@ -2,7 +2,7 @@
 .Version 9.9.3 of ABINIT 
 .(MPI version, prepared for a x86_64_darwin21.5.0_gnu12.1 computer) 
 
-.Copyright (C) 1998-2022 ABINIT group . 
+.Copyright (C) 1998-2024 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -345,8 +345,8 @@ meta: {optdriver: 6, }
 )     Maximum=    2.2576E+00  at reduced coord.    0.0000    0.0000    0.0000
 )     Minimum=    1.1446E-03  at reduced coord.    0.2500    0.2500    0.2500
    Integrated=    1.0000E+01
- setmesh: FFT mesh size selected  =    20x   20x   15
-          total number of points  =         6000
+ setmesh: FFT mesh size selected  =    15x   15x   15
+          total number of points  =         3375
 
  Computing oscilator matrix elements for CC4S.
 
@@ -360,18 +360,23 @@ meta: {optdriver: 6, }
 
  Writing CoulombVertex data to file: t07o_DS2_CoulombVertex.elements
 
- Writing Coulomb vertex for testing purposes with ng: 4
+ Reading norm of Coulomb vertex for testing purposes with ng: 4
 
+ List of g-vectors in the Coulomb vertex:
+1 : [0, 0, 0]
+2 : [1, 0, 0]
+3 : [-1, 0, 0]
+4 : [0, 1, 0]
  For band1: 1 , band2: 1
-  0.00000E+00  0.00000E+00  2.22623E+01 -4.12984E-16  6.94798E+00 -2.56130E-16  6.94798E+00  2.56130E-16
+  7.60297E-01  1.94792E-01  1.94792E-01  1.94792E-01
  For band1: 1 , band2: 2
-  0.00000E+00  0.00000E+00  2.73160E+00 -2.03188E-15  7.98311E-01 -1.30404E-15  7.98311E-01 -1.08209E-15
+  0.00000E+00  2.39011E-02  2.39011E-02  2.39011E-02
  For band1: 1 , band2: 3
- -0.00000E+00  0.00000E+00 -5.88605E-01  1.51908E-08 -7.45242E-02  1.92333E-09  7.45242E-02 -1.92333E-09
+  0.00000E+00  5.14930E-03  5.14930E-03  7.34877E-04
  For band1: 1 , band2: 4
-  0.00000E+00  0.00000E+00 -7.84017E-01 -2.12028E-07 -9.92657E-02 -2.68453E-08  9.92657E-02  2.68453E-08
+  0.00000E+00  6.85820E-03  6.85820E-03  2.20535E-02
  For band1: 1 , band2: 5
-  0.00000E+00  0.00000E+00 -2.32501E+00 -1.07013E-07 -2.94374E-01 -1.35491E-08  2.94374E-01  1.35491E-08
+  0.00000E+00  2.03443E-02  2.03443E-02  7.38160E-04
 
  === KS gaps after direct diagonalization ===
  Direct band gap semiconductor

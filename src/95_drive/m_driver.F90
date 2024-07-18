@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group ()
+!!  Copyright (C) 2008-2024 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -35,6 +35,7 @@ module m_driver
  use m_dtfil
  use m_fftcore
  use libxc_functionals
+ use m_longwave
 #if defined DEV_YP_VDWXC
  use m_xc_vdw
 #endif
@@ -74,8 +75,6 @@ module m_driver
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
 
- use m_longwave
-
  implicit none
 
  private
@@ -101,7 +100,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2024 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

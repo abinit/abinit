@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2022 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
+!! Copyright (C) 2008-2024 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -632,7 +632,9 @@ integer function kpts_map(mode, timrev, cryst, krank, nkpt2, kpt2, map, qpt, dks
  case("symrec")
    ! Note symrec and use_symrec = .True.
    ! These are the conventions for the symmetrization of the DVDB as well as the conventions
-   ! used in several BZ routines. We should always use this convention.
+   ! used in several BZ routines.
+   ! In principle one should always use this convention but then the symmetrization of the
+   ! wavefunctions should be rewritten almost completely.
 
    call krank%get_mapping(nkpt2, kpt2, dksqmax, cryst%gmet, map, &
                           cryst%nsym, cryst%symafm, cryst%symrec, timrev, use_symrec=.True., qpt=my_qpt)

@@ -7,7 +7,7 @@
 !!  or to perform the FFT of the wavefunctions when the orbitals are distributed in linalg mode (paral_kgb = 1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2022 ABINIT group (FBottin,MT,GZ,MD,FDahm)
+!!  Copyright (C) 1998-2024 ABINIT group (FBottin,MT,GZ,MD,FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -642,8 +642,8 @@ subroutine prep_nonlop(choice,cpopt,cwaveprj,enlout_block,hamk,idir,lambdablock,
  logical,optional,intent(in)            :: already_transposed
  integer,optional,intent(in)            :: gpu_option
  real(dp),        intent(in)            :: lambdablock(blocksize)
- real(dp),        intent(out)           :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
- real(dp),        intent(inout)         :: cwavef(:,:)
+ real(dp),        intent(out)  , target :: enlout_block(nnlout*blocksize),gvnlc(:,:),gsc(:,:)
+ real(dp),        intent(inout), target :: cwavef(:,:)
  real(dp),ABI_CONTIGUOUS optional,intent(inout)        :: vectproj(:,:,:)
  type(gs_hamiltonian_type),intent(in)   :: hamk
  type(mpi_type),intent(in)              :: mpi_enreg

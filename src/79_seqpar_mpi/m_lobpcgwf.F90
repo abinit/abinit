@@ -10,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (JB)
+!! Copyright (C) 1998-2024 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,6 +49,10 @@ module m_lobpcgwf
  use m_prep_kgb,    only : prep_getghc, prep_nonlop
  use m_getghc,      only : multithreaded_getghc
  use m_cgtools,     only : dotprod_g
+
+#if defined(HAVE_GPU)
+ use m_gpu_toolbox
+#endif
 
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
  use m_nvtx_data

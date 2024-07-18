@@ -6,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2022 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2024 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -158,7 +158,6 @@ program abinit
  integer :: mu,natom,ncomment,ncomment_paw,ndtset
  integer :: ndtset_alloc,nexit,nexit_paw,nfft,nkpt,npsp
  integer :: nsppol,nwarning,nwarning_paw,prtvol,timopt,gpu_option
- logical :: use_nvtx
  integer,allocatable :: nband(:),npwtot(:)
  real(dp) :: etotal, tcpui, twalli
  real(dp) :: strten(6),tsec(2)
@@ -351,7 +350,7 @@ program abinit
  ! Check whether the string only contains valid keywords
  call chkvars(string)
 
-!At this stage, all the information from the "files" file and "input" file have been read and checked.
+ ! At this stage, all the information from the "files" file and "input" file have been read and checked.
 
 !------------------------------------------------------------------------------
 
@@ -365,14 +364,12 @@ program abinit
 
 !Activate GPU is required
  gpu_option=ABI_GPU_DISABLED
- use_nvtx=.false.
  gpu_devices(:)=-1
  do ii=1,ndtset_alloc
    if (dtsets(ii)%gpu_option/=ABI_GPU_DISABLED) then
      gpu_option=dtsets(ii)%gpu_option
      gpu_devices(:)=dtsets(ii)%gpu_devices(:)
    end if
-   if (dtsets(ii)%gpu_use_nvtx==1) use_nvtx=.true.
  end do
 #ifdef HAVE_GPU
  call setdevice_cuda(gpu_devices,gpu_option)
@@ -383,8 +380,9 @@ program abinit
  end if
 #endif
 
+!Enable GPU markers (NVTX/ROCTX) if required
 #if defined(HAVE_GPU) && defined(HAVE_GPU_MARKERS)
- NVTX_INIT(use_nvtx)
+ NVTX_INIT()
 #endif
 
 !------------------------------------------------------------------------------
@@ -429,9 +427,9 @@ program abinit
      call wrtout([std_out, ab_out], msg)
    else
      ! Echo input to output file on unit ab_out, and to log file on unit std_out.
-     ! (Well, this might make sense for outvars, but not so much for out_spg_anal 
+     ! (Well, this might make sense for outvars, but not so much for out_spg_anal
      !  so there is only one call to the latter, for both units)
-     ! both 
+     ! both
      choice=2
      do ii=1,2
        if(ii==1)iounit=ab_out

@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2022 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2024 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1478,7 +1478,7 @@ end subroutine hartrestr
 !! put total density in first half of rhor array and spin up in second half
 !! If (nspden=2 and nsppol=2) the density is transformed as  (up,down) => (up+down,up)
 !! If (nspden=2 and nsppol=1) anti-ferromagnetic symmetry operations
-!!  must be used, such as to transform (2*up) => (up+down,up)
+!! must be used, such as to transform (2*up) => (up+down,up)
 !! In spin-polarized, and if there is no symmetry to be
 !! applied on the system, only the total density is generated in G space
 !!
@@ -2626,7 +2626,7 @@ end subroutine setsym
 !!  The calculation is performed in reduced reciprocal space coordinates.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2021-2022 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2021-2024 ABINIT group (FIXME: add author)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2022 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,12 +37,12 @@ module m_cohsex
  use m_crystal,       only : crystal_t
  use m_bz_mesh,       only : kmesh_t, findqg0, littlegroup_t
  use m_gsphere,       only : gsphere_t
- use m_fft_mesh,      only : get_gftt, rotate_fft_mesh, cigfft
+ use m_fft_mesh,      only : get_gfft, rotate_fft_mesh, cigfft
  use m_vcoul,         only : vcoul_t
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g
  use m_wfd,           only : wfdgw_t, wave_t
  use m_oscillators,   only : rho_tw_g, calc_wfwfg
- use m_screening,     only : epsm1_symmetrizer, get_epsm1, epsilonm1_results
+ use m_screening,     only : epsilonm1_results
  use m_esymm,         only : esymm_t, esymm_symmetrize_mels, esymm_failed
  use m_sigma,         only : sigma_t, sigma_distribute_bks
  use m_pawang,        only : pawang_type
@@ -69,7 +69,7 @@ contains
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2022 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2024 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -380,7 +380,7 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
    if (mod10==SIG_COHSEX) then
      ABI_MALLOC(gw_gfft,(3,gwc_nfftot))
      q0=zero
-     call get_gftt(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
+     call get_gfft(gwc_ngfft,q0,Cryst%gmet,gw_gsq,gw_gfft)
      ABI_MALLOC(Pwij_fft,(Psps%ntypat))
      call pawpwij_init(Pwij_fft,gwc_nfftot,(/zero,zero,zero/),gw_gfft,Cryst%rprimd,Psps,Pawtab,Paw_pwff)
    end if
@@ -529,11 +529,11 @@ subroutine cohsex_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,Cryst,QP_BSt,Si
 
      if (Er%mqmem==0) then
        ! Read q-slice of epsilon^{-1}|chi0 in Er%epsm1(:,:,:,1) (much slower but less memory).
-       call get_epsm1(Er,Vcp,0,0,iomode,xmpi_comm_self,iqibzA=iq_ibz)
+       call Er%get_epsm1(Vcp,0,0,iomode,xmpi_comm_self,iqibzA=iq_ibz)
      end if
 
      ! Only omega==0 for SEX or COHSEX
-     call Epsm1_symmetrizer(iq_bz, 1, npwc, Er, Gsph_c, Qmesh, .True., epsm1_qbz)
+     call Er%rotate_iqbz(iq_bz, 1, npwc, Gsph_c, Qmesh, .True., epsm1_qbz)
 
      ! Get Fourier components of the Coulomb interaction in the BZ.
      ! In 3D systems, neglecting umklapp,  vc(Sq,sG)=vc(q,G)=4pi/|q+G|
