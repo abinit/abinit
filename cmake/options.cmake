@@ -63,20 +63,24 @@ endif()
 
 option(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX "Enable a workaround for buggy MPI interfaces (mishandling scalars) (default: auto)" AUTO)
 if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX STREQUAL "AUTO")
-  try_compile(MPI_NOT_BUGGY ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
+  try_compile(MPI_NOT_BUGGY
+    ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace_buggy.F90
     LINK_LIBRARIES MPI::MPI_Fortran)
-    if(NOT MPI_NOT_BUGGY)
-      set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX,ON)
-    endif()
+  if(NOT MPI_NOT_BUGGY)
+    set(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX,ON)
+  endif()
 endif()
 if(ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
   set(HAVE_MPI_BUGGY_INTERFACES 1)
 endif()
 
 option(ABINIT_ENABLE_MPI_INPLACE "Enable the use of MPI_IN_PLACE (default: auto)" AUTO)
+message("JE SUIS ICIIIIIIIIIIIIIIIII")
+message("ABINIT_ENABLE_MPI_INPLACE=${ABINIT_ENABLE_MPI_INPLACE}")
 if(ABINIT_ENABLE_MPI_INPLACE STREQUAL "AUTO")
   if(NOT ABINIT_ENABLE_MPI_INTERFACES_BUGFIX)
-    try_compile(ABINIT_ENABLE_MPI_INPLACE ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
+    try_compile(ABINIT_ENABLE_MPI_INPLACE
+      ${CMAKE_BINARY_DIR}/try_compile ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_mpi_inplace.F90
       LINK_LIBRARIES MPI::MPI_Fortran)
   else()
     set(ABINIT_ENABLE_MPI_INPLACE,OFF)
@@ -107,12 +111,6 @@ option(ABINIT_ENABLE_PYTHON_INVOCATION "Enable python invocation (default OFF)" 
 if(ABINIT_ENABLE_PYTHON_INVOCATION)
   set(HAVE_PYTHON_INVOCATION 1)
   set(DO_BUILD_67_PYTHON_INVOCATION_EXT ON)
-endif()
-
-option(ABINIT_ENABLE_ZDOT_BUGFIX "Activate workaround for bugged ZDOTC and ZDOTU (default OFF)" OFF)
-if(ABINIT_ENABLE_ZDOT_BUGFIX)
-  set(HAVE_LINALG_ZDOTC_BUG 1)
-  set(HAVE_LINALG_ZDOTU_BUG 1)
 endif()
 
 option (ABINIT_ENFORCE_CUDA_AWARE_MPI "Some MPI cuda-aware implementation are not well detected; use this variable to enforce if you that your MPI implementation is Cuda-aware." OFF)

@@ -25,6 +25,7 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
   sd_linalg_has_lapacke="unknown"
   sd_linalg_has_blacs="unknown"
   sd_linalg_has_scalapack="unknown"
+  sd_linalg_has_buggy_zdot="unknown"
   sd_linalg_has_elpa="unknown"
   sd_linalg_has_elpa_2013="unknown"
   sd_linalg_has_elpa_2014="unknown"
@@ -47,6 +48,9 @@ AC_DEFUN([_SD_LINALG_CHECK_LIBS], [
 
   # BLAS?
   _SD_LINALG_CHECK_BLAS
+
+  # Buggy dot/norm BLAS functions ?
+  _SD_LINALG_CHECK_BUGGY_ZDOT
 
   # BLAS extensions?
   _SD_LINALG_CHECK_BLAS_EXTS
@@ -596,14 +600,14 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       ;;
 
     aocl|AOCL)
-      abi_linalg_vendor_provided="blas lapack scalapack"
-      if test "${abi_openmp_enable}" = "yes"; then
-        abi_linalg_vendor_blas_libs="-lblis-mt"
+      sd_linalg_vendor_provided="blas lapack scalapack"
+      if test "${sd_openmp_enable}" = "yes"; then
+        sd_linalg_vendor_blas_libs="-lblis-mt"
       else
-        abi_linalg_vendor_blas_libs="-lblis"
+        sd_linalg_vendor_blas_libs="-lblis"
       fi
-      abi_linalg_vendor_lapack_libs="-lflame"
-      abi_linalg_vendor_scalapack_libs="-lscalapack"
+      sd_linalg_vendor_lapack_libs="-lflame"
+      sd_linalg_vendor_scalapack_libs="-lscalapack"
       ;;
 
     asl)
@@ -699,10 +703,10 @@ AC_DEFUN([_SD_LINALG_SET_VENDOR_FLAGS], [
       ;;
 
     nvpl)
-      abi_linalg_vendor_provided="blas lapack scalapack"
-      abi_linalg_vendor_blas_libs="-Mnvpl=blas"
-      abi_linalg_vendor_lapack_libs="-Mnvpl=lapack"
-      abi_linalg_vendor_scalapack_libs="-Mscalapack"
+      sd_linalg_vendor_provided="blas lapack scalapack"
+      sd_linalg_vendor_blas_libs="-Mnvpl=blas"
+      sd_linalg_vendor_lapack_libs="-Mnvpl=lapack"
+      sd_linalg_vendor_scalapack_libs="-Mscalapack"
       ;;
 
     openblas)

@@ -732,11 +732,12 @@ SD_YAKL_INIT([optional fail])
 
 ABI_MSG_SECTION([Linear algebra support])
 
-#SD_LINALG_INIT([required fail])
-SD_LINALG_INIT([required warn])
-SD_LINALG_INIT_FLAVOR
+#SD_LINALG_INIT([required warn]) # This is called by ABI_LINALG_INIT now
+#SD_LINALG_INIT_FLAVOR           # This is called by ABI_LINALG_INIT now
 
-SD_LINALG_DETECT
+ABI_LINALG_INIT
+
+ABI_LINALG_DETECT
 
 # the minimum needed to declare linalg working...
 sd_linalg_ok="no"
