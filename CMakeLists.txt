@@ -146,6 +146,32 @@ find_package(BLAS)
 find_package(LAPACK)
 
 #
+# Check for buggy BLAS interfaces
+# Set the ABINIT_ENABLE_ZDOT_BUGFIX flag
+#
+set(ABINIT_ENABLE_ZDOT_BUGFIX AUTO CACHE STRING "Activate workaround for bugged ZDOTC and ZDOTU (default: auto)")
+set_property(CACHE ABINIT_ENABLE_ZDOT_BUGFIX PROPERTY STRINGS AUTO ON OFF)
+if((ABINIT_ENABLE_ZDOT_BUGFIX STREQUAL "AUTO") OR (NOT ABINIT_ENABLE_ZDOT_BUGFIX))
+  try_run(BLAS_BUGGY_RUN BLAS_BUGGY_COMPILE
+    ${CMAKE_BINARY_DIR}/try_run ${CMAKE_SOURCE_DIR}/cmake/try_compile/have_linalg_zdot_bug.F90
+    LINK_LIBRARIES BLAS::BLAS
+    RUN_OUTPUT_VARIABLE BLAS_BUGGY_OUTPUT)
+  STRING(STRIP "${BLAS_BUGGY_OUTPUT}" BLAS_BUGGY_OUTPUT)
+  if(BLAS_BUGGY_OUTPUT STREQUAL "OK")
+    set(ABINIT_ENABLE_ZDOT_BUGFIX OFF CACHE STRING "Activate workaround for bugged ZDOTC and ZDOTU (default: auto)" FORCE)
+  else()
+    if(NOT ABINIT_ENABLE_ZDOT_BUGFIX)
+      message(FATAL_ERROR "ABINIT_ENABLE_ZDOT_BUGFIX option is deactivated but the BLAS library has buggy interfaces!")
+    endif()
+    set(ABINIT_ENABLE_ZDOT_BUGFIX ON CACHE STRING "Activate workaround for bugged ZDOTC and ZDOTU (default: auto)" FORCE)
+  endif()
+endif()
+if(ABINIT_ENABLE_ZDOT_BUGFIX)
+  set(HAVE_LINALG_ZDOTC_BUG 1)
+  set(HAVE_LINALG_ZDOTU_BUG 1)
+endif()
+
+#
 # Select FFT flavor
 # available flavors are: FFTW3, MKL_DFTI, GOEDECKER, PFFT
 #
@@ -736,10 +762,11 @@ message("")
 
 
 message(STATUS "BLAS config:")
-message("  BLA_VENDOR : ${BLA_VENDOR}")
+message("  BLA_VENDOR        : ${BLA_VENDOR}")
 if (BLAS_FOUND)
   message("  BLAS_LINKER_FLAGS : ${BLAS_LINKER_FLAGS}")
   message("  BLAS_LIBRARIES    : ${BLAS_LIBRARIES}")
+  message("  ZDOT workaround   : ${ABINIT_ENABLE_ZDOT_BUGFIX}")
 else()
   message("  BLAS not found ! Please recheck your environment variables.")
 endif()
