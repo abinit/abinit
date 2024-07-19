@@ -790,7 +790,7 @@ subroutine varpeq_setup(self, dtfil)
 
 !----------------------------------------------------------------------
 
- ! If a comaptible VARPEQ.nc file is avaliable along with special flags, use it to either
+ ! If a compatible VARPEQ.nc file is avaliable along with special flags, use it to either
  ! restart the calculation or interpolate initial charge localization
 
  units = [std_out, ab_out]
@@ -2537,6 +2537,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_CALLOC(sc_displ_cart_re, (3, scell%natom, nsppol))
    ABI_CALLOC(sc_displ_cart_im, (3, scell%natom, nsppol))
 
+   ! TODO: Finalize the implementation.
    cnt = 0
    do spin=1,nsppol
      do iq=1,vpq%nq_spin(spin)
@@ -2559,8 +2560,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !
        isirr_q = (isym_q == 1 .and. trev_q == 0)
        qq_ibz = qibz(:, iq_ibz)
-
-       ! TODO: Finalize the implementation.
+       !if (all(abs(qq_ibz) < tol6)) cycle
        pheigvec_qibz = pheigvec_cart_ibz(:,:,:,:,iq_ibz)
 
        if (isirr_q) then
