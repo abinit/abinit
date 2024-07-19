@@ -2212,8 +2212,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      ik_ibz = mapl_k(1)
      do ib=1,vpq%nb_spin(spin)
        band = bstart + ib - 1
-       !print *, "vpq%nb_spin(spin)", vpq%nb_spin(spin), "bstart:", bstart, "mband:", mband, "band", band
-       !print *, "ik_ibz:", ik_ibz, "nkibz:", nkibz
        bks_mask(band, ik_ibz, spin) = .True.
      end do
    end do
@@ -2272,7 +2270,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  call wrtout(std_out, " Computing polaron wavefunction in the real-space supercell...")
 
  ABI_MALLOC(kg_k, (3, mpw))
-
  ABI_MALLOC(gbound_k, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(ur_k, (wfd%nfft*nspinor))
  ABI_MALLOC(ceikr, (sc_nfft*nspinor))
@@ -2345,7 +2342,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
      ! Handle spin-polarized case by writing two XSF files.
      do spin=1,nsppol
        write(msg, "(a,i0,a,es16.6)")&
-         " For spin: ", spin, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:, spin)**2) / nkbz
+         " For spin: ", spin, ": 1/N_k \sum_nk |A_nk|^2 = ", sum(vpq%a_spin(:,:,:,spin)**2) / nkbz
        call wrtout(units, msg)
        pol_rho = abs(pol_wf(:, spin))**2
        write(msg, "(a,i0,a,es16.6)")" Polaron density for spin: ", spin, " integrates to: ", sum(pol_rho) * cryst%ucvol/wfd%nfft
@@ -2432,9 +2429,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
 
        !if (iq == 1) then
-       !  do nu=1,3
-       !    write(std_out, *)"hello:", vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin)
-       !  end do
+       !  do nu=1,3; write(std_out, *)"hello:", vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin); end do
        !end if
 
        qq = vpq%qpts_spin(:, iq, spin)
@@ -2479,7 +2474,8 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
            sc_displ_cart_re(:,sc_iat,spin) = sc_displ_cart_re(:,sc_iat,spin) + real(c3tmp)
            sc_displ_cart_im(:,sc_iat,spin) = sc_displ_cart_im(:,sc_iat,spin) + aimag(c3tmp) ! This to check if the imag part is zero.
          end do
-       end do ! nu
+       end do ! sc_iat
+
      end do ! iq
    end do ! spin
 
@@ -2505,11 +2501,11 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        !call wrtout(units, msg)
        write(msg, "(a,i0,a,es16.6)") "For spin:", spin, ": maxval(abs(sc_displ_cart_im)): ", maxval(abs(sc_displ_cart_im(:,:,spin)))
        call wrtout(units, msg)
+       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
+       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
        ! Here we displace the atoms in the supercell for this spin.
        !do sc_iat=1,scell%natom; write(std_out, *) sc_displ_cart_re(:,sc_iat); end do
        scell%xcart = scell%xcart_ref + sc_displ_cart_re(:,:,spin)
-       path = strcat(dtfil%filnam_ds(4), "_POLARON_DISPL.xsf")
-       if (nsppol == 2) path = strcat(dtfil%filnam_ds(4), "_spin_", itoa(spin), "_POLARON_DISPL.xsf")
        call scell%write_xsf(path)
      end do
    end if

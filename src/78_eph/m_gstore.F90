@@ -1885,9 +1885,8 @@ subroutine gstore_filter_qprange__(gstore, dtset, qbz, qbz2ibz, qibz2bz, kbz, ki
  type(ebands_t),pointer :: ebands
  type(gaps_t) :: gaps
 !arrays
- real(dp),allocatable :: kcalc(:,:)
  integer,allocatable :: bstart_ks(:,:), nbcalc_ks(:,:)
-
+ real(dp),allocatable :: kcalc(:,:)
 !----------------------------------------------------------------------
 
  my_rank = xmpi_comm_rank(gstore%comm)
@@ -1987,7 +1986,6 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
  real(dp),contiguous, pointer :: kpts_ptr(:,:)
-
 ! *************************************************************************
 
  ABI_UNUSED(kbz2ibz)
@@ -2109,7 +2107,6 @@ subroutine gstore_fill_bks_mask(gstore, mband, nkibz, nsppol, bks_mask)
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
-
 !----------------------------------------------------------------------
 
  call cwtime(cpu, wall, gflops, "start")
@@ -2315,7 +2312,7 @@ subroutine gstore_get_mpw_gmax(gstore, ecut, mpw, gmax)
        mpw = max(mpw, onpw)
        do ipw=1,onpw
          do ii=1,3
-          gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
+           gmax(ii) = max(gmax(ii), abs(gtmp(ii,ipw)))
          end do
        end do
        ABI_FREE(gtmp)
