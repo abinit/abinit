@@ -48,6 +48,7 @@ module m_varpeq
  use m_pawtab,          only : pawtab_type
  use m_gstore,          only : gstore_t, gqk_t
  use m_supercell,       only : supercell_type
+ use m_paw_sphharm,     only : ylm_angular_mesh
  use m_fftcore,         only : ngfft_seq !, get_kg
  use m_ephtk,           only : ephtk_get_mpw_gmax
  use m_phonons,         only : pheigvec_rotate
@@ -160,6 +161,8 @@ module m_varpeq
    integer :: max_nq
    integer :: max_nb
 
+   real(dp) :: enfrohlich
+
    real(dp) :: pc_factor
    real(dp) :: tolgrs
 
@@ -194,6 +197,7 @@ module m_varpeq
     procedure :: init => varpeq_init
     procedure :: free => varpeq_free
     procedure :: solve => varpeq_solve
+    procedure :: avg_frohlich => varpeq_avg_frohlich
     procedure :: record => varpeq_record
     procedure :: collect => varpeq_collect
     procedure :: print => varpeq_print
@@ -645,6 +649,10 @@ subroutine varpeq_print(self)
        ABI_WARNING(msg)
      endif
 
+     ! ! magic test
+     ! self%enfrohlich = self%avg_frohlich(32)
+     ! write(ab_out, *) "enfrohlich =", self%enfrohlich
+
    enddo
  endif
 
@@ -674,7 +682,8 @@ subroutine varpeq_collect(self)
  class(gqk_t), pointer :: gqk
  class(polstate_t), pointer :: polstate
  integer :: ierr, my_is, spin, my_ik, ik_glob, my_iq, iq_glob
- integer :: oc_iter, oc_a, oc_b
+ integer :: my_pert, pert_glob
+ integer :: oc_iter, oc_a, oc_b, oc_k, oc_q
 
 !----------------------------------------------------------------------
 
@@ -706,8 +715,11 @@ subroutine varpeq_collect(self)
    ! phonon vector & q-points
    do my_iq=1,gqk%my_nq
      iq_glob = gqk%my_qstart + my_iq - 1
-     self%b_spin(1, :, iq_glob, spin) = real(polstate%my_b(:, my_iq))  ! real part
-     self%b_spin(2, :, iq_glob, spin) = aimag(polstate%my_b(:, my_iq)) ! imaginary part
+     do my_pert=1,gqk%my_npert
+       pert_glob = gqk%my_pert_start + my_pert - 1
+       self%b_spin(1, pert_glob, iq_glob, spin) = real(polstate%my_b(my_pert, my_iq))  ! real part
+       self%b_spin(2, pert_glob, iq_glob, spin) = aimag(polstate%my_b(my_pert, my_iq)) ! imaginary part
+     enddo
      self%qpts_spin(:, iq_glob, spin) = polstate%my_qpts(:, my_iq)
    enddo
 
@@ -726,13 +738,15 @@ subroutine varpeq_collect(self)
    oc_iter = gqk%comm%nproc
    oc_a = gqk%qpt_pert_comm%nproc
    oc_b = gqk%kpt_comm%nproc
+   oc_k = oc_a
+   oc_q = oc_b * gqk%pert_comm%nproc
 
    self%iter_rec_spin(:,:,spin) = self%iter_rec_spin(:,:,spin) / oc_iter
    self%nstep2cv_spin(spin) = self%nstep2cv_spin(spin) / oc_iter
    self%a_spin(:,:,:,spin) = self%a_spin(:,:,:,spin) / oc_a
    self%b_spin(:,:,:,spin) = self%b_spin(:,:,:,spin) / oc_b
    self%kpts_spin(:,:,spin) = self%kpts_spin(:,:,spin) / oc_a
-   self%qpts_spin(:,:,spin) = self%qpts_spin(:,:,spin) / oc_b
+   self%qpts_spin(:,:,spin) = self%qpts_spin(:,:,spin) / oc_q
  enddo
 
 end subroutine varpeq_collect
@@ -1099,6 +1113,97 @@ subroutine varpeq_init(self, gstore, dtset)
 end subroutine varpeq_init
 !!***
 
+!----------------------------------------------------------------------
+
+!!****f* m_varpeq/varpeq_avg_frohlich
+!! NAME
+!!  varpeq_avg_frohlich
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!!
+!! SOURCE
+
+real(dp) function varpeq_avg_frohlich(self, ntheta) result(enfr)
+
+!Arguments ------------------------------------
+ class(varpeq_t), intent(inout) :: self
+ integer, intent(in) :: ntheta
+
+!Local variables-------------------------------
+!scalars
+ type(ifc_type), pointer :: ifc
+ type(crystal_t), pointer :: cryst
+ integer :: nphi, angl_size
+ integer :: iang, iatom
+ integer :: nu, natom3
+ real(dp) :: inv_qepsq, wqnu
+ complex(dpc) :: cnum
+!arrays
+ real(dp) :: qpt_cart(3)
+ real(dp), allocatable :: phfreq(:), displ_cart(:, :, :, :)
+ real(dp), allocatable :: frohlich_corr(:)
+ real(dp), allocatable :: qvers_cart(:, :)
+ real(dp), allocatable :: angweight(:)
+ complex(dpc) :: cp3(3)
+
+!----------------------------------------------------------------------
+
+ ! self%angl_size
+ ! self%qvers_cart
+ ! self%angweight
+
+ nphi = 2*ntheta
+ call ylm_angular_mesh(ntheta, nphi, angl_size, qvers_cart, angweight)
+
+ ifc => self%gstore%ifc
+ cryst => self%gstore%cryst
+
+ natom3 = 3*cryst%natom
+ ABI_MALLOC(phfreq, (natom3))
+ ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
+ ABI_MALLOC(frohlich_corr, (natom3))
+
+ frohlich_corr(:) = zero
+ do iang=1,angl_size
+   qpt_cart = qvers_cart(:, iang)
+   inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
+   call ifc%fourq(cryst, qpt_cart, phfreq, displ_cart, nanaqdir="cart")
+
+   do nu=4,natom3
+     wqnu = phfreq(nu)
+
+     cp3 = zero
+     do iatom=1,cryst%natom
+       cp3 = cp3 + matmul(ifc%zeff(:, :, iatom), &
+         cmplx(displ_cart(1, :, iatom, nu), displ_cart(2, :, iatom, nu), kind=dpc))
+     enddo
+     cnum = dot_product(qpt_cart, cp3)
+     if (abs(cnum) < tol12) cycle
+
+     frohlich_corr(nu) = frohlich_corr(nu) + &
+       angweight(iang)*abs(cnum)**2 * inv_qepsq**2 / wqnu**2
+   enddo
+ enddo
+
+ frohlich_corr(:) = frohlich_corr(:) * &
+   eight*pi/cryst%ucvol * (three / (four_pi* cryst%ucvol * self%gstore%nqbz))**third
+
+ enfr = -sum(frohlich_corr)
+
+ ABI_FREE(phfreq)
+ ABI_FREE(displ_cart)
+ ABI_FREE(frohlich_corr)
+ ABI_FREE(qvers_cart)
+ ABI_FREE(angweight)
+
+end function varpeq_avg_frohlich
+!!***
+
+!----------------------------------------------------------------------
 
 !!****f* m_varpeq/polstate_free
 !! NAME
