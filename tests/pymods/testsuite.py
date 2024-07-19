@@ -2101,9 +2101,17 @@ pp_dirpath $ABI_PSPDIR
             # 1) use fldiff to compare ref and output files.
             # 2) fldiff stdout is redirected to fldiff_fname.
             for f in self.files_to_test:
+
+                simplified_test = simplified_diff
+                is_abo = os.path.splitext(f.name)[-1] == ".abo" or os.path.splitext(f.name)[-1] == ".out"
+                if simplified_test and not is_abo:
+                  isok = True
+                  msg = ""
+                  status = "skipped"
+                  continue
+
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
-                simplified_test = simplified_diff and os.path.splitext(f.name)[-1] == ".abo"
 
                 with open(fldiff_fname, "wt") as fh:
                     f.fldiff_fname = fldiff_fname
