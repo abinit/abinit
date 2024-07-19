@@ -161,7 +161,9 @@ module m_varpeq
    integer :: max_nq
    integer :: max_nb
 
-   real(dp) :: enfrohlich
+   integer :: frohl_ntheta
+
+   real(dp) :: e_frohl
 
    real(dp) :: pc_factor
    real(dp) :: tolgrs
@@ -197,7 +199,6 @@ module m_varpeq
     procedure :: init => varpeq_init
     procedure :: free => varpeq_free
     procedure :: solve => varpeq_solve
-    procedure :: avg_frohlich => varpeq_avg_frohlich
     procedure :: record => varpeq_record
     procedure :: collect => varpeq_collect
     procedure :: print => varpeq_print
@@ -205,6 +206,8 @@ module m_varpeq
     procedure :: ncread => varpeq_ncread
     procedure :: compare => varpeq_compare
     procedure :: setup => varpeq_setup
+
+    procedure :: avg_frohlich => varpeq_avg_frohlich
 
  end type varpeq_t
 !!***
@@ -502,11 +505,11 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    ! Define scalars
    ! integers
    ncerr = nctk_def_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "varpeq_nstep", "nkbz", "nqbz"])
+     "eph_task", "varpeq_nstep", "nkbz", "nqbz", "frohl_ntheta"])
    NCF_CHECK(ncerr)
    ! real(dp)
    ncerr = nctk_def_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs"])
+     "varpeq_tolgrs", "e_frohl"])
    NCF_CHECK(ncerr)
 
    ! Define arrays with results
@@ -536,12 +539,12 @@ subroutine varpeq_ncwrite(self, dtset, dtfil)
    NCF_CHECK(nctk_set_datamode(ncid))
    ! scalars
    ncerr = nctk_write_iscalars(ncid, [character(len=nctk_slen) :: &
-     "eph_task", "varpeq_nstep", "nkbz", "nqbz"], &
-     [dtset%eph_task, self%nstep, self%gstore%nkbz, self%gstore%nqbz])
+     "eph_task", "varpeq_nstep", "nkbz", "nqbz", "frohl_ntheta"], &
+     [dtset%eph_task, self%nstep, self%gstore%nkbz, self%gstore%nqbz, self%frohl_ntheta])
    NCF_CHECK(ncerr)
    ncerr = nctk_write_dpscalars(ncid, [character(len=nctk_slen) :: &
-     "varpeq_tolgrs"], &
-     [self%tolgrs])
+     "varpeq_tolgrs", "e_frohl"], &
+     [self%tolgrs, self%e_frohl])
    NCF_CHECK(ncerr)
    ! arrays
    NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "varpeq_pkind"), self%pkind))
@@ -649,10 +652,6 @@ subroutine varpeq_print(self)
        ABI_WARNING(msg)
      endif
 
-     ! ! magic test
-     ! self%enfrohlich = self%avg_frohlich(32)
-     ! write(ab_out, *) "enfrohlich =", self%enfrohlich
-
    enddo
  endif
 
@@ -745,7 +744,7 @@ subroutine varpeq_collect(self)
    self%nstep2cv_spin(spin) = self%nstep2cv_spin(spin) / oc_iter
    self%a_spin(:,:,:,spin) = self%a_spin(:,:,:,spin) / oc_a
    self%b_spin(:,:,:,spin) = self%b_spin(:,:,:,spin) / oc_b
-   self%kpts_spin(:,:,spin) = self%kpts_spin(:,:,spin) / oc_a
+   self%kpts_spin(:,:,spin) = self%kpts_spin(:,:,spin) / oc_k
    self%qpts_spin(:,:,spin) = self%qpts_spin(:,:,spin) / oc_q
  enddo
 
@@ -898,6 +897,7 @@ subroutine varpeq_solve(self)
 
 !----------------------------------------------------------------------
 
+ ! Variational Polaron Equations
  self%iter_rec_spin(:,:,:) = zero
 
  do my_is=1,self%gstore%my_nspins
@@ -925,6 +925,10 @@ subroutine varpeq_solve(self)
 
  enddo
 
+ ! Correction for the infrared Fr\"ohlich divergence
+ call self%avg_frohlich()
+
+ ! Collect results from each polstate
  call self%collect()
 
 end subroutine varpeq_solve
@@ -1024,6 +1028,7 @@ subroutine varpeq_init(self, gstore, dtset)
  self%aseed = dtset%varpeq_aseed
  self%pkind = dtset%varpeq_pkind
  self%gau_params = dtset%varpeq_gau_params
+ self%frohl_ntheta = dtset%eph_frohl_ntheta
  self%gaps = ebands_get_gaps(gstore%ebands, ierr)
  self%cryst_trinv = gstore%cryst%new_trinv_only()
 
@@ -1127,17 +1132,17 @@ end subroutine varpeq_init
 !!
 !! SOURCE
 
-real(dp) function varpeq_avg_frohlich(self, ntheta) result(enfr)
+subroutine varpeq_avg_frohlich(self)
 
 !Arguments ------------------------------------
  class(varpeq_t), intent(inout) :: self
- integer, intent(in) :: ntheta
 
 !Local variables-------------------------------
 !scalars
  type(ifc_type), pointer :: ifc
  type(crystal_t), pointer :: cryst
- integer :: nphi, angl_size
+ integer :: comm, my_rank, nproc, ierr
+ integer :: ntheta, nphi, angl_size
  integer :: iang, iatom
  integer :: nu, natom3
  real(dp) :: inv_qepsq, wqnu
@@ -1145,19 +1150,14 @@ real(dp) function varpeq_avg_frohlich(self, ntheta) result(enfr)
 !arrays
  real(dp) :: qpt_cart(3)
  real(dp), allocatable :: phfreq(:), displ_cart(:, :, :, :)
- real(dp), allocatable :: frohlich_corr(:)
  real(dp), allocatable :: qvers_cart(:, :)
  real(dp), allocatable :: angweight(:)
  complex(dpc) :: cp3(3)
 
 !----------------------------------------------------------------------
 
- ! self%angl_size
- ! self%qvers_cart
- ! self%angweight
-
- nphi = 2*ntheta
- call ylm_angular_mesh(ntheta, nphi, angl_size, qvers_cart, angweight)
+ comm = self%gstore%comm
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
  ifc => self%gstore%ifc
  cryst => self%gstore%cryst
@@ -1165,10 +1165,15 @@ real(dp) function varpeq_avg_frohlich(self, ntheta) result(enfr)
  natom3 = 3*cryst%natom
  ABI_MALLOC(phfreq, (natom3))
  ABI_MALLOC(displ_cart, (2, 3, cryst%natom, natom3))
- ABI_MALLOC(frohlich_corr, (natom3))
 
- frohlich_corr(:) = zero
+ ntheta = self%frohl_ntheta
+ nphi = 2*ntheta
+ call ylm_angular_mesh(ntheta, nphi, angl_size, qvers_cart, angweight)
+
+ self%e_frohl = zero
  do iang=1,angl_size
+   if (mod(iang, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
+
    qpt_cart = qvers_cart(:, iang)
    inv_qepsq = one / dot_product(qpt_cart, matmul(ifc%dielt, qpt_cart))
    call ifc%fourq(cryst, qpt_cart, phfreq, displ_cart, nanaqdir="cart")
@@ -1184,23 +1189,20 @@ real(dp) function varpeq_avg_frohlich(self, ntheta) result(enfr)
      cnum = dot_product(qpt_cart, cp3)
      if (abs(cnum) < tol12) cycle
 
-     frohlich_corr(nu) = frohlich_corr(nu) + &
-       angweight(iang)*abs(cnum)**2 * inv_qepsq**2 / wqnu**2
+     self%e_frohl = self%e_frohl + angweight(iang)*(abs(cnum)*inv_qepsq/wqnu)**2
    enddo
  enddo
 
- frohlich_corr(:) = frohlich_corr(:) * &
-   eight*pi/cryst%ucvol * (three / (four_pi* cryst%ucvol * self%gstore%nqbz))**third
-
- enfr = -sum(frohlich_corr)
+ call xmpi_sum(self%e_frohl, comm, ierr)
+ self%e_frohl = self%e_frohl * &
+   eight*pi/cryst%ucvol * (three / (four_pi * cryst%ucvol * self%gstore%nqbz))**third
 
  ABI_FREE(phfreq)
  ABI_FREE(displ_cart)
- ABI_FREE(frohlich_corr)
  ABI_FREE(qvers_cart)
  ABI_FREE(angweight)
 
-end function varpeq_avg_frohlich
+end subroutine varpeq_avg_frohlich
 !!***
 
 !----------------------------------------------------------------------
