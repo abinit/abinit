@@ -3649,7 +3649,6 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
 !************************************************************************
 
  ! TODO: Handle long-range part.
-
  nr_p = wan%nr_p; nr_e = wan%nr_e; nwan = wan%nwan; my_npert = wan%my_npert
 
  ABI_MALLOC(eikr, (nr_e))
@@ -3658,9 +3657,9 @@ subroutine wan_interp_eph_manyq(wan, nq, qpts, kpt, g_atm)
  ABI_MALLOC(u_kq, (nwan, nwan))
  ABI_MALLOC(cmat_w, (nwan, nwan))
 
- ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
- ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
- ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
+ !ABI_CHECK(allocated(wan%r_e), "wan%r_e is not allocated!")
+ !ABI_CHECK(allocated(wan%ndegen_e), "wan%ndegen_e is not allocated!")
+ !ABI_CHECK(allocated(wan%grpe_wwp), "wan%grpe_wwp is not allocated!")
 
  do ir=1,nr_e
    eikr(ir) = exp(+j_dpc * two_pi * dot_product(kpt, wan%r_e(:, ir))) / wan%ndegen_e(ir)
