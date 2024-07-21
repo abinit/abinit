@@ -219,7 +219,7 @@ real(dp) :: gr_avg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
 logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: changed,useprtxfase
-logical :: skipcycle
+logical :: skipcycle,force_hist_copy=.FALSE.
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 logical :: file_exists
@@ -310,6 +310,11 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 !  If restartxf specifies to reconstruct the history
    if (hist_prev%mxhist>0.and.ab_mover%restartxf==-1)then
      ntime=ntime+hist_prev%mxhist
+   end if
+
+!  If non deterministic algorithm is used, forcing reading of input hist file
+   if (ab_mover%ionmov==16) then
+     force_hist_copy=.TRUE.
    end if
 
 !  If restartxf specifies to start from the lowest energy
@@ -559,7 +564,7 @@ real(dp),allocatable :: gred_corrected(:,:),xred_prev(:,:)
 
      if(hist_prev%mxhist>0.and.ab_mover%restartxf==-1.and.hist_prev%ihist<=hist_prev%mxhist)then
 
-       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot)
+       call abihist_compare_and_copy(hist_prev,hist,ab_mover%natom,similar,tol8,specs%nhist==nhisttot,force_hist_copy)
        hist_prev%ihist=hist_prev%ihist+1
 
      else

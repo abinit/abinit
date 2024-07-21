@@ -186,7 +186,7 @@ subroutine precpred_1geo(ab_mover,ab_xfh,amu_curr,deloc,dt_chkdilatmx,comm_cell,
    case (15)
      call pred_fire(ab_mover, ab_xfh,preconforstr,hist,ab_mover%ionmov,itime,DEBUG,iexit)
    case (16)
-     call pred_langevin_pimd(ab_mover,hist,icycle,itime,ncycle,ntime,DEBUG,iexit,skipcycle,pimd_param)
+     call pred_langevin_pimd(ab_mover,hist,itime,DEBUG,pimd_param)
    case (20)
      call pred_diisrelax(ab_mover,hist,itime,ntime,DEBUG,iexit)
    case (21)

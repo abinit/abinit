@@ -888,7 +888,7 @@ end subroutine abihist_copy
 !!
 !! SOURCE
 
-subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all)
+subroutine abihist_compare_and_copy(hist_in,hist_out,natom,similar,tolerance,store_all,force_copy)
 
 !Arguments ------------------------------------
 !scalars
@@ -897,7 +897,7 @@ integer,intent(out) :: similar
 real(dp),intent(in) :: tolerance
 type(abihist),intent(in) :: hist_in
 type(abihist),intent(inout) :: hist_out
-logical,intent(in) :: store_all
+logical,intent(in) :: force_copy,store_all
 !Local variables-------------------------------
 !scalars
 integer :: kk,jj
@@ -962,7 +962,7 @@ character(len= 500) :: msg
  call wrtout(std_out,msg,'COLL')
  if (maxdiff>tolerance) similar=0
 
- if (similar==1) then
+ if (similar==1.or.force_copy) then
    hist_out%acell(:,hist_out%ihist)     =hist_in%acell(:,hist_in%ihist)
    hist_out%rprimd(:,:,hist_out%ihist)  =hist_in%rprimd(:,:,hist_in%ihist)
    hist_out%xred(:,:,hist_out%ihist)    =hist_in%xred(:,:,hist_in%ihist)
