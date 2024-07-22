@@ -1487,6 +1487,7 @@ subroutine gwpt_run(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb,
  NCF_CHECK(nf90_close(root_ncid))
  call xmpi_barrier(comm)
 
+ ! TODO: Output some of the results to ab_out for testing purposes
  call gstore%print_for_abitests(dtset)
 
  ! Free memory
@@ -1597,6 +1598,9 @@ subroutine dump_data()
 
  ! Zero the counter before returning
 10 iqbuf_cnt = 0
+
+ NCF_CHECK(nf90_sync(spin_ncid))
+ NCF_CHECK(nf90_sync(root_ncid))
 
 end subroutine dump_data
 
