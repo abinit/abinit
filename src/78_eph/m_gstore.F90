@@ -1981,7 +1981,8 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
 
 !Local variables-------------------------------
 !scalars
- integer :: all_nproc, my_rank, ierr, ii, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
+ integer :: all_nproc, my_rank, ierr, ii, ik_bz, iq_bz, iq_ibz, ikq_ibz, ikq_bz, len_kpts_ptr, ebands_timrev
+ integer :: spin
 !arrays
  integer,allocatable :: map_kq(:,:)
  real(dp) :: qpt(3)
@@ -2014,9 +2015,23 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
      end if
 
      do ii=1,len_kpts_ptr
-       ikq_ibz = map_kq(1, ii)
-       ikq_bz = kibz2bz(ikq_ibz)
-       select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
+
+       ! get the k-index in BZ
+       select case (gstore%kzone)
+       case ("bz")
+         ik_bz = ii
+       case ("ibz")
+         ik_bz = kibz2bz(ii)
+       end select
+
+       do spin=1,gstore%nsppol
+         if (select_kbz_spin(ik_bz, spin) /= 0) then
+           ! now, see if q-point connects k-points inside the filtered zone
+           ikq_ibz = map_kq(1, ii)
+           ikq_bz = kibz2bz(ikq_ibz)
+           select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
+         end if
+       end do
      end do
    end do ! iq_ibz
 
@@ -2031,10 +2046,27 @@ subroutine recompute_select_qbz_spin(gstore, qbz, qbz2ibz, qibz2bz, kbz, kibz, k
        ABI_ERROR("Cannot map k+q to IBZ!")
      end if
 
+     ! here we loop over all k-points in iBZ (kzone="ibz") or BZ (kzone="bz")
      do ii=1,len_kpts_ptr
-       ikq_ibz = map_kq(1, ii)
-       ikq_bz = kibz2bz(ikq_ibz)
-       select_qbz_spin(iq_bz, :) = select_qbz_spin(iq_bz, :) + select_kbz_spin(ikq_bz, :)
+       ! but for each spin, we have to loop only over e-range filtered kpts
+
+       ! get the k-index in BZ
+       select case (gstore%kzone)
+       case ("bz")
+         ik_bz = ii
+       case ("ibz")
+         ik_bz = kibz2bz(ii)
+       end select
+
+       do spin=1,gstore%nsppol
+         ! now, see if q-point connects k-points inside the filtered zone
+         if (select_kbz_spin(ik_bz, spin) /= 0) then
+           ikq_ibz = map_kq(1, ii)
+           ikq_bz = kibz2bz(ikq_ibz)
+           select_qbz_spin(iq_bz, spin) = select_qbz_spin(iq_bz, spin) + select_kbz_spin(ikq_bz, spin)
+         endif
+       enddo
+
      end do
    end do
  end select
