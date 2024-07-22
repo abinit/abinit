@@ -38,6 +38,7 @@ from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
 from .termcolor import cprint
 from .fldiff import Differ as FlDiffer
+from .abo_file_analysis import AboFileAnalysis, AboDataset
 
 import logging
 logger = logging.getLogger(__name__)
@@ -2105,10 +2106,10 @@ pp_dirpath $ABI_PSPDIR
                 simplified_test = simplified_diff
                 is_abo = os.path.splitext(f.name)[-1] == ".abo" or os.path.splitext(f.name)[-1] == ".out"
                 if simplified_test and not is_abo:
-                  isok = True
-                  msg = ""
-                  status = "skipped"
-                  continue
+                    isok = True
+                    msg = ""
+                    status = "skipped"
+                    continue
 
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
@@ -2121,6 +2122,18 @@ pp_dirpath $ABI_PSPDIR
                                                   simplified_yaml_test=simplified_test)
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
+
+                # In the case of a "simplified" test, lets check the number of iterations
+                if simplified_test and is_abo:
+                    abo_analysis = AboFileAnalysis(os.path.join(self.workdir,f.name),option="iterations")
+                    ref_analysis = AboFileAnalysis(os.path.join(self.ref_dir,f.name),option="iterations")
+                    st, err_msg, err_msg_short = abo_analysis.compare_with(ref_analysis,option="iterations", \
+                                                 percent_allowed_small=40,percent_allowed_large=25)
+                    if st == "failed":
+                        self._status = "failed"
+                        self.fld_isok= False
+                        indent = '\n' + ' '*len(self.full_id)
+                        msg += indent + err_msg.replace('\n',indent)
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
