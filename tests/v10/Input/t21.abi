@@ -1,5 +1,5 @@
 # H2. Interface with CC4S code (NC pseudos)
-# Test in particular time-reversal symmetry ON with Hartree-Fock
+# Test in particular time-reversal symmetry with Hartree-Fock
 
 enunit 2
 ixc 40   # HF
