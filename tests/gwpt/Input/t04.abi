@@ -1,5 +1,6 @@
 # ZPR computation at the Gamma point for MgO.
- nband 30
+ nband 12
+ #nband 30
  ecut 35.0
 
  ngkpt 4 4 4
@@ -11,42 +12,33 @@
 ##############################################
  optdriver 7              # Enter EPH driver
  eph_task 17              # GWPT computation
+
  getddb_filepath "t01_DDB"
  ddb_ngqpt 4 4 4          # The code expects to find in the DDB
                           # all the IBZ q-points corresponding to a 4x4x4 q-mesh
 
  ecuteps 4
+ ecutsigx 4
+ tolwfr 1e-14
+
  mdf_epsinf 12    # For model dielectric function
+ ppmodel 2
 
  getdvdb_filepath "t02_DVDB"
- getwfk_filepath "t03o_WFK"    # 4x4x4 k-mesh with 70 bands
+ getdrhodb_filepath "t02_DVDB"  # FIXME: FAKE DRHODB
+ getwfk_filepath "t03o_WFK"     # 4x4x4 k-mesh with 70 bands
  getden_filepath  "MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"
+ #gstore_kzone "bz"; gstore_qzone "ibz"
+ gstore_kzone "ibz"; gstore_qzone "bz"; gstore_kfilter "qprange"
+
+ # Disable output of phonon DOS and phonon bands
+ prtphdos 0
+ prtphbands 0
 
 ##############################################
 ####                 SECTION: Sigma_nk
 ##############################################
  zcut 0.01 eV
-
-# Activate computation of phonon band structure
-# ph_ndivsm 10
-# ph_nqpath 12
-# ph_qpath
-#    0.0    0.0    0.0
-#    0.5    0.0    0.5
-#    0.5    0.25   0.75
-#    0.375  0.375  0.75
-#    0.0    0.0    0.0
-#    0.5    0.5    0.5
-#    0.625  0.25   0.625
-#    0.5    0.25   0.75
-#    0.5    0.5    0.5
-#    0.375  0.375  0.75
-#    0.625  0.25   0.625
-#    0.5    0.0    0.5
-
-# Phonon DOS with tetrahedron method
-# #ph_prtdos 0; ph_intmeth 2; ph_wstep 0.0001 eV
-# ph_ngqpt 16 16 16
 
 # Read crystal structure from DEN.nc file
  structure "abifile:MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc"

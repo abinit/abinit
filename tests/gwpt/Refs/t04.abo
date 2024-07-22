@@ -30,12 +30,12 @@
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =          30        mffmem =           1         mkmem =           8
+-    mband =          12        mffmem =           1         mkmem =           8
        mpw =        1304          nfft =       32768          nkpt =           8
 ================================================================================
-P This job should need less than                      16.501 Mbytes of memory.
+P This job should need less than                      13.632 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
+_ WF disk file :      1.912 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -54,6 +54,7 @@ _ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
         ddb_ngqpt        4    4    4
              ecut      3.50000000E+01 Hartree
           ecuteps      4.00000000E+00 Hartree
+         ecutsigx      4.00000000E+00 Hartree
          eph_task          17
 -          fftalg         312
            istwfk        2    0    3    0    0    0    7    0
@@ -71,17 +72,17 @@ _ WF disk file :      4.777 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
        mdf_epsinf      1.20000000E+01
 P           mkmem           8
             natom           2
-            nband          30
+            nband          12
             ngfft          32      32      32
              nkpt           8
              nsym          48
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
+          ppmodel           2
+       prtphbands           0
+         prtphdos           0
             rprim      0.0000000000E+00  4.0182361526E+00  4.0182361526E+00
                        4.0182361526E+00  0.0000000000E+00  4.0182361526E+00
                        4.0182361526E+00  4.0182361526E+00  0.0000000000E+00
@@ -110,6 +111,7 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           tolwfr      1.00000000E-14
             typat      2  1
               wtk        0.01563    0.12500    0.06250    0.09375    0.37500    0.18750
                          0.04688    0.09375
@@ -133,7 +135,7 @@ P           mkmem           8
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
-dimensions: {natom: 2, nkpt: 8, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
+dimensions: {natom: 2, nkpt: 8, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1304, }
 cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
 electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
 meta: {optdriver: 7, eph_task: 17, }
@@ -144,6 +146,8 @@ meta: {optdriver: 7, eph_task: 17, }
  mkfilename: getddb from: t01_DDB
 
  mkfilename: getdvdb from: t02_DVDB
+
+ mkfilename: getdrhodb from: t02_DVDB
 
  mkfilename: getden from: MgO_eph_zpr/flow_zpr_mgo/w0/t0/outdata/out_DEN.nc
 
@@ -277,14 +281,6 @@ meta: {optdriver: 7, eph_task: 17, }
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
 
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.3115170319E-02 (at units)
--                                   =           6.8150 [km/s]
-
- Debye frequency from partial sums:     0.2398391094E-02 (Ha)
--                                 =     0.1578065532E+02 (THz)
--Debye temperature from partial sums:     0.7573511083E+03 (K)
-
-- Writing phonon DOS to netcdf file: t04o_PHDOS.nc
 
 --- Pseudopotential description ------------------------------------------------
 - pspini: atom type   1  psp file is /Users/giantomassi/git_repos/abinit/tests/Psps_for_tests/O.psp8
@@ -319,32 +315,65 @@ meta: {optdriver: 7, eph_task: 17, }
    2.46705647E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
 
+ === Gstore parameters ===
+ kzone: ibz
+ kfilter: qprange
+ nkibz: 8
+ nkbz: 64
+ glob_nk_spin: [1]
+ qzone: bz
+ nqibz: 8
+ nqbz: 64
+ glob_nq_spin: [8]
+ kptopt: 1
+ qptopt: 1
+ with_vk: 1
 
- Number of bands in gwpt sum: 30
- From bsum_start: 1 to bsum_stop: 30
- Symsigma: 1 Timrev: 1
- Imaginary shift in the denominator (zcut): 0.010 [eV]
- Ab-initio q-mesh from DDB file: [4, 4, 4]
- Q-mesh used for gwpt-energy integration [ngqpt]: [4, 4, 4]
- Number of q-points in the IBZ: 8
- asr: 1 chneut: 1
- dipdip: 1 symdynmat: 1
- Number of k-points for gwpt-energy corrections: 1
- List of k-points for gwpt-energy corrections:
-   1     1  [ 0.0000E+00,  0.0000E+00,  0.0000E+00]   6    9
-
- === MPI parallelism ===
-P Allocating and summing bands from my_bsum_start: 1 up to my_bsum_stop: 30
+  === MPI distribution ===
 P Number of CPUs for parallelism over perturbations: 1
 P Number of perturbations treated by this CPU: 6
 P Number of CPUs for parallelism over q-points: 1
-P Number of q-points in the IBZ treated by this proc: 8 of 8
-P Number of CPUs for parallelism over bands: 1
-P Number of CPUs for parallelism over spins: 1
 P Number of CPUs for parallelism over k-points: 1
-P Number of k-point in gwpt_nk treated by this proc: 1 of 1
 
+ gqk_cplex: 2
+ gqk_bstart: 1
+ gqk_bstop: 12
+ gqk_nb: 12
+ gqk_my_npert: 6
+ gqk_my_nk: -1
+ gqk_my_nq: -1
  DVDB file contains all q-points in the IBZ --> Reading DFPT potentials from file.
+ 
+ gstore_completed: 1
+ gstore_done_qbz_spin: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+ gqk%nb: 12
+ Group velocites v_nk in Cartesian coordinates:
+ For k-point [ 0.0000E+00,  0.0000E+00,  0.0000E+00] , spin 1
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+ For k-point [-2.5000E-01,  5.0000E-01,  2.5000E-01] , spin 1
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
+    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00    0.000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -355,6 +384,7 @@ P Number of k-point in gwpt_nk treated by this proc: 1 of 1
         ddb_ngqpt        4    4    4
              ecut      3.50000000E+01 Hartree
           ecuteps      4.00000000E+00 Hartree
+         ecutsigx      4.00000000E+00 Hartree
          eph_task          17
            etotal      0.0000000000E+00
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -366,17 +396,17 @@ P Number of k-point in gwpt_nk treated by this proc: 1 of 1
        mdf_epsinf      1.20000000E+01
 P           mkmem           8
             natom           2
-            nband          30
+            nband          12
             ngfft          32      32      32
              nkpt           8
              nsym          48
            ntypat           2
               occ      2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
                        2.000000  2.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
-                       0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
         optdriver           7
+          ppmodel           2
+       prtphbands           0
+         prtphdos           0
             rprim      0.0000000000E+00  4.0182361526E+00  4.0182361526E+00
                        4.0182361526E+00  0.0000000000E+00  4.0182361526E+00
                        4.0182361526E+00  4.0182361526E+00  0.0000000000E+00
@@ -407,6 +437,7 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
+           tolwfr      1.00000000E-14
             typat      2  1
            xangst      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.1263589907E+00  2.1263589907E+00  2.1263589907E+00
@@ -511,10 +542,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   0 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.5  wall=          1.5
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.0
