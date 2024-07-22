@@ -1549,6 +1549,17 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    vel=dtset%vel_orig(1:3,1:natom,iimage)
    vel_cell=dtset%vel_cell_orig(1:3,1:3,iimage)
    xred=dtset%xred_orig(1:3,1:natom,iimage)
+
+! if getxred or getxcart we need to import xred before entering ingeo.
+! NB: xred/cart might be re-updated at runtime after running source dtset
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxred',tread,'INT')
+!   if (tread==1 .or. tread_geo==1) 
+!     source_dtset = 
+!     if (== -1) source_dtset = jdtset-1
+!   end if
+!   call intagm(dprarr,intarr,source_dtset,marr,3,string(1:lenstr),'getxcart',tread_geo,'INT')
+! 
+
    ABI_MALLOC(chrgat,(natom))
    ABI_MALLOC(iatfix,(3,natom))
    ABI_MALLOC(nucdipmom,(3,natom))

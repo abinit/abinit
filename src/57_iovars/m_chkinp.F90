@@ -1106,7 +1106,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! getxred
    if(dt%getxcart/=0)then
      cond_string(1)='getxcart' ; cond_values(1)=dt%getxcart
-     ! Make sure that dt%getxred is 0
+     ! Make sure that dt%getxred is 0. NB: this has already been checked elsewhere:
+     !  that only one of xred xcart xrandom getxred getxcart are set 
      call chkint_eq(1,1,cond_string,cond_values,ierr,'getxred',dt%getxred,1,[0],iout)
    end if
 
@@ -1566,7 +1567,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if ( dt%gpu_option==2 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
      write(msg,'(3a)' )&
       'When gpu_option is 2, all the components of istwfk must be 1 or 2.',ch10,&
-      'Action: set istwfk to 1 for all k-points or change gpu_option.'
+      'Action: change gpu_option or set "istwfk *1" in the input file. If there is one k-point which is "0 0 0" then set "istwfk 2".'
+     ABI_ERROR_NOSTOP(msg, ierr)
+   end if
+   if ( dt%npfft>1 .and. any( dt%istwfk(1:nkpt) > 2 ) ) then
+     write(msg,'(3a)' )&
+      'When npfft>1, all the components of istwfk must be 1 or 2.',ch10,&
+      'Action: set "npfft 1" or set "istwfk *1" in the input file. If only one k-point which is "0 0 0" then set "istwfk 2".'
      ABI_ERROR_NOSTOP(msg, ierr)
    end if
 

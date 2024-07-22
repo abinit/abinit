@@ -801,13 +801,13 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                    px(ist1,ist2,lx,ly,lz)=f1*pmat(ist1,ist2,ik,lx,isp)
                    py(ist2,ist1,lx,ly,lz)=f2*pmat(ist2,ist1,ik,lx,isp)
                    pz(ist2,ist1,lx,ly,lz)=f3*pmat(ist2,ist1,ik,lx,isp)
-                 end do
-               end do
-             end do ! end loop over states
+                 end do ! lz=1,3
+               end do ! ly=1,3
+             end do ! lx=1,3
            end if
-         end do
+         end do ! ist2=1,nband_sum
        end if
-     end do
+     end do ! ist1=1,nband_sum
 
      ! calculate the energy window and \Delta_nm
      do ist1=1,nband_sum
@@ -1089,13 +1089,13 @@ complex(dpc), allocatable :: intra2w(:), intra1w(:), intra1wS(:),chi2tot(:)
                intra2w(iw)=intra2w(iw)+(ks_ebands%wtk(ik)*(b24/(wmn-2._dp*w))) ! Intra(2w) from eta
                intra1w(iw)=intra1w(iw)+(ks_ebands%wtk(ik)*((b21_22)/(wmn-w))) ! Intra(1w) from eta
                intra1wS(iw)=intra1wS(iw)+(ks_ebands%wtk(ik)*((b31_32)/(wmn-w))) ! Intra(1w) from sigma
-             end do
+             end do ! iw=1,nmesh
            end if
-         end do ! istm
+         end do ! istm=1,nband_sum (conduction states)
        end if
-     end do ! istn
-   end do  ! spins
- end do ! k-points
+     end do ! istn=1,nband_sum (valence states)
+   end do ! isp=1,ks_ebands%nsppol (spins)
+ end do ! ik=my_k1,my_k2 (k-points)
 
  call xmpi_sum(inter2w,comm,ierr)
  call xmpi_sum(inter1w,comm,ierr)
