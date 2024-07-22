@@ -64,6 +64,9 @@ basic_tests:
 #	cat $(top_srcdir)/tests/built-in/README
 check-local:
 	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff && rm -rf $(abspath $(top_builddir))/tests/Test_suite
+all: $(BUILT_SOURCES) config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+	$(MAKE) check
 
 # Set of internal tests
 test_fast:
