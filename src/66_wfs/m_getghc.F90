@@ -2066,9 +2066,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(1)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(1)
-#endif
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(1)
+!#endif
 #ifdef HAVE_LINALG_NVPL_THREADS
    call nvpl_set_num_threads(1)
 #endif
@@ -2132,9 +2132,9 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(nthreads)
 #endif
-#ifdef HAVE_LINALG_OPENBLAS_THREADS
-   call openblas_set_num_threads(nthreads)
-#endif
+!#ifdef HAVE_LINALG_OPENBLAS_THREADS
+!   call openblas_set_num_threads(nthreads)
+!#endif
 #ifdef HAVE_LINALG_NVPL_THREADS
    call nvpl_set_num_threads(nthreads)
 #endif
