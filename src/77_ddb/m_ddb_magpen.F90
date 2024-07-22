@@ -297,9 +297,9 @@ contains
  ! BERRY CURVATURES
  if (timdisp==1) then
 
-   if (dissip==1) then
-     ABI_BUG("Berry curvatures calculation is not implemented with dissipation, set dissip=0")
-   end if
+!   if (dissip==1) then
+!     ABI_BUG("Berry curvatures calculation is not implemented with dissipation, set dissip=0")
+!   end if
 
    ABI_MALLOC(bc_barmagsus,(ndim,ndim))
    ABI_MALLOC(bc_ss,(ndim,ndim))
@@ -2085,7 +2085,7 @@ contains
  ifc_bc_sp(:,:)=bc_sp(:,1:natom*3)
  term(:,:,1)=matmul(transpose(conjg(ifc_bc_sp)),matmul(barmagsus,ifc_zfield))
  term(:,:,2)=matmul(transpose(conjg(ifc_zfield)),matmul(bc_barmagsus,ifc_zfield))
- term(:,:,3)=matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,bc_sp))
+ term(:,:,3)=matmul(transpose(conjg(ifc_zfield)),matmul(barmagsus,ifc_bc_sp))
 
  bc_pp(:,:)= bc_barpp(:,:) + term(:,:,1) + term(:,:,2) + term(:,:,3)
 
@@ -2215,7 +2215,7 @@ contains
  complex(dpc), allocatable :: barepsilon(:,:,:),epsilon(:,:,:),ifcmat(:,:),ifcmat_fm(:,:)
  complex(dpc), allocatable :: modemm(:,:,:),zeff(:,:,:),zeff_tr(:,:,:),modezeff(:,:,:)
  complex(dpc), allocatable :: zeffspec(:,:),mmomspec(:,:),magphongreen(:,:),phongreen(:,:)
- complex(dpc), allocatable :: lm_epsilon(:,:,:),magelsus(:,:),lm_magelsus(:,:,:)
+ complex(dpc), allocatable :: lm_epsilon(:,:,:),ri_magelsus(:,:),lm_magelsus(:,:,:)
  complex(dpc), allocatable :: macmagsus(:,:,:)
 
 !TMP: CrI3 varaibles:
@@ -2274,7 +2274,7 @@ contains
  ABI_MALLOC(barmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(magsus,(ndim,ndim,nomega))
  ABI_MALLOC(lm_magsus,(ndim,ndim,nomega))
- ABI_MALLOC(magelsus,(ndim,3))
+ ABI_MALLOC(ri_magelsus,(ndim,3))
  ABI_MALLOC(lm_magelsus,(ndim,3,nomega))
  ABI_MALLOC(invbarmagsus,(ndim,ndim,nomega))
  ABI_MALLOC(invmagsus,(ndim,ndim,nomega))
@@ -2400,13 +2400,13 @@ contains
    end if
 
    !Apply ASR
-!   if (omega(1) < tol12) then
-!     call asrw0(delta_asrw0,ifcmat,natom,0) 
-!     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
-!   else 
-!     call asrw0(delta_asrw0,ifcmat,natom,1) 
-!     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
-!   end if
+   if (omega(1) < tol12) then
+     call asrw0(delta_asrw0,ifcmat,natom,0) 
+     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,0) 
+   else 
+     call asrw0(delta_asrw0,ifcmat,natom,1) 
+     call asrw0(delta_asrw0_fm,ifcmat_fm,natom,1) 
+   end if
 
    !Calculate the phonon and magnon-phonon Green's functions and spectral functions
    call phonon_green(amu,eigvec,eta_phongreen,ifcmat,ifcmat_fm,invmagsus(:,:,iw),& 
@@ -2550,7 +2550,7 @@ contains
  call wrtout(spin_unit,msg,'COLL')
  do iw=1,nomega
     write(msg,pfmt) &
- &  omega(iw), ((aimag(lm_magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
+ &  omega(iw), ((aimag(magsus(i,j,iw)+lm_magsus(i,j,iw)),j=1,ndim),i=1,ndim)
     call wrtout(spin_unit,msg,'COLL')
  end do
 
@@ -2690,7 +2690,6 @@ contains
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
- magelsus(:,:)= mmom(:,3*(natom+1)+1:3*(natom+2),iw)
  write(mmom_unit,*) ' '
  write(mmom_unit,*) '#  Real part of relaxed-ion local magnetoelectric tensor (at. units)'
  write(msg,'(a,a,a)') ch10,&
@@ -2698,8 +2697,9 @@ contains
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
+    ri_magelsus(:,:)=mmom(:,3*(natom+1)+1:3*(natom+2),iw)+lm_magelsus(:,:,iw)
     write(msg,pfmt) &
- &  omega(iw), ((real(lm_magelsus(i,j,iw)+magelsus(i,j)),j=1,3),i=1,ndim)
+ &  omega(iw), ((real(ri_magelsus(i,j)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -2710,8 +2710,9 @@ contains
 &           '      ...     m_{mat_1,2}^{Ex}     ...     m_{mat_2,1}^{Ex}     ...'
  call wrtout(mmom_unit,msg,'COLL')
  do iw=1,nomega
+    ri_magelsus(:,:)=mmom(:,3*(natom+1)+1:3*(natom+2),iw)+lm_magelsus(:,:,iw)
     write(msg,pfmt) &
- &  omega(iw), ((aimag(lm_magelsus(i,j,iw)+magelsus(i,j)),j=1,3),i=1,ndim)
+ &  omega(iw), ((aimag(ri_magelsus(i,j)),j=1,3),i=1,ndim)
     call wrtout(mmom_unit,msg,'COLL')
  end do
 
@@ -3019,7 +3020,7 @@ contains
  ABI_FREE(zeff)
  ABI_FREE(zeff_tr)
  ABI_FREE(lm_epsilon)
- ABI_FREE(magelsus)
+ ABI_FREE(ri_magelsus)
  ABI_FREE(lm_magelsus)
  ABI_FREE(modezeff)
  ABI_SFREE(w0hessian)
@@ -3457,14 +3458,14 @@ subroutine phonon_green(amu,eigvec,eta_phongreen,ifc,ifc_fm,invmagsus,&
      iat2= ceiling(icol/three)
      mfac2= sqrt(amu(typat(iat2))*amu_emass)
    else
-     mfac2= one
+      mfac2=zero
    end if
    do irow= 1, mpdim
      if (irow <= pdim) then
        iat1= ceiling(irow/three)
        mfac1= sqrt(amu(typat(iat1))*amu_emass)
      else
-       mfac1= one
+       mfac1=zero
      end if
  
      magphongreen(irow,icol)= mfac1*work1(irow,icol)*mfac2
