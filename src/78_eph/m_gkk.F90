@@ -55,6 +55,7 @@ module m_gkk
  use m_eig2d,          only : gkk_t, gkk_init, gkk_ncwrite, gkk_free
  use m_wfd,            only : wfd_init, wfd_t
  use m_getgh1c,        only : getgh1c, rf_transgrid_and_pack, getgh1c_setup
+ use m_ephtk,          only : ephtk_v1atm_to_vqnu
 
  implicit none
 
@@ -89,8 +90,6 @@ contains  !=====================================================================
 !! comm=MPI communicator.
 !!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -137,14 +136,12 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  character(len=fnlen) :: fname, gkkfilnam
 !arrays
  integer :: g0_k(3),symq(4,2,cryst%nsym)
- integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),blkflg(:,:), wfd_istwfk(:)
- real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom)
- real(dp) :: dvdb_qdamp(1)
+ integer,allocatable :: kg_k(:,:),kg_kq(:,:),nband(:,:),nband_kq(:,:),wfd_istwfk(:)
+ real(dp) :: kk(3),kq(3),qpt(3),phfrq(3*cryst%natom),dvdb_qdamp(1)
  real(dp),allocatable :: displ_cart(:,:,:),displ_red(:,:,:), eigens_kq(:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:)
- real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:)
- real(dp),allocatable :: bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
+ real(dp),allocatable :: v1scf(:,:,:,:),gkk(:,:,:,:,:), bras(:,:,:),kets(:,:,:),h1_kets(:,:,:)
  real(dp),allocatable :: ph1d(:,:),vlocal(:,:,:,:),vlocal1(:,:,:,:,:)
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: dummy_vtrial(:,:),gvnlx1(:,:), gs1c(:,:), gkq_atm(:,:,:,:)
@@ -165,15 +162,8 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm); i_am_master = my_rank == master
 
  ! Copy important dimensions
- natom = cryst%natom
- natom3 = 3 * natom
- nsppol = ebands_k%nsppol
- nspinor = ebands_k%nspinor
- nspden = dtset%nspden
- nkpt = ebands_k%nkpt
- mband = ebands_k%mband
- nkpt_kq = ebands_kq%nkpt
- mband_kq = ebands_kq%mband
+ natom = cryst%natom; natom3 = 3 * natom; nsppol = ebands_k%nsppol; nspinor = ebands_k%nspinor; nspden = dtset%nspden
+ nkpt = ebands_k%nkpt; mband = ebands_k%mband; nkpt_kq = ebands_kq%nkpt; mband_kq = ebands_kq%mband
  ecut = dtset%ecut
  !write(std_out, *)"ebands dims (b, k, s): ", ebands_k%mband, ebands_k%nkpt, ebands_k%nsppol
  !write(std_out, *)"ebands_kq dims (b, k, s): ", ebands_kq%mband, ebands_kq%nkpt, ebands_kq%nsppol
@@ -246,7 +236,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  ! Read wavefunctions on the k-points grid and q-shifted k-points grid.
  call wfd_k%read_wfk(wfk0_path, iomode_from_fname(wfk0_path))
-
  call wfd_kq%read_wfk(wfq_path, iomode_from_fname(wfq_path))
 
  ! ph1d(2,3*(2*mgfft+1)*natom)=one-dimensional structure factor information on the coarse grid.
@@ -294,7 +283,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ! Allocate vlocal. Note nvloc
  ABI_MALLOC(vlocal,(n4,n5,n6,gs_hamkq%nvloc))
  ! Allocate work space arrays.
- ABI_MALLOC(blkflg, (natom3,natom3))
  ABI_CALLOC(dummy_vtrial, (nfftf,nspden))
 
  call cwtime(cpu, wall, gflops, "start")
@@ -336,7 +324,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
 
  else if (dtset%eph_task == -2) then
    ! Write GKQ file with all perturbations. gkq are given in the atom representation.
-   ! TODO: mband_kq == mband
+   ! TODO: Assuming mband_kq == mband
    ABI_MALLOC(gkq_atm, (2, mband_kq, mband, nkpt))
    if (i_am_master) then
      call ifc%fourq(cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red)
@@ -360,7 +348,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        nctkarr_t("eigenvalues_kq", "dp", "max_number_of_states, number_of_kpoints, number_of_spins"), &
        nctkarr_t('phfreqs', "dp", 'number_of_phonon_modes'), &
        nctkarr_t('phdispl_cart', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
-       !nctkarr_t('phdispl_cart_qvers', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t('phdispl_red', "dp", 'complex, number_of_phonon_modes, number_of_phonon_modes'), &
        nctkarr_t("gkq_representation", "char", "character_string_length"), &
        nctkarr_t('gkq', "dp", &
@@ -390,12 +377,10 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(eigens_kq)
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfrq))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart'), displ_cart))
-     ! Add phonon displacement for qvers
-     !call ifc_fourq(ifc, cryst, qpt, phfrq, displ_cart, out_displ_red=displ_red, nanaqdir="reduced")
-     !NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_cart_qvers'), displ_cart))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, 'phdispl_red'), displ_red))
      NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "gkq_representation"), "atom"))
-   end if
+   end if ! master
+
  else
    ABI_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))
  end if
@@ -404,7 +389,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  do ipc=1,natom3
    idir = mod(ipc-1, 3) + 1
    ipert = (ipc - idir) / 3 + 1
-   write(msg, '(a,2i4)') " Treating ipert, idir = ", ipert, idir
+   write(msg, '(a,2(i0,1x))') " Treating ipert, idir = ", ipert, idir
    call wrtout(std_out, msg, do_flush=.True.)
    if (dtset%eph_task == 2) gkk = zero
 
@@ -496,18 +481,16 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        do ib2=1,mband
          do ib1=1,mband_kq
            call dotprod_g(dotr,doti,istwf_kq,npw_kq*nspinor,2,bras(1,1,ib1),h1_kets(1,1,ib2),&
-             mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
+                          mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
            band = 2*ib2-1 + (spin-1) * 2 * mband
-
            if (dtset%eph_task == 2) then
              gkk(band,ik,1,1,ib1) = dotr
              gkk(band+1,ik,1,1,ib1) = doti
            else
              gkq_atm(:, ib1, ib2, ik) = [dotr, doti]
            end if
-
-         end do
-       end do
+         end do ! ib1
+       end do ! ib2
 
      end do ! ikpt
 
@@ -522,10 +505,11 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
        if (i_am_master) then
          ! Write the netCDF file.
          ncerr = nf90_put_var(ncid, nctk_idname(ncid, "gkq"), gkq_atm, &
-           start=[1, 1, 1, ipc, 1, 1], count=[2, mband, mband, 1, nkpt, spin])
+                              start=[1, 1, 1, ipc, 1, spin], count=[2, mband, mband, 1, nkpt, 1])
          NCF_CHECK(ncerr)
        end if
      end if
+
    end do ! spin
 
    if (dtset%eph_task == 2) then
@@ -576,7 +560,6 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(ylm_k)
  ABI_FREE(ylm_kq)
  ABI_FREE(ylmgr_kq)
- ABI_FREE(blkflg)
 
  call gs_hamkq%free()
  call wfd_k%free()
@@ -622,21 +605,17 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0, qptopt1 = 1
- integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt
+ integer :: db_iqpt, cplex, nfft, comm, ip, idir, ipert, my_rank, interpolated, comm_rpt, ncid, ncerr
+ integer :: iq, nu, iatom, ii, jj, kk
+ real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
  logical :: with_lr_model
- integer :: ncid, ncerr
 !arrays
  integer :: ngfft(18)
  real(dp) :: phfreqs(dvdb%natom3),qpt(3)
  real(dp) :: displ_cart(2,3, dvdb%cryst%natom, dvdb%natom3), displ_red(2,dvdb%natom3,dvdb%natom3)
- real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:)
- real(dp),allocatable :: v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
-#if 1
- integer :: iq, nu, iatom, ii, jj, kk
- real(dp) :: inv_qepsq, qtau, phre, phim, rtmp
+ real(dp),allocatable :: v1scf(:,:,:,:), v1_qnu(:,:,:,:), v1lr_atm(:,:,:,:), v1lr_qnu(:,:,:,:)
  type(kpath_t) :: qpath
- real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3)
- real(dp) :: values(dvdb%natom3)
+ real(dp) :: bounds(3,6), qpt_red(3), qpt_cart(3),  glr(3), values(dvdb%natom3)
 
 !************************************************************************
 
@@ -692,7 +671,6 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
 
  call qpath%free()
  return
-#endif
 
  my_rank = xmpi_comm_rank(dvdb%comm)
  comm = dvdb%comm
@@ -782,7 +760,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
  ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
  ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
  ! v1_qnu(2, nfft, nspden, natom3), v1scf(cplex, nfft, nspden, natom3)
- call v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
+ call ephtk_v1atm_to_vqnu(cplex, nfft, dvdb%nspden, dvdb%natom3, v1scf, displ_red, v1_qnu)
 
  if (with_lr_model) then
    ! Compute LR model in the atomic representation then compute phonon representation in v1lr_qnu.
@@ -794,7 +772,7 @@ subroutine ncwrite_v1qnu(dvdb, dtset, ifc, out_ncpath)
        if (dvdb%nspden == 2) v1lr_atm(:,:,2,ip) = v1lr_atm(:,:,1,ip)
      end do
    end do
-   call v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
+   call ephtk_v1atm_to_vqnu(2, nfft, dvdb%nspden, dvdb%natom3, v1lr_atm, displ_red, v1lr_qnu)
  end if
 
  NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "phfreqs"), phfreqs))
@@ -819,73 +797,16 @@ end subroutine ncwrite_v1qnu
 
 !----------------------------------------------------------------------
 
-!!****f* m_gkk/v1atm_to_vqnu
-!! NAME
-!!  v1atm_to_vqnu
-!!
-!! FUNCTION
-!!  Receive potentials in atomic representation and return potential in phonon representation
-!!
-!! INPUTS
-!!
-!! OUTPUT
-!!
-!! SOURCE
-
-subroutine v1atm_to_vqnu(cplex, nfft, nspden, natom3, v1_atm, displ_red, v1_qnu)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: cplex, nfft, nspden, natom3
-!arrays
- real(dp),intent(in) :: v1_atm(cplex, nfft, nspden, natom3)
- real(dp),intent(out) :: v1_qnu(2, nfft, nspden, natom3)
- real(dp),intent(in) :: displ_red(2, natom3, natom3)
-
-!Local variables-------------------------------
-!scalars
- integer :: nu, ip, ispden
-
-!************************************************************************
-
- do nu=1,natom3
-   ! v1_qnu = \sum_{ka} phdispl{ka}(q,nu) D_{ka,q} V_scf(r)
-   ! NOTE: prefactor 1/sqrt(2 w(q,nu)) is not included in the potentials saved to file.
-   ! v1_qnu(2, nfft, nspden, natom3), v1_atm(cplex, nfft, nspden, natom3)
-   v1_qnu(:, :, :, nu) = zero
-   do ip=1,natom3
-     do ispden=1,nspden
-       if (cplex == 2) then
-         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + &
-           displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip) - displ_red(2,ip,nu) * v1_atm(2,:,ispden,ip)
-         v1_qnu(2, :, ispden, nu) = v1_qnu(2, :, ispden, nu) + &
-           displ_red(2,ip,nu) * v1_atm(1,:,ispden,ip) + displ_red(1,ip,nu) * v1_atm(2,:,ispden,ip)
-       else
-         ! Gamma point. d(q) = d(-q)* --> d is real.
-         v1_qnu(1, :, ispden, nu) = v1_qnu(1, :, ispden, nu) + displ_red(1,ip,nu) * v1_atm(1,:,ispden,ip)
-       end if
-     end do
-   end do
- end do
-
-end subroutine v1atm_to_vqnu
-!!***
-
-!----------------------------------------------------------------------
-
 !!****f* m_gkk/find_mpw
 !! NAME
 !!  find_mpw
 !!
 !! FUNCTION
-!!  Look at all k-points and spins to find the maximum
-!!  number of plane waves.
+!!  Look at all k-points and spins to find the maximum number of plane waves.
 !!
 !! INPUTS
 !!
 !! OUTPUT
-!!
-!! NOTES
 !!
 !! SOURCE
 
@@ -894,20 +815,18 @@ subroutine find_mpw(mpw, kpts, nsppol, nkpt, gmet, ecut, comm)
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: mpw
- integer,intent(in) :: nsppol, nkpt
- integer,intent(in) :: comm
+ integer,intent(in) :: nsppol, nkpt, comm
  real(dp),intent(in) :: ecut
 !arrays
- real(dp),intent(in) :: kpts(3,nkpt)
- real(dp),intent(in) :: gmet(3,3)
+ real(dp),intent(in) :: kpts(3,nkpt), gmet(3,3)
 
 !Local variables ------------------------------
 !scalars
- integer :: my_rank, cnt, nproc, ierr
- integer :: ispin, ikpt
- integer :: my_mpw, onpw
+ integer :: my_rank, cnt, nproc, ierr, ispin, ikpt, my_mpw, onpw
  integer,allocatable :: gtmp(:,:)
  real(dp) :: kpt(3)
+
+!************************************************************************
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
