@@ -44,7 +44,7 @@ module m_ddb
  use m_copy,           only : alloc_copy
  use m_geometry,       only : phdispl_cart2red, mkrdim, xred2xcart, metric
  use m_crystal,        only : crystal_t, crystal_init
- use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens
+ use m_dynmat,         only : cart29, d2sym3, cart39, d3sym, chneu9, asria_calc, asria_corr, asrprs, dfpt_phfrq, sytens, d3lwsym
  use m_pawtab,         only : pawtab_type, pawtab_nullify, pawtab_free
 
  implicit none
@@ -1912,6 +1912,9 @@ subroutine rdddb9(ddb,ddb_hdr,ddbun,&
      tmpflg(:,:,:,:,:,:) = reshape(ddb%flg(1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(1,:,:,:,:,:,:) = reshape(ddb%val(1,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
      tmpval(2,:,:,:,:,:,:) = reshape(ddb%val(2,1:nsize,iblok), shape = (/3,mpert,3,mpert,3,mpert/))
+
+     !Apply symmetry operations
+     call d3lwsym(tmpflg,tmpval,indsym,mpert,natom,nsym,symrec,symrel)
 
      ABI_MALLOC(d3cart,(2,3,mpert,3,mpert,3,mpert))
      ABI_MALLOC(car3flg,(3,mpert,3,mpert,3,mpert))
