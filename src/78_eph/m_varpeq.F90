@@ -1570,29 +1570,51 @@ subroutine polstate_get_grad_a(self)
      ik_back = self%krank_kpts%get_index(kmq)
      if ((ik_forw == -1) .and. (ik_back == -1)) cycle
 
-     do ib=1,gqk%nb
-       do jb=1,gqk%nb
-         !a_forw = self%a_glob(jb, ik_forw)
-         !a_back = self%a_glob(jb, ik_back)
+     ! forward scattering
+     if (ik_forw /= -1) then
+       do ib=1,gqk%nb
+         do jb=1,gqk%nb
+           a_forw = self%a_glob(jb, ik_forw)
 
-         a_forw = zero
-         a_back = zero
-         if (ik_forw /= -1) a_forw = self%a_glob(jb, ik_forw)
-         if (ik_back /= -1) a_back = self%a_glob(jb, ik_back)
+           do my_pert=1,gqk%my_npert
+             b = self%my_b(my_pert, my_iq)
+             g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
 
-         do my_pert=1,gqk%my_npert
-           b = self%my_b(my_pert, my_iq)
-           g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
-           !g_back = gq_gathered(my_pert, ib, jb, ik_back)
-
-           g_back = zero
-           if (ik_back /= -1) g_back = gq_gathered(my_pert, ib, jb, ik_back)
-
-           self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + &
-             (a_forw*b*conjg(g_forw) + a_back*conjg(b)*g_back)
+             self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_forw*b*conjg(g_forw)
+           enddo
          enddo
        enddo
-     enddo
+     endif
+
+     ! backward scattering
+     if (ik_back /= -1) then
+       do ib=1,gqk%nb
+         do jb=1,gqk%nb
+           a_back = self%a_glob(jb, ik_back)
+
+           do my_pert=1,gqk%my_npert
+             b = self%my_b(my_pert, my_iq)
+             g_back= gq_gathered(my_pert, ib, jb, ik_back)
+
+             self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + a_back*conjg(b)*g_back
+           enddo
+         enddo
+       enddo
+     endif
+
+     !do ib=1,gqk%nb
+     !  do jb=1,gqk%nb
+     !    a_forw = self%a_glob(jb, ik_forw)
+     !    a_back = self%a_glob(jb, ik_back)
+     !    do my_pert=1,gqk%my_npert
+     !      b = self%my_b(my_pert, my_iq)
+     !      g_forw = gqk%my_g(my_pert, jb, my_iq, ib, my_ik)
+     !      g_back = gq_gathered(my_pert, ib, jb, ik_back)
+     !      self%my_grad_a(ib, my_ik) = self%my_grad_a(ib, my_ik) + &
+     !        (a_forw*b*conjg(g_forw) + a_back*conjg(b)*g_back)
+     !    enddo
+     !  enddo
+     !enddo
 
    enddo
  enddo
