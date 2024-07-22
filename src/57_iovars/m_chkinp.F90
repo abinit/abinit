@@ -1071,7 +1071,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    ! getxred
    if(dt%getxcart/=0)then
      cond_string(1)='getxcart' ; cond_values(1)=dt%getxcart
-     ! Make sure that dt%getxred is 0
+     ! Make sure that dt%getxred is 0. NB: this has already been checked elsewhere:
+     !  that only one of xred xcart xrandom getxred getxcart are set 
      call chkint_eq(1,1,cond_string,cond_values,ierr,'getxred',dt%getxred,1,[0],iout)
    end if
 
