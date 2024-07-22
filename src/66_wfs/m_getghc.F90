@@ -393,7 +393,8 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
    end if
    ndat_             = ndat
    istwf_k_          = gs_ham%istwf_k
-   double_rfft_trick = istwf_k_==2.and.ndat>1
+   double_rfft_trick = istwf_k_==2.and.ndat>1.and.mpi_enreg%paral_kgb==1
+   ! double_rfft_trick could work for paral_kgb=0, but this generates an error in RMM-DIIS.
    ! Note that the trick can be activated only if nspinortot=1 (if =2 then istwf_k=1), so gs_ham%nvloc=1 too
    if (double_rfft_trick) then
      if (mpi_enreg%nproc_fft>1) then
