@@ -1584,6 +1584,7 @@ contains
  complex(dpc) :: barzeff(3,natom*3)
  complex(dpc) :: barzeff_tr(natom*3,3)
  complex(dpc) :: fmzeff(3,natom*3)
+ complex(dpc) :: fmzeff_tr(natom*3,3)
  complex(dpc) :: srzeff(3,natom*3)
  complex(dpc) :: srzeff_tr(natom*3,3)
  complex(dpc) :: diel_zfield(ndim,3)
@@ -1622,10 +1623,13 @@ contains
    fmzeff= matmul(transpose(conjg(diel_zfield)),matmul(barmagsus,ifc_zfield))
  else if (dissip==1) then
    fmzeff= matmul(diel_zfield_tr,matmul(barmagsus,ifc_zfield))
+   fmzeff_tr= matmul(ifc_zfield_tr,matmul(barmagsus,diel_zfield))
  end if
  fmzeff= barzeff - fmzeff
+ fmzeff_tr= barzeff_tr - fmzeff_tr
 
  zeff= fmzeff
+ zeff_tr= fmzeff_tr
 
  !Calculate the spin-relaxed flavor
  if (mpopt==2) then
@@ -2276,10 +2280,6 @@ contains
  write(msg, '(2a,(80a),4a)' ) ch10,('=',ii=1,80),ch10,ch10,&
  ' Omega interpolation of magnetic penalty quantities section ',ch10
  call wrtout([std_out, ab_out], msg)
-
- if (dissip==1.and.mpopt==1) then
-   ABI_BUG("Frozen-magnetic flavor not implemented with dissip=1, use mpopt==2")
- end if
 
 !Identify the calculated omegas
  nwcalc=ddb%nblok
