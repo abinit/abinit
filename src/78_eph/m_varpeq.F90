@@ -2333,7 +2333,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  integer :: natom, natom3, nsppol, nspinor, nspden, nkibz, mband, spin, ik, sc_nfft, ebands_timrev, cnt, nproc
  integer :: ik_ibz, isym_k, trev_k, npw_k, istwf_k, npw_kq_ibz, istwf_k_ibz, nkpg_k, ierr, nk, spinor, spad, nkbz, ncid
  integer :: nqibz, iq, qtimrev, iq_ibz, isym_q, trev_q, qptopt, uc_iat, sc_iat, nu, nqbz ! icell,
- logical :: isirr_k, isirr_q, has_scell_q
+ logical :: isirr_k, isirr_q, have_scell_q
  real(dp) :: cpu_all, wall_all, gflops_all
  character(len=500) :: msg
  character(len=fnlen) :: path
@@ -2355,7 +2355,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
  real(dp),allocatable :: sc_displ_cart_re(:,:,:), sc_displ_cart_im(:,:,:)
  real(dp), ABI_CONTIGUOUS pointer :: xcart_ptr(:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:)
- !complex(dp),allocatable :: ceiqr(:)
  complex(gwpc),allocatable :: ur_k(:), pol_wf(:,:), ceikr(:)
 !----------------------------------------------------------------------
 
@@ -2372,14 +2371,14 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
  if (dtfil%filgstorein == ABI_NOFILE) then
    call wrtout(units, "gstore_filepath is not specified in input. Cannot compute polaron-induced displacements!")
-   has_scell_q = .False.
+   have_scell_q = .False.
 
  else
    ! Start by reading ph displacements and frequencies in the IBZ from the gstore file.
    ! First compute displaced supercell then polaron wf so that we can use both when writing the XSF file.
    call wrtout(units, sjoin(" Computing polaron-induced displacements. Reading phonons from: ", dtfil%filgstorein))
    call cwtime(cpu_all, wall_all, gflops_all, "start")
-   has_scell_q = .True.
+   have_scell_q = .True.
 
    NCF_CHECK(nctk_open_read(ncid, dtfil%filgstorein, comm))
    NCF_CHECK(nctk_get_dim(ncid, "gstore_nqibz", nqibz))
@@ -2415,7 +2414,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
 
    call scell_q%init(cryst%natom, qptrlatt_, cryst%rprimd, cryst%typat, cryst%xcart, cryst%znucl, xyz_order="xyz")
 
-   !ABI_MALLOC(ceiqr, (scell_q%ncells))
    ABI_CALLOC(sc_displ_cart_re, (3, scell_q%natom, nsppol))
    ABI_CALLOC(sc_displ_cart_im, (3, scell_q%natom, nsppol))
 
@@ -2424,7 +2422,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    do spin=1,nsppol
      do iq=1,vpq%nq_spin(spin)
        cnt = cnt + 1; if (mod(cnt, nproc) /= my_rank) cycle ! MPI parallelism inside comm.
-
        !if (iq == 1) then
        !  do nu=1,3; write(std_out, *)"hello:", vpq%b_spin(1, nu, iq, spin) + j_dpc * vpq%b_spin(2, nu, iq, spin); end do
        !end if
@@ -2455,13 +2452,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
          call pheigvec_rotate(cryst, qq_ibz, isym_q, trev_q, pheigvec_qibz, pheigvec_qbz, displ_cart_qbz)
        end if
 
-       ! Compute phase e^{iq.R}
-       !do icell=1,scell_q%ncells
-       !  ceiqr(icell) = exp(+j_dpc * two_pi * dot_product(qq, scell_q%rvecs(:, icell)))
-       !end do
-
        do sc_iat=1, scell_q%natom
          uc_iat = scell_q%atom_indexing(sc_iat)
+         ! Compute phase e^{iq.R}
          cphase = exp(+j_dpc * two_pi * dot_product(qq, scell_q%uc_indexing(:, sc_iat)))
          ! Summing over ph modes.
          do nu=1,natom3
@@ -2481,7 +2474,6 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_FREE(displ_cart_qbz)
    ABI_FREE(pheigvec_qbz)
    ABI_FREE(pheigvec_qibz)
-   !ABI_FREE(ceiqr)
    call qrank_ibz%free()
 
    call xmpi_sum_master(sc_displ_cart_re, master, comm, ierr)
@@ -2534,11 +2526,9 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
        write(msg, '(4a)' )"k-mesh is not closed!",ch10, "k-point could not be generated from a symmetrical one.",trim(ltoa(kk))
        ABI_ERROR(msg)
      end if
-
      ik_ibz = mapl_k(1)
      do ib=1,vpq%nb_spin(spin)
-       band = bstart + ib - 1
-       bks_mask(band, ik_ibz, spin) = .True.
+       band = bstart + ib - 1; bks_mask(band, ik_ibz, spin) = .True.
      end do
    end do
  end do
@@ -2665,7 +2655,7 @@ subroutine varpeq_plot(wfk0_path, ngfft, dtset, dtfil, cryst, ebands, pawtab, ps
    ABI_MALLOC(pol_rho, (sc_nfft))
 
    ! Here decide if we write the polaron wavefunction with_diplaced atoms or not.
-   if (all(kptrlatt_ == qptrlatt_) .and. has_scell_q) then
+   if (all(kptrlatt_ == qptrlatt_) .and. have_scell_q) then
      call wrtout(units, " Writing the polaron wavefunction with diplaced atoms")
      xcart_ptr => scell_q%xcart
    else
