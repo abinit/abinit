@@ -267,7 +267,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: gscase,g0term,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
- integer :: mband_mem_rbz, mpert_
+ integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
  integer :: n3xccc,nband_k,ncpgr,ndir,nkpt_eff,nkpt_max,nline_save,nmatel,npert_io,npert_me,nspden_rhoij
@@ -287,7 +287,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  logical,parameter :: paral_pert_inplace=.true.,remove_inv=.false.
  logical :: first_entry,found_eq_gkk,has_nd,has_vxctau,t_exist,paral_atom,write_1wfk,init_rhor1
  logical :: kramers_deg
- character(len=fnlen) :: dscrpt,fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
+ character(len=fnlen) :: fiden1i,fiwf1i,fiwf1o,fiwfddk,fnamewff(4),gkkfilnam,fname,filnam
  character(len=500) :: msg
  type(crystal_t) :: crystal,ddb_crystal
  type(dataset_type), pointer :: dtset_tmp
@@ -295,7 +295,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(ebands_t) :: ebands_kmq !+/-q duplicates
  type(gkk_t)     :: gkk2d
  type(hdr_type) :: hdr,hdr_den,hdr_tmp
- type(ddb_hdr_type) :: ddb_hdr, tmp_ddb_hdr
+ type(ddb_hdr_type) :: ddb_hdr
  type(pawang_type) :: pawang1
  type(wfk_t) :: ddk_f(4)
  type(wvl_data) :: wvl
@@ -633,8 +633,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  ABI_MALLOC(zeff,(3,3,dtset%natom))
  if (dtset%getddb .ne. 0 .or. dtset%irdddb .ne. 0 ) then
    filnam = dtfil%filddbsin
-   call ddb%from_file(filnam, tmp_ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
-   call tmp_ddb_hdr%free()
+   call ddb%from_file(filnam, ddb_hdr, ddb_crystal, mpi_enreg%comm_world)
+   call ddb_hdr%free()
    ! Get Dielectric Tensor and Effective Charges
    ! (initialized to one_3D and zero if the derivatives are not available in the DDB file)
    iblok = ddb%get_dielt_zeff(ddb_crystal,1,0,0,dielt,zeff)

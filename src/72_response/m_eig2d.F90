@@ -790,7 +790,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
  real(dp),allocatable :: cwavef(:,:),cwavef2(:,:),center(:),eigen0tmp(:),eigenqtmp(:)
  real(dp) :: eigen(mband*nsppol),eigen_prime(mband*nsppol)
  real(dp),allocatable :: gh(:,:),gh1(:,:),ghc(:,:)
- real(dp),allocatable :: smdfun(:,:),occ_pert(:)
+ real(dp),allocatable :: smdfun(:,:)
  real(dp),pointer     :: wgt_sub(:)
  type(ddb_type)       :: ddb
  type(ddb_hdr_type)   :: ddb_hdr
@@ -1172,7 +1172,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
    dscrpt=' Note : temporary (transfer) database '
    call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
                      mpert=mpert_,&
-                     xred=xred,occ=occ_pert,&
+                     xred=xred,occ=occ,&
                      mband=bdeigrf / dtset%nsppol,&
                      nkpt=nkpt_rbz,&
                      kpt=dtset%kptns(:,1:nkpt_rbz))
@@ -1207,7 +1207,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
      dscrpt=' Note : temporary (transfer) database '
      call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
                        mpert=mpert_,&
-                       xred=xred,occ=occ_pert,&
+                       xred=xred,occ=occ,&
                        mband=bdeigrf / dtset%nsppol,&
                        nkpt=nkpt_rbz,&
                        kpt=dtset%kptns(:,1:nkpt_rbz))
@@ -1251,7 +1251,7 @@ subroutine eig2stern(dtfil,occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eig
      dscrpt=' Note : temporary (transfer) database '
      call ddb_hdr%init(dtset,psps,pawtab,dscrpt,1,&
                        mpert=mpert_,&
-                       xred=xred,occ=occ_pert,&
+                       xred=xred,occ=occ,&
                        mband=bdeigrf / dtset%nsppol,&
                        nkpt=nkpt_rbz,&
                        kpt=dtset%kptns(:,1:nkpt_rbz))
@@ -1793,6 +1793,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    if (ieig2rf /= 5 ) then
      if(smdelta>0) then
 
+       mpert_ = dtset%natom
        ABI_MALLOC(flg,(3,mpert_,3,mpert_))
        flg = one
        call ddb%init(dtset, 1, mpert_, &
