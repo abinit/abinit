@@ -63,7 +63,7 @@ basic_tests:
 #check-local:
 #	cat $(top_srcdir)/tests/built-in/README
 check-local:
-	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff --forced-tolerance=easy && rm -rf $(abspath $(top_builddir))/tests/Test_suite && echo "For these quick tests, the tests/Test_suite directory has been erased!"
+	cd $(abspath $(top_builddir))/tests && $(abspath $(top_srcdir))/tests/runtests.py --no-logo --no-colors --keyword MINIMAL --yaml-simplified-diff --forced-tolerance=easy && rm -rf $(abspath $(top_builddir))/tests/Test_suite $(abspath $(top_builddir))/tests/.*.pickle && echo "For these quick tests, the tests/Test_suite directory has been erased!"
 
 # Set of internal tests
 test_fast:
