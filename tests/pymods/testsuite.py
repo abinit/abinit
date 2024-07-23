@@ -332,7 +332,7 @@ class FileToTest(object):
     def __str__(self): pass
 
     def compare(self, fldiff_path, ref_dir, workdir, yaml_test, timebomb=None,
-                outf=sys.stdout, simplified_yaml_test=False):
+                outf=sys.stdout, simplified_yaml_test=False, forced_tolerance='default'):
         """
         Use fldiff_path to compare the reference file located in ref_dir with
         the output file located in workdir. Results are written to stream outf.
@@ -381,7 +381,16 @@ class FileToTest(object):
             'debug': fldebug,
         }
 
-        if '-medium' in self.fld_options:
+        
+        if forced_tolerance == 'high':
+            opts['tolerance'] = 1.01e-10
+        elif forced_tolerance == 'medium':
+            opts['tolerance'] = 1.01e-8
+        elif forced_tolerance == 'easy':
+            opts['tolerance'] = 1.01e-5
+        elif forced_tolerance == 'ridiculous':
+            opts['tolerance'] = 1.01e-2
+        elif '-medium' in self.fld_options:
             opts['tolerance'] = 1.01e-8
         elif '-easy' in self.fld_options:
             opts['tolerance'] = 1.01e-5
@@ -1927,6 +1936,9 @@ pp_dirpath $ABI_PSPDIR
                            Default: False
         simplified_diff    True if we perform a "simplified diff" when comparing files
                              by using only YAML sections in abo files
+        forced_tolerance   String: Force the use of fldiff tool with the specified tolerance.
+                           Possible values are: default (from test config), high(1.e-10),
+                                                medium (1.e-8), easy (1.e-5), ridiculous (1.e-2)
         ================  ====================================================================
 
         .. warning:
@@ -1955,6 +1967,7 @@ pp_dirpath $ABI_PSPDIR
         self.make_html_diff = kwargs.get("make_html_diff", self.make_html_diff)
         self.sub_timeout = kwargs.get("sub_timeout", self.sub_timeout)
         simplified_diff = kwargs.get("simplified_diff")
+        forced_tolerance = kwargs.get("forced_tolerance")
 
         timeout = self.sub_timeout
         if self.build_env.has_bin("timeout") and timeout > 0.0:
@@ -2105,11 +2118,9 @@ pp_dirpath $ABI_PSPDIR
 
                 simplified_test = simplified_diff
                 is_abo = os.path.splitext(f.name)[-1] == ".abo" or os.path.splitext(f.name)[-1] == ".out"
-                if simplified_test and not is_abo:
-                    isok = True
-                    msg = ""
-                    status = "skipped"
-                    continue
+                if simplified_test:
+                  fld_options_sav = f.fld_options
+                  f.fld_options = "-easy"
 
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
@@ -2119,21 +2130,13 @@ pp_dirpath $ABI_PSPDIR
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
                                                   yaml_test=self.yaml_test, timebomb=self.timebomb, outf=fh,
-                                                  simplified_yaml_test=simplified_test)
+                                                  simplified_yaml_test=simplified_test,
+                                                  forced_tolerance=forced_tolerance)
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
 
-                # In the case of a "simplified" test, lets check the number of iterations
-                if simplified_test and is_abo:
-                    abo_analysis = AboFileAnalysis(os.path.join(self.workdir,f.name),option="iterations")
-                    ref_analysis = AboFileAnalysis(os.path.join(self.ref_dir,f.name),option="iterations")
-                    st, err_msg, err_msg_short = abo_analysis.compare_with(ref_analysis,option="iterations", \
-                                                 percent_allowed_small=40,percent_allowed_large=25)
-                    if st == "failed":
-                        self._status = "failed"
-                        self.fld_isok= False
-                        indent = '\n' + ' '*len(self.full_id)
-                        msg += indent + err_msg.replace('\n',indent)
+                if simplified_test:
+                  f.fld_options= fld_options_sav
 
                 if not self.exec_error and f.has_line_count_error:
                     f.do_html_diff = True
@@ -2154,6 +2157,19 @@ pp_dirpath $ABI_PSPDIR
 
                 self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
                             status2txtcolor[status])
+
+                # In the case of a "simplified" test, lets check the number of iterations
+                if simplified_test and is_abo:
+                    abo_analysis = AboFileAnalysis(os.path.join(self.workdir,f.name),option="iterations")
+                    ref_analysis = AboFileAnalysis(os.path.join(self.ref_dir,f.name),option="iterations")
+                    st, err_msg, err_msg_short = abo_analysis.compare_with(ref_analysis,option="iterations", \
+                                                 percent_allowed_small=40,percent_allowed_large=25)
+                    if st == "failed":
+                        self._status = "failed"
+                        self.fld_isok= False
+                        indent = ' '*len(self.full_id)
+                        msg = indent + err_msg.replace('\n','\n'+indent)
+                        self.cprint(msg, status2txtcolor[self._status])
 
                 # Print message for users running the test suite on their machine
                 # if the test failed and we have exclusion rules on the ABINIT testfarm.
