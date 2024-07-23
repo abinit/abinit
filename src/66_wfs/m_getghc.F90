@@ -2066,6 +2066,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(1)
 #endif
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
 !#ifdef HAVE_LINALG_OPENBLAS_THREADS
 !   call openblas_set_num_threads(1)
 !#endif
@@ -2132,6 +2133,7 @@ subroutine multithreaded_getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lamb
 #ifdef HAVE_LINALG_MKL_THREADS
    call mkl_set_num_threads(nthreads)
 #endif
+!LB-23/07/24: OpenBLAS detects parallel sections automatically. To comment this line improves performances for some cases.
 !#ifdef HAVE_LINALG_OPENBLAS_THREADS
 !   call openblas_set_num_threads(nthreads)
 !#endif
