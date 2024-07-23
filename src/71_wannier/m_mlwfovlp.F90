@@ -3980,6 +3980,7 @@ subroutine wan_interp_ebands(wan_spin, cryst, in_ebands, intp_kptrlatt, intp_nsh
 
  my_rank = xmpi_comm_rank(comm); nproc = xmpi_comm_size(comm)
 
+ ! Build new ebands object with memory to be filled.
  band_block(:) = [1, wan_spin(1)%max_nwan]
  out_ebands = ebands_interp_kmesh(in_ebands, cryst, params, intp_kptrlatt, intp_nshiftk, intp_shiftk, &
                                   band_block, comm, malloc_only=.True.)
