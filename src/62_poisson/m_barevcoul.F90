@@ -31,6 +31,7 @@ module m_barevcoul
  use m_numeric_tools,   only : arth, l2norm, OPERATOR(.x.)
  use m_geometry,        only : normv
  use m_crystal,         only : crystal_t
+ use m_fft,             only : zerosym
  !use m_gsphere,         only : gsphere_t
 
 ! Cut-off methods modules
@@ -139,11 +140,11 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
+subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,izero,barev,shortrange)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in)         :: icutcoul,nfft,nkpt_bz
+ integer,intent(in)         :: icutcoul,nfft,nkpt_bz,izero
  real(dp),intent(in)        :: rcut,gsqcut,ucvol
  logical,intent(in),optional:: shortrange
 !arrays
@@ -161,14 +162,16 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
 !Local variables-------------------------------
 !scalars
  integer,parameter    :: empty(3,3)=zero
+ integer,parameter    :: cplex1=1
  integer              :: comm
- integer              :: i1,i2,i23,i3,id1,id2,id3,icutcoul_local
- integer              :: ig,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
+ integer              :: ii1,i1,i2,i23,i3,id1,id2,id3,icutcoul_local
+ integer              :: ig,ig1,ig2,ig3,ig1min,ig1max,ig2min,ig2max,ig3min,ig3max
  integer              :: ii,ing,n1,n2,n3,npar,npt
  integer              :: opt_cylinder,opt_slab,test
+ integer              :: qeq0,qeq05
  real(dp),parameter   :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp)             :: check,step
- real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs2,gs3,divgq0,rcut0
+ real(dp)             :: cutoff,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,divgq0,rcut0
  real(dp)             :: bz_plane,dx,integ,q0_vol,q0_volsph
  character(len=500)   :: msg
 !arrays
@@ -188,7 +191,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
  vcut%hcyl      = zero                 ! Length of finite cylinder (Rozzi"s method, default is Beigi).
  vcut%ucvol     = ucvol                ! Unit cell volume.
 
- !FBruneval: comment the definitions below since Cryst and dtset are not set here!
+ !FBruneval: comment the definitions below since Cryst and dtset have never been initialized!
  !vcut%rprimd    = Cryst%rprimd(:,:)    ! Dimensional direct lattice.
  !vcut%boxcenter = dtset%boxcenter      ! boxcenter at the moment is supposed to be at the origin.
  !vcut%vcutgeo   = dtset%vcutgeo(:)     ! Info on the orientation and extension of the cutoff region.
@@ -197,7 +200,7 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
  vcut%mode='NONE'
  icutcoul_local=icutcoul
 
- ! for short-range exchange, enforce ERFC
+ ! for short-range exchange (e.g. HSE06), enforce ERFC
  if( PRESENT(shortrange) ) then
    if(shortrange) then
       icutcoul_local=5
@@ -217,8 +220,16 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- cutoff=gsqcut*tolfix
+ cutoff = gsqcut * tolfix
  barev=zero
+
+!Some peculiar values of q: q=0 or q on the BZ edge
+ qeq0=0; if(qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
+ qeq05=0
+ if (qeq0==0) then
+   if (abs(abs(qpoint(1))-half)<tol12.or.abs(abs(qpoint(2))-half)<tol12.or. &
+&   abs(abs(qpoint(3))-half)<tol12) qeq05=1
+ end if
 
 !In order to speed the routine, precompute the components of g+q
 !Also check if the booked space was large enough...
@@ -239,25 +250,57 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
+ ! Triple loop on each dimension
  do i3=1,n3
+   ig3=i3-(i3/id3)*n3-1
    ! Precompute some products that do not depend on i2 and i1
    gs3=gq(3,i3)*gq(3,i3)*gmet(3,3)
    gqgm23=gq(3,i3)*gmet(2,3)*2
    gqgm13=gq(3,i3)*gmet(1,3)*2
    do i2=1,n2
+     ig2=i2-(i2/id2)*n2-1
      i23=n1*(i2-1 +(n2)*(i3-1))
      gs2=gs3+ gq(2,i2)*(gq(2,i2)*gmet(2,2)+gqgm23)
      gqgm12=gq(2,i2)*gmet(1,2)*2
      gqg2p3=gqgm13+gqgm12
+
      do i1=1,n1
         ii=i1+i23
-        gpq(ii)=gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+        gpq(ii)= gs2 + gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
         if(gpq(ii)>=tol4) then
           gpq2(ii) = piinv/gpq(ii)
         end if
      end do
+
+     ! Do the test that eliminates the Gamma point outside of the inner loop
+     ii1=1
+     if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
+       ii1=2
+     end if
+
+     ! Final inner loop on the first dimension (note the lower limit)
+     do i1=ii1,n1
+       gs = gs2+ gq(1,i1)*(gq(1,i1)*gmet(1,1)+gqg2p3)
+
+       !ii=i1+i23
+
+       if(gs<=cutoff)then
+         ! Identify min/max indexes (to cancel unbalanced contributions later)
+         ! Count (q+g)-vectors with similar norm
+         if ((qeq05==1).and.(izero==1)) then
+           ig1=i1-(i1/id1)*n1-1
+           ig1max=max(ig1max,ig1); ig1min=min(ig1min,ig1)
+           ig2max=max(ig2max,ig2); ig2min=min(ig2min,ig2)
+           ig3max=max(ig3max,ig3); ig3min=min(ig3min,ig3)
+         end if
+
+       end if ! Cut-off
+     end do ! End loop on i1
    end do
  end do
+
+
+
 
 ! Old version of the code extracted from m_Fock
 ! do ig=1,nfft
@@ -483,7 +526,8 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
         !FIXME FBruneval check this value, ERFC value was wrong, so why not this one.
         barev(ig)=barev(ig) + divgq0
      else if(gpq(ig)<=cutoff) then
-       !FIXME FBruneval shortrange does not make sense here (it is an optional argument)
+       !FIXME FBruneval shortrange does not make sense here (it is an optional argument that may not be present)
+       ! and ERF is long range any way
        if(shortrange) then
          barev(ig)=barev(ig) + gpq2(ig) * exp( -pi * rcut**2 /gpq2(ig) )
        end if
@@ -508,6 +552,31 @@ subroutine barevcoul(rcut,icutcoul,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,b
                     'Either icutcoul value not allowed or not defined.'
    ABI_WARNING(msg)
  END SELECT
+
+ if (izero==1) then
+   ! Set contribution of unbalanced components to zero
+   if (qeq0==1) then !q=0
+     call zerosym(barev,cplex1,n1,n2,n3)
+   else if (qeq05==1) then
+     !q=1/2; this doesn't work in parallel
+     ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
+     ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
+     ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
+     if (abs(abs(qpoint(1))-half)<tol12) then
+       if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
+       if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
+     end if
+     if (abs(abs(qpoint(2))-half)<tol12) then
+       if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
+       if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
+     end if
+     if (abs(abs(qpoint(3))-half)<tol12) then
+       if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
+       if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
+     end if
+     call zerosym(barev,cplex1,n1,n2,n3,ig1=ig1,ig2=ig2,ig3=ig3)
+   end if
+ end if
 
  ABI_FREE(gq)
  ABI_FREE(gpq)
