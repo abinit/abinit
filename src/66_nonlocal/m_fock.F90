@@ -110,6 +110,13 @@ module m_fock
     !==0 if the normal Fock operator is to be created and/or used
     !==1 if the ACE operator is to be created and/or used
 
+  integer :: fock_icutcoul
+    ! contains input variable fock_icutcoul that specifies the treatment of the Coulomb interaction (cutoff in real-space,
+    ! divergence treatment etc.)
+
+  integer :: rcut
+    ! contains input variable rcut that specifies the cutoff radius for spherical cutoff
+
   integer ABI_PRIVATE :: getghc_call_ = 1
   ! 1 if fock_getghc should be called in getghc, 0 otherwise
 
@@ -635,6 +642,9 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
    fockcommon%use_ACE=use_ACE
    call fockbz_create(fockbz,mgfft,dtset%mpw,mkpt,mkptband,my_nsppol,n4,n5,n6,use_ACE)
+
+   fockcommon%fock_icutcoul = dtset%fock_icutcoul
+   fockcommon%rcut = dtset%rcut
 
 !* Initialize %mband, %mkpt, %mkptband = size of arrays
    fockcommon%mband=mband
@@ -1957,20 +1967,16 @@ end subroutine fock_print
 !! bare_vqg
 !!
 !! FUNCTION
-!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
+!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2 for a specified qpoint
 !!
 !! INPUTS
-!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
-!!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
-!!  icutcoul=Option for the Coulomb potential cutoff technique
-!!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
+!!  qpoint(3)=reduced coordinates for the phonon wavelength
+!!  fockcommon=all the technical details of the Fock operator
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
-!!  izero=if 1, unbalanced components of V(q,g) are set to zero # Used by the PAW library
-!!  hyb_mixing=hybrid mixing coefficient for the Fock contribution
-!!  hyb_mixing_sr=hybrid mixing coefficient for the short-range Fock contribution
-!!  hyb_range_fock=hybrid range for separation
 !!  nfft=Total number of FFT grid points.
+!!  nkpt_bz=total number of kpoints in the full BZ
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~abinit/doc/variables/vargs.htm#ngfft
+!!  ucvol=unitcell volume
 !!
 !! OUTPUT
 !!  vqg(nfft)=4pi/(G+q)**2, G=0 component is set to divgq0/pi if q = Gamma.
@@ -1982,21 +1988,23 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qpoint,fockcommon,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz
- real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
+ type(fock_common_type),intent(in) :: fockcommon
+ integer,intent(in) :: nfft,nkpt_bz
+ real(dp),intent(in) :: ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
- real(dp),intent(in) :: qphon(3)
+ real(dp),intent(in) :: qpoint(3)
  real(dp),intent(inout) :: gmet(3,3)
  real(dp),intent(out) ::  vqg(nfft)
 
 !Local variables-------------------------------
 !scalars
  integer,parameter :: cplex1=1
+ integer :: izero
  integer :: i1,i2,i23,i3,id1,id2,id3
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
@@ -2010,9 +2018,12 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 ! *************************************************************************
 
- if (abs(hyb_mixing_sr)>tol8.and.abs(hyb_range_fock)<tol8) then
+ if (abs(fockcommon%hyb_mixing_sr)>tol8.and.abs(fockcommon%hyb_range_fock)<tol8) then
    ABI_BUG('SR mixing<>0 while range separation=0!')
  end if
+
+ izero = fockcommon%usepaw
+
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
@@ -2021,15 +2032,15 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
 !Initialize a few quantities
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
- cutoff=gsqcut*tolfix
+ cutoff=fockcommon%gsqcut * tolfix
  vqg=zero
 
 !Some peculiar values of q
- qeq0=0; if(qphon(1)**2+qphon(2)**2+qphon(3)**2<1.d-15) qeq0=1
+ qeq0=0; if(qpoint(1)**2+qpoint(2)**2+qpoint(3)**2<1.d-15) qeq0=1
  qeq05=0
  if (qeq0==0) then
-   if (abs(abs(qphon(1))-half)<tol12.or.abs(abs(qphon(2))-half)<tol12.or. &
-&   abs(abs(qphon(3))-half)<tol12) qeq05=1
+   if (abs(abs(qpoint(1))-half)<tol12.or.abs(abs(qpoint(2))-half)<tol12.or. &
+&   abs(abs(qpoint(3))-half)<tol12) qeq05=1
  end if
 
 !In order to speed the routine, precompute the components of g+q
@@ -2039,7 +2050,7 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
      ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig+qphon(ii)
+     gq(ii,ing)=ig+qpoint(ii)
    end do
  end do
  ig1max=-1;ig2max=-1;ig3max=-1
@@ -2047,23 +2058,23 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
 
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
 
- if (abs(hyb_mixing)>tol8) then
+ if (abs(fockcommon%hyb_mixing)>tol8) then
     shortrange=.false.
     rcut= (three*nkpt_bz*ucvol/four_pi)**(one/three)
-    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*hyb_mixing
-    if (hyb_range_fock>tol8)then
-       vqg(1)=hyb_mixing*divgq0+hyb_mixing*(pi/hyb_range_fock**2)
+    call barevcoul(rcut,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
+    vqg=vqg*fockcommon%hyb_mixing
+    if (fockcommon%hyb_range_fock>tol8)then
+       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing*(pi/fockcommon%hyb_range_fock**2)
     endif
  end if
 
- if (abs(hyb_mixing_sr)>tol8) then
+ if (abs(fockcommon%hyb_mixing_sr)>tol8) then
     shortrange=.true.
-    rcut=hyb_range_fock
-    call barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
-    vqg=vqg*hyb_mixing_sr
-!    if (hyb_range_fock>tol8)then
-!       vqg(1)=hyb_mixing*divgq0+hyb_mixing_sr*pi/hyb_range_fock**2
+    rcut=fockcommon%hyb_range_fock
+    call barevcoul(rcut,qpoint,fockcommon%gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,vqg,shortrange)
+    vqg=vqg*fockcommon%hyb_mixing_sr
+!    if (fockcommon%hyb_range_fock>tol8)then
+!       vqg(1)=fockcommon%hyb_mixing*divgq0+fockcommon%hyb_mixing_sr*pi/fockcommon%hyb_range_fock**2
 !    endif
  end if
 
@@ -2087,14 +2098,14 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
      if (i23==0 .and. qeq0==1  .and. ig2==0 .and. ig3==0) then
        ii1=2
        ! value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq
-       vqg(1+i23)=hyb_mixing*divgq0
+       vqg(1+i23)=fockcommon%hyb_mixing*divgq0
 
 !      Note the combination of Spencer-Alavi and Erfc screening
-       if (abs(hyb_range_fock)>tol8)then
-         vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*(pi/hyb_range_fock**2)
+       if (abs(fockcommon%hyb_range_fock)>tol8)then
+         vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*(pi/fockcommon%hyb_range_fock**2)
 !        This would give a combination of Spencer-Alavi and Erfc screening,
 !        unfortunately, it modifies also the tests for pure HSE06, so was not retained.
-!        vqg(1+i23)=vqg(1+i23)+hyb_mixing_sr*min(divgq0,pi/(hyb_range_fock**2))
+!        vqg(1+i23)=vqg(1+i23)+fockcommon%hyb_mixing_sr*min(divgq0,pi/(fockcommon%hyb_range_fock**2))
        endif
 
      end if
@@ -2130,15 +2141,15 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
      ig1=-1;if (mod(n1,2)==0) ig1=1+n1/2
      ig2=-1;if (mod(n2,2)==0) ig2=1+n2/2
      ig3=-1;if (mod(n3,2)==0) ig3=1+n3/2
-     if (abs(abs(qphon(1))-half)<tol12) then
+     if (abs(abs(qpoint(1))-half)<tol12) then
        if (abs(ig1min)<abs(ig1max)) ig1=abs(ig1max)
        if (abs(ig1min)>abs(ig1max)) ig1=n1-abs(ig1min)
      end if
-     if (abs(abs(qphon(2))-half)<tol12) then
+     if (abs(abs(qpoint(2))-half)<tol12) then
        if (abs(ig2min)<abs(ig2max)) ig2=abs(ig2max)
        if (abs(ig2min)>abs(ig2max)) ig2=n2-abs(ig2min)
      end if
-     if (abs(abs(qphon(3))-half)<tol12) then
+     if (abs(abs(qpoint(3))-half)<tol12) then
        if (abs(ig3min)<abs(ig3max)) ig3=abs(ig3max)
        if (abs(ig3min)>abs(ig3max)) ig3=n3-abs(ig3min)
      end if

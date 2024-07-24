@@ -117,10 +117,10 @@ contains
 !! barevcoul
 !!
 !! FUNCTION
-!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2
+!! Compute bare coulomb term in G-space on the FFT mesh i.e. 4pi/(G+q)**2 for a specified q-point
 !!
 !! INPUTS
-!!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
+!!  qpoint(3)=reduced coordinates for the phonon wavelength
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
 !!  icutcoul=Option for the Coulomb potential cutoff technique
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
@@ -140,7 +140,7 @@ contains
 !!
 !! SOURCE
 
-subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
+subroutine barevcoul(rcut,qpoint,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,shortrange)
 
 !Arguments ------------------------------------
 !scalars
@@ -150,7 +150,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
 !arrays
  integer,intent(in)         :: ngfft(18)
  integer                    :: ng!!!!
- real(dp),intent(in)        :: qphon(3)
+ real(dp),intent(in)        :: qpoint(3)
  real(dp),intent(inout)     :: gmet(3,3)
  real(dp),intent(inout)     :: barev(nfft)
  !real(dp)                   :: a1(3),a2(3),a3(3)
@@ -232,7 +232,7 @@ subroutine barevcoul(rcut,qphon,gsqcut,gmet,nfft,nkpt_bz,ngfft,ucvol,barev,short
    id(ii)=ngfft(ii)/2+2
    do ing=1,ngfft(ii)
      ig=ing-(ing/id(ii))*ngfft(ii)-1
-     gq(ii,ing)=ig+qphon(ii)
+     gq(ii,ing)=ig+qpoint(ii)
    end do
  end do
  ig1max=-1;ig2max=-1;ig3max=-1
